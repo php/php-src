@@ -18,7 +18,7 @@ var_dump(ldap_mod_del($link));
 var_dump(ldap_mod_del($link, "$base"));
 
 // Too many parameters
-var_dump(ldap_mod_del($link, "$base", array(), [], [], "Additional data"));
+var_dump(ldap_mod_del($link, "$base", array(), [], "Additional data"));
 
 // DN not found
 var_dump(ldap_mod_del($link, "dc=my-domain,$base", array()));
@@ -48,7 +48,7 @@ NULL
 Warning: ldap_mod_del() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_mod_del() expects at most 5 parameters, 6 given in %s on line %d
+Warning: ldap_mod_del() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: ldap_mod_del(): Modify: No such object in %s on line %d

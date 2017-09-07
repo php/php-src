@@ -18,7 +18,7 @@ var_dump(ldap_modify($link));
 var_dump(ldap_modify($link, "$base"));
 
 // Too many parameters
-var_dump(ldap_modify($link, "$base", array(), [], [], "Additional data"));
+var_dump(ldap_modify($link, "$base", array(), [], "Additional data"));
 
 // DN not found
 var_dump(ldap_modify($link, "cn=not-found,$base", array()));
@@ -66,7 +66,7 @@ NULL
 Warning: ldap_modify() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_modify() expects at most 5 parameters, 6 given in %s on line %d
+Warning: ldap_modify() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: ldap_modify(): Modify: No such object in %s on line %d

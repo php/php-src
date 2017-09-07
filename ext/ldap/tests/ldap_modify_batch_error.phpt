@@ -26,7 +26,7 @@ var_dump(ldap_modify_batch($link));
 var_dump(ldap_modify_batch($link, "$base"));
 
 // Too many parameters
-var_dump(ldap_modify_batch($link, "$base", $addGivenName, [], [], "Invalid additional parameter"));
+var_dump(ldap_modify_batch($link, "$base", $addGivenName, [], "Invalid additional parameter"));
 
 // DN not found
 var_dump(ldap_modify_batch($link, "cn=not-found,$base", $addGivenName));
@@ -87,7 +87,7 @@ NULL
 Warning: ldap_modify_batch() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_modify_batch() expects at most 5 parameters, 6 given in %s on line %d
+Warning: ldap_modify_batch() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: ldap_modify_batch(): Batch Modify: No such object in %s on line %d

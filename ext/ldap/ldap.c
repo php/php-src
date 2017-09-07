@@ -1055,24 +1055,23 @@ static void php_set_opts(LDAP *ldap, int sizelimit, int timelimit, int deref, in
  */
 static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 {
-	zval *link, *base_dn, *filter, *attrs = NULL, *attr, *serverctrls, *clientctrls;
+	zval *link, *base_dn, *filter, *attrs = NULL, *attr, *serverctrls = NULL;
 	zend_long attrsonly, sizelimit, timelimit, deref;
 	char *ldap_base_dn = NULL, *ldap_filter = NULL, **ldap_attrs = NULL;
 	ldap_linkdata *ld = NULL;
 	LDAPMessage *ldap_res;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	int ldap_attrsonly = 0, ldap_sizelimit = -1, ldap_timelimit = -1, ldap_deref = -1;
 	int old_ldap_sizelimit = -1, old_ldap_timelimit = -1, old_ldap_deref = -1;
 	int num_attribs = 0, ret = 1, i, errno, argcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(argcount, "zzz|allllzz", &link, &base_dn, &filter, &attrs, &attrsonly,
-		&sizelimit, &timelimit, &deref, &serverctrls, &clientctrls) == FAILURE) {
+	if (zend_parse_parameters(argcount, "zzz|alllla", &link, &base_dn, &filter, &attrs, &attrsonly,
+		&sizelimit, &timelimit, &deref, &serverctrls) == FAILURE) {
 		return;
 	}
 
 	/* Reverse -> fall through */
 	switch (argcount) {
-		case 10:
 		case 9:
 		case 8:
 			ldap_deref = deref;
@@ -1184,20 +1183,12 @@ static void php_ldap_do_search(INTERNAL_FUNCTION_PARAMETERS, int scope)
 					rcs[i] = -1;
 					continue;
 				}
-				if (argcount > 9) {
-					_php_ldap_controls_free(&lclientctrls);
-					lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-					if (lclientctrls == NULL) {
-						rcs[i] = -1;
-						continue;
-					}
-				}
 			}
 
 			php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 			/* Run the actual search */
-			ldap_search_ext(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, lserverctrls, lclientctrls, NULL, ldap_sizelimit, &rcs[i]);
+			ldap_search_ext(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &rcs[i]);
 			lds[i] = ld;
 			zend_hash_move_forward(Z_ARRVAL_P(link));
 		}
@@ -1241,19 +1232,12 @@ cleanup_parallel:
 				ret = 0;
 				goto cleanup;
 			}
-			if (argcount > 9) {
-				lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-				if (lclientctrls == NULL) {
-					ret = 0;
-					goto cleanup;
-				}
-			}
 		}
 
 		php_set_opts(ld->link, ldap_sizelimit, ldap_timelimit, ldap_deref, &old_ldap_sizelimit, &old_ldap_timelimit, &old_ldap_deref);
 
 		/* Run the actual search */
-		errno = ldap_search_ext_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, lserverctrls, lclientctrls, NULL, ldap_sizelimit, &ldap_res);
+		errno = ldap_search_ext_s(ld->link, ldap_base_dn, scope, ldap_filter, ldap_attrs, ldap_attrsonly, lserverctrls, NULL, NULL, ldap_sizelimit, &ldap_res);
 
 		if (errno != LDAP_SUCCESS
 			&& errno != LDAP_SIZELIMIT_EXCEEDED
@@ -1294,13 +1278,10 @@ cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
 	}
-	if (lclientctrls) {
-		_php_ldap_controls_free(&lclientctrls);
-	}
 }
 /* }}} */
 
-/* {{{ proto resource ldap_read(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols [, array clientcontrols]]]]]]])
+/* {{{ proto resource ldap_read(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
    Read an entry */
 PHP_FUNCTION(ldap_read)
 {
@@ -1308,7 +1289,7 @@ PHP_FUNCTION(ldap_read)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_list(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols [, array clientcontrols]]]]]]])
+/* {{{ proto resource ldap_list(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
    Single-level search */
 PHP_FUNCTION(ldap_list)
 {
@@ -1316,7 +1297,7 @@ PHP_FUNCTION(ldap_list)
 }
 /* }}} */
 
-/* {{{ proto resource ldap_search(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols [, array clientcontrols]]]]]]])
+/* {{{ proto resource ldap_search(resource|array link, string base_dn, string filter [, array attrs [, int attrsonly [, int sizelimit [, int timelimit [, int deref [, array servercontrols]]]]]])
    Search LDAP tree under base_dn */
 PHP_FUNCTION(ldap_search)
 {
@@ -1807,12 +1788,12 @@ PHP_FUNCTION(ldap_dn2ufn)
  */
 static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 {
-	zval *serverctrls = NULL, *clientctrls = NULL;
+	zval *serverctrls = NULL;
 	zval *link, *entry, *value, *ivalue;
 	ldap_linkdata *ld;
 	char *dn;
 	LDAPMod **ldap_mods;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	int i, j, num_attribs, num_values;
 	size_t dn_len;
 	int *num_berval;
@@ -1820,7 +1801,7 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 	zend_ulong index;
 	int is_full_add=0; /* flag for full add operation so ldap_mod_add can be put back into oper, gerrit THomson */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|aa", &link, &dn, &dn_len, &entry, &serverctrls, &clientctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a", &link, &dn, &dn_len, &entry, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -1908,22 +1889,15 @@ static void php_ldap_do_modify(INTERNAL_FUNCTION_PARAMETERS, int oper)
 			goto cleanup;
 		}
 	}
-	if (clientctrls) {
-		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-		if (lclientctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
 /* check flag to see if do_mod was called to perform full add , gerrit thomson */
 	if (is_full_add == 1) {
-		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
+		if ((i = ldap_add_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL)) != LDAP_SUCCESS) {
 			php_error_docref(NULL, E_WARNING, "Add: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
 	} else {
-		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
+		if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL)) != LDAP_SUCCESS) {
 			php_error_docref(NULL, E_WARNING, "Modify: %s", ldap_err2string(i));
 			RETVAL_FALSE;
 		} else RETVAL_TRUE;
@@ -1943,15 +1917,12 @@ cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
 	}
-	if (lclientctrls) {
-		_php_ldap_controls_free(&lclientctrls);
-	}
 
 	return;
 }
 /* }}} */
 
-/* {{{ proto bool ldap_add(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_add(resource link, string dn, array entry [, array servercontrols])
    Add entries to LDAP directory */
 PHP_FUNCTION(ldap_add)
 {
@@ -1962,7 +1933,7 @@ PHP_FUNCTION(ldap_add)
 
 /* three functions for attribute base modifications, gerrit Thomson */
 
-/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_mod_replace(resource link, string dn, array entry [, array servercontrols])
    Replace attribute values with new ones */
 PHP_FUNCTION(ldap_mod_replace)
 {
@@ -1970,7 +1941,7 @@ PHP_FUNCTION(ldap_mod_replace)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_mod_add(resource link, string dn, array entry [, array servercontrols])
    Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
 {
@@ -1978,7 +1949,7 @@ PHP_FUNCTION(ldap_mod_add)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_mod_del(resource link, string dn, array entry [, array servercontrols])
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
@@ -1986,19 +1957,19 @@ PHP_FUNCTION(ldap_mod_del)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols])
    Delete an entry from a directory */
 PHP_FUNCTION(ldap_delete)
 {
-	zval *serverctrls = NULL, *clientctrls = NULL;
+	zval *serverctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	char *dn;
 	int rc;
 	size_t dn_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|aa", &link, &dn, &dn_len, &serverctrls, &clientctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|a", &link, &dn, &dn_len, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2013,15 +1984,8 @@ PHP_FUNCTION(ldap_delete)
 			goto cleanup;
 		}
 	}
-	if (clientctrls) {
-		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-		if (lclientctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
-	if ((rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
+	if ((rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, NULL)) != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
 		RETVAL_FALSE;
 	} else {
@@ -2031,9 +1995,6 @@ PHP_FUNCTION(ldap_delete)
 cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
-	}
-	if (lclientctrls) {
-		_php_ldap_controls_free(&lclientctrls);
 	}
 
 	return;
@@ -2083,11 +2044,11 @@ static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_modify_batch(resource link, string dn, array modifs [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_modify_batch(resource link, string dn, array modifs [, array servercontrols])
    Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
-	zval *serverctrls = NULL, *clientctrls = NULL;
+	zval *serverctrls = NULL;
 	ldap_linkdata *ld;
 	zval *link, *mods, *mod, *modinfo, *modval;
 	zval *attrib, *modtype, *vals;
@@ -2097,7 +2058,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	uint32_t oper;
 
 	/*
@@ -2124,7 +2085,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|aa", &link, &dn, &dn_len, &mods, &serverctrls, &clientctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|a", &link, &dn, &dn_len, &mods, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2359,16 +2320,9 @@ PHP_FUNCTION(ldap_modify_batch)
 			goto cleanup;
 		}
 	}
-	if (clientctrls) {
-		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-		if (lclientctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
 	/* perform (finally) */
-	if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
+	if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, NULL)) != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Batch Modify: %s", ldap_err2string(i));
 		RETVAL_FALSE;
 	} else RETVAL_TRUE;
@@ -2402,9 +2356,6 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		if (lserverctrls) {
 			_php_ldap_controls_free(&lserverctrls);
-		}
-		if (lclientctrls) {
-			_php_ldap_controls_free(&lclientctrls);
 		}
 	}
 }
@@ -2469,16 +2420,16 @@ PHP_FUNCTION(ldap_error)
    Determine if an entry has a specific value for one of its attributes */
 PHP_FUNCTION(ldap_compare)
 {
-	zval *serverctrls = NULL, *clientctrls = NULL;
+	zval *serverctrls = NULL;
 	zval *link;
 	char *dn, *attr, *value;
 	size_t dn_len, attr_len, value_len;
 	ldap_linkdata *ld;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	int errno;
 	struct berval lvalue;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss|aa", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls, &clientctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsss|a", &link, &dn, &dn_len, &attr, &attr_len, &value, &value_len, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2493,18 +2444,11 @@ PHP_FUNCTION(ldap_compare)
 			goto cleanup;
 		}
 	}
-	if (clientctrls) {
-		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-		if (lclientctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
 	lvalue.bv_val = value;
 	lvalue.bv_len = value_len;
 
-	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, lclientctrls);
+	errno = ldap_compare_ext_s(ld->link, dn, attr, &lvalue, lserverctrls, NULL);
 
 	switch (errno) {
 		case LDAP_COMPARE_TRUE:
@@ -2523,9 +2467,6 @@ PHP_FUNCTION(ldap_compare)
 cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
-	}
-	if (lclientctrls) {
-		_php_ldap_controls_free(&lclientctrls);
 	}
 
 	return;
@@ -3164,20 +3105,20 @@ PHP_FUNCTION(ldap_parse_reference)
 /* }}} */
 #endif
 
-/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn [, array servercontrols [, array clientcontrols]])
+/* {{{ proto bool ldap_rename(resource link, string dn, string newrdn, string newparent, bool deleteoldrdn [, array servercontrols])
    Modify the name of an entry */
 PHP_FUNCTION(ldap_rename)
 {
-	zval *serverctrls = NULL, *clientctrls = NULL;
+	zval *serverctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
-	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
+	LDAPControl **lserverctrls = NULL;
 	int rc;
 	char *dn, *newrdn, *newparent;
 	size_t dn_len, newrdn_len, newparent_len;
 	zend_bool deleteoldrdn;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|aa", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls, &clientctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsssb|a", &link, &dn, &dn_len, &newrdn, &newrdn_len, &newparent, &newparent_len, &deleteoldrdn, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -3197,21 +3138,14 @@ PHP_FUNCTION(ldap_rename)
 			goto cleanup;
 		}
 	}
-	if (clientctrls) {
-		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
-		if (lclientctrls == NULL) {
-			RETVAL_FALSE;
-			goto cleanup;
-		}
-	}
 
-	rc = ldap_rename_s(ld->link, dn, newrdn, newparent, deleteoldrdn, lserverctrls, lclientctrls);
+	rc = ldap_rename_s(ld->link, dn, newrdn, newparent, deleteoldrdn, lserverctrls, NULL);
 #else
 	if (newparent_len != 0) {
 		php_error_docref(NULL, E_WARNING, "You are using old LDAP API, newparent must be the empty string, can only modify RDN");
 		RETURN_FALSE;
 	}
-	if (serverctrls || clientctrls) {
+	if (serverctrls) {
 		php_error_docref(NULL, E_WARNING, "You are using old LDAP API, controls are not supported");
 		RETURN_FALSE;
 	}
@@ -3228,9 +3162,6 @@ PHP_FUNCTION(ldap_rename)
 cleanup:
 	if (lserverctrls) {
 		_php_ldap_controls_free(&lserverctrls);
-	}
-	if (lclientctrls) {
-		_php_ldap_controls_free(&lclientctrls);
 	}
 
 	return;
@@ -4007,7 +3938,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_read, 0, 0, 3)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_list, 0, 0, 3)
@@ -4020,7 +3950,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_list, 0, 0, 3)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_search, 0, 0, 3)
@@ -4033,7 +3962,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_search, 0, 0, 3)
 	ZEND_ARG_INFO(0, timelimit)
 	ZEND_ARG_INFO(0, deref)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_count_entries, 0, 0, 2)
@@ -4102,14 +4030,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify, 0, 0, 3)
@@ -4117,7 +4043,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify_batch, 0, 0, 3)
@@ -4125,7 +4050,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify_batch, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_ARRAY_INFO(0, modifications_info, 0)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
@@ -4133,7 +4057,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
@@ -4141,7 +4064,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
@@ -4149,7 +4071,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_err2str, 0, 0, 1)
@@ -4162,7 +4083,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
 	ZEND_ARG_INFO(0, attribute)
 	ZEND_ARG_INFO(0, value)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
@@ -4195,7 +4115,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename, 0, 0, 5)
 	ZEND_ARG_INFO(0, newparent)
 	ZEND_ARG_INFO(0, deleteoldrdn)
 	ZEND_ARG_INFO(0, servercontrols)
-	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_option, 0, 0, 3)

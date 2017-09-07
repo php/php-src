@@ -17,7 +17,7 @@ var_dump(ldap_delete());
 var_dump(ldap_delete($link));
 
 // Too many parameters
-var_dump(ldap_delete($link, "$base", [], [], "Additional data"));
+var_dump(ldap_delete($link, "$base", [], "Additional data"));
 
 // Invalid DN
 var_dump(
@@ -47,7 +47,7 @@ NULL
 Warning: ldap_delete() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: ldap_delete() expects at most 4 parameters, 5 given in %s on line %d
+Warning: ldap_delete() expects at most 3 parameters, 4 given in %s on line %d
 NULL
 
 Warning: ldap_delete(): Delete: Invalid DN syntax in %s on line %d

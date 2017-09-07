@@ -18,7 +18,7 @@ var_dump(ldap_mod_replace($link));
 var_dump(ldap_mod_replace($link, "$base"));
 
 // Too many parameters
-var_dump(ldap_mod_replace($link, "$base", array(), [], [], "Additional data"));
+var_dump(ldap_mod_replace($link, "$base", array(), [], "Additional data"));
 
 // DN not found
 var_dump(ldap_mod_replace($link, "dc=my-domain,$base", array()));
@@ -46,7 +46,7 @@ NULL
 Warning: ldap_mod_replace() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_mod_replace() expects at most 5 parameters, 6 given in %s on line %d
+Warning: ldap_mod_replace() expects at most 4 parameters, 5 given in %s on line %d
 NULL
 
 Warning: ldap_mod_replace(): Modify: No such object in %s on line %d
