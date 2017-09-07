@@ -1203,7 +1203,7 @@ ZEND_FUNCTION(get_object_vars)
 						zend_unmangle_property_name_ex(key, &class_name, &prop_name, &prop_len);
 						zend_hash_str_add_new(Z_ARRVAL_P(return_value), prop_name, prop_len, value);
 					} else {
-						zend_symbtable_add_new(Z_ARRVAL_P(return_value), key, value);
+						zend_symtable_add_new(Z_ARRVAL_P(return_value), key, value);
 					}
 				}
 			}
