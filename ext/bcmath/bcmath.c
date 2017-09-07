@@ -326,6 +326,13 @@ PHP_FUNCTION(bcmul)
 	if (result->n_scale > scale) {
 		result = split_bc_num(result);
 		result->n_scale = scale;
+	} else if (result->n_scale < scale) {
+		bc_num temp;
+
+		bc_init_num(&temp);
+		bc_divide(result, BCG(_one_), &temp, scale);
+		bc_free_num(&result);
+		result = temp;
 	}
 
 	RETVAL_STR(bc_num2str(result));
