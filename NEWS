@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug #75155 (AppendIterator::append() is broken when appending another
     AppendIterator). (Nikita)
 
+- Standard:
+  . Fixed bug #75170 (mt_rand() bias on 64-bit machines). (Nikita)
+
 - ZIP:
   . Fixed bug #75143 (new method setEncryptionName() seems not to exist
     in ZipArchive). (Anatol)
