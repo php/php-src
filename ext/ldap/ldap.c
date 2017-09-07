@@ -2083,10 +2083,11 @@ static void _ldap_hash_fetch(zval *hashTbl, const char *key, zval **out)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_modify_batch(resource link, string dn, array modifs)
+/* {{{ proto bool ldap_modify_batch(resource link, string dn, array modifs [, array servercontrols [, array clientcontrols]])
    Perform multiple modifications as part of one operation */
 PHP_FUNCTION(ldap_modify_batch)
 {
+	zval *serverctrls = NULL, *clientctrls = NULL;
 	ldap_linkdata *ld;
 	zval *link, *mods, *mod, *modinfo, *modval;
 	zval *attrib, *modtype, *vals;
@@ -2096,6 +2097,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	int i, j, k;
 	int num_mods, num_modprops, num_modvals;
 	LDAPMod **ldap_mods;
+	LDAPControl **lserverctrls = NULL, **lclientctrls = NULL;
 	uint32_t oper;
 
 	/*
@@ -2122,7 +2124,7 @@ PHP_FUNCTION(ldap_modify_batch)
 	);
 	*/
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &link, &dn, &dn_len, &mods) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/|aa", &link, &dn, &dn_len, &mods, &serverctrls, &clientctrls) != SUCCESS) {
 		return;
 	}
 
@@ -2350,8 +2352,23 @@ PHP_FUNCTION(ldap_modify_batch)
 	/* NULL-terminate modifications */
 	ldap_mods[num_mods] = NULL;
 
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+	if (clientctrls) {
+		lclientctrls = _php_ldap_controls_from_array(ld->link, clientctrls);
+		if (lclientctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+
 	/* perform (finally) */
-	if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, NULL, NULL)) != LDAP_SUCCESS) {
+	if ((i = ldap_modify_ext_s(ld->link, dn, ldap_mods, lserverctrls, lclientctrls)) != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Batch Modify: %s", ldap_err2string(i));
 		RETVAL_FALSE;
 	} else RETVAL_TRUE;
@@ -2382,6 +2399,13 @@ PHP_FUNCTION(ldap_modify_batch)
 
 		/* the modifications array */
 		efree(ldap_mods);
+
+		if (lserverctrls) {
+			_php_ldap_controls_free(&lserverctrls);
+		}
+		if (lclientctrls) {
+			_php_ldap_controls_free(&lclientctrls);
+		}
 	}
 }
 /* }}} */
@@ -4100,6 +4124,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify_batch, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_ARRAY_INFO(0, modifications_info, 0)
+	ZEND_ARG_INFO(0, servercontrols)
+	ZEND_ARG_INFO(0, clientcontrols)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
