@@ -1213,14 +1213,14 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, z
 
 /* May be called even if source is not used in the phi (useful when removing uses in a phi
  * with multiple identical operands) */
-static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source) /* {{{ */
+static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi) /* {{{ */
 {
 	zend_ssa_phi **cur = &ssa->vars[source].phi_use_chain;
 	while (*cur && *cur != phi) {
 		cur = zend_ssa_next_use_phi_ptr(ssa, source, *cur);
 	}
 	if (*cur) {
-		*cur = zend_ssa_next_use_phi(ssa, source, *cur);
+		*cur = next_use_phi;
 	}
 }
 /* }}} */
@@ -1229,7 +1229,7 @@ static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi
 {
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
-		zend_ssa_remove_use_of_phi_source(ssa, phi, source);
+		zend_ssa_remove_use_of_phi_source(ssa, phi, source, zend_ssa_next_use_phi(ssa, source, phi));
 	} FOREACH_PHI_SOURCE_END();
 }
 /* }}} */
@@ -1289,7 +1289,7 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	}
 
 	/* Variable only used in one operand, remove the phi from the use chain. */
-	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num);
+	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num, phi->use_chains[pred_offset]);
 	phi->use_chains[pred_offset] = NULL;
 }
 /* }}} */
