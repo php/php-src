@@ -318,8 +318,7 @@ PHP_FUNCTION(readline_info)
 		} else if (!strcasecmp(what, "completion_suppress_append")) {
 			oldval = rl_completion_suppress_append;
 			if (value) {
-				convert_to_long_ex(value);
-				rl_completion_suppress_append = Z_LVAL_P(value);
+				rl_completion_suppress_append = zend_is_true(value);
 			}
 			RETVAL_BOOL(oldval);
 		} else if (!strcasecmp(what, "completion_append_character")) {
