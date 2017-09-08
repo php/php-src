@@ -73,6 +73,10 @@ Date:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
+ ZIP:
+  . Bunled libzip have been dropped,
+    system library is now required.
+
 ========================================
 10. New Global Constants
 ========================================

@@ -36,10 +36,10 @@ function extract_genpw($retdata)
 
 $userAPassword = "oops";
 
-// ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, array clientcontrols [, string &retdata [, string &retoid]]]]])
+// ldap_exop(resource link, string reqoid [, string reqdata [, array servercontrols [, string &retdata [, string &retoid]]]])
 // bool ldap_parse_exop(resource link, resource result [, string &retdata [, string &retoid]])
 var_dump(
-	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, NULL, NULL, $retdata, $retoid),
+	ldap_exop($link, LDAP_EXOP_WHO_AM_I, NULL, NULL, $retdata, $retoid),
 	$retdata,
 	$retoid,
 	$r = ldap_exop($link, LDAP_EXOP_WHO_AM_I),

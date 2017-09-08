@@ -104,6 +104,8 @@
 #define ssize_t __int64
 #elif defined(_WIN32)
 #define ssize_t __int32
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#define ssize_t long
 #endif
 #endif
 

@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -65,6 +66,12 @@
  * b) Otherwise, if we branch on TOP none of the successors are feasible.
  * c) Otherwise (we branch on a constant), the feasible successors are marked based on the constant
  *    (usually only one successor will be feasible).
+ *
+ * The original SCCP algorithm is extended with ability to propagate constant array
+ * elements and object properties. The extension is based on a variation of Array
+ * SSA form and its application to Spare Constant Propagation, described at
+ * "Array SSA Form" by Vivek Sarkar, Kathleen Knobe and Stephen Fink in chapter
+ * 16 of the SSA book.
  */
 
 #if 0
@@ -1509,7 +1516,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						dup_partial_object(&zv, op1);
 						ct_eval_assign_obj(&zv, &tmp2, op2);
 						if (opline->opcode == ZEND_PRE_INC_OBJ
-								|| ZEND_PRE_DEC_OBJ) {
+								|| opline->opcode == ZEND_PRE_DEC_OBJ) {
 							SET_RESULT(result, &tmp2);
 						} else {
 							SET_RESULT(result, &tmp1);

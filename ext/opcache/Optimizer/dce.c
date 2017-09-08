@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -42,6 +43,8 @@
  *    zend_may_throw().
  *  * We often cannot DCE assignments and unsets while guaranteeing that dtors run in the same
  *    order. There is an optimization option to allow reordering of dtor effects.
+ *  * The algorithm is able to eliminate dead modifications of non-escaping arrays
+ *    and objects as well as dead arrays and objects allocations.
  */
 
 typedef struct {

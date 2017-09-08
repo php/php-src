@@ -43,6 +43,9 @@ PHP                                                                        NEWS
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
     before PHP-FPM sets it up). (Ingmar Runge)
 
+- PDO SQLite
+  . Add support for additional open flags
+
 - phar:
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
