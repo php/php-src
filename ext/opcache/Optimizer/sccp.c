@@ -283,93 +283,6 @@ static zend_bool try_replace_op1(
 		zval zv;
 		ZVAL_COPY(&zv, value);
 		if (zend_optimizer_update_op1_const(ctx->scdf.op_array, opline, &zv)) {
-			/* Reconstruct SSA */
-			int num;
-			zend_basic_block *block;
-
-			switch (opline->opcode) {
-				case ZEND_JMPZ:
-					if (zend_is_true(&zv)) {
-						MAKE_NOP(opline);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[0]);
-							}
-							block->successors_count = 1;
-							block->successors[0] = block->successors[1];
-						}
-					} else {
-						opline->opcode = ZEND_JMP;
-						COPY_NODE(opline->op1, opline->op2);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[1]);
-							}
-							block->successors_count = 1;
-						}
-					}
-					break;
-				case ZEND_JMPNZ:
-					if (zend_is_true(&zv)) {
-						opline->opcode = ZEND_JMP;
-						COPY_NODE(opline->op1, opline->op2);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[1]);
-							}
-							block->successors_count = 1;
-						}
-					} else {
-						MAKE_NOP(opline);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[0]);
-							}
-							block->successors_count = 1;
-							block->successors[0] = block->successors[1];
-						}
-					}
-					break;
-				case ZEND_JMPZNZ:
-					if (zend_is_true(&zv)) {
-						zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[0]);
-							}
-							block->successors_count = 1;
-							block->successors[0] = block->successors[1];
-						}
-					} else {
-						zend_op *target_opline = ZEND_OP2_JMP_ADDR(opline);
-						ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-						num = ctx->scdf.ssa->cfg.map[opline - ctx->scdf.op_array->opcodes];
-						block = &ctx->scdf.ssa->cfg.blocks[num];
-						if (block->successors_count == 2) {
-							if (block->successors[1] != block->successors[0]) {
-								zend_ssa_remove_predecessor(ctx->scdf.ssa, num, block->successors[1]);
-							}
-							block->successors_count = 1;
-						}
-					}
-					opline->op1_type = IS_UNUSED;
-					opline->extended_value = 0;
-					opline->opcode = ZEND_JMP;
-					break;
-				default:
-					break;
-			}
 			return 1;
 		} else {
 			// TODO: check the following special cases ???
@@ -2082,6 +1995,17 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 					|| ssa_op->op2_def >= 0) {
 				/* we cannot remove instruction that defines other varibales */
 				return 0;
+			} else if (opline->opcode == ZEND_JMPZ_EX
+					|| opline->opcode == ZEND_JMPNZ_EX
+					|| opline->opcode == ZEND_JMP_SET
+					|| opline->opcode == ZEND_COALESCE
+					|| opline->opcode == ZEND_FE_RESET_R
+					|| opline->opcode == ZEND_FE_RESET_RW
+					|| opline->opcode == ZEND_FE_FETCH_R
+					|| opline->opcode == ZEND_FE_FETCH_RW
+					|| opline->opcode == ZEND_NEW) {
+				/* we cannot simple remove jump instructions */
+				return 0;
 			} else if (var->use_chain >= 0
 					|| var->phi_use_chain != NULL) {
 				if (value
@@ -2090,16 +2014,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ROPE_INIT
 						&& opline->opcode != ZEND_ROPE_ADD
 						&& opline->opcode != ZEND_INIT_ARRAY
-						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT
-						&& opline->opcode != ZEND_JMPZ_EX
-						&& opline->opcode != ZEND_JMPNZ_EX
-						&& opline->opcode != ZEND_JMP_SET
-						&& opline->opcode != ZEND_COALESCE
-						&& opline->opcode != ZEND_FE_RESET_R
-						&& opline->opcode != ZEND_FE_RESET_RW
-						&& opline->opcode != ZEND_FE_FETCH_R
-						&& opline->opcode != ZEND_FE_FETCH_RW
-						&& opline->opcode != ZEND_NEW) {
+						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
 					/* Replace with QM_ASSIGN */
 					zend_uchar old_type = opline->result_type;
 					zend_uchar old_var = opline->result.var;

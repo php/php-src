@@ -423,112 +423,6 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	return 1;
 }
 
-// TODO Move this somewhere else (CFG simplification?)
-static int simplify_jumps(zend_ssa *ssa, zend_op_array *op_array) {
-	int removed_ops = 0;
-	zend_basic_block *block;
-	FOREACH_BLOCK(block) {
-		int block_num = block - ssa->cfg.blocks;
-		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
-		zend_ssa_op *ssa_op = &ssa->ops[block->start + block->len - 1];
-		zval *op1;
-
-		if (block->len == 0) {
-			continue;
-		}
-
-		/* Convert jump-and-set into jump if result is not used */
-		switch (opline->opcode) {
-			case ZEND_JMPZ_EX:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					opline->opcode = ZEND_JMPZ;
-					opline->result_type = IS_UNUSED;
-					zend_ssa_remove_result_def(ssa, ssa_op);
-				}
-				break;
-			case ZEND_JMPNZ_EX:
-			case ZEND_JMP_SET:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					opline->opcode = ZEND_JMPNZ;
-					opline->result_type = IS_UNUSED;
-					zend_ssa_remove_result_def(ssa, ssa_op);
-				}
-				break;
-		}
-
-		/* Convert jump-and-set to QM_ASSIGN/BOOL if the "else" branch is not taken. */
-		switch (opline->opcode) {
-			case ZEND_JMPZ_EX:
-			case ZEND_JMPNZ_EX:
-				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
-					opline->opcode = ZEND_BOOL;
-				}
-				break;
-			case ZEND_JMP_SET:
-			case ZEND_COALESCE:
-				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
-					opline->opcode = ZEND_QM_ASSIGN;
-				}
-				break;
-		}
-
-		if (opline->op1_type != IS_CONST) {
-			continue;
-		}
-
-		/* Convert constant conditional jump to unconditional jump */
-		op1 = &ZEND_OP1_LITERAL(opline);
-		switch (opline->opcode) {
-			case ZEND_JMPZ:
-				if (!zend_is_true(op1)) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-			case ZEND_JMPNZ:
-				if (zend_is_true(op1)) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-			case ZEND_COALESCE:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain >= 0
-						|| ssa->vars[ssa_op->result_def].phi_use_chain != NULL) {
-					break;
-				}
-
-				zend_ssa_remove_result_def(ssa, ssa_op);
-				if (Z_TYPE_P(op1) != IS_NULL) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-					opline->result_type = IS_UNUSED;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-		}
-	} FOREACH_BLOCK_END();
-	return removed_ops;
-}
-
 static inline int get_common_phi_source(zend_ssa *ssa, zend_ssa_phi *phi) {
 	int common_source = -1;
 	int source;
@@ -771,8 +665,6 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			try_remove_trivial_phi(&ctx, phi);
 		}
 	} FOREACH_PHI_END();
-
-	removed_ops += simplify_jumps(ssa, op_array);
 
 	return removed_ops;
 }
