@@ -346,7 +346,7 @@ static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, cons
 			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
 }
 
-static zend_always_inline zval *zend_symbtable_add_new(HashTable *ht, zend_string *key, zval *pData)
+static zend_always_inline zval *zend_symtable_add_new(HashTable *ht, zend_string *key, zval *pData)
 {
 	zend_ulong idx;
 
