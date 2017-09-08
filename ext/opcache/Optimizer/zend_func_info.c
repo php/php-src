@@ -1507,6 +1507,11 @@ static const func_info_t func_infos[] = {
 	F0("bccomp",								MAY_BE_NULL | MAY_BE_LONG),
 	F0("bcscale",								MAY_BE_NULL | MAY_BE_TRUE),
 
+	/* ext/exif */
+	F1("exif_tagname",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("exif_read_data",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_ANY),
+	F1("exif_thumbnail",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F0("exif_imagetype",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 };
 
 static HashTable func_info;
