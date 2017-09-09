@@ -60,9 +60,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_bcdiv, 0, 0, 2)
 	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_bcmod, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcmod, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
+	ZEND_ARG_INFO(0, scale)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcpowmod, 0, 0, 3)
@@ -388,17 +389,25 @@ PHP_FUNCTION(bcdiv)
 }
 /* }}} */
 
-/* {{{ proto string bcmod(string left_operand, string right_operand)
+/* {{{ proto string bcmod(string left_operand, string right_operand [, int scale])
    Returns the modulus of the two arbitrary precision operands */
 PHP_FUNCTION(bcmod)
 {
 	zend_string *left, *right;
+	zend_long scale_param = 0;
 	bc_num first, second, result;
+	int scale = (int)BCG(bc_precision);
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(left)
 		Z_PARAM_STR(right)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() == 3) {
+		scale = (int) ((int)scale_param < 0 ? 0 : scale_param);
+	}
 
 	bc_init_num(&first);
 	bc_init_num(&second);
@@ -406,8 +415,12 @@ PHP_FUNCTION(bcmod)
 	php_str2num(&first, ZSTR_VAL(left));
 	php_str2num(&second, ZSTR_VAL(right));
 
-	switch (bc_modulo(first, second, &result, 0)) {
+	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
+			if (result->n_scale > scale) {
+				result = split_bc_num(result);
+				result->n_scale = scale;
+			}
 			RETVAL_STR(bc_num2str(result));
 			break;
 		case -1:
