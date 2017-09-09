@@ -31,6 +31,7 @@ var_dump(ftp_site($ftp));
 var_dump(ftp_set_option($ftp));
 var_dump(ftp_get_option($ftp));
 var_dump(ftp_mlsd($ftp));
+var_dump(ftp_append($ftp));
 
 ?>
 --EXPECTF--
@@ -101,4 +102,7 @@ Warning: ftp_get_option() expects exactly 2 parameters, 1 given in %s006.php on 
 NULL
 
 Warning: ftp_mlsd() expects exactly 2 parameters, 1 given in %s006.php on line 26
+NULL
+
+Warning: ftp_append() expects at least 3 parameters, 1 given in %s006.php on line 27
 NULL
