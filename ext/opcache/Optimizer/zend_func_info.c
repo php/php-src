@@ -1552,6 +1552,14 @@ static const func_info_t func_infos[] = {
 	F0("ctype_upper",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("ctype_xdigit",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 
+	/* ext/fileinfo */
+	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("finfo_close",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("finfo_set_flags",						MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("finfo_file",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("finfo_buffer",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("mime_content_type",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+
 };
 
 static HashTable func_info;
