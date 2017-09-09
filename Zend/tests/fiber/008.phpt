@@ -1,5 +1,5 @@
 --TEST--
-tests Fiber during internal call
+tests Fiber in internal call
 --FILE--
 <?php
 function foo()
@@ -12,7 +12,7 @@ $f = new Fiber(function () {
 
 echo $f->resume();
 --EXPECTF--
-Fatal error: Uncaught Error: Cannot await in internal call in %s/Zend/tests/fiber/008.php:4
+Fatal error: Uncaught Error: Cannot call Fiber::yield in internal call in %s/Zend/tests/fiber/008.php:4
 Stack trace:
 #0 %s/Zend/tests/fiber/008.php(4): Fiber::yield()
 #1 [internal function]: foo(1)

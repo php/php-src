@@ -317,12 +317,12 @@ ZEND_METHOD(Fiber, yield)
 	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
 
 	if (!fiber) {
-		zend_throw_error(NULL, "Cannot await out of Fiber");
+		zend_throw_error(NULL, "Cannot call Fiber::yield out of Fiber");
 		return;
 	}
 
 	if (fiber->n_vars) {
-		zend_throw_error(NULL, "Cannot await in internal call");
+		zend_throw_error(NULL, "Cannot call Fiber::yield in internal call");
 		return;
 	}
 

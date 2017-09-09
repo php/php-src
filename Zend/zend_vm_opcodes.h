@@ -269,9 +269,8 @@ END_EXTERN_C()
 #define ZEND_FUNC_GET_ARGS                   195
 #define ZEND_UNSET_CV                        196
 #define ZEND_ISSET_ISEMPTY_CV                197
-#define ZEND_AWAIT                           198
-#define ZEND_HANDLE_FIBER_YIELD              199
+#define ZEND_HANDLE_FIBER_YIELD              198
 
-#define ZEND_VM_LAST_OPCODE                  199
+#define ZEND_VM_LAST_OPCODE                  198
 
 #endif

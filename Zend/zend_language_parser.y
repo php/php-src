@@ -59,7 +59,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %left T_LOGICAL_AND
 %right T_PRINT
 %right T_YIELD
-%right T_AWAIT
 %right T_DOUBLE_ARROW
 %right T_YIELD_FROM
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
@@ -109,7 +108,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_PRINT        "print (T_PRINT)"
 %token T_YIELD        "yield (T_YIELD)"
 %token T_YIELD_FROM   "yield from (T_YIELD_FROM)"
-%token T_AWAIT        "await (T_AWAIT)"
 %token T_PLUS_EQUAL   "+= (T_PLUS_EQUAL)"
 %token T_MINUS_EQUAL  "-= (T_MINUS_EQUAL)"
 %token T_MUL_EQUAL    "*= (T_MUL_EQUAL)"
@@ -275,7 +273,7 @@ reserved_non_modifiers:
 	| T_THROW | T_USE | T_INSTEADOF | T_GLOBAL | T_VAR | T_UNSET | T_ISSET | T_EMPTY | T_CONTINUE | T_GOTO
 	| T_FUNCTION | T_CONST | T_RETURN | T_PRINT | T_YIELD | T_LIST | T_SWITCH | T_ENDSWITCH | T_CASE | T_DEFAULT | T_BREAK
 	| T_ARRAY | T_CALLABLE | T_EXTENDS | T_IMPLEMENTS | T_NAMESPACE | T_TRAIT | T_INTERFACE | T_CLASS
-	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C | T_AWAIT
+	| T_CLASS_C | T_TRAIT_C | T_FUNC_C | T_METHOD_C | T_LINE | T_FILE | T_DIR | T_NS_C
 ;
 
 semi_reserved:
@@ -980,8 +978,6 @@ expr_without_variable:
 	|	T_YIELD expr { $$ = zend_ast_create(ZEND_AST_YIELD, $2, NULL); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD expr T_DOUBLE_ARROW expr { $$ = zend_ast_create(ZEND_AST_YIELD, $4, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
 	|	T_YIELD_FROM expr { $$ = zend_ast_create(ZEND_AST_YIELD_FROM, $2); CG(extra_fn_flags) |= ZEND_ACC_GENERATOR; }
-	|	T_AWAIT { $$ = zend_ast_create(ZEND_AST_AWAIT, NULL, NULL); }
-	|	T_AWAIT expr { $$ = zend_ast_create(ZEND_AST_AWAIT, $2, NULL); }
 	|	function returns_ref backup_doc_comment '(' parameter_list ')' lexical_vars return_type
 		backup_fn_flags '{' inner_statement_list '}' backup_fn_flags
 			{ $$ = zend_ast_create_decl(ZEND_AST_CLOSURE, $2 | $13, $1, $3,

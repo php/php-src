@@ -7108,13 +7108,13 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, throw_op_num);
 }
 
-ZEND_VM_HANDLER(199, ZEND_HANDLE_FIBER_YIELD, ANY, ANY)
+ZEND_VM_HANDLER(198, ZEND_HANDLE_FIBER_YIELD, ANY, ANY)
 {
 	USE_OPLINE;
 	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
 
 	if (!fiber) {
-		zend_throw_error(NULL, "Cannot await out of Fiber");
+		zend_throw_error(NULL, "Cannot call Fiber::yield out of Fiber");
 		FREE_UNFETCHED_OP2();
 		FREE_UNFETCHED_OP1();
 		UNDEF_RESULT();
@@ -7490,85 +7490,6 @@ ZEND_VM_HANDLER(142, ZEND_YIELD_FROM, CONST|TMP|VAR|CV, ANY)
 
 	/* This generator has no send target (though the generator we delegate to might have one) */
 	generator->send_target = NULL;
-
-	/* We increment to the next op, so we are at the correct position when the
-	 * generator is resumed. */
-	ZEND_VM_INC_OPCODE();
-
-	/* The GOTO VM uses a local opline variable. We need to set the opline
-	 * variable in execute_data so we don't resume at an old position. */
-	SAVE_OPLINE();
-
-	ZEND_VM_RETURN();
-}
-
-ZEND_VM_HANDLER(198, ZEND_AWAIT, CONST|TMP|VAR|CV|UNUSED, ANY, SRC)
-{
-	USE_OPLINE
-
-	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
-
-	SAVE_OPLINE();
-
-	if (!fiber) {
-		zend_throw_error(NULL, "Cannot await out of Fiber");
-		FREE_UNFETCHED_OP2();
-		FREE_UNFETCHED_OP1();
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
-	}
-
-	if (fiber->n_vars) {
-		zend_throw_error(NULL, "Cannot await in internal call");
-		FREE_UNFETCHED_OP2();
-		FREE_UNFETCHED_OP1();
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
-	}
-
-	/* Destroy the previously yielded value */
-	zval_ptr_dtor(&fiber->value);
-
-	/* Set the new yielded value */
-	if (OP1_TYPE != IS_UNUSED) {
-		zend_free_op free_op1;
-		zval *value = GET_OP1_ZVAL_PTR(BP_VAR_R);
-
-		/* Consts, temporary variables and references need copying */
-		if (OP1_TYPE == IS_CONST) {
-			ZVAL_COPY_VALUE(&fiber->value, value);
-			if (UNEXPECTED(Z_OPT_REFCOUNTED(fiber->value))) {
-				Z_ADDREF(fiber->value);
-			}
-		} else if (OP1_TYPE == IS_TMP_VAR) {
-			ZVAL_COPY_VALUE(&fiber->value, value);
-		} else if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(value)) {
-			ZVAL_COPY(&fiber->value, Z_REFVAL_P(value));
-			FREE_OP1_IF_VAR();
-		} else {
-			ZVAL_COPY_VALUE(&fiber->value, value);
-			if (OP1_TYPE == IS_CV) {
-				if (Z_OPT_REFCOUNTED_P(value)) Z_ADDREF_P(value);
-			}
-		}
-	} else {
-		/* If no value was specified yield null */
-		ZVAL_NULL(&fiber->value);
-	}
-
-	if (RETURN_VALUE_USED(opline)) {
-		fiber->send_target = EX_VAR(opline->result.var);
-		ZVAL_NULL(fiber->send_target);
-	} else {
-		fiber->send_target = NULL;
-	}
-
-	fiber->execute_data = EG(current_execute_data);
-	fiber->stack = EG(vm_stack);
-	fiber->stack_top = EG(vm_stack_top);
-	fiber->stack_end = EG(vm_stack_end);
-
-	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
 
 	/* We increment to the next op, so we are at the correct position when the
 	 * generator is resumed. */
