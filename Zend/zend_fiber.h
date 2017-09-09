@@ -43,6 +43,8 @@ struct _zend_fiber {
 	zval *stack_top;
 	zval *stack_end;
 
+	const zend_op *opline;
+
 	zval value;
 	zval *send_target;
 

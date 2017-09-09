@@ -1,12 +1,12 @@
 --TEST--
-tests Fiber await variable
+tests Fiber::yield variable
 --FILE--
 <?php
 $f = new Fiber(function () {
-    await "string";
-    await 1;
-    await [1, 2];
-    await new stdclass;
+    Fiber::yield("string");
+    Fiber::yield(1);
+    Fiber::yield([1, 2]);
+    Fiber::yield(new stdclass);
 });
 var_dump($f->resume());
 var_dump($f->resume());

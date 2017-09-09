@@ -1,10 +1,10 @@
 --TEST--
-tests Fiber await
+tests Fiber::yield
 --FILE--
 <?php
 $f = new Fiber(function () {
     echo "start\n";
-    await;
+    Fiber::yield();
     echo "end\n";
 });
 $f->resume();

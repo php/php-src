@@ -3,7 +3,7 @@ tests Fiber status
 --FILE--
 <?php
 $f = new Fiber(function () {
-    await;
+    Fiber::yield();
 });
 
 var_dump($f->status() == Fiber::STATUS_SUSPENDED);

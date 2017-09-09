@@ -4,7 +4,7 @@ tests Fiber during internal call
 <?php
 function foo()
 {
-    await;
+    Fiber::yield();
 }
 $f = new Fiber(function () {
     array_map('foo', [1,2]);
@@ -14,9 +14,10 @@ echo $f->resume();
 --EXPECTF--
 Fatal error: Uncaught Error: Cannot await in internal call in %s/Zend/tests/fiber/008.php:4
 Stack trace:
-#0 [internal function]: foo(1)
-#1 %s/Zend/tests/fiber/008.php(7): array_map('foo', Array)
-#2 [internal function]: {closure}()
-#3 %s/Zend/tests/fiber/008.php(10): Fiber->resume()
-#4 {main}
+#0 %s/Zend/tests/fiber/008.php(4): Fiber::yield()
+#1 [internal function]: foo(1)
+#2 %s/Zend/tests/fiber/008.php(7): array_map('foo', Array)
+#3 [internal function]: {closure}()
+#4 %s/Zend/tests/fiber/008.php(10): Fiber->resume()
+#5 {main}
   thrown in %s/Zend/tests/fiber/008.php on line 4

@@ -4,9 +4,9 @@ tests Fiber resume args
 <?php
 $f = new Fiber(function ($a) {
     var_dump($a);
-    var_dump(await);
-    var_dump(await);
-    var_dump(await);
+    var_dump(Fiber::yield());
+    var_dump(Fiber::yield());
+    var_dump(Fiber::yield());
 });
 $f->resume("string");
 $f->resume(1);

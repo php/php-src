@@ -3681,6 +3681,8 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 			zend_execute_internal(call, ret);
 		}
 
+		LOAD_OPLINE();
+
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
@@ -7104,6 +7106,40 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	}
 
 	ZEND_VM_DISPATCH_TO_HELPER(zend_dispatch_try_catch_finally_helper, try_catch_offset, current_try_catch_offset, op_num, throw_op_num);
+}
+
+ZEND_VM_HANDLER(199, ZEND_HANDLE_FIBER_YIELD, ANY, ANY)
+{
+	USE_OPLINE;
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		FREE_UNFETCHED_OP2();
+		FREE_UNFETCHED_OP1();
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	}
+
+	fiber->execute_data = EG(current_execute_data);
+	fiber->stack = EG(vm_stack);
+	fiber->stack_top = EG(vm_stack_top);
+	fiber->stack_end = EG(vm_stack_end);
+
+	fiber->status = ZEND_FIBER_STATUS_SUSPENDED;
+
+	opline = fiber->opline;
+
+	if (RETURN_VALUE_USED(opline-1)) {
+		fiber->send_target = EX_VAR((opline-1)->result.var);
+		ZVAL_NULL(fiber->send_target);
+	} else {
+		fiber->send_target = NULL;
+	}
+
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 ZEND_VM_HANDLER(146, ZEND_VERIFY_ABSTRACT_CLASS, ANY, ANY)

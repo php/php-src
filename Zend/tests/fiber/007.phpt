@@ -5,7 +5,7 @@ tests Fiber status
 function bar()
 {
     $a = null;
-    await;
+    Fiber::yield();
     $a->foo();
 }
 function foo()

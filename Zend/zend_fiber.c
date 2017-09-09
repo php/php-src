@@ -22,6 +22,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_vm.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
@@ -31,6 +32,24 @@ ZEND_API zend_class_entry *zend_ce_fiber;
 static zend_object_handlers zend_fiber_handlers;
 
 static zend_object *zend_fiber_create(zend_class_entry *class_type);
+static zend_op yield_op[2];
+
+static void zend_fiber_init_yield_op(void) /* {{{ */
+{
+	memset(yield_op, 0, sizeof(yield_op));
+
+	yield_op[0].opcode = ZEND_HANDLE_FIBER_YIELD;
+	yield_op[0].op1_type = IS_UNUSED;
+	yield_op[0].op2_type = IS_UNUSED;
+	yield_op[0].result_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(yield_op);
+
+	yield_op[1].opcode = ZEND_HANDLE_FIBER_YIELD;
+	yield_op[1].op1_type = IS_UNUSED;
+	yield_op[1].op2_type = IS_UNUSED;
+	yield_op[1].result_type = IS_UNUSED;
+	ZEND_VM_SET_OPCODE_HANDLER(yield_op+1);
+}
 
 static void zend_fiber_cleanup_unfinished_execution(zend_execute_data *execute_data,
 		zend_fiber *fiber, uint32_t catch_op_num) /* {{{ */
@@ -287,7 +306,38 @@ ZEND_METHOD(Fiber, resume)
 
 	zend_fiber_resume(fiber);
 
-	ZVAL_COPY(return_value, &fiber->value);
+	ZVAL_COPY_VALUE(return_value, &fiber->value);
+}
+/* }}} */
+
+/* {{{ proto mixed Fiber::yield(vars...)
+ * Pause and return a value to the fiber */
+ZEND_METHOD(Fiber, yield)
+{
+	zend_fiber *fiber = (zend_fiber *) EG(vm_fiber);
+
+	if (!fiber) {
+		zend_throw_error(NULL, "Cannot await out of Fiber");
+		return;
+	}
+
+	if (fiber->n_vars) {
+		zend_throw_error(NULL, "Cannot await in internal call");
+		return;
+	}
+
+	ZEND_PARSE_PARAMETERS_START(0, -1)
+		Z_PARAM_VARIADIC('+', fiber->vars, fiber->n_vars)
+	ZEND_PARSE_PARAMETERS_END();
+
+	zval_ptr_dtor(&fiber->value);
+	if (fiber->n_vars) {
+		ZVAL_COPY(&fiber->value, fiber->vars);
+	}
+
+	fiber->opline = EX(prev_execute_data)->opline + 1;
+
+	EX(prev_execute_data)->opline = yield_op;
 }
 /* }}} */
 
@@ -330,6 +380,7 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry fiber_functions[] = {
 	ZEND_ME(Fiber, __construct,   arginfo_fiber_create, ZEND_ACC_PUBLIC)
 	ZEND_ME(Fiber, resume,   arginfo_fiber_resume, ZEND_ACC_PUBLIC)
+	ZEND_ME(Fiber, yield,    arginfo_fiber_resume, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
 	ZEND_ME(Fiber, status,   arginfo_fiber_void, ZEND_ACC_PUBLIC)
 	ZEND_ME(Fiber, __wakeup, arginfo_fiber_void, ZEND_ACC_PUBLIC)
 	ZEND_FE_END
@@ -355,6 +406,8 @@ void zend_register_fiber_ce(void) /* {{{ */
 	REGISTER_FIBER_CLASS_CONST_LONG("STATUS_RUNNING", (zend_long)ZEND_FIBER_STATUS_RUNNING);
 	REGISTER_FIBER_CLASS_CONST_LONG("STATUS_FINISHED", (zend_long)ZEND_FIBER_STATUS_FINISHED);
 	REGISTER_FIBER_CLASS_CONST_LONG("STATUS_DEAD", (zend_long)ZEND_FIBER_STATUS_DEAD);
+
+	zend_fiber_init_yield_op();
 }
 /* }}} */
 

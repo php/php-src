@@ -5,12 +5,12 @@ tests Fiber stackful await
 function foo()
 {
     echo "before\n";
-    await;
+    Fiber::yield();
     echo "after\n";
 }
 $f = new Fiber(function () {
     foo();
-    await;
+    Fiber::yield();
     echo "bye\n";
 });
 $f->resume();
