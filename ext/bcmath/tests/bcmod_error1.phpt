@@ -7,7 +7,7 @@ antoni@solucionsinternet.com
 <?php if(!extension_loaded("bcmath")) print "skip"; ?>
 --FILE--
 <?php
-echo bcmod('1', '2', '3');
+echo bcmod('1', '2', '3', '4');
 ?>
 --EXPECTF--
-Warning: bcmod() expects exactly 2 parameters, 3 given in %s.php on line %d
+Warning: bcmod() expects at most 3 parameters, 4 given in %s.php on line %d
