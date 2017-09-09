@@ -9,6 +9,7 @@ PHP                                                                        NEWS
 - BCMath:
   . Fixed bug #44995 (bcpowmod() fails if scale != 0). (cmb)
   . Fixed bug #54598 (bcpowmod() may return 1 if modulus is 1). (okano1220, cmb)
+  . Fixed bug #75178 (bcpowmod() misbehaves for non-integer base or modulus). (cmb)
 
 - CLI server:
   . Fixed bug #70470 (Built-in server truncates headers spanning over TCP
