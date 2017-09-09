@@ -3036,7 +3036,7 @@ PHP_FUNCTION(imagecolorexact)
 }
 /* }}} */
 
-/* {{{ proto void imagecolorset(resource im, int col, int red, int green, int blue)
+/* {{{ proto bool imagecolorset(resource im, int col, int red, int green, int blue)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
@@ -4634,7 +4634,7 @@ PHP_FUNCTION(imageconvolution)
 /* }}} */
 /* End section: Filters */
 
-/* {{{ proto void imageflip(resource im, int mode)
+/* {{{ proto bool imageflip(resource im, int mode)
    Flip an image (in place) horizontally, vertically or both directions. */
 PHP_FUNCTION(imageflip)
 {
@@ -4692,7 +4692,7 @@ PHP_FUNCTION(imageantialias)
 }
 /* }}} */
 
-/* {{{ proto void imagecrop(resource im, array rect)
+/* {{{ proto resource imagecrop(resource im, array rect)
    Crop an image using the given coordinates and size, x, y, width and height. */
 PHP_FUNCTION(imagecrop)
 {
@@ -4749,7 +4749,7 @@ PHP_FUNCTION(imagecrop)
 }
 /* }}} */
 
-/* {{{ proto void imagecropauto(resource im [, int mode [, float threshold [, int color]]])
+/* {{{ proto resource imagecropauto(resource im [, int mode [, float threshold [, int color]]])
    Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
 {
