@@ -92,6 +92,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token <ast> T_VARIABLE  "variable (T_VARIABLE)"
 %token <ast> T_INLINE_HTML
 %token <ast> T_ENCAPSED_AND_WHITESPACE  "quoted-string and whitespace (T_ENCAPSED_AND_WHITESPACE)"
+%token <ast> T_HASH_OPEN_CURLY_BRACES "quoted arbitrary expression (T_HASH_OPEN_CURLY_BRACES)"
 %token <ast> T_CONSTANT_ENCAPSED_STRING "quoted-string (T_CONSTANT_ENCAPSED_STRING)"
 %token <ast> T_STRING_VARNAME "variable name (T_STRING_VARNAME)"
 %token <ast> T_NUM_STRING "number (T_NUM_STRING)"
@@ -212,6 +213,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_START_HEREDOC   "heredoc start (T_START_HEREDOC)"
 %token T_END_HEREDOC     "heredoc end (T_END_HEREDOC)"
 %token T_DOLLAR_OPEN_CURLY_BRACES "${ (T_DOLLAR_OPEN_CURLY_BRACES)"
+%token T_HASH_OPEN_CURLY_BRACES "#{ (T_HASH_OPEN_CURLY_BRACES)"
 %token T_CURLY_OPEN      "{$ (T_CURLY_OPEN)"
 %token T_PAAMAYIM_NEKUDOTAYIM ":: (T_PAAMAYIM_NEKUDOTAYIM)"
 %token T_NAMESPACE       "namespace (T_NAMESPACE)"
@@ -1249,6 +1251,8 @@ encaps_var:
 			{ $$ = zend_ast_create(ZEND_AST_DIM,
 			      zend_ast_create(ZEND_AST_VAR, $2), $4); }
 	|	T_CURLY_OPEN variable '}' { $$ = $2; }
+	|	T_HASH_OPEN_CURLY_BRACES expr '}'
+			{ $$ = $2; }
 ;
 
 encaps_var_offset:

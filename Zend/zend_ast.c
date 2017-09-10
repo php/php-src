@@ -772,7 +772,10 @@ static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_lis
 		if (ast->kind == ZEND_AST_ZVAL) {
 			zval *zv = zend_ast_get_zval(ast);
 
-			ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+			if (Z_TYPE_P(zv) != IS_STRING) {
+				convert_to_string(zv);
+			}
+
 			zend_ast_export_qstr(str, quote, Z_STR_P(zv));
 		} else if (ast->kind == ZEND_AST_VAR &&
 		           ast->child[0]->kind == ZEND_AST_ZVAL &&

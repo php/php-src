@@ -1590,6 +1590,11 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_DOLLAR_OPEN_CURLY_BRACES);
 }
 
+<ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"#{" {
+	yy_push_state(ST_LOOKING_FOR_EXPRESSION);
+	RETURN_TOKEN(T_HASH_OPEN_CURLY_BRACES);
+}
+
 
 <ST_IN_SCRIPTING>"}" {
 	RESET_DOC_COMMENT();
@@ -1610,6 +1615,13 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 
 <ST_LOOKING_FOR_VARNAME>{ANY_CHAR} {
+	yyless(0);
+	yy_pop_state();
+	yy_push_state(ST_IN_SCRIPTING);
+	goto restart;
+}
+
+<ST_LOOKING_FOR_EXPRESSION>{ANY_CHAR} {
 	yyless(0);
 	yy_pop_state();
 	yy_push_state(ST_IN_SCRIPTING);
@@ -2045,6 +2057,11 @@ inline_char_handler:
 				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '#':
+				if (*YYCURSOR == '{') {
 					break;
 				}
 				continue;
