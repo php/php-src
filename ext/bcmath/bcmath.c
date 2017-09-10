@@ -28,6 +28,7 @@
 
 #include "php_ini.h"
 #include "ext/standard/info.h"
+#include "ext/standard/php_math.h"
 #include "php_bcmath.h"
 #include "libbcmath/src/bcmath.h"
 
@@ -36,6 +37,11 @@ static PHP_GINIT_FUNCTION(bcmath);
 static PHP_GSHUTDOWN_FUNCTION(bcmath);
 
 /* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_bcinit, 0, 0, 1)
+	ZEND_ARG_INFO(0, num)
+	ZEND_ARG_INFO(0, scale)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_bcadd, 0, 0, 2)
 	ZEND_ARG_INFO(0, left_operand)
 	ZEND_ARG_INFO(0, right_operand)
@@ -96,6 +102,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 const zend_function_entry bcmath_functions[] = {
+	PHP_FE(bcinit,									arginfo_bcinit)
 	PHP_FE(bcadd,									arginfo_bcadd)
 	PHP_FE(bcsub,									arginfo_bcsub)
 	PHP_FE(bcmul,									arginfo_bcmul)
@@ -219,6 +226,46 @@ static bc_num split_bc_num(bc_num num) {
 	newnum->n_refs = 1;
 	num->n_refs--;
 	return newnum;
+}
+/* }}} */
+
+/* {{{ proto string bcinit(mixed num [, int scale])
+   Returns num properly formatted as BCMath string */
+PHP_FUNCTION(bcinit)
+{
+	zval *num_param;
+	bc_num num;
+	zend_long scale_param = 0;
+	int scale = (int)BCG(bc_precision);
+
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(num_param)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(scale_param)
+	ZEND_PARSE_PARAMETERS_END();
+
+	if (ZEND_NUM_ARGS() == 2) {
+		scale = (int) (scale_param < 0 ? 0 : scale_param);
+	}
+
+	switch (Z_TYPE_P(num_param)) {
+		case IS_DOUBLE:
+			RETURN_STR(_php_math_number_format_ex(Z_DVAL_P(num_param), scale, ".", 1, "", 0));
+		case IS_LONG:
+		case IS_STRING:
+			bc_init_num(&num);
+			if (Z_TYPE_P(num_param) == IS_LONG) {
+				bc_int2num(&num, Z_LVAL_P(num_param));
+			} else {
+				bc_str2num(&num, Z_STRVAL_P(num_param), scale);
+			}
+			RETVAL_STR(bc_num2str(num));
+			bc_free_num(&num);
+			return;
+		default:
+			php_error_docref(NULL, E_WARNING, "Invalid type for num");
+			RETURN_FALSE;
+	}
 }
 /* }}} */
 
