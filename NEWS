@@ -21,6 +21,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #75139 (libgd/gd_interpolation.c:1786: suspicious if ?). (cmb)
 
+- Gettext:
+  . Fixed bug #73730 (textdomain(null) throws in strict mode). (cmb)
+
 - Opcache
   . Fixed incorect constant conditional jump elimination. (Dmitry)
 
