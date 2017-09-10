@@ -83,11 +83,7 @@ ZEND_API void zend_fiber_close(zend_fiber *fiber, zend_bool finished_execution) 
 		return;
 	}
 
-	if (fiber->status == ZEND_FIBER_STATUS_DEAD) {
-		return;
-	}
-
-	if (fiber->status == ZEND_FIBER_STATUS_FINISHED) {
+	if (fiber->status == ZEND_FIBER_STATUS_FINISHED || fiber->status == ZEND_FIBER_STATUS_DEAD) {
 		zend_vm_stack original_stack = EG(vm_stack);
 		EG(vm_stack) = fiber->stack;
 
@@ -239,8 +235,8 @@ ZEND_API void zend_fiber_resume(zend_fiber *fiber) /* {{{ */
 	/* If an exception was thrown in the fiber we have to internally
 	 * rethrow it in the parent scope.*/
 	if (UNEXPECTED(EG(exception) != NULL)) {
-		zend_fiber_close(fiber, 0);
 		fiber->status = ZEND_FIBER_STATUS_DEAD;
+		zend_fiber_close(fiber, 0);
 		if (EG(current_execute_data) &&
 				EG(current_execute_data)->func &&
 				ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
@@ -330,9 +326,10 @@ ZEND_METHOD(Fiber, yield)
 		Z_PARAM_VARIADIC('+', fiber->vars, fiber->n_vars)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_ptr_dtor(&fiber->value);
 	if (fiber->n_vars) {
 		ZVAL_COPY(&fiber->value, fiber->vars);
+	} else {
+		ZVAL_NULL(&fiber->value);
 	}
 
 	fiber->opline = EX(prev_execute_data)->opline + 1;
