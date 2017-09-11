@@ -475,11 +475,139 @@ static zend_always_inline void take_successor_1(zend_ssa *ssa, int block_num, ze
 	}
 }
 
+static void compress_block(zend_op_array *op_array, zend_basic_block *block)
+{
+	while (block->len > 0) {
+		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
+
+		if (opline->opcode == ZEND_NOP
+				&& (block->len == 1 || !zend_is_smart_branch(opline - 1))) {
+			block->len--;
+		} else {
+			break;
+		}
+	}
+}
+
+static void zned_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
+{
+	zend_basic_block *src = &ssa->cfg.blocks[from];
+	zend_basic_block *old = &ssa->cfg.blocks[to];
+	zend_basic_block *dst = &ssa->cfg.blocks[new_to];
+	int *predecessors = &ssa->cfg.predecessors[dst->predecessor_offset];
+	int dup = 0;
+	int i;
+	zend_op *opline;
+
+	for (i = 0; i < src->successors_count; i++) {
+		if (src->successors[i] == to) {
+			src->successors[i] = new_to;
+		}
+	}
+
+	if (src->len > 0) {
+		opline = op_array->opcodes + src->start + src->len - 1;
+		switch (opline->opcode) {
+			case ZEND_JMP:
+			case ZEND_FAST_CALL:
+				ZEND_ASSERT(ZEND_OP1_JMP_ADDR(opline) == op_array->opcodes + old->start);
+				ZEND_SET_OP_JMP_ADDR(opline, opline->op1, op_array->opcodes + dst->start);
+				break;
+			case ZEND_JMPZNZ:
+				if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
+					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+				}
+				/* break missing intentionally */
+			case ZEND_JMPZ:
+			case ZEND_JMPNZ:
+			case ZEND_JMPZ_EX:
+			case ZEND_JMPNZ_EX:
+			case ZEND_FE_RESET_R:
+			case ZEND_FE_RESET_RW:
+			case ZEND_JMP_SET:
+			case ZEND_COALESCE:
+			case ZEND_ASSERT_CHECK:
+				if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
+					ZEND_SET_OP_JMP_ADDR(new_opline, opline->op2, op_array->opcodes + dst->start);
+				}
+				break;
+			case ZEND_CATCH:
+				if (!opline->result.num) {
+					if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
+						opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+					}
+				}
+				break;
+			case ZEND_DECLARE_ANON_CLASS:
+			case ZEND_DECLARE_ANON_INHERITED_CLASS:
+			case ZEND_FE_FETCH_R:
+			case ZEND_FE_FETCH_RW:
+				if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
+					opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+				}
+				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+				{
+					HashTable *jumptable = Z_ARRVAL(ZEND_OP2_LITERAL(opline));
+					zval *zv;
+					ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+						if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)) == old->start) {
+							Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+						}
+					} ZEND_HASH_FOREACH_END();
+					if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
+						opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+					}
+					break;
+				}
+		}
+	}
+
+	for (i = 0; i < dst->predecessors_count; i++) {
+		if (dup) {
+			predecessors[i] = predecessors[i+1];
+		} else if (predecessors[i] == to) {
+			predecessors[i] = from;
+		} else if (predecessors[i] == from) {
+			dup = 1;
+			dst->predecessors_count--;
+		}
+	}
+}
+
+static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, int block_num)
+{
+	if (block->predecessors_count && ssa->blocks[block_num].phis == NULL) {
+		int *predecessors, i;
+
+		ZEND_ASSERT(block->successors_count == 1);
+		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
+		for (i = 0; i < block->predecessors_count; i++) {
+			zned_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
+		}
+	}
+	zend_ssa_remove_block(op_array, ssa, block_num);
+}
+
 static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
 {
 	int removed_ops = 0;
 	int block_num = 0;
 
+	for (block_num = 1; block_num < ssa->cfg.blocks_count; block_num++) {
+		zend_basic_block *block = &ssa->cfg.blocks[block_num];
+
+		if (!(block->flags & ZEND_BB_REACHABLE)) {
+			continue;
+		}
+		compress_block(op_array, block);
+		if (block->len == 0) {
+			zend_ssa_unlink_block(op_array, ssa, block, block_num);
+		}
+	}
+
+	block_num = 0;
 	while (block_num < ssa->cfg.blocks_count
 		&& !(ssa->cfg.blocks[block_num].flags & ZEND_BB_REACHABLE)) {
 		block_num++;
@@ -507,6 +635,7 @@ optimize_jmp:
 					if (block->successors[0] == next_block_num) {
 						MAKE_NOP(opline);
 						removed_ops++;
+						goto optimize_nop;
 					}
 					break;
 				case ZEND_JMPZ:
@@ -516,6 +645,7 @@ optimize_jmpz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						} else {
 							opline->opcode = ZEND_JMP;
 							COPY_NODE(opline->op1, opline->op2);
@@ -525,9 +655,13 @@ optimize_jmpz:
 					} else {
 						if (block->successors[0] == next_block_num) {
 							take_successor_0(ssa, block_num, block);
-							if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
+								opline->opcode = ZEND_CHECK_VAR;
+								opline->op2.num = 0;
+							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 								zend_ssa_remove_instr(ssa, opline, ssa_op);
 								removed_ops++;
+								goto optimize_nop;
 							} else {
 								opline->opcode = ZEND_FREE;
 								opline->op2.num = 0;
@@ -547,14 +681,19 @@ optimize_jmpnz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						}
 					} else {
 						ZEND_ASSERT(block->successors_count == 2);
 						if (block->successors[0] == next_block_num) {
 							take_successor_0(ssa, block_num, block);
-							if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+							if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
+								opline->opcode = ZEND_CHECK_VAR;
+								opline->op2.num = 0;
+							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 								zend_ssa_remove_instr(ssa, opline, ssa_op);
 								removed_ops++;
+								goto optimize_nop;
 							} else {
 								opline->opcode = ZEND_FREE;
 								opline->op2.num = 0;
@@ -582,14 +721,18 @@ optimize_jmpnz:
 						if (block->successors[0] == block->successors[1]) {
 							take_successor_0(ssa, block_num, block);
 							if (block->successors[0] == next_block_num) {
-								if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+								if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_UNDEF)) {
+									opline->opcode = ZEND_CHECK_VAR;
+									opline->op2.num = 0;
+								} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 									zend_ssa_remove_instr(ssa, opline, ssa_op);
 									removed_ops++;
+									goto optimize_nop;
 								} else {
 									opline->opcode = ZEND_FREE;
 									opline->op2.num = 0;
 								}
-							} else if (opline->op1_type == IS_CV || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
+							} else if ((opline->op1_type == IS_CV && !(OP1_INFO() & MAY_BE_UNDEF)) || !(OP1_INFO() & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF))) {
 								ZEND_ASSERT(ssa_op->op1_use >= 0);
 								zend_ssa_unlink_use_chain(ssa, op_num, ssa_op->op1_use);
 								ssa_op->op1_use = -1;
@@ -642,6 +785,7 @@ optimize_jmpnz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						}
 					}
 					break;
@@ -651,6 +795,7 @@ optimize_jmpnz:
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
+							goto optimize_nop;
 						} else {
 							zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
 							if (var->use_chain < 0 && var->phi_use_chain == NULL) {
@@ -664,6 +809,24 @@ optimize_jmpnz:
 								opline->opcode = ZEND_JMP;
 								COPY_NODE(opline->op1, opline->op2);
 								take_successor_0(ssa, block_num, block);
+								goto optimize_jmp;
+							}
+						}
+					}
+					break;
+				case ZEND_NOP:
+optimize_nop:
+					compress_block(op_array, block);
+					if (block->len == 0) {
+						if (block_num > 0) {
+							zend_ssa_unlink_block(op_array, ssa, block, block_num);
+							/* backtrack to previous basic block */
+							do {
+								block_num--;
+							} while (block_num >= 0
+								&& !(ssa->cfg.blocks[block_num].flags & ZEND_BB_REACHABLE));
+							if (block_num >= 0) {
+								continue;
 							}
 						}
 					}
