@@ -119,6 +119,11 @@ PHP 7.2 UPGRADE NOTES
 - DBA:
   . Implemented support for the LMDB backend.
 
+- JSON:
+  . Added JSON_INVALID_UTF8_IGNORE and JSON_INVALID_UTF8_SUBSTITUTE options for
+    json_encode() and json_decode() to ignore and replace invalid UTF-8 byte
+    sequences, respectively.
+
 - OCI8:
   . Added Oracle Database Transparent Application Failover (TAF) callback support.
 
