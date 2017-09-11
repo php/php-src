@@ -182,11 +182,19 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
 						return 1;
 					}
-			    }
+				}
 				break;
 			case ZEND_QM_ASSIGN:
 				if (opline->op1_type == IS_CONST
 				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op1, ssa->rt_constants)) == IS_ARRAY) {
+					return 1;
+				}
+				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
+					return 1;
+				}
+				break;
+			case ZEND_ASSIGN:
+				if (opline->op1_type == IS_CV && (OP1_INFO() & MAY_BE_ARRAY)) {
 					return 1;
 				}
 				break;
@@ -196,6 +204,9 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			case ZEND_ASSIGN:
 				if (opline->op2_type == IS_CONST
 				 && Z_TYPE_P(CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants)) == IS_ARRAY) {
+					return 1;
+				}
+				if (opline->op2_type == IS_CV && (OP2_INFO() & MAY_BE_ARRAY)) {
 					return 1;
 				}
 				break;

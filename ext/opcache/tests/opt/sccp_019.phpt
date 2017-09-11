@@ -1,5 +1,5 @@
 --TEST--
-SCCP 017: Array assignemnt
+SCCP 019: Array assignemnt
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -13,18 +13,17 @@ function foo(int $x) {
 	$a[0] = 5;
 	$a[1] = $x;
 	$b = $a;
-	$b[0] = 42;
-	return $a[0];
+	return $b[0];
 }
 ?>
 --EXPECTF--
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
-    ; %ssccp_017.php:1-10
+    ; %ssccp_019.php:1-9
 L0:     RETURN int(1)
 
 foo: ; (lines=2, args=1, vars=1, tmps=0)
     ; (after optimizer)
-    ; %ssccp_017.php:2-8
+    ; %ssccp_019.php:2-7
 L0:     CV0($x) = RECV 1
 L1:     RETURN int(5)
