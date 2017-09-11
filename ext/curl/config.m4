@@ -99,7 +99,7 @@ if test "$PHP_CURL" != "no"; then
    
     save_CFLAGS="$CFLAGS"
     CFLAGS=$CURL_INCL
-    save_LDFLAGS="$CFLAGS"
+    save_LDFLAGS="$LDFLAGS"
     LDFLAGS=$CURL_LIBS
    
     AC_PROG_CPP
