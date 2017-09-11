@@ -224,12 +224,12 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				/* no_val */
 				break;
 			case ZEND_QM_ASSIGN:
-#if 0
 				if (opline->op1_type == IS_CV) {
-					/* array duplication */
-					return 1;
+					if (OP1_INFO() & MAY_BE_OBJECT) {
+						/* object aliasing */
+						return 1;
+					}
 				}
-#endif
 				break;
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
 			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
@@ -274,12 +274,12 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				/* reference dependencies processed separately */
 				break;
 			case ZEND_ASSIGN:
-#if 0
 				if (opline->op2_type == IS_CV) {
-					/* array duplication */
-					return 1;
+					if (OP2_INFO() & MAY_BE_OBJECT) {
+						/* object aliasing */
+						return 1;
+					}
 				}
-#endif
 				break;
 			default:
 				return 1;
