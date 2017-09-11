@@ -926,6 +926,7 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 					}
 				case '\\':
 				case '$':
+				case '#':
 					*t++ = *s;
 					Z_STRLEN_P(zendlval)--;
 					break;

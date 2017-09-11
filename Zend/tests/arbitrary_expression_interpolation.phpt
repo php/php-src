@@ -9,10 +9,12 @@ $value = 10;
 var_dump(
 	"Result: #{$value * 5}",
 	"abc#{(function(){return "def";})()}",
-	"abc#{a()}"
+	"abc#{a()}",
+	"ab \#{c}"
 );
 ?>
 --EXPECT--	
 string(10) "Result: 50"
 string(6) "abcdef"
 string(6) "abcd"
+string(7) "ab #{c}"
