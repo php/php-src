@@ -16,18 +16,24 @@ var_dump(ftp_login($ftp, 'user', 'pass'));
 $fooPath = __DIR__ . '/ftp_append_foo';
 file_put_contents($fooPath, 'foo');
 var_dump(ftp_append($ftp, 'ftp_append_foobar', $fooPath, FTP_BINARY));
-unlink($fooPath);
 
 $barPath = __DIR__ . '/ftp_append_bar';
 file_put_contents($barPath, 'bar');
 var_dump(ftp_append($ftp, 'ftp_append_foobar', $barPath, FTP_BINARY));
-unlink($barPath);
 
 $fooBarPath = __DIR__ . '/ftp_append_foobar';
 var_dump(file_get_contents($fooBarPath));
-unlink($fooBarPath);
 
 ftp_close($ftp);
+?>
+--CLEAN--
+<?php
+$fooPath = __DIR__ . '/ftp_append_foo';
+unlink($fooPath);
+$barPath = __DIR__ . '/ftp_append_bar';
+unlink($barPath);
+$fooBarPath = __DIR__ . '/ftp_append_foobar';
+unlink($fooBarPath);
 ?>
 --EXPECTF--
 bool(true)
