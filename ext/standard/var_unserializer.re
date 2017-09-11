@@ -327,29 +327,21 @@ object = [OC];
 
 static inline zend_long parse_iv2(const unsigned char *p, const unsigned char **q)
 {
-	char cursor;
 	zend_long result = 0;
-	int neg = 0;
+	char *end;
 
-	switch (*p) {
-		case '-':
-			neg++;
-			/* fall-through */
-		case '+':
-			p++;
+	errno = 0;
+	result = ZEND_STRTOL((const char*)p, &end, 0);
+
+	if (q) {
+		*q = (const unsigned char *)end;
 	}
 
-	while (1) {
-		cursor = (char)*p;
-		if (cursor >= '0' && cursor <= '9') {
-			result = result * 10 + (size_t)(cursor - (unsigned char)'0');
-		} else {
-			break;
-		}
-		p++;
+	if (errno) {
+		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
+		return result;
 	}
-	if (q) *q = p;
-	if (neg) return -result;
+
 	return result;
 }
 

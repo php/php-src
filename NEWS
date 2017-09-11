@@ -21,6 +21,7 @@ PHP                                                                        NEWS
     before PHP-FPM sets it up). (Ingmar Runge)
 
 - Standard:
+  . Fixed bug #75152 (signed integer overflow in parse_iv). (Laruence)
   . Fixed bug #75097 (gethostname fails if your host name is 64 chars long). (Andrea)
 
 31 Aug 2017, PHP 7.1.9
