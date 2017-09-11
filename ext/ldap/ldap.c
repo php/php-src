@@ -217,7 +217,10 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 		if (Z_TYPE_P(val) != IS_ARRAY) {
 			convert_to_string_ex(val);
 			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value != NULL) {
+			if (control_value == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+			} else {
 				control_value->bv_val = Z_STRVAL_P(val);
 				control_value->bv_len = Z_STRLEN_P(val);
 			}
@@ -238,21 +241,29 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				}
 			}
 			control_value = ber_memalloc(sizeof * control_value);
-			if (control_value != NULL) {
+			if (control_value == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+			} else {
 				rc = ldap_create_page_control_value(ld, pagesize, cookie, control_value);
 				if (rc != LDAP_SUCCESS) {
 					php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
-					control_value = NULL;
 				}
 			}
 		} else if (strcmp(control_oid, LDAP_CONTROL_ASSERT) == 0) {
 			zval* tmp;
 			char* assert;
-			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) != NULL) {
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Filter missing from assert control value array");
+			} else {
 				convert_to_string_ex(tmp);
 				assert = Z_STRVAL_P(tmp);
 				control_value = ber_memalloc(sizeof * control_value);
-				if (control_value != NULL) {
+				if (control_value == NULL) {
+					rc = -1;
+					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+				} else {
 					// ldap_create_assertion_control_value does not reset ld_errno, we need to do it ourselves
 					// See http://www.openldap.org/its/index.cgi/Incoming?id=8674
 					int success = LDAP_SUCCESS;
@@ -260,7 +271,6 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					rc = ldap_create_assertion_control_value(ld, assert, control_value);
 					if (rc != LDAP_SUCCESS) {
 						php_error_docref(NULL, E_WARNING, "Failed to create assert control value: %s (%d)", ldap_err2string(rc), rc);
-						control_value = NULL;
 					}
 				}
 			}
