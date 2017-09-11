@@ -5,8 +5,7 @@ Test 10: EXSLT Support
 require_once dirname(__FILE__) .'/skipif.inc';
 $proc = new xsltprocessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
-if (LIBXSLT_VERSION < 10117) die('skip too old libxsl');
-if (LIBXSLT_VERSION > 10129) die('skip for libxsl < 10130');
+if (LIBXSLT_VERSION < 10130) die('skip too old libxsl');
 ?>
 --FILE--
 <?php
@@ -98,18 +97,18 @@ Test 10: EXSLT Support
     second-in-minute     : NaN
   
   Test Date : -0004-02-29
-    year                 : -4
-    leap-year            : true
-    month-in-year        : 2
-    month-name           : February
-    month-abbreviation   : Feb
-    week-in-year         : 9
-    day-in-year          : 60
-    day-in-month         : 29
-    day-of-week-in-month : 5
-    day-in-week          : 1
-    day-name             : Sunday
-    day-abbreviation     : Sun
+    year                 : NaN
+    leap-year            : NaN
+    month-in-year        : NaN
+    month-name           : 
+    month-abbreviation   : 
+    week-in-year         : NaN
+    day-in-year          : NaN
+    day-in-month         : NaN
+    day-of-week-in-month : NaN
+    day-in-week          : NaN
+    day-name             : 
+    day-abbreviation     : 
     time                 : 
     hour-in-day          : NaN
     minute-in-hour       : NaN
