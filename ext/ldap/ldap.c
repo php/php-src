@@ -264,6 +264,32 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					}
 				}
 			}
+		} else if (strcmp(control_oid, LDAP_CONTROL_VALUESRETURNFILTER) == 0) {
+			zval* tmp;
+			char* filter;
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "filter", sizeof("filter") - 1)) == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Filter missing from control value array");
+			} else {
+				BerElement	*vrber = NULL;
+				control_value = ber_memalloc(sizeof * control_value);
+				if ((vrber = ber_alloc_t(LBER_USE_DER)) == NULL) {
+					rc = -1;
+					php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+				} else {
+					convert_to_string_ex(tmp);
+					if (ldap_put_vrFilter(vrber, Z_STRVAL_P(tmp)) == -1) {
+						ber_free(vrber, 1);
+						rc = -1;
+						php_error_docref(NULL, E_WARNING, "Failed to create control value: Bad ValuesReturnFilter: %s", Z_STRVAL_P(tmp));
+					} else {
+						if (ber_flatten2(vrber, control_value, 0) == -1) {
+							rc = -1;
+						}
+						ber_free(vrber, 1);
+					}
+				}
+			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Control OID %s does not expect an array as value", control_oid);
 			rc = -1;

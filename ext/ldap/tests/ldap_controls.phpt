@@ -37,6 +37,15 @@ var_dump(
 	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc2)']]]),
 	ldap_compare($link, "o=test,$base", "o", "test", [['oid' => LDAP_CONTROL_ASSERT, 'iscritical' => TRUE, 'value' => ['filter' => '(description=desc)']]])
 );
+
+/* Test valuesreturnfilter control */
+var_dump(
+	$result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"]),
+	ldap_get_entries($link, $result)[0]['l'],
+	$result = ldap_read($link, "o=test2,$base", "objectClass=*", ["l"], 0, 0, 0, LDAP_DEREF_NEVER,
+		[['oid' => LDAP_CONTROL_VALUESRETURNFILTER, 'iscritical' => TRUE, 'value' => ['filter' => '(l=*here)']]]),
+	ldap_get_entries($link, $result)[0]['l']
+);
 ?>
 ===DONE===
 --CLEAN--
@@ -127,4 +136,24 @@ bool(false)
 bool(true)
 int(-1)
 bool(true)
+resource(%d) of type (ldap result)
+array(4) {
+  ["count"]=>
+  int(3)
+  [0]=>
+  string(4) "here"
+  [1]=>
+  string(5) "there"
+  [2]=>
+  string(10) "Antarctica"
+}
+resource(%d) of type (ldap result)
+array(3) {
+  ["count"]=>
+  int(2)
+  [0]=>
+  string(4) "here"
+  [1]=>
+  string(5) "there"
+}
 ===DONE===
