@@ -2248,6 +2248,11 @@ double_quotes_scan_done:
 					break;
 				}
 				continue;
+			case '#':
+				if (*YYCURSOR == '{') {
+					break;
+				}
+				continue;
 			case '{':
 				if (*YYCURSOR == '$') {
 					break;
@@ -2318,6 +2323,11 @@ double_quotes_scan_done:
 				continue;
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '#':
+				if (*YYCURSOR == '{') {
 					break;
 				}
 				continue;

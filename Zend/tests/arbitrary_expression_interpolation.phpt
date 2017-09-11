@@ -10,11 +10,24 @@ var_dump(
 	"Result: #{$value * 5}",
 	"abc#{(function(){return "def";})()}",
 	"abc#{a()}",
-	"ab \#{c}"
+	"ab \#{c}",
+	`echo #{$value * 5}`,
+	<<<END
+Result: #{$value * 5}
+abc#{(function(){return "def";})()}
+abc#{a()}
+ab \#{c}
+END
 );
 ?>
 --EXPECT--	
 string(10) "Result: 50"
 string(6) "abcdef"
-string(6) "abcd"
+string(4) "abcd"
 string(7) "ab #{c}"
+string(3) "50
+"
+string(30) "Result: 50
+abcdef
+abcd
+ab #{c}"
