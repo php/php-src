@@ -85,6 +85,10 @@ PHP                                                                        NEWS
 - FTP:
   . Added ftp_append() function. (blar)
 
+- JSON:
+  . Fixed bug #75185 (Buffer overflow in json_decode() with
+    JSON_INVALID_UTF8_IGNORE or JSON_INVALID). (Jakub Zelenka)
+
 - Mbstring:
   . Fixed bug #75001 (Wrong reflection on mb_eregi_replace). (Fabien
     Villepinte)
