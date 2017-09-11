@@ -337,7 +337,7 @@ static zend_always_inline int zend_hash_str_exists_ind(const HashTable *ht, cons
 			Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF);
 }
 
-static zend_always_inline zval *zend_symbtable_add_new(HashTable *ht, zend_string *key, zval *pData)
+static zend_always_inline zval *zend_symtable_add_new(HashTable *ht, zend_string *key, zval *pData)
 {
 	zend_ulong idx;
 
@@ -347,6 +347,10 @@ static zend_always_inline zval *zend_symbtable_add_new(HashTable *ht, zend_strin
 		return zend_hash_add_new(ht, key, pData);
 	}
 }
+
+/* This typo snuck into 7.0.17 and 7.1.3, this define exists for BC */
+#define zend_symbtable_add_new(ht, key, pData) \
+        zend_symtable_add_new(ht, key, pData)
 
 static zend_always_inline zval *zend_symtable_update(HashTable *ht, zend_string *key, zval *pData)
 {
