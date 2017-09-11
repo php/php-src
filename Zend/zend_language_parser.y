@@ -243,7 +243,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> exit_expr scalar backticks_expr lexical_var function_call member_name property_name
 %type <ast> variable_class_name dereferencable_scalar constant dereferencable
 %type <ast> callable_expr callable_variable static_member new_variable
-%type <ast> encaps_var encaps_var_offset isset_variables
+%type <ast> encaps_expr encaps_expr_offset isset_variables
 %type <ast> top_statement_list use_declarations const_list inner_statement_list if_stmt
 %type <ast> alt_if_stmt for_exprs switch_case_list global_var_list static_var_list
 %type <ast> echo_expr_list unset_variables catch_name_list catch_list parameter_list class_statement_list
@@ -1224,20 +1224,20 @@ array_pair:
 ;
 
 encaps_list:
-		encaps_list encaps_var
+		encaps_list encaps_expr
 			{ $$ = zend_ast_list_add($1, $2); }
 	|	encaps_list T_ENCAPSED_AND_WHITESPACE
 			{ $$ = zend_ast_list_add($1, $2); }
-	|	encaps_var
+	|	encaps_expr
 			{ $$ = zend_ast_create_list(1, ZEND_AST_ENCAPS_LIST, $1); }
-	|	T_ENCAPSED_AND_WHITESPACE encaps_var
+	|	T_ENCAPSED_AND_WHITESPACE encaps_expr
 			{ $$ = zend_ast_create_list(2, ZEND_AST_ENCAPS_LIST, $1, $2); }
 ;
 
-encaps_var:
+encaps_expr:
 		T_VARIABLE
 			{ $$ = zend_ast_create(ZEND_AST_VAR, $1); }
-	|	T_VARIABLE '[' encaps_var_offset ']'
+	|	T_VARIABLE '[' encaps_expr_offset ']'
 			{ $$ = zend_ast_create(ZEND_AST_DIM,
 			      zend_ast_create(ZEND_AST_VAR, $1), $3); }
 	|	T_VARIABLE T_OBJECT_OPERATOR T_STRING
@@ -1255,7 +1255,7 @@ encaps_var:
 			{ $$ = $2; }
 ;
 
-encaps_var_offset:
+encaps_expr_offset:
 		T_STRING			{ $$ = $1; }
 	|	T_NUM_STRING		{ $$ = $1; }
 	|	'-' T_NUM_STRING 	{ $$ = zend_negate_num_string($2); }

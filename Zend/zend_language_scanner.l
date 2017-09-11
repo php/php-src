@@ -1629,6 +1629,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	goto restart;
 }
 
+
 <ST_IN_SCRIPTING>{BNUM} {
 	char *bin = yytext + 2; /* Skip "0b" */
 	int len = yyleng - 2;
