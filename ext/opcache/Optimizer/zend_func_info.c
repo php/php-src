@@ -62,9 +62,8 @@ typedef struct _func_info_t {
 
 static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 1) {
-
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 1) {
 		uint32_t tmp = 0;
 		if (call_info->arg_info[0].opline) {
 			uint32_t arg_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -88,8 +87,8 @@ static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 1) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 1) {
 		return MAY_BE_RC1 | MAY_BE_STRING;
 	} else {
 		/* warning, and returns NULL */
@@ -99,8 +98,8 @@ static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    (call_info->num_args == 2 || call_info->num_args == 3)) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 2 || call_info->num_args == 3) {
 
 		uint32_t t1 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t t2 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
@@ -132,8 +131,8 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 
 static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 1) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 1) {
 		return MAY_BE_FALSE | MAY_BE_TRUE;
 	} else {
 		return MAY_BE_FALSE | MAY_BE_TRUE | FUNC_MAY_WARN;
@@ -142,8 +141,8 @@ static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ss
 
 static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 2) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 2) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
@@ -167,8 +166,8 @@ static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *
 
 static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 3) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 3) {
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
 		uint32_t arg3_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[2].opline);
@@ -194,8 +193,8 @@ static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_b_s_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
-	    call_info->num_args == 1) {
+	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
+	if (call_info->num_args == 1) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t tmp = 0;
@@ -1551,6 +1550,135 @@ static const func_info_t func_infos[] = {
 	F0("ctype_space",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("ctype_upper",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("ctype_xdigit",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+
+	/* ext/fileinfo */
+	F1("finfo_open",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("finfo_close",							MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("finfo_set_flags",						MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("finfo_file",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("finfo_buffer",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+	F1("mime_content_type",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
+
+	/* ext/gd */
+	F1("gd_info",								MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_FALSE | MAY_BE_ARRAY_OF_TRUE),
+	F0("imageloadfont",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagesetstyle",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imagecreatetruecolor",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imageistruecolor",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagetruecolortopalette",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagepalettetotruecolor",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecolormatch",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagesetthickness",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilledellipse",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilledarc",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagealphablending",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagesavealpha",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagelayereffect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecolorallocatealpha",				MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorresolvealpha",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorclosestalpha",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorexactalpha",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecopyresampled",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+#ifdef PHP_WIN32
+	F1("imagegrabwindow",						MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagegrabscreen",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+#endif
+	F1("imagerotate",							MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagesettile",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagesetbrush",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imagecreate",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagetypes",							MAY_BE_NULL | MAY_BE_LONG),
+	F1("imagecreatefromstring",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromgif",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+#ifdef HAVE_GD_JPG
+	F1("imagecreatefromjpeg",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagejpeg",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("jpeg2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+#endif
+#ifdef HAVE_GD_PNG
+	F1("imagecreatefrompng",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagepng",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("png2wbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+#endif
+#ifdef HAVE_GD_WEBP
+	F1("imagecreatefromwebp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagewebp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+#endif
+	F1("imagecreatefromxbm",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+#if defined(HAVE_GD_XPM)
+	F1("imagecreatefromxpm",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+#endif
+	F1("imagecreatefromwbmp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromgd",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromgd2",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecreatefromgd2part",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+#if defined(HAVE_GD_BMP)
+	F1("imagecreatefrombmp",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F0("imagebmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+#endif
+	F0("imagexbm",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagegif",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagewbmp",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagegd",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagegd2",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagedestroy",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("magecolorallocate",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagepalettecopy",						MAY_BE_NULL | MAY_BE_FALSE),
+	F0("imagecolorat",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorclosest",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorclosesthwb",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolordeallocate",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecolorresolve",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorexact",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolorset",							MAY_BE_NULL | MAY_BE_FALSE),
+	F1("imagecolorsforindex",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY |  MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG),
+	F0("imagegammacorrect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagesetpixel",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageline",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagedashedline",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagerectangle",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilledrectangle",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagearc",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageellipse",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilltoborder",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefill",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecolorstotal",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagecolortransparent",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imageinterlace",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagepolygon",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageopenpolygon",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilledpolygon",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefontwidth",						MAY_BE_NULL | MAY_BE_LONG),
+	F0("imagefontheight",						MAY_BE_NULL | MAY_BE_LONG),
+	F0("imagechar",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecharup",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagestring",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagestringup",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecopy",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecopymerge",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecopymergegray",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagecopyresized",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagesx",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagesy",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
+	F0("imagesetclip",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imagegetclip",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imageftbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imagefttext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imagettfbbox",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F1("imagettftext",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
+	F0("image2wbmp",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imagefilter",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageconvolution",						MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageflip",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("imageantialias",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imagecrop",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagecropauto",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imagescale",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imageaffine",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("imageaffinematrixget",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
+	F1("imageaffinematrixconcat",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_DOUBLE),
+	F0("imagesetinterpolation",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F1("imageresolution",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_LONG),
 
 };
 
