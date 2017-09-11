@@ -35,6 +35,7 @@ PHP                                                                        NEWS
     AppendIterator). (Nikita)
 
 - Standard:
+  . Fixed bug #75152 (signed integer overflow in parse_iv). (Laruence)
   . Fixed bug #75170 (mt_rand() bias on 64-bit machines). (Nikita)
 
 - ZIP:
