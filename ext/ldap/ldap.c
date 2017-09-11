@@ -901,6 +901,83 @@ PHP_FUNCTION(ldap_bind)
 }
 /* }}} */
 
+/* {{{ proto resource ldap_bind_ext(resource link [, string dn [, string password [, serverctrls]]])
+   Bind to LDAP directory */
+PHP_FUNCTION(ldap_bind_ext)
+{
+	zval *serverctrls = NULL;
+	zval *link;
+	char *ldap_bind_dn = NULL, *ldap_bind_pw = NULL;
+	size_t ldap_bind_dnlen, ldap_bind_pwlen;
+	ldap_linkdata *ld;
+	LDAPControl **lserverctrls = NULL;
+	LDAPMessage *ldap_res;
+	int rc;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|ssa", &link, &ldap_bind_dn, &ldap_bind_dnlen, &ldap_bind_pw, &ldap_bind_pwlen, &serverctrls) != SUCCESS) {
+		RETURN_FALSE;
+	}
+
+	if ((ld = (ldap_linkdata *)zend_fetch_resource(Z_RES_P(link), "ldap link", le_link)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (ldap_bind_dn != NULL && memchr(ldap_bind_dn, '\0', ldap_bind_dnlen) != NULL) {
+		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
+		php_error_docref(NULL, E_WARNING, "DN contains a null byte");
+		RETURN_FALSE;
+	}
+
+	if (ldap_bind_pw != NULL && memchr(ldap_bind_pw, '\0', ldap_bind_pwlen) != NULL) {
+		_set_lderrno(ld->link, LDAP_INVALID_CREDENTIALS);
+		php_error_docref(NULL, E_WARNING, "Password contains a null byte");
+		RETURN_FALSE;
+	}
+
+	if (serverctrls) {
+		lserverctrls = _php_ldap_controls_from_array(ld->link, serverctrls);
+		if (lserverctrls == NULL) {
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+	}
+
+	{
+		/* ldap_simple_bind() is deprecated, use ldap_sasl_bind() instead */
+		struct berval   cred;
+		int msgid;
+
+		cred.bv_val = ldap_bind_pw;
+		cred.bv_len = ldap_bind_pw ? ldap_bind_pwlen : 0;
+		/* asynchronous call */
+		rc = ldap_sasl_bind(ld->link, ldap_bind_dn, LDAP_SASL_SIMPLE, &cred,
+				lserverctrls, NULL, &msgid);
+		if (rc != LDAP_SUCCESS ) {
+			php_error_docref(NULL, E_WARNING, "Unable to bind to server: %s (%d)", ldap_err2string(rc), rc);
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+
+		rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
+		if (rc == -1) {
+			php_error_docref(NULL, E_WARNING, "Bind operation failed");
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+
+		/* return a PHP control object */
+		RETVAL_RES(zend_register_resource(ldap_res, le_result));
+	}
+
+cleanup:
+	if (lserverctrls) {
+		_php_ldap_controls_free(&lserverctrls);
+	}
+
+	return;
+}
+/* }}} */
+
 #ifdef HAVE_LDAP_SASL
 typedef struct {
 	char *mech;
@@ -3952,6 +4029,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_bind, 0, 0, 1)
 	ZEND_ARG_INFO(0, bind_password)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_bind_ext, 0, 0, 1)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, bind_rdn)
+	ZEND_ARG_INFO(0, bind_password)
+	ZEND_ARG_INFO(0, servercontrols)
+ZEND_END_ARG_INFO()
+
 #ifdef HAVE_LDAP_SASL
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sasl_bind, 0, 0, 1)
 	ZEND_ARG_INFO(0, link)
@@ -4275,6 +4359,7 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								arginfo_ldap_connect)
 	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_resource)
 	PHP_FE(ldap_bind,									arginfo_ldap_bind)
+	PHP_FE(ldap_bind_ext,								arginfo_ldap_bind_ext)
 #ifdef HAVE_LDAP_SASL
 	PHP_FE(ldap_sasl_bind,								arginfo_ldap_sasl_bind)
 #endif
