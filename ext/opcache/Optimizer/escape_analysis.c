@@ -285,7 +285,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				/* reference dependencies processed separately */
 				break;
 			case ZEND_ASSIGN:
-				if (opline->op2_type == IS_CV) {
+				if (opline->op2_type == IS_CV || opline->result_type != IS_UNUSED) {
 					if (OP2_INFO() & MAY_BE_OBJECT) {
 						/* object aliasing */
 						return 1;
