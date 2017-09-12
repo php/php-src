@@ -34,6 +34,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #75155 (AppendIterator::append() is broken when appending another
     AppendIterator). (Nikita)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
+    (jhdxr)
 
 - Standard:
   . Fixed bug #75152 (signed integer overflow in parse_iv). (Laruence)
