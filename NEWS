@@ -3,7 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.1.10
 
 - Core:
-  . Fixed #75042 run-tests.php issues with EXTENSION block). (John Boehr)
+  . Fixed bug #75042 (run-tests.php issues with EXTENSION block). (John Boehr)
 
 - BCMath:
   . Fixed bug #44995 (bcpowmod() fails if scale != 0). (cmb)
