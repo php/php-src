@@ -283,7 +283,6 @@ ZEND_COLD void zenderror(const char *error);
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
-extern ZEND_API zval zval_used_for_init;
 
 /* If DTrace is available and enabled */
 extern ZEND_API zend_bool zend_dtrace_enabled;
