@@ -68,5 +68,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
+    (jhdxr)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
