@@ -2183,6 +2183,14 @@ PHP_FUNCTION(ldap_mod_replace)
 }
 /* }}} */
 
+/* {{{ proto resource ldap_mod_replace_ext(resource link, string dn, array entry [, array servercontrols])
+   Replace attribute values with new ones */
+PHP_FUNCTION(ldap_mod_replace_ext)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_REPLACE, 1);
+}
+/* }}} */
+
 /* {{{ proto bool ldap_mod_add(resource link, string dn, array entry [, array servercontrols])
    Add attribute values to current */
 PHP_FUNCTION(ldap_mod_add)
@@ -2191,11 +2199,27 @@ PHP_FUNCTION(ldap_mod_add)
 }
 /* }}} */
 
+/* {{{ proto resource ldap_mod_add(resource link, string dn, array entry [, array servercontrols])
+   Add attribute values to current */
+PHP_FUNCTION(ldap_mod_add_ext)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_ADD, 1);
+}
+/* }}} */
+
 /* {{{ proto bool ldap_mod_del(resource link, string dn, array entry [, array servercontrols])
    Delete attribute values */
 PHP_FUNCTION(ldap_mod_del)
 {
 	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 0);
+}
+/* }}} */
+
+/* {{{ proto resource ldap_mod_del_ext(resource link, string dn, array entry [, array servercontrols])
+   Delete attribute values */
+PHP_FUNCTION(ldap_mod_del_ext)
+{
+	php_ldap_do_modify(INTERNAL_FUNCTION_PARAM_PASSTHRU, LDAP_MOD_DELETE, 1);
 }
 /* }}} */
 
@@ -4314,6 +4338,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add, 0, 0, 3)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_add_ext, 0, 0, 3)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, servercontrols)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
@@ -4321,7 +4352,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace, 0, 0, 3)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_replace_ext, 0, 0, 3)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, servercontrols)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del, 0, 0, 3)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, entry)
+	ZEND_ARG_INFO(0, servercontrols)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_mod_del_ext, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, entry)
@@ -4523,8 +4568,11 @@ const zend_function_entry ldap_functions[] = {
 
 /* additional functions for attribute based modifications, Gerrit Thomson */
 	PHP_FE(ldap_mod_add,								arginfo_ldap_mod_add)
+	PHP_FE(ldap_mod_add_ext,							arginfo_ldap_mod_add_ext)
 	PHP_FE(ldap_mod_replace,							arginfo_ldap_mod_replace)
+	PHP_FE(ldap_mod_replace_ext,						arginfo_ldap_mod_replace_ext)
 	PHP_FE(ldap_mod_del,								arginfo_ldap_mod_del)
+	PHP_FE(ldap_mod_del_ext,							arginfo_ldap_mod_del_ext)
 /* end gjt mod */
 
 	PHP_FE(ldap_errno,									arginfo_ldap_resource)
