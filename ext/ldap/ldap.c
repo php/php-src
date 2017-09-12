@@ -3160,7 +3160,7 @@ PHP_FUNCTION(ldap_set_option)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_RESULT
-/* {{{ proto bool ldap_parse_result(resource link, resource result, int errcode, string matcheddn, string errmsg, array referrals)
+/* {{{ proto bool ldap_parse_result(resource link, resource result, int &errcode [, string &matcheddn [, string &errmsg [, array &referrals [, array &controls]]]])
    Extract information from result */
 PHP_FUNCTION(ldap_parse_result)
 {
