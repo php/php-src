@@ -2223,16 +2223,17 @@ PHP_FUNCTION(ldap_mod_del_ext)
 }
 /* }}} */
 
-/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols])
-   Delete an entry from a directory */
-PHP_FUNCTION(ldap_delete)
+/* {{{ php_ldap_do_delete
+ */
+static void php_ldap_do_delete(INTERNAL_FUNCTION_PARAMETERS, int ext)
 {
 	zval *serverctrls = NULL;
 	zval *link;
 	ldap_linkdata *ld;
 	LDAPControl **lserverctrls = NULL;
+	LDAPMessage *ldap_res;
 	char *dn;
-	int rc;
+	int rc, msgid;
 	size_t dn_len;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|a", &link, &dn, &dn_len, &serverctrls) != SUCCESS) {
@@ -2251,9 +2252,25 @@ PHP_FUNCTION(ldap_delete)
 		}
 	}
 
-	if ((rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, NULL)) != LDAP_SUCCESS) {
+	if (ext) {
+		rc = ldap_delete_ext(ld->link, dn, lserverctrls, NULL, &msgid);
+	} else {
+		rc = ldap_delete_ext_s(ld->link, dn, lserverctrls, NULL);
+	}
+	if (rc != LDAP_SUCCESS) {
 		php_error_docref(NULL, E_WARNING, "Delete: %s", ldap_err2string(rc));
 		RETVAL_FALSE;
+		goto cleanup;
+	} else if (ext) {
+		rc = ldap_result(ld->link, msgid, 1 /* LDAP_MSG_ALL */, NULL, &ldap_res);
+		if (rc == -1) {
+			php_error_docref(NULL, E_WARNING, "Delete operation failed");
+			RETVAL_FALSE;
+			goto cleanup;
+		}
+
+		/* return a PHP control object */
+		RETVAL_RES(zend_register_resource(ldap_res, le_result));
 	} else {
 		RETVAL_TRUE;
 	}
@@ -2264,6 +2281,22 @@ cleanup:
 	}
 
 	return;
+}
+/* }}} */
+
+/* {{{ proto bool ldap_delete(resource link, string dn [, array servercontrols])
+   Delete an entry from a directory */
+PHP_FUNCTION(ldap_delete)
+{
+	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
+}
+/* }}} */
+
+/* {{{ proto resource ldap_delete_ext(resource link, string dn [, array servercontrols])
+   Delete an entry from a directory */
+PHP_FUNCTION(ldap_delete_ext)
+{
+	php_ldap_do_delete(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -4317,6 +4350,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete, 0, 0, 2)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_delete_ext, 0, 0, 2)
+	ZEND_ARG_INFO(0, link_identifier)
+	ZEND_ARG_INFO(0, dn)
+	ZEND_ARG_INFO(0, servercontrols)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_modify, 0, 0, 3)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, dn)
@@ -4563,6 +4602,7 @@ const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_add,									arginfo_ldap_add)
 	PHP_FE(ldap_add_ext,								arginfo_ldap_add_ext)
 	PHP_FE(ldap_delete,									arginfo_ldap_delete)
+	PHP_FE(ldap_delete_ext,								arginfo_ldap_delete_ext)
 	PHP_FE(ldap_modify_batch,							arginfo_ldap_modify_batch)
 	PHP_FALIAS(ldap_modify,		ldap_mod_replace,		arginfo_ldap_modify)
 
