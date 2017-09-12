@@ -44,11 +44,9 @@ int(0)
 string(0) ""
 array(1) {
   [0]=>
-  array(3) {
+  array(2) {
     ["oid"]=>
     string(14) "1.3.6.1.1.13.2"
-    ["iscritical"]=>
-    bool(false)
     ["value"]=>
     array(2) {
       ["dn"]=>

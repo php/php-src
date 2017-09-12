@@ -19,7 +19,6 @@ var_dump(
 	$result = ldap_search($link, $dn, $filter, array('cn')),
 	ldap_parse_result($link, $result, $errcode, $dn, $errmsg, $refs, $ctrls),
 	$ctrls[0]['oid'],
-	$ctrls[0]['iscritical'],
 	$ctrls[0]['value']['size'],
 	bin2hex($ctrls[0]['value']['cookie']),
 	ldap_get_entries($link, $result)['count']
@@ -38,7 +37,6 @@ bool(true)
 resource(%d) of type (ldap result)
 bool(true)
 string(22) "1.2.840.113556.1.4.319"
-bool(false)
 int(%d)
 string(%d) "%s"
 int(1)

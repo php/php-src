@@ -64,11 +64,9 @@ int(0)
 string(0) ""
 array(2) {
   [0]=>
-  array(3) {
+  array(2) {
     ["oid"]=>
     string(14) "1.3.6.1.1.13.1"
-    ["iscritical"]=>
-    bool(false)
     ["value"]=>
     array(1) {
       ["dn"]=>
@@ -76,11 +74,9 @@ array(2) {
     }
   }
   [1]=>
-  array(3) {
+  array(2) {
     ["oid"]=>
     string(14) "1.3.6.1.1.13.2"
-    ["iscritical"]=>
-    bool(false)
     ["value"]=>
     array(2) {
       ["dn"]=>
@@ -139,11 +135,9 @@ int(0)
 string(0) ""
 array(2) {
   [0]=>
-  array(3) {
+  array(2) {
     ["oid"]=>
     string(14) "1.3.6.1.1.13.1"
-    ["iscritical"]=>
-    bool(false)
     ["value"]=>
     array(2) {
       ["dn"]=>
@@ -156,11 +150,9 @@ array(2) {
     }
   }
   [1]=>
-  array(3) {
+  array(2) {
     ["oid"]=>
     string(14) "1.3.6.1.1.13.2"
-    ["iscritical"]=>
-    bool(false)
     ["value"]=>
     array(1) {
       ["dn"]=>

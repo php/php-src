@@ -137,12 +137,15 @@ static void _free_ldap_result_entry(zend_resource *rsrc) /* {{{ */
 /* }}} */
 
 /* {{{ Parse controls from and to arrays */
-static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array)
+static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array, int request)
 {
 	array_init(array);
 
 	add_assoc_string(array, "oid", ctrl->ldctl_oid);
-	add_assoc_bool(array, "iscritical", (ctrl->ldctl_iscritical != 0));
+	if (request) {
+		/* iscritical field only makes sense in request controls (which may be obtained by ldap_get_option) */
+		add_assoc_bool(array, "iscritical", (ctrl->ldctl_iscritical != 0));
+	}
 
 	// If it is a known oid, parse to values
 	if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_PASSWORDPOLICYRESPONSE) == 0) {
@@ -413,7 +416,7 @@ failure:
 	return -1;
 }
 
-static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* array)
+static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* array, int request)
 {
 	zval tmp1;
 	LDAPControl **ctrlp;
@@ -424,7 +427,7 @@ static void _php_ldap_controls_to_array(LDAP *ld, LDAPControl** ctrls, zval* arr
 	}
 	ctrlp = ctrls;
 	while (*ctrlp != NULL) {
-		_php_ldap_control_to_array(ld, *ctrlp, &tmp1);
+		_php_ldap_control_to_array(ld, *ctrlp, &tmp1, request);
 		add_next_index_zval(array, &tmp1);
 		ctrlp++;
 	}
@@ -2966,7 +2969,7 @@ PHP_FUNCTION(ldap_get_option)
 				}
 				RETURN_FALSE;
 			}
-			_php_ldap_controls_to_array(ld->link, ctrls, retval);
+			_php_ldap_controls_to_array(ld->link, ctrls, retval, 1);
 		} break;
 /* options not implemented
 	case LDAP_OPT_API_INFO:
@@ -3201,7 +3204,7 @@ PHP_FUNCTION(ldap_parse_result)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 7:
-			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls);
+			_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 		case 6:
 			zval_ptr_dtor(referrals);
 			array_init(referrals);
@@ -4109,7 +4112,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	}
 
 	if (myargcount > 4) {
-		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls);
+		_php_ldap_controls_to_array(ld->link, lserverctrls, serverctrls, 0);
 	}
 
 	ldap_memfree(lgenpasswd.bv_val);
