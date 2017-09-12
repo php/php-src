@@ -21,7 +21,7 @@ var_dump(
 	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
 	$errcode,
 	$errmsg,
-	$ctrls,
+	$ctrls[LDAP_CONTROL_POST_READ],
 	ldap_get_entries(
 		$link,
 		ldap_search($link, "$base", "(o=test_ldap_add_ext)")
@@ -42,20 +42,17 @@ resource(%d) of type (ldap result)
 bool(true)
 int(0)
 string(0) ""
-array(1) {
-  [0]=>
+array(2) {
+  ["oid"]=>
+  string(14) "1.3.6.1.1.13.2"
+  ["value"]=>
   array(2) {
-    ["oid"]=>
-    string(14) "1.3.6.1.1.13.2"
-    ["value"]=>
-    array(2) {
-      ["dn"]=>
-      string(%d) "o=test_ldap_add_ext,%s"
-      ["o"]=>
-      array(1) {
-        [0]=>
-        string(17) "test_ldap_add_ext"
-      }
+    ["dn"]=>
+    string(%d) "o=test_ldap_add_ext,%s"
+    ["o"]=>
+    array(1) {
+      [0]=>
+      string(17) "test_ldap_add_ext"
     }
   }
 }

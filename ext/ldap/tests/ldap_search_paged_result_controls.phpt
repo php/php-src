@@ -22,7 +22,7 @@ var_dump(
 	ldap_get_entries($link, $result),
 	ldap_parse_result($link, $result, $errcode , $matcheddn , $errmsg , $referrals, $controls),
 	$result = ldap_search($link, $dn, $filter, array('cn'), 0, 0, 0, LDAP_DEREF_NEVER,
-		[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 20, 'cookie' => $controls[0]['value']['cookie']]]]),
+		[['oid' => LDAP_CONTROL_PAGEDRESULTS, 'value' => ['size' => 20, 'cookie' => $controls[LDAP_CONTROL_PAGEDRESULTS]['value']['cookie']]]]),
 	ldap_get_entries($link, $result)
 );
 ?>

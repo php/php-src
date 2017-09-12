@@ -26,7 +26,7 @@ var_dump(
 	ldap_parse_result($link, $result, $errcode, $matcheddn, $errmsg, $referrals, $ctrls),
 	$errcode,
 	$errmsg,
-	$ctrls,
+	$ctrls[LDAP_CONTROL_PRE_READ],
 	@ldap_search($link, "dc=my-domain,$base", "(o=my-domain)")
 );
 ?>
@@ -44,25 +44,22 @@ resource(%d) of type (ldap result)
 bool(true)
 int(0)
 string(0) ""
-array(1) {
-  [0]=>
-  array(2) {
-    ["oid"]=>
-    string(14) "1.3.6.1.1.13.1"
-    ["value"]=>
-    array(3) {
-      ["dn"]=>
-      string(%d) "dc=my-domain,%s"
-      ["dc"]=>
-      array(1) {
-        [0]=>
-        string(9) "my-domain"
-      }
-      ["o"]=>
-      array(1) {
-        [0]=>
-        string(9) "my-domain"
-      }
+array(2) {
+  ["oid"]=>
+  string(14) "1.3.6.1.1.13.1"
+  ["value"]=>
+  array(3) {
+    ["dn"]=>
+    string(%d) "dc=my-domain,%s"
+    ["dc"]=>
+    array(1) {
+      [0]=>
+      string(9) "my-domain"
+    }
+    ["o"]=>
+    array(1) {
+      [0]=>
+      string(9) "my-domain"
     }
   }
 }
