@@ -1347,7 +1347,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					SKIP_IF_TOP(data);
 
 					if (ct_eval_fetch_dim(&tmp, op1, op2, 0) == SUCCESS) {
-
 						if (IS_BOT(data)) {
 							dup_partial_array(&zv, op1);
 							ct_eval_del_array_elem(&zv, op2);
@@ -1355,6 +1354,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							if (zend_optimizer_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
 								SET_RESULT_BOT(result);
 								SET_RESULT_BOT(op1);
+								zval_ptr_dtor_nogc(&tmp);
 								break;
 							}
 
@@ -1368,9 +1368,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						if (ct_eval_assign_dim(&zv, &tmp, op2) == SUCCESS) {
 							SET_RESULT(result, &tmp);
 							SET_RESULT(op1, &zv);
+							zval_ptr_dtor_nogc(&tmp);
 							zval_ptr_dtor_nogc(&zv);
 							break;
 						}
+						zval_ptr_dtor_nogc(&tmp);
 						zval_ptr_dtor_nogc(&zv);
 					}
 				}
@@ -1384,7 +1386,6 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					SKIP_IF_TOP(data);
 
 					if (ct_eval_fetch_obj(&tmp, op1, op2) == SUCCESS) {
-
 						if (IS_BOT(data)) {
 							dup_partial_object(&zv, op1);
 							ct_eval_del_obj_prop(&zv, op2);
@@ -1392,6 +1393,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							if (zend_optimizer_eval_binary_op(&tmp, zend_compound_assign_to_binary_op(opline->opcode), &tmp, data) != SUCCESS) {
 								SET_RESULT_BOT(result);
 								SET_RESULT_BOT(op1);
+								zval_ptr_dtor_nogc(&tmp);
 								break;
 							}
 
@@ -1401,9 +1403,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						if (ct_eval_assign_obj(&zv, &tmp, op2) == SUCCESS) {
 							SET_RESULT(result, &tmp);
 							SET_RESULT(op1, &zv);
+							zval_ptr_dtor_nogc(&tmp);
 							zval_ptr_dtor_nogc(&zv);
 							break;
 						}
+						zval_ptr_dtor_nogc(&tmp);
 						zval_ptr_dtor_nogc(&zv);
 					}
 				}
