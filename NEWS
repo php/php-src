@@ -32,6 +32,7 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #75090 (IntlGregorianCalendar doesn't have constants from parent
     class). (tpunt)
+  . Fixed bug #75193 (segfault in collator_convert_object_to_string). (Remi)
 
 - PDO_OCI:
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
