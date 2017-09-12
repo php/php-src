@@ -489,7 +489,7 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 	}
 }
 
-static void zned_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
+static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa, int from, int to, int new_to)
 {
 	zend_basic_block *src = &ssa->cfg.blocks[from];
 	zend_basic_block *old = &ssa->cfg.blocks[to];
@@ -584,7 +584,7 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 		ZEND_ASSERT(block->successors_count == 1);
 		predecessors = &ssa->cfg.predecessors[block->predecessor_offset];
 		for (i = 0; i < block->predecessors_count; i++) {
-			zned_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
+			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
 	}
 	zend_ssa_remove_block(op_array, ssa, block_num);
