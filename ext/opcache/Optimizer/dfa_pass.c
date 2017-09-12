@@ -586,8 +586,8 @@ static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_b
 		for (i = 0; i < block->predecessors_count; i++) {
 			zend_ssa_replace_control_link(op_array, ssa, predecessors[i], block_num, block->successors[0]);
 		}
+		zend_ssa_remove_block(op_array, ssa, block_num);
 	}
-	zend_ssa_remove_block(op_array, ssa, block_num);
 }
 
 static int zend_dfa_optimize_jmps(zend_op_array *op_array, zend_ssa *ssa)
