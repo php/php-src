@@ -578,7 +578,7 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 
 static void zend_ssa_unlink_block(zend_op_array *op_array, zend_ssa *ssa, zend_basic_block *block, int block_num)
 {
-	if (block->predecessors_count && ssa->blocks[block_num].phis == NULL) {
+	if (block->predecessors_count == 1 && ssa->blocks[block_num].phis == NULL) {
 		int *predecessors, i;
 
 		ZEND_ASSERT(block->successors_count == 1);
