@@ -1,5 +1,5 @@
 --TEST--
-SCCP 020: Memleak
+SCCP 021: Memleak
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
@@ -24,7 +24,7 @@ class A {
 		return; 
 	}
 }
-okey
 ?>
+okey
 --EXPECT--
 okey
