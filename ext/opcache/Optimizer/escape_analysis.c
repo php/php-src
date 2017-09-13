@@ -243,11 +243,18 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				}
 				break;
 			case ZEND_ISSET_ISEMPTY_DIM_OBJ:
-			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			case ZEND_FETCH_DIM_R:
-			case ZEND_FETCH_OBJ_R:
 			case ZEND_FETCH_DIM_IS:
+				if (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY)) {
+					return 1; /* incorrect type */
+				}
+				break;
+			case ZEND_FETCH_OBJ_R:
+			case ZEND_ISSET_ISEMPTY_PROP_OBJ:
 			case ZEND_FETCH_OBJ_IS:
+				if (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_OBJECT)) {
+					return 1; /* incorrect type */
+				}
 				break;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
@@ -263,15 +270,33 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 			case ZEND_ASSIGN_POW:
 				if (!opline->extended_value) {
 					return 1;
+				} else if (opline->extended_value == ZEND_ASSIGN_DIM) {
+					if (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_ARRAY)) {
+						return 1; /* incorrect type */
+					}
+				} else if (opline->extended_value == ZEND_ASSIGN_OBJ) {
+					if (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_OBJECT)) {
+						return 1; /* incorrect type */
+					}
 				}
-				/* break missing intentionally */
+				break;
 			case ZEND_ASSIGN_DIM:
+				if (OP1_INFO() & (MAY_BE_ANY-(MAY_BE_ARRAY|MAY_BE_NULL|MAY_BE_FALSE))) {
+					return 1; /* incorrect type */
+				}
+				break;
 			case ZEND_ASSIGN_OBJ:
+				if (OP1_INFO() & (MAY_BE_ANY-(MAY_BE_OBJECT|MAY_BE_NULL|MAY_BE_FALSE))) {
+					return 1; /* incorrect type */
+				}
 				break;
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
 			case ZEND_POST_INC_OBJ:
 			case ZEND_POST_DEC_OBJ:
+				if (OP1_INFO() & ((MAY_BE_ANY|MAY_BE_UNDEF)-MAY_BE_OBJECT)) {
+					return 1; /* incorrect type */
+				}
 				break;
 			default:
 				return 1;
