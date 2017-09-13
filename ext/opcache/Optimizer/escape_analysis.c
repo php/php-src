@@ -298,6 +298,17 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 					return 1; /* incorrect type */
 				}
 				break;
+			case ZEND_INIT_ARRAY:
+			case ZEND_ADD_ARRAY_ELEMENT:
+				if (opline->extended_value & ZEND_ARRAY_ELEMENT_REF) {
+					return 1;
+				}
+				if (OP1_INFO() & MAY_BE_OBJECT) {
+					/* object aliasing */
+					return 1;
+				}
+				/* reference dependencies processed separately */
+				break;
 			default:
 				return 1;
 		}
@@ -307,9 +318,19 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 		switch (opline->opcode) {
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+				if (OP1_INFO() & MAY_BE_OBJECT) {
+					/* object aliasing */
+					return 1;
+				}
 				/* reference dependencies processed separately */
 				break;
 			case ZEND_ASSIGN:
+				if (OP1_INFO() & MAY_BE_REF) {
+					return 1;
+				}
+				if (op->op1_def >= 0 && ssa->vars[op->op1_def].alias) {
+					return 1;
+				}
 				if (opline->op2_type == IS_CV || opline->result_type != IS_UNUSED) {
 					if (OP2_INFO() & MAY_BE_OBJECT) {
 						/* object aliasing */
@@ -428,30 +449,40 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 						FOREACH_USE(ssa->vars + i, use) {
 							zend_ssa_op *op = ssa->ops + use;
 							zend_op *opline = op_array->opcodes + use;
+							int enclosing_root;
 
 							if ((opline->opcode == ZEND_ASSIGN_DIM ||
 							     opline->opcode == ZEND_ASSIGN_OBJ) &&
 							    op->op2_use == i &&
 							    op->op1_use >= 0) {
-								int root2 = ees[op->op1_use];
+								enclosing_root = ees[op->op1_use];
+							} else if ((opline->opcode == ZEND_INIT_ARRAY ||
+							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT) &&
+							    op->op1_use == i &&
+							    op->result_def >= 0) {
+								enclosing_root = ees[op->result_def];
+							} else {
+								continue;
+							}
 
-								if (ssa_vars[root2].escape_state == ESCAPE_STATE_UNKNOWN ||
-								    ssa_vars[root2].escape_state > ssa_vars[root].escape_state) {
-								    if (ssa_vars[root2].escape_state == ESCAPE_STATE_UNKNOWN) {
-										ssa_vars[root].escape_state = ESCAPE_STATE_GLOBAL_ESCAPE;
-								    } else {
-										ssa_vars[root].escape_state = ssa_vars[root2].escape_state;
-									}
-									if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
-										num_non_escaped--;
-										if (num_non_escaped == 0) {
-											i = ssa_vars_count;
-											changed = 0;
-										}
-										break;
+							if (ssa_vars[enclosing_root].escape_state == ESCAPE_STATE_UNKNOWN ||
+							    ssa_vars[enclosing_root].escape_state > ssa_vars[root].escape_state) {
+							    if (ssa_vars[enclosing_root].escape_state == ESCAPE_STATE_UNKNOWN) {
+									ssa_vars[root].escape_state = ESCAPE_STATE_GLOBAL_ESCAPE;
+							    } else {
+									ssa_vars[root].escape_state = ssa_vars[enclosing_root].escape_state;
+								}
+								if (ssa_vars[root].escape_state == ESCAPE_STATE_GLOBAL_ESCAPE) {
+									num_non_escaped--;
+									if (num_non_escaped == 0) {
+										i = ssa_vars_count;
+										changed = 0;
 									} else {
 										changed = 1;
 									}
+									break;
+								} else {
+									changed = 1;
 								}
 							}
 						} FOREACH_USE_END();

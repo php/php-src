@@ -151,8 +151,6 @@ _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
 
 /* Prototypes needed for external utility routines. */
 
-_PROTOTYPE(void bc_rt_warn, (char *mesg ,...));
-_PROTOTYPE(void bc_rt_error, (char *mesg ,...));
 _PROTOTYPE(void bc_out_of_memory, (void));
 
 #define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)

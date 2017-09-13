@@ -25,6 +25,10 @@ Core:
 	dependencies.
   . Support for BeOS has been dropped.
 
+BCMath:
+  . All warnings thrown by BCMath functions are now using PHP's error handling.
+	  Formerly some warnings have directly been written to stderr.
+
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
 	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
@@ -33,6 +37,9 @@ Standard:
 ========================================
 2. New Features
 ========================================
+
+BCMath:
+  . bcscale() can now also be used as getter to retrieve the current scale in use.
 
 ========================================
 3. Changes in SAPI modules
