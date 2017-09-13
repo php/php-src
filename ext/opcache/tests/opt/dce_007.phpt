@@ -1,5 +1,5 @@
 --TEST--
-DCE 007: Escaiping of enclosed arrays doesn't prevent removing of enclosing array
+DCE 007: Escaping of enclosed arrays doesn't prevent removal of enclosing array
 --INI--
 opcache.enable=1
 opcache.enable_cli=1
