@@ -11,6 +11,10 @@ PHP                                                                        NEWS
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
 
+- BCMath:
+	. Implemented request #67855 (No way to get current scale in use). (Chris
+	  Wright, cmb)
+
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)

@@ -34,6 +34,9 @@ Standard:
 2. New Features
 ========================================
 
+BCMath:
+  . bcscale() can now also be used as getter to retrieve the current scale in use.
+
 ========================================
 3. Changes in SAPI modules
 ========================================
