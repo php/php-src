@@ -25,6 +25,10 @@ Core:
 	dependencies.
   . Support for BeOS has been dropped.
 
+BCMath:
+  . All warnings thrown by BCMath functions are now using PHP's error handling.
+	  Formerly some warnings have directly been written to stderr.
+
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
 	  as image/bmp instead of image/x-ms-bmp, since the former has been registered

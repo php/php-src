@@ -14,6 +14,7 @@ PHP                                                                        NEWS
 - BCMath:
 	. Implemented request #67855 (No way to get current scale in use). (Chris
 	  Wright, cmb)
+  . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
