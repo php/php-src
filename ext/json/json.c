@@ -285,7 +285,7 @@ static PHP_FUNCTION(json_encode)
 	encoder.max_depth = (int)depth;
 	php_json_encode_zval(&buf, parameter, (int)options, &encoder);
 
-	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+	if (!(options & PHP_JSON_THROW_ON_ERROR) || (options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 		JSON_G(error_code) = encoder.error_code;
 		if (encoder.error_code != PHP_JSON_ERROR_NONE && !(options & PHP_JSON_PARTIAL_OUTPUT_ON_ERROR)) {
 			smart_str_free(&buf);
