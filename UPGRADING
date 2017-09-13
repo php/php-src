@@ -24,7 +24,7 @@ PHP 7.2 UPGRADE NOTES
     closed resources.
   . is_object() will now return true for objects of class
     __PHP_Incomplete_Class.
-  . Support for Netware operating systems have been removed.
+  . Support for Netware operating systems has been removed.
   . Casting arrays to objects (with (object) or settype()) will now convert
     integer keys to string property names. This fixes the behaviour of previous
     versions, where integer keys would become inaccessible properties with
@@ -182,7 +182,7 @@ PHP 8.0.
     it does not trigger a deprecation warning for technical reasons.
   
 - EXIF:
-  . The read_exif_data() alias have been deprecated, use exif_read_data() instead.
+  . The read_exif_data() alias has been deprecated, use exif_read_data() instead.
 
 - GD:
   . png2wbmp() and jpeg2wbmp() have been deprecated.
@@ -345,7 +345,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 ========================================
 
 - sql.safe_mode
-  . This INI directive have been removed.
+  . This INI directive has been removed.
 
 - realpath_cache_size
   . Set to 4096k by default
