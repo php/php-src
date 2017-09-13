@@ -2284,6 +2284,39 @@ int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zen
 	scdf_init(ctx, &sccp.scdf, op_array, ssa);
 	scdf_solve(&sccp.scdf, "SCCP");
 
+	if (ctx->debug_level & ZEND_DUMP_SCCP) {
+		int i, first = 1;
+
+		for (i = op_array->last_var; i < ssa->vars_count; i++) {
+			zval *zv = &sccp.values[i];
+
+			if (IS_TOP(zv) || IS_BOT(zv)) {
+				continue;
+			}
+			if (first) {
+				first = 0;
+				fprintf(stderr, "\nSCCP Values for \"");
+				zend_dump_op_array_name(op_array);
+				fprintf(stderr, "\":\n");
+			}
+			fprintf(stderr, "    #%d.", i);
+			zend_dump_var(op_array, IS_CV, ssa->vars[i].var);
+			if (IS_PARTIAL_ARRAY(zv)) {
+				fprintf(stderr, " = [");
+				zend_dump_ht(Z_ARRVAL_P(zv));
+				fprintf(stderr, "]");
+			} else if (IS_PARTIAL_OBJECT(zv)) {
+				fprintf(stderr, " = {");
+				zend_dump_ht(Z_ARRVAL_P(zv));
+				fprintf(stderr, "}");
+			} else {
+				fprintf(stderr, " =");
+				zend_dump_const(zv);
+			}
+			fprintf(stderr, "\n");
+		}
+	}
+
 	removed_ops += scdf_remove_unreachable_blocks(&sccp.scdf);
 	removed_ops += replace_constant_operands(&sccp);
 

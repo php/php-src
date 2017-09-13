@@ -25,7 +25,30 @@
 #include "zend_call_graph.h"
 #include "zend_dump.h"
 
-static void zend_dump_const(const zval *zv)
+void zend_dump_ht(HashTable *ht)
+{
+	zend_ulong index;
+	zend_string *key;
+	zval *val;
+	int first = 1;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
+		if (first) {
+			first = 0;
+		} else {
+			fprintf(stderr, ", ");
+		}
+		if (key) {
+			fprintf(stderr, "\"%s\"", ZSTR_VAL(key));
+		} else {
+			fprintf(stderr, ZEND_LONG_FMT, index);
+		}
+		fprintf(stderr, " =>");
+		zend_dump_const(val);
+	} ZEND_HASH_FOREACH_END();
+}
+
+void zend_dump_const(const zval *zv)
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -803,7 +826,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 	}
 }
 
-static void zend_dump_op_array_name(const zend_op_array *op_array)
+void zend_dump_op_array_name(const zend_op_array *op_array)
 {
 	zend_func_info *func_info = NULL;
 
