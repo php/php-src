@@ -43,10 +43,10 @@ PHP_FUNCTION(sodium_crypto_aead_aes256gcm_is_available);
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_keygen);
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_decrypt);
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_encrypt);
-PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_keygen);
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_decrypt);
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_encrypt);
 PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_ietf_keygen);
+PHP_FUNCTION(sodium_crypto_aead_chacha20poly1305_keygen);
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt);
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt);
 PHP_FUNCTION(sodium_crypto_aead_xchacha20poly1305_ietf_keygen);
@@ -108,6 +108,8 @@ PHP_FUNCTION(sodium_hex2bin);
 PHP_FUNCTION(sodium_increment);
 PHP_FUNCTION(sodium_memcmp);
 PHP_FUNCTION(sodium_memzero);
+PHP_FUNCTION(sodium_pad);
+PHP_FUNCTION(sodium_unpad);
 
 #endif	/* PHP_LIBSODIUM_H */
 

@@ -99,6 +99,13 @@ typedef enum _zend_ssa_alias_kind {
 	HTTP_RESPONSE_HEADER_ALIAS
 } zend_ssa_alias_kind;
 
+typedef enum _zend_ssa_escape_state {
+	ESCAPE_STATE_UNKNOWN,
+	ESCAPE_STATE_NO_ESCAPE,
+	ESCAPE_STATE_FUNCTION_ESCAPE,
+	ESCAPE_STATE_GLOBAL_ESCAPE
+} zend_ssa_escape_state;
+
 typedef struct _zend_ssa_var {
 	int                    var;            /* original var number; op.var for CVs and following numbers for VARs and TMP_VARs */
 	int                    scc;            /* strongly connected component */
@@ -110,6 +117,7 @@ typedef struct _zend_ssa_var {
 	unsigned int           no_val : 1;     /* value doesn't mater (used as op1 in ZEND_ASSIGN) */
 	unsigned int           scc_entry : 1;
 	zend_ssa_alias_kind    alias : 2;  /* value may be changed indirectly */
+	zend_ssa_escape_state  escape_state : 2;
 } zend_ssa_var;
 
 typedef struct _zend_ssa_var_info {
@@ -139,6 +147,7 @@ int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_
 int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_unlink_use_chain(zend_ssa *ssa, int op, int var);
 
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to);
 void zend_ssa_remove_instr(zend_ssa *ssa, zend_op *opline, zend_ssa_op *ssa_op);
 void zend_ssa_remove_phi(zend_ssa *ssa, zend_ssa_phi *phi);
 void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num);
@@ -179,10 +188,13 @@ END_EXTERN_C()
 static zend_always_inline int zend_ssa_next_use(const zend_ssa_op *ssa_op, int var, int use)
 {
 	ssa_op += use;
-	if (ssa_op->result_use == var) {
+	if (ssa_op->op1_use == var) {
+		return ssa_op->op1_use_chain;
+	} else if (ssa_op->op2_use == var) {
+		return ssa_op->op2_use_chain;
+	} else {
 		return ssa_op->res_use_chain;
 	}
-	return (ssa_op->op1_use == var) ? ssa_op->op1_use_chain : ssa_op->op2_use_chain;
 }
 
 static zend_always_inline zend_ssa_phi* zend_ssa_next_use_phi(const zend_ssa *ssa, int var, const zend_ssa_phi *p)
@@ -209,7 +221,7 @@ static zend_always_inline zend_bool zend_ssa_is_no_val_use(const zend_op *opline
 		return ssa_op->op2_use == var && ssa_op->op1_use != var;
 	}
 	if (ssa_op->result_use == var && opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
-		return 1;
+		return ssa_op->op1_use != var && ssa_op->op2_use != var;
 	}
 	return 0;
 }

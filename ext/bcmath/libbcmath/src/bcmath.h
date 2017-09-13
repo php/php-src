@@ -42,7 +42,6 @@ typedef struct bc_struct
       int   n_len;	/* The number of digits before the decimal point. */
       int   n_scale;	/* The number of digits after the decimal point. */
       int   n_refs;     /* The number of pointers to this number. */
-      bc_num n_next;	/* Linked list for available list. */
       char *n_ptr;	/* The pointer to the actual storage.
 			   If NULL, n_value points to the inside of
 			   another number (bc_multiply...) and should

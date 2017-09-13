@@ -388,7 +388,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		return NULL;
 	}
 
-#if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
+#if defined(S_IFSOCK) && !defined(PHP_WIN32)
 	do {
 		zend_stat_t st;
 		memset(&st, 0, sizeof(st));

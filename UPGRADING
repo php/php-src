@@ -23,6 +23,7 @@ Core:
   . The ext_skel utility has been completely redesigned with new options and 
     some old options removed. This is now written in PHP and have no external 
 	dependencies.
+  . Support for BeOS has been dropped.
 
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
@@ -49,6 +50,10 @@ Standard:
 6. New Functions
 ========================================
 
+Date:
+  . Added the DateTime::createFromImmutable() method, which mirrors
+    DateTimeImmutable::createFromMutable().
+
 ========================================
 7. New Classes and Interfaces
 ========================================
@@ -67,6 +72,10 @@ Standard:
  ODBC: 
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
+
+ ZIP:
+  . Bunled libzip have been dropped,
+    system library is now required.
 
 ========================================
 10. New Global Constants

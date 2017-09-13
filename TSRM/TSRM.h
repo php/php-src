@@ -72,13 +72,6 @@ typedef int ts_rsrc_id;
 #elif defined(TSRM_ST)
 # define THREAD_T st_thread_t
 # define MUTEX_T st_mutex_t
-#elif defined(BETHREADS)
-# define THREAD_T thread_id
-typedef struct {
-  sem_id sem;
-  int32 ben;
-} beos_ben;
-# define MUTEX_T beos_ben *
 #endif
 
 #ifdef HAVE_SIGNAL_H

@@ -141,13 +141,6 @@ void spoofchecker_register_Spoofchecker_class(void)
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
-
-	if (!Spoofchecker_ce_ptr) {
-		zend_error(E_ERROR,
-			"Spoofchecker: attempt to create properties "
-			"on a non-registered class.");
-		return;
-	}
 }
 /* }}} */
 

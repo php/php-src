@@ -101,7 +101,7 @@ static uint8_t browscap_compute_prefix_len(zend_string *pattern) {
 			break;
 		}
 	}
-	return MIN(i, UINT8_MAX);
+	return (uint8_t)MIN(i, UINT8_MAX);
 }
 
 static size_t browscap_compute_contains(
@@ -119,7 +119,7 @@ static size_t browscap_compute_contains(
 			}
 		}
 	}
-	*contains_start = i;
+	*contains_start = (uint16_t)i;
 
 	/* Find first placeholder character after that */
 	for (; i < ZSTR_LEN(pattern); i++) {
@@ -127,7 +127,7 @@ static size_t browscap_compute_contains(
 			break;
 		}
 	}
-	*contains_len = MIN(i - *contains_start, UINT8_MAX);
+	*contains_len = (uint8_t)MIN(i - *contains_start, UINT8_MAX);
 	return i;
 }
 

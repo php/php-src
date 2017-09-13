@@ -14,7 +14,7 @@ PHP_ARG_WITH(pcre-dir, pcre install prefix,
 [  --with-pcre-dir         ZIP: pcre install prefix], no, no)
 
 PHP_ARG_WITH(libzip, libzip,
-[  --with-libzip[=DIR]       ZIP: use libzip], no, no)
+[  --with-libzip[=DIR]       ZIP: use libzip], yes, no)
 
 if test "$PHP_ZIP" != "no"; then
 
@@ -115,7 +115,7 @@ if test "$PHP_ZIP" != "no"; then
   else
     AC_MSG_WARN(========================================================)
     AC_MSG_WARN(Use of bundled libzip is deprecated and will be removed.)
-    AC_MSG_WARN(Some features such as encryption are not available.)
+    AC_MSG_WARN(Some features such as encryption and bzip2 are not available.)
     AC_MSG_WARN(Use system library and --with-libzip is recommended.)
     AC_MSG_WARN(========================================================)
 

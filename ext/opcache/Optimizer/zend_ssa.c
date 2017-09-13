@@ -644,6 +644,17 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 						//NEW_SSA_VAR(next->op1.var)
 					}
 					break;
+				case ZEND_PRE_INC_OBJ:
+				case ZEND_PRE_DEC_OBJ:
+				case ZEND_POST_INC_OBJ:
+				case ZEND_POST_DEC_OBJ:
+					if (opline->op1_type == IS_CV) {
+						ssa_ops[k].op1_def = ssa_vars_count;
+						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
+						ssa_vars_count++;
+						//NEW_SSA_VAR(opline->op1.var)
+					}
+					break;
 				case ZEND_ADD_ARRAY_ELEMENT:
 					ssa_ops[k].result_use = var[EX_VAR_TO_NUM(opline->result.var)];
 				case ZEND_INIT_ARRAY:
@@ -1213,14 +1224,14 @@ static inline zend_ssa_phi **zend_ssa_next_use_phi_ptr(zend_ssa *ssa, int var, z
 
 /* May be called even if source is not used in the phi (useful when removing uses in a phi
  * with multiple identical operands) */
-static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source) /* {{{ */
+static inline void zend_ssa_remove_use_of_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int source, zend_ssa_phi *next_use_phi) /* {{{ */
 {
 	zend_ssa_phi **cur = &ssa->vars[source].phi_use_chain;
 	while (*cur && *cur != phi) {
 		cur = zend_ssa_next_use_phi_ptr(ssa, source, *cur);
 	}
 	if (*cur) {
-		*cur = zend_ssa_next_use_phi(ssa, source, *cur);
+		*cur = next_use_phi;
 	}
 }
 /* }}} */
@@ -1229,7 +1240,7 @@ static void zend_ssa_remove_uses_of_phi_sources(zend_ssa *ssa, zend_ssa_phi *phi
 {
 	int source;
 	FOREACH_PHI_SOURCE(phi, source) {
-		zend_ssa_remove_use_of_phi_source(ssa, phi, source);
+		zend_ssa_remove_use_of_phi_source(ssa, phi, source, zend_ssa_next_use_phi(ssa, source, phi));
 	} FOREACH_PHI_SOURCE_END();
 }
 /* }}} */
@@ -1289,7 +1300,7 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	}
 
 	/* Variable only used in one operand, remove the phi from the use chain. */
-	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num);
+	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num, phi->use_chains[pred_offset]);
 	phi->use_chains[pred_offset] = NULL;
 }
 /* }}} */
@@ -1339,6 +1350,52 @@ void zend_ssa_remove_uses_of_var(zend_ssa *ssa, int var_num) /* {{{ */
 }
 /* }}} */
 
+void zend_ssa_remove_predecessor(zend_ssa *ssa, int from, int to) /* {{{ */
+{
+	zend_basic_block *next_block = &ssa->cfg.blocks[to];
+	zend_ssa_block *next_ssa_block = &ssa->blocks[to];
+	zend_ssa_phi *phi;
+	int j;
+
+	/* Find at which predecessor offset this block is referenced */
+	int pred_offset = -1;
+	int *predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset];
+
+	for (j = 0; j < next_block->predecessors_count; j++) {
+		if (predecessors[j] == from) {
+			pred_offset = j;
+			break;
+		}
+	}
+
+	/* If there are duplicate successors, the predecessors may have been removed in
+	 * a previous iteration already. */
+	if (pred_offset == -1) {
+		return;
+	}
+
+	/* For phis in successor blocks, remove the operands associated with this block */
+	for (phi = next_ssa_block->phis; phi; phi = phi->next) {
+		if (phi->pi >= 0) {
+			if (phi->pi == from) {
+				zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
+				zend_ssa_remove_phi(ssa, phi);
+			}
+		} else {
+			ZEND_ASSERT(phi->sources[pred_offset] >= 0);
+			zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
+		}
+	}
+
+	/* Remove this predecessor */
+	next_block->predecessors_count--;
+	if (pred_offset < next_block->predecessors_count) {
+		predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset + pred_offset];
+		memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
+	}
+}
+/* }}} */
+
 void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{ */
 {
 	zend_basic_block *block = &ssa->cfg.blocks[i];
@@ -1369,45 +1426,7 @@ void zend_ssa_remove_block(zend_op_array *op_array, zend_ssa *ssa, int i) /* {{{
 	}
 
 	for (s = 0; s < block->successors_count; s++) {
-		zend_basic_block *next_block = &ssa->cfg.blocks[block->successors[s]];
-		zend_ssa_block *next_ssa_block = &ssa->blocks[block->successors[s]];
-		zend_ssa_phi *phi;
-
-		/* Find at which predecessor offset this block is referenced */
-		int pred_offset = -1;
-		predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset];
-		for (j = 0; j < next_block->predecessors_count; j++) {
-			if (predecessors[j] == i) {
-				pred_offset = j;
-				break;
-			}
-		}
-
-		/* If there are duplicate successors, the predecessors may have been removed in
-		 * a previous iteration already. */
-		if (pred_offset == -1) {
-			continue;
-		}
-
-		/* For phis in successor blocks, remove the operands associated with this block */
-		for (phi = next_ssa_block->phis; phi; phi = phi->next) {
-			if (phi->pi >= 0) {
-				if (phi->pi == i) {
-					zend_ssa_remove_uses_of_var(ssa, phi->ssa_var);
-					zend_ssa_remove_phi(ssa, phi);
-				}
-			} else {
-				ZEND_ASSERT(phi->sources[pred_offset] >= 0);
-				zend_ssa_remove_phi_source(ssa, phi, pred_offset, next_block->predecessors_count);
-			}
-		}
-
-		/* Remove this predecessor */
-		next_block->predecessors_count--;
-		if (pred_offset < next_block->predecessors_count) {
-			predecessors = &ssa->cfg.predecessors[next_block->predecessor_offset + pred_offset];
-			memmove(predecessors, predecessors + 1, (next_block->predecessors_count - pred_offset) * sizeof(uint32_t));
-		}
+		zend_ssa_remove_predecessor(ssa, i, block->successors[s]);
 	}
 
 	/* Remove successors of predecessors */

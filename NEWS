@@ -6,9 +6,14 @@ PHP                                                                        NEWS
   . Redesigned the old ext_skel program written in PHP, run: 
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
+  . Removed support for BeOS. (Kalle)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
+
+- Date:
+  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
+    (majkl578, Rican7)
 
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
@@ -34,6 +39,13 @@ PHP                                                                        NEWS
   . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
 
+- PDO_OCI:
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
+
+- PDO SQLite
+  . Add support for additional open flags
+
 - phar:
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
@@ -56,5 +68,7 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
+    (jhdxr)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

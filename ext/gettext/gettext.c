@@ -161,16 +161,16 @@ PHP_MINFO_FUNCTION(php_gettext)
    Set the textdomain to "domain". Returns the current domain */
 PHP_NAMED_FUNCTION(zif_textdomain)
 {
-	char *domain, *domain_name, *retval;
-	size_t domain_len;
+	char *domain = NULL, *domain_name, *retval;
+	size_t domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &domain, &domain_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &domain, &domain_len) == FAILURE) {
 		return;
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
-	if (strcmp(domain, "") && strcmp(domain, "0")) {
+	if (domain != NULL && strcmp(domain, "") && strcmp(domain, "0")) {
 		domain_name = domain;
 	} else {
 		domain_name = NULL;

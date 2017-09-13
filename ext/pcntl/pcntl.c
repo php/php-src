@@ -622,7 +622,7 @@ PHP_FUNCTION(pcntl_alarm)
 
 #define PHP_RUSAGE_PARA(from, to, field) \
 	add_assoc_long(to, #field, from.field)
-#if !defined(_OSD_POSIX) && !defined(__BEOS__) /* BS2000 has only a few fields in the rusage struct */
+#ifndef _OSD_POSIX
 	#define PHP_RUSAGE_SPECIAL(from, to) \
 		PHP_RUSAGE_PARA(from, to, ru_oublock); \
 		PHP_RUSAGE_PARA(from, to, ru_inblock); \

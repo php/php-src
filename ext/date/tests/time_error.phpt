@@ -15,5 +15,7 @@ var_dump (time($extra_arg));
 ===DONE===
 --EXPECTF--
 Too many arguments
-int(%d)
+
+Warning: time() expects exactly 0 parameters, 1 given in %stime_error.php on line %d
+NULL
 ===DONE===

@@ -50,7 +50,7 @@ PHP_COM_DOTNET_API OLECHAR *php_com_string_to_olestring(char *string, size_t str
 		This should be fixed by reallocating the olestring, but as emalloc is used, that doesn't
 		matter much. */
 		ok = MultiByteToWideChar(codepage, flags, string, (int)string_len, olestring, (int)string_len);
-		if (ok > 0 && ok < string_len) {
+		if (ok > 0 && (size_t)ok < string_len) {
 			olestring[ok] = '\0';
 		}
 	} else {
