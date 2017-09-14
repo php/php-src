@@ -21,7 +21,7 @@ PHP 7.3 UPGRADE NOTES
 
 Core:
   . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and have no external 
+    some old options removed. This is now written in PHP and has no external 
 	dependencies.
   . Support for BeOS has been dropped.
 
@@ -81,7 +81,7 @@ Date:
   . Support for Birdstep has been removed.
 
  ZIP:
-  . Bunled libzip have been dropped,
+  . Bunled libzip has been dropped,
     system library is now required.
 
 ========================================
@@ -103,7 +103,7 @@ PGSQL:
 ========================================
 
 - birdstep.max_links
-  . This INI directive have been removed.
+  . This INI directive has been removed.
 
 ========================================
 12. Windows Support

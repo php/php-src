@@ -222,8 +222,7 @@ static inline zend_bool may_have_side_effects(
 				opline++;
 				ssa_op++;
 				if (opline->op1_type != IS_CONST
-					&& (OP1_INFO() & MAY_HAVE_DTOR)
-					&& ssa->vars[ssa_op->op1_use].escape_state != ESCAPE_STATE_NO_ESCAPE) {
+					&& (OP1_INFO() & MAY_HAVE_DTOR)) {
 					/* DCE might shorten lifetime */
 					return 1;
 				}
