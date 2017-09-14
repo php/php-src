@@ -284,6 +284,25 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				}
 				/* reference dependencies processed separately */
 				break;
+			case ZEND_OP_DATA:
+				if ((opline-1)->opcode != ZEND_ASSIGN_DIM
+				 && (opline-1)->opcode != ZEND_ASSIGN_OBJ) {
+					return 1;
+				}
+				if (OP1_INFO() & MAY_BE_OBJECT) {
+					/* object aliasing */
+					return 1;
+				}
+				opline--;
+				op--;
+				if (opline->op1_type != IS_CV
+				 || (OP1_INFO() & MAY_BE_REF)
+				 || (op->op1_def >= 0 && ssa->vars[op->op1_def].alias)) {
+					/* asignment into escaping structure */
+					return 1;
+				}
+				/* reference dependencies processed separately */
+				break;
 			default:
 				return 1;
 		}
@@ -291,19 +310,11 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 
 	if (op->op2_use == var) {
 		switch (opline->opcode) {
-			case ZEND_ASSIGN_DIM:
-			case ZEND_ASSIGN_OBJ:
-				if (OP2_INFO() & MAY_BE_OBJECT) {
-					/* object aliasing */
-					return 1;
-				}
-				/* reference dependencies processed separately */
-				break;
 			case ZEND_ASSIGN:
-				if (OP1_INFO() & MAY_BE_REF) {
-					return 1;
-				}
-				if (op->op1_def >= 0 && ssa->vars[op->op1_def].alias) {
+				if (opline->op1_type != IS_CV
+				 || (OP1_INFO() & MAY_BE_REF)
+				 || (op->op1_def >= 0 && ssa->vars[op->op1_def].alias)) {
+					/* asignment into escaping variable */
 					return 1;
 				}
 				if (opline->op2_type == IS_CV || opline->result_type != IS_UNUSED) {
@@ -426,11 +437,12 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 							zend_op *opline = op_array->opcodes + use;
 							int enclosing_root;
 
-							if ((opline->opcode == ZEND_ASSIGN_DIM ||
-							     opline->opcode == ZEND_ASSIGN_OBJ) &&
-							    op->op2_use == i &&
-							    op->op1_use >= 0) {
-								enclosing_root = ees[op->op1_use];
+							if (opline->opcode == ZEND_OP_DATA &&
+							    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
+							     (opline-1)->opcode == ZEND_ASSIGN_OBJ) &&
+							    op->op1_use == i &&
+							    (op-1)->op1_use >= 0) {
+								enclosing_root = ees[(op-1)->op1_use];
 							} else if ((opline->opcode == ZEND_INIT_ARRAY ||
 							     opline->opcode == ZEND_ADD_ARRAY_ELEMENT) &&
 							    op->op1_use == i &&
