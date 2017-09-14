@@ -1873,12 +1873,18 @@ timelib_time* timelib_strtotime(char *s, size_t len, timelib_error_container **e
 #define TIMELIB_CHECK_NUMBER                                           \
 		if (strchr("0123456789", *ptr) == NULL)                        \
 		{                                                              \
-			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Unexpected data found.", string, begin); \
+			char *msg = timelib_calloc(sizeof(char), 80 + strlen(format)); \
+			sprintf(msg, "Found character %c when expecting a number (0-9) in DateTime parsing format %s", *ptr, format); \
+			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, msg, string, begin); \
+			timelib_free(msg);                                         \
 		}
 #define TIMELIB_CHECK_SIGNED_NUMBER                                    \
 		if (strchr("-0123456789", *ptr) == NULL)                       \
 		{                                                              \
-			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Unexpected data found.", string, begin); \
+			char *msg = timelib_calloc(sizeof(char), 120 + strlen(format)); \
+			sprintf(msg, "Found character %c when expecting a signed number (0-9 plus the hyphen sign) in DateTime parsing format %s", *ptr, format); \
+			add_pbf_error(s, TIMELIB_ERR_UNEXPECTED_DATA, "Unexpected data found in DateTime Format input.", string, begin); \
+			timelib_free(msg);                                         \
 		}
 
 static void timelib_time_reset_fields(timelib_time *time)
@@ -2200,7 +2206,12 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					break;
 
 				default:
-					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, "Data missing", string, ptr);
+					int len = strlen(format) + strlen(string) + 80;
+					char *msg = timelib_calloc(sizeof(char), len);
+					sprintf(msg, "DateTime format (%s) indicates that data is missing from "
+						"the input string (%s)", format, string);
+					add_pbf_error(s, TIMELIB_ERR_DATA_MISSING, msg, string, ptr);
+					timelib_free(msg);
 					done = 1;
 			}
 		}
