@@ -270,25 +270,22 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 		} else if (strcmp(control_oid, LDAP_CONTROL_PAGEDRESULTS) == 0) {
 			zval* tmp;
 			int pagesize = 1;
-			struct berval *cookie = NULL;
+			struct berval cookie = { 0, NULL };
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "size", sizeof("size") - 1)) != NULL) {
 				convert_to_long_ex(tmp);
 				pagesize = Z_LVAL_P(tmp);
 			}
 			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "cookie", sizeof("cookie") - 1)) != NULL) {
 				convert_to_string_ex(tmp);
-				cookie = ber_memalloc(sizeof * cookie);
-				if (cookie != NULL) {
-					cookie->bv_val = Z_STRVAL_P(tmp);
-					cookie->bv_len = Z_STRLEN_P(tmp);
-				}
+				cookie.bv_val = Z_STRVAL_P(tmp);
+				cookie.bv_len = Z_STRLEN_P(tmp);
 			}
 			control_value = ber_memalloc(sizeof * control_value);
 			if (control_value == NULL) {
 				rc = -1;
 				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
 			} else {
-				rc = ldap_create_page_control_value(ld, pagesize, cookie, control_value);
+				rc = ldap_create_page_control_value(ld, pagesize, &cookie, control_value);
 				if (rc != LDAP_SUCCESS) {
 					php_error_docref(NULL, E_WARNING, "Failed to create paged result control value: %s (%d)", ldap_err2string(rc), rc);
 				}
