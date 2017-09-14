@@ -1,7 +1,9 @@
 --TEST--
-zlib_get_coding_type() basic call without env
+zlib_get_coding_type() with deflate encoding
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
+--ENV--
+HTTP_ACCEPT_ENCODING=deflate
 --FILE--
 <?php
 ini_set('zlib.output_compression', 'On');
@@ -11,5 +13,5 @@ var_dump($enc);
 var_dump(zlib_get_coding_type());
 ?>
 --EXPECT--
-bool(false)
-bool(false)
+string(7) "deflate"
+string(7) "deflate"

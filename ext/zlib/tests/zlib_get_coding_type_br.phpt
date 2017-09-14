@@ -1,7 +1,9 @@
 --TEST--
-zlib_get_coding_type() basic call without env
+zlib_get_coding_type() with unsupported encoding
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
+--ENV--
+HTTP_ACCEPT_ENCODING=br
 --FILE--
 <?php
 ini_set('zlib.output_compression', 'On');
