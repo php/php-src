@@ -224,6 +224,27 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 		if (ber != NULL) {
 			ber_free(ber, 1);
 		}
+	} else if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_SORTRESPONSE) == 0) {
+		zval value;
+		int errcode, rc;
+		char* attribute;
+
+		if (ctrl->ldctl_value.bv_len) {
+			rc = ldap_parse_sortresponse_control(ld, ctrl, &errcode, &attribute);
+		} else {
+			rc = -1;
+		}
+		if ( rc == LDAP_SUCCESS ) {
+			array_init(&value);
+			add_assoc_long(&value, "errcode", errcode);
+			if (attribute) {
+				add_assoc_string(&value, "attribute", attribute);
+				ldap_memfree(attribute);
+			}
+			add_assoc_zval(array, "value", &value);
+		} else {
+			add_assoc_null(array, "value");
+		}
 	} else {
 		if (ctrl->ldctl_value.bv_len) {
 			add_assoc_stringl(array, "value", ctrl->ldctl_value.bv_val, ctrl->ldctl_value.bv_len);
@@ -239,6 +260,7 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 	char * control_oid = NULL;
 	int control_iscritical = 0, rc = LDAP_SUCCESS;
 	char** ldap_attrs = NULL;
+	LDAPSortKey** sort_keys = NULL;
 
 	if ((val = zend_hash_str_find(Z_ARRVAL_P(array), "oid", sizeof("oid") - 1)) == NULL) {
 		php_error_docref(NULL, E_WARNING, "Control must have an oid key");
@@ -385,6 +407,54 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 					}
 				}
 			}
+		} else if (strcmp(control_oid, LDAP_CONTROL_SORTREQUEST) == 0) {
+			int num_keys, i;
+			zval *sortkey, *tmp;
+
+			num_keys = zend_hash_num_elements(Z_ARRVAL_P(val));
+			sort_keys = safe_emalloc((num_keys+1), sizeof(LDAPSortKey*), 0);
+
+			for (i = 0; i<num_keys; i++) {
+				if ((sortkey = zend_hash_index_find(Z_ARRVAL_P(val), i)) == NULL) {
+					rc = -1;
+					php_error_docref(NULL, E_WARNING, "Failed to encode sort keys list");
+					goto failure;
+				}
+
+				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "attr", sizeof("attr") - 1)) == NULL) {
+					rc = -1;
+					php_error_docref(NULL, E_WARNING, "Sort key list missing field");
+					goto failure;
+				}
+				sort_keys[i] = emalloc(sizeof(LDAPSortKey));
+				convert_to_string_ex(tmp);
+				sort_keys[i]->attributeType = Z_STRVAL_P(tmp);
+
+				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "oid", sizeof("oid") - 1)) != NULL) {
+					convert_to_string_ex(tmp);
+					sort_keys[i]->orderingRule = Z_STRVAL_P(tmp);
+				} else {
+					sort_keys[i]->orderingRule = NULL;
+				}
+
+				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(sortkey), "reverse", sizeof("reverse") - 1)) != NULL) {
+					convert_to_boolean_ex(tmp);
+					sort_keys[i]->reverseOrder = (Z_TYPE_P(tmp) == IS_TRUE);
+				} else {
+					sort_keys[i]->reverseOrder = 0;
+				}
+			}
+			sort_keys[num_keys] = NULL;
+			control_value = ber_memalloc(sizeof * control_value);
+			if (control_value == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+			} else {
+				rc = ldap_create_sort_control_value(ld, sort_keys, control_value);
+				if (rc != LDAP_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
+				}
+			}
 		} else {
 			php_error_docref(NULL, E_WARNING, "Control OID %s does not expect an array as value", control_oid);
 			rc = -1;
@@ -402,6 +472,15 @@ failure:
 	}
 	if (ldap_attrs != NULL) {
 		efree(ldap_attrs);
+	}
+	if (sort_keys != NULL) {
+		LDAPSortKey** sortp = sort_keys;
+		while (*sortp) {
+			efree(*sortp);
+			sortp++;
+		}
+		efree(sort_keys);
+		sort_keys = NULL;
 	}
 
 	if (rc == LDAP_SUCCESS) {
