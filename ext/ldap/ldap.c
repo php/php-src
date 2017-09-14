@@ -245,6 +245,27 @@ static void _php_ldap_control_to_array(LDAP *ld, LDAPControl* ctrl, zval* array,
 		} else {
 			add_assoc_null(array, "value");
 		}
+	} else if (strcmp(ctrl->ldctl_oid, LDAP_CONTROL_VLVRESPONSE) == 0) {
+		int target, count, errcode, rc;
+		struct berval *context;
+		zval value;
+
+		if (ctrl->ldctl_value.bv_len) {
+			rc = ldap_parse_vlvresponse_control(ld, ctrl, &target, &count, &context, &errcode);
+		} else {
+			rc = -1;
+		}
+		if ( rc == LDAP_SUCCESS ) {
+			array_init(&value);
+			add_assoc_long(&value, "target", target);
+			add_assoc_long(&value, "count", count);
+			add_assoc_long(&value, "errcode", errcode);
+			add_assoc_stringl(&value, "context", context->bv_val, context->bv_len);
+			add_assoc_zval(array, "value", &value);
+		} else {
+			add_assoc_null(array, "value");
+		}
+		ber_bvfree(context);
 	} else {
 		if (ctrl->ldctl_value.bv_len) {
 			add_assoc_stringl(array, "value", ctrl->ldctl_value.bv_val, ctrl->ldctl_value.bv_len);
@@ -453,6 +474,72 @@ static int _php_ldap_control_from_array(LDAP *ld, LDAPControl** ctrl, zval* arra
 				rc = ldap_create_sort_control_value(ld, sort_keys, control_value);
 				if (rc != LDAP_SUCCESS) {
 					php_error_docref(NULL, E_WARNING, "Failed to create sort control value: %s (%d)", ldap_err2string(rc), rc);
+				}
+			}
+		} else if (strcmp(control_oid, LDAP_CONTROL_VLVREQUEST) == 0) {
+			zval* tmp;
+			LDAPVLVInfo vlvInfo;
+			struct berval attrValue;
+			struct berval context;
+
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "before", sizeof("before") - 1)) != NULL) {
+				convert_to_long_ex(tmp);
+				vlvInfo.ldvlv_before_count = Z_LVAL_P(tmp);
+			} else {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Before key missing from array value for VLV control");
+				goto failure;
+			}
+
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "after", sizeof("after") - 1)) != NULL) {
+				convert_to_long_ex(tmp);
+				vlvInfo.ldvlv_after_count = Z_LVAL_P(tmp);
+			} else {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "After key missing from array value for VLV control");
+				goto failure;
+			}
+
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "attrvalue", sizeof("attrvalue") - 1)) != NULL) {
+				convert_to_string_ex(tmp);
+				attrValue.bv_val = Z_STRVAL_P(tmp);
+				attrValue.bv_len = Z_STRLEN_P(tmp);
+				vlvInfo.ldvlv_attrvalue = &attrValue;
+			} else if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "offset", sizeof("offset") - 1)) != NULL) {
+				vlvInfo.ldvlv_attrvalue = NULL;
+				convert_to_long_ex(tmp);
+				vlvInfo.ldvlv_offset = Z_LVAL_P(tmp);
+				if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "count", sizeof("count") - 1)) != NULL) {
+					convert_to_long_ex(tmp);
+					vlvInfo.ldvlv_count = Z_LVAL_P(tmp);
+				} else {
+					rc = -1;
+					php_error_docref(NULL, E_WARNING, "Count key missing from array value for VLV control");
+					goto failure;
+				}
+			} else {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Missing either attrvalue or offset key from array value for VLV control");
+				goto failure;
+			}
+
+			if ((tmp = zend_hash_str_find(Z_ARRVAL_P(val), "context", sizeof("context") - 1)) != NULL) {
+				convert_to_string_ex(tmp);
+				context.bv_val = Z_STRVAL_P(tmp);
+				context.bv_len = Z_STRLEN_P(tmp);
+				vlvInfo.ldvlv_context = &context;
+			} else {
+				vlvInfo.ldvlv_context = NULL;
+			}
+
+			control_value = ber_memalloc(sizeof * control_value);
+			if (control_value == NULL) {
+				rc = -1;
+				php_error_docref(NULL, E_WARNING, "Failed to allocate control value");
+			} else {
+				rc = ldap_create_vlv_control_value(ld, &vlvInfo, control_value);
+				if (rc != LDAP_SUCCESS) {
+					php_error_docref(NULL, E_WARNING, "Failed to create VLV control value: %s (%d)", ldap_err2string(rc), rc);
 				}
 			}
 		} else {
