@@ -5,6 +5,10 @@ Côme Chilliet <mcmic@php.net>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
+<?php
+require_once('skipifcontrol.inc');
+skipifunsupportedcontrol(LDAP_CONTROL_PAGEDRESULTS);
+?>
 --FILE--
 <?php
 require "connect.inc";

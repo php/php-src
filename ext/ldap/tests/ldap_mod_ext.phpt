@@ -6,6 +6,11 @@ Patrick Allaert <patrickallaert@php.net>
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 <?php require_once('skipifbindfailure.inc'); ?>
+<?php
+require_once('skipifcontrol.inc');
+skipifunsupportedcontrol(LDAP_CONTROL_PRE_READ);
+skipifunsupportedcontrol(LDAP_CONTROL_POST_READ);
+?>
 --FILE--
 <?php
 require "connect.inc";
