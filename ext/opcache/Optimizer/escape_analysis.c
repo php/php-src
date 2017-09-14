@@ -293,7 +293,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 		switch (opline->opcode) {
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
-				if (OP1_INFO() & MAY_BE_OBJECT) {
+				if (OP2_INFO() & MAY_BE_OBJECT) {
 					/* object aliasing */
 					return 1;
 				}
