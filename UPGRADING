@@ -61,6 +61,11 @@ Standard:
 ========================================
 
 Core:
+  . Implemented flexible heredoc and nowdoc syntax: The closing marker for doc
+    strings is no longer required to be followed by a semicolon or newline.
+    Additionally the closing marker may be indented, in which case the
+    indentation will be stripped from all lines in the doc string.
+    (RFC: https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes)
   . Array destructuring now supports reference assignments using the syntax
     [&$a, [$b, &$c]] = $d. The same is also supported for list().
     (RFC: https://wiki.php.net/rfc/list_reference_assignment)
