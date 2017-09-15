@@ -1112,10 +1112,38 @@ skip_escape_conversion:
 		goto emit_token; \
 	} while (0)
 
-#define RETURN_TOKEN_WITH_VAL(_token) do { \
-		token = _token; \
-		goto emit_token_with_val; \
-	} while (0)
+static int strip_multiline_string_indentation(char *copy, int len, int newline, int indentation)
+{
+	int new_len = len;
+
+	for (int i = 0, j = 0, skip; ; ) {
+		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
+			if (copy[j] != ' ' && copy[j] != '\t') {
+				break;
+			}
+		}
+
+		while (copy[j] != '\r' && copy[j] != '\n') {
+			copy[i++] = copy[j++];
+		}
+
+		if (copy[j] == '\r') {
+			copy[i++] = copy[j++];
+		}
+
+		if (copy[j] == '\n') {
+			copy[i++] = copy[j++];
+		}
+
+		if (j >= len) {
+			break;
+		}
+	}
+
+	return new_len - newline;
+}
+
+#define RETURN_TOKEN(token) return emit_token(token, start_line);
 
 #define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
 		token = _token; \
@@ -2349,7 +2377,8 @@ double_quotes_scan_done:
 
 
 <ST_HEREDOC>{ANY_CHAR} {
-	int newline = 0;
+	int newline = 0, indentation, len, new_len;
+	char *copy;
 
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
@@ -2367,6 +2396,12 @@ double_quotes_scan_done:
 				}
 				/* fall through */
 			case '\n':
+				indentation = 0;
+				while (*YYCURSOR == ' ' || *YYCURSOR == '\t') {
+					++YYCURSOR;
+					++indentation;
+				}
+
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
 					YYCTYPE *end = YYCURSOR + heredoc_label->length;
@@ -2416,18 +2451,20 @@ double_quotes_scan_done:
 
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
+	len = yyleng - indentation;
+	copy = estrndup(yytext, len);
 
-	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == SUCCESS)
-	 || !PARSER_MODE()) {
-		RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
-	} else {
-		RETURN_TOKEN(T_ERROR);
-	}
+	new_len = strip_multiline_string_indentation(copy, len, newline, indentation);
+
+	zend_scan_escape_string(zendlval, copy, new_len, 0);
+	efree(copy);
+	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
 <ST_NOWDOC>{ANY_CHAR} {
-	int newline = 0;
+	int newline = 0, indentation, len, new_len;
+	char *copy;
 
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
@@ -2445,6 +2482,12 @@ heredoc_scan_done:
 				}
 				/* fall through */
 			case '\n':
+				indentation = 0;
+				while (*YYCURSOR == ' ' || *YYCURSOR == '\t') {
+					++YYCURSOR;
+					++indentation;
+				}
+
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
 					YYCTYPE *end = YYCURSOR + heredoc_label->length;
@@ -2476,8 +2519,13 @@ heredoc_scan_done:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
+	len = yyleng - indentation;
+	copy = estrndup(yytext, len);
 
-	zend_copy_value(zendlval, yytext, yyleng - newline);
+	new_len = strip_multiline_string_indentation(copy, len, newline, indentation);
+
+	zend_copy_value(zendlval, copy, new_len);
+	efree(copy);
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
