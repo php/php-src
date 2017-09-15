@@ -2378,7 +2378,6 @@ double_quotes_scan_done:
 
 <ST_HEREDOC>{ANY_CHAR} {
 	int newline = 0, indentation, len, new_len;
-	char *copy;
 
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
@@ -2452,19 +2451,20 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 	len = yyleng - indentation;
-	copy = estrndup(yytext, len);
 
-	new_len = strip_multiline_string_indentation(copy, len, newline, indentation);
+	zend_scan_escape_string(zendlval, yytext, len, 0);
 
-	zend_scan_escape_string(zendlval, copy, new_len, 0);
-	efree(copy);
+	new_len = strip_multiline_string_indentation(Z_STRVAL_P(zendlval), Z_STRLEN_P(zendlval), newline, indentation);
+
+	Z_STRVAL_P(zendlval)[new_len] = '\0';
+	Z_STRLEN_P(zendlval) = new_len;
+
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
 <ST_NOWDOC>{ANY_CHAR} {
 	int newline = 0, indentation, len, new_len;
-	char *copy;
 
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
 
@@ -2520,12 +2520,14 @@ heredoc_scan_done:
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 	len = yyleng - indentation;
-	copy = estrndup(yytext, len);
 
-	new_len = strip_multiline_string_indentation(copy, len, newline, indentation);
+	zend_copy_value(zendlval, yytext, len);
 
-	zend_copy_value(zendlval, copy, new_len);
-	efree(copy);
+	new_len = strip_multiline_string_indentation(Z_STRVAL_P(zendlval), Z_STRLEN_P(zendlval), newline, indentation);
+
+	Z_STRVAL_P(zendlval)[new_len] = '\0';
+	Z_STRLEN_P(zendlval) = new_len;
+
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }

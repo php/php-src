@@ -96,11 +96,12 @@ e
 echo $text, PHP_EOL;
 
 $text = <<<END
-\ta\r\n
-   b\n
-  c\r\n
- d\n
-e\r\n
+	a\r\n
+\ta\n
+   b\r\n
+  c\n
+ d\r\n
+e\n
  END;
 
 echo $text, PHP_EOL;
@@ -157,6 +158,8 @@ c
 d
 
 e
+
+a
 
 a
 
