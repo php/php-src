@@ -105,6 +105,14 @@ e\n
  END;
 
 echo $text, PHP_EOL;
+
+echo <<<END
+    a
+   b
+  c
+ d
+e
+END, PHP_EOL;
 ?>
 --EXPECT--
     a
@@ -169,4 +177,10 @@ a
 
 d
 
+e
+
+    a
+   b
+  c
+ d
 e
