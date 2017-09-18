@@ -1214,7 +1214,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					if (!result) {
 						empty_partial_array(&zv);
 					} else {
-						Z_TYPE_INFO_P(result) = PARTIAL_ARRAY | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT);
+						Z_TYPE_INFO_P(result) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
 						ZVAL_COPY_VALUE(&zv, result);
 						ZVAL_NULL(result);
 					}
