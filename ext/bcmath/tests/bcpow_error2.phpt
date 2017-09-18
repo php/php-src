@@ -11,5 +11,5 @@ var_dump(bcpow('0', '9223372036854775808', 2));
 ===DONE===
 --EXPECTF--
 Warning: bcpow(): exponent too large in %s on line %d
-string(1) "1"
+string(4) "1.00"
 ===DONE===
