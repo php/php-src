@@ -9001,6 +9001,8 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	return 1;
 }
 
+#define ZEND_WRONG_PROPERTY_OFFSET 0
+
 static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename)
 {
 	zend_property_info *info;
@@ -9120,8 +9122,8 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
-		|	cmp eax, (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET
-		|	je >8 // dynamic property
+		|	test eax, eax
+		|	jl >8 // dynamic property
 		|	mov edx, dword [FCARG1a + r0 + 8]
 		|	IF_TYPE dl, IS_UNDEF, >5
 		|	add FCARG1a, r0
