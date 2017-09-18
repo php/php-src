@@ -133,7 +133,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	zend_basic_block *b;
 	zend_func_info *func_info;
 	int j;
-	uint32_t i;
+	uint32_t i = 0;
 	uint32_t target = 0;
 	uint32_t *shiftlist;
 	ALLOCA_FLAG(use_heap);
@@ -143,46 +143,53 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 	for (b = blocks; b < end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			uint32_t end;
-			if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
-				/* Only keep the FREE for the loop var */
-				ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
-						|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
-				b->len = 1;
-			}
 
-			end = b->start + b->len;
-			i = b->start;
-			b->start = target;
-			while (i < end) {
-				shiftlist[i] = i - target;
-				if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-				   /*keep NOP to support ZEND_VM_SMART_BRANCH */
-				   (i > 0 &&
-				    i + 1 < op_array->last &&
-				    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
-				     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-				    zend_is_smart_branch(op_array->opcodes + i - 1))) {
-					if (i != target) {
-						op_array->opcodes[target] = op_array->opcodes[i];
-						ssa->ops[target] = ssa->ops[i];
-						ssa->cfg.map[target] = b - blocks;
+			if (b->len) {
+				while (i < b->start) {
+					shiftlist[i] = i - target;
+					i++;
+				}
+				
+				if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
+					/* Only keep the FREE for the loop var */
+					ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
+							|| op_array->opcodes[b->start].opcode == ZEND_FE_FREE);
+					b->len = 1;
+				}
+
+				end = b->start + b->len;
+				b->start = target;
+				while (i < end) {
+					shiftlist[i] = i - target;
+					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
+					   /*keep NOP to support ZEND_VM_SMART_BRANCH */
+					   (i > 0 &&
+					    i + 1 < op_array->last &&
+					    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
+					     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
+					    zend_is_smart_branch(op_array->opcodes + i - 1))) {
+						if (i != target) {
+							op_array->opcodes[target] = op_array->opcodes[i];
+							ssa->ops[target] = ssa->ops[i];
+							ssa->cfg.map[target] = b - blocks;
+						}
+						target++;
 					}
-					target++;
+					i++;
 				}
-				i++;
-			}
-			if (target != end && b->len != 0) {
-				zend_op *opline;
-				zend_op *new_opline;
+				if (target != end) {
+					zend_op *opline;
+					zend_op *new_opline;
 
-				b->len = target - b->start;
-				opline = op_array->opcodes + end - 1;
-				if (opline->opcode == ZEND_NOP) {
-					continue;
+					b->len = target - b->start;
+					opline = op_array->opcodes + end - 1;
+					if (opline->opcode == ZEND_NOP) {
+						continue;
+					}
+
+					new_opline = op_array->opcodes + target - 1;
+					zend_optimizer_migrate_jump(op_array, new_opline, opline);
 				}
-
-				new_opline = op_array->opcodes + target - 1;
-				zend_optimizer_migrate_jump(op_array, new_opline, opline);
 			}
 		} else {
 			b->start = target;
