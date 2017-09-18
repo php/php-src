@@ -1902,7 +1902,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		zend_object *zobj = Z_OBJ_P(container);
 		zval *retval;
 
-		if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 			retval = OBJ_PROP(zobj, prop_offset);
 			if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 				ZVAL_INDIRECT(result, retval);

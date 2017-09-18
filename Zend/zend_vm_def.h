@@ -1792,7 +1792,7 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR
 			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
-			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 				retval = OBJ_PROP(zobj, prop_offset);
 				if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
 					ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
@@ -1913,7 +1913,7 @@ ZEND_VM_HANDLER(91, ZEND_FETCH_OBJ_IS, CONST|TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR
 			EXPECTED(zobj->ce == CACHED_PTR(Z_CACHE_SLOT_P(offset)))) {
 			uint32_t prop_offset = (uint32_t)(intptr_t)CACHED_PTR(Z_CACHE_SLOT_P(offset) + sizeof(void*));
 
-			if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+			if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 				retval = OBJ_PROP(zobj, prop_offset);
 				if (EXPECTED(Z_TYPE_P(retval) != IS_UNDEF)) {
 					ZVAL_COPY(EX_VAR(opline->result.var), retval);
@@ -2083,7 +2083,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 		zend_object *zobj = Z_OBJ_P(object);
 		zval *property_val;
 
-		if (EXPECTED(prop_offset != (uint32_t)ZEND_DYNAMIC_PROPERTY_OFFSET)) {
+		if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 			property_val = OBJ_PROP(zobj, prop_offset);
 			if (Z_TYPE_P(property_val) != IS_UNDEF) {
 ZEND_VM_C_LABEL(fast_assign_obj):
