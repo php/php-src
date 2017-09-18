@@ -4060,6 +4060,8 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_SWITCH_STRING:
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_ISSET_ISEMPTY_CV:
+		case ZEND_FUNC_NUM_ARGS:
+		case ZEND_FUNC_GET_ARGS:
 			return 0;
 		case ZEND_INIT_FCALL:
 			/* can't throw, because call is resolved at compile time */
