@@ -11,6 +11,6 @@ libpng-1.6.29
 libpq-9.6.2
 libssh2-1.8.0
 libtidy-5.4.0
-libxslt-1.1.29
-libxml-2.9.4
+libxslt-1.1.30
+libxml-2.9.5
 openssl-1.0.2k
