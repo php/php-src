@@ -526,7 +526,7 @@ PHP_FUNCTION(password_hash)
 #endif
 				);
 
-				encoded = zend_string_alloc(encoded_len, 0);
+				encoded = zend_string_alloc(encoded_len - 1, 0);
 				status = argon2_hash(
 					time_cost,
 					memory_cost,
@@ -538,7 +538,7 @@ PHP_FUNCTION(password_hash)
 					ZSTR_VAL(out),
 					ZSTR_LEN(out),
 					ZSTR_VAL(encoded),
-					ZSTR_LEN(encoded),
+					encoded_len,
 					type,
 					ARGON2_VERSION_NUMBER
 				);

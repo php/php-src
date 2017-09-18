@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - Openssl:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
 
+- Standard:
+  . Fixed bug #75221 (Argon2i always throws NUL at the end). (cmb)
+
 - Zlib:
   . Fixed bug #75299 (Wrong reflection on inflate_init and inflate_add). (Fabien
     Villepinte)
