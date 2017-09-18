@@ -427,6 +427,8 @@ continue_jmpznz_optimization:
 				}
 				break;
 
+			case ZEND_POST_INC_OBJ:
+			case ZEND_POST_DEC_OBJ:
 			case ZEND_POST_INC:
 			case ZEND_POST_DEC: {
 					/* POST_INC, FREE => PRE_INC */
