@@ -127,6 +127,7 @@ function run_request($host, $port, $uri='/ping', $query='', $headers=array()) { 
 		'SERVER_NAME'       => php_uname('n'),
 		'SERVER_PROTOCOL'   => 'HTTP/1.1',
 		'CONTENT_TYPE'      => '',
+		'DOCUMENT_ROOT'     => __DIR__,
 		'CONTENT_LENGTH'    => 0
 	), $headers);
 	return $client->request($params, false)."\n";
