@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #75018 (Data corruption when reading fields of bit type). (Anatol)
 
+- PCRE:
+  . Fixed bug ##75223 (PCRE JIT broken in 7.2). (Dmitry)
+
 - PDO_mysql:
   . Fixed bug #75177 (Type 'bit' is fetched as unexpected string). (Anatol)
 
