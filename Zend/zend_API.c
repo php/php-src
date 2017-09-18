@@ -3067,7 +3067,8 @@ get_function_via_handler:
 					    (!fcc->function_handler->common.scope ||
 					     !instanceof_function(ce_org, fcc->function_handler->common.scope))) {
 						if (fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+							if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION && 
+								fcc->function_handler->common.function_name) {
 								zend_string_release(fcc->function_handler->common.function_name);
 							}
 							zend_free_trampoline(fcc->function_handler);
@@ -3237,7 +3238,8 @@ again:
 				((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
 			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
 			     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+				if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION && 
+					fcc->function_handler->common.function_name) {
 					zend_string_release(fcc->function_handler->common.function_name);
 				}
 				zend_free_trampoline(fcc->function_handler);
@@ -3324,7 +3326,8 @@ again:
 						((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
 					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
 					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION) {
+						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION && 
+							fcc->function_handler->common.function_name) {
 							zend_string_release(fcc->function_handler->common.function_name);
 						}
 						zend_free_trampoline(fcc->function_handler);

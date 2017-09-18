@@ -8,6 +8,8 @@ PHP                                                                        NEWS
   . Fixed bug #75236 (infinite loop when printing an error-message). (Andrea)
   . Fixed bug #75252 (Incorrect token formatting on two parse errors in one
     request). (Nikita)
+  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+    (andrewnester)
 
 - SPL:
   . Fixed bug #73629 (SplDoublyLinkedList::setIteratorMode masks intern flags).
