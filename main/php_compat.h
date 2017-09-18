@@ -71,6 +71,26 @@
 #define _pcre_ucd_stage1		php__pcre_ucd_stage1
 #define _pcre_ucd_stage2		php__pcre_ucd_stage2
 #define _pcre_ucp_gentype		php__pcre_ucp_gentype
+#define pcre_free_study			php_pcre_free_study
+#define pcre_assign_jit_stack	php_pcre_assign_jit_stack
+#define pcre_stack_guard		php_pcre_stack_guard
+#define pcre_jit_stack_alloc	php_pcre_jit_stack_alloc
+#define pcre_jit_stack_free		php_pcre_jit_stack_free
+#define pcre_jit_exec			php_pcre_jit_exec
+#define pcre_jit_free_unused_memory	php_pcre_jit_free_unused_memory
+#define _pcre_jit_exec			php__pcre_jit_exec
+#define _pcre_jit_compile		php__pcre_jit_compile
+#define _pcre_jit_get_size		php__pcre_jit_get_size
+#define _pcre_jit_get_target	php__pcre_jit_get_target
+#define _pcre_jit_free			php__pcre_jit_free
+#define _pcre_ucp_typerange		php__pcre_ucp_typerange
+#define _pcre_ucd_caseless_sets	php__pcre_ucd_caseless_sets
+#define _pcre_find_bracket		php__pcre_find_bracket
+#define _pcre_hspace_list		php__pcre_hspace_list
+#define _pcre_ord2utf			php__pcre_ord2utf
+#define _pcre_ucp_gbtable		php__pcre_ucp_gbtable
+#define _pcre_valid_utf			php__pcre_valid_utf
+#define _pcre_vspace_list		php__pcre_vspace_list
 #endif
 
 #define lookup				php_lookup
