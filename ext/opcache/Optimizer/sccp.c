@@ -103,8 +103,7 @@ typedef struct _sccp_ctx {
 static void empty_partial_array(zval *zv)
 {
 	Z_TYPE_INFO_P(zv) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-	Z_ARR_P(zv) = (zend_array *) emalloc(sizeof(zend_array));
-	zend_hash_init(Z_ARR_P(zv), 8, NULL, ZVAL_PTR_DTOR, 0);
+	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_array(zval *dst, zval *src)
@@ -116,8 +115,7 @@ static void dup_partial_array(zval *dst, zval *src)
 static void empty_partial_object(zval *zv)
 {
 	Z_TYPE_INFO_P(zv) = PARTIAL_OBJECT | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-	Z_ARR_P(zv) = (zend_array *) emalloc(sizeof(zend_array));
-	zend_hash_init(Z_ARR_P(zv), 8, NULL, ZVAL_PTR_DTOR, 0);
+	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_object(zval *dst, zval *src)

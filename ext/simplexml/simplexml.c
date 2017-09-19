@@ -1133,14 +1133,12 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 	sxe = Z_SXEOBJ_P(object);
 
 	if (is_debug) {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 	} else if (sxe->properties) {
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 		sxe->properties = rv;
 	}
 

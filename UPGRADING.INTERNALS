@@ -9,6 +9,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   f. zend_arg_info.class_name removed
   g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
   h. valid_symbol_table removed
+  i. array_init() and array_init_size()
 
 2. Build system changes
   a. Unix build system changes
@@ -47,6 +48,9 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
   h. valid_symbol_table is removed from executor_globals.
      Use EG(active) instead of removed EG(valid_symbol_table)
+
+  i. array_init() and array_init_size() are not functions anymore.
+     They don't return any values.
 
 ========================
 2. Build system changes

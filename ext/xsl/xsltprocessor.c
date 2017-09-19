@@ -343,8 +343,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				xmlNode *nodep;
 				dom_object *obj;
 				if (intern->node_list == NULL) {
-					ALLOC_HASHTABLE(intern->node_list);
-					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
+					intern->node_list = zend_new_array(0);
 				}
 				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);

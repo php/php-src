@@ -900,8 +900,7 @@ ZEND_VM_C_LABEL(assign_dim_op_new_array):
 		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_INFO_P(container) == IS_UNDEF)) {
 			container = GET_OP1_UNDEF_CV(container, BP_VAR_RW);
 ZEND_VM_C_LABEL(assign_dim_op_convert_to_array):
-			ZVAL_NEW_ARR(container);
-			zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+			ZVAL_ARR(container, zend_new_array(8));
 			ZEND_VM_C_GOTO(assign_dim_op_new_array);
 		}
 
@@ -2247,8 +2246,7 @@ ZEND_VM_C_LABEL(try_assign_dim_array):
 				FREE_OP_DATA();
 			}
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) <= IS_FALSE)) {
-			ZVAL_NEW_ARR(object_ptr);
-			zend_hash_init(Z_ARRVAL_P(object_ptr), 8, NULL, ZVAL_PTR_DTOR, 0);
+			ZVAL_ARR(object_ptr, zend_new_array(8));
 			ZEND_VM_C_GOTO(try_assign_dim_array);
 		} else {
 			if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
@@ -5219,8 +5217,7 @@ ZEND_VM_HANDLER(71, ZEND_INIT_ARRAY, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|
 	} else {
 		size = 0;
 	}
-	ZVAL_NEW_ARR(array);
-	zend_hash_init(Z_ARRVAL_P(array), size, NULL, ZVAL_PTR_DTOR, 0);
+	ZVAL_ARR(array, zend_new_array(size));
 
 	if (OP1_TYPE != IS_UNUSED) {
 		/* Explicitly initialize array as not-packed if flag is set */
@@ -5277,8 +5274,7 @@ ZEND_VM_HANDLER(21, ZEND_CAST, CONST|TMP|VAR|CV, ANY, TYPE)
 
 			if (opline->extended_value == IS_ARRAY) {
 				if (Z_TYPE_P(expr) != IS_OBJECT) {
-					ZVAL_NEW_ARR(result);
-					zend_hash_init(Z_ARRVAL_P(result), 8, NULL, ZVAL_PTR_DTOR, 0);
+					ZVAL_ARR(result, zend_new_array(8));
 					if (Z_TYPE_P(expr) != IS_NULL) {
 						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 						if (OP1_TYPE == IS_CONST) {
@@ -7774,8 +7770,7 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 
 	SAVE_OPLINE();
 
-	args = emalloc(sizeof(zend_array));
-	zend_hash_init(args, num_args, NULL, ZVAL_PTR_DTOR, 0);
+	args = zend_new_array(num_args);
 	if (num_args) {
 		zval *p = ZEND_CALL_ARG(execute_data, 1);
 		zval *end = p + num_args;
@@ -8270,8 +8265,7 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 		result_size = arg_count;
 	}
 
-	ht = (zend_array *) emalloc(sizeof(zend_array));
-	zend_hash_init(ht, result_size, NULL, ZVAL_PTR_DTOR, 0);
+	ht = zend_new_array(result_size);
 	ZVAL_ARR(EX_VAR(opline->result.var), ht);
 
 	if (result_size) {
