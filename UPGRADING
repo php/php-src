@@ -255,7 +255,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 
 - Mbstring:
   . Added mb_chr() and mb_ord().
-  . Added mb_scurb() that scrub broken multibyte strings.
+  . Added mb_scrub() that scrubs broken multibyte strings.
 
 - OCI8:
   . Added oci_register_taf_callback() and oci_disable_taf_callback() for
