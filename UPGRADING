@@ -28,6 +28,8 @@ Core:
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
 	  Formerly some warnings have directly been written to stderr.
+  . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
+    the returned numbers may have omitted trailing decimal zeroes.
 
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images

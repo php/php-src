@@ -11,5 +11,5 @@ var_dump(bcpow('1', '1.1', 2));
 ===DONE===
 --EXPECTF--
 Warning: bcpow(): non-zero scale in exponent in %s on line %d
-string(1) "1"
+string(4) "1.00"
 ===DONE===
