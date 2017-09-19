@@ -190,6 +190,8 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					new_opline = op_array->opcodes + target - 1;
 					zend_optimizer_migrate_jump(op_array, new_opline, opline);
 				}
+			} else {
+				b->start = target;
 			}
 		} else {
 			b->start = target;
