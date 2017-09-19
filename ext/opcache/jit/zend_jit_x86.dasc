@@ -4358,42 +4358,33 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
 			|	jg >7
 		}
-		|	// ZVAL_NEW_ARR(container);
-		|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+		|	// ZVAL_ARR(container, zend_new_array(8));
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
 		if (ZEND_DEBUG) {
 			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 			|.if X64
-				|	LOAD_ADDR CARG3, filename
-				|	xor CARG4d, opline->lineno
+				|	mov CARG3d, opline->lineno
 			|.else
+				|	sub r4, 12
 				|	push opline->lineno
-				|	push filename
 			|.endif
-		} else {
+			|	LOAD_ADDR FCARG2a, filename
+		}
+		|	mov FCARG1d, 8
+		|	EXT_CALL _zend_new_array, r0
+		if (ZEND_DEBUG) {
 			|.if not X64
-				|	sub r4, 8
+				|	add r4, 12
 			|.endif
 		}
-		|.if X64
-			|	LOAD_ADDR CARG2, 8
-			if (Z_REG(op1_addr) != ZREG_FCARG1a) {
-				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-			}
-		|.else
-			|	push 8
-			|	PUSH_ZVAL_ADDR op1_addr, r0
-		|.endif
-		|	EXT_CALL _array_init, r0
-		|.if not X64
-			|	add r4, 16
-		|.endif
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
-		|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
+		|	SET_ZVAL_LVAL op1_addr, r0
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX
+		|	mov FCARG1a, r0
 	}
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
@@ -4465,42 +4456,33 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 				|	CMP_ZVAL_TYPE op1_addr, IS_FALSE
 				|	jg >2
 			}
-			|	// ZVAL_NEW_ARR(container);
-			|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+			|	// ZVAL_ARR(container, zend_new_array(8));
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
 			if (ZEND_DEBUG) {
 				const char *filename = op_array->filename ? op_array->filename->val : NULL;
 				|.if X64
-					|	LOAD_ADDR CARG3, filename
-					|	xor CARG4d, opline->lineno
+					|	mov CARG3d, opline->lineno
 				|.else
+					|	sub r4, 12
 					|	push opline->lineno
-					|	push filename
 				|.endif
-			} else {
+				|	LOAD_ADDR FCARG2a, filename
+			}
+			|	mov FCARG1d, 8
+			|	EXT_CALL _zend_new_array, r0
+			if (ZEND_DEBUG) {
 				|.if not X64
-					|	sub r4, 8
+					|	add r4, 12
 				|.endif
 			}
-			|.if X64
-				|	LOAD_ADDR CARG2, 8
-				if (Z_REG(op1_addr) != ZREG_FCARG1a) {
-					|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-				}
-			|.else
-				|	push 8
-				|	PUSH_ZVAL_ADDR op1_addr, r0
-			|.endif
-			|	EXT_CALL _array_init, r0
-			|.if not X64
-				|	add r4, 16
-			|.endif
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
-			|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
+			|	SET_ZVAL_LVAL op1_addr, r0
+			|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX
+			|	mov FCARG1a, r0
 			|	// ZEND_VM_C_GOTO(assign_dim_op_new_array);
 			|	jmp <6
 			|2:
@@ -4624,42 +4606,33 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 			|	EXT_CALL zend_jit_undefined_op_helper, r0
 			|1:
 		}
-		|	// ZVAL_NEW_ARR(container);
-		|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+		|	// ZVAL_ARR(container, zend_new_array(8));
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov [r4], Ra(Z_REG(op1_addr)) // save
 		}
 		if (ZEND_DEBUG) {
 			const char *filename = op_array->filename ? op_array->filename->val : NULL;
 			|.if X64
-				|	LOAD_ADDR CARG3, filename
-				|	xor CARG4d, opline->lineno
+				|	mov CARG3d, opline->lineno
 			|.else
+				|	sub r4, 12
 				|	push opline->lineno
-				|	push filename
 			|.endif
-		} else {
+			|	LOAD_ADDR FCARG2a, filename
+		}
+		|	mov FCARG1d, 8
+		|	EXT_CALL _zend_new_array, r0
+		if (ZEND_DEBUG) {
 			|.if not X64
-				|	sub r4, 8
+				|	add r4, 12
 			|.endif
-			}
-		|.if X64
-			|	LOAD_ADDR CARG2, 8
-			if (Z_REG(op1_addr) != ZREG_FCARG1a) {
-				|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-			}
-		|.else
-			|	push 8
-			|	PUSH_ZVAL_ADDR op1_addr, r0
-		|.endif
-		|	EXT_CALL _array_init, r0
-		|.if not X64
-			|	add r4, 16
-		|.endif
+		}
 		if (Z_REG(op1_addr) != ZREG_FP) {
 			|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 		}
-		|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
+		|	SET_ZVAL_LVAL op1_addr, r0
+		|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX
+		|	mov FCARG1a, r0
 	}
 
 	if (op1_info & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE|MAY_BE_ARRAY)) {
@@ -4757,42 +4730,33 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 				|	EXT_CALL zend_jit_undefined_op_helper, r0
 				|1:
 			}
-			|	// ZVAL_NEW_ARR(container);
-			|	// zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+			|	// ZVAL_ARR(container, zend_new_array(8));
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov [r4], Ra(Z_REG(op1_addr)) // save
 			}
 			if (ZEND_DEBUG) {
 				const char *filename = op_array->filename ? op_array->filename->val : NULL;
 				|.if X64
-					|	LOAD_ADDR CARG3, filename
-					|	xor CARG4d, opline->lineno
+					|	mov CARG3d, opline->lineno
 				|.else
+					|	sub r4, 12
 					|	push opline->lineno
-					|	push filename
 				|.endif
-			} else {
+				|	LOAD_ADDR FCARG2a, filename
+			}
+			|	mov FCARG1d, 8
+			|	EXT_CALL _zend_new_array, r0
+			if (ZEND_DEBUG) {
 				|.if not X64
-					|	sub r4, 8
+					|	add r4, 12
 				|.endif
 			}
-			|.if X64
-				|	LOAD_ADDR CARG2, 8
-				if (Z_REG(op1_addr) != ZREG_FCARG1a) {
-					|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
-				}
-			|.else
-				|	push 8
-				|	PUSH_ZVAL_ADDR op1_addr, r0
-			|.endif
-			|	EXT_CALL _array_init, r0
-			|.if not X64
-				|	add r4, 16
-			|.endif
 			if (Z_REG(op1_addr) != ZREG_FP) {
 				|	mov Ra(Z_REG(op1_addr)), [r4] // restore
 			}
-			|	GET_ZVAL_LVAL ZREG_FCARG1a, op1_addr
+			|	SET_ZVAL_LVAL op1_addr, r0
+			|	SET_ZVAL_TYPE_INFO op1_addr, IS_ARRAY_EX
+			|	mov FCARG1a, r0
 			|	// ZEND_VM_C_GOTO(assign_dim_op_new_array);
 			|	jmp <6
 			|2:
