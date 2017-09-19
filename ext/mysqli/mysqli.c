@@ -424,8 +424,7 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
-	ALLOC_HASHTABLE(retval);
-	ZEND_INIT_SYMTABLE_EX(retval, zend_hash_num_elements(props) + 1, 0);
+	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
 		zval rv, member;

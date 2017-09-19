@@ -3134,8 +3134,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		php_error_docref(NULL, E_WARNING, "Cannot convert recursively referenced values");
 		return NULL;
 	}
-	output = (HashTable *)emalloc(sizeof(HashTable));
-	zend_hash_init(output, zend_hash_num_elements(input), NULL, ZVAL_PTR_DTOR, 0);
+	output = zend_new_array(zend_hash_num_elements(input));
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
 		if (key) {
@@ -3160,8 +3159,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(HASH_OF(entry), _to_encoding, _from_encodings);
 				if (!chash) {
-					chash = (HashTable *)emalloc(sizeof(HashTable));
-					zend_hash_init(chash, 0, NULL, ZVAL_PTR_DTOR, 0);
+					chash = zend_new_array(0);
 				}
 				ZVAL_ARR(&entry_tmp, chash);
 				break;

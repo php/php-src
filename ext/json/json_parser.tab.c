@@ -1856,7 +1856,8 @@ yyreturn:
 
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
-	return array_init(array);
+	array_init(array);
+	return SUCCESS;
 }
 
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
@@ -1868,7 +1869,8 @@ static int php_json_parser_array_append(php_json_parser *parser, zval *array, zv
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
-		return array_init(object);
+		array_init(object);
+		return SUCCESS;
 	} else {
 		return object_init(object);
 	}

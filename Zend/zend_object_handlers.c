@@ -79,8 +79,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 		zend_property_info *prop_info;
 		zend_class_entry *ce = zobj->ce;
 
-		ALLOC_HASHTABLE(zobj->properties);
-		zend_hash_init(zobj->properties, ce->default_properties_count, NULL, ZVAL_PTR_DTOR, 0);
+		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
 			zend_hash_real_init(zobj->properties, 0);
 			zobj->properties->nInternalPointer = 0;
@@ -180,8 +179,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp) /* {{{ *
 		}
 	} else if (Z_TYPE(retval) == IS_NULL) {
 		*is_temp = 1;
-		ALLOC_HASHTABLE(ht);
-		zend_hash_init(ht, 0, NULL, ZVAL_PTR_DTOR, 0);
+		ht = zend_new_array(0);
 		return ht;
 	}
 
