@@ -483,6 +483,14 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 	}
 
 	if ((Z_TYPE(retval) == IS_OBJECT) &&
+		(Z_OBJ(retval) != Z_OBJ_P(val)) &&
+		ce->name == Z_OBJCE(retval)->name) {
+			zend_throw_exception_ex(NULL, 0, "%s::jsonSerialize() cannot return a new instance of itself", ZSTR_VAL(ce->name));
+			zval_ptr_dtor(&retval);
+			zval_ptr_dtor(&fname);
+			PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
+			return FAILURE;
+	} else if ((Z_TYPE(retval) == IS_OBJECT) &&
 		(Z_OBJ(retval) == Z_OBJ_P(val))) {
 		/* Handle the case where jsonSerialize does: return $this; by going straight to encode array */
 		PHP_JSON_HASH_APPLY_PROTECTION_DEC(myht);
