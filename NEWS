@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - PDO_mysql:
   . Fixed bug #75177 (Type 'bit' is fetched as unexpected string). (Anatol)
 
+- SPL:
+  . Fixed bug #73629 (SplDoublyLinkedList::setIteratorMode masks intern flags).
+    (J. Jeising, cmb)
+
 28 Sep 2017, PHP 7.1.10
 
 - Core:
