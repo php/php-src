@@ -92,6 +92,8 @@
 #include "SAPI.h"
 #include "rfc1867.h"
 
+#include "ext/standard/html_tables.h"
+
 #if HAVE_MMAP || defined(PHP_WIN32)
 # if HAVE_UNISTD_H
 #  include <unistd.h>
@@ -123,6 +125,31 @@ PHPAPI int core_globals_id;
 #endif
 
 #define SAFE_FILENAME(f) ((f)?(f):"-")
+
+static char *get_safe_charset_hint(void) {
+	static char *lastHint = NULL;
+	static char *lastCodeset = NULL;
+	char *hint = SG(default_charset);
+	size_t len = strlen(hint);
+	size_t i = 0;
+
+	if (lastHint == SG(default_charset)) {
+		return lastCodeset;
+	}
+
+	lastHint = hint;
+	lastCodeset = NULL;
+
+	for (i = 0; i < sizeof(charset_map)/sizeof(charset_map[0]); i++) {
+		if (len == charset_map[i].codeset_len
+			&& zend_binary_strcasecmp(hint, len, charset_map[i].codeset, len) == 0) {
+			lastCodeset = (char*)charset_map[i].codeset;
+			break;
+		}
+	}
+
+	return lastCodeset;
+}
 
 /* {{{ PHP_INI_MH
  */
@@ -762,10 +789,10 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	buffer_len = (int)vspprintf(&buffer, 0, format, args);
 
 	if (PG(html_errors)) {
-		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, SG(default_charset));
+		replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
 		/* Retry with substituting invalid chars on fail. */
 		if (!replace_buffer || ZSTR_LEN(replace_buffer) < 1) {
-			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, SG(default_charset));
+			replace_buffer = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT | ENT_HTML_SUBSTITUTE_ERRORS, get_safe_charset_hint());
 		}
 
 		efree(buffer);
@@ -832,7 +859,7 @@ PHPAPI ZEND_COLD void php_verror(const char *docref, const char *params, int typ
 	}
 
 	if (PG(html_errors)) {
-		replace_origin = php_escape_html_entities((unsigned char*)origin, origin_len, 0, ENT_COMPAT, SG(default_charset));
+		replace_origin = php_escape_html_entities((unsigned char*)origin, origin_len, 0, ENT_COMPAT, get_safe_charset_hint());
 		efree(origin);
 		origin = ZSTR_VAL(replace_origin);
 	}
@@ -1154,7 +1181,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 
 				if (PG(html_errors)) {
 					if (type == E_ERROR || type == E_PARSE) {
-						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, SG(default_charset));
+						zend_string *buf = php_escape_html_entities((unsigned char*)buffer, buffer_len, 0, ENT_COMPAT, get_safe_charset_hint());
 						php_printf("%s<br />\n<b>%s</b>:  %s in <b>%s</b> on line <b>%d</b><br />\n%s", STR_PRINT(prepend_string), error_type_str, ZSTR_VAL(buf), error_filename, error_lineno, STR_PRINT(append_string));
 						zend_string_free(buf);
 					} else {
