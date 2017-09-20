@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.25
 
-
+- SPL:
+  . Fixed bug #73629 (SplDoublyLinkedList::setIteratorMode masks intern flags).
+    (J. Jeising, cmb)
 
 28 Sep 2017 PHP 7.0.24
 
