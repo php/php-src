@@ -16,7 +16,8 @@ insert_dummy_data($link, $base);
 // and optionally returns the NEW password if none was passed.
 // ldap_exop_passwd(resource link [, string user [, string oldpw [, string newpw [, string newpasswd ]]]])
 var_dump(
-  $genpw = ldap_exop_passwd($link, "cn=userA,$base", "oops", ""),
+  $genpw = ldap_exop_passwd($link, "cn=userA,$base", "oops", "", $ctrls),
+  $ctrls,
   $genpw = ldap_exop_passwd($link, "cn=userA,$base"),
   test_bind($host, $port, "cn=userA,$base", $genpw, $protocol_version),
   ldap_exop_passwd($link, "cn=userA,$base", $genpw, "newPassword"),
@@ -34,6 +35,8 @@ remove_dummy_data($link, $base);
 ?>
 --EXPECTF--
 string(%d) "%s"
+array(0) {
+}
 string(%d) "%s"
 bool(true)
 bool(true)
