@@ -127,8 +127,8 @@ PHPAPI int core_globals_id;
 #define SAFE_FILENAME(f) ((f)?(f):"-")
 
 static char *get_safe_charset_hint(void) {
-	static char *lastHint = NULL;
-	static char *lastCodeset = NULL;
+	ZEND_TLS char *lastHint = NULL;
+	ZEND_TLS char *lastCodeset = NULL;
 	char *hint = SG(default_charset);
 	size_t len = strlen(hint);
 	size_t i = 0;
