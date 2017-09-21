@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #75857 (Timezone gets truncated when formatted). (carusogabriel)
   . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
     accept `null`). (Pedro Lacerda)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
 
 - PGSQL:
   . Fixed #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
