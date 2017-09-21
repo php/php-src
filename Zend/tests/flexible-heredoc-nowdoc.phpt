@@ -3,67 +3,23 @@ Flexible heredoc/nowdoc syntax
 --FILE--
 <?php
 
-$text = <<<END
-    a
-   b
-  c
- d
-e
-END;
+echo <<<'END'
+     a
+    b
+   c
+  d
+ e
+ END, PHP_EOL;
 
-echo $text, PHP_EOL;
+echo <<<END
+	    a
+	   b
+	  c
+	 d
+	e
+	END, PHP_EOL;
 
-$text = <<<'END'
-    a
-   b
-  c
- d
-e
- END;
-
-echo $text, PHP_EOL;
-
-$text = <<<END
-    a
-   b
-  c
- d
-e
-  END;
-
-echo $text, PHP_EOL;
-
-$text = <<<'END'
-    a
-   b
-  c
- d
-e
-   END;
-
-echo $text, PHP_EOL;
-
-$text = <<<END
-    a
-   b
-  c
- d
-e
-    END;
-
-echo $text, PHP_EOL;
-
-$text = <<<'END'
-    a
-   b
-  c
- d
-e
-     END;
-
-echo $text, PHP_EOL;
-
-$text = <<<END
+echo <<<'END'
 
     a
 
@@ -75,38 +31,18 @@ $text = <<<END
 
 e
 
-END;
+END, PHP_EOL;
 
-echo $text, PHP_EOL;
-
-$text = <<<'END'
-
-    a
-
-   b
-
-  c
-
- d
-
-e
-
-     END;
-
-echo $text, PHP_EOL;
-
-$text = <<<END
+echo <<<END
 	a\r\n
 \ta\n
    b\r\n
   c\n
  d\r\n
 e\n
- END;
+END, PHP_EOL;
 
-echo $text, PHP_EOL;
-
-echo <<<END
+echo <<<'END'
     a
    b
   c
@@ -120,30 +56,10 @@ END, PHP_EOL;
   c
  d
 e
-   a
-  b
- c
-d
-e
-  a
- b
-c
-d
-e
- a
-b
-c
-d
-e
-a
-b
-c
-d
-e
-a
-b
-c
-d
+    a
+   b
+  c
+ d
 e
 
     a
@@ -156,26 +72,15 @@ e
 
 e
 
+	a
 
-a
+	a
 
-b
+   b
 
-c
+  c
 
-d
-
-e
-
-a
-
-a
-
-  b
-
- c
-
-d
+ d
 
 e
 
