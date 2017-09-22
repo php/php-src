@@ -11,6 +11,11 @@ PHP                                                                        NEWS
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
 
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
+
 - SPL:
   . Fixed bug #73629 (SplDoublyLinkedList::setIteratorMode masks intern flags).
     (J. Jeising, cmb)
