@@ -260,6 +260,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 {
 	switch (opline->opcode) {
 		case ZEND_FREE:
+		case ZEND_CHECK_VAR:
 			MAKE_NOP(opline);
 			zval_ptr_dtor_nogc(val);
 			return 1;
