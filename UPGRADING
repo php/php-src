@@ -102,6 +102,11 @@ Core:
     (RFC: https://wiki.php.net/rfc/list_reference_assignment)
   . instanceof now allows literals as the first operand,
     in which case the result is always FALSE.
+  . A new CompileError exception has been added, from which ParseError inherits.
+    A small number of compilation errors will now throw a CompileError instead
+    of generating a fatal error. Currently this only affects compilation errors
+    that may be thrown by token_get_all() in TOKEN_PARSE mode, but more errors
+    may be converted in the future.
 
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.

@@ -30,6 +30,7 @@ extern ZEND_API zend_class_entry *zend_ce_throwable;
 extern ZEND_API zend_class_entry *zend_ce_exception;
 extern ZEND_API zend_class_entry *zend_ce_error_exception;
 extern ZEND_API zend_class_entry *zend_ce_error;
+extern ZEND_API zend_class_entry *zend_ce_compile_error;
 extern ZEND_API zend_class_entry *zend_ce_parse_error;
 extern ZEND_API zend_class_entry *zend_ce_type_error;
 extern ZEND_API zend_class_entry *zend_ce_argument_count_error;

@@ -34,6 +34,7 @@ ZEND_API zend_class_entry *zend_ce_throwable;
 ZEND_API zend_class_entry *zend_ce_exception;
 ZEND_API zend_class_entry *zend_ce_error_exception;
 ZEND_API zend_class_entry *zend_ce_error;
+ZEND_API zend_class_entry *zend_ce_compile_error;
 ZEND_API zend_class_entry *zend_ce_parse_error;
 ZEND_API zend_class_entry *zend_ce_type_error;
 ZEND_API zend_class_entry *zend_ce_argument_count_error;
@@ -154,7 +155,7 @@ ZEND_API ZEND_COLD void zend_throw_exception_internal(zval *exception) /* {{{ */
 		}
 	}
 	if (!EG(current_execute_data)) {
-		if (exception && Z_OBJCE_P(exception) == zend_ce_parse_error) {
+		if (exception && (Z_OBJCE_P(exception) == zend_ce_parse_error || Z_OBJCE_P(exception) == zend_ce_compile_error)) {
 			return;
 		}
 		if(EG(exception)) {
@@ -221,7 +222,8 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 
 	base_ce = i_get_exception_base(&obj);
 
-	if (EXPECTED(class_type != zend_ce_parse_error || !(filename = zend_get_compiled_filename()))) {
+	if (EXPECTED((class_type != zend_ce_parse_error && class_type != zend_ce_compile_error)
+			|| !(filename = zend_get_compiled_filename()))) {
 		ZVAL_STRING(&tmp, zend_get_executed_filename());
 		zend_update_property_ex(base_ce, &obj, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
@@ -842,8 +844,12 @@ void zend_register_default_exception(void) /* {{{ */
 	zend_declare_property_null(zend_ce_error, "trace", sizeof("trace")-1, ZEND_ACC_PRIVATE);
 	zend_declare_property_null(zend_ce_error, "previous", sizeof("previous")-1, ZEND_ACC_PRIVATE);
 
+	INIT_CLASS_ENTRY(ce, "CompileError", NULL);
+	zend_ce_compile_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_compile_error->create_object = zend_default_exception_new;
+
 	INIT_CLASS_ENTRY(ce, "ParseError", NULL);
-	zend_ce_parse_error = zend_register_internal_class_ex(&ce, zend_ce_error);
+	zend_ce_parse_error = zend_register_internal_class_ex(&ce, zend_ce_compile_error);
 	zend_ce_parse_error->create_object = zend_default_exception_new;
 
 	INIT_CLASS_ENTRY(ce, "TypeError", NULL);
@@ -963,12 +969,13 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 	ZVAL_OBJ(&exception, ex);
 	ce_exception = Z_OBJCE(exception);
 	EG(exception) = NULL;
-	if (ce_exception == zend_ce_parse_error) {
+	if (ce_exception == zend_ce_parse_error || ce_exception == zend_ce_compile_error) {
 		zend_string *message = zval_get_string(GET_PROPERTY(&exception, ZEND_STR_MESSAGE));
 		zend_string *file = zval_get_string(GET_PROPERTY_SILENT(&exception, ZEND_STR_FILE));
 		zend_long line = zval_get_long(GET_PROPERTY_SILENT(&exception, ZEND_STR_LINE));
 
-		zend_error_helper(E_PARSE, ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
+		zend_error_helper(ce_exception == zend_ce_parse_error ? E_PARSE : E_COMPILE_ERROR,
+			ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
 
 		zend_string_release_ex(file, 0);
 		zend_string_release_ex(message, 0);
