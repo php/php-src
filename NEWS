@@ -16,6 +16,9 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #75018 (Data corruption when reading fields of bit type). (Anatol)
 
+- Opcache:
+  . Fixed bug #75230 (Invalid opcode 49/1/8 using opcache). (Laruence)
+
 - PCRE:
   . Fixed bug ##75223 (PCRE JIT broken in 7.2). (Dmitry)
 
