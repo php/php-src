@@ -222,8 +222,10 @@ ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op) /* {{{ */
 					if (Z_TYPE(holder) == IS_LONG) {				\
 						if (op == result) {							\
 							zval_ptr_dtor(op);						\
+							ZVAL_LONG(op, Z_LVAL(holder));			\
+						} else {									\
+							(op) = &(holder);						\
 						}											\
-						(op) = &(holder);							\
 					}												\
 					break;											\
 			}														\
