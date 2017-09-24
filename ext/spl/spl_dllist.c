@@ -732,7 +732,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 		return;
 	}
 
-	intern->flags = value & SPL_DLLIST_IT_MASK | intern->flags & SPL_DLLIST_IT_FIX;
+	intern->flags = (value & SPL_DLLIST_IT_MASK) | (intern->flags & SPL_DLLIST_IT_FIX);
 
 	RETURN_LONG(intern->flags);
 }
