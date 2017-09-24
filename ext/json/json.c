@@ -292,7 +292,6 @@ static PHP_FUNCTION(json_encode)
 			RETURN_FALSE;
 		}
 	} else {
-		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
 		if (encoder.error_code != PHP_JSON_ERROR_NONE) {
 			smart_str_free(&buf);
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(encoder.error_code), encoder.error_code);
@@ -327,11 +326,14 @@ static PHP_FUNCTION(json_decode)
 		Z_PARAM_LONG(options)
 	ZEND_PARSE_PARAMETERS_END();
 
-	JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+		JSON_G(error_code) = PHP_JSON_ERROR_NONE;
+	}
 
 	if (!str_len) {
-		JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
-		if (options & PHP_JSON_THROW_ON_ERROR) {
+		if (!(options & PHP_JSON_THROW_ON_ERROR)) {
+			JSON_G(error_code) = PHP_JSON_ERROR_SYNTAX;
+		} else {
 			zend_throw_exception(php_json_exception_ce, php_json_get_error_msg(PHP_JSON_ERROR_SYNTAX), PHP_JSON_ERROR_SYNTAX);
 		}
 		RETURN_NULL();
