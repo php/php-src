@@ -947,6 +947,8 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* this should be compatible with the standard zenderror */
 ZEND_COLD void zenderror(const char *error) /* {{{ */
 {
+	CG(parse_error) = 0;
+
 	if (EG(exception)) {
 		/* An exception was thrown in the lexer, don't throw another in the parser. */
 		return;

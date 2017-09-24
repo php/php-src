@@ -1242,9 +1242,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 				}
 				/* the parser would return 1 (failure), we can bail out nicely */
-				if (type == E_PARSE) {
-					CG(parse_error) = 0;
-				} else {
+				if (type != E_PARSE) {
 					/* restore memory limit */
 					zend_set_memory_limit(PG(memory_limit));
 					efree(buffer);

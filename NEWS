@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core
   . Fixed bug #74878 (Data race in ZTS builds). (Nikita, Dmitry)
   . Fixed bug #75236 (infinite loop when printing an error-message). (Andrea)
+  . Fixed bug #75252 (Incorrect token formatting on two parse errors in one
+    request). (Nikita)
 
 - FPM:
   . Fixed bug #75212 (php_value acts like php_admin_value). (Remi)
