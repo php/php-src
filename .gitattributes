@@ -18,8 +18,6 @@ ext/filter/filter.c             ident
 ext/zip/php_zip.c               ident
 README.input_filter             ident
 run-tests.php                   ident
-sapi/nsapi/nsapi.c              ident
-sapi/continuity/capi.c          ident
 Zend/RFCs/002.txt               ident
 Zend/RFCs/003.txt               ident
 ext/exif/exif.c                 ident
@@ -32,7 +30,6 @@ UPGRADING.INTERNALS             merge=NEWS
 /ext/bz2/tests/with_strings.phpt	-crlf
 /ext/dom/tests/bug40836.phpt	-crlf
 /ext/dom/tests/domelement.phpt	-crlf
-/ext/ereg/tests/eregi_basic_002.phpt	-crlf
 /ext/iconv/tests/iconv004.phpt	-crlf
 /ext/iconv/tests/iconv_basic.phpt	-crlf
 /ext/iconv/tests/iconv_strpos.phpt	-crlf
