@@ -2333,7 +2333,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (opline->op1_type == IS_CV) {
 					if (!(orig & MAY_BE_REF)) {
 						if (orig & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
-							orig &= (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
+							orig &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
 							orig |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
 						}
 						if (orig & MAY_BE_OBJECT) {
