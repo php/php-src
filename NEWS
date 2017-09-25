@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
 
+- Date:
+  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
+
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
     only litespeed SAPI). (petk)
