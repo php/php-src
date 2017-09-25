@@ -122,7 +122,7 @@ array(7) {
 int(5)
 array(5) {
   [0]=>
-  string(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
+  string(54) "This is a text with special chars: \!\@#$\%\^\&\*\(\)\"
   ["f"]=>
   string(5) "first"
   ["s"]=>
@@ -135,7 +135,7 @@ array(5) {
 int(7)
 array(7) {
   [0]=>
-  string(55) "This is a text with special chars: \!\@\#$\%\^\&\*\(\)\"
+  string(54) "This is a text with special chars: \!\@#$\%\^\&\*\(\)\"
   [1]=>
   string(5) "hello"
   [2]=>

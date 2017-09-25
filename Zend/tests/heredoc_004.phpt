@@ -6,12 +6,12 @@ braces variable replacement test (heredoc)
 require_once 'nowdoc.inc';
 
 print <<<ENDOFHEREDOC
-This is heredoc test #{$a}.
+This is heredoc test \#{$a}.
 
 ENDOFHEREDOC;
 
 $x = <<<ENDOFHEREDOC
-This is heredoc test #{$b}.
+This is heredoc test \#{$b}.
 
 ENDOFHEREDOC;
 
