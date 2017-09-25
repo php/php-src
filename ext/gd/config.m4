@@ -309,7 +309,6 @@ else
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
-  PHP_GD_TTSTR
   PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG
@@ -348,7 +347,7 @@ dnl
 if test "$PHP_GD" != "no"; then
   PHP_NEW_EXTENSION(gd, gd.c $extra_sources, $ext_shared,, \\$(GDLIB_CFLAGS))
 
-  if test "$GD_MODULE_TYPE" = "builtin"; then 
+  if test "$GD_MODULE_TYPE" = "builtin"; then
     PHP_ADD_BUILD_DIR($ext_builddir/libgd)
     GDLIB_CFLAGS="-I$ext_srcdir/libgd $GDLIB_CFLAGS"
     GD_HEADER_DIRS="ext/gd/ ext/gd/libgd/"
