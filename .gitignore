@@ -262,9 +262,7 @@ pear/phpize
 pear/run-tests
 pear/php-config
 pear/scripts
-sapi/apache/libphp7.module
 sapi/apache2handler/libphp7.module
-sapi/apache_hooks/libphp7.module
 sapi/cgi/php-cgi
 sapi/cgi/php-cgi.1
 sapi/cli/php.1
