@@ -296,7 +296,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	cfg->split_at_live_ranges = (build_flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES) != 0;
 	cfg->split_at_calls = (build_flags & ZEND_CFG_STACKLESS) != 0;
-	cfg->split_at_recv = (build_flags & ZEND_CFG_RECV_ENTRY) != 0 && (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0;
+	cfg->split_at_recv = (build_flags & ZEND_CFG_RECV_ENTRY) != 0;
 
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
 
