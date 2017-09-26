@@ -1495,8 +1495,7 @@ PHP_FUNCTION(sodium_crypto_sign)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		return;
 	}
-	if (msg_signed_real_len < 0U || msg_signed_real_len >= SIZE_MAX ||
-		msg_signed_real_len > msg_signed_len) {
+	if (msg_signed_real_len >= SIZE_MAX || msg_signed_real_len > msg_signed_len) {
 		zend_string_free(msg_signed);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
@@ -1857,6 +1856,7 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 	zend_long      alg;
 	size_t         passwd_len;
 	size_t         salt_len;
+	int            ret;
 
 	alg = (zend_long) crypto_pwhash_ALG_DEFAULT;
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "lssll|l",
@@ -1906,11 +1906,22 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		zend_error(E_WARNING, "maximum memory for the password hashing function is low");
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
-	if (crypto_pwhash
-		((unsigned char *) ZSTR_VAL(hash), (unsigned long long) hash_len,
-		 passwd, (unsigned long long) passwd_len, salt,
-		 (unsigned long long) opslimit, (size_t) memlimit,
-		 (int) alg) != 0) {
+	ret = -1;
+# ifdef crypto_pwhash_ALG_ARGON2ID13
+	if (alg == crypto_pwhash_ALG_ARGON2ID13) {
+		ret = crypto_pwhash_argon2id
+			((unsigned char *) ZSTR_VAL(hash), (unsigned long long) hash_len,
+			  passwd, (unsigned long long) passwd_len, salt,
+			  (unsigned long long) opslimit, (size_t) memlimit, (int) alg);
+	}
+# endif
+	if (ret == -1) {
+		ret = crypto_pwhash
+			((unsigned char *) ZSTR_VAL(hash), (unsigned long long) hash_len,
+			  passwd, (unsigned long long) passwd_len, salt,
+			  (unsigned long long) opslimit, (size_t) memlimit, (int) alg);
+	}
+	if (ret != 0) {
 		zend_string_free(hash);
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		return;
