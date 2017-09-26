@@ -978,7 +978,7 @@ php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *pa
 
 	if (!Z_ISUNDEF(headers)) {
 		if (FAILURE == zend_set_local_var_str(
-				"http_response_header", sizeof("http_response_header")-1, &headers, 0)) {
+				"http_response_header", sizeof("http_response_header")-1, &headers, 1)) {
 			zval_ptr_dtor(&headers);
 		}
 	}
