@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-14 Sep 2017 PHP 7.0.24RC1
+28 Sep 2017 PHP 7.0.24
 
 - Core:
   . Fixed bug #75042 (run-tests.php issues with EXTENSION block). (John Boehr)
