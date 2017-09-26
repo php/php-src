@@ -1,12 +1,9 @@
 --TEST--
-Flexible nowdoc syntax 1: different indentation for body (spaces) ending marker (tabs)
+Flexible nowdoc syntax error 5: mixing spaces and tabs in ending marker for 0 length body
 --FILE--
 <?php
 
 echo <<<'END'
-	   a
-	  b
-	 c
-		END;
+	 END;
 --EXPECTF--
 Parse error: Invalid indentation - tabs and spaces cannot be mixed in %s on line %d
