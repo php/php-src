@@ -1822,6 +1822,10 @@ static ZEND_COLD void zend_verify_type_error_common(
 				*need_msg = "be iterable";
 				*need_kind = "";
 				break;
+			case IS_OBJECT:
+				*need_msg = "be an object";
+				*need_kind = "";
+				break;
 			default:
 				*need_msg = "be of the type ";
 				*need_kind = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
@@ -1857,7 +1861,7 @@ static ZEND_COLD void zend_verify_arg_error(
 	const char *fname, *fsep, *fclass;
 	const char *need_msg, *need_kind, *need_or_null, *given_msg, *given_kind;
 
-	if (value) {
+	if (value && !Z_ISUNDEF_P(value)) {
 		zend_verify_type_error_common(
 				zf, arg_info, ce, value,
 				&fname, &fsep, &fclass, &need_msg, &need_kind, &need_or_null, &given_msg, &given_kind);
@@ -1874,7 +1878,7 @@ static ZEND_COLD void zend_verify_arg_error(
 			zend_type_error("Argument %d passed to %s%s%s() must %s%s%s, %s%s given", arg_num, fclass, fsep, fname, need_msg, need_kind, need_or_null, given_msg, given_kind);
 		}
 	} else {
-		zend_missing_arg_error(ptr);
+		zend_missing_arg_error(EG(current_execute_data));
 	}
 }
 
@@ -1928,8 +1932,9 @@ static void ZEND_FASTCALL zend_jit_verify_arg_slow(zval *arg, zend_op_array *op_
 	} else if (ZEND_TYPE_CODE(arg_info->type) == _IS_BOOL &&
 			EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return;
-	} else {
-		if (zend_verify_scalar_type_hint(ZEND_TYPE_CODE(arg_info->type), arg, ZEND_RET_USES_STRICT_TYPES()) == 0) {
+	} else if (ZEND_TYPE_CODE(arg_info->type) != Z_TYPE_P(arg)) {
+		if (Z_ISUNDEF_P(arg) ||
+		    zend_verify_scalar_type_hint(ZEND_TYPE_CODE(arg_info->type), arg, ZEND_ARG_USES_STRICT_TYPES()) == 0) {
 			goto err;
 		}
 	}

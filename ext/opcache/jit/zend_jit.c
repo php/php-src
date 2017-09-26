@@ -2364,6 +2364,11 @@ pass:
 							goto jit_failure;
 						}
 						goto done;
+					case ZEND_RECV:
+						if (!zend_jit_recv(&dasm_state, opline, op_array, ssa)) {
+							goto jit_failure;
+						}
+						goto done;
 					case ZEND_RECV_INIT:
 						if (!zend_jit_recv_init(&dasm_state, opline, op_array, (opline + 1)->opcode != ZEND_RECV_INIT, ssa)) {
 							goto jit_failure;
