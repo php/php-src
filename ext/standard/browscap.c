@@ -276,9 +276,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	zval tmp;
 	uint32_t i;
 
-	HashTable *ht;
-	ALLOC_HASHTABLE(ht);
-	zend_hash_init(ht, 8, NULL, ZVAL_PTR_DTOR, 0);
+	HashTable *ht = zend_new_array(8);
 
 	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
 	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);

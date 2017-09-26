@@ -103,8 +103,7 @@ typedef struct _sccp_ctx {
 static void empty_partial_array(zval *zv)
 {
 	Z_TYPE_INFO_P(zv) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-	Z_ARR_P(zv) = (zend_array *) emalloc(sizeof(zend_array));
-	zend_hash_init(Z_ARR_P(zv), 8, NULL, ZVAL_PTR_DTOR, 0);
+	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_array(zval *dst, zval *src)
@@ -116,8 +115,7 @@ static void dup_partial_array(zval *dst, zval *src)
 static void empty_partial_object(zval *zv)
 {
 	Z_TYPE_INFO_P(zv) = PARTIAL_OBJECT | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
-	Z_ARR_P(zv) = (zend_array *) emalloc(sizeof(zend_array));
-	zend_hash_init(Z_ARR_P(zv), 8, NULL, ZVAL_PTR_DTOR, 0);
+	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_object(zval *dst, zval *src)
@@ -1214,7 +1212,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					if (!result) {
 						empty_partial_array(&zv);
 					} else {
-						Z_TYPE_INFO_P(result) = PARTIAL_ARRAY | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT);
+						Z_TYPE_INFO_P(result) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
 						ZVAL_COPY_VALUE(&zv, result);
 						ZVAL_NULL(result);
 					}
@@ -2283,6 +2281,39 @@ int sccp_optimize_op_array(zend_optimizer_ctx *ctx, zend_op_array *op_array, zen
 
 	scdf_init(ctx, &sccp.scdf, op_array, ssa);
 	scdf_solve(&sccp.scdf, "SCCP");
+
+	if (ctx->debug_level & ZEND_DUMP_SCCP) {
+		int i, first = 1;
+
+		for (i = op_array->last_var; i < ssa->vars_count; i++) {
+			zval *zv = &sccp.values[i];
+
+			if (IS_TOP(zv) || IS_BOT(zv)) {
+				continue;
+			}
+			if (first) {
+				first = 0;
+				fprintf(stderr, "\nSCCP Values for \"");
+				zend_dump_op_array_name(op_array);
+				fprintf(stderr, "\":\n");
+			}
+			fprintf(stderr, "    #%d.", i);
+			zend_dump_var(op_array, IS_CV, ssa->vars[i].var);
+			if (IS_PARTIAL_ARRAY(zv)) {
+				fprintf(stderr, " = [");
+				zend_dump_ht(Z_ARRVAL_P(zv));
+				fprintf(stderr, "]");
+			} else if (IS_PARTIAL_OBJECT(zv)) {
+				fprintf(stderr, " = {");
+				zend_dump_ht(Z_ARRVAL_P(zv));
+				fprintf(stderr, "}");
+			} else {
+				fprintf(stderr, " =");
+				zend_dump_const(zv);
+			}
+			fprintf(stderr, "\n");
+		}
+	}
 
 	removed_ops += scdf_remove_unreachable_blocks(&sccp.scdf);
 	removed_ops += replace_constant_operands(&sccp);

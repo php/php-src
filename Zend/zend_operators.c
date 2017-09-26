@@ -225,8 +225,10 @@ ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op) /* {{{ */
 					if (Z_TYPE(holder) == IS_LONG) {				\
 						if (op == result) {							\
 							zval_ptr_dtor(op);						\
+							ZVAL_LONG(op, Z_LVAL(holder));			\
+						} else {									\
+							(op) = &(holder);						\
 						}											\
-						(op) = &(holder);							\
 					}												\
 					break;											\
 			}														\
@@ -581,8 +583,7 @@ static void convert_scalar_to_array(zval *op) /* {{{ */
 
 	ZVAL_COPY_VALUE(&entry, op);
 
-	ZVAL_NEW_ARR(op);
-	zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(op, 1);
 	zend_hash_index_add_new(Z_ARRVAL_P(op), 0, &entry);
 }
 /* }}} */
@@ -632,8 +633,7 @@ try_again:
 			}
 			break;
 		case IS_NULL:
-			ZVAL_NEW_ARR(op);
-			zend_hash_init(Z_ARRVAL_P(op), 8, NULL, ZVAL_PTR_DTOR, 0);
+			array_init(op);
 			break;
 		case IS_REFERENCE:
 			zend_unwrap_reference(op);

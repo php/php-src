@@ -1527,8 +1527,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		}
 		zend_hash_extend(symbol_table, ex->func->op_array.last_var, 0);
 	} else {
-		symbol_table = ex->symbol_table = emalloc(sizeof(zend_array));
-		zend_hash_init(symbol_table, ex->func->op_array.last_var, NULL, ZVAL_PTR_DTOR, 0);
+		symbol_table = ex->symbol_table = zend_new_array(ex->func->op_array.last_var);
 		if (!ex->func->op_array.last_var) {
 			return symbol_table;
 		}

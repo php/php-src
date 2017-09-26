@@ -1750,6 +1750,8 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
 							opline->opcode -= 2;
 							opline->result_type = IS_UNUSED;
 							break;

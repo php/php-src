@@ -170,11 +170,11 @@ static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
-ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
 {
 	GC_REFCOUNT(ht) = 1;
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
-	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | (bApplyProtection ? HASH_FLAG_APPLY_PROTECTION : 0) | HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 	ht->nNumUsed = 0;
@@ -183,6 +183,18 @@ ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_
 	ht->nNextFreeElement = 0;
 	ht->pDestructor = pDestructor;
 	ht->nTableSize = zend_hash_check_size(nSize);
+}
+
+ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
+{
+	_zend_hash_init_int(ht, nSize, pDestructor, persistent, 1);
+}
+
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize ZEND_FILE_LINE_DC)
+{
+	HashTable *ht = emalloc(sizeof(HashTable));
+	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0, 1);
+	return ht;
 }
 
 static void ZEND_FASTCALL zend_hash_packed_grow(HashTable *ht)
@@ -233,12 +245,9 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	pefree(old_data, (ht)->u.flags & HASH_FLAG_PERSISTENT);
 }
 
-ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
+ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
 {
-	_zend_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
-	if (!bApplyProtection) {
-		ht->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-	}
+	_zend_hash_init_int(ht, nSize, pDestructor, persistent, bApplyProtection);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed)
@@ -2507,9 +2516,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 
 convert:
 	{
-		HashTable *new_ht = emalloc(sizeof(HashTable));
-
-		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
 		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
 			if (!str_key) {
@@ -2567,9 +2574,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 
 convert:
 	{
-		HashTable *new_ht = emalloc(sizeof(HashTable));
-
-		zend_hash_init(new_ht, zend_hash_num_elements(ht), NULL, ZVAL_PTR_DTOR, 0);
+		HashTable *new_ht = zend_new_array(zend_hash_num_elements(ht));
 
 		ZEND_HASH_FOREACH_KEY_VAL(ht, num_key, str_key, zv) {
 			do {

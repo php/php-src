@@ -845,8 +845,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 		HashTable *debug_info;
 		*is_temp = 1;
 
-		ALLOC_HASHTABLE(debug_info);
-		ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
+		debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 		zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 		storage = &intern->array;

@@ -142,6 +142,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
+#ifndef ZTS
 		if ((function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 		    !function->common.scope && function->common.arg_info) {
 
@@ -159,6 +160,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 			free(arg_info);
 		}
+#endif
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
@@ -244,7 +246,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
+#ifndef ZTS
 	zend_function *fn;
+#endif
 
 	if (--ce->refcount > 0) {
 		return;
@@ -328,6 +332,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
+#ifndef ZTS
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 				    fn->common.scope == ce) {
@@ -335,6 +340,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					fn->common.scope = NULL;
 				}
 			} ZEND_HASH_FOREACH_END();
+#endif
 			zend_hash_destroy(&ce->function_table);
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;

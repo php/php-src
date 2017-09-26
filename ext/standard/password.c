@@ -415,9 +415,6 @@ PHP_FUNCTION(password_hash)
 	zend_long algo = PHP_PASSWORD_DEFAULT;
 	HashTable *options = NULL;
 
-#if HAVE_ARGON2LIB
-#endif
-
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(password)
 		Z_PARAM_LONG(algo)

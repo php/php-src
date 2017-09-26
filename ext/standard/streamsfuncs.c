@@ -665,8 +665,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	ZVAL_NEW_ARR(&new_array);
-	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		php_socket_t this_fd;
@@ -714,8 +713,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	ZVAL_NEW_ARR(&new_array);
-	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
 		ZVAL_DEREF(elem);

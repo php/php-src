@@ -1761,7 +1761,7 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 				if (Z_TYPE_P(current_field) == IS_LONG && !as_int_or_float) {
 					/* we are using the text protocol, so convert to string */
 					char tmp[22];
-					const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, Z_LVAL_P(current_field));
+					const size_t tmp_len = sprintf((char *)&tmp, MYSQLND_LLU_SPEC, (uint64_t) Z_LVAL_P(current_field));
 					ZVAL_STRINGL(current_field, tmp, tmp_len);
 				} else if (Z_TYPE_P(current_field) == IS_STRING) {
 					/* nothing to do here, as we want a string and ps_fetch_from_1_to_8_bytes() has given us one */

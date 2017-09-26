@@ -38,7 +38,10 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 			|| ini_entry->on_modify(ini_entry, duplicate,
 				ini_entry->mh_arg1, ini_entry->mh_arg2, ini_entry->mh_arg3, stage) == SUCCESS) {
 		ini_entry->value = duplicate;
-		ini_entry->modifiable = mode;
+		/* when mode == ZEND_INI_USER keep unchanged to allow ZEND_INI_PERDIR (.user.ini) */
+		if (mode == ZEND_INI_SYSTEM) {
+			ini_entry->modifiable = mode;
+		}
 	} else {
 		zend_string_release(duplicate);
 	}
