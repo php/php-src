@@ -1495,8 +1495,7 @@ PHP_FUNCTION(sodium_crypto_sign)
 		zend_throw_exception(sodium_exception_ce, "internal error", 0);
 		return;
 	}
-	if (msg_signed_real_len < 0U || msg_signed_real_len >= SIZE_MAX ||
-		msg_signed_real_len > msg_signed_len) {
+	if (msg_signed_real_len >= SIZE_MAX || msg_signed_real_len > msg_signed_len) {
 		zend_string_free(msg_signed);
 		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
 		return;
