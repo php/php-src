@@ -154,8 +154,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;

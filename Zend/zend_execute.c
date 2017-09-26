@@ -1698,8 +1698,7 @@ fetch_from_array:
 		}
 		if (EXPECTED(Z_TYPE_P(container) <= IS_FALSE)) {
 			if (type != BP_VAR_UNSET) {
-				ZVAL_NEW_ARR(container);
-				zend_hash_init(Z_ARRVAL_P(container), 8, NULL, ZVAL_PTR_DTOR, 0);
+				array_init(container);
 				goto fetch_from_array;
 			} else {
 				/* for read-mode only */

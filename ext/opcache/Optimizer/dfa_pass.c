@@ -190,6 +190,8 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					new_opline = op_array->opcodes + target - 1;
 					zend_optimizer_migrate_jump(op_array, new_opline, opline);
 				}
+			} else {
+				b->start = target;
 			}
 		} else {
 			b->start = target;
@@ -389,8 +391,7 @@ int zend_dfa_optimize_calls(zend_op_array *op_array, zend_ssa *ssa)
 					zend_ulong idx;
 
 					ZVAL_TRUE(&tmp);
-					dst = emalloc(sizeof(HashTable));
-					zend_hash_init(dst, zend_hash_num_elements(src), NULL, ZVAL_PTR_DTOR, 0);
+					dst = zend_new_array(zend_hash_num_elements(src));
 					if (strict) {
 						ZEND_HASH_FOREACH_VAL(src, val) {
 							if (Z_TYPE_P(val) == IS_STRING) {
