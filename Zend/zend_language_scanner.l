@@ -2576,10 +2576,15 @@ heredoc_scan_done:
 			case '\n':
 				indentation = spacing = 0;
 
-				while (*YYCURSOR == ' ' || *YYCURSOR == '\t') {
+				while (YYCURSOR < YYLIMIT && (*YYCURSOR == ' ' || *YYCURSOR == '\t')) {
 					spacing |= 1 << (*YYCURSOR == '\t');
 					++YYCURSOR;
 					++indentation;
+				}
+
+				if (YYCURSOR == YYLIMIT) {
+					CG(increment_lineno) = 1;
+					RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 				}
 
 				/* Check for ending label on the next line */
