@@ -1226,9 +1226,6 @@ static void* dasm_labels[zend_lb_MAX];
 // zval should be in FCARG1a
 |.macro ZVAL_DTOR_FUNC, var_info, filename, opline // arg1 must be in FCARG1a
 ||	do {
-||		if (opline) {
-|			SAVE_VALID_OPLINE opline
-||		}
 ||		if (has_concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 ||			zend_uchar type = concrete_type((var_info) & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE));
 ||			if (type == IS_STRING && !ZEND_DEBUG) {
@@ -1241,9 +1238,15 @@ static void* dasm_labels[zend_lb_MAX];
 |2:
 ||				break;
 ||			} else if (type == IS_ARRAY) {
+||				if (opline) {
+|					SAVE_VALID_OPLINE opline
+||				}
 |				EXT_CALL zend_array_destroy, r0
 ||				break;
 ||			} else if (type == IS_OBJECT) {
+||				if (opline) {
+|					SAVE_VALID_OPLINE opline
+||				}
 |				.if X64
 |					EXT_CALL zend_objects_store_del, r0
 |				.else
@@ -1254,6 +1257,9 @@ static void* dasm_labels[zend_lb_MAX];
 |				.endif
 ||				break;
 ||			}
+||		}
+||		if (opline) {
+|			SAVE_VALID_OPLINE opline
 ||		}
 ||		if (ZEND_DEBUG) {
 ||			uint32_t lineno = opline ? ((zend_op*)opline)->lineno : 0;
@@ -8381,7 +8387,6 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 				}
 			}
 			|	//SAVE_OPLINE()
-			|	SAVE_VALID_OPLINE opline
 			|	ZVAL_DTOR_FUNC op1_info, op_array->filename, opline
 			|	//????mov r1, EX->return_value // reload ???
 		}
