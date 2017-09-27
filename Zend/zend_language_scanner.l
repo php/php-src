@@ -1112,7 +1112,7 @@ skip_escape_conversion:
 		goto emit_token; \
 	} while (0)
 
-static void strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
+static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
 {
 	int len = Z_STRLEN_P(zendlval), new_len = len;
 	char *copy = Z_STRVAL_P(zendlval);
@@ -1154,11 +1154,13 @@ skip:
 	Z_STRVAL_P(zendlval)[new_len - newline] = '\0';
 	Z_STRLEN_P(zendlval) = new_len - newline;
 
-	return;
+	return 1;
 
 error:
 	zval_dtor(zendlval);
 	ZVAL_UNDEF(zendlval);
+
+	return 0;
 }
 
 #define RETURN_TOKEN(token) return emit_token(token, start_line);
@@ -2547,10 +2549,14 @@ double_quotes_scan_done:
 
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
+	ZVAL_STRINGL(zendlval, yytext, yyleng - indentation);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng - indentation, 0);
+	if (strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_spacing)) {
+		zend_string *copy = Z_STR_P(zendlval);
 
-	strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_spacing);
+		zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
+		zend_string_release(copy);
+	}
 
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
