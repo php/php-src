@@ -17,8 +17,6 @@ ext/dba/libcdb/cdb.c            ident
 ext/filter/filter.c             ident
 README.input_filter             ident
 run-tests.php                   ident
-Zend/RFCs/002.txt               ident
-Zend/RFCs/003.txt               ident
 ext/exif/exif.c                 ident
 ext/ldap/ldap.c                 ident
 ext/pdo_pgsql/pdo_pgsql.c       ident
