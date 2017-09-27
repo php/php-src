@@ -10,6 +10,8 @@ PHP                                                                        NEWS
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
+  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+    (andrewnester)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -21,6 +23,7 @@ PHP                                                                        NEWS
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)
+  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
@@ -32,6 +35,11 @@ PHP                                                                        NEWS
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
+
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
 - Mbstring:
   . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
