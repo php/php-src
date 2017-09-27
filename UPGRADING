@@ -253,6 +253,9 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added imageresolution().
   . Added imagecreatefrombmp() and imagebmp().
 
+- Hash:
+  . Added hash_hmac_algos().
+
 - Mbstring:
   . Added mb_chr() and mb_ord().
   . Added mb_scrub() that scrubs broken multibyte strings.
