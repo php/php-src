@@ -23,6 +23,7 @@ PHP                                                                        NEWS
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)
+  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
