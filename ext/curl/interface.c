@@ -2609,16 +2609,18 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 				return FAILURE;
 			}
 
-			ZEND_HASH_FOREACH_VAL(ph, current) {
-				ZVAL_DEREF(current);
-				val = zval_get_string(current);
-				slist = curl_slist_append(slist, ZSTR_VAL(val));
-				zend_string_release(val);
-				if (!slist) {
-					php_error_docref(NULL, E_WARNING, "Could not build curl_slist");
-					return 1;
-				}
-			} ZEND_HASH_FOREACH_END();
+			if (zend_hash_num_elements(ph)) {
+				ZEND_HASH_FOREACH_VAL(ph, current) {
+					ZVAL_DEREF(current);
+					val = zval_get_string(current);
+					slist = curl_slist_append(slist, ZSTR_VAL(val));
+					zend_string_release(val);
+					if (!slist) {
+						php_error_docref(NULL, E_WARNING, "Could not build curl_slist");
+						return 1;
+					}
+				} ZEND_HASH_FOREACH_END();
+			}
 
 			if (slist) {
 				if ((*ch->clone) == 1) {
