@@ -2519,6 +2519,7 @@ double_quotes_scan_done:
 
 					indentation = heredoc_label->indentation;
 
+					CG(increment_lineno) = 1;
 					BEGIN(ST_END_HEREDOC);
 
 					goto heredoc_scan_done;
