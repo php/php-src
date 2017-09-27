@@ -4165,7 +4165,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 		GET_VALUE_FROM_STRUCT(i, "i");
 		GET_VALUE_FROM_STRUCT(s, "s");
 		if (strcmp(Z_STRVAL_P(member), "f") == 0) {
-			fvalue = obj->diff->us / 1000000;
+			fvalue = obj->diff->us / 1000000.0;
 			break;
 		}
 		GET_VALUE_FROM_STRUCT(invert, "invert");
