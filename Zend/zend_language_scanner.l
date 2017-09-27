@@ -2279,9 +2279,8 @@ skip_escape_conversion:
 
 	if (is_heredoc) {
 		int indentation;
-		unsigned char *cursor = YYCURSOR;
 
-		--YYCURSOR;
+		saved_cursor = YYCURSOR--;
 
 		while (YYCURSOR < YYLIMIT) {
 			switch (*YYCURSOR++) {
@@ -2325,12 +2324,11 @@ skip_escape_conversion:
 			}
 		}
 
+		YYCURSOR = saved_cursor;
+
 		if (heredoc_label->indentation == -1) {
-			YYCURSOR = saved_cursor;
 			RETURN_TOKEN(T_START_HEREDOC);
 		}
-
-		YYCURSOR = cursor;
 	}
 
 	RETURN_TOKEN(T_START_HEREDOC);
@@ -2517,7 +2515,6 @@ double_quotes_scan_done:
 						newline = 1;
 					}
 
-					CG(increment_lineno) = 1; /* For newline before label */
 					indentation = heredoc_label->indentation;
 
 					BEGIN(ST_END_HEREDOC);
