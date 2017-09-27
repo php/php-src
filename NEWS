@@ -14,6 +14,9 @@ PHP                                                                        NEWS
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
+- Opcache
+  . Fixed bug #75255 (Request hangs and not finish). (Dmitry)
+
 28 Sep 2017, PHP 7.2.0RC3
 
 - Core
