@@ -35,6 +35,11 @@ PHP                                                                        NEWS
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
 
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
+
 - Mbstring:
   . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
     capitalized). (Nikita)
