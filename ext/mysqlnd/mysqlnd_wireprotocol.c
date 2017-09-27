@@ -538,7 +538,7 @@ size_t php_mysqlnd_auth_write(void * _packet)
 			DBG_RETURN(0);
 		}
 
-		int1store(p, packet->auth_data_len);
+		int1store(p, (int8_t)packet->auth_data_len);
 		++p;
 /*!!!!! is the buffer big enough ??? */
 		if (sizeof(buffer) < (packet->auth_data_len + (p - buffer))) {

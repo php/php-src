@@ -721,8 +721,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	} while (0)
 
 #define ZVAL_ARR(z, a) do {						\
+		zend_array *__arr = (a);				\
 		zval *__z = (z);						\
-		Z_ARR_P(__z) = (a);						\
+		Z_ARR_P(__z) = __arr;					\
 		Z_TYPE_INFO_P(__z) = IS_ARRAY_EX;		\
 	} while (0)
 

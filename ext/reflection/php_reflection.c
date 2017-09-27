@@ -214,7 +214,7 @@ static void _fix_closure_prototype(zend_function *fptr) /* {{{ */
 {
 	/* Actually we are setting proxy function's prototype to null
 	 * as for it, the prototype is an object not a function
-	 * which could cause serias problems, see #74949 */
+	 * which could cause serious problems, see #74949 */
 	fptr->common.prototype = NULL;
 }
 /* }}} */

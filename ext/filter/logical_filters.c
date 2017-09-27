@@ -532,7 +532,8 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
+	if (url->scheme != NULL &&
+		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
 		char *e, *s, *t;
 		size_t l;
 
@@ -540,9 +541,9 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			goto bad_url;
 		}
 
-		s = url->host;
-		l = strlen(s);
-		e = url->host + l;
+		s = ZSTR_VAL(url->host);
+		l = ZSTR_LEN(url->host);
+		e = s + l;
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
@@ -552,7 +553,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		// Validate domain
-		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
+		if (!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)) {
 			php_url_free(url);
 			RETURN_VALIDATION_FAILED
 		}
@@ -561,7 +562,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
+		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:

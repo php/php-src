@@ -3711,9 +3711,8 @@ static int zend_compile_func_in_array(znode *result, zend_ast_list *args) /* {{{
 		zend_bool ok = 1;
 		zval *val, tmp;
 		HashTable *src = Z_ARRVAL(array.u.constant);
-		HashTable *dst = emalloc(sizeof(HashTable));
+		HashTable *dst = zend_new_array(zend_hash_num_elements(src));
 
-		zend_hash_init(dst, zend_hash_num_elements(src), NULL, ZVAL_PTR_DTOR, 0);
 		ZVAL_TRUE(&tmp);
 
 		if (strict) {
@@ -4239,8 +4238,7 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 		if (CG(active_op_array)->scope) {
 			CG(active_op_array)->scope->ce_flags |= ZEND_HAS_STATIC_IN_METHODS;
 		}
-		ALLOC_HASHTABLE(CG(active_op_array)->static_variables);
-		zend_hash_init(CG(active_op_array)->static_variables, 8, NULL, ZVAL_PTR_DTOR, 0);
+		CG(active_op_array)->static_variables = zend_new_array(8);
 	}
 
 	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {

@@ -38,6 +38,24 @@
 #include "bcmath.h"
 #include "private.h"
 
+
+/* Truncate a number to zero scale.  To avoid sharing issues (refcount and
+   shared n_value) the number is copied, this copy is truncated, and the
+   original number is "freed". */
+
+static void
+_bc_truncate (bc_num *num)
+{
+  bc_num temp;
+
+  temp = bc_new_num ((*num)->n_len, 0);
+  temp->n_sign = (*num)->n_sign;
+  memcpy (temp->n_value, (*num)->n_value, (*num)->n_len);
+  bc_free_num (num);
+  *num = temp;
+}
+
+
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
    placed in RESULT.  If a EXPO is not an integer,
    only the integer part is used.  */
@@ -62,22 +80,22 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   /* Check the base for scale digits. */
   if (power->n_scale != 0)
     {
-      bc_rt_warn ("non-zero scale in base");
-      bc_divide (power, BCG(_one_), &power, 0); /*truncate */
+      php_error_docref (NULL, E_WARNING, "non-zero scale in base");
+      _bc_truncate (&power);
     }
 
   /* Check the exponent for scale digits. */
   if (exponent->n_scale != 0)
     {
-      bc_rt_warn ("non-zero scale in exponent");
-      bc_divide (exponent, BCG(_one_), &exponent, 0); /*truncate */
+      php_error_docref (NULL, E_WARNING, "non-zero scale in exponent");
+      _bc_truncate (&exponent);
     }
 
   /* Check the modulus for scale digits. */
   if (modulus->n_scale != 0)
     {
-      bc_rt_warn ("non-zero scale in modulus");
-      bc_divide (modulus, BCG(_one_), &modulus, 0); /*truncate */
+      php_error_docref (NULL, E_WARNING, "non-zero scale in modulus");
+      _bc_truncate (&modulus);
     }
 
   /* Do the calculation. */

@@ -46,12 +46,6 @@ function get_depends($module)
 		/* apache 2 */
 		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll','libapr-1.dll', 'libaprutil-1.dll',
 
-		/* pi3web */
-		'piapi.dll', 'pi3api.dll',
-
-		/* nsapi */
-		'ns-httpd30.dll', 'ns-httpd35.dll', 'ns-httpd36.dll', 'ns-httpd40.dll',
-
 		/* oracle */
 		'oci.dll', 'ociw32.dll',
 
@@ -253,10 +247,10 @@ if(sizeof($pecl_targets)) {
 $text_files = array(
 	"LICENSE" => "license.txt",
 	"NEWS" => "news.txt",
+	"INSTALL" => "install.txt", 
 	"README.REDIST.BINS" => "readme-redist-bins.txt",
 	"php.ini-development" => "php.ini-development",
-	"php.ini-production" => "php.ini-production",
-	"win32/install.txt" => "install.txt",
+	"php.ini-production" => "php.ini-production"
 );
 
 foreach ($text_files as $src => $dest) {

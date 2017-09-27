@@ -310,11 +310,11 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
 int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
 int  validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force);
+int  zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool force);
 int  accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key(const char *path, int path_length, int *key_len);
+char *accel_make_persistent_key(const char *path, size_t path_length, int *key_len);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #define IS_ACCEL_INTERNED(str) \

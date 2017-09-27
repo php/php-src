@@ -101,7 +101,7 @@ static uint8_t browscap_compute_prefix_len(zend_string *pattern) {
 			break;
 		}
 	}
-	return MIN(i, UINT8_MAX);
+	return (uint8_t)MIN(i, UINT8_MAX);
 }
 
 static size_t browscap_compute_contains(
@@ -119,7 +119,7 @@ static size_t browscap_compute_contains(
 			}
 		}
 	}
-	*contains_start = i;
+	*contains_start = (uint16_t)i;
 
 	/* Find first placeholder character after that */
 	for (; i < ZSTR_LEN(pattern); i++) {
@@ -127,7 +127,7 @@ static size_t browscap_compute_contains(
 			break;
 		}
 	}
-	*contains_len = MIN(i - *contains_start, UINT8_MAX);
+	*contains_len = (uint8_t)MIN(i - *contains_start, UINT8_MAX);
 	return i;
 }
 
@@ -276,9 +276,7 @@ static HashTable *browscap_entry_to_array(browser_data *bdata, browscap_entry *e
 	zval tmp;
 	uint32_t i;
 
-	HashTable *ht;
-	ALLOC_HASHTABLE(ht);
-	zend_hash_init(ht, 8, NULL, ZVAL_PTR_DTOR, 0);
+	HashTable *ht = zend_new_array(8);
 
 	ZVAL_STR(&tmp, browscap_convert_pattern(entry->pattern, 0));
 	zend_hash_str_add(ht, "browser_name_regex", sizeof("browser_name_regex")-1, &tmp);

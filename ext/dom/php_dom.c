@@ -1105,8 +1105,7 @@ zend_object *dom_xpath_objects_new(zend_class_entry *class_type)
 {
 	dom_xpath_object *intern = ecalloc(1, sizeof(dom_xpath_object) + zend_object_properties_size(class_type));
 
-	ALLOC_HASHTABLE(intern->registered_phpfunctions);
-	zend_hash_init(intern->registered_phpfunctions, 0, NULL, ZVAL_PTR_DTOR, 0);
+	intern->registered_phpfunctions = zend_new_array(0);
 
 	intern->dom.prop_handler = &dom_xpath_prop_handlers;
 	intern->dom.std.handlers = &dom_xpath_object_handlers;

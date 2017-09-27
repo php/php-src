@@ -1084,15 +1084,6 @@ ZEND_API int zend_parse_method_parameters_ex(int flags, int num_args, zval *this
 }
 /* }}} */
 
-/* Argument parsing API -- andrei */
-ZEND_API int _array_init(zval *arg, uint32_t size ZEND_FILE_LINE_DC) /* {{{ */
-{
-	ZVAL_NEW_ARR(arg);
-	_zend_hash_init(Z_ARRVAL_P(arg), size, ZVAL_PTR_DTOR, 0 ZEND_FILE_LINE_RELAY_CC);
-	return SUCCESS;
-}
-/* }}} */
-
 /* This function should be called after the constructor has been called
  * because it may call __set from the uninitialized object otherwise. */
 ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */

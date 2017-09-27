@@ -110,11 +110,6 @@ static DWORD tls_key;
 # define tsrm_tls_set(what)		TlsSetValue(tls_key, (void*)(what))
 # define tsrm_tls_get()			TlsGetValue(tls_key)
 
-#elif defined(BETHREADS)
-static int32 tls_key;
-# define tsrm_tls_set(what)		tls_set(tls_key, (void*)(what))
-# define tsrm_tls_get()			(tsrm_tls_entry*)tls_get(tls_key)
-
 #else
 # define tsrm_tls_set(what)
 # define tsrm_tls_get()			NULL
@@ -135,8 +130,6 @@ TSRM_API int tsrm_startup(int expected_threads, int expected_resources, int debu
 	st_key_create(&tls_key, 0);
 #elif defined(TSRM_WIN32)
 	tls_key = TlsAlloc();
-#elif defined(BETHREADS)
-	tls_key = tls_allocate();
 #endif
 
 	/* ensure singleton */
@@ -585,14 +578,8 @@ TSRM_API THREAD_T tsrm_thread_id(void)
 	return pth_self();
 #elif defined(PTHREADS)
 	return pthread_self();
-#elif defined(NSAPI)
-	return systhread_current();
-#elif defined(PI3WEB)
-	return PIThread_getCurrent();
 #elif defined(TSRM_ST)
 	return st_thread_self();
-#elif defined(BETHREADS)
-	return find_thread(NULL);
 #endif
 }/*}}}*/
 
@@ -610,16 +597,8 @@ TSRM_API MUTEX_T tsrm_mutex_alloc(void)
 #elif defined(PTHREADS)
 	mutexp = (pthread_mutex_t *)malloc(sizeof(pthread_mutex_t));
 	pthread_mutex_init(mutexp,NULL);
-#elif defined(NSAPI)
-	mutexp = crit_init();
-#elif defined(PI3WEB)
-	mutexp = PIPlatform_allocLocalMutex();
 #elif defined(TSRM_ST)
 	mutexp = st_mutex_new();
-#elif defined(BETHREADS)
-	mutexp = (beos_ben*)malloc(sizeof(beos_ben));
-	mutexp->ben = 0;
-	mutexp->sem = create_sem(1, "PHP sempahore");
 #endif
 #ifdef THR_DEBUG
 	printf("Mutex created thread: %d\n",mythreadid());
@@ -640,15 +619,8 @@ TSRM_API void tsrm_mutex_free(MUTEX_T mutexp)
 #elif defined(PTHREADS)
 		pthread_mutex_destroy(mutexp);
 		free(mutexp);
-#elif defined(NSAPI)
-		crit_terminate(mutexp);
-#elif defined(PI3WEB)
-		PISync_delete(mutexp);
 #elif defined(TSRM_ST)
 		st_mutex_destroy(mutexp);
-#elif defined(BETHREADS)
-		delete_sem(mutexp->sem);
-		free(mutexp);
 #endif
 	}
 #ifdef THR_DEBUG
@@ -674,17 +646,8 @@ TSRM_API int tsrm_mutex_lock(MUTEX_T mutexp)
 	return -1;
 #elif defined(PTHREADS)
 	return pthread_mutex_lock(mutexp);
-#elif defined(NSAPI)
-	crit_enter(mutexp);
-	return 0;
-#elif defined(PI3WEB)
-	return PISync_lock(mutexp);
 #elif defined(TSRM_ST)
 	return st_mutex_lock(mutexp);
-#elif defined(BETHREADS)
-	if (atomic_add(&mutexp->ben, 1) != 0)
-		return acquire_sem(mutexp->sem);
-	return 0;
 #endif
 }/*}}}*/
 
@@ -706,17 +669,8 @@ TSRM_API int tsrm_mutex_unlock(MUTEX_T mutexp)
 	return -1;
 #elif defined(PTHREADS)
 	return pthread_mutex_unlock(mutexp);
-#elif defined(NSAPI)
-	crit_exit(mutexp);
-	return 0;
-#elif defined(PI3WEB)
-	return PISync_unlock(mutexp);
 #elif defined(TSRM_ST)
 	return st_mutex_unlock(mutexp);
-#elif defined(BETHREADS)
-	if (atomic_add(&mutexp->ben, -1) != 1)
-		return release_sem(mutexp->sem);
-	return 0;
 #endif
 }/*}}}*/
 

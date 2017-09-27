@@ -791,7 +791,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
-	zend_long timeout = 60;
+	zend_long timeout = 60, flags;
 	char *filename;
 
 	H = pecalloc(1, sizeof(pdo_sqlite_db_handle), dbh->is_persistent);
@@ -809,7 +809,14 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 		goto cleanup;
 	}
 
+	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+
+#if SQLITE_VERSION_NUMBER >= 3005000
+	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
+#else
 	i = sqlite3_open(filename, &H->db);
+#endif
+
 	efree(filename);
 
 	if (i != SQLITE_OK) {

@@ -60,29 +60,32 @@ DEFINE("BASE_INCLUDES", "/I . /I main /I Zend /I TSRM /I ext ");
 
 toolset_setup_common_cflags();
 
-ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
-var PHP_MP_DISABLED = true;
-if (VS_TOOLSET && PHP_MP != 'disable') {
-	if(PHP_DEBUG == 'yes') {
-		STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
-	} else {
-		// no from disable-all 
-		if(PHP_MP == 'auto' || PHP_MP == 'no') {
-			 ADD_FLAG('CFLAGS', ' /MP ');
-			PHP_MP_DISABLED = false;
+if (VS_TOOLSET) {
+	ARG_WITH('mp', 'Tell Visual Studio use up to [n,auto,disable] processes for compilation', 'auto');
+	var PHP_MP_DISABLED = true;
+
+	if (PHP_MP != 'disable') {
+		if(PHP_DEBUG == 'yes') {
+			STDOUT.WriteLine('WARNING: Debug builds cannot be built using multi processing');
 		} else {
-			if(parseInt(PHP_MP) != 0) {
-				ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+			// no from disable-all 
+			if(PHP_MP == 'auto' || PHP_MP == 'no') {
+				ADD_FLAG('CFLAGS', ' /MP ');
 				PHP_MP_DISABLED = false;
 			} else {
-				STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				if(parseInt(PHP_MP) != 0) {
+					ADD_FLAG('CFLAGS', ' /MP'+ PHP_MP +' ');
+					PHP_MP_DISABLED = false;
+				} else {
+					STDOUT.WriteLine('WARNING: Invalid argument for MP: ' + PHP_MP);
+				}
 			}
 		}
 	}
-}
 
-if (!PHP_MP_DISABLED) {
-	STDOUT.WriteLine('Enabling multi process build');
+	if (!PHP_MP_DISABLED) {
+		STDOUT.WriteLine('Enabling multi process build');
+	}
 }
 
 // General link flags
@@ -241,7 +244,8 @@ ADD_FLAG("CFLAGS_BD_ZEND", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 ADD_SOURCES("main", "main.c snprintf.c spprintf.c getopt.c fopen_wrappers.c \
 	php_scandir.c php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
 	strlcat.c mergesort.c reentrancy.c php_variables.c php_ticks.c network.c \
-	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c");
+	php_open_temporary_file.c output.c internal_functions.c php_sprintf.c \
+	php_syslog.c");
 ADD_FLAG("CFLAGS_BD_MAIN", "/D ZEND_ENABLE_STATIC_TSRMLS_CACHE=1");
 
 AC_DEFINE('HAVE_STRNLEN', 1);
