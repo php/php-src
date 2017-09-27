@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC4
 
+- Core
+  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+    (andrewnester)
 
 28 Sep 2017, PHP 7.2.0RC3
 
