@@ -6,6 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
 
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
+
 28 Sep 2017, PHP 7.2.0RC3
 
 - Core
