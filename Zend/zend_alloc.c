@@ -283,7 +283,7 @@ struct _zend_mm_chunk {
 	uint32_t           free_pages;				/* number of free pages */
 	uint32_t           free_tail;               /* number of free pages at the end of chunk */
 	uint32_t           num;
-	char               reserve[64 - (sizeof(void*) * 3 + sizeof(int) * 3)];
+	char               reserve[64 - (sizeof(void*) * 3 + sizeof(uint32_t) * 3)];
 	zend_mm_heap       heap_slot;               /* used only in main chunk */
 	zend_mm_page_map   free_map;                /* 512 bits or 64 bytes */
 	zend_mm_page_info  map[ZEND_MM_PAGES];      /* 2 KB = 512 * 4 */
