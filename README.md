@@ -33,8 +33,7 @@ pulled and pushed through http://git.php.net.
 
 Guidelines for contributors
 ===========================
+- [CONTRIBUTING.md](/CONTRIBUTING.md)
 - [CODING_STANDARDS](/CODING_STANDARDS)
-- [README.GIT-RULES](/README.GIT-RULES)
 - [README.MAILINGLIST_RULES](/README.MAILINGLIST_RULES)
 - [README.RELEASE_PROCESS](/README.RELEASE_PROCESS)
-
