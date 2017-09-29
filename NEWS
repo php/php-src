@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
+  . Fixed bug #75290 (debug info of Closures of internal functions contain
+    garbage argument names). (Andrea)
 
 - Date:
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)

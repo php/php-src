@@ -500,6 +500,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 	zval val;
 	struct _zend_arg_info *arg_info = closure->func.common.arg_info;
 	HashTable *debug_info;
+	zend_bool zstr_args = (closure->func.type == ZEND_USER_FUNCTION) || (closure->func.common.fn_flags & ZEND_ACC_USER_ARG_INFO);
 
 	*is_temp = 1;
 
@@ -532,9 +533,15 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 			zend_string *name;
 			zval info;
 			if (arg_info->name) {
-				name = zend_strpprintf(0, "%s$%s",
-						arg_info->pass_by_reference ? "&" : "",
-						ZSTR_VAL(arg_info->name));
+				if (zstr_args) {
+					name = zend_strpprintf(0, "%s$%s",
+							arg_info->pass_by_reference ? "&" : "",
+							ZSTR_VAL(arg_info->name));
+				} else {
+					name = zend_strpprintf(0, "%s$%s",
+							arg_info->pass_by_reference ? "&" : "",
+							((zend_internal_arg_info*)arg_info)->name);
+				}
 			} else {
 				name = zend_strpprintf(0, "%s$param%d",
 						arg_info->pass_by_reference ? "&" : "",
