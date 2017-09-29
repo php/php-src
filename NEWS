@@ -17,6 +17,10 @@ PHP                                                                        NEWS
 - Opcache
   . Fixed bug #75255 (Request hangs and not finish). (Dmitry)
 
+- PCRE:
+  . Fixed bug #75285 (Broken build when system libpcre don't have jit support).
+    (Remi)
+
 28 Sep 2017, PHP 7.2.0RC3
 
 - Core
