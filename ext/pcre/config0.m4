@@ -78,20 +78,12 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality]
     fi
   fi
 
-  if test "$PHP_DEBUG" != "no" && test "$PHP_DEBUG" != "0"; then
-    PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                          Enable PCRE valgrind support. Developers only!], yes, no)
-  else
-    PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                           Enable PCRE valgrind support. Developers only!], no, no)
-  fi
-
+PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
+                          Enable PCRE valgrind support. Developers only!], no, no)
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
     AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
   else
-    if test "$PHP_PCRE_VALGRIND" = "no" && test "$PHP_DEBUG" != "0"; then
-      AC_MSG_NOTICE([PCRE Valgrind support is disabled for debug build])
-    elif test "$PHP_PCRE_VALGRIND" != "no" || test "$PHP_DEBUG" != "0"; then
+    if test "$PHP_PCRE_VALGRIND" != "no"; then
       PHP_PCRE_VALGRIND_INCDIR=
       AC_MSG_CHECKING([for Valgrind headers location])
       for i in $PHP_PCRE_VALGRIND $PHP_PCRE_VALGRIND/include $PHP_PCRE_VALGRIND/local/include /usr/include /usr/local/include; do
