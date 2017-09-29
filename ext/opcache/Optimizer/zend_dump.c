@@ -690,7 +690,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_KILL_VAR) {
 		fprintf(stderr, " kill_var");
 	}
-	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
+	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) && !(b->flags & ZEND_BB_REACHABLE)) {
 		fprintf(stderr, " unreachable");
 	}
 	if (b->flags & ZEND_BB_LOOP_HEADER) {
