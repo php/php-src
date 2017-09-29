@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     request). (Nikita)
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
+  . Fixed bug #75290 (debug info of Closures of internal functions contain
+    garbage argument names). (Andrea)
 
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
