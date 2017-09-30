@@ -16,6 +16,8 @@ PHP                                                                        NEWS
     files). (petk)
   . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
     properties). (pmmaga)
+  . Fixed bug #63911 (identical trait methods raise errors during composition). 
+    (pmmaga)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
