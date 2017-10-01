@@ -1,83 +1,90 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2
-
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
+?? ??? ????, PHP 7.3.0alpha1
 
 - Core:
-  . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
-  . Removed the sql.safe_mode directive. (Kalle)
-  . Removed support for Netware. (Kalle)
-  . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
-  . Implemented FR #69791 (Disallow mail header injections by extra headers)
-    (Yasuo)
-  . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
-  . Fix pthreads detection when cross-compiling (ffontaine)
-  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
-    Dmitry).
-  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
-  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
-    operation). (Dmitry)
-  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
-    php.exe). (Michele Locati)
-  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
-    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
+  . Redesigned the old ext_skel program written in PHP, run: 
+    'php ext_skel.php' for all options. This means there is no dependencies 
+    thrus making it work on Windows out of the box. (Kalle)
+  . Removed support for BeOS. (Kalle)
+  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
+  . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
+    error_log set to "syslog"). (Philip Prindeville)
+  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+    (andrewnester)
+
+- BCMath:
+  . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
+	. Implemented request #67855 (No way to get current scale in use). (Chris
+	  Wright, cmb)
+  . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
+  . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
 - Date:
-  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
+  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
+    (majkl578, Rican7)
+  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
-- EXIF:
-  . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
-  . Fixed bug #72682 (exif_read_data() fails to read all data for some
-    images). (Kalle)
-  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
-    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
-  . Fixed bug #68547 (Exif Header component value check error).
-    (sjh21a at gmail dot com, Kalle)
-  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
-    reached for some cameras). (Kalle)
-  . Fixed Redhat bug #1362571 (PHP not returning full results for
-    exif_read_data function). (Kalle)
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
 
 - GD:
-  . Implemented imageresolution as getter and setter (Christoph)
+  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
 
-- GMP:
-  . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
+- LDAP:
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
+    (Come)
+  . Added full support for sending and parsing ldap controls (Come)
+
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
 - Mbstring:
-  . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
-  . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
-  . Implemented request #69086 (enhancement for mb_convert_encoding() that
-    handles multibyte replacement char nicely). (Masakielastic, Yasuo)
-  . Added array input support to mb_convert_encoding(). (Yasuo)
-  . Added array input support to mb_check_encoding(). (Yasuo)
+  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
+    capitalized). (Nikita)
+  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
+    (Nikita)
+  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
+  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
+    on Windows). (Nikita)
 
-- PDO:
-  . Add PDOStatement::activeQueryString(). (Adam Baratz)
+- ODBC:
+  . Removed support for ODBCRouter. (Kalle)
+  . Removed support for Birdstep. (Kalle)
 
-- PDO_DBlib:
-  . Fixed bug #73234 (Emulated statements let value dictate parameter type).
-    (Adam Baratz)
-  . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
+- PDO_OCI:
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
+
+- PDO SQLite
+  . Add support for additional open flags
+
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+
+- pgsql:
+  . Added new error constants for pg_result_error(): (Kalle)
+    - Requires Postgres 9.3
+      - PGSQL_DIAG_SCHEMA_NAME
+	  - PGSQL_DIAG_TABLE_NAME
+	  - PGSQL_DIAG_COLUMN_NAME
+	  - PGSQL_DIAG_DATATYPE_NAME
+	  - PGSQL_DIAG_CONSTRAINT_NAME
+	- Requires Postgres 9.6
+	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
 
 - Session:
-  . Fixed bug #73461 (Prohibit session save handler recursion) . (yohgaki)
+  . Fixed bug #74941 (session fails to start after having headers sent). 
+    (morozov)
 
-- SOAP:
-  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
-    (Keith Smiley)
-
-- SQLite3:
-  . Update to Sqlite 3.15.2. (cmb)
-
-- XML:
-  . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
-  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
-
-- XMLRPC:
-  . Use Zend MM for allocation in bundled libxmlrpc (Joe)
+- SPL:
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+    (Andrew Nester)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
+    (jhdxr)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -315,10 +315,6 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 
 	/* Create this filter */
 	data = pecalloc(1, sizeof(php_bz2_filter_data), persistent);
-	if (!data) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", sizeof(php_bz2_filter_data));
-		return NULL;
-	}
 
 	/* Circular reference */
 	data->strm.opaque = (void *) data;
@@ -328,19 +324,8 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	data->persistent = persistent;
 	data->strm.avail_out = data->outbuf_len = data->inbuf_len = 2048;
 	data->strm.next_in = data->inbuf = (char *) pemalloc(data->inbuf_len, persistent);
-	if (!data->inbuf) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", data->inbuf_len);
-		pefree(data, persistent);
-		return NULL;
-	}
 	data->strm.avail_in = 0;
 	data->strm.next_out = data->outbuf = (char *) pemalloc(data->outbuf_len, persistent);
-	if (!data->outbuf) {
-		php_error_docref(NULL, E_WARNING, "Failed allocating %zu bytes", data->outbuf_len);
-		pefree(data->inbuf, persistent);
-		pefree(data, persistent);
-		return NULL;
-	}
 
 	if (strcasecmp(filtername, "bzip2.decompress") == 0) {
 		data->small_footprint = 0;

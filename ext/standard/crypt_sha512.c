@@ -63,7 +63,7 @@ struct sha512_ctx
 };
 
 
-#if PHP_WIN32 || (!defined(WORDS_BIGENDIAN))
+#if defined(PHP_WIN32) || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
   (((n) << 56)					\
    | (((n) & 0xff00) << 40)			\

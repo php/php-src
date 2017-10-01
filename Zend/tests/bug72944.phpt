@@ -6,7 +6,7 @@ Bug #72944 (Null pointer deref in zval_delref_p).
 echo "OK\n";
 ?>
 --EXPECTF--
-Notice: Use of undefined constant e - assumed 'e' in %sbug72944.php on line 2
+Warning: Use of undefined constant e - assumed 'e' (this will throw an Error in a future version of PHP) in %sbug72944.php on line 2
 
 Notice: Undefined variable: A in %sbug72944.php on line 2
 OK

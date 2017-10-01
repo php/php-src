@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -360,6 +360,8 @@ int LSAPI_Init_Prefork_Server( int max_children, fn_select_t fp, int avoidFork )
 void LSAPI_Set_Server_fd( int fd );
 
 int LSAPI_Prefork_Accept_r( LSAPI_Request * pReq );
+
+void LSAPI_No_Check_ppid(void);
 
 void LSAPI_Set_Max_Reqs( int reqs );
 

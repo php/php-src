@@ -41,11 +41,11 @@ bool(false)
 
 Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
-string(%d) "%s"
-string(%d) "%s"
+string(%d) "%a"
+string(%d) "%a"
 
 Warning: gzencode(): encoding mode must be either ZLIB_ENCODING_RAW, ZLIB_ENCODING_GZIP or ZLIB_ENCODING_DEFLATE in %s on line %d
 bool(false)
-string(%d) "%s"
-string(%d) "%s"
+string(%d) "%a"
+string(%d) "%a"
 Done

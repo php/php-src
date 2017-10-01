@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -132,7 +132,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 						meta->fields[i].max_length = len;
 					}
 				}
-				zval_ptr_dtor(&current_row[i]);
+				zval_ptr_dtor_nogc(&current_row[i]);
 			}
 		}
 		mnd_efree(current_row);
@@ -156,7 +156,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 	if (unbuf->last_row_data) {
 		unsigned int i;
 		for (i = 0; i < unbuf->field_count; i++) {
-			zval_ptr_dtor(&(unbuf->last_row_data[i]));
+			zval_ptr_dtor_nogc(&(unbuf->last_row_data[i]));
 		}
 
 		/* Free last row's zvals */
@@ -225,7 +225,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, free_result)(MYSQLND_RES_BUFFERED_Z
 
 			if (current_row != NULL) {
 				for (col = field_count - 1; col >= 0; --col) {
-					zval_ptr_dtor(&(current_row[col]));
+					zval_ptr_dtor_nogc(&(current_row[col]));
 				}
 			}
 		}
@@ -968,8 +968,6 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 		row_packet->field_count = result->field_count;
 		row_packet->binary_protocol = ps;
 		row_packet->fields_metadata = result->meta->fields;
-		row_packet->bit_fields_count = result->meta->bit_fields_count;
-		row_packet->bit_fields_total_len = result->meta->bit_fields_total_len;
 
 		result->unbuf->row_packet = row_packet;
 	}
@@ -1246,7 +1244,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 				It also simplifies the handling of Z_ADDREF_P because we don't need to check if only
 				either NUM or ASSOC is set but not both.
 			*/
-			zval_ptr_dtor(data);
+			zval_ptr_dtor_nogc(data);
 		}
 		mnd_efree(current_row);
 		++set->current_row;
@@ -1322,8 +1320,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	row_packet->field_count = meta->field_count;
 	row_packet->binary_protocol = binary_protocol;
 	row_packet->fields_metadata = meta->fields;
-	row_packet->bit_fields_count	= meta->bit_fields_count;
-	row_packet->bit_fields_total_len = meta->bit_fields_total_len;
 
 	row_packet->skip_extraction = TRUE; /* let php_mysqlnd_rowp_read() not allocate row_packet->fields, we will do it */
 
@@ -1826,7 +1822,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_all)(MYSQLND_RES * result, const unsigned int 
 	do {
 		mysqlnd_fetch_into(result, flags, &row, MYSQLND_MYSQLI);
 		if (Z_TYPE(row) != IS_ARRAY) {
-			zval_ptr_dtor(&row);
+			zval_ptr_dtor_nogc(&row);
 			break;
 		}
 		add_index_zval(return_value, i++, &row);

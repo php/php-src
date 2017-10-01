@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,7 +121,7 @@ typedef unsigned short mode_t;
 CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat);
 # define php_sys_stat(path, buf) php_sys_stat_ex(path, buf, 0)
 # define php_sys_lstat(path, buf) php_sys_stat_ex(path, buf, 1)
-CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
+CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_len);
 #else
 # define php_sys_stat stat
 # define php_sys_lstat lstat
@@ -132,7 +132,7 @@ CWD_API int php_sys_readlink(const char *link, char *target, size_t target_len);
 
 typedef struct _cwd_state {
 	char *cwd;
-	int cwd_length;
+	size_t cwd_length;
 } cwd_state;
 
 typedef int (*verify_path_func)(const cwd_state *);
@@ -232,11 +232,15 @@ extern virtual_cwd_globals cwd_globals;
 #endif
 
 CWD_API void realpath_cache_clean(void);
-CWD_API void realpath_cache_del(const char *path, int path_len);
-CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, int path_len, time_t t);
+CWD_API void realpath_cache_del(const char *path, size_t path_len);
+CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
 CWD_API zend_long realpath_cache_size(void);
 CWD_API zend_long realpath_cache_max_buckets(void);
 CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
+
+#ifdef CWD_EXPORTS
+extern void virtual_cwd_main_cwd_init(uint8_t);
+#endif
 
 /* The actual macros to be used in programs using TSRM
  * If the program defines VIRTUAL_DIR it will use the
@@ -342,7 +346,8 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #endif
 
 #ifndef S_IFLNK
-# define S_IFLNK 0120000
+#define _IFLNK  0120000	/* symbolic link */
+#define S_IFLNK _IFLNK
 #endif
 
 #ifndef S_ISDIR
@@ -361,4 +366,25 @@ CWD_API realpath_cache_bucket** realpath_cache_get_buckets(void);
 #define S_IXROOT ( S_IXUSR | S_IXGRP | S_IXOTH )
 #endif
 
+/* XXX should be _S_IFIFO? */
+#ifndef S_IFIFO
+#define	_IFIFO  0010000	/* fifo */
+#define S_IFIFO	_IFIFO
+#endif
+
+#ifndef S_IFBLK
+#define	_IFBLK  0060000	/* block special */
+#define S_IFBLK	_IFBLK
+#endif
+
 #endif /* VIRTUAL_CWD_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

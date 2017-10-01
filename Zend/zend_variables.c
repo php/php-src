@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -167,8 +167,10 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 {
 	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
 		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
-	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING) ||
-	           EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING)) {
+		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
+		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
+	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT)) {
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {

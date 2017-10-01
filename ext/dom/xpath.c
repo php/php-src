@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -204,8 +204,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				xmlNode *nodep;
 				dom_object *obj;
 				if (intern->node_list == NULL) {
-					ALLOC_HASHTABLE(intern->node_list);
-					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
+					intern->node_list = zend_new_array(0);
 				}
 				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);

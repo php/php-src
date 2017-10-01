@@ -1188,7 +1188,7 @@ static void to_zval_read_iov(const char *msghdr_c, zval *zv, res_context *ctx)
 	size_t				iovlen = msghdr->msg_iovlen;
 	ssize_t				*recvmsg_ret,
 						bytes_left;
-	uint				i;
+	uint32_t			i;
 
 	if (iovlen > UINT_MAX) {
 		do_to_zval_err(ctx, "unexpectedly large value for iov_len: %lu",

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -627,7 +627,7 @@ static int _php_source_op_to_ipv4_op(enum source_op sop)
 
 #endif /* HAS_MCAST_EXT */
 
-#if PHP_WIN32
+#ifdef PHP_WIN32
 int php_if_index_to_addr4(unsigned if_index, php_socket *php_sock, struct in_addr *out_addr)
 {
 	MIB_IPADDRTABLE *addr_table;

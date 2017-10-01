@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -306,9 +306,36 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 
 PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 {/*{{{*/
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
+	size_t pathw_len = 0;
+	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, 0, &pathw_len);
 	int ret = 0;
 	DWORD err = 0;
+
+	if (pathw_len < _MAX_PATH && pathw_len > _MAX_PATH - 12) {
+		/* Special case here. From the doc:
+
+		 "When using an API to create a directory, the specified path cannot be
+		 so long that you cannot append an 8.3 file name ..."
+
+		 Thus, if the directory name length happens to be in this range, it
+		 already needs to be a long path. The given path is already normalized
+		 and prepared, need only to prefix it.
+		 */
+		wchar_t *tmp = (wchar_t *) malloc((pathw_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+		if (!tmp) {
+			free(pathw);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return -1;
+		}
+
+		memmove(tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
+		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, pathw, pathw_len * sizeof(wchar_t));
+		pathw_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		tmp[pathw_len] = L'\0';
+
+		free(pathw);
+		pathw = tmp;
+	}
 
 	/* TODO extend with mode usage */
 	if (!pathw) {
@@ -395,14 +422,15 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 	return ret;
 }/*}}}*/
 
-PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 {/*{{{*/
 	DWORD err = 0;
 	wchar_t *tmp_buf = NULL;
+	DWORD tmp_len = (DWORD)len;
 
 	/* If buf was NULL, the result has to be freed outside here. */
 	if (!buf) {
-		DWORD tmp_len = GetCurrentDirectoryW(0, NULL) + 1;
+		tmp_len = GetCurrentDirectoryW(0, NULL) + 1;
 		if (!tmp_len) {
 			err = GetLastError();
 			SET_ERRNO_FROM_WIN32_CODE(err);
@@ -412,9 +440,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 			return NULL;
 		}
 
-		len = tmp_len;
-
-		tmp_buf = (wchar_t *)malloc((len)*sizeof(wchar_t));
+		tmp_buf = (wchar_t *)malloc((tmp_len)*sizeof(wchar_t));
 		if (!tmp_buf) {
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return NULL;
@@ -422,7 +448,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len)
 		buf = tmp_buf;
 	}
 	
-	if (!GetCurrentDirectoryW(len, buf)) {
+	if (!GetCurrentDirectoryW(tmp_len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		free(tmp_buf);
@@ -445,14 +471,15 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	
 	start = path;
 
-	startw = pathw = php_win32_ioutil_conv_any_to_w(path, len, &pathw_len);
+	/* Don't really care about the path normalization, pure parsing here. */
+	startw = pathw = php_win32_cp_conv_any_to_w(path, len, &pathw_len);
 	if (!pathw) {
 		return 0;
 	}
 
 	endw = pathw + pathw_len - 1;
 
-	if ((2 <= len) && isalpha((int)((unsigned char *)path)[0]) && (':' == path[1])) {
+	if ((2 <= pathw_len) && iswalpha((wint_t)(pathw)[0]) && (L':' == pathw[1])) {
 		pathw += 2;
 		path += 2;
 		len_adjust += 2;
@@ -521,7 +548,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
-	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && idx - *buf <= len) {
+	while (NULL != (pos = wcschr(idx, PHP_WIN32_IOUTIL_FW_SLASHW)) && (size_t)(idx - *buf) <= len) {
 		*pos = PHP_WIN32_IOUTIL_DEFAULT_SLASHW;
 		idx = pos++;
 	}
@@ -560,6 +587,8 @@ BOOL php_win32_ioutil_init(void)
 		if (!canonicalize_path_w) {
 			canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 		}
+
+		FreeLibrary(hMod);
 	} else {
 		canonicalize_path_w = (MyPathCchCanonicalizeEx)MyPathCchCanonicalizeExFallback;
 	}

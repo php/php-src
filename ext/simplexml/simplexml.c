@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1133,14 +1133,12 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 	sxe = Z_SXEOBJ_P(object);
 
 	if (is_debug) {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 	} else if (sxe->properties) {
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 		sxe->properties = rv;
 	}
 
@@ -2309,16 +2307,16 @@ SXE_METHOD(__construct)
 	}
 
 	if (ZEND_SIZE_T_INT_OVFL(data_len)) {
-		php_error_docref(NULL, E_WARNING, "Data is too long");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Data is too long", 0);
+		return;
 	}
 	if (ZEND_SIZE_T_INT_OVFL(ns_len)) {
-		php_error_docref(NULL, E_WARNING, "Namespace is too long");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Namespace is too long", 0);
+		return;
 	}
 	if (ZEND_LONG_EXCEEDS_INT(options)) {
-		php_error_docref(NULL, E_WARNING, "Invalid options");
-		RETURN_FALSE;
+		zend_throw_exception(zend_ce_exception, "Invalid options", 0);
+		return;
 	}
 
 	docp = is_url ? xmlReadFile(data, NULL, (int)options) : xmlReadMemory(data, (int)data_len, NULL, NULL, (int)options);

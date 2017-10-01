@@ -43,7 +43,9 @@ from the subject string after a regex match has succeeded. The original idea
 for these functions came from Scott Wimer. */
 
 
+#ifdef HAVE_CONFIG_H
 #include "config.h"
+#endif
 
 #include "pcre_internal.h"
 
@@ -248,6 +250,7 @@ Arguments:
   code         the compiled regex
   stringname   the name of the capturing substring
   ovector      the vector of matched substrings
+  stringcount  number of captured substrings
 
 Returns:       the number of the first that is set,
                or the number of the last one if none are set,
@@ -256,13 +259,16 @@ Returns:       the number of the first that is set,
 
 #if defined COMPILE_PCRE8
 static int
-get_first_set(const pcre *code, const char *stringname, int *ovector)
+get_first_set(const pcre *code, const char *stringname, int *ovector,
+  int stringcount)
 #elif defined COMPILE_PCRE16
 static int
-get_first_set(const pcre16 *code, PCRE_SPTR16 stringname, int *ovector)
+get_first_set(const pcre16 *code, PCRE_SPTR16 stringname, int *ovector,
+  int stringcount)
 #elif defined COMPILE_PCRE32
 static int
-get_first_set(const pcre32 *code, PCRE_SPTR32 stringname, int *ovector)
+get_first_set(const pcre32 *code, PCRE_SPTR32 stringname, int *ovector,
+  int stringcount)
 #endif
 {
 const REAL_PCRE *re = (const REAL_PCRE *)code;
@@ -293,7 +299,7 @@ if (entrysize <= 0) return entrysize;
 for (entry = (pcre_uchar *)first; entry <= (pcre_uchar *)last; entry += entrysize)
   {
   int n = GET2(entry, 0);
-  if (ovector[n*2] >= 0) return n;
+  if (n < stringcount && ovector[n*2] >= 0) return n;
   }
 return GET2(entry, 0);
 }
@@ -400,7 +406,7 @@ pcre32_copy_named_substring(const pcre32 *code, PCRE_SPTR32 subject,
   PCRE_UCHAR32 *buffer, int size)
 #endif
 {
-int n = get_first_set(code, stringname, ovector);
+int n = get_first_set(code, stringname, ovector, stringcount);
 if (n <= 0) return n;
 #if defined COMPILE_PCRE8
 return pcre_copy_substring(subject, ovector, stringcount, n, buffer, size);
@@ -455,7 +461,10 @@ pcre_uchar **stringlist;
 pcre_uchar *p;
 
 for (i = 0; i < double_count; i += 2)
-  size += sizeof(pcre_uchar *) + IN_UCHARS(ovector[i+1] - ovector[i] + 1);
+  {
+  size += sizeof(pcre_uchar *) + IN_UCHARS(1);
+  if (ovector[i+1] > ovector[i]) size += IN_UCHARS(ovector[i+1] - ovector[i]);
+  }
 
 stringlist = (pcre_uchar **)(PUBL(malloc))(size);
 if (stringlist == NULL) return PCRE_ERROR_NOMEMORY;
@@ -471,7 +480,7 @@ p = (pcre_uchar *)(stringlist + stringcount + 1);
 
 for (i = 0; i < double_count; i += 2)
   {
-  int len = ovector[i+1] - ovector[i];
+  int len = (ovector[i+1] > ovector[i])? (ovector[i+1] - ovector[i]) : 0;
   memcpy(p, subject + ovector[i], IN_UCHARS(len));
   *stringlist++ = p;
   p += len;
@@ -617,7 +626,7 @@ pcre32_get_named_substring(const pcre32 *code, PCRE_SPTR32 subject,
   PCRE_SPTR32 *stringptr)
 #endif
 {
-int n = get_first_set(code, stringname, ovector);
+int n = get_first_set(code, stringname, ovector, stringcount);
 if (n <= 0) return n;
 #if defined COMPILE_PCRE8
 return pcre_get_substring(subject, ovector, stringcount, n, stringptr);

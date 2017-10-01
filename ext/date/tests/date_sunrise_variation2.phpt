@@ -125,7 +125,7 @@ Warning: date_sunrise() expects parameter 2 to be integer, float given in %s on 
 bool(false)
 
 --float .5--
-int(1218174483)
+int(1218174468)
 
 --empty array--
 
@@ -148,22 +148,22 @@ Warning: date_sunrise() expects parameter 2 to be integer, array given in %s on 
 bool(false)
 
 --uppercase NULL--
-int(1218174483)
+int(1218174468)
 
 --lowercase null--
-int(1218174483)
+int(1218174468)
 
 --lowercase true--
-string(5) "06:48"
+string(5) "06:47"
 
 --lowercase false--
-int(1218174483)
+int(1218174468)
 
 --uppercase TRUE--
-string(5) "06:48"
+string(5) "06:47"
 
 --uppercase FALSE--
-int(1218174483)
+int(1218174468)
 
 --empty string DQ--
 
@@ -206,8 +206,8 @@ Warning: date_sunrise() expects parameter 2 to be integer, object given in %s on
 bool(false)
 
 --undefined var--
-int(1218174483)
+int(1218174468)
 
 --unset var--
-int(1218174483)
+int(1218174468)
 ===DONE===

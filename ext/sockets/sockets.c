@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -789,8 +789,12 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("AI_PASSIVE",		AI_PASSIVE,			CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONNAME",		AI_CANONNAME,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_NUMERICHOST",	AI_NUMERICHOST,		CONST_CS | CONST_PERSISTENT);
+#if HAVE_AI_V4MAPPED
 	REGISTER_LONG_CONSTANT("AI_V4MAPPED",		AI_V4MAPPED,		CONST_CS | CONST_PERSISTENT);
+#endif
+#if HAVE_AI_ALL
 	REGISTER_LONG_CONSTANT("AI_ALL",			AI_ALL,				CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("AI_ADDRCONFIG",		AI_ADDRCONFIG,		CONST_CS | CONST_PERSISTENT);
 #ifdef __USE_GNU
 	REGISTER_LONG_CONSTANT("AI_IDN",			AI_IDN,				CONST_CS | CONST_PERSISTENT);

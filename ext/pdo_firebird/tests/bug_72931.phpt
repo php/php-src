@@ -10,7 +10,7 @@ $C->exec('create table tablea (id integer)');
 $S = $C->prepare('insert into tablea (id) values (1) returning id');
 $S->execute();
 $D = $S->fetch(PDO::FETCH_NUM);
-echo $D[0][0];
+echo $D[0];
 unset($S);
 unset($C);
 ?>
@@ -18,7 +18,7 @@ unset($C);
 <?php
 require 'testdb.inc';
 $C = new PDO('firebird:dbname='.$test_base, $user, $password) or die;
-$C->exec('DROP table tablea');
+$C->exec('drop table tablea');
 ?>
 --EXPECT--
 1

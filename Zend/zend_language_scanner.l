@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1142,7 +1142,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_RETURN);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
@@ -1662,7 +1663,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
-				errno = 0;
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
@@ -1674,7 +1674,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 				ZVAL_UNDEF(zendlval);
 				RETURN_TOKEN(T_DNUMBER);
 			}
-			ZEND_ASSERT(!errno);
 			RETURN_TOKEN(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
@@ -1959,6 +1958,9 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
+	if (yytext[yyleng-1] != '>') {
+		CG(increment_lineno) = 1;
+	}
 	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
 

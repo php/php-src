@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -108,7 +108,7 @@ static void zend_generator_cleanup_unfinished_execution(
 		if (UNEXPECTED(generator->frozen_call_stack)) {
 			zend_generator_restore_call_stack(generator);
 		}
-		zend_cleanup_unfinished_execution(execute_data, op_num, 0);
+		zend_cleanup_unfinished_execution(execute_data, op_num, catch_op_num);
 	}
 }
 /* }}} */
@@ -753,14 +753,12 @@ failure:
 
 ZEND_API void zend_generator_resume(zend_generator *orig_generator) /* {{{ */
 {
-	zend_generator *generator;
+	zend_generator *generator = zend_generator_get_current(orig_generator);
 
 	/* The generator is already closed, thus can't resume */
-	if (UNEXPECTED(!orig_generator->execute_data)) {
+	if (UNEXPECTED(!generator->execute_data)) {
 		return;
 	}
-
-	generator = zend_generator_get_current(orig_generator);
 
 try_again:
 	if (generator->flags & ZEND_GENERATOR_CURRENTLY_RUNNING) {
@@ -1261,4 +1259,6 @@ void zend_register_generator_ce(void) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

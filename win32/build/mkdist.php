@@ -1,21 +1,22 @@
 <?php # $Id$
 /* piece together a windows binary distro */
 
-$build_dir = $argv[1];
-$php_build_dir = $argv[2];
-$phpdll = $argv[3];
-$sapi_targets = explode(" ", $argv[4]);
-$ext_targets = explode(" ", $argv[5]);
-$pecl_targets = explode(" ", $argv[6]);
-$snapshot_template = $argv[7];
+$php_version = $argv[1];
+$build_dir = $argv[2];
+$php_build_dir = $argv[3];
+$phpdll = $argv[4];
+$sapi_targets = explode(" ", $argv[5]);
+$ext_targets = explode(" ", $argv[6]);
+$pecl_targets = explode(" ", $argv[7]);
+$snapshot_template = $argv[8];
 
 $is_debug = preg_match("/^debug/i", $build_dir);
 
 echo "Making dist for $build_dir\n";
 
-$dist_dir = $build_dir . "/php-" . phpversion();
-$test_dir = $build_dir . "/php-test-pack-" . phpversion();
-$pecl_dir = $build_dir . "/pecl-" . phpversion();
+$dist_dir = $build_dir . "/php-" . $php_version;
+$test_dir = $build_dir . "/php-test-pack-" . $php_version;
+$pecl_dir = $build_dir . "/pecl-" . $php_version;
 
 @mkdir($dist_dir);
 @mkdir("$dist_dir/ext");
@@ -36,19 +37,14 @@ function get_depends($module)
 		'odbc32.dll', 'ole32.dll', 'oleaut32.dll', 'rpcrt4.dll',
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
 		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
-		'secur32.dll', 'netapi32.dll',
+		'secur32.dll', 'netapi32.dll', 'dnsapi.dll', 'psapi.dll', 'normaliz.dll',
+		'iphlpapi.dll', 'bcrypt.dll',
 
 		/* apache */
 		'apachecore.dll',
 
 		/* apache 2 */
 		'libhttpd.dll', 'libapr.dll', 'libaprutil.dll','libapr-1.dll', 'libaprutil-1.dll',
-
-		/* pi3web */
-		'piapi.dll', 'pi3api.dll',
-
-		/* nsapi */
-		'ns-httpd30.dll', 'ns-httpd35.dll', 'ns-httpd36.dll', 'ns-httpd40.dll',
 
 		/* oracle */
 		'oci.dll', 'ociw32.dll',
@@ -64,8 +60,13 @@ function get_depends($module)
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
 		'msvcr90.dll',
-		'wldap32.dll'
+		'wldap32.dll',
+		'vcruntime140.dll',
+		'msvcp140.dll',
 		);
+	static $no_dist_re = array(
+		"api-ms-win-crt-.+\.dll",
+	);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
 	$bd = strtolower(realpath($build_dir));
@@ -93,6 +94,17 @@ function get_depends($module)
 		/* ignore some well-known system dlls */
 		if (in_array(basename($dep), $no_dist)) {
 			continue;
+		} else {
+			$skip = false;
+			foreach ($no_dist_re as $re) {
+				if (preg_match(",$re,", basename($dep)) > 0) {
+					$skip = true;
+					break;
+				}
+			}
+			if ($skip) {
+				continue;
+			}
 		}
 		
 		if ($is_pecl) {
@@ -209,7 +221,8 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
 
 /* the core dll */
 copy("$build_dir/php.exe", "$dist_dir/php.exe");
-copy("$build_dir/$phpdll", "$dist_dir/$phpdll");
+/* copy dll and its dependencies */
+copy_file_list($build_dir, "$dist_dir", [$phpdll]);
 
 /* and the .lib goes into dev */
 $phplib = str_replace(".dll", ".lib", $phpdll);
@@ -234,10 +247,10 @@ if(sizeof($pecl_targets)) {
 $text_files = array(
 	"LICENSE" => "license.txt",
 	"NEWS" => "news.txt",
+	"INSTALL" => "install.txt", 
 	"README.REDIST.BINS" => "readme-redist-bins.txt",
 	"php.ini-development" => "php.ini-development",
-	"php.ini-production" => "php.ini-production",
-	"win32/install.txt" => "install.txt",
+	"php.ini-production" => "php.ini-production"
 );
 
 foreach ($text_files as $src => $dest) {
@@ -258,12 +271,11 @@ foreach ($general_files as $src => $dest) {
 $branch = "HEAD"; // TODO - determine this from SVN branche name
 $fp = fopen("$dist_dir/snapshot.txt", "w");
 $now = date("r");
-$version = phpversion();
 fwrite($fp, <<<EOT
 This snapshot was automatically generated on
 $now
 
-Version: $version
+Version: $php_version
 Branch: $branch
 Build: $build_dir
 

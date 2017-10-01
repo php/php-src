@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -102,6 +102,9 @@ static char *get_mmap_base_file(void)
 	}
 	GetTempPath(MAXPATHLEN, windir);
 	l = strlen(windir);
+	if ('\\' == windir[l-1]) {
+		l--;
+	}
 	snprintf(windir + l, sizeof(windir) - l - 1, "\\%s@%s@%.32s", ACCEL_FILEMAP_BASE, uname, ZCG(system_id));
 
 	free(uname);
@@ -141,8 +144,8 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 	FILE *fp = fopen(mmap_base_file, "r");
 	MEMORY_BASIC_INFORMATION info;
 
-	err = GetLastError();
 	if (!fp) {
+		err = GetLastError();
 		zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to open base address file", err);
 		*error_in="fopen";
@@ -191,9 +194,9 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
    	}
 
 	mapping_base = MapViewOfFileEx(memfile, FILE_MAP_ALL_ACCESS, 0, 0, 0, wanted_mapping_base);
-	err = GetLastError();
 
 	if (mapping_base == NULL) {
+		err = GetLastError();
 		if (err == ERROR_INVALID_ADDRESS) {
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to reattach to base address", err);
 			return ALLOC_FAILURE;
@@ -207,7 +210,7 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 
 static int create_segments(size_t requested_size, zend_shared_segment ***shared_segments_p, int *shared_segments_count, char **error_in)
 {
-	int err, ret;
+	int err = 0, ret;
 	zend_shared_segment *shared_segment;
 	int map_retries = 0;
 	void *default_mapping_base_set[] = { 0, 0 };
@@ -218,8 +221,10 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	*/
 #if defined(_WIN64)
 	void *vista_mapping_base_set[] = { (void *) 0x0000100000000000, (void *) 0x0000200000000000, (void *) 0x0000300000000000, (void *) 0x0000700000000000, 0 };
+	DWORD size_high = (requested_size >> 32), size_low = (requested_size & 0xffffffff);
 #else
 	void *vista_mapping_base_set[] = { (void *) 0x20000000, (void *) 0x21000000, (void *) 0x30000000, (void *) 0x31000000, (void *) 0x50000000, 0 };
+	DWORD size_high = 0, size_low = requested_size;
 #endif
 	void **wanted_mapping_base = default_mapping_base_set;
 
@@ -229,14 +234,14 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	   and we have to sleep some time (until the child releases the mapping object) and retry.*/
 	do {
 		memfile = OpenFileMapping(FILE_MAP_WRITE, 0, create_name_with_username(ACCEL_FILEMAP_NAME));
-		err = GetLastError();
 		if (memfile == NULL) {
+			err = GetLastError();
 			break;
 		}
 
 		ret =  zend_shared_alloc_reattach(requested_size, error_in);
-		err = GetLastError();
 		if (ret == ALLOC_FAIL_MAPPING) {
+			err = GetLastError();
 			/* Mapping failed, wait for mapping object to get freed and retry */
 			CloseHandle(memfile);
 			memfile = NULL;
@@ -263,18 +268,19 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	*shared_segments_count = 1;
 	*shared_segments_p = (zend_shared_segment **) calloc(1, sizeof(zend_shared_segment)+sizeof(void *));
 	if (!*shared_segments_p) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
-		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed", GetLastError());
+		zend_win_error_message(ACCEL_LOG_FATAL, "calloc() failed", err);
 		*error_in = "calloc";
 		return ALLOC_FAILURE;
 	}
 	shared_segment = (zend_shared_segment *)((char *)(*shared_segments_p) + sizeof(void *));
 	(*shared_segments_p)[0] = shared_segment;
 
-	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, requested_size,
+	memfile	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, size_high, size_low,
 								create_name_with_username(ACCEL_FILEMAP_NAME));
-	err = GetLastError();
 	if (memfile == NULL) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create file mapping", err);
 		*error_in = "CreateFileMapping";
@@ -308,8 +314,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 		wanted_mapping_base++;
 	} while (!mapping_base);
 
-	err = GetLastError();
 	if (mapping_base == NULL) {
+		err = GetLastError();
 		zend_shared_alloc_unlock_win32();
 		zend_win_error_message(ACCEL_LOG_FATAL, "Unable to create view for file mapping", err);
 		*error_in = "MapViewOfFile";
@@ -317,8 +323,8 @@ static int create_segments(size_t requested_size, zend_shared_segment ***shared_
 	} else {
 		char *mmap_base_file = get_mmap_base_file();
 		FILE *fp = fopen(mmap_base_file, "w");
-		err = GetLastError();
 		if (!fp) {
+			err = GetLastError();
 			zend_shared_alloc_unlock_win32();
 			zend_win_error_message(ACCEL_LOG_WARNING, mmap_base_file, err);
 			zend_win_error_message(ACCEL_LOG_FATAL, "Unable to write base address", err);

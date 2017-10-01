@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -191,7 +191,6 @@ typedef struct _zend_oparray_context {
 	int        vars_size;
 	int        literals_size;
 	int        backpatch_count;
-	int        in_finally;
 	uint32_t   fast_call_var;
 	uint32_t   try_catch_offset;
 	int        current_brk_cont;
@@ -200,22 +199,21 @@ typedef struct _zend_oparray_context {
 	HashTable *labels;
 } zend_oparray_context;
 
+/*
+ * Function and method flags
+ *
+ * Free flags:
+ * 0x10
+ * 0x20
+ * 0x8000
+ * 0x2000000
+ */
+
 /* method flags (types) */
 #define ZEND_ACC_STATIC			0x01
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
-
-/* class flags (types) */
-/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
-/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
-#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
-#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
-#define ZEND_ACC_INTERFACE		            0x40
-#define ZEND_ACC_TRAIT						0x80
-#define ZEND_ACC_ANON_CLASS                 0x100
-#define ZEND_ACC_ANON_BOUND                 0x200
-#define ZEND_ACC_INHERITED                  0x400
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -230,7 +228,6 @@ typedef struct _zend_oparray_context {
 /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
-#define ZEND_ACC_CLONE		0x8000
 
 /* method flag used by Closure::__invoke() */
 #define ZEND_ACC_USER_ARG_INFO 0x80
@@ -243,17 +240,6 @@ typedef struct _zend_oparray_context {
 
 /* deprecation flag */
 #define ZEND_ACC_DEPRECATED 0x40000
-
-/* class implement interface(s) flag */
-#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
-#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
-
-/* class constants updated */
-#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
-
-/* user class has methods with static variables */
-#define ZEND_HAS_STATIC_IN_METHODS    0x800000
-
 
 #define ZEND_ACC_CLOSURE              0x100000
 #define ZEND_ACC_FAKE_CLOSURE         0x40
@@ -293,6 +279,33 @@ typedef struct _zend_oparray_context {
 /* op_array uses strict mode types */
 #define ZEND_ACC_STRICT_TYPES			0x80000000
 
+/*
+ * Class flags
+ *
+ * Classes also use the ZEND_ACC_FINAL (0x04) flag, otherwise there is no overlap.
+ */
+
+/* class flags (types) */
+/* ZEND_ACC_IMPLICIT_ABSTRACT_CLASS is used for abstract classes (since it is set by any abstract method even interfaces MAY have it set, too). */
+/* ZEND_ACC_EXPLICIT_ABSTRACT_CLASS denotes that a class was explicitly defined as abstract by using the keyword. */
+#define ZEND_ACC_IMPLICIT_ABSTRACT_CLASS	0x10
+#define ZEND_ACC_EXPLICIT_ABSTRACT_CLASS	0x20
+#define ZEND_ACC_INTERFACE		            0x40
+#define ZEND_ACC_TRAIT						0x80
+#define ZEND_ACC_ANON_CLASS                 0x100
+#define ZEND_ACC_ANON_BOUND                 0x200
+#define ZEND_ACC_INHERITED                  0x400
+
+/* class implement interface(s) flag */
+#define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
+#define ZEND_ACC_IMPLEMENT_TRAITS	  0x400000
+
+/* class constants updated */
+#define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
+
+/* user class has methods with static variables */
+#define ZEND_HAS_STATIC_IN_METHODS    0x800000
+
 char *zend_visibility_string(uint32_t fn_flags);
 
 typedef struct _zend_property_info {
@@ -322,20 +335,16 @@ typedef struct _zend_class_constant {
 /* arg_info for internal functions */
 typedef struct _zend_internal_arg_info {
 	const char *name;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_internal_arg_info;
 
 /* arg_info for user functions */
 typedef struct _zend_arg_info {
 	zend_string *name;
-	zend_string *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_uchar pass_by_reference;
-	zend_bool allow_null;
 	zend_bool is_variadic;
 } zend_arg_info;
 
@@ -346,10 +355,8 @@ typedef struct _zend_arg_info {
  */
 typedef struct _zend_internal_function_info {
 	zend_uintptr_t required_num_args;
-	const char *class_name;
-	zend_uchar type_hint;
+	zend_type type;
 	zend_bool return_reference;
-	zend_bool allow_null;
 	zend_bool _is_variadic;
 } zend_internal_function_info;
 
@@ -402,6 +409,9 @@ struct _zend_op_array {
 #define ZEND_RETURN_VALUE				0
 #define ZEND_RETURN_REFERENCE			1
 
+/* zend_internal_function_handler */
+typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
+
 typedef struct _zend_internal_function {
 	/* Common elements */
 	zend_uchar type;
@@ -415,7 +425,7 @@ typedef struct _zend_internal_function {
 	zend_internal_arg_info *arg_info;
 	/* END of common elements */
 
-	void (*handler)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler handler;
 	struct _zend_module_entry *module;
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 } zend_internal_function;
@@ -769,12 +779,8 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle);
 ZEND_API void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size);
 ZEND_API void destroy_op_array(zend_op_array *op_array);
 ZEND_API void zend_destroy_file_handle(zend_file_handle *file_handle);
-ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce);
 ZEND_API void zend_cleanup_internal_classes(void);
-ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array);
-ZEND_API int clean_non_persistent_function_full(zval *zv);
-ZEND_API int clean_non_persistent_class_full(zval *zv);
 
 ZEND_API void destroy_zend_function(zend_function *function);
 ZEND_API void zend_function_dtor(zval *zv);
@@ -820,7 +826,7 @@ int zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
 
-ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
+void zend_assert_valid_class_name(const zend_string *const_name);
 
 /* BEGIN: OPCODES */
 
@@ -900,7 +906,6 @@ ZEND_API void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_ISSET				    0x02000000
 #define ZEND_ISEMPTY			    0x01000000
 #define ZEND_ISSET_ISEMPTY_MASK	    (ZEND_ISSET | ZEND_ISEMPTY)
-#define ZEND_QUICK_SET			    0x00800000
 
 #define ZEND_FETCH_ARG_MASK         0x000fffff
 
@@ -1051,4 +1056,6 @@ ZEND_API zend_bool zend_binary_op_produces_numeric_string_error(uint32_t opcode,
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

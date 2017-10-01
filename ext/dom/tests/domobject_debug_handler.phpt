@@ -47,6 +47,7 @@ DOMDocument Object
     [firstChild] => (object value omitted)
     [lastChild] => (object value omitted)
     [previousSibling] => 
+    [nextSibling] => 
     [attributes] => 
     [ownerDocument] => 
     [namespaceURI] => 

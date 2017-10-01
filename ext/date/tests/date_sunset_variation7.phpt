@@ -42,24 +42,24 @@ string(5) "18:13"
 string(5) "18:13"
 
 --US/Alaska--
-string(5) "21:00"
-string(5) "20:57"
+string(5) "21:02"
+string(5) "20:59"
 
 --America/Chicago--
+string(5) "19:52"
 string(5) "19:51"
-string(5) "19:50"
 
 --America/Montevideo--
 string(5) "18:08"
-string(5) "18:09"
+string(5) "18:08"
 
 --Africa/Casablanca--
+string(5) "19:18"
 string(5) "19:17"
-string(5) "19:16"
 
 --Europe/Moscow--
-string(5) "21:09"
-string(5) "21:07"
+string(5) "21:10"
+string(5) "21:08"
 
 --Asia/Hong_Kong--
 string(5) "18:55"

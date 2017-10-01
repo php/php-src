@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -517,7 +517,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, size_t name_len, php_output_handler_context_func_t output_handler, size_t chunk_size, int flags)
 {
 	php_output_handler *handler;
-	zend_string *str = zend_string_init(name, name_len, 1);
+	zend_string *str = zend_string_init(name, name_len, 0);
 
 	handler = php_output_handler_init(str, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_INTERNAL);
 	handler->func.internal = output_handler;

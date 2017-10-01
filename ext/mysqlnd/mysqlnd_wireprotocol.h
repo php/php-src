@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -235,9 +235,6 @@ typedef struct st_mysqlnd_packet_row {
 	zend_bool		binary_protocol;
 	zend_bool		persistent_alloc;
 	MYSQLND_FIELD	*fields_metadata;
-	/* We need this to alloc bigger bufs in non-PS mode */
-	unsigned int	bit_fields_count;
-	size_t			bit_fields_total_len; /* trailing \0 not counted */
 
 	/* If error packet, we use these */
 	MYSQLND_ERROR_INFO	error_info;

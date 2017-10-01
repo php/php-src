@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -213,15 +213,15 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 	zval *ret_code=NULL, *ret_array=NULL;
 	int ret;
 
-	if (mode) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &cmd, &cmd_len, &ret_code) == FAILURE) {
-			RETURN_FALSE;
+	ZEND_PARSE_PARAMETERS_START(1, (mode ? 2 : 3))
+		Z_PARAM_STRING(cmd, cmd_len)
+		Z_PARAM_OPTIONAL
+		if (!mode) {
+			Z_PARAM_ZVAL_DEREF(ret_array)
 		}
-	} else {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/z/", &cmd, &cmd_len, &ret_array, &ret_code) == FAILURE) {
-			RETURN_FALSE;
-		}
-	}
+		Z_PARAM_ZVAL_DEREF(ret_code)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 	if (!cmd_len) {
 		php_error_docref(NULL, E_WARNING, "Cannot execute a blank command");
 		RETURN_FALSE;
@@ -235,13 +235,16 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(mode, cmd, NULL, return_value);
 	} else {
 		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
-			zval_dtor(ret_array);
+			zval_ptr_dtor(ret_array);
 			array_init(ret_array);
+		} else if (Z_REFCOUNT_P(ret_array) > 1) {
+			zval_ptr_dtor(ret_array);
+			ZVAL_ARR(ret_array, zend_array_dup(Z_ARR_P(ret_array)));
 		}
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
 	if (ret_code) {
-		zval_dtor(ret_code);
+		zval_ptr_dtor(ret_code);
 		ZVAL_LONG(ret_code, ret);
 	}
 }
@@ -477,9 +480,9 @@ PHP_FUNCTION(escapeshellcmd)
 	char *command;
 	size_t command_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (command_len) {
 		if (command_len != strlen(command)) {
@@ -500,9 +503,9 @@ PHP_FUNCTION(escapeshellarg)
 	char *argument;
 	size_t argument_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &argument, &argument_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(argument, argument_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (argument) {
 		if (argument_len != strlen(argument)) {
@@ -524,9 +527,9 @@ PHP_FUNCTION(shell_exec)
 	zend_string *ret;
 	php_stream *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &command, &command_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(command, command_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef PHP_WIN32
 	if ((in=VCWD_POPEN(command, "rt"))==NULL) {
@@ -554,9 +557,9 @@ PHP_FUNCTION(proc_nice)
 {
 	zend_long pri;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &pri) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(pri)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	errno = 0;
 	php_ignore_value(nice(pri));

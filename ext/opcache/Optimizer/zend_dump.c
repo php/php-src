@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 The PHP Group                                |
+   | Copyright (c) 1998-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,30 @@
 #include "zend_call_graph.h"
 #include "zend_dump.h"
 
-static void zend_dump_const(const zval *zv)
+void zend_dump_ht(HashTable *ht)
+{
+	zend_ulong index;
+	zend_string *key;
+	zval *val;
+	int first = 1;
+
+	ZEND_HASH_FOREACH_KEY_VAL(ht, index, key, val) {
+		if (first) {
+			first = 0;
+		} else {
+			fprintf(stderr, ", ");
+		}
+		if (key) {
+			fprintf(stderr, "\"%s\"", ZSTR_VAL(key));
+		} else {
+			fprintf(stderr, ZEND_LONG_FMT, index);
+		}
+		fprintf(stderr, " =>");
+		zend_dump_const(val);
+	} ZEND_HASH_FOREACH_END();
+}
+
+void zend_dump_const(const zval *zv)
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -320,8 +343,11 @@ static void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *ssa
 	zend_dump_var(op_array, (var_num < op_array->last_var ? IS_CV : var_type), var_num);
 
 	if (ssa_var_num >= 0 && ssa->vars) {
-		if (ssa_var_num >= 0 && ssa->vars[ssa_var_num].no_val) {
+		if (ssa->vars[ssa_var_num].no_val) {
 			fprintf(stderr, " NOVAL");
+		}
+		if (ssa->vars[ssa_var_num].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+			fprintf(stderr, " NOESC");
 		}
 		if (ssa->var_info) {
 			zend_dump_ssa_var_info(ssa, ssa_var_num, dump_flags);
@@ -519,9 +545,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
-		    if (opline->extended_value & ZEND_QUICK_SET) {
-				fprintf(stderr, " (quick)");
-		    }
 			if (opline->extended_value & ZEND_ISSET) {
 				fprintf(stderr, " (isset)");
 			} else if (opline->extended_value & ZEND_ISEMPTY) {
@@ -581,7 +604,28 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (opline->op2_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zval *op = CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS));
+		if (opline->opcode == ZEND_SWITCH_LONG || opline->opcode == ZEND_SWITCH_STRING) {
+			HashTable *jumptable = Z_ARRVAL_P(op);
+			zend_string *key;
+			zend_ulong num_key;
+			zval *zv;
+			ZEND_HASH_FOREACH_KEY_VAL(jumptable, num_key, key, zv) {
+				if (key) {
+					fprintf(stderr, " \"%s\":", ZSTR_VAL(key));
+				} else {
+					fprintf(stderr, " " ZEND_LONG_FMT ":", num_key);
+				}
+				if (b) {
+					fprintf(stderr, " BB%d,", b->successors[n++]);
+				} else {
+					fprintf(stderr, " L%u,", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
+				}
+			} ZEND_HASH_FOREACH_END();
+			fprintf(stderr, " default:");
+		} else {
+			zend_dump_const(op);
+		}
 	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op2_use;
@@ -654,7 +698,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags)
 {
 	zend_basic_block *b = cfg->blocks + n;
-	int printed = 0;
 
 	fprintf(stderr, "BB%d:", n);
 	if (b->flags & ZEND_BB_START) {
@@ -690,7 +733,7 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 	if (b->flags & ZEND_BB_KILL_VAR) {
 		fprintf(stderr, " kill_var");
 	}
-	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) & !(b->flags & ZEND_BB_REACHABLE)) {
+	if (!(dump_flags & ZEND_DUMP_HIDE_UNREACHABLE) && !(b->flags & ZEND_BB_REACHABLE)) {
 		fprintf(stderr, " unreachable");
 	}
 	if (b->flags & ZEND_BB_LOOP_HEADER) {
@@ -717,14 +760,12 @@ static void zend_dump_block_info(const zend_cfg *cfg, int n, uint32_t dump_flags
 		fprintf(stderr, ")\n");
 	}
 
-	if (b->successors[0] != -1) {
+	if (b->successors_count > 0) {
+		int s;
 		fprintf(stderr, "    ; to=(BB%d", b->successors[0]);
-		printed = 1;
-		if (b->successors[1] != -1) {
-			fprintf(stderr, ", BB%d", b->successors[1]);
+		for (s = 1; s < b->successors_count; s++) {
+			fprintf(stderr, ", BB%d", b->successors[s]);
 		}
-	}
-	if (printed) {
 		fprintf(stderr, ")\n");
 	}
 
@@ -785,7 +826,7 @@ static void zend_dump_block_header(const zend_cfg *cfg, const zend_op_array *op_
 	}
 }
 
-static void zend_dump_op_array_name(const zend_op_array *op_array)
+void zend_dump_op_array_name(const zend_op_array *op_array)
 {
 	zend_func_info *func_info = NULL;
 

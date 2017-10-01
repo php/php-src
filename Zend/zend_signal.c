@@ -86,12 +86,17 @@ void zend_signal_handler_defer(int signo, siginfo_t *siginfo, void *context)
 {
 	int errno_save = errno;
 	zend_signal_queue_t *queue, *qtmp;
+	zend_bool is_handling_safe = 1;
 
 #ifdef ZTS
 	ZEND_TSRMLS_CACHE_UPDATE();
+	/* A signal could hit after TSRM shutdown, in this case globals are already freed. */
+	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+		is_handling_safe = 0;
+	}
 #endif
 
-	if (EXPECTED(SIGG(active))) {
+	if (EXPECTED(is_handling_safe && SIGG(active))) {
 		if (UNEXPECTED(SIGG(depth) == 0)) { /* try to handle signal */
 			if (UNEXPECTED(SIGG(blocked))) {
 				SIGG(blocked) = 0;
@@ -174,7 +179,14 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	int errno_save = errno;
 	struct sigaction sa;
 	sigset_t sigset;
-	zend_signal_entry_t p_sig = SIGG(handlers)[signo-1];
+	zend_signal_entry_t p_sig;
+#ifdef ZTS
+	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
+		p_sig.flags = 0;
+		p_sig.handler = SIG_DFL;
+	} else 
+#endif
+	p_sig = SIGG(handlers)[signo-1];
 
 	if (p_sig.handler == SIG_DFL) { /* raise default handler */
 		if (sigaction(signo, NULL, &sa) == 0) {
@@ -198,7 +210,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 #endif
 			}
 		}
-	} else if (p_sig.handler != SIG_IGN) { /* ignore SIG_IGN */
+	} else if (p_sig.handler != SIG_IGN) {
 		if (p_sig.flags & SA_SIGINFO) {
 			if (p_sig.flags & SA_RESETHAND) {
 				SIGG(handlers)[signo-1].flags   = 0;
@@ -234,9 +246,13 @@ ZEND_API int zend_sigaction(int signo, const struct sigaction *act, struct sigac
 		}
 
 		memset(&sa, 0, sizeof(sa));
-		sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
-		sa.sa_sigaction = zend_signal_handler_defer;
-		sa.sa_mask      = global_sigmask;
+		if (SIGG(handlers)[signo-1].handler == (void *) SIG_IGN) {
+			sa.sa_sigaction = (void *) SIG_IGN;
+		} else {
+			sa.sa_flags     = SA_SIGINFO | (act->sa_flags & SA_FLAGS_MASK);
+			sa.sa_sigaction = zend_signal_handler_defer;
+			sa.sa_mask      = global_sigmask;
+		}
 
 		if (sigaction(signo, &sa, NULL) < 0) {
 			zend_error_noreturn(E_ERROR, "Error installing signal handler for %d", signo);
@@ -427,6 +443,6 @@ void zend_signal_startup(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

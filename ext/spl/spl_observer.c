@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -295,8 +295,7 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 
 	props = Z_OBJPROP_P(obj);
 
-	ALLOC_HASHTABLE(debug_info);
-	ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(props) + 1, 0);
+	debug_info = zend_new_array(zend_hash_num_elements(props) + 1);
 	zend_hash_copy(debug_info, props, (copy_ctor_func_t)zval_add_ref);
 
 	array_init(&storage);

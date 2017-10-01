@@ -53,6 +53,9 @@ if test $PHP_SQLITE3 != "no"; then
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_column_table_name,[
       AC_DEFINE(SQLITE_ENABLE_COLUMN_METADATA, 1, [have sqlite3 with column metadata enabled])
     ])
+    PHP_CHECK_LIBRARY(sqlite3,sqlite3_errstr,[
+      AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
+    ])
 
     PHP_CHECK_LIBRARY(sqlite3,sqlite3_load_extension,
     [],
@@ -82,6 +85,7 @@ if test $PHP_SQLITE3 != "no"; then
       other_flags="$other_flags -DSQLITE_ENABLE_ICU=1"
     fi
 
+    AC_DEFINE(HAVE_SQLITE3_ERRSTR, 1, [have sqlite3_errstr function])
     PHP_SQLITE3_CFLAGS="-I@ext_srcdir@/libsqlite $other_flags $threadsafe_flags $debug_flags"
     PHP_INSTALL_HEADERS([ext/sqlite3/libsqlite/sqlite3.h])
   fi

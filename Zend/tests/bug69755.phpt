@@ -5,4 +5,4 @@ Bug #69755: segfault in ZEND_CONCAT_SPEC_TMPVAR_CONST_HANDLER
 c . 10;
 ?>
 --EXPECTF--
-Notice: Use of undefined constant c - assumed 'c' in %sbug69755.php on line 2
+Warning: Use of undefined constant c - assumed 'c' (this will throw an Error in a future version of PHP) in %sbug69755.php on line 2

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2016 The PHP Group                                |
+  | Copyright (c) 2006-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1149,10 +1149,6 @@ struct st_mysqlnd_result_metadata
 	struct mysqlnd_field_hash_key	*zend_hash_keys;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta) * m;
-
-	size_t							bit_fields_total_len; /* trailing \0 not counted */
-	/* We need this to make fast allocs in rowp_read */
-	unsigned int					bit_fields_count;
 
 	unsigned int					current_field;
 	unsigned int					field_count;

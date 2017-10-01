@@ -269,7 +269,7 @@ STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           exif
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
+PRIMARY MAINTAINER:  Kalle Sommer Nielsen <kalle@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.2
@@ -292,7 +292,7 @@ MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           gd
-PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net>
+PRIMARY MAINTAINER:  Pierre-Alain Joye <pajoye@php.net>, Christoph M. Becker <cmb@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -341,11 +341,6 @@ STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mbstring
 PRIMARY MAINTAINER:  Rui Hirokawa <hirokawa@php.net>
-MAINTENANCE:         Maintained
-STATUS:              Working
--------------------------------------------------------------------------------
-EXTENSION:           mcrypt
-PRIMARY MAINTAINER:  Derick Rethans <derick@derickrethans.nl>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -423,6 +418,12 @@ PRIMARY MAINTAINER:  Chris Vandomelen <chrisv@b0rked.dhs.org>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               4.0.2
+-------------------------------------------------------------------------------
+EXTENSION:           sodium
+PRIMARY MAINTAINER:  Frank Denis <jedisct1@php.net>
+MAINTENANCE:         Maintained
+STATUS:              Working
+SINCE:               7.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           spl
 PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Etienne Kneuss <colder@php.net>

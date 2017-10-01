@@ -2,9 +2,10 @@
 Bug #61011 (Crash when an exception is thrown by __autoload accessing a static property)
 --FILE--
 <?php
-function __autoload($name) {
+spl_autoload_register(function ($name) {
 	throw new Exception($name);
-}
+});
+
 try { 
 	echo AAA::$a; //zend_fetch_var_address_helper
 } catch (Exception $e) {

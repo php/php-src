@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2016 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -359,7 +359,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		ini_entry->orig_value = ini_entry->value;
 		ini_entry->orig_modifiable = modifiable;
 		ini_entry->modified = 1;
-		zend_hash_add_ptr(EG(modified_ini_directives), name, ini_entry);
+		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
 	}
 
 	duplicate = zend_string_copy(new_value);
@@ -658,7 +658,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	*p = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	*p = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	return SUCCESS;
 }
 /* }}} */
@@ -674,7 +674,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	tmp = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	if (tmp < 0) {
 		return FAILURE;
 	}
@@ -750,4 +750,6 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

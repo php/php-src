@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,9 +92,10 @@ PHP_FUNCTION(strptime)
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(ts, ts_length)
+		Z_PARAM_STRING(format, format_length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
 

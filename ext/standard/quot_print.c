@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -206,9 +206,9 @@ PHP_FUNCTION(quoted_printable_decode)
 	zend_string *str_out;
 	size_t i = 0, j = 0, k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg1) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(arg1)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(arg1) == 0) {
 		/* shortcut */
@@ -267,9 +267,9 @@ PHP_FUNCTION(quoted_printable_encode)
 	zend_string *str;
 	zend_string *new_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) != SUCCESS) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(str)) {
 		RETURN_EMPTY_STRING();

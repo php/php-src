@@ -8,6 +8,7 @@ session.gc_divisor=1
 session.gc_maxlifetime=0
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --FILE--
 <?php
 
@@ -54,7 +55,7 @@ ob_end_flush();
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
-1 deleted
+2 deleted
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"

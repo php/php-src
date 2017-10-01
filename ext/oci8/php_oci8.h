@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Thies C. Arntzen <thies@thieso.net>                         |
    |                                                                      |
    | Collection support by Andy Sautins <asautins@veripost.net>           |
@@ -43,11 +43,12 @@
  */
 #undef PHP_OCI8_VERSION
 #endif
-#define PHP_OCI8_VERSION "2.1.3"
+#define PHP_OCI8_VERSION "2.1.7"
 
 extern zend_module_entry oci8_module_entry;
 #define phpext_oci8_ptr &oci8_module_entry
 #define phpext_oci8_11g_ptr &oci8_module_entry
+#define phpext_oci8_12c_ptr &oci8_module_entry
 
 
 PHP_MINIT_FUNCTION(oci);

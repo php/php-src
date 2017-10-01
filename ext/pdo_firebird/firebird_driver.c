@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,56 +37,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*,
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
 {
-#if 0
-	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H
-		: (pdo_firebird_db_handle *)dbh->driver_data;
-#endif
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 
-#if 0
-	switch (isc_sqlcode(H->isc_status)) {
-
-		case 0:
-			*error_code = PDO_ERR_NONE;
-			break;
-		default:
-			*error_code = PDO_ERR_CANT_MAP;
-			break;
-		case -104:
-			*error_code = PDO_ERR_SYNTAX;
-			break;
-		case -530:
-		case -803:
-			*error_code = PDO_ERR_CONSTRAINT;
-			break;
-		case -204:
-		case -205:
-		case -206:
-		case -829:
-			*error_code = PDO_ERR_NOT_FOUND;
-			break;
-
-			*error_code = PDO_ERR_ALREADY_EXISTS;
-			break;
-
-			*error_code = PDO_ERR_NOT_IMPLEMENTED;
-			break;
-		case -313:
-		case -804:
-			*error_code = PDO_ERR_MISMATCH;
-			break;
-		case -303:
-		case -314:
-		case -413:
-			*error_code = PDO_ERR_TRUNCATED;
-			break;
-
-			*error_code = PDO_ERR_DISCONNECTED;
-			break;
-	}
-#else
 	strcpy(*error_code, "HY000");
-#endif
 }
 /* }}} */
 
@@ -238,14 +191,16 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 	/* execute the statement */
 	if (isc_dsql_execute2(H->isc_status, &H->tr, &stmt, PDO_FB_SQLDA_VERSION, &in_sqlda, &out_sqlda)) {
 		RECORD_ERROR(dbh);
-		return -1;
+		ret = -1;
+		goto free_statement;
 	}
 
 	/* find out how many rows were affected */
 	if (isc_dsql_sql_info(H->isc_status, &stmt, sizeof(info_count), const_cast(info_count),
 			sizeof(result),	result)) {
 		RECORD_ERROR(dbh);
-		return -1;
+		ret = -1;
+		goto free_statement;
 	}
 
 	if (result[0] == isc_info_sql_records) {
@@ -262,6 +217,12 @@ static zend_long firebird_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sq
 
 	/* commit if we're in auto_commit mode */
 	if (dbh->auto_commit && isc_commit_retaining(H->isc_status, &H->tr)) {
+		RECORD_ERROR(dbh);
+	}
+
+free_statement:
+
+	if (isc_dsql_free_statement(H->isc_status, &stmt, DSQL_drop)) {
 		RECORD_ERROR(dbh);
 	}
 
@@ -584,6 +545,9 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				info_func(tmp);
 				ZVAL_STRING(val, tmp);
 			}
+#ifdef PHP_WIN32
+			FreeLibrary(l);
+#endif
 #else
 			ZVAL_NULL(val);
 #endif

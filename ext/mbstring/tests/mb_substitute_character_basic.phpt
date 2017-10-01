@@ -38,6 +38,6 @@ int(1234)
 bool(true)
 string(4) "none"
 
-Warning: mb_substitute_character(): Unknown character. in %s on line %d
+Warning: mb_substitute_character(): Unknown character in %s on line %d
 bool(false)
 ===DONE===

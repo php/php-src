@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2016 The PHP Group                                |
+  | Copyright (c) 1997-2017 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -619,7 +619,7 @@ PHP_FUNCTION(mysqli_change_user)
 	const		CHARSET_INFO * old_charset;
 #endif
 
-	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss", &mysql_link, mysqli_link_class_entry, &user, &user_len, &password, &password_len, &dbname, &dbname_len) == FAILURE) {
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Osss!", &mysql_link, mysqli_link_class_entry, &user, &user_len, &password, &password_len, &dbname, &dbname_len) == FAILURE) {
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
@@ -1210,7 +1210,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	zval		*mysql_result;
 	zval		obj;
 
-	unsigned int i;
+	unsigned int i, num_fields;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &mysql_result, mysqli_result_class_entry) == FAILURE) {
 		return;
@@ -1219,8 +1219,9 @@ PHP_FUNCTION(mysqli_fetch_fields)
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		const MYSQL_FIELD *field = mysql_fetch_field_direct(result, i);
 
 		object_init(&obj);
@@ -1266,7 +1267,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 {
 	MYSQL_RES		*result;
 	zval			*mysql_result;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 #if defined(MYSQLI_USE_MYSQLND)
 	const size_t	*ret;
 #else
@@ -1284,8 +1285,9 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 	}
 
 	array_init(return_value);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		add_index_long(return_value, i, ret[i]);
 	}
 }
@@ -1712,14 +1714,12 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
 		case MYSQL_OPT_GUESS_CONNECTION:
 		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
 		case MYSQL_OPT_USE_REMOTE_CONNECTION:
 		case MYSQL_SECURE_AUTH:
-#endif
 #ifdef MYSQL_OPT_RECONNECT
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */

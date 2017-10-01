@@ -26,7 +26,6 @@ var_dump(count(get_defined_constants()));
 function test () {
 }
 
-var_dump(get_defined_functions(true));
 var_dump(gettype(get_defined_functions()));
 var_dump(count(get_defined_functions()));
 
@@ -65,9 +64,6 @@ NULL
 string(5) "array"
 string(5) "array"
 int(%d)
-
-Warning: get_defined_functions() expects exactly 0 parameters, 1 given in %s on line %d
-NULL
 string(5) "array"
 int(%d)
 

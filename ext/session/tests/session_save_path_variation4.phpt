@@ -19,7 +19,7 @@ ob_start();
  */
 
 echo "*** Testing session_save_path() : variation ***\n";
-$initdir = getcwd();
+$initdir = __DIR__;
 $sessions = ($initdir."/sessions");
 
 chdir($initdir);
@@ -37,14 +37,14 @@ var_dump(session_start());
 var_dump(session_save_path());
 var_dump(session_destroy());
 var_dump(session_save_path());
-var_dump(rmdir($sessions));
 
 echo "Done";
 ob_end_flush();
 ?>
 --CLEAN--
-$initdir = getcwd();
+$initdir = __DIR__;
 $sessions = ($initdir."/sessions");
+chdir($initdir);
 var_dump(rmdir($sessions));
 --EXPECTF--
 *** Testing session_save_path() : variation ***
@@ -63,5 +63,4 @@ string(0) ""
 Warning: session_destroy(): Trying to destroy uninitialized session in %s on line 28
 bool(false)
 string(0) ""
-bool(true)
 Done

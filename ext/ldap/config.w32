@@ -6,10 +6,8 @@ ARG_WITH("ldap", "LDAP support", "no");
 if (PHP_LDAP != "no") {
 
 	if (CHECK_HEADER_ADD_INCLUDE("ldap.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
-			CHECK_HEADER_ADD_INCLUDE("lber.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP)
-			&&
-			CHECK_LIB("ssleay32.lib", "ldap", PHP_LDAP) &&
-			CHECK_LIB("libeay32.lib", "ldap", PHP_LDAP) &&
+			CHECK_HEADER_ADD_INCLUDE("lber.h", "CFLAGS_LDAP", PHP_PHP_BUILD + "\\include\\openldap;" + PHP_PHP_BUILD + "\\openldap\\include;" + PHP_LDAP) &&
+			SETUP_OPENSSL("ldap", PHP_LDAP) > 0 &&
 			CHECK_LIB("oldap32_a.lib", "ldap", PHP_LDAP) &&
 			CHECK_LIB("olber32_a.lib", "ldap", PHP_LDAP)&&
 			CHECK_LIB("libsasl.lib", "ldap", PHP_LDAP)) {
@@ -23,6 +21,12 @@ if (PHP_LDAP != "no") {
 		AC_DEFINE('HAVE_LDAP_SASL_SASL_H', 1);
 		AC_DEFINE('LDAP_DEPRECATED', 1);
 		AC_DEFINE('HAVE_LDAP_CONTROL_FIND', 1);
+		AC_DEFINE('HAVE_LDAP_PARSE_EXTENDED_RESULT', 1);
+		AC_DEFINE('HAVE_LDAP_EXTENDED_OPERATION_S', 1);
+		AC_DEFINE('HAVE_LDAP_PASSWD', 1);
+		AC_DEFINE('HAVE_LDAP_WHOAMI_S', 1);
+		AC_DEFINE('HAVE_LDAP_REFRESH_S', 1);
+		AC_DEFINE('HAVE_LDAP_EXTENDED_OPERATION', 1);
 
 	} else {
 		WARNING("ldap not enabled; libraries and headers not found");

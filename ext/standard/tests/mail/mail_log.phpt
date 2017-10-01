@@ -44,5 +44,5 @@ unlink("/tmp/mail.out");
 bool(true)
 bool(true)
 bool(true)
-[%d-%s-%d %d:%d:%d UTC] mail() on [%smail_log.php:%d]: To: test@example.com -- Headers: X-Test: 1
+[%d-%s-%d %d:%d:%d UTC] mail() on [%smail_log.php:%d]: To: test@example.com -- Headers: X-Test: 1 -- Subject: mail.log test
 Done

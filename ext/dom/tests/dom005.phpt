@@ -5,7 +5,7 @@ Test 5: HTML Test
 --FILE--
 <?php
 $dom = new domdocument;
-$dom->loadHTMLFile(dirname(__FILE__)."/test.html");
+$dom->loadHTMLFile(dirname(__FILE__)."/test.html", LIBXML_NOBLANKS);
 print  "--- save as XML\n";
 
 print adjustDoctype($dom->saveXML());

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20160731
+#define PHP_API_VERSION 20170718
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -41,13 +41,27 @@
 #undef sprintf
 #define sprintf php_sprintf
 
+/* Operating system family defintion */
+#ifdef PHP_WIN32
+# define PHP_OS_FAMILY			"Windows"
+#elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
+# define PHP_OS_FAMILY			"BSD"
+#elif defined(__APPLE__) || defined(__MACH__)
+# define PHP_OS_FAMILY			"Darwin"
+#elif defined(__sun__)
+# define PHP_OS_FAMILY			"Solaris"
+#elif defined(__linux__)
+# define PHP_OS_FAMILY			"Linux"
+#else
+# define PHP_OS_FAMILY			"Unknown"
+#endif
+
 /* PHP's DEBUG value must match Zend's ZEND_DEBUG value */
 #undef PHP_DEBUG
 #define PHP_DEBUG ZEND_DEBUG
 
 #ifdef PHP_WIN32
 #	include "tsrm_win32.h"
-#	include "win95nt.h"
 #	ifdef PHP_EXPORTS
 #		define PHPAPI __declspec(dllexport)
 #	else
@@ -64,6 +78,51 @@
 #	define THREAD_LS
 #	define PHP_DIR_SEPARATOR '/'
 #	define PHP_EOL "\n"
+#endif
+
+/* Windows specific defines */
+#ifdef PHP_WIN32
+# define PHP_PROG_SENDMAIL		"Built in mailer"
+# define HAVE_DECLARED_TIMEZONE
+# define WIN32_LEAN_AND_MEAN
+# define NOOPENFILE
+
+# include <io.h>
+# include <malloc.h>
+# include <direct.h>
+# include <stdlib.h>
+# include <stdio.h>
+# include <stdarg.h>
+# include <sys/types.h>
+# include <process.h>
+
+typedef int uid_t;
+typedef int gid_t;
+typedef char * caddr_t;
+typedef unsigned int uint;
+typedef unsigned long ulong;
+typedef int pid_t;
+
+# ifndef PHP_DEBUG
+#  ifdef inline
+#   undef inline
+#  endif
+#  define inline		__inline
+# endif
+
+# define M_TWOPI        (M_PI * 2.0)
+# define off_t			_off_t
+
+# define lstat(x, y)	php_sys_lstat(x, y)
+# define chdir(path)	_chdir(path)
+# define mkdir(a, b)	_mkdir(a)
+# define rmdir(a)		_rmdir(a)
+# define getpid			_getpid
+# define php_sleep(t)	SleepEx(t*1000, TRUE)
+
+# ifndef getcwd
+#  define getcwd(a, b)	_getcwd(a, b)
+# endif
 #endif
 
 #if HAVE_ASSERT_H
@@ -120,6 +179,8 @@ PHPAPI size_t php_strlcpy(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcpy
 #define strlcpy php_strlcpy
+#define HAVE_STRLCPY 1
+#define USE_STRLCPY_PHP_IMPL 1
 #endif
 
 #ifndef HAVE_STRLCAT
@@ -128,6 +189,16 @@ PHPAPI size_t php_strlcat(char *dst, const char *src, size_t siz);
 END_EXTERN_C()
 #undef strlcat
 #define strlcat php_strlcat
+#define HAVE_STRLCAT 1
+#define USE_STRLCAT_PHP_IMPL 1
+#endif
+
+#ifndef HAVE_EXPLICIT_BZERO
+BEGIN_EXTERN_C()
+PHPAPI void php_explicit_bzero(void *dst, size_t siz);
+END_EXTERN_C()
+#undef explicit_bzero
+#define explicit_bzero php_explicit_bzero
 #endif
 
 #ifndef HAVE_STRTOK_R
@@ -137,7 +208,7 @@ END_EXTERN_C()
 #endif
 
 #ifndef HAVE_SOCKLEN_T
-# if PHP_WIN32
+# ifdef PHP_WIN32
 typedef int socklen_t;
 # else
 typedef unsigned int socklen_t;
@@ -164,14 +235,6 @@ typedef unsigned int socklen_t;
 #else
 # if HAVE_SYS_VARARGS_H
 # include <sys/varargs.h>
-# endif
-#endif
-
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
-# else
-#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
 
@@ -250,7 +313,7 @@ END_EXTERN_C()
 #define STR_PRINT(str)	((str)?(str):"")
 
 #ifndef MAXPATHLEN
-# if PHP_WIN32
+# ifdef PHP_WIN32
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # elif PATH_MAX

@@ -11,5 +11,6 @@ function test() {
 test();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: parse_str(): Calling parse_str() without the result argument is deprecated in %s on line %d
 int(42)

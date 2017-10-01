@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -49,7 +49,13 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, 
 	assert(strval != NULL);
 
 	/* Prepare value */
-	ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
+	if (str_len == 0) {
+		ZVAL_EMPTY_STRING(&new_entry);
+	} else if (str_len == 1) {
+		ZVAL_INTERNED_STR(&new_entry, ZSTR_CHAR((zend_uchar)*strval));
+	} else {
+		ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
+	}
 	php_register_variable_ex(var, &new_entry, track_vars_array);
 }
 
@@ -259,11 +265,14 @@ typedef struct post_var_data {
 	char *ptr;
 	char *end;
 	uint64_t cnt;
+
+	/* Bytes in ptr that have already been scanned for '&' */
+	size_t already_scanned;
 } post_var_data_t;
 
 static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
 {
-	char *ksep, *vsep, *val;
+	char *start, *ksep, *vsep, *val;
 	size_t klen, vlen;
 	size_t new_vlen;
 
@@ -271,9 +280,11 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
 		return 0;
 	}
 
-	vsep = memchr(var->ptr, '&', var->end - var->ptr);
+	start = var->ptr + var->already_scanned;
+	vsep = memchr(start, '&', var->end - start);
 	if (!vsep) {
 		if (!eof) {
+			var->already_scanned = var->end - var->ptr;
 			return 0;
 		} else {
 			vsep = var->end;
@@ -306,6 +317,7 @@ static zend_bool add_post_var(zval *arr, post_var_data_t *var, zend_bool eof)
 	efree(val);
 
 	var->ptr = vsep + (vsep != var->end);
+	var->already_scanned = 0;
 	return 1;
 }
 
@@ -325,7 +337,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof)
 		}
 	}
 
-	if (!eof) {
+	if (!eof && ZSTR_VAL(vars->str.s) != vars->ptr) {
 		memmove(ZSTR_VAL(vars->str.s), vars->ptr, ZSTR_LEN(vars->str.s) = vars->end - vars->ptr);
 	}
 	return SUCCESS;
@@ -446,7 +458,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
+			separator = PG(arg_separator).input;
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";
@@ -499,10 +511,6 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 		}
 next_cookie:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
-	}
-
-	if (arg != PARSE_COOKIE) {
-		efree(separator);
 	}
 
 	if (free_buffer) {
@@ -604,7 +612,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv")-1, &arr);
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc")-1, &argc);
 	}
-	zval_ptr_dtor(&arr);
+	zval_ptr_dtor_nogc(&arr);
 }
 /* }}} */
 
@@ -794,6 +802,11 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_SERVER]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_SERVER]);
+
+	/* TODO: TRACK_VARS_SERVER is modified in a number of places (e.g. phar) past this point,
+	 * where rc>1 due to the $_SERVER global. Ideally this shouldn't happen, but for now we
+	 * ignore this issue, as it would probably require larger changes. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 
 	return 0; /* don't rearm */
 }

@@ -59,8 +59,12 @@ static int collator_regular_compare_function(zval *result, zval *op1, zval *op2)
 	zval norm1, norm2;
 	zval *num1_p = NULL, *num2_p = NULL;
 	zval *norm1_p = NULL, *norm2_p = NULL;
-	zval* str1_p  = collator_convert_object_to_string( op1, &str1 );
-	zval* str2_p  = collator_convert_object_to_string( op2, &str2 );
+	zval *str1_p, *str2_p;
+
+	ZVAL_NULL(&str1);
+	str1_p  = collator_convert_object_to_string( op1, &str1 );
+	ZVAL_NULL(&str2);
+	str2_p  = collator_convert_object_to_string( op2, &str2 );
 
 	/* If both args are strings AND either of args is not numeric string
 	 * then use ICU-compare. Otherwise PHP-compare. */

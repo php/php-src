@@ -13,8 +13,12 @@ PDOTest::skip();
 if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE__) . '/../../pdo/tests/');
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
-
-$statement = $db->prepare("SELECT NULL AS null_value, 0 AS zero, 1 AS one");
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+	case 'oci': $from = 'from dual'; break;
+	case 'firebird': $from = 'from rdb$database'; break;
+	default: $from = ''; break;
+}
+$statement = $db->prepare("SELECT NULL AS null_value, 0 AS zero, 1 AS one $from");
 $statement->execute();
 $row = $statement->fetch(PDO::FETCH_LAZY);
 var_dump(

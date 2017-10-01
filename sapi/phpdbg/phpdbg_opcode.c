@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -98,6 +98,11 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	const char *opcode_name = phpdbg_decode_opcode(opline->opcode);
 	uint32_t flags = zend_get_opcode_flags(opline->opcode);
 	char *result, *decode[4] = {NULL, NULL, NULL, NULL};
+
+	/* OpcodeName */
+	if (opline->extended_value) {
+		spprintf(&decode[0], 0, "%s<%" PRIi32 ">", opcode_name, opline->extended_value);
+	}
 
 	/* OP1 */
 	decode[1] = phpdbg_decode_input_op(

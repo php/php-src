@@ -200,23 +200,23 @@ print "wanted=Thursday             00:00:00\n\n";
 ?>
 --EXPECT--
 TZ=America/Mendoza - wrong day.
-tStamp=Sunday 1992-10-18 17:17:17 ARST 1
-result=Sunday 1992-10-25 00:00:00 ARST 1
+tStamp=Sunday 1992-10-18 17:17:17 -02 1
+result=Sunday 1992-10-25 00:00:00 -02 1
 wanted=Sunday              00:00:00
 
 TZ=America/Catamarca - wrong day.
-tStamp=Sunday 1990-10-21 17:17:17 ARST 1
-result=Sunday 1990-10-28 00:00:00 ARST 1
+tStamp=Sunday 1990-10-21 17:17:17 -02 1
+result=Sunday 1990-10-28 00:00:00 -02 1
 wanted=Sunday              00:00:00
 
 TZ=America/Cordoba - wrong day.
-tStamp=Sunday 1990-10-21 17:17:17 ARST 1
-result=Sunday 1990-10-28 00:00:00 ARST 1
+tStamp=Sunday 1990-10-21 17:17:17 -02 1
+result=Sunday 1990-10-28 00:00:00 -02 1
 wanted=Sunday              00:00:00
 
 TZ=America/Rosario - wrong day.
-tStamp=Tuesday 1991-10-15 17:17:17 WART 0
-result=Tuesday 1991-10-22 00:00:00 ARST 1
+tStamp=Tuesday 1991-10-15 17:17:17 -04 0
+result=Tuesday 1991-10-22 00:00:00 -02 1
 wanted=Tuesday           00:00:00
 
 TZ=Europe/Vienna - wrong day - giving unexpected results, at
@@ -231,8 +231,8 @@ result=Monday 1992-09-28 00:00:00 +04 0
 wanted=Monday              00:00:00
 
 TZ=America/Noronha - wrong day.
-tStamp=Friday 1999-10-01 17:17:17 FNT 0
-result=Friday 1999-10-08 00:00:00 FNST 1
+tStamp=Friday 1999-10-01 17:17:17 -02 0
+result=Friday 1999-10-08 00:00:00 -01 1
 wanted=Friday              00:00:00
 
 TZ=America/Havana - wrong day.
@@ -256,13 +256,13 @@ result=Friday 2003-04-04 00:00:00 EEST 1
 wanted=Friday            00:00:00
 
 TZ=Pacific/Kwajalein - wrong day.
-tStamp=Friday 1993-08-13 17:17:17 KWAT 0
-result=Saturday 1993-08-21 00:00:00 MHT 0
+tStamp=Friday 1993-08-13 17:17:17 -12 0
+result=Saturday 1993-08-21 00:00:00 +12 0
 wanted=Friday            00:00:00
 
 TZ=Asia/Ulan_Bator - wrong day.
-tStamp=Saturday 2001-09-22 17:17:17 ULAST 1
-result=Saturday 2001-09-29 00:00:00 ULAST 1
+tStamp=Saturday 2001-09-22 17:17:17 +09 1
+result=Saturday 2001-09-29 00:00:00 +09 1
 wanted=Saturday            00:00:00
 
 TZ=America/Cancun - wrong day.
@@ -286,18 +286,18 @@ result=Thursday 2002-04-11 00:00:00 MDT 1
 wanted=Thursday            00:00:00
 
 TZ=Asia/Kuala_Lumpur - wrong day.
-tStamp=Monday 1981-12-28 17:17:17 MALT 0
-result=Monday 1982-01-04 00:00:00 MYT 0
+tStamp=Monday 1981-12-28 17:17:17 +0730 0
+result=Monday 1982-01-04 00:00:00 +08 0
 wanted=Monday            00:00:00
 
 TZ=Pacific/Chatham - wrong day.
-tStamp=Monday 1974-10-28 17:17:17 CHAST 0
-result=Monday 1974-11-04 00:00:00 CHADT 1
+tStamp=Monday 1974-10-28 17:17:17 +1245 0
+result=Monday 1974-11-04 00:00:00 +1345 1
 wanted=Monday            00:00:00
 
 TZ=America/Lima - wrong day.
-tStamp=Thursday 1985-12-26 17:17:17 PET 0
-result=Thursday 1986-01-02 00:00:00 PEST 1
+tStamp=Thursday 1985-12-26 17:17:17 -05 0
+result=Thursday 1986-01-02 00:00:00 -04 1
 wanted=Thursday            00:00:00
 
 TZ=Asia/Karachi - wrong day.
@@ -306,16 +306,16 @@ result=Friday 2002-04-12 00:00:00 PKST 1
 wanted=Friday            00:00:00
 
 TZ=America/Asuncion - wrong day.
-tStamp=Wednesday 2002-02-27 17:17:17 PYST 1
-result=Wednesday 2002-03-06 00:00:00 PYST 1
+tStamp=Wednesday 2002-02-27 17:17:17 -03 1
+result=Wednesday 2002-03-06 00:00:00 -03 1
 wanted=Wednesday            00:00:00
 
 TZ=Asia/Singapore - wrong day.
-tStamp=Thursday 1981-12-31 17:17:17 SGT 0
-result=Thursday 1982-01-07 00:00:00 SGT 0
+tStamp=Thursday 1981-12-31 17:17:17 +0730 0
+result=Thursday 1982-01-07 00:00:00 +08 0
 wanted=Thursday             00:00:00
 
 TZ=America/Montevideo - wrong day.
-tStamp=Thursday 2004-09-16 17:17:17 UYT 0
-result=Thursday 2004-09-23 00:00:00 UYST 1
+tStamp=Thursday 2004-09-16 17:17:17 -03 0
+result=Thursday 2004-09-23 00:00:00 -02 1
 wanted=Thursday             00:00:00

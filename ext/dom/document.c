@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2038,15 +2038,15 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	if (options) {
-		htmlCtxtUseOptions(ctxt, (int)options);
-	}
-
+	
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
 		ctxt->sax->error = php_libxml_ctx_error;
 		ctxt->sax->warning = php_libxml_ctx_warning;
+	}
+	if (options) {
+		htmlCtxtUseOptions(ctxt, (int)options);
 	}
 	htmlParseDocument(ctxt);
 	newdoc = ctxt->myDoc;

@@ -2,8 +2,6 @@
 Test: setAttributeNode()
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
---INI--
-error_reporting = E_ALL & ~E_WARNING
 --FILE--
 <?php
 

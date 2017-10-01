@@ -38,6 +38,24 @@
 #include "bcmath.h"
 #include "private.h"
 
+
+/* Truncate a number to zero scale.  To avoid sharing issues (refcount and
+   shared n_value) the number is copied, this copy is truncated, and the
+   original number is "freed". */
+
+static void
+_bc_truncate (bc_num *num)
+{
+  bc_num temp;
+
+  temp = bc_new_num ((*num)->n_len, 0);
+  temp->n_sign = (*num)->n_sign;
+  memcpy (temp->n_value, (*num)->n_value, (*num)->n_len);
+  bc_free_num (num);
+  *num = temp;
+}
+
+
 /* Raise BASE to the EXPO power, reduced modulo MOD.  The result is
    placed in RESULT.  If a EXPO is not an integer,
    only the integer part is used.  */
@@ -45,7 +63,7 @@
 int
 bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
 {
-  bc_num power, exponent, parity, temp;
+  bc_num power, exponent, modulus, parity, temp;
   int rscale;
 
   /* Check for correct numbers. */
@@ -55,42 +73,57 @@ bc_raisemod (bc_num base, bc_num expo, bc_num mod, bc_num *result, int scale)
   /* Set initial values.  */
   power = bc_copy_num (base);
   exponent = bc_copy_num (expo);
+  modulus = bc_copy_num (mod);
   temp = bc_copy_num (BCG(_one_));
   bc_init_num(&parity);
 
   /* Check the base for scale digits. */
-  if (base->n_scale != 0)
-      bc_rt_warn ("non-zero scale in base");
+  if (power->n_scale != 0)
+    {
+      php_error_docref (NULL, E_WARNING, "non-zero scale in base");
+      _bc_truncate (&power);
+    }
 
   /* Check the exponent for scale digits. */
   if (exponent->n_scale != 0)
     {
-      bc_rt_warn ("non-zero scale in exponent");
-      bc_divide (exponent, BCG(_one_), &exponent, 0); /*truncate */
+      php_error_docref (NULL, E_WARNING, "non-zero scale in exponent");
+      _bc_truncate (&exponent);
     }
 
   /* Check the modulus for scale digits. */
-  if (mod->n_scale != 0)
-      bc_rt_warn ("non-zero scale in modulus");
+  if (modulus->n_scale != 0)
+    {
+      php_error_docref (NULL, E_WARNING, "non-zero scale in modulus");
+      _bc_truncate (&modulus);
+    }
 
   /* Do the calculation. */
-  rscale = MAX(scale, base->n_scale);
-  while ( !bc_is_zero(exponent) )
+  rscale = MAX(scale, power->n_scale);
+  if ( !bc_compare(modulus, BCG(_one_)) )
     {
-      (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
-      if ( !bc_is_zero(parity) )
+      temp = bc_new_num (1, scale);
+    }
+  else
+    {
+      while ( !bc_is_zero(exponent) )
 	{
-	  bc_multiply (temp, power, &temp, rscale);
-	  (void) bc_modulo (temp, mod, &temp, scale);
-	}
+	  (void) bc_divmod (exponent, BCG(_two_), &exponent, &parity, 0);
+	  if ( !bc_is_zero(parity) )
+	    {
+	      bc_multiply (temp, power, &temp, rscale);
+	      (void) bc_modulo (temp, modulus, &temp, scale);
+	    }
 
-      bc_multiply (power, power, &power, rscale);
-      (void) bc_modulo (power, mod, &power, scale);
+	  bc_multiply (power, power, &power, rscale);
+	  (void) bc_modulo (power, modulus, &power, scale);
+	}
     }
 
   /* Assign the value. */
   bc_free_num (&power);
   bc_free_num (&exponent);
+  bc_free_num (&modulus);
   bc_free_num (result);
   bc_free_num (&parity);
   *result = temp;

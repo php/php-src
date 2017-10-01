@@ -36,6 +36,8 @@ var_dump($res3_array);
 --EXPECTF--
 *** Testing parse_str() : basic functionality ***
 Basic test WITHOUT result arg
+
+Deprecated: parse_str(): Calling parse_str() without the result argument is deprecated in %s on line %d
 NULL
 string(4) "val1"
 string(4) "val2"

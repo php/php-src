@@ -29,9 +29,9 @@ for ($i = 0; $i < NUMLOBS; $i++) {
 }
 
 for ($i = 0; $i < NUMLOBS; $i++) {
-	echo "Row $i Size:  " . $row[$i][0]->size() . "\n";;
+	echo "Row $i Size:  " . $row[$i][0]->size() . "\n";
 	echo "Pos 1: " . $row[$i][0]->tell() . "\n";
-	echo "Data:  " . $row[$i][0]->read(5) . "\n";;
+	echo "Data:  " . $row[$i][0]->read(5) . "\n";
 	echo "Pos 2: " . $row[$i][0]->tell() . "\n";
 	echo "Data:  " . $row[$i][0]->read(12) . "\n";
 }

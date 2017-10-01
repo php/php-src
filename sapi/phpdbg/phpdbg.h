@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,7 +48,7 @@
 #include "zend_signal.h"
 #if !defined(_WIN32) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
 #	include <signal.h>
-#elif PHP_WIN32
+#elif defined(PHP_WIN32)
 #	include "win32/signal.h"
 #endif
 #include "SAPI.h"

@@ -411,8 +411,7 @@ int get_ps_title(int *displen, const char** string)
 
 	ps_buffer_cur_len = ps_buffer_cur_len > sizeof(ps_buffer)-1 ? sizeof(ps_buffer)-1 : ps_buffer_cur_len;
 
-	memmove(ps_buffer, tmp, ps_buffer_size);
-	ps_buffer[ps_buffer_cur_len] = '\0';
+	memmove(ps_buffer, tmp, ps_buffer_cur_len);
 	free(tmp);
     }
 #endif

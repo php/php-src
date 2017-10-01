@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -921,7 +921,7 @@ literal:
 					if (numVars) {
 						char __buf[2];
 						__buf[0] = sch;
-						__buf[1] = '\0';;
+						__buf[1] = '\0';
 						current = args[objIndex++];
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1);

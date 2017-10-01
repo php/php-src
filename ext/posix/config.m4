@@ -21,7 +21,7 @@ int main(int argc, char *argv[])
 {
 	char buf[64];
 
-	return ttyname_r(0, buf, 64) ? 1 : 0;
+	return !ttyname_r(0, buf, 64);
 }
   ],[
     AC_MSG_RESULT([yes])

@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -901,7 +901,7 @@ class testHarness {
 		}
 		$sum_results['SKIPPED'] += $this->ignored_by_ext;
 		$percent_results = array();
-		while (list($v,$n) = each($sum_results)) {
+		foreach ($sum_results as $v => $n) {
 			$percent_results[$v] = (100.0 * $n) / $n_total;
 		}
 		

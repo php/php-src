@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2016 The PHP Group                                |
+   | Copyright (c) 1997-2017 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -74,22 +74,11 @@ PHPAPI php_stream_bucket *php_stream_bucket_new(php_stream *stream, char *buf, s
 	php_stream_bucket *bucket;
 
 	bucket = (php_stream_bucket*)pemalloc(sizeof(php_stream_bucket), is_persistent);
-
-	if (bucket == NULL) {
-		return NULL;
-	}
-
 	bucket->next = bucket->prev = NULL;
 
 	if (is_persistent && !buf_persistent) {
 		/* all data in a persistent bucket must also be persistent */
 		bucket->buf = pemalloc(buflen, 1);
-
-		if (bucket->buf == NULL) {
-			pefree(bucket, 1);
-			return NULL;
-		}
-
 		memcpy(bucket->buf, buf, buflen);
 		bucket->buflen = buflen;
 		bucket->own_buf = 1;
@@ -141,10 +130,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	*left = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 	*right = (php_stream_bucket*)pecalloc(1, sizeof(php_stream_bucket), in->is_persistent);
 
-	if (*left == NULL || *right == NULL) {
-		goto exit_fail;
-	}
-
 	(*left)->buf = pemalloc(length, in->is_persistent);
 	(*left)->buflen = length;
 	memcpy((*left)->buf, in->buf, length);
@@ -160,21 +145,6 @@ PHPAPI int php_stream_bucket_split(php_stream_bucket *in, php_stream_bucket **le
 	(*right)->is_persistent = in->is_persistent;
 
 	return SUCCESS;
-
-exit_fail:
-	if (*right) {
-		if ((*right)->buf) {
-			pefree((*right)->buf, in->is_persistent);
-		}
-		pefree(*right, in->is_persistent);
-	}
-	if (*left) {
-		if ((*left)->buf) {
-			pefree((*left)->buf, in->is_persistent);
-		}
-		pefree(*left, in->is_persistent);
-	}
-	return FAILURE;
 }
 
 PHPAPI void php_stream_bucket_delref(php_stream_bucket *bucket)
@@ -263,7 +233,7 @@ PHPAPI php_stream_filter *php_stream_filter_create(const char *filtername, zval 
 		/* try a wildcard */
 		char *wildname;
 
-		wildname = emalloc(n+3);
+		wildname = safe_emalloc(1, n, 3);
 		memcpy(wildname, filtername, n+1);
 		period = wildname + (period - filtername);
 		while (period && !filter) {
@@ -358,7 +328,7 @@ PHPAPI int php_stream_filter_append_ex(php_stream_filter_chain *chain, php_strea
 		php_stream_bucket_append(brig_inp, bucket);
 		status = filter->fops->filter(stream, filter, brig_inp, brig_outp, &consumed, PSFS_FLAG_NORMAL);
 
-		if (stream->readpos + consumed > (uint)stream->writepos) {
+		if (stream->readpos + consumed > (uint32_t)stream->writepos) {
 			/* No behaving filter should cause this. */
 			status = PSFS_ERR_FATAL;
 		}
