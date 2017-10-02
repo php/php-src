@@ -60,6 +60,13 @@ ZEND_BEGIN_ARG_INFO_EX(AI_StringAndMaybeString, 0, 0, 1)
 	ZEND_ARG_INFO(0, string_2)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(AI_StringAndIdAndMaybeString, 0, 0, 2)
+	ZEND_ARG_INFO(0, string_1)
+	ZEND_ARG_INFO(0, id)
+	/* optional */
+	ZEND_ARG_INFO(0, string_2)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(AI_StringRefAndString, 0, 0, 2)
 	ZEND_ARG_INFO(1, string_1)
 	ZEND_ARG_INFO(0, string_2)
@@ -73,6 +80,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndLength, 0, 0, 2)
 	ZEND_ARG_INFO(0, string)
 	ZEND_ARG_INFO(0, length)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(AI_StringAndId, 0, 0, 2)
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, id)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(AI_StringAndKeyPair, 0, 0, 2)
@@ -148,6 +160,25 @@ ZEND_BEGIN_ARG_INFO_EX(AI_StringAndADAndNonceAndKey, 0, 0, 4)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(AI_StateByReference, 0, 0, 1)
+	ZEND_ARG_INFO(1, state)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndStringAndMaybeStringAndLong, 0, 0, 2)
+	ZEND_ARG_INFO(1, state)
+	ZEND_ARG_INFO(0, string)
+	/* optional */
+	ZEND_ARG_INFO(0, string)
+	ZEND_ARG_INFO(0, long)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndStringAndMaybeString, 0, 0, 2)
+	ZEND_ARG_INFO(1, state)
+	ZEND_ARG_INFO(0, string)
+	/* optional */
+	ZEND_ARG_INFO(0, string)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(AI_StateByReferenceAndMaybeLength, 0, 0, 1)
 	ZEND_ARG_INFO(1, state)
 	/* optional */
@@ -182,8 +213,7 @@ ZEND_BEGIN_ARG_INFO_EX(AI_KDF, 0, 0, 4)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-#if defined(HAVE_CRYPTO_AEAD_AES256GCM) && defined(crypto_aead_aes256gcm_KEYBYTES) && \
-	(defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(__i386__) || \
+#if (defined(__amd64) || defined(__amd64__) || defined(__x86_64__) || defined(__i386__) || \
 	 defined(_M_AMD64) || defined(_M_IX86))
 # define HAVE_AESGCM 1
 #endif
