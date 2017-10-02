@@ -14,9 +14,9 @@ $y = sodium_crypto_secretbox_open("\0" . $a, $nonce, $key);
 var_dump($y);
 
 try {
-	sodium_crypto_secretbox('test', substr($nonce, 1), $key);
+    sodium_crypto_secretbox('test', substr($nonce, 1), $key);
 } catch (SodiumException $ex) {
-	var_dump(true);
+    var_dump(true);
 }
 
 ?>
