@@ -228,6 +228,10 @@ ZEND_END_ARG_INFO()
 # define crypto_aead_chacha20poly1305_IETF_ABYTES crypto_aead_chacha20poly1305_ABYTES
 #endif
 
+#if defined(crypto_secretstream_xchacha20poly1305_ABYTES) && SODIUM_LIBRARY_VERSION_MAJOR < 10
+# undef crypto_secretstream_xchacha20poly1305_ABYTES
+#endif
+
 const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, AI_None)
 #ifdef HAVE_AESGCM
@@ -289,6 +293,14 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_secretbox, AI_StringAndNonceAndKey)
 	PHP_FE(sodium_crypto_secretbox_keygen, AI_None)
 	PHP_FE(sodium_crypto_secretbox_open, AI_StringAndNonceAndKey)
+#ifdef crypto_secretstream_xchacha20poly1305_ABYTES
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_keygen, AI_None)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_push, AI_Key)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_push, AI_StateByReferenceAndStringAndMaybeStringAndLong)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_init_pull, AI_StringAndKey)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_pull, AI_StateByReferenceAndStringAndMaybeString)
+	PHP_FE(sodium_crypto_secretstream_xchacha20poly1305_rekey, AI_StateByReference)
+#endif
 	PHP_FE(sodium_crypto_shorthash, AI_StringAndKey)
 	PHP_FE(sodium_crypto_shorthash_keygen, AI_None)
 	PHP_FE(sodium_crypto_sign, AI_StringAndKeyPair)
@@ -491,6 +503,32 @@ PHP_MINIT_FUNCTION(sodium)
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_KX_KEYPAIRBYTES",
 						   crypto_kx_SECRETKEYBYTES + crypto_kx_PUBLICKEYBYTES,
 						   CONST_CS | CONST_PERSISTENT);
+#ifdef crypto_secretstream_xchacha20poly1305_ABYTES
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_ABYTES",
+						   crypto_secretstream_xchacha20poly1305_ABYTES,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES",
+						   crypto_secretstream_xchacha20poly1305_HEADERBYTES,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES",
+						   crypto_secretstream_xchacha20poly1305_KEYBYTES,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX",
+						   crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_MESSAGE",
+						   crypto_secretstream_xchacha20poly1305_TAG_MESSAGE,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_PUSH",
+						   crypto_secretstream_xchacha20poly1305_TAG_PUSH,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_REKEY",
+						   crypto_secretstream_xchacha20poly1305_TAG_REKEY,
+						   CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_TAG_FINAL",
+						   crypto_secretstream_xchacha20poly1305_TAG_FINAL,
+						   CONST_CS | CONST_PERSISTENT);
+#endif
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_GENERICHASH_BYTES",
 						   crypto_generichash_BYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_GENERICHASH_BYTES_MIN",
@@ -3447,6 +3485,218 @@ PHP_FUNCTION(sodium_unpad)
 	ZSTR_VAL(unpadded)[unpadded_len] = 0;
 	RETURN_STR(unpadded);
 }
+
+#ifdef crypto_secretstream_xchacha20poly1305_ABYTES
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_keygen)
+{
+	unsigned char key[crypto_secretstream_xchacha20poly1305_KEYBYTES];
+
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
+	randombytes_buf(key, sizeof key);
+	RETURN_STRINGL((const char *) key, sizeof key);
+}
+
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_push)
+{
+	crypto_secretstream_xchacha20poly1305_state  state;
+	unsigned char                                header[crypto_secretstream_xchacha20poly1305_HEADERBYTES];
+	unsigned char                               *key;
+	size_t                                       key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
+							  &key, &key_len) == FAILURE) {
+		return;
+	}
+	if (key_len != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
+		zend_throw_exception(sodium_exception_ce,
+				   "key size should be SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES bytes",
+				   0);
+		return;
+	}
+	if (crypto_secretstream_xchacha20poly1305_init_push(&state,
+														header, key) != 0) {
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		return;
+	}
+	array_init(return_value);
+	add_next_index_stringl(return_value, (const char *) &state, sizeof state);
+	add_next_index_stringl(return_value, (const char *) header, sizeof header);
+}
+
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
+{
+	zval               *state_zv;
+	zend_string        *c;
+	unsigned char      *ad = NULL;
+	unsigned char      *msg;
+	unsigned char      *state;
+	unsigned long long  c_real_len;
+	zend_long           tag = crypto_secretstream_xchacha20poly1305_TAG_MESSAGE;
+	size_t              ad_len = (size_t) 0U;
+	size_t              c_len;
+	size_t              msg_len;
+	size_t              state_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|sl",
+							  &state_zv,
+							  &msg, &msg_len, &ad, &ad_len, &tag) == FAILURE) {
+		return;
+	}
+	ZVAL_DEREF(state_zv);
+	if (Z_TYPE_P(state_zv) != IS_STRING) {
+		zend_throw_exception(sodium_exception_ce, "a reference to a state is required", 0);
+		return;
+	}
+	sodium_separate_string(state_zv);
+	state = (unsigned char *) Z_STRVAL(*state_zv);
+	state_len = Z_STRLEN(*state_zv);
+	if (state_len != sizeof (crypto_secretstream_xchacha20poly1305_state)) {
+		zend_throw_exception(sodium_exception_ce, "incorrect state length", 0);
+		return;
+	}
+	if (msg_len > crypto_secretstream_xchacha20poly1305_MESSAGEBYTES_MAX ||
+		msg_len > SIZE_MAX - crypto_secretstream_xchacha20poly1305_ABYTES) {
+		zend_throw_exception(sodium_exception_ce, "message cannot be larger than SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_MESSAGEBYTES_MAX bytes", 0);
+		return;
+	}
+	if (tag < 0 || tag > 255) {
+		zend_throw_exception(sodium_exception_ce, "unsupported value for the tag", 0);
+		return;
+	}
+	c_len = msg_len + crypto_secretstream_xchacha20poly1305_ABYTES;
+	c = zend_string_alloc((size_t) c_len, 0);
+	if (crypto_secretstream_xchacha20poly1305_push
+		((void *) state, (unsigned char *) ZSTR_VAL(c), &c_real_len,
+		 msg, (unsigned long long) msg_len, ad, (unsigned long long) ad_len,
+		 (unsigned char) tag) != 0) {
+		zend_string_free(c);
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		return;
+	}
+	if (c_real_len <= 0U || c_real_len >= SIZE_MAX || c_real_len > c_len) {
+		zend_string_free(c);
+		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		return;
+	}
+	PHP_SODIUM_ZSTR_TRUNCATE(c, (size_t) c_real_len);
+	ZSTR_VAL(c)[c_real_len] = 0;
+
+	RETURN_STR(c);
+}
+
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_pull)
+{
+	crypto_secretstream_xchacha20poly1305_state  state;
+	unsigned char                               *header;
+	unsigned char                               *key;
+	size_t                                       header_len;
+	size_t                                       key_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
+							  &header, &header_len,
+							  &key, &key_len) == FAILURE) {
+		return;
+	}
+	if (header_len != crypto_secretstream_xchacha20poly1305_HEADERBYTES) {
+		zend_throw_exception(sodium_exception_ce,
+				   "header size should be SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_HEADERBYTES bytes",
+				   0);
+		return;
+	}
+	if (key_len != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
+		zend_throw_exception(sodium_exception_ce,
+				   "key size should be SODIUM_CRYPTO_SECRETSTREAM_XCHACHA20POLY1305_KEYBYTES bytes",
+				   0);
+		return;
+	}
+	if (crypto_secretstream_xchacha20poly1305_init_pull(&state,
+														header, key) != 0) {
+		zend_throw_exception(sodium_exception_ce, "internal error", 0);
+		return;
+	}
+	RETURN_STRINGL((const char *) &state, sizeof state);
+}
+
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_pull)
+{
+	zval               *state_zv;
+	zend_string        *msg;
+	unsigned char      *ad = NULL;
+	unsigned char      *c;
+	unsigned char      *state;
+	unsigned long long  msg_real_len;
+	size_t              ad_len = (size_t) 0U;
+	size_t              msg_len;
+	size_t              c_len;
+	size_t              state_len;
+	unsigned char       tag;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|s",
+							  &state_zv,
+							  &c, &c_len, &ad, &ad_len) == FAILURE) {
+		return;
+	}
+	ZVAL_DEREF(state_zv);
+	if (Z_TYPE_P(state_zv) != IS_STRING) {
+		zend_throw_exception(sodium_exception_ce, "a reference to a state is required", 0);
+		return;
+	}
+	sodium_separate_string(state_zv);
+	state = (unsigned char *) Z_STRVAL(*state_zv);
+	state_len = Z_STRLEN(*state_zv);
+	if (state_len != sizeof (crypto_secretstream_xchacha20poly1305_state)) {
+		zend_throw_exception(sodium_exception_ce, "incorrect state length", 0);
+		return;
+	}
+	if (c_len < crypto_secretstream_xchacha20poly1305_ABYTES) {
+		RETURN_FALSE;
+	}
+	msg_len = c_len - crypto_secretstream_xchacha20poly1305_ABYTES;
+	msg = zend_string_alloc((size_t) msg_len, 0);
+	if (crypto_secretstream_xchacha20poly1305_pull
+		((void *) state, (unsigned char *) ZSTR_VAL(msg), &msg_real_len, &tag,
+		 c, (unsigned long long) c_len, ad, (unsigned long long) ad_len) != 0) {
+		zend_string_free(msg);
+		RETURN_FALSE;
+	}
+	if (msg_real_len >= SIZE_MAX || msg_real_len > msg_len) {
+		zend_string_free(msg);
+		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		return;
+	}
+	PHP_SODIUM_ZSTR_TRUNCATE(msg, (size_t) msg_real_len);
+	ZSTR_VAL(msg)[msg_real_len] = 0;
+	array_init(return_value);
+	add_next_index_str(return_value, msg);
+	add_next_index_long(return_value, (long) tag);
+}
+
+PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey)
+{
+	zval          *state_zv;
+	unsigned char *state;
+	size_t         state_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &state_zv) == FAILURE) {
+		return;
+	}
+	ZVAL_DEREF(state_zv);
+	if (Z_TYPE_P(state_zv) != IS_STRING) {
+		zend_throw_exception(sodium_exception_ce, "a reference to a state is required", 0);
+		return;
+	}
+	sodium_separate_string(state_zv);
+	state = (unsigned char *) Z_STRVAL(*state_zv);
+	state_len = Z_STRLEN(*state_zv);
+	if (state_len != sizeof (crypto_secretstream_xchacha20poly1305_state)) {
+		zend_throw_exception(sodium_exception_ce, "incorrect state length", 0);
+		return;
+	}
+	crypto_secretstream_xchacha20poly1305_rekey((void *) state);
+}
+#endif
 
 /*
  * Local variables:
