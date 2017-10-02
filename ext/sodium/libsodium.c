@@ -456,10 +456,8 @@ PHP_MINIT_FUNCTION(sodium)
 						   crypto_auth_BYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_AUTH_KEYBYTES",
 						   crypto_auth_KEYBYTES, CONST_CS | CONST_PERSISTENT);
-#ifdef crypto_box_SEALBYTES
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_SEALBYTES",
 						   crypto_box_SEALBYTES, CONST_CS | CONST_PERSISTENT);
-#endif
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_SECRETKEYBYTES",
 						   crypto_box_SECRETKEYBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_BOX_PUBLICKEYBYTES",
@@ -1293,7 +1291,6 @@ PHP_FUNCTION(sodium_crypto_box_open)
 	}
 }
 
-#ifdef crypto_box_SEALBYTES
 PHP_FUNCTION(sodium_crypto_box_seal)
 {
 	zend_string   *ciphertext;
@@ -1368,7 +1365,6 @@ PHP_FUNCTION(sodium_crypto_box_seal_open)
 		RETURN_STR(msg);
 	}
 }
-#endif
 
 PHP_FUNCTION(sodium_crypto_sign_keypair)
 {
