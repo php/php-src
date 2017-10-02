@@ -3141,8 +3141,6 @@ PHP_FUNCTION(sodium_crypto_sign_ed25519_pk_to_curve25519)
 	RETURN_STR(ecdhkey);
 }
 
-#if SODIUM_LIBRARY_VERSION_MAJOR > 7 || \
-	(SODIUM_LIBRARY_VERSION_MAJOR == 7 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
 PHP_FUNCTION(sodium_compare)
 {
 	char      *buf1;
@@ -3164,7 +3162,6 @@ PHP_FUNCTION(sodium_compare)
 								   (const unsigned char *) buf2, (size_t) len1));
 	}
 }
-#endif
 
 #ifdef HAVE_AESGCM
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_keygen)
