@@ -23,12 +23,11 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_gmp.h"
+#include "php_gmp_int.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str_public.h"
 #include "zend_exceptions.h"
-
-#if HAVE_GMP
 
 #include <gmp.h>
 
@@ -220,13 +219,12 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(gmp)
 #endif
 
-zend_class_entry *gmp_ce;
+static zend_class_entry *gmp_ce;
 static zend_object_handlers gmp_object_handlers;
 
-typedef struct _gmp_object {
-	mpz_t num;
-	zend_object std;
-} gmp_object;
+zend_class_entry *php_gmp_class_entry() {
+	return gmp_ce;
+}
 
 typedef struct _gmp_temp {
 	mpz_t num;
@@ -252,7 +250,7 @@ typedef struct _gmp_temp {
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce))
 
 #define GET_GMP_OBJECT_FROM_OBJ(obj) \
-	((gmp_object *) ((char *) (obj) - XtOffsetOf(gmp_object, std)))
+	php_gmp_object_from_zend_object(obj)
 #define GET_GMP_OBJECT_FROM_ZVAL(zv) \
 	GET_GMP_OBJECT_FROM_OBJ(Z_OBJ_P(zv))
 
@@ -2087,8 +2085,6 @@ ZEND_FUNCTION(gmp_scan1)
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
-
-#endif	/* HAVE_GMP */
 
 /*
  * Local variables:

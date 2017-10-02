@@ -32,6 +32,9 @@ PHP                                                                        NEWS
 - GD:
   . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
 
+- GMP:
+  . Export internal structures and accessor helpers for GMP object. (Sara)
+
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
