@@ -2075,8 +2075,9 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash)
 	zend_long  opslimit;
 	size_t     hash_str_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
-							  &hash_str, &hash_str_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sll",
+									&hash_str, &hash_str_len) == FAILURE) {
+		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
 		return;
 	}
 	if (crypto_pwhash_str_needs_rehash(hash_str, opslimit, memlimit) == 0) {
@@ -2723,8 +2724,9 @@ PHP_FUNCTION(sodium_bin2base64)
 	size_t         bin_len;
 	size_t         b64_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
-							  &bin, &bin_len, &variant) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sl",
+									&bin, &bin_len, &variant) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	if ((((unsigned int) variant) & ~ 0x6U) != 0x1U) {
@@ -2755,9 +2757,10 @@ PHP_FUNCTION(sodium_base642bin)
 	size_t         b64_len;
 	size_t         ignore_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s",
-							  &b64, &b64_len, &variant,
-							  &ignore, &ignore_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sl|s",
+									&b64, &b64_len, &variant,
+									&ignore, &ignore_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	if ((((unsigned int) variant) & ~ 0x6U) != 0x1U) {
@@ -3505,8 +3508,9 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_push)
 	unsigned char                               *key;
 	size_t                                       key_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s",
-							  &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s",
+									&key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	if (key_len != crypto_secretstream_xchacha20poly1305_KEYBYTES) {
@@ -3539,9 +3543,10 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_push)
 	size_t              msg_len;
 	size_t              state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|sl",
-							  &state_zv,
-							  &msg, &msg_len, &ad, &ad_len, &tag) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|sl",
+									&state_zv,
+									&msg, &msg_len, &ad, &ad_len, &tag) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	ZVAL_DEREF(state_zv);
@@ -3594,9 +3599,10 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_init_pull)
 	size_t                                       header_len;
 	size_t                                       key_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss",
-							  &header, &header_len,
-							  &key, &key_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ss",
+									&header, &header_len,
+									&key, &key_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	if (header_len != crypto_secretstream_xchacha20poly1305_HEADERBYTES) {
@@ -3633,9 +3639,10 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_pull)
 	size_t              state_len;
 	unsigned char       tag;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs|s",
-							  &state_zv,
-							  &c, &c_len, &ad, &ad_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs|s",
+									&state_zv,
+									&c, &c_len, &ad, &ad_len) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	ZVAL_DEREF(state_zv);
@@ -3679,7 +3686,8 @@ PHP_FUNCTION(sodium_crypto_secretstream_xchacha20poly1305_rekey)
 	unsigned char *state;
 	size_t         state_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &state_zv) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "z", &state_zv) == FAILURE) {
+		sodium_remove_param_values_from_backtrace(EG(exception));
 		return;
 	}
 	ZVAL_DEREF(state_zv);
