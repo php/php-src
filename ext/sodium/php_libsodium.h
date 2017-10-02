@@ -83,6 +83,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256);
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str);
 PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str_verify);
 PHP_FUNCTION(sodium_crypto_pwhash_str);
+PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash);
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify);
 PHP_FUNCTION(sodium_crypto_scalarmult);
 PHP_FUNCTION(sodium_crypto_scalarmult_base);

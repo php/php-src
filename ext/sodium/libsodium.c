@@ -240,9 +240,10 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, AI_None)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, AI_None)
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, AI_None)
+	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_keygen, AI_None)
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
 #endif
 	PHP_FE(sodium_crypto_auth, AI_StringAndKey)
@@ -275,6 +276,9 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_pwhash, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_str, AI_PasswordAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_str_verify, AI_HashAndPassword)
+#endif
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+	PHP_FE(sodium_crypto_pwhash_str_needs_rehash, AI_PasswordAndOpsLimitAndMemLimit)
 #endif
 #ifdef crypto_pwhash_scryptsalsa208sha256_SALTBYTES
 	PHP_FE(sodium_crypto_pwhash_scryptsalsa208sha256, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
@@ -2024,6 +2028,25 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 
 	RETURN_STR(hash_str);
 }
+
+#if SODIUM_LIBRARY_VERSION_MAJOR > 9 || (SODIUM_LIBRARY_VERSION_MAJOR == 9 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
+PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash)
+{
+	char      *hash_str;
+	zend_long  memlimit;
+	zend_long  opslimit;
+	size_t     hash_str_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll",
+							  &hash_str, &hash_str_len) == FAILURE) {
+		return;
+	}
+	if (crypto_pwhash_str_needs_rehash(hash_str, opslimit, memlimit) == 0) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+#endif
 
 PHP_FUNCTION(sodium_crypto_pwhash_str_verify)
 {
