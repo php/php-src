@@ -2823,7 +2823,7 @@ PHP_FUNCTION(sodium_crypto_kx_seed_keypair)
 	unsigned char *sk;
 	unsigned char *pk;
 	unsigned char *seed;
-	size_t       seed_len;
+	size_t         seed_len;
 	zend_string   *keypair;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s",
@@ -2874,7 +2874,7 @@ PHP_FUNCTION(sodium_crypto_kx_secretkey)
 {
 	zend_string   *secretkey;
 	unsigned char *keypair;
-	size_t       keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s",
 									&keypair, &keypair_len) == FAILURE) {
@@ -2899,7 +2899,7 @@ PHP_FUNCTION(sodium_crypto_kx_publickey)
 {
 	zend_string   *publickey;
 	unsigned char *keypair;
-	size_t       keypair_len;
+	size_t         keypair_len;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s",
 									&keypair, &keypair_len) == FAILURE) {
@@ -2930,8 +2930,8 @@ PHP_FUNCTION(sodium_crypto_kx_client_session_keys)
 	unsigned char *client_pk;
 	unsigned char *server_pk;
 	unsigned char  session_keys[2 * crypto_kx_SESSIONKEYBYTES];
-	size_t       keypair_len;
-	size_t       server_pk_len;
+	size_t         keypair_len;
+	size_t         server_pk_len;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ss",
 									&keypair, &keypair_len,
@@ -2980,8 +2980,8 @@ PHP_FUNCTION(sodium_crypto_kx_server_session_keys)
 	unsigned char *server_pk;
 	unsigned char *client_pk;
 	unsigned char  session_keys[2 * crypto_kx_SESSIONKEYBYTES];
-	size_t       keypair_len;
-	size_t       client_pk_len;
+	size_t         keypair_len;
+	size_t         client_pk_len;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ss",
 									&keypair, &keypair_len,
