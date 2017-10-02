@@ -203,16 +203,20 @@ const zend_function_entry sodium_functions[] = {
 #ifdef HAVE_AESGCM
 	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_aes256gcm_encrypt, AI_StringAndADAndNonceAndKey)
+	PHP_FE(sodium_crypto_aead_aes256gcm_keygen, AI_None)
 #endif
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_encrypt, AI_StringAndADAndNonceAndKey)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, AI_None)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
 	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
 #ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_decrypt, AI_StringAndADAndNonceAndKey)
+	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, AI_None)
 	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_encrypt, AI_StringAndADAndNonceAndKey)
 #endif
 	PHP_FE(sodium_crypto_auth, AI_StringAndKey)
+	PHP_FE(sodium_crypto_auth_keygen, AI_None)
 	PHP_FE(sodium_crypto_auth_verify, AI_SignatureAndStringAndKey)
 	PHP_FE(sodium_crypto_box, AI_StringAndNonceAndKeyPair)
 	PHP_FE(sodium_crypto_box_keypair, AI_None)
@@ -221,10 +225,8 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_box_open, AI_StringAndNonceAndKey)
 	PHP_FE(sodium_crypto_box_publickey, AI_Key)
 	PHP_FE(sodium_crypto_box_publickey_from_secretkey, AI_Key)
-#ifdef crypto_box_SEALBYTES
 	PHP_FE(sodium_crypto_box_seal, AI_StringAndKey)
 	PHP_FE(sodium_crypto_box_seal_open, AI_StringAndKey)
-#endif
 	PHP_FE(sodium_crypto_box_secretkey, AI_Key)
 	PHP_FE(sodium_crypto_kx_keypair, AI_None)
 	PHP_FE(sodium_crypto_kx_publickey, AI_Key)
@@ -233,10 +235,12 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_kx_client_session_keys, AI_KXClientSession)
 	PHP_FE(sodium_crypto_kx_server_session_keys, AI_KXServerSession)
 	PHP_FE(sodium_crypto_generichash, AI_StringAndMaybeKeyAndLength)
+	PHP_FE(sodium_crypto_generichash_keygen, AI_None)
 	PHP_FE(sodium_crypto_generichash_init, AI_MaybeKeyAndLength)
 	PHP_FE(sodium_crypto_generichash_update, AI_StateByReferenceAndString)
 	PHP_FE(sodium_crypto_generichash_final, AI_StateByReferenceAndMaybeLength)
 	PHP_FE(sodium_crypto_kdf_derive_from_key, AI_KDF)
+	PHP_FE(sodium_crypto_kdf_keygen, AI_None)
 #ifdef crypto_pwhash_SALTBYTES
 	PHP_FE(sodium_crypto_pwhash, AI_LengthAndPasswordAndSaltAndOpsLimitAndMemLimit)
 	PHP_FE(sodium_crypto_pwhash_str, AI_PasswordAndOpsLimitAndMemLimit)
@@ -249,8 +253,10 @@ const zend_function_entry sodium_functions[] = {
 #endif
 	PHP_FE(sodium_crypto_scalarmult, AI_TwoStrings)
 	PHP_FE(sodium_crypto_secretbox, AI_StringAndNonceAndKey)
+	PHP_FE(sodium_crypto_secretbox_keygen, AI_None)
 	PHP_FE(sodium_crypto_secretbox_open, AI_StringAndNonceAndKey)
 	PHP_FE(sodium_crypto_shorthash, AI_StringAndKey)
+	PHP_FE(sodium_crypto_shorthash_keygen, AI_None)
 	PHP_FE(sodium_crypto_sign, AI_StringAndKeyPair)
 	PHP_FE(sodium_crypto_sign_detached, AI_StringAndKeyPair)
 	PHP_FE(sodium_crypto_sign_ed25519_pk_to_curve25519, AI_Key)
@@ -264,35 +270,25 @@ const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_sign_seed_keypair, AI_Key)
 	PHP_FE(sodium_crypto_sign_verify_detached, AI_SignatureAndStringAndKey)
 	PHP_FE(sodium_crypto_stream, AI_LengthAndNonceAndKey)
+	PHP_FE(sodium_crypto_stream_keygen, AI_None)
 	PHP_FE(sodium_crypto_stream_xor, AI_StringAndNonceAndKey)
-	PHP_FE(sodium_bin2hex, AI_String)
-#if SODIUM_LIBRARY_VERSION_MAJOR > 7 || \
-	(SODIUM_LIBRARY_VERSION_MAJOR == 7 && SODIUM_LIBRARY_VERSION_MINOR >= 6)
-	PHP_FE(sodium_compare, AI_TwoStrings)
-#endif
-	PHP_FE(sodium_hex2bin, AI_StringAndMaybeString)
-	PHP_FE(sodium_increment, AI_StringRef)
+
+	/* helpers */
+
 	PHP_FE(sodium_add, AI_StringRefAndString)
+	PHP_FE(sodium_compare, AI_TwoStrings)
+	PHP_FE(sodium_increment, AI_StringRef)
 	PHP_FE(sodium_memcmp, AI_TwoStrings)
 	PHP_FE(sodium_memzero, AI_FirstArgByReferenceSecondLength)
-
-#ifdef HAVE_AESGCM
-	PHP_FE(sodium_crypto_aead_aes256gcm_keygen, AI_None)
-#endif
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_keygen, AI_None)
-	PHP_FE(sodium_crypto_aead_chacha20poly1305_ietf_keygen, AI_None)
-#ifdef crypto_aead_xchacha20poly1305_IETF_NPUBBYTES
-	PHP_FE(sodium_crypto_aead_xchacha20poly1305_ietf_keygen, AI_None)
-#endif
-	PHP_FE(sodium_crypto_auth_keygen, AI_None)
-	PHP_FE(sodium_crypto_generichash_keygen, AI_None)
-	PHP_FE(sodium_crypto_secretbox_keygen, AI_None)
-	PHP_FE(sodium_crypto_kdf_keygen, AI_None)
-	PHP_FE(sodium_crypto_shorthash_keygen, AI_None)
-	PHP_FE(sodium_crypto_stream_keygen, AI_None)
-
 	PHP_FE(sodium_pad, AI_StringAndLength)
 	PHP_FE(sodium_unpad, AI_StringAndLength)
+
+	/* codecs */
+
+	PHP_FE(sodium_bin2hex, AI_String)
+	PHP_FE(sodium_hex2bin, AI_StringAndMaybeString)
+
+	/* aliases */
 
 	PHP_FALIAS(sodium_crypto_scalarmult_base, sodium_crypto_box_publickey_from_secretkey, AI_TwoStrings)
 
