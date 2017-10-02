@@ -39,7 +39,7 @@ static inline unsigned char idx(unsigned char x, unsigned char y) {
 
 #ifdef WORDS_BIGENDIAN
 static inline uint64_t load64(const unsigned char* x) {
-	char i;
+	signed char i;
 	uint64_t ret = 0;
 	for (i = 7; i >= 0; --i) {
 		ret <<= 8;
