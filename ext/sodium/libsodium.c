@@ -28,6 +28,7 @@
 
 #include <sodium.h>
 #include <stdint.h>
+#include <string.h>
 
 #define PHP_SODIUM_ZSTR_TRUNCATE(zs, len) do { ZSTR_LEN(zs) = (len); } while(0)
 
