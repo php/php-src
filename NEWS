@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #75285 (Broken build when system libpcre don't have jit support).
     (Remi)
 
+- Sodium:
+  . Added missing bindings for libsodium > 1.0.13. (Frank)
+
 28 Sep 2017, PHP 7.2.0RC3
 
 - Core
