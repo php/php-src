@@ -317,6 +317,10 @@ const zend_function_entry sodium_functions[] = {
 
 	PHP_FE(sodium_bin2hex, AI_String)
 	PHP_FE(sodium_hex2bin, AI_StringAndMaybeString)
+#ifdef sodium_base64_VARIANT_ORIGINAL
+	PHP_FE(sodium_bin2base64, AI_StringAndId)
+	PHP_FE(sodium_base642bin, AI_StringAndIdAndMaybeString)
+#endif
 
 	/* aliases */
 
@@ -564,6 +568,16 @@ PHP_MINIT_FUNCTION(sodium)
 						   crypto_stream_NONCEBYTES, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("SODIUM_CRYPTO_STREAM_KEYBYTES",
 						   crypto_stream_KEYBYTES, CONST_CS | CONST_PERSISTENT);
+#ifdef sodium_base64_VARIANT_ORIGINAL
+	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_ORIGINAL",
+						   sodium_base64_VARIANT_ORIGINAL, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_ORIGINAL_NO_PADDING",
+						   sodium_base64_VARIANT_ORIGINAL_NO_PADDING, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_URLSAFE",
+						   sodium_base64_VARIANT_URLSAFE, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("SODIUM_BASE64_VARIANT_URLSAFE_NO_PADDING",
+						   sodium_base64_VARIANT_URLSAFE_NO_PADDING, CONST_CS | CONST_PERSISTENT);
+#endif
 	return SUCCESS;
 }
 
@@ -2638,6 +2652,79 @@ PHP_FUNCTION(sodium_hex2bin)
 
 	RETURN_STR(bin);
 }
+
+#ifdef sodium_base64_VARIANT_ORIGINAL
+PHP_FUNCTION(sodium_bin2base64)
+{
+	zend_string   *b64;
+	unsigned char *bin;
+	zend_long      variant;
+	size_t         bin_len;
+	size_t         b64_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl",
+							  &bin, &bin_len, &variant) == FAILURE) {
+		return;
+	}
+	if ((((unsigned int) variant) & ~ 0x6U) != 0x1U) {
+		zend_throw_exception(sodium_exception_ce,
+							 "invalid base64 variant identifier", 0);
+		return;
+	}
+	if (bin_len >= SIZE_MAX / 4U * 3U - 3U - 1U) {
+		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		return;
+	}
+	b64_len = sodium_base64_ENCODED_LEN(bin_len, variant);
+	b64 = zend_string_alloc((size_t) b64_len - 1U, 0);
+	sodium_bin2base64(ZSTR_VAL(b64), b64_len, bin, bin_len, (int) variant);
+
+	RETURN_STR(b64);
+}
+
+PHP_FUNCTION(sodium_base642bin)
+{
+	zend_string   *bin;
+	char          *b64;
+	const char    *end;
+	char          *ignore = NULL;
+	zend_long      variant;
+	size_t         bin_real_len;
+	size_t         bin_len;
+	size_t         b64_len;
+	size_t         ignore_len = 0;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s",
+							  &b64, &b64_len, &variant,
+							  &ignore, &ignore_len) == FAILURE) {
+		return;
+	}
+	if ((((unsigned int) variant) & ~ 0x6U) != 0x1U) {
+		zend_throw_exception(sodium_exception_ce,
+							 "invalid base64 variant identifier", 0);
+		return;
+	}
+	bin_len = b64_len / 4U * 3U;
+	bin = zend_string_alloc(bin_len, 0);
+	if (sodium_base642bin((unsigned char *) ZSTR_VAL(bin), bin_len,
+						  b64, b64_len,
+						  ignore, &bin_real_len, &end, (int) variant) != 0 ||
+		end != b64 + b64_len) {
+		zend_string_free(bin);
+		zend_throw_exception(sodium_exception_ce, "invalid base64 string", 0);
+		return;
+	}
+	if (bin_real_len >= SIZE_MAX || bin_real_len > bin_len) {
+		zend_string_free(bin);
+		zend_throw_exception(sodium_exception_ce, "arithmetic overflow", 0);
+		return;
+	}
+	PHP_SODIUM_ZSTR_TRUNCATE(bin, (size_t) bin_real_len);
+	ZSTR_VAL(bin)[bin_real_len] = 0;
+
+	RETURN_STR(bin);
+}
+#endif
 
 PHP_FUNCTION(sodium_crypto_scalarmult)
 {

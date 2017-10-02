@@ -35,6 +35,8 @@ PHP_RSHUTDOWN_FUNCTION(sodium);
 PHP_MINFO_FUNCTION(sodium);
 
 PHP_FUNCTION(sodium_add);
+PHP_FUNCTION(sodium_base642bin);
+PHP_FUNCTION(sodium_bin2base64);
 PHP_FUNCTION(sodium_bin2hex);
 PHP_FUNCTION(sodium_compare);
 PHP_FUNCTION(sodium_crypto_aead_aes256gcm_decrypt);
