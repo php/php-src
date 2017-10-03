@@ -10,9 +10,9 @@ $q = sodium_crypto_scalarmult($n, $p);
 
 var_dump(sodium_bin2hex($q));
 try {
-	sodium_crypto_scalarmult(substr($n, 1), $p);
+    sodium_crypto_scalarmult(substr($n, 1), $p);
 } catch (SodiumException $ex) {
-	var_dump(true);
+    var_dump(true);
 }
 ?>
 --EXPECT--

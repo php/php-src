@@ -9,6 +9,8 @@ PHP_ARG_WITH(pcre-regex,,
 [  --with-pcre-regex=DIR   Include Perl Compatible Regular Expressions support.
                           DIR is the PCRE install prefix [BUNDLED]], yes, no)
 
+PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality (BUNDLED only)], yes, no)
+
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
     AC_MSG_CHECKING([for PCRE headers location])
     for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre $PHP_PCRE_REGEX/local/include; do
@@ -43,6 +45,13 @@ PHP_ARG_WITH(pcre-regex,,
       AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 6.6])
     fi
 
+    PHP_CHECK_LIBRARY(pcre, pcre_jit_exec,
+    [
+      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+    ],[
+    ],[
+      -L$PCRE_LIBDIR
+    ])
     PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
@@ -65,33 +74,24 @@ PHP_ARG_WITH(pcre-regex,,
     PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
-  fi
 
-PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality], yes, no)
-  if test "$PHP_PCRE_REGEX" != "no"; then
-    AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
-    if test "$PHP_PCRE_JIT" != "no"; then
-      AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
-      AC_MSG_RESULT([yes])
-    else
+    if test "$PHP_PCRE_REGEX" != "no"; then
+      AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
+      if test "$PHP_PCRE_JIT" != "no"; then
+        AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
+        AC_MSG_RESULT([yes])
+      else
       AC_MSG_RESULT([no])
+      fi
     fi
   fi
 
-  if test "$PHP_DEBUG" != "no" && test "$PHP_DEBUG" != "0"; then
-    PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                          Enable PCRE valgrind support. Developers only!], yes, no)
-  else
-    PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
-                           Enable PCRE valgrind support. Developers only!], no, no)
-  fi
-
+PHP_ARG_WITH(pcre-valgrind,,[  --with-pcre-valgrind=DIR
+                          Enable PCRE valgrind support. Developers only!], no, no)
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
     AC_MSG_WARN([PHP is going to be linked with an external PCRE, --with-pcre-valgrind has no effect])
   else
-    if test "$PHP_PCRE_VALGRIND" = "no" && test "$PHP_DEBUG" != "0"; then
-      AC_MSG_NOTICE([PCRE Valgrind support is disabled for debug build])
-    elif test "$PHP_PCRE_VALGRIND" != "no" || test "$PHP_DEBUG" != "0"; then
+    if test "$PHP_PCRE_VALGRIND" != "no"; then
       PHP_PCRE_VALGRIND_INCDIR=
       AC_MSG_CHECKING([for Valgrind headers location])
       for i in $PHP_PCRE_VALGRIND $PHP_PCRE_VALGRIND/include $PHP_PCRE_VALGRIND/local/include /usr/include /usr/local/include; do

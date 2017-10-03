@@ -6,7 +6,7 @@ SodiumException backtraces do not contain function arguments
 <?php
 
 function do_memzero($x) {
-	sodium_memzero($x);
+    sodium_memzero($x);
 }
 
 $x = 42;
