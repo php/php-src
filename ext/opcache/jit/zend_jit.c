@@ -36,8 +36,6 @@
 
 //#define CONTEXT_THREADED_JIT
 #define PREFER_MAP_32BIT
-//#define ZEND_JIT_RECORD
-//#define ZEND_JIT_FILTER
 #define ZEND_JIT_USE_RC_INFERENCE
 
 #ifdef ZEND_JIT_USE_RC_INFERENCE
@@ -1970,35 +1968,6 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 	void *checkpoint = NULL;
 	zend_lifetime_interval **ra = NULL;
 
-#ifdef ZEND_JIT_FILTER
-	const char *names[] = {
-#include "zend_jit_filter.c"
-	};
-
-	for (i = 0; i < sizeof(names)/sizeof(names[0]); i++) {
-		const char *name = names[i];
-		const char *sep = strstr(name, "::");
-
-		if (sep) {
-			if (op_array->scope &&
-			    op_array->scope->name &&
-			    op_array->function_name &&
-			    strncmp(ZSTR_VAL(op_array->scope->name), name, sep-name) == 0 &&
-			    strcmp(ZSTR_VAL(op_array->function_name), sep+2) == 0) {
-				goto pass;
-			}
-		} else {
-			if (op_array->scope == NULL &&
-			    op_array->function_name &&
-			    strcmp(ZSTR_VAL(op_array->function_name), name) == 0) {
-				goto pass;
-			}
-		}
-	}
-	return SUCCESS;
-pass:
-#endif
-
 	if (zend_jit_reg_alloc) {
 		checkpoint = zend_arena_checkpoint(CG(arena));
 		ra = zend_jit_allocate_registers(op_array, ssa);
@@ -2064,11 +2033,6 @@ pass:
 				zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 				zend_jit_prologue(&dasm_state);
 			}
-#ifdef ZEND_JIT_RECORD
-			if (opline->opcode != ZEND_RECV && opline->opcode != ZEND_RECV_INIT) {
-				zend_jit_func_header(&dasm_state, op_array);
-			}
-#endif
 		}
 
 		if (ssa->cfg.blocks[b].len == 1 &&
@@ -2134,9 +2098,6 @@ pass:
 			}
 		}
 		if (ssa->cfg.blocks[b].flags & ZEND_BB_LOOP_HEADER) {
-#ifdef ZEND_JIT_RECORD
-			zend_jit_loop_header(&dasm_state, op_array, op_array->opcodes + ssa->cfg.blocks[b].start);
-#endif
 			if (!zend_jit_check_timeout(&dasm_state, op_array->opcodes + ssa->cfg.blocks[b].start)) {
 				goto jit_failure;
 			}
