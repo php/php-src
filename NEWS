@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
+- Hash:
+  . Fixed Bug #75284 (sha3 is not supported on bigendian machine). (Remi)
+
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
     only litespeed SAPI). (petk)
