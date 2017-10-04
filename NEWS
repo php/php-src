@@ -24,6 +24,9 @@ PHP                                                                        NEWS
 - MySQLi:
   . Fixed bug #75018 (Data corruption when reading fields of bit type). (Anatol)
 
+- OCI8:
+  . Fixed incorrect reference counting. (Dmitry, Tianfang Yang)
+
 - Opcache
   . Fixed bug #75255 (Request hangs and not finish). (Dmitry)
 
