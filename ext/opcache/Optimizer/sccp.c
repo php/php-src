@@ -2019,7 +2019,7 @@ static int try_remove_definition(sccp_ctx *ctx, int var_num, zend_ssa_var *var, 
 						&& opline->opcode != ZEND_ADD_ARRAY_ELEMENT) {
 					/* Replace with QM_ASSIGN */
 					zend_uchar old_type = opline->result_type;
-					zend_uchar old_var = opline->result.var;
+					uint32_t old_var = opline->result.var;
 
 					ssa_op->result_def = -1;
 					zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
