@@ -128,7 +128,7 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, 
 
 	if (new_per_dir_entry->status >= orig_per_dir_entry->status) {
 		/* use new entry */
-		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", hash_key->arKey, new_per_dir_entry->status, orig_per_dir_entry->status));
+		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", ZSTR_VAL(hash_key->key), new_per_dir_entry->status, orig_per_dir_entry->status));
 		return 1;
 	} else {
 		return 0;
@@ -176,7 +176,7 @@ void apply_config(void *dummy)
 	php_dir_entry *data;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&d->config, str, data) {
-		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", ZSTR_VAL(str), data->value));
 		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}
