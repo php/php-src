@@ -493,9 +493,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define IS_STR_INTERNED				(1<<1) /* interned string          */
 #define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
 
-#define IS_STR_CONSTANT             (1<<3) /* constant index */
-#define IS_STR_CONSTANT_UNQUALIFIED (1<<4) /* the same as IS_CONSTANT_UNQUALIFIED */
-
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			(1<<1)
 
