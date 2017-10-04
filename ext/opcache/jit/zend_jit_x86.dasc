@@ -1769,8 +1769,8 @@ static int zend_jit_undefined_offset_stub(dasm_State **Dst)
 	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
 	|	jne >2
 	|.if X64
-		|	movsxd r0, dword OP:r0->op2.constant
-		|   add r0, aword EX->literals
+		|	movsxd r1, dword OP:r0->op2.constant
+		|   add r0, r1
 	|.else
 		|	mov r0, aword OP:r0->op2.zv
 	|.endif
@@ -1829,8 +1829,8 @@ static int zend_jit_undefined_index_stub(dasm_State **Dst)
 	|	SET_Z_TYPE_INFO FP + r1, IS_NULL
 	|	jne >2
 	|.if X64
-		|	movsxd r0, dword OP:r0->op2.constant
-		|   add r0, aword EX->literals
+		|	movsxd r1, dword OP:r0->op2.constant
+		|   add r0, r1
 	|.else
 		|	mov r0, aword OP:r0->op2.zv
 	|.endif
@@ -4361,7 +4361,7 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 
 	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, NULL, -1);
-	op3_addr = zend_jit_decode_op(op_array, (opline+1)->op1_type, (opline+1)->op1, opline, NULL, -1);
+	op3_addr = zend_jit_decode_op(op_array, (opline+1)->op1_type, (opline+1)->op1, opline+1, NULL, -1);
 	if (opline->result_type == IS_UNUSED) {
 		res_addr = 0;
 	} else {
@@ -4605,7 +4605,7 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 
 	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, NULL, -1);
-	op3_addr = zend_jit_decode_op(op_array, (opline+1)->op1_type, (opline+1)->op1, opline, NULL, -1);
+	op3_addr = zend_jit_decode_op(op_array, (opline+1)->op1_type, (opline+1)->op1, opline+1, NULL, -1);
 
 	if (op1_info & MAY_BE_REF) {
 		|	LOAD_ZVAL_ADDR FCARG1a, op1_addr
@@ -6870,7 +6870,7 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 		/* recursive call */
 		|	mov r0,	EX->func
 	} else {
-		zval *zv = RT_CONSTANT(op_array, opline->op2);
+		zval *zv = RT_CONSTANT(opline, opline->op2);
 
 		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname)))
 		|	mov r0,	EX->run_time_cache
@@ -7095,20 +7095,6 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	mov EX:RX->run_time_cache, r2
 			}
 		}
-
-		|	//EX_LOAD_LITERALS(op_array);
-		|.if X64
-			if (func && zend_accel_in_shm(func->op_array.literals)) {
-				|	LOAD_ADDR r2, func->op_array.literals
-				|	mov EX:RX->literals, r2
-			} else {
-				if (func) {
-					|	mov r0, EX:RX->func
-				}
-				|	mov	r2, aword [r0 + offsetof(zend_op_array, literals)]
-				|	mov EX:RX->literals, r2
-			}
-		|.endif
 
 		|	// EG(current_execute_data) = execute_data;
 		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), RX, r1
@@ -7440,7 +7426,7 @@ static int zend_jit_new(dasm_State **Dst, const zend_op *opline, int *opnum, zen
 			}
 		} else {
 			if (opline->op1_type == IS_CONST) {
-				zval *zv = RT_CONSTANT(op_array, opline->op1);
+				zval *zv = RT_CONSTANT(opline, opline->op1);
 				if (Z_TYPE_P(zv) == IS_STRING) {
 					zval *lc = zv + 1;
 					ce = (zend_class_entry*)zend_hash_find_ptr(EG(class_table), Z_STR_P(lc));
@@ -7504,7 +7490,7 @@ static int zend_jit_send_val(dasm_State **Dst, const zend_op *opline, zend_op_ar
 	arg_addr = ZEND_ADDR_MEM_ZVAL(ZREG_RX, opline->result.var);
 
 	if (opline->op1_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(op_array, opline->op1);
+		zval *zv = RT_CONSTANT(opline, opline->op1);
 
 		|	ZVAL_COPY_CONST arg_addr, -1, zv, r0
 		if (Z_REFCOUNTED_P(zv)) {
@@ -7874,7 +7860,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 	zend_bool smart_branch = 0;
 	uint32_t defined_label = (uint32_t)-1;
 	uint32_t undefined_label = (uint32_t)-1;
-	zval *zv = RT_CONSTANT(op_array, opline->op1);
+	zval *zv = RT_CONSTANT(opline, opline->op1);
 	zend_jit_addr res_addr;
 
 	if (((opline+1)->opcode == ZEND_JMPZ ||
@@ -8405,7 +8391,7 @@ static int zend_jit_return(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	}
 
 	if (opline->op1_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(op_array, opline->op1);
+		zval *zv = RT_CONSTANT(opline, opline->op1);
 		|	ZVAL_COPY_CONST ret_addr, -1, zv, r0
 		if (Z_REFCOUNTED_P(zv)) {
 			|	ADDREF_CONST zv, r0
@@ -8778,7 +8764,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 {
 	uint32_t op1_info;
 	zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
-	zval *varname = RT_CONSTANT(op_array, opline->op2);
+	zval *varname = RT_CONSTANT(opline, opline->op2);
 
 	if (!ssa->ops || !ssa->var_info) {
 		op1_info = MAY_BE_ANY|MAY_BE_REF;
@@ -9043,7 +9029,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	zend_arg_info *arg_info;
 	zend_bool has_slow = 0;
 	uint32_t arg_num = opline->op1.num;
-	zval *zv = RT_CONSTANT(op_array, opline->op2);
+	zval *zv = RT_CONSTANT(opline, opline->op2);
 	zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 
 	|	cmp dword EX->This.u2.num_args, arg_num
@@ -9230,7 +9216,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		goto fallback;
 	}
 
-	member = RT_CONSTANT(op_array, opline->op2);
+	member = RT_CONSTANT(opline, opline->op2);
 	if (Z_TYPE_P(member) != IS_STRING || Z_STRVAL_P(member)[0] == '\0') {
 		goto fallback;
 	}
@@ -9439,7 +9425,7 @@ static int zend_jit_free(dasm_State **Dst, const zend_op *opline, zend_op_array 
 static int zend_jit_echo(dasm_State **Dst, const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	if (opline->op1_type == IS_CONST) {
-		zval *zv = RT_CONSTANT(op_array, opline->op1);
+		zval *zv = RT_CONSTANT(opline, opline->op1);
 
 		if (Z_TYPE_P(zv) == IS_STRING) {
 			size_t len = Z_STRLEN_P(zv);
@@ -9629,11 +9615,11 @@ static zend_bool zend_jit_may_be_in_reg(zend_op_array *op_array, zend_ssa *ssa, 
 	return 1;
 }
 
-static zend_bool zend_needs_extra_reg_for_const(zend_op_array *op_array, zend_uchar op_type, znode_op op)
+static zend_bool zend_needs_extra_reg_for_const(zend_op_array *op_array, const zend_op *opline, zend_uchar op_type, znode_op op)
 {
 |.if X64
 ||	if (op_type == IS_CONST) {
-||		zval *zv = RT_CONSTANT(op_array, op);
+||		zval *zv = RT_CONSTANT(opline, op);
 ||		if (Z_TYPE_P(zv) == IS_DOUBLE && Z_DVAL_P(zv) != 0 && !IS_32BIT(zv)) {
 ||			return 1;
 ||		}
@@ -9784,8 +9770,8 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
-				if (zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op2)) {
+				if (zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op2)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}
@@ -9827,8 +9813,8 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 			    !(op2_info & ((MAY_BE_ANY|MAY_BE_REF|MAY_BE_UNDEF)-MAY_BE_LONG))) {
 				regset = ZEND_REGSET_EMPTY;
 				if (opline->op2_type == IS_CONST &&
-				    Z_TYPE_P(RT_CONSTANT(op_array, opline->op2)) == IS_LONG &&
-				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(op_array, opline->op2)))) {
+				    Z_TYPE_P(RT_CONSTANT(opline, opline->op2)) == IS_LONG &&
+				    zend_long_is_power_of_two(Z_LVAL_P(RT_CONSTANT(opline, opline->op2)))) {
 					if (ssa->ops[line].result_def != current_var &&
 					    (ssa->ops[line].op1_use != current_var || !zend_ssa_is_last_use(op_array, ssa, current_var, opline-op_array->opcodes))) {
 						ZEND_REGSET_INCL(regset, ZREG_R0);
@@ -9870,8 +9856,8 @@ static zend_regset zend_jit_get_scratch_regset(zend_op_array *op_array, zend_ssa
 						ZEND_REGSET_INCL(regset, ZREG_XMM0);
 					}
 				}
-				if (zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op1) ||
-				    zend_needs_extra_reg_for_const(op_array, opline->op1_type, opline->op2)) {
+				if (zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op1) ||
+				    zend_needs_extra_reg_for_const(op_array, opline, opline->op1_type, opline->op2)) {
 					ZEND_REGSET_INCL(regset, ZREG_R0);
 				}
 			}

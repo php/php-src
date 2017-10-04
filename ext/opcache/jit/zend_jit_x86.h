@@ -192,7 +192,7 @@ static zend_always_inline zend_jit_addr zend_jit_decode_op(const zend_op_array *
 #if ZEND_USE_ABS_CONST_ADDR
 		return ZEND_ADDR_CONST_ZVAL(op.zv);
 #else
-		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(op_array, op));
+		return ZEND_ADDR_CONST_ZVAL(RT_CONSTANT(opline, op));
 #endif
 	} else {
 		if (ra && ssa_var >= 0 && ra[ssa_var]) {
