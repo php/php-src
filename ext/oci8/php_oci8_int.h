@@ -209,7 +209,7 @@ typedef struct {
 
 /* {{{ php_oci_define */
 typedef struct { 
-	zval		*zval;			/* zval used in define */
+	zval		 val;			/* zval used in define */
 	text		*name;			/* placeholder's name */
 	ub4			 name_len;		/* placeholder's name length */
 	ub4			 type;			/* define type */
@@ -244,8 +244,7 @@ typedef struct {
 /* {{{ php_oci_bind */
 typedef struct { 
 	OCIBind				*bind;					/* bind handle */
-	zval				*zval;					/* value */
-	zval				parameter;				/* a copy of bound variable used for oci_bind_by_name */
+	zval				val;					/* value */
 	dvoid				*descriptor;			/* used for binding of LOBS etc */
 	OCIStmt				*statement;				/* used for binding REFCURSORs */
 	php_oci_statement	*parent_statement;		/* pointer to the parent statement */
