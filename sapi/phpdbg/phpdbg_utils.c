@@ -763,9 +763,9 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				zend_class_entry *ce;
 				cur = &op_array->opcodes[catch];
 
-				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1))))) {
-					ce = zend_fetch_class_by_name(Z_STR_P(EX_CONSTANT(cur->op1)), EX_CONSTANT(cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					CACHE_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(cur->op1)), ce);
+				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1))))) {
+					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+					CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1)), ce);
 				}
 
 				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {

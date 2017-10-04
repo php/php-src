@@ -75,10 +75,10 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 	ZVAL_NULL(&params[0]);
 
 	/* Cleanup */
-	zval_dtor(&retval);
-	zval_dtor(&params[0]);
-	zval_dtor(&params[1]);
-	zval_dtor(&params[2]);
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&params[0]);
+	zval_ptr_dtor(&params[1]);
+	zval_ptr_dtor(&params[2]);
 
 	return returnValue;
 }

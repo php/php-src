@@ -117,7 +117,7 @@ PHP_FUNCTION(oci_define_by_name)
 	php_oci_define *define;
 	zend_string *zvtmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz|l", &stmt, &name, &name_len, &var, &type) == FAILURE) {
 		return;
 	}
 
@@ -153,7 +153,8 @@ PHP_FUNCTION(oci_define_by_name)
 	define->name[name_len] = '\0';
 	define->name_len = (ub4) name_len;
 	define->type = (ub4) type;
-	define->zval = var;
+	ZEND_ASSERT(Z_ISREF_P(var));
+	ZVAL_COPY(&define->val, var);
 
 	RETURN_TRUE;
 }
@@ -202,7 +203,7 @@ PHP_FUNCTION(oci_bind_array_by_name)
 	zval *bind_var = NULL;
 	php_oci_statement *statement;
 	
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsz/l|ll", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rszl|ll", &z_statement, &name, &name_len, &bind_var, &max_array_len, &max_item_len, &type) == FAILURE) {
 		return;
 	}
 
@@ -1439,7 +1440,7 @@ PHP_FUNCTION(oci_fetch_all)
 
 	PHP_OCI_ZVAL_TO_STATEMENT(z_statement, statement);
 
-	zval_dtor(array);
+	zval_ptr_dtor(array);
 
 	while (skip--) {
 		if (php_oci_statement_fetch(statement, nrows)) {

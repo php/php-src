@@ -1402,6 +1402,8 @@ void php_oci_define_hash_dtor(zval *data)
 		define->name = NULL;
 	}
 
+	zval_ptr_dtor(&define->val);
+
     efree(define);
 }
 /* }}} */
@@ -1414,9 +1416,9 @@ void php_oci_bind_hash_dtor(zval *data)
 {
 	php_oci_bind *bind = (php_oci_bind *) Z_PTR_P(data);
 
-	if (!Z_ISUNDEF(bind->parameter)) {
-		zval_ptr_dtor(&bind->parameter);
-		ZVAL_UNDEF(&bind->parameter);
+	if (!Z_ISUNDEF(bind->val)) {
+		zval_ptr_dtor(&bind->val);
+		ZVAL_UNDEF(&bind->val);
 	}
 
 	if (bind->array.elements) {
@@ -2642,7 +2644,7 @@ void php_oci_fetch_row (INTERNAL_FUNCTION_PARAMETERS, int mode, int expected_arg
 	if (placeholder == NULL) {
 		placeholder = return_value;
 	} else {
-		zval_dtor(placeholder);
+		zval_ptr_dtor(placeholder);
 	}
 
 	array_init(placeholder);

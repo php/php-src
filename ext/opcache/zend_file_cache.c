@@ -406,6 +406,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
+#else
+			if (opline->op1_type == IS_CONST) {
+				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op1);
+			}
+			if (opline->op2_type == IS_CONST) {
+				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
+			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
@@ -1000,15 +1007,22 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#else
+			if (opline->op1_type == IS_CONST) {
+				ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
+			}
+			if (opline->op2_type == IS_CONST) {
+				ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
+			}
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -1037,7 +1051,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
 			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}

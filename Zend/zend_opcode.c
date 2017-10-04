@@ -407,7 +407,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			zval_ptr_dtor_nogc(literal);
 			literal++;
 		}
-		efree(op_array->literals);
+		if (ZEND_USE_ABS_CONST_ADDR
+		 || !(op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
+			efree(op_array->literals);
+		}
 	}
 	efree(op_array->opcodes);
 
@@ -576,6 +579,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
+
+#if ZEND_USE_ABS_CONST_ADDR
 	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
 		CG(context).opcodes_size = op_array->last;
@@ -584,6 +589,20 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+#else
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes,
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16) +
+		sizeof(zval) * op_array->last_literal);
+	if (op_array->literals) {
+		memcpy(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16),
+			op_array->literals, sizeof(zval) * op_array->last_literal);
+		efree(op_array->literals);
+		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
+	}
+	CG(context).opcodes_size = op_array->last;
+	CG(context).literals_size = op_array->last_literal;
+#endif
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -671,12 +690,12 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			}
 		}
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
 		}
