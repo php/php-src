@@ -1082,7 +1082,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
 		rtd_key = lcname + 1;
 	} else {
-		lcname = RT_CONSTANT(op_array, opline->op1);
+		lcname = RT_CONSTANT(opline, opline->op1);
 		rtd_key = lcname + 1;
 	}
 
@@ -1123,7 +1123,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
 		rtd_key = lcname + 1;
 	} else {
-		lcname = RT_CONSTANT(op_array, opline->op1);
+		lcname = RT_CONSTANT(opline, opline->op1);
 		rtd_key = lcname + 1;
 	}
 	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
@@ -1158,7 +1158,7 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
 		rtd_key = lcname + 1;
 	} else {
-		lcname = RT_CONSTANT(op_array, opline->op1);
+		lcname = RT_CONSTANT(opline, opline->op1);
 		rtd_key = lcname + 1;
 	}
 
@@ -1304,7 +1304,8 @@ ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array) /* {{
 
 		CG(in_compilation) = 1;
 		while (opline_num != (uint32_t)-1) {
-			zval *parent_name = RT_CONSTANT(op_array, op_array->opcodes[opline_num-1].op2);
+			const zend_op *opline = &op_array->opcodes[opline_num-1];
+			zval *parent_name = RT_CONSTANT(opline, opline->op2);
 			if ((ce = zend_lookup_class_ex(Z_STR_P(parent_name), parent_name + 1, 0)) != NULL) {
 				do_bind_inherited_class(op_array, &op_array->opcodes[opline_num], EG(class_table), ce, 0);
 			}

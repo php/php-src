@@ -59,12 +59,10 @@ typedef struct _zend_op zend_op;
 #if SIZEOF_SIZE_T == 4
 # define ZEND_USE_ABS_JMP_ADDR      1
 # define ZEND_USE_ABS_CONST_ADDR    1
-# define ZEND_EX_USE_LITERALS       0
 # define ZEND_EX_USE_RUN_TIME_CACHE 1
 #else
 # define ZEND_USE_ABS_JMP_ADDR      0
 # define ZEND_USE_ABS_CONST_ADDR    0
-# define ZEND_EX_USE_LITERALS       1
 # define ZEND_EX_USE_RUN_TIME_CACHE 1
 #endif
 
@@ -470,9 +468,6 @@ struct _zend_execute_data {
 #if ZEND_EX_USE_RUN_TIME_CACHE
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
 #endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;         /* cache op_array->literals       */
-#endif
 };
 
 #define ZEND_CALL_FUNCTION           (0 << 0)
@@ -616,63 +611,37 @@ struct _zend_execute_data {
 #if ZEND_USE_ABS_CONST_ADDR
 
 /* run-time constant */
-# define RT_CONSTANT_EX(base, node) \
+# define RT_CONSTANT(opline, node) \
 	(node).zv
 
 /* convert constant from compile-time to run-time */
-# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, node) do { \
 		(node).zv = CT_CONSTANT_EX(op_array, (node).constant); \
 	} while (0)
 
-/* convert constant back from run-time to compile-time */
-# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
-		(node).constant = (node).zv - (op_array)->literals; \
-	} while (0)
-
 #else
 
+/* At run-time, constants are allocated together with op_array->opcodes
+ * and addressed relatively to current opline.
+ */
+
 /* run-time constant */
-# define RT_CONSTANT_EX(base, node) \
-	((zval*)(((char*)(base)) + (node).constant))
+# define RT_CONSTANT(opline, node) \
+	((zval*)(((char*)(opline)) + (int32_t)(node).constant))
 
 /* convert constant from compile-time to run-time */
-# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
-		(node).constant *= sizeof(zval); \
-	} while (0)
-
-/* convert constant back from run-time to compile-time (do nothing) */
-# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
-		(node).constant /= sizeof(zval); \
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, node) do { \
+		(node).constant = \
+			(((char*)CT_CONSTANT_EX(op_array, (node).constant)) - \
+			((char*)opline)); \
 	} while (0)
 
 #endif
 
-#if ZEND_EX_USE_LITERALS
-
-# define EX_LITERALS() \
-	EX(literals)
-
-# define EX_LOAD_LITERALS(op_array) do { \
-		EX(literals) = (op_array)->literals; \
+/* convert constant back from run-time to compile-time */
+#define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, node) do { \
+		(node).constant = RT_CONSTANT(opline, node) - (op_array)->literals; \
 	} while (0)
-
-#else
-
-# define EX_LITERALS() \
-	EX(func)->op_array.literals
-
-# define EX_LOAD_LITERALS(op_array) do { \
-	} while (0)
-
-#endif
-
-/* run-time constant */
-#define RT_CONSTANT(op_array, node) \
-	RT_CONSTANT_EX((op_array)->literals, node)
-
-/* constant in currently executed function */
-#define EX_CONSTANT(node) \
-	RT_CONSTANT_EX(EX_LITERALS(), node)
 
 #if ZEND_EX_USE_RUN_TIME_CACHE
 

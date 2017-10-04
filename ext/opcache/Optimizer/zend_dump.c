@@ -568,7 +568,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (opline->op1_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zend_dump_const(CRT_CONSTANT_EX(op_array, opline, opline->op1, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
 	} else if (opline->op1_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa && ssa->ops) {
 			int ssa_var_num = ssa->ops[opline - op_array->opcodes].op1_use;
@@ -604,7 +604,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (opline->op2_type == IS_CONST) {
-		zval *op = CRT_CONSTANT_EX(op_array, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS));
+		zval *op = CRT_CONSTANT_EX(op_array, opline, opline->op2, (dump_flags & ZEND_DUMP_RT_CONSTANTS));
 		if (opline->opcode == ZEND_SWITCH_LONG || opline->opcode == ZEND_SWITCH_STRING) {
 			HashTable *jumptable = Z_ARRVAL_P(op);
 			zend_string *key;
@@ -670,7 +670,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		}
 	}
 	if (opline->result_type == IS_CONST) {
-		zend_dump_const(CRT_CONSTANT_EX(op_array, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
+		zend_dump_const(CRT_CONSTANT_EX(op_array, opline, opline->result, (dump_flags & ZEND_DUMP_RT_CONSTANTS)));
 	} else if (ssa && ssa->ops && ssa->ops[opline - op_array->opcodes].result_use >= 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 			if (ssa && ssa->ops) {

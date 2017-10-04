@@ -70,12 +70,20 @@
 # define EXECUTE_DATA_DC
 # define EXECUTE_DATA_CC
 # define NO_EXECUTE_DATA_CC
+# define OPLINE_D           void
+# define OPLINE_C
+# define OPLINE_DC
+# define OPLINE_CC
 #else
 # define EXECUTE_DATA_D     zend_execute_data* execute_data
 # define EXECUTE_DATA_C     execute_data
 # define EXECUTE_DATA_DC    , EXECUTE_DATA_D
 # define EXECUTE_DATA_CC    , EXECUTE_DATA_C
 # define NO_EXECUTE_DATA_CC , NULL
+# define OPLINE_D           const zend_op* opline
+# define OPLINE_C           opline
+# define OPLINE_DC          , OPLINE_D
+# define OPLINE_CC          , OPLINE_C
 #endif
 
 #if defined(ZEND_VM_IP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
@@ -93,15 +101,14 @@
 
 typedef int (ZEND_FASTCALL *incdec_t)(zval *);
 
-#define get_zval_ptr(op_type, node, should_free, type) _get_zval_ptr(op_type, node, should_free, type EXECUTE_DATA_CC)
-#define get_zval_ptr_deref(op_type, node, should_free, type) _get_zval_ptr_deref(op_type, node, should_free, type EXECUTE_DATA_CC)
-#define get_zval_ptr_r(op_type, node, should_free) _get_zval_ptr_r(op_type, node, should_free EXECUTE_DATA_CC)
-#define get_zval_ptr_r_deref(op_type, node, should_free) _get_zval_ptr_r_deref(op_type, node, should_free EXECUTE_DATA_CC)
-#define get_zval_ptr_undef(op_type, node, should_free, type) _get_zval_ptr_undef(op_type, node, should_free, type EXECUTE_DATA_CC)
+#define get_zval_ptr(op_type, node, should_free, type) _get_zval_ptr(op_type, node, should_free, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_zval_ptr_deref(op_type, node, should_free, type) _get_zval_ptr_deref(op_type, node, should_free, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_zval_ptr_undef(op_type, node, should_free, type) _get_zval_ptr_undef(op_type, node, should_free, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_op_data_zval_ptr_r(op_type, node, should_free) _get_op_data_zval_ptr_r(op_type, node, should_free EXECUTE_DATA_CC OPLINE_CC)
 #define get_zval_ptr_ptr(op_type, node, should_free, type) _get_zval_ptr_ptr(op_type, node, should_free, type EXECUTE_DATA_CC)
 #define get_zval_ptr_ptr_undef(op_type, node, should_free, type) _get_zval_ptr_ptr(op_type, node, should_free, type EXECUTE_DATA_CC)
-#define get_obj_zval_ptr(op_type, node, should_free, type) _get_obj_zval_ptr(op_type, node, should_free, type EXECUTE_DATA_CC)
-#define get_obj_zval_ptr_undef(op_type, node, should_free, type) _get_obj_zval_ptr_undef(op_type, node, should_free, type EXECUTE_DATA_CC)
+#define get_obj_zval_ptr(op_type, node, should_free, type) _get_obj_zval_ptr(op_type, node, should_free, type EXECUTE_DATA_CC OPLINE_CC)
+#define get_obj_zval_ptr_undef(op_type, node, should_free, type) _get_obj_zval_ptr_undef(op_type, node, should_free, type EXECUTE_DATA_CC OPLINE_CC)
 #define get_obj_zval_ptr_ptr(op_type, node, should_free, type) _get_obj_zval_ptr_ptr(op_type, node, should_free, type EXECUTE_DATA_CC)
 
 #define RETURN_VALUE_USED(opline) ((opline)->result_type != IS_UNUSED)
@@ -435,7 +442,7 @@ static zend_always_inline zval *_get_zval_ptr_cv_deref_BP_VAR_W(uint32_t var EXE
 	return ret;
 }
 
-static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC)
+static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -447,7 +454,7 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_f
 	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return EX_CONSTANT(node);
+			return RT_CONSTANT(opline, node);
 		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv(node.var, type EXECUTE_DATA_CC);
 		} else {
@@ -456,7 +463,7 @@ static zend_always_inline zval *_get_zval_ptr(int op_type, znode_op node, zend_f
 	}
 }
 
-static zend_always_inline zval *_get_zval_ptr_r(int op_type, znode_op node, zend_free_op *should_free EXECUTE_DATA_DC)
+static zend_always_inline zval *_get_op_data_zval_ptr_r(int op_type, znode_op node, zend_free_op *should_free EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -468,7 +475,7 @@ static zend_always_inline zval *_get_zval_ptr_r(int op_type, znode_op node, zend
 	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return EX_CONSTANT(node);
+			return RT_CONSTANT(opline + 1, node);
 		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv_BP_VAR_R(node.var EXECUTE_DATA_CC);
 		} else {
@@ -477,7 +484,7 @@ static zend_always_inline zval *_get_zval_ptr_r(int op_type, znode_op node, zend
 	}
 }
 
-static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC)
+static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -489,7 +496,7 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return EX_CONSTANT(node);
+			return RT_CONSTANT(opline, node);
 		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv_deref(node.var, type EXECUTE_DATA_CC);
 		} else {
@@ -498,28 +505,7 @@ static zend_always_inline zval *_get_zval_ptr_deref(int op_type, znode_op node, 
 	}
 }
 
-static zend_always_inline zval *_get_zval_ptr_r_deref(int op_type, znode_op node, zend_free_op *should_free EXECUTE_DATA_DC)
-{
-	if (op_type & (IS_TMP_VAR|IS_VAR)) {
-		if (op_type == IS_TMP_VAR) {
-			return _get_zval_ptr_tmp(node.var, should_free EXECUTE_DATA_CC);
-		} else {
-			ZEND_ASSERT(op_type == IS_VAR);
-			return _get_zval_ptr_var_deref(node.var, should_free EXECUTE_DATA_CC);
-		}
-	} else {
-		*should_free = NULL;
-		if (op_type == IS_CONST) {
-			return EX_CONSTANT(node);
-		} else if (op_type == IS_CV) {
-			return _get_zval_ptr_cv_deref_BP_VAR_R(node.var EXECUTE_DATA_CC);
-		} else {
-			return NULL;
-		}
-	}
-}
-
-static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC)
+static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type & (IS_TMP_VAR|IS_VAR)) {
 		if (op_type == IS_TMP_VAR) {
@@ -531,7 +517,7 @@ static zend_always_inline zval *_get_zval_ptr_undef(int op_type, znode_op node, 
 	} else {
 		*should_free = NULL;
 		if (op_type == IS_CONST) {
-			return EX_CONSTANT(node);
+			return RT_CONSTANT(opline, node);
 		} else if (op_type == IS_CV) {
 			return _get_zval_ptr_cv_undef(node.var EXECUTE_DATA_CC);
 		} else {
@@ -569,7 +555,7 @@ static zend_always_inline zval *_get_obj_zval_ptr_unused(EXECUTE_DATA_D)
 	return &EX(This);
 }
 
-static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_free_op *should_free, int type EXECUTE_DATA_DC)
+static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		*should_free = NULL;
@@ -578,7 +564,7 @@ static inline zval *_get_obj_zval_ptr(int op_type, znode_op op, zend_free_op *sh
 	return get_zval_ptr(op_type, op, should_free, type);
 }
 
-static inline zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, zend_free_op *should_free, int type EXECUTE_DATA_DC)
+static inline zval *_get_obj_zval_ptr_undef(int op_type, znode_op op, zend_free_op *should_free, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	if (op_type == IS_UNUSED) {
 		*should_free = NULL;
@@ -1947,7 +1933,7 @@ use_read_property:
 	}
 }
 
-static zend_always_inline zval* zend_fetch_static_property_address(zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type, int type EXECUTE_DATA_DC)
+static zend_always_inline zval* zend_fetch_static_property_address(zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	zval *retval;
 	zend_string *name;
@@ -1979,7 +1965,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zval *varname
 
 			return retval;
 		} else {
-			zval *class_name = EX_CONSTANT(op2);
+			zval *class_name = RT_CONSTANT(opline, op2);
 
 			if (UNEXPECTED((ce = CACHED_PTR(Z_CACHE_SLOT_P(class_name))) == NULL)) {
 				ce = zend_fetch_class_by_name(Z_STR_P(class_name), class_name + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -2205,7 +2191,6 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	}
 
 	EX_LOAD_RUN_TIME_CACHE(op_array);
-	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 }
@@ -2234,7 +2219,6 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
 	EX_LOAD_RUN_TIME_CACHE(op_array);
-	EX_LOAD_LITERALS(op_array);
 
 	EG(current_execute_data) = execute_data;
 }
@@ -3018,13 +3002,13 @@ ZEND_API user_opcode_handler_t zend_get_user_opcode_handler(zend_uchar opcode)
 	return zend_user_opcode_handlers[opcode];
 }
 
-ZEND_API zval *zend_get_zval_ptr(int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
+ZEND_API zval *zend_get_zval_ptr(const zend_op *opline, int op_type, const znode_op *node, const zend_execute_data *execute_data, zend_free_op *should_free, int type)
 {
 	zval *ret;
 
 	switch (op_type) {
 		case IS_CONST:
-			ret = EX_CONSTANT(*node);
+			ret = RT_CONSTANT(opline, *node);
 			*should_free = NULL;
 			break;
 		case IS_TMP_VAR:

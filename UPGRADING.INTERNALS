@@ -10,6 +10,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
   h. valid_symbol_table removed
   i. array_init() and array_init_size()
+  j. Run-time constant operand addressing
 
 2. Build system changes
   a. Unix build system changes
@@ -51,6 +52,24 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
   i. array_init() and array_init_size() are not functions anymore.
      They don't return any values.
+
+  j. In 64-bit builds PHP-7.2 and below used relative run-time constant operand
+     addressing. E.g. opline->op1.constant kept an offset from start of literals
+     table - op_array->literals. To speedup access op_array->literals was cached
+     in execute_data->literals. So the resulting address calculated as
+     EX(literals) + opline->op1.constant.
+
+     Now at run-time literals allocated close to opcodes, and addressed
+     relatively from current opline. This eliminates load of EX(literals) on
+     each constant access as well as EX(literals) initialization on each call.
+
+     As result some related macros were removed (ZEND_EX_USE_LITERALS,
+     EX_LOAD_LITERALS, EX_LITERALS, RT_CONSTANT_EX, EX_CONSTANT) or changed
+     (RT_CONSTANT, ZEND_PASS_TWO_UPDATE_CONSTANT, ZEND_PASS_TWO_UNDO_CONSTANT).
+     This change way affect only some "system" extensions. EX_LITERALS,
+     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT than now
+     use "opline" (instead of "op_array") as first argument.
+
 
 ========================
 2. Build system changes

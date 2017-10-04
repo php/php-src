@@ -109,15 +109,15 @@ typedef struct _zend_cfg {
 #define ZEND_CALL_TREE                 (1<<23)
 #define ZEND_SSA_USE_CV_RESULTS        (1<<22)
 
-#define CRT_CONSTANT_EX(op_array, node, rt_constants) \
+#define CRT_CONSTANT_EX(op_array, opline, node, rt_constants) \
 	((rt_constants) ? \
-		RT_CONSTANT(op_array, (node)) \
+		RT_CONSTANT(opline, (node)) \
 	: \
 		CT_CONSTANT_EX(op_array, (node).constant) \
 	)
 
 #define CRT_CONSTANT(node) \
-	CRT_CONSTANT_EX(op_array, node, (build_flags & ZEND_RT_CONSTANTS))
+	CRT_CONSTANT_EX(op_array, opline, node, (build_flags & ZEND_RT_CONSTANTS))
 
 #define RETURN_VALUE_USED(opline) \
 	((opline)->result_type != IS_UNUSED)
