@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #75290 (debug info of Closures of internal functions contain
     garbage argument names). (Andrea)
 
+- OCI8:
+  . Fixed incorrect reference counting. (Dmitry, Tianfang Yang)
+
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
     only litespeed SAPI). (petk)
