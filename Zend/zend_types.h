@@ -456,9 +456,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_INFO_MASK				0xffff0000
 
 /* zval.value->gc.u.v.flags (common flags) */
-#define GC_PROTECTED                (1<<0) /* used for array/object recursion detection */
-#define GC_IMMUTABLE                (1<<1) /* string/array can't be canged in place */
-#define GC_COLLECTABLE				(1<<7)
+#define GC_COLLECTABLE				(1<<0)
+#define GC_PROTECTED                (1<<1) /* used for recursion detection */
+#define GC_IMMUTABLE                (1<<2) /* can't be canged in place */
+#define GC_PERSISTENT               (1<<3) /* allocated using malloc */
 
 #define GC_ARRAY					(IS_ARRAY          | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
@@ -491,20 +492,19 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define RESET_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
 /* string flags (zval.value->gc.u.flags) */
-#define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
-#define IS_STR_INTERNED				GC_IMMUTABLE /* interned string */
-#define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
+#define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
+#define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
+#define IS_STR_PERMANENT        	(1<<4)        /* relives request boundary */
 
 /* array flags */
-#define IS_ARRAY_PROTECTED			GC_PROTECTED
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
+#define IS_ARRAY_PERSISTENT			GC_PERSISTENT
 
 /* object flags (zval.value->gc.u.flags) */
-#define IS_OBJ_PROTECTED			GC_PROTECTED
-#define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
-#define IS_OBJ_FREE_CALLED			(1<<4)
-#define IS_OBJ_USE_GUARDS           (1<<5)
-#define IS_OBJ_HAS_GUARDS           (1<<6)
+#define IS_OBJ_DESTRUCTOR_CALLED	(1<<4)
+#define IS_OBJ_FREE_CALLED			(1<<5)
+#define IS_OBJ_USE_GUARDS           (1<<6)
+#define IS_OBJ_HAS_GUARDS           (1<<7)
 
 /* Recursion protection macros must be used only for arrays and objects */
 #define GC_IS_RECURSIVE(p) \

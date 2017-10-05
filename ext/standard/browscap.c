@@ -301,7 +301,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 {
 	browscap_parser_ctx *ctx = arg;
 	browser_data *bdata = ctx->bdata;
-	int persistent = bdata->htab->u.flags & HASH_FLAG_PERSISTENT;
+	int persistent = GC_FLAGS(bdata->htab) & IS_ARRAY_PERSISTENT;
 
 	if (!arg1) {
 		return;

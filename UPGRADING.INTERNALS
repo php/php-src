@@ -12,6 +12,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   i. array_init() and array_init_size()
   j. Run-time constant operand addressing
   k. Array/Object recursion protection
+  l. HASH_FLAG_PERSISTENT
 
 2. Build system changes
   a. Unix build system changes
@@ -84,6 +85,8 @@ PHP 7.2 INTERNALS UPGRADE NOTES
      Corresponding checks should be replaced by Z_REFCOUNTED() or
      !(GC_GLAGS(p) & GC_IMMUTABLE).
 
+  l. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
+     GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
 
 ========================
 2. Build system changes
