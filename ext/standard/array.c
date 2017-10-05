@@ -30,6 +30,7 @@
 #include <math.h>
 #include <time.h>
 #include <stdio.h>
+#include <float.h>
 #if HAVE_STRING_H
 #include <string.h>
 #else
@@ -2211,7 +2212,7 @@ double_str:
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(low, high);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = low; i < size && element >= high; ++i, element = low - (i * step)) {
+				for (i = 0, element = low; i < size && (element > high || fabs(high - element) < DBL_EPSILON); ++i, element = low - (i * step)) {
 					Z_DVAL(tmp) = element;
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
@@ -2225,7 +2226,7 @@ double_str:
 			RANGE_CHECK_DOUBLE_INIT_ARRAY(high, low);
 
 			ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
-				for (i = 0, element = low; i < size && element <= high; ++i, element = low + (i * step)) {
+				for (i = 0, element = low; i < size && (high > element || fabs(high - element) < DBL_EPSILON); ++i, element = low + (i * step)) {
 					Z_DVAL(tmp) = element;
 					ZEND_HASH_FILL_ADD(&tmp);
 				}
