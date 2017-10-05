@@ -2319,7 +2319,6 @@ static inline int accel_find_sapi(void)
 		"cli-server",
 		"cgi-fcgi",
 		"fpm-fcgi",
-		"apache2filter",
 		"apache2handler",
 		"litespeed",
 		"uwsgi",
