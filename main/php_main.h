@@ -34,8 +34,6 @@ PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additio
 PHPAPI void php_module_shutdown(void);
 PHPAPI void php_module_shutdown_for_exec(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
-PHPAPI int php_request_startup_for_hook(void);
-PHPAPI void php_request_shutdown_for_hook(void *dummy);
 
 PHPAPI int php_register_extensions(zend_module_entry **ptr, int count);
 
