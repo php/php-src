@@ -8,6 +8,10 @@ PHP                                                                        NEWS
   . Fixed bug #75290 (debug info of Closures of internal functions contain
     garbage argument names). (Andrea)
 
+- Apache2Handler:
+  . Fixed bug #75311 (error: 'zend_hash_key' has no member named 'arKey' in
+    apache2handler). (mcarbonneaux)
+
 - Date:
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
