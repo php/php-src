@@ -1590,39 +1590,8 @@ static void sigchld_handler(int apar)
 /* }}} */
 #endif
 
-/* {{{ php_start_sapi()
- */
-static int php_start_sapi(void)
-{
-	int retval = SUCCESS;
-
-	if(!SG(sapi_started)) {
-		zend_try {
-			PG(during_request_startup) = 1;
-
-			/* initialize global variables */
-			PG(modules_activated) = 0;
-			PG(header_is_being_sent) = 0;
-			PG(connection_status) = PHP_CONNECTION_NORMAL;
-
-			zend_activate();
-			zend_set_timeout(EG(timeout_seconds), 1);
-			zend_activate_modules();
-			PG(modules_activated)=1;
-		} zend_catch {
-			retval = FAILURE;
-		} zend_end_try();
-
-		SG(sapi_started) = 1;
-	}
-	return retval;
-}
-
-/* }}} */
-
 /* {{{ php_request_startup
  */
-#ifndef APACHE_HOOKS
 int php_request_startup(void)
 {
 	int retval = SUCCESS;
@@ -1702,61 +1671,6 @@ int php_request_startup(void)
 
 	return retval;
 }
-# else
-int php_request_startup(void)
-{
-	int retval = SUCCESS;
-
-	zend_interned_strings_activate();
-
-#if PHP_SIGCHILD
-	signal(SIGCHLD, sigchld_handler);
-#endif
-
-	if (php_start_sapi() == FAILURE) {
-		return FAILURE;
-	}
-
-	php_output_activate();
-	sapi_activate();
-	php_hash_environment();
-
-	zend_try {
-		PG(during_request_startup) = 1;
-		if (PG(expose_php)) {
-			sapi_add_header(SAPI_PHP_VERSION_HEADER, sizeof(SAPI_PHP_VERSION_HEADER)-1, 1);
-		}
-	} zend_catch {
-		retval = FAILURE;
-	} zend_end_try();
-
-	return retval;
-}
-# endif
-/* }}} */
-
-/* {{{ php_request_startup_for_hook
- */
-int php_request_startup_for_hook(void)
-{
-	int retval = SUCCESS;
-
-	zend_interned_strings_activate();
-
-#if PHP_SIGCHLD
-	signal(SIGCHLD, sigchld_handler);
-#endif
-
-	if (php_start_sapi() == FAILURE) {
-		return FAILURE;
-	}
-
-	php_output_activate();
-	sapi_activate_headers_only();
-	php_hash_environment();
-
-	return retval;
-}
 /* }}} */
 
 /* {{{ php_request_shutdown_for_exec
@@ -1769,60 +1683,6 @@ void php_request_shutdown_for_exec(void *dummy)
 	zend_interned_strings_deactivate();
 	shutdown_memory_manager(1, 1);
 }
-/* }}} */
-
-/* {{{ php_request_shutdown_for_hook
- */
-void php_request_shutdown_for_hook(void *dummy)
-{
-
-	if (PG(modules_activated)) zend_try {
-		php_call_shutdown_functions();
-	} zend_end_try();
-
-	if (PG(modules_activated)) {
-		zend_deactivate_modules();
-	}
-
-	if (PG(modules_activated)) {
-		php_free_shutdown_functions();
-	}
-
-	zend_try {
-		zend_unset_timeout();
-	} zend_end_try();
-
-	zend_try {
-		int i;
-
-		for (i = 0; i < NUM_TRACK_VARS; i++) {
-			zval_ptr_dtor(&PG(http_globals)[i]);
-		}
-	} zend_end_try();
-
-	zend_deactivate();
-
-	zend_try {
-		sapi_deactivate();
-	} zend_end_try();
-
-	zend_try {
-		php_shutdown_stream_hashes();
-	} zend_end_try();
-
-	zend_interned_strings_deactivate();
-
-	zend_try {
-		shutdown_memory_manager(CG(unclean_shutdown), 0);
-	} zend_end_try();
-
-#ifdef ZEND_SIGNALS
-	zend_try {
-		zend_signal_deactivate();
-	} zend_end_try();
-#endif
-}
-
 /* }}} */
 
 /* {{{ php_request_shutdown
