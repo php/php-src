@@ -18,10 +18,7 @@ array(1) refcount(%d){
   [0]=>
   array(1) refcount(%d){
     [0]=>
-    array(1) refcount(%d){
-      [0]=>
-      *RECURSION*
-    }
+    *RECURSION*
   }
 }
 array(1) refcount(%d){
@@ -30,13 +27,7 @@ array(1) refcount(%d){
     [0]=>
     array(1) refcount(%d){
       [0]=>
-      array(1) refcount(%d){
-        [0]=>
-        array(1) refcount(%d){
-          [0]=>
-          *RECURSION*
-        }
-      }
+      *RECURSION*
     }
   }
 }

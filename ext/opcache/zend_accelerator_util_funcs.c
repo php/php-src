@@ -181,7 +181,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
@@ -378,7 +378,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* constants table */
 	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
-	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {

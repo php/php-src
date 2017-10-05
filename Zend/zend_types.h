@@ -239,7 +239,7 @@ struct _zend_array {
 		struct {
 			ZEND_ENDIAN_LOHI_4(
 				zend_uchar    flags,
-				zend_uchar    nApplyCount,
+				zend_uchar    _unused,
 				zend_uchar    nIteratorsCount,
 				zend_uchar    consistency)
 		} v;
@@ -455,7 +455,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_INFO_SHIFT				16
 #define GC_INFO_MASK				0xffff0000
 
-/* zval.value->gc.u.v.flags */
+/* zval.value->gc.u.v.flags (common flags) */
+#define GC_PROTECTED                (1<<0) /* used for array/object recursion detection */
+#define GC_IMMUTABLE                (1<<1) /* string/array can't be canged in place */
 #define GC_COLLECTABLE				(1<<7)
 
 #define GC_ARRAY					(IS_ARRAY          | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
@@ -490,37 +492,38 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_PERSISTENT			(1<<0) /* allocated using malloc   */
-#define IS_STR_INTERNED				(1<<1) /* interned string          */
+#define IS_STR_INTERNED				GC_IMMUTABLE /* interned string */
 #define IS_STR_PERMANENT        	(1<<2) /* relives request boundary */
 
 /* array flags */
-#define IS_ARRAY_IMMUTABLE			(1<<1)
+#define IS_ARRAY_PROTECTED			GC_PROTECTED
+#define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
 
 /* object flags (zval.value->gc.u.flags) */
-#define IS_OBJ_APPLY_COUNT			0x07
+#define IS_OBJ_PROTECTED			GC_PROTECTED
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<3)
 #define IS_OBJ_FREE_CALLED			(1<<4)
 #define IS_OBJ_USE_GUARDS           (1<<5)
 #define IS_OBJ_HAS_GUARDS           (1<<6)
 
-#define Z_OBJ_APPLY_COUNT(zval) \
-	(Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT)
+/* Recursion protection macros must be used only for arrays and objects */
+#define GC_IS_RECURSIVE(p) \
+	(GC_FLAGS(p) & GC_PROTECTED)
 
-#define Z_OBJ_INC_APPLY_COUNT(zval) do { \
-		Z_GC_FLAGS(zval) = \
-			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \
-			((Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT) + 1); \
+#define GC_PROTECT_RECURSION(p) do { \
+		GC_FLAGS(p) |= GC_PROTECTED; \
 	} while (0)
 
-#define Z_OBJ_DEC_APPLY_COUNT(zval) do { \
-		Z_GC_FLAGS(zval) = \
-			(Z_GC_FLAGS(zval) & ~IS_OBJ_APPLY_COUNT) | \
-			((Z_GC_FLAGS(zval) & IS_OBJ_APPLY_COUNT) - 1); \
+#define GC_UNPROTECT_RECURSION(p) do { \
+		GC_FLAGS(p) &= ~GC_PROTECTED; \
 	} while (0)
 
-#define Z_OBJ_APPLY_COUNT_P(zv)     Z_OBJ_APPLY_COUNT(*(zv))
-#define Z_OBJ_INC_APPLY_COUNT_P(zv) Z_OBJ_INC_APPLY_COUNT(*(zv))
-#define Z_OBJ_DEC_APPLY_COUNT_P(zv) Z_OBJ_DEC_APPLY_COUNT(*(zv))
+#define Z_IS_RECURSIVE(zval)        GC_IS_RECURSIVE(Z_COUNTED(zval))
+#define Z_PROTECT_RECURSION(zval)   GC_PROTECT_RECURSION(Z_COUNTED(zval))
+#define Z_UNPROTECT_RECURSION(zval) GC_UNPROTECT_RECURSION(Z_COUNTED(zval))
+#define Z_IS_RECURSIVE_P(zv)        Z_IS_RECURSIVE(*(zv))
+#define Z_PROTECT_RECURSION_P(zv)   Z_PROTECT_RECURSION(*(zv))
+#define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
 #define Z_CONSTANT(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_CONSTANT) != 0)

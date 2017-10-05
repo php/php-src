@@ -72,19 +72,6 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 #define SET_INCONSISTENT(n)
 #endif
 
-#define HASH_PROTECT_RECURSION(ht)														\
-	if ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION) {									\
-		if (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >= (3 << ZEND_HASH_APPLY_SHIFT)) {\
-			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");\
-		}																				\
-		ZEND_HASH_INC_APPLY_COUNT(ht);													\
-	}
-
-#define HASH_UNPROTECT_RECURSION(ht)													\
-	if ((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION) {									\
-		ZEND_HASH_DEC_APPLY_COUNT(ht);													\
-	}
-
 #define ZEND_HASH_IF_FULL_DO_RESIZE(ht)				\
 	if ((ht)->nNumUsed >= (ht)->nTableSize) {		\
 		zend_hash_do_resize(ht);					\
@@ -170,11 +157,11 @@ static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
-static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
+static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 	GC_REFCOUNT(ht) = 1;
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? 0 : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
-	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | (bApplyProtection ? HASH_FLAG_APPLY_PROTECTION : 0) | HASH_FLAG_STATIC_KEYS;
+	ht->u.flags = (persistent ? HASH_FLAG_PERSISTENT : 0) | HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 	ht->nNumUsed = 0;
@@ -187,13 +174,13 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
-	_zend_hash_init_int(ht, nSize, pDestructor, persistent, 1);
+	_zend_hash_init_int(ht, nSize, pDestructor, persistent);
 }
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize ZEND_FILE_LINE_DC)
 {
 	HashTable *ht = emalloc(sizeof(HashTable));
-	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0, 1);
+	_zend_hash_init_int(ht, nSize, ZVAL_PTR_DTOR, 0);
 	return ht;
 }
 
@@ -243,11 +230,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_to_packed(HashTable *ht)
 	HT_HASH_RESET_PACKED(ht);
 	memcpy(ht->arData, old_buckets, sizeof(Bucket) * ht->nNumUsed);
 	pefree(old_data, (ht)->u.flags & HASH_FLAG_PERSISTENT);
-}
-
-ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
-{
-	_zend_hash_init_int(ht, nSize, pDestructor, persistent, bApplyProtection);
 }
 
 ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend_bool packed)
@@ -316,15 +298,6 @@ ZEND_API uint32_t zend_array_count(HashTable *ht)
 	return num;
 }
 /* }}} */
-
-ZEND_API void ZEND_FASTCALL zend_hash_set_apply_protection(HashTable *ht, zend_bool bApplyProtection)
-{
-	if (bApplyProtection) {
-		ht->u.flags |= HASH_FLAG_APPLY_PROTECTION;
-	} else {
-		ht->u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
-	}
-}
 
 ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPosition pos)
 {
@@ -1508,7 +1481,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_fu
 
 	IS_CONSISTENT(ht);
 
-	HASH_PROTECT_RECURSION(ht);
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
@@ -1522,7 +1494,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_fu
 			break;
 		}
 	}
-	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -1534,7 +1505,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_f
 
 	IS_CONSISTENT(ht);
 
-	HASH_PROTECT_RECURSION(ht);
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
@@ -1548,7 +1518,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_f
 			break;
 		}
 	}
-	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -1561,8 +1530,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_arguments(HashTable *ht, apply_
 	int result;
 
 	IS_CONSISTENT(ht);
-
-	HASH_PROTECT_RECURSION(ht);
 
 	for (idx = 0; idx < ht->nNumUsed; idx++) {
 		p = ht->arData + idx;
@@ -1583,8 +1550,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_apply_with_arguments(HashTable *ht, apply_
 		}
 		va_end(args);
 	}
-
-	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -1596,7 +1561,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 
 	IS_CONSISTENT(ht);
 
-	HASH_PROTECT_RECURSION(ht);
 	idx = ht->nNumUsed;
 	while (idx > 0) {
 		idx--;
@@ -1613,7 +1577,6 @@ ZEND_API void ZEND_FASTCALL zend_hash_reverse_apply(HashTable *ht, apply_func_t 
 			break;
 		}
 	}
-	HASH_UNPROTECT_RECURSION(ht);
 }
 
 
@@ -1776,7 +1739,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->pDestructor = source->pDestructor;
 
 	if (source->nNumUsed == 0) {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
+		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT)) | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
 		target->nNumOfElements = 0;
@@ -1784,7 +1747,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		target->nInternalPointer = HT_INVALID_IDX;
 		HT_SET_DATA_ADDR(target, &uninitialized_bucket);
 	} else if (GC_FLAGS(source) & IS_ARRAY_IMMUTABLE) {
-		target->u.flags = (source->u.flags & ~HASH_FLAG_PERSISTENT) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = source->u.flags & ~HASH_FLAG_PERSISTENT;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1801,7 +1764,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else if (source->u.flags & HASH_FLAG_PACKED) {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = source->u.flags & ~HASH_FLAG_PERSISTENT;
 		target->nTableMask = source->nTableMask;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
@@ -1824,7 +1787,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 			target->nInternalPointer = idx;
 		}
 	} else {
-		target->u.flags = (source->u.flags & ~(HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION;
+		target->u.flags = source->u.flags & ~HASH_FLAG_PERSISTENT;
 		target->nTableMask = source->nTableMask;
 		target->nNextFreeElement = source->nNextFreeElement;
 		target->nInternalPointer = source->nInternalPointer;
@@ -2402,11 +2365,28 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 	IS_CONSISTENT(ht1);
 	IS_CONSISTENT(ht2);
 
-	HASH_PROTECT_RECURSION(ht1);
-	HASH_PROTECT_RECURSION(ht2);
+	if (ht1 == ht2) {
+		return 0;
+	}
+
+	/* use bitwise OR to make only one conditional jump */
+	if (UNEXPECTED(GC_IS_RECURSIVE(ht1) | GC_IS_RECURSIVE(ht2))) {
+		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+	}
+
+	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
+		GC_PROTECT_RECURSION(ht1);
+	}
+	if (!(GC_FLAGS(ht2) & GC_IMMUTABLE)) {
+		GC_PROTECT_RECURSION(ht2);
+	}
 	result = zend_hash_compare_impl(ht1, ht2, compar, ordered);
-	HASH_UNPROTECT_RECURSION(ht1);
-	HASH_UNPROTECT_RECURSION(ht2);
+	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
+		GC_UNPROTECT_RECURSION(ht1);
+	}
+	if (!(GC_FLAGS(ht2) & GC_IMMUTABLE)) {
+		GC_UNPROTECT_RECURSION(ht2);
+	}
 
 	return result;
 }

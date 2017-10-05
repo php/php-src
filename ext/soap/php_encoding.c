@@ -453,7 +453,7 @@ static xmlNodePtr master_to_xml_int(encodePtr encode, zval *data, int style, xml
 	} else {
 		if (check_class_map && SOAP_GLOBAL(class_map) && data &&
 		    Z_TYPE_P(data) == IS_OBJECT &&
-		    !ZEND_HASH_GET_APPLY_COUNT(Z_OBJPROP_P(data))) {
+		    !GC_IS_RECURSIVE(Z_OBJPROP_P(data))) {
 			zend_class_entry *ce = Z_OBJCE_P(data);
 			zval *tmp;
 			zend_string *type_name;
@@ -1859,9 +1859,9 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_LIST &&
 			    sdlType->encode->details.sdl_type->kind != XSD_TYPEKIND_UNION) {
 
-				if (prop) ZEND_HASH_INC_APPLY_COUNT(prop);
+				if (prop) {GC_PROTECT_RECURSION(prop);}
 				xmlParam = master_to_xml(sdlType->encode, data, style, parent);
-				if (prop) ZEND_HASH_DEC_APPLY_COUNT(prop);
+				if (prop) {GC_UNPROTECT_RECURSION(prop);}
 			} else {
 				zval rv;
 				zval *tmp = get_zval_property(data, "_", &rv);

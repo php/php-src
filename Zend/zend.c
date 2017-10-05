@@ -334,16 +334,17 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
-				ZEND_PUTS(" *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
-				return;
+			if (Z_REFCOUNTED_P(expr)) {
+				if (Z_IS_RECURSIVE_P(expr)) {
+					ZEND_PUTS(" *RECURSION*");
+					return;
+				}
+				Z_PROTECT_RECURSION_P(expr);
 			}
 			print_flat_hash(Z_ARRVAL_P(expr));
 			ZEND_PUTS(")");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (Z_REFCOUNTED_P(expr)) {
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			break;
 		case IS_OBJECT:
@@ -353,7 +354,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
 			zend_string_release(class_name);
 
-			if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+			if (Z_IS_RECURSIVE_P(expr)) {
 				ZEND_PUTS(" *RECURSION*");
 				return;
 			}
@@ -362,9 +363,9 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 				properties = Z_OBJPROP_P(expr);
 			}
 			if (properties) {
-				Z_OBJ_INC_APPLY_COUNT_P(expr);
+				Z_PROTECT_RECURSION_P(expr);
 				print_flat_hash(properties);
-				Z_OBJ_DEC_APPLY_COUNT_P(expr);
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			ZEND_PUTS(")");
 			break;
@@ -384,15 +385,16 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			smart_str_appends(buf, "Array\n");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
-				smart_str_appends(buf, " *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
-				return;
+			if (Z_REFCOUNTED_P(expr)) {
+				if (Z_IS_RECURSIVE_P(expr)) {
+					smart_str_appends(buf, " *RECURSION*");
+					return;
+				}
+				Z_PROTECT_RECURSION_P(expr);
 			}
 			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (Z_REFCOUNTED_P(expr)) {
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			break;
 		case IS_OBJECT:
@@ -405,7 +407,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				zend_string_release(class_name);
 
 				smart_str_appends(buf, " Object\n");
-				if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+				if (Z_IS_RECURSIVE_P(expr)) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -413,9 +415,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				Z_OBJ_INC_APPLY_COUNT_P(expr);
+				Z_PROTECT_RECURSION_P(expr);
 				print_hash(buf, properties, indent, 1);
-				Z_OBJ_DEC_APPLY_COUNT_P(expr);
+				Z_UNPROTECT_RECURSION_P(expr);
 
 				if (is_temp) {
 					zend_hash_destroy(properties);

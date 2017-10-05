@@ -44,18 +44,6 @@
 #define IN_UNSET	(1<<2)
 #define IN_ISSET	(1<<3)
 
-#define Z_OBJ_PROTECT_RECURSION(zval_p) \
-	do { \
-		if (Z_OBJ_APPLY_COUNT_P(zval_p) >= 3) { \
-			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?"); \
-		} \
-		Z_OBJ_INC_APPLY_COUNT_P(zval_p); \
-	} while (0)
-
-
-#define Z_OBJ_UNPROTECT_RECURSION(zval_p) \
-	Z_OBJ_DEC_APPLY_COUNT_P(zval_p)
-
 /*
   __X accessors explanation:
 
@@ -1444,6 +1432,9 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 	zobj1 = Z_OBJ_P(o1);
 	zobj2 = Z_OBJ_P(o2);
 
+	if (zobj1 == zobj2) {
+		return 0; /* the same object */
+	}
 	if (zobj1->ce != zobj2->ce) {
 		return 1; /* different classes */
 	}
@@ -1456,40 +1447,45 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		p1 = zobj1->properties_table;
 		p2 = zobj2->properties_table;
 		end = p1 + zobj1->ce->default_properties_count;
-		Z_OBJ_PROTECT_RECURSION(o1);
-		Z_OBJ_PROTECT_RECURSION(o2);
+
+		/* use bitwise OR to make only one conditional jump */
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1) | Z_IS_RECURSIVE_P(o2))) {
+			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
+		}
+		Z_PROTECT_RECURSION_P(o1);
+		Z_PROTECT_RECURSION_P(o2);
 		do {
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					zval result;
 
 					if (compare_function(&result, p1, p2)==FAILURE) {
-						Z_OBJ_UNPROTECT_RECURSION(o1);
-						Z_OBJ_UNPROTECT_RECURSION(o2);
+						Z_UNPROTECT_RECURSION_P(o1);
+						Z_UNPROTECT_RECURSION_P(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
-						Z_OBJ_UNPROTECT_RECURSION(o1);
-						Z_OBJ_UNPROTECT_RECURSION(o2);
+						Z_UNPROTECT_RECURSION_P(o1);
+						Z_UNPROTECT_RECURSION_P(o2);
 						return Z_LVAL(result);
 					}
 				} else {
-					Z_OBJ_UNPROTECT_RECURSION(o1);
-					Z_OBJ_UNPROTECT_RECURSION(o2);
+					Z_UNPROTECT_RECURSION_P(o1);
+					Z_UNPROTECT_RECURSION_P(o2);
 					return 1;
 				}
 			} else {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
-					Z_OBJ_UNPROTECT_RECURSION(o1);
-					Z_OBJ_UNPROTECT_RECURSION(o2);
+					Z_UNPROTECT_RECURSION_P(o1);
+					Z_UNPROTECT_RECURSION_P(o2);
 					return 1;
 				}
 			}
 			p1++;
 			p2++;
 		} while (p1 != end);
-		Z_OBJ_UNPROTECT_RECURSION(o1);
-		Z_OBJ_UNPROTECT_RECURSION(o2);
+		Z_UNPROTECT_RECURSION_P(o1);
+		Z_UNPROTECT_RECURSION_P(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {

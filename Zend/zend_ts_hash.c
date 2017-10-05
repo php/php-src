@@ -69,16 +69,6 @@ ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pD
 	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent);
 }
 
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection)
-{
-#ifdef ZTS
-	ht->mx_reader = tsrm_mutex_alloc();
-	ht->mx_writer = tsrm_mutex_alloc();
-	ht->reader = 0;
-#endif
-	_zend_hash_init_ex(TS_HASH(ht), nSize, pDestructor, persistent, bApplyProtection);
-}
-
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)
 {
 	begin_write(ht);

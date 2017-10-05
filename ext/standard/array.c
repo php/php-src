@@ -743,30 +743,29 @@ PHP_FUNCTION(ksort)
 }
 /* }}} */
 
-PHPAPI zend_long php_count_recursive(zval *array, zend_long mode) /* {{{ */
+PHPAPI zend_long php_count_recursive(HashTable *ht) /* {{{ */
 {
 	zend_long cnt = 0;
 	zval *element;
 
-	if (Z_TYPE_P(array) == IS_ARRAY) {
-		if (Z_ARRVAL_P(array)->u.v.nApplyCount > 1) {
+	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+		if (GC_IS_RECURSIVE(ht)) {
 			php_error_docref(NULL, E_WARNING, "recursion detected");
 			return 0;
 		}
+		GC_PROTECT_RECURSION(ht);
+	}
 
-		cnt = zend_array_count(Z_ARRVAL_P(array));
-		if (mode == COUNT_RECURSIVE) {
-		    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
-				Z_ARRVAL_P(array)->u.v.nApplyCount++;
-			}
-			ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
-				ZVAL_DEREF(element);
-				cnt += php_count_recursive(element, COUNT_RECURSIVE);
-			} ZEND_HASH_FOREACH_END();
-		    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(array))) {
-				Z_ARRVAL_P(array)->u.v.nApplyCount--;
-			}
+	cnt = zend_array_count(ht);
+	ZEND_HASH_FOREACH_VAL(ht, element) {
+		ZVAL_DEREF(element);
+		if (Z_TYPE_P(element) == IS_ARRAY) {
+			cnt += php_count_recursive(Z_ARRVAL_P(element));
 		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+		GC_UNPROTECT_RECURSION(ht);
 	}
 
 	return cnt;
@@ -794,12 +793,10 @@ PHP_FUNCTION(count)
 			RETURN_LONG(0);
 			break;
 		case IS_ARRAY:
-			cnt = zend_array_count(Z_ARRVAL_P(array));
-			if (mode == COUNT_RECURSIVE) {
-				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(array), element) {
-					ZVAL_DEREF(element);
-					cnt += php_count_recursive(element, COUNT_RECURSIVE);
-				} ZEND_HASH_FOREACH_END();
+			if (mode != COUNT_RECURSIVE) {
+				cnt = zend_array_count(Z_ARRVAL_P(array));
+			} else {
+				cnt = php_count_recursive(Z_ARRVAL_P(array));
 			}
 			RETURN_LONG(cnt);
 			break;
@@ -1431,7 +1428,7 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			ZVAL_DEREF(zv);
 			SEPARATE_ARRAY(zv);
 			thash = Z_ARRVAL_P(zv);
-			if (thash->u.v.nApplyCount > 1) {
+			if (GC_IS_RECURSIVE(thash)) {
 				php_error_docref(NULL, E_WARNING, "recursion detected");
 				result = FAILURE;
 				break;
@@ -1442,12 +1439,12 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
 			Z_ADDREF(ref);
-			thash->u.v.nApplyCount++;
+			GC_PROTECT_RECURSION(thash);
 			result = php_array_walk(zv, userdata, recursive);
 			if (Z_TYPE_P(Z_REFVAL(ref)) == IS_ARRAY && thash == Z_ARRVAL_P(Z_REFVAL(ref))) {
 				/* If the hashtable changed in the meantime, we'll "leak" this apply count
 				 * increment -- our reference to thash is no longer valid. */
-				thash->u.v.nApplyCount--;
+				GC_UNPROTECT_RECURSION(thash);
 			}
 			zval_ptr_dtor(&ref);
 
@@ -2577,19 +2574,18 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 			}
 		}
 	} else if (Z_TYPE_P(entry) == IS_ARRAY) {
-		if ((Z_ARRVAL_P(entry)->u.v.nApplyCount > 1)) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
-			return;
-		}
-
-	    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(entry))) {
-			Z_ARRVAL_P(entry)->u.v.nApplyCount++;
+	    if (Z_REFCOUNTED_P(entry)) {
+			if (Z_IS_RECURSIVE_P(entry)) {
+				php_error_docref(NULL, E_WARNING, "recursion detected");
+				return;
+			}
+			Z_PROTECT_RECURSION_P(entry);
 		}
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL_P(entry), value_ptr) {
 			php_compact_var(eg_active_symbol_table, return_value, value_ptr);
 		} ZEND_HASH_FOREACH_END();
-	    if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(entry))) {
-			Z_ARRVAL_P(entry)->u.v.nApplyCount--;
+	    if (Z_REFCOUNTED_P(entry)) {
+			Z_UNPROTECT_RECURSION_P(entry);
 		}
 	}
 }
@@ -3636,7 +3632,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				ZVAL_DEREF(src_zval);
 				ZVAL_DEREF(dest_zval);
 				thash = Z_TYPE_P(dest_zval) == IS_ARRAY ? Z_ARRVAL_P(dest_zval) : NULL;
-				if ((thash && thash->u.v.nApplyCount > 1) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
+				if ((thash && GC_IS_RECURSIVE(thash)) || (src_entry == dest_entry && Z_ISREF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 					php_error_docref(NULL, E_WARNING, "recursion detected");
 					return 0;
 				}
@@ -3662,12 +3658,12 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 					src_zval = &tmp;
 				}
 				if (Z_TYPE_P(src_zval) == IS_ARRAY) {
-					if (thash && ZEND_HASH_APPLY_PROTECTION(thash)) {
-						thash->u.v.nApplyCount++;
+					if (thash && !(GC_FLAGS(thash) & GC_IMMUTABLE)) {
+						GC_PROTECT_RECURSION(thash);
 					}
 					ret = php_array_merge_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval));
-					if (thash && ZEND_HASH_APPLY_PROTECTION(thash)) {
-						thash->u.v.nApplyCount--;
+					if (thash && !(GC_FLAGS(thash) & GC_IMMUTABLE)) {
+						GC_UNPROTECT_RECURSION(thash);
 					}
 					if (!ret) {
 						return 0;
@@ -3761,8 +3757,8 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 
 		dest_zval = dest_entry;
 		ZVAL_DEREF(dest_zval);
-		if (Z_ARRVAL_P(dest_zval)->u.v.nApplyCount > 1 ||
-		    Z_ARRVAL_P(src_zval)->u.v.nApplyCount > 1 ||
+		if (Z_IS_RECURSIVE_P(dest_zval) ||
+		    Z_IS_RECURSIVE_P(src_zval) ||
 		    (Z_ISREF_P(src_entry) && Z_ISREF_P(dest_entry) && Z_REF_P(src_entry) == Z_REF_P(dest_entry) && (Z_REFCOUNT_P(dest_entry) % 2))) {
 			php_error_docref(NULL, E_WARNING, "recursion detected");
 			return 0;
@@ -3772,20 +3768,20 @@ PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src) /* {{{ *
 		SEPARATE_ZVAL(dest_entry);
 		dest_zval = dest_entry;
 
-		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
-			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount++;
+		if (Z_REFCOUNTED_P(dest_zval)) {
+			Z_PROTECT_RECURSION_P(dest_zval);
 		}
-		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(src_zval))) {
-			Z_ARRVAL_P(src_zval)->u.v.nApplyCount++;
+		if (Z_REFCOUNTED_P(src_zval)) {
+			Z_PROTECT_RECURSION_P(src_zval);
 		}
 
 		ret = php_array_replace_recursive(Z_ARRVAL_P(dest_zval), Z_ARRVAL_P(src_zval));
 
-		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(dest_zval))) {
-			Z_ARRVAL_P(dest_zval)->u.v.nApplyCount--;
+		if (Z_REFCOUNTED_P(dest_zval)) {
+			Z_UNPROTECT_RECURSION_P(dest_zval);
 		}
-		if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(src_zval))) {
-			Z_ARRVAL_P(src_zval)->u.v.nApplyCount--;
+		if (Z_REFCOUNTED_P(src_zval)) {
+			Z_UNPROTECT_RECURSION_P(src_zval);
 		}
 
 		if (!ret) {

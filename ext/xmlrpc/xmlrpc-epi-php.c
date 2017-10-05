@@ -556,9 +556,12 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_VECTOR_TYPE vtype;
 
 						ht = HASH_OF(&val);
-						if (ht && ht->u.v.nApplyCount > 1) {
-							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
-							return NULL;
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							if (GC_IS_RECURSIVE(ht)) {
+								zend_throw_error(NULL, "XML-RPC doesn't support circular references");
+								return NULL;
+							}
+							GC_PROTECT_RECURSION(ht);
 						}
 
 						ZVAL_COPY(&val_arr, &val);
@@ -569,10 +572,6 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
 							ZVAL_DEREF(pIter);
-							ht = HASH_OF(pIter);
-							if (ht) {
-								ht->u.v.nApplyCount++;
-							}
 							if (my_key == NULL) {
 								char *num_str = NULL;
 
@@ -587,10 +586,10 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							} else {
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(ZSTR_VAL(my_key), pIter, depth++));
 							}
-							if (ht) {
-								ht->u.v.nApplyCount--;
-							}
 						} ZEND_HASH_FOREACH_END();
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							GC_UNPROTECT_RECURSION(ht);
+						}
 						zval_ptr_dtor(&val_arr);
 					}
 					break;

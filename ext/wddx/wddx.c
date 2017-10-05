@@ -640,28 +640,28 @@ void php_wddx_serialize_var(wddx_packet *packet, zval *var, zend_string *name)
 
 		case IS_ARRAY:
 			ht = Z_ARRVAL_P(var);
-			if (ht->u.v.nApplyCount > 1) {
-				zend_throw_error(NULL, "WDDX doesn't support circular references");
-				return;
-			}
-			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount++;
+			if (Z_REFCOUNTED_P(var)) {
+				if (GC_IS_RECURSIVE(ht)) {
+					zend_throw_error(NULL, "WDDX doesn't support circular references");
+					return;
+				}
+				GC_PROTECT_RECURSION(ht);
 			}
 			php_wddx_serialize_array(packet, var);
-			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount--;
+			if (Z_REFCOUNTED_P(var)) {
+				GC_UNPROTECT_RECURSION(ht);
 			}
 			break;
 
 		case IS_OBJECT:
 			ht = Z_OBJPROP_P(var);
-			if (ht->u.v.nApplyCount > 1) {
+			if (GC_IS_RECURSIVE(ht)) {
 				zend_throw_error(NULL, "WDDX doesn't support circular references");
 				return;
 			}
-			ht->u.v.nApplyCount++;
+			GC_PROTECT_RECURSION(ht);
  			php_wddx_serialize_object(packet, var);
-			ht->u.v.nApplyCount--;
+			GC_UNPROTECT_RECURSION(ht);
 			break;
 	}
 
@@ -691,28 +691,26 @@ static void php_wddx_add_var(wddx_packet *packet, zval *name_var)
 
 		target_hash = HASH_OF(name_var);
 
-		if (is_array && target_hash->u.v.nApplyCount > 1) {
-			php_error_docref(NULL, E_WARNING, "recursion detected");
-			return;
-		}
-
 		if (!Z_REFCOUNTED_P(name_var)) {
 			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				php_wddx_add_var(packet, val);
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			ZEND_HASH_FOREACH_VAL(target_hash, val) {
-				if (is_array) {
-					target_hash->u.v.nApplyCount++;
+			if (is_array) {
+				if (GC_IS_RECURSIVE(target_hash)) {
+					php_error_docref(NULL, E_WARNING, "recursion detected");
+					return;
 				}
-
+				GC_PROTECT_RECURSION(target_hash);
+			}
+			ZEND_HASH_FOREACH_VAL(target_hash, val) {
 				ZVAL_DEREF(val);
 				php_wddx_add_var(packet, val);
 
-				if (is_array) {
-					target_hash->u.v.nApplyCount--;
-				}
 			} ZEND_HASH_FOREACH_END();
+			if (is_array) {
+				GC_UNPROTECT_RECURSION(target_hash);
+			}
 		}
 	}
 }

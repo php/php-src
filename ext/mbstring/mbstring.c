@@ -3129,11 +3129,12 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 		return NULL;
 	}
 
-	if (input->u.v.nApplyCount++ > 1) {
-		input->u.v.nApplyCount--;
+	if (GC_IS_RECURSIVE(input)) {
+		GC_UNPROTECT_RECURSION(input);
 		php_error_docref(NULL, E_WARNING, "Cannot convert recursively referenced values");
 		return NULL;
 	}
+	GC_PROTECT_RECURSION(input);
 	output = zend_new_array(zend_hash_num_elements(input));
 	ZEND_HASH_FOREACH_KEY_VAL(input, idx, key, entry) {
 		/* convert key */
@@ -3177,7 +3178,7 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 			zend_hash_index_add(output, idx, &entry_tmp);
 		}
 	} ZEND_HASH_FOREACH_END();
-	input->u.v.nApplyCount--;
+	GC_UNPROTECT_RECURSION(input);
 
 	return output;
 }
@@ -3764,11 +3765,11 @@ PHP_FUNCTION(mb_convert_variables)
 					if (target_hash != NULL) {
 						while ((hash_entry = zend_hash_get_current_data(target_hash)) != NULL) {
 							if (Z_REFCOUNTED_P(var)) {
-								if (++target_hash->u.v.nApplyCount > 1) {
-									--target_hash->u.v.nApplyCount;
+								if (GC_IS_RECURSIVE(target_hash)) {
 									recursion_error = 1;
 									goto detect_end;
 								}
+								GC_PROTECT_RECURSION(target_hash);
 							}
 							zend_hash_move_forward(target_hash);
 							if (Z_TYPE_P(hash_entry) == IS_INDIRECT) {
@@ -3813,9 +3814,7 @@ detect_end:
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
 				if (Z_REFCOUNTED_P(var)) {
-					if (HASH_OF(var)->u.v.nApplyCount > 1) {
-						HASH_OF(var)->u.v.nApplyCount--;
-					}
+					Z_UNPROTECT_RECURSION_P(var);
 				}
 			}
 			efree(stack);
@@ -3880,11 +3879,11 @@ detect_end:
 						ZVAL_DEREF(hash_entry);
 						if (Z_TYPE_P(hash_entry) == IS_ARRAY || Z_TYPE_P(hash_entry) == IS_OBJECT) {
 							if (Z_REFCOUNTED_P(hash_entry)) {
-								if (++(HASH_OF(hash_entry)->u.v.nApplyCount) > 1) {
-									--(HASH_OF(hash_entry)->u.v.nApplyCount);
+								if (Z_IS_RECURSIVE_P(hash_entry)) {
 									recursion_error = 1;
 									goto conv_end;
 								}
+								Z_PROTECT_RECURSION_P(hash_entry);
 							}
 							if (stack_level >= stack_max) {
 								stack_max += PHP_MBSTR_STACK_BLOCK_SIZE;
@@ -3933,9 +3932,7 @@ conv_end:
 		if (recursion_error) {
 			while(stack_level-- && (var = &stack[stack_level])) {
 				if (Z_REFCOUNTED_P(var)) {
-					if (HASH_OF(var)->u.v.nApplyCount > 1) {
-						HASH_OF(var)->u.v.nApplyCount--;
-					}
+					Z_UNPROTECT_RECURSION_P(var);
 				}
 			}
 			efree(stack);
@@ -4787,12 +4784,12 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 		return 0;
 	}
 
-	if (vars->u.v.nApplyCount++ > 1) {
-		vars->u.v.nApplyCount--;
+	if (GC_IS_RECURSIVE(vars)) {
 		mbfl_buffer_converter_delete(convd);
 		php_error_docref(NULL, E_WARNING, "Cannot not handle circular references");
 		return 0;
 	}
+	GC_PROTECT_RECURSION(vars);
 	ZEND_HASH_FOREACH_KEY_VAL(vars, idx, key, entry) {
 		ZVAL_DEREF(entry);
 		if (key) {
@@ -4826,7 +4823,7 @@ MBSTRING_API int php_mb_check_encoding_recursive(HashTable *vars, const zend_str
 				break;
 		}
 	} ZEND_HASH_FOREACH_END();
-	vars->u.v.nApplyCount--;
+	GC_UNPROTECT_RECURSION(vars);
 	mbfl_buffer_converter_delete(convd);
 	return valid;
 }
