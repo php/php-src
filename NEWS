@@ -17,6 +17,10 @@ PHP                                                                        NEWS
   . Fixed bug #75311 (error: 'zend_hash_key' has no member named 'arKey' in
     apache2handler). (mcarbonneaux)
 
+- Intl:
+  . Fixed bug #75318 (The parameter of UConverter::getAliases() is not
+    optional). (cmb)
+
 - OCI8:
   . Fixed incorrect reference counting. (Dmitry, Tianfang Yang)
 
