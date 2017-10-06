@@ -897,7 +897,7 @@ static PHP_METHOD(UConverter, getAvailable) {
 /* }}} */
 
 /* {{{ proto array UConverter::getAliases(string name) */
-ZEND_BEGIN_ARG_INFO_EX(php_converter_getaliases_arginfo, 0, ZEND_RETURN_VALUE, 0)
+ZEND_BEGIN_ARG_INFO_EX(php_converter_getaliases_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, name)
 ZEND_END_ARG_INFO();
 static PHP_METHOD(UConverter, getAliases) {

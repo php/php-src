@@ -20,6 +20,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed bug #75303 (sha3 hangs on bigendian). (Remi)
 
+- Intl:
+  . Fixed bug #75318 (The parameter of UConverter::getAliases() is not
+    optional). (cmb)
+
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
     only litespeed SAPI). (petk)
