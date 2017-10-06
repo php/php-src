@@ -20,9 +20,9 @@ function foo() {
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_001.php:1-9
-L0:     RETURN int(1)
+L0 (9):     RETURN int(1)
 
 foo: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_001.php:2-7
-L0:     RETURN int(4)
+L0 (6):     RETURN int(4)
