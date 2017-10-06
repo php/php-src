@@ -683,7 +683,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_SEND_REF:
 				case ZEND_SEND_UNPACK:
 				case ZEND_FE_RESET_RW:
-//TODO: ???
+				case ZEND_MAKE_REF:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
@@ -737,6 +737,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_FETCH_OBJ_RW:
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 				case ZEND_FETCH_OBJ_UNSET:
+				case ZEND_FETCH_LIST_W:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;

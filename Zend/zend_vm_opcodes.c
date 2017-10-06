@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <zend.h>
 
-static const char *zend_vm_opcodes_names[198] = {
+static const char *zend_vm_opcodes_names[199] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -120,7 +120,7 @@ static const char *zend_vm_opcodes_names[198] = {
 	"ZEND_FETCH_UNSET",
 	"ZEND_FETCH_DIM_UNSET",
 	"ZEND_FETCH_OBJ_UNSET",
-	"ZEND_FETCH_LIST",
+	"ZEND_FETCH_LIST_R",
 	"ZEND_FETCH_CONSTANT",
 	NULL,
 	"ZEND_EXT_STMT",
@@ -220,9 +220,10 @@ static const char *zend_vm_opcodes_names[198] = {
 	"ZEND_FUNC_GET_ARGS",
 	"ZEND_UNSET_CV",
 	"ZEND_ISSET_ISEMPTY_CV",
+	"ZEND_FETCH_LIST_W",
 };
 
-static uint32_t zend_vm_opcodes_flags[198] = {
+static uint32_t zend_vm_opcodes_flags[199] = {
 	0x00000000,
 	0x00000707,
 	0x00000707,
@@ -421,6 +422,7 @@ static uint32_t zend_vm_opcodes_flags[198] = {
 	0x00000103,
 	0x00000101,
 	0x00020101,
+	0x00000701,
 };
 
 ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {

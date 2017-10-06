@@ -45,6 +45,11 @@ Standard:
 2. New Features
 ========================================
 
+Core:
+  . Array destructuring now supports reference assignments using the syntax
+    [&$a, [$b, &$c]] = $d. The same is also supported for list().
+    (RFC: https://wiki.php.net/rfc/list_reference_assignment)
+
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
 

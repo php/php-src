@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
+  . Added support for references in list() and array destructuring, per
+    RFC https://wiki.php.net/rfc/list_reference_assignment.
+    (David Walker)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)

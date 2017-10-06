@@ -1150,6 +1150,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
 			/* TODO: Encode the "reason" into opline->extended_value??? */
 			var = opline->result.var;
 			opline++;
@@ -1192,6 +1193,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 						case ZEND_FETCH_DIM_RW:
 						case ZEND_FETCH_DIM_FUNC_ARG:
 						case ZEND_FETCH_DIM_UNSET:
+						case ZEND_FETCH_LIST_W:
 						case ZEND_ASSIGN_DIM:
 							msg = "Cannot use string offset as an array";
 							break;
@@ -1857,7 +1859,12 @@ static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result,
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_LIST(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void zend_fetch_dimension_address_LIST_w(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+{
+	zend_fetch_dimension_address(result, container, dim, IS_TMP_VAR, BP_VAR_W EXECUTE_DATA_CC);
+}
+
+static zend_never_inline void zend_fetch_dimension_address_LIST_r(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
 {
 	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
 }

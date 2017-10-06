@@ -2994,12 +2994,14 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_UNSET:
 		case ZEND_FETCH_DIM_FUNC_ARG:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_W:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = t1 & ~(MAY_BE_RC1|MAY_BE_RCN);
 				if (opline->opcode == ZEND_FETCH_DIM_W ||
 				    opline->opcode == ZEND_FETCH_DIM_RW ||
-				    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) {
+				    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
+                    opline->opcode == ZEND_FETCH_LIST_W) {
 					if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
 						if (opline->opcode != ZEND_FETCH_DIM_FUNC_ARG) {
 							tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
@@ -3046,6 +3048,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_FETCH_DIM_W:
 						case ZEND_FETCH_DIM_RW:
 						case ZEND_FETCH_DIM_FUNC_ARG:
+						case ZEND_FETCH_LIST_W:
 						case ZEND_ASSIGN_ADD:
 						case ZEND_ASSIGN_SUB:
 						case ZEND_ASSIGN_MUL:
@@ -3116,13 +3119,14 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
-				opline->opcode != ZEND_FETCH_LIST ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
 				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
-					&& opline->opcode != ZEND_FETCH_LIST,
+					&& opline->opcode != ZEND_FETCH_LIST_R,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||
-			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG) {
+			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
+			    opline->opcode == ZEND_FETCH_LIST_W) {
 				if (t1 & (MAY_BE_ERROR|MAY_BE_TRUE|MAY_BE_LONG|MAY_BE_DOUBLE|MAY_BE_RESOURCE|MAY_BE_OBJECT)) {
 					tmp |= MAY_BE_ERROR;
 				} else if (opline->op2_type == IS_UNUSED) {
@@ -3256,6 +3260,13 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				} else {
 					UPDATE_SSA_OBJ_TYPE(NULL, 0, ssa_ops[i].result_def);
 				}
+			}
+			break;
+		case ZEND_MAKE_REF:
+			tmp = MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+			if (ssa_ops[i].op1_def >= 0) {
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 			}
 			break;
 		case ZEND_CATCH:
@@ -4007,7 +4018,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				case ZEND_CASE:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
-				case ZEND_FETCH_LIST:
+				case ZEND_FETCH_LIST_R:
 				case ZEND_QM_ASSIGN:
 				case ZEND_SEND_VAL:
 				case ZEND_SEND_VAL_EX:
