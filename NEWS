@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - Hash:
   . Fixed Bug #75284 (sha3 is not supported on bigendian machine). (Remi)
 
+- Intl:
+  . Fixed bug #75318 (The parameter of UConverter::getAliases() is not
+    optional). (cmb)
+
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
     only litespeed SAPI). (petk)
