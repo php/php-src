@@ -393,9 +393,9 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (!b) {
-		len = fprintf(stderr, "L%u:", (uint32_t)(opline - op_array->opcodes));
+		len = fprintf(stderr, "L%u (%u):", (uint32_t)(opline - op_array->opcodes), opline->lineno);
 	}
-	fprintf(stderr, "%*c", 8-len, ' ');
+	fprintf(stderr, "%*c", 12-len, ' ');
 
 	if (!ssa || !ssa->ops || ssa->ops[opline - op_array->opcodes].result_use < 0) {
 		if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
