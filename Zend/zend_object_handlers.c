@@ -1448,12 +1448,15 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 		p2 = zobj2->properties_table;
 		end = p1 + zobj1->ce->default_properties_count;
 
+		/* It's enough to protect only one of the objects.
+		 * The second one may be referenced from the first and this may cause
+		 * false recursion detection.
+		 */
 		/* use bitwise OR to make only one conditional jump */
-		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1) | Z_IS_RECURSIVE_P(o2))) {
+		if (UNEXPECTED(Z_IS_RECURSIVE_P(o1))) {
 			zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 		}
 		Z_PROTECT_RECURSION_P(o1);
-		Z_PROTECT_RECURSION_P(o2);
 		do {
 			if (Z_TYPE_P(p1) != IS_UNDEF) {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
@@ -1461,23 +1464,19 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 
 					if (compare_function(&result, p1, p2)==FAILURE) {
 						Z_UNPROTECT_RECURSION_P(o1);
-						Z_UNPROTECT_RECURSION_P(o2);
 						return 1;
 					}
 					if (Z_LVAL(result) != 0) {
 						Z_UNPROTECT_RECURSION_P(o1);
-						Z_UNPROTECT_RECURSION_P(o2);
 						return Z_LVAL(result);
 					}
 				} else {
 					Z_UNPROTECT_RECURSION_P(o1);
-					Z_UNPROTECT_RECURSION_P(o2);
 					return 1;
 				}
 			} else {
 				if (Z_TYPE_P(p2) != IS_UNDEF) {
 					Z_UNPROTECT_RECURSION_P(o1);
-					Z_UNPROTECT_RECURSION_P(o2);
 					return 1;
 				}
 			}
@@ -1485,7 +1484,6 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 			p2++;
 		} while (p1 != end);
 		Z_UNPROTECT_RECURSION_P(o1);
-		Z_UNPROTECT_RECURSION_P(o2);
 		return 0;
 	} else {
 		if (!zobj1->properties) {

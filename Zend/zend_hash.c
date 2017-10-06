@@ -2369,23 +2369,20 @@ ZEND_API int zend_hash_compare(HashTable *ht1, HashTable *ht2, compare_func_t co
 		return 0;
 	}
 
-	/* use bitwise OR to make only one conditional jump */
-	if (UNEXPECTED(GC_IS_RECURSIVE(ht1) | GC_IS_RECURSIVE(ht2))) {
+	/* It's enough to protect only one of the arrays.
+	 * The second one may be referenced from the first and this may cause
+	 * false recursion detection.
+	 */
+	if (UNEXPECTED(GC_IS_RECURSIVE(ht1))) {
 		zend_error_noreturn(E_ERROR, "Nesting level too deep - recursive dependency?");
 	}
 
 	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
 		GC_PROTECT_RECURSION(ht1);
 	}
-	if (!(GC_FLAGS(ht2) & GC_IMMUTABLE)) {
-		GC_PROTECT_RECURSION(ht2);
-	}
 	result = zend_hash_compare_impl(ht1, ht2, compar, ordered);
 	if (!(GC_FLAGS(ht1) & GC_IMMUTABLE)) {
 		GC_UNPROTECT_RECURSION(ht1);
-	}
-	if (!(GC_FLAGS(ht2) & GC_IMMUTABLE)) {
-		GC_UNPROTECT_RECURSION(ht2);
 	}
 
 	return result;
