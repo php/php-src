@@ -269,6 +269,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_RETURN_BY_REF:
 			return 0;
@@ -307,7 +308,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			 * zend_optimizer_replace_by_const() supports this. */
 			return 0;
 		case ZEND_CASE:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
 			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -450,7 +451,8 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_IS:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_W:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
@@ -571,6 +573,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_FETCH_DIM_RW:
 				case ZEND_FETCH_DIM_FUNC_ARG:
 				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_LIST_W:
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
 				case ZEND_RETURN_BY_REF:
@@ -593,15 +596,15 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE and ZEND_FETCH_LIST are exceptions, they keeps operand
+				 * ZEND_CASE and ZEND_FETCH_LIST_R are exceptions, they keeps operand
 				 * unchanged, and allows its reuse. these instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
-				case ZEND_FETCH_LIST: {
+				case ZEND_FETCH_LIST_R: {
 					zend_op *m = opline;
 
 					do {
-						if (m->opcode == ZEND_FETCH_LIST &&
+						if (m->opcode == ZEND_FETCH_LIST_R &&
 							m->op1_type == type &&
 							m->op1.var == var) {
 							zval v;
