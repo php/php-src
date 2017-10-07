@@ -330,7 +330,7 @@ PHP_FUNCTION(stream_socket_get_name)
 		RETURN_FALSE;
 	}
 
-	if (!ZSTR_LEN(name)) {
+	if ((ZSTR_LEN(name) == 0) || (ZSTR_VAL(name)[0] == 0)) {
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
