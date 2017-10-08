@@ -1320,6 +1320,23 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 		}
 	}
 
+	// We assume most test directories should be executed in serial, but for
+	// big directories, this would waste time if they can actually be parallel.
+	// Therefore, if a directory has a special '!CAN_BE_PARALLELISED' file, we
+	// will divide it up into smaller “directories” automatically.
+	foreach ($testDirsToGo as $dir => &$tests) {
+		if (count($tests) < 64 || !is_string($dir)) {
+			continue;
+		}
+		if (file_exists($dir . DIRECTORY_SEPARATOR . '!CAN_BE_PARALLELISED')) {
+			foreach (array_chunk($tests, 64) as $testsChunk) {
+				$testDirsToGo[] = $testsChunk;
+			}
+			unset($testDirsToGo[$dir]);
+		}
+	}
+	unset($tests);
+
 	// Sort test dirs so the biggest ones are handled first, so we spend less
 	// time waiting on workers tasked with very large dirs.
 	// This is an ascending sort because items are popped off the end.
@@ -1339,15 +1356,15 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	if ($shamedDirs) {
 		$shameList = "";
 		foreach ($shamedDirs as $dir => $shame) {
-			$shameList .= "$dir: " .  count($shame) . " files\n";
+			$shameList .= "\n$dir: " .  count($shame) . " files";
 		}
 
 		echo <<<NAME_AND_SHAME
 ----⚠️-----------------------------------------------------------⚠️----
 To effectively utilise parallelism, test directories should not contain
 large numbers of files that have to be run sequentially. The following
-directories contain more than 100 test files:
-
+directories contain more than 100 test files and do not contain a 
+'!CAN_BE_PARALLELISED' file:
 $shameList
 ----⚠️-----------------------------------------------------------⚠️----
 
