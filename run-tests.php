@@ -19,6 +19,7 @@
    |          Marcus Boerger <helly@php.net>                              |
    |          Derick Rethans <derick@php.net>                             |
    |          Sander Roobol <sander@php.net>                              |
+   |          Andrea Faulds <ajf@ajf.me>                                  |
    | (based on version by: Stig Bakken <ssb@php.net>)                     |
    | (based on the PHP 3 test framework by Rasmus Lerdorf)                |
    +----------------------------------------------------------------------+
@@ -52,7 +53,14 @@ function run_tests() {
 		$failed_tests_file, $result_tests_file, $test_idx, $cfg, $log_format,
 		$test_cnt, $temp_source, $temp_target, $environment, $no_clean,
 		$SHOW_ONLY_GROUPS, $slow_min_ms, $exts_tested, $end_time, $start_time,
-		$html_output, $html_file, $temp_urlbase;
+		$html_output, $html_file, $temp_urlbase, $workers, $workerID;
+
+	$workerID = 0;
+	if (getenv("TEST_PHP_WORKER")) {
+		$workerID = intval(getenv("TEST_PHP_WORKER"), 10);
+		run_worker();
+		die;
+	}
 
 	define('INIT_DIR', getcwd());
 
@@ -300,6 +308,7 @@ NO_PROC_OPEN_ERROR;
 	$conf_passed = null;
 	$no_clean = false;
 	$slow_min_ms = INF;
+	$workers = null;
 
 	$cfgtypes = array('show', 'keep');
 	$cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem');
@@ -360,6 +369,13 @@ NO_PROC_OPEN_ERROR;
 				$repeat = false;
 
 				switch($switch) {
+					case 'j':
+						$workers = substr($argv[$i], 2);
+						if (!preg_match('/^\d+$/', $workers) || $workers == 0) {
+							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
+						}
+						$workers = intval($workers, 10);
+						break;
 					case 'r':
 					case 'l':
 						$test_list = file($argv[++$i]);
@@ -499,6 +515,10 @@ Synopsis:
     php run-tests.php [options] [files] [directories]
 
 Options:
+    -j<workers> Run <workers> simultaneous testing processes in parallel for
+                quicker testing on systems with multiple logical processors.
+                Note that this is experimental feature.
+
     -l <file>   Read the testfiles to be executed from <file>. After the test
                 has finished all failed tests are written to the same <file>.
                 If the list is empty and no further test is specified then
@@ -1212,10 +1232,14 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx;
+	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $PHP_FAILED_TESTS, $workers, $workerID;
+
+	if ($workers !== null && !$workerID) {
+		run_all_tests_parallel($test_files, $env, $redir_tested);
+		return;
+	}
 
 	foreach($test_files as $name) {
-
 		if (is_array($name)) {
 			$index = "# $name[1]: $name[0]";
 
@@ -1228,10 +1252,30 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			$index = $name;
 		}
 		$test_idx++;
+
+		if ($workerID) {
+			$PHP_FAILED_TESTS = ['BORKED' => [], 'FAILED' => [], 'WARNED' => [], 'LEAKED' => [], 'XFAILED' => [], 'SLOW' => []];
+			ob_start();
+		}
+
 		$result = run_test($php, $name, $env);
+		$resultText = ob_get_clean();
 
 		if (!is_array($name) && $result != 'REDIR') {
+			if ($workerID) {
+				send_message(STDOUT, [
+					"type" => "test_result",
+					"name" => $name,
+					"index" => $index,
+					"result" => $result,
+					"text" => $resultText,
+					"PHP_FAILED_TESTS" => $PHP_FAILED_TESTS
+				]);
+				continue;
+			}
+
 			$test_results[$index] = $result;
+
 			if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
 				fwrite($failed_tests_file, "$index\n");
 			}
@@ -1240,6 +1284,261 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 			}
 		}
 	}
+}
+
+function run_all_tests_parallel($test_files, $env, $redir_tested) {
+	global $workers, $test_idx, $test_cnt, $test_results, $failed_tests_file, $result_tests_file, $PHP_FAILED_TESTS;
+
+	// The PHP binary running run-tests.php, and run-tests.php itself
+	// This PHP executable is *not* necessarily the same as the tested version
+	$thisPHP = PHP_BINARY;
+	$thisScript = __FILE__;
+
+	$workerProcs = [];
+	$workerStdins = [];
+	$workerStdouts = [];
+	$workerStderrs = [];
+
+	echo "====⚡️===========================================================⚡️====\n";
+	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
+	echo "====⚡️===========================================================⚡️====\n";
+
+	// Because some of the PHP test suite has not been written with
+	// parallel execution in mind, it is not safe to just run any two tests
+	// concurrently.
+	// Therefore, we divide the test set into directories and test multiple
+	// directories at once, but not multiple tests within them.
+
+	$testDirs = [];
+
+	foreach ($test_files as $file) {
+		$dirSeparator = strrpos($file, DIRECTORY_SEPARATOR);
+		if ($dirSeparator !== FALSE) {
+			$testDirs[substr($file, 0, $dirSeparator)][] = $file;
+		} else {
+			$testDirs[""][] = $file;
+		}
+	}
+
+	$testDirsToGo = array_values($testDirs);
+	// Sort test dirs so the biggest ones are handled first, so we spend less
+	// time waiting on workers tasked with very large dirs.
+	// This is an ascending sort because items are popped off the end.
+	// Thank you Rasmus for this idea :)
+	usort($testDirsToGo, 'count');
+	$testsInProgress = 0;
+
+	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
+
+	echo "Spawning workers… ";
+	for ($i = 1; $i <= $workers; $i++) {
+		$proc = proc_open(
+			$thisPHP . ' ' . escapeshellarg($thisScript),
+			[
+				0 => ['pipe', 'r'],
+				1 => ['pipe', 'w'],
+				2 => ['pipe', 'w']
+			],
+			$pipes,
+			NULL,
+			$_ENV + [
+				"TEST_PHP_WORKER" => $i
+			],
+			[
+				"suppress_errors" => TRUE
+			]
+		);
+		if ($proc === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to spawn worker $i");
+		}
+		$workerProcs[$i] = $proc;
+
+		$greeting = base64_encode(serialize([
+			"type" => "hello",
+			"workerID" => $i,
+			"GLOBALS" => $GLOBALS,
+			"constants" => [
+				"INIT_DIR" => INIT_DIR,
+				"TEST_PHP_SRCDIR" => TEST_PHP_SRCDIR,
+				"PHP_QA_EMAIL" => PHP_QA_EMAIL,
+				"QA_SUBMISSION_PAGE" => QA_SUBMISSION_PAGE,
+				"QA_REPORTS_PAGE" => QA_REPORTS_PAGE,
+				"TRAVIS_CI" => TRAVIS_CI
+			]
+		])) . "\n";
+
+		stream_set_timeout($pipes[0], 5);
+		if (fwrite($pipes[0], $greeting) === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to send greeting to worker $i.");
+		}
+
+		stream_set_timeout($pipes[1], 5);
+		$rawReply = fgets($pipes[1]);
+		if ($rawReply === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to read greeting reply from worker $i.");
+		}
+
+		$reply = unserialize(base64_decode($rawReply));
+		if (!$reply || $reply["type"] !== "hello_reply" || $reply["workerID"] !== $i) {
+			kill_children($workerProcs);
+			error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
+		}
+
+		$workerStdins[$i] = $pipes[0];
+		$workerStdouts[$i] = $pipes[1];
+		$workerStderrs[$i] = $pipes[2];
+
+		echo "$i ";
+	}
+	echo "… done!\n";
+	echo "====⚡️===========================================================⚡️====\n";
+	echo "\n";
+
+	while ($testDirsToGo || $testsInProgress) {
+		$toRead = array_values($workerStdouts);
+		$toWrite = NULL;
+		$toExcept = NULL;
+		if (stream_select($toRead, $toWrite, $toExcept, 0, 50 * 1000)) {
+			foreach ($toRead as $workerStdout) {
+				$i = array_search($workerStdout, $workerStdouts);
+				stream_set_timeout($workerStdout, 0);
+				stream_set_blocking($workerStdout, FALSE);
+				while (FALSE !== ($rawMessage = fgets($workerStdout))) {
+					$message = unserialize(base64_decode($rawMessage));
+					if (!$message) {
+						kill_children($workerProcs);
+						$stuff = fread($workerStdout, 65536);
+						error("Could not decode message from worker $i: '$rawMessage$stuff'");
+					}
+
+					switch ($message["type"]) {
+						case "ready":
+							if ($testDir = array_pop($testDirsToGo)) {
+								$testsInProgress += count($testDir);
+								send_message($workerStdins[$i], [
+									"type" => "run_tests",
+									"test_files" => $testDir,
+									"env" => $env,
+									"redir_tested" => $redir_tested
+								]);
+							} else {
+								proc_terminate($workerProcs[$i]);
+								unset($workerProcs[$i]);
+								unset($workerStdins[$i]);
+								unset($workerStdouts[$i]);
+								unset($workerStderrs[$i]);
+								goto escape;
+							}
+							break;
+						case "test_result":
+							[$name, $index, $result, $resultText] = [$message["name"], $message["index"], $message["result"], $message["text"]];
+							foreach ($message["PHP_FAILED_TESTS"] as $category => $tests) {
+								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
+							}
+							$test_idx++;
+							$testsInProgress--;
+							clear_show_test();
+							echo $resultText;
+							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
+
+							if (!is_array($name) && $result != 'REDIR') {
+								$test_results[$index] = $result;
+
+								if ($failed_tests_file && ($result == 'XFAILED' || $result == 'FAILED' || $result == 'WARNED' || $result == 'LEAKED')) {
+									fwrite($failed_tests_file, "$index\n");
+								}
+								if ($result_tests_file) {
+									fwrite($result_tests_file, "$result\t$index\n");
+								}
+							}
+							break;
+						case "error":
+							kill_children($workerProcs);
+							error("Worker $i reported error: $message[msg]");
+							break;
+						default:
+							kill_children($workerProcs);
+							error("Unrecognised message type '$message[type]' from worker $i");
+					}
+				}
+			}
+		}
+escape:
+	}
+
+	clear_show_test();
+
+	if ($test_idx !== $test_cnt) {
+		error("Somehow, " . ($test_cnt - $test_idx) . " tests never got executed. This is probably a bug in parallel test execution.");
+	}
+	kill_children($workerProcs);
+}
+
+function send_message($stream, array $message) {
+	fwrite($stream, base64_encode(serialize($message)) . "\n");
+}
+
+function kill_children(array $children) {
+	foreach ($children as $child) {
+		if ($child) {
+			proc_terminate($child);
+		}
+	}
+}
+
+function run_worker() {
+	global $workerID;
+
+	@unlink(__DIR__ . "/../worker$workerID.log");
+	ini_set("error_log", __DIR__ . "/../worker$workerID.log");
+
+	$greeting = fgets(STDIN);
+	$greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
+	if ($greeting["type"] !== "hello" || $greeting["workerID"] !== $workerID) {
+		error("Unexpected greeting of type $greeting[type] and for worker $greeting[workerID]");
+	}
+
+	foreach ($greeting["GLOBALS"] as $var => $value) {
+		if ($var !== "workerID" && $var !== "GLOBALS") {
+			$GLOBALS[$var] = $value;
+		}
+	}
+	foreach ($greeting["constants"] as $const => $value) {
+		define($const, $value);
+	}
+
+	send_message(STDOUT, [
+		"type" => "hello_reply",
+		"workerID" => $workerID
+	]);
+
+	send_message(STDOUT, [
+		"type" => "ready"
+	]);
+
+	while (($command = fgets(STDIN))) {
+		$command = unserialize(base64_decode($command));
+
+		switch ($command["type"]) {
+			case "run_tests":
+				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
+				send_message(STDOUT, [
+					"type" => "ready"
+				]);
+				break;
+			default:
+				send_message(STDOUT, [
+					"type" => "error",
+					"msg" => "Unrecognised message type: $command[type]"
+				]);
+				die;
+		}
+	}
+
+	die;
 }
 
 //
@@ -1273,6 +1572,7 @@ function run_test($php, $file, $env)
 	global $SHOW_ONLY_GROUPS;
 	global $no_file_cache;
 	global $slow_min_ms;
+	global $workerID;
 	$temp_filenames = null;
 	$org_file = $file;
 
@@ -1480,7 +1780,7 @@ TEST $file
 		}
 	}
 
-	if (!$SHOW_ONLY_GROUPS) {
+	if (!$SHOW_ONLY_GROUPS && !$workerID) {
 		show_test($test_idx, $shortname);
 	}
 
@@ -2655,7 +2955,7 @@ function show_summary()
 
 function show_redirect_start($tests, $tested, $tested_file)
 {
-	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
+	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS, $workerID;
 
 	if ($html_output) {
 		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) begin</td></tr>\n");
@@ -2663,15 +2963,14 @@ function show_redirect_start($tests, $tested, $tested_file)
 
 	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
 		   echo "REDIRECT $tests ($tested [$tested_file]) begin\n";
-	} else {
-		   // Write over the last line to avoid random trailing chars on next echo
-		   echo str_repeat(" ", $line_length), "\r";
+	} else if (!$workerID) {
+		   clear_show_test();
 	}
 }
 
 function show_redirect_ends($tests, $tested, $tested_file)
 {
-	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS;
+	global $html_output, $html_file, $line_length, $SHOW_ONLY_GROUPS, $workerID;
 
 	if ($html_output) {
 		fwrite($html_file, "<tr><td colspan='3'>---&gt; $tests ($tested [$tested_file]) done</td></tr>\n");
@@ -2679,9 +2978,8 @@ function show_redirect_ends($tests, $tested, $tested_file)
 
 	if (!$SHOW_ONLY_GROUPS || in_array('REDIRECT', $SHOW_ONLY_GROUPS)) {
 		   echo "REDIRECT $tests ($tested [$tested_file]) done\n";
-	} else {
-		   // Write over the last line to avoid random trailing chars on next echo
-		   echo str_repeat(" ", $line_length), "\r";
+	} else if (!$workerID) {
+		   clear_show_test();
 	}
 }
 
@@ -2696,15 +2994,21 @@ function show_test($test_idx, $shortname)
 	flush();
 }
 
+function clear_show_test() {
+	global $line_length;
+
+	// Write over the last line to avoid random trailing chars on next echo
+	echo str_repeat(" ", $line_length), "\r";
+}
+
 function show_result($result, $tested, $tested_file, $extra = '', $temp_filenames = null)
 {
-	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS;
+	global $html_output, $html_file, $temp_target, $temp_urlbase, $line_length, $SHOW_ONLY_GROUPS, $workerID;
 
 	if (!$SHOW_ONLY_GROUPS || in_array($result, $SHOW_ONLY_GROUPS)) {
 		echo "$result $tested [$tested_file] $extra\n";
-	} else if (!$SHOW_ONLY_GROUPS) {
-		// Write over the last line to avoid random trailing chars on next echo
-		echo str_repeat(" ", $line_length), "\r";
+	} else if (!$SHOW_ONLY_GROUPS && !$workerID) {
+		clear_show_test();
 	}
 
 	if ($html_output) {
