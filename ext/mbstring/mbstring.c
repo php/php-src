@@ -14,35 +14,12 @@
    +----------------------------------------------------------------------+
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
    |         Rui Hirokawa <hirokawa@php.net>                              |
+   |         Hironori Sato <satoh@jpnnet.com>                             |
+   |         Shigeru Kanemoto <sgk@happysize.co.jp>                       |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
-
-/*
- * PHP 4 Multibyte String module "mbstring"
- *
- * History:
- *   2000.5.19  Release php-4.0RC2_jstring-1.0
- *   2001.4.1   Release php4_jstring-1.0.91
- *   2001.4.30  Release php4_jstring-1.1 (contribute to The PHP Group)
- *   2001.5.1   Renamed from jstring to mbstring (hirokawa@php.net)
- */
-
-/*
- * PHP3 Internationalization support program.
- *
- * Copyright (c) 1999,2000 by the PHP3 internationalization team.
- * All rights reserved.
- *
- * See README_PHP3-i18n-ja for more detail.
- *
- * Authors:
- *    Hironori Sato <satoh@jpnnet.com>
- *    Shigeru Kanemoto <sgk@happysize.co.jp>
- *    Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>
- *    Rui Hirokawa <rui_hirokawa@ybb.ne.jp>
- */
 
 /* {{{ includes */
 #ifdef HAVE_CONFIG_H
@@ -3286,7 +3263,7 @@ PHP_FUNCTION(mb_convert_case)
 	if (!enc) {
 		return;
 	}
-	
+
 	if (case_mode < 0 || case_mode > PHP_UNICODE_CASE_MODE_MAX) {
 		php_error_docref(NULL, E_WARNING, "Invalid case mode");
 		return;
