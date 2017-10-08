@@ -1328,7 +1328,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	usort($testDirsToGo, function ($a, $b) {
 		return count($a) - count($b);
 	});
-	$testsInProgress = 0;
+	$testDirsInProgress = 0;
 
 	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
 
@@ -1400,7 +1400,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	echo "\n";
 
 escape:
-	while ($testDirsToGo || ($testsInProgress > 0)) {
+	while ($testDirsToGo || ($testDirsInProgress > 0)) {
 		$toRead = array_values($workerStdouts);
 		$toWrite = NULL;
 		$toExcept = NULL;
@@ -1422,9 +1422,12 @@ escape:
 					}
 
 					switch ($message["type"]) {
+						case "dir_finished":
+							$testDirsInProgress--;
+							// intentional fall-through
 						case "ready":
 							if ($testDir = array_pop($testDirsToGo)) {
-								$testsInProgress += count($testDir);
+								$testDirsInProgress++;
 								send_message($workerStdins[$i], [
 									"type" => "run_tests",
 									"test_files" => $testDir,
@@ -1446,7 +1449,6 @@ escape:
 								$PHP_FAILED_TESTS[$category] = array_merge($PHP_FAILED_TESTS[$category], $tests);
 							}
 							$test_idx++;
-							$testsInProgress--;
 							clear_show_test();
 							echo $resultText;
 							show_test($test_idx, "⚡️[" . count($workerProcs) . "/$workers concurrent test workers running]⚡️");
@@ -1497,15 +1499,15 @@ escape:
 
 	clear_show_test();
 
-	if ($testsInProgress < 0) {
-		kill_children($workerProcs);
-		error("$testsInProgress tests in progress, THIS SHOULD NOT HAPPEN.");
+	kill_children($workerProcs);
+
+	if ($testDirsInProgress < 0) {
+		error("$testDirsInProgress test directories “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
 	}
 
 	if ($test_idx !== $test_cnt) {
 		error("Somehow, " . ($test_cnt - $test_idx) . " tests never got executed. This is probably a bug in parallel test execution.");
 	}
-	kill_children($workerProcs);
 }
 
 function send_message($stream, array $message) {
@@ -1566,7 +1568,7 @@ function run_worker() {
 			case "run_tests":
 				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
 				send_message(STDOUT, [
-					"type" => "ready"
+					"type" => "dir_finished"
 				]);
 				break;
 			default:
