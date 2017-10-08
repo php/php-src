@@ -1309,28 +1309,50 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	// Therefore, we divide the test set into directories and test multiple
 	// directories at once, but not multiple tests within them.
 
-	$testDirs = [];
+	$testDirsToGo = [];
 
 	foreach ($test_files as $file) {
 		$dirSeparator = strrpos($file, DIRECTORY_SEPARATOR);
 		if ($dirSeparator !== FALSE) {
-			$testDirs[substr($file, 0, $dirSeparator)][] = $file;
+			$testDirsToGo[substr($file, 0, $dirSeparator)][] = $file;
 		} else {
-			$testDirs[""][] = $file;
+			$testDirsToGo[""][] = $file;
 		}
 	}
 
-	$testDirsToGo = array_values($testDirs);
 	// Sort test dirs so the biggest ones are handled first, so we spend less
 	// time waiting on workers tasked with very large dirs.
 	// This is an ascending sort because items are popped off the end.
 	// Thank you Rasmus for this idea :)
-	usort($testDirsToGo, function ($a, $b) {
+	uasort($testDirsToGo, function ($a, $b) {
 		return count($a) - count($b);
 	});
+
 	$testDirsInProgress = 0;
 
 	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
+
+	$shamedDirs = array_reverse(array_filter($testDirsToGo, function ($files) {
+		return count($files) > 100;
+	}), true);
+
+	if ($shamedDirs) {
+		$shameList = "";
+		foreach ($shamedDirs as $dir => $shame) {
+			$shameList .= "$dir: " .  count($shame) . " files\n";
+		}
+
+		echo <<<NAME_AND_SHAME
+----⚠️-----------------------------------------------------------⚠️----
+To effectively utilise parallelism, test directories should not contain
+large numbers of files that have to be run sequentially. The following
+directories contain more than 100 test files:
+
+$shameList
+----⚠️-----------------------------------------------------------⚠️----
+
+NAME_AND_SHAME;
+	}
 
 	echo "Spawning workers… ";
 	for ($i = 1; $i <= $workers; $i++) {
