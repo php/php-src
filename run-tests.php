@@ -1325,7 +1325,9 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	// time waiting on workers tasked with very large dirs.
 	// This is an ascending sort because items are popped off the end.
 	// Thank you Rasmus for this idea :)
-	usort($testDirsToGo, 'count');
+	usort($testDirsToGo, function ($a, $b) {
+		return count($a) - count($b);
+	});
 	$testsInProgress = 0;
 
 	echo "Isolated ", count($testDirsToGo), " directories to be tested in parallel.\n";
