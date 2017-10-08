@@ -1399,13 +1399,18 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	echo "====⚡️===========================================================⚡️====\n";
 	echo "\n";
 
-	while ($testDirsToGo || $testsInProgress) {
+escape:
+	while ($testDirsToGo || ($testsInProgress > 0)) {
 		$toRead = array_values($workerStdouts);
 		$toWrite = NULL;
 		$toExcept = NULL;
 		if (stream_select($toRead, $toWrite, $toExcept, 0, 50 * 1000)) {
 			foreach ($toRead as $workerStdout) {
 				$i = array_search($workerStdout, $workerStdouts);
+				if ($i === FALSE) {
+					kill_children($workerProcs);
+					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
+				}
 				stream_set_timeout($workerStdout, 0);
 				stream_set_blocking($workerStdout, FALSE);
 				while (FALSE !== ($rawMessage = fgets($workerStdout))) {
@@ -1488,10 +1493,14 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 				}
 			}
 		}
-escape:
 	}
 
 	clear_show_test();
+
+	if ($testsInProgress < 0) {
+		kill_children($workerProcs);
+		error("$testsInProgress tests in progress, THIS SHOULD NOT HAPPEN.");
+	}
 
 	if ($test_idx !== $test_cnt) {
 		error("Somehow, " . ($test_cnt - $test_idx) . " tests never got executed. This is probably a bug in parallel test execution.");
