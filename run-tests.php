@@ -1461,6 +1461,26 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 							kill_children($workerProcs);
 							error("Worker $i reported error: $message[msg]");
 							break;
+						case "php_error":
+							kill_children($workerProcs);
+							$error_consts = [
+								'E_ERROR',
+								'E_WARNING',
+								'E_PARSE',
+								'E_NOTICE',
+								'E_CORE_ERROR',
+								'E_CORE_WARNING',
+								'E_COMPILE_ERROR',
+								'E_COMPILE_WARNING',
+								'E_USER_ERROR',
+								'E_USER_WARNING',
+								'E_USER_NOTICE',
+								'E_STRICT',
+								'E_RECOVERABLE_ERROR',
+								'E_USER_DEPRECATED'
+							];
+							$error_consts = array_combine(array_map('constant', $error_consts), $error_consts);
+							error("Worker $i reported unexpected {$error_consts[$message['errno']]}: $message[errstr] in $message[errfile] on line $message[errline]");
 						default:
 							kill_children($workerProcs);
 							error("Unrecognised message type '$message[type]' from worker $i");
@@ -1496,6 +1516,15 @@ function run_worker() {
 
 	@unlink(__DIR__ . "/../worker$workerID.log");
 	ini_set("error_log", __DIR__ . "/../worker$workerID.log");
+	set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+		if (error_reporting() & $errno) {
+			send_message(STDOUT, compact('errno', 'errstr', 'errfile', 'errline') + [
+				'type' => 'php_error'
+			]);
+		}
+
+		return true;
+	});
 
 	$greeting = fgets(STDIN);
 	$greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
