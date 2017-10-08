@@ -1504,10 +1504,6 @@ escape:
 	if ($testDirsInProgress < 0) {
 		error("$testDirsInProgress test directories “in progress”, which is less than zero. THIS SHOULD NOT HAPPEN.");
 	}
-
-	if ($test_idx !== $test_cnt) {
-		error("Somehow, " . ($test_cnt - $test_idx) . " tests never got executed. This is probably a bug in parallel test execution.");
-	}
 }
 
 function send_message($stream, array $message) {
