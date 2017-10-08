@@ -50,8 +50,6 @@ namespace PHP {
 
 		virtual void setText(UText *text, UErrorCode &status);
 
-		virtual void adoptText(CharacterIterator* it);
-
 		virtual int32_t first(void);
 
 		virtual int32_t last(void);

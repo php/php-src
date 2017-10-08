@@ -132,15 +132,6 @@ void CodePointBreakIterator::setText(UText *text, UErrorCode &status)
 	clearCurrentCharIter();
 }
 
-void CodePointBreakIterator::adoptText(CharacterIterator* it)
-{
-	UErrorCode uec = UErrorCode();
-	clearCurrentCharIter();
-
-	this->fCharIter = it;
-	this->fText = utext_openCharacterIterator(this->fText, it, &uec);
-}
-
 int32_t CodePointBreakIterator::first(void)
 {
 	UTEXT_SETNATIVEINDEX(this->fText, 0);
