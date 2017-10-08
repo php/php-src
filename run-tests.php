@@ -1389,6 +1389,9 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 			error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
 		}
 
+		stream_set_timeout($pipes[1], 0);
+		stream_set_blocking($pipes[1], FALSE);
+
 		$workerStdins[$i] = $pipes[0];
 		$workerStdouts[$i] = $pipes[1];
 		$workerStderrs[$i] = $pipes[2];
@@ -1411,8 +1414,6 @@ escape:
 					kill_children($workerProcs);
 					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
 				}
-				stream_set_timeout($workerStdout, 0);
-				stream_set_blocking($workerStdout, FALSE);
 				while (FALSE !== ($rawMessage = fgets($workerStdout))) {
 					$message = unserialize(base64_decode($rawMessage));
 					if (!$message) {
