@@ -13,35 +13,12 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>              |
+   |         Hironori Sato <satoh@jpnnet.com>                             |
+   |         Shigeru Kanemoto <sgk@happysize.co.jp>                       |
    +----------------------------------------------------------------------+
  */
 
 /* $Id$ */
-
-/*
- * PHP 4 Multibyte String module "mbstring" (currently only for Japanese)
- *
- * History:
- *   2000.5.19  Release php-4.0RC2_jstring-1.0
- *   2001.4.1   Release php4_jstring-1.0.91
- *   2001.4.30  Release php4-jstring-1.1 (contribute to The PHP Group)
- *   2001.5.1   Renamed from jstring to mbstring (hirokawa@php.net)
- */
-
-/*
- * PHP3 Internationalization support program.
- *
- * Copyright (c) 1999,2000 by the PHP3 internationalization team.
- * All rights reserved.
- *
- * See README_PHP3-i18n-ja for more detail.
- *
- * Authors:
- *    Hironori Sato <satoh@jpnnet.com>
- *    Shigeru Kanemoto <sgk@happysize.co.jp>
- *    Tsukada Takuya <tsukada@fminn.nagano.nagano.jp>
- */
-
 
 #ifndef _MBSTRING_H
 #define _MBSTRING_H
