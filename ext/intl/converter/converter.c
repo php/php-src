@@ -411,7 +411,7 @@ static zend_bool php_converter_set_encoding(php_converter_object *objval,
 ZEND_BEGIN_ARG_INFO_EX(php_converter_set_encoding_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO();
-static void php_converter_do_set_encoding(UConverter *cnv, INTERNAL_FUNCTION_PARAMETERS) {
+static void php_converter_do_set_encoding(UConverter **pcnv, INTERNAL_FUNCTION_PARAMETERS) {
 	php_converter_object *objval = CONV_GET(getThis());
 	char *enc;
 	size_t enc_len;
@@ -423,21 +423,21 @@ static void php_converter_do_set_encoding(UConverter *cnv, INTERNAL_FUNCTION_PAR
 	}
 	intl_errors_reset(&objval->error);
 
-	RETURN_BOOL(php_converter_set_encoding(objval, &(objval->src), enc, enc_len));
+	RETURN_BOOL(php_converter_set_encoding(objval, pcnv, enc, enc_len));
 }
 /* }}} */
 
 /* {{{ proto bool UConverter::setSourceEncoding(string encoding) */
 static PHP_METHOD(UConverter, setSourceEncoding) {
 	php_converter_object *objval = CONV_GET(getThis());
-	php_converter_do_set_encoding(objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_converter_do_set_encoding(&(objval->src), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
 /* {{{ proto bool UConverter::setDestinationEncoding(string encoding) */
 static PHP_METHOD(UConverter, setDestinationEncoding) {
 	php_converter_object *objval = CONV_GET(getThis());
-	php_converter_do_set_encoding(objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
+	php_converter_do_set_encoding(&(objval->dest), INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
