@@ -2046,7 +2046,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -4679,7 +4679,7 @@ ZEND_VM_HOT_HANDLER(64, ZEND_RECV_INIT, NUM, CONST)
 		if (Z_OPT_CONSTANT_P(param)) {
 			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
-				zval_ptr_dtor(param);
+				zval_ptr_dtor_nogc(param);
 				ZVAL_UNDEF(param);
 				HANDLE_EXCEPTION();
 			}
@@ -5193,13 +5193,13 @@ ZEND_VM_C_LABEL(num_index):
 			ZEND_VM_C_GOTO(str_index);
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		FREE_OP2();
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -7150,7 +7150,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 	ZVAL_COPY(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
-			zval_ptr_dtor(&c.value);
+			zval_ptr_dtor_nogc(&c.value);
 			FREE_OP1();
 			FREE_OP2();
 			HANDLE_EXCEPTION();

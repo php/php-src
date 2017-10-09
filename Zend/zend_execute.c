@@ -739,7 +739,7 @@ static int is_null_constant(zend_class_entry *scope, zval *default_value)
 		if (Z_TYPE(constant) == IS_NULL) {
 			return 1;
 		}
-		zval_ptr_dtor(&constant);
+		zval_ptr_dtor_nogc(&constant);
 	}
 	return 0;
 }
