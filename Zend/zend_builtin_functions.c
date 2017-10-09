@@ -727,13 +727,13 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 	int ret = 1;
 	zval *val;
 
-	ht->u.v.nApplyCount++;
+	GC_PROTECT_RECURSION(ht);
 	ZEND_HASH_FOREACH_VAL_IND(ht, val) {
 		ZVAL_DEREF(val);
 		if (Z_REFCOUNTED_P(val)) {
 			if (Z_TYPE_P(val) == IS_ARRAY) {
 				if (Z_REFCOUNTED_P(val)) {
-					if (Z_ARRVAL_P(val)->u.v.nApplyCount > 0) {
+					if (Z_IS_RECURSIVE_P(val)) {
 						zend_error(E_WARNING, "Constants cannot be recursive arrays");
 						ret = 0;
 						break;
@@ -749,7 +749,7 @@ static int validate_constant_array(HashTable *ht) /* {{{ */
 			}
 		}
 	} ZEND_HASH_FOREACH_END();
-	ht->u.v.nApplyCount--;
+	GC_UNPROTECT_RECURSION(ht);
 	return ret;
 }
 /* }}} */
@@ -1137,7 +1137,7 @@ ZEND_FUNCTION(get_object_vars)
 
 	zobj = Z_OBJ_P(obj);
 
-	if (!zobj->ce->default_properties_count && properties == zobj->properties && !ZEND_HASH_GET_APPLY_COUNT(properties)) {
+	if (!zobj->ce->default_properties_count && properties == zobj->properties && !GC_IS_RECURSIVE(properties)) {
 		/* fast copy */
 		if (EXPECTED(zobj->handlers == &std_object_handlers)) {
 			RETURN_ARR(zend_proptable_to_symtable(properties, 0));

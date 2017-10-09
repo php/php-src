@@ -35,8 +35,6 @@
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
 
-#define HASH_FLAG_PERSISTENT       (1<<0)
-#define HASH_FLAG_APPLY_PROTECTION (1<<1)
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)
 #define HASH_FLAG_STATIC_KEYS      (1<<4) /* long and interned strings */
@@ -69,14 +67,13 @@ BEGIN_EXTERN_C()
 
 /* startup/shutdown */
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
-ZEND_API void ZEND_FASTCALL _zend_hash_init_ex(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection);
 ZEND_API void ZEND_FASTCALL zend_hash_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_clean(HashTable *ht);
 
 #define zend_hash_init(ht, nSize, pHashFunction, pDestructor, persistent) \
 	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
 #define zend_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection) \
-	_zend_hash_init_ex((ht), (nSize), (pDestructor), (persistent), (bApplyProtection))
+	_zend_hash_init((ht), (nSize), (pDestructor), (persistent))
 
 ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed);
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht);
@@ -621,7 +618,7 @@ static zend_always_inline void *zend_hash_add_mem(HashTable *ht, zend_string *ke
 
 	ZVAL_PTR(&tmp, NULL);
 	if ((zv = zend_hash_add(ht, key, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		memcpy(Z_PTR_P(zv), pData, size);
 		return Z_PTR_P(zv);
 	}
@@ -634,7 +631,7 @@ static zend_always_inline void *zend_hash_str_add_mem(HashTable *ht, const char 
 
 	ZVAL_PTR(&tmp, NULL);
 	if ((zv = zend_hash_str_add(ht, str, len, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		memcpy(Z_PTR_P(zv), pData, size);
 		return Z_PTR_P(zv);
 	}
@@ -645,7 +642,7 @@ static zend_always_inline void *zend_hash_update_mem(HashTable *ht, zend_string 
 {
 	void *p;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_update_ptr(ht, key, p);
 }
@@ -654,7 +651,7 @@ static zend_always_inline void *zend_hash_str_update_mem(HashTable *ht, const ch
 {
 	void *p;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_str_update_ptr(ht, str, len, p);
 }
@@ -697,7 +694,7 @@ static zend_always_inline void *zend_hash_index_add_mem(HashTable *ht, zend_ulon
 
 	ZVAL_PTR(&tmp, NULL);
 	if ((zv = zend_hash_index_add(ht, h, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		memcpy(Z_PTR_P(zv), pData, size);
 		return Z_PTR_P(zv);
 	}
@@ -722,7 +719,7 @@ static zend_always_inline void *zend_hash_index_update_mem(HashTable *ht, zend_u
 {
 	void *p;
 
-	p = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+	p = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 	memcpy(p, pData, size);
 	return zend_hash_index_update_ptr(ht, h, p);
 }
@@ -733,7 +730,7 @@ static zend_always_inline void *zend_hash_next_index_insert_mem(HashTable *ht, v
 
 	ZVAL_PTR(&tmp, NULL);
 	if ((zv = zend_hash_next_index_insert(ht, &tmp))) {
-		Z_PTR_P(zv) = pemalloc(size, ht->u.flags & HASH_FLAG_PERSISTENT);
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		memcpy(Z_PTR_P(zv), pData, size);
 		return Z_PTR_P(zv);
 	}
@@ -984,16 +981,6 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 	_h = _p->h; \
 	_key = _p->key; \
 	_val = _z;
-
-#define ZEND_HASH_APPLY_PROTECTION(ht) \
-	((ht)->u.flags & HASH_FLAG_APPLY_PROTECTION)
-
-#define ZEND_HASH_APPLY_SHIFT         8
-#define ZEND_HASH_APPLY_COUNT_MASK    0xff00
-#define ZEND_HASH_GET_APPLY_COUNT(ht) (((ht)->u.flags & ZEND_HASH_APPLY_COUNT_MASK) >> ZEND_HASH_APPLY_SHIFT)
-#define ZEND_HASH_INC_APPLY_COUNT(ht) ((ht)->u.flags += (1 << ZEND_HASH_APPLY_SHIFT))
-#define ZEND_HASH_DEC_APPLY_COUNT(ht) ((ht)->u.flags -= (1 << ZEND_HASH_APPLY_SHIFT))
-
 
 /* The following macros are useful to insert a sequence of new elements
  * of packed array. They may be use insted of series of

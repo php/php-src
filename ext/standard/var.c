@@ -119,10 +119,12 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht) && ++myht->u.v.nApplyCount > 1) {
-				PUTS("*RECURSION*\n");
-				--myht->u.v.nApplyCount;
-				return;
+			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				if (GC_IS_RECURSIVE(myht)) {
+					PUTS("*RECURSION*\n");
+					return;
+				}
+				GC_PROTECT_RECURSION(myht);
 			}
 			count = zend_array_count(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
@@ -131,8 +133,8 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
-			if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht)) {
-				--myht->u.v.nApplyCount;
+			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				GC_UNPROTECT_RECURSION(myht);
 			}
 			if (is_temp) {
 				zend_hash_destroy(myht);
@@ -144,11 +146,11 @@ again:
 			PUTS("}\n");
 			break;
 		case IS_OBJECT:
-			if (Z_OBJ_APPLY_COUNT_P(struc) > 0) {
+			if (Z_IS_RECURSIVE_P(struc)) {
 				PUTS("*RECURSION*\n");
 				return;
 			}
-			Z_OBJ_INC_APPLY_COUNT_P(struc);
+			Z_PROTECT_RECURSION_P(struc);
 
 			myht = Z_OBJDEBUG_P(struc, is_temp);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
@@ -172,7 +174,7 @@ again:
 				php_printf("%*c", level-1, ' ');
 			}
 			PUTS("}\n");
-			Z_OBJ_DEC_APPLY_COUNT_P(struc);
+			Z_UNPROTECT_RECURSION_P(struc);
 			break;
 		case IS_RESOURCE: {
 			const char *type_name = zend_rsrc_list_get_rsrc_type(Z_RES_P(struc));
@@ -289,18 +291,20 @@ again:
 		break;
 	case IS_ARRAY:
 		myht = Z_ARRVAL_P(struc);
-		if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 1) {
-			myht->u.v.nApplyCount--;
-			PUTS("*RECURSION*\n");
-			return;
+		if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			if (GC_IS_RECURSIVE(myht)) {
+				PUTS("*RECURSION*\n");
+				return;
+			}
+			GC_PROTECT_RECURSION(myht);
 		}
 		count = zend_array_count(myht);
 		php_printf("%sarray(%d) refcount(%u){\n", COMMON, count, Z_REFCOUNTED_P(struc) ? Z_REFCOUNT_P(struc) : 1);
 		ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 			zval_array_element_dump(val, index, key, level);
 		} ZEND_HASH_FOREACH_END();
-		if (level > 1 && ZEND_HASH_APPLY_PROTECTION(myht)) {
-			myht->u.v.nApplyCount--;
+		if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+			GC_UNPROTECT_RECURSION(myht);
 		}
 		if (is_temp) {
 			zend_hash_destroy(myht);
@@ -314,12 +318,11 @@ again:
 	case IS_OBJECT:
 		myht = Z_OBJDEBUG_P(struc, is_temp);
 		if (myht) {
-			if (myht->u.v.nApplyCount > 1) {
+			if (GC_IS_RECURSIVE(myht)) {
 				PUTS("*RECURSION*\n");
 				return;
-			} else {
-				myht->u.v.nApplyCount++;
 			}
+			GC_PROTECT_RECURSION(myht);
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
@@ -328,7 +331,7 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				zval_object_property_dump(val, index, key, level);
 			} ZEND_HASH_FOREACH_END();
-			myht->u.v.nApplyCount--;
+			GC_UNPROTECT_RECURSION(myht);
 			if (is_temp) {
 				zend_hash_destroy(myht);
 				efree(myht);
@@ -487,11 +490,13 @@ again:
 			break;
 		case IS_ARRAY:
 			myht = Z_ARRVAL_P(struc);
-			if (ZEND_HASH_APPLY_PROTECTION(myht) && myht->u.v.nApplyCount++ > 0) {
-				myht->u.v.nApplyCount--;
-				smart_str_appendl(buf, "NULL", 4);
-				zend_error(E_WARNING, "var_export does not handle circular references");
-				return;
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				if (GC_IS_RECURSIVE(myht)) {
+					smart_str_appendl(buf, "NULL", 4);
+					zend_error(E_WARNING, "var_export does not handle circular references");
+					return;
+				}
+				GC_PROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
 				smart_str_appendc(buf, '\n');
@@ -501,8 +506,8 @@ again:
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				php_array_element_export(val, index, key, level, buf);
 			} ZEND_HASH_FOREACH_END();
-			if (ZEND_HASH_APPLY_PROTECTION(myht)) {
-				myht->u.v.nApplyCount--;
+			if (!(GC_FLAGS(myht) & GC_IMMUTABLE)) {
+				GC_UNPROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
@@ -514,12 +519,12 @@ again:
 		case IS_OBJECT:
 			myht = Z_OBJPROP_P(struc);
 			if (myht) {
-				if (myht->u.v.nApplyCount > 0) {
+				if (GC_IS_RECURSIVE(myht)) {
 					smart_str_appendl(buf, "NULL", 4);
 					zend_error(E_WARNING, "var_export does not handle circular references");
 					return;
 				} else {
-					myht->u.v.nApplyCount++;
+					GC_PROTECT_RECURSION(myht);
 				}
 			}
 			if (level > 1) {
@@ -534,7 +539,7 @@ again:
 				ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 					php_object_element_export(val, index, key, level, buf);
 				} ZEND_HASH_FOREACH_END();
-				myht->u.v.nApplyCount--;
+				GC_UNPROTECT_RECURSION(myht);
 			}
 			if (level > 1) {
 				buffer_append_spaces(buf, level - 1);
@@ -951,18 +956,22 @@ again:
 
 					/* we should still add element even if it's not OK,
 					 * since we already wrote the length of the array before */
-					if ((Z_TYPE_P(data) == IS_ARRAY && Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc))
-						|| (Z_TYPE_P(data) == IS_ARRAY && Z_ARRVAL_P(data)->u.v.nApplyCount > 1)
-					) {
-						smart_str_appendl(buf, "N;", 2);
+					if (Z_TYPE_P(data) == IS_ARRAY) {
+						if (Z_TYPE_P(data) == IS_ARRAY
+						 && (UNEXPECTED(Z_IS_RECURSIVE_P(data))
+						  || UNEXPECTED(Z_TYPE_P(struc) == IS_ARRAY && Z_ARR_P(data) == Z_ARR_P(struc)))) {
+							smart_str_appendl(buf, "N;", 2);
+						} else {
+							if (Z_REFCOUNTED_P(data)) {
+								Z_PROTECT_RECURSION_P(data);
+							}
+							php_var_serialize_intern(buf, data, var_hash);
+							if (Z_REFCOUNTED_P(data)) {
+								Z_UNPROTECT_RECURSION_P(data);
+							}
+						}
 					} else {
-						if (Z_TYPE_P(data) == IS_ARRAY && ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(data))) {
-							Z_ARRVAL_P(data)->u.v.nApplyCount++;
-						}
 						php_var_serialize_intern(buf, data, var_hash);
-						if (Z_TYPE_P(data) == IS_ARRAY && ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(data))) {
-							Z_ARRVAL_P(data)->u.v.nApplyCount--;
-						}
 					}
 				} ZEND_HASH_FOREACH_END();
 			}

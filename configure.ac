@@ -1544,15 +1544,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
-    echo "+--------------------------------------------------------------------+"
-    echo "|                        *** WARNING ***                             |"
-    echo "|                                                                    |"
-    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
-    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
-    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
-  fi
-
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
@@ -1578,7 +1569,7 @@ cat <<X
 X
   fi
 
-    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+    if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then
         if test -z "$APACHE_THREADED_MPM"; then
 cat <<X

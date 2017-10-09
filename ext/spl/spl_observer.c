@@ -569,12 +569,13 @@ SPL_METHOD(SplObjectStorage, count)
 	}
 
 	if (mode == COUNT_RECURSIVE) {
-		zend_long ret = zend_hash_num_elements(&intern->storage);
-		zval *element;
+		zend_long ret;
 
-		ZEND_HASH_FOREACH_VAL(&intern->storage, element) {
-			ret += php_count_recursive(element, mode);
-		} ZEND_HASH_FOREACH_END();
+		if (mode != COUNT_RECURSIVE) {
+			ret = zend_hash_num_elements(&intern->storage);
+		} else {
+			ret = php_count_recursive(&intern->storage);
+		}
 
 		RETURN_LONG(ret);
 		return;

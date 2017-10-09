@@ -607,7 +607,7 @@ try_again:
 						/* fast copy */
 						if (!Z_OBJCE_P(op)->default_properties_count &&
 							obj_ht == Z_OBJ_P(op)->properties &&
-							!ZEND_HASH_GET_APPLY_COUNT(Z_OBJ_P(op)->properties) &&
+							!GC_IS_RECURSIVE(obj_ht) &&
 							EXPECTED(Z_OBJ_P(op)->handlers == &std_object_handlers)) {
 							arr = zend_proptable_to_symtable(obj_ht, 0);
 						} else {
