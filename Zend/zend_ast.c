@@ -451,40 +451,92 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 	return ret;
 }
 
-ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
+static size_t zend_ast_tree_size(zend_ast *ast)
 {
-	if (ast == NULL) {
-		return NULL;
-	} else if (ast->kind == ZEND_AST_ZVAL) {
-		zend_ast_zval *new = emalloc(sizeof(zend_ast_zval));
+	size_t size;
+
+	if (ast->kind == ZEND_AST_ZVAL) {
+		size = sizeof(zend_ast_zval);
+	} else if (zend_ast_is_list(ast)) {
+		uint32_t i;
+		zend_ast_list *list = zend_ast_get_list(ast);
+
+		size = zend_ast_list_size(list->children);
+		for (i = 0; i < list->children; i++) {
+			if (list->child[i]) {
+				size += zend_ast_tree_size(list->child[i]);
+			}
+		}
+	} else {
+		uint32_t i, children = zend_ast_get_num_children(ast);
+
+		size = zend_ast_size(children);
+		for (i = 0; i < children; i++) {
+			if (ast->child[i]) {
+				size += zend_ast_tree_size(ast->child[i]);
+			}
+		}
+	}
+	return size;
+}
+
+static void* zend_ast_tree_copy(zend_ast *ast, void *buf)
+{
+	if (ast->kind == ZEND_AST_ZVAL) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
-		return (zend_ast *) new;
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_ast_list *new = emalloc(zend_ast_list_size(list->children));
+		zend_ast_list *new = (zend_ast_list*)buf;
 		uint32_t i;
 		new->kind = list->kind;
 		new->attr = list->attr;
 		new->children = list->children;
+		buf = (void*)((char*)buf + zend_ast_list_size(list->children));
 		for (i = 0; i < list->children; i++) {
-			new->child[i] = zend_ast_copy(list->child[i]);
+			if (list->child[i]) {
+				new->child[i] = (zend_ast*)buf;
+				buf = zend_ast_tree_copy(list->child[i], buf);
+			} else {
+				new->child[i] = NULL;
+			}
 		}
-		return (zend_ast *) new;
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
-		zend_ast *new = emalloc(zend_ast_size(children));
+		zend_ast *new = (zend_ast*)buf;
 		new->kind = ast->kind;
 		new->attr = ast->attr;
+		buf = (void*)((char*)buf + zend_ast_size(children));
 		for (i = 0; i < children; i++) {
-			new->child[i] = zend_ast_copy(ast->child[i]);
+			if (ast->child[i]) {
+				new->child[i] = (zend_ast*)buf;
+				buf = zend_ast_tree_copy(ast->child[i], buf);
+			} else {
+				new->child[i] = NULL;
+			}
 		}
-		return new;
 	}
+	return buf;
 }
 
-static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
+ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
+{
+	size_t tree_size;
+	zend_ast_ref *ref;
+
+	ZEND_ASSERT(ast != NULL);
+	tree_size = zend_ast_tree_size(ast) + sizeof(zend_ast_ref);
+	ref = emalloc(tree_size);
+	zend_ast_tree_copy(ast, GC_AST(ref));
+	GC_REFCOUNT(ref) = 1;
+	GC_TYPE_INFO(ref) = IS_CONSTANT_AST;
+	return ref;
+}
+
+ZEND_API void zend_ast_destroy(zend_ast *ast) {
 	if (!ast) {
 		return;
 	}
@@ -508,10 +560,10 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			if (decl->doc_comment) {
 				zend_string_release(decl->doc_comment);
 			}
-			zend_ast_destroy_ex(decl->child[0], free);
-			zend_ast_destroy_ex(decl->child[1], free);
-			zend_ast_destroy_ex(decl->child[2], free);
-			zend_ast_destroy_ex(decl->child[3], free);
+			zend_ast_destroy(decl->child[0]);
+			zend_ast_destroy(decl->child[1]);
+			zend_ast_destroy(decl->child[2]);
+			zend_ast_destroy(decl->child[3]);
 			break;
 		}
 		default:
@@ -519,26 +571,15 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 				zend_ast_list *list = zend_ast_get_list(ast);
 				uint32_t i;
 				for (i = 0; i < list->children; i++) {
-					zend_ast_destroy_ex(list->child[i], free);
+					zend_ast_destroy(list->child[i]);
 				}
 			} else {
 				uint32_t i, children = zend_ast_get_num_children(ast);
 				for (i = 0; i < children; i++) {
-					zend_ast_destroy_ex(ast->child[i], free);
+					zend_ast_destroy(ast->child[i]);
 				}
 			}
 	}
-
-	if (free) {
-		efree(ast);
-	}
-}
-
-ZEND_API void zend_ast_destroy(zend_ast *ast) {
-	zend_ast_destroy_ex(ast, 0);
-}
-ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
-	zend_ast_destroy_ex(ast, 1);
 }
 
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {

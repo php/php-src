@@ -273,7 +273,6 @@ static zend_ast *zend_persist_ast(zend_ast *ast)
 		}
 	}
 
-	efree(ast);
 	return node;
 }
 
@@ -323,10 +322,12 @@ static void zend_persist_zval(zval *z)
 				Z_AST_P(z) = new_ptr;
 				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 			} else {
-				zend_accel_store(Z_AST_P(z), sizeof(zend_ast_ref));
-				Z_ASTVAL_P(z) = zend_persist_ast(Z_ASTVAL_P(z));
+				zend_ast_ref *old_ref = Z_AST_P(z);
+				Z_ARR_P(z) = zend_accel_memdup(Z_AST_P(z), sizeof(zend_ast_ref));
+				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) = IS_TYPE_CONSTANT | IS_TYPE_COPYABLE;
 				GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+				efree(old_ref);
 			}
 			break;
 	}

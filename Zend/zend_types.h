@@ -355,7 +355,7 @@ struct _zend_reference {
 
 struct _zend_ast_ref {
 	zend_refcounted_h gc;
-	zend_ast         *ast;
+	/*zend_ast        ast; zend_ast follows the zend_ast_ref structure */
 };
 
 /* regular data types */
@@ -635,7 +635,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_AST(zval)					(zval).value.ast
 #define Z_AST_P(zval_p)				Z_AST(*(zval_p))
 
-#define Z_ASTVAL(zval)				(zval).value.ast->ast
+#define GC_AST(p)					((zend_ast*)(((char*)p) + sizeof(zend_ast_ref)))
+
+#define Z_ASTVAL(zval)				GC_AST(Z_AST(zval))
 #define Z_ASTVAL_P(zval_p)			Z_ASTVAL(*(zval_p))
 
 #define Z_INDIRECT(zval)			(zval).value.zv
@@ -818,14 +820,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
 
-#define ZVAL_NEW_AST(z, a) do {									\
+#define ZVAL_AST(z, ast) do {									\
 		zval *__z = (z);										\
-		zend_ast_ref *_ast =									\
-		(zend_ast_ref *) emalloc(sizeof(zend_ast_ref));			\
-		GC_REFCOUNT(_ast) = 1;									\
-		GC_TYPE_INFO(_ast) = IS_CONSTANT_AST;					\
-		_ast->ast = (a);										\
-		Z_AST_P(__z) = _ast;									\
+		Z_AST_P(__z) = ast;										\
 		Z_TYPE_INFO_P(__z) = IS_CONSTANT_AST_EX;				\
 	} while (0)
 

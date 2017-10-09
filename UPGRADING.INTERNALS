@@ -13,6 +13,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   j. Run-time constant operand addressing
   k. Array/Object recursion protection
   l. HASH_FLAG_PERSISTENT
+  m. zend_ast_ref
 
 2. Build system changes
   a. Unix build system changes
@@ -87,6 +88,11 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
   l. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
      GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
+
+  m. zend_ast_ref structure is changed to use only one allocation.
+     zend_ast_copy() now returns zend_ast_ref (instead of zend_asr).
+     zend_ast_destroy_and_free() is removed. ZVAL_NEW_AST() is replaced
+     by ZVAL_AST().
 
 ========================
 2. Build system changes

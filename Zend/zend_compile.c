@@ -8040,7 +8040,7 @@ void zend_const_expr_to_zval(zval *result, zend_ast *ast) /* {{{ */
 	if (ast->kind == ZEND_AST_ZVAL) {
 		ZVAL_COPY_VALUE(result, zend_ast_get_zval(ast));
 	} else {
-		ZVAL_NEW_AST(result, zend_ast_copy(ast));
+		ZVAL_AST(result, zend_ast_copy(ast));
 		/* destroy the ast here, it might have been replaced */
 		zend_ast_destroy(ast);
 	}
