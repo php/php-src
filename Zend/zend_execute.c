@@ -847,8 +847,15 @@ static zend_always_inline zend_bool zend_check_type(
 			   EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1;
 	} else {
+		zend_execute_data *caller_execute_data = EG(current_execute_data)->prev_execute_data;
+		while (caller_execute_data && 
+				caller_execute_data->func && 
+				!ZEND_USER_CODE(caller_execute_data->func->type)) {
+			caller_execute_data = caller_execute_data->prev_execute_data;
+		}
+
 		return zend_verify_scalar_type_hint(ZEND_TYPE_CODE(type), arg,
-			is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_ARG_USES_STRICT_TYPES());
+			is_return_type ? ZEND_RET_USES_STRICT_TYPES() : ZEND_CALL_USES_STRICT_TYPES(caller_execute_data));
 	}
 
 	/* Special handling for IS_VOID is not necessary (for return types),
