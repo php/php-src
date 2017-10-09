@@ -337,9 +337,7 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 				SERIALIZE_PTR(Z_AST_P(zv));
 				ast = Z_AST_P(zv);
 				UNSERIALIZE_PTR(ast);
-				if (!IS_SERIALIZED(ast->ast)) {
-					ast->ast = zend_file_cache_serialize_ast(ast->ast, script, info, buf);
-				}
+				zend_file_cache_serialize_ast(Z_ASTVAL_P(zv), script, info, buf);
 			}
 			break;
 	}
@@ -950,10 +948,7 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 				zend_ast_ref *ast;
 
 				UNSERIALIZE_PTR(Z_AST_P(zv));
-				ast = Z_AST_P(zv);
-				if (!IS_UNSERIALIZED(ast->ast)) {
-					ast->ast = zend_file_cache_unserialize_ast(ast->ast, script, buf);
-				}
+				zend_file_cache_unserialize_ast(Z_ASTVAL_P(zv), script, buf);
 			}
 			break;
 	}

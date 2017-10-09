@@ -2295,7 +2295,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 		if (Z_OPT_CONSTANT_P(param)) {
 			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
-				zval_ptr_dtor(param);
+				zval_ptr_dtor_nogc(param);
 				ZVAL_UNDEF(param);
 				HANDLE_EXCEPTION();
 			}
@@ -5861,13 +5861,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -6234,7 +6234,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 	ZVAL_COPY(&c.value, val);
 	if (Z_OPT_CONSTANT(c.value)) {
 		if (UNEXPECTED(zval_update_constant_ex(&c.value, EX(func)->op_array.scope) != SUCCESS)) {
-			zval_ptr_dtor(&c.value);
+			zval_ptr_dtor_nogc(&c.value);
 
 
 			HANDLE_EXCEPTION();
@@ -7644,13 +7644,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -9877,13 +9877,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -11844,13 +11844,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -13789,13 +13789,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -14517,13 +14517,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -15139,13 +15139,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -15661,13 +15661,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -18395,7 +18395,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -18553,7 +18553,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -18711,7 +18711,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -18869,7 +18869,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -19744,13 +19744,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -21500,13 +21500,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -22721,7 +22721,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -22879,7 +22879,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -23037,7 +23037,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -23195,7 +23195,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -24042,13 +24042,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -25326,7 +25326,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -25484,7 +25484,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -25642,7 +25642,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -25800,7 +25800,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -26534,13 +26534,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -27450,7 +27450,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -27608,7 +27608,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -27766,7 +27766,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -27924,7 +27924,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -30058,7 +30058,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -30216,7 +30216,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -30374,7 +30374,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -30532,7 +30532,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -31772,7 +31772,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -31930,7 +31930,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -32088,7 +32088,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -32246,7 +32246,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -36308,7 +36308,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -36466,7 +36466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -36624,7 +36624,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -36782,7 +36782,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -37719,13 +37719,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -40421,13 +40421,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -42746,7 +42746,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -42904,7 +42904,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -43062,7 +43062,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -43220,7 +43220,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -44213,13 +44213,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -46420,7 +46420,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -46578,7 +46578,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -46736,7 +46736,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -46894,7 +46894,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 			    (Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
 				zend_object *obj;
 
-				zval_ptr_dtor(object);
+				zval_ptr_dtor_nogc(object);
 				object_init(object);
 				Z_ADDREF_P(object);
 				obj = Z_OBJ_P(object);
@@ -47776,13 +47776,13 @@ num_index:
 			goto str_index;
 		} else {
 			zend_error(E_WARNING, "Illegal offset type");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
 			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
-			zval_ptr_dtor(expr_ptr);
+			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();

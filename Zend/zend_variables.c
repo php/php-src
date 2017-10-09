@@ -46,8 +46,8 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 		case IS_CONSTANT_AST: {
 				zend_ast_ref *ast = (zend_ast_ref*)p;
 
-				zend_ast_destroy_and_free(ast->ast);
-				efree_size(ast, sizeof(zend_ast_ref));
+				zend_ast_destroy(GC_AST(ast));
+				efree(ast);
 				break;
 			}
 		case IS_OBJECT: {
@@ -174,8 +174,7 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		Z_STR_P(zvalue) = zend_string_dup(Z_STR_P(zvalue), 0);
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
-		zend_ast *copy = zend_ast_copy(Z_ASTVAL_P(zvalue));
-		ZVAL_NEW_AST(zvalue, copy);
+		ZVAL_AST(zvalue, zend_ast_copy(Z_ASTVAL_P(zvalue)));
 	}
 }
 

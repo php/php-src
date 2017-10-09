@@ -333,7 +333,7 @@ void shutdown_executor(void) /* {{{ */
 				if (c->flags & CONST_PERSISTENT) {
 					break;
 				}
-				zval_ptr_dtor(&c->value);
+				zval_ptr_dtor_nogc(&c->value);
 				if (c->name) {
 					zend_string_release(c->name);
 				}
@@ -623,7 +623,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 			return FAILURE;
 		}
 		if (inline_change) {
-			zval_ptr_dtor(p);
+			zval_ptr_dtor_nogc(p);
 		}
 		ZVAL_COPY_VALUE(p, &tmp);
 	}
