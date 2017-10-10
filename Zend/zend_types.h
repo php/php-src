@@ -180,11 +180,13 @@ struct _zval_struct {
 	zend_value        value;			/* value */
 	union {
 		struct {
-			ZEND_ENDIAN_LOHI_4(
+			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
-				zend_uchar    _unused,
-				zend_uchar    _reserved)    /* call info for EX(This) */
+				union {
+					uint16_t  call_info;    /* call info for EX(This) */
+					uint16_t  extra;        /* not further specified */
+				} u)
 		} v;
 		uint32_t type_info;
 	} u1;
@@ -374,16 +376,16 @@ struct _zend_ast_ref {
 /* constant expressions */
 #define IS_CONSTANT_AST				12
 
-/* fake types */
-#define _IS_BOOL					13
-#define IS_CALLABLE					14
-#define IS_ITERABLE					19
-#define IS_VOID						18
-
 /* internal types */
-#define IS_INDIRECT             	15
-#define IS_PTR						17
-#define _IS_ERROR					20
+#define IS_INDIRECT             	13
+#define IS_PTR						14
+#define _IS_ERROR					15
+
+/* fake types used only for type hinting (Z_TYPE(zv) can not use them) */
+#define _IS_BOOL					16
+#define IS_CALLABLE					17
+#define IS_ITERABLE					18
+#define IS_VOID						19
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -460,9 +462,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
-#define IS_TYPE_REFCOUNTED			(1<<2)
-#define IS_TYPE_COPYABLE			(1<<4)
-#define IS_CONSTANT_VISITED_MARK    (1<<5)
+#define IS_CONSTANT_VISITED_MARK    (1<<0)
+#define IS_TYPE_COPYABLE			(1<<1)
+#define IS_TYPE_REFCOUNTED			(1<<2) /* equal to ZEND_CALL_FREE_EXTRA_ARGS */
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
