@@ -49,7 +49,7 @@ if test "$PHP_ZIP" != "no"; then
 
     if test -z "$LIBZIP_LIBDIR"; then
       AC_MSG_RESULT(not found)
-      AC_MSG_ERROR(Please reinstall the libzip distribution)
+      AC_MSG_ERROR(Please reinstall the libzip. Header zip.h not found.)
     fi
 
     dnl Could not think of a simple way to check libzip for overwrite support
