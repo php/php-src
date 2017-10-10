@@ -167,8 +167,6 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING)) {
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
-	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_CONSTANT_AST)) {
-		ZVAL_AST(zvalue, zend_ast_copy(Z_ASTVAL_P(zvalue)));
 	}
 }
 

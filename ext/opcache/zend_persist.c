@@ -319,12 +319,12 @@ static void zend_persist_zval(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_AST_P(z));
 			if (new_ptr) {
 				Z_AST_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
+				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 			} else {
 				zend_ast_ref *old_ref = Z_AST_P(z);
 				Z_ARR_P(z) = zend_accel_memdup(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
+				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
 				GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
 				efree(old_ref);
 			}
