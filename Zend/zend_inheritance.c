@@ -497,9 +497,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 					if (precv && precv->opcode == ZEND_RECV_INIT && precv->op2_type != IS_UNUSED) {
 						zval *zv = RT_CONSTANT(precv, precv->op2);
 
-						if (Z_TYPE_P(zv) == IS_CONSTANT) {
-							smart_str_append(&str, Z_STR_P(zv));
-						} else if (Z_TYPE_P(zv) == IS_FALSE) {
+						if (Z_TYPE_P(zv) == IS_FALSE) {
 							smart_str_appends(&str, "false");
 						} else if (Z_TYPE_P(zv) == IS_TRUE) {
 							smart_str_appends(&str, "true");
@@ -515,7 +513,12 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 						} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 							smart_str_appends(&str, "Array");
 						} else if (Z_TYPE_P(zv) == IS_CONSTANT_AST) {
-							smart_str_appends(&str, "<expression>");
+							zend_ast *ast = Z_ASTVAL_P(zv);
+							if (ast->kind == ZEND_AST_CONSTANT) {
+								smart_str_append(&str, zend_ast_get_constant_name(ast));
+							} else {
+								smart_str_appends(&str, "<expression>");
+							}
 						} else {
 							zend_string *zv_str = zval_get_string(zv);
 							smart_str_append(&str, zv_str);
@@ -769,7 +772,7 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(ce->parent->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
 		}
 	} else if (!(Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PRIVATE)) {
-		if (Z_CONSTANT(parent_const->value)) {
+		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
@@ -845,7 +848,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 #ifdef ZTS
 			if (parent_ce->type != ce->type) {
 				ZVAL_DUP(dst, src);
-				if (Z_OPT_CONSTANT_P(dst)) {
+				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
 				continue;
@@ -853,7 +856,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 #endif
 
 			ZVAL_COPY(dst, src);
-			if (Z_OPT_CONSTANT_P(dst)) {
+			if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		} while (dst != end);
@@ -894,7 +897,7 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			}
 			ZVAL_COPY_VALUE(dst, src);
 			Z_ADDREF_P(dst);
-			if (Z_CONSTANT_P(Z_REFVAL_P(dst))) {
+			if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
 				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 			}
 		} while (dst != end);
@@ -982,7 +985,7 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 {
 	if (do_inherit_constant_check(&ce->constants_table, c, name, iface)) {
 		zend_class_constant *ct;
-		if (Z_CONSTANT(c->value)) {
+		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {

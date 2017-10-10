@@ -1339,9 +1339,6 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 			case IS_DOUBLE:
 				type = xmlrpc_double;
 				break;
-			case IS_CONSTANT:
-				type = xmlrpc_string;
-				break;
 			case IS_STRING:
 				type = xmlrpc_string;
 				break;

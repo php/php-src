@@ -25,6 +25,7 @@
 #include "zend_language_parser.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
+#include "zend_constants.h"
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
@@ -70,6 +71,17 @@ ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 	return zend_ast_create_zval_with_lineno(zv, attr, CG(zend_lineno));
+}
+
+ZEND_API zend_ast *zend_ast_create_constant(zend_string *name, zend_ast_attr attr) {
+	zend_ast_zval *ast;
+
+	ast = zend_ast_alloc(sizeof(zend_ast_zval));
+	ast->kind = ZEND_AST_CONSTANT;
+	ast->attr = attr;
+	ZVAL_STR(&ast->val, name);
+	ast->val.u2.lineno = CG(zend_lineno);
+	return (zend_ast *) ast;
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
@@ -276,25 +288,30 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 		{
 			zval *zv = zend_ast_get_zval(ast);
 
-			if (Z_OPT_CONSTANT_P(zv)) {
-				if (Z_TYPE_FLAGS_P(zv) & IS_TYPE_REFCOUNTED) {
-					if (UNEXPECTED(zval_update_constant_ex(zv, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
-					ZVAL_COPY(result, zv);
-				} else {
-					ZVAL_COPY_VALUE(result, zv);
-					if (UNEXPECTED(zval_update_constant_ex(result, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
-				}
-			} else {
-				ZVAL_COPY(result, zv);
-			}
+			ZVAL_COPY(result, zv);
 			break;
 		}
+		case ZEND_AST_CONSTANT:
+		{
+			zend_string *name = zend_ast_get_constant_name(ast);
+			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
+
+			if (UNEXPECTED(zv == NULL)) {
+				ZVAL_UNDEF(result);
+				ret = zend_use_undefined_constant(name, ast->attr, result);
+				break;
+			}
+			ZVAL_DUP(result, zv);
+			break;
+		}
+		case ZEND_AST_CONSTANT_CLASS:
+			ZEND_ASSERT(EG(current_execute_data));
+			if (scope && scope->name) {
+				ZVAL_STR_COPY(result, scope->name);
+			} else {
+				ZVAL_EMPTY_STRING(result);
+			}
+			break;
 		case ZEND_AST_AND:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
@@ -455,7 +472,7 @@ static size_t zend_ast_tree_size(zend_ast *ast)
 {
 	size_t size;
 
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		size = sizeof(zend_ast_zval);
 	} else if (zend_ast_is_list(ast)) {
 		uint32_t i;
@@ -487,6 +504,12 @@ static void* zend_ast_tree_copy(zend_ast *ast, void *buf)
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
+		new->kind = ZEND_AST_CONSTANT;
+		new->attr = ast->attr;
+		ZVAL_STR_COPY(&new->val, zend_ast_get_constant_name(ast));
 		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -547,6 +570,9 @@ ZEND_API void zend_ast_destroy(zend_ast *ast) {
 			 * free the zend_array structure, so references to it from outside the op array
 			 * become invalid. GC would cause such a reference in the root buffer. */
 			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
+			break;
+		case ZEND_AST_CONSTANT:
+			zend_string_release(zend_ast_get_constant_name(ast));
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
@@ -996,9 +1022,6 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 			} ZEND_HASH_FOREACH_END();
 			smart_str_appendc(str, ']');
 			break;
-		case IS_CONSTANT:
-			smart_str_appendl(str, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
-			break;
 		case IS_CONSTANT_AST:
 			zend_ast_export_ex(str, Z_ASTVAL_P(zv), priority, indent);
 			break;
@@ -1077,6 +1100,14 @@ tail_call:
 		/* special nodes */
 		case ZEND_AST_ZVAL:
 			zend_ast_export_zval(str, zend_ast_get_zval(ast), priority, indent);
+			break;
+		case ZEND_AST_CONSTANT: {
+			zend_string *name = zend_ast_get_constant_name(ast);
+			smart_str_appendl(str, ZSTR_VAL(name), ZSTR_LEN(name));
+			break;
+		}
+		case ZEND_AST_CONSTANT_CLASS:
+			smart_str_appendl(str, "__CLASS__", sizeof("__CLASS__")-1);
 			break;
 		case ZEND_AST_ZNODE:
 			/* This AST kind is only used for temporary nodes during compilation */

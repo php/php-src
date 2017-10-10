@@ -542,90 +542,63 @@ ZEND_API void _zval_internal_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC) /* {{{ *
 }
 /* }}} */
 
+ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result) /* {{{ */
+{
+	char *colon;
+
+	if (UNEXPECTED(EG(exception))) {
+		return FAILURE;
+	} else if ((colon = (char*)zend_memrchr(ZSTR_VAL(name), ':', ZSTR_LEN(name)))) {
+		zend_throw_error(NULL, "Undefined class constant '%s'", ZSTR_VAL(name));
+		return FAILURE;
+	} else if ((attr & IS_CONSTANT_UNQUALIFIED) == 0) {
+		zend_throw_error(NULL, "Undefined constant '%s'", ZSTR_VAL(name));
+		return FAILURE;
+	} else {
+		char *actual = ZSTR_VAL(name);
+		size_t actual_len = ZSTR_LEN(name);
+		char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
+
+		if (slash) {
+			actual = slash + 1;
+			actual_len -= (actual - ZSTR_VAL(name));
+		}
+
+		zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)", actual, actual);
+		if (EG(exception)) {
+			return FAILURE;
+		} else {
+			zval_ptr_dtor_nogc(result);
+			ZVAL_STRINGL(result, actual, actual_len);
+		}
+	}
+	return SUCCESS;
+}
+/* }}} */
+
 ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 {
-	zval *const_value;
-	char *colon;
-	zend_bool inline_change;
+	if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
+		zend_ast *ast = Z_ASTVAL_P(p);
 
-	if (Z_TYPE_P(p) == IS_CONSTANT) {
-		if (IS_CONSTANT_VISITED(p)) {
-			zend_throw_error(NULL, "Cannot declare self-referencing constant '%s'", Z_STRVAL_P(p));
-			return FAILURE;
-		}
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
-		SEPARATE_ZVAL_NOREF(p);
-		MARK_CONSTANT_VISITED(p);
-		if (Z_CONST_FLAGS_P(p) & IS_CONSTANT_CLASS) {
-			ZEND_ASSERT(EG(current_execute_data));
-			if (inline_change) {
-				zend_string_release(Z_STR_P(p));
-			}
-			if (scope && scope->name) {
-				ZVAL_STR_COPY(p, scope->name);
-			} else {
-				ZVAL_EMPTY_STRING(p);
-			}
-		} else if (UNEXPECTED((const_value = zend_get_constant_ex(Z_STR_P(p), scope, Z_CONST_FLAGS_P(p))) == NULL)) {
-			if (UNEXPECTED(EG(exception))) {
-				RESET_CONSTANT_VISITED(p);
-				return FAILURE;
-			} else if ((colon = (char*)zend_memrchr(Z_STRVAL_P(p), ':', Z_STRLEN_P(p)))) {
-				zend_throw_error(NULL, "Undefined class constant '%s'", Z_STRVAL_P(p));
-				RESET_CONSTANT_VISITED(p);
-				return FAILURE;
-			} else {
-				if ((Z_CONST_FLAGS_P(p) & IS_CONSTANT_UNQUALIFIED) == 0) {
-					zend_throw_error(NULL, "Undefined constant '%s'", Z_STRVAL_P(p));
-					RESET_CONSTANT_VISITED(p);
-					return FAILURE;
-				} else {
-					zend_string *save = Z_STR_P(p);
-					char *actual = Z_STRVAL_P(p);
-					size_t actual_len = Z_STRLEN_P(p);
-					char *slash = (char *) zend_memrchr(actual, '\\', actual_len);
-					if (slash) {
-						actual = slash + 1;
-						actual_len -= (actual - Z_STRVAL_P(p));
-					}
+		if (ast->kind == ZEND_AST_CONSTANT) {
+			zend_string *name = zend_ast_get_constant_name(ast);
+			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
 
-					zend_error(E_WARNING, "Use of undefined constant %s - assumed '%s' (this will throw an Error in a future version of PHP)", actual, actual);
-					if (EG(exception)) {
-						RESET_CONSTANT_VISITED(p);
-						return FAILURE;
-					}
-
-					if (!inline_change) {
-						ZVAL_STRINGL(p, actual, actual_len);
-					} else {
-						if (slash) {
-							ZVAL_STRINGL(p, actual, actual_len);
-							zend_string_release(save);
-						} else {
-							Z_TYPE_INFO_P(p) = Z_REFCOUNTED_P(p) ?
-								IS_STRING_EX : IS_INTERNED_STRING_EX;
-						}
-					}
-				}
+			if (UNEXPECTED(zv == NULL)) {
+				return zend_use_undefined_constant(name, ast->attr, p);
 			}
-		} else {
-			if (inline_change) {
-				zend_string_release(Z_STR_P(p));
-			}
-			ZVAL_COPY_VALUE(p, const_value);
-			zval_opt_copy_ctor(p);
-		}
-	} else if (Z_TYPE_P(p) == IS_CONSTANT_AST) {
-		zval tmp;
-
-		inline_change = (Z_TYPE_FLAGS_P(p) & IS_TYPE_REFCOUNTED) != 0;
-		if (UNEXPECTED(zend_ast_evaluate(&tmp, Z_ASTVAL_P(p), scope) != SUCCESS)) {
-			return FAILURE;
-		}
-		if (inline_change) {
 			zval_ptr_dtor_nogc(p);
+			ZVAL_DUP(p, zv);
+		} else {
+			zval tmp;
+
+			if (UNEXPECTED(zend_ast_evaluate(&tmp, ast, scope) != SUCCESS)) {
+				return FAILURE;
+			}
+			zval_ptr_dtor_nogc(p);
+			ZVAL_COPY_VALUE(p, &tmp);
 		}
-		ZVAL_COPY_VALUE(p, &tmp);
 	}
 	return SUCCESS;
 }

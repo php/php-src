@@ -94,9 +94,9 @@ static void zend_persist_ast_calc(zend_ast *ast)
 {
 	uint32_t i;
 
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		ADD_SIZE(sizeof(zend_ast_zval));
-		zend_persist_zval_calc(zend_ast_get_zval(ast));
+		zend_persist_zval_calc(&((zend_ast_zval*)(ast))->val);
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		ADD_SIZE(sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * list->children);
@@ -122,7 +122,6 @@ static void zend_persist_zval_calc(zval *z)
 
 	switch (Z_TYPE_P(z)) {
 		case IS_STRING:
-		case IS_CONSTANT:
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);

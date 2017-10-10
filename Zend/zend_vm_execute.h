@@ -2292,7 +2292,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(opline->result.var EXECUTE_DATA_CC);
 	if (arg_num > EX_NUM_ARGS()) {
 		ZVAL_COPY(param, RT_CONSTANT(opline, opline->op2));
-		if (Z_OPT_CONSTANT_P(param)) {
+		if (Z_OPT_TYPE_P(param) == IS_CONSTANT_AST) {
 			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
 				zval_ptr_dtor_nogc(param);
@@ -5746,7 +5746,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_CONS
 				HANDLE_EXCEPTION();
 			}
 			value = &c->value;
-			if (Z_CONSTANT_P(value)) {
+			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(value, c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -19629,7 +19629,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_VAR_
 				HANDLE_EXCEPTION();
 			}
 			value = &c->value;
-			if (Z_CONSTANT_P(value)) {
+			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(value, c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -28467,7 +28467,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CLASS_CONSTANT_SPEC_UNUS
 				HANDLE_EXCEPTION();
 			}
 			value = &c->value;
-			if (Z_CONSTANT_P(value)) {
+			if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 				zval_update_constant_ex(value, c->ce);
 				if (UNEXPECTED(EG(exception) != NULL)) {
 					ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -38504,7 +38504,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_CONST_HAND
 	value = zend_hash_find(ht, Z_STR_P(varname));
 
 	if (opline->extended_value) {
-		if (Z_CONSTANT_P(value)) {
+		if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 			SAVE_OPLINE();
 			if (UNEXPECTED(zval_update_constant_ex(value, EX(func)->op_array.scope) != SUCCESS)) {
 				ZVAL_NULL(variable_ptr);
