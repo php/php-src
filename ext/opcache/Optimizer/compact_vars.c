@@ -93,7 +93,7 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 	}
 
 	/* Update CV name table */
-	{
+	if (num_cvs) {
 		zend_string **names = safe_emalloc(sizeof(zend_string *), num_cvs, 0);
 		for (i = 0; i < op_array->last_var; i++) {
 			if (cv_map[i] != (uint32_t) -1) {
@@ -104,6 +104,12 @@ void zend_optimizer_compact_vars(zend_op_array *op_array) {
 		}
 		efree(op_array->vars);
 		op_array->vars = names;
+	} else {
+		for (i = 0; i < op_array->last_var; i++) {
+			zend_string_release(op_array->vars[i]);
+		}
+		efree(op_array->vars);
+		op_array->vars = NULL;
 	}
 
 	op_array->last_var = num_cvs;
