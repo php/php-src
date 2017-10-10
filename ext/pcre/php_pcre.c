@@ -2426,6 +2426,7 @@ static PHP_FUNCTION(preg_quote)
 			case '|':
 			case ':':
 			case '-':
+			case '#':
 				extra_len++;
 				break;
 
@@ -2475,6 +2476,7 @@ static PHP_FUNCTION(preg_quote)
 			case '|':
 			case ':':
 			case '-':
+			case '#':
 				*q++ = '\\';
 				*q++ = c;
 				break;
