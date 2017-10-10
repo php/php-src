@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.25
+?? ??? 2017 PHP 7.0.26
+
+
+
+26 Oct 2017 PHP 7.0.25
 
 - Core:
   . Fixed bug #75241 (Null pointer dereference in zend_mm_alloc_small()).
