@@ -1446,7 +1446,7 @@ escape:
 		$toRead = array_values($workerStdouts);
 		$toWrite = NULL;
 		$toExcept = NULL;
-		if (stream_select($toRead, $toWrite, $toExcept, 0, 50 * 1000)) {
+		if (stream_select($toRead, $toWrite, $toExcept, 10, 0)) {
 			foreach ($toRead as $workerStdout) {
 				$i = array_search($workerStdout, $workerStdouts);
 				if ($i === FALSE) {
