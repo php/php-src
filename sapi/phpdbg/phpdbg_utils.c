@@ -844,12 +844,17 @@ char *phpdbg_short_zval_print(zval *zv, int maxlen) /* {{{ */
 				ZSTR_VAL(str), ZSTR_LEN(str) <= maxlen ? 0 : '+');
 			break;
 		}
-		case IS_CONSTANT:
-			decode = estrdup("<constant>");
+		case IS_CONSTANT_AST: {
+			zend_ast *ast = Z_ASTVAL_P(zv);
+
+			if (ast->kind == ZEND_AST_CONSTANT
+			 || ast->kind == ZEND_AST_CONSTANT_CLASS) {
+				decode = estrdup("<constant>");
+			} else {
+				decode = estrdup("<ast>");
+			}
 			break;
-		case IS_CONSTANT_AST:
-			decode = estrdup("<ast>");
-			break;
+		}
 		default:
 			spprintf(&decode, 0, "unknown type: %d", Z_TYPE_P(zv));
 			break;

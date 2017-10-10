@@ -886,6 +886,10 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_DIM_IS 1
 
+#define IS_CONSTANT_UNQUALIFIED     0x010
+#define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
+#define IS_CONSTANT_IN_NAMESPACE    0x100
+
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {
 	arg_num--;

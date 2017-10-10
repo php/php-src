@@ -123,7 +123,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				i = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array.opcodes[i], func->op_array.opcodes[i].op2))) {
+					if (Z_TYPE_P(RT_CONSTANT(&func->op_array.opcodes[i], func->op_array.opcodes[i].op2)) == IS_CONSTANT_AST) {
 						return;
 					}
 					i++;

@@ -35,8 +35,6 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-#define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
-
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	int i = 0;
@@ -305,11 +303,10 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							break;
-						}
-						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) {
-							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1) ||
-							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
+							zend_ast *ast = Z_ASTVAL_P(c);
+							if (ast->kind != ZEND_AST_CONSTANT
+							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &t, 1)
+							 || Z_TYPE(t) == IS_CONSTANT_AST) {
 								break;
 							}
 						} else {

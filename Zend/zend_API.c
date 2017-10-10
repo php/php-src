@@ -1150,7 +1150,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 
 			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
 				val = &c->value;
-				if (Z_CONSTANT_P(val)) {
+				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 					if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
 						return FAILURE;
 					}
@@ -1167,7 +1167,7 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 							val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
 						}
 						ZVAL_DEREF(val);
-						if (Z_CONSTANT_P(val)) {
+						if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
 							if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
 								return FAILURE;
 							}
@@ -3685,12 +3685,12 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		property_info = pemalloc(sizeof(zend_property_info), 1);
-		if ((access_type & ZEND_ACC_STATIC) || Z_CONSTANT_P(property)) {
+		if ((access_type & ZEND_ACC_STATIC) || Z_TYPE_P(property) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 	} else {
 		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
-		if (Z_CONSTANT_P(property)) {
+		if (Z_TYPE_P(property) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 	}
@@ -3846,7 +3846,7 @@ ZEND_API int zend_declare_class_constant_ex(zend_class_entry *ce, zend_string *n
 	Z_ACCESS_FLAGS(c->value) = access_type;
 	c->doc_comment = doc_comment;
 	c->ce = ce;
-	if (Z_CONSTANT_P(value)) {
+	if (Z_TYPE_P(value) == IS_CONSTANT_AST) {
 		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 	}
 

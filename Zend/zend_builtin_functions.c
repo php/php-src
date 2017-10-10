@@ -1071,7 +1071,7 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
-		if (Z_OPT_CONSTANT_P(prop)) {
+		if (Z_OPT_TYPE_P(prop) == IS_CONSTANT_AST) {
 			if (UNEXPECTED(zval_update_constant_ex(prop, NULL) != SUCCESS)) {
 				return;
 			}

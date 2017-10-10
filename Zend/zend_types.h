@@ -183,8 +183,8 @@ struct _zval_struct {
 			ZEND_ENDIAN_LOHI_4(
 				zend_uchar    type,			/* active type */
 				zend_uchar    type_flags,
-				zend_uchar    const_flags,
-				zend_uchar    reserved)	    /* call info for EX(This) */
+				zend_uchar    _unused,
+				zend_uchar    _reserved)    /* call info for EX(This) */
 		} v;
 		uint32_t type_info;
 	} u1;
@@ -372,7 +372,6 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 
 /* constant expressions */
-#define IS_CONSTANT					11
 #define IS_CONSTANT_AST				12
 
 /* fake types */
@@ -402,9 +401,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_FLAGS(zval)			(zval).u1.v.type_flags
 #define Z_TYPE_FLAGS_P(zval_p)		Z_TYPE_FLAGS(*(zval_p))
 
-#define Z_CONST_FLAGS(zval)			(zval).u1.v.const_flags
-#define Z_CONST_FLAGS_P(zval_p)		Z_CONST_FLAGS(*(zval_p))
-
 #define Z_TYPE_INFO(zval)			(zval).u1.type_info
 #define Z_TYPE_INFO_P(zval_p)		Z_TYPE_INFO(*(zval_p))
 
@@ -432,7 +428,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TYPE_MASK					0xff
 
 #define Z_TYPE_FLAGS_SHIFT			8
-#define Z_CONST_FLAGS_SHIFT			16
 
 #define GC_REFCOUNT(p)				(p)->gc.refcount
 #define GC_TYPE(p)					(p)->gc.u.v.type
@@ -465,31 +460,24 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
-#define IS_TYPE_CONSTANT			(1<<0)
 #define IS_TYPE_REFCOUNTED			(1<<2)
 #define IS_TYPE_COPYABLE			(1<<4)
+#define IS_CONSTANT_VISITED_MARK    (1<<5)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
 
-#define IS_STRING_EX				(IS_STRING         | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_ARRAY_EX					(IS_ARRAY          | ((                   IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_OBJECT_EX				(IS_OBJECT         | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
-#define IS_RESOURCE_EX				(IS_RESOURCE       | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
-#define IS_REFERENCE_EX				(IS_REFERENCE      | ((                   IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_STRING_EX				(IS_STRING         | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_ARRAY_EX					(IS_ARRAY          | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_OBJECT_EX				(IS_OBJECT         | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_RESOURCE_EX				(IS_RESOURCE       | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
+#define IS_REFERENCE_EX				(IS_REFERENCE      | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 
-#define IS_CONSTANT_EX				(IS_CONSTANT       | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
-#define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_CONSTANT | IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 
-/* zval.u1.v.const_flags */
-#define IS_CONSTANT_UNQUALIFIED		0x010
-#define IS_CONSTANT_VISITED_MARK	0x020
-#define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
-#define IS_CONSTANT_IN_NAMESPACE	0x100  /* used only in opline->extended_value */
-
-#define IS_CONSTANT_VISITED(p)		(Z_CONST_FLAGS_P(p) & IS_CONSTANT_VISITED_MARK)
-#define MARK_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
-#define RESET_CONSTANT_VISITED(p)	Z_CONST_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
+#define IS_CONSTANT_VISITED(p)         (Z_TYPE_FLAGS_P(p) & IS_CONSTANT_VISITED_MARK)
+#define MARK_CONSTANT_VISITED(p)       Z_TYPE_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
+#define RESET_CONSTANT_VISITED(p)      Z_TYPE_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
@@ -526,7 +514,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_UNPROTECT_RECURSION_P(zv) Z_UNPROTECT_RECURSION(*(zv))
 
 /* All data types < IS_STRING have their constructor/destructors skipped */
-#define Z_CONSTANT(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_CONSTANT) != 0)
+#define Z_CONSTANT(zval)			(Z_TYPE(zval) == IS_CONSTANT_AST)
 #define Z_CONSTANT_P(zval_p)		Z_CONSTANT(*(zval_p))
 
 #define Z_REFCOUNTED(zval)			((Z_TYPE_FLAGS(zval) & IS_TYPE_REFCOUNTED) != 0)
@@ -545,7 +533,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OPT_TYPE(zval)			(Z_TYPE_INFO(zval) & Z_TYPE_MASK)
 #define Z_OPT_TYPE_P(zval_p)		Z_OPT_TYPE(*(zval_p))
 
-#define Z_OPT_CONSTANT(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_CONSTANT << Z_TYPE_FLAGS_SHIFT)) != 0)
+#define Z_OPT_CONSTANT(zval)		(Z_OPT_TYPE(zval) == IS_CONSTANT_AST)
 #define Z_OPT_CONSTANT_P(zval_p)	Z_OPT_CONSTANT(*(zval_p))
 
 #define Z_OPT_REFCOUNTED(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)

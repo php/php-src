@@ -131,6 +131,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 
 ZEND_API int zval_update_constant(zval *pp);
 ZEND_API int zval_update_constant_ex(zval *pp, zend_class_entry *scope);
+ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, zval *result);
 
 /* dedicated Zend executor functions - do not use! */
 struct _zend_vm_stack {

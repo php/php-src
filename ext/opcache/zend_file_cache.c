@@ -278,7 +278,7 @@ static zend_ast *zend_file_cache_serialize_ast(zend_ast                 *ast,
 	ret = ast;
 	UNSERIALIZE_PTR(ast);
 
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		zend_file_cache_serialize_zval(&((zend_ast_zval*)ast)->val, script, info, buf);
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -305,7 +305,6 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-		case IS_CONSTANT:
 			if (!IS_SERIALIZED(Z_STR_P(zv))) {
 				SERIALIZE_STR(Z_STR_P(zv));
 			}
@@ -893,7 +892,7 @@ static zend_ast *zend_file_cache_unserialize_ast(zend_ast                *ast,
 
 	UNSERIALIZE_PTR(ast);
 
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		zend_file_cache_unserialize_zval(&((zend_ast_zval*)ast)->val, script, buf);
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
@@ -919,7 +918,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-		case IS_CONSTANT:
 			if (!IS_UNSERIALIZED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
 			}
@@ -945,8 +943,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			break;
 		case IS_CONSTANT_AST:
 			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
-				zend_ast_ref *ast;
-
 				UNSERIALIZE_PTR(Z_AST_P(zv));
 				zend_file_cache_unserialize_ast(Z_ASTVAL_P(zv), script, buf);
 			}

@@ -422,7 +422,6 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case IS_STRING:
-				case IS_CONSTANT:
 					if (info[i].flags & LITERAL_MAY_MERGE) {
 						if (info[i].flags & LITERAL_EX_OBJ) {
 							int key_len = sizeof("$this->") - 1 + Z_STRLEN(op_array->literals[i]);

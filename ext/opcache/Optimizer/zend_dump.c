@@ -455,9 +455,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		if (opline->extended_value & IS_CONSTANT_UNQUALIFIED) {
 				fprintf(stderr, " (unqualified)");
 		}
-		if (opline->extended_value & IS_CONSTANT_CLASS) {
-				fprintf(stderr, " (__class__)");
-		}
 		if (opline->extended_value & IS_CONSTANT_IN_NAMESPACE) {
 				fprintf(stderr, " (in-namespace)");
 		}
