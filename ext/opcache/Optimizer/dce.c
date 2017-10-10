@@ -535,6 +535,10 @@ static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa
 		i++;
 	}
 	op_array->last_live_range = j;
+	if (op_array->last_live_range == 0) {
+		efree(op_array->live_range);
+		op_array->live_range = NULL;
+	}
 }
 
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
