@@ -200,6 +200,7 @@ PHP                                                                        NEWS
     non-object). (Laruence)
   . Fixed bug #74947 (Segfault in scanner on INF number). (Laruence)
   . Fixed bug #74954 (null deref and segfault in zend_generator_resume()). (Bob)
+  . Fixed bug #75349 (NAN comparison). (Sara)
 
 - CLI:
   . Fixed bug #74979 (Interactive shell opening instead of script execution
