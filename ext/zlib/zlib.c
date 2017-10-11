@@ -1366,11 +1366,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, flush_behavior)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, encoded_data)
+	ZEND_ARG_INFO(0, flush_mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)
