@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC5
 
+- Exif:
+  . Fixed bug #75301 (Exif extension has built in revision version). (Peter
+    Kokot).
 
 12 Oct 2017, PHP 7.2.0RC4
 
