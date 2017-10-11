@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC5
 
+- Fileinfo:
+  . Upgrade bundled libmagic to 5.31. (Anatol)
+
 - Exif:
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
