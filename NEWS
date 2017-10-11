@@ -4,7 +4,11 @@ PHP                                                                        NEWS
 
 - Exif:
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
-    Kokot).
+    Kokot)
+
+- Zlib:
+  . Fixed bug #75299 (Wrong reflection on inflate_init and inflate_add). (Fabien
+    Villepinte)
 
 26 Sep 2017, PHP 7.1.11
 
