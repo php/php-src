@@ -616,7 +616,7 @@ CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 }
 /* }}} */
 
-static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
+static inline void realpath_cache_add(const char *path, size_t path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
 {
 	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
