@@ -129,9 +129,9 @@ typedef struct {
 
 typedef struct {
 	void *sst_tab;
-	size_t sst_len;
-	size_t sst_dirlen;
-	size_t sst_ss;
+	size_t sst_len;		/* Number of sectors */
+	size_t sst_dirlen;	/* Directory sector size */
+	size_t sst_ss;		/* Sector size */
 } cdf_stream_t;
 
 typedef struct {

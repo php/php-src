@@ -40,11 +40,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
 #include <unistd.h>
 #endif
 #include <string.h>
-#ifdef PHP_WIN32
-# include "config.w32.h"
-#else
-# include "php_config.h"
-#endif
+#include "config.h"
 
 #ifdef PHP_WIN32
 #include <shlwapi.h>
