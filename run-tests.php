@@ -1232,7 +1232,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $PHP_FAILED_TESTS, $workers, $workerID;
+	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $PHP_FAILED_TESTS, $workers, $workerID, $workerOutput;
 
 	if ($workers !== null && !$workerID) {
 		run_all_tests_parallel($test_files, $env, $redir_tested);
@@ -1263,7 +1263,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 		if (!is_array($name) && $result != 'REDIR') {
 			if ($workerID) {
-				send_message(STDOUT, [
+				send_message($workerOutput, [
 					"type" => "test_result",
 					"name" => $name,
 					"index" => $index,
@@ -1295,9 +1295,8 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	$thisScript = __FILE__;
 
 	$workerProcs = [];
-	$workerStdins = [];
-	$workerStdouts = [];
-	$workerStderrs = [];
+	$workerInputs = [];
+	$workerOutputs = [];
 
 	echo "====⚡️===========================================================⚡️====\n";
 	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
@@ -1372,6 +1371,16 @@ NAME_AND_SHAME;
 	}
 
 	echo "Spawning workers… ";
+
+	// Windows pipes can't be non-blocking, so use sockets there instead
+	$useSockets = (PHP_OS === "WINNT");
+
+	if ($useSockets) {
+		// IPv6 because nobody uses it, so less chance of collisions, right? ;)
+		$port = (ord('<') << 8) + ord('?');
+		$listenSock = stream_socket_server("tcp://[::1]:$port") or error("Couldn't create socket on [::1]:$port.");
+	}
+
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
 			$thisPHP . ' ' . escapeshellarg($thisScript),
@@ -1384,7 +1393,9 @@ NAME_AND_SHAME;
 			NULL,
 			$_ENV + [
 				"TEST_PHP_WORKER" => $i
-			],
+			] + (!$useSockets ? [] : [
+				"TEST_PHP_PORT" => $port
+			]),
 			[
 				"suppress_errors" => TRUE
 			]
@@ -1394,6 +1405,19 @@ NAME_AND_SHAME;
 			error("Failed to spawn worker $i");
 		}
 		$workerProcs[$i] = $proc;
+
+		if ($useSockets) {
+			$workerSock = stream_socket_accept($listenSock, 5);
+			if ($workerSock === FALSE) {
+				kill_children($workerProcs);
+				error("Failed to accept connection from worker $i");
+			}
+			$workerInput = $workerSock;
+			$workerOutput = $workerSock;
+		} else {
+			$workerInput = $pipes[0];
+			$workerOutput = $pipes[1];
+		}
 
 		$greeting = base64_encode(serialize([
 			"type" => "hello",
@@ -1409,14 +1433,14 @@ NAME_AND_SHAME;
 			]
 		])) . "\n";
 
-		stream_set_timeout($pipes[0], 5);
-		if (fwrite($pipes[0], $greeting) === FALSE) {
+		stream_set_timeout($workerInput, 5);
+		if (fwrite($workerInput, $greeting) === FALSE) {
 			kill_children($workerProcs);
 			error("Failed to send greeting to worker $i.");
 		}
 
-		stream_set_timeout($pipes[1], 5);
-		$rawReply = fgets($pipes[1]);
+		stream_set_timeout($workerOutput, 5);
+		$rawReply = fgets($workerOutput);
 		if ($rawReply === FALSE) {
 			kill_children($workerProcs);
 			error("Failed to read greeting reply from worker $i.");
@@ -1428,12 +1452,11 @@ NAME_AND_SHAME;
 			error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
 		}
 
-		stream_set_timeout($pipes[1], 0);
-		stream_set_blocking($pipes[1], FALSE);
+		stream_set_timeout($workerOutput, 0);
+		stream_set_blocking($workerOutput, FALSE);
 
-		$workerStdins[$i] = $pipes[0];
-		$workerStdouts[$i] = $pipes[1];
-		$workerStderrs[$i] = $pipes[2];
+		$workerInputs[$i] = $workerInput;
+		$workerOutputs[$i] = $workerOutput;
 
 		echo "$i ";
 	}
@@ -1443,21 +1466,21 @@ NAME_AND_SHAME;
 
 escape:
 	while ($testDirsToGo || ($testDirsInProgress > 0)) {
-		$toRead = array_values($workerStdouts);
+		$toRead = array_values($workerOutputs);
 		$toWrite = NULL;
 		$toExcept = NULL;
 		if (stream_select($toRead, $toWrite, $toExcept, 10, 0)) {
-			foreach ($toRead as $workerStdout) {
-				$i = array_search($workerStdout, $workerStdouts);
+			foreach ($toRead as $workerOutput) {
+				$i = array_search($workerOutput, $workerOutputs);
 				if ($i === FALSE) {
 					kill_children($workerProcs);
 					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
 				}
-				while (FALSE !== ($rawMessage = fgets($workerStdout))) {
+				while (FALSE !== ($rawMessage = fgets($workerOutput))) {
 					$message = unserialize(base64_decode($rawMessage));
 					if (!$message) {
 						kill_children($workerProcs);
-						$stuff = fread($workerStdout, 65536);
+						$stuff = fread($workerOutput, 65536);
 						error("Could not decode message from worker $i: '$rawMessage$stuff'");
 					}
 
@@ -1468,7 +1491,7 @@ escape:
 						case "ready":
 							if ($testDir = array_pop($testDirsToGo)) {
 								$testDirsInProgress++;
-								send_message($workerStdins[$i], [
+								send_message($workerInputs[$i], [
 									"type" => "run_tests",
 									"test_files" => $testDir,
 									"env" => $env,
@@ -1477,9 +1500,8 @@ escape:
 							} else {
 								proc_terminate($workerProcs[$i]);
 								unset($workerProcs[$i]);
-								unset($workerStdins[$i]);
-								unset($workerStdouts[$i]);
-								unset($workerStderrs[$i]);
+								unset($workerInputs[$i]);
+								unset($workerOutputs[$i]);
 								goto escape;
 							}
 							break;
@@ -1547,7 +1569,10 @@ escape:
 }
 
 function send_message($stream, array $message) {
+	$blocking = stream_get_meta_data($stream)["blocked"];
+	stream_set_blocking($stream, true);
 	fwrite($stream, base64_encode(serialize($message)) . "\n");
+	stream_set_blocking($stream, $blocking);
 }
 
 function kill_children(array $children) {
@@ -1559,13 +1584,20 @@ function kill_children(array $children) {
 }
 
 function run_worker() {
-	global $workerID;
+	global $workerID, $workerInput, $workerOutput;
+
+	if (getenv("TEST_PHP_PORT")) {
+		$useSockets = true;
+		$port = (int)getenv("TEST_PHP_PORT");
+	} else {
+		$useSockets = false;
+	}
 
 	@unlink(__DIR__ . "/../worker$workerID.log");
 	ini_set("error_log", __DIR__ . "/../worker$workerID.log");
-	set_error_handler(function ($errno, $errstr, $errfile, $errline) {
+	set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$workerOutput) {
 		if (error_reporting() & $errno) {
-			send_message(STDOUT, compact('errno', 'errstr', 'errfile', 'errline') + [
+			send_message($workerOutput, compact('errno', 'errstr', 'errfile', 'errline') + [
 				'type' => 'php_error'
 			]);
 		}
@@ -1573,14 +1605,23 @@ function run_worker() {
 		return true;
 	});
 
-	$greeting = fgets(STDIN);
+	if ($useSockets) {
+		$sock = stream_socket_client("tcp://[::1]:$port", $_, $_, 5) or error("Couldn't connect to [::1]:$port");
+		$workerInput = $sock;
+		$workerOutput = $sock;
+	} else {
+		$workerInput = STDIN;
+		$workerOutput = STDOUT;
+	}
+
+	$greeting = fgets($workerInput);
 	$greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
 	if ($greeting["type"] !== "hello" || $greeting["workerID"] !== $workerID) {
 		error("Unexpected greeting of type $greeting[type] and for worker $greeting[workerID]");
 	}
 
 	foreach ($greeting["GLOBALS"] as $var => $value) {
-		if ($var !== "workerID" && $var !== "GLOBALS") {
+		if ($var !== "workerID" && $var !== "workerInput" && $var !== "workerOutput" && $var !== "GLOBALS") {
 			$GLOBALS[$var] = $value;
 		}
 	}
@@ -1588,27 +1629,27 @@ function run_worker() {
 		define($const, $value);
 	}
 
-	send_message(STDOUT, [
+	send_message($workerOutput, [
 		"type" => "hello_reply",
 		"workerID" => $workerID
 	]);
 
-	send_message(STDOUT, [
+	send_message($workerOutput, [
 		"type" => "ready"
 	]);
 
-	while (($command = fgets(STDIN))) {
+	while (($command = fgets($workerInput))) {
 		$command = unserialize(base64_decode($command));
 
 		switch ($command["type"]) {
 			case "run_tests":
 				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
-				send_message(STDOUT, [
+				send_message($workerOutput, [
 					"type" => "dir_finished"
 				]);
 				break;
 			default:
-				send_message(STDOUT, [
+				send_message($workerOutput, [
 					"type" => "error",
 					"msg" => "Unrecognised message type: $command[type]"
 				]);
