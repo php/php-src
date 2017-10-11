@@ -939,8 +939,6 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  
  	return rv;
  }
-Only in libmagic.orig: asctime_r.c
-Only in libmagic.orig: asprintf.c
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2017-05-08 20:10:13.000000000 +0200
 +++ libmagic/cdf.c	2017-10-11 16:42:33.074325600 +0200
@@ -1314,8 +1312,6 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
  }
 -#endif
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
-Only in libmagic: config.h
-Only in libmagic.orig: ctime_r.c
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2017-03-07 23:20:58.000000000 +0100
 +++ libmagic/der.c	2017-10-11 15:25:46.389495700 +0200
@@ -1346,7 +1342,6 @@ diff -u libmagic.orig/der.c libmagic/der.c
  		uint32_t z = i << 1;
  		if (z < blen - 2)
  			snprintf(buf + z, blen - z, "%.2x", d[i]);
-Only in libmagic.orig: dprintf.c
 diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
 --- libmagic.orig/elfclass.h	2014-12-16 23:23:50.000000000 +0100
 +++ libmagic/elfclass.h	2017-10-11 15:25:46.389495700 +0200
@@ -1377,7 +1372,6 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    (size_t)elf_getu16(swap, elfhdr.e_shentsize),
  		    fsize, elf_getu16(swap, elfhdr.e_machine),
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
-Only in libmagic.orig: file.c
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2017-05-08 20:10:13.000000000 +0200
 +++ libmagic/file.h	2017-10-11 18:12:53.033898200 +0200
@@ -1626,8 +1620,6 @@ diff -u libmagic.orig/file.h libmagic/file.h
  #ifndef __RCSID
  #define __RCSID(a)
  #endif
-Only in libmagic.orig: file_opts.h
-Only in libmagic.orig: fmtcheck.c
 diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
 --- libmagic.orig/fsmagic.c	2016-05-03 17:48:37.000000000 +0200
 +++ libmagic/fsmagic.c	2017-10-11 15:25:46.420736400 +0200
@@ -2311,11 +2303,6 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  	return rbuf;
  }
  
-Only in libmagic.orig: getline.c
-Only in libmagic.orig: getopt_long.c
-Only in libmagic.orig: gmtime_r.c
-Only in libmagic: LICENSE
-Only in libmagic.orig: localtime_r.c
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2016-07-18 13:43:05.000000000 +0200
 +++ libmagic/magic.c	2017-10-11 18:13:31.147783600 +0200
@@ -2814,13 +2801,6 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  
  public const char *
  magic_error(struct magic_set *ms)
-Only in libmagic: magic.h
-Only in libmagic.orig: magic.h.in
-Only in libmagic.orig: Makefile.am
-Only in libmagic.orig: Makefile.in
-Only in libmagic.orig: mygetopt.h
-Only in libmagic: patchlevel.h
-Only in libmagic.orig: pread.c
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2017-03-07 23:20:58.000000000 +0100
 +++ libmagic/print.c	2017-10-11 16:59:51.225863100 +0200
@@ -3193,8 +3173,6 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
                                          if (c != NULL &&
  					    (ec = strchr(c, '\n')) != NULL)
  						*ec = '\0';
-Only in libmagic.orig: readelf.c
-Only in libmagic.orig: readelf.h
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2017-05-08 20:10:13.000000000 +0200
 +++ libmagic/softmagic.c	2017-10-11 15:50:26.812155000 +0200
@@ -3597,6 +3575,3 @@ diff -u libmagic.orig/strcasestr.c libmagic/strcasestr.c
  #include <assert.h>
  #include <ctype.h>
  #include <string.h>
-Only in libmagic.orig: strlcat.c
-Only in libmagic.orig: strlcpy.c
-Only in libmagic.orig: vasprintf.c
