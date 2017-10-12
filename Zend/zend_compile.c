@@ -3000,7 +3000,13 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			if (zend_is_assign_to_self(var_ast, expr_ast)
 			 && !is_this_fetch(expr_ast)) {
 				/* $a[0] = $a should evaluate the right $a first */
-				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+				znode cv_node;
+
+				if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
+					zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+				} else {
+					zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+				}
 			} else {
 				zend_compile_expr(&expr_node, expr_ast);
 			}
@@ -3023,7 +3029,13 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 		case ZEND_AST_ARRAY:
 			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
 				/* list($a, $b) = $a should evaluate the right $a first */
-				zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+				znode cv_node;
+
+				if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
+					zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+				} else {
+					zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+				}
 			} else {
 				zend_compile_expr(&expr_node, expr_ast);
 			}

@@ -14,20 +14,19 @@ $a[0][0] = $a;
 debug_zval_dump($a);
 ?>
 --EXPECTF--
-array(1) refcount(%d){
+array(1) refcount(2){
   [0]=>
-  array(1) refcount(%d){
-    [0]=>
-    *RECURSION*
+  array(0) refcount(1){
   }
 }
-array(1) refcount(%d){
+array(1) refcount(2){
   [0]=>
-  array(1) refcount(%d){
+  array(1) refcount(1){
     [0]=>
-    array(1) refcount(%d){
+    array(1) refcount(1){
       [0]=>
-      *RECURSION*
+      array(0) refcount(1){
+      }
     }
   }
 }
