@@ -172,7 +172,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 		while (p <= end) {
 			if ((p = (const char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-				if (!memcmp(needle, p, needle_len-1)) {
+				if (!memcmp(needle+1, p+1, needle_len-2)) {
 					return p;
 				}
 			}
