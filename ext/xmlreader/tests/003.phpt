@@ -66,6 +66,9 @@ while ($reader->read()) {
 			echo $reader->name . ": ";
 			echo $reader->value . "\n";
 
+			var_dump($reader->moveToAttributeNo(20));
+			var_dump($reader->moveToAttribute('missing-attribute'));
+			var_dump($reader->moveToAttribute(''));
 		}
 	}
 }
@@ -73,11 +76,16 @@ $reader->close();
 unlink($filename);
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 num: 1
 idx: 2
 num: 1
 idx: 2
 num: 1
 idx: 2
+bool(false)
+bool(false)
+
+Warning: XMLReader::moveToAttribute(): Attribute Name is required in %s on line %d
+bool(false)
 ===DONE===
