@@ -1122,7 +1122,8 @@ static zend_always_inline void zend_mm_delete_chunk(zend_mm_heap *heap, zend_mm_
 	chunk->next->prev = chunk->prev;
 	chunk->prev->next = chunk->next;
 	heap->chunks_count--;
-	if (heap->chunks_count + heap->cached_chunks_count < heap->avg_chunks_count + 0.1) {
+	if (heap->chunks_count + heap->cached_chunks_count < heap->avg_chunks_count + 0.1
+			|| heap->cached_chunks_count == 0) {
 		/* delay deletion */
 		heap->cached_chunks_count++;
 		chunk->next = heap->cached_chunks;
