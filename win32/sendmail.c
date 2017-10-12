@@ -145,7 +145,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
-				  NULL, header, (int)strlen(header),
+				  NULL, header, strlen(header),
 				  replace,
 				  -1,
 				  NULL);
@@ -161,7 +161,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
+				   result, ZSTR_VAL(result), ZSTR_LEN(result),
 				   replace,
 				  -1,
 				  NULL);
@@ -220,6 +220,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
+		if (headers_lc == headers_trim) {
+			zend_string_release(headers_lc);
+		}
 	}
 
 	/* Fall back to sendmail_from php.ini setting */

@@ -412,9 +412,9 @@ flush:
 private int
 check_fmt(struct magic_set *ms, struct magic *m)
 {
-	pcre *pce;
-	int re_options, rv = -1;
-	pcre_extra *re_extra;
+	pcre2_code *pce;
+	uint32_t re_options, capture_count;
+	int rv = -1;
 	zend_string *pattern;
 
 	if (strchr(m->desc, '%') == NULL)
@@ -422,10 +422,14 @@ check_fmt(struct magic_set *ms, struct magic *m)
 
 	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &re_extra, &re_options)) == NULL) {
+	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
 		rv = -1;
 	} else {
-	 	rv = !pcre_exec(pce, re_extra, m->desc, strlen(m->desc), 0, re_options, NULL, 0);
+		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
+		if (match_data) {
+			rv = pcre2_match(pce, m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx()) > 0;
+			php_pcre_free_match_data(match_data);
+		}
 	}
 	zend_string_release(pattern);
 	(void)setlocale(LC_CTYPE, "");
@@ -1725,10 +1729,10 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	}
 	ZSTR_VAL(t)[j++] = '~';
 
-	if (options & PCRE_CASELESS) 
+	if (options & PCRE2_CASELESS) 
 		ZSTR_VAL(t)[j++] = 'i';
 
-	if (options & PCRE_MULTILINE)
+	if (options & PCRE2_MULTILINE)
 		ZSTR_VAL(t)[j++] = 'm';
 
 	ZSTR_VAL(t)[j]='\0';
@@ -1901,10 +1905,10 @@ magiccheck(struct magic_set *ms, struct magic *m)
 		int options = 0;
 		pcre_cache_entry *pce;
 
-		options |= PCRE_MULTILINE;
+		options |= PCRE2_MULTILINE;
 
 		if (m->str_flags & STRING_IGNORE_CASE) {
-			options |= PCRE_CASELESS;
+			options |= PCRE2_CASELESS;
 		}
 
 		convert_libmagic_pattern(&pattern, (char *)m->value.s, m->vallen, options);
