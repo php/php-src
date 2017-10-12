@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
 
+- Openssl:
+  . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
+
 - Zlib:
   . Fixed bug #75299 (Wrong reflection on inflate_init and inflate_add). (Fabien
     Villepinte)
