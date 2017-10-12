@@ -577,9 +577,10 @@ static int browser_reg_compare(
 	const char *cur;
 	int i;
 
-	pcre *re;
-	int re_options;
-	pcre_extra *re_extra;
+	pcre2_code *re;
+	pcre2_match_data *match_data;
+	uint32_t re_options;
+	int rc;
 
 	/* Agent name too short */
 	if (ZSTR_LEN(agent_name) < browscap_get_minimum_length(entry)) {
@@ -621,14 +622,17 @@ static int browser_reg_compare(
 	}
 
 	regex = browscap_convert_pattern(entry->pattern, 0);
-	re = pcre_get_compiled_regex(regex, &re_extra, &re_options);
+	re = pcre_get_compiled_regex(regex, &re_options);
 	if (re == NULL) {
 		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
 		zend_string_release(regex);
 		return 0;
 	}
 
-	if (pcre_exec(re, re_extra, ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, NULL, 0) == 0) {
+	match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
+	rc = pcre2_match(re, ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, match_data, php_pcre_mctx());
+	pcre2_match_data_free(match_data);
+	if (PCRE2_ERROR_NOMATCH != rc) {
 		/* If we've found a possible browser, we need to do a comparison of the
 		   number of characters changed in the user agent being checked versus
 		   the previous match found and the current match. */

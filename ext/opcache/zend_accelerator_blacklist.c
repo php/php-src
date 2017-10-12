@@ -43,7 +43,7 @@
 #define ZEND_BLACKLIST_BLOCK_SIZE	32
 
 struct _zend_regexp_list {
-	pcre             *re;
+	pcre2_code       *re;
 	zend_regexp_list *next;
 };
 
@@ -73,8 +73,9 @@ static void blacklist_report_regexp_error(const char *pcre_error, int pcre_error
 
 static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 {
-	const char *pcre_error;
-	int i, pcre_error_offset;
+	PCRE2_UCHAR pcre_error[256];
+	int i, errnumber;
+	PCRE2_SIZE pcre_error_offset;
 	zend_regexp_list **regexp_list_it, *it;
 	char regexp[12*1024], *p, *end, *c, *backtrack = NULL;
 
@@ -177,8 +178,9 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre_compile(regexp, PCRE_NO_AUTO_CAPTURE, &pcre_error, &pcre_error_offset, 0)) == NULL) {
+			if ((it->re = pcre2_compile(regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, php_pcre_cctx())) == NULL) {
 				free(it);
+				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
 				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
 				return;
 			}
@@ -207,7 +209,7 @@ void zend_accel_blacklist_shutdown(zend_blacklist *blacklist)
 	if (blacklist->regexp_list) {
 		zend_regexp_list *temp, *it = blacklist->regexp_list;
 		while (it) {
-			pcre_free(it->re);
+			pcre2_code_free(it->re);
 			temp = it;
 			it = it->next;
 			free(temp);
@@ -343,10 +345,14 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 		return 0;
 	}
 	while (regexp_list_it != NULL) {
-		if (pcre_exec(regexp_list_it->re, NULL, verify_path, strlen(verify_path), 0, 0, NULL, 0) >= 0) {
+		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regexp_list_it->re, php_pcre_gctx());
+		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, php_pcre_mctx());
+		if (rc >= 0) {
 			ret = 1;
+			pcre2_match_data_free(match_data);
 			break;
 		}
+		pcre2_match_data_free(match_data);
 		regexp_list_it = regexp_list_it->next;
 	}
 	return ret;

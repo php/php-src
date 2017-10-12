@@ -2031,8 +2031,9 @@ SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern;
 	zend_string *result, *subject;
-	int count = 0;
+	size_t count = 0;
 	zval zcount, *replacement, tmp_replacement, rv;
+	pcre2_match_data *match_data;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2057,13 +2058,11 @@ SPL_METHOD(RegexIterator, accept)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
-#ifdef PCRE_EXTRA_MARK
-			if (intern->u.regex.pce->extra) {
-				intern->u.regex.pce->extra->flags &= ~PCRE_EXTRA_MARK;
-			}
-#endif
-			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, NULL, 0);
-			RETVAL_BOOL(count >= 0);
+			match_data = pcre2_match_data_create_from_pattern(intern->u.regex.pce->re, php_pcre_gctx());
+			/* XXX error check. */
+			pcre2_match(intern->u.regex.pce->re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
+			RETVAL_BOOL(pcre2_get_ovector_count(match_data) >= 0);
+			pcre2_match_data_free(match_data);
 			break;
 
 		case REGIT_MODE_ALL_MATCHES:
