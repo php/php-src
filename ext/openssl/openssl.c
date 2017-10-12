@@ -2280,7 +2280,6 @@ PHP_FUNCTION(openssl_x509_parse)
 {
 	zval * zcert;
 	X509 * cert = NULL;
-	zend_resource *certresource = NULL;
 	int i, sig_nid;
 	zend_bool useshortnames = 1;
 	char * tmpstr;
@@ -2300,7 +2299,7 @@ PHP_FUNCTION(openssl_x509_parse)
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &zcert, &useshortnames) == FAILURE) {
 		return;
 	}
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		RETURN_FALSE;
 	}
@@ -2416,9 +2415,6 @@ PHP_FUNCTION(openssl_x509_parse)
 				add_assoc_stringl(&subitem, extname, bio_buf->data, bio_buf->length);
 			} else {
 				zval_dtor(return_value);
-				if (certresource == NULL && cert) {
-					X509_free(cert);
-				}
 				BIO_free(bio_out);
 				RETURN_FALSE;
 			}
@@ -2432,10 +2428,6 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
-
-	if (certresource == NULL && cert) {
-		X509_free(cert);
-	}
 }
 /* }}} */
 
