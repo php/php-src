@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.26
 
+- Core:
+  . Fixed bug #75368 (mmap/munmap trashing on unlucky allocations). (Nikita,
+    Dmitry)
+
 - Exif:
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
