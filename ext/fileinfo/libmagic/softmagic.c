@@ -426,7 +426,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
 		rv = -1;
 	} else {
 		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(pce, php_pcre_gctx());
-		rv = !pcre2_match(pce, m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx());
+		rv = pcre2_match(pce, m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx()) > 0;
 		pcre2_match_data_free(match_data);
 	}
 	zend_string_release(pattern);

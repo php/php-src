@@ -5797,7 +5797,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 
 	if (res == PCRE2_ERROR_NOMATCH) {
 		return FAILURE;
-	} else if (res) {
+	} else if (res < 0) {
 		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
 		return FAILURE;
 	}

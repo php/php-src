@@ -2034,6 +2034,7 @@ SPL_METHOD(RegexIterator, accept)
 	size_t count = 0;
 	zval zcount, *replacement, tmp_replacement, rv;
 	pcre2_match_data *match_data;
+	int re;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2060,8 +2061,8 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_MATCH:
 			match_data = pcre2_match_data_create_from_pattern(intern->u.regex.pce->re, php_pcre_gctx());
 			/* XXX error check. */
-			pcre2_match(intern->u.regex.pce->re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
-			RETVAL_BOOL(pcre2_get_ovector_count(match_data) >= 0);
+			re = pcre2_match(intern->u.regex.pce->re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
+			RETVAL_BOOL(re >= 0);
 			pcre2_match_data_free(match_data);
 			break;
 
