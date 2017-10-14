@@ -12,9 +12,6 @@ echo "---", PHP_EOL;
 var_dump("11 sed" * "13 do");
 var_dump("eiusmod" * "tempor");
 echo "---", PHP_EOL;
-var_dump("17 incididunt" / "19 ut");
-var_dump("labore" / "et");
-echo "---", PHP_EOL;
 var_dump("23 dolore" ** "29 magna");
 var_dump("aliqua." ** "Ut");
 echo "---", PHP_EOL;
@@ -84,19 +81,6 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
----
-
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(0.89473684210526)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: Division by zero in %s on line %d
-float(NAN)
 ---
 
 Notice: A non well formed numeric value encountered in %s on line %d

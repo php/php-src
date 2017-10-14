@@ -29,13 +29,6 @@ $a = foxcache("eiusmod");
 $a *= "tempor";
 var_dump($a);
 echo "---", PHP_EOL;
-$a = foxcache("17 incididunt");
-$a /= "19 ut";
-var_dump($a);
-$a = foxcache("labore");
-$a /= "et";
-var_dump($a);
-echo "---", PHP_EOL;
 $a = foxcache("23 dolore");
 $a **= "29 magna";
 var_dump($a);
@@ -139,19 +132,6 @@ Warning: A non-numeric value encountered in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d
 int(0)
----
-
-Notice: A non well formed numeric value encountered in %s on line %d
-
-Notice: A non well formed numeric value encountered in %s on line %d
-float(0.89473684210526)
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: A non-numeric value encountered in %s on line %d
-
-Warning: Division by zero in %s on line %d
-float(NAN)
 ---
 
 Notice: A non well formed numeric value encountered in %s on line %d

@@ -6,4 +6,4 @@ Error messages are shown
 $error = 1 / 0;
 ?>
 --EXPECTREGEX--
-.*Division by zero.*
+.*Fatal error: Uncaught DivisionByZeroError.*
