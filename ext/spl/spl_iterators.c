@@ -1567,7 +1567,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				/* pcre_get_compiled_regex_cache has already sent error */
 				return NULL;
 			}
-			intern->u.regex.pce->refcount++;
+			php_pcre_pce_incref(intern->u.regex.pce);
 			break;
 		}
 #endif
@@ -2034,7 +2034,8 @@ SPL_METHOD(RegexIterator, accept)
 	size_t count = 0;
 	zval zcount, *replacement, tmp_replacement, rv;
 	pcre2_match_data *match_data;
-	int re;
+	pcre2_code *re;
+	int rc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2059,10 +2060,11 @@ SPL_METHOD(RegexIterator, accept)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
-			match_data = pcre2_match_data_create_from_pattern(intern->u.regex.pce->re, php_pcre_gctx());
+			re = php_pcre_pce_re(intern->u.regex.pce);
+			match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
 			/* XXX error check. */
-			re = pcre2_match(intern->u.regex.pce->re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
-			RETVAL_BOOL(re >= 0);
+			rc = pcre2_match(re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
+			RETVAL_BOOL(rc >= 0);
 			pcre2_match_data_free(match_data);
 			break;
 
@@ -2327,7 +2329,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	if (object->dit_type == DIT_RegexIterator || object->dit_type == DIT_RecursiveRegexIterator) {
 		if (object->u.regex.pce) {
-			object->u.regex.pce->refcount--;
+			php_pcre_pce_decref(object->u.regex.pce);
 		}
 		if (object->u.regex.regex) {
 			zend_string_release(object->u.regex.regex);

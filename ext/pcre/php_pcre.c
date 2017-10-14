@@ -50,6 +50,18 @@
 # define PCRE2_NOTEMPTY_ATSTART PCRE_NOTEMPTY
 #endif
 
+struct _pcre_cache_entry {
+	pcre2_code *re;
+	uint32_t preg_options;
+	uint32_t capture_count;
+	uint32_t name_count;
+#if HAVE_SETLOCALE
+	const uint8_t *tables;
+#endif
+	uint32_t compile_options;
+	int refcount;
+};
+
 enum {
 	PHP_PCRE_NO_ERROR = 0,
 	PHP_PCRE_INTERNAL_ERROR,
@@ -2647,6 +2659,21 @@ PHPAPI pcre2_general_context *php_pcre_gctx(void)
 PHPAPI pcre2_compile_context *php_pcre_cctx(void)
 {/*{{{*/
 	return cctx;
+}/*}}}*/
+
+PHPAPI void php_pcre_pce_incref(pcre_cache_entry *pce)
+{/*{{{*/
+	pce->refcount++;
+}/*}}}*/
+
+PHPAPI void php_pcre_pce_decref(pcre_cache_entry *pce)
+{/*{{{*/
+	pce->refcount--;
+}/*}}}*/
+
+PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *pce)
+{/*{{{*/
+	return pce->re;
 }/*}}}*/
 
 #endif /* HAVE_PCRE || HAVE_BUNDLED_PCRE */

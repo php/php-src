@@ -43,17 +43,6 @@ extern zend_module_entry pcre_module_entry;
 #include "php_version.h"
 #define PHP_PCRE_VERSION PHP_VERSION
 
-struct _pcre_cache_entry {
-	pcre2_code *re;
-	uint32_t preg_options;
-	uint32_t capture_count;
-	uint32_t name_count;
-#if HAVE_SETLOCALE
-	const uint8_t *tables;
-#endif
-	uint32_t compile_options;
-	int refcount;
-};
 typedef struct _pcre_cache_entry pcre_cache_entry;
 
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex);
@@ -73,6 +62,9 @@ PHPAPI void  php_pcre_grep_impl(   pcre_cache_entry *pce, zval *input, zval *ret
 PHPAPI pcre2_match_context *php_pcre_mctx(void);
 PHPAPI pcre2_general_context *php_pcre_gctx(void);
 PHPAPI pcre2_compile_context *php_pcre_cctx(void);
+PHPAPI void php_pcre_pce_incref(pcre_cache_entry *);
+PHPAPI void php_pcre_pce_decref(pcre_cache_entry *);
+PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;
