@@ -59,7 +59,7 @@ struct _pcre_cache_entry {
 	const uint8_t *tables;
 #endif
 	uint32_t compile_options;
-	int refcount;
+	uint32_t refcount;
 };
 
 enum {
@@ -2668,6 +2668,7 @@ PHPAPI void php_pcre_pce_incref(pcre_cache_entry *pce)
 
 PHPAPI void php_pcre_pce_decref(pcre_cache_entry *pce)
 {/*{{{*/
+	assert(0 != pce->refcount);
 	pce->refcount--;
 }/*}}}*/
 
