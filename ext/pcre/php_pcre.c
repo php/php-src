@@ -80,7 +80,7 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 #define PCRE_JIT_STACK_MAX_SIZE (64 * 1024)
 ZEND_TLS pcre2_jit_stack *jit_stack = NULL;
 #endif
-static pcre2_general_context *gctx = NULL;
+ZEND_TLS pcre2_general_context *gctx = NULL;
 /* These two are global per thread for now. Though it is possible to use these
  	per pattern. Either one can copy it and use in pce, or one does no global
 	contexts at all, but creates for every pce. */
@@ -173,8 +173,11 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
 	pcre2_general_context_free(gctx);
+	gctx = NULL;
 	pcre2_compile_context_free(cctx);
+	cctx = NULL;
 	pcre2_match_context_free(mctx);
+	mctx = NULL;
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	/* Stack may only be destroyed when no cached patterns
