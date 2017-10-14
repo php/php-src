@@ -141,13 +141,13 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 
 static void *php_pcre_malloc(PCRE2_SIZE size, void *data)
 {/*{{{*/
-	void *p = malloc(size);
+	void *p = pemalloc(size, 1);
 	return p;
 }/*}}}*/
 
 static void php_pcre_free(void *block, void *data)
 {/*{{{*/
-	free(block);
+	pefree(block, 1);
 }/*}}}*/
 
 static PHP_GINIT_FUNCTION(pcre) /* {{{ */
