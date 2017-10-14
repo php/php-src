@@ -136,6 +136,19 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 
 	shiftlist = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last, use_heap);
 	memset(shiftlist, 0, sizeof(uint32_t) * op_array->last);
+	/* remove empty callee_info */
+	func_info = ZEND_FUNC_INFO(op_array);
+	if (func_info) {
+		zend_call_info **call_info = &func_info->callee_info;
+		while ((*call_info)) {
+			if ((*call_info)->caller_init_opline->opcode == ZEND_NOP) {
+				*call_info = (*call_info)->next_callee;
+			} else {
+				call_info = &(*call_info)->next_callee;
+			}
+		}
+	}
+
 	for (b = blocks; b < end; b++) {
 		if (b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE)) {
 			uint32_t end;
@@ -257,7 +270,6 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 
 		/* update call graph */
-		func_info = ZEND_FUNC_INFO(op_array);
 		if (func_info) {
 			zend_call_info *call_info = func_info->callee_info;
 			while (call_info) {
