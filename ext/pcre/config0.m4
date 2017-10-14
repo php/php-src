@@ -75,7 +75,6 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
     AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
-    AC_DEFINE(PCRE2_STATIC, 1, [ ])
 
     if test "$PHP_PCRE_REGEX" != "no"; then
       AC_MSG_CHECKING([whether to enable PCRE JIT functionality])
