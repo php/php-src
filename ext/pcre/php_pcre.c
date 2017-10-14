@@ -226,7 +226,7 @@ PHP_INI_END()
 static PHP_MINFO_FUNCTION(pcre)
 {
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	int jit_yes = 0;
+	uint32_t jit_yes = 0;
 #endif
 
 	php_info_print_table_start();
