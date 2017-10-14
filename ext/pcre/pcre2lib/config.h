@@ -17,12 +17,11 @@
 
 #if defined(__GNUC__) && __GNUC__ >= 4
 # ifdef __cplusplus
-#  define PCRE_EXP_DECL		extern "C" __attribute__ ((visibility("default")))
+#  define PCRE2_EXP_DECL		extern "C" __attribute__ ((visibility("default")))
 # else
-#  define PCRE_EXP_DECL		extern __attribute__ ((visibility("default")))
+#  define PCRE2_EXP_DECL		extern __attribute__ ((visibility("default")))
 # endif
-# define PCRE_EXP_DEFN		__attribute__ ((visibility("default")))
-# define PCRE_EXP_DATA_DEFN	__attribute__ ((visibility("default")))
+# define PCRE2_EXP_DEFN		__attribute__ ((visibility("default")))
 #endif
 
 /* Define to any value for valgrind support to find invalid memory reads. */
