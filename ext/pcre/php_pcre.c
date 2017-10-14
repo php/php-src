@@ -210,11 +210,23 @@ static PHP_INI_MH(OnUpdateRecursionLimit)
 	return SUCCESS;
 }/*}}}*/
 
+static PHP_INI_MH(OnUpdateJit)
+{
+	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (PCRE_G(jit) && jit_stack) {
+		pcre2_jit_stack_assign(mctx, NULL, jit_stack);
+	}
+#endif
+
+	return SUCCESS;
+}
+
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
 	STD_PHP_INI_ENTRY("pcre.recursion_limit", "100000",  PHP_INI_ALL, OnUpdateRecursionLimit, recursion_limit, zend_pcre_globals, pcre_globals)
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateBool, jit,             zend_pcre_globals, pcre_globals)
+	STD_PHP_INI_ENTRY("pcre.jit",             "1",       PHP_INI_ALL, OnUpdateJit, jit,             zend_pcre_globals, pcre_globals)
 #endif
 PHP_INI_END()
 
@@ -360,7 +372,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	pcre2_code			*re = NULL;
 	int					 coptions = 0;
-	int					 soptions = 0;
 	PCRE2_UCHAR	         error[256];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -369,7 +380,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	char				 end_delimiter;
 	char				*p, *pp;
 	char				*pattern;
-	int					 do_study = 0;
 	int					 poptions = 0;
 	const uint8_t       *tables = NULL;
 	pcre_cache_entry	*pce;
@@ -499,10 +509,10 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			/* PCRE specific options */
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
-						/* TODO in how far it is feasible at all, no separate study for non jit in pcre2. */
+			/* TODO in how far it is feasible at all, study is done for every pattern in PCRE2. */
 			case 'S':	/*do_study  = 1;*/					break;
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
-						/* TODO see PCRE2_EXTRA_* flags */
+			/* TODO see PCRE2_EXTRA_* flags */
 			/*case 'X':	coptions |= PCRE_EXTRA;			break;*/
 			case 'u':	coptions |= PCRE2_UTF;
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
@@ -566,27 +576,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit)) {
 		/* Enable PCRE JIT compiler */
-		do_study = 1;
-		soptions |= PCRE2_JIT_COMPLETE;
-	}
-#endif
-
-	/* If study option was specified, study the pattern and
-	   store the result in extra for passing to pcre_exec. */
-	if (do_study) {
-		int rc = pcre2_jit_compile(re, soptions);
-		if (!rc) {
-#ifdef HAVE_PCRE_JIT_SUPPORT
-			if (PCRE_G(jit) && jit_stack) {
-				pcre2_jit_stack_assign(mctx, NULL, jit_stack);
-			}
-#endif
+		int rc;
+		rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
+		if (rc < 0) {
+			pcre2_get_error_message(rc, error, sizeof(error));
+			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
 		}
-		/*if (error != NULL) {
-			php_error_docref(NULL, E_WARNING, "Error while studying pattern");
-		}*/
 	}
-
+#endif
 	efree(pattern);
 
 	/*
