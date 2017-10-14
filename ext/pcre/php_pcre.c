@@ -81,6 +81,9 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 ZEND_TLS pcre2_jit_stack *jit_stack = NULL;
 #endif
 static pcre2_general_context *gctx = NULL;
+/* These two are global per thread for now. Though it is possible to use these
+ 	per pattern. Either one can copy it and use in pce, or one does no global
+	contexts at all, but creates for every pce. */
 ZEND_TLS pcre2_compile_context *cctx = NULL;
 ZEND_TLS pcre2_match_context   *mctx = NULL;
 
