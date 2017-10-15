@@ -2,16 +2,20 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC5
 
-- Fileinfo:
-  . Upgrade bundled libmagic to 5.31. (Anatol)
-
 - Core:
   . Fixed bug #75368 (mmap/munmap trashing on unlucky allocations). (Nikita,
     Dmitry)
 
+- CLI:
+  . Fixed bug #75287 (Builtin webserver crash after chdir in a shutdown
+    function). (Laruence)
+
 - Exif:
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
+
+- Fileinfo:
+  . Upgrade bundled libmagic to 5.31. (Anatol)
 
 - Opcache:
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
