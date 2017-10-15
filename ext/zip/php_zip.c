@@ -625,6 +625,8 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 #endif
 	int files_cnt;
 	zend_string **namelist;
+	pcre2_match_context *mctx = php_pcre_mctx();
+	pcre2_general_context *gctx = php_pcre_gctx();
 
 #ifdef ZTS
 	if (!IS_ABSOLUTE_PATH(path, path_len)) {
@@ -696,8 +698,8 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 				continue;
 			}
 
-			match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
-			rc = pcre2_match(re, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, php_pcre_mctx());
+			match_data = pcre2_match_data_create_from_pattern(re, gctx);
+			rc = pcre2_match(re, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
 			pcre2_match_data_free(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (rc < 0) {

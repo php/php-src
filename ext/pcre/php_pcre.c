@@ -211,7 +211,7 @@ static PHP_INI_MH(OnUpdateRecursionLimit)
 }/*}}}*/
 
 static PHP_INI_MH(OnUpdateJit)
-{
+{/*{{{*/
 	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit) && jit_stack) {
@@ -220,7 +220,7 @@ static PHP_INI_MH(OnUpdateJit)
 #endif
 
 	return SUCCESS;
-}
+}/*}}}*/
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
@@ -317,7 +317,7 @@ static int pcre_clean_cache(zval *data, void *arg)
 /* }}} */
 
 /* {{{ static make_subpats_table */
-static char **make_subpats_table(int num_subpats, pcre_cache_entry *pce)
+static char **make_subpats_table(size_t num_subpats, pcre_cache_entry *pce)
 {
 	uint32_t name_cnt = pce->name_count, name_size, ni = 0;
 	char *name_table;
@@ -371,7 +371,7 @@ static zend_always_inline size_t calculate_unit_length(pcre_cache_entry *pce, ch
 PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 {
 	pcre2_code			*re = NULL;
-	int					 coptions = 0;
+	uint32_t			 coptions = 0;
 	PCRE2_UCHAR	         error[256];
 	PCRE2_SIZE           erroffset;
 	int                  errnumber;
@@ -380,7 +380,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	char				 end_delimiter;
 	char				*p, *pp;
 	char				*pattern;
-	int					 poptions = 0;
+	uint32_t			 poptions = 0;
 	const uint8_t       *tables = NULL;
 	pcre_cache_entry	*pce;
 	pcre_cache_entry	 new_entry;
@@ -685,7 +685,7 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *preg
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, size_t len, zend_off_t offset, char *name, int unmatched_as_null)
+static inline void add_offset_pair(zval *result, char *str, size_t len, zend_off_t offset, char *name, uint32_t unmatched_as_null)
 {
 	zval match_pair, tmp;
 
@@ -746,24 +746,24 @@ static void php_do_pcre_match(INTERNAL_FUNCTION_PARAMETERS, int global) /* {{{ *
 
 /* {{{ php_pcre_match_impl() */
 PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t subject_len, zval *return_value,
-	zval *subpats, int global, int use_flags, zend_long flags, zend_long start_offset)
+	zval *subpats, int global, int use_flags, zend_long flags, zend_off_t start_offset)
 {
 	zval			 result_set,		/* Holds a set of subpatterns after
 										   a global match */
 					*match_sets = NULL;	/* An array of sets of matches for each
 										   subpattern after a global match */
-	int				 no_utf_check = 0;  /* Execution options */
+	uint32_t		 no_utf_check = 0;  /* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	int				 num_subpats;		/* Number of captured subpatterns */
-	int				 size_offsets;		/* Size of the offsets array */
+	size_t			 num_subpats;		/* Number of captured subpatterns */
+	size_t			 size_offsets;		/* Size of the offsets array */
 	int				 matched;			/* Has anything matched */
-	int				 g_notempty = 0;	/* If the match should not be empty */
+	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char 		   **subpat_names;		/* Array for named subpatterns */
 	size_t			 i;
-	int				 subpats_order;		/* Order of subpattern matches */
-	int				 offset_capture;	/* Capture match offsets: yes/no */
-	int				 unmatched_as_null;	/* Null non-matches: yes/no */
+	uint32_t		 subpats_order;		/* Order of subpattern matches */
+	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
+	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
 	PCRE2_SPTR      *mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
@@ -1258,18 +1258,18 @@ PHPAPI zend_string *php_pcre_replace(zend_string *regex,
 /* {{{ php_pcre_replace_impl() */
 PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count)
 {
-	int				 no_utf_check = 0;	/* Execution options */
+	uint32_t		 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
-	int				 num_subpats;		/* Number of captured subpatterns */
-	int				 size_offsets;		/* Size of the offsets array */
+	size_t			 num_subpats;		/* Number of captured subpatterns */
+	size_t			 size_offsets;		/* Size of the offsets array */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
-	int				 match_len;			/* Length of the current match */
+	size_t			 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
-	int				 start_offset;		/* Where the new search starts */
-	int				 g_notempty=0;		/* If the match should not be empty */
+	zend_off_t		 start_offset;		/* Where the new search starts */
+	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
 					*match,				/* The current match */
@@ -1497,16 +1497,16 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 /* {{{ php_pcre_replace_func_impl() */
 static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, size_t subject_len, zend_fcall_info *fci, zend_fcall_info_cache *fcc, size_t limit, size_t *replace_count)
 {
-	int				 no_utf_check = 0;	/* Execution options */
+	uint32_t		 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
-	int				 num_subpats;		/* Number of captured subpatterns */
-	int				 size_offsets;		/* Size of the offsets array */
+	size_t			 num_subpats;		/* Number of captured subpatterns */
+	size_t			 size_offsets;		/* Size of the offsets array */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
 	int				 start_offset;		/* Where the new search starts */
-	int				 g_notempty=0;		/* If the match should not be empty */
+	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*piece;				/* The current piece of subject */
 	size_t			result_len; 		/* Length of result */
@@ -2151,16 +2151,16 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	zend_long limit_val, zend_long flags)
 {
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	int				 size_offsets;		/* Size of the offsets array */
-	int				 no_utf_check = 0;	/* Execution options */
+	size_t			 size_offsets;		/* Size of the offsets array */
+	uint32_t		 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	size_t			 start_offset;		/* Where the new search starts */
-	int				 next_offset;		/* End of the last delimiter match + 1 */
-	int				 g_notempty = 0;	/* If the match should not be empty */
+	PCRE2_SIZE		 next_offset;		/* End of the last delimiter match + 1 */
+	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char			*last_match;		/* Location of last match */
-	int				 no_empty;			/* If NO_EMPTY flag is set */
-	int				 delim_capture; 	/* If delimiters should be captured */
-	int				 offset_capture;	/* If offsets should be captured */
+	uint32_t		 no_empty;			/* If NO_EMPTY flag is set */
+	uint32_t		 delim_capture; 	/* If delimiters should be captured */
+	uint32_t		 offset_capture;	/* If offsets should be captured */
 	zval			 tmp;
 	pcre2_match_data *match_data;
 	size_t jit_size;
@@ -2467,9 +2467,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 {
 	zval            *entry;             /* An entry in the input array */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	int				 size_offsets;		/* Size of the offsets array */
+	size_t			 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
-	int				 no_utf_check;		/* Execution options */
+	uint32_t		 no_utf_check;		/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching

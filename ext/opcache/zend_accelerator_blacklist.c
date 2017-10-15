@@ -78,6 +78,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 	PCRE2_SIZE pcre_error_offset;
 	zend_regexp_list **regexp_list_it, *it;
 	char regexp[12*1024], *p, *end, *c, *backtrack = NULL;
+	pcre2_compile_context *cctx = php_pcre_cctx();
 
 	if (blacklist->pos == 0) {
 		/* we have no blacklist to talk about */
@@ -178,7 +179,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre2_compile(regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, php_pcre_cctx())) == NULL) {
+			if ((it->re = pcre2_compile(regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
 				free(it);
 				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
 				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
@@ -340,13 +341,15 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 {
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
+	pcre2_match_context *mctx = php_pcre_mctx();
+	pcre2_general_context *gctx = php_pcre_gctx();
 
 	if (regexp_list_it == NULL) {
 		return 0;
 	}
 	while (regexp_list_it != NULL) {
-		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regexp_list_it->re, php_pcre_gctx());
-		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, php_pcre_mctx());
+		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regexp_list_it->re, gctx);
+		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;
 			pcre2_match_data_free(match_data);
