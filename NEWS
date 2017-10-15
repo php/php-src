@@ -30,8 +30,8 @@ PHP                                                                        NEWS
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
   . Fixed bug #75357 (segfault loading WordPress wp-admin). (Laruence)
 
-- Openssl:
-  . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
+- OpenSSL:
+  . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob, Jakub Zelenka)
 
 - Standard:
   . Fixed bug #75221 (Argon2i always throws NUL at the end). (cmb)
