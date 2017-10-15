@@ -240,7 +240,7 @@ PHP_INI_BEGIN()
 #endif
 PHP_INI_END()
 
-static char *pcre2_config_str(uint32_t what)
+static char *_pcre2_config_str(uint32_t what)
 {/*{{{*/
 	int len = pcre2_config(what, NULL);
 	char *ret = (char *) malloc(len + 1);
@@ -259,16 +259,17 @@ static PHP_MINFO_FUNCTION(pcre)
 {
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	uint32_t flag = 0;
-	char *jit_target = pcre2_config_str(PCRE2_CONFIG_JITTARGET);
+	char *jit_target = _pcre2_config_str(PCRE2_CONFIG_JITTARGET);
 #endif
-	char *version = pcre2_config_str(PCRE2_CONFIG_VERSION);
-	char *unicode = pcre2_config_str(PCRE2_CONFIG_UNICODE_VERSION);
+	char *version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
+	char *unicode = _pcre2_config_str(PCRE2_CONFIG_UNICODE_VERSION);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PCRE (Perl Compatible Regular Expressions) Support", "enabled" );
 	php_info_print_table_row(2, "PCRE Library Version", version);
 	free(version);
 	php_info_print_table_row(2, "PCRE UNICODE", unicode);
+	free(unicode);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (!pcre2_config(PCRE2_CONFIG_JIT, &flag)) {
@@ -279,6 +280,7 @@ static PHP_MINFO_FUNCTION(pcre)
 	if (jit_target) {
 		php_info_print_table_row(2, "PCRE JIT Target", jit_target);
 	}
+	free(jit_target);
 #else
 	php_info_print_table_row(2, "PCRE JIT Support", "not compiled in" );
 #endif
@@ -296,7 +298,7 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	char *version = pcre2_config_str(PCRE2_CONFIG_VERSION);
+	char *version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
