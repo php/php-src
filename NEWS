@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75287 (Builtin webserver crash after chdir in a shutdown
     function). (Laruence)
 
+- Enchant:
+  . Fixed bug #75365 (Enchant still reports version 1.1.0). (cmb)
+
 - Exif:
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
