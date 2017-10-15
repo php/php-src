@@ -482,6 +482,11 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 			RETURN_FALSE;
 	}
 
+	if (value == NULL) {
+		php_error_docref(NULL, E_WARNING, "dict_path not set");
+		RETURN_FALSE;
+	}
+
 	RETURN_STRING(value);
 }
 /* }}} */

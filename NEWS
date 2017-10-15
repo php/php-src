@@ -11,6 +11,8 @@ PHP                                                                        NEWS
     function). (Laruence)
 
 - Enchant:
+  . Fixed bug #53070 (enchant_broker_get_path crashes if no path is set). (jelle
+    van der Waa, cmb)
   . Fixed bug #75365 (Enchant still reports version 1.1.0). (cmb)
 
 - Exif:
