@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade bundled libmagic to 5.31. (Anatol)
 
+- JSON:
+  . Fixed bug #68567 (JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null
+    key). (Jakub Zelenka)
+
 - Opcache:
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
   . Fixed bug #75357 (segfault loading WordPress wp-admin). (Laruence)
