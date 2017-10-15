@@ -223,7 +223,7 @@ int ssa_verify_integrity(zend_op_array *op_array, zend_ssa *ssa, const char *ext
 				FAIL("op2 use %d out of range\n", ssa_op->op2_use);
 			}
 			if (!is_in_use_chain(ssa, ssa_op->op2_use, i)) {
-				FAIL("op1 use of " VARFMT " in " INSTRFMT " not in use chain\n",
+				FAIL("op2 use of " VARFMT " in " INSTRFMT " not in use chain\n",
 						VAR(ssa_op->op2_use), INSTR(i));
 			}
 			if (VAR_NUM(opline->op2.var) != ssa->vars[ssa_op->op2_use].var) {

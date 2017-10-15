@@ -689,7 +689,8 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 		return 0;
 	}
 
-	if (Z_ISUNDEF_P(rval_ref) || (Z_ISREF_P(rval_ref) && Z_ISUNDEF_P(Z_REFVAL_P(rval_ref)))) {
+	ZVAL_DEREF(rval_ref);
+	if (Z_TYPE_P(rval_ref) != IS_OBJECT) {
 		return 0;
 	}
 

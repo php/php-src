@@ -90,4 +90,8 @@ PHP                                                                        NEWS
   . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
     (jhdxr)
 
+- Standard:
+  . Fixed unzserialize(), to disable creation of unsupported data structures
+    through manually crafted strings. (Dmitry)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

@@ -40,7 +40,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: is_tar.c,v 1.38 2015/04/09 20:01:41 christos Exp $")
+FILE_RCSID("@(#)$File: is_tar.c,v 1.39 2017/03/17 20:45:01 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -51,7 +51,7 @@ FILE_RCSID("@(#)$File: is_tar.c,v 1.38 2015/04/09 20:01:41 christos Exp $")
 #define	isodigit(c)	( ((c) >= '0') && ((c) <= '7') )
 
 private int is_tar(const unsigned char *, size_t);
-private int from_oct(int, const char *);	/* Decode octal number */
+private int from_oct(const char *, size_t);	/* Decode octal number */
 
 static const char tartype[][32] = {
 	"tar archive",
@@ -93,31 +93,35 @@ private int
 is_tar(const unsigned char *buf, size_t nbytes)
 {
 	const union record *header = (const union record *)(const void *)buf;
-	int	i;
-	int	sum, recsum;
-	const unsigned char	*p;
+	size_t i;
+	int sum, recsum;
+	const unsigned char *p, *ep;
 
-	if (nbytes < sizeof(union record))
+	if (nbytes < sizeof(*header))
 		return 0;
 
-	recsum = from_oct(8,  header->header.chksum);
+	recsum = from_oct(header->header.chksum, sizeof(header->header.chksum));
 
 	sum = 0;
 	p = header->charptr;
-	for (i = sizeof(union record); --i >= 0;)
+	ep = header->charptr + sizeof(*header);
+	while (p < ep)
 		sum += *p++;
 
 	/* Adjust checksum to count the "chksum" field as blanks. */
-	for (i = sizeof(header->header.chksum); --i >= 0;)
+	for (i = 0; i < sizeof(header->header.chksum); i++)
 		sum -= header->header.chksum[i];
-	sum += ' ' * sizeof header->header.chksum;
+	sum += ' ' * sizeof(header->header.chksum);
 
 	if (sum != recsum)
 		return 0;	/* Not a tar archive */
 
-	if (strcmp(header->header.magic, GNUTMAGIC) == 0)
+	if (strncmp(header->header.magic, GNUTMAGIC,
+	    sizeof(header->header.magic)) == 0)
 		return 3;		/* GNU Unix Standard tar archive */
-	if (strcmp(header->header.magic, TMAGIC) == 0)
+
+	if (strncmp(header->header.magic, TMAGIC,
+	    sizeof(header->header.magic)) == 0)
 		return 2;		/* Unix Standard tar archive */
 
 	return 1;			/* Old fashioned tar archive */
@@ -130,19 +134,22 @@ is_tar(const unsigned char *buf, size_t nbytes)
  * Result is -1 if the field is invalid (all blank, or non-octal).
  */
 private int
-from_oct(int digs, const char *where)
+from_oct(const char *where, size_t digs)
 {
 	int	value;
 
+	if (digs == 0)
+		return -1;
+
 	while (isspace((unsigned char)*where)) {	/* Skip spaces */
 		where++;
-		if (--digs <= 0)
+		if (digs-- == 0)
 			return -1;		/* All blank field */
 	}
 	value = 0;
 	while (digs > 0 && isodigit(*where)) {	/* Scan til non-octal */
 		value = (value << 3) | (*where++ - '0');
-		--digs;
+		digs--;
 	}
 
 	if (digs > 0 && *where && !isspace((unsigned char)*where))
