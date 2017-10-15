@@ -2106,12 +2106,6 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 {
 	int decline = 0;
 	zend_file_handle zfd;
-	char *old_cwd;
-
-	ALLOCA_FLAG(use_heap)
-	old_cwd = do_alloca(MAXPATHLEN, use_heap);
-	old_cwd[0] = '\0';
-	php_ignore_value(VCWD_GETCWD(old_cwd, MAXPATHLEN - 1));
 
 	zfd.type = ZEND_HANDLE_FILENAME;
 	zfd.filename = server->router;
@@ -2132,12 +2126,6 @@ static int php_cli_server_dispatch_router(php_cli_server *server, php_cli_server
 			decline = 1;
 		}
 	} zend_end_try();
-
-	if (old_cwd[0] != '\0') {
-		php_ignore_value(VCWD_CHDIR(old_cwd));
-	}
-
-	free_alloca(old_cwd, use_heap);
 
 	return decline;
 }
@@ -2330,10 +2318,20 @@ static int php_cli_server_ctor(php_cli_server *server, const char *addr, const c
 
 	if (router) {
 		size_t router_len = strlen(router);
-		_router = pestrndup(router, router_len, 1);
-		if (!_router) {
-			retval = FAILURE;
-			goto out;
+		if (!IS_ABSOLUTE_PATH(router, router_len)) {
+			_router = pemalloc(server->document_root_len + router_len + 2, 1);
+			if (!_router) {
+				retval = FAILURE;
+				goto out;
+			}
+			snprintf(_router,
+				server->document_root_len + router_len + 2, "%s%c%s", server->document_root, DEFAULT_SLASH, router);
+		} else {
+			_router = pestrndup(router, router_len, 1);
+			if (!_router) {
+				retval = FAILURE;
+				goto out;
+			}
 		}
 		server->router = _router;
 		server->router_len = router_len;
