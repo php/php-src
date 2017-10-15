@@ -218,17 +218,19 @@ static PHP_INI_MH(OnUpdateRecursionLimit)
 	return SUCCESS;
 }/*}}}*/
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
 static PHP_INI_MH(OnUpdateJit)
 {/*{{{*/
 	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-#ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit) && jit_stack) {
 		pcre2_jit_stack_assign(mctx, NULL, jit_stack);
+	} else {
+		pcre2_jit_stack_assign(mctx, NULL, NULL);
 	}
-#endif
 
 	return SUCCESS;
 }/*}}}*/
+#endif
 
 PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("pcre.backtrack_limit", "1000000", PHP_INI_ALL, OnUpdateBacktrackLimit, backtrack_limit, zend_pcre_globals, pcre_globals)
@@ -855,18 +857,20 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	matched = 0;
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
+
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (!(pce->compile_options & PCRE2_UTF)) {
 		no_utf_check = PCRE2_NO_UTF_CHECK;
 	}
-#endif
 
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
+#endif
+	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+
 	do {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (!rc && jit_size > 0
+		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check && !g_notempty) {
 			if (start_offset < 0 || start_offset > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
@@ -1335,14 +1339,15 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	if (!(pce->compile_options & PCRE2_UTF)) {
 		no_utf_check = PCRE2_NO_UTF_CHECK;
 	}
-#endif
 
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
+#endif
+	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+
 	while (1) {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (!rc && jit_size > 0
+		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
 					no_utf_check|g_notempty, match_data, mctx);
@@ -1570,14 +1575,15 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	if (!(pce->compile_options & PCRE2_UTF)) {
 		no_utf_check = PCRE2_NO_UTF_CHECK;
 	}
-#endif
 
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
+#endif
+	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+
 	while (1) {
 		/* Execute the regular expression. */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (!rc && jit_size > 0
+		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
 					no_utf_check|g_notempty, match_data, mctx);
@@ -2209,14 +2215,15 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	if (!(pce->compile_options & PCRE2_UTF)) {
 		no_utf_check = PCRE2_NO_UTF_CHECK;
 	}
-#endif
 
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
+#endif
+	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (!rc && jit_size > 0
+		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 					no_utf_check|g_notempty, match_data, mctx);
@@ -2507,7 +2514,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
+#endif
 
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
@@ -2516,7 +2525,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		no_utf_check = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
-		if (!rc && jit_size > 0
+		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check) {
 			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					no_utf_check, match_data, mctx);
