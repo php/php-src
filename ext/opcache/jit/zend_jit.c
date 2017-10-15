@@ -2018,7 +2018,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 					}
 				} else {
 					if (opline != op_array->opcodes) {
-						zend_jit_jmp(&dasm_state, 1);
+						zend_jit_jmp(&dasm_state, b);
 					}
 					zend_jit_label(&dasm_state, ssa->cfg.blocks_count + b);
 					for (i = 1; (opline+i)->opcode == ZEND_RECV_INIT; i++) {
