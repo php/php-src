@@ -240,26 +240,44 @@ PHP_INI_BEGIN()
 #endif
 PHP_INI_END()
 
-#define STRING(a)  # a
-#define XSTRING(s) STRING(s)
-#define PCRE2_VER XSTRING(PCRE2_MAJOR) "." XSTRING(PCRE2_MINOR) " " XSTRING(PCRE2_DATE)
+static char *pcre2_config_str(uint32_t what)
+{/*{{{*/
+	int len = pcre2_config(what, NULL);
+	char *ret = (char *) malloc(len + 1);
+
+	len = pcre2_config(what, ret);
+	if (!len) {
+		free(ret);
+		return NULL;
+	}
+
+	return ret;
+}/*}}}*/
 
 /* {{{ PHP_MINFO_FUNCTION(pcre) */
 static PHP_MINFO_FUNCTION(pcre)
 {
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	uint32_t jit_yes = 0;
+	uint32_t flag = 0;
+	char *jit_target = pcre2_config_str(PCRE2_CONFIG_JITTARGET);
 #endif
+	char *version = pcre2_config_str(PCRE2_CONFIG_VERSION);
+	char *unicode = pcre2_config_str(PCRE2_CONFIG_UNICODE_VERSION);
 
 	php_info_print_table_start();
 	php_info_print_table_row(2, "PCRE (Perl Compatible Regular Expressions) Support", "enabled" );
-	php_info_print_table_row(2, "PCRE Library Version", PCRE2_VER );
+	php_info_print_table_row(2, "PCRE Library Version", version);
+	free(version);
+	php_info_print_table_row(2, "PCRE UNICODE", unicode);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
-	if (!pcre2_config(PCRE2_CONFIG_JIT, &jit_yes)) {
-		php_info_print_table_row(2, "PCRE JIT Support", jit_yes ? "enabled" : "disabled");
+	if (!pcre2_config(PCRE2_CONFIG_JIT, &flag)) {
+		php_info_print_table_row(2, "PCRE JIT Support", flag ? "enabled" : "disabled");
 	} else {
 		php_info_print_table_row(2, "PCRE JIT Support", "unknown" );
+	}
+	if (jit_target) {
+		php_info_print_table_row(2, "PCRE JIT Target", jit_target);
 	}
 #else
 	php_info_print_table_row(2, "PCRE JIT Support", "not compiled in" );
@@ -278,6 +296,7 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
+	char *version = pcre2_config_str(PCRE2_CONFIG_VERSION);
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -296,7 +315,10 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
-	REGISTER_STRING_CONSTANT("PCRE_VERSION", PCRE2_VER, CONST_CS | CONST_PERSISTENT);
+	REGISTER_STRING_CONSTANT("PCRE_VERSION", version, CONST_CS | CONST_PERSISTENT);
+	free(version);
+	REGISTER_LONG_CONSTANT("PCRE_VERSION_MAJOR", PCRE2_MAJOR, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PCRE_VERSION_MINOR", PCRE2_MINOR, CONST_CS | CONST_PERSISTENT);
 
 	return SUCCESS;
 }
