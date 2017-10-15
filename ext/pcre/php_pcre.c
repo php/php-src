@@ -55,12 +55,12 @@ struct _pcre_cache_entry {
 	uint32_t preg_options;
 	uint32_t capture_count;
 	uint32_t name_count;
-#if HAVE_SETLOCALE
-	const uint8_t *tables;
-#endif
 	uint32_t compile_options;
 	uint32_t extra_compile_options;
 	uint32_t refcount;
+#if HAVE_SETLOCALE
+	const uint8_t *tables;
+#endif
 };
 
 enum {
