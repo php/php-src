@@ -2025,7 +2025,9 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 		struct pdo_column_data *cols = stmt->columns;
 
 		for (i = 0; i < stmt->column_count; i++) {
-			zend_string_release(cols[i].name);
+			if (cols[i].name) {
+				zend_string_release(cols[i].name);
+			}
 		}
 		efree(stmt->columns);
 		stmt->columns = NULL;
