@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #75301 (Exif extension has built in revision version). (Peter
     Kokot)
 
+- OCI8:
+  . Fixed valgrind issue. (Tianfang Yang)
+
 - OpenSSL:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob, Jakub Zelenka)
 
