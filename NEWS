@@ -26,7 +26,7 @@ PHP                                                                        NEWS
   . Fixed bug #75299 (Wrong reflection on inflate_init and inflate_add). (Fabien
     Villepinte)
 
-26 Sep 2017, PHP 7.1.11
+26 Oct 2017, PHP 7.1.11
 
 - Core:
   . Fixed bug #75241 (Null pointer dereference in zend_mm_alloc_small()).
