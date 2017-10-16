@@ -346,10 +346,6 @@ static inline void accel_unlock_all(void)
  * it creates interned strings in shared memory when saves a script.
  * Such interned strings are shared across all PHP processes
  */
-static zend_string *accel_new_interned_string_for_php(zend_string *str)
-{
-	return str;
-}
 
 static void accel_interned_strings_restore_state(void)
 {
@@ -489,6 +485,19 @@ zend_string *accel_new_interned_string(zend_string *str)
 	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
 	zend_string_release(str);
 	return p->key;
+}
+
+static zend_string *accel_new_interned_string_for_php(zend_string *str)
+{
+	if (ZCG(counted)) {
+		zend_string *ret = accel_find_interned_string(str);
+
+		if (ret) {
+			zend_string_release(str);
+			return ret;
+		}
+	}
+	return str;
 }
 
 /* Copy PHP interned strings from PHP process memory into the shared memory */
