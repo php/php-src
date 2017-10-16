@@ -394,6 +394,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H->err.sqlstate = dbh->error_code;
 	H->assume_national_character_set_strings = 0;
 	H->stringify_uniqueidentifier = 0;
+	H->skip_empty_rowsets = 0;
 
 	if (!H->login) {
 		goto cleanup;
@@ -416,6 +417,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 		H->assume_national_character_set_strings = pdo_attr_lval(driver_options, PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
+		H->skip_empty_rowsets = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS, 0);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
