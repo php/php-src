@@ -323,7 +323,6 @@ PHP_MINFO_FUNCTION(enchant)
 #elif defined(HAVE_ENCHANT_BROKER_SET_PARAM)
 	php_info_print_table_row(2, "Libenchant Version", "1.5.0 or later");
 #endif
-	php_info_print_table_row(2, "Revision", "$Id$");
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -481,6 +480,11 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 
 		default:
 			RETURN_FALSE;
+	}
+
+	if (value == NULL) {
+		php_error_docref(NULL, E_WARNING, "dict_path not set");
+		RETURN_FALSE;
 	}
 
 	RETURN_STRING(value);
