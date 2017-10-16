@@ -268,7 +268,7 @@ static PHP_MINFO_FUNCTION(pcre)
 	php_info_print_table_row(2, "PCRE (Perl Compatible Regular Expressions) Support", "enabled" );
 	php_info_print_table_row(2, "PCRE Library Version", version);
 	free(version);
-	php_info_print_table_row(2, "PCRE UNICODE", unicode);
+	php_info_print_table_row(2, "PCRE Unicode Version", unicode);
 	free(unicode);
 
 #ifdef HAVE_PCRE_JIT_SUPPORT
