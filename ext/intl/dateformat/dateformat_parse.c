@@ -145,6 +145,7 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		ZVAL_DEREF(z_parse_pos);
 		convert_to_long(z_parse_pos);
 		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
@@ -188,6 +189,7 @@ PHP_FUNCTION(datefmt_localtime)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		ZVAL_DEREF(z_parse_pos);
 		convert_to_long(z_parse_pos);
 		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);

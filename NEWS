@@ -22,6 +22,10 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade bundled libmagic to 5.31. (Anatol)
 
+- Intl:
+  . Fixed bug #75378 ([REGRESSION] IntlDateFormatter::parse() does not change
+    $position argument). (Laruence)
+
 - JSON:
   . Fixed bug #68567 (JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null
     key). (Jakub Zelenka)
