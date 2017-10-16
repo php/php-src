@@ -583,8 +583,13 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 #if HAVE_SETLOCALE
 	if (key != regex) {
+		/* XXX a better solution here were to create a copy of cctx
+			and to cache it along with the generated tables. Once same locale
+			is encountered, the cached cctx and tables would be fetched.
+			Currently the tables are generated every time a locale based
+			pattern is used, and the tables are overwritten in the global
+			cctx. */
 		tables = pcre2_maketables(gctx);
-		/* XXX cctx seems to be per pattern, not global! */
 		pcre2_set_character_tables(cctx, tables);
 	}
 #endif
