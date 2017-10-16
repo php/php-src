@@ -30,6 +30,9 @@ PHP                                                                        NEWS
   . Fixed bug #68567 (JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null
     key). (Jakub Zelenka)
 
+- OCI8:
+  . Fixed valgrind issue. (Tianfang Yang)
+
 - Opcache:
   . Fixed bug (Phi sources removel). (Laruence)
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
