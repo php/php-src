@@ -1742,7 +1742,6 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	zval * zcert;
 	zend_bool notext = 1;
 	BIO * bio_out;
-	zend_resource *certresource;
 	char * filename;
 	size_t filename_len;
 
@@ -1751,7 +1750,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 	}
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		php_error_docref(NULL, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -1775,7 +1774,7 @@ PHP_FUNCTION(openssl_x509_export_to_file)
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "error opening file %s", filename);
 	}
-	if (certresource == NULL && cert) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 
@@ -2084,14 +2083,13 @@ PHP_FUNCTION(openssl_x509_export)
 	zval * zcert, *zout;
 	zend_bool notext = 1;
 	BIO * bio_out;
-	zend_resource *certresource;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz/|b", &zcert, &zout, &notext) == FAILURE) {
 		return;
 	}
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		php_error_docref(NULL, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -2120,7 +2118,7 @@ PHP_FUNCTION(openssl_x509_export)
 	BIO_free(bio_out);
 
 cleanup:
-	if (certresource == NULL && cert != NULL) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 }
@@ -2157,7 +2155,6 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 {
 	X509 *cert;
 	zval *zcert;
-	zend_resource *certresource;
 	zend_bool raw_output = 0;
 	char *method = "sha1";
 	size_t method_len;
@@ -2167,7 +2164,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		return;
 	}
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		php_error_docref(NULL, E_WARNING, "cannot get cert from parameter 1");
 		RETURN_FALSE;
@@ -2180,7 +2177,7 @@ PHP_FUNCTION(openssl_x509_fingerprint)
 		RETVAL_FALSE;
 	}
 
-	if (certresource == NULL && cert) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 }
@@ -2192,14 +2189,14 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 	zval * zcert, *zkey;
 	X509 * cert = NULL;
 	EVP_PKEY * key = NULL;
-	zend_resource *certresource = NULL, *keyresource = NULL;
+	zend_resource *keyresource = NULL;
 
 	RETVAL_FALSE;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &zcert, &zkey) == FAILURE) {
 		return;
 	}
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		RETURN_FALSE;
 	}
@@ -2211,7 +2208,7 @@ PHP_FUNCTION(openssl_x509_check_private_key)
 	if (keyresource == NULL && key) {
 		EVP_PKEY_free(key);
 	}
-	if (certresource == NULL && cert) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 }
@@ -2430,6 +2427,9 @@ PHP_FUNCTION(openssl_x509_parse)
 			} else {
 				zval_dtor(return_value);
 				BIO_free(bio_out);
+				if (Z_TYPE_P(zcert) != IS_RESOURCE) {
+					X509_free(cert);
+				}
 				RETURN_FALSE;
 			}
 		}
@@ -2442,6 +2442,9 @@ PHP_FUNCTION(openssl_x509_parse)
 		BIO_free(bio_out);
 	}
 	add_assoc_zval(return_value, "extensions", &subitem);
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
+		X509_free(cert);
+	}
 }
 /* }}} */
 
@@ -2539,7 +2542,6 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	zval * zcert, * zcainfo = NULL;
 	X509_STORE * cainfo = NULL;
 	X509 * cert = NULL;
-	zend_resource *certresource = NULL;
 	STACK_OF(X509) * untrustedchain = NULL;
 	zend_long purpose;
 	char * untrusted = NULL;
@@ -2563,7 +2565,7 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	if (cainfo == NULL) {
 		goto clean_exit;
 	}
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		goto clean_exit;
 	}
@@ -2574,11 +2576,10 @@ PHP_FUNCTION(openssl_x509_checkpurpose)
 	} else {
 		RETVAL_BOOL(ret);
 	}
-
-clean_exit:
-	if (certresource == NULL && cert) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
+clean_exit:
 	if (cainfo) {
 		X509_STORE_free(cainfo);
 	}
@@ -2770,7 +2771,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 	size_t pass_len;
 	zval *zcert = NULL, *zpkey = NULL, *args = NULL;
 	EVP_PKEY *priv_key = NULL;
-	zend_resource *certresource, *keyresource;
+	zend_resource *keyresource;
 	zval * item;
 	STACK_OF(X509) *ca = NULL;
 
@@ -2779,7 +2780,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		php_error_docref(NULL, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -2789,7 +2790,7 @@ PHP_FUNCTION(openssl_pkcs12_export_to_file)
 		php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
 		goto cleanup;
 	}
-	if (cert && !X509_check_private_key(cert, priv_key)) {
+	if (!X509_check_private_key(cert, priv_key)) {
 		php_openssl_store_errors();
 		php_error_docref(NULL, E_WARNING, "private key does not correspond to cert");
 		goto cleanup;
@@ -2844,7 +2845,8 @@ cleanup:
 	if (keyresource == NULL && priv_key) {
 		EVP_PKEY_free(priv_key);
 	}
-	if (certresource == NULL && cert) {
+
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 }
@@ -2859,7 +2861,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 	PKCS12 * p12 = NULL;
 	zval * zcert = NULL, *zout = NULL, *zpkey, *args = NULL;
 	EVP_PKEY *priv_key = NULL;
-	zend_resource *certresource, *keyresource;
+	zend_resource *keyresource;
 	char * pass;
 	size_t pass_len;
 	char * friendly_name = NULL;
@@ -2871,7 +2873,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 
 	RETVAL_FALSE;
 
-	cert = php_openssl_x509_from_zval(zcert, 0, &certresource);
+	cert = php_openssl_x509_from_zval(zcert, 0, NULL);
 	if (cert == NULL) {
 		php_error_docref(NULL, E_WARNING, "cannot get cert from parameter 1");
 		return;
@@ -2881,7 +2883,7 @@ PHP_FUNCTION(openssl_pkcs12_export)
 		php_error_docref(NULL, E_WARNING, "cannot get private key from parameter 3");
 		goto cleanup;
 	}
-	if (cert && !X509_check_private_key(cert, priv_key)) {
+	if (!X509_check_private_key(cert, priv_key)) {
 		php_error_docref(NULL, E_WARNING, "private key does not correspond to cert");
 		goto cleanup;
 	}
@@ -2927,7 +2929,7 @@ cleanup:
 	if (keyresource == NULL && priv_key) {
 		EVP_PKEY_free(priv_key);
 	}
-	if (certresource == NULL && cert) {
+	if (Z_TYPE_P(zcert) != IS_RESOURCE) {
 		X509_free(cert);
 	}
 }
