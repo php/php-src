@@ -27,6 +27,7 @@ PHP                                                                        NEWS
     key). (Jakub Zelenka)
 
 - Opcache:
+  . Fixed bug (Phi sources removel). (Laruence)
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
   . Fixed bug #75357 (segfault loading WordPress wp-admin). (Laruence)
 

@@ -1266,10 +1266,12 @@ static inline void zend_ssa_remove_defs_of_instr(zend_ssa *ssa, zend_ssa_op *ssa
 static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, int pred_offset, int predecessors_count) /* {{{ */
 {
 	int j, var_num = phi->sources[pred_offset];
+	zend_ssa_phi *next_phi = phi->use_chains[pred_offset];
 
 	predecessors_count--;
 	if (pred_offset < predecessors_count) {
 		memmove(phi->sources + pred_offset, phi->sources + pred_offset + 1, (predecessors_count - pred_offset) * sizeof(uint32_t));
+		memmove(phi->use_chains + pred_offset, phi->use_chains + pred_offset + 1, (predecessors_count - pred_offset) * sizeof(zend_ssa_phi*));
 	}
 
 	/* Check if they same var is used in a different phi operand as well, in this case we don't
@@ -1278,19 +1280,15 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 		if (phi->sources[j] == var_num) {
 			if (j < pred_offset) {
 				ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
-				return;
+			} else if (j >= pred_offset) {
+				phi->use_chains[j] = next_phi;
 			}
-			if (j >= pred_offset) {
-				phi->use_chains[j] = phi->use_chains[pred_offset];
-				phi->use_chains[pred_offset] = NULL;
-				return;
-			}
+			return;
 		}
 	}
 
 	/* Variable only used in one operand, remove the phi from the use chain. */
-	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num, phi->use_chains[pred_offset]);
-	phi->use_chains[pred_offset] = NULL;
+	zend_ssa_remove_use_of_phi_source(ssa, phi, var_num, next_phi);
 }
 /* }}} */
 
