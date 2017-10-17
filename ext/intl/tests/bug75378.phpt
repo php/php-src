@@ -11,7 +11,7 @@ $formatter = new IntlDateFormatter("en-GB", IntlDateFormatter::NONE, IntlDateFor
 $position = 0;
 $parsedDate = $formatter->parse("2017-10-12", $position);
 var_dump($parsedDate, $position);
-$localdate = $formatter->localtime("2017-10-12", $position1);
+$localdate = $formatter->localtime("2017-10-12 00:00:00", $position1);
 var_dump($localdate, $position1);
 ?>
 --EXPECT--
