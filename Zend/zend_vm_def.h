@@ -3480,11 +3480,12 @@ ZEND_VM_HOT_HANDLER(129, ZEND_DO_ICALL, ANY, ANY, SPEC(RETVAL))
 	fbc->internal_function.handler(call, ret);
 
 #if ZEND_DEBUG
-	ZEND_ASSERT(
-		EG(exception) || !call->func ||
-		!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-		zend_verify_internal_return_type(call->func, ret));
-	ZEND_ASSERT(!Z_ISREF_P(ret));
+	if (!EG(exception) && call->func) {
+		ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+			zend_verify_internal_return_type(call->func, ret));
+		ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+			? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
+	}
 #endif
 
 	EG(current_execute_data) = execute_data;
@@ -7837,10 +7838,12 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 		}
 
 #if ZEND_DEBUG
-		ZEND_ASSERT(
-			EG(exception) || !call->func ||
-			!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
-			zend_verify_internal_return_type(call->func, ret));
+		if (!EG(exception) && call->func) {
+			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
+				zend_verify_internal_return_type(call->func, ret));
+			ZEND_ASSERT((call->func->common.fn_flags & ZEND_ACC_RETURN_REFERENCE)
+				? Z_ISREF_P(ret) : !Z_ISREF_P(ret));
+		}
 #endif
 
 		EG(current_execute_data) = call->prev_execute_data;
