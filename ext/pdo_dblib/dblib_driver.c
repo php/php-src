@@ -287,6 +287,9 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
 			H->stringify_uniqueidentifier = zval_get_long(val);
 			return 1;
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			H->skip_empty_rowsets = zval_is_true(val);
+			return 1;
 		default:
 			return 0;
 	}
@@ -312,6 +315,10 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 
 		case PDO_DBLIB_ATTR_VERSION:
 			ZVAL_STRING(return_value, dbversion());
+			break;
+
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			ZVAL_BOOL(return_value, H->skip_empty_rowsets);
 			break;
 
 		default:
@@ -387,6 +394,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H->err.sqlstate = dbh->error_code;
 	H->assume_national_character_set_strings = 0;
 	H->stringify_uniqueidentifier = 0;
+	H->skip_empty_rowsets = 0;
 
 	if (!H->login) {
 		goto cleanup;
@@ -409,6 +417,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 		H->assume_national_character_set_strings = pdo_attr_lval(driver_options, PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
+		H->skip_empty_rowsets = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS, 0);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
