@@ -7902,20 +7902,22 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 		} else {
 			|	jz >3
 		}
-	} else {
-		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
-	}
-	|	mov r0,	EX->run_time_cache
-	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
-	if (smart_branch) {
+		|	mov r1,	EX->run_time_cache
+		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
 		if (defined_label != (uint32_t)-1) {
 			|	jmp =>defined_label
 		} else {
 			|	jmp >3
 		}
 	} else {
-		|	add eax, IS_FALSE
-		|	SET_ZVAL_TYPE_INFO res_addr, eax
+		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
+		|	jz >2
+		|	mov r1,	EX->run_time_cache
+		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
+		|	jmp >3
+		|2:
+		|	SET_ZVAL_TYPE_INFO res_addr, IS_FALSE
 		|	jmp >3
 	}
 	|.code
