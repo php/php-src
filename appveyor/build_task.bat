@@ -8,6 +8,8 @@ if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\mingw-w64 >NUL 2>NUL
 if %errorlevel% neq 0 exit /b 3
+if "%APPVEYOR%" equ "True" rmdir /s /q C:\msys64 >NUL 2>NUL
+if %errorlevel% neq 0 exit /b 3
 
 cd /D %APPVEYOR_BUILD_FOLDER%
 if %errorlevel% neq 0 exit /b 3
