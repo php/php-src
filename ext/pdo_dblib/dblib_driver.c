@@ -273,6 +273,14 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 	return id;
 }
 
+static int dblib_set_attr_millisecond(pdo_dblib_db_handle *H, int millisecond) {
+	if (millisecond) {
+		strncpy(H->datetime_format, "%d-%02d-%02d %02d:%02d:%02d.%03d", 33);
+	} else {
+		strncpy(H->datetime_format, "%d-%02d-%02d %02d:%02d:%02d", 28);
+	}
+}
+
 static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -289,6 +297,8 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			return 1;
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			H->skip_empty_rowsets = zval_is_true(val);
+		case PDO_DBLIB_ATTR_MILLISECOND:
+			dblib_set_attr_millisecond(H, zval_is_true(val));
 			return 1;
 		default:
 			return 0;
@@ -319,6 +329,10 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
 			ZVAL_BOOL(return_value, H->skip_empty_rowsets);
+			break;
+
+		case PDO_DBLIB_ATTR_MILLISECOND:
+			ZVAL_BOOL(return_value, H->datetime_format[27] == '.');
 			break;
 
 		default:
@@ -400,6 +414,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		goto cleanup;
 	}
 
+	int millisecond = 0;
 	if (driver_options) {
 		int connect_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_CONNECTION_TIMEOUT, -1);
 		int query_timeout = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_QUERY_TIMEOUT, -1);
@@ -418,7 +433,9 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		H->assume_national_character_set_strings = pdo_attr_lval(driver_options, PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
 		H->skip_empty_rowsets = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS, 0);
+		millisecond = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_MILLISECOND, 0);
 	}
+	dblib_set_attr_millisecond(H, millisecond);
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
 	DBMSGHANDLE(H->login, (MHANDLEFUNC) pdo_dblib_msg_handler);

@@ -337,11 +337,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
 					dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
 
-					dl = spprintf(&tmp_data, 20, "%d-%02d-%02d %02d:%02d:%02d",
+					dl = spprintf(&tmp_data, 24, H->datetime_format,
 #if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
-							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
+							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second,     di.millisecond
 #else
-							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
+							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond, di.datemsecond
 #endif
 					);
 
