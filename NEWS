@@ -34,6 +34,7 @@ PHP                                                                        NEWS
   . Fixed valgrind issue. (Tianfang Yang)
 
 - Opcache:
+  . Fixed bug (assertion fails with extended info generated). (Laruence)
   . Fixed bug (Phi sources removel). (Laruence)
   . Fixed bug #75370 (Webserver hangs on valid PHP text). (Laruence)
   . Fixed bug #75357 (segfault loading WordPress wp-admin). (Laruence)
