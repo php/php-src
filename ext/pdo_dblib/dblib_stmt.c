@@ -124,20 +124,29 @@ static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 	RETCODE ret;
+	int num_fields;
 
-	ret = dbresults(H->link);
+	do {
+		ret = dbresults(H->link);
+		num_fields = dbnumcols(H->link);
+	} while (H->skip_empty_rowsets && num_fields <= 0 && ret == SUCCEED);
+
 
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");
 		return 0;
 	}
 
-	if(NO_MORE_RESULTS == ret) {
+	if (NO_MORE_RESULTS == ret) {
+		return 0;
+	}
+
+	if (H->skip_empty_rowsets && num_fields <= 0) {
 		return 0;
 	}
 
 	stmt->row_count = DBCOUNT(H->link);
-	stmt->column_count = dbnumcols(H->link);
+	stmt->column_count = num_fields;
 
 	return 1;
 }
