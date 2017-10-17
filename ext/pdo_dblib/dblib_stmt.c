@@ -27,6 +27,8 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/date/php_date.h"
+#include <zend_interfaces.h>
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
@@ -330,6 +332,21 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				}
 				case SQLDATETIME:
 				case SQLDATETIM4: {
+					if (H->datetime_format && zend_string_equals_literal(H->datetime_format, "raw")) {
+						//datetime_format "raw" => as returned by the driver
+						if (dbwillconvert(coltype, SQLCHAR)) {
+							tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
+							tmp_data = emalloc(tmp_data_len);
+							data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
+
+							zv = emalloc(sizeof(zval));
+							ZVAL_STRING(zv, tmp_data);
+
+							efree(tmp_data);
+						}
+						break;
+					}
+
 					DBDATEREC di;
 					DBDATEREC dt;
 
@@ -344,13 +361,37 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond, di.datemsecond
 #endif
 					);
-					if (!H->millisecond) {
+
+					if (!H->datetime_format || !ZSTR_LEN(H->datetime_format)) {
+						//datetime_format "" => YYYY-MM-DD HH:MM:SS
 						tmp_data_len -= 4;
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
+					} else if (zend_string_equals_literal(H->datetime_format, "millisecond")) {
+						//datetime_format "millisecond" => YYYY-MM-DD HH:MM:SS.F
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
+					} else {
+						zval *datetime_object;
+						datetime_object = emalloc(sizeof(zval));
+						php_date_instantiate(php_date_get_date_ce(), datetime_object);
+						if (!php_date_initialize(Z_PHPDATE_P(datetime_object), tmp_data, tmp_data_len, NULL, NULL, 1)) {
+							//invalid datetime => NULL + warning reported by php_date_initialize
+							zval_ptr_dtor(datetime_object);
+							efree(datetime_object);
+						} else if (zend_string_equals_literal(H->datetime_format, "object")) {
+							//datetime_format "object" => DateTime object
+							zv = datetime_object;
+						} else {
+							//datetime_format anything else => DateTime::format(datetime_format)
+							zval format;
+							ZVAL_STR(&format, H->datetime_format);
+							zv = emalloc(sizeof(zval));
+							zend_call_method_with_1_params(datetime_object, php_date_get_date_ce(), NULL, "format", zv, &format);
+							zval_ptr_dtor(datetime_object);
+							efree(datetime_object);
+						}
 					}
-
-					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
-
 					efree(tmp_data);
 
 					break;
