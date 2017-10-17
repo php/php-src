@@ -336,7 +336,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 					dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
 					dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
 
-					tmp_data_len = spprintf(&tmp_data, 24, "%d-%02d-%02d %02d:%02d:%02d.%03d",
+					tmp_data = emalloc(24);
+					tmp_data_len = slprintf(tmp_data, 24, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
 #if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
 							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second,     di.millisecond
 #else
