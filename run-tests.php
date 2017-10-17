@@ -1376,9 +1376,16 @@ NAME_AND_SHAME;
 	$useSockets = (PHP_OS === "WINNT");
 
 	if ($useSockets) {
-		// IPv6 because nobody uses it, so less chance of collisions, right? ;)
-		$port = (ord('<') << 8) + ord('?');
-		$listenSock = stream_socket_server("tcp://[::1]:$port") or error("Couldn't create socket on [::1]:$port.");
+		$listenSock = stream_socket_server("tcp://127.0.0.1:0") or error("Couldn't create socket on localhost.");
+		$sockName = stream_socket_get_name($listenSock, false);
+		// PHP is terrible and returns IPv6 addresses not enclosed by []
+		$portPos = strrpos($sockName, ":");
+		$sockHost = substr($sockName, 0, $portPos);
+		if (FALSE !== strpos($sockHost, ":")) {
+			$sockHost = "[$sockHost]";
+		}
+		$sockPort = substr($sockName, $portPos + 1);
+		$sockUri = "tcp://$sockHost:$sockPort";
 	}
 
 	for ($i = 1; $i <= $workers; $i++) {
@@ -1394,7 +1401,7 @@ NAME_AND_SHAME;
 			$_ENV + [
 				"TEST_PHP_WORKER" => $i
 			] + (!$useSockets ? [] : [
-				"TEST_PHP_PORT" => $port
+				"TEST_PHP_URI" => $sockUri
 			]),
 			[
 				"suppress_errors" => TRUE
@@ -1586,9 +1593,9 @@ function kill_children(array $children) {
 function run_worker() {
 	global $workerID, $workerInput, $workerOutput;
 
-	if (getenv("TEST_PHP_PORT")) {
+	if (getenv("TEST_PHP_URI")) {
 		$useSockets = true;
-		$port = (int)getenv("TEST_PHP_PORT");
+		$sockUri = getenv("TEST_PHP_URI");
 	} else {
 		$useSockets = false;
 	}
@@ -1606,7 +1613,7 @@ function run_worker() {
 	});
 
 	if ($useSockets) {
-		$sock = stream_socket_client("tcp://[::1]:$port", $_, $_, 5) or error("Couldn't connect to [::1]:$port");
+		$sock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
 		$workerInput = $sock;
 		$workerOutput = $sock;
 	} else {
