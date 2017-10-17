@@ -1232,7 +1232,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 
 function run_all_tests($test_files, $env, $redir_tested = null)
 {
-	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $PHP_FAILED_TESTS, $workers, $workerID, $workerOutput;
+	global $test_results, $failed_tests_file, $result_tests_file, $php, $test_idx, $PHP_FAILED_TESTS, $workers, $workerID, $workerSock;
 
 	if ($workers !== null && !$workerID) {
 		run_all_tests_parallel($test_files, $env, $redir_tested);
@@ -1263,7 +1263,7 @@ function run_all_tests($test_files, $env, $redir_tested = null)
 
 		if (!is_array($name) && $result != 'REDIR') {
 			if ($workerID) {
-				send_message($workerOutput, [
+				send_message($workerSock, [
 					"type" => "test_result",
 					"name" => $name,
 					"index" => $index,
@@ -1295,8 +1295,7 @@ function run_all_tests_parallel($test_files, $env, $redir_tested) {
 	$thisScript = __FILE__;
 
 	$workerProcs = [];
-	$workerInputs = [];
-	$workerOutputs = [];
+	$workerSocks = [];
 
 	echo "====⚡️===========================================================⚡️====\n";
 	echo "====⚡️==== WELCOME TO THE FUTURE: run-tests PARALLEL EDITION ====⚡️====\n";
@@ -1372,21 +1371,18 @@ NAME_AND_SHAME;
 
 	echo "Spawning workers… ";
 
-	// Windows pipes can't be non-blocking, so use sockets there instead
-	$useSockets = (PHP_OS === "WINNT");
-
-	if ($useSockets) {
-		$listenSock = stream_socket_server("tcp://127.0.0.1:0") or error("Couldn't create socket on localhost.");
-		$sockName = stream_socket_get_name($listenSock, false);
-		// PHP is terrible and returns IPv6 addresses not enclosed by []
-		$portPos = strrpos($sockName, ":");
-		$sockHost = substr($sockName, 0, $portPos);
-		if (FALSE !== strpos($sockHost, ":")) {
-			$sockHost = "[$sockHost]";
-		}
-		$sockPort = substr($sockName, $portPos + 1);
-		$sockUri = "tcp://$sockHost:$sockPort";
+	// We use sockets rather than STDIN/STDOUT for comms because on Windows,
+	// those can't be non-blocking for some reason.
+	$listenSock = stream_socket_server("tcp://127.0.0.1:0") or error("Couldn't create socket on localhost.");
+	$sockName = stream_socket_get_name($listenSock, false);
+	// PHP is terrible and returns IPv6 addresses not enclosed by []
+	$portPos = strrpos($sockName, ":");
+	$sockHost = substr($sockName, 0, $portPos);
+	if (FALSE !== strpos($sockHost, ":")) {
+		$sockHost = "[$sockHost]";
 	}
+	$sockPort = substr($sockName, $portPos + 1);
+	$sockUri = "tcp://$sockHost:$sockPort";
 
 	for ($i = 1; $i <= $workers; $i++) {
 		$proc = proc_open(
@@ -1399,10 +1395,9 @@ NAME_AND_SHAME;
 			$pipes,
 			NULL,
 			$_ENV + [
-				"TEST_PHP_WORKER" => $i
-			] + (!$useSockets ? [] : [
-				"TEST_PHP_URI" => $sockUri
-			]),
+				"TEST_PHP_WORKER" => $i,
+				"TEST_PHP_URI" => $sockUri,
+			],
 			[
 				"suppress_errors" => TRUE
 			]
@@ -1413,17 +1408,10 @@ NAME_AND_SHAME;
 		}
 		$workerProcs[$i] = $proc;
 
-		if ($useSockets) {
-			$workerSock = stream_socket_accept($listenSock, 5);
-			if ($workerSock === FALSE) {
-				kill_children($workerProcs);
-				error("Failed to accept connection from worker $i");
-			}
-			$workerInput = $workerSock;
-			$workerOutput = $workerSock;
-		} else {
-			$workerInput = $pipes[0];
-			$workerOutput = $pipes[1];
+		$workerSock = stream_socket_accept($listenSock, 5);
+		if ($workerSock === FALSE) {
+			kill_children($workerProcs);
+			error("Failed to accept connection from worker $i");
 		}
 
 		$greeting = base64_encode(serialize([
@@ -1440,14 +1428,13 @@ NAME_AND_SHAME;
 			]
 		])) . "\n";
 
-		stream_set_timeout($workerInput, 5);
-		if (fwrite($workerInput, $greeting) === FALSE) {
+		stream_set_timeout($workerSock, 5);
+		if (fwrite($workerSock, $greeting) === FALSE) {
 			kill_children($workerProcs);
 			error("Failed to send greeting to worker $i.");
 		}
 
-		stream_set_timeout($workerOutput, 5);
-		$rawReply = fgets($workerOutput);
+		$rawReply = fgets($workerSock);
 		if ($rawReply === FALSE) {
 			kill_children($workerProcs);
 			error("Failed to read greeting reply from worker $i.");
@@ -1459,11 +1446,10 @@ NAME_AND_SHAME;
 			error("Greeting reply from worker $i unexpected or could not be decoded: '$rawReply'");
 		}
 
-		stream_set_timeout($workerOutput, 0);
-		stream_set_blocking($workerOutput, FALSE);
+		stream_set_timeout($workerSock, 0);
+		stream_set_blocking($workerSock, FALSE);
 
-		$workerInputs[$i] = $workerInput;
-		$workerOutputs[$i] = $workerOutput;
+		$workerSocks[$i] = $workerSock;
 
 		echo "$i ";
 	}
@@ -1473,21 +1459,21 @@ NAME_AND_SHAME;
 
 escape:
 	while ($testDirsToGo || ($testDirsInProgress > 0)) {
-		$toRead = array_values($workerOutputs);
+		$toRead = array_values($workerSocks);
 		$toWrite = NULL;
 		$toExcept = NULL;
 		if (stream_select($toRead, $toWrite, $toExcept, 10, 0)) {
-			foreach ($toRead as $workerOutput) {
-				$i = array_search($workerOutput, $workerOutputs);
+			foreach ($toRead as $workerSock) {
+				$i = array_search($workerSock, $workerSocks);
 				if ($i === FALSE) {
 					kill_children($workerProcs);
 					error("Could not find worker stdout in array of worker stdouts, THIS SHOULD NOT HAPPEN.");
 				}
-				while (FALSE !== ($rawMessage = fgets($workerOutput))) {
+				while (FALSE !== ($rawMessage = fgets($workerSock))) {
 					$message = unserialize(base64_decode($rawMessage));
 					if (!$message) {
 						kill_children($workerProcs);
-						$stuff = fread($workerOutput, 65536);
+						$stuff = fread($workerSock, 65536);
 						error("Could not decode message from worker $i: '$rawMessage$stuff'");
 					}
 
@@ -1498,7 +1484,7 @@ escape:
 						case "ready":
 							if ($testDir = array_pop($testDirsToGo)) {
 								$testDirsInProgress++;
-								send_message($workerInputs[$i], [
+								send_message($workerSocks[$i], [
 									"type" => "run_tests",
 									"test_files" => $testDir,
 									"env" => $env,
@@ -1507,8 +1493,7 @@ escape:
 							} else {
 								proc_terminate($workerProcs[$i]);
 								unset($workerProcs[$i]);
-								unset($workerInputs[$i]);
-								unset($workerOutputs[$i]);
+								unset($workerSocks[$i]);
 								goto escape;
 							}
 							break;
@@ -1591,20 +1576,15 @@ function kill_children(array $children) {
 }
 
 function run_worker() {
-	global $workerID, $workerInput, $workerOutput;
+	global $workerID, $workerSock;
 
-	if (getenv("TEST_PHP_URI")) {
-		$useSockets = true;
-		$sockUri = getenv("TEST_PHP_URI");
-	} else {
-		$useSockets = false;
-	}
+	$sockUri = getenv("TEST_PHP_URI");
 
 	@unlink(__DIR__ . "/../worker$workerID.log");
 	ini_set("error_log", __DIR__ . "/../worker$workerID.log");
-	set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$workerOutput) {
+	set_error_handler(function ($errno, $errstr, $errfile, $errline) use (&$workerSock) {
 		if (error_reporting() & $errno) {
-			send_message($workerOutput, compact('errno', 'errstr', 'errfile', 'errline') + [
+			send_message($workerSock, compact('errno', 'errstr', 'errfile', 'errline') + [
 				'type' => 'php_error'
 			]);
 		}
@@ -1612,23 +1592,16 @@ function run_worker() {
 		return true;
 	});
 
-	if ($useSockets) {
-		$sock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
-		$workerInput = $sock;
-		$workerOutput = $sock;
-	} else {
-		$workerInput = STDIN;
-		$workerOutput = STDOUT;
-	}
+	$workerSock = stream_socket_client($sockUri, $_, $_, 5) or error("Couldn't connect to $sockUri");
 
-	$greeting = fgets($workerInput);
+	$greeting = fgets($workerSock);
 	$greeting = unserialize(base64_decode($greeting)) or die("Could not decode greeting\n");
 	if ($greeting["type"] !== "hello" || $greeting["workerID"] !== $workerID) {
 		error("Unexpected greeting of type $greeting[type] and for worker $greeting[workerID]");
 	}
 
 	foreach ($greeting["GLOBALS"] as $var => $value) {
-		if ($var !== "workerID" && $var !== "workerInput" && $var !== "workerOutput" && $var !== "GLOBALS") {
+		if ($var !== "workerID" && $var !== "workerSock" && $var !== "GLOBALS") {
 			$GLOBALS[$var] = $value;
 		}
 	}
@@ -1636,27 +1609,27 @@ function run_worker() {
 		define($const, $value);
 	}
 
-	send_message($workerOutput, [
+	send_message($workerSock, [
 		"type" => "hello_reply",
 		"workerID" => $workerID
 	]);
 
-	send_message($workerOutput, [
+	send_message($workerSock, [
 		"type" => "ready"
 	]);
 
-	while (($command = fgets($workerInput))) {
+	while (($command = fgets($workerSock))) {
 		$command = unserialize(base64_decode($command));
 
 		switch ($command["type"]) {
 			case "run_tests":
 				run_all_tests($command["test_files"], $command["env"], $command["redir_tested"]);
-				send_message($workerOutput, [
+				send_message($workerSock, [
 					"type" => "dir_finished"
 				]);
 				break;
 			default:
-				send_message($workerOutput, [
+				send_message($workerSock, [
 					"type" => "error",
 					"msg" => "Unrecognised message type: $command[type]"
 				]);
