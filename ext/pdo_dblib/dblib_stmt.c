@@ -132,16 +132,16 @@ static int pdo_dblib_stmt_next_rowset_no_cancel(pdo_stmt_t *stmt)
 	} while (H->skip_empty_rowsets && num_fields <= 0 && ret == SUCCEED);
 
 
-	if (H->skip_empty_rowsets && num_fields <= 0) {
-		return 0;
-	}
-
 	if (FAIL == ret) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbresults() returned FAIL");
 		return 0;
 	}
 
 	if(NO_MORE_RESULTS == ret) {
+		return 0;
+	}
+
+	if (H->skip_empty_rowsets && num_fields <= 0) {
 		return 0;
 	}
 
