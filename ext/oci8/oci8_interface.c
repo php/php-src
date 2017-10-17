@@ -1611,14 +1611,15 @@ PHP_FUNCTION(oci_close)
 	}
 
 	PHP_OCI_ZVAL_TO_CONNECTION(z_connection, connection);
-	if (GC_REFCOUNT(connection->id) == 2) /* CHANGED VERSION::PHP7
-											 Changed the refCount to 2 since
-											 internally Zend engine increments
-											 RefCount value by 1 */
+	if (GC_REFCOUNT(connection->id) == 2) { /* CHANGED VERSION::PHP7
+											   Changed the refCount to 2 since
+											   internally Zend engine increments
+											   RefCount value by 1 */
+		/* Unregister Oracle TAF */
+		php_oci_unregister_taf_callback(connection);
+
 		zend_list_close(connection->id);
-	
-	/* Unregister Oracle TAF */
-	php_oci_unregister_taf_callback(connection);
+	}
 
 	/* ZVAL_NULL(z_connection); */
 	

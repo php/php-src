@@ -531,7 +531,7 @@ static const func_info_t func_infos[] = {
 	FN("forward_static_call",          UNKNOWN_INFO),
 	FN("forward_static_call_array",    UNKNOWN_INFO),
 	F1("serialize",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
-	FN("unserialize",                  UNKNOWN_INFO),
+	FN("unserialize",                  UNKNOWN_INFO | MAY_BE_REF),
 	F0("var_dump",                     MAY_BE_NULL),
 	F1("var_export",                   MAY_BE_NULL | MAY_BE_STRING),
 	F0("debug_zval_dump",              MAY_BE_NULL),
