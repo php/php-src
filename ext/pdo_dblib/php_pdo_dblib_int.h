@@ -119,7 +119,7 @@ typedef struct {
 	unsigned assume_national_character_set_strings:1;
 	unsigned stringify_uniqueidentifier:1;
 	unsigned skip_empty_rowsets:1;
-	char datetime_format[33];
+	unsigned millisecond:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
