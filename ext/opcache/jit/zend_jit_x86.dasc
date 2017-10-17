@@ -8811,7 +8811,7 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		|	mov CARG1, r1
 		|	LOAD_ADDR CARG2, Z_STRVAL_P(varname)
 		|	mov CARG3, Z_STRLEN_P(varname)
-		|	call &memcmp
+		|	EXT_CALL memcmp, r0
 	|.else
 		|	sub r4, 4
 		|	push Z_STRLEN_P(varname)
