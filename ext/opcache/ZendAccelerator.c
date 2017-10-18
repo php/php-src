@@ -2140,6 +2140,11 @@ static void accel_activate(void)
 		return;
 	}
 
+	if (!ZCG(function_table).nTableSize) {
+		zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
+		zend_accel_copy_internal_functions();
+	}
+
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
 	ZCG(auto_globals_mask) = 0;
 	ZCG(request_time) = (time_t)sapi_get_request_time();
@@ -2627,9 +2632,6 @@ static int accel_post_startup(void)
 			return FAILURE;
 		}
 	}
-
-	zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
-	zend_accel_copy_internal_functions();
 
 /********************************************/
 /* End of non-SHM dependent initializations */
