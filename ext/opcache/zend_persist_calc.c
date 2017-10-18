@@ -396,7 +396,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length)
+uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int for_shm)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;
@@ -405,12 +405,14 @@ uint zend_accel_script_persist_calc(zend_persistent_script *new_persistent_scrip
 	new_persistent_script->corrupted = 0;
 	ZCG(current_persistent_script) = new_persistent_script;
 
+	if (!for_shm) {
+		/* script is not going to be saved in SHM */
+		new_persistent_script->corrupted = 1;
+	}
+
 	ADD_DUP_SIZE(new_persistent_script, sizeof(zend_persistent_script));
 	if (key) {
 		ADD_DUP_SIZE(key, key_length + 1);
-	} else {
-		/* script is not going to be saved in SHM */
-		new_persistent_script->corrupted = 1;
 	}
 	ADD_STRING(new_persistent_script->script.filename);
 
