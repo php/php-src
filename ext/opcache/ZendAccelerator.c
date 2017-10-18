@@ -502,6 +502,47 @@ static zend_string *accel_new_interned_string_for_php(zend_string *str)
 	return str;
 }
 
+static zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
+{
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *arData, *p;
+
+	nIndex = h | ZCSG(interned_strings).nTableMask;
+
+	/* check for existing interned string */
+	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
+	arData = ZCSG(interned_strings).arData;
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET_EX(arData, idx);
+		if ((p->h == h) && (ZSTR_LEN(p->key) == size)) {
+			if (!memcmp(ZSTR_VAL(p->key), str, size)) {
+				return p->key;
+			}
+		}
+		idx = Z_NEXT(p->val);
+	}
+
+	return NULL;
+}
+
+static zend_string *accel_init_interned_string_for_php(const char *str, size_t size, int permanent)
+{
+	if (ZCG(counted)) {
+	    zend_ulong h = zend_inline_hash_func(str, size);
+		zend_string *ret = accel_find_interned_string_ex(h, str, size);
+
+		if (!ret) {
+			ret = zend_string_init(str, size, permanent);
+			ZSTR_H(ret) = h;
+		}
+
+		return ret;
+	}
+
+	return zend_string_init(str, size, permanent);
+}
+
 /* Copy PHP interned strings from PHP process memory into the shared memory */
 static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_interned_string)
 {
@@ -2389,7 +2430,7 @@ static int zend_accel_init_shm(void)
 		zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
 	}
 
-	zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
+	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 
 	zend_reset_cache_vars();
 
@@ -2658,7 +2699,7 @@ static int accel_post_startup(void)
 				if (ZCG(accel_directives).interned_strings_buffer) {
 					zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
 				}
-				zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
+				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:

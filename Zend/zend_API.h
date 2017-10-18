@@ -193,9 +193,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		zend_string *cl_name;									\
-		cl_name = zend_string_init(class_name, class_name_len, 1);		\
-		class_container.name = zend_new_interned_string(cl_name);	\
+		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
 		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	}
 
