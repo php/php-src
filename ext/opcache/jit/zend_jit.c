@@ -649,9 +649,9 @@ static int zend_may_overflow(const zend_op *opline, zend_op_array *op_array, zen
 	}
 }
 
-static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags)
+static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg)
 {
-	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS, cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&CG(arena), op_array, ZEND_CFG_STACKLESS | ZEND_CFG_RECV_ENTRY | ZEND_RT_CONSTANTS | ZEND_CFG_NO_ENTRY_PREDECESSORS | ZEND_SSA_RC_INFERENCE_FLAG | ZEND_SSA_USE_CV_RESULTS, cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -665,16 +665,21 @@ static int zend_jit_build_cfg(zend_op_array *op_array, zend_cfg *cfg, uint32_t *
 	}
 
 	/* Identify reducible and irreducible loops */
-	if (zend_cfg_identify_loops(op_array, cfg, flags) != SUCCESS) {
+	if (zend_cfg_identify_loops(op_array, cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
+static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
 {
-	if (zend_jit_build_cfg(op_array, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_jit_build_cfg(op_array, &ssa->cfg) != SUCCESS) {
+		return FAILURE;
+	}
+
+	/* TODO: debugger and profiler supports? */
+	if ((ssa->cfg.flags & ZEND_FUNC_HAS_EXTENDED_INFO)) {
 		return FAILURE;
 	}
 
@@ -682,8 +687,8 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
-	 && !(*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
-		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS, ssa, flags) != SUCCESS) {
+	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
+		if (zend_build_ssa(&CG(arena), script, op_array, ZEND_RT_CONSTANTS | ZEND_SSA_RC_INFERENCE | ZEND_SSA_USE_CV_RESULTS, ssa) != SUCCESS) {
 			return FAILURE;
 		}
 
@@ -705,13 +710,13 @@ static int zend_jit_op_array_analyze1(zend_op_array *op_array, zend_script *scri
 	return SUCCESS;
 }
 
-static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *script, zend_ssa *ssa, uint32_t *flags)
+static int zend_jit_op_array_analyze2(zend_op_array *op_array, zend_script *script, zend_ssa *ssa)
 {
 	if ((zend_jit_level >= ZEND_JIT_LEVEL_OPT_FUNC)
 	 && ssa->cfg.blocks
 	 && op_array->last_try_catch == 0
 	 && !(op_array->fn_flags & ZEND_ACC_GENERATOR)
-	 && !(*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
+	 && !(ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 
 		if (zend_ssa_inference(&CG(arena), op_array, script, ssa) != SUCCESS) {
 			return FAILURE;
@@ -2083,7 +2088,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 #endif
 		if (ssa->cfg.blocks[b].flags & (ZEND_BB_START|ZEND_BB_RECV_ENTRY)) {
 			opline = op_array->opcodes + ssa->cfg.blocks[b].start;
-			if (ssa->cfg.split_at_recv && opline->opcode == ZEND_RECV_INIT) {
+			if ((ssa->cfg.flags & ZEND_CFG_RECV_ENTRY) && opline->opcode == ZEND_RECV_INIT) {
 				if (opline > op_array->opcodes &&
 				    (opline-1)->opcode == ZEND_RECV_INIT) {
 					if (zend_jit_level < ZEND_JIT_LEVEL_INLINE) {
@@ -2431,7 +2436,7 @@ static int zend_jit(zend_op_array *op_array, zend_ssa *ssa, const zend_op *rt_op
 
 			switch (opline->opcode) {
 				case ZEND_RECV_INIT:
-					if (ssa->cfg.split_at_recv) {
+					if ((ssa->cfg.flags & ZEND_CFG_RECV_ENTRY)) {
 						if (!zend_jit_handler(&dasm_state, opline, zend_may_throw(opline, op_array, ssa))) {
 							goto jit_failure;
 						}
@@ -2600,7 +2605,6 @@ static int zend_jit_collect_calls(zend_op_array *op_array, zend_script *script)
 
 static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, const zend_op *rt_opline)
 {
-	uint32_t flags = 0;
 	zend_ssa ssa;
 	void *checkpoint;
 
@@ -2613,11 +2617,11 @@ static int zend_real_jit_func(zend_op_array *op_array, zend_script *script, cons
     /* Build SSA */
 	memset(&ssa, 0, sizeof(zend_ssa));
 
-	if (zend_jit_op_array_analyze1(op_array, script, &ssa, &flags) != SUCCESS) {
+	if (zend_jit_op_array_analyze1(op_array, script, &ssa) != SUCCESS) {
 		goto jit_failure;
 	}
 
-	if (zend_jit_op_array_analyze2(op_array, script, &ssa, &flags) != SUCCESS) {
+	if (zend_jit_op_array_analyze2(op_array, script, &ssa) != SUCCESS) {
 		goto jit_failure;
 	}
 
@@ -2757,10 +2761,9 @@ static int zend_jit_setup_hot_counters(zend_op_array *op_array)
 	zend_op *opline = op_array->opcodes;
 	const void **orig_handlers;
 	zend_cfg cfg;
-	uint32_t flags = 0;
 	uint32_t i;
 
-	if (zend_jit_build_cfg(op_array, &cfg, &flags) != SUCCESS) {
+	if (zend_jit_build_cfg(op_array, &cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -2895,9 +2898,10 @@ ZEND_API int zend_jit_script(zend_script *script)
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
-				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+				if (zend_jit_op_array_analyze1(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {
 					goto jit_failure;
 				}
+				info->flags = info->ssa.cfg.flags;
 			}
 		}
 
@@ -2918,9 +2922,10 @@ ZEND_API int zend_jit_script(zend_script *script)
 			}
 			info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (info) {
-				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa, &info->flags) != SUCCESS) {
+				if (zend_jit_op_array_analyze2(call_graph.op_arrays[i], script, &info->ssa) != SUCCESS) {
 					goto jit_failure;
 				}
+				info->flags = info->ssa.cfg.flags;
 			}
 		}
 
