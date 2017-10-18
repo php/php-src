@@ -1221,7 +1221,7 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 	zend_shared_alloc_init_xlat_table();
 
 	/* Calculate the required memory size */
-	memory_used = zend_accel_script_persist_calc(new_persistent_script, NULL, 0);
+	memory_used = zend_accel_script_persist_calc(new_persistent_script, NULL, 0, 0);
 
 	/* Allocate memory block */
 #ifdef __SSE2__
@@ -1309,7 +1309,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	zend_shared_alloc_init_xlat_table();
 
 	/* Calculate the required memory size */
-	memory_used = zend_accel_script_persist_calc(new_persistent_script, key, key_length);
+	memory_used = zend_accel_script_persist_calc(new_persistent_script, key, key_length, 1);
 
 	/* Allocate shared memory */
 #ifdef __SSE2__
