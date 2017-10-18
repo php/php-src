@@ -2287,10 +2287,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 					ZVAL_STRINGL(&tmp, last_match, &ZSTR_VAL(subject_str)[offsets[0]]-last_match);
 					zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 				}
-
-				/* One less left to do */
-				if (limit_val != -1)
-					limit_val--;
 			}
 
 			last_match = &ZSTR_VAL(subject_str)[offsets[1]];
@@ -2311,6 +2307,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 					}
 				}
 			}
+
+			/* One less left to do */
+			if (limit_val != -1)
+				limit_val--;
 
 			/* Advance to the position right after the last full match */
 			start_offset = offsets[1];
