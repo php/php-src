@@ -9231,7 +9231,7 @@ static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string 
 	return 0;
 }
 
-static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
+static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa, zend_bitset checked_this)
 {
 	uint32_t op1_info;
 	zend_class_entry *ce = NULL;
@@ -9274,12 +9274,14 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	offset = zend_get_known_property_offset(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 
 	if (opline->op1_type == IS_UNUSED) {
-		|	IF_ZVAL_TYPE this_addr, IS_UNDEF, >1
-		|.cold_code
-		|1:
-		|	SAVE_VALID_OPLINE opline
-		|	jmp ->not_obj
-		|.code
+		if (!checked_this || !zend_bitset_in(checked_this, (opline - op_array->opcodes))) {
+			|	IF_ZVAL_TYPE this_addr, IS_UNDEF, >1
+			|.cold_code
+			|1:
+			|	SAVE_VALID_OPLINE opline
+			|	jmp ->not_obj
+			|.code
+		}
 		|	GET_ZVAL_PTR FCARG1a, this_addr
 	} else {
 		if (op1_info & MAY_BE_REF) {
