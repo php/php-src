@@ -553,7 +553,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 	int removed_ops = 0;
 
 	/* DCE of CV operations that changes arguments may affect vararg functions. */
-	zend_bool has_varargs = ssa->cfg.vararg;
+	zend_bool has_varargs = (ssa->cfg.flags & ZEND_FUNC_VARARG) != 0;
 
 	context ctx;
 	ctx.ssa = ssa;

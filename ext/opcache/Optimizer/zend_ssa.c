@@ -859,7 +859,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 }
 /* }}} */
 
-int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags) /* {{{ */
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -1115,7 +1115,7 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 
 	/* Mark indirectly accessed variables */
 	for (i = 0; i < op_array->last_var; i++) {
-		if (ssa->cfg.dynamic) {
+		if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 			ssa_vars[i].alias = SYMTABLE_ALIAS;
 		} else if (zend_string_equals_literal(op_array->vars[i], "php_errormsg")) {
 			ssa_vars[i].alias = PHP_ERRORMSG_ALIAS;

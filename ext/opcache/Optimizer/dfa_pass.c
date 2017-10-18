@@ -39,7 +39,7 @@
 # include "ssa_integrity.c"
 #endif
 
-int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa, uint32_t *flags)
+int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
 {
 	uint32_t build_flags;
 
@@ -51,12 +51,11 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
     /* Build SSA */
 	memset(ssa, 0, sizeof(zend_ssa));
 
-	if (zend_build_cfg(&ctx->arena, op_array,
-			ZEND_CFG_NO_ENTRY_PREDECESSORS, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_NO_ENTRY_PREDECESSORS, &ssa->cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
-	if (*flags & ZEND_FUNC_INDIRECT_VAR_ACCESS) {
+	if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 		/* TODO: we can't analyze functions with indirect variable access ??? */
 		return FAILURE;
 	}
@@ -75,7 +74,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	}
 
 	/* Identify reducible and irreducible loops */
-	if (zend_cfg_identify_loops(op_array, &ssa->cfg, flags) != SUCCESS) {
+	if (zend_cfg_identify_loops(op_array, &ssa->cfg) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -90,7 +89,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	if (ctx->debug_level & ZEND_DUMP_DFA_PHI) {
 		build_flags |= ZEND_SSA_DEBUG_PHI_PLACEMENT;
 	}
-	if (zend_build_ssa(&ctx->arena, ctx->script, op_array, build_flags, ssa, flags) != SUCCESS) {
+	if (zend_build_ssa(&ctx->arena, ctx->script, op_array, build_flags, ssa) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -1189,10 +1188,9 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 void zend_optimize_dfa(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	void *checkpoint = zend_arena_checkpoint(ctx->arena);
-	uint32_t flags = 0;
 	zend_ssa ssa;
 
-	if (zend_dfa_analyze_op_array(op_array, ctx, &ssa, &flags) != SUCCESS) {
+	if (zend_dfa_analyze_op_array(op_array, ctx, &ssa) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}

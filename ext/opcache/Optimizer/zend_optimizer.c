@@ -1365,7 +1365,8 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
-				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, &func_info->flags);
+				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
+				func_info->flags = func_info->ssa.cfg.flags;
 			}
 		}
 

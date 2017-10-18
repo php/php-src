@@ -895,6 +895,9 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 	if (func_flags & ZEND_FUNC_NO_LOOPS) {
 		fprintf(stderr, ", no_loops");
 	}
+	if (func_flags & ZEND_FUNC_HAS_EXTENDED_INFO) {
+		fprintf(stderr, ", extended_info");
+	}
 //TODO: this is useful only for JIT???
 #if 0
 	if (info->flags & ZEND_JIT_FUNC_NO_IN_MEM_CVS) {
@@ -972,7 +975,7 @@ void zend_dump_op_array(const zend_op_array *op_array, uint32_t dump_flags, cons
 		if (op_array->last_live_range) {
 			fprintf(stderr, "LIVE RANGES:\n");
 			for (i = 0; i < op_array->last_live_range; i++) {
-				if (cfg->split_at_live_ranges) {
+				if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
 					fprintf(stderr, "        %u: BB%u - BB%u ",
 						EX_VAR_TO_NUM(op_array->live_range[i].var & ~ZEND_LIVE_MASK),
 						cfg->map[op_array->live_range[i].start],
