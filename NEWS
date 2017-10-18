@@ -58,6 +58,10 @@ PHP                                                                        NEWS
   . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
 
+- PDO_DBlib:
+  . Implemented request #69592 (allow 0-column rowsets to be skipped
+    automatically). (fandrieu)
+
 - PDO_OCI:
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
     before PHP-FPM sets it up). (Ingmar Runge)

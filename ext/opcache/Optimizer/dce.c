@@ -488,6 +488,12 @@ static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa
 			uint32_t var = live_range->var & ~ZEND_LIVE_MASK;
 			uint32_t def = live_range->start - 1;
 
+			if ((op_array->opcodes[def].result_type == IS_UNUSED) &&
+					(UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_STMT) ||
+					UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_FCALL_END))) {
+				def--;
+			}
+
 			if (op_array->opcodes[def].result_type == IS_UNUSED) {
 				if (op_array->opcodes[def].opcode == ZEND_DO_FCALL) {
 					/* constructor call */
