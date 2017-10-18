@@ -9203,12 +9203,41 @@ static uint32_t zend_get_known_property_offset(zend_class_entry *ce, zend_string
 	return info->offset;
 }
 
+static zend_bool zend_may_be_dynamic_property(zend_class_entry *ce, zend_string *member, zend_bool on_this, zend_string *filename)
+{
+	zend_property_info *info;
+
+	if (!ce || (ce->ce_flags & ZEND_ACC_TRAIT)) {
+		return 1;
+	}
+
+	if (ce->info.user.filename != filename) {
+		/* class declaration might be changed infdependently */
+		return 1;
+	}
+
+	info = (zend_property_info*)zend_hash_find_ptr(&ce->properties_info, member);
+	if (info == NULL ||
+	    info->offset == ZEND_WRONG_PROPERTY_OFFSET ||
+	    (info->flags & ZEND_ACC_STATIC)) {
+		return 1;
+	}
+
+	if (!(info->flags & ZEND_ACC_PUBLIC) &&
+	    (!on_this || info->ce != ce)) {
+		return 1;
+	}
+
+	return 0;
+}
+
 static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_array *op_array, zend_ssa *ssa)
 {
 	uint32_t op1_info;
 	zend_class_entry *ce = NULL;
 	zval *member;
 	uint32_t offset;
+	zend_bool may_be_dynamic = 1;
 	zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 	zend_jit_addr res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 	zend_jit_addr this_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FP, offsetof(zend_execute_data, This));
@@ -9270,8 +9299,11 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
-		|	test eax, eax
-		|	jl >8 // dynamic property
+		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
+		if (may_be_dynamic) {
+			|	test eax, eax
+			|	jl >8 // dynamic property
+		}
 		|	mov edx, dword [FCARG1a + r0 + 8]
 		|	IF_TYPE dl, IS_UNDEF, >5
 		|	add FCARG1a, r0
@@ -9360,7 +9392,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	jmp >9
 	}
 
-	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
+	if (offset == ZEND_WRONG_PROPERTY_OFFSET && may_be_dynamic) {
 		|8:
 		|	LOAD_ADDR FCARG2a, member
 		|.if X64
