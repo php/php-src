@@ -2193,7 +2193,9 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 		module->info_func = PHP_MINFO(php_core);
 	}
 
-	zend_post_startup();
+	if (zend_post_startup() != SUCCESS) {
+		return FAILURE;
+	}
 
 	module_initialized = 1;
 

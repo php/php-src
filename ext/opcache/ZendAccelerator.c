@@ -117,8 +117,10 @@ static int (*accelerator_orig_zend_stream_open_function)(const char *filename, z
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
+static int (*orig_post_startup_cb)(void);
 
 static void accel_gen_system_id(void);
+static int accel_post_startup(void);
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -2138,11 +2140,6 @@ static void accel_activate(void)
 		return;
 	}
 
-	if (!ZCG(function_table).nTableSize) {
-		zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
-		zend_accel_copy_internal_functions();
-	}
-
 	/* PHP-5.4 and above return "double", but we use 1 sec precision */
 	ZCG(auto_globals_mask) = 0;
 	ZCG(request_time) = (time_t)sapi_get_request_time();
@@ -2567,9 +2564,6 @@ static void accel_move_code_to_huge_pages(void)
 
 static int accel_startup(zend_extension *extension)
 {
-	zend_function *func;
-	zend_ini_entry *ini_entry;
-
 #ifdef ZTS
 	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
@@ -2613,6 +2607,29 @@ static int accel_startup(zend_extension *extension)
 	if (ZCG(enabled) == 0) {
 		return SUCCESS ;
 	}
+
+	orig_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = accel_post_startup;
+
+	return SUCCESS;
+}
+
+static int accel_post_startup(void)
+{
+	zend_function *func;
+	zend_ini_entry *ini_entry;
+
+	if (orig_post_startup_cb) {
+		int (*cb)(void) = orig_post_startup_cb;
+
+		orig_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+	zend_hash_init(&ZCG(function_table), zend_hash_num_elements(CG(function_table)), NULL, ZEND_FUNCTION_DTOR, 1);
+	zend_accel_copy_internal_functions();
 
 /********************************************/
 /* End of non-SHM dependent initializations */
