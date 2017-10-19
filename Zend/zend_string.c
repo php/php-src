@@ -203,7 +203,7 @@ static zend_string *zend_new_interned_string_request(zend_string *str)
 static zend_string *zend_string_init_interned_permanent(const char *str, size_t size, int permanent)
 {
 	zend_string *ret;
-	zend_long h = zend_inline_hash_func(str, size);
+	zend_ulong h = zend_inline_hash_func(str, size);
 
 	ret = zend_interned_string_ht_lookup_ex(h, str, size, &interned_strings_permanent);
 	if (ret) {
@@ -218,7 +218,7 @@ static zend_string *zend_string_init_interned_permanent(const char *str, size_t 
 static zend_string *zend_string_init_interned_request(const char *str, size_t size, int permanent)
 {
 	zend_string *ret;
-	zend_long h = zend_inline_hash_func(str, size);
+	zend_ulong h = zend_inline_hash_func(str, size);
 
 	/* Check for permanent strings, the table is readonly at this point. */
 	ret = zend_interned_string_ht_lookup_ex(h, str, size, &interned_strings_permanent);
