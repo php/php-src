@@ -76,6 +76,7 @@ void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_li
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+ZEND_API int (*zend_post_startup_cb)(void) = NULL;
 
 void (*zend_on_timeout)(int seconds);
 
@@ -868,7 +869,7 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */
-void zend_post_startup(void) /* {{{ */
+int zend_post_startup(void) /* {{{ */
 {
 #ifdef ZTS
 	zend_encoding **script_encoding_list;
@@ -898,6 +899,17 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #endif
+
+	if (zend_post_startup_cb) {
+		int (*cb)(void) = zend_post_startup_cb;
+
+		zend_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 

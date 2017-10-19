@@ -27,8 +27,10 @@ BEGIN_EXTERN_C()
 
 typedef void (*zend_string_copy_storage_func_t)(void);
 typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
+typedef zend_string *(*zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
+ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
 ZEND_API void zend_interned_strings_init(void);
@@ -36,7 +38,7 @@ ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
 ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
-ZEND_API void zend_interned_strings_set_request_storage_handler(zend_new_interned_string_func_t handler);
+ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
 ZEND_API void zend_interned_strings_set_permanent_storage_copy_handler(zend_string_copy_storage_func_t handler);
 ZEND_API void zend_interned_strings_switch_storage(void);
 
@@ -172,13 +174,6 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 	memcpy(ZSTR_VAL(ret), str, len);
 	ZSTR_VAL(ret)[len] = '\0';
 	return ret;
-}
-
-static zend_always_inline zend_string *zend_string_init_interned(const char *str, size_t len, int persistent)
-{
-	zend_string *ret = zend_string_init(str, len, persistent);
-
-	return zend_new_interned_string(ret);
 }
 
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)

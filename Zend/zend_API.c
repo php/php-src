@@ -2177,7 +2177,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 	while (ptr->fname) {
 		fname_len = strlen(ptr->fname);
 		internal_function->handler = ptr->handler;
-		internal_function->function_name = zend_new_interned_string(zend_string_init(ptr->fname, fname_len, 1));
+		internal_function->function_name = zend_string_init_interned(ptr->fname, fname_len, 1);
 		internal_function->scope = scope;
 		internal_function->prototype = NULL;
 		if (ptr->flags) {
@@ -2307,7 +2307,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 						class_name++;
 						allow_null = 1;
 					}
-					str = zend_new_interned_string(zend_string_init(class_name, strlen(class_name), 1));
+					str = zend_string_init_interned(class_name, strlen(class_name), 1);
 					new_arg_info[i].type = ZEND_TYPE_ENCODE_CLASS(str, allow_null);
 				}
 			}
@@ -3863,9 +3863,12 @@ ZEND_API int zend_declare_class_constant(zend_class_entry *ce, const char *name,
 {
 	int ret;
 
-	zend_string *key = zend_string_init(name, name_length, ce->type & ZEND_INTERNAL_CLASS);
+	zend_string *key;
+
 	if (ce->type == ZEND_INTERNAL_CLASS) {
-		key = zend_new_interned_string(key);
+		key = zend_string_init_interned(name, name_length, 1);
+	} else {
+		key = zend_string_init(name, name_length, 0);
 	}
 	ret = zend_declare_class_constant_ex(ce, key, value, ZEND_ACC_PUBLIC, NULL);
 	zend_string_release(key);

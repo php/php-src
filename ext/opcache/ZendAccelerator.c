@@ -121,8 +121,10 @@ static int (*accelerator_orig_zend_stream_open_function)(const char *filename, z
 static zend_string *(*accelerator_orig_zend_resolve_path)(const char *filename, size_t filename_len);
 static zif_handler orig_chdir = NULL;
 static ZEND_INI_MH((*orig_include_path_on_modify)) = NULL;
+static int (*orig_post_startup_cb)(void);
 
 static void accel_gen_system_id(void);
+static int accel_post_startup(void);
 
 #ifdef ZEND_WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
@@ -502,6 +504,47 @@ static zend_string *accel_new_interned_string_for_php(zend_string *str)
 		}
 	}
 	return str;
+}
+
+static zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
+{
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *arData, *p;
+
+	nIndex = h | ZCSG(interned_strings).nTableMask;
+
+	/* check for existing interned string */
+	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
+	arData = ZCSG(interned_strings).arData;
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET_EX(arData, idx);
+		if ((p->h == h) && (ZSTR_LEN(p->key) == size)) {
+			if (!memcmp(ZSTR_VAL(p->key), str, size)) {
+				return p->key;
+			}
+		}
+		idx = Z_NEXT(p->val);
+	}
+
+	return NULL;
+}
+
+static zend_string *accel_init_interned_string_for_php(const char *str, size_t size, int permanent)
+{
+	if (ZCG(counted)) {
+	    zend_ulong h = zend_inline_hash_func(str, size);
+		zend_string *ret = accel_find_interned_string_ex(h, str, size);
+
+		if (!ret) {
+			ret = zend_string_init(str, size, permanent);
+			ZSTR_H(ret) = h;
+		}
+
+		return ret;
+	}
+
+	return zend_string_init(str, size, permanent);
 }
 
 /* Copy PHP interned strings from PHP process memory into the shared memory */
@@ -2399,7 +2442,7 @@ static int zend_accel_init_shm(void)
 		zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
 	}
 
-	zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
+	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 
 	zend_reset_cache_vars();
 
@@ -2579,9 +2622,6 @@ static void accel_move_code_to_huge_pages(void)
 
 static int accel_startup(zend_extension *extension)
 {
-	zend_function *func;
-	zend_ini_entry *ini_entry;
-
 #ifdef ZTS
 	accel_globals_id = ts_allocate_id(&accel_globals_id, sizeof(zend_accel_globals), (ts_allocate_ctor) accel_globals_ctor, (ts_allocate_dtor) accel_globals_dtor);
 #else
@@ -2626,6 +2666,26 @@ static int accel_startup(zend_extension *extension)
 		return SUCCESS ;
 	}
 
+	orig_post_startup_cb = zend_post_startup_cb;
+	zend_post_startup_cb = accel_post_startup;
+
+	return SUCCESS;
+}
+
+static int accel_post_startup(void)
+{
+	zend_function *func;
+	zend_ini_entry *ini_entry;
+
+	if (orig_post_startup_cb) {
+		int (*cb)(void) = orig_post_startup_cb;
+
+		orig_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
@@ -2651,7 +2711,7 @@ static int accel_startup(zend_extension *extension)
 				if (ZCG(accel_directives).interned_strings_buffer) {
 					zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
 				}
-				zend_interned_strings_set_request_storage_handler(accel_new_interned_string_for_php);
+				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 				zend_shared_alloc_unlock();
 				break;
 			case FAILED_REATTACHED:
