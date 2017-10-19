@@ -25,6 +25,8 @@ PHP                                                                        NEWS
 - Intl:
   . Fixed bug #75378 ([REGRESSION] IntlDateFormatter::parse() does not change
     $position argument). (Laruence)
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+    of destination). (andrewnester)
 
 - JSON:
   . Fixed bug #68567 (JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null
