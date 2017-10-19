@@ -35,6 +35,10 @@ PHP                                                                        NEWS
 - GMP:
   . Export internal structures and accessor helpers for GMP object. (Sara)
 
+- intl:
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+    of destination). (andrewnester)
+
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
