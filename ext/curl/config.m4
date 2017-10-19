@@ -33,8 +33,8 @@ if test "$PHP_CURL" != "no"; then
   fi
 
   if test -z "$CURL_DIR"; then
-    AC_MSG_ERROR(Could not find cURL, please reinstall the libcurl distribution -
-    easy.h should be in <curl-dir>/include/curl/)
+    AC_MSG_ERROR(Could not find cURL, please reinstall the libcurl distribution -dnl
+ easy.h should be in <curl-dir>/include/curl/)
   fi
 
   CURL_CONFIG="curl-config"
