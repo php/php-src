@@ -842,7 +842,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce);
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length)
 {
 	script->mem = ZCG(mem);
 
