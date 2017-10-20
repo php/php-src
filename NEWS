@@ -26,6 +26,9 @@ PHP                                                                        NEWS
 - OCI8:
   . Fixed valgrind issue. (Tianfang Yang)
 
+- Opcache:
+  . Fixed bug #75373 (Warning Internal error: wrong size calculation). (Laruence, Dmitry)
+
 - OpenSSL:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob, Jakub Zelenka)
 
