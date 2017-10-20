@@ -4,8 +4,8 @@ IntlTimeZone::getIDForWindowsID basic test
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '52') < 0)die('skip for ICU >= 52'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '57.1') >= 0) die('skip for ICU <= 57.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '52') < 0) die('skip for ICU >= 52'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '57.1') < 0) die('skip for ICU >= 58.1'); ?>
 --FILE--
 <?php
 
@@ -35,7 +35,7 @@ string(13) "Asia/Calcutta"
 ** Pacific Standard Time
 string(19) "America/Los_Angeles"
 string(17) "America/Vancouver"
-string(15) "America/Tijuana"
+string(19) "America/Los_Angeles"
 string(19) "America/Los_Angeles"
 string(7) "PST8PDT"
 ** Romance Standard Time
