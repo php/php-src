@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob, Jakub Zelenka)
 
+- Opcache:
+  . Fixed bug #75373 (Warning Internal error: wrong size calculation). (Laruence, Dmitry)
+
 - Zlib:
   . Fixed bug #75299 (Wrong reflection on inflate_init and inflate_add). (Fabien
     Villepinte)
