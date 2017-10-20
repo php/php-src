@@ -1,10 +1,10 @@
 --TEST--
-IntlBreakIterator::getPartsIterator(): basic test, ICU <= 57.1
+IntlBreakIterator::getPartsIterator(): basic test, ICU >= 58.1
 --SKIPIF--
 <?php
 if (!extension_loaded('intl'))
 	die('skip intl extension not enabled');
-if (version_compare(INTL_ICU_VERSION, '57.1') >= 0) die('skip for ICU <= 57.1');
+if (version_compare(INTL_ICU_VERSION, '57.1') < 0) die('skip for ICU >= 58.1');
 ?>
 --FILE--
 <?php
@@ -35,5 +35,5 @@ Array
     [1] =>  
     [2] => bar
 )
-int(0)
+int(200)
 ==DONE==

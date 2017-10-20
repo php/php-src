@@ -4,7 +4,7 @@ IntlDateFormatter: setCalendar()/getCalendar()/getCalendarObject()
 <?php
 if (!extension_loaded('intl')) die('skip intl extension not enabled'); ?>
 <?php if (version_compare(INTL_ICU_VERSION, '54.1') < 0) die('skip for ICU >= 54.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '57.1') >= 0) die('skip for ICU <= 57.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '57.1') < 0) die('skip for ICU >= 58.1'); ?>
 --FILE--
 <?php
 ini_set("intl.error_level", E_WARNING);
@@ -48,7 +48,7 @@ int(0)
 string(7) "islamic"
 string(12) "Europe/Minsk"
 
-dimanche 1 janvier 2012 ap. J.-C. à 00:00:00 UTC
+dimanche 1 janvier 2012 ap. J.-C. à 00:00:00 Temps universel coordonné
 bool(false)
 string(9) "gregorian"
 string(3) "UTC"
