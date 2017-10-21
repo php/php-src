@@ -28,23 +28,19 @@ $c = new MyConverter('ascii', 'utf-8');
 foreach(array("regular", "irregul\xC1\xA1r", "\xC2\xA1unsupported!") as $word) {
   $c->convert($word);
 }
---EXPECT--
+--EXPECTF--
 toUCallback(REASON_RESET, ...)
 toUCallback(REASON_RESET, ...)
 fromUCallback(REASON_RESET, ...)
 fromUCallback(REASON_RESET, ...)
 toUCallback(REASON_RESET, ...)
-toUCallback(REASON_ILLEGAL, ...)
-toUCallback(REASON_ILLEGAL, ...)
+toUCallback(REASON_ILLEGAL, ...)%S
 toUCallback(REASON_RESET, ...)
-toUCallback(REASON_ILLEGAL, ...)
-toUCallback(REASON_ILLEGAL, ...)
+toUCallback(REASON_ILLEGAL, ...)%S
 fromUCallback(REASON_RESET, ...)
-fromUCallback(REASON_UNASSIGNED, ...)
-fromUCallback(REASON_UNASSIGNED, ...)
+fromUCallback(REASON_UNASSIGNED, ...)%S
 fromUCallback(REASON_RESET, ...)
-fromUCallback(REASON_UNASSIGNED, ...)
-fromUCallback(REASON_UNASSIGNED, ...)
+fromUCallback(REASON_UNASSIGNED, ...)%S
 toUCallback(REASON_RESET, ...)
 toUCallback(REASON_RESET, ...)
 fromUCallback(REASON_RESET, ...)
