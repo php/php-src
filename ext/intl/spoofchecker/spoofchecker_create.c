@@ -48,11 +48,9 @@ PHP_METHOD(Spoofchecker, __construct)
 	/* ICU 58 removes WSC and MSC handling. However there are restriction
 	 levels as defined in
 	 http://www.unicode.org/reports/tr39/tr39-15.html#Restriction_Level_Detection
-	 and the default is high restrictive. However the moderately restrictive
-	 level is what seems to correspond to the setting below applicable to
-	 ICU < 58. In further, we might want to utilize uspoof_check2 APIs when
-	 it became stable, to use extended check result APIs. Subsequent changes
-	 in the unicode security algos are to be watched.*/
+	 and the default is high restrictive. In further, we might want to utilize
+	 uspoof_check2 APIs when it became stable, to use extended check result APIs.
+	 Subsequent changes in the unicode security algos are to be watched.*/
 	uspoof_setRestrictionLevel(co->uspoof, SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL);
 #else
 	/* Single-script enforcement is on by default. This fails for languages
