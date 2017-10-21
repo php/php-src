@@ -362,10 +362,9 @@ static void pdo_dblib_stmt_stringify_col(int coltype, LPBYTE data, DBINT data_le
 	*ptr = zv;
 }
 
-static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
-	 zend_ulong *len, int *caller_frees)
+static int pdo_dblib_stmt_get_col_or_ret(pdo_stmt_t *stmt, int colno, char **ptr,
+	 zend_ulong *len, int is_ret)
 {
-
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
 
@@ -375,9 +374,15 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	DBINT data_len, tmp_data_len;
 	zval *zv = NULL;
 
-	coltype = dbcoltype(H->link, colno+1);
-	data = dbdata(H->link, colno+1);
-	data_len = dbdatlen(H->link, colno+1);
+	if (is_ret) {
+		coltype = dbrettype(H->link, colno+1);
+		data = dbretdata(H->link, colno+1);
+		data_len = dbretlen(H->link, colno+1);
+	} else {
+		coltype = dbcoltype(H->link, colno+1);
+		data = dbdata(H->link, colno+1);
+		data_len = dbdatlen(H->link, colno+1);
+	}
 
 	if (data_len != 0 || data != NULL) {
 		if (pdo_dblib_stmt_should_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
@@ -518,9 +523,14 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 		*len = 0;
 	}
 
-	*caller_frees = 1;
-
 	return 1;
+}
+
+static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
+	 zend_ulong *len, int *caller_frees)
+{
+	*caller_frees = 1;
+	return pdo_dblib_stmt_get_col_or_ret(stmt, colno, ptr, len, 0);
 }
 
 static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *return_value)
@@ -571,9 +581,7 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 	if (
 		event_type == PDO_PARAM_EVT_FREE ||
 		event_type == PDO_PARAM_EVT_EXEC_PRE ||
-		event_type == PDO_PARAM_EVT_EXEC_POST ||
-		event_type == PDO_PARAM_EVT_FETCH_PRE ||
-		event_type == PDO_PARAM_EVT_FETCH_POST
+		event_type == PDO_PARAM_EVT_FETCH_PRE
 	) {
 		return 1;
 	}
@@ -602,9 +610,10 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 		return 1;
 	}
+	int is_retval = !strncmp(ZSTR_VAL(param->name), "@RETVAL", sizeof("@RETVAL")-1);
 
 	/* bind param */
-	if (event_type == PDO_PARAM_EVT_ALLOC) {
+	if (event_type == PDO_PARAM_EVT_ALLOC && !is_retval) {
 		char *value = NULL;
 		int datalen = 0, status = 0;
 		long type = 0, maxlen = -1;
@@ -618,10 +627,56 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 			datalen = Z_STRLEN_P(parameter);
 		}
 
+		if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
+			status = DBRPCRETURN;
+		}
+
 		if (FAIL == dbrpcparam(H->link, ZSTR_VAL(param->name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
 			pdo_raise_impl_error(stmt->dbh, NULL, "HY000", "PDO_DBLIB: RPC: Unable to set parameter.");
 
 			return 0;
+		}
+
+		return 1;
+	}
+
+	/* get return value */
+	if (
+		/* after FETCH with results / EXEC without */
+		(event_type == PDO_PARAM_EVT_EXEC_POST || event_type == PDO_PARAM_EVT_FETCH_POST) &&
+		(param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT
+	) {
+		/* get RETVAL */
+		if (is_retval) {
+			if (dbhasretstat(H->link)) {
+				convert_to_long_ex(parameter);
+				Z_LVAL_P(parameter) = dbretstatus(H->link);
+			}
+
+			return 1;
+		}
+
+		/* fetch value from returns */
+		int num_rets, i;
+		char *value = NULL;
+		char *name = NULL;
+		size_t value_len = 0;
+
+		num_rets = dbnumrets(H->link);
+		for (i = 0; i < num_rets; i++) {
+			name = (char *)dbretname(H->link, i+1);
+			if (!strncmp(ZSTR_VAL(param->name), name, sizeof(name))) {
+				pdo_dblib_stmt_get_col_or_ret(stmt, i, &value, &value_len, 1);
+
+				if (value && value_len == sizeof(zval)) {
+					ZVAL_COPY_VALUE(parameter, (zval *)value);
+				} else {
+					ZVAL_NULL(parameter);
+				}
+				efree(value);
+
+				break;
+			}
 		}
 
 		return 1;
