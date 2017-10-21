@@ -23,7 +23,7 @@ print_r(iterator_to_array($pi));
 var_dump($pi->getRuleStatus());
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 string(17) "IntlPartsIterator"
 Array
 (
@@ -35,5 +35,5 @@ Array
     [1] =>  
     [2] => bar
 )
-int(200)
+int(%d)
 ==DONE==
