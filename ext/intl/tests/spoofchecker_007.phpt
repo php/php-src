@@ -5,7 +5,7 @@ spoofchecker with restriction level
 <?php
 	$r = new ReflectionClass("SpoofChecker");
 	if (false === $r->getConstant("SINGLE_SCRIPT_RESTRICTIVE")) {
-		die("Incompatible ICU version");
+		die("skip Incompatible ICU version");
 	}
 ?>
 --FILE--
