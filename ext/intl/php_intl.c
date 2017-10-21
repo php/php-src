@@ -1045,6 +1045,11 @@ PHP_RSHUTDOWN_FUNCTION( intl )
  */
 PHP_MINFO_FUNCTION( intl )
 {
+#if !UCONFIG_NO_FORMATTING
+	UErrorCode status = U_ZERO_ERROR;
+	const char *tzdata_ver = NULL;
+#endif
+
 	php_info_print_table_start();
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
@@ -1052,6 +1057,13 @@ PHP_MINFO_FUNCTION( intl )
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
+#if !UCONFIG_NO_FORMATTING
+	tzdata_ver = ucal_getTZDataVersion(&status);
+	if (U_ZERO_ERROR == status) {
+		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);
+	}
+#endif
+	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
     /* For the default locale php.ini setting */
