@@ -18,8 +18,8 @@ var_dump($bi->preceding(50));
 var_dump($bi->preceding(-1));
 ?>
 ==DONE==
---EXPECT--
+--EXPECTF--
 int(4)
 int(21)
-int(-1)
+int(%d)
 ==DONE==
