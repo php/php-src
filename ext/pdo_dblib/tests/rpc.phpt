@@ -31,12 +31,24 @@ var_dump($prms);
 /* fetch */
 $prms = ['a' => 'sel', 'b' => null];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
+var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC_SKIP_RESULTS));
 $st->bindValue('stmt', 'set @b = @a; select @a');
 $st->bindValue('params', '@a varchar(10), @b varchar(10) out');
 $st->bindParam('a', $prms['a']);
 $st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($st->fetch(PDO::FETCH_ASSOC));
+var_dump($prms['b']);
+
+/* fetch skip */
+$prms = ['a' => 'selskip', 'b' => null];
+$st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1, PDO::DBLIB_ATTR_RPC_SKIP_RESULTS => 1]);
+var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC_SKIP_RESULTS));
+$st->bindValue('stmt', 'set @b = @a; select @a');
+$st->bindValue('params', '@a varchar(10), @b varchar(10) out');
+$st->bindParam('a', $prms['a']);
+$st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
+$st->execute();
 var_dump($prms['b']);
 ?>
 --EXPECT--
@@ -54,8 +66,11 @@ array(3) {
   ["r"]=>
   &int(0)
 }
+bool(false)
 array(1) {
   ["computed"]=>
   string(3) "sel"
 }
 string(3) "sel"
+bool(true)
+string(7) "selskip"

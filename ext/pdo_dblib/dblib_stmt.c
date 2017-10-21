@@ -191,6 +191,14 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 
 			return 0;
 		}
+
+		if (S->skip_results) {
+			while (SUCCEED == dbresults(H->link)) {
+				while(NO_MORE_ROWS != dbnextrow(H->link)) {};
+			}
+
+			return 1;
+		}
 	} else {
 		if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
 			return 0;
@@ -694,6 +702,9 @@ static int pdo_dblib_stmt_set_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 		case PDO_DBLIB_ATTR_RPC:
 			S->enable_rpc = zval_is_true(val);
 			return 1; */
+		case PDO_DBLIB_ATTR_RPC_SKIP_RESULTS:
+			S->skip_results = zval_is_true(val);
+			return 1;
 		default:
 			return 0;
 	}
@@ -706,6 +717,9 @@ static int pdo_dblib_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *retur
 	switch(attr) {
 		case PDO_DBLIB_ATTR_RPC:
 			ZVAL_BOOL(return_value, S->enable_rpc);
+			return 1;
+		case PDO_DBLIB_ATTR_RPC_SKIP_RESULTS:
+			ZVAL_BOOL(return_value, S->skip_results);
 			return 1;
 		default:
 			return 0;
