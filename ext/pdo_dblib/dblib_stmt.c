@@ -626,13 +626,30 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		int datalen = 0, status = 0;
 		long type = 0, maxlen = -1;
 
-		type = SQLVARCHAR;
 		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || Z_TYPE_P(parameter) == IS_NULL) {
-			/* nothing */
+			datalen = 0;
+			type = SQLVARCHAR;
+		} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT) {
+			datalen = -1;
+			if (Z_TYPE_P(parameter) == IS_DOUBLE) {
+				value = (LPBYTE)(&Z_DVAL_P(parameter));
+				type = SQLFLT8;
+			} else {
+				convert_to_long_ex(parameter);
+				value = (LPBYTE)(&Z_LVAL_P(parameter));
+				type = SQLINT8;
+			}
+		} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL) {
+			convert_to_long_ex(parameter);
+			datalen = -1;
+			value = (LPBYTE)(&Z_LVAL_P(parameter));
+			type = SQLBIT;
 		} else {
+			/* default = PDO_PARAM_STR */
 			convert_to_string_ex(parameter);
-			value = Z_STRVAL_P(parameter);
 			datalen = Z_STRLEN_P(parameter);
+			value = Z_STRVAL_P(parameter);
+			type = datalen > 8000 ? SQLTEXT : SQLVARCHAR;
 		}
 
 		if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
