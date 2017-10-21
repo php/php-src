@@ -134,6 +134,34 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
+/* {{{ proto void Spoofchecker::setRestrictionLevel( int $restriction_level )
+ * Set the loosest restriction level allowed for strings.
+ */
+PHP_METHOD(Spoofchecker, setRestrictionLevel)
+{
+	zend_long level;
+	SPOOFCHECKER_METHOD_INIT_VARS;
+
+	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "l", &level)) {
+		return;
+	}
+
+	SPOOFCHECKER_METHOD_FETCH_OBJECT;
+
+	if (USPOOF_ASCII != level &&
+			USPOOF_SINGLE_SCRIPT_RESTRICTIVE != level &&
+			USPOOF_HIGHLY_RESTRICTIVE != level &&
+			USPOOF_MODERATELY_RESTRICTIVE != level &&
+			USPOOF_MINIMALLY_RESTRICTIVE != level &&
+			USPOOF_UNRESTRICTIVE != level) {
+		php_error_docref(NULL, E_WARNING, "Invalid restriction level value");
+		return;
+	}
+
+	uspoof_setRestrictionLevel(co->uspoof, (URestrictionLevel)level);
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
