@@ -109,6 +109,20 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
+	S->enable_rpc = 0;
+
+	if (driver_options) {
+		S->enable_rpc = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC, 0);
+	}
+
+	if (S->enable_rpc) {
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+
+		if (FAIL == dbrpcinit(H->link, sql, 0)) {
+			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: RPC: Unable to init.");
+			return 0;
+		}
+	}
 
 	return 1;
 }

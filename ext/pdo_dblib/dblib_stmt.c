@@ -176,17 +176,29 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
+	RETCODE ret;
 
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 
 	pdo_dblib_stmt_cursor_closer(stmt);
 
-	if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
-		return 0;
-	}
+	if (S->enable_rpc) {
+		ret = dbrpcexec(H->link);
+		if (FAIL == ret || FAIL == dbsqlok(H->link)) {
+			if (FAIL == ret) {
+				dbcancel(H->link);
+			}
 
-	if (FAIL == dbsqlexec(H->link)) {
-		return 0;
+			return 0;
+		}
+	} else {
+		if (FAIL == dbcmd(H->link, stmt->active_query_string)) {
+			return 0;
+		}
+
+		if (FAIL == dbsqlexec(H->link)) {
+			return 0;
+		}
 	}
 
 	pdo_dblib_stmt_next_rowset_no_cancel(stmt);
@@ -553,6 +565,97 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 	return 1;
 }
 
+static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
+		enum pdo_param_event event_type)
+{
+	if (
+		event_type == PDO_PARAM_EVT_FREE ||
+		event_type == PDO_PARAM_EVT_EXEC_PRE ||
+		event_type == PDO_PARAM_EVT_EXEC_POST ||
+		event_type == PDO_PARAM_EVT_FETCH_PRE ||
+		event_type == PDO_PARAM_EVT_FETCH_POST
+	) {
+		return 1;
+	}
+
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+
+	if (!S->enable_rpc) {
+		return 1;
+	}
+
+	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STMT) {
+		return 0;
+	}
+
+	zval *parameter;
+	if (!Z_ISREF(param->parameter)) {
+		parameter = &param->parameter;
+	} else {
+		parameter = Z_REFVAL(param->parameter);
+	}
+
+	/* force "@" prefix instead of ":" */
+	if (event_type == PDO_PARAM_EVT_NORMALIZE) {
+		ZSTR_VAL(param->name)[0] = '@';
+
+		return 1;
+	}
+
+	/* bind param */
+	if (event_type == PDO_PARAM_EVT_ALLOC) {
+		char *value = NULL;
+		int datalen = 0, status = 0;
+		long type = 0, maxlen = -1;
+
+		type = SQLVARCHAR;
+		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || Z_TYPE_P(parameter) == IS_NULL) {
+			/* nothing */
+		} else {
+			convert_to_string_ex(parameter);
+			value = Z_STRVAL_P(parameter);
+			datalen = Z_STRLEN_P(parameter);
+		}
+
+		if (FAIL == dbrpcparam(H->link, ZSTR_VAL(param->name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
+			pdo_raise_impl_error(stmt->dbh, NULL, "HY000", "PDO_DBLIB: RPC: Unable to set parameter.");
+
+			return 0;
+		}
+
+		return 1;
+	}
+
+	return 1;
+};
+
+static int pdo_dblib_stmt_set_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+
+	switch(attr) {
+		/* must be set at prepare time
+		case PDO_DBLIB_ATTR_RPC:
+			S->enable_rpc = zval_is_true(val);
+			return 1; */
+		default:
+			return 0;
+	}
+}
+
+static int pdo_dblib_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *return_value)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+
+	switch(attr) {
+		case PDO_DBLIB_ATTR_RPC:
+			ZVAL_BOOL(return_value, S->enable_rpc);
+			return 1;
+		default:
+			return 0;
+	}
+}
 
 struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
@@ -560,9 +663,9 @@ struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_fetch,
 	pdo_dblib_stmt_describe,
 	pdo_dblib_stmt_get_col,
-	NULL, /* param hook */
-	NULL, /* set attr */
-	NULL, /* get attr */
+	pdo_dblib_stmt_param_hook,
+	pdo_dblib_stmt_set_attr,
+	pdo_dblib_stmt_get_attr,
 	pdo_dblib_stmt_get_column_meta, /* meta */
 	pdo_dblib_stmt_next_rowset, /* nextrow */
 	pdo_dblib_stmt_cursor_closer

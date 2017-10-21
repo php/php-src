@@ -134,6 +134,7 @@ typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
 	unsigned int computed_column_name_count;
+	unsigned enable_rpc:1;
 } pdo_dblib_stmt;
 
 typedef struct {
@@ -163,6 +164,7 @@ enum {
 	PDO_DBLIB_ATTR_TDS_VERSION,
 	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
 	PDO_DBLIB_ATTR_DATETIME_CONVERT,
+	PDO_DBLIB_ATTR_RPC,
 };
 
 #endif
