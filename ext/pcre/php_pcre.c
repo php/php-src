@@ -807,14 +807,14 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *preg
 /* }}} */
 
 /* {{{ add_offset_pair */
-static inline void add_offset_pair(zval *result, char *str, size_t len, zend_off_t offset, char *name, uint32_t unmatched_as_null)
+static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SIZE offset, char *name, uint32_t unmatched_as_null)
 {
 	zval match_pair, tmp;
 
 	array_init_size(&match_pair, 2);
 
 	/* Add (match, offset) to the return value */
-	if (offset < 0) {
+	if (PCRE2_UNSET == offset) {
 		if (unmatched_as_null) {
 			ZVAL_NULL(&tmp);
 		} else {
@@ -891,6 +891,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	pcre2_match_data *match_data;
 	size_t jit_size;
 	int rc;
+	PCRE2_SIZE		 start_offset2;
 
 	ZVAL_UNDEF(&marks);
 
@@ -925,10 +926,13 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 
 	/* Negative offset counts from the end of the string. */
 	if (start_offset < 0) {
-		start_offset = subject_len + start_offset;
-		if (start_offset < 0) {
-			start_offset = 0;
+		if ((PCRE2_SIZE)-start_offset <= subject_len) {
+			start_offset2 = subject_len + start_offset;
+		} else {
+			start_offset2 = 0;
 		}
+	} else {
+		start_offset2 = (PCRE2_SIZE)start_offset;
 	}
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
@@ -973,15 +977,15 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (PCRE_G(jit) && !rc && jit_size > 0
 		 && no_utf_check && !g_notempty) {
-			if (start_offset < 0 || start_offset > subject_len) {
+			if (PCRE2_UNSET == start_offset2 || start_offset2 > subject_len) {
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
 			}
-			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
+			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset2,
 					no_utf_check|g_notempty, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, subject, subject_len, start_offset,
+		count = pcre2_match(pce->re, subject, subject_len, start_offset2,
 				no_utf_check|g_notempty, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -1188,23 +1192,23 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 			}
 
 			/* Advance to the next piece. */
-			start_offset = offsets[1];
+			start_offset2 = offsets[1];
 
 			/* If we have matched an empty string, mimic what Perl's /g options does.
 			   This turns out to be rather cunning. First we set PCRE2_NOTEMPTY_ATSTART and try
 			   the match again at the same point. If this fails (picked up above) we
 			   advance to the next character. */
-			g_notempty = (start_offset == offsets[0]) ? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
+			g_notempty = (start_offset2 == offsets[0]) ? PCRE2_NOTEMPTY_ATSTART | PCRE2_ANCHORED : 0;
 
 		} else if (count == PCRE2_ERROR_NOMATCH) {
 			/* If we previously set PCRE2_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
 			   the start offset, and continue. Fudge the offset values
 			   to achieve this, unless we're already at the end of the string. */
-			if (g_notempty != 0 && start_offset < subject_len) {
-				size_t unit_len = calculate_unit_length(pce, subject + start_offset);
+			if (g_notempty != 0 && start_offset2 < subject_len) {
+				size_t unit_len = calculate_unit_length(pce, subject + start_offset2);
 
-				start_offset += unit_len;
+				start_offset2 += unit_len;
 				g_notempty = 0;
 			} else {
 				break;
@@ -1392,7 +1396,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	size_t			 alloc_len;			/* Actual allocated length */
 	size_t			 match_len;			/* Length of the current match */
 	int				 backref;			/* Backreference number */
-	zend_off_t		 start_offset;		/* Where the new search starts */
+	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
 	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*walkbuf,			/* Location of current replacement in the result */
 					*walk,				/* Used to walk the replacement string */
@@ -1630,7 +1634,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	size_t			 size_offsets;		/* Size of the offsets array */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
-	int				 start_offset;		/* Where the new search starts */
+	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
 	uint32_t		 g_notempty=0;		/* If the match should not be empty */
 	char			*match,				/* The current match */
 					*piece;				/* The current piece of subject */
@@ -2280,7 +2284,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	size_t			 size_offsets;		/* Size of the offsets array */
 	uint32_t		 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
-	size_t			 start_offset;		/* Where the new search starts */
+	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
 	PCRE2_SIZE		 next_offset;		/* End of the last delimiter match + 1 */
 	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char			*last_match;		/* Location of last match */
