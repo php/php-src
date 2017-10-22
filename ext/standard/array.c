@@ -394,7 +394,7 @@ static int php_array_data_compare(const void *a, const void *b) /* {{{ */
 	}
 
 	ZEND_ASSERT(Z_TYPE(result) == IS_LONG);
-	return Z_LVAL(result);
+	return ZEND_NORMALIZE_BOOL(Z_LVAL(result));
 }
 /* }}} */
 
@@ -779,7 +779,6 @@ PHP_FUNCTION(count)
 	zval *array;
 	zend_long mode = COUNT_NORMAL;
 	zend_long cnt;
-	zval *element;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(array)
@@ -2654,13 +2653,13 @@ PHP_FUNCTION(array_fill)
 
 			array_init_size(return_value, (uint32_t)(start_key + num));
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
-			Z_ARRVAL_P(return_value)->nNumUsed = start_key + num;
-			Z_ARRVAL_P(return_value)->nNumOfElements = num;
-			Z_ARRVAL_P(return_value)->nInternalPointer = start_key;
-			Z_ARRVAL_P(return_value)->nNextFreeElement = start_key + num;
+			Z_ARRVAL_P(return_value)->nNumUsed = (uint32_t)(start_key + num);
+			Z_ARRVAL_P(return_value)->nNumOfElements = (uint32_t)num;
+			Z_ARRVAL_P(return_value)->nInternalPointer = (uint32_t)start_key;
+			Z_ARRVAL_P(return_value)->nNextFreeElement = (zend_long)(start_key + num);
 
 			if (Z_REFCOUNTED_P(val)) {
-				GC_REFCOUNT(Z_COUNTED_P(val)) += num;
+				GC_REFCOUNT(Z_COUNTED_P(val)) += (uint32_t)num;
 			}
 
 			p = Z_ARRVAL_P(return_value)->arData;
@@ -2681,7 +2680,7 @@ PHP_FUNCTION(array_fill)
 			array_init_size(return_value, (uint32_t)num);
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 			if (Z_REFCOUNTED_P(val)) {
-				GC_REFCOUNT(Z_COUNTED_P(val)) += num;
+				GC_REFCOUNT(Z_COUNTED_P(val)) += (uint32_t)num;
 			}
 			zend_hash_index_add_new(Z_ARRVAL_P(return_value), start_key, val);
 			while (--num) {
@@ -2949,7 +2948,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	Bucket *p, temp;
 	HashTable *hash;
 	zend_long rnd_idx;
-	zend_long n_left;
+	uint32_t n_left;
 
 	n_elems = zend_hash_num_elements(Z_ARRVAL_P(array));
 

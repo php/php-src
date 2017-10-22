@@ -2757,7 +2757,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
+ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
 	int ret1, ret2;
 	int oflow1, oflow2;

@@ -85,7 +85,7 @@ ZEND_BEGIN_ARG_INFO_EX(spoofchecker_are_confusable, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(spoofchecker_set_restriction_level, 0, 0, 1)
-	ZEND_ARG_INFO(0, checks)
+	ZEND_ARG_INFO(0, level)
 ZEND_END_ARG_INFO()
 
 /* }}} */
