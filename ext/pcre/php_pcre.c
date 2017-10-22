@@ -87,6 +87,7 @@ ZEND_TLS pcre2_general_context *gctx = NULL;
 	contexts at all, but creates for every pce. */
 ZEND_TLS pcre2_compile_context *cctx = NULL;
 ZEND_TLS pcre2_match_context   *mctx = NULL;
+ZEND_TLS uint8_t pcre2_init_ok = 0;
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -153,6 +154,80 @@ static void php_pcre_free(void *block, void *data)
 
 #define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
 
+static void php_pcre_init_pcre2(uint8_t jit)
+{/*{{{*/
+	if (!gctx) {
+		gctx = pcre2_general_context_create(php_pcre_malloc, php_pcre_free, NULL);
+		if (!gctx) {
+			pcre2_init_ok = 0;
+			return;
+		}
+	}
+
+	if (!cctx) {
+		cctx = pcre2_compile_context_create(gctx);
+		if (!cctx) {
+			pcre2_init_ok = 0;
+			return;
+		}
+	}
+
+	/* XXX The 'X' modifier is the default behavior in PCRE2. This option is
+		called dangerous in the manual, as typos in patterns can cause
+		unexpected results. We might want to to switch to the default PCRE2
+		behavior, too, thus causing a certain BC break. */
+	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
+
+	if (!mctx) {
+		mctx = pcre2_match_context_create(gctx);
+		if (!mctx) {
+			pcre2_init_ok = 0;
+			return;
+		}
+	}
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	if (jit && !jit_stack) {
+		jit_stack = pcre2_jit_stack_create(PCRE_JIT_STACK_MIN_SIZE, PCRE_JIT_STACK_MAX_SIZE, gctx);
+		if (!jit_stack) {
+			pcre2_init_ok = 0;
+			return;
+		}
+	}
+#endif
+
+	pcre2_init_ok = 1;
+}/*}}}*/
+
+static void php_pcre_shutdown_pcre2(void)
+{/*{{{*/
+	if (gctx) {
+		pcre2_general_context_free(gctx);
+		gctx = NULL;
+	}
+
+	if (cctx) {
+		pcre2_compile_context_free(cctx);
+		cctx = NULL;
+	}
+
+	if (mctx) {
+		pcre2_match_context_free(mctx);
+		mctx = NULL;
+	}
+
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	/* Stack may only be destroyed when no cached patterns
+	 	possibly associated with it do exist. */
+	if (jit_stack) {
+		pcre2_jit_stack_free(jit_stack);
+		jit_stack = NULL;
+	}
+#endif
+
+	pcre2_init_ok = 0;
+}/*}}}*/
+
 static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
@@ -160,19 +235,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
 
-	/* XXX error check! */
-	gctx = pcre2_general_context_create(php_pcre_malloc, php_pcre_free, NULL);
-	cctx = pcre2_compile_context_create(gctx);
-	/* XXX The 'X' modifier is the default behavior in PCRE2. This option is
-		called dangerous in the manual, as typos in patterns can cause
-		unexpected results. We might want to to switch to the default PCRE2
-		behavior, too, thus causing a certain BC break. */
-	pcre2_set_compile_extra_options(cctx, PHP_PCRE_DEFAULT_EXTRA_COPTIONS);
-	mctx = pcre2_match_context_create(gctx);
-
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	jit_stack = pcre2_jit_stack_create(PCRE_JIT_STACK_MIN_SIZE, PCRE_JIT_STACK_MAX_SIZE, gctx);
-#endif
+	php_pcre_init_pcre2(1);
 }
 /* }}} */
 
@@ -180,19 +243,7 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 {
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
-	pcre2_general_context_free(gctx);
-	gctx = NULL;
-	pcre2_compile_context_free(cctx);
-	cctx = NULL;
-	pcre2_match_context_free(mctx);
-	mctx = NULL;
-
-#ifdef HAVE_PCRE_JIT_SUPPORT
-	/* Stack may only be destroyed when no cached patterns
-	 	possibly associated with it do exist. */
-	pcre2_jit_stack_free(jit_stack);
-	jit_stack = NULL;
-#endif
+	php_pcre_shutdown_pcre2();
 }
 /* }}} */
 
@@ -298,7 +349,12 @@ static PHP_MINFO_FUNCTION(pcre)
 /* {{{ PHP_MINIT_FUNCTION(pcre) */
 static PHP_MINIT_FUNCTION(pcre)
 {
-	char *version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
+	char *version;
+
+	if (!pcre2_init_ok) {
+		return FAILURE;
+	}
+
 	REGISTER_INI_ENTRIES();
 
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
@@ -317,6 +373,7 @@ static PHP_MINIT_FUNCTION(pcre)
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_ERROR", PHP_PCRE_BAD_UTF8_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_BAD_UTF8_OFFSET_ERROR", PHP_PCRE_BAD_UTF8_OFFSET_ERROR, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_JIT_STACKLIMIT_ERROR", PHP_PCRE_JIT_STACKLIMIT_ERROR, CONST_CS | CONST_PERSISTENT);
+	version = _pcre2_config_str(PCRE2_CONFIG_VERSION);
 	REGISTER_STRING_CONSTANT("PCRE_VERSION", version, CONST_CS | CONST_PERSISTENT);
 	free(version);
 	REGISTER_LONG_CONSTANT("PCRE_VERSION_MAJOR", PCRE2_MAJOR, CONST_CS | CONST_PERSISTENT);
@@ -330,6 +387,21 @@ static PHP_MINIT_FUNCTION(pcre)
 static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
+
+	return SUCCESS;
+}
+/* }}} */
+
+/* {{{ PHP_RINIT_FUNCTION(pcre) */
+static PHP_RINIT_FUNCTION(pcre)
+{
+	if (!pcre2_init_ok) {
+		/* Retry. */
+		php_pcre_init_pcre2(PCRE_G(jit));
+		if (!pcre2_init_ok) {
+			return FAILURE;
+		}
+	}
 
 	return SUCCESS;
 }
@@ -2689,7 +2761,7 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
-	NULL,
+	PHP_RINIT(pcre),
 	NULL,
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
@@ -2723,17 +2795,20 @@ PHPAPI pcre2_compile_context *php_pcre_cctx(void)
 
 PHPAPI void php_pcre_pce_incref(pcre_cache_entry *pce)
 {/*{{{*/
+	assert(NULL != pce);
 	pce->refcount++;
 }/*}}}*/
 
 PHPAPI void php_pcre_pce_decref(pcre_cache_entry *pce)
 {/*{{{*/
+	assert(NULL != pce);
 	assert(0 != pce->refcount);
 	pce->refcount--;
 }/*}}}*/
 
 PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *pce)
 {/*{{{*/
+	assert(NULL != pce);
 	return pce->re;
 }/*}}}*/
 
