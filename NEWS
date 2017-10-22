@@ -29,6 +29,9 @@ PHP                                                                        NEWS
 - GD:
   . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
 
+- JSON:
+  . Added JSON_THROW_ON_ERROR flag. (Andrea)
+
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
