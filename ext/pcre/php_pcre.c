@@ -695,7 +695,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	if (PCRE_G(jit)) {
 		/* Enable PCRE JIT compiler */
-		int rc;
 		rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
 		if (rc < 0) {
 			pcre2_get_error_message(rc, error, sizeof(error));
