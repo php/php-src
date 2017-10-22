@@ -352,7 +352,11 @@ static PHP_MINIT_FUNCTION(pcre)
 	char *version;
 
 	if (!pcre2_init_ok) {
-		return FAILURE;
+		/* Retry. */
+		php_pcre_init_pcre2(PCRE_G(jit));
+		if (!pcre2_init_ok) {
+			return FAILURE;
+		}
 	}
 
 	REGISTER_INI_ENTRIES();
