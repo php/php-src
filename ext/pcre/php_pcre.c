@@ -2593,7 +2593,6 @@ static PHP_FUNCTION(preg_grep)
 PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags) /* {{{ */
 {
 	zval            *entry;             /* An entry in the input array */
-	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	size_t			 size_offsets;		/* Size of the offsets array */
 	int				 count = 0;			/* Count of matched subpatterns */
 	uint32_t		 no_utf_check;		/* Execution options */
