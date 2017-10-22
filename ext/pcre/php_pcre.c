@@ -45,11 +45,6 @@
 
 #define PCRE_CACHE_SIZE 4096
 
-/* not fully functional workaround for libpcre < 8.0, see bug #70232 */
-#ifndef PCRE2_NOTEMPTY_ATSTART
-# define PCRE2_NOTEMPTY_ATSTART PCRE_NOTEMPTY
-#endif
-
 struct _pcre_cache_entry {
 	pcre2_code *re;
 	uint32_t preg_options;
