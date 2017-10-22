@@ -890,7 +890,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	uint32_t		 subpats_order;		/* Order of subpattern matches */
 	uint32_t		 offset_capture;	/* Capture match offsets: yes/no */
 	uint32_t		 unmatched_as_null;	/* Null non-matches: yes/no */
-	PCRE2_SPTR      *mark = NULL;		/* Target for MARK name */
+	PCRE2_SPTR       mark = NULL;		/* Target for MARK name */
 	zval			 marks;				/* Array of marks for PREG_PATTERN_ORDER */
 	pcre2_match_data *match_data;
 	size_t jit_size;
@@ -1317,7 +1317,7 @@ static int preg_get_backref(char **str, int *backref)
 
 /* {{{ preg_do_repl_func
  */
-static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, char **subpat_names, int count, PCRE2_SPTR *mark)
+static zend_string *preg_do_repl_func(zend_fcall_info *fci, zend_fcall_info_cache *fcc, char *subject, PCRE2_SIZE *offsets, char **subpat_names, int count, const PCRE2_SPTR mark)
 {
 	zend_string *result_str;
 	zval		 retval;			/* Function return value */
@@ -1643,7 +1643,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	char			*match,				/* The current match */
 					*piece;				/* The current piece of subject */
 	size_t			result_len; 		/* Length of result */
-	PCRE2_SPTR      *mark = NULL;		/* Target for MARK name */
+	PCRE2_SPTR		mark = NULL;		/* Target for MARK name */
 	zend_string		*result;			/* Result of replacement */
 	zend_string     *eval_result=NULL;  /* Result of custom function */
 	pcre2_match_data *match_data;
