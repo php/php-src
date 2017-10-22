@@ -39,6 +39,9 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- JSON:
+  . Added JSON_THROW_ON_ERROR flag. (Andrea)
+
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
