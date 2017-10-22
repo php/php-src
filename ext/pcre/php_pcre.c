@@ -615,8 +615,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			/* PCRE specific options */
 			case 'A':	coptions |= PCRE2_ANCHORED;		break;
 			case 'D':	coptions |= PCRE2_DOLLAR_ENDONLY;break;
-			/* TODO in how far it is feasible at all, study is done for every pattern in PCRE2. */
-			case 'S':	/*do_study  = 1;*/					break;
+			case 'S':	/* Pass. */					break;
 			case 'U':	coptions |= PCRE2_UNGREEDY;		break;
 			case 'X':	extra_coptions &= ~PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL;			break;
 			case 'u':	coptions |= PCRE2_UTF;
