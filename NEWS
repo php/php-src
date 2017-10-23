@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     error_log set to "syslog"). (Philip Prindeville)
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
+  . Fixed bug #69954 (broken links and unused config items in distributed ini
+    files). (petk)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
