@@ -2853,7 +2853,7 @@ apprentice_buf(struct magic_set *ms, struct magic *buf, size_t len)
 {
 	struct magic_map *map;
 
-	if ((map = CAST(struct magic_map *, calloc(1, sizeof(*map)))) == NULL) {
+	if ((map = CAST(struct magic_map *, ecalloc(1, sizeof(*map)))) == NULL) {
 		file_oomem(ms, sizeof(*map));
 		return NULL;
 	}
