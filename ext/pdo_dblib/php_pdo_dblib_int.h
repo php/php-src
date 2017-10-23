@@ -120,6 +120,7 @@ typedef struct {
 	unsigned stringify_uniqueidentifier:1;
 	unsigned skip_empty_rowsets:1;
 	unsigned datetime_convert:1;
+	zend_string *datetime_format;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -154,6 +155,7 @@ enum {
 	PDO_DBLIB_ATTR_VERSION,
 	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
 	PDO_DBLIB_ATTR_DATETIME_CONVERT,
+	PDO_DBLIB_ATTR_DATETIME_FORMAT,
 };
 
 #endif

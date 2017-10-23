@@ -260,6 +260,81 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
+static int pdo_dblib_strftime(zval *output, zend_string *format, DBDATEREC *dr)
+{
+	/* copied from php_date.c */
+	struct tm            ta;
+	int                  max_reallocs = 5;
+	size_t               buf_len = 256, real_len;
+	zend_string         *buf;
+	char                 millisecond[3];
+	static const char   *default_format = "%Y-%m-%d %H:%M:%S";
+	char                *ok_format = (char *)default_format;
+
+	if (format && ZSTR_LEN(format) > 0) {
+		ok_format = ZSTR_VAL(format);
+	}
+
+#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
+	sprintf(millisecond, "%03d", dr->millisecond);
+	ta.tm_sec   = dr->second;
+	ta.tm_min   = dr->minute;
+	ta.tm_hour  = dr->hour;
+	ta.tm_mday  = dr->day;
+	ta.tm_mon   = dr->month - 1;
+	ta.tm_year  = dr->year - 1900;
+	ta.tm_wday  = dr->weekday;
+	ta.tm_yday  = dr->dayofyear;
+#else
+	sprintf(millisecond, "%03d", dr->datemsecond);
+	ta.tm_sec   = dr->datesecond;
+	ta.tm_min   = dr->dateminute;
+	ta.tm_hour  = dr->datehour;
+	ta.tm_mday  = dr->datedmonth;
+	ta.tm_mon   = dr->datemonth;
+	ta.tm_year  = dr->dateyear - 1900;
+	ta.tm_wday  = dr->datedweek + 1;
+	ta.tm_yday  = dr->datedyear;
+#endif
+	ta.tm_isdst = 0;
+#if HAVE_TM_GMTOFF
+	ta.tm_gmtoff = 0;
+#endif
+#if HAVE_TM_ZONE
+	ta.tm_zone = "GMT";
+#endif
+
+	/* FIXME: replace %z in format with millisecond */
+
+	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
+	   initial buffer is too small. See
+	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
+	buf = zend_string_alloc(buf_len, 0);
+	while ((real_len = strftime(ZSTR_VAL(buf), buf_len, ok_format, &ta)) == buf_len || real_len == 0) {
+		buf_len *= 2;
+		buf = zend_string_extend(buf, buf_len, 0);
+		if (!--max_reallocs) {
+			break;
+		}
+	}
+#ifdef PHP_WIN32
+	/* VS2012 strftime() returns number of characters, not bytes.
+		See VC++11 bug id 766205. */
+	if (real_len > 0) {
+		real_len = strlen(buf->val);
+	}
+#endif
+
+	if (real_len && real_len != buf_len) {
+		buf = zend_string_truncate(buf, real_len, 0);
+		ZVAL_STR(output, buf);
+		return 1;
+	}
+
+	zend_string_free(buf);
+	return 0;
+}
+
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	 zend_ulong *len, int *caller_frees)
 {
@@ -339,6 +414,10 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 							efree(tmp_data);
 							break;
 						}
+
+						zv = emalloc(sizeof(zval));
+						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
+						efree(tmp_data);
 					} else {
 						DBDATEREC di;
 						DBDATEREC dt;
@@ -346,20 +425,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
 						dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
 
-						tmp_data_len = spprintf(&tmp_data, 20, "%d-%02d-%02d %02d:%02d:%02d",
-#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
-								di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
-#else
-								di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
-#endif
-						);
+						zv = emalloc(sizeof(zval));
+						pdo_dblib_strftime(zv, H->datetime_format, &di);
 					}
-
-					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
-
-					efree(tmp_data);
-
 					break;
 				}
 				case SQLFLT4: {
