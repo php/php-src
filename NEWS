@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75368 (mmap/munmap trashing on unlucky allocations). (Nikita,
     Dmitry)
+  . Fixed bug #69954 (broken links and unused config items in distributed ini
+    files). (petk)
 
 - CLI:
   . Fixed bug #75287 (Builtin webserver crash after chdir in a shutdown
