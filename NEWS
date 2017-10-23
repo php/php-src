@@ -45,6 +45,9 @@ PHP                                                                        NEWS
 - Openssl:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
 
+- PGSQL:
+  . Fixed bug #75419 (Default link incorrectly cleared/linked by pg_close()). (Sara)
+
 - Standard:
   . Fixed bug #75221 (Argon2i always throws NUL at the end). (cmb)
 
