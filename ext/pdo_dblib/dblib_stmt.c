@@ -330,38 +330,23 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 				}
 				case SQLDATETIME:
 				case SQLDATETIM4: {
-					if (H->datetime_format == PDO_DBLIB_DATETIME_FORMAT_CONVERT) {
-						tmp_data_len = 63; /* hardcoded maximum length in freetds */
-						tmp_data = emalloc(tmp_data_len);
-						tmp_data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, tmp_data, tmp_data_len);
-						if (tmp_data_len == (unsigned int) -1) { /* in case tmp_data_len wasn't enough */
-							pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: dbconvert() from datetime error");
-							efree(tmp_data);
-							break;
-						}
-					} else {
-						DBDATEREC di;
-						DBDATEREC dt;
+					int dl;
+					DBDATEREC di;
+					DBDATEREC dt;
 
-						dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
-						dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
-						tmp_data_len = 24; /* fixed length printf */
-						tmp_data = emalloc(tmp_data_len);
-						tmp_data_len = slprintf(tmp_data, tmp_data_len, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
+					dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
+					dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
+
+					dl = spprintf(&tmp_data, 20, "%d-%02d-%02d %02d:%02d:%02d",
 #if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
-								di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second,     di.millisecond
+							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
 #else
-								di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond, di.datemsecond
+							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
 #endif
-						);
-
-						if (H->datetime_format != PDO_DBLIB_DATETIME_FORMAT_MILLISECOND) {
-							tmp_data_len -= 4;
-						}
-					}
+					);
 
 					zv = emalloc(sizeof(zval));
-					ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
+					ZVAL_STRINGL(zv, tmp_data, dl);
 
 					efree(tmp_data);
 

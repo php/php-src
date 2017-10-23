@@ -119,7 +119,6 @@ typedef struct {
 	unsigned assume_national_character_set_strings:1;
 	unsigned stringify_uniqueidentifier:1;
 	unsigned skip_empty_rowsets:1;
-	unsigned datetime_format;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -153,13 +152,6 @@ enum {
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
 	PDO_DBLIB_ATTR_VERSION,
 	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
-	PDO_DBLIB_ATTR_DATETIME_FORMAT,
-};
-
-enum {
-    PDO_DBLIB_DATETIME_FORMAT_DEFAULT,
-    PDO_DBLIB_DATETIME_FORMAT_MILLISECOND,
-    PDO_DBLIB_DATETIME_FORMAT_CONVERT,
 };
 
 #endif
