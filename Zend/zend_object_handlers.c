@@ -222,11 +222,7 @@ static void zend_std_call_unsetter(zval *object, zval *member) /* {{{ */
 	      property name
 	*/
 
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-
 	zend_call_method_with_1_params(object, ce, &ce->__unset, ZEND_UNSET_FUNC_NAME, NULL, member);
-
-	zval_ptr_dtor(member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -245,11 +241,7 @@ static void zend_std_call_issetter(zval *object, zval *member, zval *retval) /* 
 	   it should return whether the property is set or not
 	*/
 
-	if (Z_REFCOUNTED_P(member)) Z_ADDREF_P(member);
-
 	zend_call_method_with_1_params(object, ce, &ce->__isset, ZEND_ISSET_FUNC_NAME, retval, member);
-
-	zval_ptr_dtor(member);
 
 	EG(fake_scope) = orig_fake_scope;
 }
@@ -612,25 +604,22 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic isset */
 	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
-		zval tmp_object, tmp_result;
+		zval tmp_result;
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
-			ZVAL_COPY(&tmp_object, object);
 			ZVAL_UNDEF(&tmp_result);
 
 			*guard |= IN_ISSET;
-			zend_std_call_issetter(&tmp_object, member, &tmp_result);
+			zend_std_call_issetter(object, member, &tmp_result);
 			*guard &= ~IN_ISSET;
 	
 			if (!zend_is_true(&tmp_result)) {
 				retval = &EG(uninitialized_zval);
-				zval_ptr_dtor(&tmp_object);
 				zval_ptr_dtor(&tmp_result);
 				goto exit;
 			}
 
-			zval_ptr_dtor(&tmp_object);
 			zval_ptr_dtor(&tmp_result);
 		}
 	}
@@ -639,12 +628,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	if (zobj->ce->__get) {
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_GET)) {
-			zval tmp_object;
-
 			/* have getter - try with it! */
-			ZVAL_COPY(&tmp_object, object);
 			*guard |= IN_GET; /* prevent circular getting */
-			zend_std_call_getter(&tmp_object, member, rv);
+			zend_std_call_getter(object, member, rv);
 			*guard &= ~IN_GET;
 
 			if (Z_TYPE_P(rv) != IS_UNDEF) {
@@ -659,7 +645,6 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			} else {
 				retval = &EG(uninitialized_zval);
 			}
-			zval_ptr_dtor(&tmp_object);
 			goto exit;
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
@@ -729,13 +714,9 @@ found:
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 	    if (!((*guard) & IN_SET)) {
-			zval tmp_object;
-
-			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			zend_std_call_setter(&tmp_object, member, value);
+			zend_std_call_setter(object, member, value);
 			(*guard) &= ~IN_SET;
-			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			goto write_std_property;
 		} else {
@@ -785,17 +766,15 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
-			SEPARATE_ARG_IF_REF(offset);
+			ZVAL_DEREF(offset);
 		}
 
 		if (type == BP_VAR_IS) {
 			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
 			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
-				zval_ptr_dtor(offset);
 				return NULL;
 			}
 			if (!i_zend_is_true(rv)) {
-				zval_ptr_dtor(offset);
 				zval_ptr_dtor(rv);
 				return &EG(uninitialized_zval);
 			}
@@ -803,8 +782,6 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 		}
 
 		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
-
-		zval_ptr_dtor(offset);
 
 		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 			if (UNEXPECTED(!EG(exception))) {
@@ -830,10 +807,9 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /*
 			ZVAL_NULL(&tmp);
 			offset = &tmp;
 		} else {
-			SEPARATE_ARG_IF_REF(offset);
+			ZVAL_DEREF(offset);
 		}
 		zend_call_method_with_2_params(object, ce, NULL, "offsetset", NULL, offset, value);
-		zval_ptr_dtor(offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
@@ -847,7 +823,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 	int result;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
-		SEPARATE_ARG_IF_REF(offset);
+		ZVAL_DEREF(offset);
 		zend_call_method_with_1_params(object, ce, NULL, "offsetexists", &retval, offset);
 		if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
 			result = i_zend_is_true(&retval);
@@ -862,7 +838,6 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 		} else {
 			result = 0;
 		}
-		zval_ptr_dtor(offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 		return 0;
@@ -990,14 +965,10 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	if (zobj->ce->__unset) {
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_UNSET)) {
-			zval tmp_object;
-
 			/* have unseter - try with it! */
-			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
-			zend_std_call_unsetter(&tmp_object, member);
+			zend_std_call_unsetter(object, member);
 			(*guard) &= ~IN_UNSET;
-			zval_ptr_dtor(&tmp_object);
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
 				zend_throw_error(NULL, "Cannot access property started with '\\0'");
@@ -1018,9 +989,8 @@ static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 	zend_class_entry *ce = Z_OBJCE_P(object);
 
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1)) {
-		SEPARATE_ARG_IF_REF(offset);
+		ZVAL_DEREF(offset);
 		zend_call_method_with_1_params(object, ce, NULL, "offsetunset", NULL, offset);
-		zval_ptr_dtor(offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
@@ -1599,19 +1569,17 @@ found:
 
 		if (!((*guard) & IN_ISSET)) {
 			zval rv;
-			zval tmp_object;
 
 			/* have issetter - try with it! */
-			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
-			zend_std_call_issetter(&tmp_object, member, &rv);
+			zend_std_call_issetter(object, member, &rv);
 			if (Z_TYPE(rv) != IS_UNDEF) {
 				result = zend_is_true(&rv);
 				zval_ptr_dtor(&rv);
 				if (has_set_exists && result) {
 					if (EXPECTED(!EG(exception)) && zobj->ce->__get && !((*guard) & IN_GET)) {
 						(*guard) |= IN_GET;
-						zend_std_call_getter(&tmp_object, member, &rv);
+						zend_std_call_getter(object, member, &rv);
 						(*guard) &= ~IN_GET;
 						if (Z_TYPE(rv) != IS_UNDEF) {
 							result = i_zend_is_true(&rv);
@@ -1625,7 +1593,6 @@ found:
 				}
 			}
 			(*guard) &= ~IN_ISSET;
-			zval_ptr_dtor(&tmp_object);
 		}
 	}
 
