@@ -66,7 +66,7 @@ DBA_OPEN_FUNC(gdbm)
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
-	*error = gdbm_strerror(gdbm_errno);
+	*error = (char *)gdbm_strerror(gdbm_errno);
 	return FAILURE;
 }
 
