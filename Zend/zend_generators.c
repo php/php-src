@@ -223,6 +223,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
+		generator->flags &= ~ZEND_GENERATOR_CURRENTLY_RUNNING;
+		
 		zend_generator_resume(generator);
 	}
 }
