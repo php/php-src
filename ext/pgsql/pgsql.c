@@ -1562,32 +1562,26 @@ PHP_FUNCTION(pg_close)
 {
 	zval *pgsql_link = NULL;
 	zend_resource *link;
-	int argc = ZEND_NUM_ARGS();
-	PGconn *pgsql;
 
-	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
 		return;
 	}
 
-	if (argc == 0) {
+	if (pgsql_link) {
+		link = Z_RES_P(pgsql_link);
+	} else {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
-		link = Z_RES_P(pgsql_link);
 	}
 
-	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
+	if (zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (argc == 0) { /* explicit resource number */
-		zend_list_close(link);
-	}
-
-	if (argc || (pgsql_link && Z_RES_P(pgsql_link) == PGG(default_link))) {
-		zend_list_close(link);
+	if (link == PGG(default_link)) {
 		PGG(default_link) = NULL;
 	}
+	zend_list_close(link);
 
 	RETURN_TRUE;
 }
