@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75287 (Builtin webserver crash after chdir in a shutdown
     function). (Laruence)
 
+- DBA:
+  . Fixed bug #75264 (compiler warnings emitted). (petk)
+
 - Enchant:
   . Fixed bug #53070 (enchant_broker_get_path crashes if no path is set). (jelle
     van der Waa, cmb)
