@@ -2928,14 +2928,10 @@ function toolset_setup_project_tools()
 		var intmin =  (nm[1]-0)*10000 + (nm[2]-0)*100 + (nm[3]-0);
 
 		if (intvers < intmin) {
-			STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
-			STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
-			DEFINE('RE2C', '');
-		} else {
-			DEFINE('RE2C_FLAGS', '');
+			ERROR('The minimum RE2C version requirement is ' + MINRE2C);
 		}
 	} else {
-		STDOUT.WriteLine('Parsers will not be regenerated');
+		ERROR('re2c is required')
 	}
 	PATH_PROG('zip');
 	PATH_PROG('lemon');
