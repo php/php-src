@@ -24,7 +24,7 @@ var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
 $db->setAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT, 0);
-$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "%b %e %Y %I:%M:%S:FIXME%p");
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "%b %e %Y %I:%M:%S:%z%p");
 var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
@@ -42,8 +42,8 @@ array(1) {
   ["d"]=>
   string(26) "Oct 17 2017 10:22:44:123AM"
 }
-string(25) "%b %e %Y %I:%M:%S:FIXME%p"
+string(22) "%b %e %Y %I:%M:%S:%z%p"
 array(1) {
   ["d"]=>
-  string(28) "Oct 17 2017 10:22:44:FIXMEAM"
+  string(26) "Oct 17 2017 10:22:44:123AM"
 }

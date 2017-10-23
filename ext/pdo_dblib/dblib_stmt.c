@@ -262,7 +262,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 static int pdo_dblib_strftime(zval *output, zend_string *format, DBDATEREC *dr)
 {
-	/* copied from php_date.c */
+	/* mashup of php_date.c php_strftime & FreeTDS convert.c tds_strftime */
 	struct tm            ta;
 	int                  max_reallocs = 5;
 	size_t               buf_len = 256, real_len;
@@ -304,13 +304,31 @@ static int pdo_dblib_strftime(zval *output, zend_string *format, DBDATEREC *dr)
 	ta.tm_zone = "GMT";
 #endif
 
-	/* FIXME: replace %z in format with millisecond */
+	/* replace %z in format with millisecond: see FreeTDS tds_strftime:
+
+	   Look for "%z" in the format string.  If found, replace it with dr->milliseconds.
+	   For example, if milliseconds is 124, the format string
+	   "%b %d %Y %H:%M:%S.%z" would become
+	   "%b %d %Y %H:%M:%S.124". */
+	char *our_format;
+	char *pz = NULL;
+	our_format = emalloc(strlen(ok_format) + 1);
+	strcpy(our_format, ok_format);
+	pz = our_format;
+	while((pz = strstr(pz, "%z")) != NULL) {
+		if (pz == our_format || *(pz - 1) != '%') {
+			memcpy(pz, millisecond, 3);
+			strcpy(pz + 3, ok_format + (pz - our_format) + 2);
+			break;
+		}
+		pz++;
+	}
 
 	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
 	   initial buffer is too small. See
 	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
 	buf = zend_string_alloc(buf_len, 0);
-	while ((real_len = strftime(ZSTR_VAL(buf), buf_len, ok_format, &ta)) == buf_len || real_len == 0) {
+	while ((real_len = strftime(ZSTR_VAL(buf), buf_len, our_format, &ta)) == buf_len || real_len == 0) {
 		buf_len *= 2;
 		buf = zend_string_extend(buf, buf_len, 0);
 		if (!--max_reallocs) {
@@ -324,6 +342,8 @@ static int pdo_dblib_strftime(zval *output, zend_string *format, DBDATEREC *dr)
 		real_len = strlen(buf->val);
 	}
 #endif
+
+	efree(our_format);
 
 	if (real_len && real_len != buf_len) {
 		buf = zend_string_truncate(buf, real_len, 0);
