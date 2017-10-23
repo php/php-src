@@ -25,6 +25,9 @@ PHP                                                                        NEWS
     (majkl578, Rican7)
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
+- DBA:
+  . Fixed bug #75264 (compiler warnings emitted). (petk)
+
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)
