@@ -25,6 +25,9 @@ PHP                                                                        NEWS
 - Fileinfo:
   . Upgrade bundled libmagic to 5.31. (Anatol)
 
+- GD:
+  . Fixed bug #65148 (imagerotate may alter image dimensions). (cmb)
+
 - Intl:
   . Fixed bug #75378 ([REGRESSION] IntlDateFormatter::parse() does not change
     $position argument). (Laruence)
