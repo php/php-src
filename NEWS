@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75287 (Builtin webserver crash after chdir in a shutdown
     function). (Laruence)
 
+- Date:
+  . Fixed bug #75055 (Out-Of-Bounds Read in timelib_meridian()). (Derick)
+
 - Enchant:
   . Fixed bug #53070 (enchant_broker_get_path crashes if no path is set). (jelle
     van der Waa, cmb)
@@ -44,6 +47,9 @@ PHP                                                                        NEWS
 
 - Openssl:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
+
+- PCRE:
+  . Fixed bug #75207 (applied upstream patch for CVE-2016-1283). (Anatol)
 
 - PGSQL:
   . Fixed bug #75419 (Default link incorrectly cleared/linked by pg_close()). (Sara)
