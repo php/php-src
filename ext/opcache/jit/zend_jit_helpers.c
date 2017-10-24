@@ -1969,12 +1969,35 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result)
 {
 	if (zobj->properties) {
-		zval *retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
+		zval *retval;
+
+		if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
+			intptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
+
+			if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+				Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
+
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+			        (EXPECTED(p->key == Z_STR_P(offset)) ||
+			         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
+			          EXPECTED(p->key != NULL) &&
+			          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
+			          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+					ZVAL_COPY_UNREF(result, &p->val);
+					return;
+				}
+			}
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+		}
+
+		retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 
 		if (EXPECTED(retval)) {
+			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 			ZVAL_COPY_UNREF(result, retval);
 			return;
 		}
@@ -1999,12 +2022,35 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *of
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result)
 {
 	if (zobj->properties) {
-		zval *retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
+		zval *retval;
+
+		if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(prop_offset)) {
+			intptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(prop_offset);
+
+			if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+				Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
+
+				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
+			        (EXPECTED(p->key == Z_STR_P(offset)) ||
+			         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
+			          EXPECTED(p->key != NULL) &&
+			          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
+			          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+					ZVAL_COPY_UNREF(result, &p->val);
+					return;
+				}
+			}
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+		}
+
+		retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 
 		if (EXPECTED(retval)) {
+			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 			ZVAL_COPY(result, retval);
 			return;
 		}

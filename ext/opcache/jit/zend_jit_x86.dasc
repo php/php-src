@@ -9303,7 +9303,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (may_be_dynamic) {
-			|	test eax, eax
+			|	test r0, r0
 			|	jl >8 // dynamic property
 		}
 		|	mov edx, dword [FCARG1a + r0 + 8]
@@ -9396,11 +9396,13 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 
 	if (offset == ZEND_WRONG_PROPERTY_OFFSET && may_be_dynamic) {
 		|8:
-		|	LOAD_ADDR FCARG2a, member
+		|	mov FCARG2a, r0
 		|.if X64
-			|	LOAD_ZVAL_ADDR CARG3, res_addr
+			|	LOAD_ADDR CARG3, member
+			|	LOAD_ZVAL_ADDR CARG4, res_addr
 		|.else
 			|	PUSH_ZVAL_ADDR res_addr, r0
+			|	PUSH_ADDR member, r0
 		|.endif
 		|	SAVE_VALID_OPLINE opline
 		if (opline->opcode == ZEND_FETCH_OBJ_R) {
