@@ -89,7 +89,7 @@ static php_stream_filter_status_t php_mcrypt_filter(
 			php_stream_bucket_delref(bucket);
 		} else {
 			/* Stream cipher */
-			php_stream_bucket_make_writeable(bucket);
+			bucket = php_stream_bucket_make_writeable(bucket);
 			if (data->encrypt) {
 				mcrypt_generic(data->module, bucket->buf, (int)bucket->buflen);
 			} else {
