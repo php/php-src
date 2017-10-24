@@ -110,4 +110,7 @@ PHP                                                                        NEWS
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
 
+- Zlib:
+  . Added zlib/level context option for compress.zlib wrapper. (Sara)
+
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
