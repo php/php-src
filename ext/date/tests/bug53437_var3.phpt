@@ -40,7 +40,7 @@ object(DateInterval)#%d (16) {
   ["special_amount"]=>
   int(-1)
   ["have_weekday_relative"]=>
-  int(9)
+  int(0)
   ["have_special_relative"]=>
   int(0)
   ["f"]=>
