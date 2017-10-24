@@ -3136,10 +3136,11 @@ MBSTRING_API HashTable *php_mb_convert_encoding_recursive(HashTable *input, cons
 				break;
 			case IS_ARRAY:
 				chash = php_mb_convert_encoding_recursive(HASH_OF(entry), _to_encoding, _from_encodings);
-				if (!chash) {
-					chash = zend_new_array(0);
+				if (chash) {
+					ZVAL_ARR(&entry_tmp, chash);
+				} else {
+					ZVAL_EMPTY_ARRAY(&entry_tmp);
 				}
-				ZVAL_ARR(&entry_tmp, chash);
 				break;
 			case IS_OBJECT:
 			default:

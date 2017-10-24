@@ -844,11 +844,14 @@ use_double:
 		return 0;
 	}
 
-	array_init_size(rval, elements);
 	if (elements) {
+		array_init_size(rval, elements);
 		/* we can't convert from packed to hash during unserialization, because
 		   reference to some zvals might be keept in var_hash (to support references) */
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
+	} else {
+		ZVAL_EMPTY_ARRAY(rval);
+		return finish_nested_data(UNSERIALIZE_PASSTHRU);
 	}
 
 	/* The array may contain references to itself, in which case we'll be modifying an

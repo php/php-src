@@ -184,8 +184,8 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval)
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	array_init(retval);
 	if (mysql) {
+		array_init(retval);
 #if defined(MYSQLI_USE_MYSQLND)
 		if (mysql->mysql->data->error_info->error_list) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
@@ -212,6 +212,8 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval)
 			add_next_index_zval(retval, &single_error);
 		}
 #endif
+	} else {
+		ZVAL_EMPTY_ARRAY(retval);
 	}
 
 	return retval;
@@ -374,8 +376,8 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 
  	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	array_init(retval);
 	if (stmt && stmt->stmt) {
+		array_init(retval);
 #if defined(MYSQLI_USE_MYSQLND)
 		if (stmt->stmt->data && stmt->stmt->data->error_info->error_list) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
@@ -402,6 +404,8 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
 			add_next_index_zval(retval, &single_error);
 		}
 #endif
+	} else {
+		ZVAL_EMPTY_ARRAY(retval);
 	}
 	return retval;
 }

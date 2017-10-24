@@ -157,6 +157,20 @@ static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
+ZEND_API const HashTable zend_empty_array = {
+	.gc.refcount = 2,
+	.gc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
+	.u.flags = HASH_FLAG_STATIC_KEYS,
+	.nTableMask = HT_MIN_MASK,
+	.arData = (Bucket*)&uninitialized_bucket[2],
+	.nNumUsed = 0,
+	.nNumOfElements = 0,
+	.nTableSize = HT_MIN_SIZE,
+	.nInternalPointer = HT_INVALID_IDX,
+	.nNextFreeElement = 0,
+	.pDestructor = ZVAL_PTR_DTOR
+};
+
 static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 	GC_REFCOUNT(ht) = 1;

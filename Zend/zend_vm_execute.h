@@ -1501,7 +1501,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_VARIADIC_SPEC_HANDLER(ZEN
 			}
 		} ZEND_HASH_FILL_END();
 	} else {
-		array_init(params);
+		ZVAL_EMPTY_ARRAY(params);
 	}
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -1967,11 +1967,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 
 	SAVE_OPLINE();
 
-	args = zend_new_array(num_args);
 	if (num_args) {
 		zval *p = ZEND_CALL_ARG(execute_data, 1);
 		zval *end = p + num_args;
 
+		args = zend_new_array(num_args);
 		zend_hash_real_init(args, 1);
 		ZEND_HASH_FILL_PACKED(args) {
 			do {
@@ -1990,7 +1990,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	ZEND_CALL_NUM_ARGS(call) = 2;
 
 	ZVAL_STR(ZEND_CALL_ARG(call, 1), fbc->common.function_name);
-	ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
+	if (num_args) {
+		ZVAL_ARR(ZEND_CALL_ARG(call, 2), args);
+	} else {
+		ZVAL_EMPTY_ARRAY(ZEND_CALL_ARG(call, 2));
+	}
 	zend_free_trampoline(fbc);
 	fbc = call->func;
 
@@ -3395,14 +3399,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CONST_HANDLER(ZEND_O
 
 			if (opline->extended_value == IS_ARRAY) {
 				if (Z_TYPE_P(expr) != IS_OBJECT) {
-					ZVAL_ARR(result, zend_new_array(8));
 					if (Z_TYPE_P(expr) != IS_NULL) {
+						ZVAL_ARR(result, zend_new_array(8));
 						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 						if (IS_CONST == IS_CONST) {
 							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
 						} else {
 							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(result);
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
@@ -5934,19 +5940,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_CONST_HA
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CONST != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -7717,19 +7720,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_UNUSED_H
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CONST != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -8221,11 +8221,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 		result_size = arg_count;
 	}
 
-	ht = zend_new_array(result_size);
-	ZVAL_ARR(EX_VAR(opline->result.var), ht);
-
 	if (result_size) {
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
+
+		ht = zend_new_array(result_size);
+		ZVAL_ARR(EX_VAR(opline->result.var), ht);
 		zend_hash_real_init(ht, 1);
 		ZEND_HASH_FILL_PACKED(ht) {
 			zval *p, *q;
@@ -8269,6 +8269,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_CONST_UNUSE
 			}
 		} ZEND_HASH_FILL_END();
 		ht->nNumOfElements = result_size;
+	} else {
+		ZVAL_EMPTY_ARRAY(EX_VAR(opline->result.var));
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -9998,19 +10000,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_CV_HANDL
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CONST != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -12013,19 +12012,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CONST_TMPVAR_H
 	array = EX_VAR(opline->result.var);
 	if (IS_CONST != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CONST != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_DIM_OBJ_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -13038,14 +13034,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_TMP_HANDLER(ZEND_OPC
 
 			if (opline->extended_value == IS_ARRAY) {
 				if (Z_TYPE_P(expr) != IS_OBJECT) {
-					ZVAL_ARR(result, zend_new_array(8));
 					if (Z_TYPE_P(expr) != IS_NULL) {
+						ZVAL_ARR(result, zend_new_array(8));
 						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 						if (IS_TMP_VAR == IS_CONST) {
 							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
 						} else {
 							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(result);
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
@@ -13982,19 +13980,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_CONST_HAND
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_TMP_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -14710,19 +14705,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_UNUSED_HAN
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_TMP_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -15356,19 +15348,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_CV_HANDLER
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_TMP_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -15902,19 +15891,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_TMP_TMPVAR_HAN
 	array = EX_VAR(opline->result.var);
 	if (IS_TMP_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_TMP_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -16757,14 +16743,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_VAR_HANDLER(ZEND_OPC
 
 			if (opline->extended_value == IS_ARRAY) {
 				if (Z_TYPE_P(expr) != IS_OBJECT) {
-					ZVAL_ARR(result, zend_new_array(8));
 					if (Z_TYPE_P(expr) != IS_NULL) {
+						ZVAL_ARR(result, zend_new_array(8));
 						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 						if (IS_VAR == IS_CONST) {
 							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
 						} else {
 							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(result);
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
@@ -20009,19 +19997,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_CONST_HAND
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -21765,19 +21750,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_UNUSED_HAN
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEPARATE_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -24331,19 +24313,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_CV_HANDLER
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -26847,19 +26826,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_VAR_TMPVAR_HAN
 	array = EX_VAR(opline->result.var);
 	if (IS_VAR != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_VAR != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -29775,11 +29751,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 		result_size = arg_count;
 	}
 
-	ht = zend_new_array(result_size);
-	ZVAL_ARR(EX_VAR(opline->result.var), ht);
-
 	if (result_size) {
 		uint32_t first_extra_arg = EX(func)->op_array.num_args;
+
+		ht = zend_new_array(result_size);
+		ZVAL_ARR(EX_VAR(opline->result.var), ht);
 		zend_hash_real_init(ht, 1);
 		ZEND_HASH_FILL_PACKED(ht) {
 			zval *p, *q;
@@ -29823,6 +29799,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FUNC_GET_ARGS_SPEC_UNUSED_UNUS
 			}
 		} ZEND_HASH_FILL_END();
 		ht->nNumOfElements = result_size;
+	} else {
+		ZVAL_EMPTY_ARRAY(EX_VAR(opline->result.var));
 	}
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -34217,14 +34195,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CAST_SPEC_CV_HANDLER(ZEND_OPCO
 
 			if (opline->extended_value == IS_ARRAY) {
 				if (Z_TYPE_P(expr) != IS_OBJECT) {
-					ZVAL_ARR(result, zend_new_array(8));
 					if (Z_TYPE_P(expr) != IS_NULL) {
+						ZVAL_ARR(result, zend_new_array(8));
 						expr = zend_hash_index_add_new(Z_ARRVAL_P(result), 0, expr);
 						if (IS_CV == IS_CONST) {
 							if (UNEXPECTED(Z_OPT_REFCOUNTED_P(expr))) Z_ADDREF_P(expr);
 						} else {
 							if (Z_OPT_REFCOUNTED_P(expr)) Z_ADDREF_P(expr);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(result);
 					}
 				} else {
 					ZVAL_COPY_VALUE(result, expr);
@@ -38224,19 +38204,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_CONST_HANDL
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CV != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_STATIC_PROP_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -40926,19 +40903,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_UNUSED_HAND
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CV != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_CV_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -44766,19 +44740,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_CV_HANDLER(
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CV != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -48377,19 +48348,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_ARRAY_SPEC_CV_TMPVAR_HAND
 	array = EX_VAR(opline->result.var);
 	if (IS_CV != IS_UNUSED) {
 		size = opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT;
-	} else {
-		size = 0;
-	}
-	ZVAL_ARR(array, zend_new_array(size));
-
-	if (IS_CV != IS_UNUSED) {
+		ZVAL_ARR(array, zend_new_array(size));
 		/* Explicitly initialize array as not-packed if flag is set */
 		if (opline->extended_value & ZEND_ARRAY_NOT_PACKED) {
 			zend_hash_real_init(Z_ARRVAL_P(array), 0);
 		}
+		ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	} else {
+		ZVAL_EMPTY_ARRAY(array);
+		ZEND_VM_NEXT_OPCODE();
 	}
-
-	ZEND_VM_TAIL_CALL(ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_DIM_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
