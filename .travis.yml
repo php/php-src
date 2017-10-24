@@ -1,4 +1,4 @@
-dist: trusty
+dist: precise
 language: c
 sudo: false
 addons:
