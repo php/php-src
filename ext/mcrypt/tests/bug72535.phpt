@@ -19,5 +19,6 @@ stream_filter_append($fp, 'mcrypt.arcfour', STREAM_FILTER_WRITE, $opts);
 fwrite($fp, $plaintext);
 ?>
 ==NOCRASH==
---EXPECT--
+--EXPECTF--
+Deprecated: stream_filter_append(): mcrypt and mdecrypt stream filters have been deprecated in %s on line %d
 ==NOCRASH==
