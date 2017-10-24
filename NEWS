@@ -2,6 +2,15 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ?? 2017, PHP 5.6.32
 
+- Date:
+  . Fixed bug #75055 (Out-Of-Bounds Read in timelib_meridian()). (Derick)
+
+- mcrypt:
+  . Fixed bug #72535 (arcfour encryption stream filter crashes php). (Leigh)
+
+- PCRE:
+  . Fixed bug #75207 (applied upstream patch for CVE-2016-1283). (Anatol)
+
 06 Jul 2017, PHP 5.6.31
 
 - Core:
