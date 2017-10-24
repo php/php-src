@@ -56,6 +56,9 @@ PHP                                                                        NEWS
   . Fixed bug #75311 (error: 'zend_hash_key' has no member named 'arKey' in
     apache2handler). (mcarbonneaux)
 
+- Date:
+  . Fixed bug #75055 (Out-Of-Bounds Read in timelib_meridian()). (Derick)
+
 - Hash:
   . Fixed bug #75303 (sha3 hangs on bigendian). (Remi)
 
@@ -68,6 +71,9 @@ PHP                                                                        NEWS
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
+- mcrypt:
+  . Fixed bug #72535 (arcfour encryption stream filter crashes php). (Leigh)
+
 - MySQLi:
   . Fixed bug #75018 (Data corruption when reading fields of bit type). (Anatol)
 
@@ -76,6 +82,9 @@ PHP                                                                        NEWS
 
 - Opcache
   . Fixed bug #75255 (Request hangs and not finish). (Dmitry)
+
+- PCRE:
+  . Fixed bug #75207 (applied upstream patch for CVE-2016-1283). (Anatol)
 
 - PDO_mysql:
   . Fixed bug #75177 (Type 'bit' is fetched as unexpected string). (Anatol)
