@@ -25,17 +25,17 @@
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
-	((struct _zend_property_info*)((zend_intptr_t)-1))
+	((struct _zend_property_info*)((intptr_t)-1))
 
-#define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uint32_t)(-1))
+#define ZEND_DYNAMIC_PROPERTY_OFFSET               ((intptr_t)(-1))
 
-#define IS_VALID_PROPERTY_OFFSET(offset)           ((int32_t)(offset) > 0)
-#define IS_WRONG_PROPERTY_OFFSET(offset)           ((int32_t)(offset) == 0)
-#define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((int32_t)(offset) < 0)
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) > 0)
+#define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
+#define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
 
 #define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
-#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uint32_t)(-(int32_t)(offset) - 2))
-#define ZEND_ENCODE_DYN_PROP_OFFSET(idx)           ((uint32_t)(-(idx + 2)))
+#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        (-(intptr_t)(offset) - 2)
+#define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        (-((intptr_t)(offset) + 2))
 
 
 /* The following rule applies to read_property() and read_dimension() implementations:

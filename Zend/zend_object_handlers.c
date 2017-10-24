@@ -286,7 +286,7 @@ static zend_always_inline zend_bool is_derived_class(zend_class_entry *child_cla
 }
 /* }}} */
 
-static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot) /* {{{ */
+static zend_always_inline intptr_t zend_get_property_offset(zend_class_entry *ce, zend_string *member, int silent, void **cache_slot) /* {{{ */
 {
 	zval *zv;
 	zend_property_info *property_info = NULL;
@@ -294,7 +294,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 	zend_class_entry *scope;
 
 	if (cache_slot && EXPECTED(ce == CACHED_PTR_EX(cache_slot))) {
-		return (uint32_t)(intptr_t)CACHED_PTR_EX(cache_slot + 1);
+		return (intptr_t)CACHED_PTR_EX(cache_slot + 1);
 	}
 
 	if (UNEXPECTED(ZSTR_VAL(member)[0] == '\0' && ZSTR_LEN(member) != 0)) {
@@ -352,7 +352,7 @@ static zend_always_inline uint32_t zend_get_property_offset(zend_class_entry *ce
 	} else if (UNEXPECTED(property_info == NULL)) {
 exit_dynamic:
 		if (cache_slot) {
-			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)(intptr_t)ZEND_DYNAMIC_PROPERTY_OFFSET);
+			CACHE_POLYMORPHIC_PTR_EX(cache_slot, ce, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
 		return ZEND_DYNAMIC_PROPERTY_OFFSET;
 	} else if (UNEXPECTED(property_info == ZEND_WRONG_PROPERTY_INFO)) {
@@ -544,7 +544,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zend_object *zobj;
 	zval tmp_member;
 	zval *retval;
-	uint32_t property_offset;
+	intptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
 
@@ -570,10 +570,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
-				uint32_t idx =  ZEND_DECODE_DYN_PROP_OFFSET(property_offset);
+				intptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(property_offset);
 
-				if (EXPECTED(idx < zobj->properties->nNumUsed)) {
-					Bucket *p = zobj->properties->arData + idx;
+				if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+					Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				        (EXPECTED(p->key == Z_STR_P(member)) ||
@@ -585,14 +585,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 						goto exit;
 					}
 				}
-				CACHE_PTR_EX(cache_slot + 1, (void*)(uintptr_t)ZEND_DYNAMIC_PROPERTY_OFFSET);
+				CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 			}
 			retval = zend_hash_find(zobj->properties, Z_STR_P(member));
 			if (EXPECTED(retval)) {
 				if (cache_slot) {
-					uint32_t idx = ((char*)retval - (char*)zobj->properties->arData) / sizeof(Bucket);
-					/* Store "hash slot index" + 2 (NULL is a mark of uninitialized cache slot) */
-					CACHE_PTR_EX(cache_slot + 1, (void*)(uintptr_t)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
+					intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
+					CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 				}
 				goto exit;
 			}
@@ -673,7 +672,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 	zend_object *zobj;
 	zval tmp_member;
 	zval *variable_ptr;
-	uint32_t property_offset;
+	intptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
 
@@ -851,7 +850,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 	zend_object *zobj;
 	zend_string *name;
 	zval *retval = NULL;
-	uint32_t property_offset;
+	intptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
 	if (EXPECTED(Z_TYPE_P(member) == IS_STRING)) {
@@ -922,7 +921,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 {
 	zend_object *zobj;
 	zval tmp_member;
-	uint32_t property_offset;
+	intptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
 
@@ -1497,7 +1496,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 	int result;
 	zval *value = NULL;
 	zval tmp_member;
-	uint32_t property_offset;
+	intptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
 
@@ -1518,10 +1517,10 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 	} else if (EXPECTED(IS_DYNAMIC_PROPERTY_OFFSET(property_offset))) {
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(property_offset)) {
-				uint32_t idx =  ZEND_DECODE_DYN_PROP_OFFSET(property_offset);
+				intptr_t idx = ZEND_DECODE_DYN_PROP_OFFSET(property_offset);
 
-				if (EXPECTED(idx < zobj->properties->nNumUsed)) {
-					Bucket *p = zobj->properties->arData + idx;
+				if (EXPECTED(idx < zobj->properties->nNumUsed * sizeof(Bucket))) {
+					Bucket *p = (Bucket*)((char*)zobj->properties->arData + idx);
 
 					if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF) &&
 				        (EXPECTED(p->key == Z_STR_P(member)) ||
@@ -1533,14 +1532,13 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 						goto found;
 					}
 				}
-				CACHE_PTR_EX(cache_slot + 1, (void*)(uintptr_t)ZEND_DYNAMIC_PROPERTY_OFFSET);
+				CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 			}
 			value = zend_hash_find(zobj->properties, Z_STR_P(member));
 			if (value) {
 				if (cache_slot) {
-					uint32_t idx = ((char*)value - (char*)zobj->properties->arData) / sizeof(Bucket);
-					/* Store "hash slot index" + 2 (NULL is a mark of uninitialized cache slot) */
-					CACHE_PTR_EX(cache_slot + 1, (void*)(uintptr_t)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
+					intptr_t idx = (char*)value - (char*)zobj->properties->arData;
+					CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 				}
 found:
 				switch (has_set_exists) {
