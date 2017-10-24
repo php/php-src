@@ -394,7 +394,7 @@ static void zend_accel_persist_class_table_calc(HashTable *class_table)
 	zend_hash_persist_calc(class_table, zend_persist_class_entry_calc);
 }
 
-uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, char *key, unsigned int key_length, int for_shm)
+uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_script, const char *key, unsigned int key_length, int for_shm)
 {
 	new_persistent_script->mem = NULL;
 	new_persistent_script->size = 0;

@@ -568,6 +568,9 @@ static void php_soap_prepare_globals()
 
 static void php_soap_init_globals(zend_soap_globals *soap_globals)
 {
+#if defined(COMPILE_DL_SOAP) && defined(ZTS)
+	ZEND_TSRMLS_CACHE_UPDATE();
+#endif
 	soap_globals->defEnc = defEnc;
 	soap_globals->defEncIndex = defEncIndex;
 	soap_globals->defEncNs = defEncNs;
@@ -597,9 +600,6 @@ PHP_MSHUTDOWN_FUNCTION(soap)
 
 PHP_RINIT_FUNCTION(soap)
 {
-#if defined(COMPILE_DL_SOAP) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	SOAP_GLOBAL(typemap) = NULL;
 	SOAP_GLOBAL(use_soap_error_handler) = 0;
 	SOAP_GLOBAL(error_code) = NULL;
@@ -637,9 +637,6 @@ PHP_MINIT_FUNCTION(soap)
 {
 	zend_class_entry ce;
 
-#if defined(COMPILE_DL_SOAP) && defined(ZTS)
-	ZEND_TSRMLS_CACHE_UPDATE();
-#endif
 	/* TODO: add ini entry for always use soap errors */
 	php_soap_prepare_globals();
 	ZEND_INIT_MODULE_GLOBALS(soap, php_soap_init_globals, NULL);

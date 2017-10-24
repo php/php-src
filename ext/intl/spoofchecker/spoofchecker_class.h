@@ -78,4 +78,6 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
         RETURN_FALSE;                                                           \
     }                                                                           \
 
+#define SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL USPOOF_HIGHLY_RESTRICTIVE
+
 #endif // #ifndef SPOOFCHECKER_CLASS_H

@@ -12,6 +12,8 @@ PHP                                                                        NEWS
     error_log set to "syslog"). (Philip Prindeville)
   . Fixed bug #75220 (Segfault when calling is_callable on parent). 
     (andrewnester)
+  . Fixed bug #69954 (broken links and unused config items in distributed ini
+    files). (petk)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -25,6 +27,9 @@ PHP                                                                        NEWS
     (majkl578, Rican7)
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
 
+- DBA:
+  . Fixed bug #75264 (compiler warnings emitted). (petk)
+
 - cURL:
   . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
     (cebe)
@@ -34,6 +39,13 @@ PHP                                                                        NEWS
 
 - GMP:
   . Export internal structures and accessor helpers for GMP object. (Sara)
+
+- intl:
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+    of destination). (andrewnester)
+
+- JSON:
+  . Added JSON_THROW_ON_ERROR flag. (Andrea)
 
 - LDAP:
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
@@ -97,5 +109,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
+
+- Zlib:
+  . Added zlib/level context option for compress.zlib wrapper. (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>
