@@ -1589,6 +1589,7 @@ PHP_FUNCTION(pg_close)
 	}
 
 	if (link == PGG(default_link)) {
+		zend_list_delete(link);
 		PGG(default_link) = NULL;
 	}
 	zend_list_close(link);
