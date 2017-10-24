@@ -56,12 +56,21 @@ PHP                                                                        NEWS
   . Fixed bug #75311 (error: 'zend_hash_key' has no member named 'arKey' in
     apache2handler). (mcarbonneaux)
 
+- Date:
+  . Fixed bug #75055 (Out-Of-Bounds Read in timelib_meridian()). (Derick)
+
 - Intl:
   . Fixed bug #75318 (The parameter of UConverter::getAliases() is not
     optional). (cmb)
 
+- mcrypt:
+  . Fixed bug #72535 (arcfour encryption stream filter crashes php). (Leigh)
+
 - OCI8:
   . Fixed incorrect reference counting. (Dmitry, Tianfang Yang)
+
+- PCRE:
+  . Fixed bug #75207 (applied upstream patch for CVE-2016-1283). (Anatol)
 
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
