@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 
 - GD:
   . Fixed bug #65148 (imagerotate may alter image dimensions). (cmb)
+  . Fixed bug #75437 (Wrong reflection on imagewebp). (Fabien Villepinte)
 
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
