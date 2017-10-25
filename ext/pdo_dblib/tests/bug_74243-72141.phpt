@@ -29,10 +29,17 @@ var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
+
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "");
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "test");
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, null);
+var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
 ?>
 --EXPECT--
 bool(false)
-string(0) ""
+NULL
 array(1) {
   ["d"]=>
   string(19) "2017-10-17 10:22:44"
@@ -47,3 +54,6 @@ array(1) {
   ["d"]=>
   string(26) "Oct 17 2017 10:22:44:123AM"
 }
+NULL
+string(4) "test"
+NULL
