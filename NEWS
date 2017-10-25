@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ?? 2017, PHP 5.6.32
+?? ?? 2017, PHP 5.6.33
+
+26 Sep 2017, PHP 5.6.32
 
 - Date:
   . Fixed bug #75055 (Out-Of-Bounds Read in timelib_meridian()). (Derick)
