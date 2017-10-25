@@ -27,6 +27,7 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
+#include "ext/date/php_date.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
@@ -260,99 +261,70 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pdo_dblib_strftime(zval *output, zend_string *format, DBDATEREC *dr)
+static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBBIGINT bigdatetime)
 {
-	/* mashup of php_date.c php_strftime & FreeTDS convert.c tds_strftime */
-	struct tm            ta;
-	int                  max_reallocs = 5;
-	size_t               buf_len = 256, real_len;
+	DBBIGINT             temp_ts;
+	time_t               ts;
 	zend_string         *buf;
-	char                 millisecond[3];
-	static const char   *default_format = "%Y-%m-%d %H:%M:%S";
+	static const char   *default_format = "Y-m-d H:i:s";
 	char                *ok_format = (char *)default_format;
 
 	if (format && ZSTR_LEN(format) > 0) {
 		ok_format = ZSTR_VAL(format);
 	}
 
-#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
-	sprintf(millisecond, "%03d", dr->millisecond);
-	ta.tm_sec   = dr->second;
-	ta.tm_min   = dr->minute;
-	ta.tm_hour  = dr->hour;
-	ta.tm_mday  = dr->day;
-	ta.tm_mon   = dr->month - 1;
-	ta.tm_year  = dr->year - 1900;
-	ta.tm_wday  = dr->weekday;
-	ta.tm_yday  = dr->dayofyear;
-#else
-	sprintf(millisecond, "%03d", dr->datemsecond);
-	ta.tm_sec   = dr->datesecond;
-	ta.tm_min   = dr->dateminute;
-	ta.tm_hour  = dr->datehour;
-	ta.tm_mday  = dr->datedmonth;
-	ta.tm_mon   = dr->datemonth;
-	ta.tm_year  = dr->dateyear - 1900;
-	ta.tm_wday  = dr->datedweek + 1;
-	ta.tm_yday  = dr->datedyear;
-#endif
-	ta.tm_isdst = 0;
-#if HAVE_TM_GMTOFF
-	ta.tm_gmtoff = 0;
-#endif
-#if HAVE_TM_ZONE
-	ta.tm_zone = "GMT";
-#endif
+	/* convert bigdatetime to unix timestamp
+	 *
+	 * "bigdatetime is a 64 bit integer containing the number of microseconds since 01/01/0000"
+	 *
+	 * - substract 719528 (number of days from here to unix epoch) * 86400 * 1000000
+	 * - integer division to seconds (via floor to support negative values)
+	 */
+	temp_ts = bigdatetime - 62167219200000000u;
+	ts = floor(temp_ts / (double)1000000);
 
-	/* replace %z in format with millisecond: see FreeTDS tds_strftime:
-
-	   Look for "%z" in the format string.  If found, replace it with dr->milliseconds.
-	   For example, if milliseconds is 124, the format string
-	   "%b %d %Y %H:%M:%S.%z" would become
-	   "%b %d %Y %H:%M:%S.124". */
+	/* replace u/f in format with micro/milli seconds
+	 *
+	 * Look for the first "u" and "f" in the format string.
+	 * If found, replace it with micro and milli seconds.
+	 * For example, if milliseconds is 124, the format string
+	 * "Y-m-d H:i:s.f" would become
+	 * "Y-m-d H:i:s.124".
+	 *
+	 * temp buffers are larger to accomodate for the added data: f => +2, u => +5
+	 * microseconds = remainder of the integer division
+	 * milliseconds = round(remainder / 1000)
+	 *
+	 * credits to FreeTDS's tds_strftime
+	 */
 	char *our_format;
+	char *base_format;
 	char *pz = NULL;
-	our_format = emalloc(strlen(ok_format) + 1);
+	our_format = emalloc(strlen(ok_format) + 2 + 5);
+	base_format = emalloc(strlen(ok_format) + 2 + 5);
 	strcpy(our_format, ok_format);
-	pz = our_format;
-	while((pz = strstr(pz, "%z")) != NULL) {
-		if (pz == our_format || *(pz - 1) != '%') {
-			memcpy(pz, millisecond, 3);
-			strcpy(pz + 3, ok_format + (pz - our_format) + 2);
-			break;
-		}
-		pz++;
+	strcpy(base_format, our_format);
+	if ((pz = strstr(our_format, "u")) != NULL) {
+		char micro[6];
+		sprintf(micro, "%06d", temp_ts - ts * 1000000);
+		memcpy(pz, micro, 6);
+		strcpy(pz + 6, base_format + (pz - our_format) + 1);
+		strcpy(base_format, our_format);
+	}
+	if ((pz = strstr(our_format, "f")) != NULL) {
+		char milli[3];
+		sprintf(milli, "%03.0f", (double)(temp_ts - ts * 1000000) / 1000);
+		memcpy(pz, milli, 3);
+		strcpy(pz + 3, base_format + (pz - our_format) + 1);
 	}
 
-	/* VS2012 crt has a bug where strftime crash with %z and %Z format when the
-	   initial buffer is too small. See
-	   http://connect.microsoft.com/VisualStudio/feedback/details/759720/vs2012-strftime-crash-with-z-formatting-code */
-	buf = zend_string_alloc(buf_len, 0);
-	while ((real_len = strftime(ZSTR_VAL(buf), buf_len, our_format, &ta)) == buf_len || real_len == 0) {
-		buf_len *= 2;
-		buf = zend_string_extend(buf, buf_len, 0);
-		if (!--max_reallocs) {
-			break;
-		}
-	}
-#ifdef PHP_WIN32
-	/* VS2012 strftime() returns number of characters, not bytes.
-		See VC++11 bug id 766205. */
-	if (real_len > 0) {
-		real_len = strlen(buf->val);
-	}
-#endif
+	buf = php_format_date(our_format, strlen(our_format), ts, 0);
+	ZVAL_STR(output, buf);
 
 	efree(our_format);
+	efree(base_format);
 
-	if (real_len && real_len != buf_len) {
-		buf = zend_string_truncate(buf, real_len, 0);
-		ZVAL_STR(output, buf);
-		return 1;
-	}
-
-	zend_string_free(buf);
-	return 0;
+	return 1;
 }
 
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
@@ -439,14 +411,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
 						efree(tmp_data);
 					} else {
-						DBDATEREC di;
-						DBDATEREC dt;
-
-						dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
-						dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
+						DBBIGINT bigdatetime;
+						dbconvert(H->link, coltype, data, -1, SYBBIGDATETIME, (LPBYTE) &bigdatetime, -1);
 
 						zv = emalloc(sizeof(zval));
-						pdo_dblib_strftime(zv, H->datetime_format, &di);
+						pdo_dblib_datetime_format(zv, H->datetime_format, bigdatetime);
 					}
 					break;
 				}
