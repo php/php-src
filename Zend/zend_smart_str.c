@@ -18,6 +18,7 @@
 
 #include <zend.h>
 #include "zend_smart_str.h"
+#include "zend_smart_string.h"
 
 #define SMART_STR_OVERHEAD (ZEND_MM_OVERHEAD + _ZSTR_HEADER_SIZE)
 
@@ -123,6 +124,46 @@ ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char 
 	va_start(arg, format);
 	zend_printf_to_smart_str(dest, format, arg);
 	va_end(arg);
+}
+
+#define SMART_STRING_START_SIZE 255
+#define SMART_STRING_PREALLOC   128
+#define SMART_STRING_PAGE       4096
+
+ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, size_t len)
+{
+	if (!str->c) {
+		str->len = 0;
+		str->a = len <= SMART_STRING_START_SIZE
+				? SMART_STRING_START_SIZE
+				: (ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_PREALLOC, SMART_STRING_PAGE) - 1);
+		str->c = malloc(str->a + 1);
+	} else {
+		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
+			zend_error(E_ERROR, "String size overflow");
+		}
+		len += str->len;
+		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_PREALLOC, SMART_STRING_PAGE) - 1;
+		str->c = realloc(str->c, str->a + 1);
+	}
+}
+
+ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
+{
+	if (!str->c) {
+		str->len = 0;
+		str->a = len <= SMART_STRING_START_SIZE
+				? SMART_STRING_START_SIZE
+				: (ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_PREALLOC, SMART_STRING_PAGE) - 1);
+		str->c = emalloc(str->a + 1);
+	} else {
+		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
+			zend_error(E_ERROR, "String size overflow");
+		}
+		len += str->len;
+		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_PREALLOC, SMART_STRING_PAGE) - 1;
+		str->c = erealloc(str->c, str->a + 1);
+	}
 }
 
 /*
