@@ -2,6 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0RC6
 
+- GD:
+  . Fixed bug #75437 (Wrong reflection on imagewebp). (Fabien Villepinte)
 
 26 Oct 2017, PHP 7.2.0RC5
 
