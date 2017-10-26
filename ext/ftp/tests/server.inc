@@ -471,11 +471,17 @@ if ($pid) {
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 
-                }elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
-                        $GLOBALS['rest_pos'] = $matches[1];
+        }elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
+			$GLOBALS['rest_pos'] = $matches[1];
 			fputs($s, "350 OK\r\n");
-                }elseif (preg_match('/^SIZE largefile/', $buf)) {
-                        fputs($s, "213 5368709120\r\n");
+        }elseif (preg_match('/^SIZE largefile/', $buf)) {
+            fputs($s, "213 5368709120\r\n");
+		}elseif (preg_match('/^RNFR existing_file/', $buf, $matches)) {
+			fputs($s, "350 File or directory exists, ready for destination name\r\n");
+		}elseif (preg_match('/^RNFR nonexisting_file/', $buf, $matches)) {
+			fputs($s, "550 No such file or directory\r\n");
+		}elseif (preg_match('/^RNTO nonexisting_file/', $buf, $matches)) {
+			fputs($s, "250 Rename successful\r\n");
 		}elseif (preg_match('/^MLSD no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 		}elseif (preg_match("~^MLSD(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
@@ -518,7 +524,7 @@ if ($pid) {
 
 			fputs($s, "226 Closing data Connection.\r\n");
 			fclose($fs);
-                }else {
+        }else {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}
