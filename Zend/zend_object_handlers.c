@@ -780,30 +780,38 @@ exit:
 zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval tmp;
+	zval tmp_offset, tmp_object;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
 		if (offset == NULL) {
 			/* [] construct */
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
+			ZVAL_NULL(&tmp_offset);
 		} else {
 			ZVAL_DEREF(offset);
+			ZVAL_COPY(&tmp_offset, offset);
 		}
 
+		ZVAL_COPY(&tmp_object, object);
 		if (type == BP_VAR_IS) {
-			zend_call_method_with_1_params(object, ce, NULL, "offsetexists", rv, offset);
+			zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetexists", rv, &tmp_offset);
 			if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
+				zval_ptr_dtor(&tmp_object);
+				zval_ptr_dtor(&tmp_offset);
 				return NULL;
 			}
 			if (!i_zend_is_true(rv)) {
+				zval_ptr_dtor(&tmp_object);
+				zval_ptr_dtor(&tmp_offset);
 				zval_ptr_dtor(rv);
 				return &EG(uninitialized_zval);
 			}
 			zval_ptr_dtor(rv);
 		}
 
-		zend_call_method_with_1_params(object, ce, NULL, "offsetget", rv, offset);
+		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetget", rv, &tmp_offset);
+
+		zval_ptr_dtor(&tmp_object);
+		zval_ptr_dtor(&tmp_offset);
 
 		if (UNEXPECTED(Z_TYPE_P(rv) == IS_UNDEF)) {
 			if (UNEXPECTED(!EG(exception))) {
@@ -822,16 +830,19 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval tmp;
+	zval tmp_offset, tmp_object;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
 		if (!offset) {
-			ZVAL_NULL(&tmp);
-			offset = &tmp;
+			ZVAL_NULL(&tmp_offset);
 		} else {
 			ZVAL_DEREF(offset);
+			ZVAL_COPY(&tmp_offset, offset);
 		}
-		zend_call_method_with_2_params(object, ce, NULL, "offsetset", NULL, offset, value);
+		ZVAL_COPY(&tmp_object, object);
+		zend_call_method_with_2_params(&tmp_object, ce, NULL, "offsetset", NULL, &tmp_offset, value);
+		zval_ptr_dtor(&tmp_object);
+		zval_ptr_dtor(&tmp_offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
@@ -841,17 +852,19 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /*
 static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
-	zval retval;
+	zval retval, tmp_offset, tmp_object;
 	int result;
 
 	if (EXPECTED(instanceof_function_ex(ce, zend_ce_arrayaccess, 1) != 0)) {
 		ZVAL_DEREF(offset);
-		zend_call_method_with_1_params(object, ce, NULL, "offsetexists", &retval, offset);
+		ZVAL_COPY(&tmp_offset, offset);
+		ZVAL_COPY(&tmp_object, object);
+		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetexists", &retval, &tmp_offset);
 		if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
 			result = i_zend_is_true(&retval);
 			zval_ptr_dtor(&retval);
 			if (check_empty && result && EXPECTED(!EG(exception))) {
-				zend_call_method_with_1_params(object, ce, NULL, "offsetget", &retval, offset);
+				zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetget", &retval, &tmp_offset);
 				if (EXPECTED(Z_TYPE(retval) != IS_UNDEF)) {
 					result = i_zend_is_true(&retval);
 					zval_ptr_dtor(&retval);
@@ -860,6 +873,8 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 		} else {
 			result = 0;
 		}
+		zval_ptr_dtor(&tmp_object);
+		zval_ptr_dtor(&tmp_offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 		return 0;
@@ -1013,10 +1028,15 @@ exit:
 static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
+	zval tmp_offset, tmp_object;
 
 	if (instanceof_function_ex(ce, zend_ce_arrayaccess, 1)) {
 		ZVAL_DEREF(offset);
-		zend_call_method_with_1_params(object, ce, NULL, "offsetunset", NULL, offset);
+		ZVAL_COPY(&tmp_offset, offset);
+		ZVAL_COPY(&tmp_object, object);
+		zend_call_method_with_1_params(&tmp_object, ce, NULL, "offsetunset", NULL, &tmp_offset);
+		zval_ptr_dtor(&tmp_object);
+		zval_ptr_dtor(&tmp_offset);
 	} else {
 		zend_throw_error(NULL, "Cannot use object of type %s as array", ZSTR_VAL(ce->name));
 	}
