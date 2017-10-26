@@ -1596,6 +1596,10 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 1;
+#endif
+
 	zend_interned_strings_activate();
 
 #ifdef HAVE_DTRACE
@@ -1805,6 +1809,10 @@ void php_request_shutdown(void *dummy)
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 0;
+#endif
 }
 /* }}} */
 

@@ -52,7 +52,7 @@ php_oci_collection *php_oci_collection_create(php_oci_connection *connection, ch
 
 	collection->connection = connection;
 	collection->collection = NULL;
-	++GC_REFCOUNT(collection->connection->id);
+	GC_ADDREF(collection->connection->id);
 
 	/* get type handle by name */
 	PHP_OCI_CALL_RETURN(errstatus, OCITypeByName,

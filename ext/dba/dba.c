@@ -695,7 +695,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			info = (dba_info *)le->ptr;
 
-			GC_REFCOUNT(le)++;
+			GC_ADDREF(le);
 			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}

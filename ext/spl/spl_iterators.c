@@ -1583,7 +1583,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				Z_ADDREF(cfi->fci.function_name);
 			}
 			cfi->object = cfi->fcc.object;
-			if (cfi->object) GC_REFCOUNT(cfi->object)++;
+			if (cfi->object) GC_ADDREF(cfi->object);
 			intern->u.cbfilter = cfi;
 			break;
 		}

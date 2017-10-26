@@ -431,7 +431,13 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_TYPE_FLAGS_SHIFT			8
 
-#define GC_REFCOUNT(p)				(p)->gc.refcount
+#define GC_REFCOUNT(p)				zend_gc_refcount(&(p)->gc)
+#define GC_SET_REFCOUNT(p, rc)		zend_gc_set_refcount(&(p)->gc, rc)
+#define GC_ADDREF(p)				zend_gc_addref(&(p)->gc)
+#define GC_DELREF(p)				zend_gc_delref(&(p)->gc)
+#define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
+#define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
+
 #define GC_TYPE(p)					(p)->gc.u.v.type
 #define GC_FLAGS(p)					(p)->gc.u.v.flags
 #define GC_INFO(p)					(p)->gc.u.v.gc_info
@@ -704,10 +710,10 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_string *__s = (s);							\
 		Z_STR_P(__z) = __s;								\
 		/* interned strings support */					\
-		if (ZSTR_IS_INTERNED(__s)) {							\
+		if (ZSTR_IS_INTERNED(__s)) {					\
 			Z_TYPE_INFO_P(__z) = IS_INTERNED_STRING_EX;	\
 		} else {										\
-			GC_REFCOUNT(__s)++;							\
+			GC_ADDREF(__s);								\
 			Z_TYPE_INFO_P(__z) = IS_STRING_EX;			\
 		}												\
 	} while (0)
@@ -751,7 +757,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_resource *_res =									\
 		(zend_resource *) emalloc(sizeof(zend_resource));		\
 		zval *__z;												\
-		GC_REFCOUNT(_res) = 1;									\
+		GC_SET_REFCOUNT(_res, 1);								\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
@@ -765,7 +771,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_resource *_res =									\
 		(zend_resource *) malloc(sizeof(zend_resource));		\
 		zval *__z;												\
-		GC_REFCOUNT(_res) = 1;									\
+		GC_SET_REFCOUNT(_res, 1);								\
 		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
 		_res->handle = (h);										\
 		_res->type = (t);										\
@@ -784,7 +790,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define ZVAL_NEW_EMPTY_REF(z) do {								\
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
-		GC_REFCOUNT(_ref) = 1;									\
+		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
@@ -793,7 +799,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define ZVAL_NEW_REF(z, r) do {									\
 		zend_reference *_ref =									\
 		(zend_reference *) emalloc(sizeof(zend_reference));		\
-		GC_REFCOUNT(_ref) = 1;									\
+		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
@@ -803,7 +809,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\
 		zend_reference *_ref =									\
 		(zend_reference *) malloc(sizeof(zend_reference));		\
-		GC_REFCOUNT(_ref) = 1;									\
+		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
@@ -865,24 +871,69 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_TRY_ADDREF(z)				Z_TRY_ADDREF_P(&(z))
 #define Z_TRY_DELREF(z)				Z_TRY_DELREF_P(&(z))
 
-static zend_always_inline uint32_t zval_refcount_p(zval* pz) {
+#ifndef ZEND_RC_DEBUG
+# define ZEND_RC_DEBUG 0
+#endif
+
+#if ZEND_RC_DEBUG
+extern ZEND_API zend_bool zend_rc_debug;
+# define ZEND_RC_MOD_CHECK(p) \
+	ZEND_ASSERT(!zend_rc_debug || \
+		((p)->u.v.flags & (GC_IMMUTABLE | GC_PERSISTENT)) == 0)
+#else
+# define ZEND_RC_MOD_CHECK(p) \
+	do { } while (0)
+#endif
+
+static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) {
+	return p->refcount;
+}
+
+static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
+    p->refcount = rc;
+	return p->refcount;
+}
+
+static zend_always_inline uint32_t zend_gc_addref(zend_refcounted_h *p) {
+	ZEND_RC_MOD_CHECK(p);
+	return ++(p->refcount);
+}
+
+static zend_always_inline uint32_t zend_gc_delref(zend_refcounted_h *p) {
+	ZEND_RC_MOD_CHECK(p);
+	return --(p->refcount);
+}
+
+static zend_always_inline uint32_t zend_gc_addref_ex(zend_refcounted_h *p, uint32_t rc) {
+	ZEND_RC_MOD_CHECK(p);
+	p->refcount += rc;
+	return p->refcount;
+}
+
+static zend_always_inline uint32_t zend_gc_delref_ex(zend_refcounted_h *p, uint32_t rc) {
+	ZEND_RC_MOD_CHECK(p);
+	p->refcount -= rc;
+	return p->refcount;
+}
+
+static zend_always_inline uint32_t zval_refcount_p(const zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz) || Z_COPYABLE_P(pz));
 	return GC_REFCOUNT(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline uint32_t zval_set_refcount_p(zval* pz, uint32_t rc) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return GC_REFCOUNT(Z_COUNTED_P(pz)) = rc;
+	return GC_SET_REFCOUNT(Z_COUNTED_P(pz), rc);
 }
 
 static zend_always_inline uint32_t zval_addref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return ++GC_REFCOUNT(Z_COUNTED_P(pz));
+	return GC_ADDREF(Z_COUNTED_P(pz));
 }
 
 static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 	ZEND_ASSERT(Z_REFCOUNTED_P(pz));
-	return --GC_REFCOUNT(Z_COUNTED_P(pz));
+	return GC_DELREF(Z_COUNTED_P(pz));
 }
 
 #if SIZEOF_SIZE_T == 4
@@ -920,7 +971,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 		if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) { \
-			GC_REFCOUNT(_gc)++;							\
+			GC_ADDREF(_gc);								\
 		}												\
 	} while (0)
 
@@ -935,7 +986,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			if ((_t & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0) { \
 				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); \
 			} else {									\
-				GC_REFCOUNT(_gc)++;						\
+				GC_ADDREF(_gc);							\
 			}											\
 		}												\
 	} while (0)
@@ -1000,7 +1051,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		zend_array *_arr = Z_ARR_P(_zv);				\
 		if (UNEXPECTED(GC_REFCOUNT(_arr) > 1)) {		\
 			if (Z_REFCOUNTED_P(_zv)) {					\
-				GC_REFCOUNT(_arr)--;					\
+				GC_DELREF(_arr);						\
 			}											\
 			ZVAL_ARR(_zv, zend_array_dup(_arr));		\
 		}												\

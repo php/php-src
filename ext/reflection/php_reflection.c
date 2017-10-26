@@ -1850,7 +1850,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 		array_init(return_value);
 		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
 			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(fptr->op_array.static_variables)--;
+				GC_DELREF(fptr->op_array.static_variables);
 			}
 			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
 		}
@@ -2278,7 +2278,7 @@ ZEND_METHOD(reflection_generator, getExecutingGenerator)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	current = zend_generator_get_current(generator);
-	++GC_REFCOUNT(&current->std);
+	GC_ADDREF(&current->std);
 
 	ZVAL_OBJ(return_value, (zend_object *) current);
 }

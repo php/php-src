@@ -2652,7 +2652,7 @@ try_and_get_another_connection:
 			p = zend_hash_index_find_ptr(&EG(regular_list), conn_id);   /* check if the connection is still there */
 
 			if (p && p->ptr && (p->type == le_conn || p->type == le_pconn)) {
-				GC_REFCOUNT(p)++;
+				GC_ADDREF(p);
 				RETVAL_RES(p);
 				efree(hashed_details);
 				return;

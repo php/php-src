@@ -471,7 +471,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	p->key = (zend_string*) ZCSG(interned_strings_top);
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	p->h = h;
-	GC_REFCOUNT(p->key) = 1;
+	GC_SET_REFCOUNT(p->key, 1);
 #if 1
 	/* optimized single assignment */
 	GC_TYPE_INFO(p->key) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);

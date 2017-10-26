@@ -559,7 +559,7 @@ ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
 	tree_size = zend_ast_tree_size(ast) + sizeof(zend_ast_ref);
 	ref = emalloc(tree_size);
 	zend_ast_tree_copy(ast, GC_AST(ref));
-	GC_REFCOUNT(ref) = 1;
+	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = IS_CONSTANT_AST;
 	return ref;
 }

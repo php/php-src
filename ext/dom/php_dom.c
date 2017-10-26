@@ -1199,7 +1199,7 @@ PHP_DOM_EXPORT zend_bool php_dom_create_object(xmlNodePtr obj, zval *return_valu
 	}
 
 	if ((intern = (dom_object *) php_dom_object_get_data((void *) obj))) {
-		GC_REFCOUNT(&intern->std)++;
+		GC_ADDREF(&intern->std);
 		ZVAL_OBJ(return_value, &intern->std);
 		return 1;
 	}

@@ -2567,7 +2567,7 @@ static void php_compact_var(HashTable *eg_active_symbol_table, zval *return_valu
 		if (zend_string_equals_literal(Z_STR_P(entry), "this")) {
 			zend_object *object = zend_get_this_object(EG(current_execute_data));
 			if (object) {
-				GC_REFCOUNT(object)++;
+				GC_ADDREF(object);
 				ZVAL_OBJ(&data, object);
 				zend_hash_update(Z_ARRVAL_P(return_value), Z_STR_P(entry), &data);
 			}
@@ -2659,7 +2659,7 @@ PHP_FUNCTION(array_fill)
 			Z_ARRVAL_P(return_value)->nNextFreeElement = (zend_long)(start_key + num);
 
 			if (Z_REFCOUNTED_P(val)) {
-				GC_REFCOUNT(Z_COUNTED_P(val)) += (uint32_t)num;
+				GC_ADDREF_EX(Z_COUNTED_P(val), (uint32_t)num);
 			}
 
 			p = Z_ARRVAL_P(return_value)->arData;
@@ -2680,7 +2680,7 @@ PHP_FUNCTION(array_fill)
 			array_init_size(return_value, (uint32_t)num);
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 			if (Z_REFCOUNTED_P(val)) {
-				GC_REFCOUNT(Z_COUNTED_P(val)) += (uint32_t)num;
+				GC_ADDREF_EX(Z_COUNTED_P(val), (uint32_t)num);
 			}
 			zend_hash_index_add_new(Z_ARRVAL_P(return_value), start_key, val);
 			while (--num) {
@@ -4311,7 +4311,7 @@ PHP_FUNCTION(array_pad)
 
 	num_pads = pad_size_abs - input_size;
 	if (Z_REFCOUNTED_P(pad_value)) {
-		GC_REFCOUNT(Z_COUNTED_P(pad_value)) += num_pads;
+		GC_ADDREF_EX(Z_COUNTED_P(pad_value), num_pads);
 	}
 
 	array_init_size(return_value, pad_size_abs);

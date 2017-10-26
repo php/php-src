@@ -47,7 +47,7 @@ static void zend_accel_destroy_zend_function(zval *zv)
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
 			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
+				if (GC_DELREF(function->op_array.static_variables) == 0) {
 					FREE_HASHTABLE(function->op_array.static_variables);
 				}
 			}

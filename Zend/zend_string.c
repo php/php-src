@@ -137,7 +137,7 @@ static zend_always_inline zend_string *zend_add_interned_string(zend_string *str
 {
 	zval val;
 
-	GC_REFCOUNT(str) = 1;
+	GC_SET_REFCOUNT(str, 1);
 	GC_FLAGS(str) |= IS_STR_INTERNED | flags;
 
 	ZVAL_INTERNED_STR(&val, str);

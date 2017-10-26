@@ -1061,7 +1061,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 		}
 		if (op_array->static_variables) {
 			if (!(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(op_array->static_variables)++;
+				GC_ADDREF(op_array->static_variables);
 			}
 		}
 		op_array->run_time_cache = NULL;
@@ -4256,7 +4256,7 @@ static void zend_compile_static_var_common(zend_ast *var_ast, zval *value, zend_
 
 	if (GC_REFCOUNT(CG(active_op_array)->static_variables) > 1) {
 		if (!(GC_FLAGS(CG(active_op_array)->static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(CG(active_op_array)->static_variables)--;
+			GC_DELREF(CG(active_op_array)->static_variables);
 		}
 		CG(active_op_array)->static_variables = zend_array_dup(CG(active_op_array)->static_variables);
 	}

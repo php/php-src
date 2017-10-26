@@ -171,7 +171,7 @@ ZEND_METHOD(Closure, call)
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
-		--GC_REFCOUNT(&closure->std);
+		GC_DELREF(&closure->std);
 	} else if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
 		efree(my_function.op_array.run_time_cache);
 	}

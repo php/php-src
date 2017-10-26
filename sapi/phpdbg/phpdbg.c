@@ -580,10 +580,10 @@ static PHP_FUNCTION(phpdbg_get_executable)
 				zend_hash_add_empty_element(files, zval_get_string(filename));
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			GC_REFCOUNT(files)++;
+			GC_ADDREF(files);
 		}
 	} else {
-		GC_REFCOUNT(files)++;
+		GC_ADDREF(files);
 	}
 
 	array_init(return_value);
@@ -632,7 +632,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (!--GC_REFCOUNT(files)) {
+	if (!GC_DELREF(files)) {
 		zend_hash_destroy(files);
 	}
 }

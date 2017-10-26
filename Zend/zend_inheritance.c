@@ -79,7 +79,7 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			return func;
 		}
 		if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(func->op_array.static_variables)++;
+			GC_ADDREF(func->op_array.static_variables);
 		}
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));

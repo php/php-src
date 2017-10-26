@@ -1250,7 +1250,7 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 		 && Z_OBJ_P(arg)->properties
 		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+				GC_DELREF(Z_OBJ_P(arg)->properties);
 			}
 			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
 		}

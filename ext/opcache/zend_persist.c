@@ -300,7 +300,7 @@ static void zend_persist_zval(zval *z)
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
-					GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
 					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
 				}
@@ -325,7 +325,7 @@ static void zend_persist_zval(zval *z)
 				Z_ARR_P(z) = zend_accel_memdup(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-				GC_REFCOUNT(Z_COUNTED_P(z)) = 2;
+				GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
 				efree(old_ref);
 			}
 			break;
@@ -370,7 +370,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			zend_hash_persist(op_array->static_variables, zend_persist_zval);
 			zend_accel_store(op_array->static_variables, sizeof(HashTable));
 			/* make immutable array */
-			GC_REFCOUNT(op_array->static_variables) = 2;
+			GC_SET_REFCOUNT(op_array->static_variables, 2);
 			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
 			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
 		}

@@ -173,7 +173,7 @@ ZEND_API const HashTable zend_empty_array = {
 
 static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
-	GC_REFCOUNT(ht) = 1;
+	GC_SET_REFCOUNT(ht, 1);
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? (GC_PERSISTENT << GC_FLAGS_SHIFT) : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
 	ht->u.flags = HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
@@ -1746,7 +1746,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	IS_CONSISTENT(source);
 
 	ALLOC_HASHTABLE(target);
-	GC_REFCOUNT(target) = 1;
+	GC_SET_REFCOUNT(target, 1);
 	GC_TYPE_INFO(target) = IS_ARRAY | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 
 	target->nTableSize = source->nTableSize;
@@ -2500,7 +2500,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_symtable_to_proptable(HashTable *ht)
 	} ZEND_HASH_FOREACH_END();
 
 	if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-		GC_REFCOUNT(ht)++;
+		GC_ADDREF(ht);
 	}
 
 	return ht;
@@ -2558,7 +2558,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_proptable_to_symtable(HashTable *ht, zend
 	}
 
 	if (EXPECTED(!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE))) {
-		GC_REFCOUNT(ht)++;
+		GC_ADDREF(ht);
 	}
 
 	return ht;

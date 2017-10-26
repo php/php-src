@@ -514,7 +514,7 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 	if (was_leaf) {
 		zend_generator *next = generator->node.parent;
 		leaf->node.ptr.root = generator->node.ptr.root;
-		++GC_REFCOUNT(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
+		GC_ADDREF(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
 		generator->node.ptr.leaf = leaf;
 
 		while (next) {
@@ -592,7 +592,7 @@ void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 
 	generator->node.parent = from;
 	zend_generator_get_current(generator);
-	--GC_REFCOUNT(&from->std);
+	GC_DELREF(&from->std);
 }
 
 ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf)
@@ -658,7 +658,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 		} else {
 			do {
 				root = root->node.parent;
-				++GC_REFCOUNT(&root->std);
+				GC_ADDREF(&root->std);
 			} while (root->node.parent);
 		}
 	}

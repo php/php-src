@@ -444,7 +444,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 #else
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
-				GC_REFCOUNT(object)--;
+				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
 			}
 			OBJ_RELEASE(object);
@@ -475,7 +475,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 #else
 			if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
 #endif
-				GC_REFCOUNT(object)--;
+				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
 			}
 			OBJ_RELEASE(object);
@@ -952,7 +952,7 @@ fcall_end:
 #else
 		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
 #endif
-			GC_REFCOUNT(object)--;
+			GC_DELREF(object);
 			zend_object_store_ctor_failed(object);
 		}
 		OBJ_RELEASE(object);
@@ -1077,7 +1077,7 @@ fcall_end:
 #else
 		if (UNEXPECTED(EG(exception) != NULL) && (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR)) {
 #endif
-			GC_REFCOUNT(object)--;
+			GC_DELREF(object);
 			zend_object_store_ctor_failed(object);
 		}
 		OBJ_RELEASE(object);
@@ -2924,7 +2924,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CONST_
 
 				retval_ptr = Z_REFVAL_P(retval_ptr);
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					efree_size(ref, sizeof(zend_reference));
 				} else if (Z_OPT_REFCOUNTED_P(retval_ptr)) {
 					Z_ADDREF_P(retval_ptr);
@@ -3022,7 +3022,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CONST_HA
 
 			retval = Z_REFVAL_P(retval);
 			ZVAL_COPY_VALUE(&generator->retval, retval);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(retval)) {
 				Z_ADDREF_P(retval);
@@ -3532,7 +3532,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -3652,7 +3652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -3802,7 +3802,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CONST_HANDLER(ZEN
 		} else if (IS_CONST == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -3842,7 +3842,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CONST_HANDLER(ZE
 		} else if (IS_CONST == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -5438,7 +5438,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -5642,14 +5642,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
 			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)func->common.prototype)++;
+			GC_ADDREF((zend_object*)func->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
 			}
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
+			GC_ADDREF(object); /* For $this pointer */
 		}
 
 		if ((IS_CONST & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
@@ -5867,7 +5867,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -7647,7 +7647,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_U
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -9528,7 +9528,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -9732,14 +9732,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
 			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)func->common.prototype)++;
+			GC_ADDREF((zend_object*)func->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
 			}
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
+			GC_ADDREF(object); /* For $this pointer */
 		}
 
 		if ((IS_CV & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
@@ -9822,7 +9822,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZE
 	zval_ptr_dtor(ex);
 	ZVAL_OBJ(ex, EG(exception));
 	if (UNEXPECTED(EG(exception) != exception)) {
-		GC_REFCOUNT(EG(exception))++;
+		GC_ADDREF(EG(exception));
 		HANDLE_EXCEPTION();
 	} else {
 		EG(exception) = NULL;
@@ -9927,7 +9927,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -11593,7 +11593,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 	} else if (IS_CONST & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -11798,14 +11798,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
 			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)func->common.prototype)++;
+			GC_ADDREF((zend_object*)func->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
 			}
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
+			GC_ADDREF(object); /* For $this pointer */
 		}
 
 		zval_ptr_dtor_nogc(free_op2);
@@ -11939,7 +11939,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_T
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -12749,7 +12749,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_TMP_HA
 
 				retval_ptr = Z_REFVAL_P(retval_ptr);
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					efree_size(ref, sizeof(zend_reference));
 				} else if (Z_OPT_REFCOUNTED_P(retval_ptr)) {
 					Z_ADDREF_P(retval_ptr);
@@ -12847,7 +12847,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_TMP_HAND
 
 			retval = Z_REFVAL_P(retval);
 			ZVAL_COPY_VALUE(&generator->retval, retval);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(retval)) {
 				Z_ADDREF_P(retval);
@@ -13100,7 +13100,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -13221,7 +13221,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -13352,7 +13352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_TMP_HANDLER(ZEND_
 		} else if (IS_TMP_VAR == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -13393,7 +13393,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_TMP_HANDLER(ZEND
 		} else if (IS_TMP_VAR == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -13907,7 +13907,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CON
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -14632,7 +14632,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNU
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -15275,7 +15275,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -15818,7 +15818,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -16177,7 +16177,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_VAR_HA
 
 				retval_ptr = Z_REFVAL_P(retval_ptr);
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					efree_size(ref, sizeof(zend_reference));
 				} else if (Z_OPT_REFCOUNTED_P(retval_ptr)) {
 					Z_ADDREF_P(retval_ptr);
@@ -16276,7 +16276,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_VAR_HAND
 
 			retval = Z_REFVAL_P(retval);
 			ZVAL_COPY_VALUE(&generator->retval, retval);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(retval)) {
 				Z_ADDREF_P(retval);
@@ -16359,7 +16359,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_VAR_
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -16536,7 +16536,7 @@ send_var_by_ref:
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -16585,7 +16585,7 @@ send_var_by_ref:
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -16806,7 +16806,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -16929,7 +16929,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -17168,7 +17168,7 @@ fe_fetch_r_exit:
 
 		ZVAL_COPY_VALUE_EX(res, value, gc, value_type);
 		if (EXPECTED((value_type & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)) {
-			GC_REFCOUNT(gc)++;
+			GC_ADDREF(gc);
 		}
 	}
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -17337,7 +17337,7 @@ fe_fetch_w_exit:
 			zend_reference *ref;
 
 			ref = Z_REF_P(value);
-			GC_REFCOUNT(ref)++;
+			GC_ADDREF(ref);
 			zval_ptr_dtor(variable_ptr);
 			ZVAL_REF(variable_ptr, ref);
 		}
@@ -17385,7 +17385,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_VAR_HANDLER(ZEND_
 		} else if (IS_VAR == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -17426,7 +17426,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_VAR_HANDLER(ZEND
 		} else if (IS_VAR == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -18669,7 +18669,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -18692,7 +18692,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -18827,7 +18827,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -18850,7 +18850,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -18985,7 +18985,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -19008,7 +19008,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -19143,7 +19143,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -19166,7 +19166,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -19916,7 +19916,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CON
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -21668,7 +21668,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNU
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -21925,7 +21925,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_VAR_UNUSED_HANDL
 		if (EXPECTED(!Z_ISREF_P(op1))) {
 			ZVAL_MAKE_REF(op1);
 		}
-		GC_REFCOUNT(Z_REF_P(op1))++;
+		GC_ADDREF(Z_REF_P(op1));
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
@@ -23008,7 +23008,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -23031,7 +23031,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -23166,7 +23166,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -23189,7 +23189,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -23324,7 +23324,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -23347,7 +23347,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -23482,7 +23482,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -23505,7 +23505,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -24227,7 +24227,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -25630,7 +25630,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -25653,7 +25653,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -25788,7 +25788,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -25811,7 +25811,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -25946,7 +25946,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -25969,7 +25969,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -26104,7 +26104,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -26127,7 +26127,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -26736,7 +26736,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -27797,7 +27797,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -27820,7 +27820,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -27955,7 +27955,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -27978,7 +27978,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -28113,7 +28113,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -28136,7 +28136,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -28271,7 +28271,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -28294,7 +28294,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -28495,7 +28495,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -30453,7 +30453,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -30476,7 +30476,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -30611,7 +30611,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -30634,7 +30634,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -30769,7 +30769,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -30792,7 +30792,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -30927,7 +30927,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -30950,7 +30950,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -31151,7 +31151,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -32213,7 +32213,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -32236,7 +32236,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -32371,7 +32371,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -32394,7 +32394,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -32529,7 +32529,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -32552,7 +32552,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -32687,7 +32687,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -32710,7 +32710,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -32911,7 +32911,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 	} else if (IS_UNUSED & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -33679,7 +33679,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_SPEC_CV_HAN
 
 				retval_ptr = Z_REFVAL_P(retval_ptr);
 				ZVAL_COPY_VALUE(return_value, retval_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					efree_size(ref, sizeof(zend_reference));
 				} else if (Z_OPT_REFCOUNTED_P(retval_ptr)) {
 					Z_ADDREF_P(retval_ptr);
@@ -33777,7 +33777,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_RETURN_SPEC_CV_HANDL
 
 			retval = Z_REFVAL_P(retval);
 			ZVAL_COPY_VALUE(&generator->retval, retval);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(retval)) {
 				Z_ADDREF_P(retval);
@@ -33860,7 +33860,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SPEC_CV_H
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -33937,7 +33937,7 @@ send_var_by_ref:
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -33986,7 +33986,7 @@ send_var_by_ref:
 
 			varptr = Z_REFVAL_P(varptr);
 			ZVAL_COPY_VALUE(arg, varptr);
-			if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+			if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 				efree_size(ref, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(arg)) {
 				Z_ADDREF_P(arg);
@@ -34301,7 +34301,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -34421,7 +34421,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			if (Z_OBJ_P(array_ptr)->properties
 			 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(array_ptr)->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(Z_OBJ_P(array_ptr)->properties)--;
+					GC_DELREF(Z_OBJ_P(array_ptr)->properties);
 				}
 				Z_OBJ_P(array_ptr)->properties = zend_array_dup(Z_OBJ_P(array_ptr)->properties);
 			}
@@ -34571,7 +34571,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMP_SET_SPEC_CV_HANDLER(ZEND_O
 		} else if (IS_CV == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -34611,7 +34611,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_COALESCE_SPEC_CV_HANDLER(ZEND_
 		} else if (IS_CV == IS_VAR && ref) {
 			zend_reference *r = Z_REF_P(ref);
 
-			if (UNEXPECTED(--GC_REFCOUNT(r) == 0)) {
+			if (UNEXPECTED(GC_DELREF(r) == 0)) {
 				efree_size(r, sizeof(zend_reference));
 			} else if (Z_OPT_REFCOUNTED_P(result)) {
 				Z_ADDREF_P(result);
@@ -36791,7 +36791,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -36814,7 +36814,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -36949,7 +36949,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -36972,7 +36972,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -37107,7 +37107,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -37130,7 +37130,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -37265,7 +37265,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -37288,7 +37288,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -37987,7 +37987,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CONST
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -38100,7 +38100,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONS
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -38874,21 +38874,21 @@ check_indirect:
 
 	if (UNEXPECTED(!Z_ISREF_P(value))) {
 		ref = (zend_reference*)emalloc(sizeof(zend_reference));
-		GC_REFCOUNT(ref) = 2;
+		GC_SET_REFCOUNT(ref, 2);
 		GC_TYPE_INFO(ref) = IS_REFERENCE;
 		ZVAL_COPY_VALUE(&ref->val, value);
 		Z_REF_P(value) = ref;
 		Z_TYPE_INFO_P(value) = IS_REFERENCE_EX;
 	} else {
 		ref = Z_REF_P(value);
-		GC_REFCOUNT(ref)++;
+		GC_ADDREF(ref);
 	}
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
 	if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr))) {
 		zend_refcounted *ref = Z_COUNTED_P(variable_ptr);
-		uint32_t refcnt = --GC_REFCOUNT(ref);
+		uint32_t refcnt = GC_DELREF(ref);
 
 		if (EXPECTED(variable_ptr != value)) {
 			if (refcnt == 0) {
@@ -38925,7 +38925,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_CONST_HAND
 	ZEND_ASSERT(ht != NULL);
 	if (GC_REFCOUNT(ht) > 1) {
 		if (!(GC_FLAGS(ht) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(ht)--;
+			GC_DELREF(ht);
 		}
 		EX(func)->op_array.static_variables = ht = zend_array_dup(ht);
 	}
@@ -38943,7 +38943,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_STATIC_SPEC_CV_CONST_HAND
 		}
 		if (UNEXPECTED(!Z_ISREF_P(value))) {
 			zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
-			GC_REFCOUNT(ref) = 2;
+			GC_SET_REFCOUNT(ref, 2);
 			GC_TYPE_INFO(ref) = IS_REFERENCE;
 			ZVAL_COPY_VALUE(&ref->val, value);
 			Z_REF_P(value) = ref;
@@ -40798,7 +40798,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUS
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -40893,7 +40893,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_CV_SPEC_CV_UNUSED_HANDLE
 
 		ZVAL_UNDEF(var);
 		SAVE_OPLINE();
-		if (!--GC_REFCOUNT(garbage)) {
+		if (!GC_DELREF(garbage)) {
 			zval_dtor_func(garbage);
 		} else {
 			gc_check_possible_root(garbage);
@@ -41358,7 +41358,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MAKE_REF_SPEC_CV_UNUSED_HANDLE
 		if (EXPECTED(!Z_ISREF_P(op1))) {
 			ZVAL_MAKE_REF(op1);
 		}
-		GC_REFCOUNT(Z_REF_P(op1))++;
+		GC_ADDREF(Z_REF_P(op1));
 		ZVAL_REF(EX_VAR(opline->result.var), Z_REF_P(op1));
 	} else {
 		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), op1);
@@ -43266,7 +43266,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -43289,7 +43289,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -43424,7 +43424,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -43447,7 +43447,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -43582,7 +43582,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -43605,7 +43605,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -43740,7 +43740,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -43763,7 +43763,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -44518,7 +44518,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 
@@ -44631,7 +44631,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_H
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -46981,7 +46981,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -47004,7 +47004,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CONST == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -47139,7 +47139,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -47162,7 +47162,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_TMP_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -47297,7 +47297,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -47320,7 +47320,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_VAR == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -47455,7 +47455,7 @@ fast_assign_obj:
 			if (EXPECTED(zobj->properties != NULL)) {
 				if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 					if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-						GC_REFCOUNT(zobj->properties)--;
+						GC_DELREF(zobj->properties);
 					}
 					zobj->properties = zend_array_dup(zobj->properties);
 				}
@@ -47478,7 +47478,7 @@ fast_assign_obj:
 					if (Z_ISREF_P(value)) {
 						if (IS_CV == IS_VAR) {
 							zend_reference *ref = Z_REF_P(value);
-							if (--GC_REFCOUNT(ref) == 0) {
+							if (GC_DELREF(ref) == 0) {
 								ZVAL_COPY_VALUE(&tmp, Z_REFVAL_P(value));
 								efree_size(ref, sizeof(zend_reference));
 								value = &tmp;
@@ -48121,7 +48121,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 	} else if (IS_CV & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
@@ -48235,7 +48235,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPV
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
 
 				expr_ptr = Z_REFVAL_P(expr_ptr);
-				if (UNEXPECTED(--GC_REFCOUNT(ref) == 0)) {
+				if (UNEXPECTED(GC_DELREF(ref) == 0)) {
 					ZVAL_COPY_VALUE(&new_expr, expr_ptr);
 					expr_ptr = &new_expr;
 					efree_size(ref, sizeof(zend_reference));
@@ -50324,7 +50324,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -52685,7 +52685,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op1);
@@ -54040,7 +54040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 	} else if ((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_TMP_VAR|IS_CV)) {
 		/* CV may be changed indirectly (e.g. when it's a reference) */
 		call_info = ZEND_CALL_NESTED_FUNCTION | ZEND_CALL_RELEASE_THIS;
-		GC_REFCOUNT(obj)++; /* For $this pointer */
+		GC_ADDREF(obj); /* For $this pointer */
 	}
 
 	zval_ptr_dtor_nogc(free_op2);
