@@ -277,7 +277,7 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	 *
 	 * DBDATETIMEALL.date = number of days since 2040-01-01
 	 * DBDATETIMEALL.time = number of decimicroseconds since 00:00
-	 * 25567 = number of day from 1970-01-01 to 2040-01-01
+	 * 25567 = number of days from 1970-01-01 to 2040-01-01
 	 */
 	time_ts = floor(dta->time / (double)10000000);
 	ts = (DBBIGINT)(dta->date - 25567) * 86400 + time_ts;
@@ -291,8 +291,8 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	 * "Y-m-d H:i:s.124".
 	 *
 	 * temp buffers are larger to accomodate for the added data: f => +2, u => +5
-	 * microseconds = remainder of the integer division
-	 * milliseconds = round(remainder / 1000)
+	 * microseconds = round(division remainder / 10)
+	 * milliseconds = round(division remainder / 10000)
 	 *
 	 * credits to FreeTDS's tds_strftime
 	 */
