@@ -507,7 +507,7 @@ static zend_long *zend_get_property_guard(zend_object *zobj, zend_string *member
 zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zend_object *zobj;
-	zval tmp_member;
+	zval tmp_member, tmp_object;
 	zval *retval;
 	uint32_t property_offset;
 	zend_long *guard = NULL;
@@ -543,12 +543,18 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 		goto exit;
 	}
 
+	ZVAL_UNDEF(&tmp_object);
+
 	/* magic isset */
 	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
-		zval tmp_object, tmp_result;
+		zval tmp_result;
 		guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
+			if (Z_TYPE(tmp_member) == IS_UNDEF) {
+				ZVAL_COPY(&tmp_member, member);
+				member = &tmp_member;
+			}
 			ZVAL_COPY(&tmp_object, object);
 			ZVAL_UNDEF(&tmp_result);
 
@@ -563,7 +569,6 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 				goto exit;
 			}
 
-			zval_ptr_dtor(&tmp_object);
 			zval_ptr_dtor(&tmp_result);
 		}
 	}
@@ -574,10 +579,10 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		}
 		if (!((*guard) & IN_GET)) {
-			zval tmp_object;
-
 			/* have getter - try with it! */
-			ZVAL_COPY(&tmp_object, object);
+			if (Z_TYPE(tmp_object) == IS_UNDEF) {
+				ZVAL_COPY(&tmp_object, object);
+			}
 			*guard |= IN_GET; /* prevent circular getting */
 			zend_std_call_getter(&tmp_object, member, rv);
 			*guard &= ~IN_GET;
@@ -597,6 +602,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			zval_ptr_dtor(&tmp_object);
 			goto exit;
 		} else {
+			zval_ptr_dtor(&tmp_object);
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
 					zend_throw_error(NULL, "Cannot access empty property");
@@ -610,6 +616,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			}
 		}
 	}
+
+	zval_ptr_dtor(&tmp_object);
+
 	if ((type != BP_VAR_IS)) {
 		zend_error(E_NOTICE,"Undefined property: %s::$%s", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
 	}
@@ -1510,6 +1519,10 @@ found:
 			zval tmp_object;
 
 			/* have issetter - try with it! */
+			if (Z_TYPE(tmp_member) == IS_UNDEF) {
+				ZVAL_COPY(&tmp_member, member);
+				member = &tmp_member;
+			}
 			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_ISSET; /* prevent circular getting */
 			zend_std_call_issetter(&tmp_object, member, &rv);
