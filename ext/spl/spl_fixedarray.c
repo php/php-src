@@ -637,9 +637,10 @@ SPL_METHOD(SplFixedArray, toArray)
 
 	intern = Z_SPLFIXEDARRAY_P(getThis());
 
-	array_init(return_value);
 	if (intern->array.size > 0) {
 		int i = 0;
+
+		array_init(return_value);
 		for (; i < intern->array.size; i++) {
 			if (!Z_ISUNDEF(intern->array.elements[i])) {
 				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &intern->array.elements[i]);
@@ -650,6 +651,8 @@ SPL_METHOD(SplFixedArray, toArray)
 				zend_hash_index_update(Z_ARRVAL_P(return_value), i, &EG(uninitialized_zval));
 			}
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */

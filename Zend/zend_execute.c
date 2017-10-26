@@ -1883,7 +1883,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 	}
 	if (prop_op_type == IS_CONST &&
 	    EXPECTED(Z_OBJCE_P(container) == CACHED_PTR_EX(cache_slot))) {
-		intptr_t prop_offset = (intptr_t)CACHED_PTR_EX(cache_slot + 1);
+		uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
 		zend_object *zobj = Z_OBJ_P(container);
 		zval *retval;
 

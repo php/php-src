@@ -2689,7 +2689,7 @@ PHP_FUNCTION(array_fill)
 			}
 		}
 	} else if (EXPECTED(num == 0)) {
-		array_init(return_value);
+		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Number of elements can't be negative");
@@ -3545,7 +3545,7 @@ PHP_FUNCTION(array_slice)
 
 	/* Clamp the offset.. */
 	if (offset > num_in) {
-		array_init(return_value);
+		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	} else if (offset < 0 && (offset = (num_in + offset)) < 0) {
 		offset = 0;
@@ -3559,7 +3559,7 @@ PHP_FUNCTION(array_slice)
 	}
 
 	if (length <= 0) {
-		array_init(return_value);
+		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	}
 
@@ -6316,12 +6316,12 @@ PHP_FUNCTION(array_combine)
 		RETURN_FALSE;
 	}
 
-	array_init_size(return_value, num_keys);
-
 	if (!num_keys) {
+		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	}
 
+	array_init_size(return_value, num_keys);
 	ZEND_HASH_FOREACH_VAL(keys, entry_keys) {
 		while (1) {
 			if (pos_values >= values->nNumUsed) {

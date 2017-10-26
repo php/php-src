@@ -408,10 +408,15 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		case ZEND_AST_ARRAY:
-			array_init(result);
 			{
 				uint32_t i;
 				zend_ast_list *list = zend_ast_get_list(ast);
+
+				if (!list->children) {
+					ZVAL_EMPTY_ARRAY(result);
+					break;
+				}
+				array_init(result);
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {

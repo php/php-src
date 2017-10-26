@@ -1846,8 +1846,8 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 	GET_REFLECTION_OBJECT_PTR(fptr);
 
 	/* Return an empty array in case no static variables exist */
-	array_init(return_value);
 	if (fptr->type == ZEND_USER_FUNCTION && fptr->op_array.static_variables != NULL) {
+		array_init(return_value);
 		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
 			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
 				GC_REFCOUNT(fptr->op_array.static_variables)--;
@@ -1860,6 +1860,8 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 			}
 		} ZEND_HASH_FOREACH_END();
 		zend_hash_copy(Z_ARRVAL_P(return_value), fptr->op_array.static_variables, zval_add_ref);
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */
@@ -2044,6 +2046,11 @@ ZEND_METHOD(reflection_function, getParameters)
 	num_args = fptr->common.num_args;
 	if (fptr->common.fn_flags & ZEND_ACC_VARIADIC) {
 		num_args++;
+	}
+
+	if (!num_args) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
 	}
 
 	array_init(return_value);
@@ -4917,17 +4924,17 @@ ZEND_METHOD(reflection_class, getInterfaces)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	/* Return an empty array if this class implements no interfaces */
-	array_init(return_value);
-
 	if (ce->num_interfaces) {
 		uint32_t i;
 
+		array_init(return_value);
 		for (i=0; i < ce->num_interfaces; i++) {
 			zval interface;
 			zend_reflection_class_factory(ce->interfaces[i], &interface);
 			zend_hash_update(Z_ARRVAL_P(return_value), ce->interfaces[i]->name, &interface);
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */
@@ -4945,7 +4952,12 @@ ZEND_METHOD(reflection_class, getInterfaceNames)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	/* Return an empty array if this class implements no interfaces */
+	if (!ce->num_interfaces) {
+		/* Return an empty array if this class implements no interfaces */
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
+
 	array_init(return_value);
 
 	for (i=0; i < ce->num_interfaces; i++) {
@@ -4966,6 +4978,11 @@ ZEND_METHOD(reflection_class, getTraits)
 		return;
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
+
+	if (!ce->num_traits) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
 
 	array_init(return_value);
 
@@ -4990,6 +5007,11 @@ ZEND_METHOD(reflection_class, getTraitNames)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
+	if (!ce->num_traits) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
+
 	array_init(return_value);
 
 	for (i=0; i < ce->num_traits; i++) {
@@ -5010,10 +5032,11 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 	}
 	GET_REFLECTION_OBJECT_PTR(ce);
 
-	array_init(return_value);
 
 	if (ce->trait_aliases) {
 		uint32_t i = 0;
+
+		array_init(return_value);
 		while (ce->trait_aliases[i]) {
 			zend_string *mname;
 			zend_trait_method_reference *cur_ref = ce->trait_aliases[i]->trait_method;
@@ -5026,6 +5049,8 @@ ZEND_METHOD(reflection_class, getTraitAliases)
 			}
 			i++;
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */
@@ -5961,15 +5986,15 @@ ZEND_METHOD(reflection_extension, getDependencies)
 	}
 	GET_REFLECTION_OBJECT_PTR(module);
 
-	array_init(return_value);
-
 	dep = module->deps;
 
 	if (!dep)
 	{
+		ZVAL_EMPTY_ARRAY(return_value);
 		return;
 	}
 
+	array_init(return_value);
 	while(dep->name) {
 		zend_string *relation;
 		char *rel_type;

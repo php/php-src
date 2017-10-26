@@ -1042,10 +1042,9 @@ static PHP_FUNCTION(libxml_get_errors)
 
 	xmlErrorPtr error;
 
-	array_init(return_value);
-
 	if (LIBXML(error_list)) {
 
+		array_init(return_value);
 		error = zend_llist_get_first(LIBXML(error_list));
 
 		while (error != NULL) {
@@ -1070,6 +1069,8 @@ static PHP_FUNCTION(libxml_get_errors)
 
 			error = zend_llist_get_next(LIBXML(error_list));
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */

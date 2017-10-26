@@ -629,10 +629,12 @@ try_again:
 				}
 
 				zval_dtor(op);
+				/*ZVAL_EMPTY_ARRAY(op);*/
 				array_init(op);
 			}
 			break;
 		case IS_NULL:
+			/*ZVAL_EMPTY_ARRAY(op);*/
 			array_init(op);
 			break;
 		case IS_REFERENCE:

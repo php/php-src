@@ -252,8 +252,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				} else if (type == 2) {
 					int j;
 					dom_object *domintern = (dom_object *)intern->doc;
-					array_init(&args[i]);
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+						array_init(&args[i]);
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -282,6 +282,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 							php_dom_create_object(node, &child, domintern);
 							add_next_index_zval(&args[i], &child);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(&args[i]);
 					}
 				}
 				break;

@@ -6949,6 +6949,11 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 		return 0;
 	}
 
+	if (!list->children) {
+		ZVAL_EMPTY_ARRAY(result);
+		return 1;
+	}
+
 	array_init_size(result, list->children);
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
