@@ -545,6 +545,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	zval tmp_member;
 	zval *retval;
 	uintptr_t property_offset;
+	uint32_t *guard = NULL;
 
 	zobj = Z_OBJ_P(object);
 
@@ -604,7 +605,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 	/* magic isset */
 	if ((type == BP_VAR_IS) && zobj->ce->__isset) {
 		zval tmp_result;
-		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 		if (!((*guard) & IN_ISSET)) {
 			ZVAL_UNDEF(&tmp_result);
@@ -625,7 +626,9 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	/* magic get */
 	if (zobj->ce->__get) {
-		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		if (guard == NULL) {
+			guard = zend_get_property_guard(zobj, Z_STR_P(member));
+		}
 		if (!((*guard) & IN_GET)) {
 			/* have getter - try with it! */
 			*guard |= IN_GET; /* prevent circular getting */
