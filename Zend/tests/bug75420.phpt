@@ -13,3 +13,5 @@ $name = "foo";
 var_dump($obj->$name ?? 12);
 ?>
 --EXPECT--
+int(24)
+int(42)
