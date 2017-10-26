@@ -261,10 +261,10 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBBIGINT bigdatetime)
+static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETIMEALL *dta)
 {
-	DBBIGINT             temp_ts;
-	time_t               ts;
+	DBBIGINT             time_ts;
+	DBBIGINT             ts;
 	zend_string         *buf;
 	static const char   *default_format = "Y-m-d H:i:s";
 	char                *ok_format = (char *)default_format;
@@ -273,15 +273,14 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBBIGINT
 		ok_format = ZSTR_VAL(format);
 	}
 
-	/* convert bigdatetime to unix timestamp
+	/* convert DBDATETIMEALL to unix timestamp
 	 *
-	 * "bigdatetime is a 64 bit integer containing the number of microseconds since 01/01/0000"
-	 *
-	 * - substract 719528 (number of days from here to unix epoch) * 86400 * 1000000
-	 * - integer division to seconds (via floor to support negative values)
+	 * DBDATETIMEALL.date = number of days since 2040-01-01
+	 * DBDATETIMEALL.time = number of decimicroseconds since 00:00
+	 * 25567 = number of day from 1970-01-01 to 2040-01-01
 	 */
-	temp_ts = bigdatetime - 62167219200000000u;
-	ts = floor(temp_ts / (double)1000000);
+	time_ts = floor(dta->time / (double)10000000);
+	ts = (DBBIGINT)(dta->date - 25567) * 86400 + time_ts;
 
 	/* replace u/f in format with micro/milli seconds
 	 *
@@ -306,14 +305,14 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBBIGINT
 	strcpy(base_format, our_format);
 	if ((pz = strstr(our_format, "u")) != NULL) {
 		char micro[6];
-		sprintf(micro, "%06d", temp_ts - ts * 1000000);
+		sprintf(micro, "%06.0f", (double)(dta->time - time_ts * 10000000) / 10);
 		memcpy(pz, micro, 6);
 		strcpy(pz + 6, base_format + (pz - our_format) + 1);
 		strcpy(base_format, our_format);
 	}
 	if ((pz = strstr(our_format, "f")) != NULL) {
 		char milli[3];
-		sprintf(milli, "%03.0f", (double)(temp_ts - ts * 1000000) / 1000);
+		sprintf(milli, "%03.0f", (double)(dta->time - time_ts * 10000000) / 10000);
 		memcpy(pz, milli, 3);
 		strcpy(pz + 3, base_format + (pz - our_format) + 1);
 	}
@@ -411,11 +410,11 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
 						efree(tmp_data);
 					} else {
-						DBBIGINT bigdatetime;
-						dbconvert(H->link, coltype, data, -1, SYBBIGDATETIME, (LPBYTE) &bigdatetime, -1);
+						DBDATETIMEALL dta;
+						dbconvert(H->link, coltype, data, -1, SYBMSDATETIME2, (LPBYTE) &dta, -1);
 
 						zv = emalloc(sizeof(zval));
-						pdo_dblib_datetime_format(zv, H->datetime_format, bigdatetime);
+						pdo_dblib_datetime_format(zv, H->datetime_format, &dta);
 					}
 					break;
 				}
