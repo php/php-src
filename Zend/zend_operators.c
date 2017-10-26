@@ -923,6 +923,8 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 				}
 				if (result != op1) {
 					ZVAL_DUP(result, op1);
+				} else {
+					SEPARATE_ARRAY(result);
 				}
 				zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 				return SUCCESS;
