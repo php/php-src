@@ -303,18 +303,28 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	base_format = emalloc(strlen(ok_format) + 2 + 5);
 	strcpy(our_format, ok_format);
 	strcpy(base_format, our_format);
-	if ((pz = strstr(our_format, "u")) != NULL) {
-		char micro[6];
-		sprintf(micro, "%06.0f", (double)(dta->time - time_ts * 10000000) / 10);
-		memcpy(pz, micro, 6);
-		strcpy(pz + 6, base_format + (pz - our_format) + 1);
-		strcpy(base_format, our_format);
+	pz = our_format;
+	while((pz = strstr(pz, "u")) != NULL) {
+		if (pz == our_format || *(pz - 1) != '\\') {
+			char micro[6];
+			sprintf(micro, "%06.0f", (double)(dta->time - time_ts * 10000000) / 10);
+			memcpy(pz, micro, 6);
+			strcpy(pz + 6, base_format + (pz - our_format) + 1);
+			strcpy(base_format, our_format);
+			break;
+		}
+		pz++;
 	}
-	if ((pz = strstr(our_format, "f")) != NULL) {
-		char milli[3];
-		sprintf(milli, "%03.0f", (double)(dta->time - time_ts * 10000000) / 10000);
-		memcpy(pz, milli, 3);
-		strcpy(pz + 3, base_format + (pz - our_format) + 1);
+	pz = our_format;
+	while((pz = strstr(pz, "f")) != NULL) {
+		if (pz == our_format || *(pz - 1) != '\\') {
+			char milli[3];
+			sprintf(milli, "%03.0f", (double)(dta->time - time_ts * 10000000) / 10000);
+			memcpy(pz, milli, 3);
+			strcpy(pz + 3, base_format + (pz - our_format) + 1);
+			break;
+		}
+		pz++;
 	}
 
 	buf = php_format_date(our_format, strlen(our_format), ts, 0);

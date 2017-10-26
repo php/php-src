@@ -31,7 +31,7 @@ $stmt = $db->query(str_replace('1923', '2123', $sql));
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
-$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "Y-m-d H:i:s.f/u");
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "u\u\\fY-m-d H:i:s.f/u");
 var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
@@ -64,10 +64,10 @@ array(1) {
   ["d"]=>
   string(19) "2123-10-17 10:22:44"
 }
-string(15) "Y-m-d H:i:s.f/u"
+string(20) "u\u\fY-m-d H:i:s.f/u"
 array(1) {
   ["d"]=>
-  string(30) "1923-10-17 10:22:44.137/136667"
+  string(38) "136667uf1923-10-17 10:22:44.137/000000"
 }
 NULL
 string(4) "test"
