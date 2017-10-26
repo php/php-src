@@ -732,9 +732,13 @@ found:
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
 	    if (!((*guard) & IN_SET)) {
+			zval tmp_object;
+
+			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_SET; /* prevent circular setting */
-			zend_std_call_setter(object, member, value);
+			zend_std_call_setter(&tmp_object, member, value);
 			(*guard) &= ~IN_SET;
+			zval_ptr_dtor(&tmp_object);
 		} else if (EXPECTED(!IS_WRONG_PROPERTY_OFFSET(property_offset))) {
 			goto write_std_property;
 		} else {
@@ -983,10 +987,14 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	if (zobj->ce->__unset) {
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 		if (!((*guard) & IN_UNSET)) {
+			zval tmp_object;
+
 			/* have unseter - try with it! */
+			ZVAL_COPY(&tmp_object, object);
 			(*guard) |= IN_UNSET; /* prevent circular unsetting */
-			zend_std_call_unsetter(object, member);
+			zend_std_call_unsetter(&tmp_object, member);
 			(*guard) &= ~IN_UNSET;
+			zval_ptr_dtor(&tmp_object);
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
 				zend_throw_error(NULL, "Cannot access property started with '\\0'");
