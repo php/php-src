@@ -59,7 +59,7 @@ PHPAPI int php_stream_filter_register_factory_volatile(const char *filterpattern
 {
 	if (!FG(stream_filters)) {
 		ALLOC_HASHTABLE(FG(stream_filters));
-		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash), NULL, NULL, 1);
+		zend_hash_init(FG(stream_filters), zend_hash_num_elements(&stream_filters_hash), NULL, NULL, 0);
 		zend_hash_copy(FG(stream_filters), &stream_filters_hash, NULL);
 	}
 
