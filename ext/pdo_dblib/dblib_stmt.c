@@ -263,8 +263,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 
 static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETIMEALL *dta)
 {
-	DBBIGINT             time_ts;
-	DBBIGINT             ts;
+	time_t               ts;
 	zend_string         *buf;
 	static const char   *default_format = "Y-m-d H:i:s";
 	char                *ok_format = (char *)default_format;
@@ -279,8 +278,7 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	 * DBDATETIMEALL.time = number of decimicroseconds since 00:00
 	 * 25567 = number of days from 1970-01-01 to 2040-01-01
 	 */
-	time_ts = floor(dta->time / (double)10000000);
-	ts = (DBBIGINT)(dta->date - 25567) * 86400 + time_ts;
+	ts = (time_t)(dta->date - 25567) * 86400 + (dta->time / 10000000);
 
 	/* replace u/f in format with micro/milli seconds
 	 *
@@ -291,8 +289,6 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	 * "Y-m-d H:i:s.124".
 	 *
 	 * temp buffers are larger to accomodate for the added data: f => +2, u => +5
-	 * microseconds = round(division remainder / 10)
-	 * milliseconds = round(division remainder / 10000)
 	 *
 	 * credits to FreeTDS's tds_strftime
 	 */
@@ -307,7 +303,7 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	while((pz = strstr(pz, "u")) != NULL) {
 		if (pz == our_format || *(pz - 1) != '\\') {
 			char micro[6];
-			sprintf(micro, "%06.0f", (double)(dta->time - time_ts * 10000000) / 10);
+			sprintf(micro, "%06d", (dta->time % 10000000 + 5) / 10);
 			memcpy(pz, micro, 6);
 			strcpy(pz + 6, base_format + (pz - our_format) + 1);
 			strcpy(base_format, our_format);
@@ -319,7 +315,7 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	while((pz = strstr(pz, "f")) != NULL) {
 		if (pz == our_format || *(pz - 1) != '\\') {
 			char milli[3];
-			sprintf(milli, "%03.0f", (double)(dta->time - time_ts * 10000000) / 10000);
+			sprintf(milli, "%03d", (dta->time % 10000000 + 5000) / 10000);
 			memcpy(pz, milli, 3);
 			strcpy(pz + 3, base_format + (pz - our_format) + 1);
 			break;

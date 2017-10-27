@@ -8,7 +8,7 @@ require dirname(__FILE__) . '/config.inc';
 --FILE--
 <?php
 require dirname(__FILE__) . '/config.inc';
-$sql = "SELECT convert(datetime, '19231017 10:22:44.135') AS [d]";
+$sql = "SELECT convert(datetime, '20171027 10:22:44.135') AS [d]";
 
 var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT));
 var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
@@ -25,9 +25,6 @@ $stmt->closeCursor();
 $db->setAttribute(PDO::DBLIB_ATTR_DATETIME_CONVERT, 0);
 
 $stmt = $db->query($sql);
-var_dump($stmt->fetch(PDO::FETCH_ASSOC));
-$stmt->closeCursor();
-$stmt = $db->query(str_replace('1923', '2123', $sql));
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
@@ -49,25 +46,21 @@ bool(false)
 NULL
 array(1) {
   ["d"]=>
-  string(19) "1923-10-17 10:22:44"
+  string(19) "2017-10-27 10:22:44"
 }
 bool(true)
 array(1) {
   ["d"]=>
-  string(26) "Oct 17 1923 10:22:44:137AM"
+  string(26) "Oct 27 2017 10:22:44:137AM"
 }
 array(1) {
   ["d"]=>
-  string(19) "1923-10-17 10:22:44"
-}
-array(1) {
-  ["d"]=>
-  string(19) "2123-10-17 10:22:44"
+  string(19) "2017-10-27 10:22:44"
 }
 string(20) "u\u\fY-m-d H:i:s.f/u"
 array(1) {
   ["d"]=>
-  string(38) "136667uf1923-10-17 10:22:44.137/000000"
+  string(38) "136667uf2017-10-27 10:22:44.137/000000"
 }
 NULL
 string(4) "test"
