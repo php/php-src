@@ -282,52 +282,42 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 
 	/* replace u/f in format with micro/milli seconds
 	 *
-	 * Look for the first "u" and "f" in the format string.
-	 * If found, replace it with micro and milli seconds.
+	 * Look for the first "u" OR "f" in the format string.
+	 * If found, replace it with micro/milli seconds.
 	 * For example, if milliseconds is 124, the format string
 	 * "Y-m-d H:i:s.f" would become
 	 * "Y-m-d H:i:s.124".
-	 *
-	 * temp buffers are larger to accomodate for the added data: f => +2, u => +5
+	 * This can add up to 5 extra characters
 	 *
 	 * credits to FreeTDS's tds_strftime
 	 */
-	char *our_format;
-	char *base_format;
-	char *pz = NULL;
-	our_format = emalloc(strlen(ok_format) + 2 + 5);
-	base_format = emalloc(strlen(ok_format) + 2 + 5);
+	char *our_format = emalloc(strlen(ok_format) + 1 + 5);
 	strcpy(our_format, ok_format);
-	strcpy(base_format, our_format);
-	pz = our_format;
-	while((pz = strstr(pz, "u")) != NULL) {
-		if (pz == our_format || *(pz - 1) != '\\') {
-			char micro[6];
-			sprintf(micro, "%06d", (dta->time % 10000000 + 5) / 10);
-			memcpy(pz, micro, 6);
-			strcpy(pz + 6, base_format + (pz - our_format) + 1);
-			strcpy(base_format, our_format);
+	char *pz = NULL;
+	char escape = 0;
+
+	for(pz = our_format; *pz != 0; pz++) {
+		if (*pz == '\\') {
+			escape = !escape;
+			continue;
+		}
+		if (!escape && *pz == 'u') {
+			sprintf(pz, "%06d", (dta->time % 10000000 + 5) / 10);
+			strcpy(pz + 6, ok_format + (pz - our_format) + 1);
 			break;
 		}
-		pz++;
-	}
-	pz = our_format;
-	while((pz = strstr(pz, "f")) != NULL) {
-		if (pz == our_format || *(pz - 1) != '\\') {
-			char milli[3];
-			sprintf(milli, "%03d", (dta->time % 10000000 + 5000) / 10000);
-			memcpy(pz, milli, 3);
-			strcpy(pz + 3, base_format + (pz - our_format) + 1);
+		if (!escape && *pz == 'f') {
+			sprintf(pz, "%03d", (dta->time % 10000000 + 5000) / 10000);
+			strcpy(pz + 3, ok_format + (pz - our_format) + 1);
 			break;
 		}
-		pz++;
+		escape = 0;
 	}
 
 	buf = php_format_date(our_format, strlen(our_format), ts, 0);
 	ZVAL_STR(output, buf);
 
 	efree(our_format);
-	efree(base_format);
 
 	return 1;
 }

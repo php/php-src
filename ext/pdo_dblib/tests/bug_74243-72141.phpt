@@ -28,8 +28,17 @@ $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
 
-$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "u\u\\fY-m-d H:i:s.f/u");
-var_dump($db->getAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT));
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "\u\\fY-m-d H:i:s.\\\\f");
+$stmt = $db->query($sql);
+var_dump($stmt->fetch(PDO::FETCH_ASSOC));
+$stmt->closeCursor();
+
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "u = Y-m-d H:i:s");
+$stmt = $db->query($sql);
+var_dump($stmt->fetch(PDO::FETCH_ASSOC));
+$stmt->closeCursor();
+
+$db->setAttribute(PDO::DBLIB_ATTR_DATETIME_FORMAT, "Y-m-d u H:i:s");
 $stmt = $db->query($sql);
 var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 $stmt->closeCursor();
@@ -57,10 +66,17 @@ array(1) {
   ["d"]=>
   string(19) "2017-10-27 10:22:44"
 }
-string(20) "u\u\fY-m-d H:i:s.f/u"
 array(1) {
   ["d"]=>
-  string(38) "136667uf2017-10-27 10:22:44.137/000000"
+  string(26) "uf2017-10-27 10:22:44.\137"
+}
+array(1) {
+  ["d"]=>
+  string(28) "136667 = 2017-10-27 10:22:44"
+}
+array(1) {
+  ["d"]=>
+  string(26) "2017-10-27 136667 10:22:44"
 }
 NULL
 string(4) "test"
