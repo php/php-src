@@ -59,6 +59,7 @@ PHP                                                                        NEWS
 
 - Openssl:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob)
+  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
 
 - PCRE:
   . Fixed bug #75207 (applied upstream patch for CVE-2016-1283). (Anatol)
