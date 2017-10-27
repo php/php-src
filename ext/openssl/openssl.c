@@ -358,7 +358,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_seal, 0, 0, 4)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(1, sealdata)
-	ZEND_ARG_INFO(1, ekeys) /* arary */
+	ZEND_ARG_INFO(1, ekeys) /* array */
 	ZEND_ARG_INFO(0, pubkeys) /* array */
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(1, iv)
