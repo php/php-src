@@ -766,7 +766,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		(zend_resource *) malloc(sizeof(zend_resource));		\
 		zval *__z;												\
 		GC_REFCOUNT(_res) = 1;									\
-		GC_TYPE_INFO(_res) = IS_RESOURCE;						\
+		GC_TYPE_INFO(_res) = IS_RESOURCE |						\
+			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		_res->handle = (h);										\
 		_res->type = (t);										\
 		_res->ptr = (p);										\
@@ -804,7 +805,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		zend_reference *_ref =									\
 		(zend_reference *) malloc(sizeof(zend_reference));		\
 		GC_REFCOUNT(_ref) = 1;									\
-		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		GC_TYPE_INFO(_ref) = IS_REFERENCE |						\
+			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
