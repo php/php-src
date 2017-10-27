@@ -70,6 +70,9 @@ PHP                                                                        NEWS
   . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
 
+- OpenSSL:
+  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
+
 - PDO_DBlib:
   . Implemented request #69592 (allow 0-column rowsets to be skipped
     automatically). (fandrieu)

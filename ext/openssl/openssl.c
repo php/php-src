@@ -364,17 +364,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_seal, 0, 0, 4)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(1, sealdata)
-	ZEND_ARG_INFO(1, ekeys) /* arary */
+	ZEND_ARG_INFO(1, ekeys) /* array */
 	ZEND_ARG_INFO(0, pubkeys) /* array */
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(1, iv)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(1, opendata)
 	ZEND_ARG_INFO(0, ekey)
 	ZEND_ARG_INFO(0, privkey)
+	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
@@ -5988,7 +5989,7 @@ PHP_FUNCTION(openssl_verify)
 }
 /* }}} */
 
-/* {{{ proto int openssl_seal(string data, &string sealdata, &array ekeys, array pubkeys)
+/* {{{ proto int openssl_seal(string data, &string sealdata, &array ekeys, array pubkeys [, string method [, &string iv]]))
    Seals data */
 PHP_FUNCTION(openssl_seal)
 {
@@ -6119,7 +6120,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_open(string data, &string opendata, string ekey, mixed privkey)
+/* {{{ proto bool openssl_open(string data, &string opendata, string ekey, mixed privkey [, string method [, string iv]])
    Opens data */
 PHP_FUNCTION(openssl_open)
 {
