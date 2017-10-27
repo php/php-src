@@ -37,6 +37,7 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed bug #75363 (openssl_x509_parse leaks memory). (Bob, Jakub Zelenka)
+  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
 
 - PGSQL:
   . Fixed bug #75419 (Default link incorrectly cleared/linked by pg_close()). (Sara)
