@@ -837,7 +837,12 @@ _zip_read_eocd64(zip_source_t *src, zip_buffer_t *buffer, zip_uint64_t buf_offse
         zip_error_set(error, ZIP_ER_SEEK, EFBIG);
         return NULL;
     }
-    if ((flags & ZIP_CHECKCONS) && offset+size != eocd_offset) {
+    if (offset+size > buf_offset + eocd_offset) {
+	/* cdir spans past EOCD record */
+	zip_error_set(error, ZIP_ER_INCONS, 0);
+	return NULL;
+    }
+    if ((flags & ZIP_CHECKCONS) && offset+size != buf_offset + eocd_offset) {
 	zip_error_set(error, ZIP_ER_INCONS, 0);
 	return NULL;
     }
