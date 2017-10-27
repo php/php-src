@@ -2762,15 +2762,15 @@ ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *or
 }
 /* }}} */
 
-ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce) /* {{{ */
+ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent) /* {{{ */
 {
 	zend_string *lcname;
 
 	if (name[0] == '\\') {
-		lcname = zend_string_alloc(name_len-1, 1);
+		lcname = zend_string_alloc(name_len-1, persistent);
 		zend_str_tolower_copy(ZSTR_VAL(lcname), name+1, name_len-1);
 	} else {
-		lcname = zend_string_alloc(name_len, 1);
+		lcname = zend_string_alloc(name_len, persistent);
 		zend_str_tolower_copy(ZSTR_VAL(lcname), name, name_len);
 	}
 

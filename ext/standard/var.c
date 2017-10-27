@@ -761,7 +761,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		}
 
 		priv_name = zend_mangle_property_name(
-				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), 0);
 		val = zend_hash_find(propers, priv_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
@@ -780,7 +780,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_string_free(priv_name);
 
 		prot_name = zend_mangle_property_name(
-				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), 0);
 		val = zend_hash_find(propers, prot_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
