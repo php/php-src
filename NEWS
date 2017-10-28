@@ -29,6 +29,10 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- Mysqli:
+  . Fixed bug #75434 (Wrong reflection for mysqli_fetch_all function). (Fabien
+    Villepinte)
+
 - OCI8:
   . Fixed valgrind issue. (Tianfang Yang)
 

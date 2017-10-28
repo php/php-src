@@ -124,8 +124,15 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 0
+Number of Parameters: 1
 Number of Required Parameters: 0
+
+Inspecting parameter 'result_type' of method 'fetch_all'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_array'
 isFinal: no
