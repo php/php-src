@@ -28,6 +28,17 @@ $st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms);
 
+/* numbered */
+$prms = ['a' => 'test', 'b' => 2];
+$st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
+$st->bindValue(1, 'set @b = @a');
+$st->bindValue(2, '@a varchar(10), @b varchar(10) out');
+$st->bindParam('a', $prms['a']);
+$st->bindParam(4, $prms['b'], PDO::PARAM_INPUT_OUTPUT);
+$st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
+$st->execute();
+var_dump($prms);
+
 /* types */
 $prms = ['a' => 'sel', 'b' => null, 'c' => 1, 'd' => 1.2, 'e' => 'test'];
 for ($i=0; $i<12; $i++) $prms['e'] .= $prms['e'];
@@ -62,6 +73,14 @@ array(1) {
   string(1) "1"
 }
 bool(true)
+array(3) {
+  ["a"]=>
+  &string(4) "test"
+  ["b"]=>
+  &string(4) "test"
+  ["r"]=>
+  &int(0)
+}
 array(3) {
   ["a"]=>
   &string(4) "test"

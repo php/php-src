@@ -612,13 +612,23 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		parameter = Z_REFVAL(param->parameter);
 	}
 
+	char *param_name = NULL;
+	if (param->paramno == -1) {
+		param_name = ZSTR_VAL(param->name);
+	}
+
 	/* force "@" prefix instead of ":" */
 	if (event_type == PDO_PARAM_EVT_NORMALIZE) {
-		ZSTR_VAL(param->name)[0] = '@';
+		if (param_name) {
+			param_name[0] = '@';
+		} else if (param->paramno != zend_hash_num_elements(stmt->bound_params)) {
+			/* numbered parameter: paramno has no effect, only dbrpcbind call order */
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Numbered parameters must be bound in order.");
+		}
 
 		return 1;
 	}
-	int is_retval = !strncmp(ZSTR_VAL(param->name), "@RETVAL", sizeof("@RETVAL")-1);
+	int is_retval = param_name && !strncmp(param_name, "@RETVAL", sizeof("@RETVAL")-1);
 
 	/* bind param */
 	if (event_type == PDO_PARAM_EVT_ALLOC && !is_retval) {
@@ -656,8 +666,8 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 			status = DBRPCRETURN;
 		}
 
-		if (FAIL == dbrpcparam(H->link, ZSTR_VAL(param->name), (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
-			pdo_raise_impl_error(stmt->dbh, NULL, "HY000", "PDO_DBLIB: RPC: Unable to set parameter.");
+		if (FAIL == dbrpcparam(H->link, param_name, (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Unable to set parameter.");
 
 			return 0;
 		}
@@ -682,27 +692,56 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		}
 
 		/* fetch value from returns */
-		int num_rets, i;
+		int num_rets, i, ok;
 		char *value = NULL;
 		char *name = NULL;
 		size_t value_len = 0;
 
-		num_rets = dbnumrets(H->link);
-		for (i = 0; i < num_rets; i++) {
-			name = (char *)dbretname(H->link, i+1);
-			if (!strncmp(ZSTR_VAL(param->name), name, sizeof(name))) {
-				pdo_dblib_stmt_get_col_or_ret(stmt, i, &value, &value_len, 1);
-
-				if (value && value_len == sizeof(zval)) {
-					ZVAL_COPY_VALUE(parameter, (zval *)value);
-				} else {
-					ZVAL_NULL(parameter);
-				}
-				efree(value);
-
-				break;
-			}
+		if (!(num_rets = dbnumrets(H->link))) {
+			return 1;
 		}
+
+		ok = 0;
+		if (param_name) {
+			/* named param: search using dbretname */
+			for (i = 1; i <= num_rets; i++) {
+				name = (char *)dbretname(H->link, i);
+				if (!strncmp(param_name, name, sizeof(name))) {
+					ok = 1;
+					break;
+				}
+			}
+		} else {
+			/* named param: count output params */
+			struct pdo_bound_param_data *prm;
+			i = 0;
+			ZEND_HASH_FOREACH_PTR(stmt->bound_params, prm) {
+				if ((prm->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
+					i++;
+					if (i > num_rets) {
+						break;
+					}
+				}
+				if (prm->paramno == param->paramno) {
+					ok = 1;
+					break;
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+
+		if (!ok) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Unable to get output parameter.");
+			return 0;
+		}
+
+		pdo_dblib_stmt_get_col_or_ret(stmt, i-1, &value, &value_len, 1);
+
+		if (value && value_len == sizeof(zval)) {
+			ZVAL_COPY_VALUE(parameter, (zval *)value);
+		} else {
+			ZVAL_NULL(parameter);
+		}
+		efree(value);
 
 		return 1;
 	}

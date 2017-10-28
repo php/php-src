@@ -118,7 +118,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	}
 
 	if (S->enable_rpc) {
-		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED;
+		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL;
 
 		if (FAIL == dbrpcinit(H->link, sql, 0)) {
 			pdo_raise_impl_error(dbh, NULL, "HY000", "PDO_DBLIB: RPC: Unable to init.");
