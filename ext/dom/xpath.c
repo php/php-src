@@ -432,9 +432,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			int i;
 			xmlNodeSetPtr nodesetp;
 
+			array_init(&retval);
 			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
-
-				array_init(&retval);
 				for (i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
@@ -460,8 +459,6 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 					php_dom_create_object(node, &child, &intern->dom);
 					add_next_index_zval(&retval, &child);
 				}
-			} else {
-				ZVAL_EMPTY_ARRAY(&retval);
 			}
 			php_dom_create_interator(return_value, DOM_NODELIST);
 			nodeobj = Z_DOMOBJ_P(return_value);
