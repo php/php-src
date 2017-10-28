@@ -295,6 +295,7 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 	strcpy(our_format, ok_format);
 	char *pz = NULL;
 	char escape = 0;
+	time_t decim;
 
 	for(pz = our_format; *pz != 0; pz++) {
 		if (*pz == '\\') {
@@ -302,12 +303,22 @@ static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETI
 			continue;
 		}
 		if (!escape && *pz == 'u') {
-			sprintf(pz, "%06d", (dta->time % 10000000 + 5) / 10);
+			decim = (dta->time % 10000000 + 5) / 10;
+			if (decim >= 1000000) {
+				decim = 0;
+				ts++;
+			}
+			sprintf(pz, "%06d", decim);
 			strcpy(pz + 6, ok_format + (pz - our_format) + 1);
 			break;
 		}
 		if (!escape && *pz == 'f') {
-			sprintf(pz, "%03d", (dta->time % 10000000 + 5000) / 10000);
+			decim = (dta->time % 10000000 + 5000) / 10000;
+			if (decim >= 1000) {
+				decim = 0;
+				ts++;
+			}
+			sprintf(pz, "%03d", decim);
 			strcpy(pz + 3, ok_format + (pz - our_format) + 1);
 			break;
 		}
