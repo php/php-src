@@ -52,7 +52,7 @@ if (!extension_loaded('pcre')) {
 +-----------------------------------------------------------+
 
 NO_PCRE_ERROR;
-exit;
+exit(1);
 }
 
 if (!function_exists('proc_open')) {
@@ -65,7 +65,7 @@ if (!function_exists('proc_open')) {
 +-----------------------------------------------------------+
 
 NO_PROC_OPEN_ERROR;
-exit;
+exit(1);
 }
 
 // If timezone is not set, use UTC.
