@@ -15931,7 +15931,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_RETVAL_UNUSED
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	increment_function(var_ptr);
 
@@ -15971,7 +15970,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_VAR_RETVAL_USED_H
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	increment_function(var_ptr);
 
@@ -16011,7 +16009,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_RETVAL_UNUSED
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -16051,7 +16048,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_VAR_RETVAL_USED_H
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -17773,7 +17769,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -17824,7 +17819,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -17898,7 +17892,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -18198,7 +18191,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -20863,7 +20855,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -22117,7 +22108,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -22168,7 +22158,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -22242,7 +22231,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -22542,7 +22530,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -24738,7 +24725,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -24789,7 +24775,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -24864,7 +24849,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -25165,7 +25149,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -27190,7 +27173,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -27336,7 +27318,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -29848,7 +29829,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -29994,7 +29974,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -31606,7 +31585,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -31752,7 +31730,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -33264,7 +33241,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_CV_RETVAL_UNUSED_
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	increment_function(var_ptr);
 
@@ -33303,7 +33279,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_INC_SPEC_CV_RETVAL_USED_HA
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	increment_function(var_ptr);
 
@@ -33342,7 +33317,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_CV_RETVAL_UNUSED_
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -33381,7 +33355,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_PRE_DEC_SPEC_CV_RETVAL_USED_HA
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	SEPARATE_ZVAL_NOREF(var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -35694,7 +35667,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -35745,7 +35717,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -35819,7 +35790,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -36119,7 +36089,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -39942,7 +39911,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -42241,7 +42209,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -42292,7 +42259,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -42366,7 +42332,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -42666,7 +42631,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);
@@ -45954,7 +45918,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 				}
 			} else {
 				ZVAL_DEREF(zptr);
-				SEPARATE_ZVAL_NOREF(zptr);
 
 				binary_op(zptr, zptr, value);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -46005,7 +45968,6 @@ assign_dim_op_new_array:
 				goto assign_dim_op_ret_null;
 			}
 			ZVAL_DEREF(var_ptr);
-			SEPARATE_ZVAL_NOREF(var_ptr);
 		}
 
 		value = get_op_data_zval_ptr_r((opline+1)->op1_type, (opline+1)->op1, &free_op_data1);
@@ -46080,7 +46042,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_simple_helper
 		}
 	} else {
 		ZVAL_DEREF(var_ptr);
-		SEPARATE_ZVAL_NOREF(var_ptr);
 
 		binary_op(var_ptr, var_ptr, value);
 
@@ -46381,7 +46342,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					SEPARATE_ZVAL_NOREF(zptr);
 
 					if (inc) {
 						increment_function(zptr);

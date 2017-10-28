@@ -302,12 +302,12 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
 
-ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce);
+ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent);
 
-#define zend_register_class_alias(name, ce) \
-	zend_register_class_alias_ex(name, sizeof(name)-1, ce)
-#define zend_register_ns_class_alias(ns, name, ce) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce)
+#define zend_register_class_alias(name, ce, persistent) \
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce, persistent)
+#define zend_register_ns_class_alias(ns, name, ce, persistent) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, persistent)
 
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);

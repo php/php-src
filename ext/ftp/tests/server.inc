@@ -286,7 +286,7 @@ if ($pid) {
 				file_put_contents(__DIR__.'/'.$m[1], $data, FILE_APPEND);
 				fputs($s, "226 Closing data Connection.\r\n");
 				fclose($fs);
-            }
+			}
 
 		}elseif (preg_match("~^CWD ([A-Za-z./]+)\r\n$~", $buf, $m)) {
 			change_dir($m[1]);
@@ -395,17 +395,17 @@ if ($pid) {
 					$transfer_type = $ascii? 'ASCII' : 'BINARY' ;
 					fputs($fs, "Bar\r\n");
 					fputs($s, "226 Closing data Connection.\r\n");
-                                        break;
-                                case "fget_large":
+					break;
+				case "fget_large":
 					fputs($s, "150 File status okay; about to open data connection.\r\n");
-                                        $transfer_type = $ascii? 'ASCII' : 'BINARY' ;
-                                        if ($GLOBALS['rest_pos'] == '5368709119') {
-					    fputs($fs, "X");
-                                        } else {
-					    fputs($fs, "Y");
-                                        }
+					$transfer_type = $ascii? 'ASCII' : 'BINARY' ;
+					if ($GLOBALS['rest_pos'] == '5368709119') {
+						fputs($fs, "X");
+					} else {
+						fputs($fs, "Y");
+					}
 					fputs($s, "226 Closing data Connection.\r\n");
-                                        break;
+					break;
 				case "mediumfile":
 					fputs($s, "150 File status okay; about to open data connection.\r\n");
 					for($i = 0; $i < 150; $i++){
@@ -471,11 +471,17 @@ if ($pid) {
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 
-                }elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
-                        $GLOBALS['rest_pos'] = $matches[1];
+		}elseif (preg_match('/^REST (\d+)/', $buf, $matches)) {
+			$GLOBALS['rest_pos'] = $matches[1];
 			fputs($s, "350 OK\r\n");
-                }elseif (preg_match('/^SIZE largefile/', $buf)) {
-                        fputs($s, "213 5368709120\r\n");
+		}elseif (preg_match('/^SIZE largefile/', $buf)) {
+			fputs($s, "213 5368709120\r\n");
+		}elseif (preg_match('/^RNFR existing_file/', $buf, $matches)) {
+			fputs($s, "350 File or directory exists, ready for destination name\r\n");
+		}elseif (preg_match('/^RNFR nonexisting_file/', $buf, $matches)) {
+			fputs($s, "550 No such file or directory\r\n");
+		}elseif (preg_match('/^RNTO nonexisting_file/', $buf, $matches)) {
+			fputs($s, "250 Rename successful\r\n");
 		}elseif (preg_match('/^MLSD no_exists\//', $buf, $matches)) {
 			fputs($s, "425 Error establishing connection\r\n");
 		}elseif (preg_match("~^MLSD(?: ([A-Za-z./]+))?\r\n$~", $buf, $m)) {
@@ -518,7 +524,7 @@ if ($pid) {
 
 			fputs($s, "226 Closing data Connection.\r\n");
 			fclose($fs);
-                }else {
+		}else {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
 			dump_and_exit($buf);
 		}

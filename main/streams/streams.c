@@ -1686,7 +1686,7 @@ PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
 static void clone_wrapper_hash(void)
 {
 	ALLOC_HASHTABLE(FG(stream_wrappers));
-	zend_hash_init(FG(stream_wrappers), zend_hash_num_elements(&url_stream_wrappers_hash), NULL, NULL, 1);
+	zend_hash_init(FG(stream_wrappers), zend_hash_num_elements(&url_stream_wrappers_hash), NULL, NULL, 0);
 	zend_hash_copy(FG(stream_wrappers), &url_stream_wrappers_hash, NULL);
 }
 

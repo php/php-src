@@ -1364,7 +1364,6 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			ZVAL_COPY_VALUE(z, value);
 		}
 		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
 		if (inc) {
 			increment_function(z);
 		} else {
@@ -1412,7 +1411,6 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		}
 		zptr = z;
 		ZVAL_DEREF(z);
-		SEPARATE_ZVAL_NOREF(z);
 		binary_op(z, z, value);
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
 		if (UNEXPECTED(result)) {

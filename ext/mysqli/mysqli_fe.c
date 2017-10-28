@@ -436,7 +436,7 @@ const zend_function_entry mysqli_functions[] = {
 	PHP_FE(mysqli_fetch_field_direct,					arginfo_mysqli_result_and_fieldnr)
 	PHP_FE(mysqli_fetch_lengths,						arginfo_mysqli_only_result)
 #ifdef MYSQLI_USE_MYSQLND
-	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_only_result)
+	PHP_FE(mysqli_fetch_all,							arginfo_mysqli_fetch_array)
 #endif
 	PHP_FE(mysqli_fetch_array,							arginfo_mysqli_fetch_array)
 	PHP_FE(mysqli_fetch_assoc,							arginfo_mysqli_only_result)
@@ -616,7 +616,7 @@ const zend_function_entry mysqli_result_methods[] = {
 	PHP_FALIAS(fetch_fields, mysqli_fetch_fields, arginfo_mysqli_no_params)
 	PHP_FALIAS(fetch_field_direct, mysqli_fetch_field_direct, arginfo_class_mysqli_result_and_fieldnr)
 #if defined(MYSQLI_USE_MYSQLND)
-	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_mysqli_no_params)
+	PHP_FALIAS(fetch_all, mysqli_fetch_all, arginfo_class_mysqli_fetch_array)
 #endif
 	PHP_FALIAS(fetch_array, mysqli_fetch_array, arginfo_class_mysqli_fetch_array)
 	PHP_FALIAS(fetch_assoc, mysqli_fetch_assoc, arginfo_mysqli_no_params)
