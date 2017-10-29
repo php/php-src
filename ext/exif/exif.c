@@ -19,20 +19,6 @@
 
 /* $Id$ */
 
-/*  ToDos
- *
- * 	See if example images from http://www.exif.org have illegal
- * 		thumbnail sizes or if code is corrupt.
- * 	Create/Update exif headers.
- * 	Create/Remove/Update image thumbnails.
- */
-
-/*  Security
- *
- *  At current time i do not see any security problems but a potential
- *  attacker could generate an image with recursive ifd pointers...(Marcus)
- */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
