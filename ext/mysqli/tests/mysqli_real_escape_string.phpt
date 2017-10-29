@@ -44,8 +44,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_real_escape_string($link, 'foo')))
-		printf("[010] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_real_escape_string($link, 'foo')))
+		printf("[010] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	/* Make sure that the function alias exists */
 	if (NULL !== ($tmp = @mysqli_escape_string()))

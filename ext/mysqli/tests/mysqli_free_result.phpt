@@ -60,7 +60,7 @@ NULL
 b
 
 Warning: mysqli_free_result(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 c
 bool(false)
 %s(0) ""

@@ -25,8 +25,8 @@ require_once('skipifconnectfailure.inc');
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
 	// Yes, amazing, eh? AFAIK a work around of a constructor bug...
-	if (!is_null($tmp = mysqli_stmt_close($stmt)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_close($stmt)))
+		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test"))
 		printf("[005] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -34,8 +34,8 @@ require_once('skipifconnectfailure.inc');
 	if (true !== ($tmp = mysqli_stmt_close($stmt)))
 		printf("[006] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_null($tmp = mysqli_stmt_close($stmt)))
-		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_close($stmt)))
+		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[008] [%d] %s\n", mysqli_errno($link), mysqli_error($link));

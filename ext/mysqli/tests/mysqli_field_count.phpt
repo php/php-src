@@ -59,5 +59,5 @@ int(0)
 int(3)
 
 Warning: mysqli_field_count(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

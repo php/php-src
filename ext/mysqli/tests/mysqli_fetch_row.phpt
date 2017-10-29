@@ -55,5 +55,5 @@ array(3) {
 NULL
 
 Warning: mysqli_fetch_row(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

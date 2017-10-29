@@ -46,5 +46,5 @@ NULL
 %s(5) "00000"
 
 Warning: mysqli_sqlstate(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!
