@@ -34,6 +34,9 @@
 #include "zend_exceptions.h"
 
 
+static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *param,
+		enum pdo_param_event event_type);
+
 /* {{{ pdo_dblib_get_field_name
  *
  * Return the data type name for a given TDS number
@@ -112,6 +115,10 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 
+	if (S->enable_rpc && !stmt->executed) {
+		dbrpcinit(S->H->link, "", DBRPCRESET);
+	}
+
 	pdo_dblib_err_dtor(&S->err);
 
 	efree(S);
@@ -183,6 +190,21 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 	pdo_dblib_stmt_cursor_closer(stmt);
 
 	if (S->enable_rpc) {
+		if (stmt->executed) {
+			/* need to call dbrpcinit & dbrpcparam again */
+			if (FAIL == dbrpcinit(H->link, stmt->query_string, 0)) {
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Unable to re-init.");
+				return 0;
+			}
+			
+			struct pdo_bound_param_data *param;
+			ZEND_HASH_FOREACH_PTR(stmt->bound_params, param) {
+				if (!pdo_dblib_stmt_param_hook(stmt, param, PDO_PARAM_EVT_ALLOC)) {
+					return 0;					
+				}
+			} ZEND_HASH_FOREACH_END();
+		}
+
 		ret = dbrpcexec(H->link);
 		if (FAIL == ret || FAIL == dbsqlok(H->link)) {
 			if (FAIL == ret) {
@@ -617,8 +639,14 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		param_name = ZSTR_VAL(param->name);
 	}
 
-	/* force "@" prefix instead of ":" */
+	/* init param */
 	if (event_type == PDO_PARAM_EVT_NORMALIZE) {
+		if (stmt->executed) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Can't bind after execution.");
+			return 0;
+		}
+
+		/* force "@" prefix instead of ":" */
 		if (param_name) {
 			param_name[0] = '@';
 		} else if (param->paramno != zend_hash_num_elements(stmt->bound_params)) {

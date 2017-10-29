@@ -28,6 +28,17 @@ $st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms);
 
+$st = $db->prepare('test', [PDO::DBLIB_ATTR_RPC => 1]);
+try {
+  $prm = 1;
+  $st->bindParam(2, $prm);
+} catch (PDOException $e) {
+  $st = null;
+  if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Numbered parameters must be") > -1) {
+    echo "ok\n";
+  }
+}
+
 /* numbered */
 $prms = ['a' => 'test', 'b' => 2];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
@@ -65,6 +76,10 @@ $st->bindParam('a', $prms['a']);
 $st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms['b']);
+
+$prms['a'] = 'redo';
+$st->execute();
+var_dump($prms['b']);
 ?>
 --EXPECT--
 bool(false)
@@ -81,6 +96,7 @@ array(3) {
   ["r"]=>
   &int(0)
 }
+ok
 array(3) {
   ["a"]=>
   &string(4) "test"
@@ -103,3 +119,4 @@ array(4) {
 string(3) "sel"
 bool(true)
 string(7) "selskip"
+string(4) "redo"
