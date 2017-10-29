@@ -111,6 +111,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	S->err.sqlstate = stmt->error_code;
 	S->enable_rpc = 0;
 	S->skip_results = 0;
+	S->return_count = 0;
 
 	if (driver_options) {
 		S->enable_rpc = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC, 0);

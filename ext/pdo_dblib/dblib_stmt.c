@@ -609,7 +609,6 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		enum pdo_param_event event_type)
 {
 	if (
-		event_type == PDO_PARAM_EVT_FREE ||
 		event_type == PDO_PARAM_EVT_EXEC_PRE ||
 		event_type == PDO_PARAM_EVT_FETCH_PRE
 	) {
@@ -618,6 +617,10 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
+	pdo_dblib_param *P;
+	zval *parameter;
+	char *param_name = NULL;
+	int is_retval;
 
 	if (!S->enable_rpc) {
 		return 1;
@@ -627,19 +630,26 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		return 0;
 	}
 
-	zval *parameter;
+	/* FREE: free driver_data */
+	if (event_type == PDO_PARAM_EVT_FREE) {
+		if (param->driver_data) {
+			efree(param->driver_data);
+		}
+		return 1;
+	}
+
 	if (!Z_ISREF(param->parameter)) {
 		parameter = &param->parameter;
 	} else {
 		parameter = Z_REFVAL(param->parameter);
 	}
 
-	char *param_name = NULL;
 	if (param->paramno == -1) {
 		param_name = ZSTR_VAL(param->name);
 	}
 
-	/* init param */
+
+	/* NORMALIZE: init/check param */
 	if (event_type == PDO_PARAM_EVT_NORMALIZE) {
 		if (stmt->executed) {
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Can't bind after execution.");
@@ -656,9 +666,10 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 		return 1;
 	}
-	int is_retval = param_name && !strncmp(param_name, "@RETVAL", sizeof("@RETVAL")-1);
+	is_retval = param_name && !strncmp(param_name, "@RETVAL", sizeof("@RETVAL")-1);
 
-	/* bind param */
+
+	/* ALLOC: call bind */
 	if (event_type == PDO_PARAM_EVT_ALLOC && !is_retval) {
 		char *value = NULL;
 		int datalen = 0, status = 0;
@@ -692,6 +703,11 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 		if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
 			status = DBRPCRETURN;
+			if (!param->driver_data) {
+				P = emalloc(sizeof(*P));
+				P->return_pos = S->return_count++;
+				param->driver_data = P;
+			}
 		}
 
 		if (FAIL == dbrpcparam(H->link, param_name, (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
@@ -703,7 +719,8 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		return 1;
 	}
 
-	/* get return value */
+
+	/* FETCH/EXEC: get return value */
 	if (
 		/* after FETCH with results / EXEC without */
 		(event_type == PDO_PARAM_EVT_EXEC_POST || event_type == PDO_PARAM_EVT_FETCH_POST) &&
@@ -720,49 +737,27 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 		}
 
 		/* fetch value from returns */
-		int num_rets, i, ok;
+		int num_rets;
 		char *value = NULL;
-		char *name = NULL;
 		size_t value_len = 0;
 
 		if (!(num_rets = dbnumrets(H->link))) {
 			return 1;
 		}
 
-		ok = 0;
-		if (param_name) {
-			/* named param: search using dbretname */
-			for (i = 1; i <= num_rets; i++) {
-				name = (char *)dbretname(H->link, i);
-				if (!strncmp(param_name, name, sizeof(name))) {
-					ok = 1;
-					break;
-				}
-			}
-		} else {
-			/* named param: count output params */
-			struct pdo_bound_param_data *prm;
-			i = 0;
-			ZEND_HASH_FOREACH_PTR(stmt->bound_params, prm) {
-				if ((prm->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
-					i++;
-					if (i > num_rets) {
-						break;
-					}
-				}
-				if (prm->paramno == param->paramno) {
-					ok = 1;
-					break;
-				}
-			} ZEND_HASH_FOREACH_END();
-		}
-
-		if (!ok) {
-			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Unable to get output parameter.");
+		P = (pdo_dblib_param*)param->driver_data;
+		if (P->return_pos >= num_rets) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Missing output parameter.");
 			return 0;
 		}
 
-		pdo_dblib_stmt_get_col_or_ret(stmt, i-1, &value, &value_len, 1);
+		/* not worth checking
+		if (param_name && strcmp(param_name, dbretname(H->link, P->return_pos+1))) {
+			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Output param name error.");
+			return 0;
+		} */
+
+		pdo_dblib_stmt_get_col_or_ret(stmt, P->return_pos, &value, &value_len, 1);
 
 		if (value && value_len == sizeof(zval)) {
 			ZVAL_COPY_VALUE(parameter, (zval *)value);

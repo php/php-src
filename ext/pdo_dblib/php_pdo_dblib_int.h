@@ -136,7 +136,12 @@ typedef struct {
 	unsigned int computed_column_name_count;
 	unsigned enable_rpc:1;
 	unsigned skip_results:1;
+	unsigned int return_count;
 } pdo_dblib_stmt;
+
+typedef struct {
+	unsigned int return_pos;
+} pdo_dblib_param;
 
 typedef struct {
 	const char* key;
