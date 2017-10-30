@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
 
