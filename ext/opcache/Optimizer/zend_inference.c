@@ -3083,8 +3083,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 					j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
 				}
-				if ((tmp & MAY_BE_ARRAY)
-				 && (tmp & (MAY_BE_ARRAY_KEY_LONG|MAY_BE_ARRAY_KEY_STRING))) {
+				if ((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) {
 					UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
 				} else {
 					/* invalid key type */
