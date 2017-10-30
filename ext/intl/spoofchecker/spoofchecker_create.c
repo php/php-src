@@ -43,7 +43,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	co->uspoof = uspoof_open(SPOOFCHECKER_ERROR_CODE_P(co));
 	INTL_METHOD_CHECK_STATUS(co, "spoofchecker: unable to open ICU Spoof Checker");
 
-#if U_ICU_VERSION_MAJOR_NUM >= 58
+#if U_ICU_VERSION_MAJOR_NUM >= 51
 	/* TODO save it into the object for further suspiction check comparison. */
 	/* ICU 58 removes WSC and MSC handling. However there are restriction
 	 levels as defined in
