@@ -662,6 +662,23 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_BUCKET(EG(ini_directives), p) {
+		zend_ini_entry *entry = (zend_ini_entry*)Z_PTR(p->val);
+
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+		if (entry->name) {
+			entry->name = new_interned_string(entry->name);
+		}
+		if (entry->value) {
+			entry->value = new_interned_string(entry->value);
+		}
+		if (entry->orig_value) {
+			entry->orig_value = new_interned_string(entry->orig_value);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)

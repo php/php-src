@@ -2347,6 +2347,10 @@ void php_module_shutdown(void)
 
 	php_output_shutdown();
 
+#ifndef ZTS
+	zend_interned_strings_dtor();
+#endif
+
 	module_initialized = 0;
 
 #ifndef ZTS
