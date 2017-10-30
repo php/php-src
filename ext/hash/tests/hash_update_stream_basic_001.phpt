@@ -7,6 +7,8 @@ Symeon Charalabides <symeon@systasis.com> - @phpdublin
 if (phpversion() < "5.3.0") {
     die('SKIP - php version too low.');
 }
+if (!extension_loaded('hash')) die('skip hash extension not available');
+if (!extension_loaded('openssl')) die('skip openssl extension not available');
 require_once(dirname(__FILE__) . '/skip_mhash.inc'); ?>
 ?>
 --FILE--
