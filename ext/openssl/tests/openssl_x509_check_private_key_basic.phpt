@@ -19,7 +19,7 @@ var_dump(openssl_x509_check_private_key($cert, $key));
 var_dump(openssl_x509_check_private_key("", $key));
 var_dump(openssl_x509_check_private_key($cert, ""));
 var_dump(openssl_x509_check_private_key("", ""));
-var_dump(openssl_x509_check_private_key($a, $b));
+var_dump(openssl_x509_check_private_key(openssl_x509_read($a), $b));
 ?>
 --EXPECT--
 bool(true)
