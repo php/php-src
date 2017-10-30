@@ -3038,6 +3038,16 @@ ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_n
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
 }
 
+ZEND_API ZEND_COLD void zend_vm_pause(void (*fn)(const zend_op*, zend_execute_data*)) /* {{{ */
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	*((const zend_op**)&EG(pause_op).op1) = EX(prev_execute_data)->opline + 1;
+	*((void**)&EG(pause_op).result) = fn;
+
+	EX(prev_execute_data)->opline = (&EG(pause_op)) - 1; /* zend_vm will do opline++ */
+}
+
 /*
  * Local variables:
  * tab-width: 4
