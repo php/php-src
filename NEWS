@@ -106,6 +106,9 @@ PHP                                                                        NEWS
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
 
+- SOAP:
+  . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
+
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
