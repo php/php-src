@@ -17,10 +17,17 @@ if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	echo Cloning remote SDK repository
 	git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1 
 ) else (
-	echo Fetching remote SDK repository
-	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
-	echo Checkout SDK repository branch
-	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH% 
+	git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" status 2>&1
+	if %errorlevel% neq 0 (
+		rmdir /s /q "%PHP_BUILD_CACHE_SDK_DIR%"
+		echo Cloning remote SDK repository
+		git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1 
+	) else (
+		echo Fetching remote SDK repository
+		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
+		echo Checkout SDK repository branch
+		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" checkout --force %SDK_BRANCH% 
+	)
 )
 
 set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-vc14-%PLATFORM%.bat
