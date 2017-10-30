@@ -14,7 +14,7 @@ $cert_res = openssl_x509_read($cert);
 $priv_res = openssl_pkey_get_private($priv);
 $pass = "test";
 $invalid = "";
-$invalid_path = "file:///tmp/php";
+$invalid_path = dirname(__FILE__) . "/invalid_path";
 $opts = [];
 
 var_dump(openssl_pkcs12_export($cert, $output, $priv, $pass)); // read certs as a string
