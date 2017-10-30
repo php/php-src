@@ -590,7 +590,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				return zend_use_undefined_constant(name, ast->attr, p);
 			}
 			zval_ptr_dtor_nogc(p);
-			ZVAL_DUP(p, zv);
+			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
 			zval tmp;
 

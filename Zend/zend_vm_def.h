@@ -5055,15 +5055,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED, CONST, CONST_FETCH)
 		CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2)), c);
 	}
 
-#ifdef ZTS
-	if (c->flags & CONST_PERSISTENT) {
-		ZVAL_DUP(EX_VAR(opline->result.var), &c->value);
-	} else {
-		ZVAL_COPY(EX_VAR(opline->result.var), &c->value);
-	}
-#else
-	ZVAL_COPY(EX_VAR(opline->result.var), &c->value);
-#endif
+	ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), &c->value);
 
 	ZEND_VM_NEXT_OPCODE();
 }
@@ -5081,9 +5073,6 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 		if (OP1_TYPE == IS_CONST) {
 			if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2))))) {
 				value = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2)));
-#ifdef ZTS
-				ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)));
-#endif
 				break;
 			} else if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1))))) {
 				ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)));
@@ -5140,15 +5129,7 @@ ZEND_VM_HANDLER(181, ZEND_FETCH_CLASS_CONSTANT, VAR|CONST|UNUSED|CLASS_FETCH, CO
 		}
 	} while (0);
 
-#ifdef ZTS
-	if (ce->type == ZEND_INTERNAL_CLASS) {
-		ZVAL_DUP(EX_VAR(opline->result.var), value);
-	} else {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
-	}
-#else
-	ZVAL_COPY(EX_VAR(opline->result.var), value);
-#endif
+	ZVAL_COPY_OR_DUP(EX_VAR(opline->result.var), value);
 
 	ZEND_VM_NEXT_OPCODE();
 }

@@ -98,12 +98,6 @@ static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 }
 /* }}} */
 
-static void zend_destroy_class_constant_internal(zval *zv) /* {{{ */
-{
-	free(Z_PTR_P(zv));
-}
-/* }}} */
-
 static zend_string *zend_new_interned_string_safe(zend_string *str) /* {{{ */ {
 	zend_string *interned_str;
 
@@ -1402,7 +1396,7 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 	      ((c->flags & CONST_PERSISTENT) && !(CG(compiler_options) & ZEND_COMPILE_NO_PERSISTENT_CONSTANT_SUBSTITUTION))
 	   || (Z_TYPE(c->value) < IS_OBJECT && !(CG(compiler_options) & ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION))
 	)) {
-		ZVAL_DUP(zv, &c->value);
+		ZVAL_COPY_OR_DUP(zv, &c->value);
 		return 1;
 	}
 
@@ -1417,7 +1411,7 @@ static zend_bool zend_try_ct_eval_const(zval *zv, zend_string *name, zend_bool i
 
 		c = zend_lookup_reserved_const(lookup_name, lookup_len);
 		if (c) {
-			ZVAL_DUP(zv, &c->value);
+			ZVAL_COPY_OR_DUP(zv, &c->value);
 			return 1;
 		}
 	}
@@ -1570,7 +1564,7 @@ static zend_bool zend_try_ct_eval_class_const(zval *zv, zend_string *class_name,
 
 	/* Substitute case-sensitive (or lowercase) persistent class constants */
 	if (Z_TYPE_P(c) < IS_OBJECT) {
-		ZVAL_DUP(zv, c);
+		ZVAL_COPY_OR_DUP(zv, c);
 		return 1;
 	}
 
@@ -1760,7 +1754,7 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 	ce->default_properties_table = NULL;
 	ce->default_static_members_table = NULL;
 	zend_hash_init_ex(&ce->properties_info, 8, NULL, (persistent_hashes ? zend_destroy_property_info_internal : NULL), persistent_hashes, 0);
-	zend_hash_init_ex(&ce->constants_table, 8, NULL, (persistent_hashes ? zend_destroy_class_constant_internal : NULL), persistent_hashes, 0);
+	zend_hash_init_ex(&ce->constants_table, 8, NULL, NULL, persistent_hashes, 0);
 	zend_hash_init_ex(&ce->function_table, 8, NULL, ZEND_FUNCTION_DTOR, persistent_hashes, 0);
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {

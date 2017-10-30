@@ -1064,12 +1064,8 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 
 		/* copy: enforce read only access */
 		ZVAL_DEREF(prop);
-		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
-			ZVAL_DUP(&prop_copy, prop);
-			prop = &prop_copy;
-		} else {
-			Z_TRY_ADDREF_P(prop);
-		}
+		ZVAL_COPY_OR_DUP(&prop_copy, prop);
+		prop = &prop_copy;
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
@@ -2032,7 +2028,7 @@ static int add_constant_info(zval *item, void *arg) /* {{{ */
 		return 0;
 	}
 
-	ZVAL_DUP(&const_val, &constant->value);
+	ZVAL_COPY_OR_DUP(&const_val, &constant->value);
 	zend_hash_add_new(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
@@ -2108,7 +2104,7 @@ ZEND_FUNCTION(get_defined_constants)
 				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			ZVAL_DUP(&const_val, &val->value);
+			ZVAL_COPY_OR_DUP(&const_val, &val->value);
 			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 

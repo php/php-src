@@ -993,6 +993,26 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+
+/* ZVAL_COPY_OR_DUP() should be used instead of ZVAL_COPY() and ZVAL_DUP()
+ * in all places where the source may be a persistent zval.
+ */
+#define ZVAL_COPY_OR_DUP(z, v)											\
+	do {																\
+		zval *_z1 = (z);												\
+		const zval *_z2 = (v);											\
+		zend_refcounted *_gc = Z_COUNTED_P(_z2);						\
+		uint32_t _t = Z_TYPE_INFO_P(_z2);								\
+		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);							\
+		if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) {	\
+			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
+				GC_ADDREF(_gc);											\
+			} else {													\
+				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); 			\
+			}															\
+		}																\
+	} while (0)
+
 #define ZVAL_DEREF(z) do {								\
 		if (UNEXPECTED(Z_ISREF_P(z))) {					\
 			(z) = Z_REFVAL_P(z);						\
