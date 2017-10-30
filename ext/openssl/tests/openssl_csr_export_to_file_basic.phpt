@@ -43,6 +43,7 @@ var_dump(openssl_csr_export_to_file($csr, $csrfile, false));
 ?>
 --CLEAN--
 <?php
+$csrfile = dirname(__FILE__) . "/openssl_csr_export_to_file_csr.tmp";
 if (file_exists($csrfile)) {
 	unlink($csrfile);
 }
