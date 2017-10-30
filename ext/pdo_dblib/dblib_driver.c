@@ -102,6 +102,7 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
 	pdo_dblib_stmt *S = ecalloc(1, sizeof(*S));
+	pdo_dblib_rpc_stmt *rpc;
 
 	S->H = H;
 	stmt->driver_data = S;
@@ -109,16 +110,14 @@ static int dblib_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_len
 	stmt->supports_placeholders = PDO_PLACEHOLDER_NONE;
 	S->computed_column_name_count = 0;
 	S->err.sqlstate = stmt->error_code;
-	S->enable_rpc = 0;
-	S->skip_results = 0;
-	S->return_count = 0;
+	S->rpc = NULL;
 
-	if (driver_options) {
-		S->enable_rpc = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC, 0);
-		S->skip_results = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC_SKIP_RESULTS, 0);
-	}
+	if (driver_options && pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC, 0)) {
+		S->rpc = emalloc(sizeof(*rpc));
+		rpc = S->rpc;
+		rpc->return_count = 0;
+		rpc->skip_results = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_RPC_SKIP_RESULTS, 0);
 
-	if (S->enable_rpc) {
 		stmt->supports_placeholders = PDO_PLACEHOLDER_NAMED|PDO_PLACEHOLDER_POSITIONAL;
 
 		if (FAIL == dbrpcinit(H->link, sql, 0)) {

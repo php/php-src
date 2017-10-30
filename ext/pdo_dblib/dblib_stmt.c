@@ -115,8 +115,11 @@ static int pdo_dblib_stmt_dtor(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 
-	if (S->enable_rpc && !stmt->executed) {
-		dbrpcinit(S->H->link, "", DBRPCRESET);
+	if (S->rpc) {
+		if (!stmt->executed) {
+			dbrpcinit(S->H->link, "", DBRPCRESET);
+		}
+		efree(S->rpc);
 	}
 
 	pdo_dblib_err_dtor(&S->err);
@@ -183,13 +186,14 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
+	pdo_dblib_rpc_stmt *rpc = S->rpc;
 	RETCODE ret;
 
 	dbsetuserdata(H->link, (BYTE*) &S->err);
 
 	pdo_dblib_stmt_cursor_closer(stmt);
 
-	if (S->enable_rpc) {
+	if (rpc) {
 		if (stmt->executed) {
 			/* need to call dbrpcinit & dbrpcparam again */
 			if (FAIL == dbrpcinit(H->link, stmt->query_string, 0)) {
@@ -214,7 +218,7 @@ static int pdo_dblib_stmt_execute(pdo_stmt_t *stmt)
 			return 0;
 		}
 
-		if (S->skip_results) {
+		if (rpc->skip_results) {
 			while (SUCCEED == dbresults(H->link)) {
 				while(NO_MORE_ROWS != dbnextrow(H->link)) {};
 			}
@@ -617,12 +621,13 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
-	pdo_dblib_param *P;
+	pdo_dblib_rpc_stmt *rpc = S->rpc;
+	pdo_dblib_param *P = (pdo_dblib_param*)param->driver_data;
 	zval *parameter;
 	char *param_name = NULL;
 	int is_retval;
 
-	if (!S->enable_rpc) {
+	if (!rpc) {
 		return 1;
 	}
 
@@ -632,8 +637,8 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 	/* FREE: free driver_data */
 	if (event_type == PDO_PARAM_EVT_FREE) {
-		if (param->driver_data) {
-			efree(param->driver_data);
+		if (P) {
+			efree(P);
 		}
 		return 1;
 	}
@@ -703,9 +708,9 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 
 		if ((param->param_type & PDO_PARAM_INPUT_OUTPUT) == PDO_PARAM_INPUT_OUTPUT) {
 			status = DBRPCRETURN;
-			if (!param->driver_data) {
+			if (!P) {
 				P = emalloc(sizeof(*P));
-				P->return_pos = S->return_count++;
+				P->return_pos = rpc->return_count++;
 				param->driver_data = P;
 			}
 		}
@@ -745,7 +750,6 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 			return 1;
 		}
 
-		P = (pdo_dblib_param*)param->driver_data;
 		if (P->return_pos >= num_rets) {
 			pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Missing output parameter.");
 			return 0;
@@ -775,15 +779,18 @@ static int pdo_dblib_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 static int pdo_dblib_stmt_set_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_rpc_stmt *rpc = S->rpc;
 
 	switch(attr) {
-		/* must be set at prepare time
+		/* must be set at prepare time */
 		case PDO_DBLIB_ATTR_RPC:
-			S->enable_rpc = zval_is_true(val);
-			return 1; */
+			return 0;
 		case PDO_DBLIB_ATTR_RPC_SKIP_RESULTS:
-			S->skip_results = zval_is_true(val);
-			return 1;
+			if (rpc) {
+				rpc->skip_results = zval_is_true(val);
+				return 1;
+			}
+			return 0;
 		default:
 			return 0;
 	}
@@ -792,13 +799,14 @@ static int pdo_dblib_stmt_set_attr(pdo_stmt_t *stmt, zend_long attr, zval *val)
 static int pdo_dblib_stmt_get_attr(pdo_stmt_t *stmt, zend_long attr, zval *return_value)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_rpc_stmt *rpc = S->rpc;
 
 	switch(attr) {
 		case PDO_DBLIB_ATTR_RPC:
-			ZVAL_BOOL(return_value, S->enable_rpc);
+			ZVAL_BOOL(return_value, rpc);
 			return 1;
 		case PDO_DBLIB_ATTR_RPC_SKIP_RESULTS:
-			ZVAL_BOOL(return_value, S->skip_results);
+			ZVAL_BOOL(return_value, rpc ? rpc->skip_results : 0);
 			return 1;
 		default:
 			return 0;

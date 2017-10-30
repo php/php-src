@@ -17,47 +17,61 @@ $st->execute([':test' => 1]);
 var_dump($st->fetch(PDO::FETCH_ASSOC));
 
 /* RPC */
-$prms = ['a' => 'test', 'b' => null];
+$prms = [];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
 var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC));
+var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC_SKIP_RESULTS));
 $st->bindValue('stmt', 'set @b = @a');
 $st->bindValue('params', '@a varchar(10), @b varchar(10) out');
-$st->bindParam('a', $prms['a']);
+$st->bindValue('a', 'test!');
 $st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms);
 
-$st = $db->prepare('test', [PDO::DBLIB_ATTR_RPC => 1]);
+/* error */
+$st = $db->prepare('sp_doesnt_exist', [PDO::DBLIB_ATTR_RPC => 1]);
 try {
-  $prm = 1;
-  $st->bindParam(2, $prm);
+  $st->execute();
 } catch (PDOException $e) {
   $st = null;
-  if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Numbered parameters must be") > -1) {
-    echo "ok\n";
-  }
+  if (strpos($e->getMessage(), "not find stored procedure 'sp_doesnt_exist'") > -1) echo "ok\n";
 }
 
-/* numbered */
-$prms = ['a' => 'test', 'b' => 2];
+/* numbered params check */
+$st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
+try {
+	$st->bindValue(2, 1);
+} catch (PDOException $e) {
+	$st = null;
+	if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Numbered parameters must be") > -1) echo "ok\n";
+}
+
+/* numbered params mixed */
+$prms = [];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
 $st->bindValue(1, 'set @b = @a');
 $st->bindValue(2, '@a varchar(10), @b varchar(10) out');
-$st->bindParam('a', $prms['a']);
+$st->bindValue('a', 'numbered');
 $st->bindParam(4, $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms);
 
+/* re-bind check */
+try {
+  $st->bindValue('a', 'test');
+} catch (PDOException $e) {
+  if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Can't bind after execution") > -1) echo "ok\n";
+}
+
 /* types */
-$prms = ['a' => 'sel', 'b' => null, 'c' => 1, 'd' => 1.2, 'e' => 'test'];
+$prms = ['c' => 1, 'd' => 1.2, 'e' => 'test'];
 for ($i=0; $i<12; $i++) $prms['e'] .= $prms['e'];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
-var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC_SKIP_RESULTS));
 $st->bindValue('stmt', 'set @b = @a; select b=@b, c=@c, d=@d, e=len(@e)');
 $st->bindValue('params', '@a varchar(10), @c float=null, @d float=null, @e varchar(max)=null, @b varchar(10) out');
-$st->bindParam('a', $prms['a']);
+$st->bindValue('a', 'select');
 $st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->bindParam('c', $prms['c'], PDO::PARAM_INT);
 $st->bindParam('d', $prms['d'], PDO::PARAM_INT);
@@ -66,20 +80,31 @@ $st->execute();
 var_dump($st->fetch(PDO::FETCH_ASSOC));
 var_dump($prms['b']);
 
-/* fetch skip */
-$prms = ['a' => 'selskip', 'b' => null];
+/* skip results */
+$prms = ['a' => 'selectskip'];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1, PDO::DBLIB_ATTR_RPC_SKIP_RESULTS => 1]);
 var_dump($st->getAttribute(PDO::DBLIB_ATTR_RPC_SKIP_RESULTS));
-$st->bindValue('stmt', 'set @b = @a; select @a');
-$st->bindValue('params', '@a varchar(10), @b varchar(10) out');
-$st->bindParam('a', $prms['a']);
-$st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
+$st->bindValue(1, 'set @b = @a; select @a, @b');
+$st->bindValue(2, '@a varchar(10), @b varchar(10) out');
+$st->bindParam(3, $prms['a']);
+$st->bindParam(4, $prms['b'], PDO::PARAM_INPUT_OUTPUT);
+$st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
-var_dump($prms['b']);
+var_dump($prms);
 
+/* redo */
 $prms['a'] = 'redo';
 $st->execute();
 var_dump($prms['b']);
+
+/* bindValue shortcut */
+$st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
+$st->execute([
+  'select a=@a',
+  '@a varchar(10)',
+  "sim'ple"
+]);
+var_dump($st->fetch(PDO::FETCH_ASSOC));
 ?>
 --EXPECT--
 bool(false)
@@ -88,27 +113,25 @@ array(1) {
   string(1) "1"
 }
 bool(true)
-array(3) {
-  ["a"]=>
-  &string(4) "test"
+bool(false)
+array(2) {
   ["b"]=>
-  &string(4) "test"
+  &string(5) "test!"
   ["r"]=>
   &int(0)
 }
 ok
-array(3) {
-  ["a"]=>
-  &string(4) "test"
+ok
+array(2) {
   ["b"]=>
-  &string(4) "test"
+  &string(8) "numbered"
   ["r"]=>
   &int(0)
 }
-bool(false)
+ok
 array(4) {
   ["b"]=>
-  string(3) "sel"
+  string(6) "select"
   ["c"]=>
   float(1)
   ["d"]=>
@@ -116,7 +139,18 @@ array(4) {
   ["e"]=>
   int(16384)
 }
-string(3) "sel"
+string(6) "select"
 bool(true)
-string(7) "selskip"
+array(3) {
+  ["a"]=>
+  &string(10) "selectskip"
+  ["b"]=>
+  &string(10) "selectskip"
+  ["r"]=>
+  &int(0)
+}
 string(4) "redo"
+array(1) {
+  ["a"]=>
+  string(7) "sim'ple"
+}

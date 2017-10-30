@@ -131,12 +131,15 @@ typedef struct {
 } pdo_dblib_db_handle;
 
 typedef struct {
+	unsigned skip_results:1;
+	unsigned int return_count;
+} pdo_dblib_rpc_stmt;
+
+typedef struct {
 	pdo_dblib_db_handle *H;
 	pdo_dblib_err err;
 	unsigned int computed_column_name_count;
-	unsigned enable_rpc:1;
-	unsigned skip_results:1;
-	unsigned int return_count;
+	pdo_dblib_rpc_stmt *rpc;
 } pdo_dblib_stmt;
 
 typedef struct {
