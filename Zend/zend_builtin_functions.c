@@ -647,14 +647,9 @@ ZEND_FUNCTION(each)
 	zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 
 	/* add value elements */
-	if (Z_ISREF_P(entry)) {
-		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
-		entry = &tmp;
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-	} else {
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-	}
+	ZVAL_DEREF(entry);
+	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
 	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
 	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_VALUE), entry);
 

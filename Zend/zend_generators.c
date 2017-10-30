@@ -1014,14 +1014,14 @@ ZEND_METHOD(Generator, send)
  * Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {
-	zval *exception, exception_copy;
+	zval *exception;
 	zend_generator *generator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(exception)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DUP(&exception_copy, exception);
+	Z_TRY_ADDREF_P(exception);
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -1030,7 +1030,7 @@ ZEND_METHOD(Generator, throw)
 	if (generator->execute_data) {
 		zend_generator *root = zend_generator_get_current(generator);
 
-		zend_generator_throw_exception(root, &exception_copy);
+		zend_generator_throw_exception(root, exception);
 
 		zend_generator_resume(generator);
 
@@ -1044,7 +1044,7 @@ ZEND_METHOD(Generator, throw)
 	} else {
 		/* If the generator is already closed throw the exception in the
 		 * current context */
-		zend_throw_exception_object(&exception_copy);
+		zend_throw_exception_object(exception);
 	}
 }
 /* }}} */

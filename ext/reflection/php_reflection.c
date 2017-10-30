@@ -175,23 +175,9 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 	if ((value = _default_load_entry(object, name, name_len)) == NULL) {
 		RETURN_FALSE;
 	}
-	ZVAL_DUP(return_value, value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
-
-#ifdef ilia_0
-static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value) /* {{{ */
-{
-	zval **value;
-
-	if (zend_hash_find(Z_OBJPROP_P(object), name, name_len, (void **) &value) == FAILURE) {
-		*return_value = NULL;
-	} else {
-		*return_value = *value;
-	}
-}
-/* }}} */
-#endif
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
@@ -649,7 +635,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			zval zv;
 
 			smart_str_appends(str, " = ");
-			ZVAL_DUP(&zv, RT_CONSTANT(precv, precv->op2));
+			ZVAL_COPY(&zv, RT_CONSTANT(precv, precv->op2));
 			if (UNEXPECTED(zval_update_constant_ex(&zv, fptr->common.scope) == FAILURE)) {
 				zval_ptr_dtor(&zv);
 				return;
@@ -2812,7 +2798,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		return;
 	}
 
-	ZVAL_DUP(return_value, RT_CONSTANT(precv, precv->op2));
+	ZVAL_COPY(return_value, RT_CONSTANT(precv, precv->op2));
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(return_value, param->fptr->common.scope);
 	}
