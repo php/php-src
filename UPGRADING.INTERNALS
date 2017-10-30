@@ -14,6 +14,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   k. Array/Object recursion protection
   l. HASH_FLAG_PERSISTENT
   m. AST and IS_CONSTANT
+  n. GC_REFCOUNT()
 
 2. Build system changes
   a. Unix build system changes
@@ -98,6 +99,14 @@ PHP 7.2 INTERNALS UPGRADE NOTES
      represented using IS_CONSTANT_AST (ZEND_AST_CONSTANT kind). AST node
      attributes are used instead of constant flags. IS_TYPE_CONSTANT flag is
      removed, but Z_CONSTANT() macro is kept for compatibility.
+
+  m. GC_REFCOUNT() is turned into inline function and can't be modified direcly.
+     All reference-counting operations should be done through corresponding
+     macros GC_SET_REFCOUNT(), GC_ADDREF() and GC_DELREF().
+
+     GC_REFCOUNT(p)++ should be changed into GC_ADDREF(p),
+     GC_REFCOUNT(p)-- into GC_DELREF(p),
+     GC_REFCOUNT(p) = 1 into GC_SET_REFCOUNT(p, 1).
 
 ========================
 2. Build system changes
