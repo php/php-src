@@ -775,6 +775,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 		if (Z_TYPE(parent_const->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			c = pemalloc(sizeof(zend_class_constant), 1);
+			memcpy(c, parent_const, sizeof(zend_class_constant));
+			parent_const = c;
+		}
 		_zend_hash_append_ptr(&ce->constants_table, name, parent_const);
 	}
 }
@@ -1002,6 +1007,11 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 		zend_class_constant *ct;
 		if (Z_TYPE(c->value) == IS_CONSTANT_AST) {
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+		}
+		if (ce->type & ZEND_INTERNAL_CLASS) {
+			ct = pemalloc(sizeof(zend_class_constant), 1);
+			memcpy(ct, c, sizeof(zend_class_constant));
+			c = ct;
 		}
 		zend_hash_update_ptr(&ce->constants_table, name, c);
 	}

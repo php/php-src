@@ -351,8 +351,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 						if (c->doc_comment) {
 							zend_string_release(c->doc_comment);
 						}
-						free(c);
 					}
+					free(c);
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
