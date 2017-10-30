@@ -118,8 +118,6 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
-  . Short circuit case where array_slice() would return its original array.
-    (Sara, Benjamin Coutu)
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

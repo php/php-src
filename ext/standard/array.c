@@ -3563,15 +3563,6 @@ PHP_FUNCTION(array_slice)
 		return;
 	}
 
-	if ((offset == 0) && (length >= num_in)) {
-		zend_array *ht = Z_ARRVAL_P(input);
-		if (preserve_keys || (HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht))) {
-			/* No real slicing, and the keys will match, so just copy */
-			ZVAL_COPY(return_value, input);
-			return;
-		}
-	}
-
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
