@@ -9,9 +9,15 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #75437 (Wrong reflection on imagewebp). (Fabien Villepinte)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - Mysqli:
   . Fixed bug #75434 (Wrong reflection for mysqli_fetch_all function). (Fabien
     Villepinte)
+
+- SOAP:
+  . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
 
 26 Oct 2017, PHP 7.2.0RC5
 
@@ -46,9 +52,6 @@ PHP                                                                        NEWS
     $position argument). (Laruence)
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
-
-- interbase:
-  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
 
 - JSON:
   . Fixed bug #68567 (JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null
