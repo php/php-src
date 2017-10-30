@@ -253,8 +253,6 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */

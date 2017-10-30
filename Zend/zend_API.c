@@ -45,67 +45,6 @@ static zend_module_entry **module_post_deactivate_handlers;
 
 static zend_class_entry  **class_cleanup_handlers;
 
-/* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
-{
-	int arg_count;
-	va_list ptr;
-	zval **param, *param_ptr;
-
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-
-	if (param_count>arg_count) {
-		return FAILURE;
-	}
-
-	va_start(ptr, param_count);
-
-	while (param_count-->0) {
-		param = va_arg(ptr, zval **);
-		if (!Z_ISREF_P(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
-			zval new_tmp;
-
-			ZVAL_DUP(&new_tmp, param_ptr);
-			Z_DELREF_P(param_ptr);
-			ZVAL_COPY_VALUE(param_ptr, &new_tmp);
-		}
-		*param = param_ptr;
-		param_ptr++;
-	}
-	va_end(ptr);
-
-	return SUCCESS;
-}
-/* }}} */
-
-/* Zend-optimized Extended functions */
-/* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
-{
-	int arg_count;
-	va_list ptr;
-	zval **param, *param_ptr;
-
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-
-	if (param_count>arg_count) {
-		return FAILURE;
-	}
-
-	va_start(ptr, param_count);
-	while (param_count-->0) {
-		param = va_arg(ptr, zval **);
-		*param = param_ptr;
-		param_ptr++;
-	}
-	va_end(ptr);
-
-	return SUCCESS;
-}
-/* }}} */
-
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array) /* {{{ */
 {
 	zval *param_ptr;
