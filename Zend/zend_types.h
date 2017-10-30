@@ -892,7 +892,7 @@ static zend_always_inline uint32_t zend_gc_refcount(const zend_refcounted_h *p) 
 }
 
 static zend_always_inline uint32_t zend_gc_set_refcount(zend_refcounted_h *p, uint32_t rc) {
-    p->refcount = rc;
+	p->refcount = rc;
 	return p->refcount;
 }
 
