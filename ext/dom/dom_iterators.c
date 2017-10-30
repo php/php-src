@@ -197,8 +197,8 @@ static void php_dom_iterator_move_forward(zend_object_iterator *iter) /* {{{ */
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(&objmap->baseobj_zv);
-				zend_hash_move_forward(nodeht);
-				if ((entry = zend_hash_get_current_data(nodeht))) {
+				zend_hash_move_forward_ex(nodeht, &iterator->pos);
+				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
 					zval_ptr_dtor(&iterator->curobj);
 					ZVAL_UNDEF(&iterator->curobj);
 					ZVAL_COPY(&iterator->curobj, entry);
@@ -281,8 +281,8 @@ zend_object_iterator *php_dom_get_iterator(zend_class_entry *ce, zval *object, i
 			objmap->nodetype != XML_NOTATION_NODE) {
 			if (objmap->nodetype == DOM_NODESET) {
 				nodeht = HASH_OF(&objmap->baseobj_zv);
-				zend_hash_internal_pointer_reset(nodeht);
-				if ((entry = zend_hash_get_current_data(nodeht))) {
+				zend_hash_internal_pointer_reset_ex(nodeht, &iterator->pos);
+				if ((entry = zend_hash_get_current_data_ex(nodeht, &iterator->pos))) {
 					ZVAL_COPY(&iterator->curobj, entry);
 				}
 			} else {
