@@ -119,6 +119,10 @@ PHP                                                                        NEWS
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
 
+- Testing:
+  . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
+    (cmb)
+
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)
 
