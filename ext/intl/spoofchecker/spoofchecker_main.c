@@ -134,7 +134,7 @@ PHP_METHOD(Spoofchecker, setChecks)
 }
 /* }}} */
 
-#if U_ICU_VERSION_MAJOR_NUM >= 51
+#if U_ICU_VERSION_MAJOR_NUM >= 58
 /* {{{ proto void Spoofchecker::setRestrictionLevel( int $restriction_level )
  * Set the loosest restriction level allowed for strings.
  */
@@ -150,9 +150,7 @@ PHP_METHOD(Spoofchecker, setRestrictionLevel)
 	SPOOFCHECKER_METHOD_FETCH_OBJECT;
 
 	if (USPOOF_ASCII != level &&
-#if U_ICU_VERSION_MAJOR_NUM >= 53
 			USPOOF_SINGLE_SCRIPT_RESTRICTIVE != level &&
-#endif
 			USPOOF_HIGHLY_RESTRICTIVE != level &&
 			USPOOF_MODERATELY_RESTRICTIVE != level &&
 			USPOOF_MINIMALLY_RESTRICTIVE != level &&

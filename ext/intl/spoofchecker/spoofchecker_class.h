@@ -78,7 +78,7 @@ extern zend_class_entry *Spoofchecker_ce_ptr;
         RETURN_FALSE;                                                           \
     }                                                                           \
 
-#if U_ICU_VERSION_MAJOR_NUM >= 51
+#if U_ICU_VERSION_MAJOR_NUM >= 58
 #define SPOOFCHECKER_DEFAULT_RESTRICTION_LEVEL USPOOF_HIGHLY_RESTRICTIVE
 #endif
 
