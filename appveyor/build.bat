@@ -18,7 +18,9 @@ if not exist "%PHP_BUILD_CACHE_SDK_DIR%" (
 	git clone --branch %SDK_BRANCH% %SDK_REMOTE% "%PHP_BUILD_CACHE_SDK_DIR%" 2>&1 
 ) else (
 	for /f "tokens=*" %%a in ('type %PHP_BUILD_CACHE_SDK_DIR%\VERSION') do set GOT_SDK_VER=%%a
-	if "%GOT_SDK_VER%" NEQ "%SDK_BRANCH:~8%" (
+	echo Got SDK version %GOT_SDK_VER%
+	if NOT "%GOT_SDK_VER%" == "%PHP_BUILD_SDK_BRANCH:~8%" (
+		echo Updating to the configured SDK version %SDK_BRANCH:~8%
 		echo Fetching remote SDK repository
 		git --git-dir="%PHP_BUILD_CACHE_SDK_DIR%\.git" --work-tree="%PHP_BUILD_CACHE_SDK_DIR%" fetch --prune origin 2>&1
 		echo Checkout SDK repository branch
