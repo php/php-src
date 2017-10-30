@@ -1587,10 +1587,11 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 		if (!what) {
 			return NULL;
 		}
-		/* this is so callers can decide if they should free the X509 */
 		if (resourceval) {
 			*resourceval = res;
-			Z_ADDREF_P(val);
+			if (makeresource) {
+				Z_ADDREF_P(val);
+			}
 		}
 		return (X509*)what;
 	}
@@ -3047,7 +3048,9 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		if (what) {
 			if (resourceval) {
 				*resourceval = res;
-				Z_ADDREF_P(val);
+				if (makeresource) {
+					Z_ADDREF_P(val);
+				}
 			}
 			return (X509_REQ*)what;
 		}
