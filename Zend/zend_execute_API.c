@@ -568,8 +568,9 @@ ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, 
 		if (EG(exception)) {
 			return FAILURE;
 		} else {
+			zend_string *result_str = zend_string_init(actual, actual_len, 0);
 			zval_ptr_dtor_nogc(result);
-			ZVAL_STRINGL(result, actual, actual_len);
+			ZVAL_NEW_STR(result, result_str);
 		}
 	}
 	return SUCCESS;

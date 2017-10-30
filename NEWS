@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
 
@@ -69,6 +72,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
+
+- OpenSSL:
+  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
 
 - PDO_DBlib:
   . Implemented request #69592 (allow 0-column rowsets to be skipped
@@ -109,6 +115,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
+  . Short circuit case where array_slice() would return its original array.
+    (Sara, Benjamin Coutu)
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

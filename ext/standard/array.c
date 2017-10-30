@@ -3563,6 +3563,15 @@ PHP_FUNCTION(array_slice)
 		return;
 	}
 
+	if ((offset == 0) && (length >= num_in)) {
+		zend_array *ht = Z_ARRVAL_P(input);
+		if (preserve_keys || (HT_IS_PACKED(ht) && HT_IS_WITHOUT_HOLES(ht))) {
+			/* No real slicing, and the keys will match, so just copy */
+			ZVAL_COPY(return_value, input);
+			return;
+		}
+	}
+
 	/* Initialize returned array */
 	array_init_size(return_value, (uint32_t)length);
 
@@ -4013,6 +4022,7 @@ PHP_FUNCTION(array_values)
 	zval	 *input,		/* Input array */
 			 *entry;		/* An entry in the input array */
 	zend_array *arrval;
+	zend_long arrlen;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ARRAY(input)
@@ -4021,12 +4031,14 @@ PHP_FUNCTION(array_values)
 	arrval = Z_ARRVAL_P(input);
 
 	/* Return empty input as is */
-	if (!zend_hash_num_elements(arrval)) {
+	arrlen = zend_hash_num_elements(arrval);
+	if (!arrlen) {
 		RETURN_ZVAL(input, 1, 0);
 	}
 
 	/* Return vector-like packed arrays as-is */
-	if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval)) {
+	if (HT_IS_PACKED(arrval) && HT_IS_WITHOUT_HOLES(arrval) &&
+		arrval->nNextFreeElement == arrlen) {
 		RETURN_ZVAL(input, 1, 0);
 	}
 

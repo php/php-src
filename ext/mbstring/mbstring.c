@@ -4838,14 +4838,15 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 
 		mbfl_convert_filter_feed_string(filter, (const unsigned char *) str, str_len);
 		mbfl_convert_filter_flush(filter);
-		mbfl_convert_filter_delete(filter);
 
 		if (dev.pos < 1 || filter->num_illegalchar || dev.buffer[0] >= MBFL_WCSGROUP_UCS4MAX) {
+			mbfl_convert_filter_delete(filter);
 			mbfl_wchar_device_clear(&dev);
 			return -1;
 		}
 
 		cp = dev.buffer[0];
+		mbfl_convert_filter_delete(filter);
 		mbfl_wchar_device_clear(&dev);
 		return cp;
 	}
