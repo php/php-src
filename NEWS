@@ -29,6 +29,9 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - Mysqli:
   . Fixed bug #75434 (Wrong reflection for mysqli_fetch_all function). (Fabien
     Villepinte)
