@@ -713,7 +713,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 		if (EXPECTED(zobj->properties != NULL)) {
 			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(zobj->properties)--;
+					GC_DELREF(zobj->properties);
 				}
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
@@ -923,7 +923,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		if (EXPECTED(zobj->properties)) {
 			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(zobj->properties)--;
+					GC_DELREF(zobj->properties);
 				}
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
@@ -987,7 +987,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 	 && EXPECTED(zobj->properties != NULL)) {
 		if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(zobj->properties)--;
+				GC_DELREF(zobj->properties);
 			}
 			zobj->properties = zend_array_dup(zobj->properties);
 		}

@@ -301,7 +301,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				ret = zend_use_undefined_constant(name, ast->attr, result);
 				break;
 			}
-			ZVAL_DUP(result, zv);
+			ZVAL_COPY_OR_DUP(result, zv);
 			break;
 		}
 		case ZEND_AST_CONSTANT_CLASS:
@@ -457,9 +457,9 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zend_fetch_dimension_const(&tmp, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
 
 				if (UNEXPECTED(Z_ISREF(tmp))) {
-					ZVAL_DUP(result, Z_REFVAL(tmp));
+					ZVAL_COPY_OR_DUP(result, Z_REFVAL(tmp));
 				} else {
-					ZVAL_DUP(result, &tmp);
+					ZVAL_COPY_OR_DUP(result, &tmp);
 				}
 				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
@@ -559,7 +559,7 @@ ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
 	tree_size = zend_ast_tree_size(ast) + sizeof(zend_ast_ref);
 	ref = emalloc(tree_size);
 	zend_ast_tree_copy(ast, GC_AST(ref));
-	GC_REFCOUNT(ref) = 1;
+	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = IS_CONSTANT_AST;
 	return ref;
 }

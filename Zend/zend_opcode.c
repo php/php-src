@@ -346,10 +346,13 @@ ZEND_API void destroy_zend_class(zval *zv)
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					zval_internal_ptr_dtor(&c->value);
-					if (c->doc_comment && c->ce == ce) {
-						zend_string_release(c->doc_comment);
+					if (c->ce == ce) {
+						zval_internal_ptr_dtor(&c->value);
+						if (c->doc_comment) {
+							zend_string_release(c->doc_comment);
+						}
 					}
+					free(c);
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
@@ -376,7 +379,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->static_variables &&
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+		if (GC_DELREF(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
 		}
 	}

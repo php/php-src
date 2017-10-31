@@ -654,7 +654,7 @@ is_string:
 							"input buffer");
 				} else {
 					/* make stream not being closed when the zval is freed */
-					++GC_REFCOUNT(stream->res);
+					GC_ADDREF(stream->res);
 					pib->context = stream;
 					pib->readcallback = php_libxml_streams_IO_read;
 					pib->closecallback = php_libxml_streams_IO_close;

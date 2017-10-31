@@ -3879,7 +3879,7 @@ PHP_FUNCTION(constant)
 	scope = zend_get_executed_scope();
 	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
-		ZVAL_DUP(return_value, c);
+		ZVAL_COPY_OR_DUP(return_value, c);
 		if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
 			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
 				return;

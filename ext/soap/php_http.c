@@ -519,7 +519,7 @@ try_again:
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", stream->res);
-			GC_REFCOUNT(stream->res)++;
+			GC_ADDREF(stream->res);
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -539,7 +539,7 @@ try_again:
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
 
 		add_property_resource(this_ptr, "httpurl", ret);
-		GC_REFCOUNT(ret)++;
+		GC_ADDREF(ret);
 		/*zend_list_addref(ret);*/
 
 		if (context &&
@@ -1014,7 +1014,7 @@ try_again:
 			}
 			if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 2)) {
 				add_index_str(&zcookie, 2, phpurl->host);
-				GC_REFCOUNT(phpurl->host)++;
+				GC_ADDREF(phpurl->host);
 			}
 
 			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);

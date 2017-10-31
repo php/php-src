@@ -475,7 +475,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	p->key = (zend_string*) ZCSG(interned_strings_top);
 	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
 	p->h = h;
-	GC_REFCOUNT(p->key) = 1;
+	GC_SET_REFCOUNT(p->key, 1);
 #if 1
 	/* optimized single assignment */
 	GC_TYPE_INFO(p->key) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
@@ -664,6 +664,23 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	ZEND_HASH_FOREACH_BUCKET(&module_registry, p) {
 		if (p->key) {
 			p->key = new_interned_string(p->key);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ZEND_HASH_FOREACH_BUCKET(EG(ini_directives), p) {
+		zend_ini_entry *entry = (zend_ini_entry*)Z_PTR(p->val);
+
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+		if (entry->name) {
+			entry->name = new_interned_string(entry->name);
+		}
+		if (entry->value) {
+			entry->value = new_interned_string(entry->value);
+		}
+		if (entry->orig_value) {
+			entry->orig_value = new_interned_string(entry->orig_value);
 		}
 	} ZEND_HASH_FOREACH_END();
 }

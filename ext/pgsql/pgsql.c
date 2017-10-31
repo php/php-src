@@ -923,7 +923,7 @@ static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
  */
 static void php_pgsql_set_default_link(zend_resource *res)
 {
-	GC_REFCOUNT(res)++;
+	GC_ADDREF(res);
 
 	if (PGG(default_link) != NULL) {
 		zend_list_delete(PGG(default_link));
@@ -1451,7 +1451,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			link = (zend_resource *)index_ptr->ptr;
 			if (link->ptr && (link->type == le_link || link->type == le_plink)) {
 				php_pgsql_set_default_link(link);
-				GC_REFCOUNT(link)++;
+				GC_ADDREF(link);
 				RETVAL_RES(link);
 				goto cleanup;
 			} else {

@@ -310,8 +310,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								break;
 							}
 						} else {
-							ZVAL_COPY_VALUE(&t, c);
-							zval_copy_ctor(&t);
+							ZVAL_COPY_OR_DUP(&t, c);
 						}
 
 						if (opline->op1_type == IS_CONST) {

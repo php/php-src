@@ -120,12 +120,12 @@ PHPAPI int php_stream_from_persistent_id(const char *persistent_id, php_stream *
 				*stream = (php_stream*)le->ptr;
 				ZEND_HASH_FOREACH_PTR(&EG(regular_list), regentry) {
 					if (regentry->ptr == le->ptr) {
-						GC_REFCOUNT(regentry)++;
+						GC_ADDREF(regentry);
 						(*stream)->res = regentry;
 						return PHP_STREAM_PERSISTENT_SUCCESS;
 					}
 				} ZEND_HASH_FOREACH_END();
-				GC_REFCOUNT(le)++;
+				GC_ADDREF(le);
 				(*stream)->res = zend_register_resource(*stream, le_pstream);
 			}
 			return PHP_STREAM_PERSISTENT_SUCCESS;
@@ -2127,7 +2127,7 @@ PHPAPI php_stream_context *php_stream_context_set(php_stream *stream, php_stream
 
 	if (context) {
 		stream->ctx = context->res;
-		GC_REFCOUNT(context->res)++;
+		GC_ADDREF(context->res);
 	} else {
 		stream->ctx = NULL;
 	}

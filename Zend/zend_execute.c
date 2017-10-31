@@ -593,11 +593,11 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	}
 
 	ref = Z_REF_P(value_ptr);
-	GC_REFCOUNT(ref)++;
+	GC_ADDREF(ref);
 	if (Z_REFCOUNTED_P(variable_ptr)) {
 		zend_refcounted *garbage = Z_COUNTED_P(variable_ptr);
 
-		if (--GC_REFCOUNT(garbage) == 0) {
+		if (GC_DELREF(garbage) == 0) {
 			ZVAL_REF(variable_ptr, ref);
 			zval_dtor_func(garbage);
 			return;
@@ -1894,7 +1894,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 		} else if (EXPECTED(zobj->properties != NULL)) {
 			if (UNEXPECTED(GC_REFCOUNT(zobj->properties) > 1)) {
 				if (EXPECTED(!(GC_FLAGS(zobj->properties) & IS_ARRAY_IMMUTABLE))) {
-					GC_REFCOUNT(zobj->properties)--;
+					GC_DELREF(zobj->properties);
 				}
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
@@ -2080,7 +2080,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 	while (EXPECTED(cv != end)) {
 		if (Z_REFCOUNTED_P(cv)) {
 			zend_refcounted *r = Z_COUNTED_P(cv);
-			if (!--GC_REFCOUNT(r)) {
+			if (!GC_DELREF(r)) {
 				ZVAL_NULL(cv);
 				zval_dtor_func(r);
 			} else {
@@ -2428,7 +2428,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 
 			if (ZEND_CALL_INFO(call) & ZEND_CALL_RELEASE_THIS) {
 				if (ZEND_CALL_INFO(call) & ZEND_CALL_CTOR) {
-					GC_REFCOUNT(Z_OBJ(call->This))--;
+					GC_DELREF(Z_OBJ(call->This));
 					if (GC_REFCOUNT(Z_OBJ(call->This)) == 1) {
 						zend_object_store_ctor_failed(Z_OBJ(call->This));
 					}
@@ -2618,14 +2618,14 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zval *
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
 			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
-			GC_REFCOUNT((zend_object*)fbc->common.prototype)++;
+			GC_ADDREF((zend_object*)fbc->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
 			}
 		} else if (object) {
 			call_info |= ZEND_CALL_RELEASE_THIS;
-			GC_REFCOUNT(object)++; /* For $this pointer */
+			GC_ADDREF(object); /* For $this pointer */
 		}
 	} else {
 		zend_throw_error(NULL, "Function name must be a string");
@@ -2721,7 +2721,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 				object = NULL;
 			} else {
 				call_info |= ZEND_CALL_RELEASE_THIS;
-				GC_REFCOUNT(object)++; /* For $this pointer */
+				GC_ADDREF(object); /* For $this pointer */
 			}
 		}
 	} else {

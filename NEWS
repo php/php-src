@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
 
@@ -103,6 +106,9 @@ PHP                                                                        NEWS
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
 
+- SOAP:
+  . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
+
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
@@ -112,8 +118,10 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
-  . Short circuit case where array_slice() would return its original array.
-    (Sara, Benjamin Coutu)
+
+- Testing:
+  . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
+    (cmb)
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

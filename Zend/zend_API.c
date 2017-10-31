@@ -45,67 +45,6 @@ static zend_module_entry **module_post_deactivate_handlers;
 
 static zend_class_entry  **class_cleanup_handlers;
 
-/* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters(int ht, int param_count, ...) /* {{{ */
-{
-	int arg_count;
-	va_list ptr;
-	zval **param, *param_ptr;
-
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-
-	if (param_count>arg_count) {
-		return FAILURE;
-	}
-
-	va_start(ptr, param_count);
-
-	while (param_count-->0) {
-		param = va_arg(ptr, zval **);
-		if (!Z_ISREF_P(param_ptr) && Z_REFCOUNT_P(param_ptr) > 1) {
-			zval new_tmp;
-
-			ZVAL_DUP(&new_tmp, param_ptr);
-			Z_DELREF_P(param_ptr);
-			ZVAL_COPY_VALUE(param_ptr, &new_tmp);
-		}
-		*param = param_ptr;
-		param_ptr++;
-	}
-	va_end(ptr);
-
-	return SUCCESS;
-}
-/* }}} */
-
-/* Zend-optimized Extended functions */
-/* this function doesn't check for too many parameters */
-ZEND_API int zend_get_parameters_ex(int param_count, ...) /* {{{ */
-{
-	int arg_count;
-	va_list ptr;
-	zval **param, *param_ptr;
-
-	param_ptr = ZEND_CALL_ARG(EG(current_execute_data), 1);
-	arg_count = ZEND_CALL_NUM_ARGS(EG(current_execute_data));
-
-	if (param_count>arg_count) {
-		return FAILURE;
-	}
-
-	va_start(ptr, param_count);
-	while (param_count-->0) {
-		param = va_arg(ptr, zval **);
-		*param = param_ptr;
-		param_ptr++;
-	}
-	va_end(ptr);
-
-	return SUCCESS;
-}
-/* }}} */
-
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array) /* {{{ */
 {
 	zval *param_ptr;
@@ -1127,19 +1066,22 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 #endif
 			for (i = 0; i < class_type->default_static_members_count; i++) {
 				p = &class_type->default_static_members_table[i];
-				if (Z_ISREF_P(p) &&
-					class_type->parent &&
-					i < class_type->parent->default_static_members_count &&
-					p == &class_type->parent->default_static_members_table[i] &&
-					Z_TYPE(CE_STATIC_MEMBERS(class_type->parent)[i]) != IS_UNDEF
-				) {
-					zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
+				if (Z_ISREF_P(p)) {
+					if (class_type->parent &&
+						i < class_type->parent->default_static_members_count &&
+						p == &class_type->parent->default_static_members_table[i] &&
+						Z_TYPE(CE_STATIC_MEMBERS(class_type->parent)[i]) != IS_UNDEF
+					) {
+						zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
 
-					ZVAL_NEW_REF(q, q);
-					ZVAL_COPY_VALUE(&CE_STATIC_MEMBERS(class_type)[i], q);
-					Z_ADDREF_P(q);
+						ZVAL_NEW_REF(q, q);
+						ZVAL_COPY_VALUE(&CE_STATIC_MEMBERS(class_type)[i], q);
+						Z_ADDREF_P(q);
+					} else {
+						ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], Z_REFVAL_P(p));
+					}
 				} else {
-					ZVAL_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
+					ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
 				}
 			}
 		} else {
@@ -1191,15 +1133,19 @@ ZEND_API void object_properties_init(zend_object *object, zend_class_entry *clas
 		zval *dst = object->properties_table;
 		zval *end = src + class_type->default_properties_count;
 
-		do {
-#if ZTS
-			ZVAL_DUP(dst, src);
-#else
-			ZVAL_COPY(dst, src);
-#endif
-			src++;
-			dst++;
-		} while (src != end);
+		if (UNEXPECTED(class_type->type == ZEND_INTERNAL_CLASS)) {
+			do {
+				ZVAL_COPY_OR_DUP(dst, src);
+				src++;
+				dst++;
+			} while (src != end);
+		} else {
+			do {
+				ZVAL_COPY(dst, src);
+				src++;
+				dst++;
+			} while (src != end);
+		}
 		object->properties = NULL;
 	}
 }

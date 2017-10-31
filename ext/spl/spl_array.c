@@ -100,7 +100,7 @@ static inline HashTable **spl_array_get_hash_table_ptr(spl_array_object* intern)
 			rebuild_object_properties(obj);
 		} else if (GC_REFCOUNT(obj->properties) > 1) {
 			if (EXPECTED(!(GC_FLAGS(obj->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(obj->properties)--;
+				GC_DELREF(obj->properties);
 			}
 			obj->properties = zend_array_dup(obj->properties);
 		}
@@ -1473,7 +1473,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 
 	ZVAL_NEW_EMPTY_REF(&params[0]);
 	ZVAL_ARR(Z_REFVAL(params[0]), aht);
-	GC_REFCOUNT(aht)++;
+	GC_ADDREF(aht);
 
 	if (!use_arg) {
 		intern->nApplyCount++;
@@ -1507,7 +1507,7 @@ exit:
 		if (aht != new_ht) {
 			spl_array_replace_hash_table(intern, new_ht);
 		} else {
-			GC_REFCOUNT(aht)--;
+			GC_DELREF(aht);
 		}
 		efree(Z_REF(params[0]));
 		zend_string_free(Z_STR(function_name));

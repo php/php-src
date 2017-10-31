@@ -253,8 +253,6 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
@@ -1250,7 +1248,7 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 		 && Z_OBJ_P(arg)->properties
 		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+				GC_DELREF(Z_OBJ_P(arg)->properties);
 			}
 			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
 		}

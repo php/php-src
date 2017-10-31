@@ -175,23 +175,9 @@ static void _default_get_entry(zval *object, char *name, int name_len, zval *ret
 	if ((value = _default_load_entry(object, name, name_len)) == NULL) {
 		RETURN_FALSE;
 	}
-	ZVAL_DUP(return_value, value);
+	ZVAL_COPY(return_value, value);
 }
 /* }}} */
-
-#ifdef ilia_0
-static void _default_lookup_entry(zval *object, char *name, int name_len, zval **return_value) /* {{{ */
-{
-	zval **value;
-
-	if (zend_hash_find(Z_OBJPROP_P(object), name, name_len, (void **) &value) == FAILURE) {
-		*return_value = NULL;
-	} else {
-		*return_value = *value;
-	}
-}
-/* }}} */
-#endif
 
 static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 {
@@ -649,7 +635,7 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			zval zv;
 
 			smart_str_appends(str, " = ");
-			ZVAL_DUP(&zv, RT_CONSTANT(precv, precv->op2));
+			ZVAL_COPY(&zv, RT_CONSTANT(precv, precv->op2));
 			if (UNEXPECTED(zval_update_constant_ex(&zv, fptr->common.scope) == FAILURE)) {
 				zval_ptr_dtor(&zv);
 				return;
@@ -1850,7 +1836,7 @@ ZEND_METHOD(reflection_function, getStaticVariables)
 		array_init(return_value);
 		if (GC_REFCOUNT(fptr->op_array.static_variables) > 1) {
 			if (!(GC_FLAGS(fptr->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				GC_REFCOUNT(fptr->op_array.static_variables)--;
+				GC_DELREF(fptr->op_array.static_variables);
 			}
 			fptr->op_array.static_variables = zend_array_dup(fptr->op_array.static_variables);
 		}
@@ -2278,7 +2264,7 @@ ZEND_METHOD(reflection_generator, getExecutingGenerator)
 	REFLECTION_CHECK_VALID_GENERATOR(ex)
 
 	current = zend_generator_get_current(generator);
-	++GC_REFCOUNT(&current->std);
+	GC_ADDREF(&current->std);
 
 	ZVAL_OBJ(return_value, (zend_object *) current);
 }
@@ -2812,7 +2798,7 @@ ZEND_METHOD(reflection_parameter, getDefaultValue)
 		return;
 	}
 
-	ZVAL_DUP(return_value, RT_CONSTANT(precv, precv->op2));
+	ZVAL_COPY(return_value, RT_CONSTANT(precv, precv->op2));
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(return_value, param->fptr->common.scope);
 	}
@@ -3715,7 +3701,7 @@ ZEND_METHOD(reflection_class_constant, getValue)
 	}
 	GET_REFLECTION_OBJECT_PTR(ref);
 
-	ZVAL_DUP(return_value, &ref->value);
+	ZVAL_COPY_OR_DUP(return_value, &ref->value);
 	if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
 		zval_update_constant_ex(return_value, ref->ce);
 	}
@@ -3848,7 +3834,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 
 		/* copy: enforce read only access */
 		ZVAL_DEREF(prop);
-		ZVAL_DUP(&prop_copy, prop);
+		ZVAL_COPY_OR_DUP(&prop_copy, prop);
 
 		/* this is necessary to make it able to work with default array
 		* properties, returned to user */
@@ -4504,7 +4490,7 @@ ZEND_METHOD(reflection_class, getConstants)
 	zend_class_entry *ce;
 	zend_string *key;
 	zend_class_constant *c;
-	zval *val;
+	zval val;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -4516,8 +4502,8 @@ ZEND_METHOD(reflection_class, getConstants)
 			zend_array_destroy(Z_ARRVAL_P(return_value));
 			return;
 		}
-		val = zend_hash_add_new(Z_ARRVAL_P(return_value), key, &c->value);
-		Z_TRY_ADDREF_P(val);
+		ZVAL_COPY_OR_DUP(&val, &c->value);
+		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &val);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -4567,7 +4553,7 @@ ZEND_METHOD(reflection_class, getConstant)
 	if ((c = zend_hash_find_ptr(&ce->constants_table, name)) == NULL) {
 		RETURN_FALSE;
 	}
-	ZVAL_DUP(return_value, &c->value);
+	ZVAL_COPY_OR_DUP(return_value, &c->value);
 }
 /* }}} */
 
@@ -5848,7 +5834,7 @@ static int _addconstant(zval *el, int num_args, va_list args, zend_hash_key *has
 	int number = va_arg(args, int);
 
 	if (number == constant->module_number) {
-		ZVAL_DUP(&const_val, &constant->value);
+		ZVAL_COPY_OR_DUP(&const_val, &constant->value);
 		zend_hash_update(Z_ARRVAL_P(retval), constant->name, &const_val);
 	}
 	return 0;

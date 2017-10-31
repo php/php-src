@@ -3105,7 +3105,12 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					}
 					j = zend_ssa_next_use(ssa_ops, ssa_ops[i].result_def, j);
 				}
-				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				if ((tmp & MAY_BE_ARRAY) && (tmp & MAY_BE_ARRAY_KEY_ANY)) {
+					UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				} else {
+					/* invalid key type */
+					UPDATE_SSA_TYPE(t1, ssa_ops[i].op1_def);
+				}
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
 			/* FETCH_LIST on a string behaves like FETCH_R on null */

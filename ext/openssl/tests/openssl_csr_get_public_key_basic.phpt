@@ -1,7 +1,7 @@
 --TEST--
-openssl_csr_get_subject() tests
+openssl_csr_get_public_key() tests
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip");
 ?>
 --FILE--
@@ -36,35 +36,9 @@ $privkey_file = 'file://' . dirname(__FILE__) . '/private_rsa_2048.key';
 $csr = openssl_csr_new($dn, $privkey_file, $args);
 $csr_file = file_get_contents(dirname(__FILE__) . '/cert.csr');
 
-var_dump(openssl_csr_get_subject($csr_file));
-var_dump(openssl_csr_get_subject($csr, false));
+var_dump(openssl_csr_get_public_key($csr));
+var_dump(openssl_csr_get_public_key($csr_file));
 ?>
---EXPECTF--	
-array(6) {
-  ["C"]=>
-  string(2) "NL"
-  ["ST"]=>
-  string(13) "Noord Brabant"
-  ["L"]=>
-  string(4) "Uden"
-  ["O"]=>
-  string(10) "Triconnect"
-  ["OU"]=>
-  string(10) "Triconnect"
-  ["CN"]=>
-  string(15) "*.triconnect.nl"
-}
-array(6) {
-  ["countryName"]=>
-  string(2) "BR"
-  ["stateOrProvinceName"]=>
-  string(17) "Rio Grande do Sul"
-  ["localityName"]=>
-  string(12) "Porto Alegre"
-  ["commonName"]=>
-  string(21) "Henrique do N. Angelo"
-  ["emailAddress"]=>
-  string(16) "hnangelo@php.net"
-  ["organizationName"]=>
-  string(24) "Internet Widgits Pty Ltd"
-}
+--EXPECTF--
+resource(%d) of type (OpenSSL key)
+resource(%d) of type (OpenSSL key)

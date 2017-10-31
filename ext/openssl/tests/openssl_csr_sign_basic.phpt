@@ -32,6 +32,7 @@ $csr = openssl_csr_new($dn, $privkey, $args);
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $args));
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $config_arg));
 var_dump(openssl_csr_sign($csr, $cert, $priv, 365, $config_arg));
+var_dump(openssl_csr_sign($csr, openssl_x509_read($cert), $priv, 365, $config_arg));
 var_dump(openssl_csr_sign($csr, $wrong, $privkey, 365));
 var_dump(openssl_csr_sign($csr, null, $wrong, 365));
 var_dump(openssl_csr_sign($csr, null, $privkey, $wrong));
@@ -44,6 +45,7 @@ var_dump(openssl_csr_sign($csr, null, $privkey, array()));
 var_dump(openssl_csr_sign($csr, null, $privkey, 365, $config_arg));
 ?>
 --EXPECTF--
+resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (OpenSSL X.509)

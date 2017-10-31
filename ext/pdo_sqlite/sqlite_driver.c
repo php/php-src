@@ -346,7 +346,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 			ZVAL_NULL(&zargs[0]);
 		} else {
 			if (Z_ISUNDEF(agg_context->val)) {
-				GC_REFCOUNT(agg_context) = 1;
+				GC_SET_REFCOUNT(agg_context, 1);
 				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
 				ZVAL_NULL(&agg_context->val);
 			}

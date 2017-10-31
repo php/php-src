@@ -2291,7 +2291,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		if (xparam->outputs.client) {
 			xparam->outputs.client->ctx = stream->ctx;
 			if (stream->ctx) {
-				GC_REFCOUNT(stream->ctx)++;
+				GC_ADDREF(stream->ctx);
 			}
 		}
 

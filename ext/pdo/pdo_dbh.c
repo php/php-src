@@ -367,7 +367,7 @@ static PHP_METHOD(PDO, dbh_constructor)
 
 			le.type = php_pdo_list_entry();
 			le.ptr = dbh;
-			GC_REFCOUNT(&le) = 1;
+			GC_SET_REFCOUNT(&le, 1);
 
 			if ((zend_hash_str_update_mem(&EG(persistent_list),
 						(char*)dbh->persistent_id, dbh->persistent_id_len, &le, sizeof(le))) == NULL) {

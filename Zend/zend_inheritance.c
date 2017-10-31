@@ -79,7 +79,7 @@ static zend_function *zend_duplicate_function(zend_function *func, zend_class_en
 			return func;
 		}
 		if (!(GC_FLAGS(func->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-			GC_REFCOUNT(func->op_array.static_variables)++;
+			GC_ADDREF(func->op_array.static_variables);
 		}
 		new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 		memcpy(new_function, func, sizeof(zend_op_array));
@@ -776,15 +776,11 @@ static void do_inherit_class_constant(zend_string *name, zend_class_constant *pa
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
-			if (Z_REFCOUNTED(parent_const->value)) {
-				Z_ADDREF(parent_const->value);
-			}
 			c = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(c, parent_const, sizeof(zend_class_constant));
-		} else {
-			c = parent_const;
+			parent_const = c;
 		}
-		_zend_hash_append_ptr(&ce->constants_table, name, c);
+		_zend_hash_append_ptr(&ce->constants_table, name, parent_const);
 	}
 }
 /* }}} */
@@ -842,24 +838,28 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			ce->default_properties_table = end;
 		}
 		src = parent_ce->default_properties_table + parent_ce->default_properties_count;
-		do {
-			dst--;
-			src--;
-#ifdef ZTS
-			if (parent_ce->type != ce->type) {
-				ZVAL_DUP(dst, src);
+		if (UNEXPECTED(parent_ce->type != ce->type)) {
+			/* User class extends internal */
+			do {
+				dst--;
+				src--;
+				ZVAL_COPY_OR_DUP(dst, src);
 				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
 				continue;
-			}
-#endif
-
-			ZVAL_COPY(dst, src);
-			if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
-				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-			}
-		} while (dst != end);
+			} while (dst != end);
+		} else {
+			do {
+				dst--;
+				src--;
+				ZVAL_COPY(dst, src);
+				if (Z_OPT_TYPE_P(dst) == IS_CONSTANT_AST) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				}
+				continue;
+			} while (dst != end);
+		}
 		ce->default_properties_count += parent_ce->default_properties_count;
 	}
 
@@ -884,23 +884,43 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			dst = end + parent_ce->default_static_members_count;
 			ce->default_static_members_table = end;
 		}
-		src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
-		do {
-			dst--;
-			src--;
-			if (parent_ce->type == ZEND_INTERNAL_CLASS) {
+		if (UNEXPECTED(parent_ce->type != ce->type)) {
+			/* User class extends internal */
+			if (UNEXPECTED(zend_update_class_constants(parent_ce) != SUCCESS)) {
+				ZEND_ASSERT(0);
+			}
+			src = CE_STATIC_MEMBERS(parent_ce) + parent_ce->default_static_members_count;
+			do {
+				dst--;
+				src--;
+				ZVAL_MAKE_REF(src);
+				ZVAL_COPY_VALUE(dst, src);
+				Z_ADDREF_P(dst);
+			} while (dst != end);
+		} else if (ce->type == ZEND_USER_CLASS) {
+			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
+			do {
+				dst--;
+				src--;
+				ZVAL_MAKE_REF(src);
+				ZVAL_COPY_VALUE(dst, src);
+				Z_ADDREF_P(dst);
+				if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
+					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
+				}
+			} while (dst != end);
+		} else {
+			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
+			do {
+				dst--;
+				src--;
 				if (!Z_ISREF_P(src)) {
 					ZVAL_NEW_PERSISTENT_REF(src, src);
 				}
-			} else {
-				ZVAL_MAKE_REF(src);
-			}
-			ZVAL_COPY_VALUE(dst, src);
-			Z_ADDREF_P(dst);
-			if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
-				ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-			}
-		} while (dst != end);
+				ZVAL_COPY_VALUE(dst, src);
+				Z_ADDREF_P(dst);
+			} while (dst != end);
+		}
 		ce->default_static_members_count += parent_ce->default_static_members_count;
 		if (ce->type == ZEND_USER_CLASS) {
 			ce->static_members_table = ce->default_static_members_table;
@@ -989,15 +1009,11 @@ static void do_inherit_iface_constant(zend_string *name, zend_class_constant *c,
 			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		}
 		if (ce->type & ZEND_INTERNAL_CLASS) {
-			if (Z_REFCOUNTED(c->value)) {
-				Z_ADDREF(c->value);
-			}
 			ct = pemalloc(sizeof(zend_class_constant), 1);
 			memcpy(ct, c, sizeof(zend_class_constant));
-		} else {
-			ct = c;
+			c = ct;
 		}
-		zend_hash_update_ptr(&ce->constants_table, name, ct);
+		zend_hash_update_ptr(&ce->constants_table, name, c);
 	}
 }
 /* }}} */

@@ -590,7 +590,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				return zend_use_undefined_constant(name, ast->attr, p);
 			}
 			zval_ptr_dtor_nogc(p);
-			ZVAL_DUP(p, zv);
+			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
 			zval tmp;
 
@@ -775,7 +775,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		uint32_t call_info;
 
 		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
-		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
+		GC_ADDREF((zend_object*)func->op_array.prototype);
 		call_info = ZEND_CALL_CLOSURE;
 		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 			call_info |= ZEND_CALL_FAKE_CLOSURE;

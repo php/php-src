@@ -54,9 +54,9 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 					if (obj->handlers->dtor_obj
 					 && (obj->handlers->dtor_obj != zend_objects_destroy_object
 					  || obj->ce->destructor)) {
-						GC_REFCOUNT(obj)++;
+						GC_ADDREF(obj);
 						obj->handlers->dtor_obj(obj);
-						GC_REFCOUNT(obj)--;
+						GC_DELREF(obj);
 					}
 				}
 			}
@@ -101,9 +101,9 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 					if (obj->handlers->free_obj && obj->handlers->free_obj != zend_object_std_dtor) {
-						GC_REFCOUNT(obj)++;
+						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
-						GC_REFCOUNT(obj)--;
+						GC_DELREF(obj);
 					}
 				}
 			}
@@ -116,9 +116,9 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 					if (obj->handlers->free_obj) {
-						GC_REFCOUNT(obj)++;
+						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
-						GC_REFCOUNT(obj)--;
+						GC_DELREF(obj);
 					}
 				}
 			}
@@ -169,9 +169,9 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 				if (object->handlers->dtor_obj
 				 && (object->handlers->dtor_obj != zend_objects_destroy_object
 				  || object->ce->destructor)) {
-					GC_REFCOUNT(object)++;
+					GC_ADDREF(object);
 					object->handlers->dtor_obj(object);
-					GC_REFCOUNT(object)--;
+					GC_DELREF(object);
 				}
 			}
 
@@ -183,9 +183,9 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 				if (!(GC_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
 					GC_FLAGS(object) |= IS_OBJ_FREE_CALLED;
 					if (object->handlers->free_obj) {
-						GC_REFCOUNT(object)++;
+						GC_ADDREF(object);
 						object->handlers->free_obj(object);
-						GC_REFCOUNT(object)--;
+						GC_DELREF(object);
 					}
 				}
 				ptr = ((char*)object) - object->handlers->offset;
@@ -194,7 +194,7 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 			}
 		} else {
-			GC_REFCOUNT(object)--;
+			GC_DELREF(object);
 		}
 	}
 }
