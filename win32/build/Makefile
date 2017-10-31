@@ -108,7 +108,7 @@ _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest
 !endif
 
 $(PHPDLL_RES): win32\build\template.rc
-	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
+	$(RC) /nologo /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
 		win32\build\template.rc
