@@ -549,6 +549,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 {
 	uint32_t j;
 	Bucket *p, *q;
+	HashTable *ht;
 
 	/* empty string */
 	zend_empty_string = new_interned_string(zend_empty_string);
@@ -678,6 +679,20 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 		}
 		if (entry->orig_value) {
 			entry->orig_value = new_interned_string(entry->orig_value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ht = php_get_stream_filters_hash_global();
+	ZEND_HASH_FOREACH_BUCKET(ht, p) {
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	ht = php_stream_get_url_stream_wrappers_hash_global();
+	ZEND_HASH_FOREACH_BUCKET(ht, p) {
+		if (p->key) {
+			p->key = new_interned_string(p->key);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
