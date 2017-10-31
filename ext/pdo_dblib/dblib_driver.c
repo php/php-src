@@ -94,9 +94,6 @@ static int dblib_handle_closer(pdo_dbh_t *dbh)
 		}
 		pefree(H, dbh->is_persistent);
 		dbh->driver_data = NULL;
-		if (H->datetime_format) {
-			zend_string_release(H->datetime_format);
-		}
 	}
 	return 0;
 }
@@ -296,14 +293,6 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
 			H->datetime_convert = zval_get_long(val);
 			return 1;
-		case PDO_DBLIB_ATTR_DATETIME_FORMAT:
-			if (Z_TYPE_P(val) == IS_STRING && Z_STRLEN_P(val) > 0) {
-				H->datetime_format = zval_get_string(val);
-			} else if (H->datetime_format) {
-				zend_string_release(H->datetime_format);
-				H->datetime_format = NULL;
-			}
-			return 1;
 		default:
 			return 0;
 	}
@@ -337,12 +326,6 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 
 		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
 			ZVAL_BOOL(return_value, H->datetime_convert);
-			break;
-
-		case PDO_DBLIB_ATTR_DATETIME_FORMAT:
-			if (H->datetime_format) {
-				ZVAL_STR(return_value, H->datetime_format);
-			}
 			break;
 
 		default:
@@ -420,7 +403,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 	H->stringify_uniqueidentifier = 0;
 	H->skip_empty_rowsets = 0;
 	H->datetime_convert = 0;
-	H->datetime_format = NULL;
 
 	if (!H->login) {
 		goto cleanup;
@@ -445,7 +427,6 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
 		H->skip_empty_rowsets = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS, 0);
 		H->datetime_convert = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_DATETIME_CONVERT, 0);
-		H->datetime_format = pdo_attr_strval(driver_options, PDO_DBLIB_ATTR_DATETIME_FORMAT, NULL);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);

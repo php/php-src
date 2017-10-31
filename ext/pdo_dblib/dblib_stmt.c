@@ -27,7 +27,6 @@
 #include "php_ini.h"
 #include "ext/standard/php_string.h"
 #include "ext/standard/info.h"
-#include "ext/date/php_date.h"
 #include "pdo/php_pdo.h"
 #include "pdo/php_pdo_driver.h"
 #include "php_pdo_dblib.h"
@@ -261,78 +260,6 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pdo_dblib_datetime_format(zval *output, zend_string *format, DBDATETIMEALL *dta)
-{
-	time_t               ts;
-	zend_string         *buf;
-	static const char   *default_format = "Y-m-d H:i:s";
-	char                *ok_format = (char *)default_format;
-
-	if (format && ZSTR_LEN(format) > 0) {
-		ok_format = ZSTR_VAL(format);
-	}
-
-	/* convert DBDATETIMEALL to unix timestamp
-	 *
-	 * DBDATETIMEALL.date = number of days since 2040-01-01
-	 * DBDATETIMEALL.time = number of decimicroseconds since 00:00
-	 * 25567 = number of days from 1970-01-01 to 2040-01-01
-	 */
-	ts = (time_t)(dta->date - 25567) * 86400 + (dta->time / 10000000);
-
-	/* replace u/f in format with micro/milli seconds
-	 *
-	 * Look for the first "u" OR "f" in the format string.
-	 * If found, replace it with micro/milli seconds.
-	 * For example, if milliseconds is 124, the format string
-	 * "Y-m-d H:i:s.f" would become
-	 * "Y-m-d H:i:s.124".
-	 * This can add up to 5 extra characters
-	 *
-	 * credits to FreeTDS's tds_strftime
-	 */
-	char *our_format = emalloc(strlen(ok_format) + 1 + 5);
-	strcpy(our_format, ok_format);
-	char *pz = NULL;
-	char escape = 0;
-	time_t decim;
-
-	for(pz = our_format; *pz != 0; pz++) {
-		if (*pz == '\\') {
-			escape = !escape;
-			continue;
-		}
-		if (!escape && *pz == 'u') {
-			decim = (dta->time % 10000000 + 5) / 10;
-			if (decim >= 1000000) {
-				decim = 0;
-				ts++;
-			}
-			sprintf(pz, "%06d", decim);
-			strcpy(pz + 6, ok_format + (pz - our_format) + 1);
-			break;
-		}
-		if (!escape && *pz == 'f') {
-			decim = (dta->time % 10000000 + 5000) / 10000;
-			if (decim >= 1000) {
-				decim = 0;
-				ts++;
-			}
-			sprintf(pz, "%03d", decim);
-			strcpy(pz + 3, ok_format + (pz - our_format) + 1);
-			break;
-		}
-		escape = 0;
-	}
-
-	buf = php_format_date(our_format, strlen(our_format), ts, 0);
-	ZVAL_STR(output, buf);
-
-	efree(our_format);
-
-	return 1;
-}
-
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	 zend_ulong *len, int *caller_frees)
 {
@@ -412,17 +339,27 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 							efree(tmp_data);
 							break;
 						}
-
-						zv = emalloc(sizeof(zval));
-						ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
-						efree(tmp_data);
 					} else {
-						DBDATETIMEALL dta;
-						dbconvert(H->link, coltype, data, -1, SYBMSDATETIME2, (LPBYTE) &dta, -1);
+						DBDATEREC di;
+						DBDATEREC dt;
 
-						zv = emalloc(sizeof(zval));
-						pdo_dblib_datetime_format(zv, H->datetime_format, &dta);
+						dbconvert(H->link, coltype, data, -1, SQLDATETIME, (LPBYTE) &dt, -1);
+						dbdatecrack(H->link, &di, (DBDATETIME *) &dt);
+
+						tmp_data_len = spprintf(&tmp_data, 20, "%04d-%02d-%02d %02d:%02d:%02d",
+#if defined(PHP_DBLIB_IS_MSSQL) || defined(MSDBLIB)
+							di.year,     di.month,       di.day,        di.hour,     di.minute,     di.second
+#else
+							di.dateyear, di.datemonth+1, di.datedmonth, di.datehour, di.dateminute, di.datesecond
+#endif
+						);
 					}
+
+					zv = emalloc(sizeof(zval));
+					ZVAL_STRINGL(zv, tmp_data, tmp_data_len);
+
+					efree(tmp_data);
+
 					break;
 				}
 				case SQLFLT4: {
