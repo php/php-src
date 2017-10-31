@@ -260,6 +260,51 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
+static int pdo_dblib_stmt_stringify_col(pdo_stmt_t *stmt, int coltype)
+{
+	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
+	pdo_dblib_db_handle *H = S->H;
+
+	switch (coltype) {
+		case SQLDECIMAL:
+		case SQLNUMERIC:
+		case SQLMONEY:
+		case SQLMONEY4:
+		case SQLMONEYN:
+		case SQLFLT4:
+		case SQLFLT8:
+		case SQLINT4:
+		case SQLINT2:
+		case SQLINT1:
+		case SQLBIT:
+			if (stmt->dbh->stringify) {
+				return 1;
+			}
+			break;
+
+		case SQLINT8:
+			if (stmt->dbh->stringify) {
+				return 1;
+			}
+
+			/* force stringify if DBBIGINT won't fit in zend_long */
+			/* this should only be an issue for 32-bit machines */
+			if (sizeof(zend_long) < sizeof(DBBIGINT)) {
+				return 1;
+			}
+			break;
+
+		case SQLDATETIME:
+		case SQLDATETIM4:
+			if (H->datetime_convert) {
+				return 1;
+			}
+			break;
+	}
+
+	return 0;
+}
+
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	 zend_ulong *len, int *caller_frees)
 {
@@ -278,35 +323,15 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	data_len = dbdatlen(H->link, colno+1);
 
 	if (data_len != 0 || data != NULL) {
-		/* force stringify if DBBIGINT won't fit in zend_long */
-		/* this should only be an issue for 32-bit machines */
-		if (stmt->dbh->stringify || (coltype == SQLINT8 && sizeof(zend_long) < sizeof(DBBIGINT))) {
-			switch (coltype) {
-				case SQLDECIMAL:
-				case SQLNUMERIC:
-				case SQLMONEY:
-				case SQLMONEY4:
-				case SQLMONEYN:
-				case SQLFLT4:
-				case SQLFLT8:
-				case SQLINT8:
-				case SQLINT4:
-				case SQLINT2:
-				case SQLINT1:
-				case SQLBIT: {
-					if (dbwillconvert(coltype, SQLCHAR)) {
-						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
-						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
+		if (pdo_dblib_stmt_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
+			tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
+			tmp_data = emalloc(tmp_data_len);
+			data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
 
-						zv = emalloc(sizeof(zval));
-						ZVAL_STRING(zv, tmp_data);
+			zv = emalloc(sizeof(zval));
+			ZVAL_STRING(zv, tmp_data);
 
-						efree(tmp_data);
-					}
-					break;
-				}
-			}
+			efree(tmp_data);
 		}
 
 		if (!zv) {
