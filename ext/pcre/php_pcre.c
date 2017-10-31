@@ -591,7 +591,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!ZSTR_IS_INTERNED(key) || !(GC_FLAGS(key) & IS_STR_PERMANENT)) {
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
 		pce = zend_hash_str_add_new_mem(&PCRE_G(pcre_cache),
 				ZSTR_VAL(key), ZSTR_LEN(key), &new_entry, sizeof(pcre_cache_entry));
 #if HAVE_SETLOCALE
