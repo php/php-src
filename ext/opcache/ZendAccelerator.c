@@ -695,6 +695,13 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			p->key = new_interned_string(p->key);
 		}
 	} ZEND_HASH_FOREACH_END();
+
+	ht = php_stream_xport_get_hash();
+	ZEND_HASH_FOREACH_BUCKET(ht, p) {
+		if (p->key) {
+			p->key = new_interned_string(p->key);
+		}
+	} ZEND_HASH_FOREACH_END();
 }
 
 static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
