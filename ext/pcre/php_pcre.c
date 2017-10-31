@@ -592,7 +592,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * See bug #63180
 	 */
 	if (!ZSTR_IS_INTERNED(key) || !(GC_FLAGS(key) & IS_STR_PERMANENT)) {
-		pce = zend_hash_str_update_mem(&PCRE_G(pcre_cache),
+		pce = zend_hash_str_add_new_mem(&PCRE_G(pcre_cache),
 				ZSTR_VAL(key), ZSTR_LEN(key), &new_entry, sizeof(pcre_cache_entry));
 #if HAVE_SETLOCALE
 		if (key != regex) {
@@ -600,7 +600,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 	} else {
-		pce = zend_hash_update_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
+		pce = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 	}
 
 	return pce;
