@@ -491,6 +491,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 
 static zend_string *accel_new_interned_string_for_php(zend_string *str)
 {
+	zend_string_hash_val(str);
 	if (ZCG(counted)) {
 		zend_string *ret = accel_find_interned_string(str);
 
