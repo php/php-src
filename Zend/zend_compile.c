@@ -376,8 +376,9 @@ ZEND_API zend_string *zend_set_compiled_filename(zend_string *new_compiled_filen
 		return Z_STR_P(p);
 	}
 
-	ZVAL_STR_COPY(&rv, new_compiled_filename);
-	zend_hash_update(&CG(filenames_table), new_compiled_filename, &rv);
+	new_compiled_filename = zend_new_interned_string(zend_string_copy(new_compiled_filename));
+	ZVAL_STR(&rv, new_compiled_filename);
+	zend_hash_add_new(&CG(filenames_table), new_compiled_filename, &rv);
 
 	CG(compiled_filename) = new_compiled_filename;
 	return new_compiled_filename;
@@ -451,15 +452,20 @@ void zend_del_literal(zend_op_array *op_array, int n) /* {{{ */
 }
 /* }}} */
 
+static inline void zval_make_interned_string(zval *zv) /* {{{ */
+{
+	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
+	Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv));
+	if (ZSTR_IS_INTERNED(Z_STR_P(zv))) {
+		Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+	}
+}
+
 /* Common part of zend_add_literal and zend_append_individual_literal */
 static inline void zend_insert_literal(zend_op_array *op_array, zval *zv, int literal_position) /* {{{ */
 {
 	if (Z_TYPE_P(zv) == IS_STRING) {
-		zend_string_hash_val(Z_STR_P(zv));
-		Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv));
-		if (ZSTR_IS_INTERNED(Z_STR_P(zv))) {
-			Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-		}
+		zval_make_interned_string(zv);
 	}
 	ZVAL_COPY_VALUE(CT_CONSTANT_EX(op_array, literal_position), zv);
 	Z_CACHE_SLOT(op_array->literals[literal_position]) = -1;
@@ -6074,7 +6080,9 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-
+		if (Z_TYPE(value_zv) == IS_STRING) {
+			zval_make_interned_string(&value_zv);
+		}
 		name = zend_new_interned_string_safe(name);
 		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 	}
