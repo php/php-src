@@ -47,7 +47,7 @@ void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info)
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 		zend_object *object = Z_OBJ(execute_data->This);
 		if (UNEXPECTED(EG(exception) != NULL) && (call_info & ZEND_CALL_CTOR)) {
-			GC_REFCOUNT(object)--;
+			GC_DELREF(object);
 			zend_object_store_ctor_failed(object);
 		}
 		OBJ_RELEASE(object);

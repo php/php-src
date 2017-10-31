@@ -7334,7 +7334,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	// if (UNEXPECTED(EG(exception)
 				|	MEM_OP2_1 cmp, aword, &EG(exception), 0, r1
 				|	je >1
-				|	// GC_REFCOUNT(object)--;
+				|	// GC_DELREF(object);
 				|	GC_DELREF r0
 				|	// zend_object_store_ctor_failed(object);
 				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
@@ -8260,7 +8260,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 				|	// if (call_info & ZEND_CALL_CTOR)
 				|	test FCARG1d, ZEND_CALL_CTOR
 				|	jz >5
-				|	// GC_REFCOUNT(object)--;
+				|	// GC_DELREF(object);
 				|	GC_DELREF r0
 				|	// zend_object_store_ctor_failed(object);
 				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;

@@ -1663,7 +1663,7 @@ static void ZEND_FASTCALL zend_jit_free_call_frame(zend_execute_data *call)
 static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 {
 	zend_reference *ref = (zend_reference*)emalloc(sizeof(zend_reference));
-	GC_REFCOUNT(ref) = 1;
+	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = IS_REFERENCE;
 	ZVAL_COPY_VALUE(&ref->val, value);
 	Z_REF_P(value) = ref;
