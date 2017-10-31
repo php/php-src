@@ -87,8 +87,8 @@ mysqli_close($link);
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

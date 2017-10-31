@@ -22,13 +22,14 @@ require_once('skipifconnectfailure.inc');
 	require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
-	if (!is_null($tmp = mysqli_stmt_field_count($stmt)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_field_count($stmt)))
+		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (mysqli_stmt_prepare($stmt, ''))
 		printf("[004] Prepare should fail for an empty statement\n");
-	if (!is_null($tmp = mysqli_stmt_field_count($stmt)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (false !== ($tmp = mysqli_stmt_field_count($stmt)))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, 'SELECT 1'))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -74,8 +75,9 @@ require_once('skipifconnectfailure.inc');
 
 	if (mysqli_stmt_prepare($stmt, 'SELECT id FROM test'))
 		printf("[020] Prepare should fail, statement has been closed\n");
-	if (!is_null($tmp = mysqli_stmt_field_count($stmt)))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+
+	if (false !== ($tmp = mysqli_stmt_field_count($stmt)))
+		printf("[021] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 

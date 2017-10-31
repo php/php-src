@@ -16,8 +16,8 @@ require_once('skipifconnectfailure.inc');
 
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_object()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$res->fetch_object()))
+		printf("[001] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -140,6 +140,6 @@ Exception: Too few arguments to function mysqli_fetch_object_construct::__constr
 NULL
 NULL
 [E_WARNING] mysqli_fetch_object(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 
 Fatal error: Class 'this_class_does_not_exist' not found in %s on line %d

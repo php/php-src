@@ -130,5 +130,5 @@ Strict Standards: mysqli_next_result(): There is no next result set. Please, cal
 [010] 7
 
 Warning: mysqli_multi_query(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

@@ -53,5 +53,5 @@ array(2) {
 bool(false)
 
 Warning: mysqli_fetch_lengths(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

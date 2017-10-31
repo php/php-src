@@ -55,8 +55,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (NULL !== ($tmp = mysqli_fetch_fields($res)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_fields($res)))
+		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	print "done!";
