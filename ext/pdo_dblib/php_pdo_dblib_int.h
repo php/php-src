@@ -143,6 +143,7 @@ typedef struct {
 } pdo_dblib_stmt;
 
 typedef struct {
+	unsigned retval:1;
 	unsigned int return_pos;
 } pdo_dblib_param;
 

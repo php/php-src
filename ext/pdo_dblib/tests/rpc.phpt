@@ -38,32 +38,21 @@ try {
   if (strpos($e->getMessage(), "not find stored procedure 'sp_doesnt_exist'") > -1) echo "ok\n";
 }
 
-/* numbered params check */
-$st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
-try {
-	$st->bindValue(2, 1);
-} catch (PDOException $e) {
-	$st = null;
-	if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Numbered parameters must be") > -1) echo "ok\n";
-}
-
-/* numbered params mixed */
+/* numbered params / mixed / unsorted */
 $prms = [];
 $st = $db->prepare('sp_executesql', [PDO::DBLIB_ATTR_RPC => 1]);
-$st->bindValue(1, 'set @b = @a');
-$st->bindValue(2, '@a varchar(10), @b varchar(10) out');
 $st->bindValue('a', 'numbered');
-$st->bindParam(4, $prms['b'], PDO::PARAM_INPUT_OUTPUT);
+$st->bindValue(2, '@a varchar(10), @b varchar(10) out');
 $st->bindParam('RETVAL', $prms['r'], PDO::PARAM_INPUT_OUTPUT);
+$st->bindValue(1, 'set @b = @a');
+$st->bindParam('b', $prms['b'], PDO::PARAM_INPUT_OUTPUT);
 $st->execute();
 var_dump($prms);
 
-/* re-bind check */
-try {
-  $st->bindValue('a', 'test');
-} catch (PDOException $e) {
-  if (strpos($e->getMessage(), "PDO_DBLIB: RPC: Can't bind after execution") > -1) echo "ok\n";
-}
+/* re-bind */
+$st->bindValue('a', 're-bound');
+$st->execute();
+var_dump($prms['b']);
 
 /* types */
 $prms = ['c' => 1, 'd' => 1.2, 'e' => 'test'];
@@ -121,14 +110,13 @@ array(2) {
   &int(0)
 }
 ok
-ok
 array(2) {
-  ["b"]=>
-  &string(8) "numbered"
   ["r"]=>
   &int(0)
+  ["b"]=>
+  &string(8) "numbered"
 }
-ok
+string(8) "re-bound"
 array(4) {
   ["b"]=>
   string(6) "select"
