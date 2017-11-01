@@ -1859,8 +1859,11 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_client_option_2d)(MYSQLND_CONN_DATA * cons
 			DBG_INF_FMT("Adding [%s][%s]", key, value);
 			{
 				zval attrz;
+				zend_string *str = zend_string_init(key, strlen(key), 1);
+				GC_MAKE_PERSISTENT_LOCAL(str);
 				ZVAL_NEW_STR(&attrz, zend_string_init(value, strlen(value), conn->persistent));
-				zend_hash_str_update(conn->options->connect_attr, key, strlen(key), &attrz);
+				GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(attrz));
+				zend_hash_update(conn->options->connect_attr, str, &attrz);
 			}
 			break;
 		default:
