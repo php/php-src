@@ -69179,12 +69179,14 @@ static void init_opcode_serialiser(void)
 	zval tmp;
 
 	zend_handlers_table = malloc(sizeof(HashTable));
-	zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
-	zend_hash_real_init(zend_handlers_table, 0);
-	Z_TYPE_INFO(tmp) = IS_LONG;
-	for (i = 0; i < zend_handlers_count; i++) {
-		Z_LVAL(tmp) = i;
-		zend_hash_index_add(zend_handlers_table, (zend_long)(zend_uintptr_t)zend_opcode_handlers[i], &tmp);
+	if(zend_handlers_table){
+		zend_hash_init_ex(zend_handlers_table, zend_handlers_count, NULL, NULL, 1, 0);
+		zend_hash_real_init(zend_handlers_table, 0);
+		Z_TYPE_INFO(tmp) = IS_LONG;
+		for (i = 0; i < zend_handlers_count; i++) {
+			Z_LVAL(tmp) = i;
+			zend_hash_index_add(zend_handlers_table, (zend_long)(zend_uintptr_t)zend_opcode_handlers[i], &tmp);
+		}
 	}
 }
 
