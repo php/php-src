@@ -296,12 +296,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	}
 
 	if (persistent_id) {
-		zval tmp;
-
-		ZVAL_NEW_PERSISTENT_RES(&tmp, -1, ret, le_pstream);
-
-		if (NULL == zend_hash_str_update(&EG(persistent_list), persistent_id,
-					strlen(persistent_id), &tmp)) {
+		if (NULL == zend_register_persistent_resource(persistent_id, strlen(persistent_id), ret, le_pstream)) {
 			pefree(ret, 1);
 			return NULL;
 		}

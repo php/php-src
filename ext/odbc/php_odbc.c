@@ -2571,8 +2571,6 @@ try_and_get_another_connection:
 		
 		/* the link is not in the persistent list */
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_len)) == NULL) {
-			zend_resource new_le;
-			
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 				php_error_docref(NULL, E_WARNING, "Too many open links (%ld)", ODBCG(num_links));
 				efree(hashed_details);
@@ -2589,11 +2587,7 @@ try_and_get_another_connection:
 				RETURN_FALSE;
 			}
 			
-			new_le.type = le_pconn;
-			new_le.ptr = db_conn;
-			new_le.handle = -1;
-			if (zend_hash_str_update_mem(&EG(persistent_list), hashed_details, hashed_len, &new_le,
-						sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(hashed_details, hashed_len, db_conn, le_pconn) == NULL) {
 				free(db_conn);
 				efree(hashed_details);
 				RETURN_FALSE;
