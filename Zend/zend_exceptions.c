@@ -222,9 +222,8 @@ static zend_object *zend_default_exception_new_ex(zend_class_entry *class_type, 
 	base_ce = i_get_exception_base(&obj);
 
 	if (EXPECTED(class_type != zend_ce_parse_error || !(filename = zend_get_compiled_filename()))) {
-		ZVAL_STRING(&tmp, zend_get_executed_filename());
+		ZVAL_STR(&tmp, zend_get_executed_filename_ex());
 		zend_update_property_ex(base_ce, &obj, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
-		zval_ptr_dtor(&tmp);
 		ZVAL_LONG(&tmp, zend_get_executed_lineno());
 		zend_update_property_ex(base_ce, &obj, ZSTR_KNOWN(ZEND_STR_LINE), &tmp);
 	} else {

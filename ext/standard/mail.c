@@ -521,10 +521,10 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (PG(mail_x_header)) {
-		const char *tmp = zend_get_executed_filename();
+		zend_string *tmp = zend_get_executed_filename_ex();
 		zend_string *f;
 
-		f = php_basename(tmp, strlen(tmp), NULL, 0);
+		f = php_basename(ZSTR_VAL(tmp), ZSTR_LEN(tmp), NULL, 0);
 
 		if (headers != NULL && *headers) {
 			spprintf(&hdr, 0, "X-PHP-Originating-Script: " ZEND_LONG_FMT ":%s\n%s", php_getuid(), ZSTR_VAL(f), headers);
