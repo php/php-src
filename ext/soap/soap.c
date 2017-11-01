@@ -1699,7 +1699,8 @@ PHP_METHOD(SoapServer, handle)
 			}
 
 			/* Find the soap object and assign */
-			if (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS &&
+			if (PS(http_session_vars) && Z_TYPE_P(PS(http_session_vars)) == IS_ARRAY &&
+			    (zend_hash_find(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), (void **) &tmp_soap) == SUCCESS) &&
 			    Z_TYPE_PP(tmp_soap) == IS_OBJECT &&
 			    Z_OBJCE_PP(tmp_soap) == service->soap_class.ce) {
 				soap_obj = *tmp_soap;
@@ -1775,7 +1776,8 @@ PHP_METHOD(SoapServer, handle)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistance == SOAP_PERSISTENCE_SESSION) {
 				zval **tmp_soap_pp;
-				if (zend_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS) {
+				if (PS(http_session_vars) && Z_TYPE_P(PS(http_session_vars)) == IS_ARRAY &&
+				   (zend_hash_update(Z_ARRVAL_P(PS(http_session_vars)), "_bogus_session_name", sizeof("_bogus_session_name"), &tmp_soap, sizeof(zval *), (void **)&tmp_soap_pp) == SUCCESS)) {
 					soap_obj = *tmp_soap_pp;
 				}
 			} else {
