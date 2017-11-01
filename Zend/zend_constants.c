@@ -445,21 +445,13 @@ ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, u
 
 static void* zend_hash_add_constant(HashTable *ht, zend_string *key, zend_constant *c)
 {
-	zval *ret, tmp;
-	zend_constant *copy;
+	void *ret;
+	zend_constant *copy = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
 
-	ZVAL_PTR(&tmp, NULL);
-	ret = zend_hash_add(ht, key, &tmp);
-	if (EXPECTED(ret)) {
-		Z_PTR_P(ret) = copy = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
-		memcpy(copy, c, sizeof(zend_constant));
-		if (Z_TYPE(copy->value) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR(copy->value))) {
-			SEPARATE_STRING(&copy->value);
-			Z_STR(copy->value) = zend_new_interned_string(Z_STR(copy->value));
-			if (ZSTR_IS_INTERNED(Z_STR(copy->value))) {
-				Z_TYPE_FLAGS(copy->value) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
-			}
-		}
+	memcpy(copy, c, sizeof(zend_constant));
+	ret = zend_hash_add_ptr(ht, key, copy);
+	if (!ret) {
+		pefree(copy, c->flags & CONST_PERSISTENT);
 	}
 	return ret;
 }
@@ -474,7 +466,9 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
-	c->name = zend_new_interned_string(c->name);
+    if (c->module_number != PHP_USER_CONSTANT) {
+		c->name = zend_new_interned_string(c->name);
+	}
 
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
