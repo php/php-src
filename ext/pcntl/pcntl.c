@@ -1040,7 +1040,7 @@ PHP_FUNCTION(pcntl_signal)
 
 	/* Add the function name to our signal table */
 	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {
-		if (Z_REFCOUNTED_P(handle)) Z_ADDREF_P(handle);
+		Z_TRY_ADDREF_P(handle);
 	}
 
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (Sigfunc *)SIG_ERR) {

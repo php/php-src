@@ -48,7 +48,7 @@
 		zval member; \
 		ZVAL_STR(&member, name); \
 		zend_std_write_property(object, &member, value, NULL); \
-		if (Z_REFCOUNTED_P(value)) Z_DELREF_P(value); \
+		Z_TRY_DELREF_P(value); \
 		zval_ptr_dtor(&member); \
 	} while (0)
 
@@ -4762,7 +4762,7 @@ ZEND_METHOD(reflection_class, newInstance)
 		}
 
 		for (i = 0; i < num_args; i++) {
-			if (Z_REFCOUNTED(params[i])) Z_ADDREF(params[i]);
+			Z_TRY_ADDREF(params[i]);
 		}
 
 		fci.size = sizeof(fci);
