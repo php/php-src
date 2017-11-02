@@ -329,6 +329,17 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					new_value = browscap_intern_str(ctx, Z_STR_P(arg2));
 				}
 
+				if (persistent) {
+					new_value = zend_new_interned_string(zend_string_copy(new_value));
+					if (ZSTR_IS_INTERNED(new_value)) {
+						if (new_value == Z_STR_P(arg2)) {
+							Z_TYPE_FLAGS_P(arg2) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+						}
+					} else {
+						zend_string_release(new_value);
+					}
+				}
+
 				if (!strcasecmp(Z_STRVAL_P(arg1), "parent")) {
 					/* parent entry can not be same as current section -> causes infinite loop! */
 					if (ctx->current_section_name != NULL &&
@@ -343,9 +354,22 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					if (ctx->current_entry->parent) {
 						zend_string_release(ctx->current_entry->parent);
 					}
+
 					ctx->current_entry->parent = new_value;
 				} else {
 					new_key = browscap_intern_str_ci(ctx, Z_STR_P(arg1), persistent);
+
+					if (persistent) {
+						new_key = zend_new_interned_string(zend_string_copy(new_key));
+						if (ZSTR_IS_INTERNED(new_key)) {
+							if (new_key == Z_STR_P(arg1)) {
+								Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+							}
+						} else {
+							zend_string_release(new_key);
+						}
+					}
+
 					browscap_add_kv(bdata, new_key, new_value, persistent);
 					ctx->current_entry->kv_end = bdata->kv_used;
 				}
@@ -363,7 +387,16 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					"Skipping excessively long pattern of length %zd", ZSTR_LEN(pattern));
 				break;
 			}
-			
+
+			if (persistent) {
+				pattern = zend_new_interned_string(zend_string_copy(pattern));
+				if (ZSTR_IS_INTERNED(pattern)) {
+					Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+				} else {
+					zend_string_release(pattern);
+				}
+			}
+
 			entry = ctx->current_entry
 				= pemalloc(sizeof(browscap_entry), persistent);
 			zend_hash_update_ptr(bdata->htab, pattern, entry);
