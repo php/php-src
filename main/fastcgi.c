@@ -1734,8 +1734,12 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
+	zend_string *key = zend_string_init(name, name_len, 1);
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
-	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
+	GC_MAKE_PERSISTENT_LOCAL(key);
+	GC_MAKE_PERSISTENT_LOCAL(Z_STR(zvalue));
+	zend_hash_add(&fcgi_mgmt_vars, key, &zvalue);
+	zend_string_release(key);
 }
 
 void fcgi_free_mgmt_var_cb(zval *zv)
