@@ -2467,7 +2467,7 @@ static int zend_accel_init_shm(void)
 		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
 		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
 		ZCSG(interned_strings_saved_top) = NULL;
-		zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
+		zend_interned_strings_set_permanent_storage_copy_handlers(accel_use_shm_interned_strings, accel_use_permanent_interned_strings);
 	}
 
 	zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
@@ -2737,7 +2737,7 @@ static int accel_post_startup(void)
 				zend_shared_alloc_lock();
 				accel_shared_globals = (zend_accel_shared_globals *) ZSMMG(app_shared_globals);
 				if (ZCG(accel_directives).interned_strings_buffer) {
-					zend_interned_strings_set_permanent_storage_copy_handler(accel_use_shm_interned_strings);
+					zend_interned_strings_set_permanent_storage_copy_handlers(accel_use_shm_interned_strings, accel_use_permanent_interned_strings);
 				}
 				zend_interned_strings_set_request_storage_handlers(accel_new_interned_string_for_php, accel_init_interned_string_for_php);
 				zend_shared_alloc_unlock();
@@ -2862,10 +2862,6 @@ void accel_shutdown(void)
 #ifdef HAVE_OPCACHE_FILE_CACHE
 	file_cache_only = ZCG(accel_directives).file_cache_only;
 #endif
-
-	if (!file_cache_only && ZCG(accel_directives).interned_strings_buffer) {
-		accel_use_permanent_interned_strings();
-	}
 
 	accel_reset_pcre_cache();
 

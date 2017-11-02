@@ -2280,7 +2280,7 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	shutdown_memory_manager(1, 0);
  	virtual_cwd_activate();
 
-	zend_interned_strings_switch_storage();
+	zend_interned_strings_switch_storage(1);
 
 	/* we're done */
 	return retval;
@@ -2312,6 +2312,8 @@ void php_module_shutdown(void)
 	if (!module_initialized) {
 		return;
 	}
+
+	zend_interned_strings_switch_storage(0);
 
 #ifdef ZTS
 	ts_free_worker_threads();
