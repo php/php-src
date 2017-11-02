@@ -184,7 +184,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 	result->m.free_last_data(result, global_stats);
 
 	if (result->lengths) {
-		mnd_pefree(result->lengths, result->persistent);
+		mnd_efree(result->lengths);
 		result->lengths = NULL;
 	}
 
@@ -200,7 +200,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 	}
 
 
-	mnd_pefree(result, result->persistent);
+	mnd_efree(result);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -242,7 +242,7 @@ static void
 MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)(MYSQLND_RES_BUFFERED_C * const set)
 {
 	DBG_ENTER("mysqlnd_result_buffered_c::free_result");
-	mnd_pefree(set->initialized, set->persistent);
+	mnd_efree(set->initialized);
 	set->initialized = NULL;
 	DBG_VOID_RETURN;
 }
@@ -274,7 +274,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 	}
 
 	if (set->lengths) {
-		mnd_pefree(set->lengths, set->persistent);
+		mnd_efree(set->lengths);
 		set->lengths = NULL;
 	}
 
@@ -290,7 +290,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 
 	set->row_count	= 0;
 
-	mnd_pefree(set, set->persistent);
+	mnd_efree(set);
 
 	DBG_VOID_RETURN;
 }
@@ -349,7 +349,7 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 		result->conn = NULL;
 	}
 
-	mnd_pefree(result, result->persistent);
+	mnd_efree(result);
 
 	DBG_VOID_RETURN;
 }
@@ -373,7 +373,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 		result->meta = NULL;
 	}
 
-	result->meta = result->m.result_meta_init(result->field_count, result->persistent);
+	result->meta = result->m.result_meta_init(result->field_count);
 	if (!result->meta) {
 		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
@@ -409,7 +409,6 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 	MYSQLND_STMT_DATA * stmt = s ? s->data : NULL;
 	MYSQLND_PACKET_RSET_HEADER * rset_header = NULL;
 	MYSQLND_PACKET_EOF * fields_eof = NULL;
-	const zend_bool persistent = conn->persistent;
 
 	DBG_ENTER("mysqlnd_query_read_result_set_header");
 	DBG_INF_FMT("stmt=%lu", stmt? stmt->stmt_id:0);
@@ -476,8 +475,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				UPSERT_STATUS_SET_AFFECTED_ROWS(conn->upsert_status, rset_header->affected_rows);
 				UPSERT_STATUS_SET_LAST_INSERT_ID(conn->upsert_status, rset_header->last_insert_id);
 				SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l,
-								rset_header->info_or_local_file.s, rset_header->info_or_local_file.l,
-								persistent);
+								rset_header->info_or_local_file.s, rset_header->info_or_local_file.l);
 				/* Result set can follow UPSERT statement, check server_status */
 				if (UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS) {
 					SET_CONNECTION_STATE(&conn->state, CONN_NEXT_RESULT_PENDING);
@@ -492,7 +490,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				enum_mysqlnd_collected_stats statistic = STAT_LAST;
 
 				DBG_INF("Result set pending");
-				SET_EMPTY_MESSAGE(conn->last_message.s, conn->last_message.l, persistent);
+				SET_EMPTY_MESSAGE(conn->last_message.s, conn->last_message.l);
 
 				MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_RSET_QUERY);
 				UPSERT_STATUS_RESET(conn->upsert_status);
@@ -504,7 +502,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				/* PS has already allocated it */
 				conn->field_count = rset_header->field_count;
 				if (!stmt) {
-					result = conn->current_result = conn->m->result_init(rset_header->field_count, persistent);
+					result = conn->current_result = conn->m->result_init(rset_header->field_count);
 				} else {
 					if (!stmt->result) {
 						DBG_INF("This is 'SHOW'/'EXPLAIN'-like query.");
@@ -513,7 +511,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 						  prepared statements can't send result set metadata for these queries
 						  on prepare stage. Read it now.
 						*/
-						result = stmt->result = conn->m->result_init(rset_header->field_count, stmt->persistent);
+						result = stmt->result = conn->m->result_init(rset_header->field_count);
 					} else {
 						/*
 						  Update result set metadata if it for some reason changed between
@@ -948,7 +946,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 		result->type			= MYSQLND_RES_PS_UNBUF;
 	}
 
-	result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, ps, result->persistent);
+	result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, ps);
 	if (!result->unbuf) {
 		goto oom;
 	}
@@ -1426,14 +1424,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	SET_CONNECTION_STATE(&conn->state, CONN_FETCHING_DATA);
 
 	if (flags & MYSQLND_STORE_NO_COPY) {
-		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent);
+		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, flags & MYSQLND_STORE_PS);
 		if (!result->stored_data) {
 			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
 		}
 		row_buffers = &result->stored_data->row_buffers;
 	} else if (flags & MYSQLND_STORE_COPY) {
-		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result->field_count, flags & MYSQLND_STORE_PS, result->persistent);
+		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result->field_count, flags & MYSQLND_STORE_PS);
 		if (!result->stored_data) {
 			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
@@ -1473,7 +1471,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 		} else if (flags & MYSQLND_STORE_COPY) {
 			MYSQLND_RES_BUFFERED_C * set = (MYSQLND_RES_BUFFERED_C *) result->stored_data;
 			set->current_row = 0;
-			set->initialized = mnd_pecalloc((unsigned int) ((set->row_count / 8) + 1), sizeof(zend_uchar), set->persistent); /* +1 for safety */
+			set->initialized = mnd_ecalloc((unsigned int) ((set->row_count / 8) + 1), sizeof(zend_uchar)); /* +1 for safety */
 		}
 	}
 
@@ -1920,10 +1918,10 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_result_init */
 PHPAPI MYSQLND_RES *
-mysqlnd_result_init(const unsigned int field_count, const zend_bool persistent)
+mysqlnd_result_init(const unsigned int field_count)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES * ret = mnd_pecalloc(1, alloc_size, persistent);
+	MYSQLND_RES * ret = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("mysqlnd_result_init");
 
@@ -1931,7 +1929,6 @@ mysqlnd_result_init(const unsigned int field_count, const zend_bool persistent)
 		DBG_RETURN(NULL);
 	}
 
-	ret->persistent		= persistent;
 	ret->field_count	= field_count;
 	ret->m = *mysqlnd_result_get_methods();
 
@@ -1942,27 +1939,26 @@ mysqlnd_result_init(const unsigned int field_count, const zend_bool persistent)
 
 /* {{{ mysqlnd_result_unbuffered_init */
 PHPAPI MYSQLND_RES_UNBUFFERED *
-mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent)
+mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_UNBUFFERED) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_UNBUFFERED * ret = mnd_pecalloc(1, alloc_size, persistent);
+	MYSQLND_RES_UNBUFFERED * ret = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("mysqlnd_result_unbuffered_init");
 
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
-		mnd_pefree(ret, persistent);
+	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
-		mnd_pefree(ret, persistent);
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 
-	ret->persistent	= persistent;
 	ret->field_count= field_count;
 	ret->ps = ps;
 
@@ -1982,31 +1978,30 @@ mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool p
 
 /* {{{ mysqlnd_result_buffered_zval_init */
 PHPAPI MYSQLND_RES_BUFFERED_ZVAL *
-mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent)
+mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_ZVAL) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_BUFFERED_ZVAL * ret = mnd_pecalloc(1, alloc_size, persistent);
+	MYSQLND_RES_BUFFERED_ZVAL * ret = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
-		mnd_pefree(ret, persistent);
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
-		mnd_pefree(ret, persistent);
+	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
-		mnd_pefree(ret, persistent);
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 
-	ret->persistent	= persistent;
 	ret->field_count= field_count;
 	ret->ps = ps;
 	ret->m = *mysqlnd_result_buffered_get_methods();
@@ -2029,31 +2024,30 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 
 /* {{{ mysqlnd_result_buffered_c_init */
 PHPAPI MYSQLND_RES_BUFFERED_C *
-mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent)
+mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_C) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_BUFFERED_C * ret = mnd_pecalloc(1, alloc_size, persistent);
+	MYSQLND_RES_BUFFERED_C * ret = mnd_ecalloc(1, alloc_size);
 
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
 	if (!ret) {
 		DBG_RETURN(NULL);
 	}
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, persistent)) {
-		mnd_pefree(ret, persistent);
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
-	if (!(ret->lengths = mnd_pecalloc(field_count, sizeof(size_t), persistent))) {
-		mnd_pefree(ret, persistent);
+	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
 		mnd_efree(ret->lengths);
-		mnd_pefree(ret, persistent);
+		mnd_efree(ret);
 		DBG_RETURN(NULL);
 	}
 
-	ret->persistent	= persistent;
 	ret->field_count= field_count;
 	ret->ps = ps;
 	ret->m = *mysqlnd_result_buffered_get_methods();

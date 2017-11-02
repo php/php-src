@@ -339,7 +339,7 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 		goto end;
 	}
 
-	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
+	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet->message, auth_resp_packet->message_len);
 	ret = PASS;
 end:
 	PACKET_FREE(change_auth_resp_packet);

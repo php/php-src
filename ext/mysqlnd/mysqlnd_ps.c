@@ -82,7 +82,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	result->type			= MYSQLND_RES_PS_BUF;
 /*	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol; */
 
-	result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, TRUE, result->persistent);
+	result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, TRUE);
 	if (!result->stored_data) {
 		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(NULL);
@@ -122,7 +122,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
-		mnd_pefree(stmt->result, stmt->result->persistent);
+		mnd_efree(stmt->result);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
@@ -167,13 +167,13 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 	MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_BUFFERED_SETS);
 
 	do {
-		result = conn->m->result_init(stmt->result->field_count, stmt->persistent);
+		result = conn->m->result_init(stmt->result->field_count);
 		if (!result) {
 			SET_OOM_ERROR(conn->error_info);
 			break;
 		}
 
-		result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE);
+		result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta);
 		if (!result->meta) {
 			SET_OOM_ERROR(conn->error_info);
 			break;
@@ -347,7 +347,7 @@ mysqlnd_stmt_prepare_read_eof(MYSQLND_STMT * s)
 		if (FAIL == (ret = PACKET_READ(fields_eof))) {
 			if (stmt->result) {
 				stmt->result->m.free_result_contents(stmt->result);
-				mnd_pefree(stmt->result, stmt->result->persistent);
+				mnd_efree(stmt->result);
 				/* XXX: This will crash, because we will null also the methods.
 					But seems it happens in extreme cases or doesn't. Should be fixed by exporting a function
 					(from mysqlnd_driver.c?) to do the reset.
@@ -444,7 +444,7 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	  no metadata at prepare.
 	*/
 	if (stmt_to_prepare->field_count) {
-		MYSQLND_RES * result = conn->m->result_init(stmt_to_prepare->field_count, stmt_to_prepare->persistent);
+		MYSQLND_RES * result = conn->m->result_init(stmt_to_prepare->field_count);
 		if (!result) {
 			SET_OOM_ERROR(conn->error_info);
 			goto fail;
@@ -1543,7 +1543,7 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_parameter)(MYSQLND_STMT * const s, unsigne
 
 	if (stmt->param_count) {
 		if (!stmt->param_bind) {
-			stmt->param_bind = mnd_pecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND), stmt->persistent);
+			stmt->param_bind = mnd_ecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND));
 			if (!stmt->param_bind) {
 				DBG_RETURN(FAIL);
 			}
@@ -1691,9 +1691,9 @@ MYSQLND_METHOD(mysqlnd_stmt, bind_one_result)(MYSQLND_STMT * const s, unsigned i
 		mysqlnd_stmt_separate_one_result_bind(s, param_no);
 		/* Guaranteed is that stmt->result_bind is NULL */
 		if (!stmt->result_bind) {
-			stmt->result_bind = mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
+			stmt->result_bind = mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND));
 		} else {
-			stmt->result_bind = mnd_perealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND), stmt->persistent);
+			stmt->result_bind = mnd_erealloc(stmt->result_bind, stmt->field_count * sizeof(MYSQLND_RESULT_BIND));
 		}
 		if (!stmt->result_bind) {
 			DBG_RETURN(FAIL);
@@ -1868,17 +1868,17 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 			be handled in a better way.
 	*/
 	do {
-		result_meta = conn->m->result_init(stmt->field_count, stmt->persistent);
+		result_meta = conn->m->result_init(stmt->field_count);
 		if (!result_meta) {
 			break;
 		}
 		result_meta->type = MYSQLND_RES_NORMAL;
-		result_meta->unbuf = mysqlnd_result_unbuffered_init(stmt->field_count, TRUE, result_meta->persistent);
+		result_meta->unbuf = mysqlnd_result_unbuffered_init(stmt->field_count, TRUE);
 		if (!result_meta->unbuf) {
 			break;
 		}
 		result_meta->unbuf->eof_reached = TRUE;
-		result_meta->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta, FALSE);
+		result_meta->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta);
 		if (!result_meta->meta) {
 			break;
 		}
@@ -2132,7 +2132,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s)
 	}
 	if (stmt->error_info->error_list) {
 		zend_llist_clean(stmt->error_info->error_list);
-		mnd_pefree(stmt->error_info->error_list, s->persistent);
+		mnd_efree(stmt->error_info->error_list);
 		stmt->error_info->error_list = NULL;
 	}
 
@@ -2252,7 +2252,7 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, ze
 	}
 
 	if (stmt->execute_cmd_buffer.buffer) {
-		mnd_pefree(stmt->execute_cmd_buffer.buffer, stmt->persistent);
+		mnd_efree(stmt->execute_cmd_buffer.buffer);
 		stmt->execute_cmd_buffer.buffer = NULL;
 	}
 
@@ -2273,7 +2273,6 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit)
 {
 	MYSQLND_STMT_DATA * stmt = (s != NULL) ? s->data:NULL;
 	enum_func_status ret = FAIL;
-	zend_bool persistent = (s != NULL) ? s->persistent : 0;
 
 	DBG_ENTER("mysqlnd_stmt::dtor");
 	if (stmt) {
@@ -2283,9 +2282,9 @@ MYSQLND_METHOD(mysqlnd_stmt, dtor)(MYSQLND_STMT * const s, zend_bool implicit)
 														STAT_STMT_CLOSE_EXPLICIT);
 
 		ret = s->m->close_on_server(s, implicit);
-		mnd_pefree(stmt, persistent);
+		mnd_efree(stmt);
 	}
-	mnd_pefree(s, persistent);
+	mnd_efree(s);
 
 	DBG_INF(ret == PASS? "PASS":"FAIL");
 	DBG_RETURN(ret);
@@ -2302,7 +2301,7 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_param_bind)(MYSQLND_STMT * const s)
 	if (!stmt) {
 		DBG_RETURN(NULL);
 	}
-	DBG_RETURN(mnd_pecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND), stmt->persistent));
+	DBG_RETURN(mnd_ecalloc(stmt->param_count, sizeof(MYSQLND_PARAM_BIND)));
 }
 /* }}} */
 
@@ -2316,7 +2315,7 @@ MYSQLND_METHOD(mysqlnd_stmt, alloc_result_bind)(MYSQLND_STMT * const s)
 	if (!stmt) {
 		DBG_RETURN(NULL);
 	}
-	DBG_RETURN(mnd_pecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND), stmt->persistent));
+	DBG_RETURN(mnd_ecalloc(stmt->field_count, sizeof(MYSQLND_RESULT_BIND)));
 }
 /* }}} */
 
@@ -2327,7 +2326,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_parameter_bind)(MYSQLND_STMT * const s, MYSQLN
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	if (stmt) {
-		mnd_pefree(param_bind, stmt->persistent);
+		mnd_efree(param_bind);
 	}
 }
 /* }}} */
@@ -2339,7 +2338,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_result_bind)(MYSQLND_STMT * const s, MYSQLND_R
 {
 	MYSQLND_STMT_DATA * stmt = s? s->data : NULL;
 	if (stmt) {
-		mnd_pefree(result_bind, stmt->persistent);
+		mnd_efree(result_bind);
 	}
 }
 /* }}} */

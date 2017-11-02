@@ -370,7 +370,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * factory, const zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
-typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
+typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn);
 typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
@@ -451,7 +451,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__send_close)(MYSQLND_CONN_DATA
 
 typedef enum_func_status    (*func_mysqlnd_conn_data__ssl_set)(MYSQLND_CONN_DATA * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher);
 
-typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int field_count, zend_bool persistent);
+typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int field_count);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn);
@@ -618,7 +618,7 @@ typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *result);
 
 
-typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent);
+typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 {
@@ -697,7 +697,7 @@ typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_fields)(MYSQLND_RES
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_tell)(const MYSQLND_RES_METADATA * const meta);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset);
 typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn);
-typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta, const zend_bool persistent);
+typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta);
 typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA * meta);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta)
@@ -1005,8 +1005,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 			MYSQLND_ERROR_INFO * const error_info,
 			MYSQLND_UPSERT_STATUS * const upsert_status,
 			const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
-			MYSQLND_STRING * const last_message,
-			const zend_bool last_message_persistent);
+			MYSQLND_STRING * const last_message);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_EOF)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
@@ -1022,8 +1021,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 
 			MYSQLND_ERROR_INFO	* error_info,
 			MYSQLND_UPSERT_STATUS * upsert_status,
-			MYSQLND_STRING * last_message,
-			zend_bool last_message_persistent);
+			MYSQLND_STRING * last_message);
 
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
@@ -1152,8 +1150,6 @@ struct st_mysqlnd_result_metadata
 
 	unsigned int					current_field;
 	unsigned int					field_count;
-
-	zend_bool						persistent;
 };
 
 
@@ -1173,7 +1169,6 @@ struct st_mysqlnd_result_metadata
 													\
 	unsigned int		field_count;				\
 	zend_bool			ps;							\
-	zend_bool			persistent;					\
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) m;	\
 	enum mysqlnd_buffered_type type;				\
 	void				* unused1;					\
@@ -1229,8 +1224,6 @@ struct st_mysqlnd_unbuffered_result
 	zend_bool			eof_reached;
 
 	zend_bool			ps;
-	zend_bool			persistent;
-
 };
 
 
@@ -1247,7 +1240,6 @@ struct st_mysqlnd_res
 	MYSQLND_RES_BUFFERED	*stored_data;
 	MYSQLND_RES_UNBUFFERED	*unbuf;
 
-	zend_bool				persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) m;
 };
 
@@ -1279,7 +1271,6 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_PARAM_BIND			*param_bind;
 	MYSQLND_RESULT_BIND			*result_bind;
 	zend_bool					result_zvals_separated_once;
-	zend_bool					persistent;
 
 	MYSQLND_UPSERT_STATUS * 	upsert_status;
 	MYSQLND_UPSERT_STATUS 		upsert_status_impl;
@@ -1307,7 +1298,6 @@ struct st_mysqlnd_stmt
 {
 	MYSQLND_STMT_DATA * data;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * m;
-	zend_bool persistent;
 };
 
 
