@@ -662,6 +662,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
+	zend_string *str;
 
 	if (pphar) {
 		*pphar = NULL;
@@ -1173,7 +1174,13 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		/* if signature matched, no need to check CRC32 for each file */
 		entry.is_crc_checked = (manifest_flags & PHAR_HDR_SIGNATURE ? 1 : 0);
 		phar_set_inode(&entry);
-		zend_hash_str_add_mem(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		if (mydata->is_persistent) {
+			str = zend_string_init_interned(entry.filename, entry.filename_len, 1);
+		} else {
+			str = zend_string_init(entry.filename, entry.filename_len, 0);
+		}
+		zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info));
+		zend_string_release(str);
 	}
 
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
@@ -1221,12 +1228,24 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
+		if (mydata->is_persistent) {
+			str = zend_string_init_interned(alias, alias_len, 1);
+		} else {
+			str = zend_string_init(alias, alias_len, 0);
+		}
+		zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), str, mydata);
+		zend_string_release(str);
 	} else {
 		mydata->is_temporary_alias = 1;
 	}
 
-	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
+	if (mydata->is_persistent) {
+		str = zend_string_init_interned(mydata->fname, fname_len, 1);
+	} else {
+		str = zend_string_init(mydata->fname, fname_len, 0);
+	}
+	zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), str, mydata);
+	zend_string_release(str);
 	efree(savebuf);
 
 	if (pphar) {
