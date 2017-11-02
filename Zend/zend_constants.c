@@ -210,13 +210,15 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 		return NULL;
 	} else if (name_len == sizeof("__COMPILER_HALT_OFFSET__")-1 &&
 	          !memcmp(name, "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1)) {
-		zend_string *cfilename;
+		const char *cfilename;
 		zend_string *haltname;
+		size_t clen;
 
-		cfilename = zend_get_executed_filename_ex();
+		cfilename = zend_get_executed_filename();
+		clen = strlen(cfilename);
 		/* check for __COMPILER_HALT_OFFSET__ */
 		haltname = zend_mangle_property_name(haltoff,
-			sizeof("__COMPILER_HALT_OFFSET__") - 1, ZSTR_VAL(cfilename), ZSTR_LEN(cfilename), 0);
+			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
 		c = zend_hash_find_ptr(EG(zend_constants), haltname);
 		zend_string_free(haltname);
 		return c;
