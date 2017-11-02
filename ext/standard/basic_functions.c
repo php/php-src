@@ -5126,7 +5126,7 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			if (Z_REFCOUNTED(shutdown_function_entry.arguments[i])) Z_ADDREF(shutdown_function_entry.arguments[i]);
+			Z_TRY_ADDREF(shutdown_function_entry.arguments[i]);
 		}
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}
@@ -5776,9 +5776,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		if (Z_REFCOUNTED(tick_fe.arguments[i])) {
-			Z_ADDREF(tick_fe.arguments[i]);
-		}
+		Z_TRY_ADDREF(tick_fe.arguments[i]);
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);

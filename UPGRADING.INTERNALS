@@ -16,6 +16,7 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   m. AST and IS_CONSTANT
   n. GC_REFCOUNT()
   o. zend_get_parameters()
+  p. zend_register_persistent_resource()
 
 2. Build system changes
   a. Unix build system changes
@@ -111,6 +112,10 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 
   o. The zend_get_parameters() and zend_get_parameters_ex() functions were
      removed. Instead zend_parse_parameters() should be used.
+
+  p. New functions zend_register_persistent_resource() or
+     zend_register_persistent_resource_ex() should beused to register
+     persistent resources, instead of manual insertion into EG(persistent_list).
 
 ========================
 2. Build system changes

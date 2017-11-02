@@ -1296,7 +1296,7 @@ send_again:
 				if (Z_ISREF_P(arg)) {
 					ZVAL_DUP(arg, Z_REFVAL_P(arg));
 				} else {
-					if (Z_REFCOUNTED_P(arg)) Z_ADDREF_P(arg);
+					Z_TRY_ADDREF_P(arg);
 				}
 
 				zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1);
@@ -2962,7 +2962,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_CONST_HANDL
 
 				ZVAL_NEW_REF(EX(return_value), retval_ptr);
 				if (IS_CONST == IS_CONST) {
-					if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+					Z_TRY_ADDREF_P(retval_ptr);
 				}
 			}
 			break;
@@ -3070,7 +3070,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_CONST_HANDLER(ZEND_
 
 	zend_exception_save();
 	if (IS_CONST != IS_TMP_VAR) {
-		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		Z_TRY_ADDREF_P(value);
 	}
 
 	zend_throw_exception_object(value);
@@ -5843,14 +5843,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 		if (IS_CONST == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CONST == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CONST == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CONST == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -7623,14 +7619,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_U
 		if (IS_CONST == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CONST == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CONST == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CONST == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -9903,14 +9895,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_C
 		if (IS_CONST == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CONST == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CONST == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CONST == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -11915,14 +11903,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_T
 		if (IS_CONST == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CONST == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CONST == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CONST == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -12776,7 +12760,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_TMP_HANDLER
 
 				ZVAL_NEW_REF(EX(return_value), retval_ptr);
 				if (IS_TMP_VAR == IS_CONST) {
-					if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+					Z_TRY_ADDREF_P(retval_ptr);
 				}
 			}
 			break;
@@ -12884,7 +12868,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_TMP_HANDLER(ZEND_OP
 
 	zend_exception_save();
 	if (IS_TMP_VAR != IS_TMP_VAR) {
-		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		Z_TRY_ADDREF_P(value);
 	}
 
 	zend_throw_exception_object(value);
@@ -13883,14 +13867,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CON
 		if (IS_TMP_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_TMP_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_TMP_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_TMP_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -14608,14 +14588,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_UNU
 		if (IS_TMP_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_TMP_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_TMP_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_TMP_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -15251,14 +15227,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_CV_
 		if (IS_TMP_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_TMP_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_TMP_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_TMP_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -15794,14 +15766,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_TMP_TMP
 		if (IS_TMP_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_TMP_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_TMP_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_TMP_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -16204,7 +16172,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_VAR_HANDLER
 
 				ZVAL_NEW_REF(EX(return_value), retval_ptr);
 				if (IS_VAR == IS_CONST) {
-					if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+					Z_TRY_ADDREF_P(retval_ptr);
 				}
 			}
 			break;
@@ -16313,7 +16281,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_VAR_HANDLER(ZEND_OP
 
 	zend_exception_save();
 	if (IS_VAR != IS_TMP_VAR) {
-		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		Z_TRY_ADDREF_P(value);
 	}
 
 	zend_throw_exception_object(value);
@@ -18687,15 +18655,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -18845,15 +18809,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -19003,15 +18963,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -19161,15 +19117,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -19881,14 +19833,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CON
 		if (IS_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -21633,14 +21581,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_UNU
 		if (IS_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -23015,15 +22959,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -23173,15 +23113,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -23331,15 +23267,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -23489,15 +23421,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -24192,14 +24120,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_CV_
 		if (IS_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -25637,15 +25561,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -25795,15 +25715,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -25953,15 +25869,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -26111,15 +26023,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -26701,14 +26609,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_VAR_TMP
 		if (IS_VAR == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_VAR == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_VAR == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_VAR == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -27804,15 +27708,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -27962,15 +27862,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -28120,15 +28016,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -28278,15 +28170,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -30441,15 +30329,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -30599,15 +30483,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -30757,15 +30637,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -30915,15 +30791,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -32201,15 +32073,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -32359,15 +32227,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -32517,15 +32381,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -32675,15 +32535,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -33676,7 +33532,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RETURN_BY_REF_SPEC_CV_HANDLER(
 
 				ZVAL_NEW_REF(EX(return_value), retval_ptr);
 				if (IS_CV == IS_CONST) {
-					if (Z_REFCOUNTED_P(retval_ptr)) Z_ADDREF_P(retval_ptr);
+					Z_TRY_ADDREF_P(retval_ptr);
 				}
 			}
 			break;
@@ -33784,7 +33640,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_CV_HANDLER(ZEND_OPC
 
 	zend_exception_save();
 	if (IS_CV != IS_TMP_VAR) {
-		if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+		Z_TRY_ADDREF_P(value);
 	}
 
 	zend_throw_exception_object(value);
@@ -36779,15 +36635,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -36937,15 +36789,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -37095,15 +36943,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -37253,15 +37097,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -38046,14 +37886,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CONS
 		if (IS_CV == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CV == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CV == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CV == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -40744,14 +40580,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_UNUS
 		if (IS_CV == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CV == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CV == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CV == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -43254,15 +43086,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -43412,15 +43240,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -43570,15 +43394,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -43728,15 +43548,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -44577,14 +44393,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_CV_H
 		if (IS_CV == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CV == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CV == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CV == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);
@@ -46969,15 +46781,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -47127,15 +46935,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -47285,15 +47089,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -47443,15 +47243,11 @@ fast_assign_obj:
 								value = &tmp;
 							} else {
 								value = Z_REFVAL_P(value);
-								if (Z_REFCOUNTED_P(value)) {
-									Z_ADDREF_P(value);
-								}
+								Z_TRY_ADDREF_P(value);
 							}
 						} else {
 							value = Z_REFVAL_P(value);
-							if (Z_REFCOUNTED_P(value)) {
-								Z_ADDREF_P(value);
-							}
+							Z_TRY_ADDREF_P(value);
 						}
 					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
 						Z_ADDREF_P(value);
@@ -48181,14 +47977,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CV_TMPV
 		if (IS_CV == IS_TMP_VAR) {
 			/* pass */
 		} else if (IS_CV == IS_CONST) {
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else if (IS_CV == IS_CV) {
 			ZVAL_DEREF(expr_ptr);
-			if (Z_REFCOUNTED_P(expr_ptr)) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_TRY_ADDREF_P(expr_ptr);
 		} else /* if (IS_CV == IS_VAR) */ {
 			if (UNEXPECTED(Z_ISREF_P(expr_ptr))) {
 				zend_refcounted *ref = Z_COUNTED_P(expr_ptr);

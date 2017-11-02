@@ -634,12 +634,38 @@ static zend_always_inline void *zend_hash_add_mem(HashTable *ht, zend_string *ke
 	return NULL;
 }
 
+static zend_always_inline void *zend_hash_add_new_mem(HashTable *ht, zend_string *key, void *pData, size_t size)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_add_new(ht, key, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
+	}
+	return NULL;
+}
+
 static zend_always_inline void *zend_hash_str_add_mem(HashTable *ht, const char *str, size_t len, void *pData, size_t size)
 {
 	zval tmp, *zv;
 
 	ZVAL_PTR(&tmp, NULL);
 	if ((zv = zend_hash_str_add(ht, str, len, &tmp))) {
+		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
+		memcpy(Z_PTR_P(zv), pData, size);
+		return Z_PTR_P(zv);
+	}
+	return NULL;
+}
+
+static zend_always_inline void *zend_hash_str_add_new_mem(HashTable *ht, const char *str, size_t len, void *pData, size_t size)
+{
+	zval tmp, *zv;
+
+	ZVAL_PTR(&tmp, NULL);
+	if ((zv = zend_hash_str_add_new(ht, str, len, &tmp))) {
 		Z_PTR_P(zv) = pemalloc(size, GC_FLAGS(ht) & IS_ARRAY_PERSISTENT);
 		memcpy(Z_PTR_P(zv), pData, size);
 		return Z_PTR_P(zv);

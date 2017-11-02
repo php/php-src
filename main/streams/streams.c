@@ -296,12 +296,7 @@ fprintf(stderr, "stream_alloc: %s:%p persistent=%s\n", ops->label, ret, persiste
 	}
 
 	if (persistent_id) {
-		zval tmp;
-
-		ZVAL_NEW_PERSISTENT_RES(&tmp, -1, ret, le_pstream);
-
-		if (NULL == zend_hash_str_update(&EG(persistent_list), persistent_id,
-					strlen(persistent_id), &tmp)) {
+		if (NULL == zend_register_persistent_resource(persistent_id, strlen(persistent_id), ret, le_pstream)) {
 			pefree(ret, 1);
 			return NULL;
 		}
@@ -1670,12 +1665,17 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper)
 {
 	unsigned int protocol_len = (unsigned int)strlen(protocol);
+	int ret;
+	zend_string *str;
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
 	}
 
-	return zend_hash_add_ptr(&url_stream_wrappers_hash, zend_string_init_interned(protocol, protocol_len, 1), wrapper) ? SUCCESS : FAILURE;
+	str = zend_string_init_interned(protocol, protocol_len, 1);
+	ret = zend_hash_add_ptr(&url_stream_wrappers_hash, str, wrapper) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
@@ -1691,11 +1691,9 @@ static void clone_wrapper_hash(void)
 }
 
 /* API for registering VOLATILE wrappers */
-PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper)
+PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper)
 {
-	unsigned int protocol_len = (unsigned int)strlen(protocol);
-
-	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
+	if (php_stream_wrapper_scheme_validate(ZSTR_VAL(protocol), ZSTR_LEN(protocol)) == FAILURE) {
 		return FAILURE;
 	}
 
@@ -1703,16 +1701,16 @@ PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_st
 		clone_wrapper_hash();
 	}
 
-	return zend_hash_str_add_ptr(FG(stream_wrappers), protocol, protocol_len, wrapper) ? SUCCESS : FAILURE;
+	return zend_hash_add_ptr(FG(stream_wrappers), protocol, wrapper) ? SUCCESS : FAILURE;
 }
 
-PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol)
+PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol)
 {
 	if (!FG(stream_wrappers)) {
 		clone_wrapper_hash();
 	}
 
-	return zend_hash_str_del(FG(stream_wrappers), protocol, strlen(protocol));
+	return zend_hash_del(FG(stream_wrappers), protocol);
 }
 /* }}} */
 

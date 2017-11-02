@@ -83,7 +83,7 @@ mysqlnd_com_set_option_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_EOF_PACKET, FALSE, COM_SET_OPTION, TRUE,
-		                                   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+		                                   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 	DBG_RETURN(ret);
 }
@@ -132,7 +132,7 @@ mysqlnd_com_debug_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_EOF_PACKET, FALSE, COM_DEBUG, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	DBG_RETURN(ret);
@@ -193,7 +193,7 @@ mysqlnd_com_init_db_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_INIT_DB, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	/*
@@ -261,7 +261,7 @@ mysqlnd_com_ping_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, TRUE, COM_PING, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 	/*
 	  The server sends 0 but libmysql doesn't read it and has established
@@ -400,7 +400,7 @@ mysqlnd_com_process_kill_run(void *cmd)
 					   conn);
 	if (PASS == ret && read_response) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_PROCESS_KILL, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	if (read_response) {
@@ -474,7 +474,7 @@ mysqlnd_com_refresh_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_REFRESH, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	DBG_RETURN(ret);
@@ -537,7 +537,7 @@ mysqlnd_com_shutdown_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_SHUTDOWN, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	DBG_RETURN(ret);
@@ -990,7 +990,7 @@ mysqlnd_com_stmt_reset_run(void *cmd)
 					   conn);
 	if (PASS == ret) {
 		ret = send_command_handle_response(conn->payload_decoder_factory, PROT_OK_PACKET, FALSE, COM_STMT_RESET, TRUE,
-										   conn->error_info, conn->upsert_status, &conn->last_message, conn->persistent);
+										   conn->error_info, conn->upsert_status, &conn->last_message);
 	}
 
 	DBG_RETURN(ret);

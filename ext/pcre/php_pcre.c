@@ -591,17 +591,19 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * as hash keys especually for this table.
 	 * See bug #63180
 	 */
-	if (!ZSTR_IS_INTERNED(key) || !(GC_FLAGS(key) & IS_STR_PERMANENT)) {
-		pce = zend_hash_str_update_mem(&PCRE_G(pcre_cache),
-				ZSTR_VAL(key), ZSTR_LEN(key), &new_entry, sizeof(pcre_cache_entry));
+	if (!(GC_FLAGS(key) & IS_STR_PERMANENT)) {
+		zend_string *str = zend_string_init(ZSTR_VAL(key), ZSTR_LEN(key), 1);
+
+		GC_MAKE_PERSISTENT_LOCAL(str);
 #if HAVE_SETLOCALE
 		if (key != regex) {
 			zend_string_release(key);
 		}
 #endif
-	} else {
-		pce = zend_hash_update_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
+		key = str;
 	}
+
+	pce = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 
 	return pce;
 }
@@ -2602,9 +2604,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* If the entry fits our requirements */
 		if ((count > 0 && !invert) || (count == PCRE_ERROR_NOMATCH && invert)) {
-			if (Z_REFCOUNTED_P(entry)) {
-			   	Z_ADDREF_P(entry);
-			}
+			Z_TRY_ADDREF_P(entry);
 
 			/* Add to return array */
 			if (string_key) {

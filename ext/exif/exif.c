@@ -57,13 +57,6 @@
 
 typedef unsigned char uchar;
 
-#ifndef safe_emalloc
-# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
-#endif
-#ifndef safe_erealloc
-# define safe_erealloc(p,a,b,c) erealloc(p, (a)*(b)+(c))
-#endif
-
 #ifndef TRUE
 #	define TRUE 1
 #	define FALSE 0

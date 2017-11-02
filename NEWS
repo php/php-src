@@ -79,6 +79,7 @@ PHP                                                                        NEWS
 - PDO_DBlib:
   . Implemented request #69592 (allow 0-column rowsets to be skipped
     automatically). (fandrieu)
+  . Fixed bug #74243 (allow locales.conf to drive datetime format). (fandrieu)
 
 - PDO_OCI:
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized

@@ -1619,8 +1619,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			} else {
 				prop_value = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 			}
-			if (Z_REFCOUNTED_P(prop_value)) Z_ADDREF_P(prop_value);
 
+			Z_TRY_ADDREF_P(prop_value);
 			doc_comment = property_info->doc_comment ? zend_string_copy(property_info->doc_comment) : NULL;
 			zend_declare_property_ex(ce, prop_name,
 									 prop_value, flags,

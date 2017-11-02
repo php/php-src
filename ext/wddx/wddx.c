@@ -315,7 +315,7 @@ PS_SERIALIZER_DECODE_FUNC(wddx)
 				zend_string_addref(key);
 			}
 			if (php_set_session_var(key, ent, NULL)) {
-				if (Z_REFCOUNTED_P(ent)) Z_ADDREF_P(ent);
+				Z_TRY_ADDREF_P(ent);
 			}
 			PS_ADD_VAR(key);
 			zend_string_release(key);

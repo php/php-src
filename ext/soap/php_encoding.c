@@ -1169,7 +1169,7 @@ static xmlNodePtr to_xml_null(encodeTypePtr type, zval *data, int style, xmlNode
 static void set_zval_property(zval* object, char* name, zval* val)
 {
 	zend_update_property(Z_OBJCE_P(object), object, name, strlen(name), val);
-	if (Z_REFCOUNTED_P(val)) Z_DELREF_P(val);
+	Z_TRY_DELREF_P(val);
 }
 
 static zval* get_zval_property(zval* object, char* name, zval *rv)

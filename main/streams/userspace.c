@@ -514,7 +514,7 @@ PHP_FUNCTION(stream_wrapper_register)
 	rsrc = zend_register_resource(uwrap, le_protocols);
 
 	if ((uwrap->ce = zend_lookup_class(classname)) != NULL) {
-		if (php_register_url_stream_wrapper_volatile(ZSTR_VAL(protocol), &uwrap->wrapper) == SUCCESS) {
+		if (php_register_url_stream_wrapper_volatile(protocol, &uwrap->wrapper) == SUCCESS) {
 			RETURN_TRUE;
 		} else {
 			/* We failed.  But why? */
@@ -538,10 +538,9 @@ PHP_FUNCTION(stream_wrapper_register)
 	Unregister a wrapper for the life of the current request. */
 PHP_FUNCTION(stream_wrapper_unregister)
 {
-	char *protocol;
-	size_t protocol_len;
+	zend_string *protocol;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &protocol, &protocol_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &protocol) == FAILURE) {
 		RETURN_FALSE;
 	}
 
@@ -579,9 +578,9 @@ PHP_FUNCTION(stream_wrapper_restore)
 	}
 
 	/* A failure here could be okay given that the protocol might have been merely unregistered */
-	php_unregister_url_stream_wrapper_volatile(ZSTR_VAL(protocol));
+	php_unregister_url_stream_wrapper_volatile(protocol);
 
-	if (php_register_url_stream_wrapper_volatile(ZSTR_VAL(protocol), wrapper) == FAILURE) {
+	if (php_register_url_stream_wrapper_volatile(protocol, wrapper) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Unable to restore original %s:// wrapper", ZSTR_VAL(protocol));
 		RETURN_FALSE;
 	}

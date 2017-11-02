@@ -648,15 +648,16 @@ ZEND_FUNCTION(each)
 
 	/* add value elements */
 	ZVAL_DEREF(entry);
-	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-	if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+	if (Z_REFCOUNTED_P(entry)) {
+		GC_ADDREF_EX(Z_COUNTED_P(entry), 2);
+	}
 	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
 	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_VALUE), entry);
 
 	/* add the key elements */
 	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
 		ZVAL_STR_COPY(&tmp, key);
-		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
+		Z_TRY_ADDREF(tmp);
 	} else {
 		ZVAL_LONG(&tmp, num_key);
 	}

@@ -98,7 +98,7 @@ PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *o
 {
 	size_t algo_len = strlen(algo);
 	char *lower = zend_str_tolower_dup(algo, algo_len);
-	zend_hash_str_add_ptr(&php_hash_hashtable, lower, algo_len, (void *) ops);
+	zend_hash_add_ptr(&php_hash_hashtable, zend_string_init_interned(lower, algo_len, 1), (void *) ops);
 	efree(lower);
 }
 /* }}} */
