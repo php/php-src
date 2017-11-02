@@ -97,9 +97,7 @@ static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
+	Z_TRY_ADDREF_P(elem);
 }
 /* }}} */
 

@@ -284,10 +284,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
-
-		if (Z_REFCOUNTED_P(zvalue)) {
-			Z_DELREF_P(zvalue);
-		}
+		Z_TRY_DELREF_P(zvalue);
 	}
 	zend_string_release(key);
 

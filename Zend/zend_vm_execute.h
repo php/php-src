@@ -18661,8 +18661,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -18815,8 +18815,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -18969,8 +18969,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -19123,8 +19123,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -22965,8 +22965,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -23119,8 +23119,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -23273,8 +23273,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -23427,8 +23427,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -25567,8 +25567,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -25721,8 +25721,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -25875,8 +25875,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -26029,8 +26029,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -27714,8 +27714,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -27868,8 +27868,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -28022,8 +28022,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -28176,8 +28176,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -30335,8 +30335,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -30489,8 +30489,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -30643,8 +30643,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -30797,8 +30797,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -32079,8 +32079,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -32233,8 +32233,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -32387,8 +32387,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -32541,8 +32541,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -36641,8 +36641,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -36795,8 +36795,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -36949,8 +36949,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -37103,8 +37103,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -43092,8 +43092,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -43246,8 +43246,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -43400,8 +43400,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -43554,8 +43554,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -46787,8 +46787,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CONST == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CONST == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -46941,8 +46941,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_TMP_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_TMP_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -47095,8 +47095,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_VAR == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_VAR == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);
@@ -47249,8 +47249,8 @@ fast_assign_obj:
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (IS_CV == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (IS_CV == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);

@@ -991,7 +991,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zval_ptr_dtor(&ent1->data);
 					} else if (Z_TYPE(ent2->data) == IS_OBJECT) {
 						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
-						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
+						Z_TRY_DELREF(ent1->data);
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}

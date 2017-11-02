@@ -764,9 +764,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(entry);
-			if (Z_REFCOUNTED_P(entry)) {
-				Z_ADDREF_P(entry);
-			}
+			Z_TRY_ADDREF_P(entry);
 			zend_hash_update(intern->parameter, string_key, entry);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
