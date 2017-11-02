@@ -473,10 +473,7 @@ static void spl_array_write_dimension_ex(int check_inherited, zval *object, zval
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
-
+	Z_TRY_ADDREF_P(value);
 	if (!offset) {
 		ht = spl_array_get_hash_table(intern);
 		zend_hash_next_index_insert(ht, value);

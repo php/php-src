@@ -2173,8 +2173,8 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 							value = Z_REFVAL_P(value);
 							Z_TRY_ADDREF_P(value);
 						}
-					} else if (OP_DATA_TYPE == IS_CV && Z_REFCOUNTED_P(value)) {
-						Z_ADDREF_P(value);
+					} else if (OP_DATA_TYPE == IS_CV) {
+						Z_TRY_ADDREF_P(value);
 					}
 				}
 				zend_hash_add_new(zobj->properties, Z_STR_P(property), value);

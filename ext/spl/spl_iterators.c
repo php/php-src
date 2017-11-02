@@ -1579,9 +1579,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				efree(cfi);
 				return NULL;
 			}
-			if (Z_REFCOUNTED_P(&cfi->fci.function_name)) {
-				Z_ADDREF(cfi->fci.function_name);
-			}
+			Z_TRY_ADDREF(cfi->fci.function_name);
 			cfi->object = cfi->fcc.object;
 			if (cfi->object) GC_ADDREF(cfi->object);
 			intern->u.cbfilter = cfi;
@@ -2699,8 +2697,8 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
 			if (use_copy) {
 				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &expr_copy);
-			} else if (Z_REFCOUNTED(intern->u.caching.zstr)) {
-				Z_ADDREF(intern->u.caching.zstr);
+			} else {
+				Z_TRY_ADDREF(intern->u.caching.zstr);
 			}
 		}
 		spl_dual_it_next(intern, 0);
@@ -2830,9 +2828,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
+	Z_TRY_ADDREF_P(value);
 	zend_symtable_update(Z_ARRVAL(intern->u.caching.zcache), key, value);
 }
 /* }}} */
@@ -3571,9 +3567,7 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser)
 	if (data == NULL) {
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (Z_REFCOUNTED_P(data)) {
-		Z_ADDREF_P(data);
-	}
+	Z_TRY_ADDREF_P(data);
 	add_next_index_zval(return_value, data);
 	return ZEND_HASH_APPLY_KEEP;
 }

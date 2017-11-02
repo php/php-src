@@ -771,8 +771,8 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			if (Z_REFCOUNTED_P(val)) {
 				copy_constant_array(new_val, val);
 			}
-		} else if (Z_REFCOUNTED_P(val)) {
-			Z_ADDREF_P(val);
+		} else {
+			Z_TRY_ADDREF_P(val);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
