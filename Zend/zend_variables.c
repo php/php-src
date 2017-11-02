@@ -34,9 +34,13 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 		case IS_STRING: {
 				zend_string *str = (zend_string*)p;
 				CHECK_ZVAL_STRING_REL(str);
+#if ZEND_RC_DEBUG
 				ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
 				ZEND_ASSERT(GC_REFCOUNT(str) == 0);
 				pefree(str, GC_FLAGS(str) & IS_STR_PERSISTENT);
+#else
+				zend_string_free(str);
+#endif
 				break;
 			}
 		case IS_ARRAY: {

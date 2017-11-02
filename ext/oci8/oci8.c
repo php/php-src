@@ -2041,8 +2041,10 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 
 	/* add to the appropriate hash */
 	if (connection->is_persistent) {
+#if PHP_VERSION_ID < 70300
 		new_le.ptr = connection;
 		new_le.type = le_pconnection;
+#endif
 		connection->used_this_request = 1;
 		PHP_OCI_REGISTER_RESOURCE(connection, le_pconnection);
 
@@ -2053,7 +2055,11 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 		if (OCI_G(old_oci_close_semantics)) {
 			GC_ADDREF(connection->id);
 		}
+#if PHP_VERSION_ID < 70300
 		zend_hash_update_mem(&EG(persistent_list), connection->hash_key, (void *)&new_le, sizeof(zend_resource));
+#else
+		zend_register_persistent_resource_ex(connection->hash_key, connection, le_pconnection);
+#endif
 		OCI_G(num_persistent)++;
 		OCI_G(num_links)++;
 	} else if (!exclusive) {
@@ -2874,7 +2880,9 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 {
 	smart_str spool_hashed_details = {0};
 	php_oci_spool *session_pool = NULL;
+#if PHP_VERSION_ID < 70300
 	zend_resource spool_le = {{0}};
+#endif
 	zend_resource *spool_out_le = NULL;
 	zend_bool iserror = 0;
 	zval *spool_out_zv = NULL;
@@ -2921,10 +2929,14 @@ static php_oci_spool *php_oci_get_spool(char *username, int username_len, char *
 			iserror = 1;
 			goto exit_get_spool;
 		}
+#if PHP_VERSION_ID < 70300
 		spool_le.ptr  = session_pool;
 		spool_le.type = le_psessionpool;
 		PHP_OCI_REGISTER_RESOURCE(session_pool, le_psessionpool);
 		zend_hash_update_mem(&EG(persistent_list), session_pool->spool_hash_key, (void *)&spool_le, sizeof(zend_resource));
+#else
+		zend_register_persistent_resource_ex(session_pool->spool_hash_key, session_pool, le_psessionpool);
+#endif
 	} else if (spool_out_le->type == le_psessionpool &&
 		ZSTR_LEN(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key) == ZSTR_LEN(spool_hashed_details.s) &&
 		memcmp(ZSTR_VAL(((php_oci_spool *)(spool_out_le->ptr))->spool_hash_key), ZSTR_VAL(spool_hashed_details.s), ZSTR_LEN(spool_hashed_details.s)) == 0) {

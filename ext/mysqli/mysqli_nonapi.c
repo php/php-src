@@ -196,12 +196,10 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 					} while (0);
 				}
 			} else {
-				zend_resource le;
-				le.type = php_le_pmysqli();
-				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
+				plist = calloc(1, sizeof(mysqli_plist_entry));
 
 				zend_ptr_stack_init_ex(&plist->free_links, 1);
-				zend_hash_str_update_mem(&EG(persistent_list), ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), &le, sizeof(le));
+				zend_register_persistent_resource(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), plist, php_le_pmysqli());
 			}
 		}
 	}

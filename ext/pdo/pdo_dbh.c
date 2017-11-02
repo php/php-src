@@ -359,18 +359,11 @@ static PHP_METHOD(PDO, dbh_constructor)
 		/* all set */
 
 		if (is_persistent) {
-			zend_resource le;
-
 			/* register in the persistent list etc. */
 			/* we should also need to replace the object store entry,
 			   since it was created with emalloc */
-
-			le.type = php_pdo_list_entry();
-			le.ptr = dbh;
-			GC_SET_REFCOUNT(&le, 1);
-
-			if ((zend_hash_str_update_mem(&EG(persistent_list),
-						(char*)dbh->persistent_id, dbh->persistent_id_len, &le, sizeof(le))) == NULL) {
+			if ((zend_register_persistent_resource(
+						(char*)dbh->persistent_id, dbh->persistent_id_len, dbh, php_pdo_list_entry())) == NULL) {
 				php_error_docref(NULL, E_ERROR, "Failed to register persistent entry");
 			}
 		}

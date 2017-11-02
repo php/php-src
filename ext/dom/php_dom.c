@@ -302,10 +302,13 @@ static int dom_write_na(dom_object *obj, zval *newval)
 static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_t name_len, dom_read_t read_func, dom_write_t write_func)
 {
 	dom_prop_handler hnd;
+	zend_string *str;
 
 	hnd.read_func = read_func ? read_func : dom_read_na;
 	hnd.write_func = write_func ? write_func : dom_write_na;
-	zend_hash_str_add_mem(prop_handler, name, name_len, &hnd, sizeof(dom_prop_handler));
+	str = zend_string_init_interned(name, name_len, 1);
+	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
+	zend_string_release(str);
 }
 /* }}} */
 
