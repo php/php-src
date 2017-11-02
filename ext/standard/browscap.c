@@ -221,8 +221,6 @@ typedef struct _browscap_parser_ctx {
 	browser_data *bdata;
 	browscap_entry *current_entry;
 	zend_string *current_section_name;
-	zend_string *str_empty;
-	zend_string *str_one;
 	HashTable str_interned;
 } browscap_parser_ctx;
 
@@ -317,26 +315,26 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "yes", sizeof("yes") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "true", sizeof("true") - 1))
 				) {
-					new_value = zend_string_copy(ctx->str_one);
+					new_value = ZSTR_CHAR('1');
 				} else if (
 					(Z_STRLEN_P(arg2) == 2 && !strncasecmp(Z_STRVAL_P(arg2), "no", sizeof("no") - 1)) ||
 					(Z_STRLEN_P(arg2) == 3 && !strncasecmp(Z_STRVAL_P(arg2), "off", sizeof("off") - 1)) ||
 					(Z_STRLEN_P(arg2) == 4 && !strncasecmp(Z_STRVAL_P(arg2), "none", sizeof("none") - 1)) ||
 					(Z_STRLEN_P(arg2) == 5 && !strncasecmp(Z_STRVAL_P(arg2), "false", sizeof("false") - 1))
 				) {
-					new_value = zend_string_copy(ctx->str_empty);
+					new_value = ZSTR_EMPTY_ALLOC();
 				} else { /* Other than true/false setting */
 					new_value = browscap_intern_str(ctx, Z_STR_P(arg2));
-				}
 
-				if (persistent) {
-					new_value = zend_new_interned_string(zend_string_copy(new_value));
-					if (ZSTR_IS_INTERNED(new_value)) {
-						if (new_value == Z_STR_P(arg2)) {
-							Z_TYPE_FLAGS_P(arg2) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+					if (persistent) {
+						new_value = zend_new_interned_string(zend_string_copy(new_value));
+						if (ZSTR_IS_INTERNED(new_value)) {
+							if (new_value == Z_STR_P(arg2)) {
+								Z_TYPE_FLAGS_P(arg2) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+							}
+						} else {
+							zend_string_release(new_value);
 						}
-					} else {
-						zend_string_release(new_value);
 					}
 				}
 
@@ -453,8 +451,6 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	ctx.bdata = browdata;
 	ctx.current_entry = NULL;
 	ctx.current_section_name = NULL;
-	ctx.str_empty = zend_string_init("", sizeof("")-1, persistent);
-	ctx.str_one = zend_string_init("1", sizeof("1")-1, persistent);
 	zend_hash_init(&ctx.str_interned, 8, NULL, NULL, persistent);
 
 	zend_parse_ini_file(&fh, 1, ZEND_INI_SCANNER_RAW,
@@ -464,8 +460,6 @@ static int browscap_read_file(char *filename, browser_data *browdata, int persis
 	if (ctx.current_section_name) {
 		zend_string_release(ctx.current_section_name);
 	}
-	zend_string_release(ctx.str_one);
-	zend_string_release(ctx.str_empty);
 	zend_hash_destroy(&ctx.str_interned);
 
 	return SUCCESS;

@@ -14,6 +14,8 @@ PHP                                                                        NEWS
     (andrewnester)
   . Fixed bug #69954 (broken links and unused config items in distributed ini
     files). (petk)
+  . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
+    properties). (pmmaga)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
