@@ -13,6 +13,8 @@ var_dump($a);
 --EXPECTF--
 Notice: Undefined offset: 0 in %s on line %d
 
+Warning: Variable of type null does not accept array offsets in %s on line %d
+
 Warning: Parameter 1 to foo() expected to be a reference, value given in %s on line %d
 array(0) {
 }

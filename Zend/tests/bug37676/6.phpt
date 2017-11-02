@@ -1,16 +1,16 @@
 --TEST--
-Testing nested list() with empty array
+Bug #37676 (Complex warnings)
 --FILE--
 <?php
+$a = [0 => null];
+$b = [1 => 0];
+$c = [2 => 1];
+$d = [3 => $b];
 
-list($a, list($b, list(list($d)))) = array();
-
+$a[$b[$c[2]]][0];
+$a[$d[3][1]][$b[1]];
 ?>
 --EXPECTF--
-Notice: Undefined offset: 0 in %s on line %d
-
-Notice: Undefined offset: 1 in %s on line %d
-
 Warning: Variable of type null does not accept array offsets in %s on line %d
 
 Warning: Variable of type null does not accept array offsets in %s on line %d

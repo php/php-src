@@ -13,3 +13,7 @@ while (list($key, $val) = each($arr)) {
 
 Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 7: foo%00bar => foo%00bar
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d

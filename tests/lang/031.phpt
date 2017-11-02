@@ -55,18 +55,42 @@ Correct - with inner loop reset.
 Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 inloop 0 for key1
 inloop 1 for key1
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 inloop 0 for key2
 inloop 1 for key2
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 What happens without inner loop reset.
 inloop 0 for key1
 inloop 1 for key1
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 What happens without inner loop reset but copy.
 inloop 0 for key1
 inloop 1 for key1
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 inloop 0 for key2
 inloop 1 for key2
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 What happens with inner loop reset over copy.
 inloop 0 for key1
 inloop 1 for key1
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
 inloop 0 for key2
 inloop 1 for key2
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d
+
+Warning: Variable of type boolean does not accept array offsets in %s on line %d

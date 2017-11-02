@@ -15,5 +15,7 @@ echo "ok\n";
 ?>
 --EXPECTF--
 Notice: Undefined variable: GLOBALS in %sbug31158.php on line 6
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
 ok
 

@@ -890,7 +890,8 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_SEND_BY_REF     1
 #define ZEND_SEND_PREFER_REF 2
 
-#define ZEND_DIM_IS 1
+#define ZEND_DIM_IS                 1
+#define ZEND_DIM_PROPAGATE_ERROR    2
 
 #define IS_CONSTANT_UNQUALIFIED     0x010
 #define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */

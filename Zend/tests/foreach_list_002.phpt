@@ -18,5 +18,9 @@ foreach($array as list(, $a)) {
 int(1)
 int(3)
 string(1) "b"
+
+Warning: Variable of type string does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type string does not accept array offsets in %s on line %d
 NULL

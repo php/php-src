@@ -8603,8 +8603,12 @@ void zend_eval_const_expr(zend_ast **ast_ptr) /* {{{ */
 			}
 
 			/* Set isset fetch indicator here, opcache disallows runtime altering of the AST */
-			if (ast->attr == ZEND_DIM_IS && ast->child[0]->kind == ZEND_AST_DIM) {
-				ast->child[0]->attr = ZEND_DIM_IS;
+			if (ast->child[0]->kind == ZEND_AST_DIM) {
+				if (ast->attr == ZEND_DIM_IS) {
+					ast->child[0]->attr = ZEND_DIM_IS;
+				} else {
+					ast->child[0]->attr = ZEND_DIM_PROPAGATE_ERROR;
+				}
 			}
 
 			zend_eval_const_expr(&ast->child[0]);

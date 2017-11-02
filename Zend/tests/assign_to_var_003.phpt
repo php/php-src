@@ -12,7 +12,8 @@ var_dump($var1);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--
+Warning: Variable of type float does not accept array offsets in %s on line %d
 NULL
 NULL
 Done

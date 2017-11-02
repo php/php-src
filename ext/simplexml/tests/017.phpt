@@ -37,9 +37,9 @@ function print_xml2($xml) {
   $persons = 2;
   for ($i=0;$i<$persons;$i++) {
     echo "person: ".$xml->person[$i]['name']."\n";
-	$children = 2;
+    $children = 2;
     for ($j=0;$j<$children;$j++) {
-      echo "  child: ".$xml->person[$i]->child[$j]['name']."\n";
+        echo "  child: ".$xml->person[$i]->child[$j]['name']."\n";
     }
   }
 }
@@ -75,12 +75,20 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
   child: 
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
 person: 
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
   child: 
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
   child: 
 ===DONE===

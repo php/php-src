@@ -24,14 +24,31 @@ var_dump($long[$arr]);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECTF--	
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
 Done

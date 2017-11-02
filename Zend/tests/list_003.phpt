@@ -16,7 +16,16 @@ list($e) = print '';
 var_dump($a, $b, $c, $d, $e);
 
 ?>
---EXPECT--
+--EXPECTF--
+Warning: Variable of type null does not accept array offsets in %s on line %d
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
+
+Warning: Variable of type float does not accept array offsets in %s on line %d
+
+Warning: Variable of type string does not accept array offsets in %s on line %d
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
 NULL
 NULL

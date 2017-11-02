@@ -21,7 +21,10 @@ var_dump(b()[1]);
 
 ?>
 --EXPECTF--
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
 
 Fatal error: Uncaught Error: Cannot use object of type stdClass as array in %s:%d

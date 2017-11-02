@@ -35,10 +35,21 @@ var_dump($a, $b, $c);
 
 ?>
 --EXPECTF--
+Warning: Variable of type string does not accept array offsets in %s on line %d
+
+Warning: Variable of type string does not accept array offsets in %s on line %d
+
+Warning: Variable of type string does not accept array offsets in %s on line %d
 NULL
 NULL
 NULL
 ----
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
+
+Warning: Variable of type integer does not accept array offsets in %s on line %d
 NULL
 NULL
 NULL

@@ -1,16 +1,19 @@
 --TEST--
-Testing nested list() with empty array
+Bug #37676 (Function warnings)
 --FILE--
 <?php
+function foo() {
+    return null;
+}
 
-list($a, list($b, list(list($d)))) = array();
+function foo_array() {
+    return [null];
+}
 
+foo()[0];
+foo()[0][1];
 ?>
 --EXPECTF--
-Notice: Undefined offset: 0 in %s on line %d
-
-Notice: Undefined offset: 1 in %s on line %d
-
 Warning: Variable of type null does not accept array offsets in %s on line %d
 
 Warning: Variable of type null does not accept array offsets in %s on line %d
