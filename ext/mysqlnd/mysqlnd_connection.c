@@ -329,7 +329,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, free_contents)(MYSQLND_CONN_DATA * conn)
 		conn->authentication_plugin_data.s = NULL;
 	}
 	if (conn->last_message.s) {
-		mnd_pefree(conn->last_message.s, pers);
+		mnd_efree(conn->last_message.s);
 		conn->last_message.s = NULL;
 	}
 
