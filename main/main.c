@@ -1596,10 +1596,6 @@ int php_request_startup(void)
 {
 	int retval = SUCCESS;
 
-#if ZEND_RC_DEBUG
-	zend_rc_debug = 1;
-#endif
-
 	zend_interned_strings_activate();
 
 #ifdef HAVE_DTRACE
@@ -1809,10 +1805,6 @@ void php_request_shutdown(void *dummy)
 #ifdef HAVE_DTRACE
 	DTRACE_REQUEST_SHUTDOWN(SAFE_FILENAME(SG(request_info).path_translated), SAFE_FILENAME(SG(request_info).request_uri), (char *)SAFE_FILENAME(SG(request_info).request_method));
 #endif /* HAVE_DTRACE */
-
-#if ZEND_RC_DEBUG
-	zend_rc_debug = 0;
-#endif
 }
 /* }}} */
 
@@ -2282,6 +2274,10 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 
 	zend_interned_strings_switch_storage(1);
 
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 1;
+#endif
+
 	/* we're done */
 	return retval;
 }
@@ -2317,6 +2313,10 @@ void php_module_shutdown(void)
 
 #ifdef ZTS
 	ts_free_worker_threads();
+#endif
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 0;
 #endif
 
 #ifdef PHP_WIN32
