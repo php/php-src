@@ -75,6 +75,19 @@ Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
 
+Intl:
+  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
+    when linked with ICU >= 58.1. Levels are represented as class constants
+    - Spoofchecker::ASCII
+    - Spoofchecker::HIGHLY_RESTRICTIVE
+    - Spoofchecker::MODERATELY_RESTRICTIVE
+    - Spoofchecker::MINIMALLY_RESTRICTIVE
+    - Spoofchecker::UNRESTRICTIVE
+    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
+    For the detailed documentation on the restriction levels, see
+    URestrictionLevel under
+    http://icu-project.org/apiref/icu4c/uspoof_8h.html
+
 ========================================
 7. New Classes and Interfaces
 ========================================
