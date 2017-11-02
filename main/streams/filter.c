@@ -46,8 +46,11 @@ PHPAPI HashTable *_php_get_stream_filters_hash(void)
 /* API for registering GLOBAL filters */
 PHPAPI int php_stream_filter_register_factory(const char *filterpattern, php_stream_filter_factory *factory)
 {
+	int ret;
 	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), 1);
-	return zend_hash_add_ptr(&stream_filters_hash, str, factory) ? SUCCESS : FAILURE;
+	ret = zend_hash_add_ptr(&stream_filters_hash, str, factory) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 
 PHPAPI int php_stream_filter_unregister_factory(const char *filterpattern)
