@@ -2821,6 +2821,10 @@ static void zend_compile_list_assign(
 	zend_bool is_keyed =
 		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL;
 
+	if (list->children && expr_node->op_type == IS_CONST && Z_TYPE(expr_node->u.constant) == IS_STRING) {
+		zval_make_interned_string(&expr_node->u.constant);
+	}
+
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *var_ast, *key_ast;
