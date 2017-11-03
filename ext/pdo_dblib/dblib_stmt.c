@@ -664,41 +664,82 @@ static int pdo_dblib_rpc_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 	if (event_type == PDO_PARAM_EVT_EXEC_PRE && init_post) {
 		char *value = NULL;
 		int datalen = 0, status = 0;
-		long type = 0, maxlen = -1;
+		long type = 0, maxlen = -1, zendtype = 0, pdotype = 0;
 
 		if (P && P->retval) {
 			return 1;
 		}
 
-		if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || Z_TYPE_P(parameter) == IS_NULL) {
-			datalen = 0;
-			type = SQLVARCHAR;
-		} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_INT) {
-			datalen = -1;
-			if (Z_TYPE_P(parameter) == IS_DOUBLE) {
+		/* set zendtype and convert value, according to the pdotype hint */
+		pdotype = PDO_PARAM_TYPE(param->param_type);
+		zendtype = Z_TYPE_P(parameter);
+		if (pdotype == PDO_PARAM_NULL || zendtype == IS_NULL) {
+			zendtype = IS_NULL;
+		} else if (pdotype == PDO_PARAM_BOOL || zendtype == IS_FALSE || zendtype == IS_TRUE) {
+			convert_to_long_ex(parameter);
+			zendtype = _IS_BOOL;
+		} else if (pdotype == PDO_PARAM_INT) {
+			if (zendtype != IS_DOUBLE && zendtype != IS_LONG) {
+				convert_to_long_ex(parameter);
+				zendtype = IS_LONG;
+			}
+		} else if (pdotype != PDO_PARAM_ZVAL && zendtype != IS_STRING) {
+			/* default = STRING */
+			convert_to_string_ex(parameter);
+			zendtype = IS_STRING;
+		}
+
+		/* set rpc bind data */
+		switch(zendtype) {
+			case IS_NULL:
+				datalen = 0;
+				value = NULL;
+				type = SQLVARCHAR;
+				break;
+			case IS_FALSE:
+			case IS_TRUE:
+			case _IS_BOOL:
+				datalen = -1;
+				value = (LPBYTE)(&Z_LVAL_P(parameter));
+				type = SQLINT1;
+				break;
+			case IS_LONG:
+				datalen = -1;
+				value = (LPBYTE)(&Z_LVAL_P(parameter));
+				/* TODO: smaller if possible */
+				type = SQLINT8;
+				break;
+			case IS_DOUBLE:
+				datalen = -1;
 				value = (LPBYTE)(&Z_DVAL_P(parameter));
 				type = SQLFLT8;
-			} else {
-				convert_to_long_ex(parameter);
-				value = (LPBYTE)(&Z_LVAL_P(parameter));
-				type = SQLINT8;
-			}
-		} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_BOOL) {
-			convert_to_long_ex(parameter);
-			datalen = -1;
-			value = (LPBYTE)(&Z_LVAL_P(parameter));
-			type = SQLBIT;
-		} else {
-			/* default = PDO_PARAM_STR */
-			convert_to_string_ex(parameter);
-			datalen = Z_STRLEN_P(parameter);
-			value = Z_STRVAL_P(parameter);
-			type = datalen > 8000 ? SQLTEXT : SQLVARCHAR;
+				break;
+			case IS_STRING:
+				datalen = Z_STRLEN_P(parameter);
+				value = Z_STRVAL_P(parameter);
+				type = datalen > 8000 ? SQLTEXT : SQLVARCHAR;
+				break;
+			/* TODO */
+			case IS_OBJECT:
+			case IS_RESOURCE:
+			case IS_ARRAY:
+			default:
+				pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "PDO_DBLIB: RPC: Unsupported variable type.");
+				return 0;
 		}
 
 		if (P) {
 			status = DBRPCRETURN;
 			P->return_pos = rpc->return_count++;
+			if (type == SQLTEXT) {
+				if (dbtds(H->link) < DBTDS_7_2) {
+					php_error_docref(NULL, E_WARNING, "Falling back to varchar(8000)");
+					type = SQLVARCHAR;
+				}
+				maxlen = datalen;
+			} else if (type == SQLVARCHAR) {
+				maxlen = 8000;
+			}
 		}
 
 		if (FAIL == dbrpcparam(H->link, param_name, (BYTE)status, type, maxlen, datalen, (LPBYTE)value)) {
