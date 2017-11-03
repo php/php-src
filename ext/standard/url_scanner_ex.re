@@ -87,13 +87,17 @@ static int php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value,
 		if (val) {
 			char *q;
 			size_t keylen;
+			zend_string *str;
 
 			*val++ = '\0';
 			for (q = key; *q; q++) {
 				*q = tolower(*q);
 			}
 			keylen = q - key;
-			zend_hash_str_add_mem(ctx->tags, key, keylen, val, strlen(val)+1);
+			str = zend_string_init(key, keylen, 1);
+			GC_MAKE_PERSISTENT_LOCAL(str);
+			zend_hash_add_mem(ctx->tags, str, val, strlen(val)+1);
+			zend_string_release(str);
 		}
 	}
 
