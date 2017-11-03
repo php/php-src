@@ -169,6 +169,14 @@ static zend_string *zend_new_interned_string_permanent(zend_string *str)
 		return ret;
 	}
 
+	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
+	if (GC_REFCOUNT(str) > 1) {
+		zend_ulong h = ZSTR_H(str);
+		zend_string_delref(str);
+		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
+		ZSTR_H(str) = h;
+	}
+
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
@@ -196,6 +204,14 @@ static zend_string *zend_new_interned_string_request(zend_string *str)
 	}
 
 	/* Create a short living interned, freed after the request. */
+	ZEND_ASSERT(!(GC_FLAGS(str) & GC_PERSISTENT));
+	if (GC_REFCOUNT(str) > 1) {
+		zend_ulong h = ZSTR_H(str);
+		zend_string_delref(str);
+		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_H(str) = h;
+	}
+
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);
 
 	return ret;
