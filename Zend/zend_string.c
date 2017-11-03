@@ -38,6 +38,7 @@ static HashTable interned_strings_permanent;
 static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
 static zend_string_init_interned_func_t interned_string_init_request_handler = zend_string_init_interned_request;
 static zend_string_copy_storage_func_t interned_string_copy_storage = NULL;
+static zend_string_copy_storage_func_t interned_string_restore_storage = NULL;
 
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
@@ -254,18 +255,27 @@ ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_intern
 	interned_string_init_request_handler = init_handler;
 }
 
-ZEND_API void zend_interned_strings_set_permanent_storage_copy_handler(zend_string_copy_storage_func_t handler)
+ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler)
 {
-	interned_string_copy_storage = handler;
+	interned_string_copy_storage = copy_handler;
+	interned_string_restore_storage = restore_handler;
 }
 
-ZEND_API void zend_interned_strings_switch_storage(void)
+ZEND_API void zend_interned_strings_switch_storage(zend_bool request)
 {
-	if (interned_string_copy_storage) {
-		interned_string_copy_storage();
+	if (request) {
+		if (interned_string_copy_storage) {
+			interned_string_copy_storage();
+		}
+		zend_new_interned_string = interned_string_request_handler;
+		zend_string_init_interned = interned_string_init_request_handler;
+	} else {
+		zend_new_interned_string = zend_new_interned_string_permanent;
+		zend_string_init_interned = zend_string_init_interned_permanent;
+		if (interned_string_restore_storage) {
+			interned_string_restore_storage();
+		}
 	}
-	zend_new_interned_string = interned_string_request_handler;
-	zend_string_init_interned = interned_string_init_request_handler;
 }
 
 /*

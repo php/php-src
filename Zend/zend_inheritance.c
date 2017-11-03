@@ -1584,19 +1584,32 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
 				} else {
+					not_compatible = 1;
+					
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
-						/* flags are identical, now the value needs to be checked */
+						/* the flags are identical, thus, the properties may be compatible */
+						zval op1, op2;
+
 						if (flags & ZEND_ACC_STATIC) {
-							not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
-											  &ce->traits[i]->default_static_members_table[property_info->offset]);
+							ZVAL_COPY_OR_DUP(&op1, &ce->default_static_members_table[coliding_prop->offset]);
+							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_static_members_table[property_info->offset]);
 						} else {
-							not_compatible = fast_is_not_identical_function(&ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
-											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
+							ZVAL_COPY_OR_DUP(&op1, &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)]);
+							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
 						}
-					} else {
-						/* the flags are not identical, thus, we assume properties are not compatible */
-						not_compatible = 1;
+
+						/* if any of the values is a constant, we try to resolve it */
+						if (UNEXPECTED(Z_TYPE(op1) == IS_CONSTANT_AST)) {
+							zval_update_constant_ex(&op1, ce);
+						}
+						if (UNEXPECTED(Z_TYPE(op2) == IS_CONSTANT_AST)) {
+							zval_update_constant_ex(&op2, ce);
+						}
+
+						not_compatible = fast_is_not_identical_function(&op1, &op2);
+						zval_ptr_dtor_nogc(&op1);
+						zval_ptr_dtor_nogc(&op2);
 					}
 
 					if (not_compatible) {

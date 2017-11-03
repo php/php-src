@@ -948,12 +948,17 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
 
 SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
 {
+	int ret;
+	zend_string *key;
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return FAILURE;
 	}
-	return zend_hash_str_add_mem(&SG(known_post_content_types),
-			post_entry->content_type, post_entry->content_type_len,
+	key = zend_string_init(post_entry->content_type, post_entry->content_type_len, 1);
+	GC_MAKE_PERSISTENT_LOCAL(key);
+	ret = zend_hash_add_mem(&SG(known_post_content_types), key,
 			(void *) post_entry, sizeof(sapi_post_entry)) ? SUCCESS : FAILURE;
+	zend_string_release(key);
+	return ret;
 }
 
 SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)

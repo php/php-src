@@ -1595,6 +1595,10 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
+	int ret;
+#if ZEND_RC_DEBUG
+	zend_bool old_rc_debug;
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1858,7 +1862,18 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr)) {
+#if ZEND_RC_DEBUG
+	old_rc_debug = zend_rc_debug;
+	zend_rc_debug = 0;
+#endif
+
+	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = old_rc_debug;
+#endif
+
+	if (ret < 0) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;
