@@ -533,6 +533,19 @@ static void zend_init_call_trampoline_op(void) /* {{{ */
 }
 /* }}} */
 
+static void zend_init_pause_op(void) /* {{{ */
+{
+	memset(&EG(pause_op), 0, sizeof(zend_op));
+
+	EG(pause_op).opcode = ZEND_HANDLE_PAUSE;
+	EG(pause_op).op1_type = IS_UNUSED;
+	EG(pause_op).op2_type = IS_UNUSED;
+	EG(pause_op).result_type = IS_UNUSED;
+
+	ZEND_VM_SET_OPCODE_HANDLER(&EG(pause_op));
+}
+/* }}} */
+
 static void auto_global_dtor(zval *zv) /* {{{ */
 {
 	free(Z_PTR_P(zv));
@@ -623,6 +636,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
+	zend_init_pause_op();
 	memset(&executor_globals->trampoline, 0, sizeof(zend_op_array));
 	executor_globals->lambda_count = 0;
 	ZVAL_UNDEF(&executor_globals->user_error_handler);
@@ -844,6 +858,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_init_rsrc_plist();
 	zend_init_exception_op();
 	zend_init_call_trampoline_op();
+	zend_init_pause_op();
 #endif
 
 	zend_ini_startup();

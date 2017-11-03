@@ -3710,7 +3710,9 @@ ZEND_VM_HOT_HANDLER(60, ZEND_DO_FCALL, ANY, ANY, SPEC(RETVAL))
 		} else {
 			zend_execute_internal(call, ret);
 		}
-		
+
+		LOAD_OPLINE();
+
 #if ZEND_DEBUG
 		if (!EG(exception) && call->func) {
 			ZEND_ASSERT(!(call->func->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE) ||
@@ -8338,6 +8340,24 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 		ZVAL_EMPTY_ARRAY(EX_VAR(opline->result.var));
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HANDLER(198, ZEND_HANDLE_PAUSE, ANY, ANY)
+{
+	void (*fn)(const zend_op *opline, zend_execute_data *execute_data);
+
+	USE_OPLINE;
+
+	fn = *((void**)&opline->result);
+	opline = *((const zend_op**)&opline->op1);
+
+	if (EXPECTED(fn != NULL)) {
+		fn(opline, execute_data);
+	}
+
+	SAVE_OPLINE();
+
+	ZEND_VM_RETURN();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))

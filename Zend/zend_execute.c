@@ -184,7 +184,12 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
-	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
+	zend_vm_stack_init_ex(ZEND_VM_STACK_PAGE_SIZE);
+}
+
+ZEND_API void zend_vm_stack_init_ex(size_t size)
+{
+	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size), NULL);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
 	EG(vm_stack_end) = EG(vm_stack)->end;
@@ -205,12 +210,14 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 {
 	zend_vm_stack stack;
 	void *ptr;
+	size_t prev_size;
 
 	stack = EG(vm_stack);
 	stack->top = EG(vm_stack_top);
+	prev_size = (char*)stack->end - (char*)stack;
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
-		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
+		EXPECTED(size < prev_size) ?
+			prev_size: ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -3036,6 +3043,16 @@ ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint
 ZEND_API int ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	return zend_verify_arg_type(zf, arg_num, arg, default_value, cache_slot);
+}
+
+ZEND_API ZEND_COLD void zend_vm_pause(void (*fn)(const zend_op*, zend_execute_data*)) /* {{{ */
+{
+	zend_execute_data *execute_data = EG(current_execute_data);
+
+	*((const zend_op**)&EG(pause_op).op1) = EX(prev_execute_data)->opline + 1;
+	*((void**)&EG(pause_op).result) = fn;
+
+	EX(prev_execute_data)->opline = (&EG(pause_op)) - 1; /* zend_vm will do opline++ */
 }
 
 /*

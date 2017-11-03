@@ -57,6 +57,7 @@ extern ZEND_API const zend_internal_function zend_pass_function;
 ZEND_API void ZEND_FASTCALL zend_check_internal_arg_type(zend_function *zf, uint32_t arg_num, zval *arg);
 ZEND_API int  ZEND_FASTCALL zend_check_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot);
 ZEND_API ZEND_COLD void ZEND_FASTCALL zend_missing_arg_error(zend_execute_data *execute_data);
+ZEND_API ZEND_COLD void zend_vm_pause(void (*fn)(const zend_op*, zend_execute_data*));
 
 static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval *value, zend_uchar value_type)
 {
@@ -162,6 +163,7 @@ struct _zend_vm_stack {
 #endif
 
 ZEND_API void zend_vm_stack_init(void);
+ZEND_API void zend_vm_stack_init_ex(size_t size);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
