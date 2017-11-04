@@ -129,6 +129,10 @@ PHP                                                                        NEWS
 - SQLite3:
   . Updated bundled libsqlite to 3.21.0. (cmb)
 
+- Soap:
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
+
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
