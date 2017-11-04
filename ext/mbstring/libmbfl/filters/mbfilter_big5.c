@@ -190,7 +190,7 @@ mbfl_filt_conv_big5_wchar(int c, mbfl_convert_filter *filter)
 
 			if (filter->from->no_encoding == mbfl_no_encoding_cp950) {
 				/* PUA for CP950 */
-				if (w <= 0 &&
+				if ((w <= 0) &&
 					(((c1 >= 0xfa && c1 <= 0xfe) || (c1 >= 0x8e && c1 <= 0xa0) ||
 					  (c1 >= 0x81 && c1 <= 0x8d) ||(c1 >= 0xc7 && c1 <= 0xc8))
 					 && ((c > 0x39 && c < 0x7f) || (c > 0xa0 && c < 0xff))) ||
