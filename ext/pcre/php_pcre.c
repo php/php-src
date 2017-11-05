@@ -964,6 +964,16 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (!match_data) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		if (subpat_names) {
+			efree(subpat_names);
+		}
+		if (match_sets) {
+			efree(match_sets);
+		}
+		RETURN_FALSE;
+	}
 
 	do {
 		/* Execute the regular expression. */
@@ -1441,6 +1451,13 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (!match_data) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		if (subpat_names) {
+			efree(subpat_names);
+		}
+		return NULL;
+	}
 
 	while (1) {
 		/* Execute the regular expression. */
@@ -1677,6 +1694,13 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (!match_data) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		if (subpat_names) {
+			efree(subpat_names);
+		}
+		return NULL;
+	}
 
 	while (1) {
 		/* Execute the regular expression. */
@@ -2317,6 +2341,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (!match_data) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		return;
+	}
 
 	/* Get next piece if no limit or limit not yet reached and something matched*/
 	while ((limit_val == -1 || limit_val > 1)) {
@@ -2611,6 +2639,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
 	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (!match_data) {
+		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+		return;
+	}
+
 #ifdef HAVE_PCRE_JIT_SUPPORT
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
