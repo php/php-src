@@ -241,7 +241,6 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 static PHP_INI_MH(OnUpdateBacktrackLimit)
 {/*{{{*/
 	OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	/* TODO error check */
 	if (mctx) {
 		pcre2_set_match_limit(mctx, (uint32_t)PCRE_G(backtrack_limit));
 	}
@@ -252,7 +251,6 @@ static PHP_INI_MH(OnUpdateBacktrackLimit)
 static PHP_INI_MH(OnUpdateRecursionLimit)
 {/*{{{*/
 	OnUpdateLong(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
-	/* TODO error check */
 	if (mctx) {
 		pcre2_set_depth_limit(mctx, (uint32_t)PCRE_G(recursion_limit));
 	}
