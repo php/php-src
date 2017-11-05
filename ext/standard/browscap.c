@@ -630,6 +630,11 @@ static int browser_reg_compare(
 	}
 
 	match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
+	if (!match_data) {
+		ZSTR_ALLOCA_FREE(pattern_lc, use_heap);
+		zend_string_release(regex);
+		return 0;
+	}
 	rc = pcre2_match(re, ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, match_data, php_pcre_mctx());
 	pcre2_match_data_free(match_data);
 	if (PCRE2_ERROR_NOMATCH != rc) {
