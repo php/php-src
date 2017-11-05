@@ -97,10 +97,6 @@ static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 			preg_code = PHP_PCRE_RECURSION_LIMIT_ERROR;
 			break;
 
-		/*case PCRE_ERROR_BADUTF8:
-			preg_code = PHP_PCRE_BAD_UTF8_ERROR;
-			break;*/
-
 		case PCRE2_ERROR_BADUTFOFFSET:
 			preg_code = PHP_PCRE_BAD_UTF8_OFFSET_ERROR;
 			break;
