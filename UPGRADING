@@ -261,7 +261,7 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
   . Added mb_scrub() that scrubs broken multibyte strings.
 
 - OCI8:
-  . Added oci_register_taf_callback() and oci_disable_taf_callback() for
+  . Added oci_register_taf_callback() and oci_unregister_taf_callback() for
     Oracle Database TAF callback support.
 
 - Sockets:
