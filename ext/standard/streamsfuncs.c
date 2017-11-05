@@ -1620,7 +1620,7 @@ PHP_FUNCTION(stream_supports_lock)
 	RETURN_TRUE;
 }
 
-/* {{{ proto proto stream_isatty(resource stream)
+/* {{{ proto bool stream_isatty(resource stream)
 Check if a stream is a TTY.
 */
 PHP_FUNCTION(stream_isatty)
@@ -1658,7 +1658,7 @@ PHP_FUNCTION(stream_isatty)
 }
 
 #ifdef PHP_WIN32
-/* {{{ proto proto sapi_windows_vt100_support(resource stream[, bool enable])
+/* {{{ proto bool sapi_windows_vt100_support(resource stream[, bool enable])
    Get or set VT100 support for the specified stream associated to an
    output buffer of a Windows console.
 */
