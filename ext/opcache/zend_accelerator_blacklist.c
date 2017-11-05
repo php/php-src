@@ -349,6 +349,10 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 	}
 	while (regexp_list_it != NULL) {
 		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regexp_list_it->re, gctx);
+		if (!match_data) {
+			/* Alloc failed, but next one could still come through and match. */
+			continue;
+		}
 		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;

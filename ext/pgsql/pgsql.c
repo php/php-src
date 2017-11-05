@@ -5791,6 +5791,11 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
+	if (NULL == match_data) {
+		pcre2_code_free(re);
+		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
+		return FAILURE;
+	}
 	res = pcre2_match(re, str, str_len, 0, 0, match_data, php_pcre_mctx());
 	pcre2_match_data_free(match_data);
 	pcre2_code_free(re);

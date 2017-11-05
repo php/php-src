@@ -446,6 +446,9 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 	match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
 	rc = pcre2_match(re, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
 	pcre2_match_data_free(match_data);
 
@@ -631,6 +634,9 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 	zend_string_release(sregexp);
 	match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
 	rc = pcre2_match(re, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
 	pcre2_match_data_free(match_data);
 

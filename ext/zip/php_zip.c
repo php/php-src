@@ -699,6 +699,11 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			}
 
 			match_data = pcre2_match_data_create_from_pattern(re, gctx);
+			if (!match_data) {
+				/* Allocation failed, but can proceed to the next pattern. */
+				zend_string_release(namelist[i]);
+				continue;
+			}
 			rc = pcre2_match(re, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
 			pcre2_match_data_free(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */

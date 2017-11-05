@@ -2062,7 +2062,9 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_MATCH:
 			re = php_pcre_pce_re(intern->u.regex.pce);
 			match_data = pcre2_match_data_create_from_pattern(re, php_pcre_gctx());
-			/* XXX error check. */
+			if (!match_data) {
+				RETURN_FALSE;
+			}
 			rc = pcre2_match(re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
 			RETVAL_BOOL(rc >= 0);
 			pcre2_match_data_free(match_data);
