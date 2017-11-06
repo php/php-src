@@ -31,7 +31,7 @@ extern zend_module_entry sysvshm_module_entry;
 
 #include <sys/types.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <TSRM/tsrm_win32.h>
 # include "win32/ipc.h"
 # ifndef THREAD_LS

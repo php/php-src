@@ -26,7 +26,7 @@
 #include <sys/ipc.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/ipc.h"
 #endif
 

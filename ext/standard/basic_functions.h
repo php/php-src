@@ -133,7 +133,7 @@ PHP_FUNCTION(parse_ini_string);
 PHP_FUNCTION(config_get_hash);
 #endif
 
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 PHP_FUNCTION(sapi_windows_cp_set);
 PHP_FUNCTION(sapi_windows_cp_get);
 PHP_FUNCTION(sapi_windows_cp_is_utf8);

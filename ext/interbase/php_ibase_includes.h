@@ -139,7 +139,7 @@ ZEND_TSRMLS_CACHE_EXTERN()
 #define BLOB_INPUT		1
 #define BLOB_OUTPUT		2
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define LL_MASK "I64"
 #define LL_LIT(lit) lit ## I64
 typedef void (__stdcall *info_func_t)(char*);

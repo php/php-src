@@ -30,13 +30,13 @@
 #include "zend_interfaces.h"
 #include "lib/timelib.h"
 #include "lib/timelib_private.h"
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include <time.h>
 #else
 #include "win32/time.h"
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 static __inline __int64 php_date_llabs( __int64 i ) { return i >= 0? i: -i; }
 #elif defined(__GNUC__) && __GNUC__ < 3
 static __inline __int64_t php_date_llabs( __int64_t i ) { return i >= 0 ? i : -i; }
@@ -44,7 +44,7 @@ static __inline __int64_t php_date_llabs( __int64_t i ) { return i >= 0 ? i : -i
 static inline long long php_date_llabs( long long i ) { return i >= 0 ? i : -i; }
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define DATE_I64_BUF_LEN 65
 # define DATE_I64A(i, s, len) _i64toa_s(i, s, len, 10)
 # define DATE_A64I(i, s) i = _atoi64(s)
@@ -1715,7 +1715,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 			break;
 		}
 	}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* VS2012 strftime() returns number of characters, not bytes.
 		See VC++11 bug id 766205. */
 	if (real_len > 0) {

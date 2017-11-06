@@ -392,7 +392,7 @@ static const func_info_t func_infos[] = {
 	F1("rawurlencode",                 MAY_BE_NULL | MAY_BE_STRING),
 	F1("rawurldecode",                 MAY_BE_NULL | MAY_BE_STRING),
 	F1("http_build_query",             MAY_BE_FALSE | MAY_BE_STRING),
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_SYMLINK) || defined(_WIN32)
 	F1("readlink",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("linkinfo",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("symlink",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
@@ -576,10 +576,10 @@ static const func_info_t func_infos[] = {
 #ifdef HAVE_GETHOSTNAME
 	F1("gethostname",                  MAY_BE_FALSE | MAY_BE_STRING),
 #endif
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(_WIN32) || HAVE_DNS_SEARCH_FUNC
 	F0("dns_check_record",             MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("checkdnsrr",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+# if defined(_WIN32) || HAVE_FULL_DNS_FUNCS
 	F0("dns_get_mx",                   MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("getmxrr",                      MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("dns_get_record",               MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_ARRAY),
@@ -685,7 +685,7 @@ static const func_info_t func_infos[] = {
 	F1("stream_resolve_include_path",  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 	F0("stream_is_local",              MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("get_headers",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_ARRAY_OF_ARRAY),
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if HAVE_SYS_TIME_H || defined(_WIN32)
 	F0("stream_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("socket_set_timeout",           MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 #endif
@@ -1580,7 +1580,7 @@ static const func_info_t func_infos[] = {
 	F0("imagecolorclosestalpha",				MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("imagecolorexactalpha",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("imagecopyresampled",					MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	F1("imagegrabwindow",						MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F1("imagegrabscreen",						MAY_BE_FALSE | MAY_BE_RESOURCE),
 #endif

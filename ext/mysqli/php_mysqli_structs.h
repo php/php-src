@@ -172,7 +172,7 @@ typedef struct {
 	zend_ptr_stack free_links;
 } mysqli_plist_entry;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define PHP_MYSQLI_API __declspec(dllexport)
 #define MYSQLI_LLU_SPEC "%I64u"
 #define MYSQLI_LL_SPEC "%I64d"

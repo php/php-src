@@ -89,7 +89,7 @@ extern php_apache2_info_struct php_apache2_info;
 #endif
 
 /* fix for gcc4 visibility patch */
-#ifndef PHP_WIN32
+#ifndef _WIN32
 # undef AP_MODULE_DECLARE_DATA
 # define AP_MODULE_DECLARE_DATA PHPAPI
 #endif

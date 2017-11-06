@@ -32,7 +32,7 @@
 #include "ext/standard/file.h"
 #include "ext/standard/info.h"
 #include "php_ini.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "windows_common.h"
 # include <win32/inet.h>
 # include <windows.h>
@@ -471,7 +471,7 @@ static int php_open_listen_sock(php_socket **php_sock, int port, int backlog) /*
 
 	*php_sock = sock;
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	if ((hp = php_network_gethostbyname("0.0.0.0")) == NULL) {
 #else
 	if ((hp = php_network_gethostbyname("localhost")) == NULL) {
@@ -544,7 +544,7 @@ static int php_read(php_socket *sock, void *buf, size_t maxlen, int flags)
 	int nonblock = 0;
 	char *t = (char *) buf;
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	m = fcntl(sock->bsd_socket, F_GETFL);
 	if (m < 0) {
 		return m;
@@ -604,7 +604,7 @@ char *sockets_strerror(int error) /* {{{ */
 {
 	const char *buf;
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	if (error < -10000) {
 		error = -error - 10000;
 
@@ -1183,7 +1183,7 @@ PHP_FUNCTION(socket_write)
 		length = str_len;
 	}
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	retval = write(php_sock->bsd_socket, str, MIN(length, str_len));
 #else
 	retval = send(php_sock->bsd_socket, str, min(length, str_len), 0);
@@ -1945,7 +1945,7 @@ PHP_FUNCTION(socket_get_option)
 	zval			*arg1;
 	struct linger	linger_val;
 	struct timeval	tv;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	int				timeout = 0;
 #endif
 	socklen_t		optlen;
@@ -2007,7 +2007,7 @@ PHP_FUNCTION(socket_get_option)
 
 		case SO_RCVTIMEO:
 		case SO_SNDTIMEO:
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			optlen = sizeof(tv);
 
 			if (getsockopt(php_sock->bsd_socket, level, optname, (char*)&tv, &optlen) != 0) {
@@ -2056,7 +2056,7 @@ PHP_FUNCTION(socket_set_option)
 	struct linger			lv;
 	php_socket				*php_sock;
 	int						ov, optlen, retval;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	int						timeout;
 #else
 	struct					timeval tv;
@@ -2148,7 +2148,7 @@ PHP_FUNCTION(socket_set_option)
 
 			convert_to_long_ex(sec);
 			convert_to_long_ex(usec);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			tv.tv_sec = Z_LVAL_P(sec);
 			tv.tv_usec = Z_LVAL_P(usec);
 			optlen = sizeof(tv);
@@ -2337,7 +2337,7 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET socket)
 	php_socket 				*retsock;
 	php_sockaddr_storage	addr;
 	socklen_t				addr_len = sizeof(addr);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	int					 t;
 #endif
 
@@ -2358,7 +2358,7 @@ php_socket *socket_import_file_descriptor(PHP_SOCKET socket)
 	}
 
     /* determine blocking mode */
-#ifndef PHP_WIN32
+#ifndef _WIN32
     t = fcntl(socket, F_GETFL);
     if (t == -1) {
 		PHP_SOCKET_ERROR(retsock, "unable to obtain blocking state", errno);
@@ -2399,7 +2399,7 @@ PHP_FUNCTION(socket_import_stream)
 		RETURN_FALSE;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* on windows, check if the stream is a socket stream and read its
 	 * private data; otherwise assume it's in non-blocking mode */
 	if (php_stream_is(stream, PHP_STREAM_IS_SOCKET)) {

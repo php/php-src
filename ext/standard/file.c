@@ -44,7 +44,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <io.h>
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
@@ -70,7 +70,7 @@
 #include "file.h"
 
 #if HAVE_PWD_H
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include "win32/pwd.h"
 # else
 #  include <pwd.h>
@@ -107,7 +107,7 @@ int file_globals_id;
 php_file_globals file_globals;
 #endif
 
-#if defined(HAVE_FNMATCH) && !defined(PHP_WIN32)
+#if defined(HAVE_FNMATCH) && !defined(_WIN32)
 # ifndef _GNU_SOURCE
 #  define _GNU_SOURCE
 # endif
@@ -258,19 +258,19 @@ PHP_MINIT_FUNCTION(file)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_IP", IPPROTO_IP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if defined(IPPROTO_TCP) || defined(PHP_WIN32)
+#if defined(IPPROTO_TCP) || defined(_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_TCP", IPPROTO_TCP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if defined(IPPROTO_UDP) || defined(PHP_WIN32)
+#if defined(IPPROTO_UDP) || defined(_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_UDP", IPPROTO_UDP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if defined(IPPROTO_ICMP) || defined(PHP_WIN32)
+#if defined(IPPROTO_ICMP) || defined(_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_ICMP", IPPROTO_ICMP, CONST_CS|CONST_PERSISTENT);
 #endif
 
-#if defined(IPPROTO_RAW) || defined(PHP_WIN32)
+#if defined(IPPROTO_RAW) || defined(_WIN32)
 	REGISTER_LONG_CONSTANT("STREAM_IPPROTO_RAW", IPPROTO_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
 
@@ -938,7 +938,7 @@ PHP_FUNCTION(popen)
 	ZEND_PARSE_PARAMETERS_END();
 
 	posix_mode = estrndup(mode, mode_len);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	{
 		char *z = memchr(posix_mode, 'b', mode_len);
 		if (z) {
@@ -1588,7 +1588,7 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	ZVAL_LONG(&stat_uid, stat_ssb.sb.st_uid);
 	ZVAL_LONG(&stat_gid, stat_ssb.sb.st_gid);
 #ifdef HAVE_ST_RDEV
-# ifdef PHP_WIN32
+# ifdef _WIN32
 	/* It is unsigned, so if a negative came from userspace, it'll
 	   convert to UINT_MAX, but we wan't to keep the userspace value.
 	   Almost the same as in php_fstat. This is ugly, but otherwise
@@ -1755,7 +1755,7 @@ no_stat:
 		}
 
 		res =
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			!strcmp(sp, dp);
 #else
 			!strcasecmp(sp, dp);

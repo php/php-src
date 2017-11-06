@@ -122,7 +122,7 @@ PHP_HASH_HAVAL_OPS(5,256)
 extern zend_module_entry hash_module_entry;
 #define phpext_hash_ptr &hash_module_entry
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	define PHP_HASH_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define PHP_HASH_API __attribute__ ((visibility("default")))

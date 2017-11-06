@@ -8,7 +8,7 @@
 #include "php.h"
 #include <gmp.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define PHP_GMP_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 # define PHP_GMP_API __attribute__ ((visibility("default")))
@@ -28,7 +28,7 @@ static inline gmp_object *php_gmp_object_from_zend_object(zend_object *zobj) {
 PHP_GMP_API zend_class_entry *php_gmp_class_entry();
 
 /* GMP and MPIR use different datatypes on different platforms */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef zend_long gmp_long;
 typedef zend_ulong gmp_ulong;
 #else

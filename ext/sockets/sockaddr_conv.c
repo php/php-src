@@ -2,7 +2,7 @@
 #include <php_network.h>
 #include "php_sockets.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "windows_common.h"
 #else
 #include <netdb.h>
@@ -36,7 +36,7 @@ int php_set_inet6_addr(struct sockaddr_in6 *sin6, char *string, php_socket *php_
 #endif
 		getaddrinfo(string, NULL, &hints, &addrinfo);
 		if (!addrinfo) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));
@@ -92,7 +92,7 @@ int php_set_inet_addr(struct sockaddr_in *sin, char *string, php_socket *php_soc
 	} else {
 		if (strlen(string) > MAXFQDNLEN || ! (host_entry = php_network_gethostbyname(string))) {
 			/* Note: < -10000 indicates a host lookup error */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", WSAGetLastError());
 #else
 			PHP_SOCKET_ERROR(php_sock, "Host lookup failed", (-10000 - h_errno));

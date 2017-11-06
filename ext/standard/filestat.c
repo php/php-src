@@ -55,7 +55,7 @@
 #endif
 
 #if HAVE_PWD_H
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include "win32/pwd.h"
 # else
 #  include <pwd.h>
@@ -63,7 +63,7 @@
 #endif
 
 #if HAVE_GRP_H
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include "win32/grp.h"
 # else
 #  include <grp.h>
@@ -71,14 +71,14 @@
 #endif
 
 #if HAVE_UTIME
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include <sys/utime.h>
 # else
 #  include <utime.h>
 # endif
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/winutil.h"
 #endif
 
@@ -108,7 +108,7 @@ PHP_RSHUTDOWN_FUNCTION(filestat) /* {{{ */
 /* }}} */
 
 static int php_disk_total_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+#if defined(_WIN32) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -143,7 +143,7 @@ static int php_disk_total_space(char *path, double *space) /* {{{ */
 	return FAILURE;
 }
 /* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+#else /* {{{ if !defined(OS2) && !defined(_WIN32) */
 {
 	double bytestotal = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -202,7 +202,7 @@ PHP_FUNCTION(disk_total_space)
 /* }}} */
 
 static int php_disk_free_space(char *path, double *space) /* {{{ */
-#if defined(WINDOWS) /* {{{ */
+#if defined(_WIN32) /* {{{ */
 {
 	ULARGE_INTEGER FreeBytesAvailableToCaller;
 	ULARGE_INTEGER TotalNumberOfBytes;
@@ -237,7 +237,7 @@ static int php_disk_free_space(char *path, double *space) /* {{{ */
 	return FAILURE;
 }
 /* }}} */
-#else /* {{{ if !defined(OS2) && !defined(WINDOWS) */
+#else /* {{{ if !defined(OS2) && !defined(_WIN32) */
 {
 	double bytesfree = 0;
 #if defined(HAVE_SYS_STATVFS_H) && defined(HAVE_STATVFS)
@@ -294,7 +294,7 @@ PHP_FUNCTION(disk_free_space)
 }
 /* }}} */
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 PHPAPI int php_get_gid_by_name(const char *name, gid_t *gid)
 {
 #if defined(ZTS) && defined(HAVE_GETGRNAM_R) && defined(_SC_GETGR_R_SIZE_MAX)
@@ -331,7 +331,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	zval *group;
-#if !defined(WINDOWS)
+#if !defined(_WIN32)
 	gid_t gid;
 	int ret;
 #endif
@@ -363,7 +363,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
-#if !defined(WINDOWS)
+#if !defined(_WIN32)
 /* On Windows, we expect regular chgrp to fail silently by default */
 			php_error_docref(NULL, E_WARNING, "Can not call chgrp() for a non-standard stream");
 #endif
@@ -371,7 +371,7 @@ static void php_do_chgrp(INTERNAL_FUNCTION_PARAMETERS, int do_lchgrp) /* {{{ */
 		}
 	}
 
-#if defined(WINDOWS)
+#if defined(_WIN32)
 	/* We have no native chgrp on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
@@ -421,7 +421,7 @@ PHP_FUNCTION(chgrp)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchgrp)
 {
-# if !defined(WINDOWS)
+# if !defined(_WIN32)
 	php_do_chgrp(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 # else
 	RETURN_FALSE;
@@ -430,7 +430,7 @@ PHP_FUNCTION(lchgrp)
 #endif
 /* }}} */
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 PHPAPI uid_t php_get_uid_by_name(const char *name, uid_t *uid)
 {
 #if defined(ZTS) && defined(_SC_GETPW_R_SIZE_MAX) && defined(HAVE_GETPWNAM_R)
@@ -467,7 +467,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 	char *filename;
 	size_t filename_len;
 	zval *user;
-#if !defined(WINDOWS)
+#if !defined(_WIN32)
 	uid_t uid;
 	int ret;
 #endif
@@ -499,7 +499,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 				RETURN_FALSE;
 			}
 		} else {
-#if !defined(WINDOWS)
+#if !defined(_WIN32)
 /* On Windows, we expect regular chown to fail silently by default */
 			php_error_docref(NULL, E_WARNING, "Can not call chown() for a non-standard stream");
 #endif
@@ -507,7 +507,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 		}
 	}
 
-#if defined(WINDOWS)
+#if defined(_WIN32)
 	/* We have no native chown on Windows, nothing left to do if stream doesn't have own implementation */
 	RETURN_FALSE;
 #else
@@ -559,7 +559,7 @@ PHP_FUNCTION(chown)
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
 {
-# if !defined(WINDOWS)
+# if !defined(_WIN32)
 	RETVAL_TRUE;
 	php_do_chown(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 # else
@@ -894,7 +894,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		case S_IFDIR: RETURN_STRING("dir");
 		case S_IFBLK: RETURN_STRING("block");
 		case S_IFREG: RETURN_STRING("file");
-#if defined(S_IFSOCK) && !defined(PHP_WIN32)
+#if defined(S_IFSOCK) && !defined(_WIN32)
 		case S_IFSOCK: RETURN_STRING("socket");
 #endif
 		}
@@ -926,7 +926,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 		ZVAL_LONG(&stat_uid, stat_sb->st_uid);
 		ZVAL_LONG(&stat_gid, stat_sb->st_gid);
 #ifdef HAVE_ST_RDEV
-# ifdef PHP_WIN32
+# ifdef _WIN32
 	/* It is unsigned, so if a negative came from userspace, it'll
 	   convert to UINT_MAX, but we wan't to keep the userspace value.
 	   Almost the same as in php_if_fstat. */
@@ -1135,7 +1135,7 @@ PHP_FUNCTION(realpath_cache_get)
 			add_assoc_bool_ex(&entry, "is_dir", sizeof("is_dir") - 1, bucket->is_dir);
 			add_assoc_stringl_ex(&entry, "realpath", sizeof("realpath") - 1, bucket->realpath, bucket->realpath_len);
 			add_assoc_long_ex(&entry, "expires", sizeof("expires") - 1, bucket->expires);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			add_assoc_bool_ex(&entry, "is_rvalid", sizeof("is_rvalid") - 1, bucket->is_rvalid);
 			add_assoc_bool_ex(&entry, "is_wvalid", sizeof("is_wvalid") - 1, bucket->is_wvalid);
 			add_assoc_bool_ex(&entry, "is_readable", sizeof("is_readable") - 1, bucket->is_readable);

@@ -29,7 +29,7 @@
 #include "php_content_types.h"
 #include "SAPI.h"
 #include "zend_globals.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/php_inttypes.h"
 #endif
 
@@ -343,7 +343,7 @@ static inline int add_post_vars(zval *arr, post_var_data_t *vars, zend_bool eof)
 	return SUCCESS;
 }
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define SAPI_POST_HANDLER_BUFSIZ 16384
 #else
 # define SAPI_POST_HANDLER_BUFSIZ BUFSIZ

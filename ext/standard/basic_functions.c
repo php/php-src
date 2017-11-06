@@ -37,7 +37,7 @@
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/php_win32_globals.h"
 #include "win32/time.h"
 #endif
@@ -57,12 +57,12 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 #include <time.h>
 #include <stdio.h>
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include <sys/types.h>
 #include <sys/stat.h>
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 # include <netdb.h>
 #else
 #include "win32/inet.h"
@@ -94,7 +94,7 @@ typedef struct yy_buffer_state *YY_BUFFER_STATE;
 # include <sys/loadavg.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/unistd.h"
 #endif
 
@@ -962,13 +962,13 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
 ZEND_END_ARG_INFO()
 
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+# if defined(_WIN32) || HAVE_FULL_DNS_FUNCS
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, type)
@@ -984,7 +984,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC */
+#endif /* defined(_WIN32) || HAVE_DNS_SEARCH_FUNC */
 /* }}} */
 
 /* {{{ exec.c */
@@ -1558,7 +1558,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_levenshtein, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ link.c */
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_SYMLINK) || defined(_WIN32)
 ZEND_BEGIN_ARG_INFO(arginfo_readlink, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
@@ -2014,7 +2014,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_isatty, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 ZEND_END_ARG_INFO()
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_vt100_support, 0, 0, 1)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, enable)
@@ -2091,7 +2091,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_stream_set_blocking, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO()
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if HAVE_SYS_TIME_H || defined(_WIN32)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_stream_set_timeout, 0, 0, 2)
 	ZEND_ARG_INFO(0, stream)
 	ZEND_ARG_INFO(0, seconds)
@@ -2690,7 +2690,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_version_compare, 0, 0, 2)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ win32/codepage.c */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 ZEND_BEGIN_ARG_INFO_EX(arginfo_sapi_windows_cp_set, 0, 0, 1)
 	ZEND_ARG_TYPE_INFO(0, code_page, IS_LONG, 0)
 ZEND_END_ARG_INFO()
@@ -2846,7 +2846,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(rawurldecode,													arginfo_rawurldecode)
 	PHP_FE(http_build_query,												arginfo_http_build_query)
 
-#if defined(HAVE_SYMLINK) || defined(PHP_WIN32)
+#if defined(HAVE_SYMLINK) || defined(_WIN32)
 	PHP_FE(readlink,														arginfo_readlink)
 	PHP_FE(linkinfo,														arginfo_linkinfo)
 	PHP_FE(symlink,															arginfo_symlink)
@@ -3060,12 +3060,12 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
+#if defined(_WIN32) || HAVE_DNS_SEARCH_FUNC
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
 
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+# if defined(_WIN32) || HAVE_FULL_DNS_FUNCS
 	PHP_FE(dns_get_mx,														arginfo_dns_get_mx)
 	PHP_FALIAS(getmxrr,				dns_get_mx,					arginfo_dns_get_mx)
 	PHP_FE(dns_get_record,													arginfo_dns_get_record)
@@ -3155,7 +3155,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_get_contents,												arginfo_stream_get_contents)
 	PHP_FE(stream_supports_lock,											arginfo_stream_supports_lock)
 	PHP_FE(stream_isatty,													arginfo_stream_isatty)
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	PHP_FE(sapi_windows_vt100_support,										arginfo_sapi_windows_vt100_support)
 #endif
 	PHP_FE(fgetcsv,															arginfo_fgetcsv)
@@ -3182,7 +3182,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(stream_is_local,												arginfo_stream_is_local)
 	PHP_FE(get_headers,														arginfo_get_headers)
 
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if HAVE_SYS_TIME_H || defined(_WIN32)
 	PHP_FE(stream_set_timeout,												arginfo_stream_set_timeout)
 	PHP_FALIAS(socket_set_timeout, stream_set_timeout,						arginfo_stream_set_timeout)
 #endif
@@ -3406,7 +3406,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FE(sys_get_temp_dir,												arginfo_sys_get_temp_dir)
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	PHP_FE(sapi_windows_cp_set, arginfo_sapi_windows_cp_set)
 	PHP_FE(sapi_windows_cp_get, arginfo_sapi_windows_cp_get)
 	PHP_FE(sapi_windows_cp_is_utf8, arginfo_sapi_windows_cp_is_utf8)
@@ -3444,7 +3444,7 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 	putenv_entry *pe = Z_PTR_P(zv);
 
 	if (pe->previous_value) {
-# if defined(PHP_WIN32)
+# if defined(_WIN32)
 		/* MSVCRT has a bug in putenv() when setting a variable that
 		 * is already set; if the SetEnvironmentVariable() API call
 		 * fails, the Crt will double free() a string.
@@ -3452,13 +3452,13 @@ static void php_putenv_destructor(zval *zv) /* {{{ */
 		SetEnvironmentVariable(pe->key, "bugbug");
 # endif
 		putenv(pe->previous_value);
-# if defined(PHP_WIN32)
+# if defined(_WIN32)
 		efree(pe->previous_value);
 # endif
 	} else {
 # if HAVE_UNSETENV
 		unsetenv(pe->key);
-# elif defined(PHP_WIN32)
+# elif defined(_WIN32)
 		SetEnvironmentVariable(pe->key, NULL);
 # ifndef ZTS
 		_putenv_s(pe->key, "");
@@ -3582,12 +3582,12 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 {
 #ifdef ZTS
 	ts_allocate_id(&basic_globals_id, sizeof(php_basic_globals), (ts_allocate_ctor) basic_globals_ctor, (ts_allocate_dtor) basic_globals_dtor);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	ts_allocate_id(&php_win32_core_globals_id, sizeof(php_win32_core_globals), (ts_allocate_ctor)php_win32_core_globals_ctor, (ts_allocate_dtor)php_win32_core_globals_dtor );
 #endif
 #else
 	basic_globals_ctor(&basic_globals);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	php_win32_core_globals_ctor(&the_php_win32_core_globals);
 #endif
 #endif
@@ -3700,8 +3700,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
-# if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
+#if defined(_WIN32) || HAVE_DNS_SEARCH_FUNC
+# if defined(_WIN32) || HAVE_FULL_DNS_FUNCS
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
 #endif
@@ -3719,12 +3719,12 @@ PHP_MSHUTDOWN_FUNCTION(basic) /* {{{ */
 #endif
 #ifdef ZTS
 	ts_free_id(basic_globals_id);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	ts_free_id(php_win32_core_globals_id);
 #endif
 #else
 	basic_globals_dtor(&basic_globals);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	php_win32_core_globals_dtor(&the_php_win32_core_globals);
 #endif
 #endif
@@ -3828,14 +3828,14 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 
 	PHP_RSHUTDOWN(filestat)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #ifdef HAVE_SYSLOG_H
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	BASIC_RSHUTDOWN_SUBMODULE(syslog)(SHUTDOWN_FUNC_ARGS_PASSTHRU);
 #endif
 #endif
 	BASIC_RSHUTDOWN_SUBMODULE(assert)
 	BASIC_RSHUTDOWN_SUBMODULE(url_scanner_ex)
 	BASIC_RSHUTDOWN_SUBMODULE(streams)
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	BASIC_RSHUTDOWN_SUBMODULE(win32_core_globals)
 #endif
 
@@ -4070,7 +4070,7 @@ PHP_FUNCTION(getenv)
 			return;
 		}
 	}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	{
 		char dummybuf;
 		int size;
@@ -4122,7 +4122,7 @@ PHP_FUNCTION(putenv)
 	size_t setting_len;
 	char *p, **env;
 	putenv_entry pe;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	char *value = NULL;
 	int equals = 0;
 	int error_code;
@@ -4141,13 +4141,13 @@ PHP_FUNCTION(putenv)
 	pe.key = estrndup(setting, setting_len);
 	if ((p = strchr(pe.key, '='))) {	/* nullify the '=' if there is one */
 		*p = '\0';
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		equals = 1;
 #endif
 	}
 
 	pe.key_len = (int)strlen(pe.key);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (equals) {
 		if ((size_t)pe.key_len < setting_len - 1) {
 			value = p + 1;
@@ -4164,7 +4164,7 @@ PHP_FUNCTION(putenv)
 	pe.previous_value = NULL;
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		if (!strncmp(*env, pe.key, pe.key_len) && (*env)[pe.key_len] == '=') {	/* found it */
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 			/* must copy previous value because MSVCRT's putenv can free the string without notice */
 			pe.previous_value = estrdup(*env);
 #else
@@ -4180,7 +4180,7 @@ PHP_FUNCTION(putenv)
 	}
 	if (!p || putenv(pe.putenv_string) == 0) { /* success */
 #else
-# ifndef PHP_WIN32
+# ifndef _WIN32
 	if (putenv(pe.putenv_string) == 0) { /* success */
 # else
 	error_code = SetEnvironmentVariable(pe.key, value);
@@ -5633,7 +5633,7 @@ PHP_FUNCTION(getservbyname)
 
 /* empty string behaves like NULL on windows implementation of
    getservbyname. Let be portable instead. */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (proto_len == 0) {
 		RETURN_FALSE;
 	}
@@ -5843,7 +5843,7 @@ PHP_FUNCTION(move_uploaded_file)
 	size_t path_len, new_path_len;
 	zend_bool successful = 0;
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	int oldmask; int ret;
 #endif
 
@@ -5866,7 +5866,7 @@ PHP_FUNCTION(move_uploaded_file)
 
 	if (VCWD_RENAME(path, new_path) == 0) {
 		successful = 1;
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		oldmask = umask(077);
 		umask(oldmask);
 

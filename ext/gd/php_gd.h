@@ -59,7 +59,7 @@
 #define PHP_IMG_WEBP  32
 #define PHP_IMG_BMP   64
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	define PHP_GD_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #	define PHP_GD_API __attribute__ ((visibility("default")))
@@ -127,7 +127,7 @@ PHP_FUNCTION(imagecolorclosestalpha);
 PHP_FUNCTION(imagecolorexactalpha);
 PHP_FUNCTION(imagecopyresampled);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 PHP_FUNCTION(imagegrabwindow);
 PHP_FUNCTION(imagegrabscreen);
 #endif

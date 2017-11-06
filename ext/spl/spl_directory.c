@@ -409,7 +409,7 @@ void spl_filesystem_info_set_filename(spl_filesystem_object *intern, char *path,
 	}
 
 	p1 = strrchr(intern->file_name, '/');
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 	p2 = strrchr(intern->file_name, '\\');
 #else
 	p2 = 0;
@@ -433,7 +433,7 @@ static spl_filesystem_object *spl_filesystem_object_create_info(spl_filesystem_o
 	zend_error_handling error_handling;
 
 	if (!file_path || !file_path_len) {
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0, "Cannot create SplFileInfo for empty path");
 		if (file_path && !use_copy) {
 			efree(file_path);
@@ -1247,7 +1247,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 
 	zend_replace_error_handling(EH_THROW, spl_ce_RuntimeException, &error_handling);
 
-#if defined(PHP_WIN32) || HAVE_SYMLINK
+#if defined(_WIN32) || HAVE_SYMLINK
 	if (intern->file_name == NULL) {
 		php_error_docref(NULL, E_WARNING, "Empty filename");
 		RETURN_FALSE;
@@ -2306,7 +2306,7 @@ SPL_METHOD(SplFileObject, __construct)
 		tmp_path = estrndup(intern->u.file.stream->orig_path, tmp_path_len);
 
 		p1 = strrchr(tmp_path, '/');
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 		p2 = strrchr(tmp_path, '\\');
 #else
 		p2 = 0;

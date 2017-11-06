@@ -28,7 +28,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/inet.h"
 # include <winsock2.h>
 # include <windows.h>
@@ -283,7 +283,7 @@ static zend_string *php_gethostbyname(char *name)
 }
 /* }}} */
 
-#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+#if HAVE_FULL_DNS_FUNCS || defined(_WIN32)
 # define PHP_DNS_NUM_TYPES	13	/* Number of DNS Types Supported by PHP currently */
 
 # define PHP_DNS_A      0x00000001
@@ -301,10 +301,10 @@ static zend_string *php_gethostbyname(char *name)
 # define PHP_DNS_AAAA   0x08000000
 # define PHP_DNS_ANY    0x10000000
 # define PHP_DNS_ALL    (PHP_DNS_A|PHP_DNS_NS|PHP_DNS_CNAME|PHP_DNS_SOA|PHP_DNS_PTR|PHP_DNS_HINFO|PHP_DNS_CAA|PHP_DNS_MX|PHP_DNS_TXT|PHP_DNS_A6|PHP_DNS_SRV|PHP_DNS_NAPTR|PHP_DNS_AAAA)
-#endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
+#endif /* HAVE_FULL_DNS_FUNCS || defined(_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
+#if !defined(_WIN32) && HAVE_DNS_SEARCH_FUNC
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -1114,9 +1114,9 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
+#endif /* !defined(_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
-#if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
+#if HAVE_FULL_DNS_FUNCS || defined(_WIN32)
 PHP_MINIT_FUNCTION(dns) {
 	REGISTER_LONG_CONSTANT("DNS_A",     PHP_DNS_A,     CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("DNS_NS",    PHP_DNS_NS,    CONST_CS | CONST_PERSISTENT);

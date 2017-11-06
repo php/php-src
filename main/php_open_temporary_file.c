@@ -26,7 +26,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #include "win32/winutil.h"
@@ -91,7 +91,7 @@
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
 	char *trailing_slash;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	char *opened_path = NULL;
 	size_t opened_path_len;
 	wchar_t *cwdw, *pfxw, pathw[MAXPATHLEN];
@@ -103,7 +103,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	int fd = -1;
 #ifndef HAVE_MKSTEMP
 	int open_flags = O_CREAT | O_TRUNC | O_RDWR
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		| _O_BINARY
 #endif
 		;
@@ -113,7 +113,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		return -1;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (!php_win32_check_trailing_space(pfx, strlen(pfx))) {
 		SetLastError(ERROR_INVALID_NAME);
 		return -1;
@@ -138,14 +138,14 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		trailing_slash = "/";
 	}
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
 	}
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	cwdw = php_win32_ioutil_any_to_w(new_state.cwd);
 	pfxw = php_win32_ioutil_any_to_w(pfx);
 	if (!cwdw || !pfxw) {
@@ -187,7 +187,7 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 	}
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (fd != -1 && opened_path_p) {
 		*opened_path_p = zend_string_init(opened_path, opened_path_len, 0);
 	}
@@ -227,7 +227,7 @@ PHPAPI const char* php_get_temporary_directory(void)
 		}
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* We can't count on the environment variables TEMP or TMP,
 	 * and so must make the Win32 API call to get the default
 	 * directory for temporary files.  Note this call checks

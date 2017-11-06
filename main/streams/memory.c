@@ -221,7 +221,7 @@ static int php_stream_memory_stat(php_stream *stream, php_stream_statbuf *ssb) /
 	/* generate unique inode number for alias/filename, so no phars will conflict */
 	ssb->sb.st_ino = 0;
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	ssb->sb.st_blksize = -1;
 	ssb->sb.st_blocks = -1;
 #endif

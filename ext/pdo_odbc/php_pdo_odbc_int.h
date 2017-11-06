@@ -18,7 +18,7 @@
 
 /* $Id$ */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define PDO_ODBC_TYPE	"Win32"
 #endif
 
@@ -43,7 +43,7 @@
 # include <iodbc.h>
 #endif
 
-#if HAVE_SQLUNIX_H && !defined(PHP_WIN32)
+#if HAVE_SQLUNIX_H && !defined(_WIN32)
 # include <sqlunix.h>
 #endif
 

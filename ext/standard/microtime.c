@@ -23,7 +23,7 @@
 #ifdef HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/time.h"
 #include "win32/getrusage.h"
 #else
@@ -133,7 +133,7 @@ PHP_FUNCTION(getrusage)
 #define PHP_RUSAGE_PARA(a) \
 		add_assoc_long(return_value, #a, usg.a)
 
-#ifdef PHP_WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
+#ifdef _WIN32 /* Windows only implements a limited amount of fields from the rusage struct */
 	PHP_RUSAGE_PARA(ru_majflt);
 	PHP_RUSAGE_PARA(ru_maxrss);
 #elif !defined(_OSD_POSIX)

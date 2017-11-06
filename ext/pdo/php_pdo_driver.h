@@ -30,7 +30,7 @@ typedef struct _pdo_stmt_t		 pdo_stmt_t;
 typedef struct _pdo_row_t		 pdo_row_t;
 struct pdo_bound_param_data;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef __int64 pdo_int64_t;
 typedef unsigned __int64 pdo_uint64_t;
 #else

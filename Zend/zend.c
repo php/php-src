@@ -489,7 +489,7 @@ static void zend_set_default_compile_time_values(void) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 static void zend_get_windows_version_info(OSVERSIONINFOEX *osvi) /* {{{ */
 {
 	ZeroMemory(osvi, sizeof(OSVERSIONINFOEX));
@@ -641,7 +641,7 @@ static void executor_globals_ctor(zend_executor_globals *executor_globals) /* {{
 	executor_globals->exception_class = NULL;
 	executor_globals->exception = NULL;
 	executor_globals->objects_store.object_buckets = NULL;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	zend_get_windows_version_info(&executor_globals->windows_version_info);
 #endif
 	executor_globals->flags = EG_FLAGS_INITIAL;
@@ -724,7 +724,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	extern zend_php_scanner_globals language_scanner_globals;
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	php_win32_cp_set_by_id(65001);
 #endif
 
@@ -829,7 +829,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	ini_scanner_globals_ctor(&ini_scanner_globals);
 	php_scanner_globals_ctor(&language_scanner_globals);
 	zend_set_default_compile_time_values();
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	zend_get_windows_version_info(&EG(windows_version_info));
 #endif
 #endif
@@ -848,7 +848,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 
 	zend_ini_startup();
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	/* Uses INI settings, so needs to be run after it. */
 	php_win32_cp_setup();
 #endif
@@ -1441,7 +1441,7 @@ ZEND_API ZEND_COLD void zend_output_debug_string(zend_bool trigger_break, const 
 	va_list args;
 
 	va_start(args, format);
-#	ifdef ZEND_WIN32
+#	ifdef _WIN32
 	{
 		char output_buf[1024];
 

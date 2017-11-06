@@ -22,7 +22,7 @@
 
 #include "phpdbg_io.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #undef UNICODE
 #include "win32/inet.h"
 #include <winsock2.h>
@@ -98,7 +98,7 @@ PHPDBG_API int phpdbg_consume_stdin_line(char *buf) {
 PHPDBG_API int phpdbg_consume_bytes(int sock, char *ptr, int len, int tmo) {
 	int got_now, i = len, j;
 	char *p = ptr;
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	struct pollfd pfd;
 
 	if (tmo < 0) goto recv_once;
@@ -298,7 +298,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 		}
 
 		if (0 != rc) {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			if (rc == EAI_SYSTEM) {
 				char buf[128];
 				int wrote;
@@ -318,7 +318,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			}
 #endif
 			return sock;

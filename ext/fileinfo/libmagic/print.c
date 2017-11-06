@@ -45,7 +45,7 @@ FILE_RCSID("@(#)$File: print.c,v 1.82 2017/02/10 18:14:01 christos Exp $")
 #endif
 #include <time.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define asctime_r php_asctime_r
 # define ctime_r php_ctime_r
 #endif

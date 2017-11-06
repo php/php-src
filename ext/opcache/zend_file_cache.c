@@ -48,7 +48,7 @@
 # include <sys/file.h>
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # define LOCK_SH 0
 # define LOCK_EX 1
 # define LOCK_UN 2
@@ -729,7 +729,7 @@ static char *zend_file_cache_get_bin_file_path(zend_string *script_path)
 	len = strlen(ZCG(accel_directives).file_cache);
 	filename = emalloc(len + 33 + ZSTR_LEN(script_path) + sizeof(SUFFIX));
 	memcpy(filename, ZCG(accel_directives).file_cache, len);
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	filename[len] = '/';
 	memcpy(filename + len + 1, ZCG(system_id), 32);
 	memcpy(filename + len + 33, ZSTR_VAL(script_path), ZSTR_LEN(script_path));
@@ -771,7 +771,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		return FAILURE;
 	}
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, S_IRUSR | S_IWUSR);
 #else
 	fd = open(filename, O_CREAT | O_EXCL | O_RDWR | O_BINARY, _S_IREAD | _S_IWRITE);

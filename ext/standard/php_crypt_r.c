@@ -37,7 +37,7 @@
 
 #include <string.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <windows.h>
 # include <Wincrypt.h>
 #endif
@@ -50,7 +50,7 @@
 #include "php_crypt_r.h"
 #include "crypt_freesec.h"
 
-#if !PHP_WIN32
+#if !_WIN32
 #include "ext/standard/md5.h"
 #endif
 
@@ -79,7 +79,7 @@ void php_shutdown_crypt_r()
 
 void _crypt_extended_init_r(void)
 {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	LONG volatile initialized = 0;
 #elif defined(HAVE_ATOMIC_H) /* Solaris 10 defines atomic API within */
 	volatile unsigned int initialized = 0;
@@ -92,7 +92,7 @@ void _crypt_extended_init_r(void)
 #endif
 
 	if (!initialized) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		InterlockedIncrement(&initialized);
 #elif defined(HAVE_SYNC_FETCH_AND_ADD)
 		__sync_fetch_and_add(&initialized, 1);
@@ -123,7 +123,7 @@ to64(char *s, int32_t v, int n)
 	}
 }
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 char * php_md5_crypt_r(const char *pw, const char *salt, char *out) {
 	HCRYPTPROV hCryptProv;
 	HCRYPTHASH ctx, ctx1;

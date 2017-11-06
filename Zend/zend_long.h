@@ -62,7 +62,7 @@ typedef int32_t zend_off_t;
 # define ZEND_XLONG_FMT "%" PRIx64
 # define ZEND_LONG_FMT_SPEC PRId64
 # define ZEND_ULONG_FMT_SPEC PRIu64
-# ifdef ZEND_WIN32
+# ifdef _WIN32
 #  define ZEND_LTOA(i, s, len) _i64toa_s((i), (s), (len), 10)
 #  define ZEND_ATOL(i, s) i = _atoi64((s))
 #  define ZEND_STRTOL(s0, s1, base) _strtoi64((s0), (s1), (base))
@@ -91,7 +91,7 @@ typedef int32_t zend_off_t;
 # define ZEND_XLONG_FMT "%" PRIx32
 # define ZEND_LONG_FMT_SPEC PRId32
 # define ZEND_ULONG_FMT_SPEC PRIu32
-# ifdef ZEND_WIN32
+# ifdef _WIN32
 #  define ZEND_LTOA(i, s, len) _ltoa_s((i), (s), (len), 10)
 #  define ZEND_ATOL(i, s) i = atol((s))
 # else

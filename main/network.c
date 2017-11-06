@@ -27,7 +27,7 @@
 #include <errno.h>
 
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <Ws2tcpip.h>
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
@@ -55,7 +55,7 @@
 #endif
 
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -69,7 +69,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -79,7 +79,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "ext/standard/file.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/time.h"
 # define SOCK_ERR INVALID_SOCKET
 # define SOCK_CONN_ERR SOCKET_ERROR
@@ -271,7 +271,7 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #define O_NONBLOCK O_NDELAY
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
      save = TRUE; ioctlsocket(sock, FIONBIO, &save)
@@ -330,7 +330,7 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 	if (n == 0) {
 		goto ok;
 	}
-# ifdef PHP_WIN32
+# ifdef _WIN32
 	/* The documentation for connect() says in case of non-blocking connections
 	 * the select function reports success in the writefds set and failure in
 	 * the exceptfds set. Indeed, using PHP_POLLREADABLE results in select
@@ -1007,7 +1007,7 @@ PHPAPI int php_sockaddr_size(php_sockaddr_storage *addr)
 /* {{{ php_socket_strerror */
 PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	char *errstr;
 
 	errstr = strerror(err);
@@ -1055,7 +1055,7 @@ PHPAPI char *php_socket_strerror(long err, char *buf, size_t bufsize)
 /* {{{ php_socket_error_str */
 PHPAPI zend_string *php_socket_error_str(long err)
 {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	char *errstr;
 
 	errstr = strerror(err);
@@ -1136,7 +1136,7 @@ PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block)
 {
 	int ret = SUCCESS;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	u_long flags;
 
 	/* with ioctlsocket, a non-zero sets nonblocking, a zero sets blocking */
@@ -1168,7 +1168,7 @@ PHPAPI int php_set_sock_blocking(php_socket_t socketd, int block)
 PHPAPI void _php_emit_fd_setsize_warning(int max_fd)
 {
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	php_error_docref(NULL, E_WARNING,
 		"PHP needs to be recompiled with a larger value of FD_SETSIZE.\n"
 		"If this binary is from an official www.php.net package, file a bug report\n"
@@ -1230,7 +1230,7 @@ PHPAPI int php_poll2(php_pollfd *ufds, unsigned int nfds, int timeout)
 		tv.tv_usec = (timeout - (tv.tv_sec * 1000)) * 1000;
 	}
 /* Reseting/initializing */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	WSASetLastError(0);
 #else
 	errno = 0;

@@ -880,7 +880,7 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef MYSQLI_USE_MYSQLND
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	zend_ulong client_ver = mysql_get_client_version();
 	/*
 	  Can't call mysql_server_end() multiple times prior to 5.0.46 on Windows.

@@ -33,7 +33,7 @@
 #include "zend.h"
 #include "zend_virtual_cwd.h"
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #include <io.h>
 #include "tsrm_win32.h"
 # ifndef IO_REPARSE_TAG_SYMLINK
@@ -62,7 +62,7 @@
 #include "TSRM.h"
 
 /* Only need mutex for popen() in Windows because it doesn't chdir() on UNIX */
-#if defined(ZEND_WIN32) && defined(ZTS)
+#if defined(_WIN32) && defined(ZTS)
 MUTEX_T cwd_mutex;
 #endif
 
@@ -74,7 +74,7 @@ virtual_cwd_globals cwd_globals;
 
 cwd_state main_cwd_state; /* True global */
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 #include <unistd.h>
 #else
 #include <direct.h>
@@ -89,7 +89,7 @@ cwd_state main_cwd_state; /* True global */
 	efree((s)->cwd); \
 	(s)->cwd_length = 0;
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # define CWD_STATE_FREE_ERR(state) do { \
 		DWORD last_error = GetLastError(); \
 		CWD_STATE_FREE(state); \
@@ -99,7 +99,7 @@ cwd_state main_cwd_state; /* True global */
 # define CWD_STATE_FREE_ERR(state) CWD_STATE_FREE(state)
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 
 #ifdef CTL_CODE
 #undef CTL_CODE
@@ -398,7 +398,7 @@ void virtual_cwd_main_cwd_init(uint8_t reinit) /* {{{ */
 		free(main_cwd_state.cwd);
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	ZeroMemory(&cwd, sizeof(cwd));
 	result = php_win32_ioutil_getcwd(cwd, sizeof(cwd));
 #else
@@ -410,7 +410,7 @@ void virtual_cwd_main_cwd_init(uint8_t reinit) /* {{{ */
 	}
 
 	main_cwd_state.cwd_length = strlen(cwd);
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	if (main_cwd_state.cwd_length >= 2 && cwd[1] == ':') {
 		cwd[0] = toupper(cwd[0]);
 	}
@@ -428,7 +428,7 @@ CWD_API void virtual_cwd_startup(void) /* {{{ */
 	cwd_globals_ctor(&cwd_globals);
 #endif
 
-#if (defined(ZEND_WIN32)) && defined(ZTS)
+#if (defined(_WIN32)) && defined(ZTS)
 	cwd_mutex = tsrm_mutex_alloc();
 #endif
 }
@@ -439,7 +439,7 @@ CWD_API void virtual_cwd_shutdown(void) /* {{{ */
 #ifndef ZTS
 	cwd_globals_dtor(&cwd_globals);
 #endif
-#if (defined(ZEND_WIN32)) && defined(ZTS)
+#if (defined(_WIN32)) && defined(ZTS)
 	tsrm_mutex_free(cwd_mutex);
 #endif
 
@@ -482,7 +482,7 @@ CWD_API char *virtual_getcwd_ex(size_t *length) /* {{{ */
 		return retval;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	/* If we have something like C: */
 	if (state->cwd_length == 2 && state->cwd[state->cwd_length-1] == ':') {
 		char *retval;
@@ -531,7 +531,7 @@ CWD_API char *virtual_getcwd(char *buf, size_t size) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /* {{{ */
 {
 	register zend_ulong h;
@@ -569,7 +569,7 @@ static inline zend_ulong realpath_cache_key(const char *path, size_t path_len) /
 	return h;
 }
 /* }}} */
-#endif /* defined(ZEND_WIN32) */
+#endif /* defined(_WIN32) */
 
 CWD_API void realpath_cache_clean(void) /* {{{ */
 {
@@ -647,7 +647,7 @@ static inline void realpath_cache_add(const char *path, size_t path_len, const c
 		}
 		bucket->realpath_len = realpath_len;
 		bucket->is_dir = is_dir > 0;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		bucket->is_rvalid   = 0;
 		bucket->is_readable = 0;
 		bucket->is_wvalid   = 0;
@@ -720,7 +720,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 {
 	size_t i, j;
 	int directory = 0, save;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	WIN32_FIND_DATAW dataw;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 	ALLOCA_FLAG(use_heap_large)
@@ -822,7 +822,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 			}
 		}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		if (save) {
 			pathw = php_win32_ioutil_any_to_w(path);
 			if (!pathw) {
@@ -1136,7 +1136,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 					path[j++] = DEFAULT_SLASH;
 				}
 			}
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 			if (j == (size_t)-1 || j + len >= MAXPATHLEN - 1 + i) {
 				free_alloca(tmp, use_heap);
 				FREE_PATHW()
@@ -1176,7 +1176,7 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 		}
 
 		free_alloca(tmp, use_heap);
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		FREE_PATHW()
 #undef FREE_PATHW
 #endif
@@ -1199,7 +1199,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	void *tmp;
 
 	if (!path_length || path_length >= MAXPATHLEN-1) {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		_set_errno(EINVAL);
 #else
 		errno = EINVAL;
@@ -1222,7 +1222,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		} else {
 			size_t state_cwd_length = state->cwd_length;
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 			if (IS_SLASH(path[0])) {
 				if (state->cwd[1] == ':') {
 					/* Copy only the drive name */
@@ -1261,7 +1261,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 			}
 		}
 	} else {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		if (path_length > 2 && path[1] == ':' && !IS_SLASH(path[2])) {
 			resolved_path[0] = path[0];
 			resolved_path[1] = ':';
@@ -1273,14 +1273,14 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 		memcpy(resolved_path, path, path_length + 1);
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	if (memchr(resolved_path, '*', path_length) ||
 		memchr(resolved_path, '?', path_length)) {
 		return 1;
 	}
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	if (IS_UNC_PATH(resolved_path, path_length)) {
 		/* skip UNC name */
 		resolved_path[0] = DEFAULT_SLASH;
@@ -1330,7 +1330,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	}
 	resolved_path[path_length] = 0;
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 verify:
 #endif
 	if (verify_path) {
@@ -1480,7 +1480,7 @@ CWD_API FILE *virtual_fopen(const char *path, const char *mode) /* {{{ */
 		return NULL;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	f = php_win32_ioutil_fopen(new_state.cwd, mode);
 #else
 	f = fopen(new_state.cwd, mode);
@@ -1503,7 +1503,7 @@ CWD_API int virtual_access(const char *pathname, int mode) /* {{{ */
 		return -1;
 	}
 
-#if defined(ZEND_WIN32)
+#if defined(_WIN32)
 	ret = tsrm_win32_access(new_state.cwd, mode);
 #else
 	ret = access(new_state.cwd, mode);
@@ -1527,7 +1527,7 @@ CWD_API int virtual_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 		return -1;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	ret = win32_utime(new_state.cwd, buf);
 #else
 	ret = utime(new_state.cwd, buf);
@@ -1550,7 +1550,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 		return -1;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	{
 		mode_t _tmp = mode;
 
@@ -1573,7 +1573,7 @@ CWD_API int virtual_chmod(const char *filename, mode_t mode) /* {{{ */
 }
 /* }}} */
 
-#if !defined(ZEND_WIN32)
+#if !defined(_WIN32)
 CWD_API int virtual_chown(const char *filename, uid_t owner, gid_t group, int link) /* {{{ */
 {
 	cwd_state new_state;
@@ -1620,13 +1620,13 @@ CWD_API int virtual_open(const char *path, int flags, ...) /* {{{ */
 		mode = (mode_t) va_arg(arg, int);
 		va_end(arg);
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		f = php_win32_ioutil_open(new_state.cwd, flags, mode);
 #else
 		f = open(new_state.cwd, flags, mode);
 #endif
 	} else {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		f = php_win32_ioutil_open(new_state.cwd, flags);
 #else
 		f = open(new_state.cwd, flags);
@@ -1678,7 +1678,7 @@ CWD_API int virtual_rename(const char *oldname, const char *newname) /* {{{ */
 
 	/* rename on windows will fail if newname already exists.
 	   MoveFileEx has to be used */
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	/* MoveFileEx returns 0 on failure, other way 'round for this function */
 	retval = php_win32_ioutil_rename(oldname, newname);
 #else
@@ -1739,7 +1739,7 @@ CWD_API int virtual_unlink(const char *path) /* {{{ */
 		return -1;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	retval = php_win32_ioutil_unlink(new_state.cwd);
 #else
 	retval = unlink(new_state.cwd);
@@ -1761,7 +1761,7 @@ CWD_API int virtual_mkdir(const char *pathname, mode_t mode) /* {{{ */
 		return -1;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	retval = php_win32_ioutil_mkdir(new_state.cwd, mode);
 #else
 	retval = mkdir(new_state.cwd, mode);
@@ -1782,7 +1782,7 @@ CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
 		return -1;
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	retval = php_win32_ioutil_rmdir(new_state.cwd);
 #else
 	retval = rmdir(new_state.cwd);
@@ -1792,7 +1792,7 @@ CWD_API int virtual_rmdir(const char *pathname) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 DIR *opendir(const char *name);
 #endif
 
@@ -1814,7 +1814,7 @@ CWD_API DIR *virtual_opendir(const char *pathname) /* {{{ */
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 CWD_API FILE *virtual_popen(const char *command, const char *type) /* {{{ */
 {
 	return popen_ex(command, type, CWDG(cwd).cwd, NULL);

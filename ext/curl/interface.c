@@ -31,7 +31,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <sys/types.h>
 #endif
@@ -46,10 +46,10 @@
 
 /* {{{ cruft for thread safe SSL crypto locks */
 #if defined(ZTS) && defined(HAVE_CURL_SSL)
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  define PHP_CURL_NEED_OPENSSL_TSL
 #  include <openssl/crypto.h>
-# else /* !PHP_WIN32 */
+# else /* !_WIN32 */
 #  if defined(HAVE_CURL_OPENSSL)
 #   if defined(HAVE_OPENSSL_CRYPTO_H)
 #    define PHP_CURL_NEED_OPENSSL_TSL
@@ -76,7 +76,7 @@
 	"library was used; thus no SSL crypto locking callbacks will be set, which may " \
 	"cause random crashes on SSL requests"
 #  endif /* HAVE_CURL_OPENSSL || HAVE_CURL_GNUTLS */
-# endif /* PHP_WIN32 */
+# endif /* _WIN32 */
 #endif /* ZTS && HAVE_CURL_SSL */
 /* }}} */
 
@@ -161,7 +161,7 @@ static void _php_curl_close(zend_resource *rsrc);
 		v ? zend_string_copy(v) : ZSTR_EMPTY_ALLOC());
 #define CAAZ(s, v) add_assoc_zval_ex(return_value, s, sizeof(s) -1 , (zval *) v);
 
-#if defined(PHP_WIN32) || defined(__GNUC__)
+#if defined(_WIN32) || defined(__GNUC__)
 # define php_curl_ret(__ret) RETVAL_FALSE; return __ret;
 #else
 # define php_curl_ret(__ret) RETVAL_FALSE; return;

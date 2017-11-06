@@ -96,7 +96,7 @@ static size_t php_output_stderr(const char *str, size_t str_len)
 {
 	fwrite(str, 1, str_len, stderr);
 /* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	fflush(stderr);
 #endif
 	return str_len;

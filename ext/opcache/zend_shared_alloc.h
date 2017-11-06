@@ -177,7 +177,7 @@ extern zend_shared_memory_handlers zend_alloc_shm_handlers;
 extern zend_shared_memory_handlers zend_alloc_posix_handlers;
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 extern zend_shared_memory_handlers zend_alloc_win32_handlers;
 void zend_shared_alloc_create_lock(void);
 void zend_shared_alloc_lock_win32(void);

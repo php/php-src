@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
@@ -47,7 +47,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -57,7 +57,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 

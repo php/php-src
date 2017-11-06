@@ -31,7 +31,7 @@
 #include <zlib.h>
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include <netinet/tcp.h>
 #else
 #include <winsock.h>

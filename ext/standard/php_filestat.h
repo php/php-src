@@ -61,7 +61,7 @@ PHP_FUNCTION(touch);
 #endif
 PHP_FUNCTION(clearstatcache);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define S_IRUSR S_IREAD
 #define S_IWUSR S_IWRITE
 #define S_IXUSR S_IEXEC

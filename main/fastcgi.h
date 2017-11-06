@@ -122,7 +122,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 int fcgi_flush(fcgi_request *req, int end);
 int fcgi_end(fcgi_request *req);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 void fcgi_impersonate(void);
 #endif
 

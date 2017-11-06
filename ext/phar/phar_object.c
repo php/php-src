@@ -162,7 +162,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 			highlight_file(name, &syntax_highlighter_ini);
 
 			efree(name);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			efree(arch);
 #endif
 			zend_bailout();
@@ -259,7 +259,7 @@ static int phar_file_action(phar_archive_data *phar, phar_entry_info *info, char
 				efree(name);
 				new_op_array = NULL;
 			}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			efree(arch);
 #endif
 			if (new_op_array) {
@@ -461,7 +461,7 @@ PHP_METHOD(Phar, mount)
 	fname = (char*)zend_get_executed_filename();
 	fname_len = (int)strlen(fname);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	phar_unixify_path_separators(fname, fname_len);
 #endif
 
@@ -588,7 +588,7 @@ PHP_METHOD(Phar, webPhar)
 		return;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	fname = estrndup(fname, fname_len);
 	phar_unixify_path_separators(fname, fname_len);
 #endif
@@ -818,7 +818,7 @@ PHP_METHOD(Phar, webPhar)
 	if (FAILURE == phar_get_archive(&phar, fname, (int)fname_len, NULL, 0, NULL) ||
 		(info = phar_get_entry_info(phar, entry, entry_len, NULL, 0)) == NULL) {
 		phar_do_404(phar, fname, (int)fname_len, f404, (int)f404_len, entry, entry_len);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		efree(fname);
 #endif
 		zend_bailout();
@@ -844,7 +844,7 @@ PHP_METHOD(Phar, webPhar)
 							}
 							efree(pt);
 							efree(entry);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 							efree(fname);
 #endif
 							RETURN_FALSE;
@@ -861,7 +861,7 @@ PHP_METHOD(Phar, webPhar)
 						}
 						efree(pt);
 						efree(entry);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 						efree(fname);
 #endif
 						RETURN_FALSE;
@@ -1180,12 +1180,12 @@ PHP_METHOD(Phar, __construct)
 	if (SUCCESS == phar_split_fname(fname, (int)fname_len, &arch, &arch_len, &entry, &entry_len, !is_data, 2)) {
 		/* use arch (the basename for the archive) for fname instead of fname */
 		/* this allows support for RecursiveDirectoryIterator of subdirectories */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		phar_unixify_path_separators(arch, arch_len);
 #endif
 		fname = arch;
 		fname_len = arch_len;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	} else {
 		arch = estrndup(fname, fname_len);
 		arch_len = fname_len;
@@ -4203,7 +4203,7 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 	}
 	filename = new_state.cwd + 1;
 	filename_len = new_state.cwd_length - 1;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* unixify the path back, otherwise non zip formats might be broken */
 	{
 		size_t cnt = 0;

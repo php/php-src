@@ -26,7 +26,7 @@
 extern zend_module_entry json_module_entry;
 #define phpext_json_ptr &json_module_entry
 
-#if defined(PHP_WIN32) && defined(JSON_EXPORTS)
+#if defined(_WIN32) && defined(JSON_EXPORTS)
 #define PHP_JSON_API __declspec(dllexport)
 #else
 #define PHP_JSON_API PHPAPI

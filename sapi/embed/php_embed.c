@@ -20,7 +20,7 @@
 #include "php_embed.h"
 #include "ext/standard/php_standard.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <io.h>
 #include <fcntl.h>
 #endif
@@ -33,7 +33,7 @@ const char HARDCODED_INI[] =
 	"max_execution_time=0\n"
 	"max_input_time=-1\n\0";
 
-#if defined(PHP_WIN32) && defined(ZTS)
+#if defined(_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
@@ -181,7 +181,7 @@ EMBED_SAPI_API int php_embed_init(int argc, char **argv)
 
   sapi_startup(&php_embed_module);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
   _fmode = _O_BINARY;			/*sets default for file streams to binary */
   setmode(_fileno(stdin), O_BINARY);		/* make the stdio mode be binary */
   setmode(_fileno(stdout), O_BINARY);		/* make the stdio mode be binary */

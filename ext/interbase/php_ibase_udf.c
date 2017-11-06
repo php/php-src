@@ -102,7 +102,7 @@
 
 #define min(a,b) ((a)<(b)?(a):(b))
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define LL_LIT(lit) lit ## I64
 #else
 #define LL_LIT(lit) lit ## ll

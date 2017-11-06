@@ -1,14 +1,14 @@
 #include "sockaddr_conv.h"
 #include "conversions.h"
 #include "sendrecvmsg.h" /* for ancillary registry */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "windows_common.h"
 #endif
 
 #include <Zend/zend_llist.h>
 #include <zend_smart_str.h>
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 # include <sys/types.h>
 # include <sys/socket.h>
 # include <arpa/inet.h>
@@ -24,7 +24,7 @@
 #include <stdarg.h>
 #include <stddef.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef unsigned short sa_family_t;
 # define msghdr			_WSAMSG
 /*

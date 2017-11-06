@@ -544,7 +544,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				php_stream *stream;
 				php_stream_context *context = php_stream_context_from_zval(zcontext, 0);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 				if (php_stream_stat_path_ex(buffer, 0, &ssb, context) == SUCCESS) {
 					if (ssb.sb.st_mode & S_IFDIR) {
 						ret_val = mime_directory;

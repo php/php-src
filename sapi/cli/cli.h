@@ -21,7 +21,7 @@
 #ifndef CLI_H
 #define CLI_H
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #   define PHP_CLI_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 #   define PHP_CLI_API __attribute__ ((visibility("default")))

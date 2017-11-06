@@ -39,7 +39,7 @@ static inline dom_object *php_dom_obj_from_obj(zend_object *obj) {
 
 #define Z_DOMOBJ_P(zv)  php_dom_obj_from_obj(Z_OBJ_P((zv)))
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	ifdef DOM_EXPORTS
 #		define PHP_DOM_EXPORT __declspec(dllexport)
 #	elif !defined(DOM_LOCAL_DEFINES) /* Allow to counteract LNK4049 warning. */

@@ -36,7 +36,7 @@
 #include <fcntl.h>
 #include <string.h>
 #include <time.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #ifdef HAVE_SYS_TYPES_H
@@ -931,7 +931,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 		}
 
 		if (type == FTPTYPE_ASCII) {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			char *s;
 #endif
 			char *ptr = data->buf;
@@ -940,7 +940,7 @@ ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_t pat
 			 * Win32 -> \r\n
 			 * Everything Else \n
 			 */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			php_stream_write(outstream, ptr, (e - ptr));
 			ptr = e;
 #else
@@ -1408,7 +1408,7 @@ my_send(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 		n = php_pollfd_for_ms(s, POLLOUT, ftp->timeout_sec * 1000);
 
 		if (n < 1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			if (n == 0) {
 				_set_errno(ETIMEDOUT);
 			}
@@ -1497,7 +1497,7 @@ my_recv(ftpbuf_t *ftp, php_socket_t s, void *buf, size_t len)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
@@ -1572,7 +1572,7 @@ data_available(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, 1000);
 	if (n < 1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
@@ -1596,7 +1596,7 @@ data_writeable(ftpbuf_t *ftp, php_socket_t s)
 
 	n = php_pollfd_for_ms(s, POLLOUT, 1000);
 	if (n < 1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}
@@ -1621,7 +1621,7 @@ my_accept(ftpbuf_t *ftp, php_socket_t s, struct sockaddr *addr, socklen_t *addrl
 
 	n = php_pollfd_for_ms(s, PHP_POLLREADABLE, ftp->timeout_sec * 1000);
 	if (n < 1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (n == 0) {
 			_set_errno(ETIMEDOUT);
 		}

@@ -4,7 +4,7 @@
 #include <php_network.h>
 #include "php_sockets.h" /* php_socket */
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 # include <netinet/in.h>
 #else
 # include <Winsock2.h>

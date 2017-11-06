@@ -36,7 +36,7 @@ extern zend_module_entry pgsql_module_entry;
 #undef SOCKET_SIZE_TYPE
 #include <libpq-fe.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define INV_WRITE            0x00020000
 #define INV_READ             0x00040000
 #undef PHP_PGSQL_API

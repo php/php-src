@@ -174,7 +174,7 @@ struct _zend_executor_globals {
 	zend_bool timed_out;
 	zend_long hard_timeout;
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	OSVERSIONINFOEX windows_version_info;
 #endif
 

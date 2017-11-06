@@ -35,7 +35,7 @@
 #ifndef _H_CDF_
 #define _H_CDF_
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #define timespec timeval
 #define tv_nsec tv_usec

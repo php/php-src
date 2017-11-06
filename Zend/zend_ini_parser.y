@@ -29,7 +29,7 @@
 #include "zend_ini_scanner.h"
 #include "zend_extensions.h"
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #include "win32/syslog.h"
 #endif
 
@@ -199,7 +199,7 @@ static ZEND_COLD void ini_error(const char *msg)
 	}
 
 	if (CG(ini_parser_unbuffered_errors)) {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		syslog(LOG_ALERT, "PHP: %s (%s)", error_buf, GetCommandLine());
 #endif
 		fprintf(stderr, "PHP:  %s", error_buf);

@@ -68,7 +68,7 @@ zend_ulong pdo_odbc_pool_on = SQL_CP_OFF;
 zend_ulong pdo_odbc_pool_mode = SQL_CP_ONE_PER_HENV;
 #endif
 
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+#if defined(DB2CLI_VER) && !defined(_WIN32)
 PHP_INI_BEGIN()
 	PHP_INI_ENTRY("pdo_odbc.db2_instance_name", NULL, PHP_INI_SYSTEM, NULL)
 PHP_INI_END()
@@ -86,7 +86,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
 		return FAILURE;
 	}
 
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+#if defined(DB2CLI_VER) && !defined(_WIN32)
 	REGISTER_INI_ENTRIES();
 	{
 		char *instance = INI_STR("pdo_odbc.db2_instance_name");
@@ -144,7 +144,7 @@ PHP_MINIT_FUNCTION(pdo_odbc)
  */
 PHP_MSHUTDOWN_FUNCTION(pdo_odbc)
 {
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+#if defined(DB2CLI_VER) && !defined(_WIN32)
 	UNREGISTER_INI_ENTRIES();
 #endif
 	php_pdo_unregister_driver(&pdo_odbc_driver);
@@ -166,7 +166,7 @@ PHP_MINFO_FUNCTION(pdo_odbc)
 #endif
 	php_info_print_table_end();
 
-#if defined(DB2CLI_VER) && !defined(PHP_WIN32)
+#if defined(DB2CLI_VER) && !defined(_WIN32)
 	DISPLAY_INI_ENTRIES();
 #endif
 }

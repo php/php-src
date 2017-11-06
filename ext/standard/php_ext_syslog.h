@@ -27,7 +27,7 @@
 
 PHP_MINIT_FUNCTION(syslog);
 PHP_RINIT_FUNCTION(syslog);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 PHP_RSHUTDOWN_FUNCTION(syslog);
 #endif
 PHP_MSHUTDOWN_FUNCTION(syslog);

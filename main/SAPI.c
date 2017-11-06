@@ -37,7 +37,7 @@
 #endif
 #ifdef HAVE_SYS_TIME_H
 #include <sys/time.h>
-#elif defined(PHP_WIN32)
+#elif defined(_WIN32)
 #include "win32/time.h"
 #endif
 
@@ -82,14 +82,14 @@ SAPI_API void sapi_startup(sapi_module_struct *sf)
 
 #ifdef ZTS
 	ts_allocate_id(&sapi_globals_id, sizeof(sapi_globals_struct), (ts_allocate_ctor) sapi_globals_ctor, (ts_allocate_dtor) sapi_globals_dtor);
-# ifdef PHP_WIN32
+# ifdef _WIN32
 	_configthreadlocale(_ENABLE_PER_THREAD_LOCALE);
 # endif
 #else
 	sapi_globals_ctor(&sapi_globals);
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	tsrm_win32_startup();
 #endif
 
@@ -106,7 +106,7 @@ SAPI_API void sapi_shutdown(void)
 
 	reentrancy_shutdown();
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	tsrm_win32_shutdown();
 #endif
 }

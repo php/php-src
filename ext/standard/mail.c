@@ -48,7 +48,7 @@
 #include "php_string.h"
 #include "exec.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/sendmail.h"
 #endif
 
@@ -468,7 +468,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
-#ifdef PHP_WIN32 
+#ifdef _WIN32 
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
@@ -540,7 +540,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (!sendmail_path) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		/* handle old style win smtp sending */
 		if (TSendMail(INI_STR("SMTP"), &tsm_err, &tsm_errmsg, hdr, subject, to, message, NULL, NULL, NULL) == FAILURE) {
 			if (tsm_errmsg) {
@@ -572,7 +572,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	sendmail = popen_ex(sendmail_cmd, "wb", NULL, NULL);
 #else
 	/* Since popen() doesn't indicate if the internal fork() doesn't work
@@ -586,7 +586,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 	}
 
 	if (sendmail) {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		if (EACCES == errno) {
 			php_error_docref(NULL, E_WARNING, "Permission denied: unable to execute shell to run mail delivery binary '%s'", sendmail_path);
 			pclose(sendmail);
@@ -614,7 +614,7 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 		}
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (ret == -1)
 #else
 #if defined(EX_TEMPFAIL)
@@ -650,7 +650,7 @@ PHP_MINFO_FUNCTION(mail)
 {
 	char *sendmail_path = INI_STR("sendmail_path");
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (!sendmail_path) {
 		php_info_print_table_row(2, "Internal Sendmail Support for Windows", "enabled");
 	} else {

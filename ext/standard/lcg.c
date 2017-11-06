@@ -25,7 +25,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>
@@ -37,7 +37,7 @@ int lcg_globals_id;
 static php_lcg_globals lcg_globals;
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <process.h>
 #endif
 

@@ -2773,7 +2773,7 @@ ZEND_API int zend_disable_function(char *function_name, size_t function_name_len
 }
 /* }}} */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #pragma optimize("", off)
 #endif
 static zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ */
@@ -2784,7 +2784,7 @@ static zend_object *display_disabled_class(zend_class_entry *class_type) /* {{{ 
 	zend_error(E_WARNING, "%s() has been disabled for security reasons", ZSTR_VAL(class_type->name));
 	return intern;
 }
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #pragma optimize("", on)
 #endif
 /* }}} */

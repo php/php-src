@@ -31,7 +31,7 @@
 #include "php_version.h"
 #define PHP_MBSTRING_VERSION PHP_VERSION
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	undef MBSTRING_API
 #	ifdef MBSTRING_EXPORTS
 #		define MBSTRING_API __declspec(dllexport)

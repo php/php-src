@@ -19,7 +19,7 @@
 #include "php.h"
 #include "php_network.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 
 /* $Id$ */
 

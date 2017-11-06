@@ -34,7 +34,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
 #include "magic.h"
 
 #include <stdlib.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/unistd.h"
 #else
 #include <unistd.h>
@@ -42,7 +42,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
 #include <string.h>
 #include "config.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <shlwapi.h>
 #endif
 
@@ -71,7 +71,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
 #endif
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # undef S_IFLNK
 # undef S_IFIFO
 #endif

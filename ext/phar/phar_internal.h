@@ -51,7 +51,7 @@
 #include "ext/standard/sha1.h"
 #include "ext/standard/php_var.h"
 #include "ext/standard/php_versioning.h"
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include "TSRM/tsrm_strtok_r.h"
 #endif
 #include "Zend/zend_virtual_cwd.h"
@@ -480,7 +480,7 @@ extern zend_string *(*phar_save_resolve_path)(const char *filename, int filename
 
 BEGIN_EXTERN_C()
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 char *tsrm_strtok_r(char *s, const char *delim, char **last);
 
 static inline void phar_unixify_path_separators(char *path, int path_len)

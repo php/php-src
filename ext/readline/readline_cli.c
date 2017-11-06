@@ -67,7 +67,7 @@
 #include "sapi/cli/cli.h"
 #include "readline_cli.h"
 
-#if defined(COMPILE_DL_READLINE) && !defined(PHP_WIN32)
+#if defined(COMPILE_DL_READLINE) && !defined(_WIN32)
 #include <dlfcn.h>
 #endif
 
@@ -604,13 +604,13 @@ static int readline_shell_run(void) /* {{{ */
 		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p);
 	}
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	history_file = tilde_expand("~/.php_history");
 #else
 	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
 #endif
 	rl_attempted_completion_function = cli_code_completion;
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	rl_special_prefixes = "$";
 #endif
 	read_history(history_file);
@@ -698,7 +698,7 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	efree(history_file);
 #else
 	free(history_file);
@@ -709,7 +709,7 @@ static int readline_shell_run(void) /* {{{ */
 }
 /* }}} */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
 #define GET_SHELL_CB(cb) \
 	do { \
@@ -788,7 +788,7 @@ PHP_MINFO_FUNCTION(cli_readline)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Readline Support", "enabled");
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	php_info_print_table_row(2, "Readline library", "WinEditLine");
 #else
 	php_info_print_table_row(2, "Readline library", (rl_library_version ? rl_library_version : "Unknown"));

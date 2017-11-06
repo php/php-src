@@ -37,7 +37,7 @@
 #include "ext/standard/php_fopen_wrappers.h"
 #include "ext/standard/md5.h"
 #include "ext/standard/base64.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/winutil.h"
 #endif
 
@@ -60,7 +60,7 @@
 /* Common */
 #include <time.h>
 
-#if (defined(PHP_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1900)
+#if (defined(_WIN32) && defined(_MSC_VER) && _MSC_VER >= 1900)
 #define timezone _timezone	/* timezone is called _timezone in LibC */
 #endif
 
@@ -1241,7 +1241,7 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 }
 /* }}} */
 
-#if defined(PHP_WIN32) || (OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER))
+#if defined(_WIN32) || (OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER))
 #define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
 #else
 #define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
@@ -6757,7 +6757,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 
 	if (buffer_length <= 0
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		|| ZEND_LONG_INT_OVFL(buffer_length)
 #endif
 			) {
@@ -6765,7 +6765,7 @@ PHP_FUNCTION(openssl_random_pseudo_bytes)
 	}
 	buffer = zend_string_alloc(buffer_length, 0);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* random/urandom equivalent on Windows */
 	if (php_win32_get_random_bytes((unsigned char*)buffer->val, (size_t) buffer_length) == FAILURE){
 		zend_string_release(buffer);

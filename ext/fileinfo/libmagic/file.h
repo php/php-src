@@ -35,7 +35,7 @@
 
 #include "config.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
   #ifdef _WIN64
     #define SIZE_T_FORMAT "I64"
   #else
@@ -61,7 +61,7 @@
 #ifdef HAVE_INTTYPES_H
 #include <inttypes.h>
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/php_stdint.h"
 #endif
 
@@ -70,7 +70,7 @@
 #include "ext/pcre/php_pcre.h"
 
 #include <sys/types.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/param.h"
 #else
 #include <sys/param.h>
@@ -85,7 +85,7 @@
 #define MAGIC "/etc/magic"
 #endif
 
-#if defined(__EMX__) || defined(PHP_WIN32)
+#if defined(__EMX__) || defined(_WIN32)
 #define PATHSEP	';'
 #else
 #define PATHSEP	':'
@@ -552,7 +552,7 @@ static const char *rcsid(const char *p) { \
 #define FILE_RCSID(id)
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #ifdef _WIN64
 #define FINFO_LSEEK_FUNC _lseeki64
 #else

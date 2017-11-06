@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <limits.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define __alignof__ __alignof
 # define alloca _alloca
 #else
@@ -26,7 +26,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <string.h>
 #else
 # include <sys/param.h>
@@ -68,7 +68,7 @@ struct sha256_ctx {
 	char buffer[128]; /* NB: always correctly aligned for uint32_t.  */
 };
 
-#if defined(PHP_WIN32) || (!defined(WORDS_BIGENDIAN))
+#if defined(_WIN32) || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
     (((n) << 24) | (((n) & 0xff00) << 8) | (((n) >> 8) & 0xff00) | ((n) >> 24))
 #else
@@ -333,7 +333,7 @@ static const char b64t[64] =
 
 char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int buflen)
 {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # if _MSC <= 1300
 #  pragma pack(push, 16)
 	unsigned char alt_result[32];
@@ -519,7 +519,7 @@ char * php_sha256_crypt_r(const char *key, const char *salt, char *buffer, int b
 	buflen -= sizeof(sha256_salt_prefix) - 1;
 
 	if (rounds_custom) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha256_rounds_prefix, rounds);
 #else
 		int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha256_rounds_prefix, rounds);

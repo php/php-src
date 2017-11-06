@@ -24,14 +24,14 @@
 #include "ZendAccelerator.h"
 #include "zend_accelerator_blacklist.h"
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB|REG_ICASE)
 #else
 # define REGEX_MODE (REG_EXTENDED|REG_NOSUB)
 #endif
 
 #ifdef HAVE_GLOB
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/glob.h"
 #else
 #include <glob.h>
@@ -97,7 +97,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 				switch (*c) {
 					case '?':
 						c++;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 				 		p[0] = '[';			/* * => [^\\] on Win32 */
 					 	p[1] = '^';
 					 	p[2] = '\\';
@@ -120,7 +120,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 							p[1] = '*';
 							p += 2;
 						} else {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 						 	p[0] = '[';			/* * => [^\\]* on Win32 */
 						 	p[1] = '^';
 						 	p[2] = '\\';

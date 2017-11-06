@@ -17,7 +17,7 @@
  */
 
 /* $Id$ */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 
 #include "php.h"
 #include "php_filestat.h"

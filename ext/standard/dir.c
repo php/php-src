@@ -38,13 +38,13 @@
 
 #include <errno.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/readdir.h"
 #endif
 
 
 #ifdef HAVE_GLOB
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #include <glob.h>
 #else
 #include "win32/glob.h"
@@ -459,7 +459,7 @@ PHP_FUNCTION(glob)
 		if (!result) {
 			cwd[0] = '\0';
 		}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (IS_SLASH(*pattern)) {
 			cwd[2] = '\0';
 		}
@@ -494,7 +494,7 @@ PHP_FUNCTION(glob)
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
 no_results:
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		/* Paths containing '*', '?' and some other chars are
 		illegal on Windows but legit on other platforms. For
 		this reason the direct basedir check against the glob

@@ -37,7 +37,7 @@
 #include "ext/standard/php_standard.h"
 #include "zend_smart_str.h"
 #include "ext/pcre/php_pcre.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/time.h"
 #endif
 

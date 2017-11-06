@@ -41,14 +41,14 @@ PHPAPI int flock(int fd, int operation);
 #define PHP_LOCK_UN 3
 #define PHP_LOCK_NB 4
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # ifdef EWOULDBLOCK
 #  undef EWOULDBLOCK
 # endif
 # define EWOULDBLOCK WSAEWOULDBLOCK
 # define fsync _commit
 # define ftruncate(a, b) chsize(a, b)
-#endif /* defined(PHP_WIN32) */
+#endif /* defined(_WIN32) */
 
 #if !HAVE_INET_ATON
 #if HAVE_NETINET_IN_H
@@ -58,7 +58,7 @@ PHPAPI int flock(int fd, int operation);
 #include <arpa/inet.h>
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 extern int inet_aton(const char *, struct in_addr *);
 #endif
 #endif

@@ -61,7 +61,7 @@ This file is public domain and comes with NO WARRANTY of any kind */
 #define HAVE_LONG_LONG 1
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define MYSQLND_LLU_SPEC "%I64u"
 #define MYSQLND_LL_SPEC "%I64d"
 #define MYSQLND_SZ_T_SPEC "%Id"

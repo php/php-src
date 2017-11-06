@@ -30,7 +30,7 @@
 #include <unistd.h>
 #endif
 #include "php_image.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/php_stdint.h"
 #endif
 

@@ -25,20 +25,20 @@
 #include <stdio.h>
 #include <stdlib.h>
 #if HAVE_PWD_H
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/pwd.h"
 #else
 #include <pwd.h>
 #endif
 #endif
 #if HAVE_GRP_H
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include "win32/grp.h"
 # else
 #  include <grp.h>
 # endif
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #undef getgid
 #define getgroups(a, b) 0
 #define getgid() 1
@@ -49,7 +49,7 @@
 #endif
 #include <sys/stat.h>
 #include <sys/types.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <process.h>
 #endif
 

@@ -7,7 +7,7 @@
 
 #include <errno.h>
 #include <limits.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define __alignof__ __alignof
 # define alloca _alloca
 #else
@@ -25,7 +25,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <string.h>
 #else
 # include <sys/param.h>
@@ -63,7 +63,7 @@ struct sha512_ctx
 };
 
 
-#if defined(PHP_WIN32) || (!defined(WORDS_BIGENDIAN))
+#if defined(_WIN32) || (!defined(WORDS_BIGENDIAN))
 # define SWAP(n) \
   (((n) << 56)					\
    | (((n) & 0xff00) << 40)			\
@@ -367,7 +367,7 @@ static const char b64t[64] =
 
 char *
 php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # if _MSC <= 1300
 #  pragma pack(push, 16)
 	unsigned char alt_result[64];
@@ -554,7 +554,7 @@ php_sha512_crypt_r(const char *key, const char *salt, char *buffer, int buflen) 
 	buflen -= sizeof(sha512_salt_prefix) - 1;
 
 	if (rounds_custom) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	  int n = _snprintf(cp, MAX(0, buflen), "%s" ZEND_ULONG_FMT "$", sha512_rounds_prefix, rounds);
 #else
 	  int n = snprintf(cp, MAX(0, buflen), "%s%zu$", sha512_rounds_prefix, rounds);

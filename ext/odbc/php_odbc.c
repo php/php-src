@@ -43,7 +43,7 @@
 #include "ext/standard/head.h"
 #include "php_ini.h"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 
 #define ODBC_TYPE "Win32"
@@ -857,7 +857,7 @@ PHP_MINFO_FUNCTION(odbc)
 	snprintf(buf, sizeof(buf), "0x%0.4x", ODBCVER);
 	php_info_print_table_row(2, "ODBCVER", buf);
 #endif
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	php_info_print_table_row(2, "ODBC_INCLUDE", PHP_ODBC_INCLUDE);
 	php_info_print_table_row(2, "ODBC_LFLAGS", PHP_ODBC_LFLAGS);
 	php_info_print_table_row(2, "ODBC_LIBS", PHP_ODBC_LIBS);
@@ -2462,7 +2462,7 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	}
 /*  Possible fix for bug #10250
  *  Needs testing on UnixODBC < 2.0.5 though. */
-#if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC) || defined(PHP_WIN32) || defined (HAVE_IODBC)
+#if defined(HAVE_EMPRESS) || defined(HAVE_UNIXODBC) || defined(_WIN32) || defined (HAVE_IODBC)
 /* *  Uncomment the line above, and comment line below to fully test 
  * #ifdef HAVE_EMPRESS */
 	{

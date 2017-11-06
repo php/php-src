@@ -764,7 +764,7 @@ PHP_MINIT_FUNCTION(ibase)
 
 PHP_MSHUTDOWN_FUNCTION(ibase)
 {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	/**
 	 * When the Interbase client API library libgds.so is first loaded, it registers a call to
 	 * gds__cleanup() with atexit(), in order to clean up after itself when the process exits.
@@ -816,7 +816,7 @@ PHP_MINFO_FUNCTION(ibase)
 #endif
 	php_info_print_table_row(2, "Compile-time Client Library Version", s);
 
-#if defined(__GNUC__) || defined(PHP_WIN32)
+#if defined(__GNUC__) || defined(_WIN32)
 	do {
 		info_func_t info_func = NULL;
 #ifdef __GNUC__
@@ -833,7 +833,7 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		FreeLibrary(l);
 #endif
 	} while (0);

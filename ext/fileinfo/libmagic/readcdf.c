@@ -31,7 +31,7 @@ FILE_RCSID("@(#)$File: readcdf.c,v 1.65 2017/04/08 20:58:03 christos Exp $")
 
 #include <assert.h>
 #include <stdlib.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/unistd.h"
 #else
 #include <unistd.h>
@@ -79,7 +79,7 @@ static const struct nv {
 	{ NULL,				NULL,			},
 };
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define strcasestr strstr
 #endif
 
