@@ -89,6 +89,11 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   a. Unix build system changes
 
   b. Windows build system changes
+    - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is
+      still usable in C++, but anything else inlining related is up to
+      compiler.
+    - ZEND_WIN32_KEEP_INLINE was removed, it was only needed for C++
+      convenience and is now default behavior with C++.
 
 ========================
 3. Module changes
