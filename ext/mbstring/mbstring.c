@@ -4863,7 +4863,7 @@ static inline zend_long php_mb_ord(const char* str, size_t str_len, const char* 
 }
 
 
-/* {{{ proto bool mb_ord([string str[, string encoding]]) */
+/* {{{ proto int|false mb_ord([string str[, string encoding]]) */
 PHP_FUNCTION(mb_ord)
 {
 	char* str;
@@ -4973,7 +4973,7 @@ static inline zend_string *php_mb_chr(zend_long cp, const char *enc_name)
 }
 
 
-/* {{{ proto bool mb_ord([int cp[, string encoding]]) */
+/* {{{ proto string|false mb_chr([int cp[, string encoding]]) */
 PHP_FUNCTION(mb_chr)
 {
 	zend_long cp;
@@ -5005,7 +5005,7 @@ static inline char* php_mb_scrub(const char* str, size_t str_len, const mbfl_enc
 }
 
 
-/* {{{ proto bool mb_scrub([string str[, string encoding]]) */
+/* {{{ proto string|false mb_scrub([string str[, string encoding]]) */
 PHP_FUNCTION(mb_scrub)
 {
 	const mbfl_encoding *enc;
