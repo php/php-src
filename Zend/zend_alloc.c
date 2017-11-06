@@ -1449,7 +1449,6 @@ static zend_never_inline void *zend_mm_realloc_huge(zend_mm_heap *heap, void *pt
 	size_t new_size;
 #if ZEND_DEBUG
 	size_t real_size;
-	zend_mm_debug_info *dbg;
 #endif
 
 	old_size = zend_mm_get_huge_block_size(heap, ptr ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
@@ -1538,7 +1537,6 @@ static zend_always_inline void *zend_mm_realloc_heap(zend_mm_heap *heap, void *p
 	size_t new_size;
 	void *ret;
 #if ZEND_DEBUG
-	size_t real_size;
 	zend_mm_debug_info *dbg;
 #endif
 
