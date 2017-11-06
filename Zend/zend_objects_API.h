@@ -72,7 +72,7 @@ END_EXTERN_C()
 
 static zend_always_inline void zend_object_release(zend_object *obj)
 {
-	if (--GC_REFCOUNT(obj) == 0) {
+	if (GC_DELREF(obj) == 0) {
 		zend_objects_store_del(obj);
 	} else if (UNEXPECTED(GC_MAY_LEAK((zend_refcounted*)obj))) {
 		gc_possible_root((zend_refcounted*)obj);

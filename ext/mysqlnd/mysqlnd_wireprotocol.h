@@ -209,7 +209,6 @@ typedef struct st_mysqlnd_packet_res_field {
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;
-	zend_bool				persistent_alloc;
 
 	MYSQLND_ERROR_INFO		error_info;
 } MYSQLND_PACKET_RES_FIELD;
@@ -233,7 +232,6 @@ typedef struct st_mysqlnd_packet_row {
 
 	zend_bool		skip_extraction;
 	zend_bool		binary_protocol;
-	zend_bool		persistent_alloc;
 	MYSQLND_FIELD	*fields_metadata;
 
 	/* If error packet, we use these */

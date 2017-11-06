@@ -580,10 +580,10 @@ static PHP_FUNCTION(phpdbg_get_executable)
 				zend_hash_add_empty_element(files, zval_get_string(filename));
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			GC_REFCOUNT(files)++;
+			GC_ADDREF(files);
 		}
 	} else {
-		GC_REFCOUNT(files)++;
+		GC_ADDREF(files);
 	}
 
 	array_init(return_value);
@@ -632,7 +632,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (!--GC_REFCOUNT(files)) {
+	if (!GC_DELREF(files)) {
 		zend_hash_destroy(files);
 	}
 }
@@ -2096,6 +2096,7 @@ phpdbg_out:
 		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
+			GC_MAKE_PERSISTENT_LOCAL(backup_phpdbg_compile);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
 		}
 

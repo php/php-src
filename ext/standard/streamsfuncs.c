@@ -208,7 +208,7 @@ PHP_FUNCTION(stream_socket_server)
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (context) {
-		GC_REFCOUNT(context->res)++;
+		GC_ADDREF(context->res);
 	}
 
 	if (zerrno)	{
@@ -1075,10 +1075,10 @@ PHP_FUNCTION(stream_context_get_params)
 
 	array_init(return_value);
 	if (context->notifier && Z_TYPE(context->notifier->ptr) != IS_UNDEF && context->notifier->func == user_space_stream_notifier) {
+		Z_TRY_ADDREF(context->notifier->ptr);
 		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
-		if (Z_REFCOUNTED(context->notifier->ptr)) Z_ADDREF(context->notifier->ptr);
 	}
-	if (Z_REFCOUNTED(context->options)) Z_ADDREF(context->options);
+	Z_TRY_ADDREF(context->options);
 	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
 }
 /* }}} */
@@ -1229,7 +1229,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (filter) {
 		filter->res = zend_register_resource(filter, php_file_le_stream_filter());
-		GC_REFCOUNT(filter->res)++;
+		GC_ADDREF(filter->res);
 		RETURN_RES(filter->res);
 	} else {
 		RETURN_FALSE;
@@ -1618,7 +1618,7 @@ PHP_FUNCTION(stream_supports_lock)
 	RETURN_TRUE;
 }
 
-/* {{{ proto proto stream_isatty(resource stream)
+/* {{{ proto bool stream_isatty(resource stream)
 Check if a stream is a TTY.
 */
 PHP_FUNCTION(stream_isatty)
@@ -1656,7 +1656,7 @@ PHP_FUNCTION(stream_isatty)
 }
 
 #ifdef PHP_WIN32
-/* {{{ proto proto sapi_windows_vt100_support(resource stream[, bool enable])
+/* {{{ proto bool sapi_windows_vt100_support(resource stream[, bool enable])
    Get or set VT100 support for the specified stream associated to an
    output buffer of a Windows console.
 */

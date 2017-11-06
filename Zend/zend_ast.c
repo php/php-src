@@ -301,7 +301,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				ret = zend_use_undefined_constant(name, ast->attr, result);
 				break;
 			}
-			ZVAL_DUP(result, zv);
+			ZVAL_COPY_OR_DUP(result, zv);
 			break;
 		}
 		case ZEND_AST_CONSTANT_CLASS:
@@ -408,10 +408,15 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		case ZEND_AST_ARRAY:
-			array_init(result);
 			{
 				uint32_t i;
 				zend_ast_list *list = zend_ast_get_list(ast);
+
+				if (!list->children) {
+					ZVAL_EMPTY_ARRAY(result);
+					break;
+				}
+				array_init(result);
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
@@ -447,16 +452,8 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval_dtor(&op1);
 				ret = FAILURE;
 			} else {
-				zval tmp;
+				zend_fetch_dimension_const(result, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
 
-				zend_fetch_dimension_const(&tmp, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
-
-				if (UNEXPECTED(Z_ISREF(tmp))) {
-					ZVAL_DUP(result, Z_REFVAL(tmp));
-				} else {
-					ZVAL_DUP(result, &tmp);
-				}
-				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
 				zval_dtor(&op2);
 			}
@@ -554,7 +551,7 @@ ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
 	tree_size = zend_ast_tree_size(ast) + sizeof(zend_ast_ref);
 	ref = emalloc(tree_size);
 	zend_ast_tree_copy(ast, GC_AST(ref));
-	GC_REFCOUNT(ref) = 1;
+	GC_SET_REFCOUNT(ref, 1);
 	GC_TYPE_INFO(ref) = IS_CONSTANT_AST;
 	return ref;
 }
@@ -566,9 +563,6 @@ ZEND_API void zend_ast_destroy(zend_ast *ast) {
 
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
-			/* Destroy value without using GC: When opcache moves arrays into SHM it will
-			 * free the zend_array structure, so references to it from outside the op array
-			 * become invalid. GC would cause such a reference in the root buffer. */
 			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
 			break;
 		case ZEND_AST_CONSTANT:

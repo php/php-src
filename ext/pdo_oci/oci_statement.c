@@ -691,7 +691,7 @@ static int oci_blob_close(php_stream *stream, int close_handle)
 
 		OCILobClose(self->E->svc, self->E->err, self->lob);
 		zval_ptr_dtor(&self->dbh);
-		GC_REFCOUNT(obj)--;
+		GC_DELREF(obj);
 		efree(self->E);
 		efree(self);
 	}
@@ -751,7 +751,7 @@ static php_stream *oci_create_lob_stream(zval *dbh, pdo_stmt_t *stmt, OCILobLoca
 		zend_object *obj;
 		obj = &stmt->std;
 		Z_ADDREF(self->dbh);
-		GC_REFCOUNT(obj)++;
+		GC_ADDREF(obj);
 		return stm;
 	}
 

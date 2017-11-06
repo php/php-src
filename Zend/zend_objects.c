@@ -29,7 +29,7 @@
 
 ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
-	GC_REFCOUNT(object) = 1;
+	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
 	object->properties = NULL;
@@ -46,7 +46,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 
 	if (object->properties) {
 		if (EXPECTED(!(GC_FLAGS(object->properties) & IS_ARRAY_IMMUTABLE))) {
-			if (EXPECTED(--GC_REFCOUNT(object->properties) == 0)) {
+			if (EXPECTED(GC_DELREF(object->properties) == 0)) {
 				zend_array_destroy(object->properties);
 			}
 		}
@@ -125,7 +125,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 			}
 		}
 
-		GC_REFCOUNT(object)++;
+		GC_ADDREF(object);
 		ZVAL_OBJ(&obj, object);
 
 		/* Make sure that destructors are protected from previously thrown exceptions.
@@ -183,7 +183,7 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 		/* fast copy */
 		if (EXPECTED(old_object->handlers == &std_object_handlers)) {
 			if (EXPECTED(!(GC_FLAGS(old_object->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(old_object->properties)++;
+				GC_ADDREF(old_object->properties);
 			}
 			new_object->properties = old_object->properties;
 			return;

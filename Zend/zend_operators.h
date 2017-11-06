@@ -361,7 +361,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp(const char *s1, size_t len1, 
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
-ZEND_API zend_long ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
+ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);

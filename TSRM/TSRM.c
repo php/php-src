@@ -238,13 +238,15 @@ TSRM_API ts_rsrc_id ts_allocate_id(ts_rsrc_id *rsrc_id, size_t size, ts_allocate
 
 	/* store the new resource type in the resource sizes table */
 	if (resource_types_table_size < id_count) {
-		resource_types_table = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
-		if (!resource_types_table) {
+		tsrm_resource_type *_tmp;
+		_tmp = (tsrm_resource_type *) realloc(resource_types_table, sizeof(tsrm_resource_type)*id_count);
+		if (!_tmp) {
 			tsrm_mutex_unlock(tsmm_mutex);
 			TSRM_ERROR((TSRM_ERROR_LEVEL_ERROR, "Unable to allocate storage for resource"));
 			*rsrc_id = 0;
 			return 0;
 		}
+		resource_types_table = _tmp;
 		resource_types_table_size = id_count;
 	}
 	resource_types_table[TSRM_UNSHUFFLE_RSRC_ID(*rsrc_id)].size = size;

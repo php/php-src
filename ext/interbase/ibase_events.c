@@ -328,7 +328,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
 	TSRMLS_SET_CTX(event->thread_ctx);
 	event->link_res = link_res;
-	GC_REFCOUNT(link_res)++;
+	GC_ADDREF(link_res);
 	event->link = ib_link;
 	event->event_count = 0;
 	event->state = NEW;

@@ -114,7 +114,7 @@ _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest
 !endif
 
 $(PHPDLL_RES): win32\build\template.rc
-	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
+	$(RC) /nologo /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
 		win32\build\template.rc
@@ -214,7 +214,7 @@ dist: all build-dist
 snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
-	$(CC) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
+	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 # need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk

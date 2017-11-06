@@ -695,7 +695,7 @@ static void php_dba_open(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 			info = (dba_info *)le->ptr;
 
-			GC_REFCOUNT(le)++;
+			GC_ADDREF(le);
 			RETURN_RES(zend_register_resource(info, le_pdb));
 			return;
 		}
@@ -997,10 +997,7 @@ restart:
 	info->argv = NULL;
 
 	if (persistent) {
-		zval new_le;
-
-		ZVAL_NEW_PERSISTENT_RES(&new_le, -1, info, le_pdb);
-		if (zend_hash_str_update(&EG(persistent_list), key, keylen, &new_le) == NULL) {
+		if (zend_register_persistent_resource(key, keylen, info, le_pdb) == NULL) {
 			dba_close(info);
 			php_error_docref2(NULL, Z_STRVAL(args[0]), Z_STRVAL(args[1]), E_WARNING, "Could not register persistent resource");
 			FREENOW;

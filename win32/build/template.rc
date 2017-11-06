@@ -65,7 +65,7 @@ BEGIN
 #endif
             VALUE "FileVersion", EXT_VERSION
             VALUE "InternalName", INTERNAL_NAME
-            VALUE "LegalCopyright", "Copyright Â© 1997-2017 The PHP Group"
+            VALUE "LegalCopyright", "Copyright © 1997-2017 The PHP Group"
             VALUE "LegalTrademarks", "PHP"
             VALUE "OriginalFilename", FILE_NAME
             VALUE "ProductName", "PHP"

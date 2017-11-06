@@ -97,9 +97,7 @@ static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
+	Z_TRY_ADDREF_P(elem);
 }
 /* }}} */
 
@@ -590,7 +588,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+	Z_TRY_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, getThis());
 
 	RETURN_TRUE;
@@ -641,8 +639,8 @@ SPL_METHOD(SplPriorityQueue, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(data)) Z_ADDREF_P(data);
-	if (Z_REFCOUNTED_P(priority)) Z_ADDREF_P(priority);
+	Z_TRY_ADDREF_P(data);
+	Z_TRY_ADDREF_P(priority);
 
 	array_init(&elem);
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);

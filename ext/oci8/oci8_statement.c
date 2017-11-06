@@ -111,7 +111,7 @@ php_oci_statement *php_oci_statement_create(php_oci_connection *connection, char
 	statement->impres_child_stmt = NULL;
 	statement->impres_count = 0;
 	statement->impres_flag = PHP_OCI_IMPRES_UNKNOWN;  /* may or may not have Implicit Result Set children */
-	++GC_REFCOUNT(statement->connection->id);
+	GC_ADDREF(statement->connection->id);
 
 	if (OCI_G(default_prefetch) >= 0) {
 		php_oci_statement_set_prefetch(statement, (ub4)OCI_G(default_prefetch));
@@ -171,8 +171,8 @@ php_oci_statement *php_oci_get_implicit_resultset(php_oci_statement *statement)
 		statement2->has_descr = 0;
 		statement2->stmttype = 0;
 
-		GC_REFCOUNT(statement->id)++;
-		GC_REFCOUNT(statement2->connection->id)++;
+		GC_ADDREF(statement->id);
+		GC_ADDREF(statement2->connection->id);
 
 		php_oci_statement_set_prefetch(statement2, statement->prefetch_count);
 		
@@ -433,7 +433,7 @@ sb4 php_oci_define_callback(dvoid *ctx, OCIDefine *define, ub4 iter, dvoid **buf
 					return OCI_ERROR;
 				}
 				nested_stmt->parent_stmtid = outcol->statement->id;
-				++GC_REFCOUNT(outcol->statement->id);
+				GC_ADDREF(outcol->statement->id);
 				outcol->nested_statement = nested_stmt;
 				outcol->stmtid = nested_stmt->id;
 

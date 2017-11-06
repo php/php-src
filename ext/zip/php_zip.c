@@ -800,15 +800,20 @@ typedef struct _zip_prop_handler {
 static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, zip_read_int_t read_int_func, zip_read_const_char_t read_char_func, zip_read_const_char_from_ze_t read_char_from_obj_func, int rettype) /* {{{ */
 {
 	zip_prop_handler hnd;
+	zend_string *str;
+	zval tmp;
 
 	hnd.read_const_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.read_const_char_from_obj_func = read_char_from_obj_func;
 	hnd.type = rettype;
-	zend_hash_str_add_mem(prop_handler, name, strlen(name), &hnd, sizeof(zip_prop_handler));
+	str = zend_string_init_interned(name, strlen(name), 1);
+	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(zip_prop_handler));
 
 	/* Register for reflection */
-	zend_declare_property_null(zip_class_entry, name, strlen(name), ZEND_ACC_PUBLIC);
+	ZVAL_NULL(&tmp);
+	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(str);
 }
 /* }}} */
 

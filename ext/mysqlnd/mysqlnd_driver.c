@@ -186,10 +186,10 @@ MYSQLND_METHOD(mysqlnd_object_factory, clone_connection_object)(MYSQLND * to_be_
 
 /* {{{ mysqlnd_object_factory::get_prepared_statement */
 static MYSQLND_STMT *
-MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn, const zend_bool persistent)
+MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA * const conn)
 {
 	size_t alloc_size = sizeof(MYSQLND_STMT) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_STMT * ret = mnd_pecalloc(1, alloc_size, conn->persistent);
+	MYSQLND_STMT * ret = mnd_ecalloc(1, alloc_size);
 	MYSQLND_STMT_DATA * stmt = NULL;
 
 	DBG_ENTER("mysqlnd_object_factory::get_prepared_statement");
@@ -198,16 +198,14 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 			break;
 		}
 		ret->m = mysqlnd_stmt_get_methods();
-		ret->persistent = conn->persistent;
 
-		stmt = ret->data = mnd_pecalloc(1, sizeof(MYSQLND_STMT_DATA), persistent);
+		stmt = ret->data = mnd_ecalloc(1, sizeof(MYSQLND_STMT_DATA));
 		DBG_INF_FMT("stmt=%p", stmt);
 		if (!stmt) {
 			break;
 		}
-		stmt->persistent = persistent;
 
-		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, persistent)) {
+		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, 0)) {
 			break;		
 		}
 		stmt->error_info = &stmt->error_info_impl;
@@ -216,7 +214,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		stmt->upsert_status = &(stmt->upsert_status_impl);
 		stmt->state = MYSQLND_STMT_INITTED;
 		stmt->execute_cmd_buffer.length = 4096;
-		stmt->execute_cmd_buffer.buffer = mnd_pemalloc(stmt->execute_cmd_buffer.length, stmt->persistent);
+		stmt->execute_cmd_buffer.buffer = mnd_emalloc(stmt->execute_cmd_buffer.length);
 		if (!stmt->execute_cmd_buffer.buffer) {
 			break;
 		}

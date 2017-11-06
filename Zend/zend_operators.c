@@ -629,10 +629,12 @@ try_again:
 				}
 
 				zval_dtor(op);
+				/*ZVAL_EMPTY_ARRAY(op);*/
 				array_init(op);
 			}
 			break;
 		case IS_NULL:
+			/*ZVAL_EMPTY_ARRAY(op);*/
 			array_init(op);
 			break;
 		case IS_REFERENCE:
@@ -921,6 +923,8 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 				}
 				if (result != op1) {
 					ZVAL_DUP(result, op1);
+				} else {
+					SEPARATE_ARRAY(result);
 				}
 				zend_hash_merge(Z_ARRVAL_P(result), Z_ARRVAL_P(op2), zval_add_ref, 0);
 				return SUCCESS;
@@ -1742,7 +1746,18 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 		}
 	} while (0);
 
-	{
+	if (UNEXPECTED(Z_STRLEN_P(op1) == 0)) {
+		if (EXPECTED(result != op2)) {
+			if (result == orig_op1) {
+				zval_dtor(orig_op1);
+			}
+			ZVAL_COPY(result, op2);
+		}
+	} else if (UNEXPECTED(Z_STRLEN_P(op2) == 0)) {
+		if (EXPECTED(result != op1)) {
+			ZVAL_COPY(result, op1);
+		}
+	} else {
 		size_t op1_len = Z_STRLEN_P(op1);
 		size_t op2_len = Z_STRLEN_P(op2);
 		size_t result_len = op1_len + op2_len;
@@ -2757,7 +2772,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval
 }
 /* }}} */
 
-ZEND_API zend_long ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
+ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2) /* {{{ */
 {
 	int ret1, ret2;
 	int oflow1, oflow2;

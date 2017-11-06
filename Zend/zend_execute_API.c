@@ -568,8 +568,9 @@ ZEND_API int zend_use_undefined_constant(zend_string *name, zend_ast_attr attr, 
 		if (EG(exception)) {
 			return FAILURE;
 		} else {
+			zend_string *result_str = zend_string_init(actual, actual_len, 0);
 			zval_ptr_dtor_nogc(result);
-			ZVAL_STRINGL(result, actual, actual_len);
+			ZVAL_NEW_STR(result, result_str);
 		}
 	}
 	return SUCCESS;
@@ -589,7 +590,7 @@ ZEND_API int zval_update_constant_ex(zval *p, zend_class_entry *scope) /* {{{ */
 				return zend_use_undefined_constant(name, ast->attr, p);
 			}
 			zval_ptr_dtor_nogc(p);
-			ZVAL_DUP(p, zv);
+			ZVAL_COPY_OR_DUP(p, zv);
 		} else {
 			zval tmp;
 
@@ -774,7 +775,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		uint32_t call_info;
 
 		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
-		GC_REFCOUNT((zend_object*)func->op_array.prototype)++;
+		GC_ADDREF((zend_object*)func->op_array.prototype);
 		call_info = ZEND_CALL_CLOSURE;
 		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 			call_info |= ZEND_CALL_FAKE_CLOSURE;
@@ -1025,7 +1026,7 @@ ZEND_API int zend_eval_stringl(char *str, size_t str_len, zval *retval_ptr, char
 	int retval;
 
 	if (retval_ptr) {
-		ZVAL_NEW_STR(&pv, zend_string_alloc(str_len + sizeof("return ;")-1, 1));
+		ZVAL_NEW_STR(&pv, zend_string_alloc(str_len + sizeof("return ;")-1, 0));
 		memcpy(Z_STRVAL(pv), "return ", sizeof("return ") - 1);
 		memcpy(Z_STRVAL(pv) + sizeof("return ") - 1, str, str_len);
 		Z_STRVAL(pv)[Z_STRLEN(pv) - 1] = ';';

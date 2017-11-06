@@ -835,7 +835,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		if (xparam->outputs.client) {
 			xparam->outputs.client->ctx = stream->ctx;
 			if (stream->ctx) {
-				GC_REFCOUNT(stream->ctx)++;
+				GC_ADDREF(stream->ctx);
 			}
 		}
 	}

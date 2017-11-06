@@ -282,9 +282,9 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		if (!GC_G(gc_enabled)) {
 			return;
 		}
-		GC_REFCOUNT(ref)++;
+		GC_ADDREF(ref);
 		gc_collect_cycles();
-		GC_REFCOUNT(ref)--;
+		GC_DELREF(ref);
 		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
 			zval_dtor_func(ref);
 			return;
@@ -397,7 +397,7 @@ tail_call:
 			while (zv != end) {
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
-					GC_REFCOUNT(ref)++;
+					GC_ADDREF(ref);
 					if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 						gc_scan_black(ref);
 					}
@@ -406,7 +406,7 @@ tail_call:
 			}
 			if (EXPECTED(!ht)) {
 				ref = Z_COUNTED_P(zv);
-				GC_REFCOUNT(ref)++;
+				GC_ADDREF(ref);
 				if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 					goto tail_call;
 				}
@@ -424,7 +424,7 @@ tail_call:
 	} else if (GC_TYPE(ref) == IS_REFERENCE) {
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
-			GC_REFCOUNT(ref)++;
+			GC_ADDREF(ref);
 			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 				goto tail_call;
 			}
@@ -455,7 +455,7 @@ tail_call:
 		}
 		if (Z_REFCOUNTED_P(zv)) {
 			ref = Z_COUNTED_P(zv);
-			GC_REFCOUNT(ref)++;
+			GC_ADDREF(ref);
 			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 				gc_scan_black(ref);
 			}
@@ -467,7 +467,7 @@ tail_call:
 		zv = Z_INDIRECT_P(zv);
 	}
 	ref = Z_COUNTED_P(zv);
-	GC_REFCOUNT(ref)++;
+	GC_ADDREF(ref);
 	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 		goto tail_call;
 	}
@@ -507,14 +507,14 @@ tail_call:
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
-						GC_REFCOUNT(ref)--;
+						GC_DELREF(ref);
 						gc_mark_grey(ref);
 					}
 					zv++;
 				}
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
-					GC_REFCOUNT(ref)--;
+					GC_DELREF(ref);
 					goto tail_call;
 				}
 			} else {
@@ -530,7 +530,7 @@ tail_call:
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				GC_REFCOUNT(ref)--;
+				GC_DELREF(ref);
 				goto tail_call;
 			}
 			return;
@@ -559,7 +559,7 @@ tail_call:
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
-				GC_REFCOUNT(ref)--;
+				GC_DELREF(ref);
 				gc_mark_grey(ref);
 			}
 			p++;
@@ -569,7 +569,7 @@ tail_call:
 			zv = Z_INDIRECT_P(zv);
 		}
 		ref = Z_COUNTED_P(zv);
-		GC_REFCOUNT(ref)--;
+		GC_DELREF(ref);
 		goto tail_call;
 	}
 }
@@ -799,7 +799,7 @@ tail_call:
 				while (zv != end) {
 					if (Z_REFCOUNTED_P(zv)) {
 						ref = Z_COUNTED_P(zv);
-						GC_REFCOUNT(ref)++;
+						GC_ADDREF(ref);
 						count += gc_collect_white(ref, flags);
 					/* count non-refcounted for compatibility ??? */
 					} else if (Z_TYPE_P(zv) != IS_UNDEF) {
@@ -809,7 +809,7 @@ tail_call:
 				}
 				if (EXPECTED(!ht)) {
 					ref = Z_COUNTED_P(zv);
-					GC_REFCOUNT(ref)++;
+					GC_ADDREF(ref);
 					goto tail_call;
 				}
 			} else {
@@ -828,7 +828,7 @@ tail_call:
 		} else if (GC_TYPE(ref) == IS_REFERENCE) {
 			if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 				ref = Z_COUNTED(((zend_reference*)ref)->val);
-				GC_REFCOUNT(ref)++;
+				GC_ADDREF(ref);
 				goto tail_call;
 			}
 			return count;
@@ -861,7 +861,7 @@ tail_call:
 			}
 			if (Z_REFCOUNTED_P(zv)) {
 				ref = Z_COUNTED_P(zv);
-				GC_REFCOUNT(ref)++;
+				GC_ADDREF(ref);
 				count += gc_collect_white(ref, flags);
 				/* count non-refcounted for compatibility ??? */
 			} else if (Z_TYPE_P(zv) != IS_UNDEF) {
@@ -874,7 +874,7 @@ tail_call:
 			zv = Z_INDIRECT_P(zv);
 		}
 		ref = Z_COUNTED_P(zv);
-		GC_REFCOUNT(ref)++;
+		GC_ADDREF(ref);
 		goto tail_call;
 	}
 	return count;
@@ -1118,9 +1118,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 						if (obj->handlers->dtor_obj
 						 && (obj->handlers->dtor_obj != zend_objects_destroy_object
 						  || obj->ce->destructor)) {
-							GC_REFCOUNT(obj)++;
+							GC_ADDREF(obj);
 							obj->handlers->dtor_obj(obj);
-							GC_REFCOUNT(obj)--;
+							GC_DELREF(obj);
 						}
 					}
 				}
@@ -1154,9 +1154,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
 					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 					if (obj->handlers->free_obj) {
-						GC_REFCOUNT(obj)++;
+						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
-						GC_REFCOUNT(obj)--;
+						GC_DELREF(obj);
 					}
 				}
 				SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[obj->handle], EG(objects_store).free_list_head);

@@ -587,7 +587,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(ZSTR_VAL(filtername), &user_filter_factory) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

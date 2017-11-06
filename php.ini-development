@@ -770,7 +770,6 @@ enable_dl = Off
 
 ; if cgi.discard_path is enabled, the PHP CGI binary can safely be placed outside
 ; of the web tree and people will not be able to circumvent .htaccess security.
-; http://php.net/cgi.dicard-path
 ;cgi.discard_path=1
 
 ; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
@@ -1003,13 +1002,8 @@ cli_server.color = On
 ;pdo_odbc.db2_instance_name
 
 [Pdo_mysql]
-; If mysqlnd is used: Number of cache slots for the internal result set cache
-; http://php.net/pdo_mysql.cache_size
-pdo_mysql.cache_size = 2000
-
 ; Default socket name for local MySQL connects.  If empty, uses the built-in
 ; MySQL defaults.
-; http://php.net/pdo_mysql.default-socket
 pdo_mysql.default_socket=
 
 [Phar]
@@ -1140,10 +1134,6 @@ mysqli.allow_persistent = On
 ; http://php.net/mysqli.max-links
 mysqli.max_links = -1
 
-; If mysqlnd is used: Number of cache slots for the internal result set cache
-; http://php.net/mysqli.cache_size
-mysqli.cache_size = 2000
-
 ; Default port number for mysqli_connect().  If unset, mysqli_connect() will use
 ; the $MYSQL_TCP_PORT or the mysql-tcp entry in /etc/services or the
 ; compile-time value defined MYSQL_PORT (in that order).  Win32 will only look
@@ -1178,12 +1168,10 @@ mysqli.reconnect = Off
 [mysqlnd]
 ; Enable / Disable collection of general statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
-; http://php.net/mysqlnd.collect_statistics
 mysqlnd.collect_statistics = On
 
 ; Enable / Disable collection of memory usage statistics by mysqlnd which can be
 ; used to tune and monitor MySQL operations.
-; http://php.net/mysqlnd.collect_memory_statistics
 mysqlnd.collect_memory_statistics = On
 
 ; Records communication from all extensions using mysqlnd to the specified log
@@ -1192,29 +1180,23 @@ mysqlnd.collect_memory_statistics = On
 ;mysqlnd.debug =
 
 ; Defines which queries will be logged.
-; http://php.net/mysqlnd.log_mask
 ;mysqlnd.log_mask = 0
 
 ; Default size of the mysqlnd memory pool, which is used by result sets.
-; http://php.net/mysqlnd.mempool_default_size
 ;mysqlnd.mempool_default_size = 16000
 
 ; Size of a pre-allocated buffer used when sending commands to MySQL in bytes.
-; http://php.net/mysqlnd.net_cmd_buffer_size
 ;mysqlnd.net_cmd_buffer_size = 2048
 
 ; Size of a pre-allocated buffer used for reading data sent by the server in
 ; bytes.
-; http://php.net/mysqlnd.net_read_buffer_size
 ;mysqlnd.net_read_buffer_size = 32768
 
 ; Timeout for network requests in seconds.
-; http://php.net/mysqlnd.net_read_timeout
 ;mysqlnd.net_read_timeout = 31536000
 
 ; SHA-256 Authentication Plugin related. File with the MySQL server public RSA
 ; key.
-; http://php.net/mysqlnd.sha256_server_public_key
 ;mysqlnd.sha256_server_public_key =
 
 [OCI8]

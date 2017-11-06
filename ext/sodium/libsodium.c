@@ -1935,7 +1935,7 @@ PHP_FUNCTION(sodium_crypto_pwhash_str_needs_rehash)
 	size_t     hash_str_len;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "sll",
-									&hash_str, &hash_str_len) == FAILURE) {
+									&hash_str, &hash_str_len, &opslimit, &memlimit) == FAILURE) {
 		zend_throw_exception(sodium_exception_ce, "a PHP string is required", 0);
 		return;
 	}

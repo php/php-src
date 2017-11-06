@@ -196,12 +196,10 @@ void mysqli_common_connect(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_real_conne
 					} while (0);
 				}
 			} else {
-				zend_resource le;
-				le.type = php_le_pmysqli();
-				le.ptr = plist = calloc(1, sizeof(mysqli_plist_entry));
+				plist = calloc(1, sizeof(mysqli_plist_entry));
 
 				zend_ptr_stack_init_ex(&plist->free_links, 1);
-				zend_hash_str_update_mem(&EG(persistent_list), ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), &le, sizeof(le));
+				zend_register_persistent_resource(ZSTR_VAL(hash_key), ZSTR_LEN(hash_key), plist, php_le_pmysqli());
 			}
 		}
 	}
@@ -423,11 +421,11 @@ PHP_FUNCTION(mysqli_error_list)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_CONN(mysql, mysql_link, MYSQLI_STATUS_VALID);
-	array_init(return_value);
 #if defined(MYSQLI_USE_MYSQLND)
 	if (mysql->mysql->data->error_info->error_list) {
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
+		array_init(return_value);
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(mysql->mysql->data->error_info->error_list, &pos);
 			 message;
 			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(mysql->mysql->data->error_info->error_list, &pos))
@@ -439,15 +437,20 @@ PHP_FUNCTION(mysqli_error_list)
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
 			add_next_index_zval(return_value, &single_error);
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 #else
 	if (mysql_errno(mysql->mysql)) {
 		zval single_error;
+		array_init(return_value);
 		array_init(&single_error);
 		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_errno(mysql->mysql));
 		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_sqlstate(mysql->mysql));
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_error(mysql->mysql));
 		add_next_index_zval(return_value, &single_error);
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 #endif
 }
@@ -464,11 +467,11 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 		return;
 	}
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_INITIALIZED);
-	array_init(return_value);
 #if defined(MYSQLI_USE_MYSQLND)
 	if (stmt->stmt && stmt->stmt->data && stmt->stmt->data->error_info->error_list) {
 		MYSQLND_ERROR_LIST_ELEMENT * message;
 		zend_llist_position pos;
+		array_init(return_value);
 		for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(stmt->stmt->data->error_info->error_list, &pos);
 			 message;
 			 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(stmt->stmt->data->error_info->error_list, &pos))
@@ -480,15 +483,20 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 			add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, message->error);
 			add_next_index_zval(return_value, &single_error);
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 #else
 	if (mysql_stmt_errno(stmt->stmt)) {
 		zval single_error;
+		array_init(return_value);
 		array_init(&single_error);
 		add_assoc_long_ex(&single_error, "errno", sizeof("errno") - 1, mysql_stmt_errno(stmt->stmt));
 		add_assoc_string_ex(&single_error, "sqlstate", sizeof("sqlstate") - 1, mysql_stmt_sqlstate(stmt->stmt));
 		add_assoc_string_ex(&single_error, "error", sizeof("error") - 1, mysql_stmt_error(stmt->stmt));
 		add_next_index_zval(return_value, &single_error);
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 #endif
 }

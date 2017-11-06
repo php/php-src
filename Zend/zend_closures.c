@@ -171,7 +171,7 @@ ZEND_METHOD(Closure, call)
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
-		--GC_REFCOUNT(&closure->std);
+		GC_DELREF(&closure->std);
 	} else if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
 		efree(my_function.op_array.run_time_cache);
 	}
@@ -251,8 +251,12 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fci.params = params;
 	fci.param_count = 2;
 	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);
-	array_init(&fci.params[1]);
-	zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+	if (ZEND_NUM_ARGS()) {
+		array_init_size(&fci.params[1], ZEND_NUM_ARGS());
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+	} else {
+		ZVAL_EMPTY_ARRAY(&fci.params[1]);
+	}
 
 	fci.object = Z_OBJ(EX(This));
 	fcc.object = Z_OBJ(EX(This));

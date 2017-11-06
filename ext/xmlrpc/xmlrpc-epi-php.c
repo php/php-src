@@ -279,9 +279,9 @@ static void destroy_server_data(xmlrpc_server_data *server)
 static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
-		rsrc->gc.refcount++;
+		GC_ADDREF(rsrc);
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
-		rsrc->gc.refcount--;
+		GC_DELREF(rsrc);
 	}
 }
 
@@ -981,9 +981,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
 		/* save for later use */
 
-		if (Z_REFCOUNTED_P(method_name)) {
-			Z_ADDREF_P(method_name);
-		}
+		Z_TRY_ADDREF_P(method_name);
 		/* register our php method */
 		add_zval(&server->method_map, method_key, method_name);
 
@@ -1007,9 +1005,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 		RETURN_FALSE;
 	}
 
-	if (Z_REFCOUNTED_P(method_name)) {
-		Z_ADDREF_P(method_name);
-	}
+	Z_TRY_ADDREF_P(method_name);
 	/* register our php method */
 	add_zval(&server->introspection_map, NULL, method_name);
 

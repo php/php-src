@@ -364,17 +364,18 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_seal, 0, 0, 4)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(1, sealdata)
-	ZEND_ARG_INFO(1, ekeys) /* arary */
+	ZEND_ARG_INFO(1, ekeys) /* array */
 	ZEND_ARG_INFO(0, pubkeys) /* array */
 	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(1, iv)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_open, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_open, 0, 0, 4)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(1, opendata)
 	ZEND_ARG_INFO(0, ekey)
 	ZEND_ARG_INFO(0, privkey)
+	ZEND_ARG_INFO(0, method)
 	ZEND_ARG_INFO(0, iv)
 ZEND_END_ARG_INFO()
 
@@ -1675,10 +1676,11 @@ static X509 * php_openssl_x509_from_zval(zval * val, int makeresource, zend_reso
 		if (!what) {
 			return NULL;
 		}
-		/* this is so callers can decide if they should free the X509 */
 		if (resourceval) {
 			*resourceval = res;
-			Z_ADDREF_P(val);
+			if (makeresource) {
+				Z_ADDREF_P(val);
+			}
 		}
 		return (X509*)what;
 	}
@@ -3224,7 +3226,9 @@ static X509_REQ * php_openssl_csr_from_zval(zval * val, int makeresource, zend_r
 		if (what) {
 			if (resourceval) {
 				*resourceval = res;
-				Z_ADDREF_P(val);
+				if (makeresource) {
+					Z_ADDREF_P(val);
+				}
 			}
 			return (X509_REQ*)what;
 		}
@@ -5988,7 +5992,7 @@ PHP_FUNCTION(openssl_verify)
 }
 /* }}} */
 
-/* {{{ proto int openssl_seal(string data, &string sealdata, &array ekeys, array pubkeys)
+/* {{{ proto int openssl_seal(string data, &string sealdata, &array ekeys, array pubkeys [, string method [, &string iv]]))
    Seals data */
 PHP_FUNCTION(openssl_seal)
 {
@@ -6119,7 +6123,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_open(string data, &string opendata, string ekey, mixed privkey)
+/* {{{ proto bool openssl_open(string data, &string opendata, string ekey, mixed privkey [, string method [, string iv]])
    Opens data */
 PHP_FUNCTION(openssl_open)
 {

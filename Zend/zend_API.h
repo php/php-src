@@ -193,9 +193,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		zend_string *cl_name;									\
-		cl_name = zend_string_init(class_name, class_name_len, 1);		\
-		class_container.name = zend_new_interned_string(cl_name);	\
+		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
 		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	}
 
@@ -255,8 +253,6 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
@@ -304,12 +300,12 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
 
-ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce);
+ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent);
 
-#define zend_register_class_alias(name, ce) \
-	zend_register_class_alias_ex(name, sizeof(name)-1, ce)
-#define zend_register_ns_class_alias(ns, name, ce) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce)
+#define zend_register_class_alias(name, ce, persistent) \
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce, persistent)
+#define zend_register_ns_class_alias(ns, name, ce, persistent) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, persistent)
 
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
@@ -1252,7 +1248,7 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 		 && Z_OBJ_P(arg)->properties
 		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+				GC_DELREF(Z_OBJ_P(arg)->properties);
 			}
 			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
 		}

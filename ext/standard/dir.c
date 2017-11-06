@@ -113,7 +113,7 @@ static void php_set_default_dir(zend_resource *res)
 	}
 
 	if (res) {
-		GC_REFCOUNT(res)++;
+		GC_ADDREF(res);
 	}
 
 	DIRG(default_dir) = res;

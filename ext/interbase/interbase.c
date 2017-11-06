@@ -53,7 +53,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_ibase_errcode, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 0)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -63,7 +63,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_connect, 0, 0, 1)
 	ZEND_ARG_INFO(0, role)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_pconnect, 0, 0, 0)
 	ZEND_ARG_INFO(0, database)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, password)
@@ -991,18 +991,13 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 			RETVAL_RES(zend_register_resource(ib_link, le_link));
 		} else {
-			zend_resource new_le;
-
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			if (!ib_link) {
 				RETURN_FALSE;
 			}
 
 			/* hash it up */
-			new_le.type = le_plink;
-			new_le.ptr = ib_link;
-			if (zend_hash_str_update_mem(&EG(persistent_list), hash, sizeof(hash)-1,
-					(void *) &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(hash, sizeof(hash)-1, ib_link, le_plink) == NULL) {
 				free(ib_link);
 				RETURN_FALSE;
 			}
@@ -1033,7 +1028,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 }
 /* }}} */
 
-/* {{{ proto resource ibase_connect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_connect([string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]]])
    Open a connection to an InterBase database */
 PHP_FUNCTION(ibase_connect)
 {
@@ -1041,7 +1036,7 @@ PHP_FUNCTION(ibase_connect)
 }
 /* }}} */
 
-/* {{{ proto resource ibase_pconnect(string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]])
+/* {{{ proto resource ibase_pconnect([string database [, string username [, string password [, string charset [, int buffers [, int dialect [, string role]]]]]]])
    Open a persistent connection to an InterBase database */
 PHP_FUNCTION(ibase_pconnect)
 {

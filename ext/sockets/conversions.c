@@ -1076,18 +1076,15 @@ static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, s
 {
 	struct msghdr	*msg = args[0];
 	size_t			len;
+	zend_string     *str;
 
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
-	convert_to_string_ex(elem);
+	str = zval_get_string(elem);
 
-	len = Z_STRLEN_P(elem);
-	msg->msg_iov[i - 1].iov_base = accounted_emalloc(len, ctx);
-	msg->msg_iov[i - 1].iov_len = len;
-	memcpy(msg->msg_iov[i - 1].iov_base, Z_STRVAL_P(elem), len);
+	msg->msg_iov[i - 1].iov_base = accounted_emalloc(ZSTR_LEN(str), ctx);
+	msg->msg_iov[i - 1].iov_len = ZSTR_LEN(str);
+	memcpy(msg->msg_iov[i - 1].iov_base, ZSTR_VAL(str), ZSTR_LEN(str));
 
-	zval_ptr_dtor(elem);
+	zend_string_release(str);
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {

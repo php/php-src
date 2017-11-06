@@ -563,8 +563,8 @@ PHP_RSHUTDOWN_FUNCTION(streams);
 BEGIN_EXTERN_C()
 PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol);
-PHPAPI int php_register_url_stream_wrapper_volatile(const char *protocol, php_stream_wrapper *wrapper);
-PHPAPI int php_unregister_url_stream_wrapper_volatile(const char *protocol);
+PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol);
 PHPAPI php_stream *_php_stream_open_wrapper_ex(const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const char **path_for_open, int options);
 PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);

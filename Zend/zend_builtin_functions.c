@@ -472,8 +472,8 @@ ZEND_FUNCTION(func_get_args)
 
 	arg_count = ZEND_CALL_NUM_ARGS(ex);
 
-	array_init_size(return_value, arg_count);
 	if (arg_count) {
+		array_init_size(return_value, arg_count);
 		first_extra_arg = ex->func->op_array.num_args;
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
@@ -512,6 +512,8 @@ ZEND_FUNCTION(func_get_args)
 			}
 		} ZEND_HASH_FILL_END();
 		Z_ARRVAL_P(return_value)->nNumOfElements = arg_count;
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 }
 /* }}} */
@@ -645,13 +647,9 @@ ZEND_FUNCTION(each)
 	zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
 
 	/* add value elements */
-	if (Z_ISREF_P(entry)) {
-		ZVAL_DUP(&tmp, Z_REFVAL_P(entry));
-		entry = &tmp;
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-	} else {
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
-		if (Z_REFCOUNTED_P(entry)) Z_ADDREF_P(entry);
+	ZVAL_DEREF(entry);
+	if (Z_REFCOUNTED_P(entry)) {
+		GC_ADDREF_EX(Z_COUNTED_P(entry), 2);
 	}
 	zend_hash_index_add_new(Z_ARRVAL_P(return_value), 1, entry);
 	zend_hash_add_new(Z_ARRVAL_P(return_value), ZSTR_KNOWN(ZEND_STR_VALUE), entry);
@@ -659,7 +657,7 @@ ZEND_FUNCTION(each)
 	/* add the key elements */
 	if (zend_hash_get_current_key(target_hash, &key, &num_key) == HASH_KEY_IS_STRING) {
 		ZVAL_STR_COPY(&tmp, key);
-		if (Z_REFCOUNTED(tmp)) Z_ADDREF(tmp);
+		Z_TRY_ADDREF(tmp);
 	} else {
 		ZVAL_LONG(&tmp, num_key);
 	}
@@ -773,8 +771,8 @@ static void copy_constant_array(zval *dst, zval *src) /* {{{ */
 			if (Z_REFCOUNTED_P(val)) {
 				copy_constant_array(new_val, val);
 			}
-		} else if (Z_REFCOUNTED_P(val)) {
-			Z_ADDREF_P(val);
+		} else {
+			Z_TRY_ADDREF_P(val);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -1062,12 +1060,8 @@ static void add_class_vars(zend_class_entry *scope, zend_class_entry *ce, int st
 
 		/* copy: enforce read only access */
 		ZVAL_DEREF(prop);
-		if (UNEXPECTED(Z_COPYABLE_P(prop))) {
-			ZVAL_DUP(&prop_copy, prop);
-			prop = &prop_copy;
-		} else {
-			Z_TRY_ADDREF_P(prop);
-		}
+		ZVAL_COPY_OR_DUP(&prop_copy, prop);
+		prop = &prop_copy;
 
 		/* this is necessary to make it able to work with default array
 		 * properties, returned to user */
@@ -1527,7 +1521,7 @@ ZEND_FUNCTION(class_alias)
 
 	if (ce) {
 		if (ce->type == ZEND_USER_CLASS) {
-			if (zend_register_class_alias_ex(alias_name, alias_name_len, ce) == SUCCESS) {
+			if (zend_register_class_alias_ex(alias_name, alias_name_len, ce, 0) == SUCCESS) {
 				RETURN_TRUE;
 			} else {
 				zend_error(E_WARNING, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), alias_name);
@@ -2030,7 +2024,7 @@ static int add_constant_info(zval *item, void *arg) /* {{{ */
 		return 0;
 	}
 
-	ZVAL_DUP(&const_val, &constant->value);
+	ZVAL_COPY_OR_DUP(&const_val, &constant->value);
 	zend_hash_add_new(Z_ARRVAL_P(name_array), constant->name, &const_val);
 	return 0;
 }
@@ -2106,7 +2100,7 @@ ZEND_FUNCTION(get_defined_constants)
 				add_assoc_zval(return_value, module_names[module_number], &modules[module_number]);
 			}
 
-			ZVAL_DUP(&const_val, &val->value);
+			ZVAL_COPY_OR_DUP(&const_val, &val->value);
 			zend_hash_add_new(Z_ARRVAL(modules[module_number]), val->name, &const_val);
 		} ZEND_HASH_FOREACH_END();
 
@@ -2122,11 +2116,11 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 {
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
-	array_init_size(arg_array, num_args);
 	if (num_args) {
 		uint32_t i = 0;
 		zval *p = ZEND_CALL_ARG(call, 1);
 
+		array_init_size(arg_array, num_args);
 		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
 			if (call->func->type == ZEND_USER_FUNCTION) {
@@ -2184,6 +2178,8 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 			}
 		} ZEND_HASH_FILL_END();
 		Z_ARRVAL_P(arg_array)->nNumOfElements = num_args;
+	} else {
+		ZVAL_EMPTY_ARRAY(arg_array);
 	}
 }
 /* }}} */

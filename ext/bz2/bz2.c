@@ -231,7 +231,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 
 	self->stream = innerstream;
 	if (innerstream) {
-		GC_REFCOUNT(innerstream->res)++;
+		GC_ADDREF(innerstream->res);
 	}
 	self->bz_file = bz;
 

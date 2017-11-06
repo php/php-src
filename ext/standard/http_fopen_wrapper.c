@@ -447,7 +447,7 @@ finish:
 			if (ZSTR_IS_INTERNED(tmp)) {
 				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			} else if (GC_REFCOUNT(tmp) > 1) {
-				GC_REFCOUNT(tmp)--;
+				GC_DELREF(tmp);
 				tmp = zend_string_init(ZSTR_VAL(tmp), ZSTR_LEN(tmp), 0);
 			}
 

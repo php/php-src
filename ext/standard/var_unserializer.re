@@ -437,19 +437,19 @@ string_key:
 							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
 						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
 							new_key = zend_mangle_property_name(
-								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), 0);
 							zend_string_release(unmangled);
 						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
 							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
 								new_key = zend_mangle_property_name(
 									unmangled_class, strlen(unmangled_class),
 									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+									0);
 							} else {
 								new_key = zend_mangle_property_name(
 									ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
 									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-									Z_OBJCE_P(rval)->type & ZEND_INTERNAL_CLASS);
+									0);
 							}
 							zend_string_release(unmangled);
 						} else {
@@ -844,11 +844,14 @@ use_double:
 		return 0;
 	}
 
-	array_init_size(rval, elements);
 	if (elements) {
+		array_init_size(rval, elements);
 		/* we can't convert from packed to hash during unserialization, because
 		   reference to some zvals might be keept in var_hash (to support references) */
 		zend_hash_real_init(Z_ARRVAL_P(rval), 0);
+	} else {
+		ZVAL_EMPTY_ARRAY(rval);
+		return finish_nested_data(UNSERIALIZE_PASSTHRU);
 	}
 
 	/* The array may contain references to itself, in which case we'll be modifying an

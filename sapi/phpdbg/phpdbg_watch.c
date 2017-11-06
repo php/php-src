@@ -326,6 +326,7 @@ void phpdbg_watch_backup_data(phpdbg_watchpoint_t *watch) {
 				zend_string_release(watch->backup.str);
 			}
 			watch->backup.str = zend_string_init((char *) watch->addr.ptr + XtOffsetOf(zend_string, val) - XtOffsetOf(zend_string, len), *(size_t *) watch->addr.ptr, 1);
+			GC_MAKE_PERSISTENT_LOCAL(watch->backup.str);
 			break;
 		case WATCH_ON_HASHTABLE:
 			memcpy((char *) &watch->backup + HT_WATCH_OFFSET, watch->addr.ptr, watch->size);

@@ -1628,7 +1628,9 @@ int php_request_startup(void)
 		zend_activate();
 		sapi_activate();
 
+#ifdef ZEND_SIGNALS
 		zend_signal_activate();
+#endif
 
 		if (PG(max_input_time) == -1) {
 			zend_set_timeout(EG(timeout_seconds), 1);
@@ -2270,7 +2272,11 @@ int php_module_startup(sapi_module_struct *sf, zend_module_entry *additional_mod
 	shutdown_memory_manager(1, 0);
  	virtual_cwd_activate();
 
-	zend_interned_strings_switch_storage();
+	zend_interned_strings_switch_storage(1);
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 1;
+#endif
 
 	/* we're done */
 	return retval;
@@ -2303,8 +2309,14 @@ void php_module_shutdown(void)
 		return;
 	}
 
+	zend_interned_strings_switch_storage(0);
+
 #ifdef ZTS
 	ts_free_worker_threads();
+#endif
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = 0;
 #endif
 
 #ifdef PHP_WIN32
@@ -2336,6 +2348,10 @@ void php_module_shutdown(void)
 #endif
 
 	php_output_shutdown();
+
+#ifndef ZTS
+	zend_interned_strings_dtor();
+#endif
 
 	module_initialized = 0;
 

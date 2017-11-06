@@ -128,7 +128,7 @@ static ZEND_INI_MH(OnUpdateMemoryConsumption)
 			return FAILURE;
 		}
 
-		ini_entry->value = zend_string_init(new_new_value, 1, 1);
+		ini_entry->value = zend_string_init_interned(new_new_value, 1, 1);
 	}
 	if (UNEXPECTED(memsize > ZEND_ULONG_MAX / (1024 * 1024))) {
 		*p = ZEND_ULONG_MAX;
@@ -176,7 +176,7 @@ static ZEND_INI_MH(OnUpdateMaxAcceleratedFiles)
 					sizeof("opcache.max_accelerated_files")-1)) == NULL) {
 			return FAILURE;
 		}
-		ini_entry->value = zend_string_init(new_new_value, strlen(new_new_value), 1);
+		ini_entry->value = zend_string_init_interned(new_new_value, strlen(new_new_value), 1);
 	}
 	*p = size;
 	return SUCCESS;
@@ -210,7 +210,7 @@ static ZEND_INI_MH(OnUpdateMaxWastedPercentage)
 					sizeof("opcache.max_wasted_percentage")-1)) == NULL) {
 			return FAILURE;
 		}
-		ini_entry->value = zend_string_init(new_new_value, strlen(new_new_value), 1);
+		ini_entry->value = zend_string_init_interned(new_new_value, strlen(new_new_value), 1);
 	}
 	*p = (double)percentage / 100.0;
 	return SUCCESS;
