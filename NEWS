@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
     (Anatol)
+  . Fixed bug #74862 (Unable to clone instance when private __clone defined).
+    (Daniel Ciochiu)
 
 - CLI Server:
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
