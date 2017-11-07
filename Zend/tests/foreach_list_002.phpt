@@ -14,7 +14,7 @@ foreach($array as list(, $a)) {
 }
 
 ?>
---EXPECT--
+--EXPECTF--
 int(1)
 int(3)
 string(1) "b"

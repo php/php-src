@@ -9,5 +9,5 @@ var_dump(true[0][1]);
 Warning: Variable of type null does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL

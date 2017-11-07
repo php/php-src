@@ -2038,7 +2038,7 @@ try_string_offset:
 			zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
 		}
 
-		if (type != BP_VAR_IS && (is_ast || ((EX(opline)+1)->op1_type == IS_VAR && EX(opline)->opcode == (EX(opline)+1)->opcode))) {
+		if (type != BP_VAR_IS && (is_ast || ((EX(opline)+1)->op1_type == IS_TMP_VAR && EX(opline)->opcode == (EX(opline)+1)->opcode))) {
 			ZVAL_ERROR(result);
 		} else {
 			ZVAL_NULL(result);

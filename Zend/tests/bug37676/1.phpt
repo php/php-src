@@ -22,12 +22,12 @@ $b = 2;
 $a[0] + $b[0];
 ?>
 --EXPECTF--
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
 Warning: Variable of type null does not accept array offsets in %s on line %d
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d

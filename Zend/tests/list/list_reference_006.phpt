@@ -36,6 +36,8 @@ object(StorageNoRef)#1 (1) {
 }
 
 Notice: Undefined offset: 2 in %s on line %d
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
 object(StorageNoRef)#2 (1) {
   ["s":"StorageNoRef":private]=>
   array(2) {

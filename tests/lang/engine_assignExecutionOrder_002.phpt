@@ -114,9 +114,9 @@ array(3) {
 }
 L=100 M=200 N=300
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 O= and P=
 10 20 40 50 60 70 80
 

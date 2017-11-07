@@ -20,4 +20,6 @@ var_dump($free_me);
 ?>
 --EXPECTF--
 Notice: unserialize(): Error at offset %d of %d bytes in %sbug72433.php on line 8
+
+Warning: Variable of type bool does not accept array offsets in %sbug72433.php on line 10
 bool(false)

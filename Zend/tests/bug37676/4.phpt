@@ -15,9 +15,9 @@ while (list($k, $v) = each($a)) { // each dep, boolean err
 }
 ?>
 --EXPECTF--
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
 Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 int(0)
@@ -27,6 +27,6 @@ string(3) "two"
 int(2)
 int(3)
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d

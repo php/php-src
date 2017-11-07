@@ -70,7 +70,7 @@ array(2) {
 }
 int(1)
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 NULL
 
 Notice: Undefined offset: 4 in %s on line %d

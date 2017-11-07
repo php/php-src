@@ -40,7 +40,7 @@ array(1) {
 NULL
 NULL
 
-Warning: Variable of type integer does not accept array offsets in %s on line %d
+Warning: Variable of type int does not accept array offsets in %s on line %d
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 
@@ -49,7 +49,7 @@ int(5)
 NULL
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 
 Warning: Cannot use a scalar value as an array in %s on line %d
 

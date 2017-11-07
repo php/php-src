@@ -29,7 +29,7 @@ $a = new StorageRef(['one' => 1, 'two' => 2]);
 var_dump($a);
 
 ?>
---EXPECT--
+--EXPECTF--
 object(StorageRef)#1 (1) {
   ["s":"StorageRef":private]=>
   array(2) {
@@ -39,6 +39,8 @@ object(StorageRef)#1 (1) {
     int(2)
   }
 }
+
+Warning: Variable of type null does not accept array offsets in %s on line %d
 object(StorageRef)#2 (1) {
   ["s":"StorageRef":private]=>
   array(3) {

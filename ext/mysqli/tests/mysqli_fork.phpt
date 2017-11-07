@@ -111,13 +111,15 @@ if (!have_innodb($link))
 						continue;
 					$tmp = mysqli_fetch_assoc($pres);
 					mysqli_free_result($pres);
-					if ($tmp['msg_id'] == $msg_id)
-						/* no new message */
-						continue;
-					if ($tmp['msg'] == 'stop')
-						break 2;
-					$msg_id = $tmp['msg_id'];
-					break;
+					if ($tmp) {
+						if ($tmp['msg_id'] == $msg_id)
+							/* no new message */
+							continue;
+						if ($tmp['msg'] == 'stop')
+							break 2;
+						$msg_id = $tmp['msg_id'];
+						break;
+					}
 				} while ((time() - $start) < 5);
 
 			}
@@ -143,7 +145,7 @@ if (!have_innodb($link))
 				$wait_id = pcntl_waitpid($pid, $status, WNOHANG);
 				if ($pres = mysqli_query($plink, $sql)) {
 					$row = mysqli_fetch_assoc($pres);
-					if ($row['msg_id'] != $last_msg_id) {
+					if ($row && $row['msg_id'] != $last_msg_id) {
 						$last_msg_id = $row['msg_id'];
 						switch ($row['msg']) {
 							case 'start':

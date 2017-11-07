@@ -25,30 +25,30 @@ var_dump($bool[$arr]);
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 
-Warning: Variable of type boolean does not accept array offsets in %s on line %d
+Warning: Variable of type bool does not accept array offsets in %s on line %d
 NULL
 Done

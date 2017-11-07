@@ -591,6 +591,9 @@ class Client
 
         do {
             $resp = $this->readPacket();
+            if (!$resp) {
+                break;
+            }
 
             if ($resp['type'] == self::STDOUT || $resp['type'] == self::STDERR) {
                 if ($resp['type'] == self::STDERR) {
