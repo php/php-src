@@ -4,6 +4,7 @@ PDO_DBLIB: DATETIME2 column data
 <?php
 if (!extension_loaded('pdo_dblib')) die('skip not loaded');
 require __DIR__ . '/config.inc';
+if (in_array(get_tds_version(), ['4.2', '4.6', '5.0', '6.0', '7.0', '7.1', '7.2'])) die('skip feature unsupported by this TDS version');
 ?>
 --FILE--
 <?php
@@ -27,10 +28,10 @@ var_dump($stmt->fetch(PDO::FETCH_ASSOC));
 bool(false)
 array(1) {
   ["d"]=>
-  string(27) "1023-10-17 10:22:44.1355318"
+  string(19) "1023-10-17 10:22:44"
 }
 bool(true)
 array(1) {
   ["d"]=>
-  string(27) "1023-10-17 10:22:44.1355318"
+  string(30) "Oct 17 1023 10:22:44:1355318AM"
 }
