@@ -118,6 +118,9 @@ PHP                                                                        NEWS
   . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
     (jhdxr)
 
+- SQLite3:
+  . Updated bundled libsqlite to 3.21.0. (cmb)
+
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
