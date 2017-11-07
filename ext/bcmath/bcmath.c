@@ -208,6 +208,21 @@ static void php_str2num(bc_num *num, char *str)
 }
 /* }}} */
 
+/* {{{ split_bc_num
+   Convert to bc_num detecting scale */
+static bc_num split_bc_num(bc_num num) {
+	bc_num newnum;
+	if (num->n_refs >= 1) {
+		return num;
+	}
+	newnum = _bc_new_num_ex(0, 0, 0);
+	*newnum = *num;
+	newnum->n_refs = 1;
+	num->n_refs--;
+	return newnum;
+}
+/* }}} */
+
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
