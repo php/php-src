@@ -90,6 +90,10 @@ typedef unsigned char *LPBYTE;
 typedef float			DBFLT4;
 #endif
 
+// hardcoded string length from FreeTDS
+// src/tds/convert.c:tds_convert_datetimeall()
+# define DATETIME_MAX_LEN   63
+
 int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr);
 

@@ -325,11 +325,26 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	if (data_len != 0 || data != NULL) {
 		if (pdo_dblib_stmt_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
 			tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
+
+			switch (coltype) {
+				case SQLDATETIME:
+				case SQLDATETIM4: {
+					if (tmp_data_len < DATETIME_MAX_LEN) {
+						tmp_data_len = DATETIME_MAX_LEN;
+					}
+					break;
+				}
+			}
+
 			tmp_data = emalloc(tmp_data_len);
 			data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
 
 			zv = emalloc(sizeof(zval));
-			ZVAL_STRING(zv, tmp_data);
+			if (data_len > 0) {
+				ZVAL_STRINGL(zv, tmp_data, data_len);
+			} else {
+				ZVAL_EMPTY_STRING(zv);
+			}
 
 			efree(tmp_data);
 		}
