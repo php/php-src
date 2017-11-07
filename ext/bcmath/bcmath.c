@@ -208,21 +208,6 @@ static void php_str2num(bc_num *num, char *str)
 }
 /* }}} */
 
-/* {{{ split_bc_num
-   Convert to bc_num detecting scale */
-static bc_num split_bc_num(bc_num num) {
-	bc_num newnum;
-	if (num->n_refs >= 1) {
-		return num;
-	}
-	newnum = _bc_new_num_ex(0, 0, 0);
-	*newnum = *num;
-	newnum->n_refs = 1;
-	num->n_refs--;
-	return newnum;
-}
-/* }}} */
-
 /* {{{ proto string bcadd(string left_operand, string right_operand [, int scale])
    Returns the sum of two arbitrary precision numbers */
 PHP_FUNCTION(bcadd)
@@ -398,11 +383,7 @@ PHP_FUNCTION(bcmod)
 
 	switch (bc_modulo(first, second, &result, scale)) {
 		case 0:
-			if (result->n_scale > scale) {
-				result = split_bc_num(result);
-				result->n_scale = scale;
-			}
-			RETVAL_STR(bc_num2str(result));
+			RETVAL_STR(bc_num2str_ex(result, scale));
 			break;
 		case -1:
 			php_error_docref(NULL, E_WARNING, "Division by zero");
