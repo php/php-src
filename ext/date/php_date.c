@@ -2290,8 +2290,8 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 					utc_offset < 0 ? '-' : '+',
-					php_date_llabs(utc_offset / 3600),
-					php_date_llabs(((utc_offset % 3600) / 60)));
+					abs(utc_offset / 3600),
+					abs(((utc_offset % 3600) / 60)));
 
 				ZVAL_NEW_STR(&zv, tmpstr);
 				}
@@ -2382,8 +2382,8 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				php_date_llabs(tzobj->tzi.utc_offset / 3600),
-				php_date_llabs(((tzobj->tzi.utc_offset % 3600) / 60)));
+				abs(tzobj->tzi.utc_offset / 3600),
+				abs(((tzobj->tzi.utc_offset % 3600) / 60)));
 
 			ZVAL_NEW_STR(&zv, tmpstr);
 			}
@@ -3912,8 +3912,8 @@ PHP_FUNCTION(timezone_name_get)
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset < 0 ? '-' : '+',
-				php_date_llabs(utc_offset / 3600),
-				php_date_llabs(((utc_offset % 3600) / 60)));
+				abs(utc_offset / 3600),
+				abs(((utc_offset % 3600) / 60)));
 
 			RETURN_NEW_STR(tmpstr);
 			}
