@@ -1,6 +1,5 @@
 --TEST--
-DateTimeZone::getLocation -- timezone_location_get — Returns location information for a timezone
-public array DateTimeZone::getLocation ( void ) ;
+DateTimeZone::getLocation -- timezone_location_get — Returns location information for a timezone public array DateTimeZone::getLocation ( void ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
 --SKIPIF--
@@ -57,26 +56,5 @@ Array
     [country_code] => %s
     [latitude] => %f
     [longitude] => %f
-    [comments] => 
-)
-Array
-(
-    [country_code] => %s
-    [latitude] => %f
-    [longitude] => %f
     [comments] => %s
-)
-Array
-(
-    [country_code] => %s
-    [latitude] => %f
-    [longitude] => %f
-    [comments] => %s
-)
-Array
-(
-    [country_code] => %s
-    [latitude] => %f
-    [longitude] => %f
-    [comments] => 
 )
