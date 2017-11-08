@@ -308,7 +308,7 @@ ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, si
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
 	zend_string_release(new_value);
 	return ret;
@@ -320,7 +320,7 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change);
 	zend_string_release(new_value);
 	return ret;
