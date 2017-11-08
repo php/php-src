@@ -45,6 +45,19 @@
 #  define IO_REPARSE_TAG_DEDUP   0x80000013
 # endif
 
+# ifndef IO_REPARSE_TAG_CLOUD
+#  define IO_REPARSE_TAG_CLOUD    (0x9000001AL)
+# endif
+/* IO_REPARSE_TAG_CLOUD_1 through IO_REPARSE_TAG_CLOUD_F have values of 0x9000101AL
+   to 0x9000F01AL, they can be checked against the mask. */
+#ifndef IO_REPARSE_TAG_CLOUD_MASK
+#define IO_REPARSE_TAG_CLOUD_MASK (0x0000F000L)
+#endif
+
+#ifndef IO_REPARSE_TAG_ONEDRIVE
+#define IO_REPARSE_TAG_ONEDRIVE   (0x80000021L)
+#endif
+
 # ifndef VOLUME_NAME_NT
 #  define VOLUME_NAME_NT 0x2
 # endif
@@ -908,7 +921,7 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				return -1;
 			}
 
-			hLink = CreateFile(path, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+			hLink = CreateFile(path, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
 				return -1;
 			}
@@ -977,7 +990,11 @@ static int tsrm_realpath_r(char *path, int start, int len, int *ll, time_t *t, i
 				};
 				substitutename[substitutename_len] = 0;
 			}
-			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP) {
+			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP ||
+					/* Starting with 1709. */
+					(pbuffer->ReparseTag & IO_REPARSE_TAG_CLOUD_MASK) != 0 && 0x90001018L != pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_CLOUD == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag) {
 				isabsolute = 1;
 				memcpy(substitutename, path, len + 1);
 				substitutename_len = len;
