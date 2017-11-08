@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #75434 (Wrong reflection for mysqli_fetch_all function). (Fabien
     Villepinte)
 
+- Opcache:
+  . Fixed assertion on phpMyAdmin-4.7.5 home page. (Dmitry)
+
 - SOAP:
   . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
 

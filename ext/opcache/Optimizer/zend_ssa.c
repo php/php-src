@@ -1279,7 +1279,11 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	for (j = 0; j < predecessors_count; j++) {
 		if (phi->sources[j] == var_num) {
 			if (j < pred_offset) {
-				ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				if (next_phi == NULL) {
+					next_phi = phi->use_chains[pred_offset];
+				} else {
+					ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				}
 			} else if (j >= pred_offset) {
 				phi->use_chains[j] = next_phi;
 			}
