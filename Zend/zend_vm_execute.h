@@ -48790,7 +48790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			scope = EX(func)->op_array.scope;
-                if (UNEXPECTED(clone->common.scope != scope)) {
+			if (UNEXPECTED(ce != scope)) {
 				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(ce->name), scope ? ZSTR_VAL(scope->name) : "");
 				zval_ptr_dtor_nogc(free_op1);
 				ZVAL_UNDEF(EX_VAR(opline->result.var));

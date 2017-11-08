@@ -4994,8 +4994,8 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 			/* Ensure that if we're calling a private function, we're allowed to do so.
 			 */
 			scope = EX(func)->op_array.scope;
-			if (UNEXPECTED(ce != scope)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(ce->name), scope ? ZSTR_VAL(scope->name) : "");
+			if (!zend_check_private(clone, scope, clone->common.function_name)) {
+				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(scope->name), scope ? ZSTR_VAL(scope->name) : "");
 				FREE_OP1();
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
