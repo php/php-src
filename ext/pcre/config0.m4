@@ -45,7 +45,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 10.30])
     fi
 
-    PHP_CHECK_LIBRARY(pcre, pcre_jit_exec,
+    PHP_CHECK_LIBRARY(pcre2, pcre2_jit_exec,
     [
       AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
     ],[
