@@ -340,6 +340,7 @@ static PHP_MINIT_FUNCTION(pcre)
 {
 	char *version;
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	if (!pcre2_init_ok) {
 		/* Retry. */
 		php_pcre_init_pcre2(PCRE_G(jit));
@@ -347,6 +348,7 @@ static PHP_MINIT_FUNCTION(pcre)
 			return FAILURE;
 		}
 	}
+#endif
 
 	REGISTER_INI_ENTRIES();
 
@@ -385,6 +387,7 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 }
 /* }}} */
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
 /* {{{ PHP_RINIT_FUNCTION(pcre) */
 static PHP_RINIT_FUNCTION(pcre)
 {
@@ -399,6 +402,7 @@ static PHP_RINIT_FUNCTION(pcre)
 	return SUCCESS;
 }
 /* }}} */
+#endif
 
 /* {{{ static pcre_clean_cache */
 static int pcre_clean_cache(zval *data, void *arg)
@@ -2788,7 +2792,11 @@ zend_module_entry pcre_module_entry = {
 	pcre_functions,
 	PHP_MINIT(pcre),
 	PHP_MSHUTDOWN(pcre),
+#ifdef HAVE_PCRE_JIT_SUPPORT
 	PHP_RINIT(pcre),
+#else
+	NULL,
+#endif
 	NULL,
 	PHP_MINFO(pcre),
 	PHP_PCRE_VERSION,
