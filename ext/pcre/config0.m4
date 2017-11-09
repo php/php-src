@@ -41,8 +41,8 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       pcre_minor="$pcre_minor"0
     fi
     pcre_version=$pcre_major$pcre_minor
-    if test "$pcre_version" -lt 660; then
-      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 6.6])
+    if test "$pcre_version" -lt 1030; then
+      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 10.30])
     fi
 
     PHP_CHECK_LIBRARY(pcre, pcre_jit_exec,
