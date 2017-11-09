@@ -52,7 +52,7 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     ],[
       -L$PCRE_LIBDIR
     ])
-    PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
+    PHP_ADD_LIBRARY_WITH_PATH(pcre2, $PCRE_LIBDIR)
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
