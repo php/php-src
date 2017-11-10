@@ -82,6 +82,8 @@ PHP                                                                        NEWS
   . Implemented request #69592 (allow 0-column rowsets to be skipped
     automatically). (fandrieu)
   . Fixed bug #74243 (allow locales.conf to drive datetime format). (fandrieu)
+  . Expose TDS version as \PDO::DBLIB_ATTR_TDS_VERSION attribute on \PDO
+    instance. (fandrieu)
 
 - PDO_OCI:
   . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized

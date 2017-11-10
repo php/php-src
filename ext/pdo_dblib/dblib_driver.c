@@ -298,6 +298,73 @@ static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
+static void dblib_get_tds_version(zval *return_value, int tds)
+{
+	switch (tds) {
+		case DBTDS_2_0:
+			ZVAL_STRING(return_value, "2.0");
+			break;
+
+		case DBTDS_3_4:
+			ZVAL_STRING(return_value, "3.4");
+			break;
+
+		case DBTDS_4_0:
+			ZVAL_STRING(return_value, "4.0");
+			break;
+
+		case DBTDS_4_2:
+			ZVAL_STRING(return_value, "4.2");
+			break;
+
+		case DBTDS_4_6:
+			ZVAL_STRING(return_value, "4.6");
+			break;
+
+		case DBTDS_4_9_5:
+			ZVAL_STRING(return_value, "4.9.5");
+			break;
+
+		case DBTDS_5_0:
+			ZVAL_STRING(return_value, "5.0");
+			break;
+
+#ifdef DBTDS_7_0
+		case DBTDS_7_0:
+			ZVAL_STRING(return_value, "7.0");
+			break;
+#endif
+
+#ifdef DBTDS_7_1
+		case DBTDS_7_1:
+			ZVAL_STRING(return_value, "7.1");
+			break;
+#endif
+
+#ifdef DBTDS_7_2
+		case DBTDS_7_2:
+			ZVAL_STRING(return_value, "7.2");
+			break;
+#endif
+
+#ifdef DBTDS_7_3
+		case DBTDS_7_3:
+			ZVAL_STRING(return_value, "7.3");
+			break;
+#endif
+
+#ifdef DBTDS_7_4
+		case DBTDS_7_4:
+			ZVAL_STRING(return_value, "7.4");
+			break;
+#endif
+
+		default:
+			ZVAL_FALSE(return_value);
+			break;
+	}
+}
+
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
 	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
@@ -318,6 +385,10 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 
 		case PDO_DBLIB_ATTR_VERSION:
 			ZVAL_STRING(return_value, dbversion());
+			break;
+
+		case PDO_DBLIB_ATTR_TDS_VERSION:
+			dblib_get_tds_version(return_value, dbtds(H->link));
 			break;
 
 		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
