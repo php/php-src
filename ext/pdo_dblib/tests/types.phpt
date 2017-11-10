@@ -10,7 +10,9 @@ require __DIR__ . '/config.inc';
 require __DIR__ . '/config.inc';
 
 function get_expected_float_string() {
-	switch (get_tds_version()) {
+	global $db;
+
+	switch ($db->getAttribute(PDO::DBLIB_ATTR_TDS_VERSION)) {
 		case '5.0':
 		case '6.0':
 		case '7.0':
