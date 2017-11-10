@@ -294,6 +294,9 @@ static int pdo_dblib_stmt_should_stringify_col(pdo_stmt_t *stmt, int coltype)
 			}
 			break;
 
+#ifdef SQLMSDATETIME2
+		case SQLMSDATETIME2:
+#endif
 		case SQLDATETIME:
 		case SQLDATETIM4:
 			if (H->datetime_convert) {
@@ -388,6 +391,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+#ifdef SQLMSDATETIME2
+				case SQLMSDATETIME2:
+#endif
 				case SQLDATETIME:
 				case SQLDATETIM4: {
 					size_t dl;
