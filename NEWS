@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017, PHP 7.1.13
 
-
+- Core:
+  . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
+    (Anatol)
 
 23 Nov 2017, PHP 7.1.12
 
