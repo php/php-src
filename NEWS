@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+???
+
+- Core:
+  . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
+    (Anatol)
+
 ?? ??? ????, PHP 7.2.0RC6
 
 - Core:
