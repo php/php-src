@@ -5762,11 +5762,13 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase)
 {
-	pcre *re;
-	const char *err_msg;
-	int err_offset;
-	int options = PCRE_NO_AUTO_CAPTURE, res;
+	pcre2_code *re;
+	PCRE2_UCHAR	         err_msg[256];
+	PCRE2_SIZE           err_offset;
+	int res, errnumber;
+	uint32_t options = PCRE2_NO_AUTO_CAPTURE;
 	size_t i;
+	pcre2_match_data *match_data;
 
 	/* Check invalid chars for POSIX regex */
 	for (i = 0; i < str_len; i++) {
@@ -5778,20 +5780,29 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if (icase) {
-		options |= PCRE_CASELESS;
+		options |= PCRE2_CASELESS;
 	}
 
-	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Cannot compile regex");
+	re = pcre2_compile(regex, PCRE2_ZERO_TERMINATED, options, &errnumber, &err_offset, php_pcre_cctx());
+	if (NULL == re) {
+		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
+		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
 		return FAILURE;
 	}
 
-	res = pcre_exec(re, NULL, str, str_len, 0, 0, NULL, 0);
-	pcre_free(re);
-
-	if (res == PCRE_ERROR_NOMATCH) {
+	match_data = php_pcre_create_match_data(0, re);
+	if (NULL == match_data) {
+		pcre2_code_free(re);
+		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
 		return FAILURE;
-	} else if (res) {
+	}
+	res = pcre2_match(re, str, str_len, 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
+	pcre2_code_free(re);
+
+	if (res == PCRE2_ERROR_NOMATCH) {
+		return FAILURE;
+	} else if (res < 0) {
 		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
 		return FAILURE;
 	}

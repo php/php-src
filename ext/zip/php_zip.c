@@ -625,6 +625,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 #endif
 	int files_cnt;
 	zend_string **namelist;
+	pcre2_match_context *mctx = php_pcre_mctx();
 
 #ifdef ZTS
 	if (!IS_ABSOLUTE_PATH(path, path_len)) {
@@ -651,11 +652,12 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 	files_cnt = php_stream_scandir(path, &namelist, NULL, (void *) php_stream_dirent_alphasort);
 
 	if (files_cnt > 0) {
-		pcre *re = NULL;
-		pcre_extra *pcre_extra = NULL;
-		int preg_options = 0, i;
+		pcre2_code *re = NULL;
+		pcre2_match_data *match_data = NULL;
+		uint32_t preg_options = 0, i, capture_count;
+		int rc;
 
-		re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
+		re = pcre_get_compiled_regex(regexp, &capture_count, &preg_options);
 		if (!re) {
 			php_error_docref(NULL, E_WARNING, "Invalid expression");
 			return -1;
@@ -667,9 +669,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 		for (i = 0; i < files_cnt; i++) {
 			zend_stat_t s;
 			char   fullpath[MAXPATHLEN];
-			int    ovector[3];
-			int    matches;
-			int    namelist_len = ZSTR_LEN(namelist[i]);
+			size_t    namelist_len = ZSTR_LEN(namelist[i]);
 
 			if ((namelist_len == 1 && ZSTR_VAL(namelist[i])[0] == '.') ||
 				(namelist_len == 2 && ZSTR_VAL(namelist[i])[0] == '.' && ZSTR_VAL(namelist[i])[1] == '.')) {
@@ -697,9 +697,16 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 				continue;
 			}
 
-			matches = pcre_exec(re, NULL, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, 0, ovector, 3);
+			match_data = php_pcre_create_match_data(capture_count, re);
+			if (!match_data) {
+				/* Allocation failed, but can proceed to the next pattern. */
+				zend_string_release(namelist[i]);
+				continue;
+			}
+			rc = pcre2_match(re, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
+			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
-			if (matches < 0) {
+			if (rc < 0) {
 				zend_string_release(namelist[i]);
 				continue;
 			}
