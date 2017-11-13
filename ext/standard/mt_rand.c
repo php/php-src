@@ -260,7 +260,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	zend_long n;
+	uint32_t n;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
@@ -268,7 +268,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 
 	/* Legacy mode deliberately not inside php_mt_rand_range()
 	 * to prevent other functions being affected */
-	n = (zend_long)php_mt_rand() >> 1;
+	n = php_mt_rand() >> 1;
 	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
 
 	return n;
