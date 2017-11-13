@@ -227,6 +227,7 @@ static void php_pcre_shutdown_pcre2(void)
 
 	if (mdata) {
 		pcre2_match_data_free(mdata);
+		mdata = NULL;
 	}
 
 	pcre2_init_ok = 0;
