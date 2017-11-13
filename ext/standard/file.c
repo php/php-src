@@ -1772,7 +1772,7 @@ PHPAPI PHP_FUNCTION(fread)
 	/* needed because recv/read/gzread doesnt put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
 
-	if (len > Z_STRLEN_P(return_value) * 2) {
+	if (Z_STRLEN_P(return_value) < len / 2) {
 		Z_STR_P(return_value) = zend_string_truncate(Z_STR_P(return_value), Z_STRLEN_P(return_value), 0);
 	}
 }
