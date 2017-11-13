@@ -413,7 +413,7 @@ private int
 check_fmt(struct magic_set *ms, struct magic *m)
 {
 	pcre2_code *pce;
-	uint32_t re_options;
+	uint32_t re_options, capture_count;
 	int rv = -1;
 	zend_string *pattern;
 
@@ -422,13 +422,13 @@ check_fmt(struct magic_set *ms, struct magic *m)
 
 	(void)setlocale(LC_CTYPE, "C");
 	pattern = zend_string_init("~%[-0-9.]*s~", sizeof("~%[-0-9.]*s~") - 1, 0);
-	if ((pce = pcre_get_compiled_regex(pattern, &re_options)) == NULL) {
+	if ((pce = pcre_get_compiled_regex(pattern, &capture_count, &re_options)) == NULL) {
 		rv = -1;
 	} else {
-		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(pce, php_pcre_gctx());
+		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
 		if (match_data) {
 			rv = pcre2_match(pce, m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx()) > 0;
-			pcre2_match_data_free(match_data);
+			php_pcre_free_match_data(match_data);
 		}
 	}
 	zend_string_release(pattern);

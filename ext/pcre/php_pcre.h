@@ -34,8 +34,8 @@
 #endif
 
 PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, size_t subject_len, zend_string *replace_str, size_t limit, size_t *replace_count);
-PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *options);
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *preg_options, uint32_t *coptions);
+PHPAPI pcre2_code* pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count, uint32_t *options);
+PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *coptions);
 
 extern zend_module_entry pcre_module_entry;
 #define pcre_module_ptr &pcre_module_entry
@@ -65,6 +65,9 @@ PHPAPI pcre2_compile_context *php_pcre_cctx(void);
 PHPAPI void php_pcre_pce_incref(pcre_cache_entry *);
 PHPAPI void php_pcre_pce_decref(pcre_cache_entry *);
 PHPAPI pcre2_code *php_pcre_pce_re(pcre_cache_entry *);
+/* capture_count can be ignored, re is required. */
+PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t, pcre2_code *);
+PHPAPI void php_pcre_free_match_data(pcre2_match_data *);
 
 ZEND_BEGIN_MODULE_GLOBALS(pcre)
 	HashTable pcre_cache;

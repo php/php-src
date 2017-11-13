@@ -793,12 +793,15 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 /* {{{ pcre_get_compiled_regex
  */
-PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *preg_options)
+PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options)
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
 	if (preg_options) {
 		*preg_options = pce ? pce->preg_options : 0;
+	}
+	if (capture_count) {
+		*capture_count = pce ? pce->capture_count : 0;
 	}
 
 	return pce ? pce->re : NULL;
@@ -807,7 +810,7 @@ PHPAPI pcre2_code *pcre_get_compiled_regex(zend_string *regex, uint32_t *preg_op
 
 /* {{{ pcre_get_compiled_regex_ex
  */
-PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *preg_options, uint32_t *compile_options)
+PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *capture_count, uint32_t *preg_options, uint32_t *compile_options)
 {
 	pcre_cache_entry * pce = pcre_get_compiled_regex_cache(regex);
 
@@ -817,10 +820,40 @@ PHPAPI pcre2_code* pcre_get_compiled_regex_ex(zend_string *regex, uint32_t *preg
 	if (compile_options) {
 		*compile_options = pce ? pce->compile_options : 0;
 	}
+	if (capture_count) {
+		*capture_count = pce ? pce->capture_count : 0;
+	}
 
 	return pce ? pce->re : NULL;
 }
 /* }}} */
+
+/* XXX For the cases where it's only about match yes/no and no capture
+		required, perhaps just a minimum sized data would suffice. */
+PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre2_code *re)
+{/*{{{*/
+	int rc = 0;
+
+	assert(NULL != re);
+
+	if (!capture_count) {
+		/* As we deal with a non cached pattern, no other way to gather this info. */
+		rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
+	}
+
+	if (rc >= 0 && (capture_count + 1) * 3 <= 32) {
+		return mdata;
+	}
+
+	return pcre2_match_data_create_from_pattern(re, gctx);
+}/*}}}*/
+
+PHPAPI void php_pcre_free_match_data(pcre2_match_data *match_data)
+{/*{{{*/
+	if (match_data != mdata) {
+		pcre2_match_data_free(match_data);
+	}
+}/*}}}*/
 
 /* {{{ add_offset_pair */
 static inline void add_offset_pair(zval *result, char *str, size_t len, PCRE2_SIZE offset, char *name, uint32_t unmatched_as_null)

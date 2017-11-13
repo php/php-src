@@ -342,13 +342,12 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
 	pcre2_match_context *mctx = php_pcre_mctx();
-	pcre2_general_context *gctx = php_pcre_gctx();
 
 	if (regexp_list_it == NULL) {
 		return 0;
 	}
 	while (regexp_list_it != NULL) {
-		pcre2_match_data *match_data = pcre2_match_data_create_from_pattern(regexp_list_it->re, gctx);
+		pcre2_match_data *match_data = php_pcre_create_match_data(0, regexp_list_it->re);
 		if (!match_data) {
 			/* Alloc failed, but next one could still come through and match. */
 			continue;
@@ -356,10 +355,10 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;
-			pcre2_match_data_free(match_data);
+			php_pcre_free_match_data(match_data);
 			break;
 		}
-		pcre2_match_data_free(match_data);
+		php_pcre_free_match_data(match_data);
 		regexp_list_it = regexp_list_it->next;
 	}
 	return ret;
