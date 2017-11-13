@@ -82,6 +82,7 @@ ZEND_TLS pcre2_general_context *gctx = NULL;
 	contexts at all, but creates for every pce. */
 ZEND_TLS pcre2_compile_context *cctx = NULL;
 ZEND_TLS pcre2_match_context   *mctx = NULL;
+ZEND_TLS pcre2_match_data      *mdata = NULL;
 ZEND_TLS uint8_t pcre2_init_ok = 0;
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
@@ -187,6 +188,14 @@ static void php_pcre_init_pcre2(uint8_t jit)
 	}
 #endif
 
+	if (!mdata) {
+		mdata = pcre2_match_data_create(32, gctx);
+		if (!mdata) {
+			pcre2_init_ok = 0;
+		}
+		return;
+	}
+
 	pcre2_init_ok = 1;
 }/*}}}*/
 
@@ -215,6 +224,10 @@ static void php_pcre_shutdown_pcre2(void)
 		jit_stack = NULL;
 	}
 #endif
+
+	if (mdata) {
+		pcre2_match_data_free(mdata);
+	}
 
 	pcre2_init_ok = 0;
 }/*}}}*/
@@ -965,7 +978,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (size_offsets <= 32) {
+		match_data = mdata;
+	} else {
+		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	}
 	if (!match_data) {
 		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 		if (subpat_names) {
@@ -1223,7 +1240,9 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 			break;
 		}
 	} while (global);
-	pcre2_match_data_free(match_data);
+	if (size_offsets > 32) {
+		pcre2_match_data_free(match_data);
+	}
 
 	/* Add the match sets to the output array and clean up */
 	if (global && subpats && subpats_order == PREG_PATTERN_ORDER) {
@@ -1452,7 +1471,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (size_offsets <= 32) {
+		match_data = mdata;
+	} else {
+		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	}
 	if (!match_data) {
 		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 		if (subpat_names) {
@@ -1625,7 +1648,9 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 			break;
 		}
 	}
-	pcre2_match_data_free(match_data);
+	if (size_offsets > 32) {
+		pcre2_match_data_free(match_data);
+	}
 
 	if (UNEXPECTED(subpat_names)) {
 		efree(subpat_names);
@@ -2342,7 +2367,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 
 	rc = pcre2_pattern_info(pce->re, PCRE2_INFO_JITSIZE, &jit_size);
 #endif
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (size_offsets <= 32) {
+		match_data = mdata;
+	} else {
+		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	}
 	if (!match_data) {
 		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 		return;
@@ -2433,7 +2462,9 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 			break;
 		}
 	}
-	pcre2_match_data_free(match_data);
+	if (size_offsets > 32) {
+		pcre2_match_data_free(match_data);
+	}
 
 	start_offset = (last_match - ZSTR_VAL(subject_str)); /* the offset might have been incremented, but without further successful matches */
 
@@ -2640,7 +2671,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	if (size_offsets <= 32) {
+		match_data = mdata;
+	} else {
+		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
+	}
 	if (!match_data) {
 		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
 		return;
@@ -2693,7 +2728,9 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		zend_string_release(subject_str);
 	} ZEND_HASH_FOREACH_END();
-	pcre2_match_data_free(match_data);
+	if (size_offsets > 32) {
+		pcre2_match_data_free(match_data);
+	}
 }
 /* }}} */
 
