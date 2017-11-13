@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
     (Anatol)
 
+- Standard:
+  . Fixed bug #75511 (fread not free unused buffer). (Laruence)
+
 23 Nov 2017, PHP 7.1.12
 
 - Core:
