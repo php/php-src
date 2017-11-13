@@ -842,7 +842,7 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre
 		rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
 	}
 
-	if (rc >= 0 && (capture_count + 1) * 3 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (rc >= 0 && capture_count + 1 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		return mdata;
 	}
 
