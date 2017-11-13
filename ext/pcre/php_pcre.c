@@ -148,6 +148,7 @@ static void php_pcre_free(void *block, void *data)
 }/*}}}*/
 
 #define PHP_PCRE_DEFAULT_EXTRA_COPTIONS PCRE2_EXTRA_BAD_ESCAPE_IS_LITERAL
+#define PHP_PCRE_PREALLOC_MDATA_SIZE 32
 
 static void php_pcre_init_pcre2(uint8_t jit)
 {/*{{{*/
@@ -192,7 +193,7 @@ static void php_pcre_init_pcre2(uint8_t jit)
 #endif
 
 	if (!mdata) {
-		mdata = pcre2_match_data_create(32, gctx);
+		mdata = pcre2_match_data_create(PHP_PCRE_PREALLOC_MDATA_SIZE, gctx);
 		if (!mdata) {
 			pcre2_init_ok = 0;
 		}
@@ -841,7 +842,7 @@ PHPAPI pcre2_match_data *php_pcre_create_match_data(uint32_t capture_count, pcre
 		rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &capture_count);
 	}
 
-	if (rc >= 0 && (capture_count + 1) * 3 <= 32) {
+	if (rc >= 0 && (capture_count + 1) * 3 <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		return mdata;
 	}
 
@@ -1016,7 +1017,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= 32) {
+	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -1506,7 +1507,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= 32) {
+	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -1754,7 +1755,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 #endif
 	old_mdata_used = mdata_used;
-	if (!old_mdata_used && size_offsets <= 32) {
+	if (!old_mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		mdata_used = 1;
 		match_data = mdata;
 	} else {
@@ -2407,7 +2408,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= 32) {
+	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -2709,7 +2710,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	if (!mdata_used && size_offsets <= 32) {
+	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
