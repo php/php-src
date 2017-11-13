@@ -2092,7 +2092,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
-void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
 	i_free_compiled_variables(execute_data);
 }
@@ -2500,7 +2500,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 }
 /* }}} */
 
-void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
+ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
 	cleanup_unfinished_calls(execute_data, op_num);
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
