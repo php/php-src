@@ -440,7 +440,7 @@ static int pcre_clean_cache(zval *data, void *arg)
 /* }}} */
 
 /* {{{ static make_subpats_table */
-static char **make_subpats_table(size_t num_subpats, pcre_cache_entry *pce)
+static char **make_subpats_table(uint32_t num_subpats, pcre_cache_entry *pce)
 {
 	uint32_t name_cnt = pce->name_count, name_size, ni = 0;
 	char *name_table;
@@ -927,8 +927,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	uint32_t		 no_utf_check = 0;  /* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	size_t			 num_subpats;		/* Number of captured subpatterns */
-	size_t			 size_offsets;		/* Size of the offsets array */
+	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 matched;			/* Has anything matched */
 	uint32_t		 g_notempty = 0;	/* If the match should not be empty */
 	char 		   **subpat_names;		/* Array for named subpatterns */
@@ -985,7 +984,6 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
-	size_offsets = num_subpats * 3;
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will
@@ -1017,7 +1015,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -1055,7 +1053,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets/3;
+			count = num_subpats;
 		}
 
 		/* If something has matched */
@@ -1453,8 +1451,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
-	size_t			 num_subpats;		/* Number of captured subpatterns */
-	size_t			 size_offsets;		/* Size of the offsets array */
+	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
 	size_t			 match_len;			/* Length of the current match */
@@ -1478,7 +1475,6 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
-	size_offsets = num_subpats * 3;
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will
@@ -1507,7 +1503,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -1538,7 +1534,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		/* Check for too many substrings condition. */
 		if (UNEXPECTED(count == 0)) {
 			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets / 3;
+			count = num_subpats;
 		}
 
 		piece = subject + start_offset;
@@ -1703,8 +1699,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
 	char 			**subpat_names;		/* Array for named subpatterns */
-	size_t			 num_subpats;		/* Number of captured subpatterns */
-	size_t			 size_offsets;		/* Size of the offsets array */
+	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	size_t			 new_len;			/* Length of needed storage */
 	size_t			 alloc_len;			/* Actual allocated length */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
@@ -1725,7 +1720,6 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
 	num_subpats = pce->capture_count + 1;
-	size_offsets = num_subpats * 3;
 
 	/*
 	 * Build a mapping from subpattern numbers to their names. We will
@@ -1755,7 +1749,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 
 #endif
 	old_mdata_used = mdata_used;
-	if (!old_mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (!old_mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		mdata_used = 1;
 		match_data = mdata;
 	} else {
@@ -1788,7 +1782,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets / 3;
+			count = num_subpats;
 		}
 
 		piece = subject + start_offset;
@@ -2369,7 +2363,6 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	zend_long limit_val, zend_long flags)
 {
 	PCRE2_SIZE		*offsets;			/* Array of subpattern offsets */
-	size_t			 size_offsets;		/* Size of the offsets array */
 	uint32_t		 no_utf_check = 0;	/* Execution options */
 	int				 count = 0;			/* Count of matched subpatterns */
 	PCRE2_SIZE		 start_offset;		/* Where the new search starts */
@@ -2379,6 +2372,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	uint32_t		 no_empty;			/* If NO_EMPTY flag is set */
 	uint32_t		 delim_capture; 	/* If delimiters should be captured */
 	uint32_t		 offset_capture;	/* If offsets should be captured */
+	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	zval			 tmp;
 	pcre2_match_data *match_data;
 
@@ -2394,7 +2388,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	array_init(return_value);
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pce->capture_count + 1) * 3;
+	num_subpats = pce->capture_count + 1;
 
 	/* Start at the beginning of the string */
 	start_offset = 0;
@@ -2408,7 +2402,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 	}
 
 #endif
-	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -2436,7 +2430,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL,E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets/3;
+			count = num_subpats;
 		}
 
 		offsets = pcre2_get_ovector_pointer(match_data);
@@ -2692,7 +2686,7 @@ static PHP_FUNCTION(preg_grep)
 PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return_value, zend_long flags) /* {{{ */
 {
 	zval            *entry;             /* An entry in the input array */
-	size_t			 size_offsets;		/* Size of the offsets array */
+	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 count = 0;			/* Count of matched subpatterns */
 	uint32_t		 no_utf_check;		/* Execution options */
 	zend_string		*string_key;
@@ -2703,14 +2697,14 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	invert = flags & PREG_GREP_INVERT ? 1 : 0;
 
 	/* Calculate the size of the offsets array, and allocate memory for it. */
-	size_offsets = (pce->capture_count + 1) * 3;
+	num_subpats = pce->capture_count + 1;
 
 	/* Initialize return array */
 	array_init(return_value);
 
 	PCRE_G(error_code) = PHP_PCRE_NO_ERROR;
 
-	if (!mdata_used && size_offsets <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
+	if (!mdata_used && num_subpats <= PHP_PCRE_PREALLOC_MDATA_SIZE) {
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
@@ -2742,7 +2736,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		/* Check for too many substrings condition. */
 		if (count == 0) {
 			php_error_docref(NULL, E_NOTICE, "Matched, but too many substrings");
-			count = size_offsets/3;
+			count = num_subpats;
 		} else if (count < 0 && count != PCRE2_ERROR_NOMATCH) {
 			pcre_handle_exec_error(count);
 			zend_string_release(subject_str);
