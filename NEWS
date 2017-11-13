@@ -78,6 +78,9 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
 
+- PCRE:
+  . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
+
 - PDO_DBlib:
   . Implemented request #69592 (allow 0-column rowsets to be skipped
     automatically). (fandrieu)
