@@ -1019,16 +1019,16 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
-	}
-	if (!match_data) {
-		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-		if (subpat_names) {
-			efree(subpat_names);
+		if (!match_data) {
+			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+			if (subpat_names) {
+				efree(subpat_names);
+			}
+			if (match_sets) {
+				efree(match_sets);
+			}
+			RETURN_FALSE;
 		}
-		if (match_sets) {
-			efree(match_sets);
-		}
-		RETURN_FALSE;
 	}
 
 	do {
@@ -1041,7 +1041,7 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 				break;
 			}
 			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset2,
-					no_utf_check|g_notempty, match_data, mctx);
+					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, subject, subject_len, start_offset2,
@@ -1507,13 +1507,13 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
-	}
-	if (!match_data) {
-		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-		if (subpat_names) {
-			efree(subpat_names);
+		if (!match_data) {
+			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+			if (subpat_names) {
+				efree(subpat_names);
+			}
+			return NULL;
 		}
-		return NULL;
 	}
 
 	while (1) {
@@ -1522,7 +1522,7 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
-					no_utf_check|g_notempty, match_data, mctx);
+					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, subject, subject_len, start_offset,
@@ -1754,14 +1754,14 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
-	}
-	if (!match_data) {
-		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-		if (subpat_names) {
-			efree(subpat_names);
+		if (!match_data) {
+			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+			if (subpat_names) {
+				efree(subpat_names);
+			}
+			mdata_used = old_mdata_used;
+			return NULL;
 		}
-		mdata_used = old_mdata_used;
-		return NULL;
 	}
 
 	while (1) {
@@ -1770,7 +1770,7 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
-					no_utf_check|g_notempty, match_data, mctx);
+					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, subject, subject_len, start_offset,
@@ -2406,10 +2406,10 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
-	}
-	if (!match_data) {
-		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-		return;
+		if (!match_data) {
+			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+			return;
+		}
 	}
 
 	/* Get next piece if no limit or limit not yet reached and something matched*/
@@ -2418,7 +2418,7 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
 			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
-					no_utf_check|g_notempty, match_data, mctx);
+					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
@@ -2708,10 +2708,10 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		match_data = mdata;
 	} else {
 		match_data = pcre2_match_data_create_from_pattern(pce->re, gctx);
-	}
-	if (!match_data) {
-		PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
-		return;
+		if (!match_data) {
+			PCRE_G(error_code) = PHP_PCRE_INTERNAL_ERROR;
+			return;
+		}
 	}
 
 	/* Go through the input array */
@@ -2724,7 +2724,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		if (PCRE_G(jit) && (pce->preg_options && PREG_JIT)
 		 && no_utf_check) {
 			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
-					no_utf_check, match_data, mctx);
+					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
 		count = pcre2_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
