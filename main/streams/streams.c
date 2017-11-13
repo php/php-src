@@ -24,6 +24,7 @@
 #define _GNU_SOURCE
 #include "php.h"
 #include "php_globals.h"
+#include "php_memory_streams.h"
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
@@ -709,8 +710,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			break;
 		}
 
-		/* just break anyway, to avoid greedy read */
-		if (!stream->wrapper || stream->wrapper->is_url) {
+		/* just break anyway, to avoid greedy read for file://, php://memory, and php://temp */
+		if ((stream->wrapper != &php_plain_files_wrapper) &&
+			(stream->ops != &php_stream_memory_ops) &&
+			(stream->ops != &php_stream_temp_ops)) {
 			break;
 		}
 	}
