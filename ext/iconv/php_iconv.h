@@ -22,7 +22,7 @@
 #ifndef PHP_ICONV_H
 #define PHP_ICONV_H
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # ifdef PHP_ICONV_EXPORTS
 #  define PHP_ICONV_API __declspec(dllexport)
 # else

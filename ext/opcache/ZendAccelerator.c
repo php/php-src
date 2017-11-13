@@ -46,17 +46,17 @@
 # include "zend_file_cache.h"
 #endif
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 #include  <netdb.h>
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 typedef int uid_t;
 typedef int gid_t;
 #include <io.h>
 #endif
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 # include <sys/time.h>
 #else
 # include <process.h>
@@ -69,7 +69,7 @@ typedef int gid_t;
 #include <signal.h>
 #include <time.h>
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 # include <sys/types.h>
 # include <sys/ipc.h>
 #endif
@@ -122,13 +122,13 @@ static int (*orig_post_startup_cb)(void);
 static void accel_gen_system_id(void);
 static int accel_post_startup(void);
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # define INCREMENT(v) InterlockedIncrement64(&ZCSG(v))
 # define DECREMENT(v) InterlockedDecrement64(&ZCSG(v))
 # define LOCKVAL(v)   (ZCSG(v))
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 static time_t zend_accel_get_time(void)
 {
 	FILETIME now;
@@ -226,7 +226,7 @@ static ZEND_INI_MH(accel_include_path_on_modify)
 
 static inline void accel_restart_enter(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	INCREMENT(restart_in);
 #else
 # ifdef _AIX
@@ -244,7 +244,7 @@ static inline void accel_restart_enter(void)
 
 static inline void accel_restart_leave(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	ZCSG(restart_in_progress) = 0;
 	DECREMENT(restart_in);
 #else
@@ -264,7 +264,7 @@ static inline void accel_restart_leave(void)
 static inline int accel_restart_is_active(void)
 {
 	if (ZCSG(restart_in_progress)) {
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 		FLOCK_STRUCTURE(restart_check, F_WRLCK, SEEK_SET, 2, 1);
 
 		if (fcntl(lock_file, F_GETLK, &restart_check) == -1) {
@@ -287,7 +287,7 @@ static inline int accel_restart_is_active(void)
 /* Creates a read lock for SHM access */
 static inline int accel_activate_add(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	INCREMENT(mem_usage);
 #else
 # ifdef _AIX
@@ -307,7 +307,7 @@ static inline int accel_activate_add(void)
 /* Releases a lock for SHM access */
 static inline void accel_deactivate_sub(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	if (ZCG(counted)) {
 		DECREMENT(mem_usage);
 		ZCG(counted) = 0;
@@ -327,7 +327,7 @@ static inline void accel_deactivate_sub(void)
 
 static inline void accel_unlock_all(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	accel_deactivate_sub();
 #else
 # ifdef _AIX
@@ -754,7 +754,7 @@ static void accel_use_permanent_interned_strings(void)
 	accel_copy_permanent_strings(accel_replace_string_by_process_permanent);
 }
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 static inline void kill_all_lockers(struct flock *mem_usage_check)
 {
 	int success, tries;
@@ -814,7 +814,7 @@ static inline void kill_all_lockers(struct flock *mem_usage_check)
 
 static inline int accel_is_inactive(void)
 {
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	if (LOCKVAL(mem_usage) == 0) {
 		return SUCCESS;
 	}
@@ -879,7 +879,7 @@ static int zend_get_stream_timestamp(const char *filename, zend_stat_t *statbuf)
 	return SUCCESS;
 }
 
-#if ZEND_WIN32
+#if _WIN32
 static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_handle, size_t *size)
 {
 	static unsigned __int64 utc_base = 0;
@@ -927,7 +927,7 @@ static accel_time_t zend_get_file_handle_timestamp_win(zend_file_handle *file_ha
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size)
 {
 	zend_stat_t statbuf;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	accel_time_t res;
 #endif
 
@@ -945,7 +945,7 @@ accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_
 		}
 	}
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	res = zend_get_file_handle_timestamp_win(file_handle, size);
 	if (res) {
 		return res;
@@ -2032,7 +2032,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 	} else {
 
-#if !ZEND_WIN32
+#if !_WIN32
 		ZCSG(hits)++; /* TBFixed: may lose one hit */
 		persistent_script->dynamic_members.hits++; /* see above */
 #else
@@ -2249,7 +2249,7 @@ static void accel_activate(void)
 	}
 #endif
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	if (ZCG(accel_directives).validate_root) {
 		struct stat buf;
 
@@ -2656,7 +2656,7 @@ static int accel_startup(zend_extension *extension)
 	accel_globals_ctor(&accel_globals);
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
 #endif
 
@@ -2909,7 +2909,7 @@ void zend_accel_schedule_restart(zend_accel_restart_reason reason)
 }
 
 /* this is needed because on WIN32 lock is not decreased unless ZCG(counted) is set */
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #define accel_deactivate_now() ZCG(counted) = 1; accel_deactivate_sub()
 #else
 #define accel_deactivate_now() accel_deactivate_sub()

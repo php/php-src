@@ -47,7 +47,7 @@ extern "C" {
 #include "gd_io.h"
 
 /* va_list needed in gdErrorMethod */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <stdarg.h>
 #else
 # if HAVE_STDARG_H

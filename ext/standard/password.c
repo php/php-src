@@ -35,7 +35,7 @@
 #include "argon2.h"
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/winutil.h"
 #endif
 

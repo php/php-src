@@ -87,7 +87,7 @@
 # define dbrpcexec			dbrpcsend
 
 typedef short TDS_SHORT;
-# ifndef PHP_WIN32
+# ifndef _WIN32
 typedef unsigned char *LPBYTE;
 # endif
 typedef float			DBFLT4;

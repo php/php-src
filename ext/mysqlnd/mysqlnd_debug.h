@@ -79,8 +79,8 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 #define MYSQLND_DEBUG_PROFILE_CALLS			512
 
 
-#if defined(__GNUC__) || defined(PHP_WIN32)
-#ifdef PHP_WIN32
+#if defined(__GNUC__) || defined(_WIN32)
+#ifdef _WIN32
 #include "win32/time.h"
 #else
 #include <sys/time.h>
@@ -164,7 +164,7 @@ PHPAPI MYSQLND_DEBUG * mysqlnd_debug_init(const char * skip_functions[]);
 
 
 
-#else  /* defined(__GNUC__) || defined(PHP_WIN32) */
+#else  /* defined(__GNUC__) || defined(_WIN32) */
 static inline void DBG_INF_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_ERR_EX(MYSQLND_DEBUG * dbg_obj, const char * const msg) {}
 static inline void DBG_INF_FMT_EX(MYSQLND_DEBUG * dbg_obj, ...) {}

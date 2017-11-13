@@ -39,7 +39,7 @@
 
 #include <sys/types.h>
 #include <errno.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #include <process.h>
 #include "win32/time.h"

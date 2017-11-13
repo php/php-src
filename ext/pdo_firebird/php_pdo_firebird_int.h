@@ -35,11 +35,11 @@
 
 #define SHORT_MAX (1 << (8*sizeof(short)-1))
 
-#if SIZEOF_ZEND_LONG == 8 && !defined(PHP_WIN32)
+#if SIZEOF_ZEND_LONG == 8 && !defined(_WIN32)
 # define LL_MASK "l"
 # define LL_LIT(lit) lit ## L
 #else
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  define LL_MASK "I64"
 #  define LL_LIT(lit) lit ## I64
 # else
@@ -51,7 +51,7 @@
 /* Firebird API has a couple of missing const decls in its API */
 #define const_cast(s) ((char*)(s))
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 typedef void (__stdcall *info_func_t)(char*);
 #else
 typedef void (*info_func_t)(char*);

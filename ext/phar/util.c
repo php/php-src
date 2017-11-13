@@ -187,7 +187,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 
 	entry.phar = phar;
 	entry.filename = estrndup(path, path_len);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	phar_unixify_path_separators(entry.filename, path_len);
 #endif
 	entry.filename_len = path_len;
@@ -516,7 +516,7 @@ phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char 
 	const char *pcr_error;
 	char is_dir;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	phar_unixify_path_separators(path, path_len);
 #endif
 
@@ -1121,7 +1121,7 @@ alias_success:
 		} else {
 			return FAILURE;
 		}
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		phar_unixify_path_separators(fname, fname_len);
 #endif
 
@@ -1215,7 +1215,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 	phar_entry_info *entry;
 	int is_dir;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	phar_unixify_path_separators(path, path_len);
 #endif
 

@@ -42,7 +42,7 @@
 #include <openssl/dh.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/winutil.h"
 #include "win32/time.h"
 #include <Wincrypt.h>
@@ -589,7 +589,7 @@ static int php_openssl_passwd_callback(char *buf, int num, int verify, void *dat
 }
 /* }}} */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define RETURN_CERT_VERIFY_FAILURE(code) X509_STORE_CTX_set_error(x509_store_ctx, code); return 0;
 static int php_openssl_win_cert_verify_callback(X509_STORE_CTX *x509_store_ctx, void *arg) /* {{{ */
 {
@@ -874,7 +874,7 @@ static int php_openssl_enable_peer_verification(SSL_CTX *ctx, php_stream *stream
 			}
 		}
 	} else {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		SSL_CTX_set_cert_verify_callback(ctx, php_openssl_win_cert_verify_callback, (void *)stream);
 		SSL_CTX_set_verify(ctx, SSL_VERIFY_PEER, NULL);
 #else
@@ -2171,7 +2171,7 @@ static int php_openssl_compare_timeval( struct timeval a, struct timeval b )
 static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{ */
 {
 	php_openssl_netstream_data_t *sslsock = (php_openssl_netstream_data_t*)stream->abstract;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	int n;
 #endif
 	unsigned i;
@@ -2194,12 +2194,12 @@ static int php_openssl_sockop_close(php_stream *stream, int close_handle) /* {{{
 			pefree(sslsock->alpn_ctx.data, php_stream_is_persistent(stream));
 		}
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (sslsock->s.socket == -1)
 			sslsock->s.socket = SOCK_ERR;
 #endif
 		if (sslsock->s.socket != SOCK_ERR) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			/* prevent more data from coming in */
 			shutdown(sslsock->s.socket, SHUT_RD);
 

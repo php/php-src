@@ -34,7 +34,7 @@
 #define ZEND_BUILD_DEBUG
 #endif
 
-#if defined(ZEND_WIN32) && defined(PHP_COMPILER_ID)
+#if defined(_WIN32) && defined(PHP_COMPILER_ID)
 #define ZEND_BUILD_SYSTEM "," PHP_COMPILER_ID
 #else
 #define ZEND_BUILD_SYSTEM

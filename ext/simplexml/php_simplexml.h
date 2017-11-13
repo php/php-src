@@ -77,7 +77,7 @@ typedef struct {
 #define SIMPLEXML_G(v) (simplexml_globals.v)
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	ifdef PHP_SIMPLEXML_EXPORTS
 #		define PHP_SXE_API __declspec(dllexport)
 #	else

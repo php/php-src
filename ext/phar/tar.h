@@ -19,7 +19,7 @@
   +----------------------------------------------------------------------+
 */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #pragma pack(1)
 # define PHAR_TAR_PACK
 #elif defined(__sgi)
@@ -94,7 +94,7 @@ typedef struct _tar_header {  /* {{{ */
 } PHAR_TAR_PACK tar_header;
 /* }}} */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #pragma pack()
 #endif
 

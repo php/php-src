@@ -382,7 +382,7 @@ ZEND_API char *zend_get_type_by_const(int type);
 #define ZEND_WRONG_PARAM_COUNT()					{ zend_wrong_param_count(); return; }
 #define ZEND_WRONG_PARAM_COUNT_WITH_RETVAL(ret)		{ zend_wrong_param_count(); return ret; }
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 #define DLEXPORT
 #endif
 

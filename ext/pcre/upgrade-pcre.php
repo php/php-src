@@ -104,7 +104,7 @@ foreach ($diff as $file) {
 $prepend_config_h = '
 #include <php_compat.h>
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 # include <php_config.h>
 #endif
 

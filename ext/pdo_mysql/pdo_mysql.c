@@ -52,7 +52,7 @@ ZEND_DECLARE_MODULE_GLOBALS(pdo_mysql)
 # ifdef PHP_MYSQL_UNIX_SOCK_ADDR
 #  define PDO_MYSQL_UNIX_ADDR PHP_MYSQL_UNIX_SOCK_ADDR
 # else
-#  if !PHP_WIN32
+#  if !_WIN32
 #   define PDO_MYSQL_UNIX_ADDR "/tmp/mysql.sock"
 #  else
 #   define PDO_MYSQL_UNIX_ADDR NULL
@@ -92,7 +92,7 @@ static MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 /* {{{ PHP_INI_BEGIN
 */
 PHP_INI_BEGIN()
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	STD_PHP_INI_ENTRY("pdo_mysql.default_socket", PDO_MYSQL_UNIX_ADDR, PHP_INI_SYSTEM, OnUpdateStringUnempty, default_socket, zend_pdo_mysql_globals, pdo_mysql_globals)
 #endif
 #if PDO_DBG_ENABLED
@@ -166,7 +166,7 @@ static PHP_MINFO_FUNCTION(pdo_mysql)
 
 	php_info_print_table_end();
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	DISPLAY_INI_ENTRIES();
 #endif
 }
@@ -215,7 +215,7 @@ static PHP_GINIT_FUNCTION(pdo_mysql)
 #if defined(COMPILE_DL_PDO_MYSQL) && defined(ZTS)
 ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	pdo_mysql_globals->default_socket = NULL;
 #endif
 #if PDO_DBG_ENABLED

@@ -29,7 +29,7 @@
 #include <stddef.h>
 
 #if HAVE_UTIME
-# ifdef PHP_WIN32
+# ifdef _WIN32
 #  include <sys/utime.h>
 # else
 #  include <utime.h>

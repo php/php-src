@@ -33,7 +33,7 @@ extern zend_module_entry bz2_module_entry;
 #define phpext_bz2_ptr NULL
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	ifdef PHP_BZ2_EXPORTS
 #		define PHP_BZ2_API __declspec(dllexport)
 #	elif defined(COMPILE_DL_BZ2)

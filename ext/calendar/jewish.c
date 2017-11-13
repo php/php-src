@@ -260,7 +260,7 @@
  *
  **************************************************************************/
 
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 #pragma setlocale("english")
 #endif
 

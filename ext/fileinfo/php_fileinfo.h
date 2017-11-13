@@ -26,7 +26,7 @@ extern zend_module_entry fileinfo_module_entry;
 
 #define PHP_FILEINFO_VERSION "1.0.5"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define PHP_FILEINFO_API __declspec(dllexport)
 #else
 #define PHP_FILEINFO_API

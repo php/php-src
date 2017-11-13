@@ -37,7 +37,7 @@ PHP_FUNCTION(shmop_size);
 PHP_FUNCTION(shmop_write);
 PHP_FUNCTION(shmop_delete);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "win32/ipc.h"
 #endif
 

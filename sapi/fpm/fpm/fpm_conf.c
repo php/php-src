@@ -17,7 +17,7 @@
 # include <stdint.h>
 #endif
 #ifdef HAVE_GLOB
-# ifndef PHP_WIN32
+# ifndef _WIN32
 #  include <glob.h>
 # else
 #  include "win32/glob.h"

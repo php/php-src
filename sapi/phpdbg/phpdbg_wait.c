@@ -339,7 +339,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 
 PHPDBG_COMMAND(wait) /* {{{ */
 {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	struct sockaddr_un local, remote;
 	int rlen, sr, sl;
 	unlink(PHPDBG_G(socket_path));

@@ -21,7 +21,7 @@
 #ifndef	_ZEND_DTRACE_H
 #define	_ZEND_DTRACE_H
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 # include <unistd.h>
 #endif
 

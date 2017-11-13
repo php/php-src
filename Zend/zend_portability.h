@@ -35,7 +35,7 @@
  * general definitions
  */
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # include "zend_config.w32.h"
 # define ZEND_PATHS_SEPARATOR		';'
 #elif defined(__riscos__)
@@ -72,7 +72,7 @@
 # include <alloca.h>
 #endif
 
-#if defined(ZEND_WIN32)
+#if defined(_WIN32)
 #include <intrin.h>
 #endif
 
@@ -93,7 +93,7 @@
 # define __has_builtin(x) 0
 #endif
 
-#if defined(ZEND_WIN32) && !defined(__clang__)
+#if defined(_WIN32) && !defined(__clang__)
 # define ZEND_ASSUME(c)	__assume(c)
 #elif ((defined(__GNUC__) && ZEND_GCC_VERSION >= 4005) || __has_builtin(__builtin_unreachable)) && PHP_HAVE_BUILTIN_EXPECT
 # define ZEND_ASSUME(c)	do { \
@@ -127,7 +127,7 @@
 
 /* all HAVE_XXX test have to be after the include of zend_config above */
 
-#if defined(HAVE_LIBDL) && !defined(ZEND_WIN32)
+#if defined(HAVE_LIBDL) && !defined(_WIN32)
 
 # if defined(__has_feature)
 #  if __has_feature(address_sanitizer)
@@ -159,7 +159,7 @@
 # define DL_ERROR					dlerror
 # define DL_HANDLE					void *
 # define ZEND_EXTENSIONS_SUPPORT	1
-#elif defined(ZEND_WIN32)
+#elif defined(_WIN32)
 # define DL_LOAD(libname)			LoadLibrary(libname)
 # define DL_FETCH_SYMBOL			GetProcAddress
 # define DL_UNLOAD					FreeLibrary
@@ -215,7 +215,7 @@ char *alloca();
 
 #if ZEND_GCC_VERSION >= 3001 || __has_attribute(deprecated)
 # define ZEND_ATTRIBUTE_DEPRECATED  __attribute__((deprecated))
-#elif defined(ZEND_WIN32)
+#elif defined(_WIN32)
 # define ZEND_ATTRIBUTE_DEPRECATED  __declspec(deprecated)
 #else
 # define ZEND_ATTRIBUTE_DEPRECATED
@@ -254,7 +254,7 @@ char *alloca();
 #if (defined(__GNUC__) && __GNUC__ >= 3 && !defined(__INTEL_COMPILER) && !defined(DARWIN) && !defined(__hpux) && !defined(_AIX) && !defined(__osf__)) || __has_attribute(noreturn)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __attribute__((noreturn))
-#elif defined(ZEND_WIN32)
+#elif defined(_WIN32)
 # define HAVE_NORETURN
 # define ZEND_NORETURN __declspec(noreturn)
 #else
@@ -485,14 +485,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 /* excpt.h on Digital Unix 4.0 defines function_table */
 #undef function_table
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #define ZEND_SECURE_ZERO(var, size) RtlSecureZeroMemory((var), (size))
 #else
 #define ZEND_SECURE_ZERO(var, size) explicit_bzero((var), (size))
 #endif
 
 /* This check should only be used on network socket, not file descriptors */
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 #define ZEND_VALID_SOCKET(sock) (INVALID_SOCKET != (sock))
 #else
 #define ZEND_VALID_SOCKET(sock) ((sock) >= 0)

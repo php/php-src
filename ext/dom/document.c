@@ -1309,7 +1309,7 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 
 	if (uri->scheme != NULL) {
 		/* absolute file uris - libxml only supports localhost or empty host */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (strncasecmp(source, "file://",7) == 0 && ':' == source[8]) {
 			isFileUri = 1;
 			source += 7;
@@ -1317,14 +1317,14 @@ char *_dom_get_valid_file_path(char *source, char *resolved_path, int resolved_p
 #endif
 		if (strncasecmp(source, "file:///",8) == 0) {
 			isFileUri = 1;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			source += 8;
 #else
 			source += 7;
 #endif
 		} else if (strncasecmp(source, "file://localhost/",17) == 0) {
 			isFileUri = 1;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			source += 17;
 #else
 			source += 16;

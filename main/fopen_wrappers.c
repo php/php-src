@@ -32,7 +32,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #else
@@ -53,7 +53,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -63,7 +63,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -166,7 +166,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 	memcpy(path_tmp, resolved_name, path_len + 1); /* safe */
 
 	while (VCWD_REALPATH(path_tmp, resolved_name) == NULL) {
-#if defined(PHP_WIN32) || defined(HAVE_SYMLINK)
+#if defined(_WIN32) || defined(HAVE_SYMLINK)
 		if (nesting_level == 0) {
 			ssize_t ret;
 			char buf[MAXPATHLEN];
@@ -182,7 +182,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		path_file = strrchr(path_tmp, DEFAULT_SLASH);
 		if (!path_file) {
 			path_file = strrchr(path_tmp, '/');
@@ -195,7 +195,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 			return -1;
 		} else {
 			path_len = path_file - path_tmp + 1;
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			if (path_len > 1 && path_tmp[path_len - 2] == ':') {
 				if (path_len != 3) {
 					return -1;
@@ -217,7 +217,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		size_t basedir_len = strlen(basedir);
 		/* Handler for basedirs that end with a / */
 		resolved_basedir_len = strlen(resolved_basedir);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR || basedir[basedir_len - 1] == '/') {
 #else
 		if (basedir[basedir_len - 1] == PHP_DIR_SEPARATOR) {
@@ -240,7 +240,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		}
 
 		/* Check the path */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (strncasecmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
 #else
 		if (strncmp(resolved_basedir, resolved_name, resolved_basedir_len) == 0) {
@@ -255,7 +255,7 @@ PHPAPI int php_check_specific_open_basedir(const char *basedir, const char *path
 		} else {
 			/* /openbasedir/ and /openbasedir are the same directory */
 			if (resolved_basedir_len == (resolved_name_len + 1) && resolved_basedir[resolved_basedir_len - 1] == PHP_DIR_SEPARATOR) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 				if (strncasecmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
 #else
 				if (strncmp(resolved_basedir, resolved_name, resolved_name_len) == 0) {
@@ -501,7 +501,7 @@ PHPAPI zend_string *php_resolve_path(const char *filename, size_t filename_lengt
 	     (IS_SLASH(filename[1]) ||
 	      ((filename[1] == '.') && IS_SLASH(filename[2])))) ||
 	    IS_ABSOLUTE_PATH(filename, filename_length) ||
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		/* This should count as an absolute local path as well, however
 		   IS_ABSOLUTE_PATH doesn't care about this path form till now. It
 		   might be a big thing to extend, thus just a local handling for
@@ -636,7 +636,7 @@ PHPAPI FILE *php_fopen_with_path(const char *filename, const char *mode, const c
 	}
 
 	filename_length = strlen(filename);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	(void) filename_length;
 #endif
 

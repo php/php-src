@@ -692,7 +692,7 @@ static void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
 				case '\v':
 					smart_str_appends(str, "\\v");
 					break;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 				case VK_ESCAPE:
 #else
 				case '\e':

@@ -45,7 +45,7 @@
 #if HAVE_UNISTD_H
 # include <unistd.h>
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include <io.h>
 # include <fcntl.h>
 # include <windows.h>
@@ -260,7 +260,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imagecopyresampled, 0)
 	ZEND_ARG_INFO(0, src_h)
 ZEND_END_ARG_INFO()
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagegrabwindow, 0, 0, 1)
 	ZEND_ARG_INFO(0, handle)
 	ZEND_ARG_INFO(0, client_area)
@@ -902,7 +902,7 @@ const zend_function_entry gd_functions[] = {
 	PHP_FE(imagecolorexactalpha,					arginfo_imagecolorexactalpha)
 	PHP_FE(imagecopyresampled,						arginfo_imagecopyresampled)
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	PHP_FE(imagegrabwindow,							arginfo_imagegrabwindow)
 	PHP_FE(imagegrabscreen,							arginfo_imagegrabscreen)
 #endif
@@ -1071,7 +1071,7 @@ void php_gd_error_method(int type, const char *format, va_list args)
 {
 
 	switch (type) {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		case GD_DEBUG:
 		case GD_INFO:
 #endif
@@ -1935,7 +1935,7 @@ PHP_FUNCTION(imagecopyresampled)
 }
 /* }}} */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 /* {{{ proto resource imagegrabwindow(int window_handle [, int client_area])
    Grab a window or its client area using a windows handle (HWND property in COM instance) */
 PHP_FUNCTION(imagegrabwindow)
@@ -2065,7 +2065,7 @@ PHP_FUNCTION(imagegrabscreen)
 	}
 }
 /* }}} */
-#endif /* PHP_WIN32 */
+#endif /* _WIN32 */
 
 /* {{{ proto resource imagerotate(resource src_im, float angle, int bgdcolor [, int ignoretransparent])
    Rotate an image using a custom angle */

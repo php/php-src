@@ -31,7 +31,7 @@
 #if HAVE_SOCKETS
 
 #include <php.h>
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "windows_common.h"
 #endif
 
@@ -40,7 +40,7 @@
 extern zend_module_entry sockets_module_entry;
 #define phpext_sockets_ptr &sockets_module_entry
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <Winsock2.h>
 #else
 #if HAVE_SYS_SOCKET_H
@@ -48,7 +48,7 @@ extern zend_module_entry sockets_module_entry;
 #endif
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 typedef int PHP_SOCKET;
 # define PHP_SOCKETS_API PHPAPI
 #else
@@ -64,7 +64,7 @@ typedef struct {
 	zval		zstream;
 } php_socket;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 struct	sockaddr_un {
 	short	sun_family;
 	char	sun_path[108];

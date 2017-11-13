@@ -61,7 +61,7 @@
 
 /* A way to specify the location of the php.ini dir in an apache directive */
 char *apache2_php_ini_path_override = NULL;
-#if defined(PHP_WIN32) && defined(ZTS)
+#if defined(_WIN32) && defined(ZTS)
 ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 
@@ -210,7 +210,7 @@ php_apache_sapi_get_stat(void)
 {
 	php_struct *ctx = SG(server_context);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	ctx->finfo.st_uid = 0;
 	ctx->finfo.st_gid = 0;
 #else
@@ -422,7 +422,7 @@ static apr_status_t php_apache_server_shutdown(void *tmp)
 static apr_status_t php_apache_child_shutdown(void *tmp)
 {
 	apache2_sapi_module.shutdown(&apache2_sapi_module);
-#if defined(ZTS) && !defined(PHP_WIN32)
+#if defined(ZTS) && !defined(_WIN32)
 	tsrm_shutdown();
 #endif
 	return APR_SUCCESS;

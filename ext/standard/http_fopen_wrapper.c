@@ -36,7 +36,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
 #else
@@ -50,7 +50,7 @@
 #include <sys/socket.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include <winsock2.h>
 #else
 #include <netinet/in.h>
@@ -60,7 +60,7 @@
 #endif
 #endif
 
-#if defined(PHP_WIN32) || defined(__riscos__)
+#if defined(_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -198,7 +198,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (context && (tmpzval = php_stream_context_get_option(context, wrapper->wops->label, "timeout")) != NULL) {
 		double d = zval_get_double(tmpzval);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		timeout.tv_sec = (time_t) d;
 		timeout.tv_usec = (size_t) ((d - timeout.tv_sec) * 1000000);
 #else
@@ -206,7 +206,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 		timeout.tv_usec = (long) ((d - timeout.tv_sec) * 1000000);
 #endif
 	} else {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		timeout.tv_sec = FG(default_socket_timeout);
 #else
 		timeout.tv_sec = (long)FG(default_socket_timeout);

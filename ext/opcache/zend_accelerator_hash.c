@@ -86,7 +86,7 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, const
 	}
 
 	hash_value = zend_inline_hash_func(key, key_length);
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	hash_value ^= ZCG(root_hash);
 #endif
 	index = hash_value % accel_hash->max_num_entries;
@@ -145,7 +145,7 @@ static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_h
 	zend_ulong index;
 	zend_accel_hash_entry *entry;
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	hash_value ^= ZCG(root_hash);
 #endif
 	index = hash_value % accel_hash->max_num_entries;
@@ -233,7 +233,7 @@ int zend_accel_hash_unlink(zend_accel_hash *accel_hash, const char *key, uint32_
     zend_accel_hash_entry *entry, *last_entry=NULL;
 
 	hash_value = zend_inline_hash_func(key, key_length);
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	hash_value ^= ZCG(root_hash);
 #endif
 	index = hash_value % accel_hash->max_num_entries;

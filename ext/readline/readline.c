@@ -253,7 +253,7 @@ PHP_FUNCTION(readline_info)
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
 		add_assoc_long(return_value,"point",rl_point);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		add_assoc_long(return_value,"end",rl_end);
 #endif
 #ifdef HAVE_LIBREADLINE
@@ -266,7 +266,7 @@ PHP_FUNCTION(readline_info)
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
 #endif
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		add_assoc_string(return_value,"library_version",(char *)SAFE_STRING(rl_library_version));
 #endif
 		add_assoc_string(return_value,"readline_name",(char *)SAFE_STRING(rl_readline_name));
@@ -282,7 +282,7 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "point")) {
 			RETVAL_LONG(rl_point);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		} else if (!strcasecmp(what, "end")) {
 			RETVAL_LONG(rl_end);
 #endif
@@ -317,7 +317,7 @@ PHP_FUNCTION(readline_info)
 			}
 			RETVAL_LONG(oldval);
 #endif
-#ifndef PHP_WIN32
+#ifndef _WIN32
 		} else if (!strcasecmp(what,"library_version")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_library_version));
 #endif

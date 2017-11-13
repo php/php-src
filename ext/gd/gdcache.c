@@ -39,7 +39,7 @@
 #include "php.h"
 
 /* This just seems unessacary */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define ENABLE_GD_TTF
 #else
 #include <php_config.h>

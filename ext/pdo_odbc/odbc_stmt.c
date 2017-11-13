@@ -60,7 +60,7 @@ static int pdo_odbc_sqltype_is_unicode(pdo_odbc_stmt *S, SWORD sqltype)
 static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	zend_ulong buflen, zend_ulong *outlen)
 {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (is_unicode && buflen) {
 		pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 		DWORD ret;
@@ -95,7 +95,7 @@ static int pdo_odbc_utf82ucs2(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 static int pdo_odbc_ucs22utf8(pdo_stmt_t *stmt, int is_unicode, const char *buf,
 	zend_ulong buflen, zend_ulong *outlen)
 {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (is_unicode && buflen) {
 		pdo_odbc_stmt *S = (pdo_odbc_stmt*)stmt->driver_data;
 		DWORD ret;

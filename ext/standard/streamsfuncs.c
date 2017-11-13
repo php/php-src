@@ -34,7 +34,7 @@
 #include <unistd.h>
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 typedef unsigned long long php_timeout_ull;
 #else
@@ -124,7 +124,7 @@ PHP_FUNCTION(stream_socket_client)
 
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	tv.tv_sec = (long)(conv / 1000000);
 	tv.tv_usec =(long)(conv % 1000000);
 #else
@@ -274,7 +274,7 @@ PHP_FUNCTION(stream_socket_accept)
 
 	/* prepare the timeout value for use */
 	conv = (php_timeout_ull) (timeout * 1000000.0);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	tv.tv_sec = (long)(conv / 1000000);
 	tv.tv_usec = (long)(conv % 1000000);
 #else
@@ -1348,7 +1348,7 @@ PHP_FUNCTION(stream_set_blocking)
 
 /* {{{ proto bool stream_set_timeout(resource stream, int seconds [, int microseconds])
    Set timeout on stream read to seconds + microseonds */
-#if HAVE_SYS_TIME_H || defined(PHP_WIN32)
+#if HAVE_SYS_TIME_H || defined(_WIN32)
 PHP_FUNCTION(stream_set_timeout)
 {
 	zval *socket;
@@ -1366,7 +1366,7 @@ PHP_FUNCTION(stream_set_timeout)
 
 	php_stream_from_zval(stream, socket);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	t.tv_sec = (long)seconds;
 
 	if (argc == 3) {
@@ -1392,7 +1392,7 @@ PHP_FUNCTION(stream_set_timeout)
 
 	RETURN_FALSE;
 }
-#endif /* HAVE_SYS_TIME_H || defined(PHP_WIN32) */
+#endif /* HAVE_SYS_TIME_H || defined(_WIN32) */
 /* }}} */
 
 /* {{{ proto int stream_set_write_buffer(resource fp, int buffer)
@@ -1641,7 +1641,7 @@ PHP_FUNCTION(stream_isatty)
 		RETURN_FALSE;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* Check if the Windows standard handle is redirected to file */
 	RETVAL_BOOL(php_win32_console_fileno_is_console(fileno));
 #elif HAVE_UNISTD_H
@@ -1655,7 +1655,7 @@ PHP_FUNCTION(stream_isatty)
 #endif
 }
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 /* {{{ proto bool sapi_windows_vt100_support(resource stream[, bool enable])
    Get or set VT100 support for the specified stream associated to an
    output buffer of a Windows console.

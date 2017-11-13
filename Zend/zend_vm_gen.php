@@ -2346,7 +2346,7 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, HEADER_TEXT);
 
-	out($f, "#ifdef ZEND_WIN32\n");
+	out($f, "#ifdef _WIN32\n");
 	// Suppress free_op1 warnings on Windows
 	out($f, "# pragma warning(disable : 4101)\n");
 	if (ZEND_VM_SPEC) {

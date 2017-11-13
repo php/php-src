@@ -36,7 +36,7 @@
 #else
 #include <strings.h>
 #endif
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/param.h"
 #include "win32/winutil.h"
 #define GET_DL_ERROR()	php_win_err()
@@ -86,7 +86,7 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 	handle = DL_LOAD(path);
 	if (!handle) {
 		err = GET_DL_ERROR();
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (err && (*err)) {
 			(*errp)=estrdup(err);
 			LocalFree(err);

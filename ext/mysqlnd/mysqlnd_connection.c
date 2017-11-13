@@ -562,7 +562,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, get_scheme)(MYSQLND_CONN_DATA * conn, MYSQLND_
 {
 	MYSQLND_STRING transport;
 	DBG_ENTER("mysqlnd_conn_data::get_scheme");
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	if (hostname.l == sizeof("localhost") - 1 && !strncasecmp(hostname.s, "localhost", hostname.l)) {
 		DBG_INF_FMT("socket=%s", socket_or_pipe->s? socket_or_pipe->s:"n/a");
 		if (!socket_or_pipe->s) {
@@ -2613,7 +2613,7 @@ mysqlnd_stream_array_from_fd_set(MYSQLND ** conn_array, fd_set * fds)
 /* }}} */
 
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #define php_select(m, r, w, e, t)	select(m, r, w, e, t)
 #else
 #include "win32/select.h"

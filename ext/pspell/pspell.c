@@ -269,7 +269,7 @@ static PHP_FUNCTION(pspell_new)
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	TCHAR aspell_dir[200];
 	TCHAR data_dir[220];
 	TCHAR dict_dir[220];
@@ -288,7 +288,7 @@ static PHP_FUNCTION(pspell_new)
 
 	config = new_pspell_config();
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* If aspell was installed using installer, we should have a key
 	 * pointing to the location of the dictionaries
 	 */
@@ -366,7 +366,7 @@ static PHP_FUNCTION(pspell_new_personal)
 	int argc = ZEND_NUM_ARGS();
 	zval *ind;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	TCHAR aspell_dir[200];
 	TCHAR data_dir[220];
 	TCHAR dict_dir[220];
@@ -385,7 +385,7 @@ static PHP_FUNCTION(pspell_new_personal)
 
 	config = new_pspell_config();
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* If aspell was installed using installer, we should have a key
 	 * pointing to the location of the dictionaries
 	 */
@@ -689,7 +689,7 @@ static PHP_FUNCTION(pspell_config_create)
 	zval *ind;
 	PspellConfig *config;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	TCHAR aspell_dir[200];
 	TCHAR data_dir[220];
 	TCHAR dict_dir[220];
@@ -704,7 +704,7 @@ static PHP_FUNCTION(pspell_config_create)
 
 	config = new_pspell_config();
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
     /* If aspell was installed using installer, we should have a key
      * pointing to the location of the dictionaries
      */

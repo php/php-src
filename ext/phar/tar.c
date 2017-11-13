@@ -609,7 +609,7 @@ next:
 	}
 
 	myphar->fname = pestrndup(fname, fname_len, myphar->is_persistent);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	phar_unixify_path_separators(myphar->fname, fname_len);
 #endif
 	myphar->fname_len = fname_len;

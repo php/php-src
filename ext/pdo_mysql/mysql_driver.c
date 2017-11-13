@@ -531,7 +531,7 @@ static struct pdo_dbh_methods mysql_methods = {
 };
 /* }}} */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define PDO_DEFAULT_MYSQL_UNIX_ADDR	NULL
 #else
 # define PDO_DEFAULT_MYSQL_UNIX_ADDR	PDO_MYSQL_G(default_socket)
@@ -767,7 +767,7 @@ static int pdo_mysql_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		port = atoi(vars[3].optval);
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	if (vars[2].optval && !strcmp(".", vars[2].optval)) {
 #else
 	if (vars[2].optval && !strcmp("localhost", vars[2].optval)) {

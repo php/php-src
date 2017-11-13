@@ -213,7 +213,7 @@ typedef unsigned long long uint64_t;
 # endif
 #endif
 
-#endif /* !PHP_WIN32 */
+#endif /* !_WIN32 */
 #endif /* PHP_STDINT_H */
 
 /*

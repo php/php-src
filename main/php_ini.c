@@ -29,7 +29,7 @@
 #include "SAPI.h"
 #include "php_main.h"
 #include "php_scandir.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/php_registry.h"
 #endif
 
@@ -37,7 +37,7 @@
 #include <dirent.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define TRANSLATE_SLASHES_LOWER(path) \
 	{ \
 		char *tmp = path; \
@@ -355,7 +355,7 @@ static void php_load_zend_extension_cb(void *arg)
 	char *filename = *((char **) arg);
 	const size_t length = strlen(filename);
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	(void) length;
 #endif
 
@@ -443,14 +443,14 @@ int php_init_config(void)
 		char *default_location;
 		char *env_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		char *reg_location;
 		char phprc_path[MAXPATHLEN];
 #endif
 
 		env_location = getenv("PHPRC");
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (!env_location) {
 			char dummybuf;
 			int size;
@@ -500,7 +500,7 @@ int php_init_config(void)
 			php_ini_file_name = env_location;
 		}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		/* Add registry location */
 		reg_location = GetIniPathFromRegistry();
 		if (reg_location != NULL) {
@@ -537,7 +537,7 @@ int php_init_config(void)
 		}
 
 		/* Add default location */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		default_location = (char *) emalloc(MAXPATHLEN + 1);
 
 		if (0 < GetWindowsDirectory(default_location, MAXPATHLEN)) {
@@ -840,11 +840,11 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 	zval *tmp2;
 	char *ptr;
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	char path_bak[MAXPATHLEN];
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* MAX_PATH is \0-terminated, path_len == MAXPATHLEN would overrun path_bak */
 	if (path_len >= MAXPATHLEN) {
 #else
@@ -853,7 +853,7 @@ PHPAPI void php_ini_activate_per_dir_config(char *path, size_t path_len)
 		return;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	memcpy(path_bak, path, path_len);
 	path_bak[path_len] = 0;
 	TRANSLATE_SLASHES_LOWER(path_bak);

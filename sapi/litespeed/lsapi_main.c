@@ -37,7 +37,7 @@
 #include <unistd.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 
 #include <io.h>
 #include <fcntl.h>
@@ -982,7 +982,7 @@ static int cli_main( int argc, char * argv[] )
 #endif
     lsapi_mode = 0;        /* enter CLI mode */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
     _fmode = _O_BINARY;            /*sets default for file streams to binary */
     setmode(_fileno(stdin), O_BINARY);    /* make the stdio mode be binary */
     setmode(_fileno(stdout), O_BINARY);   /* make the stdio mode be binary */

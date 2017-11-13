@@ -427,7 +427,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					if ((func = zend_hash_find_ptr(EG(function_table), lc_name)) != NULL
 						 && func->type == ZEND_INTERNAL_FUNCTION
 						 && func->module->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 						 && func->module->handle == NULL
 #endif
 						) {
@@ -472,7 +472,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						}
 					} else {
 						if (m->type == MODULE_PERSISTENT
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 						 && m->handle == NULL
 #endif
 						) {

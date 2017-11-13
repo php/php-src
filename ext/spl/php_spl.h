@@ -27,7 +27,7 @@
 extern zend_module_entry spl_module_entry;
 #define phpext_spl_ptr &spl_module_entry
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #	ifdef SPL_EXPORTS
 #		define SPL_API __declspec(dllexport)
 #	elif defined(COMPILE_DL_SPL)
@@ -41,7 +41,7 @@ extern zend_module_entry spl_module_entry;
 #	define SPL_API
 #endif
 
-#if defined(PHP_WIN32) && !defined(COMPILE_DL_SPL)
+#if defined(_WIN32) && !defined(COMPILE_DL_SPL)
 #undef phpext_spl
 #define phpext_spl NULL
 #endif

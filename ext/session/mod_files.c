@@ -65,7 +65,7 @@
 #include <dirent.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/readdir.h"
 #endif
 #include <time.h>
@@ -84,7 +84,7 @@
 
 #define FILE_PREFIX "sess_"
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # ifndef O_NOFOLLOW
 #  define O_NOFOLLOW 0
 # endif
@@ -143,7 +143,7 @@ static char *ps_files_path_create(char *buf, size_t buflen, ps_files *data, cons
 static void ps_files_close(ps_files *data)
 {
 	if (data->fd != -1) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		/* On Win32 locked files that are closed without being explicitly unlocked
 		   will be unlocked only when "system resources become available". */
 		flock(data->fd, LOCK_UN);
@@ -156,7 +156,7 @@ static void ps_files_close(ps_files *data)
 static void ps_files_open(ps_files *data, const char *key)
 {
 	char buf[MAXPATHLEN];
-#if !defined(O_NOFOLLOW) || !defined(PHP_WIN32)
+#if !defined(O_NOFOLLOW) || !defined(_WIN32)
     struct stat sbuf;
 #endif
 	int ret;
@@ -194,7 +194,7 @@ static void ps_files_open(ps_files *data, const char *key)
 #endif
 
 		if (data->fd != -1) {
-#ifndef PHP_WIN32
+#ifndef _WIN32
 			/* check that this session file was created by us or root – we
 			   don't want to end up accepting the sessions of another webapp
 
@@ -249,7 +249,7 @@ static int ps_files_write(ps_files *data, zend_string *key, zend_string *val)
 	n = pwrite(data->fd, ZSTR_VAL(val), ZSTR_LEN(val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	{
 		unsigned int to_write = ZSTR_LEN(val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(val);
 		char *buf = ZSTR_VAL(val);
@@ -501,7 +501,7 @@ PS_READ_FUNC(files)
 	n = pread(data->fd, ZSTR_VAL(*val), ZSTR_LEN(*val), 0);
 #else
 	lseek(data->fd, 0, SEEK_SET);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	{
 		unsigned int to_read = ZSTR_LEN(*val) > UINT_MAX ? UINT_MAX : (unsigned int)ZSTR_LEN(*val);
 		char *buf = ZSTR_VAL(*val);

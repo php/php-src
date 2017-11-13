@@ -34,7 +34,7 @@
   IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "php_zip_config.w32.h"
 #else
 # include "config.h"
@@ -45,7 +45,7 @@
 
 #include <zlib.h>
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 /* for dup(), close(), etc. */
 #include <io.h>
 #include "config.w32.h"

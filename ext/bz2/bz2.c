@@ -567,7 +567,7 @@ static PHP_FUNCTION(bzdecompress)
 	size_t source_len;
 	int error;
 	zend_long small = 0;
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 	unsigned __int64 size = 0;
 #else
 	unsigned long long size = 0;

@@ -26,7 +26,7 @@
 # include <unistd.h>
 #endif
 #include <fcntl.h>
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 # include <sys/types.h>
 # include <dirent.h>
 # include <signal.h>
@@ -49,7 +49,7 @@ static const char *g_shared_model;
 /* pointer to globals allocated in SHM and shared across processes */
 zend_smm_shared_globals *smm_shared_globals;
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 #ifdef ZTS
 static MUTEX_T zts_lock;
 #endif
@@ -67,13 +67,13 @@ static const zend_shared_memory_handler_entry handler_table[] = {
 #ifdef USE_SHM_OPEN
 	{ "posix", &zend_alloc_posix_handlers },
 #endif
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	{ "win32", &zend_alloc_win32_handlers },
 #endif
 	{ NULL, NULL}
 };
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 void zend_shared_alloc_create_lock(char *lockfile_path)
 {
 	int val;
@@ -162,7 +162,7 @@ int zend_shared_alloc_startup(size_t requested_size)
 	smm_shared_globals = &tmp_shared_globals;
 	ZSMMG(shared_free) = requested_size; /* goes to tmp_shared_globals.shared_free */
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	zend_shared_alloc_create_lock(ZCG(accel_directives).lockfile_path);
 #else
 	zend_shared_alloc_create_lock();
@@ -277,7 +277,7 @@ void zend_shared_alloc_shutdown(void)
 	efree(ZSMMG(shared_segments));
 	ZSMMG(shared_segments) = NULL;
 	g_shared_alloc_handler = NULL;
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	close(lock_file);
 #endif
 }
@@ -371,7 +371,7 @@ void zend_shared_alloc_safe_unlock(void)
 	}
 }
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 /* name l_type l_whence l_start l_len */
 static FLOCK_STRUCTURE(mem_write_lock, F_WRLCK, SEEK_SET, 0, 1);
 static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
@@ -379,7 +379,7 @@ static FLOCK_STRUCTURE(mem_write_unlock, F_UNLCK, SEEK_SET, 0, 1);
 
 void zend_shared_alloc_lock(void)
 {
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 
 #ifdef ZTS
 	tsrm_mutex_lock(zts_lock);
@@ -412,7 +412,7 @@ void zend_shared_alloc_unlock(void)
 {
 	ZCG(locked) = 0;
 
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	if (fcntl(lock_file, F_SETLK, &mem_write_unlock) == -1) {
 		zend_accel_error(ACCEL_LOG_ERROR, "Cannot remove lock - %s (%d)", strerror(errno), errno);
 	}

@@ -36,7 +36,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	zend_long port = -1;
 	zval *zerrno = NULL, *zerrstr = NULL;
 	double timeout = (double)FG(default_socket_timeout);
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	time_t conv;
 #else
 	long conv;
@@ -72,7 +72,7 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	}
 
 	/* prepare the timeout value for use */
-#ifndef PHP_WIN32
+#ifndef _WIN32
 	conv = (time_t) (timeout * 1000000.0);
 	tv.tv_sec = conv / 1000000;
 #else

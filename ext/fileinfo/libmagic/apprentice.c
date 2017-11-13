@@ -49,7 +49,7 @@ FILE_RCSID("@(#)$File: apprentice.c,v 1.260 2017/04/28 16:27:58 christos Exp $")
 #endif
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "win32/unistd.h"
 #define strtoull _strtoui64
 #else
@@ -2895,7 +2895,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 		goto internal_loaded;
 	}
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	/* Don't bother on windows with php_stream_open_wrapper,
 	return to give apprentice_load() a chance. */
 	if (php_stream_stat_path_ex((char *)fn, 0, &st, NULL) == SUCCESS) {
@@ -3159,7 +3159,7 @@ mkdbname(struct magic_set *ms, const char *fn, int strip)
 	/* Compatibility with old code that looked in .mime */
 	if (ms->flags & MAGIC_MIME) {
 		spprintf(&buf, MAXPATHLEN, "%.*s.mime%s", (int)(q - fn), fn, ext);
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		if (VCWD_ACCESS(buf, R_OK) == 0) {
 #else
 		if (VCWD_ACCESS(buf, R_OK) != -1) {

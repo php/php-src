@@ -21,7 +21,7 @@
 #ifndef PHPDBG_H
 #define PHPDBG_H
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define PHPDBG_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
 # define PHPDBG_API __attribute__ ((visibility("default")))
@@ -29,7 +29,7 @@
 # define PHPDBG_API
 #endif
 
-#ifndef PHP_WIN32
+#ifndef _WIN32
 #	include <stdint.h>
 #	include <stddef.h>
 #else
@@ -48,7 +48,7 @@
 #include "zend_signal.h"
 #if !defined(_WIN32) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
 #	include <signal.h>
-#elif defined(PHP_WIN32)
+#elif defined(_WIN32)
 #	include "win32/signal.h"
 #endif
 #include "SAPI.h"
@@ -74,7 +74,7 @@
 #endif
 
 #undef zend_hash_str_add
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #define zend_hash_str_add(...) \
 	_zend_hash_str_add(__VA_ARGS__ ZEND_FILE_LINE_CC)
 #else
@@ -133,7 +133,7 @@
 #include "phpdbg_watch.h"
 #include "phpdbg_bp.h"
 #include "phpdbg_opcode.h"
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # include "phpdbg_sigio_win32.h"
 #endif
 
@@ -322,7 +322,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	char *sapi_name_ptr;                         /* store sapi name to free it if necessary to not leak memory */
 	int socket_fd;                               /* file descriptor to socket (wait command) (-1 if unused) */
 	int socket_server_fd;                        /* file descriptor to master socket (wait command) (-1 if unused) */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 	HANDLE sigio_watcher_thread;                 /* sigio watcher thread handle */
 	struct win32_sigio_watcher_data swd;
 #endif

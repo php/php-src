@@ -3,7 +3,7 @@
 #ifndef _CRYPT_FREESEC_H
 #define _CRYPT_FREESEC_H
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # ifndef inline
 # define inline __inline
 # endif

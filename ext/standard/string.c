@@ -117,7 +117,7 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 int php_tag_find(char *tag, size_t len, const char *set);
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # define SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
 #elif HAVE_ATTRIBUTE_ALIGNED
 # define SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
@@ -204,7 +204,7 @@ PHPAPI struct lconv *localeconv_r(struct lconv *out)
 /*  cur->locinfo is struct __crt_locale_info which implementation is
 	hidden in vc14. TODO revisit this and check if a workaround available
 	and needed. */
-#if defined(PHP_WIN32) && _MSC_VER < 1900 && defined(ZTS)
+#if defined(_WIN32) && _MSC_VER < 1900 && defined(ZTS)
 	{
 		/* Even with the enabled per thread locale, localeconv
 			won't check any locale change in the master thread. */
@@ -1552,7 +1552,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 			case 0:
 				goto quit_loop;
 			case 1:
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 				if (*c == '/' || *c == '\\') {
 #else
 				if (*c == '/') {
@@ -1561,7 +1561,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 						state = 0;
 						cend = c;
 					}
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
 				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */
@@ -1652,7 +1652,7 @@ PHP_FUNCTION(dirname)
 
 	if (levels == 1) {
 		/* Defaut case */
-#ifdef PHP_WIN32
+#ifdef _WIN32
 		ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len);
 #else
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
@@ -1664,7 +1664,7 @@ PHP_FUNCTION(dirname)
 	} else {
 		/* Some levels up */
 		do {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
 #else
 			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));

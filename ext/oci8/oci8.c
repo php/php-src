@@ -59,7 +59,7 @@ static PHP_GSHUTDOWN_FUNCTION(oci);
 #endif
 
 /* For a user friendly message about environment setup */
-#if defined(PHP_WIN32)
+#if defined(_WIN32)
 #define PHP_OCI8_LIB_PATH_MSG "PATH"
 #elif defined(__APPLE__)
 #define PHP_OCI8_LIB_PATH_MSG "DYLD_LIBRARY_PATH"
@@ -1228,7 +1228,7 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "Oracle Compile-time Version", buf);
 #endif
 
-#if !defined(PHP_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
+#if !defined(_WIN32) && !defined(HAVE_OCI_INSTANT_CLIENT)
 #if defined(PHP_OCI8_DEF_DIR)
 	php_info_print_table_row(2, "Compile-time ORACLE_HOME", PHP_OCI8_DEF_DIR);
 #endif
@@ -1691,7 +1691,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 			return NULL;
 		}
 		if (session_mode & PHP_OCI_CRED_EXT) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 			/* Disable external authentication on Windows as Impersonation is not yet handled.
 			 * TODO: Re-enable this once OCI provides capability.
 			 */

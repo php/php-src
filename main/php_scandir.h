@@ -28,7 +28,7 @@
 #include <sys/dir.h>
 #endif
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 #include "config.w32.h"
 #include "win32/readdir.h"
 #else

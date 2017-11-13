@@ -580,7 +580,7 @@ static inline zend_long object_common1(UNSERIALIZE_PARAMETER, zend_class_entry *
 	return elements;
 }
 
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # pragma optimize("", off)
 #endif
 static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
@@ -619,7 +619,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 
 	return finish_nested_data(UNSERIALIZE_PASSTHRU);
 }
-#ifdef PHP_WIN32
+#ifdef _WIN32
 # pragma optimize("", on)
 #endif
 

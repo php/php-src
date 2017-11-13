@@ -36,7 +36,7 @@
 /* 8 - Standalone Open Source Zend OPcache */
 #define ACCELERATOR_API_NO 8
 
-#if ZEND_WIN32
+#if _WIN32
 # include "zend_config.w32.h"
 #else
 #include "zend_config.h"
@@ -56,7 +56,7 @@
 #include "zend_accelerator_debug.h"
 
 #ifndef PHPAPI
-# ifdef ZEND_WIN32
+# ifdef _WIN32
 #  define PHPAPI __declspec(dllimport)
 # else
 #  define PHPAPI
@@ -73,7 +73,7 @@
 # endif
 #endif
 
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 # ifndef MAXPATHLEN
 #  include "win32/ioutil.h"
 #  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
@@ -87,7 +87,7 @@
 #endif
 
 /*** file locking ***/
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 extern int lock_file;
 
 # if defined(__FreeBSD__) || defined(__FreeBSD_kernel__) || (defined(__APPLE__) && defined(__MACH__)/* Darwin */) || defined(__OpenBSD__) || defined(__NetBSD__)
@@ -118,11 +118,11 @@ extern int lock_file;
 # endif
 #endif
 
-#if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
+#if defined(HAVE_OPCACHE_FILE_CACHE) && defined(_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
 #endif
 
-#if ZEND_WIN32
+#if _WIN32
 typedef unsigned __int64 accel_time_t;
 #else
 typedef time_t accel_time_t;
@@ -152,7 +152,7 @@ typedef struct _zend_persistent_script {
 	 */
 	struct zend_persistent_script_dynamic_members {
 		time_t       last_used;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 		LONGLONG   hits;
 #else
 		zend_ulong        hits;
@@ -180,13 +180,13 @@ typedef struct _zend_accel_directives {
 	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	zend_bool      validate_root;
 #endif
 	zend_ulong     revalidate_freq;
 	zend_ulong     file_update_protection;
 	char          *error_log;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	char          *mmap_base;
 #endif
 	char          *memory_model;
@@ -197,7 +197,7 @@ typedef struct _zend_accel_directives {
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	char          *lockfile_path;
 #endif
 #ifdef HAVE_OPCACHE_FILE_CACHE
@@ -236,7 +236,7 @@ typedef struct _zend_accel_globals {
 	time_t                  last_restart_time; /* used to synchronize SHM and in-process caches */
 	char                    system_id[32];
 	HashTable               xlat_table;
-#ifndef ZEND_WIN32
+#ifndef _WIN32
 	zend_ulong              root_hash;
 #endif
 	/* preallocated shared-memory block to save current script */
@@ -269,7 +269,7 @@ typedef struct _zend_accel_shared_globals {
 	zend_bool       restart_pending;
 	zend_accel_restart_reason restart_reason;
 	zend_bool       cache_status_before_restart;
-#ifdef ZEND_WIN32
+#ifdef _WIN32
 	LONGLONG   mem_usage;
 	LONGLONG   restart_in;
 #endif

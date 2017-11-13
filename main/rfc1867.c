@@ -35,7 +35,7 @@
 #include "ext/standard/php_string.h"
 #include "zend_smart_string.h"
 
-#if defined(PHP_WIN32) && !defined(HAVE_ATOLL)
+#if defined(_WIN32) && !defined(HAVE_ATOLL)
 # define atoll(s) _atoi64(s)
 # define HAVE_ATOLL 1
 #endif
@@ -1054,7 +1054,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 #endif
 					cancel_upload = UPLOAD_ERROR_B;
 				} else if (blen > 0) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 					wlen = write(fd, buff, (unsigned int)blen);
 #else
 					wlen = write(fd, buff, blen);
@@ -1252,7 +1252,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					ZVAL_LONG(&file_size, 0);
 				} else {
 					if (total_bytes > ZEND_LONG_MAX) {
-#ifdef PHP_WIN32
+#ifdef _WIN32
 						if (_i64toa_s(total_bytes, file_size_buf, 65, 10)) {
 							file_size_buf[0] = '0';
 							file_size_buf[1] = '\0';
