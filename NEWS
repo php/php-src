@@ -8,6 +8,8 @@ PHP                                                                        NEWS
 
 - Standard:
   . Fixed bug #75511 (fread not free unused buffer). (Laruence)
+  . Fixed bug #75514 (mt_rand returns value outside [$min,$max]+ on 32-bit)
+    (Remi)
 
 23 Nov 2017, PHP 7.1.12
 
