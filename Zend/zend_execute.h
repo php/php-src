@@ -138,6 +138,7 @@ struct _zend_vm_stack {
 	zval *top;
 	zval *end;
 	zend_vm_stack prev;
+	size_t frame_size;
 };
 
 #define ZEND_VM_STACK_HEADER_SLOTS \
@@ -162,6 +163,7 @@ struct _zend_vm_stack {
 #endif
 
 ZEND_API void zend_vm_stack_init(void);
+ZEND_API void zend_vm_stack_init_ex(size_t size);
 ZEND_API void zend_vm_stack_destroy(void);
 ZEND_API void* zend_vm_stack_extend(size_t size);
 
