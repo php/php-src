@@ -53,15 +53,11 @@ static enum_func_status
 MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn)
 {
 	unsigned int i = 0;
-	MYSQLND_PACKET_RES_FIELD * field_packet;
+	MYSQLND_PACKET_RES_FIELD field_packet;
 
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
-	field_packet = conn->payload_decoder_factory->m.get_result_field_packet(conn->payload_decoder_factory, FALSE);
-	if (!field_packet) {
-		SET_OOM_ERROR(conn->error_info);
-		DBG_RETURN(FAIL);
-	}
+	conn->payload_decoder_factory->m.init_result_field_packet(&field_packet);
 	for (;i < meta->field_count; i++) {
 		zend_ulong idx;
 
@@ -71,31 +67,31 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 			meta->fields[i].root = NULL;
 		}
 
-		field_packet->metadata = &(meta->fields[i]);
-		if (FAIL == PACKET_READ(field_packet)) {
-			PACKET_FREE(field_packet);
+		field_packet.metadata = &(meta->fields[i]);
+		if (FAIL == PACKET_READ(conn, &field_packet)) {
+			PACKET_FREE(&field_packet);
 			DBG_RETURN(FAIL);
 		}
-		if (field_packet->error_info.error_no) {
-			COPY_CLIENT_ERROR(conn->error_info, field_packet->error_info);
+		if (field_packet.error_info.error_no) {
+			COPY_CLIENT_ERROR(conn->error_info, field_packet.error_info);
 			/* Return back from CONN_QUERY_SENT */
-			PACKET_FREE(field_packet);
+			PACKET_FREE(&field_packet);
 			DBG_RETURN(FAIL);
 		}
 
 		if (mysqlnd_ps_fetch_functions[meta->fields[i].type].func == NULL) {
 			DBG_ERR_FMT("Unknown type %u sent by the server.  Please send a report to the developers", meta->fields[i].type);
 			php_error_docref(NULL, E_WARNING, "Unknown type %u sent by the server. Please send a report to the developers", meta->fields[i].type);
-			PACKET_FREE(field_packet);
+			PACKET_FREE(&field_packet);
 			DBG_RETURN(FAIL);
 		}
 
 		/* For BC we have to check whether the key is numeric and use it like this */
-		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet->metadata->sname, idx))) {
+		if ((meta->zend_hash_keys[i].is_numeric = ZEND_HANDLE_NUMERIC(field_packet.metadata->sname, idx))) {
 			meta->zend_hash_keys[i].key = idx;
 		}
 	}
-	PACKET_FREE(field_packet);
+	PACKET_FREE(&field_packet);
 
 	DBG_RETURN(PASS);
 }

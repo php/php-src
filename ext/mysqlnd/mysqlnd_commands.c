@@ -326,17 +326,15 @@ mysqlnd_com_statistics_run(void *cmd)
 					   conn);
 
 	if (PASS == ret) {
-		MYSQLND_PACKET_STATS * stats_header = conn->payload_decoder_factory->m.get_stats_packet(conn->payload_decoder_factory, FALSE);
-		if (!stats_header) {
-			SET_OOM_ERROR(conn->error_info);
-		} else {
-			if (PASS == (ret = PACKET_READ(stats_header))) {
-				/* will be freed by Zend, thus don't use the mnd_ allocator */
-				*message = zend_string_init(stats_header->message.s, stats_header->message.l, 0);
-				DBG_INF(ZSTR_VAL(*message));
-			}
-			PACKET_FREE(stats_header);
+		MYSQLND_PACKET_STATS stats_header;
+
+		conn->payload_decoder_factory->m.init_stats_packet(&stats_header);
+		if (PASS == (ret = PACKET_READ(conn, &stats_header))) {
+			/* will be freed by Zend, thus don't use the mnd_ allocator */
+			*message = zend_string_init(stats_header.message.s, stats_header.message.l, 0);
+			DBG_INF(ZSTR_VAL(*message));
 		}
+		PACKET_FREE(&stats_header);
 	}
 
 	DBG_RETURN(ret);
@@ -1154,7 +1152,7 @@ mysqlnd_com_enable_ssl_run(void *cmd)
 	struct st_mysqlnd_protocol_com_enable_ssl_command * command = (struct st_mysqlnd_protocol_com_enable_ssl_command *) cmd;
 	enum_func_status ret = FAIL;
 	MYSQLND_CONN_DATA * conn = command->context.conn;
-	MYSQLND_PACKET_AUTH * auth_packet;
+	MYSQLND_PACKET_AUTH auth_packet;
 	size_t client_capabilities = command->context.client_capabilities;
 	size_t server_capabilities = command->context.server_capabilities;
 
@@ -1185,15 +1183,11 @@ mysqlnd_com_enable_ssl_run(void *cmd)
 	DBG_INF_FMT("CLIENT_SSL_VERIFY_SERVER_CERT=	%d", client_capabilities & CLIENT_SSL_VERIFY_SERVER_CERT? 1:0);
 	DBG_INF_FMT("CLIENT_REMEMBER_OPTIONS=		%d", client_capabilities & CLIENT_REMEMBER_OPTIONS? 1:0);
 
-	auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
-	if (!auth_packet) {
-		SET_OOM_ERROR(conn->error_info);
-		goto end;
-	}
-	auth_packet->client_flags = client_capabilities;
-	auth_packet->max_packet_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
+	conn->payload_decoder_factory->m.init_auth_packet(&auth_packet);
+	auth_packet.client_flags = client_capabilities;
+	auth_packet.max_packet_size = MYSQLND_ASSEMBLED_PACKET_MAX_SIZE;
 
-	auth_packet->charset_no	= command->context.charset_no;
+	auth_packet.charset_no	= command->context.charset_no;
 
 #ifdef MYSQLND_SSL_SUPPORTED
 	if (client_capabilities & CLIENT_SSL) {
@@ -1207,7 +1201,7 @@ mysqlnd_com_enable_ssl_run(void *cmd)
 													MYSQLND_SSL_PEER_DONT_VERIFY:
 													MYSQLND_SSL_PEER_DEFAULT);
 			DBG_INF("Switching to SSL");
-			if (!PACKET_WRITE(auth_packet)) {
+			if (!PACKET_WRITE(conn, &auth_packet)) {
 				goto close_conn;
 			}
 
@@ -1219,21 +1213,21 @@ mysqlnd_com_enable_ssl_run(void *cmd)
 		}
 	}
 #else
-	auth_packet->client_flags &= ~CLIENT_SSL;
-	if (!PACKET_WRITE(auth_packet)) {
+	auth_packet.client_flags &= ~CLIENT_SSL;
+	if (!PACKET_WRITE(conn, &auth_packet)) {
 		goto close_conn;
 	}
 #endif
 	ret = PASS;
 end:
-	PACKET_FREE(auth_packet);
+	PACKET_FREE(&auth_packet);
 	DBG_RETURN(ret);
 
 close_conn:
 	SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 	conn->m->send_close(conn);
 	SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
-	PACKET_FREE(auth_packet);
+	PACKET_FREE(&auth_packet);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -1291,66 +1285,62 @@ mysqlnd_com_handshake_run(void *cmd)
 	size_t mysql_flags =  command->context.client_flags;
 
 	MYSQLND_CONN_DATA * conn = command->context.conn;
-	MYSQLND_PACKET_GREET * greet_packet;
+	MYSQLND_PACKET_GREET greet_packet;
 
 	DBG_ENTER("mysqlnd_conn_data::connect_handshake");
 	DBG_INF_FMT("stream=%p", conn->vio->data->m.get_stream(conn->vio));
 	DBG_INF_FMT("[user=%s] [db=%s:%d] [flags=%llu]", user, db, db_len, mysql_flags);
 
-	greet_packet = conn->payload_decoder_factory->m.get_greet_packet(conn->payload_decoder_factory, FALSE);
-	if (!greet_packet) {
-		SET_OOM_ERROR(conn->error_info);
-		DBG_RETURN(FAIL); /* OOM */
-	}
+	conn->payload_decoder_factory->m.init_greet_packet(&greet_packet);
 
-	if (FAIL == PACKET_READ(greet_packet)) {
+	if (FAIL == PACKET_READ(conn, &greet_packet)) {
 		DBG_ERR("Error while reading greeting packet");
 		php_error_docref(NULL, E_WARNING, "Error while reading greeting packet. PID=%d", getpid());
 		goto err;
-	} else if (greet_packet->error_no) {
-		DBG_ERR_FMT("errorno=%u error=%s", greet_packet->error_no, greet_packet->error);
-		SET_CLIENT_ERROR(conn->error_info, greet_packet->error_no, greet_packet->sqlstate, greet_packet->error);
+	} else if (greet_packet.error_no) {
+		DBG_ERR_FMT("errorno=%u error=%s", greet_packet.error_no, greet_packet.error);
+		SET_CLIENT_ERROR(conn->error_info, greet_packet.error_no, greet_packet.sqlstate, greet_packet.error);
 		goto err;
-	} else if (greet_packet->pre41) {
-		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet->server_version);
+	} else if (greet_packet.pre41) {
+		DBG_ERR_FMT("Connecting to 3.22, 3.23 & 4.0 is not supported. Server is %-.32s", greet_packet.server_version);
 		php_error_docref(NULL, E_WARNING, "Connecting to 3.22, 3.23 & 4.0 "
-						" is not supported. Server is %-.32s", greet_packet->server_version);
+						" is not supported. Server is %-.32s", greet_packet.server_version);
 		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
 						 "Connecting to 3.22, 3.23 & 4.0 servers is not supported");
 		goto err;
 	}
 
-	conn->thread_id			= greet_packet->thread_id;
-	conn->protocol_version	= greet_packet->protocol_version;
-	conn->server_version	= mnd_pestrdup(greet_packet->server_version, conn->persistent);
+	conn->thread_id			= greet_packet.thread_id;
+	conn->protocol_version	= greet_packet.protocol_version;
+	conn->server_version	= mnd_pestrdup(greet_packet.server_version, conn->persistent);
 
-	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet->charset_no);
+	conn->greet_charset = mysqlnd_find_charset_nr(greet_packet.charset_no);
 	if (!conn->greet_charset) {
 		php_error_docref(NULL, E_WARNING,
-			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet->charset_no);
+			"Server sent charset (%d) unknown to the client. Please, report to the developers", greet_packet.charset_no);
 		SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE,
 			"Server sent charset unknown to the client. Please, report to the developers");
 		goto err;
 	}
 
-	conn->server_capabilities 	= greet_packet->server_capabilities;
+	conn->server_capabilities 	= greet_packet.server_capabilities;
 
 	if (FAIL == mysqlnd_connect_run_authentication(conn, user, passwd, db, db_len, (size_t) passwd_len,
-												   greet_packet->authentication_plugin_data, greet_packet->auth_protocol,
-												   greet_packet->charset_no, greet_packet->server_capabilities,
+												   greet_packet.authentication_plugin_data, greet_packet.auth_protocol,
+												   greet_packet.charset_no, greet_packet.server_capabilities,
 												   conn->options, mysql_flags))
 	{
 		goto err;
 	}
 
 	UPSERT_STATUS_RESET(conn->upsert_status);
-	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, greet_packet->server_status);
+	UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, greet_packet.server_status);
 
-	PACKET_FREE(greet_packet);
+	PACKET_FREE(&greet_packet);
 	DBG_RETURN(PASS);
 err:
 	conn->server_capabilities = 0;
-	PACKET_FREE(greet_packet);
+	PACKET_FREE(&greet_packet);
 	DBG_RETURN(FAIL);
 }
 /* }}} */

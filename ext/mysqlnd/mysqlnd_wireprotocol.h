@@ -31,13 +31,13 @@ PHPAPI extern const char mysqlnd_read_body_name[];
 
 
 /* Packet handling */
-#define PACKET_WRITE(packet)	((packet)->header.m->write_to_net((packet)))
-#define PACKET_READ(packet)		((packet)->header.m->read_from_net((packet)))
+#define PACKET_WRITE(conn, packet)	((packet)->header.m->write_to_net((conn), (packet)))
+#define PACKET_READ(conn, packet)	((packet)->header.m->read_from_net((conn), (packet)))
 #define PACKET_FREE(packet) \
 	do { \
 		DBG_INF_FMT("PACKET_FREE(%p)", packet); \
-		if ((packet)) { \
-			((packet)->header.m->free_mem((packet), FALSE)); \
+		if ((packet)->header.m->free_mem) { \
+			((packet)->header.m->free_mem((packet))); \
 		} \
 	} while (0);
 
@@ -45,27 +45,17 @@ PHPAPI extern const char * const mysqlnd_command_to_text[COM_END];
 
 /* Low-level extraction functionality */
 typedef struct st_mysqlnd_packet_methods {
-	size_t				struct_size;
-	enum_func_status	(*read_from_net)(void * packet);
-	size_t				(*write_to_net)(void * packet);
-	void				(*free_mem)(void *packet, zend_bool stack_allocation);
+	enum_func_status	(*read_from_net)(MYSQLND_CONN_DATA * conn, void * packet);
+	size_t				(*write_to_net)(MYSQLND_CONN_DATA * conn, void * packet);
+	void				(*free_mem)(void *packet);
 } mysqlnd_packet_methods;
 
 
 typedef struct st_mysqlnd_packet_header {
 	size_t		size;
 	zend_uchar	packet_no;
-	zend_bool	persistent;
 
 	mysqlnd_packet_methods *m;
-
-	MYSQLND_CONN_DATA * conn;
-	MYSQLND_PFC * protocol_frame_codec;
-	MYSQLND_VIO * vio;
-	MYSQLND_ERROR_INFO * error_info;
-	MYSQLND_STATS * stats;
-	MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * factory;
-	MYSQLND_CONNECTION_STATE * connection_state;
 } MYSQLND_PACKET_HEADER;
 
 /* Server greets the client */
