@@ -510,6 +510,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	char				 end_delimiter;
 	char				*p, *pp;
 	char				*pattern;
+	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
 	const uint8_t       *tables = NULL;
 	pcre_cache_entry	*pce;
@@ -621,7 +622,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	/* Make a copy of the actual pattern. */
-	pattern = estrndup(p, pp-p);
+	pattern_len = pp - p;
+	pattern = estrndup(p, pattern_len);
 
 	/* Move on to the options */
 	pp++;
@@ -694,7 +696,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	}
 
 	/* Compile pattern and display a warning if compilation failed. */
-	re = pcre2_compile(pattern, PCRE2_ZERO_TERMINATED, coptions, &errnumber, &erroffset, cctx);
+	re = pcre2_compile((PCRE2_SPTR)pattern, pattern_len, coptions, &errnumber, &erroffset, cctx);
 
 	/* Reset the compile context extra options to default. */
 	if (PHP_PCRE_DEFAULT_EXTRA_COPTIONS != extra_coptions) {
@@ -1046,11 +1048,11 @@ PHPAPI void php_pcre_match_impl(pcre_cache_entry *pce, char *subject, size_t sub
 				pcre_handle_exec_error(PCRE2_ERROR_BADOFFSET);
 				break;
 			}
-			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset2,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, subject, subject_len, start_offset2,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset2,
 				no_utf_check|g_notempty, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -1527,11 +1529,11 @@ PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *su
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
-			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, subject, subject_len, start_offset,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 				no_utf_check|g_notempty, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -1775,11 +1777,11 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
-			count = pcre2_jit_match(pce->re, subject, subject_len, start_offset,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, subject, subject_len, start_offset,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)subject, subject_len, start_offset,
 				no_utf_check|g_notempty, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -2423,11 +2425,11 @@ PHPAPI void php_pcre_split_impl(pcre_cache_entry *pce, zend_string *subject_str,
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check && !g_notempty) {
-			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), start_offset,
 				no_utf_check|g_notempty, match_data, mctx);
 
 		/* the string was already proved to be valid UTF-8 */
@@ -2732,11 +2734,11 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 #ifdef HAVE_PCRE_JIT_SUPPORT
 		if (PCRE_G(jit) && (pce->preg_options && PREG_JIT)
 		 && no_utf_check) {
-			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
+			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
 		} else
 #endif
-		count = pcre2_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
+		count = pcre2_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 				no_utf_check, match_data, mctx);
 
 		/* Check for too many substrings condition. */
