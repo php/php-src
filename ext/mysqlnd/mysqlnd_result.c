@@ -1317,7 +1317,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				ret = FAIL;
 				goto free_end;
 			}
-			new_row_buffers = mnd_perealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), 0);
+			new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
@@ -1361,7 +1361,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 			ret = FAIL;
 			goto free_end;
 		}
-		*row_buffers = mnd_perealloc(*row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), 0);
+		*row_buffers = mnd_erealloc(*row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 	}
 
 	if (UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS) {
