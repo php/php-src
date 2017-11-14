@@ -243,6 +243,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
+	pcre_globals->jit = 1;
 
 	php_pcre_init_pcre2(1);
 }
