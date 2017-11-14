@@ -1237,8 +1237,6 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES * result, void * param, const
 /* }}} */
 
 
-#define STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY 2
-
 /* {{{ mysqlnd_res::store_result_fetch_data */
 enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
@@ -1247,7 +1245,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 													zend_bool binary_protocol)
 {
 	enum_func_status ret;
-	unsigned int next_extend = STORE_RESULT_PREALLOCATED_SET_IF_NOT_EMPTY, free_rows = 1;
+	uint64_t total_allocated_rows = 0;
+	unsigned int free_rows = 0;
 	MYSQLND_RES_BUFFERED * set = result->stored_data;
 	MYSQLND_PACKET_ROW row_packet;
 
@@ -1256,14 +1255,8 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		ret = FAIL;
 		goto end;
 	}
-	if (free_rows) {
-		*row_buffers = mnd_emalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
-		if (!*row_buffers) {
-			SET_OOM_ERROR(conn->error_info);
-			ret = FAIL;
-			goto end;
-		}
-	}
+
+	*row_buffers = NULL;
 
 	conn->payload_decoder_factory->m.init_row_packet(&row_packet);
 	set->references	= 1;
@@ -1277,9 +1270,21 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	while (FAIL != (ret = PACKET_READ(conn, &row_packet)) && !row_packet.eof) {
 		if (!free_rows) {
-			uint64_t total_allocated_rows = free_rows = next_extend = next_extend * 11 / 10; /* extend with 10% */
 			MYSQLND_MEMORY_POOL_CHUNK ** new_row_buffers;
 			total_allocated_rows += set->row_count;
+
+			if (total_allocated_rows < 1024) {
+				if (total_allocated_rows == 0) {
+					free_rows = 1;
+					total_allocated_rows = 1;
+				} else {
+					free_rows = total_allocated_rows;
+					total_allocated_rows *= 2;
+				}
+			} else {
+				free_rows = 1024;
+				total_allocated_rows += 1024;
+			}
 
 			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
 			if (total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
@@ -1287,7 +1292,11 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 				ret = FAIL;
 				goto free_end;
 			}
-			new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+			if (*row_buffers) {
+				new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+			} else {
+				new_row_buffers = mnd_emalloc((size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+			}
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
@@ -1323,6 +1332,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		UPSERT_STATUS_SET_WARNINGS(conn->upsert_status, row_packet.warning_count);
 		UPSERT_STATUS_SET_SERVER_STATUS(conn->upsert_status, row_packet.server_status);
 	}
+
 	/* save some memory */
 	if (free_rows) {
 		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
