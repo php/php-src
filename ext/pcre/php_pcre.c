@@ -2694,7 +2694,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 	zval            *entry;             /* An entry in the input array */
 	uint32_t		 num_subpats;		/* Number of captured subpatterns */
 	int				 count = 0;			/* Count of matched subpatterns */
-	uint32_t		 no_utf_check;		/* Execution options */
+	uint32_t		 no_utf_check = 0;	/* Execution options */
 	zend_string		*string_key;
 	zend_ulong		 num_key;
 	zend_bool		 invert;			/* Whether to return non-matching
