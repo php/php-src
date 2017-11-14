@@ -6,6 +6,9 @@ include "skipif.inc";
 if (!extension_loaded("reflection") || !extension_loaded("session")) {
 	die("skip reflection and session extensions required");
 }
+if (PCRE_JIT_SUPPORT == false) {
+	die ("skip not pcre jit support builtin");
+}
 ?>
 --INI--
 date.timezone=
@@ -39,7 +42,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     }
   }
 
-  - Constants [18] {
+  - Constants [19] {
     Constant [ integer PREG_PATTERN_ORDER ] { 1 }
     Constant [ integer PREG_SET_ORDER ] { 2 }
     Constant [ integer PREG_OFFSET_CAPTURE ] { 256 }
@@ -58,6 +61,7 @@ string(%d) "Extension [ <persistent> extension #%d pcre version %s ] {
     Constant [ string PCRE_VERSION ] { %s }
     Constant [ integer PCRE_VERSION_MAJOR ] { %d }
     Constant [ integer PCRE_VERSION_MINOR ] { %d }
+    Constant [ boolean PCRE_JIT_SUPPORT ] { %d }
   }
 
   - Functions {
