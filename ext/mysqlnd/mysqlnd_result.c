@@ -183,11 +183,6 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 	DBG_ENTER("mysqlnd_result_unbuffered, free_result");
 	result->m.free_last_data(result, global_stats);
 
-	if (result->lengths) {
-		mnd_efree(result->lengths);
-		result->lengths = NULL;
-	}
-
 	/* must be free before because references the memory pool */
 	if (result->row_packet) {
 		PACKET_FREE(result->row_packet);
@@ -195,13 +190,8 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 		result->row_packet = NULL;
 	}
 
-	if (result->result_set_memory_pool) {
-		mysqlnd_mempool_destroy(result->result_set_memory_pool);
-		result->result_set_memory_pool = NULL;
-	}
+	mysqlnd_mempool_destroy(result->result_set_memory_pool);
 
-
-	mnd_efree(result);
 	DBG_VOID_RETURN;
 }
 /* }}} */
@@ -254,8 +244,6 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)(MYSQLND_RES_BUFFERED_C * 
 static void
 MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * const set)
 {
-	int64_t row;
-	MYSQLND_MEMORY_POOL * pool;
 
 	DBG_ENTER("mysqlnd_result_buffered::free_result");
 	DBG_INF_FMT("Freeing "MYSQLND_LLU_SPEC" row(s)", set->row_count);
@@ -268,30 +256,12 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		MYSQLND_METHOD(mysqlnd_result_buffered_c, free_result)((MYSQLND_RES_BUFFERED_C *) set);
 	}
 
-	pool = set->result_set_memory_pool;
-	for (row = set->row_count - 1; row >= 0; row--) {
-		MYSQLND_MEMORY_POOL_CHUNK *current_buffer = set->row_buffers[row];
-		pool->free_chunk(pool, current_buffer);
-	}
-
-	if (set->lengths) {
-		mnd_efree(set->lengths);
-		set->lengths = NULL;
-	}
-
 	if (set->row_buffers) {
 		mnd_pefree(set->row_buffers, 0);
 		set->row_buffers = NULL;
 	}
 
-	if (set->result_set_memory_pool) {
-		mysqlnd_mempool_destroy(set->result_set_memory_pool);
-		set->result_set_memory_pool = NULL;
-	}
-
-	set->row_count	= 0;
-
-	mnd_efree(set);
+	mysqlnd_mempool_destroy(set->result_set_memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -1927,23 +1897,23 @@ PHPAPI MYSQLND_RES_UNBUFFERED *
 mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_UNBUFFERED) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_UNBUFFERED * ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_RES_UNBUFFERED * ret;
 
 	DBG_ENTER("mysqlnd_result_unbuffered_init");
 
-	if (!ret) {
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
-		mnd_efree(ret);
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
-		mnd_efree(ret->lengths);
-		mnd_efree(ret);
+	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
+	if (!pool) {
 		DBG_RETURN(NULL);
 	}
 
+	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	memset(ret, 0, alloc_size);
+
+	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	memset(ret->lengths, 0, field_count * sizeof(size_t));
+
+	ret->result_set_memory_pool = pool;
 	ret->field_count= field_count;
 	ret->ps = ps;
 
@@ -1966,27 +1936,28 @@ PHPAPI MYSQLND_RES_BUFFERED_ZVAL *
 mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_ZVAL) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_BUFFERED_ZVAL * ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_RES_BUFFERED_ZVAL * ret;
 
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
-	if (!ret) {
-		DBG_RETURN(NULL);
-	}
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mnd_efree(ret);
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
-		mnd_efree(ret);
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
-		mnd_efree(ret->lengths);
-		mnd_efree(ret);
+	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
+	if (!pool) {
 		DBG_RETURN(NULL);
 	}
 
+	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	memset(ret, 0, alloc_size);
+
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
+		mysqlnd_mempool_destroy(pool);
+		DBG_RETURN(NULL);
+	}
+
+	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	memset(ret->lengths, 0, field_count * sizeof(size_t));
+
+	ret->result_set_memory_pool = pool;
 	ret->field_count= field_count;
 	ret->ps = ps;
 	ret->m = *mysqlnd_result_buffered_get_methods();
@@ -2012,27 +1983,28 @@ PHPAPI MYSQLND_RES_BUFFERED_C *
 mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_C) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_BUFFERED_C * ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_RES_BUFFERED_C * ret;
 
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
-	if (!ret) {
-		DBG_RETURN(NULL);
-	}
-	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mnd_efree(ret);
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->lengths = mnd_ecalloc(field_count, sizeof(size_t)))) {
-		mnd_efree(ret);
-		DBG_RETURN(NULL);
-	}
-	if (!(ret->result_set_memory_pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size)))) {
-		mnd_efree(ret->lengths);
-		mnd_efree(ret);
+	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
+	if (!pool) {
 		DBG_RETURN(NULL);
 	}
 
+	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	memset(ret, 0, alloc_size);
+
+	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
+		mysqlnd_mempool_destroy(pool);
+		DBG_RETURN(NULL);
+	}
+
+	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	memset(ret->lengths, 0, field_count * sizeof(size_t));
+
+	ret->result_set_memory_pool = pool;
 	ret->field_count= field_count;
 	ret->ps = ps;
 	ret->m = *mysqlnd_result_buffered_get_methods();

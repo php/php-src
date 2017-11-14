@@ -57,23 +57,21 @@ typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIS
 
 struct st_mysqlnd_memory_pool
 {
-	zend_uchar *arena;
-	unsigned int arena_size;
-	unsigned int free_size;
+	zend_arena		*arena;
 
 	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
-	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void				(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
+	MYSQLND_MEMORY_POOL_CHUNK*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
+	void						(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
 };
 
 struct st_mysqlnd_memory_pool_chunk
 {
-	size_t				app;
-	zend_uchar			*ptr;
-	unsigned int		size;
-	zend_bool			from_pool;
+	size_t			app;
+	size_t			size;
 };
 
+#define MYSQLND_MEMORY_POOL_CHUNK_PTR(chunk) \
+	((void*)((char*)(chunk) + sizeof(MYSQLND_MEMORY_POOL_CHUNK)))
 
 typedef struct st_mysqlnd_cmd_buffer
 {

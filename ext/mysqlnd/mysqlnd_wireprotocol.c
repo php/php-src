@@ -1422,7 +1422,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 				ret = FAIL;
 				break;
 			}
-			p = (*buffer)->ptr;
+			p = MYSQLND_MEMORY_POOL_CHUNK_PTR(*buffer);
 		} else if (!first_iteration) {
 			/* Empty packet after MYSQLND_MAX_PACKET_SIZE packet. That's ok, break */
 			if (!header.size) {
@@ -1432,13 +1432,14 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 			/*
 			  We have to realloc the buffer.
 			*/
-			if (FAIL == pool->resize_chunk(pool, *buffer, *data_size + prealloc_more_bytes)) {
+			*buffer = pool->resize_chunk(pool, *buffer, *data_size + prealloc_more_bytes);
+			if (!*buffer) {
 				SET_OOM_ERROR(error_info);
 				ret = FAIL;
 				break;
 			}
 			/* The position could have changed, recalculate */
-			p = (*buffer)->ptr + (*data_size - header.size);
+			p = MYSQLND_MEMORY_POOL_CHUNK_PTR(*buffer) + (*data_size - header.size);
 		}
 
 		if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
@@ -1467,7 +1468,7 @@ php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zv
 									  zend_bool as_int_or_float, MYSQLND_STATS * stats)
 {
 	unsigned int i;
-	const zend_uchar * p = row_buffer->ptr;
+	const zend_uchar * p = MYSQLND_MEMORY_POOL_CHUNK_PTR(row_buffer);
 	const zend_uchar * null_ptr;
 	zend_uchar bit;
 	zval *current_field, *end_field, *start_field;
@@ -1559,9 +1560,9 @@ php_mysqlnd_rowp_read_text_protocol_aux(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, 
 {
 	unsigned int i;
 	zval *current_field, *end_field, *start_field;
-	zend_uchar * p = row_buffer->ptr;
+	zend_uchar * p = MYSQLND_MEMORY_POOL_CHUNK_PTR(row_buffer);
 	size_t data_size = row_buffer->app;
-	const zend_uchar * const packet_end = (zend_uchar*) row_buffer->ptr + data_size;
+	const zend_uchar * const packet_end = (zend_uchar*) p + data_size;
 
 	DBG_ENTER("php_mysqlnd_rowp_read_text_protocol_aux");
 
@@ -1773,7 +1774,7 @@ php_mysqlnd_rowp_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	packet->header.size = data_size;
 	packet->row_buffer->app = data_size;
 
-	if (ERROR_MARKER == (*(p = packet->row_buffer->ptr))) {
+	if (ERROR_MARKER == (*(p = MYSQLND_MEMORY_POOL_CHUNK_PTR(packet->row_buffer)))) {
 		/*
 		   Error message as part of the result set,
 		   not good but we should not hang. See:
