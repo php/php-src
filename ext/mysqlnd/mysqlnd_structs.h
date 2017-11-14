@@ -85,6 +85,8 @@ typedef struct st_mysqlnd_cmd_buffer
 typedef struct st_mysqlnd_field
 {
 	zend_string *sname;			/* Name of column */
+	zend_bool    is_numeric;
+	zend_ulong	 num_key;
 	const char  *name;          /* Name of column in C string */
 	const char  *org_name;		/* Original column name, if an alias */
 	const char  *table;			/* Table of column if column was a field */
@@ -1134,18 +1136,9 @@ struct st_mysqlnd_protocol_frame_codec
 };
 
 
-
-struct mysqlnd_field_hash_key
-{
-	zend_bool		is_numeric;
-	zend_ulong	key;
-};
-
-
 struct st_mysqlnd_result_metadata
 {
 	MYSQLND_FIELD					*fields;
-	struct mysqlnd_field_hash_key	*zend_hash_keys;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta) * m;
 
