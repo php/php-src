@@ -2065,7 +2065,7 @@ SPL_METHOD(RegexIterator, accept)
 			if (!match_data) {
 				RETURN_FALSE;
 			}
-			rc = pcre2_match(re, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
+			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
 			RETVAL_BOOL(rc >= 0);
 			php_pcre_free_match_data(match_data);
 			break;

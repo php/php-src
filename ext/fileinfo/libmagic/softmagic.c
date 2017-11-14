@@ -427,7 +427,7 @@ check_fmt(struct magic_set *ms, struct magic *m)
 	} else {
 		pcre2_match_data *match_data = php_pcre_create_match_data(capture_count, pce);
 		if (match_data) {
-			rv = pcre2_match(pce, m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx()) > 0;
+			rv = pcre2_match(pce, (PCRE2_SPTR)m->desc, strlen(m->desc), 0, re_options, match_data, php_pcre_mctx()) > 0;
 			php_pcre_free_match_data(match_data);
 		}
 	}

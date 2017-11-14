@@ -5783,7 +5783,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 		options |= PCRE2_CASELESS;
 	}
 
-	re = pcre2_compile(regex, PCRE2_ZERO_TERMINATED, options, &errnumber, &err_offset, php_pcre_cctx());
+	re = pcre2_compile((PCRE2_SPTR)regex, PCRE2_ZERO_TERMINATED, options, &errnumber, &err_offset, php_pcre_cctx());
 	if (NULL == re) {
 		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
@@ -5796,7 +5796,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
 		return FAILURE;
 	}
-	res = pcre2_match(re, str, str_len, 0, 0, match_data, php_pcre_mctx());
+	res = pcre2_match(re, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
 	pcre2_code_free(re);
 

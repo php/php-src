@@ -449,7 +449,7 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (!match_data) {
 		RETURN_VALIDATION_FAILED
 	}
-	rc = pcre2_match(re, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
@@ -637,7 +637,7 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (!match_data) {
 		RETURN_VALIDATION_FAILED
 	}
-	rc = pcre2_match(re, Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */

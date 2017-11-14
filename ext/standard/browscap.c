@@ -635,7 +635,7 @@ static int browser_reg_compare(
 		zend_string_release(regex);
 		return 0;
 	}
-	rc = pcre2_match(re, ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, match_data, php_pcre_mctx());
+	rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(agent_name), ZSTR_LEN(agent_name), 0, re_options, match_data, php_pcre_mctx());
 	php_pcre_free_match_data(match_data);
 	if (PCRE2_ERROR_NOMATCH != rc) {
 		/* If we've found a possible browser, we need to do a comparison of the

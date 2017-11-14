@@ -179,10 +179,10 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre2_compile(regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
+			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
 				free(it);
 				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
-				blacklist_report_regexp_error(pcre_error, pcre_error_offset);
+				blacklist_report_regexp_error((char *)pcre_error, pcre_error_offset);
 				return;
 			}
 			/* prepare for the next iteration */
@@ -352,7 +352,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 			/* Alloc failed, but next one could still come through and match. */
 			continue;
 		}
-		int rc = pcre2_match(regexp_list_it->re, verify_path, strlen(verify_path), 0, 0, match_data, mctx);
+		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, strlen(verify_path), 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;
 			php_pcre_free_match_data(match_data);

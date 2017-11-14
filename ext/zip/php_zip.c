@@ -703,7 +703,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 				zend_string_release(namelist[i]);
 				continue;
 			}
-			rc = pcre2_match(re, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
+			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
 			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
 			if (rc < 0) {
