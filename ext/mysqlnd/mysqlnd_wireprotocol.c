@@ -1439,7 +1439,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 				break;
 			}
 			/* The position could have changed, recalculate */
-			p = MYSQLND_MEMORY_POOL_CHUNK_PTR(*buffer) + (*data_size - header.size);
+			p = (zend_uchar *) MYSQLND_MEMORY_POOL_CHUNK_PTR(*buffer) + (*data_size - header.size);
 		}
 
 		if (PASS != (ret = pfc->data->m.receive(pfc, vio, p, header.size, stats, error_info))) {
