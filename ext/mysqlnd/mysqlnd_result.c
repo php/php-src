@@ -257,7 +257,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 	}
 
 	if (set->row_buffers) {
-		mnd_pefree(set->row_buffers, 0);
+		mnd_efree(set->row_buffers);
 		set->row_buffers = NULL;
 	}
 
@@ -1257,7 +1257,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 		goto end;
 	}
 	if (free_rows) {
-		*row_buffers = mnd_pemalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)), 0);
+		*row_buffers = mnd_emalloc((size_t)(free_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
 		if (!*row_buffers) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
