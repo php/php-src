@@ -196,8 +196,8 @@ static void php_pcre_init_pcre2(uint8_t jit)
 		mdata = pcre2_match_data_create(PHP_PCRE_PREALLOC_MDATA_SIZE, gctx);
 		if (!mdata) {
 			pcre2_init_ok = 0;
+			return;
 		}
-		return;
 	}
 
 	pcre2_init_ok = 1;
@@ -243,6 +243,7 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
 	pcre_globals->error_code      = PHP_PCRE_NO_ERROR;
+	pcre_globals->jit = 1;
 
 	php_pcre_init_pcre2(1);
 }
