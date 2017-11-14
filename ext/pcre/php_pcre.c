@@ -2720,13 +2720,16 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 		}
 	}
 
+#ifdef HAVE_PCRE_JIT_SUPPORT
+	no_utf_check = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
+#endif
+
 	/* Go through the input array */
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(input), num_key, string_key, entry) {
 		zend_string *subject_str = zval_get_string(entry);
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		no_utf_check = (pce->compile_options & PCRE2_UTF) ? 0 : PCRE2_NO_UTF_CHECK;
 		if (PCRE_G(jit) && (pce->preg_options && PREG_JIT)
 		 && no_utf_check) {
 			count = pcre2_jit_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
@@ -2735,9 +2738,6 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 #endif
 		count = pcre2_match(pce->re, ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 				no_utf_check, match_data, mctx);
-
-		/* the string was already proved to be valid UTF-8 */
-		no_utf_check = PCRE2_NO_UTF_CHECK;
 
 		/* Check for too many substrings condition. */
 		if (count == 0) {
