@@ -845,13 +845,7 @@ struct st_mysqlnd_vio
 
 
 
-struct st_mysqlnd_protocol_command
-{
-	enum_func_status (*run)(void *cmd);
-	void (*free_command)(void * cmd);
-};
-
-typedef struct st_mysqlnd_protocol_command * (*func_mysqlnd__command_factory)(enum php_mysqlnd_server_command command, ...);
+typedef enum_func_status (*func_mysqlnd__run_command)(enum php_mysqlnd_server_command command, ...);
 
 
 
@@ -939,7 +933,7 @@ struct st_mysqlnd_connection_data
 	zend_bool		in_async_err_cb;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) object_factory;
-	func_mysqlnd__command_factory command_factory;
+	func_mysqlnd__run_command run_command;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * m;
 

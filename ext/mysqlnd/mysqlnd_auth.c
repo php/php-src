@@ -186,11 +186,7 @@ mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * conn,
 
 	{
 		size_t client_capabilities = mysql_flags;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+		ret = conn->run_command(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
 	}
 	DBG_RETURN(ret);
 }

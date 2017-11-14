@@ -400,11 +400,8 @@ MYSQLND_METHOD(mysqlnd_stmt, prepare)(MYSQLND_STMT * const s, const char * const
 	{
 		enum_func_status ret = FAIL;
 		const MYSQLND_CSTRING query_string = {query, query_len};
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_PREPARE, conn, query_string);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_STMT_PREPARE, conn, query_string);
 		if (FAIL == ret) {
 			goto fail;
 		}
@@ -713,12 +710,8 @@ MYSQLND_METHOD(mysqlnd_stmt, send_execute)(MYSQLND_STMT * const s, const enum_my
 	ret = s->m->generate_execute_request(s, &request, &request_len, &free_request);
 	if (ret == PASS) {
 		const MYSQLND_CSTRING payload = {(const char*) request, request_len};
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_EXECUTE, conn, payload);
-		ret = FAIL;
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}	
+
+		ret = conn->run_command(COM_STMT_EXECUTE, conn, payload);
 	} else {
 		SET_CLIENT_ERROR(stmt->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, "Couldn't generate the request. Possibly OOM.");
 	}
@@ -1047,16 +1040,10 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 	{
 		const MYSQLND_CSTRING payload = {(const char*) buf, sizeof(buf)};
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_FETCH, conn, payload);
-		ret = FAIL;
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-			if (ret == FAIL) {
-				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);	
-			}
-		}
-		if (FAIL == ret) {
+
+		ret = conn->run_command(COM_STMT_FETCH, conn, payload);
+		if (ret == FAIL) {
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);	
 			DBG_RETURN(FAIL);
 		}
 
@@ -1261,15 +1248,10 @@ MYSQLND_METHOD(mysqlnd_stmt, reset)(MYSQLND_STMT * const s)
 
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			size_t stmt_id = stmt->stmt_id;
-			struct st_mysqlnd_protocol_command * command = stmt->conn->command_factory(COM_STMT_RESET, stmt->conn, stmt_id);
-			ret = FAIL;
-			if (command) {
-				ret = command->run(command);
-				command->free_command(command);
 
-				if (ret == FAIL) {
-					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-				}
+			ret = stmt->conn->run_command(COM_STMT_RESET, stmt->conn, stmt_id);
+			if (ret == FAIL) {
+				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			}
 		}
 		*stmt->upsert_status = *conn->upsert_status;
@@ -1372,14 +1354,10 @@ MYSQLND_METHOD(mysqlnd_stmt, send_long_data)(MYSQLND_STMT * const s, unsigned in
 			/* COM_STMT_SEND_LONG_DATA doesn't acknowledge with an OK packet */
 			{
 				const MYSQLND_CSTRING payload = {(const char *) cmd_buf, packet_len};
-				struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_SEND_LONG_DATA, conn, payload);
-				ret = FAIL;
-				if (command) {
-					ret = command->run(command);
-					command->free_command(command);
-					if (ret == FAIL) {
-						COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-					}
+
+				ret = conn->run_command(COM_STMT_SEND_LONG_DATA, conn, payload);
+				if (ret == FAIL) {
+					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				}
 			}
 
@@ -2207,16 +2185,10 @@ MYSQLND_METHOD_PRIVATE(mysqlnd_stmt, close_on_server)(MYSQLND_STMT * const s, ze
 		if (GET_CONNECTION_STATE(&conn->state) == CONN_READY) {
 			enum_func_status ret = FAIL;
 			size_t stmt_id = stmt->stmt_id;
-			struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STMT_CLOSE, conn, stmt_id);
-			if (command) {
-				ret = command->run(command);
-				command->free_command(command);
 
-				if (ret == FAIL) {
-					COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
-				}
-			}
+			ret = conn->run_command(COM_STMT_CLOSE, conn, stmt_id);
 			if (ret == FAIL) {
+				COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 				DBG_RETURN(FAIL);
 			}
 		}

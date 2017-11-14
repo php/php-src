@@ -143,9 +143,9 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_connection)(MYSQLND_CLASS_METHODS_TYP
 	data->protocol_frame_codec = mysqlnd_pfc_init(persistent, factory, data->stats, data->error_info);
 	data->vio = mysqlnd_vio_init(persistent, factory, data->stats, data->error_info);
 	data->payload_decoder_factory = mysqlnd_protocol_payload_decoder_factory_init(data, persistent);
-	data->command_factory = mysqlnd_command_factory_get();
+	data->run_command = mysqlnd_command_factory_get();
 
-	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->command_factory) {
+	if (!data->protocol_frame_codec || !data->vio || !data->payload_decoder_factory || !data->run_command) {
 		new_object->m->dtor(new_object);
 		DBG_RETURN(NULL);
 	}

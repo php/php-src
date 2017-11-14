@@ -390,12 +390,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, set_server_option)(MYSQLND_CONN_DATA * const c
 	enum_func_status ret = FAIL;
 	DBG_ENTER("mysqlnd_conn_data::set_server_option");
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_SET_OPTION, conn, option);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
-
+		ret = conn->run_command(COM_SET_OPTION, conn, option);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -546,11 +541,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect_handshake)(MYSQLND_CONN_DATA * conn,
 		PASS == conn->protocol_frame_codec->data->m.reset(conn->protocol_frame_codec, conn->stats, conn->error_info))
 	{
 		size_t client_flags = mysql_flags;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_HANDSHAKE, conn, username, password, database, client_flags);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_HANDSHAKE, conn, username, password, database, client_flags);
 	}
 	DBG_RETURN(ret);
 }
@@ -891,11 +883,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_query)(MYSQLND_CONN_DATA * conn, const ch
 	if (type == MYSQLND_SEND_QUERY_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
 	{
 		const MYSQLND_CSTRING query_string = {query, query_len};
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_QUERY, conn, query_string);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_QUERY, conn, query_string);
 
 		if (type == MYSQLND_SEND_QUERY_EXPLICIT) {
 			conn->m->local_tx_end(conn, this_func, ret);
@@ -919,11 +908,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, reap_query)(MYSQLND_CONN_DATA * conn, enum_mys
 	DBG_INF_FMT("conn->server_status=%u", UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status));
 	if (type == MYSQLND_REAP_RESULT_IMPLICIT || PASS == conn->m->local_tx_start(conn, this_func))
 	{
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_REAP_RESULT, conn);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+		ret = conn->run_command(COM_REAP_RESULT, conn);
 
 		if (type == MYSQLND_REAP_RESULT_EXPLICIT) {
 			conn->m->local_tx_end(conn, this_func, ret);
@@ -1068,12 +1053,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, dump_debug_info)(MYSQLND_CONN_DATA * const con
 	DBG_ENTER("mysqlnd_conn_data::dump_debug_info");
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_DEBUG, conn);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
-
+		ret = conn->run_command(COM_DEBUG, conn);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 
@@ -1094,12 +1074,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, select_db)(MYSQLND_CONN_DATA * const conn, con
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		const MYSQLND_CSTRING database = {db, db_len};
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_INIT_DB, conn, database);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
 
+		ret = conn->run_command(COM_INIT_DB, conn, database);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1118,11 +1094,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, ping)(MYSQLND_CONN_DATA * const conn)
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_PING, conn);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+		ret = conn->run_command(COM_PING, conn);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_INF_FMT("ret=%u", ret);
@@ -1142,11 +1114,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, statistic)(MYSQLND_CONN_DATA * conn, zend_stri
 	DBG_INF_FMT("conn=%llu", conn->thread_id);
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_STATISTICS, conn, message);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+		ret = conn->run_command(COM_STATISTICS, conn, message);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1168,11 +1136,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, kill)(MYSQLND_CONN_DATA * conn, unsigned int p
 		unsigned int process_id = pid;
 		/* 'unsigned char' is promoted to 'int' when passed through '...' */
 		unsigned int read_response = (pid != conn->thread_id);
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_PROCESS_KILL, conn, process_id, read_response);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_PROCESS_KILL, conn, process_id, read_response);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1230,11 +1195,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, refresh)(MYSQLND_CONN_DATA * const conn, uint8
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		unsigned int options_param = (unsigned int) options;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_REFRESH, conn, options_param);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_REFRESH, conn, options_param);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1253,11 +1215,8 @@ MYSQLND_METHOD(mysqlnd_conn_data, shutdown)(MYSQLND_CONN_DATA * const conn, uint
 
 	if (PASS == conn->m->local_tx_start(conn, this_func)) {
 		unsigned int level_param = (unsigned int) level;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_SHUTDOWN, conn, level_param);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+
+		ret = conn->run_command(COM_SHUTDOWN, conn, level_param);
 		conn->m->local_tx_end(conn, this_func, ret);
 	}
 	DBG_RETURN(ret);
@@ -1288,11 +1247,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, send_close)(MYSQLND_CONN_DATA * const conn)
 		case CONN_READY:
 			DBG_INF("Connection clean, sending COM_QUIT");
 			if (net_stream) {
-				struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_QUIT, conn);
-				if (command) {
-					ret = command->run(command);
-					command->free_command(command);
-				}
+				ret = conn->run_command(COM_QUIT, conn);
 				vio->data->m.close_stream(vio, conn->stats, conn->error_info);
 			}
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);

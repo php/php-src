@@ -619,12 +619,8 @@ size_t php_mysqlnd_auth_write(MYSQLND_CONN_DATA * conn, void * _packet)
 		enum_func_status ret = FAIL;
 		const MYSQLND_CSTRING payload = {(char*) buffer + MYSQLND_HEADER_SIZE, p - (buffer + MYSQLND_HEADER_SIZE)};
 		const unsigned int silent = packet->silent;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_CHANGE_USER, conn, payload, silent);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
 
+		ret = conn->run_command(COM_CHANGE_USER, conn, payload, silent);
 		DBG_RETURN(ret == PASS? (p - buffer - MYSQLND_HEADER_SIZE) : 0);
 	} else {
 		size_t sent = pfc->data->m.send(pfc, vio, buffer, p - buffer - MYSQLND_HEADER_SIZE, stats, error_info);
