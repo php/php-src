@@ -2092,11 +2092,7 @@ MYSQLND_METHOD(mysqlnd_stmt, free_stmt_result)(MYSQLND_STMT * const s)
 		stmt->result->m.free_result_internal(stmt->result);
 		stmt->result = NULL;
 	}
-	if (stmt->error_info->error_list) {
-		zend_llist_clean(stmt->error_info->error_list);
-		mnd_efree(stmt->error_info->error_list);
-		stmt->error_info->error_list = NULL;
-	}
+	zend_llist_clean(&stmt->error_info->error_list);
 
 	DBG_VOID_RETURN;
 }

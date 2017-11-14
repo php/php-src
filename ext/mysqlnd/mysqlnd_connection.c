@@ -103,9 +103,7 @@ MYSQLND_METHOD(mysqlnd_error_info, reset)(MYSQLND_ERROR_INFO * const info)
 	info->error_no = 0;
 	info->error[0] = '\0';
 	memset(&info->sqlstate, 0, sizeof(info->sqlstate));
-	if (info->error_list) {
-		zend_llist_clean(info->error_list);
-	}
+	zend_llist_clean(&info->error_list);
 
 	DBG_VOID_RETURN;
 }
@@ -121,19 +119,18 @@ MYSQLND_METHOD(mysqlnd_error_info, set_client_error)(MYSQLND_ERROR_INFO * const 
 {
 	DBG_ENTER("mysqlnd_error_info::set_client_error");
 	if (err_no) {
+		MYSQLND_ERROR_LIST_ELEMENT error_for_the_list = {0};
+
 		info->error_no = err_no;
 		strlcpy(info->sqlstate, sqlstate, sizeof(info->sqlstate));
 		strlcpy(info->error, error, sizeof(info->error));
-		if (info->error_list) {
-			MYSQLND_ERROR_LIST_ELEMENT error_for_the_list = {0};
 
-			error_for_the_list.error_no = err_no;
-			strlcpy(error_for_the_list.sqlstate, sqlstate, sizeof(error_for_the_list.sqlstate));
-			error_for_the_list.error = mnd_pestrdup(error, TRUE);
-			if (error_for_the_list.error) {
-				DBG_INF_FMT("adding error [%s] to the list", error_for_the_list.error);
-				zend_llist_add_element(info->error_list, &error_for_the_list);
-			}
+		error_for_the_list.error_no = err_no;
+		strlcpy(error_for_the_list.sqlstate, sqlstate, sizeof(error_for_the_list.sqlstate));
+		error_for_the_list.error = mnd_pestrdup(error, TRUE);
+		if (error_for_the_list.error) {
+			DBG_INF_FMT("adding error [%s] to the list", error_for_the_list.error);
+			zend_llist_add_element(&info->error_list, &error_for_the_list);
 		}
 	} else {
 		info->m->reset(info);
@@ -158,12 +155,9 @@ mysqlnd_error_info_init(MYSQLND_ERROR_INFO * const info, const zend_bool persist
 	info->m = mysqlnd_error_info_get_methods();
 	info->m->reset(info);
 
-	info->error_list = mnd_pecalloc(1, sizeof(zend_llist), persistent);
-	if (info->error_list) {
-		zend_llist_init(info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
-	}
+	zend_llist_init(&info->error_list, sizeof(MYSQLND_ERROR_LIST_ELEMENT), (llist_dtor_func_t) mysqlnd_error_list_pdtor, persistent);
 	info->persistent = persistent;
-	DBG_RETURN(info->error_list? PASS:FAIL);
+	DBG_RETURN(PASS);
 }
 /* }}} */
 
@@ -174,11 +168,6 @@ mysqlnd_error_info_free_contents(MYSQLND_ERROR_INFO * const info)
 {
 	DBG_ENTER("mysqlnd_error_info_free_contents");
 	info->m->reset(info);
-	if (info->error_list) {
-		mnd_pefree(info->error_list, info->persistent);
-		info->error_list = NULL;
-	}
-
 	DBG_VOID_RETURN;
 }
 /* }}} */
