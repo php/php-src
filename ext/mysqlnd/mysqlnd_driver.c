@@ -245,29 +245,19 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 static MYSQLND_PFC *
 MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t pfc_alloc_size = sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t pfc_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_PFC) + mysqlnd_plugin_count() * sizeof(void *));
 	size_t pfc_data_alloc_size = sizeof(MYSQLND_PFC_DATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_PFC * pfc = mnd_pecalloc(1, pfc_alloc_size, persistent);
-	MYSQLND_PFC_DATA * pfc_data = mnd_pecalloc(1, pfc_data_alloc_size, persistent);
+	MYSQLND_PFC * pfc = mnd_pecalloc(1, pfc_alloc_size + pfc_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_pfc");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (pfc && pfc_data) {
-		pfc->data = pfc_data;
+	if (pfc) {
+		pfc->data = (MYSQLND_PFC_DATA*)((char*)pfc + pfc_alloc_size);
 		pfc->persistent = pfc->data->persistent = persistent;
 		pfc->data->m = *mysqlnd_pfc_get_methods();
 
 		if (PASS != pfc->data->m.init(pfc, stats, error_info)) {
 			pfc->data->m.dtor(pfc, stats, error_info);
-			pfc = NULL;
-		}
-	} else {
-		if (pfc_data) {
-			mnd_pefree(pfc_data, persistent);
-			pfc_data = NULL;
-		}
-		if (pfc) {
-			mnd_pefree(pfc, persistent);
 			pfc = NULL;
 		}
 	}
@@ -280,29 +270,19 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_pfc)(const zend_bool persistent, MYSQ
 static MYSQLND_VIO *
 MYSQLND_METHOD(mysqlnd_object_factory, get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info)
 {
-	size_t vio_alloc_size = sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *);
+	size_t vio_alloc_size = ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_VIO) + mysqlnd_plugin_count() * sizeof(void *));
 	size_t vio_data_alloc_size = sizeof(MYSQLND_VIO_DATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_VIO * vio = mnd_pecalloc(1, vio_alloc_size, persistent);
-	MYSQLND_VIO_DATA * vio_data = mnd_pecalloc(1, vio_data_alloc_size, persistent);
+	MYSQLND_VIO * vio = mnd_pecalloc(1, vio_alloc_size + vio_data_alloc_size, persistent);
 
 	DBG_ENTER("mysqlnd_object_factory::get_vio");
 	DBG_INF_FMT("persistent=%u", persistent);
-	if (vio && vio_data) {
-		vio->data = vio_data;
+	if (vio) {
+		vio->data = (MYSQLND_VIO_DATA*)((char*)vio + vio_alloc_size);
 		vio->persistent = vio->data->persistent = persistent;
 		vio->data->m = *mysqlnd_vio_get_methods();
 
 		if (PASS != vio->data->m.init(vio, stats, error_info)) {
 			vio->data->m.dtor(vio, stats, error_info);
-			vio = NULL;
-		}
-	} else {
-		if (vio_data) {
-			mnd_pefree(vio_data, persistent);
-			vio_data = NULL;
-		}
-		if (vio) {
-			mnd_pefree(vio, persistent);
 			vio = NULL;
 		}
 	}
