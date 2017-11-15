@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.0
 
+- Core:
+
+  . Fixed bug #75515 ("stream_copy_to_stream" doesn't stream anymore). (Sara)
 
 09 Nov 2017, PHP 7.2.0RC6
 
