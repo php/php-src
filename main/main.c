@@ -271,7 +271,7 @@ static void php_disable_classes(void)
  */
 static void php_binary_init(void)
 {
-	char *binary_location;
+	char *binary_location = NULL;
 #ifdef PHP_WIN32
 	binary_location = (char *)malloc(MAXPATHLEN);
 	if (binary_location && GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
@@ -311,10 +311,6 @@ static void php_binary_init(void)
 			free(binary_location);
 			binary_location = NULL;
 		}
-	} else {
-		free(binary_location);
-		binary_location = NULL;
-	}
 #endif
 	PG(php_binary) = binary_location;
 }
