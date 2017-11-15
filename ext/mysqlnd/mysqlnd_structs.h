@@ -49,29 +49,26 @@ typedef struct st_mysqlnd_const_string
 
 
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
-typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
-typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIST;
-
-
-#define MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE 100
 
 struct st_mysqlnd_memory_pool
 {
 	zend_arena		*arena;
+	void			*last;
 
-	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
-	MYSQLND_MEMORY_POOL_CHUNK*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void						(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
+	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
+	void*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size);
+	void	(*free_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr);
 };
 
-struct st_mysqlnd_memory_pool_chunk
+
+typedef struct st_mysqlnd_row_buffer MYSQLND_ROW_BUFFER;
+
+struct st_mysqlnd_row_buffer
 {
-	size_t			app;
+	void			*ptr;
 	size_t			size;
 };
 
-#define MYSQLND_MEMORY_POOL_CHUNK_PTR(chunk) \
-	((void*)((char*)(chunk) + sizeof(MYSQLND_MEMORY_POOL_CHUNK)))
 
 typedef struct st_mysqlnd_cmd_buffer
 {
@@ -585,7 +582,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn)
 
 
 	/* for decoding - binary or text protocol */
-typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
+typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
@@ -608,7 +605,7 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * con
 
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn);
 typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result);
-typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_MEMORY_POOL_CHUNK *** row_buffers, zend_bool binary_protocol);
+typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_ROW_BUFFER ** row_buffers, zend_bool binary_protocol);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
 typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, const zend_bool implicit);
@@ -1140,7 +1137,7 @@ struct st_mysqlnd_result_metadata
 
 
 #define def_mysqlnd_buffered_result_parent 			\
-	MYSQLND_MEMORY_POOL_CHUNK **row_buffers;		\
+	MYSQLND_ROW_BUFFER	*row_buffers;				\
 	uint64_t			row_count;					\
 	uint64_t			initialized_rows;			\
 													\
@@ -1193,7 +1190,7 @@ struct st_mysqlnd_unbuffered_result
 
 	/* For unbuffered (both normal and PS) */
 	zval				*last_row_data;
-	MYSQLND_MEMORY_POOL_CHUNK *last_row_buffer;
+	MYSQLND_ROW_BUFFER	 last_row_buffer;
 
 	/*
 	  Column lengths of current row - both buffered and unbuffered.

@@ -78,16 +78,17 @@ static zend_always_inline void* mysqlnd_arena_alloc(zend_arena **arena_ptr, size
 
 /* {{{ mysqlnd_mempool_free_chunk */
 static void
-mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk)
+mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
 {
 	DBG_ENTER("mysqlnd_mempool_free_chunk");
 	/* Try to back-off and guess if this is the last block allocated */
-	if ((char*)chunk == (char*)pool->arena->ptr - ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_MEMORY_POOL_CHUNK) + chunk->size)) {
+	if (ptr == pool->last) {
 		/*
 			This was the last allocation. Lucky us, we can free
 			a bit of memory from the pool. Next time we will return from the same ptr.
 		*/
-		pool->arena->ptr = (char*)chunk;
+		pool->arena->ptr = (char*)ptr;
+		pool->last = NULL;
 	}
 	DBG_VOID_RETURN;
 }
@@ -95,41 +96,40 @@ mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK
 
 
 /* {{{ mysqlnd_mempool_resize_chunk */
-static MYSQLND_MEMORY_POOL_CHUNK *
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size)
+static void *
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
 
 	/* Try to back-off and guess if this is the last block allocated */
-	if (((char*)chunk == (char*)pool->arena->ptr - ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_MEMORY_POOL_CHUNK) + chunk->size))
-	  && (ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_MEMORY_POOL_CHUNK) + size) <= ((char*)pool->arena->end - (char*)chunk))) {
+	if (ptr == pool->last
+	  && (ZEND_MM_ALIGNED_SIZE(size) <= ((char*)pool->arena->end - (char*)ptr))) {
 		/*
 			This was the last allocation. Lucky us, we can free
 			a bit of memory from the pool. Next time we will return from the same ptr.
 		*/
-		pool->arena->ptr = (char*)chunk + ZEND_MM_ALIGNED_SIZE(sizeof(MYSQLND_MEMORY_POOL_CHUNK) + size);
+		pool->arena->ptr = (char*)ptr + ZEND_MM_ALIGNED_SIZE(size);
 	} else {
-		MYSQLND_MEMORY_POOL_CHUNK *new_chunk = mysqlnd_arena_alloc(&pool->arena, sizeof(MYSQLND_MEMORY_POOL_CHUNK) + size);
-		memcpy(new_chunk, chunk, sizeof(MYSQLND_MEMORY_POOL_CHUNK) + MIN(size, chunk->size));
-		chunk = new_chunk;
+		void *new_ptr = mysqlnd_arena_alloc(&pool->arena, size);
+		memcpy(new_ptr, ptr, MIN(old_size, size));
+		pool->last = ptr = new_ptr;
 	}
-	chunk->size = size;
-	DBG_RETURN(chunk);
+	DBG_RETURN(ptr);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_mempool_get_chunk */
-static MYSQLND_MEMORY_POOL_CHUNK *
-mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, unsigned int size)
+static void *
+mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, size_t size)
 {
-	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
+	void *ptr = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");
 
-	chunk = mysqlnd_arena_alloc(&pool->arena, sizeof(MYSQLND_MEMORY_POOL_CHUNK) + size);
-	chunk->size = size;
+	ptr = mysqlnd_arena_alloc(&pool->arena, size);
+	pool->last = ptr;
 
-	DBG_RETURN(chunk);
+	DBG_RETURN(ptr);
 }
 /* }}} */
 

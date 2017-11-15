@@ -217,7 +217,7 @@ typedef struct st_mysqlnd_packet_row {
 	uint16_t	warning_count;
 	uint16_t	server_status;
 
-	struct st_mysqlnd_memory_pool_chunk	*row_buffer;
+	MYSQLND_ROW_BUFFER	row_buffer;
 	MYSQLND_MEMORY_POOL * result_set_memory_pool;
 
 	zend_bool		skip_extraction;
@@ -287,16 +287,16 @@ size_t			php_mysqlnd_net_store_length_size(uint64_t length);
 
 PHPAPI extern const char * const mysqlnd_empty_string;
 
-enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
+enum_func_status php_mysqlnd_rowp_read_binary_protocol(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
 
-enum_func_status php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
+enum_func_status php_mysqlnd_rowp_read_text_protocol_zval(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
-enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
+enum_func_status php_mysqlnd_rowp_read_text_protocol_c(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 										 unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 										 zend_bool as_int_or_float, MYSQLND_STATS * stats);
 

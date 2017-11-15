@@ -52,7 +52,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, initialize_result_set_rest)(MYSQLND
 		if (Z_ISUNDEF(data_cursor[0])) {
 			unsigned int i;
 			const size_t current_row_num = (data_cursor - data_begin) / field_count;
-			enum_func_status rc = result->m.row_decoder(result->row_buffers[current_row_num],
+			enum_func_status rc = result->m.row_decoder(&result->row_buffers[current_row_num],
 														data_cursor,
 														field_count,
 														meta->fields,
@@ -112,7 +112,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 				continue;
 			}
 
-			rc = result->m.row_decoder(result->row_buffers[i], current_row, field_count, meta->fields, int_and_float_native, stats);
+			rc = result->m.row_decoder(&result->row_buffers[i], current_row, field_count, meta->fields, int_and_float_native, stats);
 
 			if (rc != PASS) {
 				ret = FAIL;
@@ -163,12 +163,12 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_last_data)(MYSQLND_RES_UNBUFFERED
 		mnd_efree(unbuf->last_row_data);
 		unbuf->last_row_data = NULL;
 	}
-	if (unbuf->last_row_buffer) {
+	if (unbuf->last_row_buffer.ptr) {
 		DBG_INF("Freeing last row buffer");
 		/* Nothing points to this buffer now, free it */
 		unbuf->result_set_memory_pool->free_chunk(
-			unbuf->result_set_memory_pool, unbuf->last_row_buffer);
-		unbuf->last_row_buffer = NULL;
+			unbuf->result_set_memory_pool, unbuf->last_row_buffer.ptr);
+		unbuf->last_row_buffer.ptr = NULL;
 	}
 
 	DBG_VOID_RETURN;
@@ -680,14 +680,14 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row_c)(MYSQLND_RES * result, voi
 		result->unbuf->last_row_data = row_packet->fields;
 		result->unbuf->last_row_buffer = row_packet->row_buffer;
 		row_packet->fields = NULL;
-		row_packet->row_buffer = NULL;
+		row_packet->row_buffer.ptr = NULL;
 
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
 		if (!row_packet->skip_extraction) {
 			unsigned int i, field_count = meta->field_count;
 
-			enum_func_status rc = result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
+			enum_func_status rc = result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
 											result->unbuf->last_row_data,
 											field_count,
 											row_packet->fields_metadata,
@@ -801,14 +801,14 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, fetch_row)(MYSQLND_RES * result, void 
 		result->unbuf->last_row_data = row_packet->fields;
 		result->unbuf->last_row_buffer = row_packet->row_buffer;
 		row_packet->fields = NULL;
-		row_packet->row_buffer = NULL;
+		row_packet->row_buffer.ptr = NULL;
 
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_NORMAL_UNBUF);
 
 		if (!row_packet->skip_extraction) {
 			unsigned int i, field_count = meta->field_count;
 
-			enum_func_status rc = result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
+			enum_func_status rc = result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
 															   result->unbuf->last_row_data,
 															   field_count,
 															   row_packet->fields_metadata,
@@ -960,7 +960,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, fetch_row_c)(MYSQLND_RES * result, void 
 
 			if (Z_ISUNDEF(current_row[0])) {
 				uint64_t row_num = (set->data_cursor - set->data) / field_count;
-				enum_func_status rc = set->m.row_decoder(set->row_buffers[row_num],
+				enum_func_status rc = set->m.row_decoder(&set->row_buffers[row_num],
 												current_row,
 												field_count,
 												meta->fields,
@@ -1050,7 +1050,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_zval, fetch_row)(MYSQLND_RES * result, vo
 
 		if (Z_ISUNDEF(current_row[0])) {
 			const size_t row_num = (set->data_cursor - set->data) / field_count;
-			enum_func_status rc = set->m.row_decoder(set->row_buffers[row_num],
+			enum_func_status rc = set->m.row_decoder(&set->row_buffers[row_num],
 													 current_row,
 													 field_count,
 													 meta->fields,
@@ -1142,7 +1142,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 			DBG_RETURN(FAIL);
 		}
 
-		rc = result->stored_data->m.row_decoder(result->stored_data->row_buffers[set->current_row],
+		rc = result->stored_data->m.row_decoder(&result->stored_data->row_buffers[set->current_row],
 												current_row,
 												field_count,
 												meta->fields,
@@ -1241,7 +1241,7 @@ MYSQLND_METHOD(mysqlnd_res, fetch_row)(MYSQLND_RES * result, void * param, const
 enum_func_status
 MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result,
 													MYSQLND_RES_METADATA * meta,
-													MYSQLND_MEMORY_POOL_CHUNK ***row_buffers,
+													MYSQLND_ROW_BUFFER **row_buffers,
 													zend_bool binary_protocol)
 {
 	enum_func_status ret;
@@ -1270,7 +1270,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 	while (FAIL != (ret = PACKET_READ(conn, &row_packet)) && !row_packet.eof) {
 		if (!free_rows) {
-			MYSQLND_MEMORY_POOL_CHUNK ** new_row_buffers;
+			MYSQLND_ROW_BUFFER * new_row_buffers;
 			total_allocated_rows += set->row_count;
 
 			if (total_allocated_rows < 1024) {
@@ -1287,15 +1287,15 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 			}
 
 			/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
-			if (total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
+			if (total_allocated_rows * sizeof(MYSQLND_ROW_BUFFER) > SIZE_MAX) {
 				SET_OOM_ERROR(conn->error_info);
 				ret = FAIL;
 				goto free_end;
 			}
 			if (*row_buffers) {
-				new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+				new_row_buffers = mnd_erealloc(*row_buffers, (size_t)(total_allocated_rows * sizeof(MYSQLND_ROW_BUFFER)));
 			} else {
-				new_row_buffers = mnd_emalloc((size_t)(total_allocated_rows * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+				new_row_buffers = mnd_emalloc((size_t)(total_allocated_rows * sizeof(MYSQLND_ROW_BUFFER)));
 			}
 			if (!new_row_buffers) {
 				SET_OOM_ERROR(conn->error_info);
@@ -1311,7 +1311,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 
 		/* So row_packet's destructor function won't efree() it */
 		row_packet.fields = NULL;
-		row_packet.row_buffer = NULL;
+		row_packet.row_buffer.ptr = NULL;
 
 		/*
 		  No need to FREE_ALLOCA as we can reuse the
@@ -1336,12 +1336,12 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	/* save some memory */
 	if (free_rows) {
 		/* don't try to allocate more than possible - mnd_XXalloc expects size_t, and it can have narrower range than uint64_t */
-		if (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *) > SIZE_MAX) {
+		if (set->row_count * sizeof(MYSQLND_ROW_BUFFER) > SIZE_MAX) {
 			SET_OOM_ERROR(conn->error_info);
 			ret = FAIL;
 			goto free_end;
 		}
-		*row_buffers = mnd_erealloc(*row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_MEMORY_POOL_CHUNK *)));
+		*row_buffers = mnd_erealloc(*row_buffers, (size_t) (set->row_count * sizeof(MYSQLND_ROW_BUFFER)));
 	}
 
 	if (UPSERT_STATUS_GET_SERVER_STATUS(conn->upsert_status) & SERVER_MORE_RESULTS_EXISTS) {
@@ -1377,7 +1377,7 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 										  const unsigned int flags)
 {
 	enum_func_status ret;
-	MYSQLND_MEMORY_POOL_CHUNK ***row_buffers = NULL;
+	MYSQLND_ROW_BUFFER **row_buffers = NULL;
 
 	DBG_ENTER("mysqlnd_res::store_result");
 
@@ -1917,10 +1917,10 @@ mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool p
 		DBG_RETURN(NULL);
 	}
 
-	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
-	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
 
 	ret->result_set_memory_pool = pool;
@@ -1956,7 +1956,7 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 		DBG_RETURN(NULL);
 	}
 
-	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
@@ -1964,7 +1964,7 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 		DBG_RETURN(NULL);
 	}
 
-	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
 
 	ret->result_set_memory_pool = pool;
@@ -2003,7 +2003,7 @@ mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool p
 		DBG_RETURN(NULL);
 	}
 
-	ret = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, alloc_size));
+	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
@@ -2011,7 +2011,7 @@ mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool p
 		DBG_RETURN(NULL);
 	}
 
-	ret->lengths = MYSQLND_MEMORY_POOL_CHUNK_PTR(pool->get_chunk(pool, field_count * sizeof(size_t)));
+	ret->lengths = pool->get_chunk(pool, field_count * sizeof(size_t));
 	memset(ret->lengths, 0, field_count * sizeof(size_t));
 
 	ret->result_set_memory_pool = pool;

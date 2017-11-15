@@ -758,7 +758,7 @@ mysqlnd_stmt_fetch_row_buffered(MYSQLND_RES * result, void * param, const unsign
 
 				if (Z_ISUNDEF(current_row[0])) {
 					uint64_t row_num = (set->data_cursor - set->data) / field_count;
-					enum_func_status rc = result->stored_data->m.row_decoder(result->stored_data->row_buffers[row_num],
+					enum_func_status rc = result->stored_data->m.row_decoder(&result->stored_data->row_buffers[row_num],
 													current_row,
 													meta->field_count,
 													meta->fields,
@@ -878,9 +878,9 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
-			row_packet->row_buffer = NULL;
+			row_packet->row_buffer.ptr = NULL;
 
-			if (PASS != result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
+			if (PASS != result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
 									result->unbuf->last_row_data,
 									row_packet->field_count,
 									row_packet->fields_metadata,
@@ -925,8 +925,8 @@ mysqlnd_stmt_fetch_row_unbuffered(MYSQLND_RES * result, void * param, const unsi
 			  report leaks.
 			*/
 			row_packet->result_set_memory_pool->free_chunk(
-				row_packet->result_set_memory_pool, row_packet->row_buffer);
-			row_packet->row_buffer = NULL;
+				row_packet->result_set_memory_pool, row_packet->row_buffer.ptr);
+			row_packet->row_buffer.ptr = NULL;
 		}
 
 		result->unbuf->row_count++;
@@ -1062,9 +1062,9 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 			result->unbuf->last_row_data = row_packet->fields;
 			result->unbuf->last_row_buffer = row_packet->row_buffer;
 			row_packet->fields = NULL;
-			row_packet->row_buffer = NULL;
+			row_packet->row_buffer.ptr = NULL;
 
-			if (PASS != result->unbuf->m.row_decoder(result->unbuf->last_row_buffer,
+			if (PASS != result->unbuf->m.row_decoder(&result->unbuf->last_row_buffer,
 									  result->unbuf->last_row_data,
 									  row_packet->field_count,
 									  row_packet->fields_metadata,
@@ -1114,15 +1114,15 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 			  report leaks.
 			*/
 			row_packet->result_set_memory_pool->free_chunk(
-				row_packet->result_set_memory_pool, row_packet->row_buffer);
-			row_packet->row_buffer = NULL;
+				row_packet->result_set_memory_pool, row_packet->row_buffer.ptr);
+			row_packet->row_buffer.ptr = NULL;
 		}
 		/* We asked for one row, the next one should be EOF, eat it */
 		ret = PACKET_READ(conn, row_packet);
-		if (row_packet->row_buffer) {
+		if (row_packet->row_buffer.ptr) {
 			row_packet->result_set_memory_pool->free_chunk(
-				row_packet->result_set_memory_pool, row_packet->row_buffer);
-			row_packet->row_buffer = NULL;
+				row_packet->result_set_memory_pool, row_packet->row_buffer.ptr);
+			row_packet->row_buffer.ptr = NULL;
 		}
 		MYSQLND_INC_CONN_STATISTIC(conn->stats, STAT_ROWS_FETCHED_FROM_CLIENT_PS_CURSOR);
 
