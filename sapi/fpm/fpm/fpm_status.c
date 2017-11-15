@@ -151,9 +151,9 @@ int fpm_status_handle_request(void) /* {{{ */
 					"<tr><th>start since</th><td>%lu</td></tr>\n"
 					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
 #ifdef HAVE_FPM_LQ
-					"<tr><th>listen queue</th><td>%u</td></tr>\n"
-					"<tr><th>max listen queue</th><td>%u</td></tr>\n"
-					"<tr><th>listen queue len</th><td>%d</td></tr>\n"
+					"<tr><th>listen queue</th><td>%d</td></tr>\n"
+					"<tr><th>max listen queue</th><td>%d</td></tr>\n"
+					"<tr><th>listen queue len</th><td>%u</td></tr>\n"
 #endif
 					"<tr><th>idle processes</th><td>%d</td></tr>\n"
 					"<tr><th>active processes</th><td>%d</td></tr>\n"
@@ -188,7 +188,7 @@ int fpm_status_handle_request(void) /* {{{ */
 
 				full_syntax =
 					"<tr>"
-						"<td>%d</td>"
+						"<td>%ld</td>"
 						"<td>%s</td>"
 						"<td>%s</td>"
 						"<td>%lu</td>"
@@ -223,9 +223,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"<start-since>%lu</start-since>\n"
 				"<accepted-conn>%lu</accepted-conn>\n"
 #ifdef HAVE_FPM_LQ
-				"<listen-queue>%u</listen-queue>\n"
-				"<max-listen-queue>%u</max-listen-queue>\n"
-				"<listen-queue-len>%d</listen-queue-len>\n"
+				"<listen-queue>%d</listen-queue>\n"
+				"<max-listen-queue>%d</max-listen-queue>\n"
+				"<listen-queue-len>%u</listen-queue-len>\n"
 #endif
 				"<idle-processes>%d</idle-processes>\n"
 				"<active-processes>%d</active-processes>\n"
@@ -240,7 +240,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					full_pre = "<processes>\n";
 					full_syntax =
 						"<process>"
-							"<pid>%d</pid>"
+							"<pid>%ld</pid>"
 							"<state>%s</state>"
 							"<start-time>%s</start-time>"
 							"<start-since>%lu</start-since>"
@@ -273,9 +273,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"\"start since\":%lu,"
 				"\"accepted conn\":%lu,"
 #ifdef HAVE_FPM_LQ
-				"\"listen queue\":%u,"
-				"\"max listen queue\":%u,"
-				"\"listen queue len\":%d,"
+				"\"listen queue\":%d,"
+				"\"max listen queue\":%d,"
+				"\"listen queue len\":%u,"
 #endif
 				"\"idle processes\":%d,"
 				"\"active processes\":%d,"
@@ -291,7 +291,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				full_pre = ", \"processes\":[";
 
 				full_syntax = "{"
-					"\"pid\":%d,"
+					"\"pid\":%ld,"
 					"\"state\":\"%s\","
 					"\"start time\":%s,"
 					"\"start since\":%lu,"
@@ -302,7 +302,8 @@ int fpm_status_handle_request(void) /* {{{ */
 					"\"content length\":%zu,"
 					"\"user\":\"%s\","
 					"\"script\":\"%s\","
-#ifdef HAVE_FPM_LQ
+#ifdef HAVE_FPM_
+					
 					"\"last request cpu\":%.2f,"
 #endif
 					"\"last request memory\":%zu"
@@ -323,9 +324,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"start since:          %lu\n"
 				"accepted conn:        %lu\n"
 #ifdef HAVE_FPM_LQ
-				"listen queue:         %u\n"
-				"max listen queue:     %u\n"
-				"listen queue len:     %d\n"
+				"listen queue:         %d\n"
+				"max listen queue:     %d\n"
+				"listen queue len:     %u\n"
 #endif
 				"idle processes:       %d\n"
 				"active processes:     %d\n"
@@ -338,7 +339,7 @@ int fpm_status_handle_request(void) /* {{{ */
 					full_syntax =
 						"\n"
 						"************************\n"
-						"pid:                  %d\n"
+						"pid:                  %ld\n"
 						"state:                %s\n"
 						"start time:           %s\n"
 						"start since:          %lu\n"
@@ -358,11 +359,12 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&scoreboard.start_epoch));
 		now_epoch = time(NULL);
+		
 		spprintf(&buffer, 0, short_syntax,
 				scoreboard.pool,
 				PM2STR(scoreboard.pm),
 				time_buffer,
-				now_epoch - scoreboard.start_epoch,
+				(long unsigned) (now_epoch - scoreboard.start_epoch),
 				scoreboard.requests,
 #ifdef HAVE_FPM_LQ
 				scoreboard.lq,
@@ -443,10 +445,10 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
 				spprintf(&buffer, 0, full_syntax,
-					proc.pid,
+					(long int) proc.pid,
 					fpm_request_get_stage_name(proc.request_stage),
 					time_buffer,
-					now_epoch - proc.start_epoch,
+					(long unsigned) now_epoch - proc.start_epoch,
 					proc.requests,
 					duration.tv_sec * 1000000UL + duration.tv_usec,
 					proc.request_method[0] != '\0' ? proc.request_method : "-",
