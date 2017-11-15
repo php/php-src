@@ -196,6 +196,7 @@ typedef struct st_mysqlnd_packet_rset_header {
 /* Result set field packet */
 typedef struct st_mysqlnd_packet_res_field {
 	MYSQLND_PACKET_HEADER	header;
+	MYSQLND_MEMORY_POOL		*memory_pool;
 	MYSQLND_FIELD			*metadata;
 	/* For table definitions, empty for result sets */
 	zend_bool				skip_parsing;

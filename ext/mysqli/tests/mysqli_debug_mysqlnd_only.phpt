@@ -90,9 +90,9 @@ if (!$IS_MYSQLND)
 		if (isset($functions_trace[$name]))
 			$found++;
 
-	if ($found < 2) {
+	if ($found < 1) {
 		printf("[016] Only %d memory functions have been found, expecting at least %d.\n",
-			$found, 2);
+			$found, 1);
 		var_dump($trace);
 	}
 

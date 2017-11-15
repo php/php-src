@@ -1290,7 +1290,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 	{
 		BAIL_IF_NO_MORE_DATA;
 		DBG_INF_FMT("Def found, length %lu", len);
-		meta->def = mnd_emalloc(len + 1);
+		meta->def = packet->memory_pool->get_chunk(packet->memory_pool, len + 1);
 		if (!meta->def) {
 			SET_OOM_ERROR(error_info);
 			DBG_RETURN(FAIL);
@@ -1301,7 +1301,7 @@ php_mysqlnd_rset_field_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		p += len;
 	}
 
-	root_ptr = meta->root = mnd_emalloc(total_len);
+	root_ptr = meta->root = packet->memory_pool->get_chunk(packet->memory_pool, total_len);
 	if (!root_ptr) {
 		SET_OOM_ERROR(error_info);
 		DBG_RETURN(FAIL);

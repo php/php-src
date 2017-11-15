@@ -76,6 +76,25 @@ static zend_always_inline void* mysqlnd_arena_alloc(zend_arena **arena_ptr, size
 }
 /* }}} */
 
+static zend_always_inline void* mysqlnd_arena_checkpoint(zend_arena *arena)
+{
+	return arena->ptr;
+}
+
+static zend_always_inline void mysqlnd_arena_release(zend_arena **arena_ptr, void *checkpoint)
+{
+	zend_arena *arena = *arena_ptr;
+
+	while (UNEXPECTED((char*)checkpoint > arena->end) ||
+	       UNEXPECTED((char*)checkpoint <= (char*)arena)) {
+		zend_arena *prev = arena->prev;
+		mnd_efree(arena);
+		*arena_ptr = arena = prev;
+	}
+	ZEND_ASSERT((char*)checkpoint > (char*)arena && (char*)checkpoint <= arena->end);
+	arena->ptr = (char*)checkpoint;
+}
+
 /* {{{ mysqlnd_mempool_free_chunk */
 static void
 mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
@@ -145,6 +164,8 @@ mysqlnd_mempool_create(size_t arena_size)
 	arena = mysqlnd_arena_create(MAX(arena_size, sizeof(zend_arena)));
 	ret = mysqlnd_arena_alloc(&arena, sizeof(MYSQLND_MEMORY_POOL));
 	ret->arena = arena;
+	ret->last = NULL;
+	ret->checkpoint = NULL;
 	ret->get_chunk = mysqlnd_mempool_get_chunk;
 	ret->free_chunk = mysqlnd_mempool_free_chunk;
 	ret->resize_chunk = mysqlnd_mempool_resize_chunk;
@@ -164,6 +185,29 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 }
 /* }}} */
 
+/* {{{ mysqlnd_mempool_save_state */
+PHPAPI void
+mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool)
+{
+	DBG_ENTER("mysqlnd_mempool_save_state");
+	pool->checkpoint = mysqlnd_arena_checkpoint(pool->arena);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+/* {{{ mysqlnd_mempool_restore_state */
+PHPAPI void
+mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
+{
+	DBG_ENTER("mysqlnd_mempool_restore_state");
+	if (pool->checkpoint) {
+		mysqlnd_arena_release(&pool->arena, pool->checkpoint);
+		pool->last = NULL;
+		pool->checkpoint = NULL;
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
 
 /*
  * Local variables:

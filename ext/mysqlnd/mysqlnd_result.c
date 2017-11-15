@@ -190,7 +190,7 @@ MYSQLND_METHOD(mysqlnd_result_unbuffered, free_result)(MYSQLND_RES_UNBUFFERED * 
 		result->row_packet = NULL;
 	}
 
-	mysqlnd_mempool_destroy(result->result_set_memory_pool);
+	mysqlnd_mempool_restore_state(result->result_set_memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -261,7 +261,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered, free_result)(MYSQLND_RES_BUFFERED * cons
 		set->row_buffers = NULL;
 	}
 
-	mysqlnd_mempool_destroy(set->result_set_memory_pool);
+	mysqlnd_mempool_restore_state(set->result_set_memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -320,7 +320,7 @@ void MYSQLND_METHOD(mysqlnd_res, free_result_internal)(MYSQLND_RES * result)
 		result->conn = NULL;
 	}
 
-	mnd_efree(result);
+	mysqlnd_mempool_destroy(result->memory_pool);
 
 	DBG_VOID_RETURN;
 }
@@ -344,7 +344,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 		result->meta = NULL;
 	}
 
-	result->meta = result->m.result_meta_init(result->field_count);
+	result->meta = result->m.result_meta_init(result, result->field_count);
 	if (!result->meta) {
 		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(FAIL);
@@ -353,7 +353,7 @@ MYSQLND_METHOD(mysqlnd_res, read_result_metadata)(MYSQLND_RES * result, MYSQLND_
 	/* 1. Read all fields metadata */
 
 	/* It's safe to reread without freeing */
-	if (FAIL == result->meta->m->read_metadata(result->meta, conn)) {
+	if (FAIL == result->meta->m->read_metadata(result->meta, conn, result)) {
 		result->m.free_result_contents(result);
 		DBG_RETURN(FAIL);
 	}
@@ -514,7 +514,7 @@ mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * s)
 				if (FAIL == (ret = PACKET_READ(conn, &fields_eof))) {
 					DBG_ERR("Error occurred while reading the EOF packet");
 					result->m.free_result_contents(result);
-					mnd_efree(result);
+					mysqlnd_mempool_destroy(result->memory_pool);
 					if (!stmt) {
 						conn->current_result = NULL;
 					} else {
@@ -906,7 +906,7 @@ MYSQLND_METHOD(mysqlnd_res, use_result)(MYSQLND_RES * const result, const zend_b
 		result->type			= MYSQLND_RES_PS_UNBUF;
 	}
 
-	result->unbuf = mysqlnd_result_unbuffered_init(result->field_count, ps);
+	result->unbuf = mysqlnd_result_unbuffered_init(result, result->field_count, ps);
 	if (!result->unbuf) {
 		goto oom;
 	}
@@ -1389,14 +1389,14 @@ MYSQLND_METHOD(mysqlnd_res, store_result)(MYSQLND_RES * result,
 	SET_CONNECTION_STATE(&conn->state, CONN_FETCHING_DATA);
 
 	if (flags & MYSQLND_STORE_NO_COPY) {
-		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, flags & MYSQLND_STORE_PS);
+		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result, result->field_count, flags & MYSQLND_STORE_PS);
 		if (!result->stored_data) {
 			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
 		}
 		row_buffers = &result->stored_data->row_buffers;
 	} else if (flags & MYSQLND_STORE_COPY) {
-		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result->field_count, flags & MYSQLND_STORE_PS);
+		result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_c_init(result, result->field_count, flags & MYSQLND_STORE_PS);
 		if (!result->stored_data) {
 			SET_OOM_ERROR(conn->error_info);
 			DBG_RETURN(NULL);
@@ -1886,14 +1886,20 @@ PHPAPI MYSQLND_RES *
 mysqlnd_result_init(const unsigned int field_count)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES * ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_RES * ret;
 
 	DBG_ENTER("mysqlnd_result_init");
 
-	if (!ret) {
+	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
+	if (!pool) {
 		DBG_RETURN(NULL);
 	}
 
+	ret = pool->get_chunk(pool, alloc_size);
+	memset(ret, 0, alloc_size);
+
+	ret->memory_pool	= pool;
 	ret->field_count	= field_count;
 	ret->m = *mysqlnd_result_get_methods();
 
@@ -1904,19 +1910,15 @@ mysqlnd_result_init(const unsigned int field_count)
 
 /* {{{ mysqlnd_result_unbuffered_init */
 PHPAPI MYSQLND_RES_UNBUFFERED *
-mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps)
+mysqlnd_result_unbuffered_init(MYSQLND_RES *result, const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_UNBUFFERED) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_MEMORY_POOL * pool = result->memory_pool;
 	MYSQLND_RES_UNBUFFERED * ret;
 
 	DBG_ENTER("mysqlnd_result_unbuffered_init");
 
-	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
-	if (!pool) {
-		DBG_RETURN(NULL);
-	}
-
+	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
@@ -1943,24 +1945,20 @@ mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool p
 
 /* {{{ mysqlnd_result_buffered_zval_init */
 PHPAPI MYSQLND_RES_BUFFERED_ZVAL *
-mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps)
+mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_ZVAL) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_MEMORY_POOL * pool = result->memory_pool;
 	MYSQLND_RES_BUFFERED_ZVAL * ret;
 
 	DBG_ENTER("mysqlnd_result_buffered_zval_init");
 
-	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
-	if (!pool) {
-		DBG_RETURN(NULL);
-	}
-
+	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_destroy(pool);
+		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 
@@ -1990,24 +1988,20 @@ mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_boo
 
 /* {{{ mysqlnd_result_buffered_c_init */
 PHPAPI MYSQLND_RES_BUFFERED_C *
-mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps)
+mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps)
 {
 	const size_t alloc_size = sizeof(MYSQLND_RES_BUFFERED_C) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_MEMORY_POOL * pool;
+	MYSQLND_MEMORY_POOL * pool = result->memory_pool;
 	MYSQLND_RES_BUFFERED_C * ret;
 
 	DBG_ENTER("mysqlnd_result_buffered_c_init");
 
-	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
-	if (!pool) {
-		DBG_RETURN(NULL);
-	}
-
+	mysqlnd_mempool_save_state(pool);
 	ret = pool->get_chunk(pool, alloc_size);
 	memset(ret, 0, alloc_size);
 
 	if (FAIL == mysqlnd_error_info_init(&ret->error_info, 0)) {
-		mysqlnd_mempool_destroy(pool);
+		mysqlnd_mempool_restore_state(pool);
 		DBG_RETURN(NULL);
 	}
 

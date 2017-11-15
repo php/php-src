@@ -33,14 +33,8 @@ static void
 php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta)
 {
 	if (meta) {
-		if (meta->root) {
-			mnd_efree(meta->root);
-			meta->root = NULL;
-		}
-		if (meta->def) {
-			mnd_efree(meta->def);
-			meta->def = NULL;
-		}
+		meta->root = NULL;
+		meta->def = NULL;
 		if (meta->sname) {
 			zend_string_release(meta->sname);
 		}
@@ -50,7 +44,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta)
 
 /* {{{ mysqlnd_res_meta::read_metadata */
 static enum_func_status
-MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn)
+MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn, MYSQLND_RES * result)
 {
 	unsigned int i = 0;
 	MYSQLND_PACKET_RES_FIELD field_packet;
@@ -58,14 +52,13 @@ MYSQLND_METHOD(mysqlnd_res_meta, read_metadata)(MYSQLND_RES_METADATA * const met
 	DBG_ENTER("mysqlnd_res_meta::read_metadata");
 
 	conn->payload_decoder_factory->m.init_result_field_packet(&field_packet);
+	field_packet.memory_pool = result->memory_pool;
 	for (;i < meta->field_count; i++) {
 		zend_ulong idx;
 
-		if (meta->fields[i].root) {
-			/* We re-read metadata for PS */
-			mnd_efree(meta->fields[i].root);
-			meta->fields[i].root = NULL;
-		}
+		/* We re-read metadata for PS */
+		ZEND_ASSERT(meta->fields[i].root == NULL);
+		meta->fields[i].root = NULL;
 
 		field_packet.metadata = &(meta->fields[i]);
 		if (FAIL == PACKET_READ(conn, &field_packet)) {
@@ -112,12 +105,10 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 		while (i--) {
 			php_mysqlnd_free_field_metadata(fields++);
 		}
-		mnd_efree(meta->fields);
 		meta->fields = NULL;
 	}
 
 	DBG_INF("Freeing metadata structure");
-	mnd_efree(meta);
 
 	DBG_VOID_RETURN;
 }
@@ -126,7 +117,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, free)(MYSQLND_RES_METADATA * meta)
 
 /* {{{ mysqlnd_res::clone_metadata */
 static MYSQLND_RES_METADATA *
-MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * const meta)
+MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(MYSQLND_RES * result, const MYSQLND_RES_METADATA * const meta)
 {
 	unsigned int i;
 	/* +1 is to have empty marker at the end */
@@ -136,16 +127,18 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 
 	DBG_ENTER("mysqlnd_res_meta::clone_metadata");
 
-	new_meta = mnd_ecalloc(1, sizeof(MYSQLND_RES_METADATA));
+	new_meta = result->memory_pool->get_chunk(result->memory_pool, sizeof(MYSQLND_RES_METADATA));
 	if (!new_meta) {
 		goto oom;
 	}
+	memset(new_meta, 0, sizeof(MYSQLND_RES_METADATA));
 	new_meta->m = meta->m;
 
-	new_fields = mnd_ecalloc(meta->field_count + 1, sizeof(MYSQLND_FIELD));
+	new_fields = result->memory_pool->get_chunk(result->memory_pool, (meta->field_count + 1) * sizeof(MYSQLND_FIELD));
 	if (!new_fields) {
 		goto oom;
 	}
+	memset(new_fields, 0, (meta->field_count + 1) * sizeof(MYSQLND_FIELD));
 
 	/*
 	  This will copy also the strings and the root, which we will have
@@ -154,7 +147,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 	memcpy(new_fields, orig_fields, (meta->field_count) * sizeof(MYSQLND_FIELD));
 	for (i = 0; i < meta->field_count; i++) {
 		/* First copy the root, then field by field adjust the pointers */
-		new_fields[i].root = mnd_emalloc(orig_fields[i].root_len);
+		new_fields[i].root = result->memory_pool->get_chunk(result->memory_pool, orig_fields[i].root_len);
 
 		if (!new_fields[i].root) {
 			goto oom;
@@ -191,7 +184,7 @@ MYSQLND_METHOD(mysqlnd_res_meta, clone_metadata)(const MYSQLND_RES_METADATA * co
 		}
 		/* def is not on the root, if allocated at all */
 		if (orig_fields[i].def) {
-			new_fields[i].def = mnd_emalloc(orig_fields[i].def_length + 1);
+			new_fields[i].def = result->memory_pool->get_chunk(result->memory_pool, orig_fields[i].def_length + 1);
 			if (!new_fields[i].def) {
 				goto oom;
 			}
@@ -292,30 +285,25 @@ MYSQLND_CLASS_METHODS_END;
 
 /* {{{ mysqlnd_result_meta_init */
 PHPAPI MYSQLND_RES_METADATA *
-mysqlnd_result_meta_init(unsigned int field_count)
+mysqlnd_result_meta_init(MYSQLND_RES *result, unsigned int field_count)
 {
 	size_t alloc_size = sizeof(MYSQLND_RES_METADATA) + mysqlnd_plugin_count() * sizeof(void *);
-	MYSQLND_RES_METADATA *ret = mnd_ecalloc(1, alloc_size);
+	MYSQLND_RES_METADATA *ret;
 	DBG_ENTER("mysqlnd_result_meta_init");
 
 	do {
-		if (!ret) {
-			break;
-		}
+		ret = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
+		memset(ret, 0, alloc_size);
 		ret->m = & mysqlnd_mysqlnd_res_meta_methods;
 
 		ret->field_count = field_count;
 		/* +1 is to have empty marker at the end */
-		ret->fields = mnd_ecalloc(field_count + 1, sizeof(MYSQLND_FIELD));
-		if (!ret->fields) {
-			break;
-		}
+		alloc_size = (field_count + 1) * sizeof(MYSQLND_FIELD);
+		ret->fields = result->memory_pool->get_chunk(result->memory_pool, alloc_size);
+		memset(ret->fields, 0, alloc_size);
 		DBG_INF_FMT("meta=%p", ret);
 		DBG_RETURN(ret);
 	} while (0);
-	if (ret) {
-		ret->m->free_metadata(ret);
-	}
 	DBG_RETURN(NULL);
 }
 /* }}} */

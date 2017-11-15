@@ -54,6 +54,7 @@ struct st_mysqlnd_memory_pool
 {
 	zend_arena		*arena;
 	void			*last;
+	void            *checkpoint;
 
 	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
 	void*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size);
@@ -615,7 +616,7 @@ typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *result);
 
 
-typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count);
+typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(MYSQLND_RES *result, unsigned int field_count);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 {
@@ -693,8 +694,8 @@ typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_field_direct)(const
 typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_fields)(MYSQLND_RES_METADATA * const meta);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_tell)(const MYSQLND_RES_METADATA * const meta);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset);
-typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn);
-typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta);
+typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn, MYSQLND_RES * result);
+typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(MYSQLND_RES *result, const MYSQLND_RES_METADATA * const meta);
 typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA * meta);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta)
@@ -1222,6 +1223,8 @@ struct st_mysqlnd_res
 	/* To be used with store_result() - both normal and PS */
 	MYSQLND_RES_BUFFERED	*stored_data;
 	MYSQLND_RES_UNBUFFERED	*unbuf;
+
+	MYSQLND_MEMORY_POOL		*memory_pool;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) m;
 };

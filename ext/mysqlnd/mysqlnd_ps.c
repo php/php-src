@@ -82,7 +82,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	result->type			= MYSQLND_RES_PS_BUF;
 /*	result->m.row_decoder = php_mysqlnd_rowp_read_binary_protocol; */
 
-	result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result->field_count, TRUE);
+	result->stored_data	= (MYSQLND_RES_BUFFERED *) mysqlnd_result_buffered_zval_init(result, result->field_count, TRUE);
 	if (!result->stored_data) {
 		SET_OOM_ERROR(conn->error_info);
 		DBG_RETURN(NULL);
@@ -122,7 +122,7 @@ MYSQLND_METHOD(mysqlnd_stmt, store_result)(MYSQLND_STMT * const s)
 	} else {
 		COPY_CLIENT_ERROR(conn->error_info, result->stored_data->error_info);
 		stmt->result->m.free_result_contents(stmt->result);
-		mnd_efree(stmt->result);
+		mysqlnd_mempool_destroy(stmt->result->memory_pool);
 		stmt->result = NULL;
 		stmt->state = MYSQLND_STMT_PREPARED;
 	}
@@ -173,7 +173,7 @@ MYSQLND_METHOD(mysqlnd_stmt, get_result)(MYSQLND_STMT * const s)
 			break;
 		}
 
-		result->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta);
+		result->meta = stmt->result->meta->m->clone_metadata(result, stmt->result->meta);
 		if (!result->meta) {
 			SET_OOM_ERROR(conn->error_info);
 			break;
@@ -251,14 +251,21 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s)
 	unsigned int i = 0;
 	enum_func_status ret = FAIL;
 	MYSQLND_PACKET_RES_FIELD field_packet;
+	MYSQLND_MEMORY_POOL * pool;
 
 	DBG_ENTER("mysqlnd_stmt_skip_metadata");
 	if (!stmt || !conn) {
 		DBG_RETURN(FAIL);
 	}
+	pool = mysqlnd_mempool_create(MYSQLND_G(mempool_default_size));
+	if (!pool) {
+		DBG_RETURN(FAIL);
+	}
 	DBG_INF_FMT("stmt=%lu", stmt->stmt_id);
 
 	conn->payload_decoder_factory->m.init_result_field_packet(&field_packet);
+	field_packet.memory_pool = pool;
+
 	ret = PASS;
 	field_packet.skip_parsing = TRUE;
 	for (;i < stmt->param_count; i++) {
@@ -268,6 +275,7 @@ mysqlnd_stmt_skip_metadata(MYSQLND_STMT * s)
 		}
 	}
 	PACKET_FREE(&field_packet);
+	mysqlnd_mempool_destroy(pool);
 
 	DBG_RETURN(ret);
 }
@@ -1835,12 +1843,12 @@ MYSQLND_METHOD(mysqlnd_stmt, result_metadata)(MYSQLND_STMT * const s)
 			break;
 		}
 		result_meta->type = MYSQLND_RES_NORMAL;
-		result_meta->unbuf = mysqlnd_result_unbuffered_init(stmt->field_count, TRUE);
+		result_meta->unbuf = mysqlnd_result_unbuffered_init(result_meta, stmt->field_count, TRUE);
 		if (!result_meta->unbuf) {
 			break;
 		}
 		result_meta->unbuf->eof_reached = TRUE;
-		result_meta->meta = stmt->result->meta->m->clone_metadata(stmt->result->meta);
+		result_meta->meta = stmt->result->meta->m->clone_metadata(result_meta, stmt->result->meta);
 		if (!result_meta->meta) {
 			break;
 		}

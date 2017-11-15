@@ -21,7 +21,7 @@
 #ifndef MYSQLND_RESULT_META_H
 #define MYSQLND_RESULT_META_H
 
-PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(unsigned int field_count);
+PHPAPI MYSQLND_RES_METADATA * mysqlnd_result_meta_init(MYSQLND_RES * result, unsigned int field_count);
 PHPAPI struct st_mysqlnd_res_meta_methods * mysqlnd_result_metadata_get_methods();
 PHPAPI void ** _mysqlnd_plugin_get_plugin_result_metadata_data(const MYSQLND_RES_METADATA * meta, unsigned int plugin_id);
 
