@@ -311,6 +311,7 @@ static void php_binary_init(void)
 			free(binary_location);
 			binary_location = NULL;
 		}
+	}
 #endif
 	PG(php_binary) = binary_location;
 }
