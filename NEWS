@@ -11,7 +11,13 @@ PHP                                                                        NEWS
   . Fixed bug #75514 (mt_rand returns value outside [$min,$max]+ on 32-bit)
     (Remi)
 
-?? ??? ????, PHP 7.2.0RC6
+?? ??? ????, PHP 7.2.0
+
+- Core:
+
+  . Fixed bug #75515 ("stream_copy_to_stream" doesn't stream anymore). (Sara)
+
+09 Nov 2017, PHP 7.2.0RC6
 
 - Core:
   . Fixed bug #75420 (Crash when modifing property name in __isset for
