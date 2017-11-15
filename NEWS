@@ -5,6 +5,7 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
     (Anatol)
+  . Fixed bug #75525 (Access Violation in vcruntime140.dll). (Anatol)
 
 - Standard:
   . Fixed bug #75511 (fread not free unused buffer). (Laruence)
