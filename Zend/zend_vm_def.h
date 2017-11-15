@@ -4995,7 +4995,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 			 */
 			scope = EX(func)->op_array.scope;
 			if (!zend_check_private(clone, scope, clone->common.function_name)) {
-				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", clone->common.scope ? ZSTR_VAL(clone->common.scope->name) : "", scope ? ZSTR_VAL(scope->name) : "");
+				zend_throw_error(NULL, "Call to private %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
 				FREE_OP1();
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -5005,7 +5005,7 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 			 */
 			scope = EX(func)->op_array.scope;
 			if (UNEXPECTED(!zend_check_protected(zend_get_function_root_class(clone), scope))) {
-				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", clone->common.scope ? ZSTR_VAL(clone->common.scope->name) : "", scope ? ZSTR_VAL(scope->name) : "");
+				zend_throw_error(NULL, "Call to protected %s::__clone() from context '%s'", ZSTR_VAL(clone->common.scope->name), scope ? ZSTR_VAL(scope->name) : "");
 				FREE_OP1();
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
