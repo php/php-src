@@ -274,14 +274,14 @@ static void php_binary_init(void)
 	char *binary_location;
 #ifdef PHP_WIN32
 	binary_location = (char *)malloc(MAXPATHLEN);
-	if (GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
+	if (binary_location && GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
 		free(binary_location);
 		PG(php_binary) = NULL;
 	}
 #else
 	if (sapi_module.executable_location) {
 		binary_location = (char *)malloc(MAXPATHLEN);
-		if (!strchr(sapi_module.executable_location, '/')) {
+		if (binary_location && !strchr(sapi_module.executable_location, '/')) {
 			char *envpath, *path;
 			int found = 0;
 
@@ -312,6 +312,7 @@ static void php_binary_init(void)
 			binary_location = NULL;
 		}
 	} else {
+		free(binary_location);
 		binary_location = NULL;
 	}
 #endif
