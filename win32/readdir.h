@@ -22,10 +22,6 @@ struct dirent {
 	long d_ino;					/* inode (always 1 in WIN32) */
 	off_t d_off;					/* offset to this dirent */
 	unsigned short d_reclen;			/* length of d_name */
-	unsigned short pad0;
-#if defined(_WIN64)
-	uint32_t pad1;
-#endif
 	char d_name[1];	/* null terminated filename in the current encoding, glyph number <= 255 wchar_t's + \0 byte */
 };
 
