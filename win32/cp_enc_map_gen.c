@@ -117,7 +117,7 @@ static const struct cp cp_map[] = {
 	{ 20936,	"x-cp20936", "", "Simplified Chinese (GB2312); Chinese Simplified (GB2312-80)" },
 	{ 20949,	"x-cp20949", "", "Korean Wansung" },
 	{ 21025,	"cp1025", "", "IBM EBCDIC Cyrillic Serbian-Bulgarian" },
-	{ 21027,	"", "", "(deprecated)" },
+	/*{ 21027,	"", "", "(deprecated)" },*/
 	{ 21866,	"koi8-u", "KOI8-U", "Ukrainian (KOI8-U); Cyrillic (KOI8-U)" },
 	{ 28591,	"iso-8859-1", "CP819|IBM819|ISO-8859-1|ISO-IR-100|ISO8859-1|ISO_8859-1|ISO_8859-1:1987|L1|LATIN1|CSISOLATIN1", "ISO 8859-1 Latin 1; Western European (ISO)" },
 	{ 28592,	"iso-8859-2", "ISO-8859-2|ISO-IR-101|ISO8859-2|ISO_8859-2|ISO_8859-2:1987|L2|LATIN2|CSISOLATIN2", "ISO 8859-2 Central European; Central European (ISO)" },
@@ -137,7 +137,7 @@ static const struct cp cp_map[] = {
 	{ 50222,	"iso-2022-jp", "ISO-2022-JP|CP50222", "ISO 2022 Japanese JIS X 0201-1989; Japanese (JIS-Allow 1 byte Kana - SO/SI)" },
 	{ 50225,	"iso-2022-kr", "ISO-2022-KR|CSISO2022KR", "ISO 2022 Korean" },
 	{ 50227,	"x-cp50227", "", "ISO 2022 Simplified Chinese; Chinese Simplified (ISO 2022)" },
-	{ 50229,	"", "", "ISO 2022 Traditional Chinese" },
+	{ 50229,	"x-cp50229", "", "ISO 2022 Traditional Chinese" },
 	{ 50930,	"", "", "EBCDIC Japanese (Katakana) Extended" },
 	{ 50931,	"", "", "EBCDIC US-Canada and Japanese" },
 	{ 50933,	"", "", "EBCDIC Korean Extended and Korean" },
