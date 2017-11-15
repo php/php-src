@@ -1117,10 +1117,10 @@ skip_escape_conversion:
 
 static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
 {
-	int len = Z_STRLEN_P(zendlval), new_len = len;
+	int len = Z_STRLEN_P(zendlval), new_len = len, i, j, skip;
 	char *copy = Z_STRVAL_P(zendlval);
 
-	for (int i = 0, j = 0, skip; j < len; ) {
+	for (i = 0, j = 0; j < len; ) {
 		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
 			if (copy[j] == '\r' || copy[j] == '\n') {
 				goto skip;
