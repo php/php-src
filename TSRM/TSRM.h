@@ -157,10 +157,14 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
 
-#ifdef TSRM_WIN32
-# define TSRM_TLS __declspec(thread)
+#if defined(__cplusplus) && __cplusplus > 199711L
+# define TSRM_TLS thread_local
 #else
-# define TSRM_TLS __thread
+# ifdef TSRM_WIN32
+#  define TSRM_TLS __declspec(thread)
+# else
+#  define TSRM_TLS __thread
+# endif
 #endif
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
