@@ -97,6 +97,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 {/*{{{*/
 	wchar_t *ret = NULL;
 	const char *idx = in, *end; 
+	BOOL failed = FALSE;
 
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
@@ -114,14 +115,37 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 	end = in + in_len;
 
-	while (idx != end) {
-		if (!__isascii(*idx) && '\0' != *idx) {
+	while (end - idx > 8) {
+		char ch0 = *idx;
+		char ch1 = *(idx + 1);
+		char ch2 = *(idx + 2);
+		char ch3 = *(idx + 3);
+		char ch4 = *(idx + 4);
+		char ch5 = *(idx + 5);
+		char ch6 = *(idx + 6);
+		char ch7 = *(idx + 7);
+
+		if (!__isascii(ch0) || !__isascii(ch1) || !__isascii(ch2) || !__isascii(ch3) ||
+			!__isascii(ch4) || !__isascii(ch5) || !__isascii(ch6) || !__isascii(ch7)) {
+			failed = TRUE;
 			break;
 		}
-		idx++;
+
+		idx += 8;
 	}
 
-	if (idx == end) {
+	/* Finish the job on remaining chars. */
+	if (!failed) {
+		while (idx != end) {
+			if (!__isascii(*idx) && '\0' != *idx) {
+				failed = TRUE;
+				break;
+			}
+			idx++;
+		}
+	}
+
+	if (!failed) {
 		size_t i = 0;
 		int k = 0;
 		wchar_t *ret_idx;
