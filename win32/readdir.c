@@ -37,7 +37,7 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	dp = (DIR *) calloc(1, sizeof(DIR) + MAXPATHLEN*sizeof(char));
+	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
 	if (dp == NULL) {
 		return NULL;
 	}
