@@ -20,5 +20,5 @@ if (!empty(PHP_CONFIG_FILE_SCAN_DIR)) die("Skip: PHP_CONFIG_FILE_SCAN_DIR must n
     @unlink($inifile);
 ?>
 --EXPECTREGEX--
-.*\\scan-dir\.ini.*|.*\\scan-dir\.ini
+.*[\/\\]scan-dir\.ini.*|.*[\/\\]scan-dir\.ini
 Done
