@@ -33,6 +33,8 @@ PHP                                                                        NEWS
     segment fault). (Nikita)
   . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
     that getrandom() is missing). (sarciszewski)
+  . Fixed bug #73124 (php_ini_scanned_files() not reporting correctly).
+    (John Stevenson)
 
 - Zip:
   . Fixed bug #75540 (Segfault with libzip 1.3.1). (Remi)
