@@ -4484,7 +4484,7 @@ PHP_FUNCTION(setlocale)
 {
 	zval *args = NULL;
 	zval *plocale;
-	zend_string *loc, *tmp_loc;
+	zend_string *loc;
 	char *retval;
 	zend_long cat;
 	int num_args, i = 0;
@@ -4513,15 +4513,15 @@ PHP_FUNCTION(setlocale)
 			plocale = &args[i];
 		}
 
-		loc = zval_get_tmp_string(plocale, &tmp_loc);
+		loc = zval_get_string(plocale);
 
 		if (!strcmp("0", ZSTR_VAL(loc))) {
-			zend_tmp_string_release(tmp_loc);
-			tmp_loc = loc = NULL;
+			zend_string_release(loc);
+			loc = NULL;
 		} else {
 			if (ZSTR_LEN(loc) >= 255) {
 				php_error_docref(NULL, E_WARNING, "Specified locale name is too long");
-				zend_tmp_string_release(tmp_loc);
+				zend_string_release(loc);
 				break;
 			}
 		}
@@ -4543,17 +4543,19 @@ PHP_FUNCTION(setlocale)
 						RETURN_STR(BG(locale_string));
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
-						zend_tmp_string_release(tmp_loc);
+						zend_string_release(loc);
 						RETURN_STR_COPY(BG(locale_string));
 					}
 				} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 					RETURN_STR(loc);
 				}
-				zend_tmp_string_release(tmp_loc);
+				zend_string_release(loc);
 			}
 			RETURN_STRING(retval);
 		}
-		zend_tmp_string_release(tmp_loc);
+		if (loc) {
+			zend_string_release(loc);
+		}
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {
 			idx++;
