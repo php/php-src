@@ -546,7 +546,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 
 	if (php_unregister_url_stream_wrapper_volatile(protocol) == FAILURE) {
 		/* We failed */
-		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", protocol);
+		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", ZSTR_VAL(protocol));
 		RETURN_FALSE;
 	}
 

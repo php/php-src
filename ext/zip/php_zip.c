@@ -678,7 +678,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			}
 
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
-				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %i, %i given)",
+				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
 				zend_string_release(namelist[i]);
 				break;
