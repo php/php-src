@@ -718,7 +718,7 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 		if (zend_hash_exists(ht, name)) {
 			php_error_docref(NULL, E_NOTICE,
 					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
-			zend_string_release(name);
+			zend_tmp_string_release(tmp_name);
 			continue;
 		}
 		zend_hash_add_empty_element(ht, name);
