@@ -1934,10 +1934,6 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 {
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
-	
-	if (opline->opcode == ZEND_FETCH_THIS) {
-		return;
-	}
 
 	switch (type & BP_VAR_MASK) {
 		case BP_VAR_R:
@@ -2631,11 +2627,8 @@ static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 
 static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
-	zend_op *opline;
-
 	if (is_this_fetch(ast)) {
-		opline = zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
-		zend_adjust_for_fetch_type(opline, type);
+		zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
 	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
 		zend_op *opline = zend_compile_simple_var_no_cv(result, ast, type, delayed);
 		zend_adjust_for_fetch_type(opline, type);
