@@ -232,6 +232,11 @@ ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format
 ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap);
 ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
+/* Same as zend_spprintf and zend_strpprintf, without checking of format validity.
+ * For use with custom printf specifiers such as %H. */
+ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
+ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
+
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);

@@ -305,7 +305,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 	if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_STR && param->max_value_len <= 0 && !Z_ISNULL_P(parameter)) {
 		if (Z_TYPE_P(parameter) == IS_DOUBLE) {
 			char *p;
-			int len = spprintf(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
+			int len = zend_spprintf_unchecked(&p, 0, "%.*H", (int) EG(precision), Z_DVAL_P(parameter));
 			ZVAL_STRINGL(parameter, p, len);
 			efree(p);
 		} else {
@@ -2132,11 +2132,15 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 				php_stream_printf(out, "Key: Position #" ZEND_ULONG_FMT ":\n", num);
 			}
 
-			php_stream_printf(out, "paramno=%pd\nname=[%zd] \"%.*s\"\nis_param=%d\nparam_type=%d\n",
-							param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
-							param->name ? ZSTR_VAL(param->name) : "",
-							param->is_param,
-							param->param_type);
+			php_stream_printf(out,
+				"paramno=" ZEND_LONG_FMT "\n"
+				"name=[%zd] \"%.*s\"\n"
+				"is_param=%d\n"
+				"param_type=%d\n",
+				param->paramno, param->name ? ZSTR_LEN(param->name) : 0, param->name ? (int) ZSTR_LEN(param->name) : 0,
+				param->name ? ZSTR_VAL(param->name) : "",
+				param->is_param,
+				param->param_type);
 
 		} ZEND_HASH_FOREACH_END();
 	}
