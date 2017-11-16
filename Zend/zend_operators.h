@@ -259,23 +259,27 @@ ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API zend_long    ZEND_FASTCALL _zval_get_long_func(zval *op);
-ZEND_API double       ZEND_FASTCALL _zval_get_double_func(zval *op);
-ZEND_API zend_string* ZEND_FASTCALL _zval_get_string_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
+ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
+ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 
-static zend_always_inline zend_long _zval_get_long(zval *op) {
-	return Z_TYPE_P(op) == IS_LONG ? Z_LVAL_P(op) : _zval_get_long_func(op);
+static zend_always_inline zend_long zval_get_long(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
 }
-static zend_always_inline double _zval_get_double(zval *op) {
-	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op);
+static zend_always_inline double zval_get_double(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);
 }
-static zend_always_inline zend_string *_zval_get_string(zval *op) {
-	return Z_TYPE_P(op) == IS_STRING ? zend_string_copy(Z_STR_P(op)) : _zval_get_string_func(op);
+static zend_always_inline zend_string *zval_get_string(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_STRING) ? zend_string_copy(Z_STR_P(op)) : zval_get_string_func(op);
 }
 
-#define zval_get_long(op) _zval_get_long((op))
-#define zval_get_double(op) _zval_get_double((op))
-#define zval_get_string(op) _zval_get_string((op))
+/* Compatibility macros for 7.2 and below */
+#define _zval_get_long(op) zval_get_long(op)
+#define _zval_get_double(op) zval_get_double(op)
+#define _zval_get_string(op) zval_get_string(op)
+#define _zval_get_long_func(op) zval_get_long_func(op)
+#define _zval_get_double_func(op) zval_get_double_func(op)
+#define _zval_get_string_func(op) zval_get_string_func(op)
 
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }

@@ -314,7 +314,7 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
 	} else {
-		ZVAL_STR(expr_copy, _zval_get_string_func(expr));
+		ZVAL_STR(expr_copy, zval_get_string_func(expr));
 		return 1;
 	}
 }

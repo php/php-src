@@ -1096,7 +1096,7 @@ try_again:
 				break;
 		}
 
-		offset = _zval_get_long_func(dim);
+		offset = zval_get_long_func(dim);
 	} else {
 		offset = Z_LVAL_P(dim);
 	}
@@ -1769,7 +1769,7 @@ try_string_offset:
 					break;
 			}
 
-			offset = _zval_get_long_func(dim);
+			offset = zval_get_long_func(dim);
 		} else {
 			offset = Z_LVAL_P(dim);
 		}
