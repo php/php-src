@@ -1481,7 +1481,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 				if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN(key))) {
 					zval_dtor(&key);
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (too long)", ZSTR_VAL(ce->name));
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (too long)", ZSTR_VAL(ce->name));
 					return ZEND_HASH_APPLY_STOP;
 				}
 
@@ -1615,7 +1615,7 @@ phar_spl_fileinfo:
 
 			if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN(key))) {
 				zval_dtor(&key);
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (too long)", ZSTR_VAL(ce->name));
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (too long)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 

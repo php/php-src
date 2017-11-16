@@ -2185,7 +2185,7 @@ static void accel_activate(void)
 
 	if (ZCG(counted)) {
 #ifdef ZTS
-		zend_accel_error(ACCEL_LOG_WARNING, "Stuck count for thread id %d", tsrm_thread_id());
+		zend_accel_error(ACCEL_LOG_WARNING, "Stuck count for thread id %lu", (unsigned long) tsrm_thread_id());
 #else
 		zend_accel_error(ACCEL_LOG_WARNING, "Stuck count for pid %d", getpid());
 #endif
