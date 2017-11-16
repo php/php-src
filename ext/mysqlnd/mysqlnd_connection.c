@@ -1372,7 +1372,7 @@ PHPAPI const char * mysqlnd_get_client_info()
 
 
 /* {{{ mysqlnd_get_client_version */
-PHPAPI unsigned int mysqlnd_get_client_version()
+PHPAPI unsigned long mysqlnd_get_client_version()
 {
 	return MYSQLND_VERSION_ID;
 }

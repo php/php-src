@@ -202,6 +202,18 @@ ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format
 }
 /* }}} */
 
+ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	size_t len;
+
+	va_start(arg, format);
+	len = zend_vspprintf(message, max_len, format, arg);
+	va_end(arg);
+	return len;
+}
+/* }}} */
+
 ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str buf = {0};
@@ -222,6 +234,18 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 /* }}} */
 
 ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	zend_string *str;
+
+	va_start(arg, format);
+	str = zend_vstrpprintf(max_len, format, arg);
+	va_end(arg);
+	return str;
+}
+/* }}} */
+
+ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	zend_string *str;

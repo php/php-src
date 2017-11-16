@@ -713,7 +713,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		pcre2_get_error_message(errnumber, error, sizeof(error));
-		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %d", error, erroffset);
+		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
 		efree(pattern);
 		if (tables) {
 			pefree((void*)tables, 1);

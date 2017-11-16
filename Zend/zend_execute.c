@@ -1220,7 +1220,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 		EMPTY_SWITCH_DEFAULT_CASE();
 	}
 	ZEND_ASSERT(msg != NULL);
-	zend_throw_error(NULL, msg);
+	zend_throw_error(NULL, "%s", msg);
 }
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result EXECUTE_DATA_DC)
