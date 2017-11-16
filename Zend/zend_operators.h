@@ -273,6 +273,20 @@ static zend_always_inline zend_string *zval_get_string(zval *op) {
 	return EXPECTED(Z_TYPE_P(op) == IS_STRING) ? zend_string_copy(Z_STR_P(op)) : zval_get_string_func(op);
 }
 
+static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string **tmp) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		*tmp = NULL;
+		return Z_STR_P(op);
+	} else {
+		return *tmp = zval_get_string_func(op);
+	}
+}
+static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
+	if (UNEXPECTED(tmp)) {
+		zend_string_release(tmp);
+	}
+}
+
 /* Compatibility macros for 7.2 and below */
 #define _zval_get_long(op) zval_get_long(op)
 #define _zval_get_double(op) zval_get_double(op)

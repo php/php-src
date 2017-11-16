@@ -705,7 +705,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{{ */
 {
 	zval *val;
-	zend_string *name;
+	zend_string *name, *tmp_name;
 
 	zend_hash_init(ht, zend_hash_num_elements(src), NULL, NULL, 0);
 	ZEND_HASH_FOREACH_VAL(src, val) {
@@ -714,7 +714,7 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 					"__sleep should return an array only containing the names of instance-variables to serialize.");
 		}
 
-		name = zval_get_string(val);
+		name = zval_get_tmp_string(val, &tmp_name);
 		if (zend_hash_exists(ht, name)) {
 			php_error_docref(NULL, E_NOTICE,
 					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
@@ -722,7 +722,7 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 			continue;
 		}
 		zend_hash_add_empty_element(ht, name);
-		zend_string_release(name);
+		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */

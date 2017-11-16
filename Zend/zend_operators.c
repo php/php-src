@@ -1809,8 +1809,9 @@ ZEND_API int ZEND_FASTCALL concat_function(zval *result, zval *op1, zval *op2) /
 
 ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend_bool case_insensitive) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1);
-	zend_string *str2 = zval_get_string(op2);
+	zend_string *tmp_str1, *tmp_str2;
+	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
+	zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
 	int ret;
 
 	if (case_insensitive) {
@@ -1819,8 +1820,8 @@ ZEND_API int ZEND_FASTCALL string_compare_function_ex(zval *op1, zval *op2, zend
 		ret = zend_binary_strcmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2));
 	}
 
-	zend_string_release(str1);
-	zend_string_release(str2);
+	zend_tmp_string_release(tmp_str1);
+	zend_tmp_string_release(tmp_str2);
 	return ret;
 }
 /* }}} */
@@ -1835,12 +1836,13 @@ ZEND_API int ZEND_FASTCALL string_compare_function(zval *op1, zval *op2) /* {{{ 
 			return zend_binary_strcmp(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		}
 	} else {
-		zend_string *str1 = zval_get_string(op1);
-		zend_string *str2 = zval_get_string(op2);
+		zend_string *tmp_str1, *tmp_str2;
+		zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
+		zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
 		int ret = zend_binary_strcmp(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2));
 
-		zend_string_release(str1);
-		zend_string_release(str2);
+		zend_tmp_string_release(tmp_str1);
+		zend_tmp_string_release(tmp_str2);
 		return ret;
 	}
 }
@@ -1856,12 +1858,13 @@ ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2) /*
 			return zend_binary_strcasecmp_l(Z_STRVAL_P(op1), Z_STRLEN_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op2));
 		}
 	} else {
-		zend_string *str1 = zval_get_string(op1);
-		zend_string *str2 = zval_get_string(op2);
+		zend_string *tmp_str1, *tmp_str2;
+		zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
+		zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
 		int ret = zend_binary_strcasecmp_l(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str1));
 
-		zend_string_release(str1);
-		zend_string_release(str2);
+		zend_tmp_string_release(tmp_str1);
+		zend_tmp_string_release(tmp_str2);
 		return ret;
 	}
 }
@@ -1870,12 +1873,13 @@ ZEND_API int ZEND_FASTCALL string_case_compare_function(zval *op1, zval *op2) /*
 #if HAVE_STRCOLL
 ZEND_API int ZEND_FASTCALL string_locale_compare_function(zval *op1, zval *op2) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1);
-	zend_string *str2 = zval_get_string(op2);
+	zend_string *tmp_str1, *tmp_str2;
+	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
+	zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
 	int ret = strcoll(ZSTR_VAL(str1), ZSTR_VAL(str2));
 
-	zend_string_release(str1);
-	zend_string_release(str2);
+	zend_tmp_string_release(tmp_str1);
+	zend_tmp_string_release(tmp_str2);
 	return ret;
 }
 /* }}} */

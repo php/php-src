@@ -1242,7 +1242,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	if (Z_TYPE_P(value) != IS_STRING) {
 		/* Convert to string, just the time to pick the 1st byte */
-		zend_string *tmp = zval_get_string(value);
+		zend_string *tmp = zval_get_string_func(value);
 
 		string_len = ZSTR_LEN(tmp);
 		c = (zend_uchar)ZSTR_VAL(tmp)[0];
@@ -1934,19 +1934,19 @@ use_read_property:
 static zend_always_inline zval* zend_fetch_static_property_address(zval *varname, zend_uchar varname_type, znode_op op2, zend_uchar op2_type, int type EXECUTE_DATA_DC OPLINE_DC)
 {
 	zval *retval;
-	zend_string *name;
+	zend_string *name, *tmp_name;
 	zend_class_entry *ce;
 
 	if (varname_type == IS_CONST) {
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
-		zend_string_addref(name);
+		tmp_name = NULL;
 	} else {
 		if (varname_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
 			zval_undefined_cv(EX(opline)->op1.var EXECUTE_DATA_CC);
 		}
-		name = zval_get_string(varname);
+		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
 	if (op2_type == IS_CONST) {
@@ -1969,7 +1969,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zval *varname
 				ce = zend_fetch_class_by_name(Z_STR_P(class_name), class_name + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 				if (UNEXPECTED(ce == NULL)) {
 					if (varname_type != IS_CONST) {
-						zend_string_release(name);
+						zend_tmp_string_release(tmp_name);
 					}
 					return NULL;
 				}
@@ -1981,7 +1981,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zval *varname
 			ce = zend_fetch_class(NULL, op2.num);
 			if (UNEXPECTED(ce == NULL)) {
 				if (varname_type != IS_CONST) {
-					zend_string_release(name);
+					zend_tmp_string_release(tmp_name);
 				}
 				return NULL;
 			}
@@ -2007,7 +2007,7 @@ static zend_always_inline zval* zend_fetch_static_property_address(zval *varname
 	retval = zend_std_get_static_property(ce, name, type == BP_VAR_IS);
 
 	if (varname_type != IS_CONST) {
-		zend_string_release(name);
+		zend_tmp_string_release(tmp_name);
 	}
 
 	if (UNEXPECTED(retval == NULL)) {

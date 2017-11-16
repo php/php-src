@@ -564,14 +564,15 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 			tmp = &args[argnum];
 			switch (format[inpos]) {
 				case 's': {
-					zend_string *str = zval_get_string(tmp);
+					zend_string *t;
+					zend_string *str = zval_get_tmp_string(tmp, &t);
 					php_sprintf_appendstring(&result, &outpos,
 											 ZSTR_VAL(str),
 											 width, precision, padding,
 											 alignment,
 											 ZSTR_LEN(str),
 											 0, expprec, 0);
-					zend_string_release(str);
+					zend_tmp_string_release(t);
 					break;
 				}
 

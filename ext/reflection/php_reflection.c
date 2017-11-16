@@ -547,10 +547,11 @@ static void _const_string(smart_str *str, char *name, zval *value, char *indent)
 		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
 						indent, type, name, Z_STRVAL_P(value));
 	} else {
-		zend_string *value_str = zval_get_string(value);
+		zend_string *tmp_value_str;
+		zend_string *value_str = zval_get_tmp_string(value, &tmp_value_str);
 		smart_str_append_printf(str, "%s    Constant [ %s %s ] { %s }\n",
 						indent, type, name, ZSTR_VAL(value_str));
-		zend_string_release(value_str);
+		zend_tmp_string_release(tmp_value_str);
 	}
 }
 /* }}} */
@@ -568,12 +569,13 @@ static void _class_const_string(smart_str *str, char *name, zend_class_constant 
 		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { Array }\n",
 						indent, visibility, type, name);
 	} else {
-		zend_string *value_str = zval_get_string(&c->value);
+		zend_string *tmp_value_str;
+		zend_string *value_str = zval_get_tmp_string(&c->value, &tmp_value_str);
 
 		smart_str_append_printf(str, "%sConstant [ %s %s %s ] { %s }\n",
 						indent, visibility, type, name, ZSTR_VAL(value_str));
 
-		zend_string_release(value_str);
+		zend_tmp_string_release(tmp_value_str);
 	}
 }
 /* }}} */
@@ -660,9 +662,10 @@ static void _parameter_string(smart_str *str, zend_function *fptr, struct _zend_
 			} else if (Z_TYPE(zv) == IS_ARRAY) {
 				smart_str_appends(str, "Array");
 			} else {
-				zend_string *zv_str = zval_get_string(&zv);
+				zend_string *tmp_zv_str;
+				zend_string *zv_str = zval_get_tmp_string(&zv, &tmp_zv_str);
 				smart_str_append(str, zv_str);
-				zend_string_release(zv_str);
+				zend_tmp_string_release(tmp_zv_str);
 			}
 			zval_ptr_dtor(&zv);
 		}

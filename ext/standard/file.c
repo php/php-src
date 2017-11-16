@@ -669,18 +669,19 @@ PHP_FUNCTION(file_put_contents)
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
-					zend_string *str = zval_get_string(tmp);
+					zend_string *t;
+					zend_string *str = zval_get_tmp_string(tmp, &t);
 					if (ZSTR_LEN(str)) {
 						numbytes += ZSTR_LEN(str);
 						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
 						if (bytes_written != ZSTR_LEN(str)) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							zend_string_release(str);
+							zend_tmp_string_release(t);
 							numbytes = -1;
 							break;
 						}
 					}
-					zend_string_release(str);
+					zend_tmp_string_release(t);
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
@@ -1936,7 +1937,8 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
-		zend_string *field_str = zval_get_string(field_tmp);
+		zend_string *tmp_field_str;
+		zend_string *field_str = zval_get_tmp_string(field_tmp, &tmp_field_str);
 
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
@@ -1971,7 +1973,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		zend_string_release(field_str);
+		zend_tmp_string_release(tmp_field_str);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');

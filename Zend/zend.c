@@ -322,14 +322,15 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 
 ZEND_API size_t zend_print_zval(zval *expr, int indent) /* {{{ */
 {
-	zend_string *str = zval_get_string(expr);
+	zend_string *tmp_str;
+	zend_string *str = zval_get_tmp_string(expr, &tmp_str);
 	size_t len = ZSTR_LEN(str);
 
 	if (len != 0) {
 		zend_write(ZSTR_VAL(str), len);
 	}
 
-	zend_string_release(str);
+	zend_tmp_string_release(tmp_str);
 	return len;
 }
 /* }}} */
@@ -436,9 +437,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_REFERENCE:
 			zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
 			break;
+		case IS_STRING:
+			smart_str_append(buf, Z_STR_P(expr));
+			break;
 		default:
 			{
-				zend_string *str = zval_get_string(expr);
+				zend_string *str = zval_get_string_func(expr);
 				smart_str_append(buf, str);
 				zend_string_release(str);
 			}

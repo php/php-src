@@ -4336,11 +4336,12 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
-			zend_string *arg_str = zval_get_string(entry);
+			zend_string *tmp_arg_str;
+			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
 			argv[pos++] = estrdup(ZSTR_VAL(arg_str));
 
-			zend_string_release(arg_str);
+			zend_tmp_string_release(tmp_arg_str);
 		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
@@ -4369,7 +4370,8 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
-			zend_string *arg_str = zval_get_string(entry);
+			zend_string *tmp_arg_str;
+			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
 			opts->need_param = 0;
 			opts->opt_name = estrdup(ZSTR_VAL(arg_str));
@@ -4385,7 +4387,7 @@ PHP_FUNCTION(getopt)
 			opts->opt_char = 0;
 			opts++;
 
-			zend_string_release(arg_str);
+			zend_tmp_string_release(tmp_arg_str);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
