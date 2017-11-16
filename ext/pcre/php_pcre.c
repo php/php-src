@@ -726,7 +726,10 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		/* Enable PCRE JIT compiler */
 		rc = pcre2_jit_compile(re, PCRE2_JIT_COMPLETE);
 		if (EXPECTED(rc >= 0)) {
-			poptions |= PREG_JIT;
+			size_t jit_size = 0;
+			if (!pcre2_pattern_info(re, PCRE2_INFO_JITSIZE, &jit_size) && jit_size > 0) {
+				poptions |= PREG_JIT;
+			}
 		} else {
 			pcre2_get_error_message(rc, error, sizeof(error));
 			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
