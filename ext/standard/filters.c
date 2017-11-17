@@ -822,7 +822,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 		}
 
-		if (lb_ptr >= lb_cnt && icnt <= 0) {
+		if (lb_ptr >= lb_cnt && icnt == 0) {
 			break;
 		}
 
@@ -1028,7 +1028,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	for (;;) {
 		switch (scan_stat) {
 			case 0: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == '=') {
@@ -1045,7 +1045,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 1: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == ' ' || *ps == '\t') {
@@ -1074,7 +1074,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} /* break is missing intentionally */
 
 			case 2: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 
@@ -1101,7 +1101,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 4: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (lb_cnt < inst->lbchars_len &&
