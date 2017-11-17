@@ -193,7 +193,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
 	const unsigned char *e;
-	if (n <= 0) {
+	if (0 == n) {
 		return NULL;
 	}
 
