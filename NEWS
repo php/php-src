@@ -16,6 +16,8 @@ PHP                                                                        NEWS
   . Fixed bug #75511 (fread not free unused buffer). (Laruence)
   . Fixed bug #75514 (mt_rand returns value outside [$min,$max]+ on 32-bit)
     (Remi)
+  . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
+    segment fault). (Nikita)
 
 23 Nov 2017, PHP 7.1.12
 
