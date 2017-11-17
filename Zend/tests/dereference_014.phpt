@@ -27,8 +27,8 @@ var_dump($h);
 
 ?>
 --EXPECTF--
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'a' of non-object in %s on line %d
 NULL
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'b' of non-object in %s on line %d
 NULL

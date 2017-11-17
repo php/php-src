@@ -16,7 +16,6 @@ error_log = $logfile
 log_level = warning
 [unconfined]
 listen = 127.0.0.1:$port
-user = foo
 pm = dynamic
 pm.max_children = 5
 ;pm.start_servers = 2

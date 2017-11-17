@@ -80,6 +80,7 @@ echo "Done";
 --> /foo.php?a=b&c=d   : string(7) "a=b&c=d"
 --> foo.php?a=b&c=d   : string(7) "a=b&c=d"
 --> http://user:passwd@www.example.com:8080?bar=1&boom=0   : string(12) "bar=1&boom=0"
+--> http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0   : string(12) "bar=1&boom=0"
 --> file:///path/to/file   : NULL
 --> file://path/to/file   : NULL
 --> file:/path/to/file   : NULL

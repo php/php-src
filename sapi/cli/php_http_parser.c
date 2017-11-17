@@ -1470,7 +1470,7 @@ size_t php_http_parser_execute (php_http_parser *parser,
           p += to_read - 1;
         }
 
-        if (to_read == parser->content_length) {
+        if (to_read == (size_t)parser->content_length) {
           state = s_chunk_data_almost_done;
         }
 

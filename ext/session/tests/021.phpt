@@ -16,11 +16,15 @@ session.save_handler=files
 <?php
 
 error_reporting(E_ALL);
+ini_set('session.trans_sid_hosts', 'php.net');
+$_SERVER['HTTP_HOST'] = 'php.net';
 
 session_id("abtest");
 session_start();
 ?>
-<form>
+<form action="//bad.net/do.php">
+<fieldset>
+<form action="//php.net/do.php">
 <fieldset>
 <?php
 
@@ -29,7 +33,7 @@ ob_flush();
 ini_set("url_rewriter.tags", "a=href,area=href,frame=src,input=src,form=");
 
 ?>
-<form>
+<form action="../do.php">
 <fieldset>
 <?php
 
@@ -38,7 +42,7 @@ ob_flush();
 ini_set("url_rewriter.tags", "a=href,area=href,frame=src,input=src,form=fakeentry");
 
 ?>
-<form>
+<form action="/do.php">
 <fieldset>
 <?php
 
@@ -47,18 +51,20 @@ ob_flush();
 ini_set("url_rewriter.tags", "a=href,fieldset=,area=href,frame=src,input=src");
 
 ?>
-<form>
+<form action="/foo/do.php">
 <fieldset>
 <?php
 
 session_destroy();
 ?>
 --EXPECT--
-<form><input type="hidden" name="PHPSESSID" value="abtest" />
-<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />
-<form><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="//bad.net/do.php">
 <fieldset>
-<form><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="//php.net/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
 <fieldset>
-<form>
-<fieldset><input type="hidden" name="PHPSESSID" value="abtest" />
+<form action="../do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
+<form action="/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>
+<form action="/foo/do.php"><input type="hidden" name="PHPSESSID" value="abtest" />
+<fieldset>

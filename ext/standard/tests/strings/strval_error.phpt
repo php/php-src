@@ -48,4 +48,4 @@ NULL
 
 -- Testing strval() function with object which has not toString() method  --
 
-Catchable fatal error: Object of class MyClass could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class MyClass could not be converted to string in %s on line %d

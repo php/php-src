@@ -10,9 +10,9 @@ Test property_exists() function : class auto loading
 
 echo "*** Testing property_exists() : class auto loading ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
+});
 
 echo "\ntesting property in autoloaded class\n";
 var_dump(property_exists("AutoTest", "bob"));

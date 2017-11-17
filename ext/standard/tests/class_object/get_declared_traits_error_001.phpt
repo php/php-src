@@ -12,7 +12,7 @@ echo "*** Testing get_declared_traits() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing get_declared_traits() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( get_declared_traits($extra_arg) );
 
 echo "Done";

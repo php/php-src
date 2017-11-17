@@ -60,6 +60,7 @@ ZEND_API extern const zend_encoding *zend_multibyte_encoding_utf8;
 
 /* multibyte utility functions */
 ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functions);
+ZEND_API void zend_multibyte_restore_functions(void);
 ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(void);
 
 ZEND_API const zend_encoding *zend_multibyte_fetch_encoding(const char *name);
@@ -84,6 +85,6 @@ END_EXTERN_C()
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

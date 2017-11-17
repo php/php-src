@@ -118,7 +118,7 @@ public:
 		}
 		if (resultLength) {
 			//the bug is that uenum_next doesn't set the length
-			*resultLength = (length == -1) ? strlen(str) : length;
+			*resultLength = (length == -1) ? (int32_t)strlen(str) : length;
 		}
 
 		return str;

@@ -446,12 +446,6 @@ void resourcebundle_register_class( void )
 
 	ResourceBundle_ce_ptr = zend_register_internal_class( &ce );
 
-	if( !ResourceBundle_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register ResourceBundle class");
-		return;
-	}
-
 	ResourceBundle_object_handlers = std_object_handlers;
 	ResourceBundle_object_handlers.offset = XtOffsetOf(ResourceBundle_object, zend);
 	ResourceBundle_object_handlers.clone_obj	  = NULL; /* ICU ResourceBundle has no clone implementation */

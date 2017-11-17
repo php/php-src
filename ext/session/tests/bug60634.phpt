@@ -40,8 +40,20 @@ session_start();
 session_write_close();
 echo "um, hi\n";
 
+/*
+ * write() calls die(). This results in calling session_flush() which calls
+ * write() in request shutdown. The code is inside save handler still and
+ * calls save close handler.
+ *
+ * Because session_write_close() fails by die(), write() is called twice.
+ * close() is still called at request shutdown since session is active.
+ */
+
 ?>
 --EXPECTF--
 write: goodbye cruel world
-close: goodbye cruel world
 
+Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0
+
+Warning: Unknown: Failed to write session data using user defined save handler. (session.save_path: ) in Unknown on line 0
+close: goodbye cruel world

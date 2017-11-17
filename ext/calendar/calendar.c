@@ -24,16 +24,18 @@
 #include "config.h"
 #endif
 
-#ifdef PHP_WIN32
-#define _WINNLS_
-#endif
-
 #include "php.h"
 #include "ext/standard/info.h"
 #include "php_calendar.h"
 #include "sdncal.h"
 
 #include <stdio.h>
+
+#ifdef PHP_WIN32
+/* This conflicts with a define in winnls.h, but that header is needed
+   to have GetACP(). */
+#undef CAL_GREGORIAN
+#endif
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_unixtojd, 0, 0, 0)
@@ -311,7 +313,7 @@ PHP_FUNCTION(cal_info)
 
 
 	if (cal != -1 && (cal < 0 || cal >= CAL_NUM_CALS)) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -333,7 +335,7 @@ PHP_FUNCTION(cal_days_in_month)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -342,7 +344,7 @@ PHP_FUNCTION(cal_days_in_month)
 	sdn_start = calendar->to_jd(year, month, 1);
 
 	if (sdn_start == 0) {
-		php_error_docref(NULL, E_WARNING, "invalid date.");
+		php_error_docref(NULL, E_WARNING, "invalid date");
 		RETURN_FALSE;
 	}
 
@@ -379,7 +381,7 @@ PHP_FUNCTION(cal_to_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd.", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 
@@ -401,7 +403,7 @@ PHP_FUNCTION(cal_from_jd)
 	}
 
 	if (cal < 0 || cal >= CAL_NUM_CALS) {
-		php_error_docref(NULL, E_WARNING, "invalid calendar ID %pd", cal);
+		php_error_docref(NULL, E_WARNING, "invalid calendar ID " ZEND_LONG_FMT, cal);
 		RETURN_FALSE;
 	}
 	calendar = &cal_conversion_table[cal];
@@ -621,7 +623,7 @@ PHP_FUNCTION(jdtojewish)
 		RETURN_STRING(date);
 	} else {
 		if (year <= 0 || year > 9999) {
-			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999).");
+			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999)");
 			RETURN_FALSE;
 		}
 

@@ -24,8 +24,8 @@
 #include "ext/standard/basic_functions.h"
 
 typedef struct {
-	php_int32 s1;
-	php_int32 s2;
+	int32_t s1;
+	int32_t s2;
 	int seeded;
 } php_lcg_globals;
 

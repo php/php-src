@@ -62,10 +62,8 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 	spl_instantiate(pce, retval);
 
 	fci.size = sizeof(zend_fcall_info);
-	fci.function_table = &pce->function_table;
 	ZVAL_STR(&fci.function_name, func->common.function_name);
 	fci.object = Z_OBJ_P(retval);
-	fci.symbol_table = NULL;
 	fci.retval = &dummy;
 	fci.param_count = argc;
 	fci.params = argv;
@@ -73,7 +71,7 @@ static inline void spl_instantiate_arg_n(zend_class_entry *pce, zval *retval, in
 
 	fcc.initialized = 1;
 	fcc.function_handler = func;
-	fcc.calling_scope = EG(scope);
+	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = pce;
 	fcc.object = Z_OBJ_P(retval);
 

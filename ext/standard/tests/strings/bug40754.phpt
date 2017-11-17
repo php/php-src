@@ -27,12 +27,12 @@ var_dump(substr("abcde", $v, $v));
 
 ?>
 --EXPECTF--	
-%unicode|string%(4) "bcde"
-%unicode|string%(6) "abcdex"
+string(4) "bcde"
+string(6) "abcdex"
 bool(false)
 bool(false)
 
-Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
+Warning: substr_count(): Offset not contained in string in %s on line %d
 bool(false)
 
 Warning: substr_compare(): The start position cannot exceed initial string length in %s on line %d
@@ -41,10 +41,10 @@ bool(false)
 Warning: stripos(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: substr_count(): Offset value 2147483647 exceeds string length in %s on line %d
+Warning: substr_count(): Offset not contained in string in %s on line %d
 bool(false)
 
-Warning: substr_count(): Length value 2147483647 exceeds string length in %s on line %d
+Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)
 
 Warning: strpos(): Offset not contained in string in %s on line %d

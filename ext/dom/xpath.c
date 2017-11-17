@@ -134,8 +134,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 					xmlFree(str);
 				} else if (type == 2) {
 					int j;
-					array_init(&fci.params[i]);
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+						array_init(&fci.params[i]);
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -161,6 +161,8 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 							php_dom_create_object(node, &child, &intern->dom);
 							add_next_index_zval(&fci.params[i], &child);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(&fci.params[i]);
 					}
 				}
 				break;
@@ -171,7 +173,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 
 	obj = valuePop(ctxt);
 	if (obj->stringval == NULL) {
@@ -188,7 +189,6 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 	ZVAL_STRING(&fci.function_name, (char *) obj->stringval);
 	xmlXPathFreeObject(obj);
 
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.no_separation = 0;
@@ -206,8 +206,7 @@ static void dom_xpath_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs,
 				xmlNode *nodep;
 				dom_object *obj;
 				if (intern->node_list == NULL) {
-					ALLOC_HASHTABLE(intern->node_list);
-					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
+					intern->node_list = zend_new_array(0);
 				}
 				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);
@@ -433,10 +432,9 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			int i;
 			xmlNodeSetPtr nodesetp;
 
-			array_init(&retval);
+			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval) && nodesetp->nodeNr) {
 
-			if (xpathobjp->type == XPATH_NODESET && NULL != (nodesetp = xpathobjp->nodesetval)) {
-
+				array_init(&retval);
 				for (i = 0; i < nodesetp->nodeNr; i++) {
 					xmlNodePtr node = nodesetp->nodeTab[i];
 					zval child;
@@ -462,6 +460,8 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 					php_dom_create_object(node, &child, &intern->dom);
 					add_next_index_zval(&retval, &child);
 				}
+			} else {
+				ZVAL_EMPTY_ARRAY(&retval);
 			}
 			php_dom_create_interator(return_value, DOM_NODELIST);
 			nodeobj = Z_DOMOBJ_P(return_value);
@@ -474,7 +474,7 @@ static void php_xpath_eval(INTERNAL_FUNCTION_PARAMETERS, int type) /* {{{ */
 			break;
 
 		case XPATH_NUMBER:
-			RETVAL_DOUBLE(xpathobjp->floatval)
+			RETVAL_DOUBLE(xpathobjp->floatval);
 			break;
 
 		case XPATH_STRING:

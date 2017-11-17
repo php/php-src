@@ -370,7 +370,7 @@ static int sapi_lsapi_send_headers(sapi_headers_struct *sapi_headers)
 
 /* {{{ sapi_lsapi_send_headers
  */
-static void sapi_lsapi_log_message(char *message)
+static void sapi_lsapi_log_message(char *message, int syslog_type_int)
 {
     char buf[8192];
     int len = strlen( message );
@@ -443,15 +443,8 @@ static sapi_module_struct lsapi_sapi_module =
 
     sapi_lsapi_register_variables,  /* register server variables */
     sapi_lsapi_log_message,         /* Log message */
-
-    NULL,                           /* php.ini path override */
-    NULL,                           /* block interruptions */
-    NULL,                           /* unblock interruptions */
-    NULL,                           /* default post reader */
-    NULL,                           /* treat data */
-    NULL,                           /* executable location */
-
-    0,                              /* php.ini ignore */
+	NULL,							/* Get request time */
+	NULL,							/* Child terminate */
 
     STANDARD_SAPI_MODULE_PROPERTIES
 
@@ -647,7 +640,7 @@ static void walk_down_the_path(char* path_start,
 
 typedef struct {
     char *path;
-    uint path_len;
+    uint32_t path_len;
     char *doc_root;
     user_config_cache_entry *entry;
 } _lsapi_activate_user_ini_ctx;
@@ -691,8 +684,6 @@ static int lsapi_activate_user_ini_mk_path(_lsapi_activate_user_ini_ctx *ctx,
     /* Extract dir name from path_translated * and store it in 'path' */
     ctx->path_len = strlen(ctx->path);
     path = ctx->path = estrndup(SG(request_info).path_translated, ctx->path_len);
-    if (!path)
-        return FAILURE;
     ctx->path_len = zend_dirname(path, ctx->path_len);
     DEBUG_MESSAGE("dirname: %s", ctx->path);
 
@@ -776,7 +767,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                                                       void* next)
 {
     time_t request_time = sapi_get_request_time();
-    uint docroot_len;
+    uint32_t docroot_len;
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
@@ -1241,9 +1232,7 @@ int main( int argc, char * argv[] )
     tsrm_startup(1, 1, 0, NULL);
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
@@ -1358,23 +1347,16 @@ int main( int argc, char * argv[] )
 
 /*   LiteSpeed PHP module starts here */
 
-#if PHP_MAJOR_VERSION > 4
-
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_litespeed__void, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
-
-#else
-#define arginfo_litespeed__void NULL
-#endif
 
 PHP_FUNCTION(litespeed_request_headers);
 PHP_FUNCTION(litespeed_response_headers);
 PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(litespeed);
-
 
 zend_function_entry litespeed_functions[] = {
     PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)

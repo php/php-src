@@ -23,6 +23,7 @@ EXPORTS
     inflateBack
     inflateBackEnd
     zlibCompileFlags
+    inflateValidate
 ; utility functions
     compress
     compress2

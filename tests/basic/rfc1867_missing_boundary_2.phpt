@@ -2,8 +2,6 @@
 rfc1867 missing boundary 2
 --INI--
 file_uploads=1
-error_reporting=E_ALL&~E_NOTICE
-comment=debug builds show some additional E_NOTICE errors
 upload_max_filesize=1024
 --POST_RAW--
 Content-Type: multipart/form-data; boundary=---------------------------20896060251896012921717172737
@@ -19,17 +17,17 @@ var_dump($_POST);
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(0) ""
-    [%u|b%"error"]=>
+    ["error"]=>
     int(3)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(0)
   }
 }

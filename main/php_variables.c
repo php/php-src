@@ -49,7 +49,13 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, 
 	assert(strval != NULL);
 
 	/* Prepare value */
-	ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
+	if (str_len == 0) {
+		ZVAL_EMPTY_STRING(&new_entry);
+	} else if (str_len == 1) {
+		ZVAL_INTERNED_STR(&new_entry, ZSTR_CHAR((zend_uchar)*strval));
+	} else {
+		ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
+	}
 	php_register_variable_ex(var, &new_entry, track_vars_array);
 }
 
@@ -79,7 +85,7 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 
 
 	/* ignore leading spaces in the variable name */
-	while (*var_name && *var_name==' ') {
+	while (*var_name==' ') {
 		var_name++;
 	}
 
@@ -107,6 +113,26 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		zval_dtor(val);
 		free_alloca(var_orig, use_heap);
 		return;
+	}
+
+	if (var_len == sizeof("this")-1 && EG(current_execute_data)) {
+		zend_execute_data *ex = EG(current_execute_data);
+
+		while (ex) {
+			if (ex->func && ZEND_USER_CODE(ex->func->common.type)) {
+				if ((ZEND_CALL_INFO(ex) & ZEND_CALL_HAS_SYMBOL_TABLE)
+						&& ex->symbol_table == symtable1) {
+					if (memcmp(var, "this", sizeof("this")-1) == 0) {
+						zend_throw_error(NULL, "Cannot re-assign $this");
+						zval_dtor(val);
+						free_alloca(var_orig, use_heap);
+						return;
+					}
+				}
+				break;
+			}
+			ex = ex->prev_execute_data;
+		}
 	}
 
 	/* GLOBALS hijack attempt, reject parameter */
@@ -432,7 +458,7 @@ SAPI_API SAPI_TREAT_DATA_FUNC(php_default_treat_data)
 	switch (arg) {
 		case PARSE_GET:
 		case PARSE_STRING:
-			separator = (char *) estrdup(PG(arg_separator).input);
+			separator = PG(arg_separator).input;
 			break;
 		case PARSE_COOKIE:
 			separator = ";\0";
@@ -487,10 +513,6 @@ next_cookie:
 		var = php_strtok_r(NULL, separator, &strtok_buf);
 	}
 
-	if (arg != PARSE_COOKIE) {
-		efree(separator);
-	}
-
 	if (free_buffer) {
 		efree(res);
 	}
@@ -522,7 +544,7 @@ void _php_import_environment_variables(zval *array_ptr)
 	}
 }
 
-zend_bool php_std_auto_global_callback(char *name, uint name_len)
+zend_bool php_std_auto_global_callback(char *name, uint32_t name_len)
 {
 	zend_printf("%s\n", name);
 	return 0; /* don't rearm */
@@ -590,7 +612,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv")-1, &arr);
 		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc")-1, &argc);
 	}
-	zval_ptr_dtor(&arr);
+	zval_ptr_dtor_nogc(&arr);
 }
 /* }}} */
 
@@ -641,15 +663,13 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 			|| (string_key && (dest_entry = zend_hash_find(dest, string_key)) == NULL)
 			|| (string_key == NULL && (dest_entry = zend_hash_index_find(dest, num_key)) == NULL)
 			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
-			if (Z_REFCOUNTED_P(src_entry)) {
-				Z_ADDREF_P(src_entry);
-			}
+			Z_TRY_ADDREF_P(src_entry);
 			if (string_key) {
 				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
 						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
 					zend_hash_update(dest, string_key, src_entry);
-				} else if (Z_REFCOUNTED_P(src_entry)) {
-					Z_DELREF_P(src_entry);
+				} else {
+					Z_TRY_DELREF_P(src_entry);
 				}
 			} else {
 				zend_hash_index_update(dest, num_key, src_entry);
@@ -780,6 +800,11 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 	check_http_proxy(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 	zend_hash_update(&EG(symbol_table), name, &PG(http_globals)[TRACK_VARS_SERVER]);
 	Z_ADDREF(PG(http_globals)[TRACK_VARS_SERVER]);
+
+	/* TODO: TRACK_VARS_SERVER is modified in a number of places (e.g. phar) past this point,
+	 * where rc>1 due to the $_SERVER global. Ideally this shouldn't happen, but for now we
+	 * ignore this issue, as it would probably require larger changes. */
+	HT_ALLOW_COW_VIOLATION(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]));
 
 	return 0; /* don't rearm */
 }

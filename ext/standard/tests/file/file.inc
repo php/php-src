@@ -528,7 +528,7 @@ function delete_links($file_path,
   corresponding next 13 values of the same stat for equality
   $stat = stat array
 
- Retuns: true when all of them match, false otherwise
+ Returns: true when all of them match, false otherwise
 */
 function compare_self_stat( array $stat )
 {

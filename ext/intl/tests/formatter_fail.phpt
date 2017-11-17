@@ -66,7 +66,7 @@ foreach($args as $arg) {
 
 ?>
 --EXPECTF--
-TypeError: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
+ArgumentCountError: NumberFormatter::__construct() expects at least 2 parameters, 0 given in %s on line %d
 'numfmt_create: unable to parse input parameters: U_ILLEGAL_ARGUMENT_ERROR'
 
 Warning: numfmt_create() expects at least 2 parameters, 0 given in %s on line %d

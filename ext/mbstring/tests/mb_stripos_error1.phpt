@@ -22,8 +22,8 @@ echo "*** Testing mb_stripos() : error conditions ***\n";
 
 //Test mb_stripos with one more than the expected number of arguments
 echo "\n-- Testing mb_stripos() function with more than expected no. of arguments --\n";
-$haystack = b'string_val';
-$needle = b'string_val';
+$haystack = 'string_val';
+$needle = 'string_val';
 $offset = 10;
 $encoding = 'string_val';
 $extra_arg = 10;
@@ -31,7 +31,7 @@ var_dump( mb_stripos($haystack, $needle, $offset, $encoding, $extra_arg) );
 
 // Testing mb_stripos with one less than the expected number of arguments
 echo "\n-- Testing mb_stripos() function with less than expected no. of arguments --\n";
-$haystack = b'string_val';
+$haystack = 'string_val';
 var_dump( mb_stripos($haystack) );
 
 echo "Done";

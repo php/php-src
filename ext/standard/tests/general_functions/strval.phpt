@@ -96,7 +96,7 @@ $scalars = array(
   $heredoc_empty_string
 );
 /* loop to check that strval() recognizes different 
-   scalar values and retuns the string conversion of same */
+   scalar values and returns the string conversion of same */
 $loop_counter = 1;
 foreach ($scalars as $scalar ) {
    echo "-- Iteration $loop_counter --\n"; $loop_counter++;

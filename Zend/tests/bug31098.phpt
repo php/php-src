@@ -18,7 +18,7 @@ var_dump(isset($a['b']));
 $simpleString = "Bogus String Text";
 echo isset($simpleString->wrong)?"bug\n":"ok\n";
 echo isset($simpleString["wrong"])?"bug\n":"ok\n";
-echo isset($simpleString[-1])?"bug\n":"ok\n";
+echo isset($simpleString[-20])?"bug\n":"ok\n";
 echo isset($simpleString[0])?"ok\n":"bug\n";
 echo isset($simpleString["0"])?"ok\n":"bug\n";
 echo isset($simpleString["16"])?"ok\n":"bug\n";
@@ -44,7 +44,7 @@ ok
 ok
 ok
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'wrong' of non-object in %s on line %d
 ok
 
 Warning: Illegal string offset 'wrong' in %s on line %d

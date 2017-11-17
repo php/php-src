@@ -127,12 +127,6 @@ void php_base64_init(void)
 */
 /* }}} */
 
-PHPAPI zend_string *php_base64_decode(const unsigned char *str, size_t length) /* {{{ */
-{
-	return php_base64_decode_ex(str, length, 0);
-}
-/* }}} */
-
 PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length, zend_bool strict) /* {{{ */
 {
 	const unsigned char *current = str;
@@ -144,17 +138,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	/* run through the whole string, converting as we go */
 	while (length-- > 0) {
 		ch = *current++;
-		/* stop on null byte in non-strict mode (FIXME: is this really desired?) */
-		if (ch == 0 && !strict) {
-			break;
-		}
 		if (ch == base64_pad) {
-			/* fail if the padding character is second in a group (like V===) */
-			/* FIXME: why do we still allow invalid padding in other places in the middle of the string? */
-			if (i % 4 == 1) {
-				zend_string_free(result);
-				return NULL;
-			}
 			padding++;
 			continue;
 		}
@@ -172,8 +156,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 			}
 			/* fail on bad characters or if any data follows padding */
 			if (ch == -2 || padding) {
-				zend_string_free(result);
-				return NULL;
+				goto fail;
 			}
 		}
 
@@ -195,11 +178,24 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 		}
 		i++;
 	}
+	/* fail if the input is truncated (only one char in last group) */
+	if (strict && i % 4 == 1) {
+		goto fail;
+	}
+	/* fail if the padding length is wrong (not VV==, VVV=), but accept zero padding
+	 * RFC 4648: "In some circumstances, the use of padding [--] is not required" */
+	if (strict && padding && (padding > 2 || (i + padding) % 4 != 0)) {
+		goto fail;
+	}
 
 	ZSTR_LEN(result) = j;
 	ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
 
 	return result;
+
+fail:
+	zend_string_free(result);
+	return NULL;
 }
 /* }}} */
 
@@ -211,9 +207,10 @@ PHP_FUNCTION(base64_encode)
 	size_t str_len;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &str, &str_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(str, str_len)
+	ZEND_PARSE_PARAMETERS_END();
+
 	result = php_base64_encode((unsigned char*)str, str_len);
 	if (result != NULL) {
 		RETURN_STR(result);
@@ -232,9 +229,12 @@ PHP_FUNCTION(base64_decode)
 	size_t str_len;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|b", &str, &str_len, &strict) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(strict)
+	ZEND_PARSE_PARAMETERS_END();
+
 	result = php_base64_decode_ex((unsigned char*)str, str_len, strict);
 	if (result != NULL) {
 		RETURN_STR(result);

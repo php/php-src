@@ -1,11 +1,11 @@
 --TEST--
 Bug #45798 (sqlite3 doesn't track unexecuted statements)
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 
 $stmt = $db->prepare("SELECT 1");
 

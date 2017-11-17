@@ -217,11 +217,13 @@ PHPDBG_PRINT(func) /* {{{ */
 	zend_string *lcname;
 	/* search active scope if begins with period */
 	if (func_name[0] == '.') {
-		if (EG(scope)) {
+		zend_class_entry *scope = zend_get_executed_scope();
+
+		if (scope) {
 			func_name++;
 			func_name_len--;
 
-			func_table = &EG(scope)->function_table;
+			func_table = &scope->function_table;
 		} else {
 			phpdbg_error("inactive", "type=\"noclasses\"", "No active class");
 			return SUCCESS;

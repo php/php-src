@@ -35,13 +35,6 @@ static zend_object_handlers Collator_handlers;
  * Auxiliary functions needed by objects of 'Collator' class
  */
 
-/* {{{ Collator_objects_dtor */
-static void Collator_objects_dtor(zend_object *object )
-{
-	zend_objects_destroy_object(object );
-}
-/* }}} */
-
 /* {{{ Collator_objects_free */
 void Collator_objects_free(zend_object *object )
 {
@@ -142,7 +135,6 @@ void collator_register_Collator_class( void )
 	   for which we don't have the place to keep */
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL;
-	Collator_handlers.dtor_obj = Collator_objects_dtor;
 	Collator_handlers.free_obj = Collator_objects_free;
 
 	/* Declare 'Collator' class properties. */

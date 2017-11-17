@@ -183,7 +183,7 @@ static zend_object_iterator *IntlIterator_get_iterator(
 		return NULL;
 	}
 
-	++GC_REFCOUNT(&ii->iterator->std);
+	GC_ADDREF(&ii->iterator->std);
 
 	return ii->iterator;
 }

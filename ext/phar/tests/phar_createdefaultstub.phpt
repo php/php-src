@@ -34,7 +34,7 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECT--
-string(6683) "<?php
+string(6651) "<?php
 
 $web = 'index.php';
 
@@ -144,21 +144,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'index.php';
-const LEN = 6685;
+const LEN = 6653;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = (binary)fread($fp, 4));
-$m = (binary)'';
+$L = unpack('V', $a = fread($fp, 4));
+$m = '';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = (binary)fread($fp, $read);
+$last = fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -298,7 +298,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -328,7 +328,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-string(6694) "<?php
+string(6662) "<?php
 
 $web = 'index.php';
 
@@ -438,21 +438,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6696;
+const LEN = 6664;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = (binary)fread($fp, 4));
-$m = (binary)'';
+$L = unpack('V', $a = fread($fp, 4));
+$m = '';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = (binary)fread($fp, $read);
+$last = fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -592,7 +592,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -622,7 +622,7 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7074)
+int(7042)
 ============================================================================
 ============================================================================
 Illegal filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
@@ -630,7 +630,7 @@ Illegal filename passed in for stub creation, was 401 characters long, and only 
 ============================================================================
 ============================================================================
 ============================================================================
-string(6696) "<?php
+string(6664) "<?php
 
 $web = 'the/web.php';
 
@@ -740,21 +740,21 @@ const GZ = 0x1000;
 const BZ2 = 0x2000;
 const MASK = 0x3000;
 const START = 'my/custom/thingy.php';
-const LEN = 6698;
+const LEN = 6666;
 
 static function go($return = false)
 {
 $fp = fopen(__FILE__, 'rb');
 fseek($fp, self::LEN);
-$L = unpack('V', $a = (binary)fread($fp, 4));
-$m = (binary)'';
+$L = unpack('V', $a = fread($fp, 4));
+$m = '';
 
 do {
 $read = 8192;
 if ($L[1] - strlen($m) < 8192) {
 $read = $L[1] - strlen($m);
 }
-$last = (binary)fread($fp, $read);
+$last = fread($fp, $read);
 $m .= $last;
 } while (strlen($last) && strlen($m) < $L[1]);
 
@@ -894,7 +894,7 @@ die("Invalid internal .phar file (size error " . strlen($data) . " != " .
 $stat[7] . ")");
 }
 
-if ($entry[3] != sprintf("%u", crc32((binary)$data) & 0xffffffff)) {
+if ($entry[3] != sprintf("%u", crc32($data) & 0xffffffff)) {
 die("Invalid internal .phar file (checksum error)");
 }
 
@@ -924,6 +924,6 @@ Extract_Phar::go();
 __HALT_COMPILER(); ?>"
 ============================================================================
 ============================================================================
-int(7074)
+int(7042)
 Illegal web filename passed in for stub creation, was 401 characters long, and only 400 or less is allowed
 ===DONE===

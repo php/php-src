@@ -38,7 +38,7 @@ PHP_FUNCTION(shmop_write);
 PHP_FUNCTION(shmop_delete);
 
 #ifdef PHP_WIN32
-typedef int key_t;
+# include "win32/ipc.h"
 #endif
 
 struct php_shmop

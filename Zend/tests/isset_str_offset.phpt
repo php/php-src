@@ -8,6 +8,7 @@ print "- isset ---\n";
 $str = "test0123";
 
 var_dump(isset($str[-1]));
+var_dump(isset($str[-10]));
 var_dump(isset($str[0]));
 var_dump(isset($str[1]));
 var_dump(isset($str[4])); // 0
@@ -17,6 +18,7 @@ var_dump(isset($str[10000]));
 // non-numeric offsets
 print "- string ---\n";
 var_dump(isset($str['-1']));
+var_dump(isset($str['-10']));
 var_dump(isset($str['0']));
 var_dump(isset($str['1']));
 var_dump(isset($str['4'])); // 0
@@ -31,6 +33,7 @@ print "- null ---\n";
 var_dump(isset($str[null]));
 print "- double ---\n";
 var_dump(isset($str[-1.1]));
+var_dump(isset($str[-10.5]));
 var_dump(isset($str[-0.8]));
 var_dump(isset($str[-0.1]));
 var_dump(isset($str[0.2]));
@@ -50,6 +53,7 @@ print "done\n";
 ?>
 --EXPECTF--
 - isset ---
+bool(true)
 bool(false)
 bool(true)
 bool(true)
@@ -58,6 +62,7 @@ bool(true)
 bool(false)
 bool(false)
 - string ---
+bool(true)
 bool(false)
 bool(true)
 bool(true)
@@ -72,6 +77,7 @@ bool(false)
 - null ---
 bool(true)
 - double ---
+bool(true)
 bool(false)
 bool(true)
 bool(true)

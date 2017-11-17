@@ -50,8 +50,8 @@ typedef struct _zend_leak_info {
 	size_t size;
 	const char *filename;
 	const char *orig_filename;
-	uint lineno;
-	uint orig_lineno;
+	uint32_t lineno;
+	uint32_t orig_lineno;
 } zend_leak_info;
 
 #if ZEND_DEBUG
@@ -59,8 +59,8 @@ typedef struct _zend_mm_debug_info {
 	size_t             size;
 	const char        *filename;
 	const char        *orig_filename;
-	uint               lineno;
-	uint               orig_lineno;
+	uint32_t               lineno;
+	uint32_t               orig_lineno;
 } zend_mm_debug_info;
 
 # define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))
@@ -402,4 +402,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

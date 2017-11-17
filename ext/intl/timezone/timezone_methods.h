@@ -65,4 +65,9 @@ PHP_FUNCTION(intltz_get_error_code);
 
 PHP_FUNCTION(intltz_get_error_message);
 
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+PHP_FUNCTION(intltz_get_windows_id);
+PHP_FUNCTION(intltz_get_id_for_windows_id);
+#endif
+
 #endif /* #ifndef TIMEZONE_METHODS_H */

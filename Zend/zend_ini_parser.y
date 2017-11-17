@@ -111,13 +111,14 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	int length, op1_len;
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
-		zend_string *str = zval_get_string(op1);
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
 		if (ZEND_SYSTEM_INI) {
+			zend_string *tmp_str;
+			zend_string *str = zval_get_tmp_string(op1, &tmp_str);
 			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
-			zend_string_release(str);
+			zend_tmp_string_release(tmp_str);
 		} else {
-			ZVAL_STR(op1, str);
+			ZVAL_STR(op1, zval_get_string_func(op1));
 		}
 	}
 	op1_len = (int)Z_STRLEN_P(op1);
@@ -142,11 +143,10 @@ static void zend_ini_get_constant(zval *result, zval *name)
 	if (!memchr(Z_STRVAL_P(name), ':', Z_STRLEN_P(name))
 		   	&& (c = zend_get_constant(Z_STR_P(name))) != 0) {
 		if (Z_TYPE_P(c) != IS_STRING) {
-			ZVAL_COPY_VALUE(&tmp, c);
+			ZVAL_DUP(&tmp, c);
 			if (Z_OPT_CONSTANT(tmp)) {
-				zval_update_constant_ex(&tmp, 1, NULL);
+				zval_update_constant_ex(&tmp, NULL);
 			}
-			zval_opt_copy_ctor(&tmp);
 			convert_to_string(&tmp);
 			c = &tmp;
 		}
@@ -271,7 +271,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %}
 
 %expect 0
-%pure_parser
+%pure-parser
 
 %token TC_SECTION
 %token TC_RAW
@@ -412,4 +412,6 @@ constant_string:
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

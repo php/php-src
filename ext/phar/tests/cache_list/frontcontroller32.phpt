@@ -13,4 +13,4 @@ Content-type: text/html; charset=UTF-8
 --FILE_EXTERNAL--
 files/frontcontroller17.phar
 --EXPECTF--
-%ahar error: failed to call rewrite callback
+%ahar error: rewrite callback must return a string or false

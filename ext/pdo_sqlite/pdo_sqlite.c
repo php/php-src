@@ -39,12 +39,10 @@ const zend_function_entry pdo_sqlite_functions[] = {
 
 /* {{{ pdo_sqlite_deps
  */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_sqlite_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_sqlite_module_entry
@@ -71,6 +69,15 @@ ZEND_GET_MODULE(pdo_sqlite)
 /* {{{ PHP_MINIT_FUNCTION */
 PHP_MINIT_FUNCTION(pdo_sqlite)
 {
+#ifdef SQLITE_DETERMINISTIC
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_DETERMINISTIC", (zend_long)SQLITE_DETERMINISTIC);
+#endif
+
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_ATTR_OPEN_FLAGS", (zend_long)PDO_SQLITE_ATTR_OPEN_FLAGS);
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_READONLY", (zend_long)SQLITE_OPEN_READONLY);
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_READWRITE", (zend_long)SQLITE_OPEN_READWRITE);
+	REGISTER_PDO_CLASS_CONST_LONG("SQLITE_OPEN_CREATE", (zend_long)SQLITE_OPEN_CREATE);
+
 	return php_pdo_register_driver(&pdo_sqlite_driver);
 }
 /* }}} */

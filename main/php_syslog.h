@@ -21,6 +21,8 @@
 #ifndef PHP_SYSLOG_H
 #define PHP_SYSLOG_H
 
+#include "php.h"
+
 #ifdef PHP_WIN32
 #include "win32/syslog.h"
 #else
@@ -30,23 +32,17 @@
 #endif
 #endif
 
+BEGIN_EXTERN_C()
+PHPAPI void php_syslog(int, const char *format, ...);
+END_EXTERN_C()
+
+#endif
+
 /*
- * The SCO OpenServer 5 Development System (not the UDK)
- * defines syslog to std_syslog.
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */
-
-#ifdef syslog
-
-#ifdef HAVE_STD_SYSLOG
-#define php_syslog std_syslog
-#endif
-
-#undef syslog
-
-#endif
-
-#ifndef php_syslog
-#define php_syslog syslog
-#endif
-
-#endif

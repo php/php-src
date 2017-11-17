@@ -28,6 +28,7 @@ ZEND_API zend_class_entry *zend_ce_aggregate;
 ZEND_API zend_class_entry *zend_ce_iterator;
 ZEND_API zend_class_entry *zend_ce_arrayaccess;
 ZEND_API zend_class_entry *zend_ce_serializable;
+ZEND_API zend_class_entry *zend_ce_countable;
 
 /* {{{ zend_call_method
  Only returns the returned zval if retval_ptr != NULL */
@@ -36,8 +37,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	int result;
 	zend_fcall_info fci;
 	zval retval;
-	HashTable *function_table;
-
 	zval params[2];
 
 	if (param_count > 0) {
@@ -48,35 +47,31 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 	}
 
 	fci.size = sizeof(fci);
-	/*fci.function_table = NULL; will be read form zend_class_entry of object if needed */
-	fci.object = (object && Z_TYPE_P(object) == IS_OBJECT) ? Z_OBJ_P(object) : NULL;
-	ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
+	fci.object = object ? Z_OBJ_P(object) : NULL;
 	fci.retval = retval_ptr ? retval_ptr : &retval;
 	fci.param_count = param_count;
 	fci.params = params;
 	fci.no_separation = 1;
-	fci.symbol_table = NULL;
 
 	if (!fn_proxy && !obj_ce) {
 		/* no interest in caching and no information already present that is
 		 * needed later inside zend_call_function. */
-		fci.function_table = !object ? EG(function_table) : NULL;
+		ZVAL_STRINGL(&fci.function_name, function_name, function_name_len);
 		result = zend_call_function(&fci, NULL);
 		zval_ptr_dtor(&fci.function_name);
 	} else {
 		zend_fcall_info_cache fcic;
+		ZVAL_UNDEF(&fci.function_name); /* Unused */
 
 		fcic.initialized = 1;
 		if (!obj_ce) {
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
-		if (obj_ce) {
-			function_table = &obj_ce->function_table;
-		} else {
-			function_table = EG(function_table);
-		}
 		if (!fn_proxy || !*fn_proxy) {
-			if ((fcic.function_handler = zend_hash_find_ptr(function_table, Z_STR(fci.function_name))) == NULL) {
+			HashTable *function_table = obj_ce ? &obj_ce->function_table : EG(function_table);
+			fcic.function_handler = zend_hash_str_find_ptr(
+				function_table, function_name, function_name_len);
+			if (fcic.function_handler == NULL) {
 				/* error at c-level */
 				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
 			}
@@ -86,6 +81,7 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		} else {
 			fcic.function_handler = *fn_proxy;
 		}
+
 		fcic.calling_scope = obj_ce;
 		if (object) {
 			fcic.called_scope = Z_OBJCE_P(object);
@@ -102,7 +98,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		}
 		fcic.object = object ? Z_OBJ_P(object) : NULL;
 		result = zend_call_function(&fci, &fcic);
-		zval_ptr_dtor(&fci.function_name);
 	}
 	if (result == FAILURE) {
 		/* error at c-level */
@@ -112,13 +107,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		if (!EG(exception)) {
 			zend_error_noreturn(E_CORE_ERROR, "Couldn't execute method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
 		}
-	}
-	/* copy arguments back, they might be changed by references */
-	if (param_count > 0 && Z_ISREF(params[0]) && !Z_ISREF_P(arg1)) {
-		ZVAL_COPY_VALUE(arg1, &params[0]);
-	}
-	if (param_count > 1 && Z_ISREF(params[1]) && !Z_ISREF_P(arg2)) {
-		ZVAL_COPY_VALUE(arg2, &params[1]);
 	}
 	if (!retval_ptr) {
 		zval_ptr_dtor(&retval);
@@ -191,16 +179,6 @@ ZEND_API zval *zend_user_it_get_current_data(zend_object_iterator *_iter)
 	}
 	return &iter->value;
 }
-/* }}} */
-
-/* {{{ zend_user_it_get_current_key_default */
-#if 0
-static int zend_user_it_get_current_key_default(zend_object_iterator *_iter, char **str_key, uint *str_key_len, ulong *int_key)
-{
-	*int_key = _iter->index;
-	return HASH_KEY_IS_LONG;
-}
-#endif
 /* }}} */
 
 /* {{{ zend_user_it_get_current_key */
@@ -396,15 +374,6 @@ static int zend_implement_iterator(zend_class_entry *interface, zend_class_entry
 /* {{{ zend_implement_arrayaccess */
 static int zend_implement_arrayaccess(zend_class_entry *interface, zend_class_entry *class_type)
 {
-#if 0
-	/* get ht from ce */
-	if (ht->read_dimension != zend_std_read_dimension
-	||  ht->write_dimension != zend_std_write_dimension
-	||  ht->has_dimension != zend_std_has_dimension
-	||  ht->unset_dimension != zend_std_unset_dimension) {
-		return FAILURE;
-	}
-#endif
 	return SUCCESS;
 }
 /* }}}*/
@@ -502,6 +471,13 @@ static int zend_implement_serializable(zend_class_entry *interface, zend_class_e
 }
 /* }}}*/
 
+/* {{{ zend_implement_countable */
+static int zend_implement_countable(zend_class_entry *interface, zend_class_entry *class_type)
+{
+	return SUCCESS;
+}
+/* }}}*/
+
 /* {{{ function tables */
 const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
@@ -549,6 +525,14 @@ const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	ZEND_FE_END
 };
+
+ZEND_BEGIN_ARG_INFO(arginfo_countable_count, 0)
+ZEND_END_ARG_INFO()
+
+const zend_function_entry zend_funcs_countable[] = {
+	ZEND_ABSTRACT_ME(Countable, count, arginfo_countable_count)
+	ZEND_FE_END
+};
 /* }}} */
 
 /* {{{ zend_register_interfaces */
@@ -565,6 +549,8 @@ ZEND_API void zend_register_interfaces(void)
 	REGISTER_MAGIC_INTERFACE(arrayaccess, ArrayAccess);
 
 	REGISTER_MAGIC_INTERFACE(serializable, Serializable);
+
+	REGISTER_MAGIC_INTERFACE(countable, Countable);
 }
 /* }}} */
 
@@ -574,4 +560,6 @@ ZEND_API void zend_register_interfaces(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

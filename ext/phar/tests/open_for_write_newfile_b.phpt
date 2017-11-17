@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (new file)
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=1
@@ -21,7 +20,7 @@ $files['b/c.php'] = '<?php echo "This is b/c\n"; ?>';
 include 'files/phar_test.inc';
 
 function err_handler($errno, $errstr, $errfile, $errline) {
-  echo "Catchable fatal error: $errstr in $errfile on line $errline\n";
+  echo "Recoverable fatal error: $errstr in $errfile on line $errline\n";
 }
 
 set_error_handler("err_handler", E_RECOVERABLE_ERROR);

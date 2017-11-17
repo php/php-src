@@ -1,8 +1,6 @@
 #if !defined(sendmail_h)		/* Sentry, use file only if it's not already included. */
 #define sendmail_h
-#ifndef NETWARE
 #include <windows.h>
-#endif
 
 #define HOST_NAME_LEN	256
 #define MAX_APPNAME_LENGTH 100
@@ -49,3 +47,12 @@ static int Ack(char **server_response);
 static unsigned long GetAddr(LPSTR szHost);
 static int FormatEmailAddress(char* Buf, char* EmailAddress, char* FormatString);
 #endif							/* sendmail_h */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

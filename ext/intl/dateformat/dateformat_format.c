@@ -18,10 +18,11 @@
 #include "config.h"
 #endif
 
+#include "../php_intl.h"
+
 #include <unicode/ustring.h>
 #include <unicode/ucal.h>
 
-#include "../php_intl.h"
 #include "../intl_convert.h"
 #include "../common/common_date.h"
 #include "dateformat.h"
@@ -79,7 +80,7 @@ static int32_t internal_get_arr_ele(IntlDateFormatter_object *dfo,
 		} else {
 			if (Z_LVAL_P(ele_value) > INT32_MAX ||
 					Z_LVAL_P(ele_value) < INT32_MIN) {
-				spprintf(&message, 0, "datefmt_format: value %pd is out of "
+				spprintf(&message, 0, "datefmt_format: value " ZEND_LONG_FMT " is out of "
 						"bounds for a 32-bit integer in key '%s'",
 						Z_LVAL_P(ele_value), key_name);
 				intl_errors_set(err, U_ILLEGAL_ARGUMENT_ERROR, message, 1);

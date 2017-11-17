@@ -10,4 +10,4 @@ stream_context_set_params($resourceFileTemp, array());
 preg_replace('', function() {}, $resourceFileTemp);
 ?>
 --EXPECTF--
-Catchable fatal error: Object of class Closure could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class Closure could not be converted to string in %s on line %d

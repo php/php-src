@@ -28,20 +28,20 @@ foreach ($functions as $type => $function) {
     echo "Testing $type:", PHP_EOL;
     try {
         var_dump($function());
-    } catch (TypeError $e) {
+    } catch (Throwable $e) {
         echo "*** Caught " . $e->getMessage() . PHP_EOL;
     }
 }
 echo PHP_EOL . "Done";
 --EXPECTF--
 Testing int:
-*** Caught Argument 1 passed to {closure}() must be of the type integer, none given, called in %s on line %d
+*** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 Testing float:
-*** Caught Argument 1 passed to {closure}() must be of the type float, none given, called in %s on line %d
+*** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 Testing string:
-*** Caught Argument 1 passed to {closure}() must be of the type string, none given, called in %s on line %d
+*** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 Testing bool:
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, none given, called in %s on line %d
+*** Caught Too few arguments to function {closure}(), 0 passed in %s on line %d and exactly 1 expected
 Testing int nullable:
 NULL
 Testing float nullable:

@@ -46,7 +46,7 @@ ZEND_API zval *zend_list_insert(void *ptr, int type)
 
 ZEND_API int zend_list_delete(zend_resource *res)
 {
-	if (--GC_REFCOUNT(res) <= 0) {
+	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
 	} else {
 		return SUCCESS;
@@ -337,10 +337,39 @@ const char *zend_rsrc_list_get_rsrc_type(zend_resource *res)
 	}
 }
 
+ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, void *rsrc_pointer, int rsrc_type)
+{
+	zval *zv;
+	zval tmp;
+
+	ZVAL_NEW_PERSISTENT_RES(&tmp, -1, rsrc_pointer, rsrc_type);
+	GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(tmp));
+	GC_MAKE_PERSISTENT_LOCAL(key);
+
+	zv = zend_hash_update(&EG(persistent_list), key, &tmp);
+	if (UNEXPECTED(zv == NULL)) {
+		free(Z_RES(tmp));
+		return NULL;
+	}
+
+	return Z_RES_P(zv);
+}
+
+ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_t key_len, void *rsrc_pointer, int rsrc_type)
+{
+	zend_string *str = zend_string_init(key, key_len, 1);
+	zend_resource *ret  = zend_register_persistent_resource_ex(str, rsrc_pointer, rsrc_type);
+
+	zend_string_release(str);
+	return ret;
+}
+
 /*
  * Local variables:
  * tab-width: 4
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

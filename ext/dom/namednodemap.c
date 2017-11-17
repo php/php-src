@@ -57,6 +57,9 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_remove_named_item_ns, 0, 0, 0)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, localName)
 ZEND_END_ARG_INFO();
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namednodemap_count, 0, 0, 0)
+ZEND_END_ARG_INFO();
 /* }}} */
 
 /*
@@ -74,6 +77,7 @@ const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
 	PHP_FALIAS(getNamedItemNS, dom_namednodemap_get_named_item_ns, arginfo_dom_namednodemap_get_named_item_ns)
 	PHP_FALIAS(setNamedItemNS, dom_namednodemap_set_named_item_ns, arginfo_dom_namednodemap_set_named_item_ns)
 	PHP_FALIAS(removeNamedItemNS, dom_namednodemap_remove_named_item_ns, arginfo_dom_namednodemap_remove_named_item_ns)
+	PHP_FALIAS(count, dom_namednodemap_count, arginfo_dom_namednodemap_count)
 	PHP_FE_END
 };
 /* }}} */
@@ -331,6 +335,24 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item_ns)
  DOM_NOT_IMPLEMENTED();
 }
 /* }}} end dom_namednodemap_remove_named_item_ns */
+
+/* {{{ proto int|bool dom_namednodemap_count();
+*/
+PHP_FUNCTION(dom_namednodemap_count)
+{
+	zval *id;
+	dom_object *intern;
+
+	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &id, dom_namednodemap_class_entry) == FAILURE) {
+		return;
+	}
+
+	intern = Z_DOMOBJ_P(id);
+	if(dom_namednodemap_length_read(intern, return_value) == FAILURE) {
+		RETURN_FALSE;
+	}
+}
+/* }}} end dom_namednodemap_count */
 
 #endif
 

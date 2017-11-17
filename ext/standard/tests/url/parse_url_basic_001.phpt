@@ -625,6 +625,21 @@ echo "Done";
   string(12) "bar=1&boom=0"
 }
 
+--> http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0: array(6) {
+  ["scheme"]=>
+  string(4) "http"
+  ["host"]=>
+  string(15) "www.example.com"
+  ["port"]=>
+  int(8080)
+  ["user"]=>
+  string(11) "user_me-you"
+  ["pass"]=>
+  string(11) "my_pas-word"
+  ["query"]=>
+  string(12) "bar=1&boom=0"
+}
+
 --> file:///path/to/file: array(2) {
   ["scheme"]=>
   string(4) "file"

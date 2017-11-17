@@ -53,6 +53,7 @@
 # define SQLINT1	SYBINT1
 # define SQLINT2	SYBINT2
 # define SQLINT4	SYBINT4
+# define SQLINT8	SYBINT8
 # define SQLINTN	SYBINTN
 # define SQLBIT		SYBBIT
 # define SQLFLT4	SYBREAL
@@ -63,6 +64,9 @@
 # define SQLDATETIME	SYBDATETIME
 # define SQLDATETIM4	SYBDATETIME4
 # define SQLDATETIMN	SYBDATETIMN
+# ifdef SYBMSDATETIME2
+# define SQLMSDATETIME2  SYBMSDATETIME2
+# endif
 # define SQLMONEY		SYBMONEY
 # define SQLMONEY4		SYBMONEY4
 # define SQLMONEYN		SYBMONEYN
@@ -88,6 +92,11 @@ typedef unsigned char *LPBYTE;
 # endif
 typedef float			DBFLT4;
 #endif
+
+/* hardcoded string length from FreeTDS
+ * src/tds/convert.c:tds_convert_datetimeall()
+ */
+# define DATETIME_MAX_LEN   63
 
 int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr);
@@ -115,7 +124,10 @@ typedef struct {
 	DBPROCESS	*link;
 
 	pdo_dblib_err err;
+	unsigned assume_national_character_set_strings:1;
 	unsigned stringify_uniqueidentifier:1;
+	unsigned skip_empty_rowsets:1;
+	unsigned datetime_convert:1;
 } pdo_dblib_db_handle;
 
 typedef struct {
@@ -147,7 +159,10 @@ enum {
 	PDO_DBLIB_ATTR_CONNECTION_TIMEOUT = PDO_ATTR_DRIVER_SPECIFIC,
 	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
+	PDO_DBLIB_ATTR_VERSION,
+	PDO_DBLIB_ATTR_TDS_VERSION,
+	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
+	PDO_DBLIB_ATTR_DATETIME_CONVERT,
 };
 
 #endif
-

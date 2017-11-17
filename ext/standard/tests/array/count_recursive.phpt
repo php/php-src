@@ -132,7 +132,11 @@ closedir( $resource2 );
 --EXPECTF--
 *** Testing basic functionality of count() function ***
 -- Testing NULL --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 0, is 0
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_RECURSIVE: should be 0, is 0
 -- Testing arrays --
 COUNT_NORMAL: should be 2, is 2
@@ -141,9 +145,15 @@ COUNT_RECURSIVE: should be 8, is 8
 COUNT_NORMAL: should be 3, is 3
 COUNT_RECURSIVE: should be 6, is 6
 -- Testing strings --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 1, is 1
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_RECURSIVE: should be 1, is 1
 -- Testing various types with no second argument --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 COUNT_NORMAL: should be 2, is 2
 -- Testing really cool arrays --
@@ -184,11 +194,19 @@ COUNT_NORMAL is 4
 COUNT_RECURSIVE is 7
 
 -- Testing count() on constants with no second argument --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 1, is 1
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 
 -- Testing count() on NULL and Unset variables --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 0, is 0
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 COUNT_NORMAL: should be 1, is 1
 COUNT_NORMAL: should be 0, is 0
 
@@ -221,7 +239,7 @@ NULL
 Warning: count() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Notice: Use of undefined constant ABCD - assumed 'ABCD' in %s on line %d
+Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
 
 Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
 NULL

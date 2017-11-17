@@ -647,3 +647,81 @@ U_CFUNC PHP_FUNCTION(intltz_get_error_message)
 	message = intl_error_get_message(TIMEZONE_ERROR_P(to));
 	RETURN_STR(message);
 }
+
+#if U_ICU_VERSION_MAJOR_NUM >= 52
+/* {{{ proto string IntlTimeZone::getWindowsID(string $timezone)
+       proto string intltz_get_windows_id(string $timezone)
+Translate a system timezone (e.g. "America/Los_Angeles" into a
+Windows Timezone (e.g. "Pacific Standard Time")
+ */
+U_CFUNC PHP_FUNCTION(intltz_get_windows_id)
+{
+	zend_string *id, *winID;
+	UnicodeString uID, uWinID;
+	UErrorCode error;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &id) == FAILURE) {
+		return;
+	}
+
+	error = U_ZERO_ERROR;
+	if (intl_stringFromChar(uID, id->val, id->len, &error) == FAILURE) {
+		intl_error_set(NULL, error,
+		               "intltz_get_windows_id: could not convert time zone id to UTF-16", 0);
+		RETURN_FALSE;
+	}
+
+	error = U_ZERO_ERROR;
+	TimeZone::getWindowsID(uID, uWinID, error);
+	INTL_CHECK_STATUS(error, "intltz_get_windows_id: Unable to get timezone from windows ID");
+	if (uWinID.length() == 0) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		               "intltz_get_windows_id: Unknown system timezone", 0);
+		RETURN_FALSE;
+	}
+
+	error = U_ZERO_ERROR;
+	winID = intl_convert_utf16_to_utf8(uWinID.getBuffer(), uWinID.length(), &error);
+	INTL_CHECK_STATUS(error, "intltz_get_windows_id: could not convert time zone id to UTF-8");
+	RETURN_STR(winID);
+}
+/* }}} */
+
+/* {{{ proto string IntlTimeZone::getIDForWindowsID(string $timezone[, string $region = NULL])
+       proto string intltz_get_id_for_windows_id(string $timezone[, string $region = NULL])
+Translate a windows timezone (e.g. "Pacific Time Zone" into a
+System Timezone (e.g. "America/Los_Angeles")
+ */
+U_CFUNC PHP_FUNCTION(intltz_get_id_for_windows_id)
+{
+	zend_string *winID, *region = NULL, *id;
+	UnicodeString uWinID, uID;
+	UErrorCode error;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|S", &winID, &region) == FAILURE) {
+		return;
+	}
+
+	error = U_ZERO_ERROR;
+	if (intl_stringFromChar(uWinID, winID->val, winID->len, &error) == FAILURE) {
+		intl_error_set(NULL, error,
+		               "intltz_get_id_for_windows_id: could not convert time zone id to UTF-16", 0);
+		RETURN_FALSE;
+	}
+
+	error = U_ZERO_ERROR;
+	TimeZone::getIDForWindowsID(uWinID, region ? region->val : NULL, uID, error);
+	INTL_CHECK_STATUS(error, "intltz_get_id_for_windows_id: Unable to get windows ID for timezone");
+	if (uID.length() == 0) {
+		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR,
+		               "intltz_get_windows_id: Unknown windows timezone", 0);
+		RETURN_FALSE;
+	}
+
+	error = U_ZERO_ERROR;
+	id = intl_convert_utf16_to_utf8(uID.getBuffer(), uID.length(), &error);
+	INTL_CHECK_STATUS(error, "intltz_get_id_for_windows_id: could not convert time zone id to UTF-8");
+	RETURN_STR(id);
+}
+/* }}} */
+#endif

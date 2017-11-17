@@ -42,6 +42,8 @@
 #ifdef PHP_WIN32
 # include "win32/winutil.h"
 # include "win32/time.h"
+# include "win32/ioutil.h"
+# include "win32/readdir.h"
 #endif
 
 #define php_stream_fopen_from_fd_int(fd, mode, persistent_id)	_php_stream_fopen_from_fd_int((fd), (mode), (persistent_id) STREAMS_CC)
@@ -49,7 +51,7 @@
 #define php_stream_fopen_from_file_int(file, mode)	_php_stream_fopen_from_file_int((file), (mode) STREAMS_CC)
 #define php_stream_fopen_from_file_int_rel(file, mode)	 _php_stream_fopen_from_file_int((file), (mode) STREAMS_REL_CC)
 
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 extern int php_get_uid_by_name(const char *name, uid_t *uid);
 extern int php_get_gid_by_name(const char *name, gid_t *gid);
 #endif
@@ -471,7 +473,11 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 			return 0; /* everything should be closed already -> success */
 		}
 		if (data->temp_name) {
+#ifdef PHP_WIN32
+			php_win32_ioutil_unlink(ZSTR_VAL(data->temp_name));
+#else
 			unlink(ZSTR_VAL(data->temp_name));
+#endif
 			/* temporary streams are never persistent */
 			zend_string_release(data->temp_name);
 			data->temp_name = NULL;
@@ -1001,13 +1007,15 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				/* fall through */
 
 			case PHP_STREAM_PERSISTENT_FAILURE:
-				efree(persistent_id);;
+				efree(persistent_id);
 				return ret;
 		}
 	}
-
+#ifdef PHP_WIN32
+	fd = php_win32_ioutil_open(realpath, open_flags, 0666);
+#else
 	fd = open(realpath, open_flags, 0666);
-
+#endif
 	if (fd != -1)	{
 
 		if (options & STREAM_OPEN_FOR_INCLUDE) {
@@ -1131,11 +1139,11 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url_from, (int)strlen(url_from))) {
+	if (!php_win32_check_trailing_space(url_from, strlen(url_from))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
-	if (!php_win32_check_trailing_space(url_to, (int)strlen(url_to))) {
+	if (!php_win32_check_trailing_space(url_to, strlen(url_to))) {
 		php_win32_docref2_from_error(ERROR_INVALID_NAME, url_from, url_to);
 		return 0;
 	}
@@ -1162,7 +1170,7 @@ static int php_plain_files_rename(php_stream_wrapper *wrapper, const char *url_f
 			zend_stat_t sb;
 			if (php_copy_file(url_from, url_to) == SUCCESS) {
 				if (VCWD_STAT(url_from, &sb) == 0) {
-#  if !defined(TSRM_WIN32) && !defined(NETWARE)
+#  ifndef TSRM_WIN32
 					if (VCWD_CHMOD(url_to, sb.st_mode)) {
 						if (errno == EPERM) {
 							php_error_docref2(NULL, url_from, url_to, E_WARNING, "%s", strerror(errno));
@@ -1221,8 +1229,7 @@ static int php_plain_files_mkdir(php_stream_wrapper *wrapper, const char *dir, i
 		/* we look for directory separator from the end of string, thus hopefuly reducing our work load */
 		char *e;
 		zend_stat_t sb;
-		int dir_len = (int)strlen(dir);
-		int offset = 0;
+		size_t dir_len = strlen(dir), offset = 0;
 		char buf[MAXPATHLEN];
 
 		if (!expand_filepath_with_mode(dir, buf, NULL, 0, CWD_EXPAND )) {
@@ -1303,7 +1310,7 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 	}
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, (int)strlen(url))) {
+	if (!php_win32_check_trailing_space(url, strlen(url))) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
@@ -1323,18 +1330,15 @@ static int php_plain_files_rmdir(php_stream_wrapper *wrapper, const char *url, i
 static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url, int option, void *value, php_stream_context *context)
 {
 	struct utimbuf *newtime;
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 	uid_t uid;
 	gid_t gid;
 #endif
 	mode_t mode;
 	int ret = 0;
-#ifdef PHP_WIN32
-	int url_len = (int)strlen(url);
-#endif
 
 #ifdef PHP_WIN32
-	if (!php_win32_check_trailing_space(url, url_len)) {
+	if (!php_win32_check_trailing_space(url, strlen(url))) {
 		php_error_docref1(NULL, url, E_WARNING, "%s", strerror(ENOENT));
 		return 0;
 	}
@@ -1362,7 +1366,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 
 			ret = VCWD_UTIME(url, newtime);
 			break;
-#if !defined(WINDOWS) && !defined(NETWARE)
+#ifndef PHP_WIN32
 		case PHP_STREAM_META_OWNER_NAME:
 		case PHP_STREAM_META_OWNER:
 			if(option == PHP_STREAM_META_OWNER_NAME) {
@@ -1433,7 +1437,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 	const char *ptr;
 	char trypath[MAXPATHLEN];
 	php_stream *stream;
-	int filename_length;
+	size_t filename_length;
 	zend_string *exec_filename;
 
 	if (opened_path) {
@@ -1444,7 +1448,7 @@ PHPAPI php_stream *_php_stream_fopen_with_path(const char *filename, const char 
 		return NULL;
 	}
 
-	filename_length = (int)strlen(filename);
+	filename_length = strlen(filename);
 #ifndef PHP_WIN32
 	(void) filename_length;
 #endif

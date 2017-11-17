@@ -54,8 +54,8 @@ static void lcg_seed(void);
 
 PHPAPI double php_combined_lcg(void) /* {{{ */
 {
-	php_int32 q;
-	php_int32 z;
+	int32_t q;
+	int32_t z;
 
 	if (!LCG(seeded)) {
 		lcg_seed();
@@ -118,6 +118,9 @@ PHP_MINIT_FUNCTION(lcg) /* {{{ */
    Returns a value from the combined linear congruential generator */
 PHP_FUNCTION(lcg_value)
 {
+	if (zend_parse_parameters_none() == FAILURE) {
+		return;
+	}
 	RETURN_DOUBLE(php_combined_lcg());
 }
 /* }}} */

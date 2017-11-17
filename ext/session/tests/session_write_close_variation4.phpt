@@ -41,15 +41,15 @@ ob_end_flush();
 string(0) ""
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 string(4) "test"
-NULL
+bool(true)
 string(4) "test"
 bool(true)
 bool(true)

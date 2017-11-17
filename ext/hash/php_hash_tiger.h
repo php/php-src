@@ -23,8 +23,8 @@
 
 /* TIGER context */
 typedef struct {
-	php_hash_uint64 state[3];
-	php_hash_uint64 passed;
+	uint64_t state[3];
+	uint64_t passed;
 	unsigned char buffer[64];
 	unsigned int passes:1;
 	unsigned int length:7;

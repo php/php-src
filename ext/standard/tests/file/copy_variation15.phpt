@@ -28,7 +28,7 @@ $file_path = dirname(__FILE__);
 echo "*** Test copy() function: Trying to create a copy of file in a dir which doesn't have write permissions ***";
 $file = $file_path."/copy_variation15.tmp";
 $file_handle =  fopen($file, "w");
-fwrite($file_handle, str_repeat(b"Hello, world...", 20));
+fwrite($file_handle, str_repeat("Hello, world...", 20));
 fclose($file_handle);
 
 $dir = $file_path."/copy_variation15";

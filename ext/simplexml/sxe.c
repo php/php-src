@@ -189,7 +189,7 @@ static const zend_function_entry funcs_SimpleXMLIterator[] = {
 	PHP_ME(ce_SimpleXMLIterator, next,                   arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
 	PHP_ME(ce_SimpleXMLIterator, hasChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
 	PHP_ME(ce_SimpleXMLIterator, getChildren,            arginfo_simplexmliterator__void, ZEND_ACC_PUBLIC)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -211,7 +211,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, zend_ce_countable);
 
 	return SUCCESS;
 }

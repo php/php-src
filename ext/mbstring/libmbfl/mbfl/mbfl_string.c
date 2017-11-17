@@ -38,6 +38,7 @@
 
 #include "mbfl_allocators.h"
 #include "mbfl_string.h"
+#include "mbfilter_pass.h"
 
 /*
  * string object
@@ -47,18 +48,18 @@ mbfl_string_init(mbfl_string *string)
 {
 	if (string) {
 		string->no_language = mbfl_no_language_uni;
-		string->no_encoding = mbfl_no_encoding_pass;
+		string->encoding = &mbfl_encoding_pass;
 		string->val = (unsigned char*)NULL;
 		string->len = 0;
 	}
 }
 
 void
-mbfl_string_init_set(mbfl_string *string, mbfl_language_id no_language, mbfl_encoding_id no_encoding)
+mbfl_string_init_set(mbfl_string *string, mbfl_language_id no_language, const mbfl_encoding *encoding)
 {
 	if (string) {
 		string->no_language = no_language;
-		string->no_encoding = no_encoding;
+		string->encoding = encoding;
 		string->val = (unsigned char*)NULL;
 		string->len = 0;
 	}

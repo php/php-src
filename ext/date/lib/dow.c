@@ -23,6 +23,7 @@
  */
 
 #include "timelib.h"
+#include "timelib_private.h"
 
 static int m_table_common[13] = { -1, 0, 3, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
 static int m_table_leap[13] =   { -1, 6, 2, 3, 6, 1, 4, 6, 2, 5, 0, 3, 5 }; /* 1 = jan */
@@ -137,17 +138,71 @@ void timelib_isoweek_from_date(timelib_sll y, timelib_sll m, timelib_sll d, time
 	}
 }
 
-timelib_sll timelib_daynr_from_weeknr(timelib_sll y, timelib_sll w, timelib_sll d)
+void timelib_isodate_from_date(timelib_sll y, timelib_sll m, timelib_sll d, timelib_sll *iy, timelib_sll *iw, timelib_sll *id)
+{
+	timelib_isoweek_from_date(y, m, d, iw, iy);
+	*id = timelib_day_of_week_ex(y, m, d, 1);
+}
+
+static timelib_sll timelib_daynr_from_weeknr_ex(timelib_sll iy, timelib_sll iw, timelib_sll id, timelib_sll *y)
 {
 	timelib_sll dow, day;
 
 	/* Figure out the dayofweek for y-1-1 */
-	dow = timelib_day_of_week(y, 1, 1);
+	dow = timelib_day_of_week(iy, 1, 1);
 	/* then use that to figure out the offset for day 1 of week 1 */
 	day = 0 - (dow > 4 ? dow - 7 : dow);
+	/* and adjust the year to the natural year if we need to */
+	*y = (iw == 1 && day < 0 && id < dow) ? iy - 1 : iy;
 
 	/* Add weeks and days */
-	return day + ((w - 1) * 7) + d;
+	return day + ((iw - 1) * 7) + id;
+}
+
+timelib_sll timelib_daynr_from_weeknr(timelib_sll iy, timelib_sll iw, timelib_sll id)
+{
+	timelib_sll dummy_iso_year;
+
+	return timelib_daynr_from_weeknr_ex(iy, iw, id, &dummy_iso_year);
+}
+
+void timelib_date_from_isodate(timelib_sll iy, timelib_sll iw, timelib_sll id, timelib_sll *y, timelib_sll *m, timelib_sll *d)
+{
+	timelib_sll daynr = timelib_daynr_from_weeknr_ex(iy, iw, id, y) + 1;
+	int *table;
+
+	*m = 0;
+
+	if (daynr <= 0) {
+		*y += 1;
+	}
+
+	if (timelib_is_leap(*y)) {
+		table = ml_table_leap;
+		if (daynr > 366) {
+			*y += 1;
+			daynr -= 366;
+		}
+	} else {
+		table = ml_table_common;
+		if (daynr > 365) {
+			*y += 1;
+			daynr -= 365;
+		}
+	}
+
+	do {
+		daynr -= table[*m];
+		(*m)++;
+	} while (daynr > table[*m]);
+
+	if (daynr <= 0) {
+		daynr += 31;
+		*y -= 1;
+		*m = 12;
+	}
+
+	*d = daynr;
 }
 
 int timelib_valid_time(timelib_sll h, timelib_sll i, timelib_sll s)

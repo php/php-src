@@ -567,7 +567,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;
@@ -591,11 +591,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		RETURN_FALSE;
 	}
 
-#if PHP_API_VERSION < 20100412
-	if ((PG(safe_mode) && (!php_checkuid(pwl, NULL, CHECKUID_CHECK_FILE_AND_DIR))) || php_check_open_basedir(pwl)) {
-#else
 	if (php_check_open_basedir(pwl)) {
-#endif
 		RETURN_FALSE;
 	}
 
@@ -618,7 +614,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;

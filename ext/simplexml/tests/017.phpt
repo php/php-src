@@ -78,9 +78,9 @@ person: Joe
   child: 
 person: 
 
-Notice: Trying to get property of non-object in %s017.php on line %d
+Notice: Trying to get property 'child' of non-object in %s017.php on line %d
   child: 
 
-Notice: Trying to get property of non-object in %s017.php on line %d
+Notice: Trying to get property 'child' of non-object in %s017.php on line %d
   child: 
 ===DONE===

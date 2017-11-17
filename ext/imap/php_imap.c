@@ -2601,7 +2601,8 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	zval *streamind;
 	pils *imap_le_struct;
 	char date[100];
-	unsigned int msgno, unreadmsg, deletedmsg, msize;
+	unsigned long msgno;
+	zend_ulong unreadmsg = 0, deletedmsg = 0, msize = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &streamind) == FAILURE) {
 		return;
@@ -2613,10 +2614,6 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 
 	/* Initialize return object */
 	object_init(return_value);
-
-	unreadmsg = 0;
-	deletedmsg = 0;
-	msize = 0;
 
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
 		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream, msgno);
@@ -2912,7 +2909,7 @@ PHP_FUNCTION(imap_utf7_decode)
 #if PHP_DEBUG
 	/* warn if we computed outlen incorrectly */
 	if (outp - out != outlen) {
-		php_error_docref(NULL, E_WARNING, "outp - out [%ld] != outlen [%d]", outp - out, outlen);
+		php_error_docref(NULL, E_WARNING, "outp - out [%zd] != outlen [%d]", outp - out, outlen);
 	}
 #endif
 
@@ -4446,7 +4443,7 @@ static zend_string* _php_rfc822_write_address(ADDRESS *addresslist)
 	char address[SENDBUFLEN];
 
 	if (_php_imap_address_size(addresslist) >= SENDBUFLEN) {
-		php_error_docref(NULL, E_ERROR, "Address buffer overflow");
+		zend_throw_error(NULL, "Address buffer overflow");
 		return NULL;
 	}
 	address[0] = 0;

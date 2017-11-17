@@ -12,9 +12,9 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
-   |	      Kevin N. Shallow <kshallow@tampabay.rr.com> (Birdstep)      |
+   |	      Kevin N. Shallow <kshallow@tampabay.rr.com>                 |
    +----------------------------------------------------------------------+
 */
 
@@ -35,7 +35,7 @@ extern zend_module_entry odbc_module_entry;
 #include "php_version.h"
 #define PHP_ODBC_VERSION PHP_VERSION
 
-#if defined(HAVE_DBMAKER) || defined(PHP_WIN32) || defined(HAVE_IBMDB2) || defined(HAVE_UNIXODBC) || defined(HAVE_BIRDSTEP) || defined(HAVE_IODBC)
+#if defined(HAVE_DBMAKER) || defined(PHP_WIN32) || defined(HAVE_IBMDB2) || defined(HAVE_UNIXODBC) || defined(HAVE_IODBC)
 # define PHP_ODBC_HAVE_FETCH_HASH 1
 #endif
 

@@ -33,7 +33,7 @@ array(1) {
   ["foo"]=>
   string(12) "Hello World!"
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)

@@ -66,7 +66,7 @@ TestFest 2009 - AFUP - Thomas Rabaix <thomas.rabaix@gmail.com>
 ===DONE===
 --EXPECTF--
 *** Testing curl_exec() : basic functionality ***
-%unicode|string%(75) "Hello World!
+string(75) "Hello World!
 Hello World!Hello World!
 Hello World!Hello World!
 Hello World!"

@@ -5,8 +5,8 @@ The Tidy Output Buffer Filter
 --FILE--
 <?php ob_start("ob_tidyhandler"); ?>
 <B>testing</I>
---EXPECT--
-<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 3.2//EN">
+--EXPECTF--
+<!DOCTYPE html%S>
 <html>
 <head>
 <title></title>

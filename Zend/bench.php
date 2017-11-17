@@ -418,5 +418,5 @@ sieve(30);
 $t = end_test($t, "sieve(30)");
 strcat(200000);
 $t = end_test($t, "strcat(200000)");
-total($t0, "Total");
+total();
 ?>

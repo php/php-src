@@ -23,4 +23,4 @@ class B extends A {
 }
 ?>
 --EXPECTF--
-Fatal error: Declaration of B::foo($var) must be compatible with I::foo() in %sbug62358.php on line 17
+Fatal error: Declaration of B::foo($var) must be compatible with A::foo() in %sbug62358.php on line 17

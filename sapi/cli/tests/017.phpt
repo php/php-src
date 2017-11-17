@@ -6,6 +6,9 @@ include "skipif.inc";
 if (!extension_loaded('readline') || readline_info('done') !== NULL) {
 	die ("skip need readline support using libedit");
 }
+if(substr(PHP_OS, 0, 3) == 'WIN' ) {
+    die('skip not for Windows');
+}
 ?>
 --FILE--
 <?php

@@ -21,6 +21,12 @@ function ldap_connect_and_bind($host, $port, $user, $passwd, $protocol_version) 
 	return $link;
 }
 
+function test_bind($host, $port, $user, $passwd, $protocol_version) {
+	$link = ldap_connect($host, $port);
+	ldap_set_option($link, LDAP_OPT_PROTOCOL_VERSION, $protocol_version);
+	return ldap_bind($link, $user, $passwd);
+}
+
 function insert_dummy_data($link, $base) {
 	// Create root if not there
 	$testBase = ldap_read($link, $base, '(objectClass=*)', array('objectClass'));
@@ -63,6 +69,13 @@ function insert_dummy_data($link, $base) {
 	        "sn" => "testSN3",
 	        "userPassword" => "0r1g1na1 passw0rd",
 	));
+	ldap_add($link, "o=test2,$base", array(
+	        "objectClass"   => array(
+            "top",
+            "organization"),
+	        "o"             => "test2",
+	        "l" => array("here", "there", "Antarctica"),
+	));
 }
 
 function remove_dummy_data($link, $base) {
@@ -70,5 +83,6 @@ function remove_dummy_data($link, $base) {
 	ldap_delete($link, "cn=userA,$base");
 	ldap_delete($link, "cn=userB,$base");
 	ldap_delete($link, "o=test,$base");
+	ldap_delete($link, "o=test2,$base");
 }
 ?>

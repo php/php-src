@@ -55,8 +55,8 @@ echo $e->getMessage(),"\n";
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
-%unicode|string%(9) "it worked"
-%unicode|string%(%d) "phar://%sphar_bz2.phar/tar_004.php"
+string(9) "it worked"
+string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 

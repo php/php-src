@@ -127,7 +127,7 @@ PHP_FUNCTION(grapheme_strpos)
 
 	/* we checked that it will fit: */
 	offset = (int32_t) loffset;
-	noffset = offset >= 0 ? offset : haystack_len + offset;
+	noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 
 	/* the offset is 'grapheme count offset' so it still might be invalid - we'll check it later */
 
@@ -136,20 +136,21 @@ PHP_FUNCTION(grapheme_strpos)
 		RETURN_FALSE;
 	}
 
+	if (offset >= 0) {
+		/* quick check to see if the string might be there
+		 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
+		*/
+		found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
 
-	/* quick check to see if the string might be there
-	 * I realize that 'offset' is 'grapheme count offset' but will work in spite of that
-	*/
-	found = php_memnstr(haystack + noffset, needle, needle_len, haystack + haystack_len);
+		/* if it isn't there the we are done */
+		if (!found) {
+			RETURN_FALSE;
+		}
 
-	/* if it isn't there the we are done */
-	if (!found) {
-		RETURN_FALSE;
-	}
-
-	/* if it is there, and if the haystack is ascii, we are all done */
-	if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
-		RETURN_LONG(found - haystack);
+		/* if it is there, and if the haystack is ascii, we are all done */
+		if ( grapheme_ascii_check((unsigned char *)haystack, haystack_len) >= 0 ) {
+			RETURN_LONG(found - haystack);
+		}
 	}
 
 	/* do utf16 part of the strpos */
@@ -197,11 +198,10 @@ PHP_FUNCTION(grapheme_stripos)
 		RETURN_FALSE;
 	}
 
-
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
-		int32_t noffset = offset >= 0 ? offset : haystack_len + offset;
+		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
 		haystack_dup = estrndup(haystack, haystack_len);
@@ -792,6 +792,10 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
+	if (lstart < 0) {
+		lstart += str_len;
+	}
+
 	if ( NULL != next ) {
 		if ( !Z_ISREF_P(next) ) {
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -800,8 +804,7 @@ PHP_FUNCTION(grapheme_extract)
 		} else {
 			ZVAL_DEREF(next);
 			/* initialize next */
-			SEPARATE_ZVAL_NOREF(next);
-			zval_dtor(next);
+			zval_ptr_dtor(next);
             ZVAL_LONG(next, lstart);
 		}
 	}
@@ -812,7 +815,7 @@ PHP_FUNCTION(grapheme_extract)
 		RETURN_FALSE;
 	}
 
-	if ( lstart > INT32_MAX || lstart < 0 || lstart >= str_len ) {
+	if ( lstart > INT32_MAX || lstart < 0 || (size_t)lstart >= str_len ) {
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "grapheme_extract: start not contained in string", 0 );
 		RETURN_FALSE;
 	}

@@ -1,4 +1,4 @@
-dnl This file becomes configure.in for self-contained extensions.
+dnl This file becomes configure.ac for self-contained extensions.
 
 AC_PREREQ(2.59)
 AC_INIT(config.m4)

@@ -33,7 +33,7 @@ void free_zend_constant(zval *zv)
 	zend_constant *c = Z_PTR_P(zv);
 
 	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_dtor(&c->value);
+		zval_ptr_dtor(&c->value);
 	} else {
 		zval_internal_dtor(&c->value);
 	}
@@ -66,20 +66,6 @@ static void copy_zend_constant(zval *zv)
 void zend_copy_constants(HashTable *target, HashTable *source)
 {
 	zend_hash_copy(target, source, copy_zend_constant);
-}
-
-
-static int clean_non_persistent_constant(zval *zv)
-{
-	zend_constant *c = Z_PTR_P(zv);
-	return (c->flags & CONST_PERSISTENT) ? ZEND_HASH_APPLY_STOP : ZEND_HASH_APPLY_REMOVE;
-}
-
-
-static int clean_non_persistent_constant_full(zval *zv)
-{
-	zend_constant *c = Z_PTR_P(zv);
-	return (c->flags & CONST_PERSISTENT) ? 0 : 1;
 }
 
 
@@ -150,16 +136,6 @@ int zend_shutdown_constants(void)
 	zend_hash_destroy(EG(zend_constants));
 	free(EG(zend_constants));
 	return SUCCESS;
-}
-
-
-void clean_non_persistent_constants(void)
-{
-	if (EG(full_tables_cleanup)) {
-		zend_hash_apply(EG(zend_constants), clean_non_persistent_constant_full);
-	} else {
-		zend_hash_reverse_apply(EG(zend_constants), clean_non_persistent_constant);
-	}
 }
 
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
@@ -251,6 +227,18 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 	}
 }
 
+ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *scope) /* {{{ */
+{
+	if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PUBLIC) {
+		return 1;
+	} else if (Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PRIVATE) {
+		return (c->ce == scope);
+	} else {
+		ZEND_ASSERT(Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PROTECTED);
+		return zend_check_protected(c->ce, scope);
+	}
+}
+/* }}} */
 
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 {
@@ -294,7 +282,7 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, zend_ulong flags)
+ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
 {
 	zend_constant *c;
 	const char *colon;
@@ -315,15 +303,8 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		size_t const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
 		zend_string *class_name = zend_string_init(name, class_name_len, 0);
+		zend_class_constant *c = NULL;
 		zval *ret_constant = NULL;
-
-		if (!scope) {
-			if (EG(current_execute_data)) {
-				scope = EG(scope);
-			} else {
-				scope = CG(active_class_entry);
-			}
-		}
 
 		if (zend_string_equals_literal_ci(class_name, "self")) {
 			if (UNEXPECTED(!scope)) {
@@ -351,24 +332,41 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			ce = zend_fetch_class(class_name, flags);
 		}
 		if (ce) {
-			ret_constant = zend_hash_find(&ce->constants_table, constant_name);
-			if (ret_constant == NULL) {
+			c = zend_hash_find_ptr(&ce->constants_table, constant_name);
+			if (c == NULL) {
 				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
 					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
 				}
-			} else if (Z_ISREF_P(ret_constant)) {
-				ret_constant = Z_REFVAL_P(ret_constant);
+				ret_constant = NULL;
+			} else {
+				if (!zend_verify_const_access(c, scope)) {
+					zend_throw_error(NULL, "Cannot access %s const %s::%s", zend_visibility_string(Z_ACCESS_FLAGS(c->value)), ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					goto failure;
+				}
+				ret_constant = &c->value;
 			}
 		}
 
+		if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
+			if (Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
+				if (IS_CONSTANT_VISITED(ret_constant)) {
+					zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
+					ret_constant = NULL;
+					goto failure;
+				}
+				MARK_CONSTANT_VISITED(ret_constant);
+			}
+			if (UNEXPECTED(zval_update_constant_ex(ret_constant, c->ce) != SUCCESS)) {
+				RESET_CONSTANT_VISITED(ret_constant);
+				ret_constant = NULL;
+				goto failure;
+			}
+			RESET_CONSTANT_VISITED(ret_constant);
+		}
 failure:
 		zend_string_release(class_name);
 		zend_string_free(constant_name);
-		if (ret_constant && Z_CONSTANT_P(ret_constant)) {
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, 1, ce) != SUCCESS)) {
-				return NULL;
-			}
-		}
 		return ret_constant;
 	}
 
@@ -417,7 +415,7 @@ failure:
 	}
 }
 
-zend_constant *zend_quick_get_constant(const zval *key, zend_ulong flags)
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
 {
 	zend_constant *c;
 
@@ -468,6 +466,10 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
 
+    if (c->module_number != PHP_USER_CONSTANT) {
+		c->name = zend_new_interned_string(c->name);
+	}
+
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
 		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ZSTR_VAL(c->name), ZSTR_LEN(c->name));
@@ -514,4 +516,6 @@ ZEND_API int zend_register_constant(zend_constant *c)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

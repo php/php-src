@@ -43,4 +43,3 @@ PHP_MINFO_FUNCTION(pdo_dblib);
 PHP_RSHUTDOWN_FUNCTION(pdo_dblib);
 
 #endif
-

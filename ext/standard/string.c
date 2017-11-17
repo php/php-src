@@ -62,6 +62,8 @@
 
 /* For str_getcsv() support */
 #include "ext/standard/file.h"
+/* For php_next_utf8_char() */
+#include "ext/standard/html.h"
 
 #define STR_PAD_LEFT			0
 #define STR_PAD_RIGHT			1
@@ -252,9 +254,9 @@ PHP_FUNCTION(bin2hex)
 	zend_string *result;
 	zend_string *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(data)
+	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_bin2hex((unsigned char *)ZSTR_VAL(data), ZSTR_LEN(data));
 
@@ -272,9 +274,9 @@ PHP_FUNCTION(hex2bin)
 {
 	zend_string *result, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &data) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(data)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(data) % 2 != 0) {
 		php_error_docref(NULL, E_WARNING, "Hexadecimal input string must have an even length");
@@ -297,10 +299,13 @@ static void php_spn_common_handler(INTERNAL_FUNCTION_PARAMETERS, int behavior) /
 	zend_string *s11, *s22;
 	zend_long start = 0, len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|ll", &s11,
-				&s22, &start, &len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STR(s11)
+		Z_PARAM_STR(s22)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(start)
+		Z_PARAM_LONG(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZEND_NUM_ARGS() < 4) {
 		len = ZSTR_LEN(s11);
@@ -540,9 +545,9 @@ PHP_FUNCTION(nl_langinfo)
 	zend_long item;
 	char *value;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &item) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_LONG(item)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch(item) { /* {{{ */
 #ifdef ABDAY_1
@@ -727,9 +732,10 @@ PHP_FUNCTION(strcoll)
 {
 	zend_string *s1, *s2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(strcoll((const char *) ZSTR_VAL(s1),
 	                    (const char *) ZSTR_VAL(s2)));
@@ -785,7 +791,99 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
 }
 /* }}} */
 
-/* {{{ php_trim()
+/* {{{ php_trim_int()
+ * mode 1 : trim left
+ * mode 2 : trim right
+ * mode 3 : trim left and right
+ * what indicates which chars are to be trimmed. NULL->default (' \t\n\r\v\0')
+ */
+static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what, size_t what_len, int mode)
+{
+	const char *start = ZSTR_VAL(str);
+	const char *end = start + ZSTR_LEN(str);
+	char mask[256];
+
+	if (what) {
+		if (what_len == 1) {
+			char p = *what;
+			if (mode & 1) {
+				while (start != end) {
+					if (*start == p) {
+						start++;
+					} else {
+						break;
+					}
+				}
+			}
+			if (mode & 2) {
+				while (start != end) {
+					if (*(end-1) == p) {
+						end--;
+					} else {
+						break;
+					}
+				}
+			}
+		} else {
+			php_charmask((unsigned char*)what, what_len, mask);
+
+			if (mode & 1) {
+				while (start != end) {
+					if (mask[(unsigned char)*start]) {
+						start++;
+					} else {
+						break;
+					}
+				}
+			}
+			if (mode & 2) {
+				while (start != end) {
+					if (mask[(unsigned char)*(end-1)]) {
+						end--;
+					} else {
+						break;
+					}
+				}
+			}
+		}
+	} else {
+		if (mode & 1) {
+			while (start != end) {
+				unsigned char c = (unsigned char)*start;
+
+				if (c <= ' ' &&
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					start++;
+				} else {
+					break;
+				}
+			}
+		}
+		if (mode & 2) {
+			while (start != end) {
+				unsigned char c = (unsigned char)*(end-1);
+
+				if (c <= ' ' &&
+				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					end--;
+				} else {
+					break;
+				}
+			}
+		}
+	}
+
+	if (ZSTR_LEN(str) == end - start) {
+		return zend_string_copy(str);
+	} else if (end - start == 0) {
+		return ZSTR_EMPTY_ALLOC();
+	} else {
+		return zend_string_init(start, end - start, 0);
+	}
+}
+/* }}} */
+
+/* {{{ php_trim_int()
  * mode 1 : trim left
  * mode 2 : trim right
  * mode 3 : trim left and right
@@ -793,105 +891,14 @@ static inline int php_charmask(unsigned char *input, size_t len, char *mask)
  */
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode)
 {
-	const char *c = ZSTR_VAL(str);
-	size_t len = ZSTR_LEN(str);
-	register size_t i;
-	size_t trimmed = 0;
-	char mask[256];
-
-	if (what) {
-		if (what_len == 1) {
-			char p = *what;
-			if (mode & 1) {
-				for (i = 0; i < len; i++) {
-					if (c[i] == p) {
-						trimmed++;
-					} else {
-						break;
-					}
-				}
-				len -= trimmed;
-				c += trimmed;
-			}
-			if (mode & 2) {
-				if (len > 0) {
-					i = len - 1;
-					do {
-						if (c[i] == p) {
-							len--;
-						} else {
-							break;
-						}
-					} while (i-- != 0);
-				}
-			}
-		} else {
-			php_charmask((unsigned char*)what, what_len, mask);
-
-			if (mode & 1) {
-				for (i = 0; i < len; i++) {
-					if (mask[(unsigned char)c[i]]) {
-						trimmed++;
-					} else {
-						break;
-					}
-				}
-				len -= trimmed;
-				c += trimmed;
-			}
-			if (mode & 2) {
-				if (len > 0) {
-					i = len - 1;
-					do {
-						if (mask[(unsigned char)c[i]]) {
-							len--;
-						} else {
-							break;
-						}
-					} while (i-- != 0);
-				}
-			}
-		}
-	} else {
-		if (mode & 1) {
-			for (i = 0; i < len; i++) {
-				if ((unsigned char)c[i] <= ' ' &&
-				    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
-					trimmed++;
-				} else {
-					break;
-				}
-			}
-			len -= trimmed;
-			c += trimmed;
-		}
-		if (mode & 2) {
-			if (len > 0) {
-				i = len - 1;
-				do {
-					if ((unsigned char)c[i] <= ' ' &&
-					    (c[i] == ' ' || c[i] == '\n' || c[i] == '\r' || c[i] == '\t' || c[i] == '\v' || c[i] == '\0')) {
-						len--;
-					} else {
-						break;
-					}
-				} while (i-- != 0);
-			}
-		}
-	}
-
-	if (ZSTR_LEN(str) == len) {
-		return zend_string_copy(str);
-	} else {
-		return zend_string_init(c, len, 0);
-	}
+	return php_trim_int(str, what, what_len, mode);
 }
 /* }}} */
 
 /* {{{ php_do_trim
  * Base for trim(), rtrim() and ltrim() functions.
  */
-static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
+static zend_always_inline void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 {
 	zend_string *str;
 	zend_string *what = NULL;
@@ -902,7 +909,7 @@ static void php_do_trim(INTERNAL_FUNCTION_PARAMETERS, int mode)
 		Z_PARAM_STR(what)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_STR(return_value, php_trim(str, (what ? ZSTR_VAL(what) : NULL), (what ? ZSTR_LEN(what) : 0), mode));
+	ZVAL_STR(return_value, php_trim_int(str, (what ? ZSTR_VAL(what) : NULL), (what ? ZSTR_LEN(what) : 0), mode));
 }
 /* }}} */
 
@@ -943,9 +950,13 @@ PHP_FUNCTION(wordwrap)
 	zend_bool docut = 0;
 	zend_string *newtext;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|lsb", &text, &linelength, &breakchar, &breakchar_len, &docut) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STR(text)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(linelength)
+		Z_PARAM_STRING(breakchar, breakchar_len)
+		Z_PARAM_BOOL(docut)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(text) == 0) {
 		RETURN_EMPTY_STRING();
@@ -967,7 +978,7 @@ PHP_FUNCTION(wordwrap)
 		newtext = zend_string_init(ZSTR_VAL(text), ZSTR_LEN(text), 0);
 
 		laststart = lastspace = 0;
-		for (current = 0; current < ZSTR_LEN(text); current++) {
+		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (ZSTR_VAL(text)[current] == breakchar[0]) {
 				laststart = lastspace = current + 1;
 			} else if (ZSTR_VAL(text)[current] == ' ') {
@@ -999,7 +1010,7 @@ PHP_FUNCTION(wordwrap)
 		newtextlen = 0;
 
 		laststart = lastspace = 0;
-		for (current = 0; current < ZSTR_LEN(text); current++) {
+		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
 			if (chk <= 0) {
 				alloced += (size_t) (((ZSTR_LEN(text) - current + 1)/linelength + 1) * breakchar_len) + 1;
 				newtext = zend_string_extend(newtext, alloced, 0);
@@ -1084,7 +1095,15 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 		zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 	} else {
 		do {
-			ZVAL_STRINGL(&tmp, p1, p2 - p1);
+			size_t l = p2 - p1;
+
+			if (l == 0) {
+				ZVAL_EMPTY_STRING(&tmp);
+			} else if (l == 1) {
+				ZVAL_INTERNED_STR(&tmp, ZSTR_CHAR((zend_uchar)(*p1)));
+			} else {
+				ZVAL_STRINGL(&tmp, p1, p2 - p1);
+			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			p1 = p2 + ZSTR_LEN(delim);
 			p2 = (char *) php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
@@ -1187,7 +1206,7 @@ PHP_FUNCTION(explode)
 
 /* {{{ php_implode
  */
-PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
+PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_value)
 {
 	zval         *tmp;
 	int           numelems;
@@ -1196,13 +1215,13 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	size_t        len = 0;
 	zend_string **strings, **strptr;
 
-	numelems = zend_hash_num_elements(Z_ARRVAL_P(arr));
+	numelems = zend_hash_num_elements(Z_ARRVAL_P(pieces));
 
 	if (numelems == 0) {
 		RETURN_EMPTY_STRING();
 	} else if (numelems == 1) {
 		/* loop to search the first not undefined element... */
-		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
 			RETURN_STR(zval_get_string(tmp));
 		} ZEND_HASH_FOREACH_END();
 	}
@@ -1210,7 +1229,7 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 	strings = emalloc((sizeof(zend_long) + sizeof(zend_string *)) * numelems);
 	strptr = strings - 1;
 
-	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(arr), tmp) {
+	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
 		if (Z_TYPE_P(tmp) == IS_LONG) {
 			zend_long val = Z_LVAL_P(tmp);
 
@@ -1229,7 +1248,7 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 		}
 	} ZEND_HASH_FOREACH_END();
 	/* numelems can not be 0, we checked above */
-	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(delim), len, 0);
+	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
@@ -1246,8 +1265,8 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
 			*oldPtr = oldVal;
 		}
 
-		cptr -= ZSTR_LEN(delim);
-		memcpy(cptr, ZSTR_VAL(delim), ZSTR_LEN(delim));
+		cptr -= ZSTR_LEN(glue);
+		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
 	} while (--strptr > strings);
 
 	if (*strptr) {
@@ -1269,8 +1288,8 @@ PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value)
    Joins array elements placing glue string between items and return one string */
 PHP_FUNCTION(implode)
 {
-	zval *arg1, *arg2 = NULL, *arr;
-	zend_string *delim;
+	zval *arg1, *arg2 = NULL, *pieces;
+	zend_string *glue, *tmp_glue;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(arg1)
@@ -1284,23 +1303,24 @@ PHP_FUNCTION(implode)
 			return;
 		}
 
-		delim = ZSTR_EMPTY_ALLOC();
-		arr = arg1;
+		glue = ZSTR_EMPTY_ALLOC();
+		tmp_glue = NULL;
+		pieces = arg1;
 	} else {
 		if (Z_TYPE_P(arg1) == IS_ARRAY) {
-			delim = zval_get_string(arg2);
-			arr = arg1;
+			glue = zval_get_tmp_string(arg2, &tmp_glue);
+			pieces = arg1;
 		} else if (Z_TYPE_P(arg2) == IS_ARRAY) {
-			delim = zval_get_string(arg1);
-			arr = arg2;
+			glue = zval_get_tmp_string(arg1, &tmp_glue);
+			pieces = arg2;
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid arguments passed");
 			return;
 		}
 	}
 
-	php_implode(delim, arr, return_value);
-	zend_string_release(delim);
+	php_implode(glue, pieces, return_value);
+	zend_tmp_string_release(tmp_glue);
 }
 /* }}} */
 
@@ -1410,7 +1430,7 @@ PHPAPI zend_string *php_string_toupper(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!isupper(*c)) {
+		if (islower(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1473,7 +1493,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s)
 	e = c + ZSTR_LEN(s);
 
 	while (c < e) {
-		if (!islower(*c)) {
+		if (isupper(*c)) {
 			register unsigned char *r;
 			zend_string *res = zend_string_alloc(ZSTR_LEN(s), 0);
 
@@ -1533,7 +1553,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 			case 0:
 				goto quit_loop;
 			case 1:
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 				if (*c == '/' || *c == '\\') {
 #else
 				if (*c == '/') {
@@ -1542,7 +1562,7 @@ PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t
 						state = 0;
 						cend = c;
 					}
-#if defined(PHP_WIN32) || defined(NETWARE)
+#if defined(PHP_WIN32)
 				/* Catch relative paths in c:file.txt style. They're not to confuse
 				   with the NTFS streams. This part ensures also, that no drive
 				   letter traversing happens. */
@@ -1596,9 +1616,11 @@ PHP_FUNCTION(basename)
 	char *string, *suffix = NULL;
 	size_t   string_len, suffix_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|s", &string, &string_len, &suffix, &suffix_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(string, string_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(suffix, suffix_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_STR(php_basename(string, string_len, suffix, suffix_len));
 }
@@ -1621,15 +1643,21 @@ PHP_FUNCTION(dirname)
 	zend_string *ret;
 	zend_long levels = 1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &levels) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(levels)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ret = zend_string_init(str, str_len, 0);
 
 	if (levels == 1) {
 		/* Defaut case */
+#ifdef PHP_WIN32
+		ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len);
+#else
 		ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len);
+#endif
 	} else if (levels < 1) {
 		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
 		zend_string_free(ret);
@@ -1637,7 +1665,11 @@ PHP_FUNCTION(dirname)
 	} else {
 		/* Some levels up */
 		do {
+#ifdef PHP_WIN32
+			ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+#else
 			ZSTR_LEN(ret) = zend_dirname(ZSTR_VAL(ret), str_len = ZSTR_LEN(ret));
+#endif
 		} while (ZSTR_LEN(ret) < str_len && --levels);
 	}
 
@@ -1656,9 +1688,11 @@ PHP_FUNCTION(pathinfo)
 	zend_long opt = PHP_PATHINFO_ALL;
 	zend_string *ret = NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &path, &path_len, &opt) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(path, path_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(opt)
+	ZEND_PARSE_PARAMETERS_END();
 
 	have_basename = ((opt & PHP_PATHINFO_BASENAME) == PHP_PATHINFO_BASENAME);
 
@@ -1705,7 +1739,7 @@ PHP_FUNCTION(pathinfo)
 
 		p = zend_memrchr(ZSTR_VAL(ret), '.', ZSTR_LEN(ret));
 
-		idx = p ? (p - ZSTR_VAL(ret)) : ZSTR_LEN(ret);
+		idx = p ? (p - ZSTR_VAL(ret)) : (ptrdiff_t)ZSTR_LEN(ret);
 		add_assoc_stringl(&tmp, "filename", ZSTR_VAL(ret), idx);
 	}
 
@@ -1816,9 +1850,12 @@ PHP_FUNCTION(stristr)
 	char needle_char[2];
 	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|b", &haystack, &needle, &part) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(part)
+	ZEND_PARSE_PARAMETERS_END();
 
 	haystack_dup = estrndup(ZSTR_VAL(haystack), ZSTR_LEN(haystack));
 
@@ -1868,9 +1905,12 @@ PHP_FUNCTION(strstr)
 	zend_long found_offset;
 	zend_bool part = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|b", &haystack, &needle, &part) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(part)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		if (!Z_STRLEN_P(needle)) {
@@ -1921,6 +1961,9 @@ PHP_FUNCTION(strpos)
 		Z_PARAM_LONG(offset)
 	ZEND_PARSE_PARAMETERS_END();
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -1967,10 +2010,16 @@ PHP_FUNCTION(stripos)
 	zval *needle;
 	zend_string *needle_dup = NULL, *haystack_dup;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &haystack, &needle, &offset) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_ZVAL(needle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
 
+	if (offset < 0) {
+		offset += (zend_long)ZSTR_LEN(haystack);
+	}
 	if (offset < 0 || (size_t)offset > ZSTR_LEN(haystack)) {
 		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
@@ -2064,7 +2113,7 @@ PHP_FUNCTION(strrpos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack);
-		if (-offset < needle_len) {
+		if ((size_t)-offset < needle_len) {
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 		} else {
 			e = ZSTR_VAL(haystack) + ZSTR_LEN(haystack) + offset + needle_len;
@@ -2092,10 +2141,12 @@ PHP_FUNCTION(strripos)
 	zend_string *needle_dup, *haystack_dup, *ord_needle = NULL;
 	ALLOCA_FLAG(use_heap);
 
-
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &haystack, &zneedle, &offset) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_ZVAL(zneedle)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	ZSTR_ALLOCA_ALLOC(ord_needle, 1, use_heap);
 	if (Z_TYPE_P(zneedle) == IS_STRING) {
@@ -2165,7 +2216,7 @@ PHP_FUNCTION(strripos)
 			RETURN_FALSE;
 		}
 		p = ZSTR_VAL(haystack_dup);
-		if (-offset < ZSTR_LEN(needle)) {
+		if ((size_t)-offset < ZSTR_LEN(needle)) {
 			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 		} else {
 			e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack) + offset + ZSTR_LEN(needle);
@@ -2196,9 +2247,10 @@ PHP_FUNCTION(strrchr)
 	const char *found = NULL;
 	zend_long found_offset;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz", &haystack, &needle) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_ZVAL(needle)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(needle) == IS_STRING) {
 		found = zend_memrchr(ZSTR_VAL(haystack), *Z_STRVAL_P(needle), ZSTR_LEN(haystack));
@@ -2280,9 +2332,12 @@ PHP_FUNCTION(chunk_split)
 	zend_long chunklen = 76;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls", &str, &chunklen, &end, &endlen) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(chunklen)
+		Z_PARAM_STRING(end, endlen)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (chunklen <= 0) {
 		php_error_docref(NULL, E_WARNING, "Chunk length should be greater than zero");
@@ -2339,7 +2394,7 @@ PHP_FUNCTION(substr)
 
 	if (f > (zend_long)ZSTR_LEN(str)) {
 		RETURN_FALSE;
-	} else if (f < 0 && -f > ZSTR_LEN(str)) {
+	} else if (f < 0 && (size_t)-f > ZSTR_LEN(str)) {
 		f = 0;
 	}
 
@@ -2375,6 +2430,14 @@ PHP_FUNCTION(substr)
 		l = ZSTR_LEN(str) - f;
 	}
 
+	if (l == 0) {
+		RETURN_EMPTY_STRING();
+	} else if (l == 1) {
+		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)(ZSTR_VAL(str)[f])));
+	} else if (l == ZSTR_LEN(str)) {
+		RETURN_STR_COPY(str);
+	}
+
 	RETURN_STRINGL(ZSTR_VAL(str) + f, l);
 }
 /* }}} */
@@ -2394,9 +2457,13 @@ PHP_FUNCTION(substr_replace)
 	HashPosition from_idx, repl_idx, len_idx;
 	zval *tmp_str = NULL, *tmp_from = NULL, *tmp_repl = NULL, *tmp_len= NULL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zzz|z/", &str, &repl, &from, &len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_ZVAL(str)
+		Z_PARAM_ZVAL(repl)
+		Z_PARAM_ZVAL(from)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		convert_to_string_ex(str);
@@ -2438,7 +2505,7 @@ PHP_FUNCTION(substr_replace)
 	if (Z_TYPE_P(str) != IS_ARRAY) {
 		if (Z_TYPE_P(from) != IS_ARRAY) {
 			zend_string *repl_str;
-			zend_bool repl_release = 0;
+			zend_string *tmp_repl_str = NULL;
 			f = Z_LVAL_P(from);
 
 			/* if "from" position is negative, count start position from the end
@@ -2449,7 +2516,7 @@ PHP_FUNCTION(substr_replace)
 				if (f < 0) {
 					f = 0;
 				}
-			} else if (f > Z_STRLEN_P(str)) {
+			} else if ((size_t)f > Z_STRLEN_P(str)) {
 				f = Z_STRLEN_P(str);
 			}
 			/* if "length" position is negative, set it to the length
@@ -2462,7 +2529,7 @@ PHP_FUNCTION(substr_replace)
 				}
 			}
 
-			if (l > Z_STRLEN_P(str) || (l < 0 && (size_t)(-l) > Z_STRLEN_P(str))) {
+			if ((size_t)l > Z_STRLEN_P(str) || (l < 0 && (size_t)(-l) > Z_STRLEN_P(str))) {
 				l = Z_STRLEN_P(str);
 			}
 
@@ -2479,8 +2546,7 @@ PHP_FUNCTION(substr_replace)
 					repl_idx++;
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					repl_str = zval_get_string(tmp_repl);
-					repl_release = 1;
+					repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
 				} else {
 					repl_str = STR_EMPTY_ALLOC();
 				}
@@ -2496,9 +2562,7 @@ PHP_FUNCTION(substr_replace)
 			}
 			memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), Z_STRVAL_P(str) + f + l, Z_STRLEN_P(str) - f - l);
 			ZSTR_VAL(result)[ZSTR_LEN(result)] = '\0';
-			if (repl_release) {
-				zend_string_release(repl_str);
-			}
+			zend_tmp_string_release(tmp_repl_str);
 			RETURN_NEW_STR(result);
 		} else {
 			php_error_docref(NULL, E_WARNING, "Functionality of 'start' and 'length' as arrays is not implemented");
@@ -2514,7 +2578,8 @@ PHP_FUNCTION(substr_replace)
 		from_idx = len_idx = repl_idx = 0;
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(str), num_index, str_index, tmp_str) {
-			zend_string *orig_str = zval_get_string(tmp_str);
+			zend_string *tmp_orig_str;
+			zend_string *orig_str = zval_get_tmp_string(tmp_str, &tmp_orig_str);
 
 			if (Z_TYPE_P(from) == IS_ARRAY) {
 				while (from_idx < Z_ARRVAL_P(from)->nNumUsed) {
@@ -2593,7 +2658,8 @@ PHP_FUNCTION(substr_replace)
 					repl_idx++;
 				}
 				if (repl_idx < Z_ARRVAL_P(repl)->nNumUsed) {
-					zend_string *repl_str = zval_get_string(tmp_repl);
+					zend_string *tmp_repl_str;
+					zend_string *repl_str = zval_get_tmp_string(tmp_repl, &tmp_repl_str);
 
 					result_len += ZSTR_LEN(repl_str);
 					repl_idx++;
@@ -2602,7 +2668,7 @@ PHP_FUNCTION(substr_replace)
 					memcpy(ZSTR_VAL(result), ZSTR_VAL(orig_str), f);
 					memcpy((ZSTR_VAL(result) + f), ZSTR_VAL(repl_str), ZSTR_LEN(repl_str));
 					memcpy((ZSTR_VAL(result) + f + ZSTR_LEN(repl_str)), ZSTR_VAL(orig_str) + f + l, ZSTR_LEN(orig_str) - f - l);
-					zend_string_release(repl_str);
+					zend_tmp_string_release(tmp_repl_str);
 				} else {
 					result = zend_string_safe_alloc(1, result_len, 0, 0);
 
@@ -2630,7 +2696,7 @@ PHP_FUNCTION(substr_replace)
 				add_index_str(return_value, num_index, result);
 			}
 
-			zend_string_release(orig_str);
+			zend_tmp_string_release(tmp_orig_str);
 		} ZEND_HASH_FOREACH_END();
 	} /* if */
 }
@@ -2646,9 +2712,9 @@ PHP_FUNCTION(quotemeta)
 	char c;
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &old) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(old)
+	ZEND_PARSE_PARAMETERS_END();
 
 	old_end = ZSTR_VAL(old) + ZSTR_LEN(old);
 
@@ -2686,7 +2752,8 @@ PHP_FUNCTION(quotemeta)
 /* }}} */
 
 /* {{{ proto int ord(string character)
-   Returns ASCII value of character */
+   Returns ASCII value of character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
 	char   *str;
@@ -2701,7 +2768,8 @@ PHP_FUNCTION(ord)
 /* }}} */
 
 /* {{{ proto string chr(int ascii)
-   Converts ASCII code to a character */
+   Converts ASCII code to a character
+   Warning: This function is special-cased by zend_compile.c and so is bypassed for constant integer argument */
 PHP_FUNCTION(chr)
 {
 	zend_long c;
@@ -2715,23 +2783,22 @@ PHP_FUNCTION(chr)
 	ZEND_PARSE_PARAMETERS_END_EX(c = 0);
 
 	c &= 0xff;
-	if (CG(one_char_string)[c]) {
-		ZVAL_INTERNED_STR(return_value, CG(one_char_string)[c]);
-	} else {
-		ZVAL_NEW_STR(return_value, zend_string_alloc(1, 0));
-		Z_STRVAL_P(return_value)[0] = (char)c;
-		Z_STRVAL_P(return_value)[1] = '\0';
-	}
+	ZVAL_INTERNED_STR(return_value, ZSTR_CHAR(c));
 }
 /* }}} */
 
 /* {{{ php_ucfirst
    Uppercase the first character of the word in a native string */
-static void php_ucfirst(char *str)
+static zend_string* php_ucfirst(zend_string *str)
 {
-	register char *r;
-	r = str;
-	*r = toupper((unsigned char) *r);
+	unsigned char r = toupper(ZSTR_VAL(str)[0]);
+	if (r == ZSTR_VAL(str)[0]) {
+		return zend_string_copy(str);
+	} else {
+		zend_string *s = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_VAL(s)[0] = r;
+		return s;
+	}
 }
 /* }}} */
 
@@ -2749,18 +2816,22 @@ PHP_FUNCTION(ucfirst)
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
-	php_ucfirst(Z_STRVAL_P(return_value));
+	RETURN_STR(php_ucfirst(str));
 }
 /* }}} */
 
 /* {{{
    Lowercase the first character of the word in a native string */
-static void php_lcfirst(char *str)
+static zend_string* php_lcfirst(zend_string *str)
 {
-	register char *r;
-	r = str;
-	*r = tolower((unsigned char) *r);
+	unsigned char r = tolower(ZSTR_VAL(str)[0]);
+	if (r == ZSTR_VAL(str)[0]) {
+		return zend_string_copy(str);
+	} else {
+		zend_string *s = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_VAL(s)[0] = r;
+		return s;
+	}
 }
 /* }}} */
 
@@ -2770,16 +2841,15 @@ PHP_FUNCTION(lcfirst)
 {
 	zend_string  *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(str)) {
 		RETURN_EMPTY_STRING();
 	}
 
-	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
-	php_lcfirst(Z_STRVAL_P(return_value));
+	RETURN_STR(php_lcfirst(str));
 }
 /* }}} */
 
@@ -3013,12 +3083,13 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 				if ((num_bitset[len / sizeof(zend_ulong)] & (Z_UL(1) << (len % sizeof(zend_ulong))))) {
 					entry = zend_hash_str_find(pats, key, len);
 					if (entry != NULL) {
-						zend_string *s = zval_get_string(entry);
+						zend_string *tmp;
+						zend_string *s = zval_get_tmp_string(entry, &tmp);
 						smart_str_appendl(&result, str + old_pos, pos - old_pos);
 						smart_str_append(&result, s);
 						old_pos = pos + len;
 						pos = old_pos - 1;
-						zend_string_release(s);
+						zend_tmp_string_release(tmp);
 						break;
 					}
 				}
@@ -3182,7 +3253,14 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 nothing_todo:
 		return zend_string_copy(haystack);
 	} else {
-		new_str = zend_string_init(str, str_len, 0);
+		if (str_len == 0) {
+			new_str = ZSTR_EMPTY_ALLOC();
+		} else if (str_len == 1) {
+			new_str = ZSTR_CHAR((zend_uchar)(*str));
+		} else {
+			new_str = zend_string_init(str, str_len, 0);
+		}
+
 		(*replace_count)++;
 		return new_str;
 	}
@@ -3389,7 +3467,7 @@ PHP_FUNCTION(strtr)
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
-			zend_string *str_key, *replace;
+			zend_string *str_key, *replace, *tmp_replace;
 			zval *entry, tmp;
 
 			ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
@@ -3399,7 +3477,7 @@ PHP_FUNCTION(strtr)
 					convert_to_string(&tmp);
 					str_key = Z_STR(tmp);
 				}
-				replace = zval_get_string(entry);
+				replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
 					RETVAL_STR_COPY(str);
 				} else if (ZSTR_LEN(str_key) == 1) {
@@ -3415,7 +3493,7 @@ PHP_FUNCTION(strtr)
 								ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 								ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
 				}
-				zend_string_release(replace);
+				zend_tmp_string_release(tmp_replace);
 				zval_dtor(&tmp);
 				return;
 			} ZEND_HASH_FOREACH_END();
@@ -3441,9 +3519,9 @@ PHP_FUNCTION(strrev)
 	char *e, *p;
 	zend_string *n;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	n = zend_string_alloc(ZSTR_LEN(str), 0);
 	p = ZSTR_VAL(n);
@@ -3515,9 +3593,12 @@ PHP_FUNCTION(similar_text)
 	int ac = ZEND_NUM_ARGS();
 	size_t sim;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|z/", &t1, &t2, &percent) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(t1)
+		Z_PARAM_STR(t2)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(percent)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ac > 2) {
 		convert_to_double_ex(percent);
@@ -3584,9 +3665,10 @@ PHP_FUNCTION(addcslashes)
 {
 	zend_string *str, *what;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &str, &what) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_STR(what)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(str) == 0) {
 		RETURN_EMPTY_STRING();
@@ -3624,9 +3706,9 @@ PHP_FUNCTION(stripcslashes)
 {
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 	php_stripcslashes(Z_STR_P(return_value));
@@ -3639,9 +3721,9 @@ PHP_FUNCTION(stripslashes)
 {
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &str) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(str)
+	ZEND_PARSE_PARAMETERS_END();
 
 	ZVAL_STRINGL(return_value, ZSTR_VAL(str), ZSTR_LEN(str));
 	php_stripslashes(Z_STR_P(return_value));
@@ -3864,7 +3946,9 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 	zval		*search_entry,
 				*replace_entry = NULL;
 	zend_string	*tmp_result,
-				*replace_entry_str = NULL;
+	            *tmp_subject_str,
+	            *tmp_replace_entry_str = NULL,
+				*replace_entry_str;
 	char		*replace_value = NULL;
 	size_t		 replace_len = 0;
 	zend_long	 replace_count = 0;
@@ -3873,9 +3957,9 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 	uint32_t     replace_idx;
 
 	/* Make sure we're dealing with strings. */
-	subject_str = zval_get_string(subject);
+	subject_str = zval_get_tmp_string(subject, &tmp_subject_str);
 	if (ZSTR_LEN(subject_str) == 0) {
-		zend_string_release(subject_str);
+		zend_tmp_string_release(tmp_subject_str);
 		ZVAL_EMPTY_STRING(result);
 		return 0;
 	}
@@ -3896,12 +3980,14 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 		/* For each entry in the search array, get the entry */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(search), search_entry) {
 			/* Make sure we're dealing with strings. */
-			zend_string *search_str = zval_get_string(search_entry);
+			zend_string *tmp_search_str;
+			zend_string *search_str = zval_get_tmp_string(search_entry, &tmp_search_str);
+
 			if (ZSTR_LEN(search_str) == 0) {
 				if (Z_TYPE_P(replace) == IS_ARRAY) {
 					replace_idx++;
 				}
-				zend_string_release(search_str);
+				zend_tmp_string_release(tmp_search_str);
 				continue;
 			}
 
@@ -3917,7 +4003,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 				if (replace_idx < Z_ARRVAL_P(replace)->nNumUsed) {
 					/* Make sure we're dealing with strings. */
-					replace_entry_str = zval_get_string(replace_entry);
+					replace_entry_str = zval_get_tmp_string(replace_entry, &tmp_replace_entry_str);
 
 					/* Set replacement value to the one we got from array */
 					replace_value = ZSTR_VAL(replace_entry_str);
@@ -3964,11 +4050,11 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				}
 			}
 
-			zend_string_release(search_str);
+			zend_tmp_string_release(tmp_search_str);
 
-			if (replace_entry_str) {
-				zend_string_release(replace_entry_str);
-				replace_entry_str = NULL;
+			if (tmp_replace_entry_str) {
+				zend_string_release(tmp_replace_entry_str);
+				tmp_replace_entry_str = NULL;
 			}
 			zend_string_release(Z_STR_P(result));
 			ZVAL_STR(result, tmp_result);
@@ -3977,7 +4063,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				if (lc_subject_str) {
 					zend_string_release(lc_subject_str);
 				}
-				zend_string_release(subject_str);
+				zend_tmp_string_release(tmp_subject_str);
 				return replace_count;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -4010,7 +4096,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			ZVAL_STR_COPY(result, subject_str);
 		}
 	}
-	zend_string_release(subject_str);
+	zend_tmp_string_release(tmp_subject_str);
 	return replace_count;
 }
 /* }}} */
@@ -4031,7 +4117,7 @@ static void php_str_replace_common(INTERNAL_FUNCTION_PARAMETERS, int case_sensit
 		Z_PARAM_ZVAL(replace)
 		Z_PARAM_ZVAL(subject)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_EX(zcount, 0, 1)
+		Z_PARAM_ZVAL_DEREF(zcount)
 	ZEND_PARSE_PARAMETERS_END();
 
 	/* Make sure we're dealing with strings and do the replacement. */
@@ -4100,14 +4186,16 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 	char *str;
 	char *heb_str, *tmp, *target;
 	size_t block_start, block_end, block_type, block_length, i;
-	zend_long max_chars=0;
-	size_t begin, end, char_count, orig_begin;
+	zend_long max_chars=0, char_count;
+	size_t begin, end, orig_begin;
 	size_t str_len;
 	zend_string *broken_str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &max_chars) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(max_chars)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (str_len == 0) {
 		RETURN_FALSE;
@@ -4371,9 +4459,11 @@ PHP_FUNCTION(strip_tags)
 	char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|z", &str, &allow) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(allow)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* To maintain a certain BC, we allow anything for the second parameter and return original string */
 	if (allow) {
@@ -4400,9 +4490,10 @@ PHP_FUNCTION(setlocale)
 	int num_args, i = 0;
 	uint32_t idx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l+", &cat, &args, &num_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, -1)
+		Z_PARAM_LONG(cat)
+		Z_PARAM_VARIADIC('+', args, num_args)
+	ZEND_PARSE_PARAMETERS_END();
 
 #ifdef HAVE_SETLOCALE
 	idx = 0;
@@ -4478,7 +4569,7 @@ PHP_FUNCTION(setlocale)
 }
 /* }}} */
 
-/* {{{ proto void parse_str(string encoded_string [, array result])
+/* {{{ proto void parse_str(string encoded_string [, array &result])
    Parses GET/POST/COOKIE data and sets global variables */
 PHP_FUNCTION(parse_str)
 {
@@ -4487,26 +4578,35 @@ PHP_FUNCTION(parse_str)
 	char *res = NULL;
 	size_t arglen;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|z/", &arg, &arglen, &arrayArg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STRING(arg, arglen)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL_DEREF(arrayArg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	res = estrndup(arg, arglen);
 
 	if (arrayArg == NULL) {
 		zval tmp;
-		zend_array *symbol_table = zend_rebuild_symbol_table();
+		zend_array *symbol_table;
+		if (zend_forbid_dynamic_call("parse_str() with a single argument") == FAILURE) {
+			efree(res);
+			return;
+		}
 
+		php_error_docref(NULL, E_DEPRECATED, "Calling parse_str() without the result argument is deprecated");
+
+		symbol_table = zend_rebuild_symbol_table();
 		ZVAL_ARR(&tmp, symbol_table);
 		sapi_module.treat_data(PARSE_STRING, res, &tmp);
+		if (UNEXPECTED(zend_hash_del(symbol_table, ZSTR_KNOWN(ZEND_STR_THIS)) == SUCCESS)) {
+			zend_throw_error(NULL, "Cannot re-assign $this");
+		}
 	} else 	{
-		zval ret;
-
 		/* Clear out the array that was passed in. */
-		zval_dtor(arrayArg);
-		array_init(&ret);
-		sapi_module.treat_data(PARSE_STRING, res, &ret);
-		ZVAL_COPY_VALUE(arrayArg, &ret);
+		zval_ptr_dtor(arrayArg);
+		array_init(arrayArg);
+		sapi_module.treat_data(PARSE_STRING, res, arrayArg);
 	}
 }
 /* }}} */
@@ -4577,7 +4677,7 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 }
 /* }}} */
 
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len) /* {{{ */
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len) /* {{{ */
 {
 	return php_strip_tags_ex(rbuf, len, stateptr, allow, allow_len, 0);
 }
@@ -4603,11 +4703,11 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *stateptr, const char *
 	swm: Added ability to strip <?xml tags without assuming it PHP
 	code.
 */
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
 	char *tbuf, *buf, *p, *tp, *rp, c, lc;
 	int br, depth=0, in_q = 0;
-	int state = 0;
+	uint8_t state = 0;
 	size_t pos, i = 0;
 	char *allow_free = NULL;
 	const char *allow_actual;
@@ -4888,10 +4988,13 @@ PHP_FUNCTION(str_getcsv)
 	char *delim_str = NULL, *enc_str = NULL, *esc_str = NULL;
 	size_t delim_len = 0, enc_len = 0, esc_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|sss", &str, &delim_str, &delim_len,
-		&enc_str, &enc_len, &esc_str, &esc_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 4)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(delim_str, delim_len)
+		Z_PARAM_STRING(enc_str, enc_len)
+		Z_PARAM_STRING(esc_str, esc_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	delim = delim_len ? delim_str[0] : delim;
 	enc = enc_len ? enc_str[0] : enc;
@@ -4910,9 +5013,10 @@ PHP_FUNCTION(str_repeat)
 	zend_string	*result;		/* Resulting string */
 	size_t		result_len;		/* Length of the resulting string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl", &input_str, &mult) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(input_str)
+		Z_PARAM_LONG(mult)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (mult < 0) {
 		php_error_docref(NULL, E_WARNING, "Second argument has to be greater than or equal to 0");
@@ -4965,9 +5069,11 @@ PHP_FUNCTION(count_chars)
 	size_t retlen=0;
 	size_t tmp = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &input, &mymode) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(input)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(mymode)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (mymode < 0 || mymode > 4) {
 		php_error_docref(NULL, E_WARNING, "Unknown mode");
@@ -5027,9 +5133,10 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 {
 	zend_string *s1, *s2;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &s1, &s2) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETURN_LONG(strnatcmp_ex(ZSTR_VAL(s1), ZSTR_LEN(s1),
 							 ZSTR_VAL(s2), ZSTR_LEN(s2),
@@ -5039,13 +5146,14 @@ static void php_strnatcmp(INTERNAL_FUNCTION_PARAMETERS, int fold_case)
 
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive) /* {{{ */
 {
-	zend_string *str1 = zval_get_string(op1);
-	zend_string *str2 = zval_get_string(op2);
+	zend_string *tmp_str1, *tmp_str2;
+	zend_string *str1 = zval_get_tmp_string(op1, &tmp_str1);
+	zend_string *str2 = zval_get_tmp_string(op2, &tmp_str2);
 
 	ZVAL_LONG(result, strnatcmp_ex(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2), case_insensitive));
 
-	zend_string_release(str1);
-	zend_string_release(str2);
+	zend_tmp_string_release(tmp_str1);
+	zend_tmp_string_release(tmp_str2);
 	return SUCCESS;
 }
 /* }}} */
@@ -5172,9 +5280,13 @@ PHP_FUNCTION(substr_count)
 	size_t haystack_len, needle_len;
 	char *p, *endp, cmp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss|ll", &haystack, &haystack_len, &needle, &needle_len, &offset, &length) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STRING(haystack, haystack_len)
+		Z_PARAM_STRING(needle, needle_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+		Z_PARAM_LONG(length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (needle_len == 0) {
 		php_error_docref(NULL, E_WARNING, "Empty substring");
@@ -5185,24 +5297,21 @@ PHP_FUNCTION(substr_count)
 	endp = p + haystack_len;
 
 	if (offset < 0) {
-		php_error_docref(NULL, E_WARNING, "Offset should be greater than or equal to 0");
-		RETURN_FALSE;
+		offset += (zend_long)haystack_len;
 	}
-
-	if ((size_t)offset > haystack_len) {
-		php_error_docref(NULL, E_WARNING, "Offset value " ZEND_LONG_FMT " exceeds string length", offset);
+	if ((offset < 0) || ((size_t)offset > haystack_len)) {
+		php_error_docref(NULL, E_WARNING, "Offset not contained in string");
 		RETURN_FALSE;
 	}
 	p += offset;
 
 	if (ac == 4) {
 
-		if (length <= 0) {
-			php_error_docref(NULL, E_WARNING, "Length should be greater than 0");
-			RETURN_FALSE;
+		if (length < 0) {
+			length += (haystack_len - offset);
 		}
-		if (length > (haystack_len - offset)) {
-			php_error_docref(NULL, E_WARNING, "Length value " ZEND_LONG_FMT " exceeds string length", length);
+		if (length < 0 || ((size_t)length > (haystack_len - offset))) {
+			php_error_docref(NULL, E_WARNING, "Invalid length value");
 			RETURN_FALSE;
 		}
 		endp = p + length;
@@ -5242,9 +5351,13 @@ PHP_FUNCTION(str_pad)
 	size_t	   i, left_pad=0, right_pad=0;
 	zend_string *result = NULL;	/* Resulting string */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sl|sl", &input, &pad_length, &pad_str, &pad_str_len, &pad_type_val) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STR(input)
+		Z_PARAM_LONG(pad_length)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(pad_str, pad_str_len)
+		Z_PARAM_LONG(pad_type_val)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
@@ -5316,10 +5429,11 @@ PHP_FUNCTION(sscanf)
 	size_t str_len, format_len;
 	int result, num_args = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss*", &str, &str_len, &format, &format_len,
-		&args, &num_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, -1)
+		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STRING(format, format_len)
+		Z_PARAM_VARIADIC('*', args, num_args)
+	ZEND_PARSE_PARAMETERS_END();
 
 	result = php_sscanf_internal(str, format, num_args, args, 0, return_value);
 
@@ -5338,9 +5452,9 @@ PHP_FUNCTION(str_rot13)
 {
 	zend_string *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (ZSTR_LEN(arg) == 0) {
 		RETURN_EMPTY_STRING();
@@ -5382,9 +5496,9 @@ PHP_FUNCTION(str_shuffle)
 {
 	zend_string *arg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &arg) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(arg)
+	ZEND_PARSE_PARAMETERS_END();
 
 	RETVAL_STRINGL(ZSTR_VAL(arg), ZSTR_LEN(arg));
 	if (Z_STRLEN_P(return_value) > 1) {
@@ -5411,9 +5525,12 @@ PHP_FUNCTION(str_word_count)
 	size_t char_list_len = 0, word_count = 0;
 	zend_long type = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|ls", &str, &type, &char_list, &char_list_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 3)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(type)
+		Z_PARAM_STRING(char_list, char_list_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch(type) {
 		case 1:
@@ -5491,9 +5608,10 @@ PHP_FUNCTION(money_format)
 	zend_string *str;
 	ssize_t res_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sd", &format, &format_len, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(format, format_len)
+		Z_PARAM_DOUBLE(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	p = format;
 	e = p + format_len;
@@ -5539,9 +5657,11 @@ PHP_FUNCTION(str_split)
 	char *p;
 	size_t n_reg_segments;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &str, &split_length) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(split_length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (split_length <= 0) {
 		php_error_docref(NULL, E_WARNING, "The length of each segment must be greater than zero");
@@ -5578,9 +5698,10 @@ PHP_FUNCTION(strpbrk)
 	zend_string *haystack, *char_list;
 	char *haystack_ptr, *cl_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &haystack, &char_list) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(haystack)
+		Z_PARAM_STR(char_list)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!ZSTR_LEN(char_list)) {
 		php_error_docref(NULL, E_WARNING, "The character list cannot be empty");
@@ -5609,9 +5730,14 @@ PHP_FUNCTION(substr_compare)
 	zend_bool cs=0;
 	size_t cmp_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SSl|l!b", &s1, &s2, &offset, &len, &len_is_default, &cs) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 5)
+		Z_PARAM_STR(s1)
+		Z_PARAM_STR(s2)
+		Z_PARAM_LONG(offset)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG_EX(len, len_is_default, 1, 0)
+		Z_PARAM_BOOL(cs)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (!len_is_default && len <= 0) {
 		if (len == 0) {
@@ -5632,13 +5758,105 @@ PHP_FUNCTION(substr_compare)
 		RETURN_FALSE;
 	}
 
-	cmp_len = (size_t) (len ? len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset)));
+	cmp_len = len ? (size_t)len : MAX(ZSTR_LEN(s2), (ZSTR_LEN(s1) - offset));
 
 	if (!cs) {
 		RETURN_LONG(zend_binary_strncmp(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	} else {
 		RETURN_LONG(zend_binary_strncasecmp_l(ZSTR_VAL(s1) + offset, (ZSTR_LEN(s1) - offset), ZSTR_VAL(s2), ZSTR_LEN(s2), cmp_len));
 	}
+}
+/* }}} */
+
+/* {{{ */
+static zend_string *php_utf8_encode(const char *s, size_t len)
+{
+	size_t pos = len;
+	zend_string *str;
+	unsigned char c;
+
+	str = zend_string_safe_alloc(len, 2, 0, 0);
+	ZSTR_LEN(str) = 0;
+	while (pos > 0) {
+		/* The lower 256 codepoints of Unicode are identical to Latin-1,
+		 * so we don't need to do any mapping here. */
+		c = (unsigned char)(*s);
+		if (c < 0x80) {
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (char) c;
+		/* We only account for the single-byte and two-byte cases because
+		 * we're only dealing with the first 256 Unicode codepoints. */
+		} else {
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0xc0 | (c >> 6));
+			ZSTR_VAL(str)[ZSTR_LEN(str)++] = (0x80 | (c & 0x3f));
+		}
+		pos--;
+		s++;
+	}
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+	str = zend_string_truncate(str, ZSTR_LEN(str), 0);
+	return str;
+}
+/* }}} */
+
+/* {{{ */
+static zend_string *php_utf8_decode(const char *s, size_t len)
+{
+	size_t pos = 0;
+	unsigned int c;
+	zend_string *str;
+
+	str = zend_string_alloc(len, 0);
+	ZSTR_LEN(str) = 0;
+	while (pos < len) {
+		int status = FAILURE;
+		c = php_next_utf8_char((const unsigned char*)s, (size_t) len, &pos, &status);
+
+		/* The lower 256 codepoints of Unicode are identical to Latin-1,
+		 * so we don't need to do any mapping here beyond replacing non-Latin-1
+		 * characters. */
+		if (status == FAILURE || c > 0xFFU) {
+			c = '?';
+		}
+
+		ZSTR_VAL(str)[ZSTR_LEN(str)++] = c;
+	}
+	ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
+	if (ZSTR_LEN(str) < len) {
+		str = zend_string_truncate(str, ZSTR_LEN(str), 0);
+	}
+
+	return str;
+}
+/* }}} */
+
+
+/* {{{ proto string utf8_encode(string data) 
+   Encodes an ISO-8859-1 string to UTF-8 */
+PHP_FUNCTION(utf8_encode)
+{
+	char *arg;
+	size_t arg_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(arg, arg_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR(php_utf8_encode(arg, arg_len));
+}
+/* }}} */
+
+/* {{{ proto string utf8_decode(string data) 
+   Converts a UTF-8 encoded string to ISO-8859-1 */
+PHP_FUNCTION(utf8_decode)
+{
+	char *arg;
+	size_t arg_len;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(arg, arg_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_STR(php_utf8_decode(arg, arg_len));
 }
 /* }}} */
 

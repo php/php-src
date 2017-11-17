@@ -52,7 +52,7 @@ echo "test append / read / remove\n";
 for($i = 0; $i < 5; ++$i) {
 	echo "test_filter$i\n";
 	$stream = fopen('php://memory', 'wb+');
-	fwrite($stream, b"42");
+	fwrite($stream, "42");
 	fseek($stream, 0, SEEK_SET);
 	$f = stream_filter_append($stream, "test_filter$i");
 	stream_get_contents($stream);
@@ -61,7 +61,7 @@ for($i = 0; $i < 5; ++$i) {
 
 echo "test append all / read / remove all\n";
 $stream = fopen('php://memory', 'wb+');
-fwrite($stream, b"42");
+fwrite($stream, "42");
 fseek($stream, 0, SEEK_SET);
 $filters = array();
 for($i = 0; $i < 5; ++$i) {
@@ -75,7 +75,7 @@ foreach($filters as $filter) {
 
 echo "test append all / read / close\n";
 $stream = fopen('php://memory', 'wb+');
-fwrite($stream, b"42");
+fwrite($stream, "42");
 fseek($stream, 0, SEEK_SET);
 $filters = array();
 for($i = 0; $i < 5; ++$i) {

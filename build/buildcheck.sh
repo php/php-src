@@ -28,18 +28,18 @@ if test -z "$PHP_AUTOCONF"; then
   PHP_AUTOCONF='autoconf'
 fi
 
-# autoconf 2.59 or newer
+# autoconf 2.64 or newer
 ac_version=`$PHP_AUTOCONF --version 2>/dev/null|head -n 1|sed -e 's/^[^0-9]*//' -e 's/[a-z]* *$//'`
 if test -z "$ac_version"; then
 echo "buildconf: autoconf not found."
-echo "           You need autoconf version 2.59 or newer installed"
+echo "           You need autoconf version 2.64 or newer installed"
 echo "           to build PHP from Git."
 exit 1
 fi
 IFS=.; set $ac_version; IFS=' '
-if test "$1" = "2" -a "$2" -lt "59" || test "$1" -lt "2"; then
+if test "$1" = "2" -a "$2" -lt "64" || test "$1" -lt "2"; then
 echo "buildconf: autoconf version $ac_version found."
-echo "           You need autoconf version 2.59 or newer installed"
+echo "           You need autoconf version 2.64 or newer installed"
 echo "           to build PHP from Git."
 exit 1
 else

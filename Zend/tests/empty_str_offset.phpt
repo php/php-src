@@ -8,6 +8,8 @@ print "- empty ---\n";
 $str = "test0123";
 
 var_dump(empty($str[-1]));
+var_dump(empty($str[-10]));
+var_dump(empty($str[-4])); // 0
 var_dump(empty($str[0]));
 var_dump(empty($str[1]));
 var_dump(empty($str[4])); // 0
@@ -17,6 +19,8 @@ var_dump(empty($str[10000]));
 // non-numeric offsets
 print "- string ---\n";
 var_dump(empty($str['-1']));
+var_dump(empty($str['-10']));
+var_dump(empty($str['-4'])); // 0
 var_dump(empty($str['0']));
 var_dump(empty($str['1']));
 var_dump(empty($str['4'])); // 0
@@ -31,6 +35,8 @@ print "- null ---\n";
 var_dump(empty($str[null]));
 print "- double ---\n";
 var_dump(empty($str[-1.1]));
+var_dump(empty($str[-10.5]));
+var_dump(empty($str[-4.1]));
 var_dump(empty($str[-0.8]));
 var_dump(empty($str[-0.1]));
 var_dump(empty($str[0.2]));
@@ -50,6 +56,8 @@ print "done\n";
 ?>
 --EXPECTF--
 - empty ---
+bool(false)
+bool(true)
 bool(true)
 bool(false)
 bool(false)
@@ -58,6 +66,8 @@ bool(false)
 bool(true)
 bool(true)
 - string ---
+bool(false)
+bool(true)
 bool(true)
 bool(false)
 bool(false)
@@ -72,6 +82,8 @@ bool(true)
 - null ---
 bool(false)
 - double ---
+bool(false)
+bool(true)
 bool(true)
 bool(false)
 bool(false)

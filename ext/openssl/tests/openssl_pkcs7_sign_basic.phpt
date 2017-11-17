@@ -5,7 +5,7 @@ openssl_pkcs7_sign() tests
 --FILE--
 <?php
 $infile = dirname(__FILE__) . "/cert.crt";
-$outfile = tempnam("/tmp", "ssl");
+$outfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile === false) {
 	die("failed to get a temporary filename!");
 }

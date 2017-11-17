@@ -31,7 +31,7 @@
  */
 
 #define FCGI_HASH_FUNC(var, var_len) \
-	(UNEXPECTED(var_len < 3) ? var_len : \
+	(UNEXPECTED(var_len < 3) ? (unsigned int)var_len : \
 		(((unsigned int)var[3]) << 2) + \
 		(((unsigned int)var[var_len-2]) << 4) + \
 		(((unsigned int)var[var_len-1]) << 2) + \
@@ -105,7 +105,7 @@ void fcgi_set_in_shutdown(int new_value);
 void fcgi_request_set_keep(fcgi_request *req, int new_value);
 
 #ifndef HAVE_ATTRIBUTE_WEAK
-typedef void (*fcgi_logger)(int type, const char *fmt, ...);
+typedef void (*fcgi_logger)(int type, const char *fmt, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 void fcgi_set_logger(fcgi_logger lg);
 #endif
 

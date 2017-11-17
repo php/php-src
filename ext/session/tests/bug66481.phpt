@@ -6,6 +6,7 @@ session.name=
 <?php include('skipif.inc'); ?>
 --FILE--
 <?php
+ob_start();
 
 var_dump(session_name("foo"));
 var_dump(session_name("bar"));

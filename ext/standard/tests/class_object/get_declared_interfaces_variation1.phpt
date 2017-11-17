@@ -11,9 +11,9 @@ Test get_declared_interfaces() function : autoloading of interfaces
 
 echo "*** Testing get_declared_interfaces() : autoloading of interfaces ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
+});
 
 echo "\n-- before interface is used --\n";
 var_dump(in_array('AutoInterface', get_declared_interfaces()));

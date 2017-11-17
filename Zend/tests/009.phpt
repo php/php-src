@@ -7,6 +7,10 @@ class foo {
 	function bar () {
 		var_dump(get_class());
 	}
+    function testNull ()
+    {
+        var_dump(get_class(null));
+    }
 }
 
 class foo2 extends foo {
@@ -27,6 +31,8 @@ var_dump(get_class("qwerty"));
 var_dump(get_class($f1));
 var_dump(get_class($f2));
 
+$f1->testNull();
+
 echo "Done\n";
 ?>
 --EXPECTF--	
@@ -45,4 +51,7 @@ Warning: get_class() expects parameter 1 to be object, string given in %s on lin
 bool(false)
 string(3) "foo"
 string(4) "foo2"
+
+Warning: get_class() expects parameter 1 to be object, null given in %s on line %d
+bool(false)
 Done

@@ -44,8 +44,6 @@
 #include "php_pdo_pgsql_int.h"
 #include "zend_exceptions.h"
 
-static int pgsql_handle_in_transaction(pdo_dbh_t *dbh);
-
 static char * _pdo_pgsql_trim_message(const char *message, int persistent)
 {
 	register int i = strlen(message)-1;
@@ -365,15 +363,8 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 	char *id = NULL;
 	PGresult *res;
 	ExecStatusType status;
-	zend_bool savepoint = 0;
 
 	if (name == NULL) {
-		savepoint = pgsql_handle_in_transaction(dbh);
-
-		if (savepoint) {
-			/* The savepoint is overwritten every time. */
-			(void)PQexec(H->server, "SAVEPOINT _php_lastid_savepoint");
-		}
 		res = PQexec(H->server, "SELECT LASTVAL()");
 	} else {
 		const char *q[1];
@@ -387,14 +378,7 @@ static char *pdo_pgsql_last_insert_id(pdo_dbh_t *dbh, const char *name, size_t *
 		id = estrdup((char *)PQgetvalue(res, 0, 0));
 		*len = PQgetlength(res, 0, 0);
 	} else {
-		if (savepoint) {
-			(void)PQexec(H->server, "ROLLBACK TO SAVEPOINT _php_lastid_savepoint");
-		}
 		pdo_pgsql_error(dbh, status, pdo_pgsql_sqlstate(res));
-	}
-
-	if (savepoint) {
-		(void)PQexec(H->server, "RELEASE SAVEPOINT _php_lastid_savepoint");
 	}
 
 	if (res) {
@@ -828,7 +812,7 @@ static PHP_METHOD(PDO, pgsqlCopyToFile)
 			if (ret == -1) {
 				break; /* done */
 			} else if (ret > 0) {
-				if (php_stream_write(stream, csv, ret) != ret) {
+				if (php_stream_write(stream, csv, ret) != (size_t)ret) {
 					pdo_pgsql_error_msg(dbh, PGRES_FATAL_ERROR, "Unable to write to file");
 					PQfreemem(csv);
 					php_stream_close(stream);
@@ -1233,13 +1217,13 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 
 	/* support both full connection string & connection string + login and/or password */
 	if (tmp_user && tmp_pass) {
-		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), ZSTR_VAL(tmp_pass), connect_timeout);
 	} else if (tmp_user) {
-		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
+		spprintf(&conn_str, 0, "%s user='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_user), connect_timeout);
 	} else if (tmp_pass) {
-		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=%pd", (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
+		spprintf(&conn_str, 0, "%s password='%s' connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, ZSTR_VAL(tmp_pass), connect_timeout);
 	} else {
-		spprintf(&conn_str, 0, "%s connect_timeout=%pd", (char *) dbh->data_source, connect_timeout);
+		spprintf(&conn_str, 0, "%s connect_timeout=" ZEND_LONG_FMT, (char *) dbh->data_source, connect_timeout);
 	}
 
 	H->server = PQconnectdb(conn_str);

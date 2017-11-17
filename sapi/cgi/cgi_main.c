@@ -35,6 +35,7 @@
 #ifdef PHP_WIN32
 # include "win32/time.h"
 # include "win32/signal.h"
+# include "win32/winutil.h"
 # include <process.h>
 #endif
 
@@ -95,6 +96,10 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # include "openssl/applink.c"
 #endif
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
@@ -102,7 +107,6 @@ struct sigaction act, old_term, old_quit, old_int;
 
 static void (*php_php_import_environment_variables)(zval *array_ptr);
 
-#ifndef PHP_WIN32
 /* these globals used for forking children on unix systems */
 /**
  * Number of child processes that will get created to service requests
@@ -115,6 +119,7 @@ static int children = 0;
  */
 static int parent = 1;
 
+#ifndef PHP_WIN32
 /* Did parent received exit signals SIG_TERM/SIG_INT/SIG_QUIT */
 static int exit_signal = 0;
 
@@ -222,6 +227,14 @@ static php_cgi_globals_struct php_cgi_globals;
 #define TRANSLATE_SLASHES(path)
 #endif
 
+#ifdef PHP_WIN32
+#define WIN32_MAX_SPAWN_CHILDREN 64
+HANDLE kid_cgi_ps[WIN32_MAX_SPAWN_CHILDREN];
+int kids;
+HANDLE job = NULL;
+JOBOBJECT_EXTENDED_LIMIT_INFORMATION job_info = { 0 };
+#endif
+
 #ifndef HAVE_ATTRIBUTE_WEAK
 static void fcgi_log(int type, const char *format, ...) {
 	va_list ap;
@@ -267,8 +280,9 @@ static int print_extension_info(zend_extension *ext, void *arg)
 
 static int extension_name_cmp(const zend_llist_element **f, const zend_llist_element **s)
 {
-	return strcmp(	((zend_extension *)(*f)->data)->name,
-					((zend_extension *)(*s)->data)->name);
+	zend_extension *fe = (zend_extension*)(*f)->data;
+	zend_extension *se = (zend_extension*)(*s)->data;
+	return strcmp(fe->name, se->name);
 }
 
 static void print_extensions(void)
@@ -354,9 +368,7 @@ static void sapi_fcgi_flush(void *server_context)
 	fcgi_request *request = (fcgi_request*) server_context;
 
 	if (
-#ifndef PHP_WIN32
 		!parent &&
-#endif
 		request && !fcgi_flush(request, 0)) {
 
 		php_handle_aborted_connection();
@@ -612,19 +624,14 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 
 static void cgi_php_import_environment_variables(zval *array_ptr)
 {
+	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
+		zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
+	}
+
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
-		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
-	) {
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) {
 		zval_dtor(array_ptr);
 		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
-		return;
-	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
-		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
-	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
 		return;
 	}
 
@@ -703,7 +710,7 @@ static void sapi_cgi_register_variables(zval *track_vars_array)
 	}
 }
 
-static void sapi_cgi_log_message(char *message)
+static void sapi_cgi_log_message(char *message, int syslog_type_int)
 {
 	if (fcgi_is_fastcgi() && CGIG(fcgi_logging)) {
 		fcgi_request *request;
@@ -900,9 +907,7 @@ static int sapi_cgi_deactivate(void)
 	if (SG(sapi_started)) {
 		if (fcgi_is_fastcgi()) {
 			if (
-#ifndef PHP_WIN32
 				!parent &&
-#endif
 				!fcgi_finish_request((fcgi_request*)SG(server_context), 0)) {
 				php_handle_aborted_connection();
 			}
@@ -964,7 +969,7 @@ ZEND_END_ARG_INFO()
 
 static const zend_function_entry additional_functions[] = {
 	ZEND_FE(dl, arginfo_dl)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ php_cgi_usage
@@ -1431,6 +1436,29 @@ void fastcgi_cleanup(int signal)
 		exit(0);
 	}
 }
+#else
+BOOL WINAPI fastcgi_cleanup(DWORD sig)
+{
+	int i = kids;
+
+	while (0 < i--) {
+		if (NULL == kid_cgi_ps[i]) {
+				continue;
+		}
+
+		TerminateProcess(kid_cgi_ps[i], 0);
+		CloseHandle(kid_cgi_ps[i]);
+		kid_cgi_ps[i] = NULL;
+	}
+
+	if (job) {
+		CloseHandle(job);
+	}
+
+	parent = 0;
+
+	return TRUE;
+}
 #endif
 
 PHP_INI_BEGIN()
@@ -1688,7 +1716,7 @@ const zend_function_entry cgi_functions[] = {
 	PHP_FE(apache_request_headers, arginfo_no_args)
 	PHP_FE(apache_response_headers, arginfo_no_args)
 	PHP_FALIAS(getallheaders, apache_request_headers, arginfo_no_args)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 static zend_module_entry cgi_module_entry = {
@@ -1745,16 +1773,6 @@ int main(int argc, char *argv[])
 	char *decoded_query_string;
 	int skip_getopt = 0;
 
-#if 0 && defined(PHP_DEBUG)
-	/* IIS is always making things more difficult.  This allows
-	 * us to stop PHP and attach a debugger before much gets started */
-	{
-		char szMessage [256];
-		wsprintf (szMessage, "Please attach a debugger to the process 0x%X [%d] (%s) and click OK", GetCurrentProcessId(), GetCurrentProcessId(), argv[0]);
-		MessageBox(NULL, szMessage, "CGI Debug Time!", MB_OK|MB_SERVICE_NOTIFICATION);
-	}
-#endif
-
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
@@ -1772,9 +1790,7 @@ int main(int argc, char *argv[])
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
 
-#ifdef ZEND_SIGNALS
 	zend_signal_startup();
-#endif
 
 #ifdef ZTS
 	ts_allocate_id(&php_cgi_globals_id, sizeof(php_cgi_globals_struct), (ts_allocate_ctor) php_cgi_globals_ctor, NULL);
@@ -1962,6 +1978,11 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 		fastcgi = fcgi_is_fastcgi();
 	}
+
+	/* make php call us to get _ENV vars */
+	php_php_import_environment_variables = php_import_environment_variables;
+	php_import_environment_variables = cgi_php_import_environment_variables;
+
 	if (fastcgi) {
 		/* How many times to run PHP scripts before dying */
 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
@@ -1972,15 +1993,10 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		}
 
-		/* make php call us to get _ENV vars */
-		php_php_import_environment_variables = php_import_environment_variables;
-		php_import_environment_variables = cgi_php_import_environment_variables;
-
 		/* library is already initialized, now init our request */
 		request = fcgi_init_request(fcgi_fd, NULL, NULL, NULL);
 
-#ifndef PHP_WIN32
-		/* Pre-fork, if required */
+		/* Pre-fork or spawn, if required */
 		if (getenv("PHP_FCGI_CHILDREN")) {
 			char * children_str = getenv("PHP_FCGI_CHILDREN");
 			children = atoi(children_str);
@@ -1992,10 +2008,27 @@ consult the installation file that came with this distribution, or visit \n\
 			/* This is the number of concurrent requests, equals FCGI_MAX_CONNS */
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  children_str, strlen(children_str));
 		} else {
+#ifdef PHP_WIN32
+			/* If this env var is set, the process was invoked as a child. Let
+				it show the original PHP_FCGI_CHILDREN value, while don't care
+				otherwise. */
+			char * children_str = getenv("PHP_FCGI_CHILDREN_FOR_KID");
+			if (children_str) {
+				char putenv_buf[sizeof("PHP_FCGI_CHILDREN")+5];
+
+				snprintf(putenv_buf, sizeof(putenv_buf), "%s=%s", "PHP_FCGI_CHILDREN", children_str);
+				putenv(putenv_buf);
+				putenv("PHP_FCGI_CHILDREN_FOR_KID=");
+
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN", children_str);
+				SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", NULL);
+			}
+#endif
 			fcgi_set_mgmt_var("FCGI_MAX_CONNS", sizeof("FCGI_MAX_CONNS")-1, "1", sizeof("1")-1);
 			fcgi_set_mgmt_var("FCGI_MAX_REQS",  sizeof("FCGI_MAX_REQS")-1,  "1", sizeof("1")-1);
 		}
 
+#ifndef PHP_WIN32
 		if (children) {
 			int running = 0;
 			pid_t pid;
@@ -2040,6 +2073,7 @@ consult the installation file that came with this distribution, or visit \n\
 						sigaction(SIGTERM, &old_term, 0);
 						sigaction(SIGQUIT, &old_quit, 0);
 						sigaction(SIGINT,  &old_int,  0);
+						zend_signal_init();
 						break;
 					case -1:
 						perror("php (pre-forking)");
@@ -2079,8 +2113,126 @@ consult the installation file that came with this distribution, or visit \n\
 			}
 		} else {
 			parent = 0;
+			zend_signal_init();
 		}
 
+#else
+		if (children) {
+			wchar_t *cmd_line_tmp, cmd_line[PHP_WIN32_IOUTIL_MAXPATHLEN];
+			size_t cmd_line_len;
+			char kid_buf[16];
+			int i;
+
+			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
+			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
+			
+			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
+
+			/* kids will inherit the env, don't let them spawn */
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", NULL);
+			/* instead, set a temporary env var, so then the child can read and
+				show the actual setting correctly. */
+			snprintf(kid_buf, 16, "%d", children);
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN_FOR_KID", kid_buf);
+
+			/* The current command line is used as is. This should normally be no issue,
+				even if there were some I/O redirection. If some issues turn out, an
+				extra parsing might be needed here. */
+			cmd_line_tmp = GetCommandLineW();
+			if (!cmd_line_tmp) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to get current command line: [0x%08lx]: %s\n", err, err_text);
+
+				goto parent_out;
+			}
+
+			cmd_line_len = wcslen(cmd_line_tmp);
+			if (cmd_line_len > sizeof(cmd_line) - 1) {
+				fprintf(stderr, "command line is too long\n");
+				goto parent_out;
+			}
+			memmove(cmd_line, cmd_line_tmp, (cmd_line_len + 1)*sizeof(wchar_t));
+
+			job = CreateJobObject(NULL, NULL);
+			if (!job) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to create job object: [0x%08lx]: %s\n", err, err_text);
+
+				goto parent_out;
+			}
+
+			job_info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+			if (!SetInformationJobObject(job, JobObjectExtendedLimitInformation, &job_info, sizeof(job_info))) {
+				DWORD err = GetLastError();
+				char *err_text = php_win32_error_to_msg(err);
+
+				fprintf(stderr, "unable to configure job object: [0x%08lx]: %s\n", err, err_text);
+			}
+
+			while (parent) {
+				i = kids;
+				while (0 < i--) {
+					DWORD status;
+
+					if (NULL != kid_cgi_ps[i]) {
+						if(!GetExitCodeProcess(kid_cgi_ps[i], &status) || status != STILL_ACTIVE) {
+							CloseHandle(kid_cgi_ps[i]);
+							kid_cgi_ps[i] = NULL;
+						}
+					}
+				}
+
+				i = kids;
+				while (0 < i--) {
+					PROCESS_INFORMATION pi;
+					STARTUPINFOW si;
+
+					if (NULL != kid_cgi_ps[i]) {
+						continue;
+					}
+
+					ZeroMemory(&si, sizeof(si));
+					si.cb = sizeof(si);
+					ZeroMemory(&pi, sizeof(pi));
+
+					si.dwFlags = STARTF_USESTDHANDLES;
+					si.hStdOutput = INVALID_HANDLE_VALUE;
+					si.hStdInput  = (HANDLE)_get_osfhandle(fcgi_fd);
+					si.hStdError  = INVALID_HANDLE_VALUE;
+
+					if (CreateProcessW(NULL, cmd_line, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &si, &pi)) {
+						kid_cgi_ps[i] = pi.hProcess;
+						if (!AssignProcessToJobObject(job, pi.hProcess)) {
+							DWORD err = GetLastError();
+							char *err_text = php_win32_error_to_msg(err);
+
+							fprintf(stderr, "unable to assign child process to job object: [0x%08lx]: %s\n", err, err_text);
+						}
+						CloseHandle(pi.hThread);
+					} else {
+						DWORD err = GetLastError();
+						char *err_text = php_win32_error_to_msg(err);
+
+						kid_cgi_ps[i] = NULL;
+
+						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
+					}
+				}
+				
+				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
+			}
+			
+			/* restore my env */
+			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
+
+			goto parent_out;
+		} else {
+			parent = 0;
+		}
 #endif /* WIN32 */
 	}
 
@@ -2094,6 +2246,11 @@ consult the installation file that came with this distribution, or visit \n\
 						if (comma) {
 							warmup_repeats = atoi(php_optarg);
 							repeats = atoi(comma + 1);
+#ifdef HAVE_VALGRIND
+							if (warmup_repeats > 0) {
+								CALLGRIND_STOP_INSTRUMENTATION;
+							}
+#endif
 						} else {
 							repeats = atoi(php_optarg);
 						}
@@ -2305,7 +2462,7 @@ consult the installation file that came with this distribution, or visit \n\
 				file_handle.filename = SG(request_info).path_translated;
 				file_handle.handle.fp = NULL;
 			} else {
-				file_handle.filename = "-";
+				file_handle.filename = "Standard input code";
 				file_handle.type = ZEND_HANDLE_FP;
 				file_handle.handle.fp = stdin;
 			}
@@ -2516,6 +2673,9 @@ fastcgi_request_done:
 #else
 							time(&start);
 #endif
+#ifdef HAVE_VALGRIND
+							CALLGRIND_START_INSTRUMENTATION;
+#endif
 						}
 						continue;
 					} else {
@@ -2584,9 +2744,7 @@ out:
 #endif
 	}
 
-#ifndef PHP_WIN32
 parent_out:
-#endif
 
 	SG(server_context) = NULL;
 	php_module_shutdown();

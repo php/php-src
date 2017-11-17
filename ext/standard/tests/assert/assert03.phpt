@@ -34,6 +34,9 @@ assert('$a != 0');
 ?>
 ==DONE==
 --EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 assertion failed - a - %d,"$a != 0"
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 assertion failed - b - %d,"$a != 0"
 ==DONE==

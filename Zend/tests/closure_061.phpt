@@ -184,7 +184,7 @@ bindTo(new ClsChild, Cls::class):
 Success!
 
 bindTo(new ClsUnrelated, Cls::class):
-Success!
+Cannot bind method Cls::method() to object of class ClsUnrelated
 
 bindTo(new Cls, null):
 Cannot rebind scope of closure created by ReflectionFunctionAbstract::getClosure()
@@ -205,7 +205,7 @@ bindTo(new SplStack, SplDoublyLinkedList::class):
 Success!
 
 bindTo(new ClsUnrelated, SplDoublyLinkedList::class):
-Cannot bind internal method SplDoublyLinkedList::count() to object of class ClsUnrelated
+Cannot bind method SplDoublyLinkedList::count() to object of class ClsUnrelated
 
 bindTo(null, null):
 Cannot unbind $this of internal method

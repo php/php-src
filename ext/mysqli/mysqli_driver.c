@@ -150,7 +150,7 @@ const zend_function_entry mysqli_driver_methods[] = {
 	PHP_FALIAS(embedded_server_start, mysqli_embedded_server_start, NULL)
 	PHP_FALIAS(embedded_server_end, mysqli_embedded_server_end, NULL)
 #endif
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 

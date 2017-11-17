@@ -7,4 +7,5 @@ Bug #67972: SessionHandler Invalid memory read create_sid()
 
 (new SessionHandler)->create_sid();
 --EXPECTF--
-Fatal error: SessionHandler::create_sid(): Cannot call default session handler in %s on line %d
+Warning: SessionHandler::create_sid(): Session is not active in %s on line %d
+

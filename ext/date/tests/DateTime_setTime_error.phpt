@@ -25,7 +25,8 @@ echo "\n-- Testing DateTime::setTime() function with more than expected no. of a
 $min = 15;
 $sec = 30;
 $extra_arg = 10;
-var_dump( $datetime->setTime($hour, $min, $sec, $extra_arg) );
+$microseconds = 123123;
+var_dump( $datetime->setTime($hour, $min, $sec, $microseconds, $extra_arg) );
 
 ?>
 ===DONE===
@@ -44,6 +45,6 @@ bool(false)
 
 -- Testing DateTime::setTime() function with more than expected no. of arguments --
 
-Warning: DateTime::setTime() expects at most 3 parameters, 4 given in %s on line %d
+Warning: DateTime::setTime() expects at most 4 parameters, 5 given in %s on line %d
 bool(false)
 ===DONE===

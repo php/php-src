@@ -28,6 +28,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_standard.h"
+#include "php_memory_streams.h"
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
@@ -199,24 +200,16 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 			path += 11;
 			max_memory = ZEND_STRTOL(path, NULL, 10);
 			if (max_memory < 0) {
-				php_error_docref(NULL, E_RECOVERABLE_ERROR, "Max memory must be >= 0");
+				zend_throw_error(NULL, "Max memory must be >= 0");
 				return NULL;
 			}
 		}
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
+		mode_rw = php_stream_mode_from_str(mode);
 		return php_stream_temp_create(mode_rw, max_memory);
 	}
 
 	if (!strcasecmp(path, "memory")) {
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
+		mode_rw = php_stream_mode_from_str(mode);
 		return php_stream_memory_create(mode_rw);
 	}
 
@@ -357,7 +350,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		pathdup = estrndup(path + 6, strlen(path + 6));
 		p = strstr(pathdup, "/resource=");
 		if (!p) {
-			php_error_docref(NULL, E_RECOVERABLE_ERROR, "No URL resource specified");
+			zend_throw_error(NULL, "No URL resource specified");
 			efree(pathdup);
 			return NULL;
 		}
@@ -395,7 +388,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		return NULL;
 	}
 
-#if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
+#if defined(S_IFSOCK) && !defined(PHP_WIN32)
 	do {
 		zend_stat_t st;
 		memset(&st, 0, sizeof(st));
@@ -441,7 +434,8 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL, /* unlink */
 	NULL, /* rename */
 	NULL, /* mkdir */
-	NULL  /* rmdir */
+	NULL, /* rmdir */
+	NULL
 };
 
 PHPAPI php_stream_wrapper php_stream_php_wrapper =	{

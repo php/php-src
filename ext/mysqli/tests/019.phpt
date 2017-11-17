@@ -87,8 +87,8 @@ array(11) {
   [8]=>
   NULL
   [9]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
   [10]=>
-  %unicode|string%(6) "foobar"
+  string(6) "foobar"
 }
 done!

@@ -8,9 +8,9 @@ PATH=/
 variables_order=E
 --FILE--
 <?php
-var_dump(count($_ENV['PATH']) > 0);
-var_dump(count(filter_input(INPUT_ENV, 'PATH')) > 0);
+var_dump($_ENV['PATH']);
+var_dump(filter_input(INPUT_ENV, 'PATH'));
 ?>
 --EXPECT--
-bool(true)
-bool(true)
+string(1) "/"
+string(1) "/"

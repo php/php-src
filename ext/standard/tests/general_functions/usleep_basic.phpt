@@ -15,7 +15,7 @@ set_time_limit(20);
  
 echo "*** Testing usleep() : basic functionality ***\n";
 
-$sleeptime = 5000000; // == 5 seconds
+$sleeptime = 1000000; // == 1 seconds
 // Test passes if sleeps for at least 98% of specified time 
 $sleeplow = $sleeptime - ($sleeptime * 2 /100);
 

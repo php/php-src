@@ -27,7 +27,7 @@ var_dump( disk_free_space( $file_path."/dir1" )); // Invalid directory
 var_dump( diskfreespace( $file_path."/dir1" ));
 
 $fh = fopen( $file_path."/disk_free_space.tmp", "w" );
-fwrite( $fh, (binary)" Garbage data for the temporary file" );
+fwrite( $fh, " Garbage data for the temporary file" );
 var_dump( disk_free_space( $file_path."/disk_free_space.tmp" )); // file input instead of directory
 var_dump( diskfreespace( $file_path."/disk_free_space.tmp" ));
 fclose($fh);

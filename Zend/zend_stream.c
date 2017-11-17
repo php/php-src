@@ -156,16 +156,7 @@ static size_t zend_stream_read(zend_file_handle *file_handle, char *buf, size_t 
 		int c = '*';
 		size_t n;
 
-#ifdef NETWARE
-		/*
-			c != 4 check is there as fread of a character in NetWare LibC gives 4 upon ^D character.
-			Ascii value 4 is actually EOT character which is not defined anywhere in the LibC
-			or else we can use instead of hardcoded 4.
-		*/
-		for (n = 0; n < len && (c = zend_stream_getc(file_handle)) != EOF && c != 4 && c != '\n'; ++n) {
-#else
 		for (n = 0; n < len && (c = zend_stream_getc(file_handle)) != EOF && c != '\n'; ++n)  {
-#endif
 			buf[n] = (char)c;
 		}
 		if (c == '\n') {
@@ -354,3 +345,13 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 	}
 	return 0;
 } /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

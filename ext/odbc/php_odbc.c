@@ -12,10 +12,10 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Authors: Stig Sæther Bakken <ssb@php.net>                            |
+   | Authors: Stig SÃ¦ther Bakken <ssb@php.net>                            |
    |          Andreas Karajannis <Andreas.Karajannis@gmd.de>              |
    |          Frank M. Kromann <frank@kromann.info>  Support for DB/2 CLI |
-   |          Kevin N. Shallow <kshallow@tampabay.rr.com> Birdstep Support|
+   |          Kevin N. Shallow <kshallow@tampabay.rr.com>                 |
    |          Daniel R. Kalowsky <kalowsky@php.net>                       |
    +----------------------------------------------------------------------+
 */
@@ -258,7 +258,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_primarykeys, 0, 0, 4)
 ZEND_END_ARG_INFO()
 
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
-#if !defined(HAVE_BIRDSTEP)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedurecolumns, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -266,7 +265,6 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedurecolumns, 0, 0, 1)
 	ZEND_ARG_INFO(0, proc)
 	ZEND_ARG_INFO(0, column)
 ZEND_END_ARG_INFO()
-#endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_procedures, 0, 0, 1)
 	ZEND_ARG_INFO(0, connection_id)
@@ -305,7 +303,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_statistics, 0, 0, 6)
 	ZEND_ARG_INFO(0, accuracy)
 ZEND_END_ARG_INFO()
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)
 ZEND_BEGIN_ARG_INFO_EX(arginfo_odbc_tableprivileges, 0, 0, 4)
 	ZEND_ARG_INFO(0, connection_id)
 	ZEND_ARG_INFO(0, qualifier)
@@ -370,16 +368,14 @@ const zend_function_entry odbc_functions[] = {
 	PHP_FE(odbc_statistics, arginfo_odbc_statistics)
 	PHP_FE(odbc_tables, arginfo_odbc_tables)
 	PHP_FE(odbc_primarykeys, arginfo_odbc_primarykeys)
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)    /* not supported now */
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) &&!defined(HAVE_SOLID_35)    /* not supported now */
 	PHP_FE(odbc_columnprivileges, arginfo_odbc_columnprivileges)
 	PHP_FE(odbc_tableprivileges, arginfo_odbc_tableprivileges)
 #endif
 #if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) /* not supported */
 	PHP_FE(odbc_foreignkeys, arginfo_odbc_foreignkeys)
 	PHP_FE(odbc_procedures, arginfo_odbc_procedures)
-#if !defined(HAVE_BIRDSTEP)
 	PHP_FE(odbc_procedurecolumns, arginfo_odbc_procedurecolumns)
-#endif
 #endif
 	PHP_FALIAS(odbc_do, odbc_exec, arginfo_odbc_exec)
 	PHP_FALIAS(odbc_field_precision, odbc_field_len, arginfo_odbc_field_len)
@@ -2447,45 +2443,6 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	SQLSetConnectOption((*conn)->hdbc, SQL_TRANSLATE_OPTION,
 			SQL_SOLID_XLATOPT_NOCNV);
 #endif
-#ifdef HAVE_ODBC_ROUTER
-	{
-#define CONNSTRSIZE 2048
-	 char *lpszConnStr = emalloc(CONNSTRSIZE);
-	 if (lpszConnStr && db) {
-		 short cbszConnStr;
-		 if (strstr(db, ";")) {
-			 /* the caller has apparently passed a connection-string */
-			 if (strstr(db, "uid") || strstr(db, "UID")) {
-				 uid = NULL;
-			 }
-			 if (strstr(db, "pwd") || strstr(db, "PWD")) {
-				 pwd = NULL;
-			 }
-			 strlcpy( lpszConnStr, db, CONNSTRSIZE);
-		 }
-		 else {
-			 strcpy(lpszConnStr, "DSN=");
-			 strlcat(lpszConnStr, db, CONNSTRSIZE);
-		 }
-		 if (uid) {
-			 if (uid[0]) {
-				 strlcat(lpszConnStr, ";UID=", CONNSTRSIZE);
-				 strlcat(lpszConnStr, uid, CONNSTRSIZE);
-				 strlcat(lpszConnStr, ";", CONNSTRSIZE);
-			 }
-			 if (pwd) {
-				 if (pwd[0]) {
-					 strlcat(lpszConnStr, "PWD=", CONNSTRSIZE);
-					 strlcat(lpszConnStr, pwd, CONNSTRSIZE);
-					 strlcat(lpszConnStr, ";", CONNSTRSIZE);
-				 }
-			 }
-		 }
-		 rc = SQLDriverConnect((*conn)->hdbc, NULL, lpszConnStr, SQL_NTS, lpszConnStr, CONNSTRSIZE, &cbszConnStr, SQL_DRIVER_NOPROMPT);
-		 efree(lpszConnStr);
-	 }
-	}
-#else
 #ifdef HAVE_OPENLINK
 	{
 		char dsnbuf[1024];
@@ -2538,7 +2495,6 @@ int odbc_sqlconnect(odbc_connection **conn, char *db, char *uid, char *pwd, int 
 	}
 #else
 	rc = SQLConnect((*conn)->hdbc, db, SQL_NTS, uid, SQL_NTS, pwd, SQL_NTS);
-#endif
 #endif
 #endif
 	if (rc != SQL_SUCCESS && rc != SQL_SUCCESS_WITH_INFO) {
@@ -2615,8 +2571,6 @@ try_and_get_another_connection:
 		
 		/* the link is not in the persistent list */
 		if ((le = zend_hash_str_find_ptr(&EG(persistent_list), hashed_details, hashed_len)) == NULL) {
-			zend_resource new_le;
-			
 			if (ODBCG(max_links) != -1 && ODBCG(num_links) >= ODBCG(max_links)) {
 				php_error_docref(NULL, E_WARNING, "Too many open links (%ld)", ODBCG(num_links));
 				efree(hashed_details);
@@ -2633,11 +2587,7 @@ try_and_get_another_connection:
 				RETURN_FALSE;
 			}
 			
-			new_le.type = le_pconn;
-			new_le.ptr = db_conn;
-			new_le.handle = -1;
-			if (zend_hash_str_update_mem(&EG(persistent_list), hashed_details, hashed_len, &new_le,
-						sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(hashed_details, hashed_len, db_conn, le_pconn) == NULL) {
 				free(db_conn);
 				efree(hashed_details);
 				RETURN_FALSE;
@@ -2696,7 +2646,7 @@ try_and_get_another_connection:
 			p = zend_hash_index_find_ptr(&EG(regular_list), conn_id);   /* check if the connection is still there */
 
 			if (p && p->ptr && (p->type == le_conn || p->type == le_pconn)) {
-				GC_REFCOUNT(p)++;
+				GC_ADDREF(p);
 				RETVAL_RES(p);
 				efree(hashed_details);
 				return;
@@ -3289,7 +3239,7 @@ PHP_FUNCTION(odbc_columns)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ proto resource odbc_columnprivileges(resource connection_id, string catalog, string schema, string table, string column)
    Returns a result identifier that can be used to fetch a list of columns and associated privileges for the specified table */
 PHP_FUNCTION(odbc_columnprivileges)
@@ -3558,7 +3508,7 @@ PHP_FUNCTION(odbc_primarykeys)
 }
 /* }}} */
 
-#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
+#if !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ proto resource odbc_procedurecolumns(resource connection_id [, string qualifier, string owner, string proc, string column])
    Returns a result identifier containing the list of input and output parameters, as well as the columns that make up the result set for the specified procedures */
 PHP_FUNCTION(odbc_procedurecolumns)
@@ -3838,7 +3788,7 @@ PHP_FUNCTION(odbc_statistics)
 }
 /* }}} */
 
-#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35) && !defined(HAVE_BIRDSTEP)
+#if !defined(HAVE_DBMAKER) && !defined(HAVE_SOLID) && !defined(HAVE_SOLID_30) && !defined(HAVE_SOLID_35)
 /* {{{ proto resource odbc_tableprivileges(resource connection_id, string qualifier, string owner, string name)
    Returns a result identifier containing a list of tables and the privileges associated with each table */
 PHP_FUNCTION(odbc_tableprivileges)

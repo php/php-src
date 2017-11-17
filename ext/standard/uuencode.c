@@ -204,9 +204,10 @@ PHP_FUNCTION(convert_uuencode)
 {
 	zend_string *src;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || ZSTR_LEN(src) < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	RETURN_STR(php_uuencode(ZSTR_VAL(src), ZSTR_LEN(src)));
 }
@@ -219,9 +220,10 @@ PHP_FUNCTION(convert_uudecode)
 	zend_string *src;
 	zend_string *dest;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S", &src) == FAILURE || ZSTR_LEN(src) < 1) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STR(src)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	if (ZSTR_LEN(src) < 1) { RETURN_FALSE; }
 
 	if ((dest = php_uudecode(ZSTR_VAL(src), ZSTR_LEN(src))) == NULL) {
 		php_error_docref(NULL, E_WARNING, "The given parameter is not a valid uuencoded string");

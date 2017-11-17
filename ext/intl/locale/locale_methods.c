@@ -124,7 +124,7 @@ static int16_t findOffset(const char* const* list, const char* key)
 static char* getPreferredTag(const char* gf_tag)
 {
 	char* result = NULL;
-	int grOffset = 0;
+	zend_off_t grOffset = 0;
 
 	grOffset = findOffset( LOC_GRANDFATHERED ,gf_tag);
 	if(grOffset < 0) {
@@ -145,10 +145,10 @@ static char* getPreferredTag(const char* gf_tag)
 * or -1 if no token
 * strtokr equivalent search for token in reverse direction
 */
-static int getStrrtokenPos(char* str, int savedPos)
+static zend_off_t getStrrtokenPos(char* str, zend_off_t savedPos)
 {
-	int result =-1;
-	int i;
+	zend_off_t result =-1;
+	zend_off_t i;
 
 	for(i=savedPos-1; i>=0; i--) {
 		if(isIDSeparator(*(str+i)) ){
@@ -175,14 +175,14 @@ static int getStrrtokenPos(char* str, int savedPos)
 * returns -1 if no singleton
 * strtok equivalent search for singleton
 */
-static int getSingletonPos(const char* str)
+static zend_off_t getSingletonPos(const char* str)
 {
-	int result =-1;
-	int i=0;
-	int len = 0;
+	zend_off_t result =-1;
+	zend_off_t i=0;
+	size_t len = 0;
 
 	if( str && ((len=strlen(str))>0) ){
-		for( i=0; i<len ; i++){
+		for( i=0; (size_t)i < len ; i++){
 			if( isIDSeparator(*(str+i)) ){
 				if( i==1){
 					/* string is of the form x-avy or a-prv1 */
@@ -258,15 +258,15 @@ PHP_NAMED_FUNCTION(zif_locale_set_default)
 */
 static zend_string* get_icu_value_internal( const char* loc_name , char* tag_name, int* result , int fromParseLocale)
 {
-	zend_string*	tag_value	= NULL;
-	int32_t     	tag_value_len   = 512;
+	zend_string* tag_value	    = NULL;
+	int32_t      tag_value_len  = 512;
 
-	int		singletonPos   	= 0;
-	char*       	mod_loc_name	= NULL;
-	int 		grOffset	= 0;
+	zend_off_t   singletonPos   = 0;
+	char*        mod_loc_name   = NULL;
+	zend_off_t   grOffset       = 0;
 
-	int32_t     	buflen          = 512;
-	UErrorCode  	status          = U_ZERO_ERROR;
+	int32_t      buflen         = 512;
+	UErrorCode   status         = U_ZERO_ERROR;
 
 	if (strlen(loc_name) > INTL_MAX_LOCALE_LEN) {
 		return NULL;
@@ -439,7 +439,7 @@ static void get_icu_value_src_php( char* tag_name, INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 }
-/* }}} */
+/* }}} */ 
 
 /* {{{ proto static string Locale::getScript($locale)
  * gets the script for the $locale
@@ -1000,40 +1000,36 @@ PHP_FUNCTION(locale_compose)
 */
 static zend_string* get_private_subtags(const char* loc_name)
 {
-	zend_string*	result =NULL;
-	int 	singletonPos = 0;
-	int 	len =0;
-	const char* 	mod_loc_name =NULL;
+	zend_string* result = NULL;
+	zend_off_t   singletonPos = 0;
+	size_t       len = 0;
+	const char*  mod_loc_name =NULL;
 
 	if( loc_name && (len = strlen(loc_name)>0 ) ){
 		mod_loc_name = loc_name ;
 		len   = strlen(mod_loc_name);
-		while( (singletonPos = getSingletonPos(mod_loc_name))!= -1){
-
-			if( singletonPos!=-1){
-				if( (*(mod_loc_name+singletonPos)=='x') || (*(mod_loc_name+singletonPos)=='X') ){
-					/* private subtag start found */
-					if( singletonPos + 2 ==  len){
-						/* loc_name ends with '-x-' ; return  NULL */
-					}
-					else{
-						/* result = mod_loc_name + singletonPos +2; */
-						result = zend_string_init(mod_loc_name + singletonPos+2  , (len -( singletonPos +2) ), 0);
-					}
-					break;
+		while( (singletonPos = getSingletonPos(mod_loc_name)) > -1){
+			if( (*(mod_loc_name+singletonPos)=='x') || (*(mod_loc_name+singletonPos)=='X') ){
+				/* private subtag start found */
+				if( singletonPos + 2 ==  len){
+					/* loc_name ends with '-x-' ; return  NULL */
 				}
 				else{
-					if( singletonPos + 1 >=  len){
-						/* String end */
-						break;
-					} else {
-						/* singleton found but not a private subtag , hence check further in the string for the private subtag */
-						mod_loc_name = mod_loc_name + singletonPos +1;
-						len = strlen(mod_loc_name);
-					}
+					/* result = mod_loc_name + singletonPos +2; */
+					result = zend_string_init(mod_loc_name + singletonPos+2  , (len -( singletonPos +2) ), 0);
+				}
+				break;
+			}
+			else{
+				if((size_t)(singletonPos + 1) >= len){
+					/* String end */
+					break;
+				} else {
+					/* singleton found but not a private subtag , hence check further in the string for the private subtag */
+					mod_loc_name = mod_loc_name + singletonPos +1;
+					len = strlen(mod_loc_name);
 				}
 			}
-
 		} /* end of while */
 	}
 
@@ -1445,7 +1441,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	char* cur_loc_range	= NULL;
 	zend_string* can_loc_range	= NULL;
-	int	saved_pos = 0;
+	zend_off_t saved_pos = 0;
 
 	zend_string* return_value = NULL;
 

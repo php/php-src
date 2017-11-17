@@ -19,13 +19,13 @@ $a = tidy_parse_string($html);
 var_dump(tidy_diagnose($a));
 echo tidy_get_error_buffer($a);
 ?>
---EXPECT--
+--EXPECTF--
 bool(true)
 line 1 column 1 - Warning: missing <!DOCTYPE> declaration
 line 1 column 7 - Warning: discarding unexpected </html>
 line 1 column 14 - Warning: inserting missing 'title' element
-Info: Document content looks like HTML 3.2
-3 warnings, 0 errors were found!
+Info: Document content looks like HTML%w%d%S
+%S3 warnings%S0 errors%S
 bool(true)
 Info: Document content looks like HTML 3.2
 No warnings or errors were found.

@@ -1,5 +1,93 @@
 History
 
+2017/05/29: Version 6.3.0
+
+2017/05/24: fix #60 : invalid state(CCS_VALUE) in parse_char_class()
+2017/05/24: fix #59 : access to invalid address by reg->dmax value
+2017/05/23: fix invalid increment of start position in onig_scan()
+2017/05/23: fix #58 : access to invalid address by reg->dmin value
+2017/05/23: fix #57 : DATA_ENSURE() check must be before data access
+2017/05/22: fix #56 : return invalid result for codepoint 0xFFFFFFFF
+2017/05/19: [new] add \o{17777777777} syntax.
+2017/05/19: fix #55 : Byte value expressed in octal must be smaller than 256
+
+2017/04/08: Version 6.2.0
+
+2017/03/15: fix: size in xmemcpy in stack_double (PR #51)
+2017/02/21: Initialize return value
+2017/01/03: NEW API: add onig_set_capture_num_limit()
+2017/01/03: change MemNumType from short int to int
+2016/12/13: fix: [0-9-a] was not allowed as [0-9\-a]
+2016/12/13: fix: illegal capture after recursive call
+2016/12/13: fix: problem with optimization of \z
+2016/12/13: fix: .* optimization
+2016/12/13: Set a limit of parser recursion
+2016/12/12: fix; that warnings are not shown properly
+2016/12/12: fix: /[a-c#]+\W/ =~ "def#" fails when encoding is UTF-16/32
+2016/12/12: fix: /[\x{0}-X]/i doesn't match properly when UTF-16/32 is used.
+
+2016/12/11: Version 6.1.3
+
+2016/12/11: fix: Syntax error: redirection unexpected (expecting word) #35
+
+2016/11/07: Version 6.1.2
+
+2016/10/25: allow word bound, word begin and word end in look-behind.
+2016/10/19: add ONIG_OPTION_CHECK_VALIDITY_OF_STRING option.
+2016/10/16: fix use after free node.
+2016/10/10: fix memory leaks after parsing regexp error.
+2016/09/22: implement many of is_valid_mbc_string().
+
+2016/09/02: Version 6.1.1
+
+2016/08/31: fix segfault /W.?{888}{888}{888}\x00/ (found by libfuzzer)
+2016/08/31: fix error unmatched close parenthesis for %{(.*?)} #23
+
+2016/08/29: Version 6.1.0
+
+2016/08/28: add contributed/libfuzzer-onig.cpp  (thanks hannob)
+2016/08/28: update LTVERSION 4:0:0
+2016/08/28: NEW API: onigenc_is_valid_mbc_string().
+2016/08/27: add is_valid_mbc_string() member into OnigEncodingType.
+2016/08/27: fix out of bounds read.
+2016/08/26: fix out of bounds read.
+2016/08/25: disable USE_INVALID_CODE_SCHEME.
+2016/08/24: fix out of bounds read.
+2016/08/23: doc/RE improved.
+2016/08/22: add onig_scan() into doc/API.
+2016/08/22: fix bug: Out of bounds read in onig_strcpy() #17
+2016/08/21: fix bug: infinite loop of backreference and group.
+2016/08/21: fix out of bounds read in mbc_to_code() #16
+2016/08/18: doc/RE refinements.
+2016/08/16: add onig_scan() (NEW API)
+2016/08/16: reimplement match stack allocation for case too many repeat
+            and too many captures in regexp.
+2016/08/15: number of captures <= 32767 for bytecode representation.
+2016/07/17: don't use int_map_backward for thread-safe.
+2016/07/04: fix case of enclosed option in look-behind.
+2016/07/04: fix ignore case in look-behind.
+2016/05/23: fix memory leak in onig_unicode_define_user_property()
+2016/05/20: declare variables at the top of scope.  (thanks nmaya)
+
+2016/05/09: Version 6.0.0
+
+2016/05/05: add NEW API: onig_unicode_define_user_property()
+2016/05/04: update Unicode data to 8.0.0
+2016/05/02: change OnigCodePoint type to unsigned int.
+2016/05/02: add doc/UNICODE_PROPERTIES.
+2016/04/19: add error code ONIGERR_FAIL_TO_INITIALIZE.
+2016/04/18: add make_win64/32.bat.
+2016/04/18: fix bug of uninitialized regex_t value on error.
+2016/04/16: reimplement Unicode case folding.
+2016/04/11: update LTVERSION = 3.0.0
+2016/04/05: remove all THREAD_ macro.
+2016/04/05: add init member into OnigEncoding. (add onig_initialize())
+2016/03/28: remove state member of regex.
+2016/03/25: move source files into src/
+2016/03/23: rename configre.in to configure.ac.
+2015/11/17: fix memory leak. (thanks pigzang)
+2015/07/13: change mail address.
+
 2014/12/12: Version 5.9.6
 
 2013/11/27: [impl] add onigenc_end_unicode().  (thanks Takenori Imoto)
@@ -288,7 +376,7 @@ History
 2006/10/10: [impl] remove OP_WORD_SB and OP_WORD_MB.
 2006/10/10: [impl] remove OP_EXACT1_IC and OP_EXACTN_IC from match_at().
 2006/10/10: [impl] should free new_str in expand_case_fold_string().
-2006/10/06: [dist] add test entrys to sample/encode.c.
+2006/10/06: [dist] add test entries to sample/encode.c.
 2006/10/06: [impl] re-implement caseless match (case-fold).
 2006/10/06: [impl] expand string node by case fold variations.
                    add expand_case_fold_string().
@@ -857,7 +945,7 @@ History
 2004/11/16: [impl] add get_type_cc_node method to OnigEncodingType.
 2004/11/15: [impl] add st.h and st.c from Ruby 1.9.
                    use st-hash always.
-2004/11/12: [impl] change menber 'not' of CClassNode to 'flags'.
+2004/11/12: [impl] change member 'not' of CClassNode to 'flags'.
                    add flags FLAG_CCLASS_NOT and FLAG_CCLASS_SHARE.
 2004/11/12: [impl] add onig_is_in_code_range_array() to enc/unicode.c.
 2004/11/12: [impl] fix CRWord in enc/unicode.c and MBWord in enc/utf8.c.
@@ -902,7 +990,7 @@ History
 2004/10/18: [impl] (thanks Imai Yasumasa)
                    enclose #include <sys/types.h> by #ifndef __BORLANDC__.
 2004/10/18: [bug]  (thanks Imai Yasumasa)
-                   memory acess violation in select_opt_exact_info().
+                   memory access violation in select_opt_exact_info().
 2004/09/25: [dist] fix doc/API and doc/API.ja.
 2004/09/25: [bug]  fix OP_SEMI_END_BUF process in match_at() for
                    the case USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE
@@ -1113,7 +1201,7 @@ History
 2004/04/15: [new]  add onig_get_ambig_flag().
 2004/04/14: [bug]  (thanks Isao Sonobe)
                    undefined bytecode error happens if ONIG_OPTION_FIND_LONGEST
-                   is setted.
+                   is set.
                    should finish matching process if find-condition
                    is fail at OP_END in match_at().
 2004/04/12: [impl] add ambig_flag to regex_t.
@@ -1671,7 +1759,7 @@ History
 2003/03/12: [spec] change named backref and subexp call format.
                    backref: \k<name>, call: \g<name>     (thanks akr)
 2003/03/11: [inst] add regparse.[ch] in win32/Makefile.
-2003/03/11: [bug]  if UNALIGNED_WORD_ACCESS isn't setted
+2003/03/11: [bug]  if UNALIGNED_WORD_ACCESS isn't set,
                    then compile error in unset_addr_list_fix().  (thanks knu)
 2003/03/10: [impl] divide regcomp.c to regcomp.c, regparse.c and regparse.h.
 2003/03/10: [bug]  should handle multi-byte code name in fetch_name().
@@ -1738,7 +1826,7 @@ History
 2003/02/28: [impl] add opcode OP_CALL, OP_RETURN.
                    add stack type STK_CALL_FRAME, STK_RETURN, STK_MEM_END.
 2003/02/26: [spec] add new syntax behavior REG_SYN_STRICT_CHECK_BACKREF_NUMBER.
-                   if it is setted, then error /(\1)/, /\1(..)/ etc...
+                   if it is set, then error /(\1)/, /\1(..)/ etc...
 2003/02/26: [spec] if backref number is greater than max group number,
                    then return compile error. (REGERR_INVALID_BACKREF_NUMBER)
 2003/02/26: [tune] bad implemented N_ALT case in get_min_match_length().
