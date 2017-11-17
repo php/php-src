@@ -824,13 +824,13 @@ PHP_FUNCTION(dns_get_record)
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL, E_WARNING, "Type '%ld' not supported", type_param);
+			php_error_docref(NULL, E_WARNING, "Type '" ZEND_LONG_FMT "' not supported", type_param);
 			RETURN_FALSE;
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
 			php_error_docref(NULL, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
+				"Numeric DNS record type must be between 1 and 65535, '" ZEND_LONG_FMT "' given", type_param);
 			RETURN_FALSE;
 		}
 	}
