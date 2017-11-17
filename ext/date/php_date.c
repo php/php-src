@@ -2059,7 +2059,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		} else if (type == 1) {
 			retval = zend_is_true(prop);
 		} else if (type == 0) {
-			retval = (Z_TYPE(*prop) != IS_NULL);
+			retval = (Z_TYPE_P(prop) != IS_NULL);
 		}
 	} else {
 		retval = (zend_get_std_object_handlers())->has_property(object, member, type, cache_slot);
