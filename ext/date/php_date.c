@@ -1336,9 +1336,9 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 			offset->is_dst = t->dst;
 			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
 			snprintf(offset->abbr, 9, "GMT%c%02d%02d",
-			                          !localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
-			                          !localtime ? abs(offset->offset / 3600) : 0,
-			                          !localtime ? abs((offset->offset % 3600) / 60) : 0 );
+			                          (offset->offset < 0) ? '-' : '+',
+			                          abs(offset->offset / 3600),
+			                          abs((offset->offset % 3600) / 60));
 		} else {
 			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 		}
