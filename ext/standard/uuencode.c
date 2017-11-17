@@ -141,7 +141,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	e = src + src_len;
 
 	while (s < e) {
-		if ((len = PHP_UU_DEC(*s++)) <= 0) {
+		if ((len = PHP_UU_DEC(*s++)) == 0) {
 			break;
 		}
 		/* sanity check */

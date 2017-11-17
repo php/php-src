@@ -128,17 +128,12 @@ again:
 			}
 			count = zend_array_count(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
-			is_temp = 0;
 
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
 			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
-			}
-			if (is_temp) {
-				zend_hash_destroy(myht);
-				efree(myht);
 			}
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');

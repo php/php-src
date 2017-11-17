@@ -1698,7 +1698,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
 
-	if (ce->num_traits <= 0) {
+	if (ce->num_traits == 0) {
 		return;
 	}
 

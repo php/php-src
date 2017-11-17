@@ -1011,7 +1011,7 @@ PHP_FUNCTION(wordwrap)
 
 		laststart = lastspace = 0;
 		for (current = 0; current < (zend_long)ZSTR_LEN(text); current++) {
-			if (chk <= 0) {
+			if (chk == 0) {
 				alloced += (size_t) (((ZSTR_LEN(text) - current + 1)/linelength + 1) * breakchar_len) + 1;
 				newtext = zend_string_extend(newtext, alloced, 0);
 				chk = (size_t) ((ZSTR_LEN(text) - current)/linelength) + 1;
@@ -4292,7 +4292,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		while ((!max_chars || (max_chars > 0 && char_count < max_chars)) && begin > 0) {
 			char_count++;
 			begin--;
-			if (begin <= 0 || _isnewline(heb_str[begin])) {
+			if (_isnewline(heb_str[begin])) {
 				while (begin > 0 && _isnewline(heb_str[begin-1])) {
 					begin--;
 					char_count++;
@@ -4332,7 +4332,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 		}
 		begin=orig_begin;
 
-		if (begin <= 0) {
+		if (begin == 0) {
 			*target = 0;
 			break;
 		}
@@ -4627,7 +4627,7 @@ int php_tag_find(char *tag, size_t len, const char *set) {
 	int state=0, done=0;
 	char *norm;
 
-	if (len <= 0) {
+	if (len == 0) {
 		return 0;
 	}
 

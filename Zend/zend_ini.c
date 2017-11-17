@@ -189,7 +189,12 @@ static int ini_key_compare(const void *a, const void *b) /* {{{ */
 	s = (const Bucket *) b;
 
 	if (!f->key && !s->key) { /* both numeric */
-		return ZEND_NORMALIZE_BOOL(f->h - s->h);
+		if (f->h > s->h) {
+			return -1;
+		} else if (f->h < s->h) {
+			return 1;
+		}
+		return 0;
 	} else if (!f->key) { /* f is numeric, s is not */
 		return -1;
 	} else if (!s->key) { /* s is numeric, f is not */
