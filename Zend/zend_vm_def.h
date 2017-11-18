@@ -2835,7 +2835,7 @@ ZEND_VM_HANDLER(54, ZEND_ROPE_INIT, UNUSED, CONST|TMPVAR|CV, NUM)
 		var = GET_OP2_ZVAL_PTR(BP_VAR_R);
 		rope[0] = Z_STR_P(var);
 		if (UNEXPECTED(Z_REFCOUNTED_P(var))) {
-			Z_ADDREF_P(Z_STR_P(var));
+			Z_ADDREF_P(var);
 		}
 	} else {
 		var = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
