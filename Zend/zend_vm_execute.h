@@ -28280,7 +28280,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_CONST_HA
 		var = RT_CONSTANT(opline, opline->op2);
 		rope[0] = Z_STR_P(var);
 		if (UNEXPECTED(Z_REFCOUNTED_P(var))) {
-			Z_ADDREF_P(Z_STR_P(var));
+			Z_ADDREF_P(var);
 		}
 	} else {
 		var = RT_CONSTANT(opline, opline->op2);
@@ -30904,7 +30904,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_CV_HANDL
 		var = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 		rope[0] = Z_STR_P(var);
 		if (UNEXPECTED(Z_REFCOUNTED_P(var))) {
-			Z_ADDREF_P(Z_STR_P(var));
+			Z_ADDREF_P(var);
 		}
 	} else {
 		var = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
@@ -32651,7 +32651,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ROPE_INIT_SPEC_UNUSED_TMPVAR_H
 		var = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 		rope[0] = Z_STR_P(var);
 		if (UNEXPECTED(Z_REFCOUNTED_P(var))) {
-			Z_ADDREF_P(Z_STR_P(var));
+			Z_ADDREF_P(var);
 		}
 	} else {
 		var = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
