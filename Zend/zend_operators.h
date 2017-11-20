@@ -38,6 +38,7 @@
 #include "zend_portability.h"
 #include "zend_strtod.h"
 #include "zend_multiply.h"
+#include "zend_object_handlers.h"
 
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
@@ -335,7 +336,11 @@ again:
 			}
 			break;
 		case IS_OBJECT:
-			result = zend_object_is_true(op);
+			if (EXPECTED(Z_OBJ_HT_P(op)->cast_object == zend_std_cast_object_tostring)) {
+				result = 1;
+			} else {
+				result = zend_object_is_true(op);
+			}
 			break;
 		case IS_RESOURCE:
 			if (EXPECTED(Z_RES_HANDLE_P(op))) {
