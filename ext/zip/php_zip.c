@@ -1549,7 +1549,10 @@ static ZIPARCHIVE_METHOD(close)
 
 	if ((err = zip_close(intern))) {
 		php_error_docref(NULL, E_WARNING, "%s", zip_strerror(intern));
+#if LIBZIP_VERSION_MAJOR < 1 || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR < 3) || (LIBZIP_VERSION_MAJOR == 1 && LIBZIP_VERSION_MINOR == 3 && LIBZIP_VERSION_MICRO < 1)
+		/* Fix memory leak in libzip < 1.3.1 */
 		zip_discard(intern);
+#endif
 	}
 
 	efree(ze_obj->filename);
