@@ -2746,7 +2746,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options && PREG_JIT)
+		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);
