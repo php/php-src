@@ -19,6 +19,9 @@ PHP                                                                        NEWS
   . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
     segment fault). (Nikita)
 
+- Zip:
+  . Fixed bug #75540 (Segfault with libzip 1.3.1). (Remi)
+
 23 Nov 2017, PHP 7.1.12
 
 - Core:
