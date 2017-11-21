@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
     script). (SammyK)
 
+- PCRE:
+  . Fixed bug #74183 (preg_last_error not returning error code after error).
+    (Andrew Nester)
+
 - Standard:
   . Fixed bug #75511 (fread not free unused buffer). (Laruence)
   . Fixed bug #75514 (mt_rand returns value outside [$min,$max]+ on 32-bit)
