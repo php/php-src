@@ -558,6 +558,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 		php_error_docref(NULL, E_WARNING,
 						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -571,6 +572,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -621,6 +623,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		} else {
 			php_error_docref(NULL,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
 		}
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -670,6 +673,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 				} else {
 					php_error_docref(NULL,E_WARNING, "Null byte in regex");
 				}
+				pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 				efree(pattern);
 #if HAVE_SETLOCALE
 				if (key != regex) {
@@ -714,6 +718,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 		pcre2_get_error_message(errnumber, error, sizeof(error));
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		efree(pattern);
 		if (tables) {
 			pefree((void*)tables, 1);
@@ -733,6 +738,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		} else {
 			pcre2_get_error_message(rc, error, sizeof(error));
 			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
+			pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		}
 	}
 #endif
@@ -766,6 +772,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -777,6 +784,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre_pattern_info() error %d", rc);
+		pcre_handle_exec_error(PCRE_ERROR_INTERNAL);
 		return NULL;
 	}
 
