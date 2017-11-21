@@ -962,6 +962,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO(arginfo_net_get_interfaces, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
@@ -2955,7 +2958,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fmod,															arginfo_fmod)
 	PHP_FE(intdiv,															arginfo_intdiv)
 #ifdef HAVE_INET_NTOP
-	PHP_RAW_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
+	PHP_RAW_NAMED_FE(inet_ntop,		zif_inet_ntop,								arginfo_inet_ntop)
 #endif
 #ifdef HAVE_INET_PTON
 	PHP_RAW_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
@@ -3058,6 +3061,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 #ifdef HAVE_GETHOSTNAME
 	PHP_FE(gethostname,													arginfo_gethostname)
+#endif
+
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
+	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
 #endif
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
@@ -3897,7 +3904,7 @@ PHP_FUNCTION(constant)
 #ifdef HAVE_INET_NTOP
 /* {{{ proto string inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
-PHP_NAMED_FUNCTION(php_inet_ntop)
+PHP_NAMED_FUNCTION(zif_inet_ntop)
 {
 	char *address;
 	size_t address_len;
