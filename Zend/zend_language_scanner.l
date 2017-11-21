@@ -926,9 +926,17 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 					}
 				case '\\':
 				case '$':
-				case '#':
 					*t++ = *s;
 					Z_STRLEN_P(zendlval)--;
+					break;
+				case '#':
+					if (s + 1 < end && *(s + 1) != '{') {
+						*t++ = '\\';
+						*t++ = *s;
+					} else {
+						*t++ = *s;
+						Z_STRLEN_P(zendlval)--;
+					}
 					break;
 				case 'x':
 				case 'X':
@@ -2203,6 +2211,11 @@ inline_char_handler:
 				break;
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
+					break;
+				}
+				continue;
+			case '#':
+				if (*YYCURSOR == '{') {
 					break;
 				}
 				continue;

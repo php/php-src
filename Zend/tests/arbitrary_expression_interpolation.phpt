@@ -10,6 +10,7 @@ var_dump(
 	"Result: #{$value * 5}",
 	"abc#{(function(){return "def";})()}",
 	"abc#{a()}",
+	"abc#{a()}#{a()}",
 	"ab \#{c}",
 	`echo #{$value * 5}`,
 	<<<END
@@ -24,6 +25,7 @@ END
 string(10) "Result: 50"
 string(6) "abcdef"
 string(4) "abcd"
+string(5) "abcdd"
 string(7) "ab #{c}"
 string(3) "50
 "
