@@ -216,8 +216,8 @@ main(int argc, char **argv)
 #ifdef ORDER_IT
 			if (2 == rnd)
 #endif
-			printf("\t/* %u is invalid */\n", cur->id);
-			//printf("#if 0\n\t{ %u, 0, \"%s\", \"%s\" },\n#endif\n", cur->id, cur->name, cur->desc);
+			printf("\t/* %lu is invalid */\n", cur->id);
+			//printf("#if 0\n\t{ %lu, 0, \"%s\", \"%s\" },\n#endif\n", cur->id, cur->name, cur->desc);
 		} else if (GetCPInfoEx(cur->id, 0, &info)) {
 			DWORD to_w_fl = 0, from_w_fl = 0;
 
@@ -226,18 +226,18 @@ main(int argc, char **argv)
 				to_w_fl = MB_ERR_INVALID_CHARS;
 			}
 
-			//printf("\t{ %u, %u, \"%s\", \"%s\" },\n", cur->id, info.MaxCharSize, cur->name, cur->desc);
+			//printf("\t{ %lu, %u, \"%s\", \"%s\" },\n", cur->id, info.MaxCharSize, cur->name, cur->desc);
 			if (!cur->enc[0]) {
 #ifdef ORDER_IT
 				if (2 == rnd)
 #endif
 				//printf("\t/* { %u, %u, \"%s\", NULL, \"%s\" }, */\n", info.CodePage, info.MaxCharSize, cur->name, info.CodePageName);
-				printf("\t{ %u, %u, %u, %u, \"%s\", NULL, \"%s\" },\n", info.CodePage, to_w_fl, from_w_fl, info.MaxCharSize, cur->name, info.CodePageName);
+				printf("\t{ %u, %lu, %lu, %u, \"%s\", NULL, \"%s\" },\n", info.CodePage, (long unsigned) to_w_fl, (long unsigned) from_w_fl, info.MaxCharSize, cur->name, info.CodePageName);
 			} else {
 #ifdef ORDER_IT
 				if (1 == rnd)
 #endif
-				printf("\t{ %u, %u, %u, %u, \"%s\", \"%s\", \"%s\" },\n", info.CodePage, to_w_fl, from_w_fl, info.MaxCharSize, cur->name, cur->enc, info.CodePageName);
+				printf("\t{ %u, %lu, %lu, %u, \"%s\", \"%s\", \"%s\" },\n", info.CodePage, (long unsigned) to_w_fl, (long unsigned) from_w_fl, info.MaxCharSize, cur->name, cur->enc, info.CodePageName);
 			}
 		}
 		cur++;
