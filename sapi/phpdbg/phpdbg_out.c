@@ -589,7 +589,7 @@ static int format_converter(register buffy *odp, const char *fmt, zend_bool esca
 
 				case 'r':
 					if (PHPDBG_G(req_id)) {
-						s_len = spprintf(&s, 0, "req=\"%lu\"", PHPDBG_G(req_id));
+						s_len = spprintf(&s, 0, "req=\"" ZEND_ULONG_FMT "\"", PHPDBG_G(req_id));
 						free_s = s;
 					} else {
 						s = "";
@@ -1062,7 +1062,7 @@ static int phpdbg_process_print(int fd, int type, const char *tag, const char *m
 
 		if (PHPDBG_G(req_id)) {
 			char *xmlbuf = NULL;
-			xmllen = phpdbg_asprintf(&xmlbuf, "req=\"%lu\" %.*s", PHPDBG_G(req_id), xmllen, xml);
+			xmllen = phpdbg_asprintf(&xmlbuf, "req=\"" ZEND_ULONG_FMT "\" %.*s", PHPDBG_G(req_id), xmllen, xml);
 			xml = xmlbuf;
 		}
 		if (msgout) {

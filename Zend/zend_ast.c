@@ -557,24 +557,13 @@ ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
 }
 
 ZEND_API void zend_ast_destroy(zend_ast *ast) {
-	zval *zv;
-
 	if (!ast) {
 		return;
 	}
 
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
-			/* Destroy value without using GC: When opcache moves arrays into SHM it will
-			 * free the zend_array structure, so references to it from outside the op array
-			 * become invalid. GC would cause such a reference in the root buffer. */
-			zv = zend_ast_get_zval(ast);
-			if (Z_TYPE_P(zv) == IS_STRING) {
-				/* Compiler may keep REFCOUNTED zvals with INTERNED strings */
-				zend_string_release(Z_STR_P(zv));
-			} else {
-				zval_ptr_dtor_nogc(zv);
-			}
+			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
 			break;
 		case ZEND_AST_CONSTANT:
 			zend_string_release(zend_ast_get_constant_name(ast));

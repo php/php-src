@@ -362,19 +362,19 @@ _mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
 
 
 /* {{{ mysqlnd_command_factory_get */
-static func_mysqlnd__command_factory
+static func_mysqlnd__run_command
 _mysqlnd_command_factory_get()
 {
-	return mysqlnd_command_factory;
+	return mysqlnd_run_command;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_command_factory_set */
 static void
-_mysqlnd_command_factory_set(func_mysqlnd__command_factory factory)
+_mysqlnd_command_factory_set(func_mysqlnd__run_command run_command)
 {
-	mysqlnd_command_factory = factory;
+	mysqlnd_run_command = run_command;
 }
 /* }}} */
 

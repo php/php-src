@@ -328,22 +328,43 @@ object = [OC];
 
 static inline zend_long parse_iv2(const unsigned char *p, const unsigned char **q)
 {
-	zend_long result = 0;
-	char *end;
+	zend_ulong result = 0;
+	zend_ulong neg = 0;
+	const unsigned char *start;
 
-	errno = 0;
-	result = ZEND_STRTOL((const char*)p, &end, 0);
+	if (*p == '-') {
+		neg = 1;
+		p++;
+	} else if (UNEXPECTED(*p == '+')) {
+		p++;
+	}
+
+	while (UNEXPECTED(*p == '0')) {
+		p++;
+	}
+
+	start = p;
+
+	while (*p >= '0' && *p <= '9') {
+		result = result * 10 + ((zend_ulong)(*p) - '0');
+		p++;
+	}
 
 	if (q) {
-		*q = (const unsigned char *)end;
+		*q = p;
 	}
 
-	if (errno) {
-		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
-		return result;
+	/* number too long or overflow */
+	if (UNEXPECTED(p - start > MAX_LENGTH_OF_LONG - 1)
+	 || (SIZEOF_ZEND_LONG == 4
+	 	&& UNEXPECTED(p - start == MAX_LENGTH_OF_LONG - 1)
+	 	&& UNEXPECTED(*start > '2'))
+	 || UNEXPECTED(result - neg > ZEND_LONG_MAX)) {
+		php_error_docref(NULL, E_WARNING, "Numerical result out of range");
+		return (!neg) ? ZEND_LONG_MAX : ZEND_LONG_MIN;
 	}
 
-	return result;
+	return (!neg) ? (zend_long)result : -(zend_long)result;
 }
 
 static inline zend_long parse_iv(const unsigned char *p)
@@ -705,9 +726,15 @@ static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
 	return 1;
 }
 
-"b:" [01] ";"	{
+"b:0;"	{
 	*p = YYCURSOR;
-	ZVAL_BOOL(rval, parse_iv(start + 2));
+	ZVAL_FALSE(rval);
+	return 1;
+}
+
+"b:1;"	{
+	*p = YYCURSOR;
+	ZVAL_TRUE(rval);
 	return 1;
 }
 

@@ -520,9 +520,10 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 								smart_str_appends(&str, "<expression>");
 							}
 						} else {
-							zend_string *zv_str = zval_get_string(zv);
+							zend_string *tmp_zv_str;
+							zend_string *zv_str = zval_get_tmp_string(zv, &tmp_zv_str);
 							smart_str_append(&str, zv_str);
-							zend_string_release(zv_str);
+							zend_tmp_string_release(tmp_zv_str);
 						}
 					}
 				} else {
@@ -1697,7 +1698,7 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 ZEND_API void zend_do_bind_traits(zend_class_entry *ce) /* {{{ */
 {
 
-	if (ce->num_traits <= 0) {
+	if (ce->num_traits == 0) {
 		return;
 	}
 

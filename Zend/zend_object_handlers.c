@@ -886,16 +886,12 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
-	zend_string *name;
+	zend_string *name, *tmp_name;
 	zval *retval = NULL;
 	uintptr_t property_offset;
 
 	zobj = Z_OBJ_P(object);
-	if (EXPECTED(Z_TYPE_P(member) == IS_STRING)) {
-		name = Z_STR_P(member);
-	} else {
-		name = zval_get_string(member);
-	}
+	name = zval_get_tmp_string(member, &tmp_name);
 
 #if DEBUG_OBJECT_HANDLERS
 	fprintf(stderr, "Ptr object #%d property: %s\n", Z_OBJ_HANDLE_P(object), ZSTR_VAL(name));
@@ -928,9 +924,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
 		    if (EXPECTED((retval = zend_hash_find(zobj->properties, name)) != NULL)) {
-				if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-					zend_string_release(name);
-				}
+				zend_tmp_string_release(tmp_name);
 				return retval;
 		    }
 		}
@@ -948,9 +942,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 		}
 	}
 
-	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		zend_string_release(name);
-	}
+	zend_tmp_string_release(tmp_name);
 	return retval;
 }
 /* }}} */

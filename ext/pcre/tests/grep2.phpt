@@ -1,5 +1,7 @@
 --TEST--
 preg_grep() 2nd test
+--SKIPIF--
+<?php if (!PCRE_JIT_SUPPORT) die("skip no pcre jit support"); ?>
 --FILE--
 <?php
 
@@ -25,7 +27,7 @@ NULL
 Warning: preg_grep() expects parameter 2 to be array, integer given in %sgrep2.php on line 4
 NULL
 
-Warning: preg_grep(): Compilation failed: nothing to repeat at offset 0 in %sgrep2.php on line 5
+Warning: preg_grep(): Compilation failed: quantifier does not follow a repeatable item at offset 0 in %sgrep2.php on line 5
 bool(false)
 array(3) {
   [5]=>

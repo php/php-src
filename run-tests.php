@@ -1300,7 +1300,7 @@ TEST $file
 			$section = $r[1];
 			settype($section, 'string');
 
-			if (isset($section_text[$section])) {
+			if (isset($section_text[$section]) && $section_text[$section]) {
 				$bork_info = "duplicated $section section";
 				$borked    = true;
 			}

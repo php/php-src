@@ -175,6 +175,8 @@ END_EXTERN_C()
 #define ZEND_INI_STAGE_RUNTIME		(1<<4)
 #define ZEND_INI_STAGE_HTACCESS		(1<<5)
 
+#define ZEND_INI_STAGE_IN_REQUEST   (ZEND_INI_STAGE_ACTIVATE|ZEND_INI_STAGE_DEACTIVATE|ZEND_INI_STAGE_RUNTIME|ZEND_INI_STAGE_HTACCESS)
+
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);
 BEGIN_EXTERN_C()

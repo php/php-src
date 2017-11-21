@@ -64,6 +64,9 @@
 # define SQLDATETIME	SYBDATETIME
 # define SQLDATETIM4	SYBDATETIME4
 # define SQLDATETIMN	SYBDATETIMN
+# ifdef SYBMSDATETIME2
+# define SQLMSDATETIME2  SYBMSDATETIME2
+# endif
 # define SQLMONEY		SYBMONEY
 # define SQLMONEY4		SYBMONEY4
 # define SQLMONEYN		SYBMONEYN
@@ -89,6 +92,11 @@ typedef unsigned char *LPBYTE;
 # endif
 typedef float			DBFLT4;
 #endif
+
+/* hardcoded string length from FreeTDS
+ * src/tds/convert.c:tds_convert_datetimeall()
+ */
+# define DATETIME_MAX_LEN   63
 
 int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 	int oserr, char *dberrstr, char *oserrstr);
@@ -152,6 +160,7 @@ enum {
 	PDO_DBLIB_ATTR_QUERY_TIMEOUT,
 	PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER,
 	PDO_DBLIB_ATTR_VERSION,
+	PDO_DBLIB_ATTR_TDS_VERSION,
 	PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS,
 	PDO_DBLIB_ATTR_DATETIME_CONVERT,
 };

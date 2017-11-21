@@ -357,7 +357,7 @@ static void php_hashcontext_ctor(INTERNAL_FUNCTION_PARAMETERS, zval *objval) {
 			zval_dtor(return_value);
 			RETURN_FALSE;
 		}
-		if (!key || (ZSTR_LEN(key) <= 0)) {
+		if (!key || (ZSTR_LEN(key) == 0)) {
 			/* Note: a zero length key is no key at all */
 			php_error_docref(NULL, E_WARNING, "HMAC requested without a key");
 			zval_dtor(return_value);

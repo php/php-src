@@ -498,13 +498,14 @@ static int php_array_natural_general_compare(const void *a, const void *b, int f
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-	zend_string *str1 = zval_get_string(&f->val);
-	zend_string *str2 = zval_get_string(&s->val);
+	zend_string *tmp_str1, *tmp_str2;
+	zend_string *str1 = zval_get_tmp_string(&f->val, &tmp_str1);
+	zend_string *str2 = zval_get_tmp_string(&s->val, &tmp_str2);
 
 	int result = strnatcmp_ex(ZSTR_VAL(str1), ZSTR_LEN(str1), ZSTR_VAL(str2), ZSTR_LEN(str2), fold_case);
 
-	zend_string_release(str1);
-	zend_string_release(str2);
+	zend_tmp_string_release(tmp_str1);
+	zend_tmp_string_release(tmp_str2);
 	return result;
 }
 /* }}} */
@@ -2713,9 +2714,10 @@ PHP_FUNCTION(array_fill_keys)
 		if (Z_TYPE_P(entry) == IS_LONG) {
 			zend_hash_index_update(Z_ARRVAL_P(return_value), Z_LVAL_P(entry), val);
 		} else {
-			zend_string *key = zval_get_string(entry);
+			zend_string *tmp_key;
+			zend_string *key = zval_get_tmp_string(entry, &tmp_key);
 			zend_symtable_update(Z_ARRVAL_P(return_value), key, val);
-			zend_string_release(key);
+			zend_tmp_string_release(tmp_key);
 		}
 	} ZEND_HASH_FOREACH_END();
 }
@@ -4203,9 +4205,10 @@ PHP_FUNCTION(array_column)
 				} else if (Z_TYPE_P(zkeyval) == IS_LONG) {
 					add_index_zval(return_value, Z_LVAL_P(zkeyval), zcolval);
 				} else if (Z_TYPE_P(zkeyval) == IS_OBJECT) {
-					zend_string *key = zval_get_string(zkeyval);
+					zend_string *tmp_key;
+					zend_string *key = zval_get_tmp_string(zkeyval, &tmp_key);
 					zend_symtable_update(Z_ARRVAL_P(return_value), key, zcolval);
-					zend_string_release(key);
+					zend_tmp_string_release(tmp_key);
 				} else {
 					add_next_index_zval(return_value, zcolval);
 				}
@@ -4483,9 +4486,10 @@ PHP_FUNCTION(array_unique)
 			if (Z_TYPE_P(val) == IS_STRING) {
 				retval = zend_hash_add_empty_element(&seen, Z_STR_P(val));
 			} else {
-				zend_string *str_val = zval_get_string(val);
+				zend_string *tmp_str_val;
+				zend_string *str_val = zval_get_tmp_string(val, &tmp_str_val);
 				retval = zend_hash_add_empty_element(&seen, str_val);
-				zend_string_release(str_val);
+				zend_tmp_string_release(tmp_str_val);
 			}
 
 			if (retval) {
@@ -5367,7 +5371,7 @@ PHP_FUNCTION(array_diff)
 	uint32_t num;
 	HashTable exclude;
 	zval *value;
-	zend_string *str, *key;
+	zend_string *str, *tmp_str, *key;
 	zend_long idx;
 	zval dummy;
 
@@ -5405,16 +5409,16 @@ PHP_FUNCTION(array_diff)
 	zend_hash_init(&exclude, num, NULL, NULL, 0);
 	for (i = 1; i < argc; i++) {
 		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
-			str = zval_get_string(value);
+			str = zval_get_tmp_string(value, &tmp_str);
 			zend_hash_add(&exclude, str, &dummy);
-			zend_string_release(str);
+			zend_tmp_string_release(tmp_str);
 		} ZEND_HASH_FOREACH_END();
 	}
 
 	/* copy all elements of first array that are not in exclude set */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL(args[0])));
 	ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(args[0]), idx, key, value) {
-		str = zval_get_string(value);
+		str = zval_get_tmp_string(value, &tmp_str);
 		if (!zend_hash_exists(&exclude, str)) {
 			if (key) {
 				value = zend_hash_add_new(Z_ARRVAL_P(return_value), key, value);
@@ -5423,7 +5427,7 @@ PHP_FUNCTION(array_diff)
 			}
 			zval_add_ref(value);
 		}
-		zend_string_release(str);
+		zend_tmp_string_release(tmp_str);
 	} ZEND_HASH_FOREACH_END();
 
 	zend_hash_destroy(&exclude);
@@ -6316,10 +6320,11 @@ PHP_FUNCTION(array_combine)
 					entry_values = zend_hash_index_update(Z_ARRVAL_P(return_value),
 						Z_LVAL_P(entry_keys), entry_values);
 				} else {
-					zend_string *key = zval_get_string(entry_keys);
+					zend_string *tmp_key;
+					zend_string *key = zval_get_tmp_string(entry_keys, &tmp_key);
 					entry_values = zend_symtable_update(Z_ARRVAL_P(return_value),
 						key, entry_values);
-					zend_string_release(key);
+					zend_tmp_string_release(tmp_key);
 				}
 				zval_add_ref(entry_values);
 				pos_values++;

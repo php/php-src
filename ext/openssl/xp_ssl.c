@@ -1399,15 +1399,15 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", sizeof("local_cert")-1);
 			if (local_cert == NULL) {
 				php_error_docref(NULL, E_WARNING,
-					"local_cert not present in the array",
-					Z_STRVAL_P(local_cert)
+					"local_cert not present in the array"
 				);
 				return FAILURE;
 			}
 			convert_to_string_ex(local_cert);
 			if (!VCWD_REALPATH(Z_STRVAL_P(local_cert), resolved_cert_path_buff)) {
 				php_error_docref(NULL, E_WARNING,
-					"failed setting local cert chain file `%s'; file not found"
+					"failed setting local cert chain file `%s'; file not found",
+					Z_STRVAL_P(local_cert)
 				);
 				return FAILURE;
 			}
