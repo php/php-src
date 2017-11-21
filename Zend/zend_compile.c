@@ -3044,27 +3044,27 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_ARRAY:
-			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
-				/* list($a, $b) = $a should evaluate the right $a first */
-				znode cv_node;
+			if (zend_compile_list_assign_requires_w(var_ast)) {
+				if (!zend_is_variable(expr_ast)) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign reference to non referencable value");
+				}
 
-				if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
-					if (zend_compile_list_assign_requires_w(var_ast)) {
-						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_W, 0);
-						zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
-					} else {
-						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
-					}
-				} else {
-					zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+				zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
+				/* MAKE_REF is usually not necessary for CVs. However, if there are
+				 * self-assignments, this forces the RHS to evaluate first. */
+				if (expr_node.op_type != IS_CV
+						|| zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
 				}
 			} else {
-				if (zend_compile_list_assign_requires_w(var_ast)) {
-					if (zend_is_variable(expr_ast)) {
-						zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
-						zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
+				if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					/* list($a, $b) = $a should evaluate the right $a first */
+					znode cv_node;
+
+					if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
+						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
 					} else {
-						zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign reference to non referencable value");
+						zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
 					}
 				} else {
 					zend_compile_expr(&expr_node, expr_ast);

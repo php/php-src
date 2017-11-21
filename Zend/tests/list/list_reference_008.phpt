@@ -28,8 +28,11 @@ unset($a, $arr);
  * We do not allow references to the same variable of rhs.
  */
 $a = [1, 2];
-list(&$a, $a) = $a;
-var_dump($a);
+$ref =& $a;
+list(&$a, &$b) = $a;
+var_dump($a, $b);
+$a++; $b++;
+var_dump($ref);
 ?>
 --EXPECTF--
 int(1)
@@ -55,6 +58,11 @@ array(2) {
   [1]=>
   int(2)
 }
-
-Notice: Attempting to set reference to non referenceable value in %s on line %d
+int(1)
 int(2)
+array(2) {
+  [0]=>
+  &int(2)
+  [1]=>
+  &int(3)
+}
