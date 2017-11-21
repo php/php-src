@@ -2794,7 +2794,6 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node);
 
 static zend_bool zend_compile_list_assign_requires_w(zend_ast *ast) { /* {{{ */
-	zend_bool require_w = 0;
 	zend_ast_list *list;
 	uint32_t i;
 
@@ -2803,26 +2802,18 @@ static zend_bool zend_compile_list_assign_requires_w(zend_ast *ast) { /* {{{ */
 	}
 
 	list = zend_ast_get_list(ast);
-
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 
 		if (elem_ast) {
 			zend_ast *var_ast = elem_ast->child[0];
-
-			if (elem_ast->kind == ZEND_AST_ARRAY_ELEM && elem_ast->attr) {
-				require_w = 1;
-			} else if (elem_ast->kind == ZEND_AST_ARRAY_ELEM && var_ast->kind == ZEND_AST_ARRAY) {
-				require_w = zend_compile_list_assign_requires_w(var_ast);
-			}
-
-			if (require_w) {
-				break;
+			if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
+				return 1;
 			}
 		}
 	}
 
-	return require_w;
+	return 0;
 }
 /* }}} */
 
