@@ -38,7 +38,10 @@ ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len)
 		ZSTR_LEN(str->s) = 0;
 	} else {
 		str->a = SMART_STR_NEW_LEN(len);
-		str->s = (zend_string *) erealloc2(str->s, str->a + _ZSTR_HEADER_SIZE + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s));
+	    void *temp = erealloc2(str->s, str->a + _ZSTR_HEADER_SIZE + 1, _ZSTR_HEADER_SIZE + ZSTR_LEN(str->s));
+        if (temp) {
+			str->s = (zend_string *) temp;
+		}
 	}
 }
 
@@ -52,7 +55,10 @@ ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 		ZSTR_LEN(str->s) = 0;
 	} else {
 		str->a = SMART_STR_NEW_LEN(len);
-		str->s = (zend_string *) realloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1);
+		void *temp = realloc(str->s, str->a + _ZSTR_HEADER_SIZE + 1);
+		if (temp) {
+			str->s = (zend_string *) temp;
+		}
 	}
 }
 
@@ -64,7 +70,7 @@ ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len)
 static size_t zend_compute_escaped_string_len(const char *s, size_t l) {
 	size_t i, len = l;
 	for (i = 0; i < l; ++i) {
-		char c = s[i];
+		unsigned char c = s[i];
 		if (c == '\n' || c == '\r' || c == '\t' ||
 			c == '\f' || c == '\v' || c == '\\' || c == VK_ESCAPE) {
 			len += 1;
@@ -142,7 +148,10 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, si
 		}
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
-		str->c = realloc(str->c, str->a + 1);
+        void *temp = realloc(str->c, str->a + 1);
+		if (temp) {
+		    str->c = temp;
+		}
 	}
 }
 
@@ -163,7 +172,10 @@ ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len)
 		}
 		len += str->len;
 		str->a = ZEND_MM_ALIGNED_SIZE_EX(len + SMART_STRING_OVERHEAD, SMART_STRING_PAGE) - SMART_STRING_OVERHEAD;
-		str->c = erealloc2(str->c, str->a + 1, str->len);
+		void *temp = erealloc2(str->c, str->a + 1, str->len);
+		if (temp) {
+			str->c = temp;
+		}
 	}
 }
 
