@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-09 Nov 2017 PHP 7.0.26RC1
+23 Nov 2017 PHP 7.0.26
 
 - Core:
   . Fixed bug #75420 (Crash when modifing property name in __isset for
