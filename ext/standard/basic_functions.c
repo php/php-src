@@ -3877,7 +3877,7 @@ PHP_FUNCTION(constant)
 	ZEND_PARSE_PARAMETERS_END();
 
 	scope = zend_get_executed_scope();
-	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
+	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_DEFAULT);
 	if (c) {
 		ZVAL_COPY_OR_DUP(return_value, c);
 		if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
