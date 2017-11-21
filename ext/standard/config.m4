@@ -449,6 +449,26 @@ if test "$PHP_PASSWORD_ARGON2" != "no"; then
 fi
 
 dnl
+dnl net_get_interfaces
+dnl
+AC_CHECK_HEADERS([net/if.h netdb.h])
+AC_MSG_CHECKING([for usable getifaddrs])
+AC_TRY_LINK([
+  #include <ifaddrs.h>
+],[
+  struct ifaddrs *interfaces;
+  if (!getifaddrs(&interfaces)) {
+      freeifaddrs(interfaces);
+  }
+], [ac_have_getifaddrs=yes], [ac_have_getifaddrs=no])
+if test "$ac_have_getifaddrs" = "yes" ; then
+  AC_DEFINE(HAVE_GETIFADDRS, 1, [whether getifaddrs is present and usable])
+  AC_MSG_RESULT(yes)
+else
+  AC_MSG_RESULT(no)
+fi
+
+dnl
 dnl Setup extension sources
 dnl
 PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.c crypt.c \
@@ -462,7 +482,7 @@ PHP_NEW_EXTENSION(standard, array.c base64.c basic_functions.c browscap.c crc32.
                             http_fopen_wrapper.c php_fopen_wrapper.c credits.c css.c \
                             var_unserializer.c ftok.c sha1.c user_filters.c uuencode.c \
                             filters.c proc_open.c streamsfuncs.c http.c password.c \
-                            random.c,,,
+                            random.c net.c,,,
 			    -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_MAKEFILE_FRAGMENT
