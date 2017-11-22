@@ -298,7 +298,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	}
 
 	if ((colon = zend_memrchr(name, ':', name_len)) &&
-	    colon > name && (*(colon - 1) == ':')) {
+	    colon > name && (*(colon - 1) == ':') && strlen(name) > 2) {
 		int class_name_len = colon - name - 1;
 		size_t const_name_len = name_len - class_name_len - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
@@ -334,11 +334,8 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		if (ce) {
 			c = zend_hash_find_ptr(&ce->constants_table, constant_name);
 			if (c == NULL) {
-				if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
-					zend_throw_error(NULL, "Undefined class constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					goto failure;
-				}
 				ret_constant = NULL;
+				goto failure;
 			} else {
 				if (!zend_verify_const_access(c, scope)) {
 					if ((flags & ZEND_FETCH_CLASS_SILENT) == 0) {
