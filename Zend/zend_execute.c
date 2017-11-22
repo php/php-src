@@ -166,9 +166,6 @@ ZEND_API const zend_internal_function zend_pass_function = {
 
 #define ZEND_VM_STACK_PAGE_SIZE  (ZEND_VM_STACK_PAGE_SLOTS * sizeof(zval))
 
-#define ZEND_VM_STACK_FREE_PAGE_SIZE \
-	((ZEND_VM_STACK_PAGE_SLOTS - ZEND_VM_STACK_HEADER_SLOTS) * sizeof(zval))
-
 #define ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size) \
 	(((size) + ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval) \
 	  + (ZEND_VM_STACK_PAGE_SIZE - 1)) & ~(ZEND_VM_STACK_PAGE_SIZE - 1))
@@ -184,6 +181,7 @@ static zend_always_inline zend_vm_stack zend_vm_stack_new_page(size_t size, zend
 
 ZEND_API void zend_vm_stack_init(void)
 {
+	EG(vm_stack_page_size) = ZEND_VM_STACK_PAGE_SIZE;
 	EG(vm_stack) = zend_vm_stack_new_page(ZEND_VM_STACK_PAGE_SIZE, NULL);
 	EG(vm_stack)->top++;
 	EG(vm_stack_top) = EG(vm_stack)->top;
@@ -209,8 +207,8 @@ ZEND_API void* zend_vm_stack_extend(size_t size)
 	stack = EG(vm_stack);
 	stack->top = EG(vm_stack_top);
 	EG(vm_stack) = stack = zend_vm_stack_new_page(
-		EXPECTED(size < ZEND_VM_STACK_FREE_PAGE_SIZE) ?
-			ZEND_VM_STACK_PAGE_SIZE : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
+		EXPECTED(size < EG(vm_stack_page_size) - (ZEND_VM_STACK_HEADER_SLOTS * sizeof(zval))) ?
+			EG(vm_stack_page_size) : ZEND_VM_STACK_PAGE_ALIGNED_SIZE(size),
 		stack);
 	ptr = stack->top;
 	EG(vm_stack_top) = (void*)(((char*)ptr) + size);
@@ -2092,7 +2090,7 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 }
 /* }}} */
 
-void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
+ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
 	i_free_compiled_variables(execute_data);
 }
@@ -2500,7 +2498,7 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 }
 /* }}} */
 
-void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
+ZEND_API void zend_cleanup_unfinished_execution(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) {
 	cleanup_unfinished_calls(execute_data, op_num);
 	cleanup_live_vars(execute_data, op_num, catch_op_num);
 }
