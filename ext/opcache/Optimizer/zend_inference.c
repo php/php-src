@@ -3865,7 +3865,7 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 		if (ssa->vars[j].alias) {
 			if (ssa->vars[j].alias == PHP_ERRORMSG_ALIAS) {
 				ssa_var_info[j].type |= MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
-			} else if (ssa->vars[j].alias == PHP_ERRORMSG_ALIAS) {
+			} else if (ssa->vars[j].alias == HTTP_RESPONSE_HEADER_ALIAS) {
 				ssa_var_info[j].type |= MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_RC1 | MAY_BE_RCN;
 			} else {
 				ssa_var_info[j].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
