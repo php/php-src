@@ -1,6 +1,20 @@
 // vim:ft=javascript
 // $Id$
 
+ARG_WITH("password-argon2", "Argon2 support", "no");
+
+if (PHP_PASSWORD_ARGON2 != "no") {
+	if (CHECK_LIB("argon2_a.lib;argon2.lib", null, PHP_PASSWORD_ARGON2)
+	&& CHECK_HEADER_ADD_INCLUDE("argon2.h", "CFLAGS")) {
+		AC_DEFINE('HAVE_ARGON2LIB', 1);
+		if (CHECK_FUNC_IN_HEADER("argon2.h", "argon2id_hash_raw", PHP_PHP_BUILD + "\\include", "CFLAGS")) {
+			AC_DEFINE('HAVE_ARGON2ID', 1);
+		}
+	} else {
+		WARNING("Argon2 not enabled; libaries and headers not found");
+	}
+}
+
 ARG_WITH("config-file-scan-dir", "Dir to check for additional php ini files", "");
 
 AC_DEFINE("PHP_CONFIG_FILE_SCAN_DIR", PHP_CONFIG_FILE_SCAN_DIR);
@@ -26,4 +40,6 @@ EXTENSION("standard", "array.c base64.c basic_functions.c browscap.c \
 if (PHP_MBREGEX != "no") {
 	CHECK_HEADER_ADD_INCLUDE("oniguruma.h", "CFLAGS_STANDARD", PHP_MBREGEX + ";ext\\mbstring\\oniguruma")   
 }
+ADD_MAKEFILE_FRAGMENT();
 PHP_INSTALL_HEADERS("", "ext/standard");
+

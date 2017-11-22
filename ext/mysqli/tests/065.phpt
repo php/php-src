@@ -8,9 +8,6 @@ require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_set_charset')) {
 	die('skip mysqli_set_charset() not available');
 }
-if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
 ?>
 --FILE--
 <?php
@@ -44,7 +41,7 @@ if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
 					printf("[005] Expecting 2/int got %s/%s\n", gettype($tmp), $tmp);
 
 			if ('gbk' !== ($tmp = $mysql->character_set_name()))
-					printf("[005] Expecting gbk/string got %s/%s\n", gettype($tmp), $tmp);;
+					printf("[005] Expecting gbk/string got %s/%s\n", gettype($tmp), $tmp);
 		}
 	}
 	$mysql->close();

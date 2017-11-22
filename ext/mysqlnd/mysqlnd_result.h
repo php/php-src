@@ -20,10 +20,10 @@
 #ifndef MYSQLND_RESULT_H
 #define MYSQLND_RESULT_H
 
-PHPAPI MYSQLND_RES * mysqlnd_result_init(const unsigned int field_count, const zend_bool persistent);
-PHPAPI MYSQLND_RES_UNBUFFERED * mysqlnd_result_unbuffered_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
-PHPAPI MYSQLND_RES_BUFFERED_ZVAL * mysqlnd_result_buffered_zval_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
-PHPAPI MYSQLND_RES_BUFFERED_C * mysqlnd_result_buffered_c_init(const unsigned int field_count, const zend_bool ps, const zend_bool persistent);
+PHPAPI MYSQLND_RES * mysqlnd_result_init(const unsigned int field_count);
+PHPAPI MYSQLND_RES_UNBUFFERED * mysqlnd_result_unbuffered_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps);
+PHPAPI MYSQLND_RES_BUFFERED_ZVAL * mysqlnd_result_buffered_zval_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps);
+PHPAPI MYSQLND_RES_BUFFERED_C * mysqlnd_result_buffered_c_init(MYSQLND_RES * result, const unsigned int field_count, const zend_bool ps);
 
 enum_func_status mysqlnd_query_read_result_set_header(MYSQLND_CONN_DATA * conn, MYSQLND_STMT * stmt);
 

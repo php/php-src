@@ -25,13 +25,7 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
-#ifndef INFINITY
-#define INFINITY (DBL_MAX+DBL_MAX)
-#endif
-
-#ifndef NAN
-#define NAN (INFINITY-INFINITY)
-#endif
+#include "zend_portability.h"
 
 /* {{{ timezone_convert_datetimezone
  *      The timezone in DateTime and DateTimeZone is not unified. */
@@ -56,8 +50,8 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int offset_mins = is_datetime
-				? -((php_date_obj*)object)->time->z
-				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
+				? ((php_date_obj*)object)->time->z / 60
+				: (int)((php_timezone_obj*)object)->tzi.utc_offset / 60,
 				hours = offset_mins / 60,
 				minutes = offset_mins - hours * 60;
 			minutes *= minutes > 0 ? 1 : -1;
@@ -118,7 +112,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 	}
 
 	if (millis) {
-		*millis = NAN;
+		*millis = ZEND_NAN;
 	}
 	if (tz) {
 		*tz = NULL;
@@ -140,7 +134,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		}
 
 		datetime = Z_PHPDATE_P(z);
-		*millis = U_MILLIS_PER_SECOND * ((double)Z_LVAL(retval) + datetime->time->f);
+		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
 		zval_ptr_dtor(&zfuncname);
 	}
 
@@ -176,13 +170,13 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 
 U_CFUNC double intl_zval_to_millis(zval *z, intl_error *err, const char *func)
 {
-	double	rv = NAN;
+	double	rv = ZEND_NAN;
 	zend_long	lv;
 	int		type;
 	char	*message;
 
 	if (err && U_FAILURE(err->code)) {
-		return NAN;
+		return ZEND_NAN;
 	}
 
 	switch (Z_TYPE_P(z)) {

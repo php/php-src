@@ -26,8 +26,8 @@ var_dump( finfo_file( $finfo, $magicFile.chr(0).$magicFile) );
 --EXPECTF--
 *** Testing finfo_file() : basic functionality ***
 string(28) "text/x-php; charset=us-ascii"
-string(22) "PHP script, ASCII text"
-string(25) "text/plain; charset=utf-8"
+string(32) "PHP script, ASCII text\012- data"
+string(40) "application/octet-stream; charset=binary"
 
 Warning: finfo_file(): Invalid path in %s%efinfo_file_basic.php on line %d
 bool(false)

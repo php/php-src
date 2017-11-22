@@ -381,7 +381,7 @@ static PHP_FUNCTION(phpdbg_break_file)
 		return;
 	}
 
-	phpdbg_set_breakpoint_file(file, line);
+	phpdbg_set_breakpoint_file(file, 0, line);
 } /* }}} */
 
 /* {{{ proto void phpdbg_break_method(string class, string method) */
@@ -580,10 +580,10 @@ static PHP_FUNCTION(phpdbg_get_executable)
 				zend_hash_add_empty_element(files, zval_get_string(filename));
 			} ZEND_HASH_FOREACH_END();
 		} else {
-			GC_REFCOUNT(files)++;
+			GC_ADDREF(files);
 		}
 	} else {
-		GC_REFCOUNT(files)++;
+		GC_ADDREF(files);
 	}
 
 	array_init(return_value);
@@ -632,7 +632,7 @@ static PHP_FUNCTION(phpdbg_get_executable)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (!--GC_REFCOUNT(files)) {
+	if (!GC_DELREF(files)) {
 		zend_hash_destroy(files);
 	}
 }
@@ -815,15 +815,11 @@ static zend_module_entry sapi_phpdbg_module_entry = {
 	STANDARD_MODULE_PROPERTIES
 };
 
-static void phpdbg_interned_strings_nothing(void) { }
-
 static inline int php_sapi_phpdbg_module_startup(sapi_module_struct *module) /* {{{ */
 {
 	if (php_module_startup(module, &sapi_phpdbg_module_entry, 1) == FAILURE) {
 		return FAILURE;
 	}
-	/* prevent zend_interned_strings_restore from invalidating our string pointers too early (in phpdbg allocated memory only gets freed after module shutdown) */
-	zend_interned_strings_restore = phpdbg_interned_strings_nothing;
 
 	phpdbg_booted = 1;
 
@@ -2097,9 +2093,10 @@ phpdbg_out:
 			php_request_shutdown(NULL);
 		} zend_end_try();
 
-		if (PHPDBG_G(exec) && !memcmp("-", PHPDBG_G(exec), 2)) { /* i.e. execution context has been read from stdin - back it up */
+		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
+			GC_MAKE_PERSISTENT_LOCAL(backup_phpdbg_compile);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
 		}
 

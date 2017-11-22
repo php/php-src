@@ -640,7 +640,7 @@ static void walk_down_the_path(char* path_start,
 
 typedef struct {
     char *path;
-    uint path_len;
+    uint32_t path_len;
     char *doc_root;
     user_config_cache_entry *entry;
 } _lsapi_activate_user_ini_ctx;
@@ -684,8 +684,6 @@ static int lsapi_activate_user_ini_mk_path(_lsapi_activate_user_ini_ctx *ctx,
     /* Extract dir name from path_translated * and store it in 'path' */
     ctx->path_len = strlen(ctx->path);
     path = ctx->path = estrndup(SG(request_info).path_translated, ctx->path_len);
-    if (!path)
-        return FAILURE;
     ctx->path_len = zend_dirname(path, ctx->path_len);
     DEBUG_MESSAGE("dirname: %s", ctx->path);
 
@@ -769,7 +767,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                                                       void* next)
 {
     time_t request_time = sapi_get_request_time();
-    uint docroot_len;
+    uint32_t docroot_len;
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 

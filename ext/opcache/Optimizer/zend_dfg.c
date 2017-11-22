@@ -89,9 +89,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 							goto op1_def;
 						}
 						goto op1_use;
-					case ZEND_UNSET_VAR:
-						ZEND_ASSERT(opline->extended_value & ZEND_QUICK_SET);
-						/* break missing intentionally */
+					case ZEND_UNSET_CV:
 					case ZEND_ASSIGN:
 					case ZEND_ASSIGN_REF:
 					case ZEND_BIND_GLOBAL:
@@ -130,6 +128,10 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
 					case ZEND_VERIFY_RETURN_TYPE:
+					case ZEND_PRE_INC_OBJ:
+					case ZEND_PRE_DEC_OBJ:
+					case ZEND_POST_INC_OBJ:
+					case ZEND_POST_DEC_OBJ:
 op1_def:
 						/* `def` always come along with dtor or separation,
 						 * thus the origin var info might be also `use`d in the feature(CG) */
@@ -191,6 +193,10 @@ op2_use:
 				}
 				if (opline->result_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 					var_num = EX_VAR_TO_NUM(opline->result.var);
+					if ((build_flags & ZEND_SSA_USE_CV_RESULTS)
+					 && opline->result_type == IS_CV) {
+						DFG_SET(use, set_size, j, var_num);
+					}
 					DFG_SET(def, set_size, j, var_num);
 				}
 			}
@@ -216,10 +222,10 @@ op2_use:
 			if ((blocks[j].flags & ZEND_BB_REACHABLE) == 0) {
 				continue;
 			}
-			if (blocks[j].successors[0] >= 0) {
+			if (blocks[j].successors_count != 0) {
 				zend_bitset_copy(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[0]), set_size);
-				if (blocks[j].successors[1] >= 0) {
-					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[1]), set_size);
+				for (k = 1; k < blocks[j].successors_count; k++) {
+					zend_bitset_union(DFG_BITSET(out, set_size, j), DFG_BITSET(in, set_size, blocks[j].successors[k]), set_size);
 				}
 			} else {
 				zend_bitset_clear(DFG_BITSET(out, set_size, j), set_size);

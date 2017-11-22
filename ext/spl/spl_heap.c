@@ -97,9 +97,7 @@ static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
+	Z_TRY_ADDREF_P(elem);
 }
 /* }}} */
 
@@ -490,8 +488,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 		rebuild_object_properties(&intern->std);
 	}
 
-	ALLOC_HASHTABLE(debug_info);
-	ZEND_INIT_SYMTABLE_EX(debug_info, zend_hash_num_elements(intern->std.properties) + 1, 0);
+	debug_info = zend_new_array(zend_hash_num_elements(intern->std.properties) + 1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 	pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1);
@@ -591,7 +588,7 @@ SPL_METHOD(SplHeap, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
+	Z_TRY_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, getThis());
 
 	RETURN_TRUE;
@@ -642,8 +639,8 @@ SPL_METHOD(SplPriorityQueue, insert)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(data)) Z_ADDREF_P(data);
-	if (Z_REFCOUNTED_P(priority)) Z_ADDREF_P(priority);
+	Z_TRY_ADDREF_P(data);
+	Z_TRY_ADDREF_P(priority);
 
 	array_init(&elem);
 	add_assoc_zval_ex(&elem, "data", sizeof("data") - 1, data);

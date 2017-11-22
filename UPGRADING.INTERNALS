@@ -1,79 +1,86 @@
-PHP 7.1 INTERNALS UPGRADE NOTES
+PHP 7.3 INTERNALS UPGRADE NOTES
 
-0. Wiki Examples
 1. Internal API changes
-  e. Codepage handling on Windows
-  f. Path handling on Windows
-  g. SAPI logging
+  a. array_init() and array_init_size()
+  b. Run-time constant operand addressing
+  c. Array/Object recursion protection
+  d. HASH_FLAG_PERSISTENT
+  e. AST and IS_CONSTANT
+  f. GC_REFCOUNT()
+  g. zend_get_parameters()
+  h. zend_register_persistent_resource()
 
 2. Build system changes
   a. Unix build system changes
   b. Windows build system changes
+
 
 3. Module changes
 
-================
-0. Wiki Examples
-================
-
-The wiki contains multiple examples and further explanations of the internal
-changes. See: https://wiki.php.net/phpng-upgrading
-
-
 ========================
 1. Internal API changes
 ========================
 
-  e. Codepage handling on Windows
-     
-    A set of new APIs was introduced, which allows to handle codepage
-    conversions. The corresponding prototypes and macros are contained
-    in win32/codepage.h.
+  a. array_init() and array_init_size() are not functions anymore.
+     They don't return any values.
 
-    Functions with php_win32_cp_* signatures provide handling for various
-    codepage aspects. Primarily they are in use at various places in the
-    I/O utils code and directly in the core where necessary, providing
-    conversions to/from UTF-16. Arbitrary conversions between codepages
-    are possible as well, whereby UTF-16 will be always an intermediate
-    state in this case.
+  b. In 64-bit builds PHP-7.2 and below used relative run-time constant operand
+     addressing. E.g. opline->op1.constant kept an offset from start of literals
+     table - op_array->literals. To speedup access op_array->literals was cached
+     in execute_data->literals. So the resulting address calculated as
+     EX(literals) + opline->op1.constant.
 
-    For input length arguments, the macro PHP_WIN32_CP_IGNORE_LEN can be
-    passed, then the API will calculate the length.  For output length
-    arguments, the macro PHP_WIN32_CP_IGNORE_LEN_P can be passed, then
-    the API won't set the output length.
+     Now at run-time literals allocated close to opcodes, and addressed
+     relatively from current opline. This eliminates load of EX(literals) on
+     each constant access as well as EX(literals) initialization on each call.
 
-    The mapping between encodings and codepages is provided by the predefined
-    array of data contained in win32/cp_enc_map.c. To change the data,
-    a generator win32/cp_enc_map_gen.c needs to be edited and run.
+     As result some related macros were removed (ZEND_EX_USE_LITERALS,
+     EX_LOAD_LITERALS, EX_LITERALS, RT_CONSTANT_EX, EX_CONSTANT) or changed
+     (RT_CONSTANT, ZEND_PASS_TWO_UPDATE_CONSTANT, ZEND_PASS_TWO_UNDO_CONSTANT).
+     This change way affect only some "system" extensions. EX_LITERALS,
+     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT than now
+     use "opline" (instead of "op_array") as first argument.
 
-  f. Path handling on Windows
+  c. Protection from recursion during processing circular data structures was
+     refactored. HashTable.nApplyCount and IS_OBJ_APPLY_COUNT are replaced by
+     single flag GC_PROTECTED. Corresponding macros Z_OBJ_APPLY_COUNT,
+     Z_OBJ_INC_APPLY_COUNT, Z_OBJ_DEC_APPLY_COUNT, ZEND_HASH_GET_APPLY_COUNT,
+     ZEND_HASH_INC_APPLY_COUNT, ZEND_HASH_DEC_APPLY_COUNT are replaced with
+     GC_IS_RECURSIVE, GC_PROTECT_RECURSION, GC_UNPROTECT_RECURSION,
+     Z_IS_RECURSIVE, Z_PROTECT_RECURSION, Z_UNPROTECT_RECURSION.
 
-    A set of new APIs was introduced, which allows to handle UTF-8 paths. The
-    corresponding prototypes and macros are contained in win32/ioutil.h.
+     HASH_FLAG_APPLY_PROTECTION flag and ZEND_HASH_APPLY_PROTECTION() macro
+     are removed. All mutable arrays should use recursion protection.
+     Corresponding checks should be replaced by Z_REFCOUNTED() or
+     !(GC_GLAGS(p) & GC_IMMUTABLE).
 
-    Functions with php_win32_ioutil_* signatures provide POSIX I/O analogues.
-    These functions are integrated in various places across the code base to
-    support Unicode filenames. While accepting char * arguments, internally 
-    the conversion to wchar_t * happens. Internally almost no ANSI APIs are
-    used, but directly their wide equivalents. The string conversion rules
-    correspond to those already present in the core and depend on the current
-    encoding settings. Doing so allows to move away from the ANSI Windows API
-    with its dependency on the system OEM/ANSI codepage.
+  d. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
+     GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
 
-    Thanks to the wide API usage, the long paths are now supported as well. The
-    PHP_WIN32_IOUTIL_MAXPATHLEN macro is defined to 2048 bytes and will override
-    the MAXPATHLEN in files where the header is included.
+  e. zend_ast_ref structure is changed to use only one allocation.
+     zend_ast_copy() now returns zend_ast_ref (instead of zend_asr).
+     zend_ast_destroy_and_free() is removed. ZVAL_NEW_AST() is replaced
+     by ZVAL_AST().
 
-    The most optimal use case for scripts is utilizing UTF-8 for any I/O
-    related functions. UTF-8 filenames are supported on any system disregarding
-    the system OEM/ANSI codepage.
+     IS_CONSTANT type and Z_CONST_FLAGS() are removed. Now constants are always
+     represented using IS_CONSTANT_AST (ZEND_AST_CONSTANT kind). AST node
+     attributes are used instead of constant flags. IS_TYPE_CONSTANT flag is
+     removed, but Z_CONSTANT() macro is kept for compatibility.
 
-  g. SAPI logging
-    The log_message callback in the SAPI struct was extended with the severity
-    argument. This allows SAPI modules to implement mapping between PHP and
-    corresponding server error levels. A reference mapping implementation
-    can be found in apache2handler.
+  f. GC_REFCOUNT() is turned into inline function and can't be modified direcly.
+     All reference-counting operations should be done through corresponding
+     macros GC_SET_REFCOUNT(), GC_ADDREF() and GC_DELREF().
 
+     GC_REFCOUNT(p)++ should be changed into GC_ADDREF(p),
+     GC_REFCOUNT(p)-- into GC_DELREF(p),
+     GC_REFCOUNT(p) = 1 into GC_SET_REFCOUNT(p, 1).
+
+  g. The zend_get_parameters() and zend_get_parameters_ex() functions were
+     removed. Instead zend_parse_parameters() should be used.
+
+  h. New functions zend_register_persistent_resource() or
+     zend_register_persistent_resource_ex() should beused to register
+     persistent resources, instead of manual insertion into EG(persistent_list).
 
 ========================
 2. Build system changes
@@ -82,8 +89,11 @@ changes. See: https://wiki.php.net/phpng-upgrading
   a. Unix build system changes
 
   b. Windows build system changes
-    Static analysis with clang and Cppcheck is supported by passing "clang" or
-    "cppcheck" keyword to the --with-analyzer configure option.
+    - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is
+      still usable in C++, but anything else inlining related is up to
+      compiler.
+    - ZEND_WIN32_KEEP_INLINE was removed, it was only needed for C++
+      convenience and is now default behavior with C++.
 
 ========================
 3. Module changes

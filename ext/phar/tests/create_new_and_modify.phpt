@@ -35,9 +35,9 @@ file_put_contents($pname .'/b.php', "another!\n");
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
 
-var_dump($sig1[b'hash']);
-var_dump($sig2[b'hash']);
-var_dump($sig1[b'hash'] != $sig2[b'hash']);
+var_dump($sig1['hash']);
+var_dump($sig2['hash']);
+var_dump($sig1['hash'] != $sig2['hash']);
 
 include $pname . '/a.php';
 include $pname . '/b.php';

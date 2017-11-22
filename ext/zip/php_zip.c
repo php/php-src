@@ -28,6 +28,11 @@
 #include "ext/standard/php_string.h"
 #include "ext/pcre/php_pcre.h"
 #include "ext/standard/php_filestat.h"
+#if PHP_VERSION_ID >= 70200
+#include "zend_interfaces.h"
+#elif defined(HAVE_SPL)
+#include "ext/spl/spl_iterators.h"
+#endif
 #include "php_zip.h"
 
 /* zip_open is a macro for renaming libzip zipopen, so we need to use PHP_NAMED_FUNCTION */
@@ -132,18 +137,18 @@ static char * php_zip_make_relative_path(char *path, size_t path_len) /* {{{ */
 # define CWD_STATE_FREE(s)  efree(s)
 
 /* {{{ php_zip_extract_file */
-static int php_zip_extract_file(struct zip * za, char *dest, char *file, int file_len)
+static int php_zip_extract_file(struct zip * za, char *dest, char *file, size_t file_len)
 {
 	php_stream_statbuf ssb;
 	struct zip_file *zf;
 	struct zip_stat sb;
 	char b[8192];
-	int n, len, ret;
+	int n, ret;
 	php_stream *stream;
 	char *fullpath;
 	char *file_dirname_fullpath;
 	char file_dirname[MAXPATHLEN];
-	size_t dir_len;
+	size_t dir_len, len;
 	int is_dir_only = 0;
 	char *path_cleaned;
 	size_t path_cleaned_len;
@@ -176,7 +181,7 @@ static int php_zip_extract_file(struct zip * za, char *dest, char *file, int fil
 		memcpy(file_dirname, path_cleaned, path_cleaned_len);
 		dir_len = php_dirname(file_dirname, path_cleaned_len);
 
-		if (dir_len <= 0 || (dir_len == 1 && file_dirname[0] == '.')) {
+		if (!dir_len || (dir_len == 1 && file_dirname[0] == '.')) {
 			len = spprintf(&file_dirname_fullpath, 0, "%s", dest);
 		} else {
 			len = spprintf(&file_dirname_fullpath, 0, "%s/%s", dest, file_dirname);
@@ -379,6 +384,20 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 /* }}} */
 
 /* {{{ RETURN_SB(sb) */
+#ifdef HAVE_ENCRYPTION
+#define RETURN_SB(sb) \
+	{ \
+		array_init(return_value); \
+		add_ascii_assoc_string(return_value, "name", (char *)(sb)->name); \
+		add_ascii_assoc_long(return_value, "index", (zend_long) (sb)->index); \
+		add_ascii_assoc_long(return_value, "crc", (zend_long) (sb)->crc); \
+		add_ascii_assoc_long(return_value, "size", (zend_long) (sb)->size); \
+		add_ascii_assoc_long(return_value, "mtime", (zend_long) (sb)->mtime); \
+		add_ascii_assoc_long(return_value, "comp_size", (zend_long) (sb)->comp_size); \
+		add_ascii_assoc_long(return_value, "comp_method", (zend_long) (sb)->comp_method); \
+		add_ascii_assoc_long(return_value, "encryption_method", (zend_long) (sb)->encryption_method); \
+	}
+#else
 #define RETURN_SB(sb) \
 	{ \
 		array_init(return_value); \
@@ -390,6 +409,7 @@ static int php_zip_parse_options(zval *options, zend_long *remove_all_path, char
 		add_ascii_assoc_long(return_value, "comp_size", (zend_long) (sb)->comp_size); \
 		add_ascii_assoc_long(return_value, "comp_method", (zend_long) (sb)->comp_method); \
 	}
+#endif
 /* }}} */
 
 static int php_zip_status(struct zip *za) /* {{{ */
@@ -605,6 +625,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 #endif
 	int files_cnt;
 	zend_string **namelist;
+	pcre2_match_context *mctx = php_pcre_mctx();
 
 #ifdef ZTS
 	if (!IS_ABSOLUTE_PATH(path, path_len)) {
@@ -631,11 +652,12 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 	files_cnt = php_stream_scandir(path, &namelist, NULL, (void *) php_stream_dirent_alphasort);
 
 	if (files_cnt > 0) {
-		pcre *re = NULL;
-		pcre_extra *pcre_extra = NULL;
-		int preg_options = 0, i;
+		pcre2_code *re = NULL;
+		pcre2_match_data *match_data = NULL;
+		uint32_t preg_options = 0, i, capture_count;
+		int rc;
 
-		re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
+		re = pcre_get_compiled_regex(regexp, &capture_count, &preg_options);
 		if (!re) {
 			php_error_docref(NULL, E_WARNING, "Invalid expression");
 			return -1;
@@ -647,9 +669,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 		for (i = 0; i < files_cnt; i++) {
 			zend_stat_t s;
 			char   fullpath[MAXPATHLEN];
-			int    ovector[3];
-			int    matches;
-			int    namelist_len = ZSTR_LEN(namelist[i]);
+			size_t    namelist_len = ZSTR_LEN(namelist[i]);
 
 			if ((namelist_len == 1 && ZSTR_VAL(namelist[i])[0] == '.') ||
 				(namelist_len == 2 && ZSTR_VAL(namelist[i])[0] == '.' && ZSTR_VAL(namelist[i])[1] == '.')) {
@@ -658,7 +678,7 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 			}
 
 			if ((path_len + namelist_len + 1) >= MAXPATHLEN) {
-				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %i, %i given)",
+				php_error_docref(NULL, E_WARNING, "add_path string too long (max: %u, %zu given)",
 						MAXPATHLEN - 1, (path_len + namelist_len + 1));
 				zend_string_release(namelist[i]);
 				break;
@@ -677,9 +697,16 @@ int php_zip_pcre(zend_string *regexp, char *path, int path_len, zval *return_val
 				continue;
 			}
 
-			matches = pcre_exec(re, NULL, ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, 0, ovector, 3);
+			match_data = php_pcre_create_match_data(capture_count, re);
+			if (!match_data) {
+				/* Allocation failed, but can proceed to the next pattern. */
+				zend_string_release(namelist[i]);
+				continue;
+			}
+			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(namelist[i]), ZSTR_LEN(namelist[i]), 0, preg_options, match_data, mctx);
+			php_pcre_free_match_data(match_data);
 			/* 0 means that the vector is too small to hold all the captured substring offsets */
-			if (matches < 0) {
+			if (rc < 0) {
 				zend_string_release(namelist[i]);
 				continue;
 			}
@@ -780,12 +807,20 @@ typedef struct _zip_prop_handler {
 static void php_zip_register_prop_handler(HashTable *prop_handler, char *name, zip_read_int_t read_int_func, zip_read_const_char_t read_char_func, zip_read_const_char_from_ze_t read_char_from_obj_func, int rettype) /* {{{ */
 {
 	zip_prop_handler hnd;
+	zend_string *str;
+	zval tmp;
 
 	hnd.read_const_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.read_const_char_from_obj_func = read_char_from_obj_func;
 	hnd.type = rettype;
-	zend_hash_str_add_mem(prop_handler, name, strlen(name), &hnd, sizeof(zip_prop_handler));
+	str = zend_string_init_interned(name, strlen(name), 1);
+	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(zip_prop_handler));
+
+	/* Register for reflection */
+	ZVAL_NULL(&tmp);
+	zend_declare_property_ex(zip_class_entry, str, &tmp, ZEND_ACC_PUBLIC, NULL);
+	zend_string_release(str);
 }
 /* }}} */
 
@@ -1534,6 +1569,23 @@ static ZIPARCHIVE_METHOD(close)
 }
 /* }}} */
 
+/* {{{ proto bool ZipArchive::count()
+close the zip archive */
+static ZIPARCHIVE_METHOD(count)
+{
+	struct zip *intern;
+	zval *self = getThis();
+
+	if (!self) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	RETVAL_LONG(zip_get_num_files(intern));
+}
+/* }}} */
+
 /* {{{ proto string ZipArchive::getStatusString()
  * Returns the status error message, system and/or zip messages */
 static ZIPARCHIVE_METHOD(getStatusString)
@@ -2225,6 +2277,74 @@ static ZIPARCHIVE_METHOD(getExternalAttributesIndex)
 }
 /* }}} */
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
+
+#ifdef HAVE_ENCRYPTION
+/* {{{ proto bool ZipArchive::setEncryptionName(string name, int method, [string password])
+Set encryption method for file in zip, using its name */
+static ZIPARCHIVE_METHOD(setEncryptionName)
+{
+	struct zip *intern;
+	zval *self = getThis();
+	zend_long method;
+	zip_int64_t idx;
+	char *name, *password = NULL;
+	size_t name_len, password_len;
+
+	if (!self) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sl|s",
+			&name, &name_len, &method, &password, &password_len) == FAILURE) {
+		return;
+	}
+
+	if (name_len < 1) {
+		php_error_docref(NULL, E_NOTICE, "Empty string as entry name");
+	}
+
+	idx = zip_name_locate(intern, name, 0);
+	if (idx < 0) {
+		RETURN_FALSE;
+	}
+
+	if (zip_file_set_encryption(intern, idx, (zip_uint16_t)method, password)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+
+/* {{{ proto bool ZipArchive::setEncryptionIndex(int index, int method, [string password])
+Set encryption method for file in zip, using its index */
+static ZIPARCHIVE_METHOD(setEncryptionIndex)
+{
+	struct zip *intern;
+	zval *self = getThis();
+	zend_long index, method;
+	char *password = NULL;
+	size_t password_len;
+
+	if (!self) {
+		RETURN_FALSE;
+	}
+
+	ZIP_FROM_OBJECT(intern, self);
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll|s",
+			&index, &method, &password, &password_len) == FAILURE) {
+		return;
+	}
+
+	if (zip_file_set_encryption(intern, index, (zip_uint16_t)method, password)) {
+		RETURN_FALSE;
+	}
+	RETURN_TRUE;
+}
+/* }}} */
+#endif
 
 /* {{{ proto string ZipArchive::getCommentName(string name[, int flags])
 Returns the comment of an entry using its name */
@@ -2956,6 +3076,20 @@ ZEND_END_ARG_INFO()
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
 /* }}} */
 
+#ifdef HAVE_ENCRYPTION
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_setencryption_name, 0, 0, 2)
+	ZEND_ARG_INFO(0, name)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_setencryption_index, 0, 0, 2)
+	ZEND_ARG_INFO(0, index)
+	ZEND_ARG_INFO(0, method)
+	ZEND_ARG_INFO(0, password)
+ZEND_END_ARG_INFO()
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_ziparchive_setcompname, 0, 0, 2)
 	ZEND_ARG_INFO(0, name)
 	ZEND_ARG_INFO(0, method)
@@ -2973,6 +3107,7 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(open,					arginfo_ziparchive_open, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setPassword,			arginfo_ziparchive_setpassword, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(close,				arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(count,				arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(getStatusString,		arginfo_ziparchive__void, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addEmptyDir,			arginfo_ziparchive_addemptydir, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(addFromString,		arginfo_ziparchive_addfromstring, ZEND_ACC_PUBLIC)
@@ -3007,6 +3142,10 @@ static const zend_function_entry zip_class_functions[] = {
 	ZIPARCHIVE_ME(getExternalAttributesIndex,	arginfo_ziparchive_getextattrindex, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCompressionName,		arginfo_ziparchive_setcompname, ZEND_ACC_PUBLIC)
 	ZIPARCHIVE_ME(setCompressionIndex,		arginfo_ziparchive_setcompindex, ZEND_ACC_PUBLIC)
+#ifdef HAVE_ENCRYPTION
+	ZIPARCHIVE_ME(setEncryptionName,		arginfo_ziparchive_setencryption_name, ZEND_ACC_PUBLIC)
+	ZIPARCHIVE_ME(setEncryptionIndex,		arginfo_ziparchive_setencryption_index, ZEND_ACC_PUBLIC)
+#endif
 	PHP_FE_END
 };
 /* }}} */
@@ -3041,6 +3180,11 @@ static PHP_MINIT_FUNCTION(zip)
 	php_zip_register_prop_handler(&zip_prop_handlers, "numFiles",  php_zip_get_num_files, NULL, NULL, IS_LONG);
 	php_zip_register_prop_handler(&zip_prop_handlers, "filename", NULL, NULL, php_zipobj_get_filename, IS_STRING);
 	php_zip_register_prop_handler(&zip_prop_handlers, "comment", NULL, php_zipobj_get_zip_comment, NULL, IS_STRING);
+#if PHP_VERSION_ID >= 70200
+	zend_class_implements(zip_class_entry, 1, zend_ce_countable);
+#elif defined(HAVE_SPL)
+	zend_class_implements(zip_class_entry, 1, spl_ce_Countable);
+#endif
 
 	REGISTER_ZIP_CLASS_CONST_LONG("CREATE", ZIP_CREATE);
 	REGISTER_ZIP_CLASS_CONST_LONG("EXCL", ZIP_EXCL);
@@ -3051,6 +3195,7 @@ static PHP_MINIT_FUNCTION(zip)
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_NODIR", ZIP_FL_NODIR);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_COMPRESSED", ZIP_FL_COMPRESSED);
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_UNCHANGED", ZIP_FL_UNCHANGED);
+
 #ifdef ZIP_FL_ENC_GUESS
 	/* Default filename encoding policy. */
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_GUESS", ZIP_FL_ENC_GUESS);
@@ -3067,20 +3212,6 @@ static PHP_MINIT_FUNCTION(zip)
 #ifdef ZIP_FL_ENC_CP437
 	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENC_CP437", ZIP_FL_ENC_CP437);
 #endif
-
-/* XXX The below are rather not implemented or to check whether makes sense to expose. */
-/*#ifdef ZIP_FL_RECOMPRESS
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_RECOMPRESS", ZIP_FL_RECOMPRESS);
-#endif
-#ifdef ZIP_FL_ENCRYPTED
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_ENCRYPTED", ZIP_FL_ENCRYPTED);
-#endif
-#ifdef ZIP_FL_LOCAL
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_LOCAL", ZIP_FL_LOCAL);
-#endif
-#ifdef ZIP_FL_CENTRAL
-	REGISTER_ZIP_CLASS_CONST_LONG("FL_CENTRAL", ZIP_FL_CENTRAL);
-#endif */
 
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_DEFAULT", ZIP_CM_DEFAULT);
 	REGISTER_ZIP_CLASS_CONST_LONG("CM_STORE", ZIP_CM_STORE);
@@ -3150,6 +3281,13 @@ static PHP_MINIT_FUNCTION(zip)
 
 	REGISTER_ZIP_CLASS_CONST_LONG("OPSYS_DEFAULT", ZIP_OPSYS_DEFAULT);
 #endif /* ifdef ZIP_OPSYS_DEFAULT */
+
+#ifdef HAVE_ENCRYPTION
+	REGISTER_ZIP_CLASS_CONST_LONG("EM_NONE",				ZIP_EM_NONE);
+	REGISTER_ZIP_CLASS_CONST_LONG("EM_AES_128",				ZIP_EM_AES_128);
+	REGISTER_ZIP_CLASS_CONST_LONG("EM_AES_192",				ZIP_EM_AES_192);
+	REGISTER_ZIP_CLASS_CONST_LONG("EM_AES_256",				ZIP_EM_AES_256);
+#endif
 
 	php_register_url_stream_wrapper("zip", &php_stream_zip_wrapper);
 

@@ -84,331 +84,331 @@ foreach($inputs as $input) {
 -- Iteration 1 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 2 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 3 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 4 --
 array(9) {
   ["sunrise"]=>
-  int(-69665)
+  int(-69672)
   ["sunset"]=>
-  int(-33260)
+  int(-33281)
   ["transit"]=>
-  int(-51462)
+  int(-51476)
   ["civil_twilight_begin"]=>
-  int(-71269)
+  int(-71277)
   ["civil_twilight_end"]=>
-  int(-31655)
+  int(-31675)
   ["nautical_twilight_begin"]=>
-  int(-73092)
+  int(-73100)
   ["nautical_twilight_end"]=>
-  int(-29832)
+  int(-29852)
   ["astronomical_twilight_begin"]=>
-  int(-74874)
+  int(-74883)
   ["astronomical_twilight_end"]=>
-  int(-28050)
+  int(-28069)
 }
 
 -- Iteration 5 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 6 --
 array(9) {
   ["sunrise"]=>
-  int(-69665)
+  int(-69672)
   ["sunset"]=>
-  int(-33260)
+  int(-33281)
   ["transit"]=>
-  int(-51462)
+  int(-51476)
   ["civil_twilight_begin"]=>
-  int(-71269)
+  int(-71277)
   ["civil_twilight_end"]=>
-  int(-31655)
+  int(-31675)
   ["nautical_twilight_begin"]=>
-  int(-73092)
+  int(-73100)
   ["nautical_twilight_end"]=>
-  int(-29832)
+  int(-29852)
   ["astronomical_twilight_begin"]=>
-  int(-74874)
+  int(-74883)
   ["astronomical_twilight_end"]=>
-  int(-28050)
+  int(-28069)
 }
 
 -- Iteration 7 --
 array(9) {
   ["sunrise"]=>
-  int(1226363)
+  int(1226368)
   ["sunset"]=>
-  int(1263468)
+  int(1263442)
   ["transit"]=>
-  int(1244916)
+  int(1244905)
   ["civil_twilight_begin"]=>
-  int(1224788)
+  int(1224792)
   ["civil_twilight_end"]=>
-  int(1265044)
+  int(1265019)
   ["nautical_twilight_begin"]=>
-  int(1222993)
+  int(1222996)
   ["nautical_twilight_end"]=>
-  int(1266839)
+  int(1266815)
   ["astronomical_twilight_begin"]=>
-  int(1221233)
+  int(1221234)
   ["astronomical_twilight_end"]=>
-  int(1268599)
+  int(1268576)
 }
 
 -- Iteration 8 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 9 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 10 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 11 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 12 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 13 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 14 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 15 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 16 --
@@ -444,45 +444,45 @@ bool(false)
 -- Iteration 22 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 23 --
 array(9) {
   ["sunrise"]=>
-  int(16748)
+  int(16742)
   ["sunset"]=>
-  int(53182)
+  int(53161)
   ["transit"]=>
-  int(34965)
+  int(34951)
   ["civil_twilight_begin"]=>
-  int(15145)
+  int(15138)
   ["civil_twilight_end"]=>
-  int(54786)
+  int(54765)
   ["nautical_twilight_begin"]=>
-  int(13324)
+  int(13316)
   ["nautical_twilight_end"]=>
-  int(56607)
+  int(56587)
   ["astronomical_twilight_begin"]=>
-  int(11542)
+  int(11534)
   ["astronomical_twilight_end"]=>
-  int(58389)
+  int(58369)
 }
 
 -- Iteration 24 --

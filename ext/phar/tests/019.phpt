@@ -9,7 +9,7 @@ phar.require_hash=0
 
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = b"<?php
+$file = "<?php
 Phar::mapPhar('hio');
 __HALT_COMPILER(); ?>";
 

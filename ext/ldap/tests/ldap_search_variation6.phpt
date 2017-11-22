@@ -25,12 +25,12 @@ var_dump(
 	ldap_get_entries($link, $result[1]) === $result0
 );
 var_dump(
-	$result = ldap_search(array($link, $link), null, $filter),
+	$result = ldap_search(array($link, $link), "", $filter),
 	ldap_get_entries($link, $result[0]),
 	ldap_get_entries($link, $result[1])
 );
 var_dump(
-	$result = ldap_search(array($link, $link), null, array($filter, $filter)),
+	$result = ldap_search(array($link, $link), "", array($filter, $filter)),
 	ldap_get_entries($link, $result[0]),
 	ldap_get_entries($link, $result[1])
 );
@@ -87,7 +87,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(4) "oops"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -148,7 +148,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(15) "oopsIDitItAgain"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"
@@ -200,7 +200,7 @@ array(4) {
       ["count"]=>
       int(1)
       [0]=>
-      string(17) "0r1g1na1 passw0rd"
+      string(%d) "%s"
     }
     [3]=>
     string(12) "userpassword"

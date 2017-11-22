@@ -23,7 +23,7 @@
 #include "streams/php_streams_int.h"
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 # undef AF_UNIX
 #endif
 
@@ -835,7 +835,7 @@ static inline int php_tcp_sockop_accept(php_stream *stream, php_netstream_data_t
 		if (xparam->outputs.client) {
 			xparam->outputs.client->ctx = stream->ctx;
 			if (stream->ctx) {
-				GC_REFCOUNT(stream->ctx)++;
+				GC_ADDREF(stream->ctx);
 			}
 		}
 	}

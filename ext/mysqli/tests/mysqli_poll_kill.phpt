@@ -186,13 +186,13 @@ if (!$IS_MYSQLND)
 To be fixed later. Minor issue about fetching error message from killed line
 --EXPECTF--
 array(1) {
-  [%u|b%"processed before killed"]=>
-  %unicode|string%(1) "1"
+  ["processed before killed"]=>
+  string(1) "1"
 }
 Fetching from thread %d...
 array(1) {
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 
 Warning: mysqli_reap_async_query(): Premature end of data (mysqlnd_wireprotocol.c:%d) in %s on line %d

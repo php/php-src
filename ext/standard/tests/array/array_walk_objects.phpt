@@ -29,16 +29,16 @@ array_walk($var, "walk");
 echo "Done\n";
 ?>
 --EXPECTF--	
-%unicode|string%(3) "foo"
-%unicode|string%(3) "foo"
-%unicode|string%(3) "bar"
-%unicode|string%(3) "bar"
-%unicode|string%(13) "%r\0%rtest%r\0%rvar_pri"
-%unicode|string%(12) "test_private"
-%unicode|string%(10) "%r\0%r*%r\0%rvar_pro"
-%unicode|string%(14) "test_protected"
-%unicode|string%(7) "var_pub"
-%unicode|string%(11) "test_public"
+string(3) "foo"
+string(3) "foo"
+string(3) "bar"
+string(3) "bar"
+string(13) "%r\0%rtest%r\0%rvar_pri"
+string(12) "test_private"
+string(10) "%r\0%r*%r\0%rvar_pro"
+string(14) "test_protected"
+string(7) "var_pub"
+string(11) "test_public"
 
-Warning: array_walk() expects parameter 1 to be array, %unicode_string_optional% given in %s on line %d
+Warning: array_walk() expects parameter 1 to be array, string given in %s on line %d
 Done

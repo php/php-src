@@ -81,7 +81,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
-	if (--GC_REFCOUNT(&iter->std) > 0) {
+	if (GC_DELREF(&iter->std) > 0) {
 		return;
 	}
 
@@ -103,4 +103,6 @@ ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -1095,13 +1095,16 @@ static entity_table_opt determine_entity_table(int all, int doctype)
  * only the basic ones, i.e., those in basic_entities_ex + the numeric entities
  * that correspond to quotes.
  */
-PHPAPI zend_string *php_unescape_html_entities(unsigned char *old, size_t oldlen, int all, int flags, char *hint_charset)
+PHPAPI zend_string *php_unescape_html_entities(zend_string *str, int all, int flags, char *hint_charset)
 {
-	size_t retlen;
 	zend_string *ret;
 	enum entity_charset charset;
-	const entity_ht *inverse_map = NULL;
-	size_t new_size = TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(oldlen);
+	const entity_ht *inverse_map;
+	size_t new_size;
+
+	if (!memchr(ZSTR_VAL(str), '&', ZSTR_LEN(str))) {
+		return zend_string_copy(str);
+	}
 
 	if (all) {
 		charset = determine_charset(hint_charset);
@@ -1111,26 +1114,19 @@ PHPAPI zend_string *php_unescape_html_entities(unsigned char *old, size_t oldlen
 
 	/* don't use LIMIT_ALL! */
 
-	if (oldlen > new_size) {
+	new_size = TRAVERSE_FOR_ENTITIES_EXPAND_SIZE(ZSTR_LEN(str));
+	if (ZSTR_LEN(str) > new_size) {
 		/* overflow, refuse to do anything */
-		ret = zend_string_init((char*)old, oldlen, 0);
-		retlen = oldlen;
-		goto empty_source;
+		return zend_string_copy(str);
 	}
+
 	ret = zend_string_alloc(new_size, 0);
-	ZSTR_VAL(ret)[0] = '\0';
-	ZSTR_LEN(ret) = oldlen;
-	retlen = oldlen;
-	if (retlen == 0) {
-		goto empty_source;
-	}
 
 	inverse_map = unescape_inverse_map(all, flags);
 
 	/* replace numeric entities */
-	traverse_for_entities((char*)old, oldlen, ret, all, flags, inverse_map, charset);
+	traverse_for_entities(ZSTR_VAL(str), ZSTR_LEN(str), ret, all, flags, inverse_map, charset);
 
-empty_source:
 	return ret;
 }
 /* }}} */
@@ -1495,16 +1491,17 @@ PHP_FUNCTION(htmlspecialchars)
    Convert special HTML entities back to characters */
 PHP_FUNCTION(htmlspecialchars_decode)
 {
-	char *str;
-	size_t str_len;
+	zend_string *str;
 	zend_long quote_style = ENT_COMPAT;
 	zend_string *replaced;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &str, &str_len, &quote_style) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(quote_style)
+	ZEND_PARSE_PARAMETERS_END();
 
-	replaced = php_unescape_html_entities((unsigned char*)str, str_len, 0 /*!all*/, (int)quote_style, NULL);
+	replaced = php_unescape_html_entities(str, 0 /*!all*/, (int)quote_style, NULL);
 	if (replaced) {
 		RETURN_STR(replaced);
 	}
@@ -1531,7 +1528,7 @@ PHP_FUNCTION(html_entity_decode)
 	if (!hint_charset) {
 		default_charset = get_default_charset();
 	}
-	replaced = php_unescape_html_entities((unsigned char*)ZSTR_VAL(str), ZSTR_LEN(str), 1 /*all*/, (int)quote_style, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset));
+	replaced = php_unescape_html_entities(str, 1 /*all*/, (int)quote_style, (hint_charset ? ZSTR_VAL(hint_charset) : default_charset));
 
 	if (replaced) {
 		RETURN_STR(replaced);
@@ -1622,10 +1619,12 @@ PHP_FUNCTION(get_html_translation_table)
 	 * getting the translated table from data structures that are optimized for
 	 * random access, not traversal */
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|lls",
-			&all, &flags, &charset_hint, &charset_hint_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 3)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(all)
+		Z_PARAM_LONG(flags)
+		Z_PARAM_STRING(charset_hint, charset_hint_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	charset = determine_charset(charset_hint);
 	doctype = flags & ENT_HTML_DOC_TYPE_MASK;

@@ -425,7 +425,7 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 	if (exception) {
 		zend_throw_exception_object(exception);
 	} else {
-		zend_throw_exception_internal(NULL);
+		zend_rethrow_exception(EG(current_execute_data));
 	}
 	generator->execute_data->opline++;
 	EG(current_execute_data) = original_execute_data;
@@ -514,7 +514,7 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 	if (was_leaf) {
 		zend_generator *next = generator->node.parent;
 		leaf->node.ptr.root = generator->node.ptr.root;
-		++GC_REFCOUNT(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
+		GC_ADDREF(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
 		generator->node.ptr.leaf = leaf;
 
 		while (next) {
@@ -592,7 +592,7 @@ void zend_generator_yield_from(zend_generator *generator, zend_generator *from)
 
 	generator->node.parent = from;
 	zend_generator_get_current(generator);
-	--GC_REFCOUNT(&from->std);
+	GC_DELREF(&from->std);
 }
 
 ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator, zend_generator *leaf)
@@ -658,7 +658,7 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 		} else {
 			do {
 				root = root->node.parent;
-				++GC_REFCOUNT(&root->std);
+				GC_ADDREF(&root->std);
 			} while (root->node.parent);
 		}
 	}
@@ -741,12 +741,8 @@ static int zend_generator_get_next_delegated_value(zend_generator *generator) /*
 	}
 	return SUCCESS;
 
-exception: {
-		zend_execute_data *ex = EG(current_execute_data);
-		EG(current_execute_data) = generator->execute_data;
-		zend_throw_exception_internal(NULL);
-		EG(current_execute_data) = ex;
-	}
+exception:
+	zend_rethrow_exception(generator->execute_data);
 
 failure:
 	zval_ptr_dtor(&generator->values);
@@ -832,7 +828,11 @@ try_again:
 		if (UNEXPECTED(EG(exception) != NULL)) {
 			if (generator == orig_generator) {
 				zend_generator_close(generator, 0);
-				zend_throw_exception_internal(NULL);
+				if (EG(current_execute_data) &&
+				    EG(current_execute_data)->func &&
+				    ZEND_USER_CODE(EG(current_execute_data)->func->common.type)) {
+					zend_rethrow_exception(EG(current_execute_data));
+				}
 			} else {
 				generator = zend_generator_get_current(orig_generator);
 				zend_generator_throw_exception(generator, NULL);
@@ -1014,14 +1014,14 @@ ZEND_METHOD(Generator, send)
  * Throws an exception into the generator */
 ZEND_METHOD(Generator, throw)
 {
-	zval *exception, exception_copy;
+	zval *exception;
 	zend_generator *generator;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(exception)
 	ZEND_PARSE_PARAMETERS_END();
 
-	ZVAL_DUP(&exception_copy, exception);
+	Z_TRY_ADDREF_P(exception);
 
 	generator = (zend_generator *) Z_OBJ_P(getThis());
 
@@ -1030,7 +1030,7 @@ ZEND_METHOD(Generator, throw)
 	if (generator->execute_data) {
 		zend_generator *root = zend_generator_get_current(generator);
 
-		zend_generator_throw_exception(root, &exception_copy);
+		zend_generator_throw_exception(root, exception);
 
 		zend_generator_resume(generator);
 
@@ -1044,7 +1044,7 @@ ZEND_METHOD(Generator, throw)
 	} else {
 		/* If the generator is already closed throw the exception in the
 		 * current context */
-		zend_throw_exception_object(&exception_copy);
+		zend_throw_exception_object(exception);
 	}
 }
 /* }}} */
@@ -1259,4 +1259,6 @@ void zend_register_generator_ce(void) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

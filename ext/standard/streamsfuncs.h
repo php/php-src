@@ -61,6 +61,10 @@ PHP_FUNCTION(stream_socket_shutdown);
 PHP_FUNCTION(stream_resolve_include_path);
 PHP_FUNCTION(stream_is_local);
 PHP_FUNCTION(stream_supports_lock);
+PHP_FUNCTION(stream_isatty);
+#ifdef PHP_WIN32
+PHP_FUNCTION(sapi_windows_vt100_support);
+#endif
 
 #if HAVE_SOCKETPAIR
 PHP_FUNCTION(stream_socket_pair);

@@ -100,207 +100,210 @@ ob_end_flush();
 *** Testing session_set_cookie_params() : error functionality ***
 
 -- Iteration 1 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 2 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 3 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 4 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+
+Warning: session_set_cookie_params(): CookieLifetime cannot be negative in %s on line 81
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 5 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 6 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+
+Warning: session_set_cookie_params(): CookieLifetime cannot be negative in %s on line 81
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 7 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 8 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 9 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 10 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 11 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 12 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 13 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 14 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 15 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 16 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 17 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 18 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 19 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 20 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 21 --
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+
+Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in %s on line 84
 NULL
 
-Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in %s on line %d
+Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in %s on line 85
 NULL
-
-Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in %s on line %d
-NULL
-NULL
+bool(true)
 
 -- Iteration 22 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 23 --
-NULL
-NULL
-NULL
-NULL
-NULL
-NULL
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
+bool(true)
 
 -- Iteration 24 --
+bool(true)
+
+Warning: session_set_cookie_params() expects parameter 2 to be string, resource given in %s on line 82
 NULL
 
-Warning: session_set_cookie_params() expects parameter 2 to be string, resource given in %s on line %d
+Warning: session_set_cookie_params() expects parameter 3 to be string, resource given in %s on line 83
 NULL
 
-Warning: session_set_cookie_params() expects parameter 3 to be string, resource given in %s on line %d
+Warning: session_set_cookie_params() expects parameter 4 to be boolean, resource given in %s on line 84
 NULL
 
-Warning: session_set_cookie_params() expects parameter 4 to be boolean, resource given in %s on line %d
+Warning: session_set_cookie_params() expects parameter 5 to be boolean, resource given in %s on line 85
 NULL
-
-Warning: session_set_cookie_params() expects parameter 5 to be boolean, resource given in %s on line %d
-NULL
-NULL
+bool(true)
 Done
-

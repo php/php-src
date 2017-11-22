@@ -59,12 +59,12 @@ Warning: snmp2_real_walk() expects parameter 5 to be integer, %s given in %s on 
 bool(false)
 Checking working
 Single OID
-%unicode|string%(5) "array"
+string(5) "array"
 int(%d)
 string(%d) "%s"
 string(%d) "%s"
 Single OID in array
-%unicode|string%(5) "array"
+string(5) "array"
 int(%d)
 string(%d) "%s"
 string(%d) "%s"

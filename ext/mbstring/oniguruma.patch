@@ -1,0 +1,61 @@
+diff -wur oniguruma.orig/src/config.h.win32 oniguruma/src/config.h.win32
+--- oniguruma.orig/src/config.h.win32	2017-07-13 17:12:45.228068900 +0200
++++ oniguruma/src/config.h.win32	2017-07-13 16:11:19.955226200 +0200
+@@ -15,6 +15,7 @@
+ #define SIZEOF_VOIDP 4
+ #define SIZEOF_FLOAT 4
+ #define SIZEOF_DOUBLE 8
++#define SIZEOF_SIZE_T 4
+ #define HAVE_PROTOTYPES 1
+ #define TOKEN_PASTE(x,y) x##y
+ #define HAVE_STDARG_PROTOTYPES 1
+diff -wur oniguruma.orig/src/config.h.win64 oniguruma/src/config.h.win64
+--- oniguruma.orig/src/config.h.win64	2017-07-13 17:12:45.273605000 +0200
++++ oniguruma/src/config.h.win64	2017-07-13 16:11:19.957231300 +0200
+@@ -15,6 +15,7 @@
+ #define SIZEOF_VOIDP 8
+ #define SIZEOF_FLOAT 4
+ #define SIZEOF_DOUBLE 8
++#define SIZEOF_SIZE_T 8
+ #define HAVE_PROTOTYPES 1
+ #define TOKEN_PASTE(x,y) x##y
+ #define HAVE_STDARG_PROTOTYPES 1
+diff -wur oniguruma.orig/src/regint.h oniguruma/src/regint.h
+--- oniguruma.orig/src/regint.h	2017-07-13 17:12:48.686073300 +0200
++++ oniguruma/src/regint.h	2017-07-13 17:13:28.032286100 +0200
+@@ -201,17 +201,21 @@
+ } while(0)
+ 
+ /* sizeof(OnigCodePoint) */
++#ifdef SIZEOF_SIZE_T
++# define WORD_ALIGNMENT_SIZE     SIZEOF_SIZE_T
++#else
+ #define WORD_ALIGNMENT_SIZE     SIZEOF_LONG
++#endif
+ 
+ #define GET_ALIGNMENT_PAD_SIZE(addr,pad_size) do {\
+   (pad_size) = WORD_ALIGNMENT_SIZE \
+-               - ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
++               - ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
+   if ((pad_size) == WORD_ALIGNMENT_SIZE) (pad_size) = 0;\
+ } while (0)
+ 
+ #define ALIGNMENT_RIGHT(addr) do {\
+   (addr) += (WORD_ALIGNMENT_SIZE - 1);\
+-  (addr) -= ((unsigned int )(addr) % WORD_ALIGNMENT_SIZE);\
++  (addr) -= ((size_t)(addr) % WORD_ALIGNMENT_SIZE);\
+ } while (0)
+ 
+ #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
+@@ -662,7 +666,11 @@
+   BBuf*  mbuf;   /* multi-byte info or NULL */
+ } CClassNode;
+ 
++#ifdef _WIN64
++typedef __int64 OnigStackIndex;
++#else
+ typedef long OnigStackIndex;
++#endif
+ 
+ typedef struct _OnigStackType {
+   unsigned int type;

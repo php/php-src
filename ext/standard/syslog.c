@@ -12,7 +12,7 @@
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
-   | Author: Stig Sæther Bakken <ssb@php.net>                             |
+   | Author: Stig SÃ¦ther Bakken <ssb@php.net>                             |
    +----------------------------------------------------------------------+
  */
 
@@ -138,10 +138,12 @@ PHP_FUNCTION(openlog)
 	zend_long option, facility;
 	size_t ident_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sll", &ident,
-							  &ident_len, &option, &facility) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(ident, ident_len)
+		Z_PARAM_LONG(option)
+		Z_PARAM_LONG(facility)
+	ZEND_PARSE_PARAMETERS_END();
+
 	if (BG(syslog_device)) {
 		free(BG(syslog_device));
 	}
@@ -179,10 +181,10 @@ PHP_FUNCTION(syslog)
 	char *message;
 	size_t message_len;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ls", &priority,
-							  &message, &message_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_LONG(priority)
+		Z_PARAM_STRING(message, message_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_syslog(priority, "%s", message);
 	RETURN_TRUE;

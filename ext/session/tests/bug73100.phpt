@@ -13,13 +13,15 @@ ob_start();
 var_dump(session_start());
 session_module_name("user");
 var_dump(session_destroy());
+
+session_module_name("user");
 ?>
 ===DONE===
 --EXPECTF--
 bool(true)
 
-Warning: session_module_name(): A session is active. You cannot change the session module's ini settings at this time in %s on line %d
+Warning: session_module_name(): Cannot change save handler module when session is active in %s on line 4
+bool(true)
 
-Warning: session_destroy(): Session object destruction failed in %s on line %d
-bool(false)
-===DONE===
+Recoverable fatal error: session_module_name(): Cannot set 'user' save handler by ini_set() or session_module_name() in %s on line 7
+

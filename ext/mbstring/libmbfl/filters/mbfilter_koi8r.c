@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_koi8r = {
 	"KOI8-R",
 	(const char *(*)[])&mbfl_encoding_koi8r_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_koi8r_wchar,
+	&vtbl_wchar_koi8r
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_koi8r = {

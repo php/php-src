@@ -37,7 +37,7 @@ function runtest() {
    global $filename;
    //correct php53 behaviour is to ingnore the FILE_USE_INCLUDE_PATH unless the file alread exists 
    // in the include path. In this case it doesn't so the file should be written in the current dir.
-   file_put_contents($filename, (binary) "File in include path", FILE_USE_INCLUDE_PATH);
+   file_put_contents($filename, "File in include path", FILE_USE_INCLUDE_PATH);
    $line = file_get_contents($filename);
    echo "$line\n";
    unlink($filename);

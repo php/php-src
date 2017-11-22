@@ -3,7 +3,6 @@ imagecopyresampled()
 --SKIPIF--
 <?php 
 	if (!function_exists('imagecopyresampled')) die('skip imagecopyresampled() not available'); 
-	if (!(imagetype() & IMG_PNG)) die('skip PNG Support is not enabled');
 ?>
 --FILE--
 <?php

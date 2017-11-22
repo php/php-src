@@ -49,15 +49,15 @@ echo "Done"
 ?>
 --EXPECTF--
 *** Testing array_walk_recursive() : object functionality ***
-%unicode|string%(18) "%r\0%rMyClass%r\0%rpri_value"
+string(18) "%r\0%rMyClass%r\0%rpri_value"
 int(10)
 int(1)
 
-%unicode|string%(9) "pub_value"
+string(9) "pub_value"
 int(10)
 int(1)
 
-%unicode|string%(12) "%r\0%r*%r\0%rpro_value"
+string(12) "%r\0%r*%r\0%rpro_value"
 int(10)
 int(1)
 

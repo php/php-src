@@ -20,6 +20,7 @@
 
 #include "php.h"
 #include "SAPI.h"
+#include <emmintrin.h>
 
 ZEND_TLS const struct php_win32_cp *cur_cp = NULL;
 ZEND_TLS const struct php_win32_cp *orig_cp = NULL;
@@ -93,10 +94,19 @@ PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, si
 	return php_win32_cp_to_w_int(in, in_len, out_len, cp, flags);
 }/*}}}*/
 
+#define ASCII_FAIL_RETURN() \
+	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) { \
+		*out_len = 0; \
+	} \
+	return NULL;
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
 	const char *idx = in, *end; 
+	size_t i = 0;
+	int k = 0;
+	wchar_t *ret_idx;
+
 
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
@@ -114,59 +124,78 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 	end = in + in_len;
 
+	/* The ASCII check part can be moved into a separate function. */
+	while (end - idx > 16) {
+		__m128i block = _mm_loadu_si128((__m128i *)idx);
+		if (_mm_movemask_epi8(block)) {
+			ASCII_FAIL_RETURN()
+		}
+		idx += 16;
+	}
+
+	while (end - idx > 8) {
+		char ch0 = *idx;
+		char ch1 = *(idx + 1);
+		char ch2 = *(idx + 2);
+		char ch3 = *(idx + 3);
+		char ch4 = *(idx + 4);
+		char ch5 = *(idx + 5);
+		char ch6 = *(idx + 6);
+		char ch7 = *(idx + 7);
+
+		if (!__isascii(ch0) || !__isascii(ch1) || !__isascii(ch2) || !__isascii(ch3) ||
+			!__isascii(ch4) || !__isascii(ch5) || !__isascii(ch6) || !__isascii(ch7)) {
+			ASCII_FAIL_RETURN()
+		}
+
+		idx += 8;
+	}
+
+	/* Finish the job on remaining chars. */
 	while (idx != end) {
 		if (!__isascii(*idx) && '\0' != *idx) {
-			break;
+			ASCII_FAIL_RETURN()
 		}
 		idx++;
 	}
 
-	if (idx == end) {
-		size_t i = 0;
-		int k = 0;
-		wchar_t *ret_idx;
+	ret = malloc((in_len+1)*sizeof(wchar_t));
+	if (!ret) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+		return NULL;
+	}
 
-		ret = malloc((in_len+1)*sizeof(wchar_t));
-		if (!ret) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
+	ret_idx = ret;
+	do {
+		k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)(in_len - i), in);
+
+		if (-1 == k) {
+			free(ret);
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 			return NULL;
 		}
 
-		ret_idx = ret;
-		do {
-			k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)(in_len - i), in);
+		i += k + 1;
 
-			if (-1 == k) {
-				free(ret);
-				SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-				return NULL;
-			}
-
-			i += k + 1;
-
-			if (i < in_len) {
-				/* Advance as this seems to be a string with \0 in it. */
-				in += k + 1;
-				ret_idx += k + 1;
-			}
-
-
-		} while (i < in_len);
-		ret[in_len] = L'\0';
-
-		assert(ret ? wcslen(ret) == in_len : 1);
-
-		if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
-			*out_len = in_len;
+		if (i < in_len) {
+			/* Advance as this seems to be a string with \0 in it. */
+			in += k + 1;
+			ret_idx += k + 1;
 		}
-	} else {
-		if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
-			*out_len = 0;
-		}
+
+
+	} while (i < in_len);
+	ret[in_len] = L'\0';
+
+	assert(ret ? wcslen(ret) == in_len : 1);
+
+	if (PHP_WIN32_CP_IGNORE_LEN_P != out_len) {
+		*out_len = in_len;
 	}
 
 	return ret;
 }/*}}}*/
+#undef ASCII_FAIL_RETURN
 
 __forceinline static char *php_win32_cp_from_w_int(const wchar_t* in, size_t in_len, size_t *out_len, UINT cp, DWORD flags)
 {/*{{{*/

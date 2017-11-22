@@ -20,7 +20,7 @@ function_exists('mb_strtolower') or die("skip mb_strtolower() is not available i
 echo "*** Testing mb_strtolower() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$sourcestring = b'Hello, World';
+$sourcestring = 'Hello, World';
 
 //get an unset variable
 $unset_var = 10;
@@ -157,14 +157,10 @@ Warning: mb_strtolower(): Unknown encoding "0.5" in %s on line %d
 bool(false)
 
 -- Iteration 10 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 11 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 12 --
 
@@ -209,14 +205,10 @@ string(24) "68656c6c6f2c20776f726c64"
 string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 22 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 23 --
-
-Warning: mb_strtolower(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "68656c6c6f2c20776f726c64"
 
 -- Iteration 24 --
 

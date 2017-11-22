@@ -506,8 +506,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 		rebuild_object_properties(&intern->std);
 	}
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
@@ -1249,9 +1248,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
+	Z_TRY_ADDREF_P(value);
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value);

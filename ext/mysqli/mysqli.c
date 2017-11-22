@@ -370,7 +370,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
-	p.name = zend_string_init(pname, pname_len, 1);
+	p.name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = (w_func) ? w_func : mysqli_write_na;
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
@@ -424,8 +424,7 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
-	ALLOC_HASHTABLE(retval);
-	ZEND_INIT_SYMTABLE_EX(retval, zend_hash_num_elements(props) + 1, 0);
+	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
 		zval rv, member;
@@ -568,11 +567,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
-#endif
 #endif
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -691,6 +688,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 #if defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
@@ -882,7 +880,6 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	zend_ulong client_ver = mysql_get_client_version();
 	/*
@@ -894,7 +891,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	}
 #else
 	mysql_server_end();
-#endif
 #endif
 #endif
 
@@ -914,7 +910,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -951,7 +947,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {

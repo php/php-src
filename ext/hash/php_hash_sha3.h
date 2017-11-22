@@ -22,8 +22,12 @@
 #include "php.h"
 
 typedef struct {
+#ifdef HAVE_SLOW_HASH3
 	unsigned char state[200]; // 5 * 5 * sizeof(uint64)
 	uint32_t pos;
+#else
+	void *hashinstance;
+#endif
 } PHP_SHA3_CTX;
 
 typedef PHP_SHA3_CTX PHP_SHA3_224_CTX;

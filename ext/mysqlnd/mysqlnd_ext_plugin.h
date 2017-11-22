@@ -13,7 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
-  |          Johannes Schlüter <johannes@php.net>                        |
+  |          Johannes SchlÃ¼ter <johannes@php.net>                        |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
@@ -119,8 +119,8 @@ struct st_mysqlnd_plugin_methods_xetters
 
 	struct st_mnd_command_factory_xetters
 	{
-		func_mysqlnd__command_factory (*get)();
-		void (*set)(func_mysqlnd__command_factory factory);
+		func_mysqlnd__run_command (*get)();
+		void (*set)(func_mysqlnd__run_command factory);
 	} command_factory;
 };
 

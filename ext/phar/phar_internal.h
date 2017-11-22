@@ -155,28 +155,28 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	int         cwd_len;
@@ -250,7 +250,7 @@ typedef struct _phar_entry_info {
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
 	/* position in the manifest */
-	uint                     manifest_pos;
+	uint32_t                     manifest_pos;
 	/* for stat */
 	unsigned short           inode;
 
@@ -300,7 +300,7 @@ struct _phar_archive_data {
 	char                     *signature;
 	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	uint                     phar_pos;
+	uint32_t                     phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	unsigned int             is_temporary_alias:1;
 	unsigned int             is_modified:1;

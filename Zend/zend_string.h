@@ -25,14 +25,26 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API extern zend_string *(*zend_new_interned_string)(zend_string *str);
-ZEND_API extern void (*zend_interned_strings_snapshot)(void);
-ZEND_API extern void (*zend_interned_strings_restore)(void);
+typedef void (*zend_string_copy_storage_func_t)(void);
+typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
+typedef zend_string *(*zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
+
+ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
+ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
 ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
-void zend_interned_strings_init(void);
-void zend_interned_strings_dtor(void);
-void zend_known_interned_strings_init(zend_string ***, uint32_t *);
+ZEND_API void zend_interned_strings_init(void);
+ZEND_API void zend_interned_strings_dtor(void);
+ZEND_API void zend_interned_strings_activate(void);
+ZEND_API void zend_interned_strings_deactivate(void);
+ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
+ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
+ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler);
+ZEND_API void zend_interned_strings_switch_storage(zend_bool request);
+
+ZEND_API extern zend_string  *zend_empty_string;
+ZEND_API extern zend_string  *zend_one_char_string[256];
+ZEND_API extern zend_string **zend_known_strings;
 
 END_EXTERN_C()
 
@@ -56,7 +68,9 @@ END_EXTERN_C()
 
 #define ZSTR_IS_INTERNED(s)					(GC_FLAGS(s) & IS_STR_INTERNED)
 
-#define ZSTR_EMPTY_ALLOC()				CG(empty_string)
+#define ZSTR_EMPTY_ALLOC() zend_empty_string
+#define ZSTR_CHAR(c) zend_one_char_string[c]
+#define ZSTR_KNOWN(idx) zend_known_strings[idx]
 
 #define _ZSTR_HEADER_SIZE XtOffsetOf(zend_string, val)
 
@@ -64,7 +78,7 @@ END_EXTERN_C()
 
 #define ZSTR_ALLOCA_ALLOC(str, _len, use_heap) do { \
 	(str) = (zend_string *)do_alloca(ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_STRUCT_SIZE(_len), 8), (use_heap)); \
-	GC_REFCOUNT(str) = 1; \
+	GC_SET_REFCOUNT(str, 1); \
 	GC_TYPE_INFO(str) = IS_STRING; \
 	zend_string_forget_hash_val(str); \
 	ZSTR_LEN(str) = _len; \
@@ -104,7 +118,7 @@ static zend_always_inline uint32_t zend_string_refcount(const zend_string *s)
 static zend_always_inline uint32_t zend_string_addref(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
-		return ++GC_REFCOUNT(s);
+		return GC_ADDREF(s);
 	}
 	return 1;
 }
@@ -112,7 +126,7 @@ static zend_always_inline uint32_t zend_string_addref(zend_string *s)
 static zend_always_inline uint32_t zend_string_delref(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
-		return --GC_REFCOUNT(s);
+		return GC_DELREF(s);
 	}
 	return 1;
 }
@@ -121,7 +135,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 {
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
 
-	GC_REFCOUNT(ret) = 1;
+	GC_SET_REFCOUNT(ret, 1);
 #if 1
 	/* optimized single assignment */
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
@@ -139,7 +153,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 {
 	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
 
-	GC_REFCOUNT(ret) = 1;
+	GC_SET_REFCOUNT(ret, 1);
 #if 1
 	/* optimized single assignment */
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
@@ -165,7 +179,7 @@ static zend_always_inline zend_string *zend_string_init(const char *str, size_t 
 static zend_always_inline zend_string *zend_string_copy(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
-		GC_REFCOUNT(s)++;
+		GC_ADDREF(s);
 	}
 	return s;
 }
@@ -190,7 +204,7 @@ static zend_always_inline zend_string *zend_string_realloc(zend_string *s, size_
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
-			GC_REFCOUNT(s)--;
+			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
@@ -210,7 +224,7 @@ static zend_always_inline zend_string *zend_string_extend(zend_string *s, size_t
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
-			GC_REFCOUNT(s)--;
+			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
@@ -230,7 +244,7 @@ static zend_always_inline zend_string *zend_string_truncate(zend_string *s, size
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
-			GC_REFCOUNT(s)--;
+			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_alloc(len, persistent);
@@ -249,7 +263,7 @@ static zend_always_inline zend_string *zend_string_safe_realloc(zend_string *s, 
 			zend_string_forget_hash_val(ret);
 			return ret;
 		} else {
-			GC_REFCOUNT(s)--;
+			GC_DELREF(s);
 		}
 	}
 	ret = zend_string_safe_alloc(n, m, l, persistent);
@@ -268,7 +282,7 @@ static zend_always_inline void zend_string_free(zend_string *s)
 static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {
-		if (--GC_REFCOUNT(s) == 0) {
+		if (GC_DELREF(s) == 0) {
 			pefree(s, GC_FLAGS(s) & IS_STR_PERSISTENT);
 		}
 	}
@@ -359,27 +373,6 @@ EMPTY_SWITCH_DEFAULT_CASE()
 #endif
 }
 
-#ifdef ZTS
-static zend_always_inline zend_string* zend_zts_interned_string_init(const char *val, size_t len)
-{
-	zend_string *str;
-
-	str = zend_string_init(val, len, 1);
-
-	zend_string_hash_val(str);
-	GC_FLAGS(str) |= IS_STR_INTERNED;
-	return str;
-}
-
-static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
-{
-	if (NULL != *s) {
-		free(*s);
-		*s = NULL;
-	}
-}
-#endif
-
 #define ZEND_KNOWN_STRINGS(_) \
 	_(ZEND_STR_FILE,                   "file") \
 	_(ZEND_STR_LINE,                   "line") \
@@ -410,6 +403,22 @@ static zend_always_inline void zend_zts_interned_string_free(zend_string **s)
 	_(ZEND_STR_SEVERITY,               "severity") \
 	_(ZEND_STR_STRING,                 "string") \
 	_(ZEND_STR_TRACE,                  "trace") \
+	_(ZEND_STR_SCHEME,                 "scheme") \
+	_(ZEND_STR_HOST,                   "host") \
+	_(ZEND_STR_PORT,                   "port") \
+	_(ZEND_STR_USER,                   "user") \
+	_(ZEND_STR_PASS,                   "pass") \
+	_(ZEND_STR_PATH,                   "path") \
+	_(ZEND_STR_QUERY,                  "query") \
+	_(ZEND_STR_FRAGMENT,               "fragment") \
+	_(ZEND_STR_NULL,                   "NULL") \
+	_(ZEND_STR_BOOLEAN,                "boolean") \
+	_(ZEND_STR_INTEGER,                "integer") \
+	_(ZEND_STR_DOUBLE,                 "double") \
+	_(ZEND_STR_ARRAY,                  "array") \
+	_(ZEND_STR_RESOURCE,               "resource") \
+	_(ZEND_STR_CLOSED_RESOURCE,        "resource (closed)") \
+	_(ZEND_STR_NAME,                   "name") \
 
 
 typedef enum _zend_known_string_id {
@@ -419,8 +428,6 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_ID)
 	ZEND_STR_LAST_KNOWN
 } zend_known_string_id;
 
-ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count);
-
 #endif /* ZEND_STRING_H */
 
 /*
@@ -429,4 +436,6 @@ ZEND_API uint32_t zend_intern_known_strings(const char **strings, uint32_t count
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

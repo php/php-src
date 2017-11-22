@@ -818,13 +818,13 @@ MYSQLND_METHOD(mysqlnd_net, set_client_option)(MYSQLND_NET * const net, enum mys
 			break;
 		}
 		case MYSQL_OPT_READ_TIMEOUT:
+			DBG_INF("MYSQL_OPT_READ_TIMEOUT");
 			net->data->options.timeout_read = *(unsigned int*) value;
 			break;
-#ifdef WHEN_SUPPORTED_BY_MYSQLI
 		case MYSQL_OPT_WRITE_TIMEOUT:
+			DBG_INF("MYSQL_OPT_WRITE_TIMEOUT");
 			net->data->options.timeout_write = *(unsigned int*) value;
 			break;
-#endif
 		case MYSQL_OPT_COMPRESS:
 			net->data->options.flags |= MYSQLND_NET_FLAG_USE_COMPRESSION;
 			break;
@@ -906,9 +906,6 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	if (!context) {
-		DBG_RETURN(FAIL);
-	}
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;

@@ -14,7 +14,7 @@ $file_path = dirname(__FILE__);
 echo "*** Test copy() function: Trying to create a copy of source file as a dir ***\n";
 $file = $file_path."/copy_variation11.tmp";
 $file_handle =  fopen($file, "w");
-fwrite($file_handle, str_repeat(b"Hello, world...", 20));
+fwrite($file_handle, str_repeat("Hello, world...", 20));
 fclose($file_handle);
 
 $dir = $file_path."/copy_variation11";

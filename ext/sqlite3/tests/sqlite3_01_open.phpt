@@ -1,11 +1,11 @@
 --TEST--
 SQLite3::open/close tests
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 
 var_dump($db);
 var_dump($db->close());

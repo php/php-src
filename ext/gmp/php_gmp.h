@@ -19,8 +19,6 @@
 #ifndef PHP_GMP_H
 #define PHP_GMP_H
 
-#if HAVE_GMP
-
 #include <gmp.h>
 
 extern zend_module_entry gmp_module_entry;
@@ -81,15 +79,6 @@ ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
 
-/* GMP and MPIR use different datatypes on different platforms */
-#ifdef PHP_WIN32
-typedef zend_long gmp_long;
-typedef zend_ulong gmp_ulong;
-#else
-typedef long gmp_long;
-typedef unsigned long gmp_ulong;
-#endif
-
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;
 	gmp_randstate_t rand_state;
@@ -99,12 +88,6 @@ ZEND_END_MODULE_GLOBALS(gmp)
 
 #if defined(ZTS) && defined(COMPILE_DL_GMP)
 ZEND_TSRMLS_CACHE_EXTERN()
-#endif
-
-#else
-
-#define phpext_gmp_ptr NULL
-
 #endif
 
 #endif	/* PHP_GMP_H */

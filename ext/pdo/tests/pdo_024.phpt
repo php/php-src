@@ -14,12 +14,22 @@ if (getenv('REDIR_TEST_DIR') === false) putenv('REDIR_TEST_DIR='.dirname(__FILE_
 require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
-$db->exec('create table test (id int, name varchar(10) null)');
+switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
+	case 'dblib':
+		// environment settings can influence how the table is created if specifics are missing
+		// https://msdn.microsoft.com/en-us/library/ms174979.aspx#Nullability Rules Within a Table Definition
+		$sql = 'create table test (id int, name varchar(10) null)';
+		break;
+	default:
+		$sql = 'create table test (id int, name varchar(10))';
+		break;
+}
+$db->exec($sql);
 
 $stmt = $db->prepare('insert into test (id, name) values(0, :name)');
 $name = NULL;
 $before_bind = $name;
-$stmt->bindParam(':name', $name);
+$stmt->bindParam(':name', $name, PDO::PARAM_NULL);
 if ($name !== $before_bind) {
 	echo "bind: fail\n";
 } else {

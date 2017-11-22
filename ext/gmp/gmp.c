@@ -23,12 +23,11 @@
 #include "php.h"
 #include "php_ini.h"
 #include "php_gmp.h"
+#include "php_gmp_int.h"
 #include "ext/standard/info.h"
 #include "ext/standard/php_var.h"
 #include "zend_smart_str_public.h"
 #include "zend_exceptions.h"
-
-#if HAVE_GMP
 
 #include <gmp.h>
 
@@ -173,7 +172,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
-	ZEND_FE(gmp_random,		arginfo_gmp_random)
+	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
 	ZEND_FE(gmp_random_seed,	arginfo_gmp_random_seed)
 	ZEND_FE(gmp_random_bits,  arginfo_gmp_random_bits)
 	ZEND_FE(gmp_random_range, arginfo_gmp_random_range)
@@ -220,13 +219,12 @@ ZEND_TSRMLS_CACHE_DEFINE()
 ZEND_GET_MODULE(gmp)
 #endif
 
-zend_class_entry *gmp_ce;
+static zend_class_entry *gmp_ce;
 static zend_object_handlers gmp_object_handlers;
 
-typedef struct _gmp_object {
-	mpz_t num;
-	zend_object std;
-} gmp_object;
+PHP_GMP_API zend_class_entry *php_gmp_class_entry() {
+	return gmp_ce;
+}
 
 typedef struct _gmp_temp {
 	mpz_t num;
@@ -252,7 +250,7 @@ typedef struct _gmp_temp {
 	(Z_TYPE_P(zval) == IS_OBJECT && instanceof_function(Z_OBJCE_P(zval), gmp_ce))
 
 #define GET_GMP_OBJECT_FROM_OBJ(obj) \
-	((gmp_object *) ((char *) (obj) - XtOffsetOf(gmp_object, std)))
+	php_gmp_object_from_zend_object(obj)
 #define GET_GMP_OBJECT_FROM_ZVAL(zv) \
 	GET_GMP_OBJECT_FROM_OBJ(Z_OBJ_P(zv))
 
@@ -1365,7 +1363,16 @@ ZEND_FUNCTION(gmp_fact)
 			RETURN_FALSE;
 		}
 	} else {
-		if (zval_get_long(a_arg) < 0) {
+		/* Use convert_to_number first to detect getting non-integer */
+		convert_scalar_to_number(a_arg);
+		if (Z_TYPE_P(a_arg) != IS_LONG) {
+			convert_to_long(a_arg);
+			if (Z_LVAL_P(a_arg) >= 0) {
+				/* Only warn if we'll make it past the non-negative check */
+				php_error_docref(NULL, E_WARNING, "Number has to be an integer");
+			}
+		}
+		if (Z_LVAL_P(a_arg) < 0) {
 			php_error_docref(NULL, E_WARNING, "Number has to be greater than or equal to 0");
 			RETURN_FALSE;
 		}
@@ -2078,8 +2085,6 @@ ZEND_FUNCTION(gmp_scan1)
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
-
-#endif	/* HAVE_GMP */
 
 /*
  * Local variables:

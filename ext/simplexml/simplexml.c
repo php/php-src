@@ -36,8 +36,6 @@
 #include "zend_interfaces.h"
 #include "sxe.h"
 
-#define SXE_ELEMENT_BY_NAME 0
-
 zend_class_entry *sxe_class_entry = NULL;
 
 PHP_SXE_API zend_class_entry *sxe_get_element_class_entry() /* {{{ */
@@ -262,7 +260,7 @@ long_dim:
 			name = NULL;
 		} else {
 			if (Z_TYPE_P(member) != IS_STRING) {
-				ZVAL_STR(&tmp_zv, zval_get_string(member));
+				ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 				member = &tmp_zv;
 			}
 			name = Z_STRVAL_P(member);
@@ -347,20 +345,10 @@ long_dim:
 					_node_as_zval(sxe, node, rv, SXE_ITER_NONE, NULL, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
 			} else {
-#if SXE_ELEMENT_BY_NAME
-				int newtype;
-
-				GET_NODE(sxe, node);
-				node = sxe_get_element_by_name(sxe, node, &name, &newtype);
-				if (node) {
-					_node_as_zval(sxe, node, rv, newtype, name, sxe->iter.nsprefix, sxe->iter.isprefix);
-				}
-#else
 				/* In BP_VAR_IS mode only return a proper node if it actually exists. */
 				if (type != BP_VAR_IS || sxe_find_element_by_name(sxe, node->children, (xmlChar *) name)) {
 					_node_as_zval(sxe, node, rv, SXE_ITER_ELEMENT, name, sxe->iter.nsprefix, sxe->iter.isprefix);
 				}
-#endif
 			}
 		}
 	}
@@ -480,7 +468,7 @@ long_dim:
 			}
 		} else {
 			if (Z_TYPE_P(member) != IS_STRING) {
-				trim_str = zval_get_string(member);
+				trim_str = zval_get_string_func(member);
 				ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
 				zend_string_release(trim_str);
 				member = &tmp_zv;
@@ -738,7 +726,7 @@ static int sxe_prop_dim_exists(zval *object, zval *member, int check_empty, zend
 	zval            tmp_zv;
 
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
-		ZVAL_STR(&tmp_zv, zval_get_string(member));
+		ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 		member = &tmp_zv;
 	}
 
@@ -857,7 +845,7 @@ static void sxe_prop_dim_delete(zval *object, zval *member, zend_bool elements, 
 	int             test = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING && Z_TYPE_P(member) != IS_LONG) {
-		ZVAL_STR(&tmp_zv, zval_get_string(member));
+		ZVAL_STR(&tmp_zv, zval_get_string_func(member));
 		member = &tmp_zv;
 	}
 
@@ -1145,14 +1133,12 @@ static HashTable *sxe_get_prop_hash(zval *object, int is_debug) /* {{{ */
 	sxe = Z_SXEOBJ_P(object);
 
 	if (is_debug) {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 	} else if (sxe->properties) {
 		zend_hash_clean(sxe->properties);
 		rv = sxe->properties;
 	} else {
-		ALLOC_HASHTABLE(rv);
-		zend_hash_init(rv, 0, NULL, ZVAL_PTR_DTOR, 0);
+		rv = zend_new_array(0);
 		sxe->properties = rv;
 	}
 
@@ -1364,9 +1350,9 @@ SXE_METHOD(xpath)
 
 	result = retval->nodesetval;
 
-	array_init(return_value);
-
 	if (result != NULL) {
+		array_init(return_value);
+
 		for (i = 0; i < result->nodeNr; ++i) {
 			nodeptr = result->nodeTab[i];
 			if (nodeptr->type == XML_TEXT_NODE || nodeptr->type == XML_ELEMENT_NODE || nodeptr->type == XML_ATTRIBUTE_NODE) {
@@ -1386,6 +1372,8 @@ SXE_METHOD(xpath)
 				add_next_index_zval(return_value, &value);
 			}
 		}
+	} else {
+		ZVAL_EMPTY_ARRAY(return_value);
 	}
 
 	xmlXPathFreeObject(retval);

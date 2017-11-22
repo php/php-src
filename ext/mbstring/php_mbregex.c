@@ -65,7 +65,6 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 {
 	pglobals->default_mbctype = ONIG_ENCODING_UTF8;
 	pglobals->current_mbctype = ONIG_ENCODING_UTF8;
-	zend_hash_init(&(pglobals->ht_rc), 0, NULL, php_mb_regex_free_cache, 1);
 	ZVAL_UNDEF(&pglobals->search_str);
 	pglobals->search_re = (php_mb_regex_t*)NULL;
 	pglobals->search_pos = 0;
@@ -79,7 +78,6 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 /* {{{ _php_mb_regex_globals_dtor */
 static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals)
 {
-	zend_hash_destroy(&pglobals->ht_rc);
 }
 /* }}} */
 
@@ -88,9 +86,6 @@ zend_mb_regex_globals *php_mb_regex_globals_alloc(void)
 {
 	zend_mb_regex_globals *pglobals = pemalloc(
 			sizeof(zend_mb_regex_globals), 1);
-	if (!pglobals) {
-		return NULL;
-	}
 	if (SUCCESS != _php_mb_regex_globals_ctor(pglobals)) {
 		pefree(pglobals, 1);
 		return NULL;
@@ -129,7 +124,9 @@ PHP_MSHUTDOWN_FUNCTION(mb_regex)
 /* {{{ PHP_RINIT_FUNCTION(mb_regex) */
 PHP_RINIT_FUNCTION(mb_regex)
 {
-	return MBSTRG(mb_regex_globals) ? SUCCESS: FAILURE;
+	if (!MBSTRG(mb_regex_globals)) return FAILURE;
+	zend_hash_init(&MBREX(ht_rc), 0, NULL, php_mb_regex_free_cache, 0);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -148,7 +145,7 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 		onig_region_free(MBREX(search_regs), 1);
 		MBREX(search_regs) = (OnigRegion *)NULL;
 	}
-	zend_hash_clean(&MBREX(ht_rc));
+	zend_hash_destroy(&MBREX(ht_rc));
 
 	return SUCCESS;
 }

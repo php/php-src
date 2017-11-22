@@ -189,13 +189,6 @@ void formatter_register_class( void )
 	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
-
-	/* Declare 'NumberFormatter' class properties. */
-	if( !NumberFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register NumberFormatter class");
-		return;
-	}
 }
 /* }}} */
 

@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_ascii = {
 	"US-ASCII", /* preferred MIME name */
 	(const char *(*)[])&mbfl_encoding_ascii_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_ascii_wchar,
+	&vtbl_wchar_ascii
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_ascii = {

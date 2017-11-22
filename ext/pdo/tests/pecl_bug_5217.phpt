@@ -1,5 +1,5 @@
 --TEST--
-PDO Common: PECL Bug #5217 (serialize/unserialze safety)
+PDO Common: PECL Bug #5217 (serialize/unserialize safety)
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded('pdo')) die('skip');

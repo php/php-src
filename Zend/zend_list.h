@@ -68,6 +68,9 @@ ZEND_API void *zend_fetch_resource2_ex(zval *res, const char *resource_type_name
 ZEND_API const char *zend_rsrc_list_get_rsrc_type(zend_resource *res);
 ZEND_API int zend_fetch_list_dtor_id(const char *type_name);
 
+ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_t key_len, void *rsrc_pointer, int rsrc_type);
+ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, void *rsrc_pointer, int rsrc_type);
+
 extern ZEND_API int le_index_ptr;  /* list entry type for index pointers */
 
 END_EXTERN_C()
@@ -80,4 +83,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

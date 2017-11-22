@@ -252,8 +252,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				} else if (type == 2) {
 					int j;
 					dom_object *domintern = (dom_object *)intern->doc;
-					array_init(&args[i]);
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+						array_init(&args[i]);
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -282,6 +282,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 							php_dom_create_object(node, &child, domintern);
 							add_next_index_zval(&args[i], &child);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(&args[i]);
 					}
 				}
 				break;
@@ -343,8 +345,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				xmlNode *nodep;
 				dom_object *obj;
 				if (intern->node_list == NULL) {
-					ALLOC_HASHTABLE(intern->node_list);
-					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
+					intern->node_list = zend_new_array(0);
 				}
 				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);
@@ -763,9 +764,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(entry);
-			if (Z_REFCOUNTED_P(entry)) {
-				Z_ADDREF_P(entry);
-			}
+			Z_TRY_ADDREF_P(entry);
 			zend_hash_update(intern->parameter, string_key, entry);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;

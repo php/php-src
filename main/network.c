@@ -32,9 +32,6 @@
 # include "win32/inet.h"
 # define O_RDONLY _O_RDONLY
 # include "win32/param.h"
-#elif defined(NETWARE)
-#include <sys/timeval.h>
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -57,17 +54,8 @@
 #include <sys/poll.h>
 #endif
 
-#if defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <arpa/inet.h>
-#include <netinet/in.h>
-#include <netdb.h>
-#include <sys/select.h>
-#include <sys/socket.h>
-#endif
-#elif !defined(PHP_WIN32)
+
+#ifndef PHP_WIN32
 #include <netinet/in.h>
 #include <netdb.h>
 #if HAVE_ARPA_INET_H
@@ -81,7 +69,7 @@ int inet_aton(const char *, struct in_addr *);
 
 #include "php_network.h"
 
-#if defined(PHP_WIN32) || defined(__riscos__) || defined(NETWARE)
+#if defined(PHP_WIN32) || defined(__riscos__)
 #undef AF_UNIX
 #endif
 
@@ -283,22 +271,19 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #define O_NONBLOCK O_NDELAY
 #endif
 
-#if !defined(__BEOS__)
-# define HAVE_NON_BLOCKING_CONNECT 1
-# ifdef PHP_WIN32
+#ifdef PHP_WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
      save = TRUE; ioctlsocket(sock, FIONBIO, &save)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 ioctlsocket(sock, FIONBIO, &save)
-# else
+#else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
 	 save = fcntl(sock, F_GETFL, 0); \
 	 fcntl(sock, F_SETFL, save | O_NONBLOCK)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 fcntl(sock, F_SETFL, save)
-# endif
 #endif
 
 /* Connect to a socket using an interruptible connect with optional timeout.
@@ -314,7 +299,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		zend_string **error_string,
 		int *error_code)
 {
-#if HAVE_NON_BLOCKING_CONNECT
 	php_non_blocking_flags_t orig_flags;
 	int n;
 	int error = 0;
@@ -392,12 +376,6 @@ ok:
 		}
 	}
 	return ret;
-#else
-	if (asynchronous) {
-		php_error_docref(NULL, E_WARNING, "Asynchronous connect() not supported on this platform");
-	}
-	return (connect(sockfd, addr, addrlen) == 0) ? 0 : -1;
-#endif
 }
 /* }}} */
 

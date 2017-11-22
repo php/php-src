@@ -251,7 +251,8 @@ PHP_HASH_API void PHP_TIGER192Final(unsigned char digest[24], PHP_TIGER_CTX *con
 		(php_hash_copy_func_t) php_hash_copy, \
 		b/8, \
 		64, \
-		sizeof(PHP_TIGER_CTX) \
+		sizeof(PHP_TIGER_CTX), \
+		1 \
 	}
 
 PHP_HASH_TIGER_OPS(3, 128);

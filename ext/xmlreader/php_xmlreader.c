@@ -61,11 +61,14 @@ typedef struct _xmlreader_prop_handler {
 static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name, xmlreader_read_int_t read_int_func, xmlreader_read_const_char_t read_char_func, int rettype)
 {
 	xmlreader_prop_handler hnd;
+	zend_string *str;
 
 	hnd.read_char_func = read_char_func;
 	hnd.read_int_func = read_int_func;
 	hnd.type = rettype;
-	zend_hash_str_add_mem(prop_handler, name, strlen(name), &hnd, sizeof(xmlreader_prop_handler));
+	str = zend_string_init_interned(name, strlen(name), 1);
+	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(xmlreader_prop_handler));
+	zend_string_release(str);
 }
 /* }}} */
 

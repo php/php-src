@@ -146,6 +146,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "access.format",             &fpm_conf_set_string,      WPO(access_format) },
 	{ "slowlog",                   &fpm_conf_set_string,      WPO(slowlog) },
 	{ "request_slowlog_timeout",   &fpm_conf_set_time,        WPO(request_slowlog_timeout) },
+	{ "request_slowlog_trace_depth", &fpm_conf_set_integer,     WPO(request_slowlog_trace_depth) },
 	{ "request_terminate_timeout", &fpm_conf_set_time,        WPO(request_terminate_timeout) },
 	{ "rlimit_files",              &fpm_conf_set_integer,     WPO(rlimit_files) },
 	{ "rlimit_core",               &fpm_conf_set_rlimit_core, WPO(rlimit_core) },
@@ -970,6 +971,30 @@ static int fpm_conf_process_all_pools() /* {{{ */
 			}
 		}
 
+		/* request_slowlog_trace_depth */
+		if (wp->config->request_slowlog_trace_depth) {
+#if HAVE_FPM_TRACE
+			if (! (wp->config->slowlog && *wp->config->slowlog)) {
+				zlog(ZLOG_ERROR, "[pool %s] 'slowlog' must be specified for use with 'request_slowlog_trace_depth'", wp->config->name);
+				return -1;
+			}
+#else
+			static int warned = 0;
+
+			if (!warned) {
+				zlog(ZLOG_WARNING, "[pool %s] 'request_slowlog_trace_depth' is not supported on your system", wp->config->name);
+				warned = 1;
+			}
+#endif
+
+			if (wp->config->request_slowlog_trace_depth <= 0) {
+				zlog(ZLOG_ERROR, "[pool %s] 'request_slowlog_trace_depth' (%d) must be a positive value", wp->config->name, wp->config->request_slowlog_trace_depth);
+				return -1;
+			}
+		} else {
+			wp->config->request_slowlog_trace_depth = 20;
+		}
+
 		/* chroot */
 		if (wp->config->chroot && *wp->config->chroot) {
 
@@ -1250,7 +1275,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 {
 	char *filename;
-	int *error = (int *)arg;;
+	int *error = (int *)arg;
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
@@ -1465,17 +1490,17 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 	switch(callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
 			fpm_conf_ini_parser_entry(arg1, arg2, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_SECTION:
 			fpm_conf_ini_parser_section(arg1, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_POP_ENTRY:
 			fpm_conf_ini_parser_array(arg1, arg3, arg2, error);
-			break;;
+			break;
 		default:
 			zlog(ZLOG_ERROR, "[%s:%d] Unknown INI syntax", ini_filename, ini_lineno);
 			*error = 1;
-			break;;
+			break;
 	}
 }
 /* }}} */
@@ -1635,6 +1660,7 @@ static void fpm_conf_dump() /* {{{ */
 		zlog(ZLOG_NOTICE, "\taccess.format = %s",              STR2STR(wp->config->access_format));
 		zlog(ZLOG_NOTICE, "\tslowlog = %s",                    STR2STR(wp->config->slowlog));
 		zlog(ZLOG_NOTICE, "\trequest_slowlog_timeout = %ds",   wp->config->request_slowlog_timeout);
+		zlog(ZLOG_NOTICE, "\trequest_slowlog_trace_depth = %d", wp->config->request_slowlog_trace_depth);
 		zlog(ZLOG_NOTICE, "\trequest_terminate_timeout = %ds", wp->config->request_terminate_timeout);
 		zlog(ZLOG_NOTICE, "\trlimit_files = %d",               wp->config->rlimit_files);
 		zlog(ZLOG_NOTICE, "\trlimit_core = %d",                wp->config->rlimit_core);

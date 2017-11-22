@@ -45,7 +45,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_MUL:
 			case ZEND_DIV:
 			case ZEND_POW:
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING) {
 						/* don't optimise if it should produce a runtime numeric string error */
 						if (is_numeric_string(Z_STRVAL(ZEND_OP1_LITERAL(opline)), Z_STRLEN(ZEND_OP1_LITERAL(opline)), NULL, NULL, 0)) {
@@ -63,7 +63,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
-				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING) {
 						/* don't optimise if it should produce a runtime numeric string error */
 						if (is_numeric_string(Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)), NULL, NULL, 0)) {
@@ -76,7 +76,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 			case ZEND_MOD:
 			case ZEND_SL:
 			case ZEND_SR:
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_LONG) {
 						/* don't optimise if it should produce a runtime numeric string error */
 						if (!(Z_TYPE(ZEND_OP1_LITERAL(opline)) == IS_STRING
@@ -93,7 +93,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
-				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_LONG) {
 						/* don't optimise if it should produce a runtime numeric string error */
 						if (!(Z_TYPE(ZEND_OP2_LITERAL(opline)) == IS_STRING
@@ -106,7 +106,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 
 			case ZEND_CONCAT:
 			case ZEND_FAST_CONCAT:
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP1_LITERAL(opline)) != IS_STRING) {
 						convert_to_string(&ZEND_OP1_LITERAL(opline));
 					}
@@ -117,7 +117,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					/* object tristate op - don't attempt to optimize it! */
 					break;
 				}
-				if (ZEND_OP2_TYPE(opline) == IS_CONST) {
+				if (opline->op2_type == IS_CONST) {
 					if (Z_TYPE(ZEND_OP2_LITERAL(opline)) != IS_STRING) {
 						convert_to_string(&ZEND_OP2_LITERAL(opline));
 					}
@@ -132,16 +132,16 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				 * ZEND_VM_SMART_BRANCH() this may improperly eliminate
 				 * assignment to Ti.
 				 */
-				if (ZEND_OP1_TYPE(opline) == IS_TMP_VAR &&
-				    ZEND_RESULT_TYPE(opline) == IS_TMP_VAR &&
-				    ZEND_OP1(opline).var == ZEND_RESULT(opline).var) {
+				if (opline->op1_type == IS_TMP_VAR &&
+				    opline->result_type == IS_TMP_VAR &&
+				    opline->op1.var == opline->result.var) {
 					opline->opcode -= 3;
 					SET_UNUSED(opline->result);
 				} else
 #endif
 				/* convert Ti = JMPZ_EX(C, L) => Ti = QM_ASSIGN(C)
 				   in case we know it wouldn't jump */
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 					if (opline->opcode == ZEND_JMPZ_EX) {
 						should_jmp = !should_jmp;
@@ -155,14 +155,14 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					int should_jmp = zend_is_true(&ZEND_OP1_LITERAL(opline));
 
 					if (opline->opcode == ZEND_JMPZ) {
 						should_jmp = !should_jmp;
 					}
 					literal_dtor(&ZEND_OP1_LITERAL(opline));
-					ZEND_OP1_TYPE(opline) = IS_UNUSED;
+					opline->op1_type = IS_UNUSED;
 					if (should_jmp) {
 						opline->opcode = ZEND_JMP;
 						COPY_NODE(opline->op1, opline->op2);
@@ -198,7 +198,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 				break;
 
 			case ZEND_JMPZNZ:
-				if (ZEND_OP1_TYPE(opline) == IS_CONST) {
+				if (opline->op1_type == IS_CONST) {
 					zend_op *target_opline;
 
 					if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
@@ -208,7 +208,7 @@ void zend_optimizer_pass2(zend_op_array *op_array)
 					}
 					literal_dtor(&ZEND_OP1_LITERAL(opline));
 					ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-					ZEND_OP1_TYPE(opline) = IS_UNUSED;
+					opline->op1_type = IS_UNUSED;
 					opline->opcode = ZEND_JMP;
 				}
 				break;

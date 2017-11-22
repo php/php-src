@@ -5,8 +5,7 @@ Bug #31102 (Exception not handled when thrown inside __autoload())
 
 $test = 0;
 
-function __autoload($class)
-{
+spl_autoload_register(function ($class) {
 	global $test;
 
 	echo __METHOD__ . "($class,$test)\n";
@@ -22,7 +21,7 @@ function __autoload($class)
 	case 3:
 		return;
 	}
-}
+});
 
 while($test++ < 5)
 {
@@ -39,11 +38,11 @@ while($test++ < 5)
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-__autoload(Test1,1)
+{closure}(Test1,1)
 Caught: Test1::__construct
-__autoload(Test2,2)
-Caught: __autoload
-__autoload(Test3,3)
+{closure}(Test2,2)
+Caught: {closure}
+{closure}(Test3,3)
 
 Fatal error: Uncaught Error: Class 'Test3' not found in %sbug31102.php(%d) : eval()'d code:1
 Stack trace:

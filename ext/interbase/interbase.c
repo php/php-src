@@ -833,6 +833,9 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
+#ifdef PHP_WIN32
+		FreeLibrary(l);
+#endif
 	} while (0);
 #endif
 	php_info_print_table_end();
@@ -902,7 +905,7 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	}
 
 	/* restrict to the server/db in the .ini if in safe mode */
-	if ((!len[DB] || PG(sql_safe_mode)) && (c = INI_STR("ibase.default_db"))) {
+	if (!len[DB] && (c = INI_STR("ibase.default_db"))) {
 		args[DB] = c;
 		len[DB] = strlen(c);
 	}
@@ -988,18 +991,13 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			ib_link = (ibase_db_link *) emalloc(sizeof(ibase_db_link));
 			RETVAL_RES(zend_register_resource(ib_link, le_link));
 		} else {
-			zend_resource new_le;
-
 			ib_link = (ibase_db_link *) malloc(sizeof(ibase_db_link));
 			if (!ib_link) {
 				RETURN_FALSE;
 			}
 
 			/* hash it up */
-			new_le.type = le_plink;
-			new_le.ptr = ib_link;
-			if (zend_hash_str_update_mem(&EG(persistent_list), hash, sizeof(hash)-1,
-					(void *) &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(hash, sizeof(hash)-1, ib_link, le_plink) == NULL) {
 				free(ib_link);
 				RETURN_FALSE;
 			}

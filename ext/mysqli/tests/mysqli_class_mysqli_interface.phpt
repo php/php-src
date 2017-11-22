@@ -60,10 +60,6 @@ require_once('skipifconnectfailure.inc');
 		'use_result'			=> true,
 	);
 
-	if (version_compare(PHP_VERSION, '5.3.99', '<=')) {
-		$expected_methods['client_encoding'] = true;
-	}
-
 	if ($IS_MYSQLND) {
 		// mysqlnd only
 		/* $expected_methods['get_client_stats']	= true; */
@@ -118,10 +114,8 @@ require_once('skipifconnectfailure.inc');
 		"warning_count"		=> true,
 	);
 
-	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
-	  $expected_class_variables["error_list"] = true;
-	  $expected_object_variables["error_list"] = true;
-	}
+	$expected_class_variables["error_list"] = true;
+	$expected_object_variables["error_list"] = true;
 
 	$variables = get_class_vars(get_class($mysqli));
 	foreach ($variables as $var => $v) {
@@ -188,10 +182,8 @@ require_once('skipifconnectfailure.inc');
 		$mysqli->error, gettype($mysqli->error),
 		mysqli_error($link), gettype(mysqli_error($link)));
 
-	if (version_compare(PHP_VERSION, '5.3.99', '>')) {
-		assert(mysqli_error_list($link) === $mysqli->error_list);
-		assert(is_array($mysqli->error_list));
-	}
+	assert(mysqli_error_list($link) === $mysqli->error_list);
+	assert(is_array($mysqli->error_list));
 
 	assert(mysqli_field_count($link) === $mysqli->field_count);
 	printf("mysqli->field_count = '%s'/%s ('%s'/%s)\n",
@@ -289,19 +281,19 @@ ok
 
 Magic, magic properties:
 mysqli->affected_rows = '%s'/integer ('%s'/integer)
-mysqli->client_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
+mysqli->client_info = '%s'/string ('%s'/string)
 mysqli->client_version =  '%d'/integer ('%d'/integer)
 mysqli->errno = '0'/integer ('0'/integer)
-mysqli->error = ''/%unicode|string% (''/%unicode|string%)
+mysqli->error = ''/string (''/string)
 mysqli->field_count = '0'/integer ('0'/integer)
 mysqli->insert_id = '0'/integer ('0'/integer)
-mysqli->sqlstate = '00000'/%unicode|string% ('00000'/%unicode|string%)
+mysqli->sqlstate = '00000'/string ('00000'/string)
 mysqli->stat = 'Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string ('Uptime: %d  Threads: %d  Questions: %d  Slow queries: %d  Opens: %d  Flush tables: %d  Open tables: %d  Queries per second avg: %d.%d'/string)
-mysqli->host_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
+mysqli->host_info = '%s'/string ('%s'/string)
 mysqli->info = ''/NULL (''/NULL)
 mysqli->thread_id = '%d'/integer ('%d'/integer)
 mysqli->protocol_version = '%d'/integer ('%d'/integer)
-mysqli->server_info = '%s'/%unicode|string% ('%s'/%unicode|string%)
+mysqli->server_info = '%s'/string ('%s'/string)
 mysqli->server_version = '%d'/integer ('%d'/integer)
 mysqli->warning_count = '0'/integer ('0'/integer)
 

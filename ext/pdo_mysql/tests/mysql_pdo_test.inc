@@ -55,7 +55,7 @@ class MySQLPDOTest extends PDOTest {
 			strpos(PDO_MYSQL_TEST_DSN, ':') + 1,
 			strlen(PDO_MYSQL_TEST_DSN));
 
-		// no real parser - any excotic setting can fool us
+		// no real parser - any exotic setting can fool us
 		$parts = explode(';', $dsn);
 		foreach ($parts as $k => $v) {
 			$tmp = explode('=', $v);

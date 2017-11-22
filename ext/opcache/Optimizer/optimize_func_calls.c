@@ -30,10 +30,10 @@
 #include "zend_vm.h"
 
 #define ZEND_OP1_IS_CONST_STRING(opline) \
-	(ZEND_OP1_TYPE(opline) == IS_CONST && \
+	(opline->op1_type == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op1.constant]) == IS_STRING)
 #define ZEND_OP2_IS_CONST_STRING(opline) \
-	(ZEND_OP2_TYPE(opline) == IS_CONST && \
+	(opline->op2_type == IS_CONST && \
 	Z_TYPE(op_array->literals[(opline)->op2.constant]) == IS_STRING)
 
 typedef struct _optimizer_call_info {
@@ -123,7 +123,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				i = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[i].op2))) {
+					if (Z_TYPE_P(RT_CONSTANT(&func->op_array.opcodes[i], func->op_array.opcodes[i].op2)) == IS_CONSTANT_AST) {
 						return;
 					}
 					i++;
@@ -133,7 +133,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
-				ZVAL_DUP(&zv, RT_CONSTANT(&func->op_array, ret_opline->op1));
+				ZVAL_DUP(&zv, RT_CONSTANT(ret_opline, ret_opline->op1));
 				opline->opcode = ZEND_QM_ASSIGN;
 				opline->op1_type = IS_CONST;
 				opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);

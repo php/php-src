@@ -1,13 +1,18 @@
-鬼車インターフェース Version 5.9.2   2008/02/19
+鬼車インターフェース Version 6.1.0   2016/08/22
 
 #include <oniguruma.h>
 
 
-# int onig_init(void)
+# int onig_initialize(OnigEncoding use_encodings[], int num_encodings)
 
   ライブラリの初期化
+  最初に呼び出す必要がある。
 
-  onig_new()の中で呼び出されるので、この関数を明示的に呼び出さなくてもよい。
+  * onig_init() は廃止
+
+  引数
+  1 use_encodings:         使用する文字エンコーディングの配列
+  2 num_encodings:         文字エンコーディングの数
 
 
 # int onig_error_code_to_str(UChar* err_buf, int err_code, ...)
@@ -249,6 +254,27 @@
     ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
     ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
     ONIG_OPTION_POSIX_REGION  region引数をPOSIX APIのregmatch_t[]にする
+
+
+# int onig_scan(regex_t* reg, const UChar* str, const UChar* end,
+                OnigRegion* region, OnigOptionType option,
+                int (*scan_callback)(int, int, OnigRegion*, void*),
+                void* callback_arg)
+
+  正規表現で文字列をスキャンして、マッチングする毎にコールバック関数を呼び出す。
+
+  正常終了: マッチ回数 (0回も含める)
+  エラー:   エラーコード (< 0)
+  中断: コールバック関数が０以外の戻り値を返したとき、その値を戻り値として中断
+
+  引数
+  1 reg:    正規表現オブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 region: マッチ領域情報(region)  (NULLも許される)
+  5 option: 検索時オプション
+  6 scan_callback: コールバック関数
+  7 callback_arg:  コールバック関数に渡される付加引数値
 
 
 # OnigRegion* onig_region_new(void)
@@ -533,7 +559,7 @@
   2 op, op2, behavior, options: 要素の値
 
 
-# void onig_copy_encoding(OnigEncoding to, OnigOnigEncoding from)
+# void onig_copy_encoding(OnigEncoding to, OnigEncoding from)
 
   文字エンコーディングをコピーする。
 
@@ -589,6 +615,37 @@
 
   マッチスタックサイズの最大値を指定する。
   (size = 0: 無制限)
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges))
+
+  新しいUnicodeプロパティを定義する。
+  (この関数はスレッドセーフではない)
+
+  引数
+  1 name:    プロパティ名 (ASCIIコードのみ。 文字 ' ', '-', '_' は無視される。)
+  2 ranges:  プロパティコードポイント範囲
+             (最初の要素は範囲の数)
+
+    [num-of-ranges, 1st-range-start, 1st-range-end, 2nd-range-start... ]
+
+    * この関数を呼んだ後で、rangesを変更/破壊しないこと
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# unsigned int onig_get_parse_depth_limit(void)
+
+  再帰パース処理の最大深さを返す。
+  (デフォルト: regint.h で定義されている DEFAULT_PARSE_DEPTH_LIMIT。現在は 4096)
+
+
+# int onig_set_parse_depth_limit(unsigned int depth)
+
+  再帰パース処理の最大深さを指定する。
+  (depth = 0: regint.h で定義されたデフォルト値に設定する。)
 
   正常終了戻り値: ONIG_NORMAL
 

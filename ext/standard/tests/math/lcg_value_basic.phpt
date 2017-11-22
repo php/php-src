@@ -21,36 +21,38 @@ if ($i != 100) {
 	echo "PASSED\n";
 }	
 
-echo "\n lcg_value error cases..spurious args get ignored\n";
+echo "\n lcg_value error cases..\n";
 $res = lcg_value(23);
 
-if (!is_float($res) || $res < 0 || $res > 1) {
-	echo "FAILED\n";
-} else { 
+if (is_null($res)) {
 	echo "PASSED\n";
+} else { 
+	echo "FAILED\n";
 }	
 
 $res = lcg_value(10,false);
-if (!is_float($res) || $res < 0 || $res > 1) {
-	echo "FAILED\n";
-} else { 
+if (is_null($res)) {
 	echo "PASSED\n";
+} else { 
+	echo "FAILED\n";
 }	
 
 echo "MATHS test script completed\n";
  
 ?>
 
---EXPECT--
+--EXPECTF--
 MATHS test script started
 
  lcg_value tests...
 PASSED
 
- lcg_value error cases..spurious args get ignored
+ lcg_value error cases..
+
+Warning: lcg_value() expects exactly 0 parameters, 1 given in %slcg_value_basic.php on line %d
 PASSED
+
+Warning: lcg_value() expects exactly 0 parameters, 2 given in %slcg_value_basic.php on line %d
 PASSED
 MATHS test script completed
-
-
 

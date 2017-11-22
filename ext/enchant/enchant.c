@@ -567,7 +567,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;
@@ -614,7 +614,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;

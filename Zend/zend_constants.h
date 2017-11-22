@@ -64,7 +64,6 @@ void free_zend_constant(zval *zv);
 int zend_startup_constants(void);
 int zend_shutdown_constants(void);
 void zend_register_standard_constants(void);
-void clean_non_persistent_constants(void);
 ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *ce);
 ZEND_API zval *zend_get_constant(zend_string *name);
 ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len);
@@ -77,7 +76,7 @@ ZEND_API void zend_register_string_constant(const char *name, size_t name_len, c
 ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, char *strval, size_t strlen, int flags, int module_number);
 ZEND_API int zend_register_constant(zend_constant *c);
 void zend_copy_constants(HashTable *target, HashTable *sourc);
-zend_constant *zend_quick_get_constant(const zval *key, uint32_t flags);
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant
@@ -90,4 +89,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

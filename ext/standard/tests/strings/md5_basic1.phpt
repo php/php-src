@@ -8,7 +8,7 @@ Test md5() function : basic functionality
 */
 
 echo "*** Testing md5() : basic functionality ***\n";
-var_dump(md5(b"apple"));
+var_dump(md5("apple"));
 ?>
 ===DONE===
 --EXPECTF--

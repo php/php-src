@@ -15,9 +15,6 @@ $p['b/c.php'] = '<?php echo "in b\n";$a = fopen("a", "r", true);echo stream_get_
 $p['d'] = "in d\n";
 $p->setStub('<?php
 set_include_path("phar://" . __FILE__);
-if (version_compare(PHP_VERSION, "5.3", "<")) {
-Phar::interceptFileFuncs();
-}
 include "phar://" . __FILE__ . "/a";
 __HALT_COMPILER();');
 include $fname;

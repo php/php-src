@@ -157,9 +157,11 @@ PHP_FUNCTION(assert)
 		RETURN_TRUE;
 	}
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|z", &assertion, &description) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_ZVAL(assertion)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(description)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (Z_TYPE_P(assertion) == IS_STRING) {
 		zval retval;
@@ -168,6 +170,8 @@ PHP_FUNCTION(assert)
 		if (zend_forbid_dynamic_call("assert() with string argument") == FAILURE) {
 			RETURN_FALSE;
 		}
+
+		php_error_docref(NULL, E_DEPRECATED, "Calling assert() with a string argument is deprecated");
 
 		myeval = Z_STRVAL_P(assertion);
 
@@ -215,7 +219,7 @@ PHP_FUNCTION(assert)
 		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
 		zval retval;
 		int i;
-		uint lineno = zend_get_executed_lineno();
+		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
 		ZVAL_STRING(&args[0], SAFE_STRING(filename));
@@ -290,9 +294,11 @@ PHP_FUNCTION(assert_options)
 	int ac = ZEND_NUM_ARGS();
 	zend_string *key;
 
-	if (zend_parse_parameters(ac, "l|z", &what, &value) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_LONG(what)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_ZVAL(value)
+	ZEND_PARSE_PARAMETERS_END();
 
 	switch (what) {
 	case ASSERT_ACTIVE:

@@ -14,6 +14,7 @@
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
+  |          Dmitry Stogov <dmitry@zend.com>                             |
   +----------------------------------------------------------------------+
 */
 
@@ -24,114 +25,130 @@
 #include "mysqlnd_priv.h"
 
 
+/* {{{ mysqlnd_arena_create */
+static zend_always_inline zend_arena* mysqlnd_arena_create(size_t size)
+{
+	zend_arena *arena = (zend_arena*)mnd_emalloc(size);
+
+	arena->ptr = (char*) arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena));
+	arena->end = (char*) arena + size;
+	arena->prev = NULL;
+	return arena;
+}
+/* }}} */
+
+/* {{{ mysqlnd_arena_destroy */
+static zend_always_inline void mysqlnd_arena_destroy(zend_arena *arena)
+{
+	do {
+		zend_arena *prev = arena->prev;
+		mnd_efree(arena);
+		arena = prev;
+	} while (arena);
+}
+/* }}} */
+
+/* {{{ mysqlnd_arena_alloc */
+static zend_always_inline void* mysqlnd_arena_alloc(zend_arena **arena_ptr, size_t size)
+{
+	zend_arena *arena = *arena_ptr;
+	char *ptr = arena->ptr;
+
+	size = ZEND_MM_ALIGNED_SIZE(size);
+
+	if (EXPECTED(size <= (size_t)(arena->end - ptr))) {
+		arena->ptr = ptr + size;
+	} else {
+		size_t arena_size =
+			UNEXPECTED((size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) > (size_t)(arena->end - (char*) arena)) ?
+				(size + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena))) :
+				(size_t)(arena->end - (char*) arena);
+		zend_arena *new_arena = (zend_arena*)mnd_emalloc(arena_size);
+
+		ptr = (char*) new_arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena));
+		new_arena->ptr = (char*) new_arena + ZEND_MM_ALIGNED_SIZE(sizeof(zend_arena)) + size;
+		new_arena->end = (char*) new_arena + arena_size;
+		new_arena->prev = arena;
+		*arena_ptr = new_arena;
+	}
+
+	return (void*) ptr;
+}
+/* }}} */
+
+static zend_always_inline void* mysqlnd_arena_checkpoint(zend_arena *arena)
+{
+	return arena->ptr;
+}
+
+static zend_always_inline void mysqlnd_arena_release(zend_arena **arena_ptr, void *checkpoint)
+{
+	zend_arena *arena = *arena_ptr;
+
+	while (UNEXPECTED((char*)checkpoint > arena->end) ||
+	       UNEXPECTED((char*)checkpoint <= (char*)arena)) {
+		zend_arena *prev = arena->prev;
+		mnd_efree(arena);
+		*arena_ptr = arena = prev;
+	}
+	ZEND_ASSERT((char*)checkpoint > (char*)arena && (char*)checkpoint <= arena->end);
+	arena->ptr = (char*)checkpoint;
+}
+
 /* {{{ mysqlnd_mempool_free_chunk */
 static void
-mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk)
+mysqlnd_mempool_free_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr)
 {
 	DBG_ENTER("mysqlnd_mempool_free_chunk");
-	if (chunk->from_pool) {
-		/* Try to back-off and guess if this is the last block allocated */
-		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
-			/*
-				This was the last allocation. Lucky us, we can free
-				a bit of memory from the pool. Next time we will return from the same ptr.
-			*/
-			pool->free_size += chunk->size;
-		}
-	} else {
-		mnd_efree(chunk->ptr);
+	/* Try to back-off and guess if this is the last block allocated */
+	if (ptr == pool->last) {
+		/*
+			This was the last allocation. Lucky us, we can free
+			a bit of memory from the pool. Next time we will return from the same ptr.
+		*/
+		pool->arena->ptr = (char*)ptr;
+		pool->last = NULL;
 	}
-	mnd_efree(chunk);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_mempool_resize_chunk */
-static enum_func_status
-mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size)
+static void *
+mysqlnd_mempool_resize_chunk(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size)
 {
 	DBG_ENTER("mysqlnd_mempool_resize_chunk");
-	if (chunk->from_pool) {
-		/* Try to back-off and guess if this is the last block allocated */
-		if (chunk->ptr == (pool->arena + (pool->arena_size - pool->free_size - chunk->size))) {
-			/*
-				This was the last allocation. Lucky us, we can free
-				a bit of memory from the pool. Next time we will return from the same ptr.
-			*/
-			if ((chunk->size + pool->free_size) < size) {
-				zend_uchar *new_ptr;
-				new_ptr = mnd_emalloc(size);
-				if (!new_ptr) {
-					DBG_RETURN(FAIL);
-				}
-				memcpy(new_ptr, chunk->ptr, chunk->size);
-				chunk->ptr = new_ptr;
-				pool->free_size += chunk->size;
-				chunk->size = size;
-				chunk->from_pool = FALSE; /* now we have no pool memory */
-			} else {
-				/* If the chunk is > than asked size then free_memory increases, otherwise decreases*/
-				pool->free_size += (chunk->size - size);
-			}
-		} else {
-			/* Not last chunk, if the user asks for less, give it to him */
-			if (chunk->size >= size) {
-				; /* nop */
-			} else {
-				zend_uchar *new_ptr;
-				new_ptr = mnd_emalloc(size);
-				if (!new_ptr) {
-					DBG_RETURN(FAIL);
-				}
-				memcpy(new_ptr, chunk->ptr, chunk->size);
-				chunk->ptr = new_ptr;
-				chunk->size = size;
-				chunk->from_pool = FALSE; /* now we have non-pool memory */
-			}
-		}
+
+	/* Try to back-off and guess if this is the last block allocated */
+	if (ptr == pool->last
+	  && (ZEND_MM_ALIGNED_SIZE(size) <= ((char*)pool->arena->end - (char*)ptr))) {
+		/*
+			This was the last allocation. Lucky us, we can free
+			a bit of memory from the pool. Next time we will return from the same ptr.
+		*/
+		pool->arena->ptr = (char*)ptr + ZEND_MM_ALIGNED_SIZE(size);
 	} else {
-		zend_uchar *new_ptr = mnd_erealloc(chunk->ptr, size);
-		if (!new_ptr) {
-			DBG_RETURN(FAIL);
-		}
-		chunk->ptr = new_ptr;
+		void *new_ptr = mysqlnd_arena_alloc(&pool->arena, size);
+		memcpy(new_ptr, ptr, MIN(old_size, size));
+		pool->last = ptr = new_ptr;
 	}
-	DBG_RETURN(PASS);
+	DBG_RETURN(ptr);
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_mempool_get_chunk */
-static
-MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, unsigned int size)
+static void *
+mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool, size_t size)
 {
-	MYSQLND_MEMORY_POOL_CHUNK *chunk = NULL;
+	void *ptr = NULL;
 	DBG_ENTER("mysqlnd_mempool_get_chunk");
 
-	chunk = mnd_emalloc(sizeof(MYSQLND_MEMORY_POOL_CHUNK));
-	if (chunk) {
-		chunk->size = size;
-		/*
-		  Should not go over MYSQLND_MAX_PACKET_SIZE, since we
-		  expect non-arena memory in mysqlnd_wireprotocol.c . We
-		  realloc the non-arena memory.
-		*/
-		if (size > pool->free_size) {
-			chunk->from_pool = FALSE;
-			chunk->ptr = mnd_emalloc(size);
-			if (!chunk->ptr) {
-				pool->free_chunk(pool, chunk);
-				chunk = NULL;
-			}
-		} else {
-			chunk->from_pool = TRUE;
-			chunk->ptr = pool->arena + (pool->arena_size - pool->free_size);
-			/* Last step, update free_size */
-			pool->free_size -= size;
-		}
-	}
-	DBG_RETURN(chunk);
+	ptr = mysqlnd_arena_alloc(&pool->arena, size);
+	pool->last = ptr;
+
+	DBG_RETURN(ptr);
 }
 /* }}} */
 
@@ -140,21 +157,18 @@ MYSQLND_MEMORY_POOL_CHUNK * mysqlnd_mempool_get_chunk(MYSQLND_MEMORY_POOL * pool
 PHPAPI MYSQLND_MEMORY_POOL *
 mysqlnd_mempool_create(size_t arena_size)
 {
-	/* We calloc, because we free(). We don't mnd_calloc()  for a reason. */
-	MYSQLND_MEMORY_POOL * ret = mnd_ecalloc(1, sizeof(MYSQLND_MEMORY_POOL));
+	zend_arena * arena;
+	MYSQLND_MEMORY_POOL * ret;
+
 	DBG_ENTER("mysqlnd_mempool_create");
-	if (ret) {
-		ret->get_chunk = mysqlnd_mempool_get_chunk;
-		ret->free_chunk = mysqlnd_mempool_free_chunk;
-		ret->resize_chunk = mysqlnd_mempool_resize_chunk;
-		ret->free_size = ret->arena_size = arena_size ? arena_size : 0;
-		/* OOM ? */
-		ret->arena = mnd_emalloc(ret->arena_size);
-		if (!ret->arena) {
-			mysqlnd_mempool_destroy(ret);
-			ret = NULL;
-		}
-	}
+	arena = mysqlnd_arena_create(MAX(arena_size, sizeof(zend_arena)));
+	ret = mysqlnd_arena_alloc(&arena, sizeof(MYSQLND_MEMORY_POOL));
+	ret->arena = arena;
+	ret->last = NULL;
+	ret->checkpoint = NULL;
+	ret->get_chunk = mysqlnd_mempool_get_chunk;
+	ret->free_chunk = mysqlnd_mempool_free_chunk;
+	ret->resize_chunk = mysqlnd_mempool_resize_chunk;
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -166,12 +180,34 @@ mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool)
 {
 	DBG_ENTER("mysqlnd_mempool_destroy");
 	/* mnd_free will reference LOCK_access and might crash, depending on the caller...*/
-	mnd_efree(pool->arena);
-	mnd_efree(pool);
+	mysqlnd_arena_destroy(pool->arena);
 	DBG_VOID_RETURN;
 }
 /* }}} */
 
+/* {{{ mysqlnd_mempool_save_state */
+PHPAPI void
+mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool)
+{
+	DBG_ENTER("mysqlnd_mempool_save_state");
+	pool->checkpoint = mysqlnd_arena_checkpoint(pool->arena);
+	DBG_VOID_RETURN;
+}
+/* }}} */
+
+/* {{{ mysqlnd_mempool_restore_state */
+PHPAPI void
+mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool)
+{
+	DBG_ENTER("mysqlnd_mempool_restore_state");
+	if (pool->checkpoint) {
+		mysqlnd_arena_release(&pool->arena, pool->checkpoint);
+		pool->last = NULL;
+		pool->checkpoint = NULL;
+	}
+	DBG_VOID_RETURN;
+}
+/* }}} */
 
 /*
  * Local variables:

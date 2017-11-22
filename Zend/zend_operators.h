@@ -35,12 +35,10 @@
 #include <ieeefp.h>
 #endif
 
+#include "zend_portability.h"
 #include "zend_strtod.h"
 #include "zend_multiply.h"
-
-#if 0&&HAVE_BCMATH
-#include "ext/bcmath/libbcmath/src/bcmath.h"
-#endif
+#include "zend_object_handlers.h"
 
 #define LONG_SIGN_MASK (((zend_long)1) << (8*sizeof(zend_long)-1))
 
@@ -175,7 +173,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 
 		while (p <= end) {
 			if ((p = (const char *)memchr(p, *needle, (end-p+1))) && ne == p[needle_len-1]) {
-				if (!memcmp(needle, p, needle_len-1)) {
+				if (!memcmp(needle+1, p+1, needle_len-2)) {
 					return p;
 				}
 			}
@@ -196,7 +194,7 @@ zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const 
 static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t n)
 {
 	const unsigned char *e;
-	if (n <= 0) {
+	if (0 == n) {
 		return NULL;
 	}
 
@@ -233,7 +231,7 @@ zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, char 
 
 		do {
 			if ((p = (const char *)zend_memrchr(haystack, *needle, (p - haystack) + 1)) && ne == p[needle_len-1]) {
-				if (!memcmp(needle, p, needle_len - 1)) {
+				if (!memcmp(needle + 1, p + 1, needle_len - 2)) {
 					return p;
 				}
 			}
@@ -262,23 +260,41 @@ ZEND_API void multi_convert_to_long_ex(int argc, ...);
 ZEND_API void multi_convert_to_double_ex(int argc, ...);
 ZEND_API void multi_convert_to_string_ex(int argc, ...);
 
-ZEND_API zend_long    ZEND_FASTCALL _zval_get_long_func(zval *op);
-ZEND_API double       ZEND_FASTCALL _zval_get_double_func(zval *op);
-ZEND_API zend_string* ZEND_FASTCALL _zval_get_string_func(zval *op);
+ZEND_API zend_long    ZEND_FASTCALL zval_get_long_func(zval *op);
+ZEND_API double       ZEND_FASTCALL zval_get_double_func(zval *op);
+ZEND_API zend_string* ZEND_FASTCALL zval_get_string_func(zval *op);
 
-static zend_always_inline zend_long _zval_get_long(zval *op) {
-	return Z_TYPE_P(op) == IS_LONG ? Z_LVAL_P(op) : _zval_get_long_func(op);
+static zend_always_inline zend_long zval_get_long(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_LONG) ? Z_LVAL_P(op) : zval_get_long_func(op);
 }
-static zend_always_inline double _zval_get_double(zval *op) {
-	return Z_TYPE_P(op) == IS_DOUBLE ? Z_DVAL_P(op) : _zval_get_double_func(op);
+static zend_always_inline double zval_get_double(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_DOUBLE) ? Z_DVAL_P(op) : zval_get_double_func(op);
 }
-static zend_always_inline zend_string *_zval_get_string(zval *op) {
-	return Z_TYPE_P(op) == IS_STRING ? zend_string_copy(Z_STR_P(op)) : _zval_get_string_func(op);
+static zend_always_inline zend_string *zval_get_string(zval *op) {
+	return EXPECTED(Z_TYPE_P(op) == IS_STRING) ? zend_string_copy(Z_STR_P(op)) : zval_get_string_func(op);
 }
 
-#define zval_get_long(op) _zval_get_long((op))
-#define zval_get_double(op) _zval_get_double((op))
-#define zval_get_string(op) _zval_get_string((op))
+static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string **tmp) {
+	if (EXPECTED(Z_TYPE_P(op) == IS_STRING)) {
+		*tmp = NULL;
+		return Z_STR_P(op);
+	} else {
+		return *tmp = zval_get_string_func(op);
+	}
+}
+static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
+	if (UNEXPECTED(tmp)) {
+		zend_string_release(tmp);
+	}
+}
+
+/* Compatibility macros for 7.2 and below */
+#define _zval_get_long(op) zval_get_long(op)
+#define _zval_get_double(op) zval_get_double(op)
+#define _zval_get_string(op) zval_get_string(op)
+#define _zval_get_long_func(op) zval_get_long_func(op)
+#define _zval_get_double_func(op) zval_get_double_func(op)
+#define _zval_get_string_func(op) zval_get_string_func(op)
 
 #define convert_to_cstring(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_cstring((op) ZEND_FILE_LINE_CC); }
 #define convert_to_string(op) if (Z_TYPE_P(op) != IS_STRING) { _convert_to_string((op) ZEND_FILE_LINE_CC); }
@@ -320,7 +336,11 @@ again:
 			}
 			break;
 		case IS_OBJECT:
-			result = zend_object_is_true(op);
+			if (EXPECTED(Z_OBJ_HT_P(op)->cast_object == zend_std_cast_object_tostring)) {
+				result = 1;
+			} else {
+				result = zend_object_is_true(op);
+			}
 			break;
 		case IS_RESOURCE:
 			if (EXPECTED(Z_RES_HANDLE_P(op))) {
@@ -364,13 +384,13 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp(const char *s1, size_t len1, 
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
-ZEND_API zend_long ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
+ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
 ZEND_API int ZEND_FASTCALL zend_compare_objects(zval *o1, zval *o2);
 
-ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, int str_len);
-ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, int str_len);
+ZEND_API int ZEND_FASTCALL zend_atoi(const char *str, size_t str_len);
+ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len);
 
 ZEND_API void ZEND_FASTCALL zend_locale_sprintf_double(zval *op ZEND_FILE_LINE_DC);
 
@@ -444,7 +464,23 @@ ZEND_API void zend_update_current_locale(void);
 
 static zend_always_inline void fast_long_increment_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"incl (%0)\n\t"
 		"jno  0f\n\t"
@@ -482,7 +518,23 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 
 static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
-#if defined(__GNUC__) && defined(__i386__)
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), 1, &lresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = lresult;
+	}
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), 1, &llresult))) {
+		/* switch to double */
+		ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
+	} else {
+		Z_LVAL_P(op1) = llresult;
+	}
+#elif defined(__GNUC__) && defined(__i386__)
 	__asm__(
 		"decl (%0)\n\t"
 		"jno  0f\n\t"
@@ -520,7 +572,21 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 
 static zend_always_inline void fast_long_add_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(__GNUC__) && defined(__i386__) \
+#if PHP_HAVE_BUILTIN_SADDL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_saddl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif PHP_HAVE_BUILTIN_SADDLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_saddll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) + (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(__GNUC__) && defined(__i386__) \
 	&& !(4 == __GNUC__ && 8 == __GNUC_MINOR__) \
 	&& !(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
 	/* Position-independent builds fail with gcc-4.9.x */
@@ -609,7 +675,21 @@ static zend_always_inline int fast_add_function(zval *result, zval *op1, zval *o
 
 static zend_always_inline void fast_long_sub_function(zval *result, zval *op1, zval *op2)
 {
-#if defined(__GNUC__) && defined(__i386__) && \
+#if PHP_HAVE_BUILTIN_SSUBL_OVERFLOW && SIZEOF_LONG == SIZEOF_ZEND_LONG
+	long lresult;
+	if (UNEXPECTED(__builtin_ssubl_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &lresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, lresult);
+	}
+#elif PHP_HAVE_BUILTIN_SSUBLL_OVERFLOW && SIZEOF_LONG_LONG == SIZEOF_ZEND_LONG
+	long long llresult;
+	if (UNEXPECTED(__builtin_ssubll_overflow(Z_LVAL_P(op1), Z_LVAL_P(op2), &llresult))) {
+		ZVAL_DOUBLE(result, (double) Z_LVAL_P(op1) - (double) Z_LVAL_P(op2));
+	} else {
+		ZVAL_LONG(result, llresult);
+	}
+#elif defined(__GNUC__) && defined(__i386__) && \
 	!(4 == __GNUC__ && 8 == __GNUC_MINOR__) && \
 	!(4 == __GNUC__ && 9 == __GNUC_MINOR__ && (defined(__PIC__) || defined(__PIE__)))
 	/* Position-independent builds fail with gcc-4.9.x */
@@ -849,4 +929,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

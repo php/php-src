@@ -96,6 +96,10 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # include "openssl/applink.c"
 #endif
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 #ifndef PHP_WIN32
 /* XXX this will need to change later when threaded fastcgi is implemented.  shane */
 struct sigaction act, old_term, old_quit, old_int;
@@ -620,19 +624,14 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 
 static void cgi_php_import_environment_variables(zval *array_ptr)
 {
+	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
+		zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
+	}
+
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
-		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
-	) {
+		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) {
 		zval_dtor(array_ptr);
 		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
-		return;
-	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
-		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
-	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
 		return;
 	}
 
@@ -1774,16 +1773,6 @@ int main(int argc, char *argv[])
 	char *decoded_query_string;
 	int skip_getopt = 0;
 
-#if 0 && defined(PHP_DEBUG)
-	/* IIS is always making things more difficult.  This allows
-	 * us to stop PHP and attach a debugger before much gets started */
-	{
-		char szMessage [256];
-		wsprintf (szMessage, "Please attach a debugger to the process 0x%X [%d] (%s) and click OK", GetCurrentProcessId(), GetCurrentProcessId(), argv[0]);
-		MessageBox(NULL, szMessage, "CGI Debug Time!", MB_OK|MB_SERVICE_NOTIFICATION);
-	}
-#endif
-
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
 	signal(SIGPIPE, SIG_IGN); /* ignore SIGPIPE in standalone mode so
@@ -1989,6 +1978,11 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 		fastcgi = fcgi_is_fastcgi();
 	}
+
+	/* make php call us to get _ENV vars */
+	php_php_import_environment_variables = php_import_environment_variables;
+	php_import_environment_variables = cgi_php_import_environment_variables;
+
 	if (fastcgi) {
 		/* How many times to run PHP scripts before dying */
 		if (getenv("PHP_FCGI_MAX_REQUESTS")) {
@@ -1998,10 +1992,6 @@ consult the installation file that came with this distribution, or visit \n\
 				return FAILURE;
 			}
 		}
-
-		/* make php call us to get _ENV vars */
-		php_php_import_environment_variables = php_import_environment_variables;
-		php_import_environment_variables = cgi_php_import_environment_variables;
 
 		/* library is already initialized, now init our request */
 		request = fcgi_init_request(fcgi_fd, NULL, NULL, NULL);
@@ -2256,6 +2246,11 @@ consult the installation file that came with this distribution, or visit \n\
 						if (comma) {
 							warmup_repeats = atoi(php_optarg);
 							repeats = atoi(comma + 1);
+#ifdef HAVE_VALGRIND
+							if (warmup_repeats > 0) {
+								CALLGRIND_STOP_INSTRUMENTATION;
+							}
+#endif
 						} else {
 							repeats = atoi(php_optarg);
 						}
@@ -2467,7 +2462,7 @@ consult the installation file that came with this distribution, or visit \n\
 				file_handle.filename = SG(request_info).path_translated;
 				file_handle.handle.fp = NULL;
 			} else {
-				file_handle.filename = "-";
+				file_handle.filename = "Standard input code";
 				file_handle.type = ZEND_HANDLE_FP;
 				file_handle.handle.fp = stdin;
 			}
@@ -2677,6 +2672,9 @@ fastcgi_request_done:
 							gettimeofday(&start, NULL);
 #else
 							time(&start);
+#endif
+#ifdef HAVE_VALGRIND
+							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}
 						continue;

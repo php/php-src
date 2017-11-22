@@ -84,6 +84,12 @@ ZEND_BEGIN_ARG_INFO_EX(spoofchecker_are_confusable, 0, 0, 2)
 	ZEND_ARG_INFO(1, error)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+ZEND_BEGIN_ARG_INFO_EX(spoofchecker_set_restriction_level, 0, 0, 1)
+	ZEND_ARG_INFO(0, level)
+ZEND_END_ARG_INFO()
+#endif
+
 /* }}} */
 
 /* {{{ Spoofchecker_class_functions
@@ -96,6 +102,9 @@ zend_function_entry Spoofchecker_class_functions[] = {
 	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, setAllowedLocales, spoofchecker_set_allowed_locales, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, setChecks, spoofchecker_set_checks, ZEND_ACC_PUBLIC)
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+	PHP_ME(Spoofchecker, setRestrictionLevel, spoofchecker_set_restriction_level, ZEND_ACC_PUBLIC)
+#endif
 	PHP_FE_END
 };
 /* }}} */
@@ -141,13 +150,6 @@ void spoofchecker_register_Spoofchecker_class(void)
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;
 	Spoofchecker_handlers.free_obj = Spoofchecker_objects_free;
-
-	if (!Spoofchecker_ce_ptr) {
-		zend_error(E_ERROR,
-			"Spoofchecker: attempt to create properties "
-			"on a non-registered class.");
-		return;
-	}
 }
 /* }}} */
 

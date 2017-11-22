@@ -118,6 +118,8 @@ typedef enum {
 	&& 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_JUNCTION_PREFIXW, PHP_WIN32_IOUTIL_JUNCTION_PREFIX_LENW))
 #define PHP_WIN32_IOUTIL_IS_ABSOLUTEW(pathw, path_lenw) (PHP_WIN32_IOUTIL_IS_LONG_PATHW(pathw, path_lenw) \
 	|| path_lenw >= 3 && PHP_WIN32_IOUTIL_IS_LETTERW(pathw[0]) && L':' == pathw[1] && IS_SLASHW(pathw[2]))
+#define PHP_WIN32_IOUTIL_IS_UNC(pathw, path_lenw) (path_lenw >= 2 && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[0]) && PHP_WIN32_IOUTIL_IS_SLASHW(pathw[1]) \
+	|| path_lenw >= PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW && 0 == wcsncmp((pathw), PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW))
 
 #define PHP_WIN32_IOUTIL_INIT_W(path) \
 	wchar_t *pathw = php_win32_ioutil_any_to_w(path); \
@@ -139,7 +141,7 @@ typedef enum {
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
 		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, wcslen(pathw))) { \
 			if (dealloc) { \
-				free(pathw); \
+				free((void *)pathw); \
 			} \
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED); \
 			return ret; \
@@ -236,7 +238,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
-PW32IO wchar_t *php_win32_ioutil_getcwd_w(const wchar_t *buf, int len);
+PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
@@ -492,7 +494,7 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, int len)
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
-		if (tmp_bufa_len + 1 > len) {
+		if (tmp_bufa_len + 1 > (size_t)len) {
 			free(tmp_bufa);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
 			return NULL;

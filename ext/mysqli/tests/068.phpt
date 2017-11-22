@@ -8,4 +8,4 @@ mysqli get_client_info
 	echo gettype($s);
 ?>
 --EXPECTF--
-%unicode|string%
+string

@@ -45,7 +45,7 @@ $c->func('This should work!');
 
 ?>
 --EXPECTF--
-%unicode|string%(27) "B::func2: This should work!"
-%unicode|string%(27) "B::func3: This should work!"
+string(27) "B::func2: This should work!"
+string(27) "B::func3: This should work!"
 
 Warning: call_user_func_array() expects parameter 1 to be a valid callback, class 'B' does not have a method 'inexistent' in %s on line %d

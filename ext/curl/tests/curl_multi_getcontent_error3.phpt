@@ -49,5 +49,5 @@ if (!extension_loaded('curl')) print 'skip';
 
 ?>
 --EXPECTF--
-Warning: curl_multi_getcontent() expects parameter 1 to be resource, %unicode_string_optional% given in %s on line %d
+Warning: curl_multi_getcontent() expects parameter 1 to be resource, string given in %s on line %d
 CURL2

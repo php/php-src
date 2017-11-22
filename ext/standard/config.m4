@@ -289,7 +289,6 @@ dnl
 dnl log2 could be used to improve the log function, however it requires C99. The check for log2 should be turned on,
 dnl as soon as we support C99.
 AC_CHECK_FUNCS(getcwd getwd asinh acosh atanh log1p hypot glob strfmon nice fpclass mempcpy strpncpy)
-AC_CHECK_DECLS([isnan, isinf], [], [], [[#include <math.h>]])
 AC_FUNC_FNMATCH	
 
 dnl
@@ -353,143 +352,6 @@ dnl
 PHP_CHECK_FUNC(res_search, resolv, bind, socket)
 
 dnl
-dnl Check if atof() accepts NAN
-dnl
-AC_CACHE_CHECK(whether atof() accepts NAN, ac_cv_atof_accept_nan,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#if HAVE_DECL_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isnan(atof("NAN")) ? 0 : 1;
-}
-],[
-  ac_cv_atof_accept_nan=yes
-],[
-  ac_cv_atof_accept_nan=no
-],[
-  ac_cv_atof_accept_nan=no
-])])
-if test "$ac_cv_atof_accept_nan" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_NAN], 1, [whether atof() accepts NAN])
-fi
-
-dnl
-dnl Check if atof() accepts INF
-dnl
-AC_CACHE_CHECK(whether atof() accepts INF, ac_cv_atof_accept_inf,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#if HAVE_DECL_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY || (a)==-INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(atof("INF")) && zend_isinf(atof("-INF")) ? 0 : 1;
-}
-],[
-  ac_cv_atof_accept_inf=yes
-],[
-  ac_cv_atof_accept_inf=no
-],[
-  ac_cv_atof_accept_inf=no
-])])
-if test "$ac_cv_atof_accept_inf" = "yes"; then
-  AC_DEFINE([HAVE_ATOF_ACCEPTS_INF], 1, [whether atof() accepts INF])
-fi
-
-dnl
-dnl Check if HUGE_VAL == INF
-dnl
-AC_CACHE_CHECK(whether HUGE_VAL == INF, ac_cv_huge_val_inf,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#if HAVE_DECL_ISINF
-#define zend_isinf(a) isinf(a)
-#elif defined(INFINITY)
-/* Might not work, but is required by ISO C99 */
-#define zend_isinf(a) (((a)==INFINITY || (a)==-INFINITY)?1:0)
-#elif defined(HAVE_FPCLASS)
-#define zend_isinf(a) ((fpclass(a) == FP_PINF) || (fpclass(a) == FP_NINF))
-#else
-#define zend_isinf(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-	return zend_isinf(HUGE_VAL) ? 0 : 1;
-}
-],[
-  ac_cv_huge_val_inf=yes
-],[
-  ac_cv_huge_val_inf=no
-],[
-  ac_cv_huge_val_inf=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_inf" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_INF], 1, [whether HUGE_VAL == INF])
-fi
-
-dnl
-dnl Check if HUGE_VAL + -HUGEVAL == NAN
-dnl
-AC_CACHE_CHECK(whether HUGE_VAL + -HUGEVAL == NAN, ac_cv_huge_val_nan,[
-AC_TRY_RUN([
-#include <math.h>
-#include <stdlib.h>
-
-#if HAVE_DECL_ISNAN
-#define zend_isnan(a) isnan(a)
-#elif defined(HAVE_FPCLASS)
-#define zend_isnan(a) ((fpclass(a) == FP_SNAN) || (fpclass(a) == FP_QNAN))
-#else
-#define zend_isnan(a) 0
-#endif
-
-int main(int argc, char** argv)
-{
-#if defined(__sparc__) && !(__GNUC__ >= 3)
-	/* prevent bug #27830 */
-	return 1;
-#else
-	return zend_isnan(HUGE_VAL + -HUGE_VAL) ? 0 : 1;
-#endif
-}
-],[
-  ac_cv_huge_val_nan=yes
-],[
-  ac_cv_huge_val_nan=no
-],[
-  ac_cv_huge_val_nan=yes
-])])
-dnl This is the most probable fallback so we assume yes in case of cross compile.
-if test "$ac_cv_huge_val_nan" = "yes"; then
-  AC_DEFINE([HAVE_HUGE_VAL_NAN], 1, [whether HUGE_VAL + -HUGEVAL == NAN])
-fi
-
-dnl
 dnl Check for strptime()
 dnl
 AC_CACHE_CHECK(whether strptime() declaration fails, ac_cv_strptime_decl_fails,[
@@ -546,6 +408,45 @@ dnl
 dnl Check for arc4random on BSD systems
 dnl
 AC_CHECK_DECLS([arc4random_buf])
+
+dnl
+dnl Check for argon2
+dnl
+PHP_ARG_WITH(password-argon2, for Argon2 support,
+[  --with-password-argon2[=DIR]           Include Argon2 support in password_*. DIR is the Argon2 shared library path]])
+
+if test "$PHP_PASSWORD_ARGON2" != "no"; then
+  AC_MSG_CHECKING([for Argon2 library])
+  for i in $PHP_PASSWORD_ARGON2 /usr /usr/local ; do
+    if test -r $i/include/argon2.h; then
+      ARGON2_DIR=$i;
+      AC_MSG_RESULT(found in $i)
+      break
+    fi
+  done
+
+  if test -z "$ARGON2_DIR"; then
+    AC_MSG_RESULT([not found])
+    AC_MSG_ERROR([Please ensure the argon2 header and library are installed])
+  fi
+
+  PHP_ADD_LIBRARY_WITH_PATH(argon2, $ARGON2_DIR/$PHP_LIBDIR)
+  PHP_ADD_INCLUDE($ARGON2_DIR/include)
+
+  AC_CHECK_LIB(argon2, argon2_hash, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2LIB, 1, [ Define to 1 if you have the <argon2.h> header file ])
+  ], [
+    AC_MSG_ERROR([Problem with libargon2.(a|so). Please verify that Argon2 header and libaries are installed])
+  ])
+
+  AC_CHECK_LIB(argon2, argon2id_hash_raw, [
+    LIBS="$LIBS -largon2"
+    AC_DEFINE(HAVE_ARGON2ID, 1, [ Define to 1 if Argon2 library has support for Argon2ID])
+  ], [
+    AC_MSG_RESULT([not found])
+  ])
+fi
 
 dnl
 dnl Setup extension sources

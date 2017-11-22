@@ -1,8 +1,8 @@
-README.ja  2007/05/31
+README.ja  2016/05/06
 
-鬼車  ----   (C) K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
+鬼車  ----   (C) K.Kosako <kkosako0@gmail.com>
 
-http://www.geocities.jp/kosako3/oniguruma/
+https://github.com/kkos/oniguruma
 
 鬼車は正規表現ライブラリである。
 このライブラリの特長は、それぞれの正規表現オブジェクトごとに
@@ -23,25 +23,22 @@ http://www.geocities.jp/kosako3/oniguruma/
 
 ライセンス
 
-  BSDライセンスに従う。
+  BSDライセンス
 
 
 インストール
 
  ケース１: UnixとCygwin環境
 
-   1. ./configure
-   2. make
-   3. make install
+   1. autoreconf -vfi   (* configureスクリプトがないときだけ)
+
+   2. ./configure
+   3. make
+   4. make install
 
    アンインストール
 
      make uninstall
-
-   動作テスト (ASCII/EUC-JP)
-
-     make atest
-
 
    構成確認
 
@@ -52,18 +49,19 @@ http://www.geocities.jp/kosako3/oniguruma/
 
 
 
- ケース２: Win32(VC++)環境
+ ケース２: Windows 64/32bit (Visual Studio)環境
 
-   1. copy win32\Makefile Makefile
-   2. copy win32\config.h config.h
-   3. nmake
+   make_win64 あるいは make_win32 を実行
 
       onig_s.lib:  static link library
       onig.dll:    dynamic link library
 
-  * 動作テスト (ASCII/Shift_JIS)
-   4. copy win32\testc.c testc.c
-   5. nmake ctest
+   * 動作テスト (ASCII/Shift_JIS)
+      1. cd src
+      2. copy ..\windows\testc.c .
+      3. nmake -f Makefile.windows ctest
+
+   (Visual Studio Community 2015 で動作確認)
 
 
 
@@ -109,6 +107,8 @@ http://www.geocities.jp/kosako3/oniguruma/
   sample/listcap.c   捕獲履歴機能の使用例
   sample/posix.c     POSIX API使用例
   sample/sql.c       可変メタ文字機能使用例 (SQL-like パターン)
+  sample/user_property.c ユーザ定義Unicodeプロパティの使用例
+
 
 テストプログラム
   sample/syntax.c    Perl、Java、ASIS文法のテスト
@@ -142,39 +142,39 @@ http://www.geocities.jp/kosako3/oniguruma/
   regposerr.c        POSIX APIエラーメッセージ関数
   regposix.c         POSIX API関数
 
-  enc/mktable.c      文字タイプテーブル生成プログラム
-  enc/ascii.c        ASCII エンコーディング
-  enc/euc_jp.c       EUC-JP エンコーディング
-  enc/euc_tw.c       EUC-TW エンコーディング
-  enc/euc_kr.c       EUC-KR, EUC-CN エンコーディング
-  enc/sjis.c         Shift_JIS エンコーディング
-  enc/big5.c         Big5 エンコーディング
-  enc/gb18030.c      GB18030 エンコーディング
-  enc/koi8.c         KOI8 エンコーディング
-  enc/koi8_r.c       KOI8-R エンコーディング
-  enc/cp1251.c       CP1251 エンコーディング
-  enc/iso8859_1.c    ISO-8859-1  (Latin-1)
-  enc/iso8859_2.c    ISO-8859-2  (Latin-2)
-  enc/iso8859_3.c    ISO-8859-3  (Latin-3)
-  enc/iso8859_4.c    ISO-8859-4  (Latin-4)
-  enc/iso8859_5.c    ISO-8859-5  (Cyrillic)
-  enc/iso8859_6.c    ISO-8859-6  (Arabic)
-  enc/iso8859_7.c    ISO-8859-7  (Greek)
-  enc/iso8859_8.c    ISO-8859-8  (Hebrew)
-  enc/iso8859_9.c    ISO-8859-9  (Latin-5 または Turkish)
-  enc/iso8859_10.c   ISO-8859-10 (Latin-6 または Nordic)
-  enc/iso8859_11.c   ISO-8859-11 (Thai)
-  enc/iso8859_13.c   ISO-8859-13 (Latin-7 または Baltic Rim)
-  enc/iso8859_14.c   ISO-8859-14 (Latin-8 または Celtic)
-  enc/iso8859_15.c   ISO-8859-15 (Latin-9 または West European with Euro)
-  enc/iso8859_16.c   ISO-8859-16
+  mktable.c          文字タイプテーブル生成プログラム
+  ascii.c            ASCII エンコーディング
+  euc_jp.c           EUC-JP エンコーディング
+  euc_tw.c           EUC-TW エンコーディング
+  euc_kr.c           EUC-KR, EUC-CN エンコーディング
+  sjis.c             Shift_JIS エンコーディング
+  big5.c             Big5 エンコーディング
+  gb18030.c          GB18030 エンコーディング
+  koi8.c             KOI8 エンコーディング
+  koi8_r.c           KOI8-R エンコーディング
+  cp1251.c           CP1251 エンコーディング
+  iso8859_1.c        ISO-8859-1  (Latin-1)
+  iso8859_2.c        ISO-8859-2  (Latin-2)
+  iso8859_3.c        ISO-8859-3  (Latin-3)
+  iso8859_4.c        ISO-8859-4  (Latin-4)
+  iso8859_5.c        ISO-8859-5  (Cyrillic)
+  iso8859_6.c        ISO-8859-6  (Arabic)
+  iso8859_7.c        ISO-8859-7  (Greek)
+  iso8859_8.c        ISO-8859-8  (Hebrew)
+  iso8859_9.c        ISO-8859-9  (Latin-5 または Turkish)
+  iso8859_10.c       ISO-8859-10 (Latin-6 または Nordic)
+  iso8859_11.c       ISO-8859-11 (Thai)
+  iso8859_13.c       ISO-8859-13 (Latin-7 または Baltic Rim)
+  iso8859_14.c       ISO-8859-14 (Latin-8 または Celtic)
+  iso8859_15.c       ISO-8859-15 (Latin-9 または West European with Euro)
+  iso8859_16.c       ISO-8859-16
                      (Latin-10 または South-Eastern European with Euro)
-  enc/utf8.c         UTF-8    エンコーディング
-  enc/utf16_be.c     UTF-16BE エンコーディング
-  enc/utf16_le.c     UTF-16LE エンコーディング
-  enc/utf32_be.c     UTF-32BE エンコーディング
-  enc/utf32_le.c     UTF-32LE エンコーディング
-  enc/unicode.c      Unicode情報
+  utf8.c             UTF-8    エンコーディング
+  utf16_be.c         UTF-16BE エンコーディング
+  utf16_le.c         UTF-16LE エンコーディング
+  utf32_be.c         UTF-32BE エンコーディング
+  utf32_le.c         UTF-32LE エンコーディング
+  unicode.c          Unicodeエンコーディングの共通処理
 
   win32/Makefile     Win32用 Makefile (for VC++)
   win32/config.h     Win32用 config.h
@@ -192,4 +192,4 @@ http://www.geocities.jp/kosako3/oniguruma/
 and I'm thankful to Akinori MUSHA.
 
 
-アドレス: K.Kosako <sndgk393 AT ybb DOT ne DOT jp>
+アドレス: K.Kosako <kkosako0@gmail.com>

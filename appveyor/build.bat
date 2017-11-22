@@ -2,7 +2,7 @@
 
 set SDK_REMOTE=https://github.com/OSTC/php-sdk-binary-tools.git
 set SDK_BRANCH=%PHP_BUILD_SDK_BRANCH%
-set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-vc14-%PLATFORM%.bat
+set SDK_RUNNER=%PHP_BUILD_CACHE_SDK_DIR%\phpsdk-%PHP_BUILD_CRT%-%PLATFORM%.bat
 
 if not exist "%PHP_BUILD_CACHE_BASE_DIR%" (
 	echo Creating %PHP_BUILD_CACHE_BASE_DIR%

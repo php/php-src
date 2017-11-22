@@ -55,7 +55,7 @@ ob_end_flush();
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]
-1 deleted
+2 deleted
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"
@@ -66,7 +66,7 @@ array(3) {
 }
 Write [%s,%s,Blah|s:12:"Hello World!";Foo|b:0;Guff|i:1234567890;]
 Close [%s,PHPSESSID]
-NULL
+bool(true)
 Open [%s,PHPSESSID]
 Read [%s,%s]
 GC [0]

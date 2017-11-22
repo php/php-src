@@ -46,5 +46,7 @@ const mbfl_encoding mbfl_encoding_8bit = {
 	"8bit",
 	(const char *(*)[])&mbfl_encoding_8bit_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	NULL,
+	NULL
 };

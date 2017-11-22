@@ -13,5 +13,7 @@ var_dump($var1);
 ===DONE===
 --EXPECTF--
 Notice: Undefined variable: var in %s on line %d
-string(0) ""
+
+Warning: mbereg_replace(): mbregex compile err: invalid code point value in %sbug72994.php on line %d
+bool(false)
 ===DONE===

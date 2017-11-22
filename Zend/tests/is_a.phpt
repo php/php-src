@@ -4,10 +4,10 @@ is_a() and is_subclass_of() shouldn't call __autoload
 error_reporting=14335
 --FILE--
 <?php
-function __autoload($name) {
+spl_autoload_register(function ($name) {
 	echo("AUTOLOAD '$name'\n");
 	eval("class $name {}");
-}
+});
 
 class BASE {
 }

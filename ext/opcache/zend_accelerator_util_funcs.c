@@ -47,7 +47,7 @@ static void zend_accel_destroy_zend_function(zval *zv)
 	if (function->type == ZEND_USER_FUNCTION) {
 		if (function->op_array.static_variables) {
 			if (!(GC_FLAGS(function->op_array.static_variables) & IS_ARRAY_IMMUTABLE)) {
-				if (--GC_REFCOUNT(function->op_array.static_variables) == 0) {
+				if (GC_DELREF(function->op_array.static_variables) == 0) {
 					FREE_HASHTABLE(function->op_array.static_variables);
 				}
 			}
@@ -181,7 +181,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
+	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
@@ -378,7 +378,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* constants table */
 	zend_hash_clone_constants(&ce->constants_table, &old_ce->constants_table);
-	ce->constants_table.u.flags &= ~HASH_FLAG_APPLY_PROTECTION;
 
 	/* interfaces aren't really implemented, so we create a new table */
 	if (ce->num_interfaces) {
@@ -735,7 +734,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 #define ADLER32_DO8(buf, i)     ADLER32_DO4(buf, i); ADLER32_DO4(buf, i + 4);
 #define ADLER32_DO16(buf)       ADLER32_DO8(buf, 0); ADLER32_DO8(buf, 8);
 
-unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint len)
+unsigned int zend_adler32(unsigned int checksum, signed char *buf, uint32_t len)
 {
 	unsigned int s1 = checksum & 0xffff;
 	unsigned int s2 = (checksum >> 16) & 0xffff;

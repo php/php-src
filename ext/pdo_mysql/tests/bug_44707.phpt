@@ -83,10 +83,10 @@ array(0) {
 array(1) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"mybool"]=>
-    %unicode|string%(1) "0"
+    ["id"]=>
+    string(1) "1"
+    ["mybool"]=>
+    string(1) "0"
   }
 }
 done!

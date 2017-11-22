@@ -23,8 +23,8 @@ mb_internal_encoding('UTF-8');
 
 echo "*** Testing mb_strripos() : usage variations ***\n";
 
-$string_ascii = b'+Is an English string'; //21 chars
-$needle_ascii = b'G';
+$string_ascii = '+Is an English string'; //21 chars
+$needle_ascii = 'G';
 
 $string_mb = base64_decode('5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CCMDEyMzTvvJXvvJbvvJfvvJjvvJnjgII='); //21 chars
 $needle_mb = base64_decode('44CC');

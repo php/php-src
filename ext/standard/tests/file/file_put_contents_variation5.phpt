@@ -30,7 +30,7 @@ rmdir($thisTestDir);
 
 function runtest() {
    global $scriptLocFile, $filename;
-   file_put_contents($filename, (binary) "File written in working directory", FILE_USE_INCLUDE_PATH);
+   file_put_contents($filename, "File written in working directory", FILE_USE_INCLUDE_PATH);
    if(file_exists($scriptLocFile)) {
       echo "Fail - this is PHP52 behaviour\n";
       unlink($scriptLocFile);

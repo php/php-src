@@ -164,7 +164,7 @@ static void php_parserr(PDNS_RECORD pRec, int type_to_fetch, int store, int raw,
 
 	if (raw) {
 		add_assoc_long(subarray, "type", type);
-		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint) pRec->wDataLength);
+		add_assoc_stringl(subarray, "data", (char*) &pRec->Data, (uint32_t) pRec->wDataLength);
 		return;
 	}
 

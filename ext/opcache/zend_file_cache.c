@@ -266,36 +266,37 @@ static void zend_file_cache_serialize_hash(HashTable                *ht,
 	}
 }
 
-static zend_ast *zend_file_cache_serialize_ast(zend_ast                 *ast,
-                                               zend_persistent_script   *script,
-                                               zend_file_cache_metainfo *info,
-                                               void                     *buf)
+static void zend_file_cache_serialize_ast(zend_ast                 *ast,
+                                          zend_persistent_script   *script,
+                                          zend_file_cache_metainfo *info,
+                                          void                     *buf)
 {
 	uint32_t i;
-	zend_ast *ret;
+	zend_ast *tmp;
 
-	SERIALIZE_PTR(ast);
-	ret = ast;
-	UNSERIALIZE_PTR(ast);
-
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		zend_file_cache_serialize_zval(&((zend_ast_zval*)ast)->val, script, info, buf);
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		for (i = 0; i < list->children; i++) {
-			if (list->child[i]) {
-				list->child[i] = zend_file_cache_serialize_ast(list->child[i], script, info, buf);
+			if (list->child[i] && !IS_SERIALIZED(list->child[i])) {
+				SERIALIZE_PTR(list->child[i]);
+				tmp = list->child[i];
+				UNSERIALIZE_PTR(tmp);
+				zend_file_cache_serialize_ast(tmp, script, info, buf);
 			}
 		}
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
-			if (ast->child[i]) {
-				ast->child[i] = zend_file_cache_serialize_ast(ast->child[i], script, info, buf);
+			if (ast->child[i] && !IS_SERIALIZED(ast->child[i])) {
+				SERIALIZE_PTR(ast->child[i]);
+				tmp = ast->child[i];
+				UNSERIALIZE_PTR(tmp);
+				zend_file_cache_serialize_ast(tmp, script, info, buf);
 			}
 		}
 	}
-	return ret;
 }
 
 static void zend_file_cache_serialize_zval(zval                     *zv,
@@ -305,7 +306,6 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-		case IS_CONSTANT:
 			if (!IS_SERIALIZED(Z_STR_P(zv))) {
 				SERIALIZE_STR(Z_STR_P(zv));
 			}
@@ -337,9 +337,7 @@ static void zend_file_cache_serialize_zval(zval                     *zv,
 				SERIALIZE_PTR(Z_AST_P(zv));
 				ast = Z_AST_P(zv);
 				UNSERIALIZE_PTR(ast);
-				if (!IS_SERIALIZED(ast->ast)) {
-					ast->ast = zend_file_cache_serialize_ast(ast->ast, script, info, buf);
-				}
+				zend_file_cache_serialize_ast(GC_AST(ast), script, info, buf);
 			}
 			break;
 	}
@@ -406,6 +404,13 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			if (opline->op2_type == IS_CONST) {
 				SERIALIZE_PTR(opline->op2.zv);
 			}
+#else
+			if (opline->op1_type == IS_CONST) {
+				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op1);
+			}
+			if (opline->op2_type == IS_CONST) {
+				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
+			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
@@ -431,6 +436,8 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
@@ -455,8 +462,15 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				if (!IS_SERIALIZED(p->name)) {
 					SERIALIZE_STR(p->name);
 				}
-				if (!IS_SERIALIZED(p->class_name)) {
-					SERIALIZE_STR(p->class_name);
+				if (ZEND_TYPE_IS_CLASS(p->type)) {
+					zend_bool allow_null = ZEND_TYPE_ALLOW_NULL(p->type);
+					zend_string *type_name = ZEND_TYPE_NAME(p->type);
+
+					SERIALIZE_STR(type_name);
+					p->type =
+						(Z_UL(1) << (sizeof(zend_type)*8-1)) | /* type is class */
+						(allow_null ? (Z_UL(1) << (sizeof(zend_type)*8-2)) : Z_UL(0)) | /* type allow null */
+						(zend_type)type_name;
 				}
 				p++;
 			}
@@ -871,32 +885,31 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
 	}
 }
 
-static zend_ast *zend_file_cache_unserialize_ast(zend_ast                *ast,
-                                                 zend_persistent_script  *script,
-                                                 void                    *buf)
+static void zend_file_cache_unserialize_ast(zend_ast                *ast,
+                                            zend_persistent_script  *script,
+                                            void                    *buf)
 {
 	uint32_t i;
 
-	UNSERIALIZE_PTR(ast);
-
-	if (ast->kind == ZEND_AST_ZVAL) {
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
 		zend_file_cache_unserialize_zval(&((zend_ast_zval*)ast)->val, script, buf);
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
 		for (i = 0; i < list->children; i++) {
-			if (list->child[i]) {
-				list->child[i] = zend_file_cache_unserialize_ast(list->child[i], script, buf);
+			if (list->child[i] && !IS_UNSERIALIZED(list->child[i])) {
+				UNSERIALIZE_PTR(list->child[i]);
+				zend_file_cache_unserialize_ast(list->child[i], script, buf);
 			}
 		}
 	} else {
 		uint32_t children = zend_ast_get_num_children(ast);
 		for (i = 0; i < children; i++) {
-			if (ast->child[i]) {
-				ast->child[i] = zend_file_cache_unserialize_ast(ast->child[i], script, buf);
+			if (ast->child[i] && !IS_UNSERIALIZED(ast->child[i])) {
+				UNSERIALIZE_PTR(ast->child[i]);
+				zend_file_cache_unserialize_ast(ast->child[i], script, buf);
 			}
 		}
 	}
-	return ast;
 }
 
 static void zend_file_cache_unserialize_zval(zval                    *zv,
@@ -905,7 +918,6 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
-		case IS_CONSTANT:
 			if (!IS_UNSERIALIZED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
 			}
@@ -931,13 +943,8 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			break;
 		case IS_CONSTANT_AST:
 			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
-				zend_ast_ref *ast;
-
 				UNSERIALIZE_PTR(Z_AST_P(zv));
-				ast = Z_AST_P(zv);
-				if (!IS_UNSERIALIZED(ast->ast)) {
-					ast->ast = zend_file_cache_unserialize_ast(ast->ast, script, buf);
-				}
+				zend_file_cache_unserialize_ast(Z_ASTVAL_P(zv), script, buf);
 			}
 			break;
 	}
@@ -991,15 +998,22 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		opline = op_array->opcodes;
 		end = opline + op_array->last;
 		while (opline < end) {
-# if ZEND_USE_ABS_CONST_ADDR
+#if ZEND_USE_ABS_CONST_ADDR
 			if (opline->op1_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op1.zv);
 			}
 			if (opline->op2_type == IS_CONST) {
 				UNSERIALIZE_PTR(opline->op2.zv);
 			}
-# endif
-# if ZEND_USE_ABS_JMP_ADDR
+#else
+			if (opline->op1_type == IS_CONST) {
+				ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
+			}
+			if (opline->op2_type == IS_CONST) {
+				ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
+			}
+#endif
+#if ZEND_USE_ABS_JMP_ADDR
 			switch (opline->opcode) {
 				case ZEND_JMP:
 				case ZEND_FAST_CALL:
@@ -1023,10 +1037,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
 				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
 					/* relative extended_value don't have to be changed */
 					break;
 			}
-# endif
+#endif
 			zend_deserialize_opcode_handler(opline);
 			opline++;
 		}
@@ -1046,8 +1062,12 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
-				if (!IS_UNSERIALIZED(p->class_name)) {
-					UNSERIALIZE_STR(p->class_name);
+				if (p->type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
+					zend_bool allow_null = (p->type & (Z_UL(1) << (sizeof(zend_type)*8-2))) != 0; /* type allow null */
+					zend_string *type_name = (zend_string*)(p->type & ~(((Z_UL(1) << (sizeof(zend_type)*8-1))) | ((Z_UL(1) << (sizeof(zend_type)*8-2)))));
+
+					UNSERIALIZE_STR(type_name);
+					p->type = ZEND_TYPE_ENCODE_CLASS(type_name, allow_null);
 				}
 				p++;
 			}

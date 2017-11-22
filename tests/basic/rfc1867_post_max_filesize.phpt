@@ -35,43 +35,43 @@ if (is_uploaded_file($_FILES["file3"]["tmp_name"])) {
 ?>
 --EXPECTF--
 array(3) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(16) "text/plain-file1"
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
-  [%u|b%"file2"]=>
+  ["file2"]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file2.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(0) ""
-    [%u|b%"error"]=>
+    ["error"]=>
     int(1)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(0)
   }
-  [%u|b%"file3"]=>
+  ["file3"]=>
   array(5) {
-    [%u|b%"name"]=>
+    ["name"]=>
     %string|unicode%(9) "file3.txt"
-    [%u|b%"type"]=>
+    ["type"]=>
     %string|unicode%(16) "text/plain-file3"
-    [%u|b%"tmp_name"]=>
+    ["tmp_name"]=>
     %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
 }

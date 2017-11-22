@@ -161,7 +161,11 @@ static int sqlite_handle_closer(pdo_dbh_t *dbh) /* {{{ */
 
 		pdo_sqlite_cleanup_callbacks(H);
 		if (H->db) {
+#ifdef HAVE_SQLITE3_CLOSE_V2
+			sqlite3_close_v2(H->db);
+#else
 			sqlite3_close(H->db);
+#endif
 			H->db = NULL;
 		}
 		if (einfo->errmsg) {
@@ -193,7 +197,7 @@ static int sqlite_handle_preparer(pdo_dbh_t *dbh, const char *sql, size_t sql_le
 		return 0;
 	}
 
-	i = sqlite3_prepare(H->db, sql, sql_len, &S->stmt, &tail);
+	i = sqlite3_prepare_v2(H->db, sql, sql_len, &S->stmt, &tail);
 	if (i == SQLITE_OK) {
 		return 1;
 	}
@@ -342,7 +346,7 @@ static int do_callback(struct pdo_sqlite_fci *fc, zval *cb,
 			ZVAL_NULL(&zargs[0]);
 		} else {
 			if (Z_ISUNDEF(agg_context->val)) {
-				GC_REFCOUNT(agg_context) = 1;
+				GC_SET_REFCOUNT(agg_context, 1);
 				GC_TYPE_INFO(agg_context) = IS_REFERENCE;
 				ZVAL_NULL(&agg_context->val);
 			}
@@ -515,25 +519,27 @@ static PHP_METHOD(SQLite, sqliteCreateFunction)
 	size_t func_name_len;
 	zend_long argc = -1;
 	zend_long flags = 0;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz|ll",
-			&func_name, &func_name_len, &callback, &argc, &flags)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL(callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+		Z_PARAM_LONG(flags)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -585,31 +591,34 @@ static PHP_METHOD(SQLite, sqliteCreateAggregate)
 	char *func_name;
 	size_t func_name_len;
 	zend_long argc = -1;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "szz|l",
-			&func_name, &func_name_len, &step_callback, &fini_callback, &argc)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 4)
+		Z_PARAM_STRING(func_name, func_name_len)
+		Z_PARAM_ZVAL(step_callback)
+		Z_PARAM_ZVAL(fini_callback)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(argc)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(step_callback, 0, &cbname)) {
+	if (!zend_is_callable(step_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(step_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
-	if (!zend_is_callable(fini_callback, 0, &cbname)) {
+
+	if (!zend_is_callable(fini_callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(fini_callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -645,25 +654,24 @@ static PHP_METHOD(SQLite, sqliteCreateCollation)
 	zval *callback;
 	char *collation_name;
 	size_t collation_name_len;
-	zend_string *cbname = NULL;
 	pdo_dbh_t *dbh;
 	pdo_sqlite_db_handle *H;
 	int ret;
 
-	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "sz",
-		&collation_name, &collation_name_len, &callback)) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(collation_name, collation_name_len)
+		Z_PARAM_ZVAL(callback)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	dbh = Z_PDO_DBH_P(getThis());
 	PDO_CONSTRUCT_CHECK;
 
-	if (!zend_is_callable(callback, 0, &cbname)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *cbname = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "function '%s' is not callable", ZSTR_VAL(cbname));
 		zend_string_release(cbname);
 		RETURN_FALSE;
 	}
-	zend_string_release(cbname);
 
 	H = (pdo_sqlite_db_handle *)dbh->driver_data;
 
@@ -783,7 +791,7 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 {
 	pdo_sqlite_db_handle *H;
 	int i, ret = 0;
-	zend_long timeout = 60;
+	zend_long timeout = 60, flags;
 	char *filename;
 
 	H = pecalloc(1, sizeof(pdo_sqlite_db_handle), dbh->is_persistent);
@@ -801,7 +809,14 @@ static int pdo_sqlite_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{
 		goto cleanup;
 	}
 
+	flags = pdo_attr_lval(driver_options, PDO_SQLITE_ATTR_OPEN_FLAGS, SQLITE_OPEN_READWRITE | SQLITE_OPEN_CREATE);
+
+#if SQLITE_VERSION_NUMBER >= 3005000
+	i = sqlite3_open_v2(filename, &H->db, flags, NULL);
+#else
 	i = sqlite3_open(filename, &H->db);
+#endif
+
 	efree(filename);
 
 	if (i != SQLITE_OK) {

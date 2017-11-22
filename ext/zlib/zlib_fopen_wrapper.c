@@ -141,6 +141,11 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 			self->gz_file = gzdopen(dup(fd), mode);
 
 			if (self->gz_file) {
+				zval *zlevel = context ? php_stream_context_get_option(context, "zlib", "level") : NULL;
+				if (zlevel && (Z_OK != gzsetparams(self->gz_file, zval_get_long(zlevel), Z_DEFAULT_STRATEGY))) {
+					php_error(E_WARNING, "failed setting compression level");
+				}
+
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
 				if (stream) {
 					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;

@@ -1,4 +1,4 @@
-鬼車 正規表現 Version 5.9.1    2007/09/05
+鬼車 正規表現 Version 6.3.0    2017/05/19
 
 使用文法: ONIG_SYNTAX_RUBY (既定値)
 
@@ -13,21 +13,22 @@
 
 2. 文字
 
-  \t           水平タブ         (0x09)
-  \v           垂直タブ         (0x0B)
-  \n           改行             (0x0A)
-  \r           復帰             (0x0D)
-  \b           後退空白         (0x08)
-  \f           改頁             (0x0C)
-  \a           鐘               (0x07)
-  \e           退避修飾         (0x1B)
-  \nnn         八進数表現        符号化バイト値(の一部)
-  \xHH         十六進数表現      符号化バイト値(の一部)
-  \x{7HHHHHHH} 拡張十六進数表現  コードポイント値
-  \cx          制御文字表現      コードポイント値
-  \C-x         制御文字表現      コードポイント値
-  \M-x         超  (x|0x80)      コードポイント値
-  \M-\C-x      超 + 制御文字表現 コードポイント値
+  \t              水平タブ         (0x09)
+  \v              垂直タブ         (0x0B)
+  \n              改行             (0x0A)
+  \r              復帰             (0x0D)
+  \b              後退空白         (0x08)
+  \f              改頁             (0x0C)
+  \a              鐘               (0x07)
+  \e              退避修飾         (0x1B)
+  \nnn            八進数表現        符号化バイト値(の一部)
+  \o{17777777777} 拡張八進数表現    コードポイント値
+  \xHH            十六進数表現      符号化バイト値(の一部)
+  \x{7HHHHHHH}    拡張十六進数表現  コードポイント値
+  \cx             制御文字表現      コードポイント値
+  \C-x            制御文字表現      コードポイント値
+  \M-x            超  (x|0x80)     コードポイント値
+  \M-\C-x         超 + 制御文字表現 コードポイント値
 
   ※ \bは、文字集合内でのみ有効
 
@@ -86,19 +87,7 @@
        Hiragana, Katakana
 
      + UTF8, UTF16, UTF32で有効
-       Any, Assigned, C, Cc, Cf, Cn, Co, Cs, L, Ll, Lm, Lo, Lt, Lu,
-       M, Mc, Me, Mn, N, Nd, Nl, No, P, Pc, Pd, Pe, Pf, Pi, Po, Ps,
-       S, Sc, Sk, Sm, So, Z, Zl, Zp, Zs, 
-       Arabic, Armenian, Bengali, Bopomofo, Braille, Buginese,
-       Buhid, Canadian_Aboriginal, Cherokee, Common, Coptic,
-       Cypriot, Cyrillic, Deseret, Devanagari, Ethiopic, Georgian,
-       Glagolitic, Gothic, Greek, Gujarati, Gurmukhi, Han, Hangul,
-       Hanunoo, Hebrew, Hiragana, Inherited, Kannada, Katakana,
-       Kharoshthi, Khmer, Lao, Latin, Limbu, Linear_B, Malayalam,
-       Mongolian, Myanmar, New_Tai_Lue, Ogham, Old_Italic, Old_Persian,
-       Oriya, Osmanya, Runic, Shavian, Sinhala, Syloti_Nagri, Syriac,
-       Tagalog, Tagbanwa, Tai_Le, Tamil, Telugu, Thaana, Thai, Tibetan,
-       Tifinagh, Ugaritic, Yi
+       doc/UNICODE_PROPERTIES参照
 
 
 
@@ -395,7 +384,7 @@
       退避修飾しなければならない)
    + 名前付き捕獲式集合と、部分式呼出し機能追加
    + 多バイト文字コードが指定されているとき、
-     文字集合の中で八進数または十六進数表現の連続は、多バイト符合で表現された
+     文字集合の中で八進数または十六進数表現の連続は、多バイト符号で表現された
      一個の文字と解釈される
      (例. [\xa1\xa2], [\xa1\xa7-\xa4\xa1])
    + 文字集合の中で、一バイト文字と多バイト文字の範囲指定は許される。

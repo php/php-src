@@ -33,13 +33,23 @@ echo "done\n";
 
 ?>
 --EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
+
 Notice: Undefined variable: a in %sassert02.php(%d) : assert code on line 1
 
 Warning: assert(): Assertion "$a" failed in %sassert02.php on line %d
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 Failure evaluating code: 
 aa=sd+as+safsafasfasafsaf
 
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
+
 Warning: assert(): Assertion "0" failed in %sassert02.php on line %d
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 
 Fatal error: Uncaught ParseError: syntax error, unexpected '=', expecting ';' in %s(%d) : assert code:1
 Stack trace:

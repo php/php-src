@@ -2601,7 +2601,8 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 	zval *streamind;
 	pils *imap_le_struct;
 	char date[100];
-	unsigned int msgno, unreadmsg, deletedmsg, msize;
+	unsigned long msgno;
+	zend_ulong unreadmsg = 0, deletedmsg = 0, msize = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &streamind) == FAILURE) {
 		return;
@@ -2613,10 +2614,6 @@ PHP_FUNCTION(imap_mailboxmsginfo)
 
 	/* Initialize return object */
 	object_init(return_value);
-
-	unreadmsg = 0;
-	deletedmsg = 0;
-	msize = 0;
 
 	for (msgno = 1; msgno <= imap_le_struct->imap_stream->nmsgs; msgno++) {
 		MESSAGECACHE * cache = mail_elt (imap_le_struct->imap_stream, msgno);

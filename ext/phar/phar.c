@@ -27,7 +27,7 @@
 static void destroy_phar_data(zval *zv);
 
 ZEND_DECLARE_MODULE_GLOBALS(phar)
-zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
+zend_string *(*phar_save_resolve_path)(const char *filename, size_t filename_len);
 
 /**
  * set's phar->is_writeable based on the current INI value
@@ -103,7 +103,7 @@ static void phar_split_cache_list(void) /* {{{ */
 	char *key, *lasts, *end;
 	char ds[2];
 	phar_archive_data *phar;
-	uint i = 0;
+	uint32_t i = 0;
 
 	if (!PHAR_G(cache_list) || !(PHAR_G(cache_list)[0])) {
 		return;
@@ -662,6 +662,7 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 	zend_long offset;
 	int sig_len, register_alias = 0, temp_alias = 0;
 	char *signature = NULL;
+	zend_string *str;
 
 	if (pphar) {
 		*pphar = NULL;
@@ -1173,7 +1174,13 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 		/* if signature matched, no need to check CRC32 for each file */
 		entry.is_crc_checked = (manifest_flags & PHAR_HDR_SIGNATURE ? 1 : 0);
 		phar_set_inode(&entry);
-		zend_hash_str_add_mem(&mydata->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
+		if (mydata->is_persistent) {
+			str = zend_string_init_interned(entry.filename, entry.filename_len, 1);
+		} else {
+			str = zend_string_init(entry.filename, entry.filename_len, 0);
+		}
+		zend_hash_add_mem(&mydata->manifest, str, (void*)&entry, sizeof(phar_entry_info));
+		zend_string_release(str);
 	}
 
 	snprintf(mydata->version, sizeof(mydata->version), "%u.%u.%u", manifest_ver >> 12, (manifest_ver >> 8) & 0xF, (manifest_ver >> 4) & 0xF);
@@ -1221,12 +1228,24 @@ static int phar_parse_pharfile(php_stream *fp, char *fname, int fname_len, char 
 			}
 		}
 
-		zend_hash_str_add_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len, mydata);
+		if (mydata->is_persistent) {
+			str = zend_string_init_interned(alias, alias_len, 1);
+		} else {
+			str = zend_string_init(alias, alias_len, 0);
+		}
+		zend_hash_add_ptr(&(PHAR_G(phar_alias_map)), str, mydata);
+		zend_string_release(str);
 	} else {
 		mydata->is_temporary_alias = 1;
 	}
 
-	zend_hash_str_add_ptr(&(PHAR_G(phar_fname_map)), mydata->fname, fname_len, mydata);
+	if (mydata->is_persistent) {
+		str = zend_string_init_interned(mydata->fname, fname_len, 1);
+	} else {
+		str = zend_string_init(mydata->fname, fname_len, 0);
+	}
+	zend_hash_add_ptr(&(PHAR_G(phar_fname_map)), str, mydata);
+	zend_string_release(str);
 	efree(savebuf);
 
 	if (pphar) {
@@ -1956,11 +1975,11 @@ woohoo:
 				HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&(PHAR_G(phar_fname_map)), &str_key, &unused);
 				zend_hash_move_forward(&(PHAR_G(phar_fname_map)))
 			) {
-				if (ZSTR_LEN(str_key) > (uint) filename_len) {
+				if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 					continue;
 				}
 
-				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+				if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 					|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 					if (NULL == (pphar = zend_hash_get_current_data_ptr(&(PHAR_G(phar_fname_map))))) {
 						break;
@@ -1975,11 +1994,11 @@ woohoo:
 					HASH_KEY_NON_EXISTENT != zend_hash_get_current_key(&cached_phars, &str_key, &unused);
 					zend_hash_move_forward(&cached_phars)
 				) {
-					if (ZSTR_LEN(str_key) > (uint) filename_len) {
+					if (ZSTR_LEN(str_key) > (uint32_t) filename_len) {
 						continue;
 					}
 
-					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint)filename_len == ZSTR_LEN(str_key)
+					if (!memcmp(filename, ZSTR_VAL(str_key), ZSTR_LEN(str_key)) && ((uint32_t)filename_len == ZSTR_LEN(str_key)
 						|| filename[ZSTR_LEN(str_key)] == '/' || filename[ZSTR_LEN(str_key)] == '\0')) {
 						if (NULL == (pphar = zend_hash_get_current_data_ptr(&cached_phars))) {
 							break;
@@ -2202,9 +2221,9 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 
 	ext_len = 0;
 #ifdef PHP_WIN32
-	save = filename;
+	save = (char *)filename;
 	filename = estrndup(filename, filename_len);
-	phar_unixify_path_separators(filename, filename_len);
+	phar_unixify_path_separators((char *)filename, filename_len);
 #endif
 	if (phar_detect_phar_fname_ext(filename, filename_len, &ext_str, &ext_len, executable, for_create, 0) == FAILURE) {
 		if (ext_len != -1) {
@@ -2218,7 +2237,7 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 			}
 
 #ifdef PHP_WIN32
-			efree(filename);
+			efree((char *)filename);
 #endif
 			return FAILURE;
 		}
@@ -2243,7 +2262,7 @@ int phar_split_fname(const char *filename, int filename_len, char **arch, int *a
 	}
 
 #ifdef PHP_WIN32
-	efree(filename);
+	efree((char *)filename);
 #endif
 
 	return SUCCESS;
@@ -3249,7 +3268,7 @@ static size_t phar_zend_stream_fsizer(void *handle) /* {{{ */
 zend_op_array *(*phar_orig_compile_file)(zend_file_handle *file_handle, int type);
 #define phar_orig_zend_open zend_stream_open_function
 
-static zend_string *phar_resolve_path(const char *filename, int filename_len)
+static zend_string *phar_resolve_path(const char *filename, size_t filename_len)
 {
 	return phar_find_in_include_path((char *) filename, filename_len, NULL);
 }

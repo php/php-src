@@ -13,6 +13,8 @@ $func();
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
+
 Fatal error: Uncaught AssertionError: assert(false) in %sexception_012.php(%d) : runtime-created function:%d
 Stack trace:
 #0 %sexception_012.php(%d) : runtime-created function(%d): assert(false, 'assert(false)')
