@@ -1,5 +1,7 @@
 --TEST--
 Test argv passing
+--INI--
+register_argc_argv=On
 --PHPDBG--
 r
 r 1 2 3
