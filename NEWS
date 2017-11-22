@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
     segment fault). (Nikita)
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+    that getrandom() is missing). (sarciszewski)
 
 - Zip:
   . Fixed bug #75540 (Segfault with libzip 1.3.1). (Remi)
