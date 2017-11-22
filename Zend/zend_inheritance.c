@@ -1165,6 +1165,11 @@ static void zend_add_trait_method(zend_class_entry *ce, const char *name, zend_s
 	zend_function *new_fn;
 
 	if ((existing_fn = zend_hash_find_ptr(&ce->function_table, key)) != NULL) {
+		/* if it is the same function regardless of where it is coming from, there is no conflict and we do not need to add it again */
+		if (existing_fn->op_array.opcodes == fn->op_array.opcodes) {
+			return;
+		}
+
 		if (existing_fn->common.scope == ce) {
 			/* members from the current class override trait methods */
 			/* use temporary *overriden HashTable to detect hidden conflict */
