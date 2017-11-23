@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
+  . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
