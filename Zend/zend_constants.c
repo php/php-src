@@ -138,6 +138,28 @@ int zend_shutdown_constants(void)
 	return SUCCESS;
 }
 
+zend_string *zend_get_class_name (const char *from_string)
+{
+	const char *colon;
+	zend_string *class_name;
+	size_t class_name_length = strlen(from_string);
+	/* Skip leading \\ */
+	if (from_string[0] == '\\') {
+		from_string += 1;
+		class_name_length -= 1;
+	}
+	if (colon = zend_memrchr(from_string, ':', (int)class_name_length)) {
+		class_name_length = colon - from_string - 1;
+	}
+	class_name = zend_string_init(from_string, class_name_length, 0);
+	if (!class_name_length || (strspn(ZSTR_VAL(class_name), "0123456789_abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256\257\260\261\262\263\264\265\266\267\270\271\272\273\274\275\276\277\300\301\302\303\304\305\306\307\310\311\312\313\314\315\316\317\320\321\322\323\324\325\326\327\330\331\332\333\334\335\336\337\340\341\342\343\344\345\346\347\350\351\352\353\354\355\356\357\360\361\362\363\364\365\366\367\370\371\372\373\374\375\376\377\\") != class_name_length)) {
+		zend_string_release(class_name);
+		return NULL;
+	}
+
+	return class_name;
+}
+
 ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int flags, int module_number)
 {
 	zend_constant c;
@@ -289,6 +311,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 	zend_class_entry *ce = NULL;
 	const char *name = ZSTR_VAL(cname);
 	size_t name_len = ZSTR_LEN(cname);
+	zend_string *class_name;
 
 	/* Skip leading \\ */
 	if (name[0] == '\\') {
@@ -297,12 +320,10 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		cname = NULL;
 	}
 
-	if ((colon = zend_memrchr(name, ':', name_len)) &&
-	    colon > name && (*(colon - 1) == ':') && strlen(name) > 2) {
+	if ((colon = zend_memrchr(name, ':', name_len)) && (class_name = zend_get_class_name(name))) {
 		int class_name_len = colon - name - 1;
-		size_t const_name_len = name_len - class_name_len - 2;
+		size_t const_name_len = name_len - ZSTR_LEN(class_name) - 2;
 		zend_string *constant_name = zend_string_init(colon + 1, const_name_len, 0);
-		zend_string *class_name = zend_string_init(name, class_name_len, 0);
 		zend_class_constant *c = NULL;
 		zval *ret_constant = NULL;
 
