@@ -61,6 +61,7 @@ enum _zend_ast_kind {
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TYPE,
+	ZEND_AST_ARRAY_ELEM_EMPTY,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -269,7 +270,7 @@ static zend_always_inline zend_ast *zend_ast_create_cast(uint32_t type, zend_ast
 }
 static zend_always_inline zend_ast *zend_ast_list_rtrim(zend_ast *ast) {
 	zend_ast_list *list = zend_ast_get_list(ast);
-	if (list->children && list->child[list->children - 1] == NULL) {
+	if (list->children && list->child[list->children - 1]->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
 		list->children--;
 	}
 	return ast;

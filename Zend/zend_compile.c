@@ -2833,14 +2833,15 @@ static void zend_compile_list_assign(
 	uint32_t i;
 	zend_bool has_elems = 0;
 	zend_bool is_keyed =
-		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL;
+		list->children > 0 && list->child[0] != NULL && list->child[0]->child[1] != NULL &&
+			list->child[0]->kind != ZEND_AST_ARRAY_ELEM_EMPTY && list->child[0]->child[1]->kind != ZEND_AST_ARRAY_ELEM_EMPTY;
 
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *var_ast, *key_ast;
 		znode fetch_result, dim_node;
 
-		if (elem_ast == NULL) {
+		if (elem_ast->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
 			if (is_keyed) {
 				zend_error(E_COMPILE_ERROR,
 					"Cannot use empty array entries in keyed array assignment");
@@ -2938,7 +2939,7 @@ zend_bool zend_list_has_assign_to(zend_ast *list_ast, zend_string *name) /* {{{ 
 		zend_ast *elem_ast = list->child[i];
 		zend_ast *var_ast;
 
-		if (!elem_ast) {
+		if (!elem_ast || elem_ast->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
 			continue;
 		}
 		var_ast = elem_ast->child[0];
@@ -6618,7 +6619,8 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 
-		if (elem_ast == NULL) {
+		if (elem_ast->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
+			CG(zend_lineno) = elem_ast->lineno;
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
 		}
 
@@ -7253,7 +7255,8 @@ void zend_compile_array(znode *result, zend_ast *ast) /* {{{ */
 		zend_bool by_ref;
 		znode value_node, key_node, *key_node_ptr = NULL;
 
-		if (elem_ast == NULL) {
+		if (elem_ast->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
+			CG(zend_lineno) = elem_ast->lineno;
 			zend_error(E_COMPILE_ERROR, "Cannot use empty array elements in arrays");
 		}
 
@@ -7706,7 +7709,7 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 void zend_compile_const_expr(zend_ast **ast_ptr) /* {{{ */
 {
 	zend_ast *ast = *ast_ptr;
-	if (ast == NULL || ast->kind == ZEND_AST_ZVAL) {
+	if (ast == NULL || ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_ARRAY_ELEM_EMPTY) {
 		return;
 	}
 

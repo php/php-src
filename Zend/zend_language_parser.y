@@ -1188,7 +1188,7 @@ array_pair_list:
 ;
 
 possible_array_pair:
-		/* empty */ { $$ = NULL; }
+		/* empty */ { $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM_EMPTY); }
 	|	array_pair  { $$ = $1; }
 ;
 
