@@ -613,12 +613,8 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 	return SUCCESS;
 }
 
-static inline void ct_eval_type_check(zval *result, uint32_t type, zval *op1) {
-	if (type == _IS_BOOL) {
-		ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_TRUE || Z_TYPE_P(op1) == IS_FALSE);
-	} else {
-		ZVAL_BOOL(result, Z_TYPE_P(op1) == type);
-	}
+static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op1) {
+	ZVAL_BOOL(result, (1 << Z_TYPE_P(op1)) & type_mask);
 }
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
@@ -961,14 +957,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			 * even if we don't know the precise value. */
 			if (!value_known(op1)) {
 				uint32_t type = ctx->scdf.ssa->var_info[ssa_op->op1_use].type;
-				uint32_t expected_type = opline->extended_value == _IS_BOOL
-					? (MAY_BE_TRUE|MAY_BE_FALSE) : (1 << opline->extended_value);
-				if (!(type & expected_type) && !(type & MAY_BE_UNDEF)) {
+				uint32_t expected_type_mask = opline->extended_value;
+				if (!(type & expected_type_mask) && !(type & MAY_BE_UNDEF)) {
 					ZVAL_FALSE(&zv);
 					SET_RESULT(result, &zv);
 					return;
-				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type))
-						   && opline->extended_value != IS_RESOURCE) {
+				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))
+						   && !(expected_type_mask & MAY_BE_RESOURCE)) {
 					ZVAL_TRUE(&zv);
 					SET_RESULT(result, &zv);
 					return;

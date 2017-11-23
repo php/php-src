@@ -154,12 +154,10 @@ static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
 	pi_type_mask(phi, ~type_mask & relevant);
 }
 static inline uint32_t mask_for_type_check(uint32_t type) {
-	if (type == _IS_BOOL) {
-		return MAY_BE_TRUE|MAY_BE_FALSE;
-	} else if (type == IS_ARRAY) {
+	if (type & MAY_BE_ARRAY) {
 		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	} else {
-		return 1 << type;
+		return type;
 	}
 }
 

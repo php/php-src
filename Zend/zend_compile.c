@@ -3389,7 +3389,11 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-	opline->extended_value = type;
+	if (type != _IS_BOOL) {
+		opline->extended_value = (1 << type);
+	} else {
+		opline->extended_value = (1 << IS_FALSE) | (1 << IS_TRUE);
+	}
 	return SUCCESS;
 }
 /* }}} */
