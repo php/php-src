@@ -40,7 +40,7 @@
 # include <iphlpapi.h>
 #endif
 
-zend_string* php_inet_ntop(const struct sockaddr *addr) {
+PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	socklen_t addrlen = sizeof(struct sockaddr_in);
 
 	if (!addr) { return NULL; }
@@ -155,6 +155,8 @@ PHP_FUNCTION(net_get_interfaces) {
 	ULONG outBufLen = 0;
 	DWORD dwRetVal = 0;
 
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	// Make an initial call to GetAdaptersAddresses to get the
 	// size needed into the outBufLen variable
 	if (GetAdaptersAddresses(family, flags, NULL, pAddresses, &outBufLen) == ERROR_BUFFER_OVERFLOW) {
@@ -171,6 +173,7 @@ PHP_FUNCTION(net_get_interfaces) {
 
 	if (NO_ERROR != dwRetVal) {
 		/* TODO check GetLastError() */
+		FREE(pAddresses);
 		RETURN_FALSE;
 	}
 
@@ -252,6 +255,8 @@ PHP_FUNCTION(net_get_interfaces) {
 #undef FREE
 #elif HAVE_GETIFADDRS /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
+
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (getifaddrs(&addrs)) {
 		php_error(E_WARNING, "getifaddrs() failed %d: %s", errno, strerror(errno));
