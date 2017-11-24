@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #74862 (Unable to clone instance when private __clone defined).
     (Daniel Ciochiu)
 
+- Opcache:
+  . Fixed bug #75556 (Invalid opcode 138/1/1). (Laruence)
+
 - PCRE:
   . Fixed bug #74183 (preg_last_error not returning error code after error).
     (Andrew Nester)
