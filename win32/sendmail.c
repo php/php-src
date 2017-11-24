@@ -1,4 +1,4 @@
-/*
+﻿/*
  *    PHP Sendmail for Windows.
  *
  *  This file is rewriten specificly for PHPFI.  Some functionality
@@ -36,10 +36,7 @@
 
 #include "php_win32_globals.h"
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-#endif
-
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 
@@ -130,9 +127,6 @@ static char *ErrorMessages[] =
  */
 static zend_string *php_win32_mail_trim_header(char *header)
 {
-
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 	zend_string *result, *result2;
 	zend_string *replace;
 	zend_string *regex;
@@ -170,10 +164,6 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	zend_string_release(result);
 
 	return result2;
-#else
-	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
-	return zend_string_init(header, strlen(header), 0);
-#endif
 }
 
 /*********************************************************************
