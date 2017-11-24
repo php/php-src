@@ -546,9 +546,19 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
 		CHECK_INIT(ht, 0);
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+			zend_string_hash_val(key);
+		}
 		goto add_to_hash;
 	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+			zend_string_hash_val(key);
+		}
 	} else if ((flag & HASH_ADD_NEW) == 0) {
 		p = zend_hash_find_bucket(ht, key);
 
@@ -582,6 +592,14 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			ZVAL_COPY_VALUE(data, pData);
 			return data;
 		}
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		}
+	} else if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_hash_val(key);
 	}
 
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
@@ -595,11 +613,6 @@ add_to_hash:
 	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
 	p = ht->arData + idx;
 	p->key = key;
-	if (!ZSTR_IS_INTERNED(key)) {
-		zend_string_addref(key);
-		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
-		zend_string_hash_val(key);
-	}
 	p->h = h = ZSTR_H(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h | ht->nTableMask;
