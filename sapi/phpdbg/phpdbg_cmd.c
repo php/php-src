@@ -751,7 +751,11 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		}
 
 		if (buffered == NULL) {
-#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#define USE_LIB_STAR 1
+#else
+#define USE_LIB_STAR 0
+#endif
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
 #if USE_LIB_STAR
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))
