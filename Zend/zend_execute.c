@@ -1843,9 +1843,9 @@ static zend_never_inline void zend_fetch_dimension_address_read_LIST(zval *resul
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type)
 {
 	if (type == BP_VAR_IS) {
-		zend_fetch_dimension_address_read_IS(result, container, dim, IS_CONST NO_EXECUTE_DATA_CC);
+		zend_fetch_dimension_address_read_IS(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
 	} else {
-		zend_fetch_dimension_address_read_R(result, container, dim, IS_CONST NO_EXECUTE_DATA_CC);
+		zend_fetch_dimension_address_read_R(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
 	}
 }
 
