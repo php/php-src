@@ -1503,7 +1503,7 @@ num_undef:
 			}
 		}
 str_index:
-		retval = zend_hash_find(ht, offset_key);
+		retval = zend_hash_find_ex(ht, offset_key, dim_type == IS_CONST);
 		if (retval) {
 			/* support for $GLOBALS[...] */
 			if (UNEXPECTED(Z_TYPE_P(retval) == IS_INDIRECT)) {
@@ -1896,7 +1896,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				}
 				zobj->properties = zend_array_dup(zobj->properties);
 			}
-			retval = zend_hash_find(zobj->properties, Z_STR_P(prop_ptr));
+			retval = zend_hash_find_ex(zobj->properties, Z_STR_P(prop_ptr), 1);
 			if (EXPECTED(retval)) {
 				ZVAL_INDIRECT(result, retval);
 				return;

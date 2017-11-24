@@ -633,7 +633,7 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 
 static zend_function *do_inherit_method(zend_string *key, zend_function *parent, zend_class_entry *ce) /* {{{ */
 {
-	zval *child = zend_hash_find(&ce->function_table, key);
+	zval *child = zend_hash_find_ex(&ce->function_table, key, 1);
 
 	if (child) {
 		zend_function *func = (zend_function*)Z_PTR_P(child);
@@ -663,7 +663,7 @@ static zend_function *do_inherit_method(zend_string *key, zend_function *parent,
 
 static void do_inherit_property(zend_property_info *parent_info, zend_string *key, zend_class_entry *ce) /* {{{ */
 {
-	zval *child = zend_hash_find(&ce->properties_info, key);
+	zval *child = zend_hash_find_ex(&ce->properties_info, key, 1);
 	zend_property_info *child_info;
 
 	if (UNEXPECTED(child)) {
@@ -765,9 +765,11 @@ ZEND_API void zend_do_inherit_interfaces(zend_class_entry *ce, const zend_class_
 
 static void do_inherit_class_constant(zend_string *name, zend_class_constant *parent_const, zend_class_entry *ce) /* {{{ */
 {
-	zend_class_constant *c = zend_hash_find_ptr(&ce->constants_table, name);
+	zval *zv = zend_hash_find_ex(&ce->constants_table, name, 1);
+	zend_class_constant *c;
 
-	if (c != NULL) {
+	if (zv != NULL) {
+		c = (zend_class_constant*)Z_PTR_P(zv);
 		if (UNEXPECTED((Z_ACCESS_FLAGS(c->value) & ZEND_ACC_PPP_MASK) > (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PPP_MASK))) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Access level to %s::%s must be %s (as in class %s)%s",
 				ZSTR_VAL(ce->name), ZSTR_VAL(name), zend_visibility_string(Z_ACCESS_FLAGS(parent_const->value)), ZSTR_VAL(ce->parent->name), (Z_ACCESS_FLAGS(parent_const->value) & ZEND_ACC_PUBLIC) ? "" : " or weaker");
@@ -990,9 +992,11 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 
 static zend_bool do_inherit_constant_check(HashTable *child_constants_table, zend_class_constant *parent_constant, zend_string *name, const zend_class_entry *iface) /* {{{ */
 {
+	zval *zv = zend_hash_find_ex(child_constants_table, name, 1);
 	zend_class_constant *old_constant;
 
-	if ((old_constant = zend_hash_find_ptr(child_constants_table, name)) != NULL) {
+	if (zv != NULL) {
+		old_constant = (zend_class_constant*)Z_PTR_P(zv);
 		if (old_constant->ce != parent_constant->ce) {
 			zend_error_noreturn(E_COMPILE_ERROR, "Cannot inherit previously-inherited or override constant %s from interface %s", ZSTR_VAL(name), ZSTR_VAL(iface->name));
 		}
