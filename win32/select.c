@@ -1,4 +1,4 @@
-/*
+﻿/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
@@ -18,8 +18,6 @@
 
 #include "php.h"
 #include "php_network.h"
-
-#ifdef PHP_WIN32
 
 /* $Id$ */
 
@@ -168,8 +166,6 @@ PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *e
 
 	return retcode;
 }
-
-#endif
 
 /*
  * Local variables:
