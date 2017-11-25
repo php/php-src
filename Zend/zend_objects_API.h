@@ -90,7 +90,9 @@ static zend_always_inline size_t zend_object_properties_size(zend_class_entry *c
  * Properties MUST be initialized using object_properties_init(). */
 static zend_always_inline void *zend_object_alloc(size_t obj_size, zend_class_entry *ce) {
 	void *obj = emalloc(obj_size + zend_object_properties_size(ce));
-	memset(obj, 0, obj_size);
+	/* Subtraction of sizeof(zval) is necessary, because zend_object_properties_size() may be
+	 * -sizeof(zval), if the object has no properties. */
+	memset(obj, 0, obj_size - sizeof(zval));
 	return obj;
 }
 
