@@ -1554,7 +1554,7 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 {
 	pdo_dbh_object_t *dbh;
 
-	dbh = ecalloc(1, sizeof(pdo_dbh_object_t) + zend_object_properties_size(ce));
+	dbh = zend_object_alloc(sizeof(pdo_dbh_object_t), ce);
 	zend_object_std_init(&dbh->std, ce);
 	object_properties_init(&dbh->std, ce);
 	rebuild_object_properties(&dbh->std);

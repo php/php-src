@@ -100,7 +100,7 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 {
 	finfo_object *intern;
 
-	intern = ecalloc(1, sizeof(finfo_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(finfo_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);

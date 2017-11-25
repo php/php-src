@@ -61,7 +61,7 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 {
 	IntlDateFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(IntlDateFormatter_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(IntlDateFormatter_object), ce);
 	dateformat_data_init( &intern->datef_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -69,7 +69,6 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 	intern->time_type			= 0;
 	intern->calendar			= -1;
 	intern->requested_locale	= NULL;
-
 
 	intern->zo.handlers = &IntlDateFormatter_handlers;
 

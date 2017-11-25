@@ -1106,11 +1106,11 @@ PHP_FUNCTION(mhash_keygen_s2k)
 
 /* {{{ php_hashcontext_create */
 static zend_object* php_hashcontext_create(zend_class_entry *ce) {
-	php_hashcontext_object *objval = ecalloc(1,
-		sizeof(php_hashcontext_object) + zend_object_properties_size(ce));
-	zend_object *zobj = &(objval->std);
+	php_hashcontext_object *objval = zend_object_alloc(sizeof(php_hashcontext_object), ce);
+	zend_object *zobj = &objval->std;
 
 	zend_object_std_init(zobj, ce);
+	object_properties_init(zobj, ce);
 	zobj->handlers = &php_hashcontext_handlers;
 
 	return zobj;

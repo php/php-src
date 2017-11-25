@@ -2187,9 +2187,7 @@ static void date_register_classes(void) /* {{{ */
 
 static inline zend_object *date_object_new_date_ex(zend_class_entry *class_type, int init_props) /* {{{ */
 {
-	php_date_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_date_obj) + zend_object_properties_size(class_type));
+	php_date_obj *intern = zend_object_alloc(sizeof(php_date_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2318,9 +2316,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 
 static inline zend_object *date_object_new_timezone_ex(zend_class_entry *class_type, int init_props) /* {{{ */
 {
-	php_timezone_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_timezone_obj) + zend_object_properties_size(class_type));
+	php_timezone_obj *intern = zend_object_alloc(sizeof(php_timezone_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2409,9 +2405,7 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 
 static inline zend_object *date_object_new_interval_ex(zend_class_entry *class_type, int init_props) /* {{{ */
 {
-	php_interval_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_interval_obj) + zend_object_properties_size(class_type));
+	php_interval_obj *intern = zend_object_alloc(sizeof(php_interval_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {
@@ -2495,9 +2489,7 @@ static HashTable *date_object_get_properties_interval(zval *object) /* {{{ */
 
 static inline zend_object *date_object_new_period_ex(zend_class_entry *class_type, int init_props) /* {{{ */
 {
-	php_period_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_period_obj) + zend_object_properties_size(class_type));
+	php_period_obj *intern = zend_object_alloc(sizeof(php_period_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
 	if (init_props) {

@@ -685,7 +685,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 {
 	PHPTidyObj *intern;
 
-	intern = ecalloc(1, sizeof(PHPTidyObj) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(PHPTidyObj), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 

@@ -2166,7 +2166,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *f
 {
 	php_sxe_object *intern;
 
-	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(php_sxe_object), ce);
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;

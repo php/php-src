@@ -270,10 +270,7 @@ static HashTable *reflection_get_gc(zval *obj, zval **gc_data, int *gc_data_coun
 
 static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ */
 {
-	reflection_object *intern;
-
-	intern = ecalloc(1, sizeof(reflection_object) + zend_object_properties_size(class_type));
-	intern->zo.ce = class_type;
+	reflection_object *intern = zend_object_alloc(sizeof(reflection_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);

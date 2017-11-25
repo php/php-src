@@ -108,7 +108,7 @@ zend_object *xsl_objects_new(zend_class_entry *class_type)
 {
 	xsl_object *intern;
 
-	intern = ecalloc(1, sizeof(xsl_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(xsl_object), class_type);
 	intern->securityPrefs = XSL_SECPREF_DEFAULT;
 
 	zend_object_std_init(&intern->std, class_type);

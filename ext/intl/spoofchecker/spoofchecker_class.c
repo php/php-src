@@ -41,12 +41,11 @@ void Spoofchecker_objects_free(zend_object *object)
 /* }}} */
 
 /* {{{ Spoofchecker_object_create */
-zend_object *Spoofchecker_object_create(
-	zend_class_entry *ce)
+zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
 
-	intern = ecalloc(1, sizeof(Spoofchecker_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(Spoofchecker_object), ce);
 	intl_error_init(SPOOFCHECKER_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
