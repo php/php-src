@@ -502,12 +502,12 @@ PHP_FUNCTION(dom_import_simplexml)
 }
 /* }}} */
 
-static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy);
+static dom_object* dom_objects_set_class(zend_class_entry *class_type);
 
 static zend_object *dom_objects_store_clone_obj(zval *zobject) /* {{{ */
 {
 	dom_object *intern = Z_DOMOBJ_P(zobject);
-	dom_object *clone = dom_objects_set_class(intern->std.ce, 0);
+	dom_object *clone = dom_objects_set_class(intern->std.ce);
 
 	clone->std.handlers = dom_get_obj_handlers();
 
@@ -1073,7 +1073,7 @@ void dom_namednode_iter(dom_object *basenode, int ntype, dom_object *intern, xml
 }
 /* }}} */
 
-static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool hash_copy) /* {{{ */
+static dom_object* dom_objects_set_class(zend_class_entry *class_type) /* {{{ */
 {
 	dom_object *intern = zend_object_alloc(sizeof(dom_object), class_type);
 
@@ -1085,9 +1085,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 	intern->prop_handler = zend_hash_find_ptr(&classes, base_class->name);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (hash_copy) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 
 	return intern;
 }
@@ -1096,7 +1094,7 @@ static dom_object* dom_objects_set_class(zend_class_entry *class_type, zend_bool
 /* {{{ dom_objects_new */
 zend_object *dom_objects_new(zend_class_entry *class_type)
 {
-	dom_object *intern = dom_objects_set_class(class_type, 1);
+	dom_object *intern = dom_objects_set_class(class_type);
 	intern->std.handlers = dom_get_obj_handlers();
 	return &intern->std;
 }
@@ -1160,7 +1158,7 @@ zend_object *dom_nnodemap_objects_new(zend_class_entry *class_type) /* {{{ */
 	dom_object *intern;
 	dom_nnodemap_object *objmap;
 
-	intern = dom_objects_set_class(class_type, 1);
+	intern = dom_objects_set_class(class_type);
 	intern->ptr = emalloc(sizeof(dom_nnodemap_object));
 	objmap = (dom_nnodemap_object *)intern->ptr;
 	ZVAL_UNDEF(&objmap->baseobj_zv);
