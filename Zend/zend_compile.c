@@ -6064,9 +6064,6 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		if (Z_TYPE(value_zv) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR(value_zv))) {
-			zval_make_interned_string(&value_zv);
-		}
 		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 	}
 }
