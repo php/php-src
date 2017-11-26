@@ -276,7 +276,7 @@ static void php_binary_init(void)
 	char binary_location[MAXPATHLEN], *path;
 #ifdef PHP_WIN32
 	if (GetModuleFileName(0, binary_location, MAXPATHLEN)) {
-		goto failure;
+		goto success;
 	}
 #else
 	if (!sapi_module.executable_location) {
