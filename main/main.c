@@ -301,7 +301,7 @@ static void php_binary_init(void)
 	}
 #endif
 failure:
-	binary_location = '\0';
+	*binary_location = '\0';
 success:
 	PG(php_binary) = *binary_location ? estrdup(binary_location) : NULL;
 }
