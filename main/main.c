@@ -273,9 +273,7 @@ static void php_disable_classes(void)
 static void php_binary_init(void)
 {
 	zend_stat_t s;
-	char binary_location[MAXPATHLEN],
-	     *path,
-	     *last = NULL;
+	char binary_location[MAXPATHLEN], *path;
 #ifdef PHP_WIN32
 	if (GetModuleFileName(0, binary_location, MAXPATHLEN)) {
 		goto failure;
