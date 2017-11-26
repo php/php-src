@@ -291,7 +291,7 @@ static void php_binary_init(void)
 		goto failure;
 	}
 	
-	for (size_t x = 0, y; path[x]; x += y + !!path[y]) {
+	for (size_t x = 0, y; path[x]; x += y + !!path[x+y]) {
 		assert(x < PATH_MAX); y = strcspn(path + x, ":");
 		assert(y < PATH_MAX); memcpy(binary_location, path + x, y);
 		                      snprintf(binary_location + y, PATH_MAX - y, "/%s", sapi_module.executable_location);
