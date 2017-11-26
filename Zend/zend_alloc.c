@@ -1171,10 +1171,10 @@ static zend_always_inline int zend_mm_small_size_to_bit(int size)
 # define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #endif
 
-static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
+static zend_always_inline size_t zend_mm_small_size_to_bin(size_t size)
 {
-#if 0
-	int n;
+#if 0 // can we have a discussion about this `#if 0`?
+	size_t n;
                             /*0,  1,  2,  3,  4,  5,  6,  7,  8,  9  10, 11, 12*/
 	static const int f1[] = { 3,  3,  3,  3,  3,  3,  3,  4,  5,  6,  7,  8,  9};
 	static const int f2[] = { 0,  0,  0,  0,  0,  0,  0,  4,  8, 12, 16, 20, 24};
@@ -1183,7 +1183,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 	n = zend_mm_small_size_to_bit(size - 1);
 	return ((size-1) >> f1[n]) + f2[n];
 #else
-	unsigned int t1, t2;
+	size_t t1, t2;
 
 	if (size <= 64) {
 		/* we need to support size == 0 ... */
@@ -1194,7 +1194,7 @@ static zend_always_inline int zend_mm_small_size_to_bin(size_t size)
 		t1 = t1 >> t2;
 		t2 = t2 - 3;
 		t2 = t2 << 2;
-		return (int)(t1 + t2);
+		return t1 + t2;
 	}
 #endif
 }
