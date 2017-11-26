@@ -67,7 +67,7 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 		}
 
 		char *msg = NULL;
-        size_t msglen = 0;
+		size_t msglen = 0;
 		phpdbg_webdata_compress(&msg, &msglen);
 
 		send(s, (unsigned char[]){ msglen
