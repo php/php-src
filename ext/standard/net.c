@@ -29,7 +29,6 @@
 
 #if HAVE_GETIFADDRS
 # include <ifaddrs.h>
-# include <netdb.h>
 #endif
 
 #ifdef PHP_WIN32
@@ -38,6 +37,8 @@
 # include <ws2ipdef.h>
 # include <Ws2tcpip.h>
 # include <iphlpapi.h>
+#else
+# include <netdb.h>
 #endif
 
 PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
@@ -95,6 +96,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 	return NULL;
 }
 
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
 static void iface_append_unicast(zval *unicast, zend_long flags,
                                  struct sockaddr *addr, struct sockaddr *netmask,
                                  struct sockaddr *broadcast, struct sockaddr *ptp) {
@@ -124,6 +126,7 @@ static void iface_append_unicast(zval *unicast, zend_long flags,
 
 	add_next_index_zval(unicast, &u);
 }
+#endif
 
 /* {{{ proto array|false net_get_interfaces()
 Returns an array in the form:
