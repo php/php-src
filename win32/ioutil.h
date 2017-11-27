@@ -177,17 +177,17 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 			return NULL;
 		}
 
-		/* The return can be ignored here, as the normalization can fail for
-		   various reasons not directly related to the operation itself.
-		   Partial normalization could still do a better job further. And
-		   otherwise, the path might be unchanged which is ok if the path
-		   was valid long one. */
-		(void)php_win32_ioutil_normalize_path_w(&mb, mb_len, &new_mb_len);
+		if (PHP_WIN32_IOUTIL_NORM_FAIL == php_win32_ioutil_normalize_path_w(&mb, mb_len, &new_mb_len)) {
+				free(ret);
+				free(mb);
+				return NULL;
+		}
 
 		if (new_mb_len > mb_len) {
 			wchar_t *tmp = (wchar_t *) realloc(ret, (new_mb_len + 1) * sizeof(wchar_t));
 			if (!tmp) {
 				free(ret);
+				free(mb);
 				return NULL;
 			}
 			ret = tmp;
