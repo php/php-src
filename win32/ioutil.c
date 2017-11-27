@@ -539,6 +539,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	return ret_len;
 }/*}}}*/
 
+/* Partial normalization can still be acceptable, explicit fail has to be caught. */
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len)
 {/*{{{*/
 	wchar_t *pos, *idx = *buf, canonicalw[MAXPATHLEN];
@@ -546,6 +547,7 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 
 	if (len >= MAXPATHLEN) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
+		*new_len = 0;
 		return PHP_WIN32_IOUTIL_NORM_FAIL;
 	}
 
@@ -555,6 +557,8 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 	}
 
 	if (S_OK != canonicalize_path_w(canonicalw, MAXPATHLEN, *buf, PATHCCH_ALLOW_LONG_PATHS)) {
+		/* Length unchanged. */
+		*new_len = len;
 		return PHP_WIN32_IOUTIL_NORM_PARTIAL;
 	}
 	ret_len = wcslen(canonicalw);
@@ -563,6 +567,8 @@ PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(w
 			wchar_t *tmp = realloc(*buf, (ret_len + 1) * sizeof(wchar_t));
 			if (!tmp) {
 				SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+				/* Length unchanged. */
+				*new_len = len;
 				return PHP_WIN32_IOUTIL_NORM_PARTIAL;
 			}
 			*buf = tmp;
