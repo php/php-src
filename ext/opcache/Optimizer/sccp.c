@@ -194,6 +194,7 @@ static zend_bool can_replace_op1(
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
 		case ZEND_ISSET_ISEMPTY_CV:
+		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
