@@ -473,7 +473,12 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
 	size_t tmp_bufa_len;
 	DWORD err = 0;
 
-	if (php_win32_ioutil_getcwd_w(tmp_bufw, len) == NULL) {
+	if (len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
+		return NULL;
+	}
+
+	if (php_win32_ioutil_getcwd_w(tmp_bufw, len ? len : PHP_WIN32_IOUTIL_MAXPATHLEN) == NULL) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return NULL;
@@ -488,17 +493,16 @@ __forceinline static char *php_win32_ioutil_getcwd(char *buf, size_t len)
 		free(tmp_bufa);
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_BAD_LENGTH);
 		return NULL;
+	} else if (tmp_bufa_len + 1 > len) {
+		free(tmp_bufa);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
+		return NULL;
 	}
 
-	if (!buf) {
+	if (!buf && !len) {
 		/* If buf was NULL, the result has to be freed outside here. */
 		buf = tmp_bufa;
 	} else {
-		if (tmp_bufa_len + 1 > len) {
-			free(tmp_bufa);
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INSUFFICIENT_BUFFER);
-			return NULL;
-		}
 		memmove(buf, tmp_bufa, tmp_bufa_len + 1);
 		free(tmp_bufa);
 	}
