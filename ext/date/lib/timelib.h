@@ -264,6 +264,7 @@ typedef struct _timelib_abbr_info {
 #define TIMELIB_ERR_WRONG_FORMAT_SEP           0x219
 #define TIMELIB_ERR_TRAILING_DATA              0x21a
 #define TIMELIB_ERR_DATA_MISSING               0x21b
+#define TIMELIB_ERR_NO_THREE_DIGIT_MILLISECOND 0x21c
 
 #define TIMELIB_ZONETYPE_OFFSET 1
 #define TIMELIB_ZONETYPE_ABBR   2
