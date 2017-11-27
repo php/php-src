@@ -25186,20 +25186,6 @@ timelib_time *timelib_parse_from_format(char *format, char *string, size_t len, 
 					}
 				}
 				break;
-			case 'v': /* up to three digit millisecond */
-				{
-					double f;
-					char *tptr;
-
-					TIMELIB_CHECK_NUMBER;
-					tptr = ptr;
-					if ((f = timelib_get_nr((char **) &ptr, 3)) == TIMELIB_UNSET || (ptr - tptr < 1)) {
-						add_pbf_error(s, TIMELIB_ERR_NO_THREE_DIGIT_MILLISECOND, "A three digit millisecond could not be found", string, begin);
-					} else {
-						s->time->us = 1000 * (f * pow(10, 3 - (ptr - tptr)));
-					}
-				}
-				break;
 			case ' ': /* any sort of whitespace (' ' and \t) */
 				timelib_eat_spaces((char **) &ptr);
 				break;
