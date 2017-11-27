@@ -1,6 +1,6 @@
 --TEST--
 mb_strcut() - unknown encoding
--- CREDITS --
+--CREDITS--
 Jachim Coudenys <jachimcoudenys@gmail.com>
 User Group: PHP-WVL & PHPGent #PHPTestFest
 --SKIPIF--
