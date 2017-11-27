@@ -4095,15 +4095,17 @@ PHP_FUNCTION(getenv)
 		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
 		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
 				/* The environment variable doesn't exist. */
+				free(keyw);
 				RETURN_FALSE;
 		}
 
 		if (size == 0) {
 				/* env exists, but it is empty */
+				free(keyw);
 				RETURN_EMPTY_STRING();
 		}
 
-		valw = emalloc(size);
+		valw = emalloc((size + 1) * sizeof(wchar_t));
 		size = GetEnvironmentVariableW(keyw, valw, size);
 		if (size == 0) {
 				/* has been removed between the two calls */
