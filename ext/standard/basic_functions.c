@@ -4098,7 +4098,7 @@ PHP_FUNCTION(getenv)
 				RETURN_EMPTY_STRING();
 		}
 
-		valw = emalloc(size);
+		valw = emalloc((size + 1) * sizeof(wchar_t));
 		size = GetEnvironmentVariableW(keyw, valw, size);
 		if (size == 0) {
 				/* has been removed between the two calls */
