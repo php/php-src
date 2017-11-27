@@ -306,8 +306,6 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			/* This would require a non-local change.
 			 * zend_optimizer_replace_by_const() supports this. */
 			return 0;
-		case ZEND_INSTANCEOF:
-			return 0;
 		case ZEND_CASE:
 		case ZEND_FETCH_LIST:
 			return 0;
