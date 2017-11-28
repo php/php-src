@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.0
+30 Nov 2017, PHP 7.2.0
 
 - BCMath:
   . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
