@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #74862 (Unable to clone instance when private __clone defined).
     (Daniel Ciochiu)
 
+- CLI server:
+  . Fixed bug #73830 (Directory does not exist). (Anatol)
+
 - Opcache:
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
