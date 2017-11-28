@@ -534,9 +534,47 @@ static size_t sapi_fcgi_read_post(char *buffer, size_t count_bytes)
 	return read_bytes;
 }
 
+#ifdef PHP_WIN32
+/* The result needs to be freed! See sapi_getenv(). */
+static char *cgi_getenv_win32(const char *name, size_t name_len)
+{
+	char *ret = NULL;
+	wchar_t *keyw, *valw;
+	size_t size;
+	int rc;
+
+	keyw = php_win32_cp_conv_any_to_w(name, name_len, PHP_WIN32_CP_IGNORE_LEN_P);
+	if (!keyw) {
+		return NULL;
+	}
+
+	rc = _wgetenv_s(&size, NULL, 0, keyw);
+	if (rc || 0 == size) {
+		free(keyw);
+		return NULL;
+	}
+
+	valw = emalloc((size + 1) * sizeof(wchar_t));
+
+	rc = _wgetenv_s(&size, valw, size, keyw);
+	if (!rc) {
+		ret = php_win32_cp_w_to_any(valw);
+	}
+
+	free(keyw);
+	efree(valw);
+
+	return ret;
+}
+#endif
+
 static char *sapi_cgi_getenv(char *name, size_t name_len)
 {
+#ifndef PHP_WIN32
 	return getenv(name);
+#else
+	return cgi_getenv_win32(name, name_len);
+#endif
 }
 
 static char *sapi_fcgi_getenv(char *name, size_t name_len)
@@ -551,7 +589,11 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len)
 	if (ret) return ret;
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment */
+#ifndef PHP_WIN32
 	return getenv(name);
+#else
+	return cgi_getenv_win32(name, name_len);
+#endif
 }
 
 static char *_sapi_cgi_putenv(char *name, size_t name_len, char *value)
