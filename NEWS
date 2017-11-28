@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - CLI server:
   . Fixed bug #73830 (Directory does not exist). (Anatol)
 
+- FPM:
+  . Fixed bug #64938 (libxml_disable_entity_loader setting is shared between
+    requests). (Remi)
+
 - Opcache:
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
