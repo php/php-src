@@ -1365,7 +1365,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 		return;
 	}
 
-	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
+	if (php_ini_scanned_files) {
 		RETURN_STRING(php_ini_scanned_files);
 	} else {
 		RETURN_FALSE;
