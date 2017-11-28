@@ -2519,6 +2519,10 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
+#ifdef PHP_WIN32
+	char document_root_tmp[MAXPATHLEN];
+	size_t k;
+#endif
 	const char *router = NULL;
 	char document_root_buf[MAXPATHLEN];
 
@@ -2528,7 +2532,23 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 				server_bind_address = php_optarg;
 				break;
 			case 't':
+#ifndef PHP_WIN32
 				document_root = php_optarg;
+#else
+				k = strlen(php_optarg);
+				if (k + 1 > MAXPATHLEN) {
+					fprintf(stderr, "Document root path is too long.\n");
+					return 1;
+				}
+				memmove(document_root_tmp, php_optarg, k + 1);
+				/* Clean out any trailing garbage that might have been passed
+					from a batch script. */
+				do {
+					document_root_tmp[k] = '\0';
+					k--;
+				} while ('"' == document_root_tmp[k] || ' ' == document_root_tmp[k]);
+				document_root = document_root_tmp;
+#endif
 				break;
 		}
 	}
