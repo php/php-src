@@ -454,6 +454,7 @@ dnl
 AC_CHECK_HEADERS([net/if.h netdb.h])
 AC_MSG_CHECKING([for usable getifaddrs])
 AC_TRY_LINK([
+  #include <sys/types.h>
   #include <ifaddrs.h>
 ],[
   struct ifaddrs *interfaces;
