@@ -201,7 +201,8 @@ can be influenced by defining the environment variable TAR_OPTIONS='--format=gnu
     ``git submodule init;
     git submodule update;
     cd distributions;
-    git pull origin master;
+    git fetch;
+    git pull --rebase origin master;
     cd ..;
     git commit distributions;
     git push;``
