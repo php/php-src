@@ -1027,6 +1027,12 @@ SAPI_API char *sapi_getenv(char *name, size_t name_len)
 		char *value, *tmp = sapi_module.getenv(name, name_len);
 		if (tmp) {
 			value = estrdup(tmp);
+#ifdef PHP_WIN32
+			if (strlen(sapi_module.name) == sizeof("cgi-fcgi") - 1 && !strcmp(sapi_module.name, "cgi-fcgi")) {
+				/* XXX more modules to go, if needed. */
+				free(tmp);
+			}
+#endif
 		} else {
 			return NULL;
 		}
