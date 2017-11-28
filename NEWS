@@ -11,6 +11,7 @@ PHP                                                                        NEWS
 - CLI Server:
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
     script). (SammyK)
+  . Fixed bug #73830 (Directory does not exist). (Anatol)
 
 - Opcache:
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
