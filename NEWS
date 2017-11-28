@@ -10,6 +10,8 @@ PHP                                                                        NEWS
     (Daniel Ciochiu)
 
 - Opcache:
+  . Fixed bug #75570 ("Narrowing occurred during type inference" error).
+    (Dmitry)
   . Fixed bug #75556 (Invalid opcode 138/1/1). (Laruence)
 
 - PCRE:
