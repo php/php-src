@@ -1,5 +1,5 @@
 --TEST--
-Type inference warning
+Bug #75570 ("Narrowing occurred during type inference" error)
 --FILE--
 <?php
 function renderRawGraph(array $parents) {
