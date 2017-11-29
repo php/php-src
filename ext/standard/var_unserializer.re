@@ -393,7 +393,7 @@ static inline size_t parse_uiv(const unsigned char *p)
 #define UNSERIALIZE_PARAMETER zval *rval, const unsigned char **p, const unsigned char *max, php_unserialize_data_t *var_hash
 #define UNSERIALIZE_PASSTHRU rval, p, max, var_hash
 
-static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER);
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key);
 
 static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTable *ht, zend_long elements, int objprops)
 {
@@ -403,7 +403,7 @@ static zend_always_inline int process_nested_data(UNSERIALIZE_PARAMETER, HashTab
 
 		ZVAL_UNDEF(&key);
 
-		if (!php_var_unserialize_internal(&key, p, max, NULL)) {
+		if (!php_var_unserialize_internal(&key, p, max, NULL, 1)) {
 			zval_ptr_dtor(&key);
 			return 0;
 		}
@@ -442,7 +442,7 @@ numeric_key:
 string_key:
 				{
 					zend_property_info *existing_propinfo;
-					zend_string *new_key, *unmangled;
+					zend_string *new_key;
 					const char *unmangled_class = NULL; 
 					const char *unmangled_prop;
 					size_t unmangled_prop_len;
@@ -452,35 +452,37 @@ string_key:
 						return 0;
 					}
 
-					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
-					if (Z_TYPE_P(rval) == IS_OBJECT
-							&& ((existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled)) != NULL) 
-							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
-						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
-							new_key = zend_mangle_property_name(
-								"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), 0);
-							zend_string_release(unmangled);
-						} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
-							if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
+					if (Z_TYPE_P(rval) == IS_OBJECT) {
+						zend_string *unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
+
+						if (((existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled)) != NULL) 
+								&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
+							if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
 								new_key = zend_mangle_property_name(
-									unmangled_class, strlen(unmangled_class),
-									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-									0);
+									"*", 1, ZSTR_VAL(unmangled), ZSTR_LEN(unmangled), 0);
+								zend_string_release(unmangled);
+							} else if (existing_propinfo->flags & ZEND_ACC_PRIVATE) {
+								if (unmangled_class != NULL && strcmp(unmangled_class, "*") != 0) {
+									new_key = zend_mangle_property_name(
+										unmangled_class, strlen(unmangled_class),
+										ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+										0);
+								} else {
+									new_key = zend_mangle_property_name(
+										ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
+										ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
+										0);
+								}
+								zend_string_release(unmangled);
 							} else {
-								new_key = zend_mangle_property_name(
-									ZSTR_VAL(existing_propinfo->ce->name), ZSTR_LEN(existing_propinfo->ce->name),
-									ZSTR_VAL(unmangled), ZSTR_LEN(unmangled),
-									0);
+								ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
+								new_key = unmangled;
 							}
-							zend_string_release(unmangled);
+							zend_string_release(Z_STR(key));
+							ZVAL_STR(&key, new_key);
 						} else {
-							ZEND_ASSERT(existing_propinfo->flags & ZEND_ACC_PUBLIC);
-							new_key = unmangled;
+							zend_string_release(unmangled);
 						}
-						zend_string_release(Z_STR(key));
-						ZVAL_STR(&key, new_key);
-					} else {
-						zend_string_release(unmangled);
 					}
 
 					if ((old_data = zend_hash_find(ht, Z_STR(key))) != NULL) {
@@ -503,7 +505,7 @@ string_key:
 			}
 		}
 
-		if (!php_var_unserialize_internal(data, p, max, var_hash)) {
+		if (!php_var_unserialize_internal(data, p, max, var_hash, 0)) {
 			zval_ptr_dtor(&key);
 			return 0;
 		}
@@ -629,7 +631,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	zend_long orig_used_slots = orig_var_entries ? orig_var_entries->used_slots : 0;
 	int result;
 
-	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU);
+	result = php_var_unserialize_internal(UNSERIALIZE_PASSTHRU, 0);
 
 	if (!result) {
 		/* If the unserialization failed, mark all elements that have been added to var_hash
@@ -650,7 +652,7 @@ PHPAPI int php_var_unserialize(UNSERIALIZE_PARAMETER)
 	return result;
 }
 
-static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER)
+static int php_var_unserialize_internal(UNSERIALIZE_PARAMETER, int as_key)
 {
 	const unsigned char *cursor, *limit, *marker, *start;
 	zval *rval_ref;
@@ -821,6 +823,8 @@ use_double:
 		ZVAL_EMPTY_STRING(rval);
 	} else if (len == 1) {
 		ZVAL_INTERNED_STR(rval, ZSTR_CHAR((zend_uchar)*str));
+	} else if (as_key) {
+		ZVAL_STR(rval, zend_string_init_interned(str, len, 0));
 	} else {
 		ZVAL_STRINGL(rval, str, len);
 	}
