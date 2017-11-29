@@ -18,6 +18,7 @@
 
 #include "php.h"
 #include "php_network.h"
+#include "ext/standard/net.h"
 
 #if HAVE_ARPA_INET_H
 # include <arpa/inet.h>
@@ -128,7 +129,11 @@ static void iface_append_unicast(zval *unicast, zend_long flags,
 }
 #endif
 
-/* {{{ proto array|false net_get_interfaces()
+ZEND_BEGIN_ARG_INFO_EX(arginfo_net_get_interfaces, 0, 0, 0)
+	ZEND_ARG_INFO(0, flags)
+ZEND_END_ARG_INFO()
+
+/* {{{ proto array|false net_get_interfaces([ int flags ])
 Returns an array in the form:
 array(
   'ifacename' => array(
@@ -157,8 +162,12 @@ PHP_FUNCTION(net_get_interfaces) {
 	PIP_ADAPTER_UNICAST_ADDRESS u = NULL;
 	ULONG outBufLen = 0;
 	DWORD dwRetVal = 0;
+	zend_long filter = 0;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filter)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	// Make an initial call to GetAdaptersAddresses to get the
 	// size needed into the outBufLen variable
@@ -184,6 +193,9 @@ PHP_FUNCTION(net_get_interfaces) {
 	for (p = pAddresses; p; p = p->Next) {
 		zval iface, unicast;
 
+		if ((p->Flags & filter) != filter) {
+			continue;
+		}
 		if ((IF_TYPE_ETHERNET_CSMACD != p->IfType) && (IF_TYPE_SOFTWARE_LOOPBACK != p->IfType)) {
 			continue;
 		}
@@ -258,8 +270,13 @@ PHP_FUNCTION(net_get_interfaces) {
 #undef FREE
 #elif HAVE_GETIFADDRS /* !PHP_WIN32 */
 	struct ifaddrs *addrs = NULL, *p;
+	zend_long filter = 0;
 
-	ZEND_PARSE_PARAMETERS_NONE();
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(filter)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+
 
 	if (getifaddrs(&addrs)) {
 		php_error(E_WARNING, "getifaddrs() failed %d: %s", errno, strerror(errno));
@@ -268,6 +285,9 @@ PHP_FUNCTION(net_get_interfaces) {
 
 	array_init(return_value);
 	for (p = addrs; p; p = p->ifa_next) {
+		if ((p->ifa_flags & filter) != filter) {
+			continue;
+		}
 		zval *iface = zend_hash_str_find(Z_ARR_P(return_value), p->ifa_name, strlen(p->ifa_name));
 		zval *unicast;
 
@@ -299,3 +319,66 @@ PHP_FUNCTION(net_get_interfaces) {
 #endif
 }
 /* }}} */
+
+const zend_function_entry basic_net_functions[] = { /* {{{ */
+	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
+	PHP_FE_END
+};
+/* }}} */
+
+PHP_MINIT_FUNCTION(standard_net)
+{
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
+#ifdef IFF_UP
+	REGISTER_LONG_CONSTANT("IFF_UP",          IFF_UP,          CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_BROADCAST
+	REGISTER_LONG_CONSTANT("IFF_BROADCAST",   IFF_BROADCAST,   CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_DEBUG
+	REGISTER_LONG_CONSTANT("IFF_DEBUG",       IFF_DEBUG,       CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_LOOPBACK
+	REGISTER_LONG_CONSTANT("IFF_LOOPBACK",    IFF_LOOPBACK,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_POINTOPOINT
+	REGISTER_LONG_CONSTANT("IFF_POINTOPOINT", IFF_POINTOPOINT, CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_NOTRAILERS
+	REGISTER_LONG_CONSTANT("IFF_NOTRAILERS",  IFF_NOTRAILERS,  CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_RUNNING
+	REGISTER_LONG_CONSTANT("IFF_RUNNING",     IFF_RUNNING,     CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_NOARP
+	REGISTER_LONG_CONSTANT("IFF_NOARP",       IFF_NOARP,       CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_PROMISC
+	REGISTER_LONG_CONSTANT("IFF_PROMISC",     IFF_PROMISC,     CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_ALLMULTI
+	REGISTER_LONG_CONSTANT("IFF_ALLMULTI",    IFF_ALLMULTI,    CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_MASTER
+	REGISTER_LONG_CONSTANT("IFF_MASTER",      IFF_MASTER,      CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_SLAVE
+	REGISTER_LONG_CONSTANT("IFF_SLAVE",       IFF_SLAVE,       CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_MULTICAST
+	REGISTER_LONG_CONSTANT("IFF_MULTICAST",   IFF_MULTICAST,   CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_PORTSEL
+	REGISTER_LONG_CONSTANT("IFF_PORTSEL",     IFF_PORTSEL,     CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_AUTOMEDIA
+	REGISTER_LONG_CONSTANT("IFF_AUTOMEDIA",   IFF_AUTOMEDIA,   CONST_CS | CONST_PERSISTENT);
+#endif
+#ifdef IFF_DYNAMIC
+	REGISTER_LONG_CONSTANT("IFF_DYNAMIC",     IFF_DYNAMIC,     CONST_CS | CONST_PERSISTENT);
+#endif
+/* IFF_LOWER_UP, IFF_DORMANT, IFF_ECHO are not in net/if.h but in linux/if.h */
+
+    zend_register_functions(NULL, basic_net_functions, NULL, MODULE_PERSISTENT);
+#endif
+}

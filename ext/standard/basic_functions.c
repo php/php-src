@@ -36,6 +36,7 @@
 #include "ext/standard/php_dns.h"
 #include "ext/standard/php_uuencode.h"
 #include "ext/standard/php_mt_rand.h"
+#include "ext/standard/net.h"
 
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
@@ -961,9 +962,6 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
-
-ZEND_BEGIN_ARG_INFO(arginfo_net_get_interfaces, 0)
-ZEND_END_ARG_INFO()
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
@@ -3063,10 +3061,6 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || HAVE_GETIFADDRS
-	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
-#endif
-
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
@@ -3714,6 +3708,7 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 #endif
 
 	BASIC_MINIT_SUBMODULE(random)
+	BASIC_MINIT_SUBMODULE(standard_net)
 
 	return SUCCESS;
 }
