@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.13
 
+- GD:
+  . Fixed bug #75571 (Potential infinite loop in gdImageCreateFromGifCtx).
+    (Christoph)
+
 - Opcache:
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
