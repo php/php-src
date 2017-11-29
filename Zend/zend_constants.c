@@ -471,8 +471,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	}
 
 	if (!(c->flags & CONST_CS)) {
-		lowercase_name = zend_string_alloc(ZSTR_LEN(c->name), c->flags & CONST_PERSISTENT);
-		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ZSTR_VAL(c->name), ZSTR_LEN(c->name));
+		lowercase_name = zend_string_tolower_ex(c->name, c->flags & CONST_PERSISTENT);
 		lowercase_name = zend_new_interned_string(lowercase_name);
 		name = lowercase_name;
 	} else {

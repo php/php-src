@@ -65,8 +65,7 @@ static zend_class_entry * spl_find_ce_by_name(zend_string *name, zend_bool autol
 	zend_class_entry *ce;
 
 	if (!autoload) {
-		zend_string *lc_name = zend_string_alloc(ZSTR_LEN(name), 0);
-		zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(name), ZSTR_LEN(name));
+		zend_string *lc_name = zend_string_tolower(name);
 
 		ce = zend_hash_find_ptr(EG(class_table), lc_name);
 		zend_string_free(lc_name);
@@ -321,8 +320,7 @@ PHP_FUNCTION(spl_autoload)
 		pos_len = (int)ZSTR_LEN(file_exts);
 	}
 
-	lc_name = zend_string_alloc(ZSTR_LEN(class_name), 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(class_name), ZSTR_LEN(class_name));
+	lc_name = zend_string_tolower(class_name);
 	while (pos && *pos && !EG(exception)) {
 		pos1 = strchr(pos, ',');
 		if (pos1) {
@@ -569,8 +567,7 @@ PHP_FUNCTION(spl_autoload_register)
 				lc_name = zend_string_alloc(ZSTR_LEN(func_name) - 1, 0);
 				zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name) + 1, ZSTR_LEN(func_name) - 1);
 			} else {
-				lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
-				zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+				lc_name = zend_string_tolower(func_name);
 			}
 		}
 		zend_string_release(func_name);
@@ -694,8 +691,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 			lc_name = zend_string_alloc(ZSTR_LEN(func_name) - 1, 0);
 			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name) + 1, ZSTR_LEN(func_name) - 1);
 		} else {
-			lc_name = zend_string_alloc(ZSTR_LEN(func_name), 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(func_name), ZSTR_LEN(func_name));
+			lc_name = zend_string_tolower(func_name);
 		}
 	}
 	zend_string_release(func_name);
