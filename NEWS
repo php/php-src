@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? 2017, PHP 7.1.13
 
 - Core:
+  . Fixed bug #75573 (Segmentation fault in 7.1.12 and 7.0.26). (Laruence)
   . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
     (Anatol)
   . Fixed bug #74862 (Unable to clone instance when private __clone defined).
