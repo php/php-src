@@ -866,7 +866,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
-	zend_register_auto_global(zend_string_init("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
+	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
 
 #ifndef ZTS
 	zend_init_rsrc_plist();
