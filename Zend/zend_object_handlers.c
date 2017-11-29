@@ -602,13 +602,13 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			zval_ptr_dtor(&tmp_object);
 			goto exit;
 		} else {
-			zval_ptr_dtor(&tmp_object);
 			if (Z_STRVAL_P(member)[0] == '\0') {
 				if (Z_STRLEN_P(member) == 0) {
 					zend_throw_error(NULL, "Cannot access empty property");
 					retval = &EG(uninitialized_zval);
 					goto exit;
 				} else {
+					zval_ptr_dtor(&tmp_object);
 					zend_throw_error(NULL, "Cannot access property started with '\\0'");
 					retval = &EG(uninitialized_zval);
 					goto exit;
