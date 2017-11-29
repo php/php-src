@@ -58,7 +58,7 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 		int s = socket(AF_UNIX, SOCK_STREAM, 0);
 		size_t len = strlen(PHPDBG_WG(path)) + sizeof(sock.sun_family);
 		char buf[(1 << 8) + 1];
-		size_t buflen;
+		ssize_t buflen;
 		sock.sun_family = AF_UNIX;
 		strcpy(sock.sun_path, PHPDBG_WG(path));
 
@@ -70,10 +70,11 @@ static PHP_RINIT_FUNCTION(phpdbg_webhelper) /* {{{ */
 		size_t msglen = 0;
 		phpdbg_webdata_compress(&msg, &msglen);
 
-		send(s, (unsigned char[]){ msglen
-			                     , msglen / 0x100
-			                     , msglen / 0x10000
-			                     , msglen / 0x1000000 }, 4, 0);
+		buf[buflen=0] = msglen;
+		buf[++buflen] = msglen / 0x100;
+		buf[++buflen] = msglen / 0x10000;
+		buf[++buflen] = msglen / 0x1000000;
+		send(s, buf, 4, 0);
 		send(s, msg, msglen, 0);
 
 		while ((buflen = recv(s, buf, sizeof(buf) - 1, 0)) > 0) {
