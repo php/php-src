@@ -1691,9 +1691,12 @@ uint32_t zend_get_func_info(const zend_call_info *call_info, const zend_ssa *ssa
 	uint32_t ret = 0;
 
 	if (call_info->callee_func->type == ZEND_INTERNAL_FUNCTION) {
+		zval *zv;
 		func_info_t *info;
 
-		if ((info = zend_hash_find_ptr(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants)))) != NULL) {
+		zv = zend_hash_find_ex(&func_info, Z_STR_P(CRT_CONSTANT_EX(call_info->caller_op_array, call_info->caller_init_opline, call_info->caller_init_opline->op2, ssa->rt_constants)), 1);
+		if (zv) {
+			info = Z_PTR_P(zv);
 			if (UNEXPECTED(zend_optimizer_is_disabled_func(info->name, info->name_len))) {
 				ret = MAY_BE_NULL;
 			} else if (info->info_func) {
@@ -1750,9 +1753,12 @@ int zend_func_info_startup(void)
 
 		zend_hash_init(&func_info, sizeof(func_infos)/sizeof(func_info_t), NULL, NULL, 1);
 		for (i = 0; i < sizeof(func_infos)/sizeof(func_info_t); i++) {
-			if (zend_hash_str_add_ptr(&func_info, func_infos[i].name, func_infos[i].name_len, (void**)&func_infos[i]) == NULL) {
+			zend_string *key = zend_string_init_interned(func_infos[i].name, func_infos[i].name_len, 1);
+
+			if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
 				fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
 			}
+			zend_string_release(key);
 		}
 	}
 
