@@ -144,7 +144,7 @@ ZEND_API void zend_register_null_constant(const char *name, size_t name_len, int
 
 	ZVAL_NULL(&c.value);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -155,7 +155,7 @@ ZEND_API void zend_register_bool_constant(const char *name, size_t name_len, zen
 
 	ZVAL_BOOL(&c.value, bval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -166,7 +166,7 @@ ZEND_API void zend_register_long_constant(const char *name, size_t name_len, zen
 
 	ZVAL_LONG(&c.value, lval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -178,7 +178,7 @@ ZEND_API void zend_register_double_constant(const char *name, size_t name_len, d
 
 	ZVAL_DOUBLE(&c.value, dval);
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -190,7 +190,7 @@ ZEND_API void zend_register_stringl_constant(const char *name, size_t name_len, 
 
 	ZVAL_NEW_STR(&c.value, zend_string_init(strval, strlen, flags & CONST_PERSISTENT));
 	c.flags = flags;
-	c.name = zend_string_init(name, name_len, flags & CONST_PERSISTENT);
+	c.name = zend_string_init_interned(name, name_len, flags & CONST_PERSISTENT);
 	c.module_number = module_number;
 	zend_register_constant(&c);
 }
@@ -465,10 +465,6 @@ ZEND_API int zend_register_constant(zend_constant *c)
 #if 0
 	printf("Registering constant for module %d\n", c->module_number);
 #endif
-
-    if (c->module_number != PHP_USER_CONSTANT) {
-		c->name = zend_new_interned_string(c->name);
-	}
 
 	if (!(c->flags & CONST_CS)) {
 		lowercase_name = zend_string_tolower_ex(c->name, c->flags & CONST_PERSISTENT);
