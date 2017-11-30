@@ -2499,15 +2499,10 @@ static void accel_globals_ctor(zend_accel_globals *accel_globals)
 	accel_gen_system_id();
 }
 
-static void accel_globals_internal_func_dtor(zval *zv)
-{
-	free(Z_PTR_P(zv));
-}
-
 static void accel_globals_dtor(zend_accel_globals *accel_globals)
 {
 	if (accel_globals->function_table.nTableSize) {
-		accel_globals->function_table.pDestructor = accel_globals_internal_func_dtor;
+		accel_globals->function_table.pDestructor = NULL;
 		zend_hash_destroy(&accel_globals->function_table);
 	}
 }

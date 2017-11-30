@@ -143,7 +143,7 @@ void zend_accel_copy_internal_functions(void)
 	ZEND_HASH_FOREACH_STR_KEY_VAL(CG(function_table), key, val) {
 		zend_internal_function *function = Z_PTR_P(val);
 		if (function->type == ZEND_INTERNAL_FUNCTION) {
-			zend_hash_update_mem(&ZCG(function_table), key, function, sizeof(zend_internal_function));
+			zend_hash_add_new_ptr(&ZCG(function_table), key, function);
 		}
 	} ZEND_HASH_FOREACH_END();
 	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
