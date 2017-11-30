@@ -1271,7 +1271,6 @@ MYSQLND_METHOD(mysqlnd_res, store_result_fetch_data)(MYSQLND_CONN_DATA * const c
 	while (FAIL != (ret = PACKET_READ(conn, &row_packet)) && !row_packet.eof) {
 		if (!free_rows) {
 			MYSQLND_ROW_BUFFER * new_row_buffers;
-			total_allocated_rows += set->row_count;
 
 			if (total_allocated_rows < 1024) {
 				if (total_allocated_rows == 0) {
