@@ -253,7 +253,9 @@ plain_var:
 				zend_symtable_str_exists(symtable1, index, index_len)) {
 				zval_ptr_dtor(&gpc_element);
 			} else {
-				gpc_element_p = zend_symtable_str_update_ind(symtable1, index, index_len, &gpc_element);
+				zend_string *key = zend_string_init_interned(index, index_len, 0);
+				gpc_element_p = zend_symtable_update_ind(symtable1, key, &gpc_element);
+				zend_string_release(key);
 			}
 		}
 	}
