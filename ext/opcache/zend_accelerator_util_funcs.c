@@ -135,18 +135,17 @@ void zend_accel_move_user_functions(HashTable *src, HashTable *dst)
 	src->pDestructor = orig_dtor;
 }
 
-static int copy_internal_function(zval *zv, HashTable *function_table)
-{
-	zend_internal_function *function = Z_PTR_P(zv);
-	if (function->type == ZEND_INTERNAL_FUNCTION) {
-		zend_hash_update_mem(function_table, function->function_name, function, sizeof(zend_internal_function));
-	}
-	return 0;
-}
-
 void zend_accel_copy_internal_functions(void)
 {
-	zend_hash_apply_with_argument(CG(function_table), (apply_func_arg_t)copy_internal_function, &ZCG(function_table));
+	zend_string *key;
+	zval *val;
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(CG(function_table), key, val) {
+		zend_internal_function *function = Z_PTR_P(val);
+		if (function->type == ZEND_INTERNAL_FUNCTION) {
+			zend_hash_update_mem(&ZCG(function_table), key, function, sizeof(zend_internal_function));
+		}
+	} ZEND_HASH_FOREACH_END();
 	ZCG(internal_functions_count) = zend_hash_num_elements(&ZCG(function_table));
 }
 
