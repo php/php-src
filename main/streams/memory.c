@@ -638,7 +638,7 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 {
 	php_stream *stream;
 	php_stream_temp_data *ts;
-	char *comma, *semi, *sep, *key;
+	char *comma, *semi, *sep;
 	size_t mlen, dlen, plen, vlen, ilen;
 	zend_off_t newoffs;
 	zval meta;
@@ -710,11 +710,9 @@ static php_stream * php_stream_url_wrap_rfc2397(php_stream_wrapper *wrapper, con
 			/* found parameter ... the heart of cs ppl lies in +1/-1 or was it +2 this time? */
 			plen = sep - path;
 			vlen = (semi ? (size_t)(semi - sep) : (mlen - plen)) - 1 /* '=' */;
-			key = estrndup(path, plen);
-			if (plen != sizeof("mediatype")-1 || memcmp(key, "mediatype", sizeof("mediatype")-1)) {
-				add_assoc_stringl_ex(&meta, key, plen, sep + 1, vlen);
+			if (plen != sizeof("mediatype")-1 || memcmp(path, "mediatype", sizeof("mediatype")-1)) {
+				add_assoc_stringl_ex(&meta, path, plen, sep + 1, vlen);
 			}
-			efree(key);
 			plen += vlen + 1;
 			mlen -= plen;
 			path += plen;

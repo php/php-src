@@ -112,8 +112,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	if (protocol) {
-		char *tmp = estrndup(protocol, n);
-		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, tmp, n))) {
+		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, protocol, n))) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -123,10 +122,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			ERR_REPORT(error_string, "Unable to find the socket transport \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
-			efree(tmp);
 			return NULL;
 		}
-		efree(tmp);
 	}
 
 	if (factory == NULL) {
