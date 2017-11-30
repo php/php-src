@@ -2509,7 +2509,7 @@ void module_destructor(zend_module_entry *module) /* {{{ */
 	}
 
 	module->module_started=0;
-	if (module->functions) {
+	if (module->type == MODULE_TEMPORARY && module->functions) {
 		zend_unregister_functions(module->functions, -1, NULL);
 	}
 
