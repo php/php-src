@@ -50,12 +50,8 @@ typedef unsigned int uint;
 #if _MSC_VER < 1900
 #define snprintf _snprintf
 #endif
-#ifndef HAVE_STRCASECMP
 #define strcasecmp(s1, s2) _stricmp(s1, s2)
-#endif
-#ifndef HAVE_STRNCASECMP
 #define strncasecmp(s1, s2, n) _strnicmp(s1, s2, n)
-#endif
 #define zend_isinf(a)	((_fpclass(a) == _FPCLASS_PINF) || (_fpclass(a) == _FPCLASS_NINF))
 #define zend_finite(x)	_finite(x)
 #define zend_isnan(x)	_isnan(x)
