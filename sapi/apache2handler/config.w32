@@ -51,6 +51,7 @@ if (PHP_APACHE2_4HANDLER != "no") {
 				'php' + PHP_VERSION + 'apache2_4.dll',
 				'/D PHP_APACHE2_EXPORTS /I win32 /DZEND_ENABLE_STATIC_TSRMLS_CACHE=1',
 				'sapi\\apache2handler');
+		ADD_FLAG("CFLAGS_APACHE2_4HANDLER", "/D HAVE_STRCASECMP=1 /D HAVE_STRNCASECMP=1");
 	} else {
 		WARNING("Could not find apache 2.4 libraries/headers");
 	}
