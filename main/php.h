@@ -41,7 +41,7 @@
 #undef sprintf
 #define sprintf php_sprintf
 
-/* Operating system family defintion */
+/* Operating system family definition */
 #ifdef PHP_WIN32
 # define PHP_OS_FAMILY			"Windows"
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
