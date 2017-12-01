@@ -1848,7 +1848,7 @@ function generate_tmp_php_ini()
 		}
 		
 		var directive = "extension";
-		if ("opcache" == extensions_enabled[i][0]) {
+		if ("opcache" == extensions_enabled[i][0] || "xdebug" == extensions_enabled[i][0]) {
 			directive = "zend_extension";
 		}
 
