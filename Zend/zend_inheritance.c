@@ -1568,13 +1568,17 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* flags are identical, now the value needs to be checked */
+						zval *op1, *op2;
 						if (flags & ZEND_ACC_STATIC) {
-							not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
-											  &ce->traits[i]->default_static_members_table[property_info->offset]);
+							op1 = &ce->default_static_members_table[coliding_prop->offset];
+							op2 = &ce->traits[i]->default_static_members_table[property_info->offset];
+							ZVAL_DEREF(op1);
+							ZVAL_DEREF(op2);
 						} else {
-							not_compatible = fast_is_not_identical_function(&ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
-											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
+							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)];
+							op2 = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
+						not_compatible = fast_is_not_identical_function(op1, op2);
 					} else {
 						/* the flags are not identical, thus, we assume properties are not compatible */
 						not_compatible = 1;
