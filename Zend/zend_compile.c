@@ -6261,7 +6261,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			zend_string *ns_name = zend_string_alloc(ZSTR_LEN(current_ns) + 1 + ZSTR_LEN(new_name), 0);
 			zend_str_tolower_copy(ZSTR_VAL(ns_name), ZSTR_VAL(current_ns), ZSTR_LEN(current_ns));
 			ZSTR_VAL(ns_name)[ZSTR_LEN(current_ns)] = '\\';
-			memcpy(ZSTR_VAL(ns_name) + ZSTR_LEN(current_ns) + 1, ZSTR_VAL(lookup_name), ZSTR_LEN(lookup_name));
+			memcpy(ZSTR_VAL(ns_name) + ZSTR_LEN(current_ns) + 1, ZSTR_VAL(lookup_name), ZSTR_LEN(lookup_name) + 1);
 
 			zend_check_use_conflict(type, old_name, new_name, ns_name);
 
