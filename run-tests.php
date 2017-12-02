@@ -2768,8 +2768,12 @@ function junit_save_xml() {
 	global $JUNIT;
 	if (!junit_enabled()) return;
 
-	$xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>'. PHP_EOL .
-		   '<testsuites>' . PHP_EOL;
+	$xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>'. PHP_EOL;
+    $xml .= sprintf(
+		'<testsuites name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+        $JUNIT['name'], $JUNIT['test_total'], $JUNIT['test_fail'], $JUNIT['test_error'], $JUNIT['test_skip'],
+		$JUNIT['execution_time']
+	);
 	$xml .= junit_get_suite_xml();
 	$xml .= '</testsuites>';
 	fwrite($JUNIT['fp'], $xml);
@@ -2778,26 +2782,23 @@ function junit_save_xml() {
 function junit_get_suite_xml($suite_name = '') {
 	global $JUNIT;
 
-	$suite = $suite_name ? $JUNIT['suites'][$suite_name] : $JUNIT;
+	$result = "";
 
-    $result = sprintf(
-		'<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
-        $suite['name'], $suite['test_total'], $suite['test_fail'], $suite['test_error'], $suite['test_skip'],
-		$suite['execution_time']
-	);
+	foreach ($JUNIT['suites'] as $suite_name => $suite) {
+		$result .= sprintf(
+			'<testsuite name="%s" tests="%s" failures="%d" errors="%d" skip="%d" time="%s">' . PHP_EOL,
+			$suite['name'], $suite['test_total'], $suite['test_fail'], $suite['test_error'], $suite['test_skip'],
+			$suite['execution_time']
+		);
 
-	foreach($suite['suites'] as $sub_suite) {
-		$result .= junit_get_suite_xml($sub_suite['name']);
-	}
-
-	// Output files only in subsuites
-	if (!empty($suite_name)) {
-		foreach($suite['files'] as $file) {
-			$result .= $JUNIT['files'][$file]['xml'];
+		if (!empty($suite_name)) {
+			foreach($suite['files'] as $file) {
+				$result .= $JUNIT['files'][$file]['xml'];
+			}
 		}
-	}
 
-	$result .= '</testsuite>' . PHP_EOL;
+		$result .= '</testsuite>' . PHP_EOL;
+	}
 
 	return $result;
 }
