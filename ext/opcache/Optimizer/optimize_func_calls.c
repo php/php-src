@@ -290,6 +290,13 @@ void zend_optimize_func_calls(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					}
 				}
 				break;
+			case ZEND_SEND_EXPLICIT_REF:
+				if (call_stack[call - 1].func) {
+					if (ARG_SHOULD_BE_SENT_BY_REF(call_stack[call - 1].func, opline->op2.num)) {
+						opline->opcode = ZEND_SEND_REF;
+					}
+				}
+				break;
 			case ZEND_SEND_UNPACK:
 			case ZEND_SEND_USER:
 			case ZEND_SEND_ARRAY:

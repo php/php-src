@@ -686,6 +686,7 @@ add_op1_def:
 				case ZEND_SEND_VAR_EX:
 				case ZEND_SEND_FUNC_ARG:
 				case ZEND_SEND_REF:
+				case ZEND_SEND_EXPLICIT_REF:
 				case ZEND_SEND_UNPACK:
 				case ZEND_FE_RESET_RW:
 				case ZEND_MAKE_REF:

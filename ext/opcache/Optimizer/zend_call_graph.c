@@ -158,6 +158,8 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_SEND_VAR_EX:
 			case ZEND_SEND_FUNC_ARG:
 			case ZEND_SEND_REF:
+			case ZEND_SEND_EXPLICIT_REF:
+			case ZEND_SEND_EXPLICIT_REF_FUNC:
 			case ZEND_SEND_VAR_NO_REF:
 			case ZEND_SEND_VAR_NO_REF_EX:
 			case ZEND_SEND_USER:
