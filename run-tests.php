@@ -2748,7 +2748,7 @@ function junit_init() {
 	} else {
 		$JUNIT = array(
 			'fp'            => $fp,
-			'name'          => 'php-src',
+			'name'          => 'PHP',
 			'test_total'    => 0,
 			'test_pass'     => 0,
 			'test_fail'     => 0,
@@ -2768,7 +2768,7 @@ function junit_save_xml() {
 	global $JUNIT;
 	if (!junit_enabled()) return;
 
-	$xml = '<?xml version="1.0" encoding="UTF-8"?>'. PHP_EOL .
+	$xml = '<' . '?' . 'xml version="1.0" encoding="UTF-8"' . '?' . '>'. PHP_EOL .
 		   '<testsuites>' . PHP_EOL;
 	$xml .= junit_get_suite_xml();
 	$xml .= '</testsuites>';
@@ -2833,8 +2833,8 @@ function junit_mark_test_as($type, $file_name, $test_name, $time = null, $messag
 	}, $escaped_details);
 	$escaped_message = htmlspecialchars($message, ENT_QUOTES, 'UTF-8');
 
-    $escaped_test_name = basename($file_name) . ' - ' . htmlspecialchars($test_name, ENT_QUOTES);
-    $JUNIT['files'][$file_name]['xml'] = "<testcase classname='$suite' name='$escaped_test_name' time='$time'>\n";
+    $escaped_test_name = htmlspecialchars($test_name, ENT_QUOTES);
+    $JUNIT['files'][$file_name]['xml'] = "<testcase classname='" . $suite . "." . basename($file_name) . "' name='$escaped_test_name' time='$time'>\n";
 
 	if (is_array($type)) {
 		$output_type = $type[0] . 'ED';
@@ -2904,7 +2904,33 @@ function junit_get_suitename_for($file_name) {
 
 function junit_path_to_classname($file_name) {
     global $JUNIT;
-    return $JUNIT['name'] . '.' . str_replace(DIRECTORY_SEPARATOR, '.', $file_name);
+
+	$ret = $JUNIT['name'];
+	$_tmp = array();
+
+	// lookup whether we're in the PHP source checkout
+	$max = 5;
+	if (is_file($file_name)) {
+		$dir = dirname(realpath($file_name));
+	} else {
+		$dir = realpath($file_name);
+	}
+	do {
+		array_unshift($_tmp, basename($dir));
+		$chk = $dir . DIRECTORY_SEPARATOR . "main" . DIRECTORY_SEPARATOR . "php_version.h";
+		$dir = dirname($dir);
+	} while (!file_exists($chk) && --$max > 0);
+	if (file_exists($chk)) {
+		if ($max) {
+			array_shift($_tmp);
+		}
+		foreach ($_tmp as $p) {
+			$ret = $ret . "." . preg_replace(",[^a-z0-9]+,i", ".", $p);
+		}
+		return $ret;
+	}
+
+	return $JUNIT['name'] . '.' . str_replace(array(DIRECTORY_SEPARATOR, '-'), '.', $file_name);
 }
 
 function junit_init_suite($suite_name) {
