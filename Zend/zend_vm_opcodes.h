@@ -271,7 +271,9 @@ END_EXTERN_C()
 #define ZEND_GET_CALLED_CLASS           192
 #define ZEND_GET_TYPE                   193
 #define ZEND_ARRAY_KEY_EXISTS           194
+#define ZEND_SEND_EXPLICIT_REF          195
+#define ZEND_SEND_EXPLICIT_REF_FUNC     196
 
-#define ZEND_VM_LAST_OPCODE             194
+#define ZEND_VM_LAST_OPCODE             196
 
 #endif
