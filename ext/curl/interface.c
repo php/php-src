@@ -219,6 +219,17 @@ static int php_curl_option_url(php_curl *ch, const char *url, const size_t len) 
 #endif
 	}
 
+#if LIBCURL_VERSION_NUM > 0x073800 && defined(PHP_WIN32)
+	if (len > sizeof("file://") - 1 && '/' != url[sizeof("file://") - 1] && !strncmp("file://", url, sizeof("file://") - 1) && len < MAXPATHLEN - 2) {
+		char _tmp[MAXPATHLEN] = {0};
+
+		memmove(_tmp, "file:///", sizeof("file:///") - 1);
+		memmove(_tmp + sizeof("file:///") - 1, url + sizeof("file://") - 1, len - sizeof("file://") + 1);
+
+		return php_curl_option_str(ch, CURLOPT_URL, _tmp, len + 1, 0);
+	}
+#endif
+
 	return php_curl_option_str(ch, CURLOPT_URL, url, len, 0);
 }
 /* }}} */
