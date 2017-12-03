@@ -9,6 +9,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   f. GC_REFCOUNT()
   g. zend_get_parameters()
   h. zend_register_persistent_resource()
+  i. RAND_RANGE()
 
 2. Build system changes
   a. Unix build system changes
@@ -81,6 +82,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   h. New functions zend_register_persistent_resource() or
      zend_register_persistent_resource_ex() should beused to register
      persistent resources, instead of manual insertion into EG(persistent_list).
+
+  i. The RANGE_RANGE() macro has been removed. php_mt_rand_range() should be
+     used instead.
 
 ========================
 2. Build system changes
