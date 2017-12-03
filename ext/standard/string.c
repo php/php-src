@@ -5479,7 +5479,6 @@ static void php_string_shuffle(char *str, zend_long len) /* {{{ */
 	n_left = n_elems;
 
 	while (--n_left) {
-		rnd_idx = php_rand();
 		RAND_RANGE(rnd_idx, 0, n_left, PHP_RAND_MAX);
 		if (rnd_idx != n_left) {
 			temp = str[n_left];
