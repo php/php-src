@@ -2190,6 +2190,9 @@ static int _php_curl_setopt(php_curl *ch, zend_long option, zval *zvalue) /* {{{
 #endif
 #if LIBCURL_VERSION_NUM >= 0x070b02 /* Available since 7.11.2 */
 		case CURLOPT_TCP_NODELAY:
+		/* Why this function not implemented ? */
+		case CURLOPT_SSL_CTX_FUNCTION:
+		case CURLOPT_SSL_CTX_DATA:	
 #endif
 #if LIBCURL_VERSION_NUM >= 0x070c02 /* Available since 7.12.2 */
 		case CURLOPT_FTPSSLAUTH:
