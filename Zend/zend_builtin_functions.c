@@ -686,9 +686,9 @@ ZEND_FUNCTION(error_reporting)
 			zend_ini_entry *p = EG(error_reporting_ini_entry);
 
 			if (!p) {
-				p = zend_hash_find_ptr(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING));
-				if (p) {
-					EG(error_reporting_ini_entry) = p;
+				zval *zv = zend_hash_find_ex(EG(ini_directives), ZSTR_KNOWN(ZEND_STR_ERROR_REPORTING), 1);
+				if (zv) {
+					p = EG(error_reporting_ini_entry) = (zend_ini_entry*)Z_PTR_P(zv);
 				} else {
 					break;
 				}
@@ -2136,7 +2136,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 
 					while (i < first_extra_arg) {
 						arg_name = call->func->op_array.vars[i];
-						arg = zend_hash_find_ind(call->symbol_table, arg_name);
+						arg = zend_hash_find_ex_ind(call->symbol_table, arg_name, 1);
 						if (arg) {
 							if (Z_OPT_REFCOUNTED_P(arg)) {
 								Z_ADDREF_P(arg);

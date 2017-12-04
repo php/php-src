@@ -417,26 +417,30 @@ failure:
 
 ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
 {
-	zend_constant *c;
+	zval *zv;
+	zend_constant *c = NULL;
 
-	if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL) {
+	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+	if (zv) {
+		c = (zend_constant*)Z_PTR_P(zv);
+	} else {
 		key++;
-		if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL ||
-		    (c->flags & CONST_CS) != 0) {
+		zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+		if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+			c = (zend_constant*)Z_PTR_P(zv);
+		} else {
 			if ((flags & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
 				key++;
-				if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL) {
+				zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+				if (zv) {
+					c = (zend_constant*)Z_PTR_P(zv);
+				} else {
 				    key++;
-					if ((c = zend_hash_find_ptr(EG(zend_constants), Z_STR_P(key))) == NULL ||
-					    (c->flags & CONST_CS) != 0) {
-
-						key--;
-						c = NULL;
+					zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
+					if (zv && (((zend_constant*)Z_PTR_P(zv))->flags & CONST_CS) == 0) {
+						c = (zend_constant*)Z_PTR_P(zv);
 					}
 				}
-			} else {
-				key--;
-				c = NULL;
 			}
 		}
 	}

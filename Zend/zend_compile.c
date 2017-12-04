@@ -1062,7 +1062,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
 	zend_function *function, *new_function;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1072,15 +1072,18 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		rtd_key = lcname + 1;
 	}
 
-	function = zend_hash_find_ptr(function_table, Z_STR_P(rtd_key));
+	zv = zend_hash_find_ex(function_table, Z_STR_P(rtd_key), 1);
+	function = (zend_function*)Z_PTR_P(zv);
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, function, sizeof(zend_op_array));
 	if (zend_hash_add_ptr(function_table, Z_STR_P(lcname), new_function) == NULL) {
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(lcname))) != NULL
-			&& old_function->type == ZEND_USER_FUNCTION
+		zv = zend_hash_find_ex(function_table, Z_STR_P(lcname), 1);
+		ZEND_ASSERT(zv != NULL);
+		old_function = (zend_function*)Z_PTR_P(zv);
+		if (old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
 			zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
 						ZSTR_VAL(function->common.function_name),
@@ -1103,7 +1106,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1112,8 +1115,9 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		lcname = RT_CONSTANT(opline, opline->op1);
 		rtd_key = lcname + 1;
 	}
-	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
-	ZEND_ASSERT(ce);
+	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
+	ZEND_ASSERT(zv);
+	ce = (zend_class_entry*)Z_PTR_P(zv);
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		ce->refcount--;
@@ -1138,7 +1142,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1148,9 +1152,9 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		rtd_key = lcname + 1;
 	}
 
-	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
+	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
 
-	if (!ce) {
+	if (!zv) {
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -1161,6 +1165,8 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		}
 		return NULL;
 	}
+
+	ce = (zend_class_entry*)Z_PTR_P(zv);
 
 	if (zend_hash_exists(class_table, Z_STR_P(lcname))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));

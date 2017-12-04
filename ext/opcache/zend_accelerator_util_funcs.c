@@ -480,7 +480,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
@@ -524,7 +524,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
@@ -567,7 +567,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	for (; p != end; p++) {
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		ZEND_ASSERT(p->key);
-		t = zend_hash_find(target, p->key);
+		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key - ignore and wait for runtime */

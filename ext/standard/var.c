@@ -741,7 +741,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
 		zend_string *prot_name, *priv_name;
 
-		zval *val = zend_hash_find(propers, name);
+		zval *val = zend_hash_find_ex(propers, name, 1);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				val = Z_INDIRECT_P(val);
