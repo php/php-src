@@ -129,7 +129,22 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 
 static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
-	return zend_interned_string_ht_lookup_ex(ZSTR_H(str), ZSTR_VAL(str), ZSTR_LEN(str), interned_strings);
+	zend_ulong h = ZSTR_H(str);
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *p;
+
+	nIndex = h | interned_strings->nTableMask;
+	idx = HT_HASH(interned_strings, nIndex);
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET(interned_strings, idx);
+		if ((p->h == h) && zend_string_equal_content(p->key, str)) {
+			return p->key;
+		}
+		idx = Z_NEXT(p->val);
+	}
+
+	return NULL;
 }
 
 /* This function might be not thread safe at least because it would update the

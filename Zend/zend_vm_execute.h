@@ -4523,17 +4523,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CONST_HAND
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -4591,17 +4581,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CONST_
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -5062,8 +5042,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CONST_H
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -5162,8 +5141,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -5745,17 +5723,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CONST_HANDLER(
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -8698,17 +8666,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_CV_HANDLER
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -8766,17 +8724,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_CV_HAN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -9170,8 +9118,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_CV_HAND
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -9270,8 +9217,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -9908,17 +9854,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_CV_HANDLER(ZEN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -10767,17 +10703,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CONST_TMPVAR_HAN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -10835,17 +10761,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CONST_TMPVAR
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -11239,8 +11155,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CONST_TMPVAR_
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -11340,8 +11255,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_TMPVAR
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -11926,17 +11840,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CONST_TMPVAR_HANDLER
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
 				break;
@@ -13789,8 +13693,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CONST_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -15164,8 +15067,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_CV_HANDLE
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -15717,8 +15619,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMP_TMPVAR_HA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -18563,8 +18464,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CONST_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -22876,8 +22776,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_CV_HANDLE
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -25485,8 +25384,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_VAR_TMPVAR_HA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -27548,8 +27446,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CONST_
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -27695,8 +27592,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CONST
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -30184,8 +30080,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -30331,8 +30226,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_CV_HA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -31939,8 +31833,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -32087,8 +31980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_UNUSED_TMPVA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -35357,17 +35249,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CONST_HANDLER
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -35425,17 +35307,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CONST_HAN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -36517,8 +36389,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CONST_HAND
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -36664,8 +36535,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CONST_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -38078,17 +37948,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CONST_HANDLER(ZEN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -38891,8 +38751,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_BIND_GLOBAL_SPEC_C
 	        (EXPECTED(p->key == Z_STR_P(varname)) ||
 	         (EXPECTED(p->h == ZSTR_H(Z_STR_P(varname))) &&
 	          EXPECTED(p->key != NULL) &&
-	          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(varname)) &&
-	          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(varname), Z_STRLEN_P(varname)) == 0)))) {
+	          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(varname)))))) {
 
 			value = (zval*)p; /* value = &p->val; */
 			goto check_indirect;
@@ -41908,17 +41767,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -41976,17 +41825,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_CV_HANDLE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 
 			} else {
@@ -43001,8 +42840,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -43148,8 +42986,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_CV_HANDLE
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -44618,17 +44455,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_CV_HANDLER(ZEND_O
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -45606,17 +45433,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_TMPVAR_HANDLE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -45674,17 +45491,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_CV_TMPVAR_HA
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -46703,8 +46510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -46851,8 +46657,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CV_TMPVAR_HA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -48211,17 +48016,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_CV_TMPVAR_HANDLER(ZE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
 				break;
@@ -49598,17 +49393,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CONST_HAN
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 
 			} else {
@@ -49666,17 +49451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CONST
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 
 			} else {
@@ -50094,8 +49869,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CONST
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -50411,17 +50185,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CONST_HANDLER
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -52054,17 +51818,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_CV_HANDLE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 
 			} else {
@@ -52122,17 +51876,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_CV_HA
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 
 			} else {
@@ -52481,8 +52225,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CV_HA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -52798,17 +52541,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_CV_HANDLER(ZE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 
 			} else {
 				break;
@@ -53409,17 +53142,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_TMPVAR_TMPVAR_HA
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -53477,17 +53200,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_NOT_EQUAL_SPEC_TMPVAR_TMPVA
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 0;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 1;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) != 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) != 0);
-				}
+				result = !zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op1);
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
@@ -53836,8 +53549,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_TMPVA
 						        (EXPECTED(p->key == Z_STR_P(offset)) ||
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
-						          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
-						          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
+						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
 								ZVAL_COPY(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
@@ -54155,17 +53867,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CASE_SPEC_TMPVAR_TMPVAR_HANDLE
 			}
 		} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 			if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-				if (Z_STR_P(op1) == Z_STR_P(op2)) {
-					result = 1;
-				} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-					if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-						result = 0;
-					} else {
-						result = (memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0);
-					}
-				} else {
-					result = (zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0);
-				}
+				result = zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 				zval_ptr_dtor_nogc(free_op2);
 			} else {
 				break;

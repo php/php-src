@@ -288,10 +288,14 @@ static zend_always_inline void zend_string_release(zend_string *s)
 	}
 }
 
+static zend_always_inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2)
+{
+	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
+}
 
 static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
 {
-	return s1 == s2 || (ZSTR_LEN(s1) == ZSTR_LEN(s2) && !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1)));
+	return s1 == s2 || zend_string_equal_content(s1, s2);
 }
 
 #define zend_string_equals_ci(s1, s2) \

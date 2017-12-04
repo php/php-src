@@ -487,8 +487,7 @@ ZEND_API int zend_register_constant(zend_constant *c)
 	}
 
 	/* Check if the user is trying to define the internal pseudo constant name __COMPILER_HALT_OFFSET__ */
-	if ((ZSTR_LEN(c->name) == sizeof("__COMPILER_HALT_OFFSET__")-1
-		&& !memcmp(ZSTR_VAL(name), "__COMPILER_HALT_OFFSET__", sizeof("__COMPILER_HALT_OFFSET__")-1))
+	if (zend_string_equals_literal(name, "__COMPILER_HALT_OFFSET__")
 		|| zend_hash_add_constant(EG(zend_constants), name, c) == NULL) {
 
 		/* The internal __COMPILER_HALT_OFFSET__ is prefixed by NULL byte */

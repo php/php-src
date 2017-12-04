@@ -2143,9 +2143,7 @@ ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
 		case IS_DOUBLE:
 			return (Z_DVAL_P(op1) == Z_DVAL_P(op2));
 		case IS_STRING:
-			return (Z_STR_P(op1) == Z_STR_P(op2) ||
-				(Z_STRLEN_P(op1) == Z_STRLEN_P(op2) &&
-				 memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0));
+			return zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
 		case IS_ARRAY:
 			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
 				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);

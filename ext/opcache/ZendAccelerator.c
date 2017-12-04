@@ -411,10 +411,8 @@ static zend_string *accel_find_interned_string(zend_string *str)
 	arData = ZCSG(interned_strings).arData;
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == ZSTR_LEN(str))) {
-			if (!memcmp(ZSTR_VAL(p->key), ZSTR_VAL(str), ZSTR_LEN(str))) {
-				return p->key;
-			}
+		if (p->h == h && zend_string_equal_content(p->key, str)) {
+			return p->key;
 		}
 		idx = Z_NEXT(p->val);
 	}
@@ -447,11 +445,9 @@ zend_string *accel_new_interned_string(zend_string *str)
 	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
 	while (idx != HT_INVALID_IDX) {
 		p = HT_HASH_TO_BUCKET(&ZCSG(interned_strings), idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == ZSTR_LEN(str))) {
-			if (!memcmp(ZSTR_VAL(p->key), ZSTR_VAL(str), ZSTR_LEN(str))) {
-				zend_string_release(str);
-				return p->key;
-			}
+		if (p->h == h && zend_string_equal_content(p->key, str)) {
+			zend_string_release(str);
+			return p->key;
 		}
 		idx = Z_NEXT(p->val);
 	}
@@ -1033,16 +1029,14 @@ static inline int do_validate_timestamps(zend_persistent_script *persistent_scri
 	 */
 	if (file_handle->opened_path) {
 		if (persistent_script->script.filename != file_handle->opened_path &&
-		    (ZSTR_LEN(persistent_script->script.filename) != ZSTR_LEN(file_handle->opened_path) ||
-		     memcmp(ZSTR_VAL(persistent_script->script.filename), ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path)) != 0)) {
+		    !zend_string_equal_content(persistent_script->script.filename, file_handle->opened_path)) {
 			return FAILURE;
 		}
 	} else {
 		full_path_ptr = accelerator_orig_zend_resolve_path(file_handle->filename, strlen(file_handle->filename));
 		if (full_path_ptr &&
 		    persistent_script->script.filename != full_path_ptr &&
-		    (ZSTR_LEN(persistent_script->script.filename) != ZSTR_LEN(full_path_ptr) ||
-		     memcmp(ZSTR_VAL(persistent_script->script.filename), ZSTR_VAL(full_path_ptr), ZSTR_LEN(full_path_ptr)) != 0)) {
+		    !zend_string_equal_content(persistent_script->script.filename, full_path_ptr)) {
 			zend_string_release(full_path_ptr);
 			return FAILURE;
 		}

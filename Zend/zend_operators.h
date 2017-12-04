@@ -721,6 +721,17 @@ static zend_always_inline int fast_div_function(zval *result, zval *op1, zval *o
 	return div_function(result, op1, op2);
 }
 
+static zend_always_inline int zend_fast_equal_strings(zend_string *s1, zend_string *s2)
+{
+	if (s1 == s2) {
+		return 1;
+	} else if (ZSTR_VAL(s1)[0] > '9' || ZSTR_VAL(s2)[0] > '9') {
+		return zend_string_equal_content(s1, s2);
+	} else {
+		return zendi_smart_strcmp(s1, s2) == 0;
+	}
+}
+
 static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 {
 	zval result;
@@ -738,17 +749,7 @@ static zend_always_inline int fast_equal_check_function(zval *op1, zval *op2)
 		}
 	} else if (EXPECTED(Z_TYPE_P(op1) == IS_STRING)) {
 		if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-			if (Z_STR_P(op1) == Z_STR_P(op2)) {
-				return 1;
-			} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-				if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-					return 0;
-				} else {
-					return memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0;
-				}
-			} else {
-				return zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0;
-			}
+			return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 		}
 	}
 	compare_function(&result, op1, op2);
@@ -769,17 +770,7 @@ static zend_always_inline int fast_equal_check_string(zval *op1, zval *op2)
 {
 	zval result;
 	if (EXPECTED(Z_TYPE_P(op2) == IS_STRING)) {
-		if (Z_STR_P(op1) == Z_STR_P(op2)) {
-			return 1;
-		} else if (Z_STRVAL_P(op1)[0] > '9' || Z_STRVAL_P(op2)[0] > '9') {
-			if (Z_STRLEN_P(op1) != Z_STRLEN_P(op2)) {
-				return 0;
-			} else {
-				return memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0;
-			}
-		} else {
-			return zendi_smart_strcmp(Z_STR_P(op1), Z_STR_P(op2)) == 0;
-		}
+		return zend_fast_equal_strings(Z_STR_P(op1), Z_STR_P(op2));
 	}
 	compare_function(&result, op1, op2);
 	return Z_LVAL(result) == 0;
