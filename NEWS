@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     requests). (Remi)
 
 - Opcache:
+  . Fixed bug #75608 ("Narrowing occurred during type inference" error).
+    (Laruence, Dmitry)
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
 
