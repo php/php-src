@@ -288,9 +288,18 @@ static zend_always_inline void zend_string_release(zend_string *s)
 	}
 }
 
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
+#else
+static zend_always_inline zend_bool zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	return !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
+}
+#endif
+
 static zend_always_inline zend_bool zend_string_equal_content(zend_string *s1, zend_string *s2)
 {
-	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && !memcmp(ZSTR_VAL(s1), ZSTR_VAL(s2), ZSTR_LEN(s1));
+	return ZSTR_LEN(s1) == ZSTR_LEN(s2) && zend_string_equal_val(s1, s2);
 }
 
 static zend_always_inline zend_bool zend_string_equals(zend_string *s1, zend_string *s2)
