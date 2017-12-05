@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2017 PHP 7.0.27
+07 Dec 2017 PHP 7.0.27RC1
 
 - CLI Server:
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
