@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #75525 (Access Violation in vcruntime140.dll). (Anatol)
   . Fixed bug #74862 (Unable to clone instance when private __clone defined).
     (Daniel Ciochiu)
+  . Fixed bug #75074 (php-process crash when is_file() is used with strings
+    longer 260 chars). (Anatol)
 
 - CLI server:
   . Fixed bug #73830 (Directory does not exist). (Anatol)
