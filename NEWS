@@ -8,6 +8,8 @@ PHP                                                                        NEWS
     (Anatol)
   . Fixed bug #74862 (Unable to clone instance when private __clone defined).
     (Daniel Ciochiu)
+  . Fixed bug #75074 (php-process crash when is_file() is used with strings
+    longer 260 chars). (Anatol)
 
 - CLI Server:
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
