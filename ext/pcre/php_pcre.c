@@ -87,6 +87,18 @@ ZEND_TLS pcre2_match_context   *mctx = NULL;
 ZEND_TLS pcre2_match_data      *mdata = NULL;
 ZEND_TLS zend_bool              mdata_used = 0;
 ZEND_TLS uint8_t pcre2_init_ok = 0;
+#if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
+static MUTEX_T pcre_mt = NULL;
+#define php_pcre_mutex_alloc() if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
+#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt);
+#define php_pcre_mutex_lock() tsrm_mutex_lock(pcre_mt);
+#define php_pcre_mutex_unlock() tsrm_mutex_unlock(pcre_mt);
+#else
+#define php_pcre_mutex_alloc()
+#define php_pcre_mutex_free()
+#define php_pcre_mutex_lock()
+#define php_pcre_mutex_unlock()
+#endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -239,6 +251,8 @@ static void php_pcre_shutdown_pcre2(void)
 
 static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
+	php_pcre_mutex_alloc();
+
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
@@ -256,6 +270,8 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
 	php_pcre_shutdown_pcre2();
+
+	php_pcre_mutex_free();
 }
 /* }}} */
 
@@ -420,10 +436,13 @@ static PHP_RINIT_FUNCTION(pcre)
 {
 	if (!pcre2_init_ok) {
 		/* Retry. */
+		php_pcre_mutex_lock();
 		php_pcre_init_pcre2(PCRE_G(jit));
 		if (!pcre2_init_ok) {
+			php_pcre_mutex_unlock();
 			return FAILURE;
 		}
+		php_pcre_mutex_unlock();
 	}
 
 	mdata_used = 0;
