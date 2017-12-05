@@ -71,7 +71,7 @@ ZEND_TLS pcre_jit_stack *jit_stack = NULL;
 #if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
 static MUTEX_T pcre_mt = NULL;
 #define php_pcre_mutex_alloc() if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
-#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt);
+#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt); pcre_mt = NULL;
 #define php_pcre_mutex_lock() tsrm_mutex_lock(pcre_mt);
 #define php_pcre_mutex_unlock() tsrm_mutex_unlock(pcre_mt);
 #else
