@@ -68,6 +68,18 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 #define PCRE_JIT_STACK_MAX_SIZE (64 * 1024)
 ZEND_TLS pcre_jit_stack *jit_stack = NULL;
 #endif
+#if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
+static MUTEX_T pcre_mt = NULL;
+#define php_pcre_mutex_alloc() if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
+#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt);
+#define php_pcre_mutex_lock() tsrm_mutex_lock(pcre_mt);
+#define php_pcre_mutex_unlock() tsrm_mutex_unlock(pcre_mt);
+#else
+#define php_pcre_mutex_alloc()
+#define php_pcre_mutex_free()
+#define php_pcre_mutex_lock()
+#define php_pcre_mutex_unlock()
+#endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -190,6 +202,8 @@ static PHP_MINIT_FUNCTION(pcre)
 {
 	REGISTER_INI_ENTRIES();
 
+	php_pcre_mutex_alloc();
+
 	REGISTER_LONG_CONSTANT("PREG_PATTERN_ORDER", PREG_PATTERN_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_SET_ORDER", PREG_SET_ORDER, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("PREG_OFFSET_CAPTURE", PREG_OFFSET_CAPTURE, CONST_CS | CONST_PERSISTENT);
@@ -217,6 +231,8 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 {
 	UNREGISTER_INI_ENTRIES();
 
+	php_pcre_mutex_free();
+
 	return SUCCESS;
 }
 /* }}} */
@@ -226,7 +242,9 @@ static PHP_MSHUTDOWN_FUNCTION(pcre)
 static PHP_RINIT_FUNCTION(pcre)
 {
 	if (PCRE_G(jit) && jit_stack == NULL) {
+		php_pcre_mutex_lock();
 		jit_stack = pcre_jit_stack_alloc(PCRE_JIT_STACK_MIN_SIZE,PCRE_JIT_STACK_MAX_SIZE);
+		php_pcre_mutex_unlock();
 	}
 
 	return SUCCESS;
