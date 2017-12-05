@@ -2150,12 +2150,70 @@ ZEND_API void zend_free_compiled_variables(zend_execute_data *execute_data) /* {
  *                             +----------------------------------------+
  */
 
-static zend_always_inline void i_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
+{
+	zend_op_array *op_array = &EX(func)->op_array;
+	uint32_t first_extra_arg = op_array->num_args;
+	uint32_t num_args = EX_NUM_ARGS();
+	zval *src;
+	size_t delta;
+	uint32_t count;
+	uint32_t type_flags = 0;
+
+	if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
+		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+		opline += first_extra_arg;
+#else
+		EX(opline) += first_extra_arg;
+#endif
+
+	}
+
+	/* move extra args into separate array after all CV and TMP vars */
+	src = EX_VAR_NUM(num_args - 1);
+	delta = op_array->last_var + op_array->T - first_extra_arg;
+	count = num_args - first_extra_arg;
+	if (EXPECTED(delta != 0)) {
+		delta *= sizeof(zval);
+		do {
+			type_flags |= Z_TYPE_INFO_P(src);
+			ZVAL_COPY_VALUE((zval*)(((char*)src) + delta), src);
+			ZVAL_UNDEF(src);
+			src--;
+		} while (--count);
+	} else {
+		do {
+			type_flags |= Z_TYPE_INFO_P(src);
+			src--;
+		} while (--count);
+	}
+	ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
+}
+
+static zend_always_inline void zend_init_cvs(uint32_t first, uint32_t last EXECUTE_DATA_DC)
+{
+	if (EXPECTED(first < last)) {
+		zval *var = EX_VAR_NUM(first);
+		zval *end = EX_VAR_NUM(last);
+
+		do {
+			ZVAL_UNDEF(var);
+			var++;
+		} while (var != end);
+	}
+}
+
+static zend_always_inline void i_init_func_execute_data(zend_op_array *op_array, zval *return_value, zend_bool may_be_trampoline EXECUTE_DATA_DC) /* {{{ */
 {
 	uint32_t first_extra_arg, num_args;
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);
 
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+	opline = op_array->opcodes;
+#else
 	EX(opline) = op_array->opcodes;
+#endif
 	EX(call) = NULL;
 	EX(return_value) = return_value;
 
@@ -2163,54 +2221,27 @@ static zend_always_inline void i_init_func_execute_data(zend_execute_data *execu
 	first_extra_arg = op_array->num_args;
 	num_args = EX_NUM_ARGS();
 	if (UNEXPECTED(num_args > first_extra_arg)) {
-		if (EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
-			zval *end, *src, *dst;
-			uint32_t type_flags = 0;
-
-			if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
-				/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
-				EX(opline) += first_extra_arg;
-			}
-
-			/* move extra args into separate array after all CV and TMP vars */
-			end = EX_VAR_NUM(first_extra_arg - 1);
-			src = end + (num_args - first_extra_arg);
-			dst = src + (op_array->last_var + op_array->T - first_extra_arg);
-			if (EXPECTED(src != dst)) {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					ZVAL_COPY_VALUE(dst, src);
-					ZVAL_UNDEF(src);
-					src--;
-					dst--;
-				} while (src != end);
-			} else {
-				do {
-					type_flags |= Z_TYPE_INFO_P(src);
-					src--;
-				} while (src != end);
-			}
-			ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
+		if (!may_be_trampoline || EXPECTED(!(op_array->fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))) {
+			zend_copy_extra_args(EXECUTE_DATA_C);
 		}
 	} else if (EXPECTED((op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0)) {
 		/* Skip useless ZEND_RECV and ZEND_RECV_INIT opcodes */
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+		opline += num_args;
+#else
 		EX(opline) += num_args;
+#endif
 	}
 
 	/* Initialize CV variables (skip arguments) */
-	if (EXPECTED((int)num_args < op_array->last_var)) {
-		zval *var = EX_VAR_NUM(num_args);
-		zval *end = EX_VAR_NUM(op_array->last_var);
-
-		do {
-			ZVAL_UNDEF(var);
-			var++;
-		} while (var != end);
-	}
+	zend_init_cvs(num_args, op_array->last_var EXECUTE_DATA_CC);
 
 	EX_LOAD_RUN_TIME_CACHE(op_array);
 
 	EG(current_execute_data) = execute_data;
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+	EX(opline) = opline;
+#endif
 }
 /* }}} */
 
@@ -2242,14 +2273,28 @@ static zend_always_inline void i_init_code_execute_data(zend_execute_data *execu
 }
 /* }}} */
 
-ZEND_API void zend_init_func_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
+ZEND_API void zend_init_func_execute_data(zend_execute_data *ex, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+	zend_execute_data *orig_execute_data = execute_data;
+	const zend_op *orig_opline = opline;
+	execute_data = ex;
+#else
+	zend_execute_data *execute_data = ex;
+#endif
+
 	EX(prev_execute_data) = EG(current_execute_data);
 	if (!op_array->run_time_cache) {
 		op_array->run_time_cache = zend_arena_alloc(&CG(arena), op_array->cache_size);
 		memset(op_array->run_time_cache, 0, op_array->cache_size);
 	}
-	i_init_func_execute_data(execute_data, op_array, return_value);
+	i_init_func_execute_data(op_array, return_value, 1 EXECUTE_DATA_CC);
+
+#if defined(ZEND_VM_FP_GLOBAL_REG) && ((ZEND_VM_KIND == ZEND_VM_KIND_CALL) || (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID))
+    EX(opline) = opline;
+	opline = orig_opline;
+	execute_data = orig_execute_data;
+#endif
 }
 /* }}} */
 
