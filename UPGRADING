@@ -31,6 +31,11 @@ BCMath:
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
 
+SPL:
+  . If an SPL autoloader throws an exception, following autoloaders will not be
+    executed. Previously all autoloaders were executed and exceptions were
+    chained.
+
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
 	  as image/bmp instead of image/x-ms-bmp, since the former has been registered

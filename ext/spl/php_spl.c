@@ -447,16 +447,18 @@ PHP_FUNCTION(spl_autoload_call)
 			}
 
 			zend_call_function(&fci, &fcic);
-
-			zend_exception_save();
 			zval_ptr_dtor(&retval);
+
+			if (EG(exception)) {
+				break;
+			}
+
 			if (pos + 1 == SPL_G(autoload_functions)->nNumUsed ||
 			    zend_hash_exists(EG(class_table), lc_name)) {
 				break;
 			}
 			zend_hash_move_forward_ex(SPL_G(autoload_functions), &pos);
 		}
-		zend_exception_restore();
 		zend_string_release(lc_name);
 		SPL_G(autoload_running) = l_autoload_running;
 	} else {
