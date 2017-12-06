@@ -409,7 +409,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_str
 		"lea 0x3c(,%1,8), %1\n\t"
 		"shlq %b1, %0\n\t"
 		"sete %b0\n\t"
-		"movzbl %b0, %0\n\t"
+		"movzbq %b0, %0\n\t"
 		".L3%=:\n"
 		: "=&a"(ret),
 		  "+c"(len),
@@ -437,7 +437,7 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 		"rep\n\t"
 		"cmpsb\n\t"
 		"sete %b0\n\t"
-		"movzbl %b0, %0\n\t"
+		"movzbq %b0, %0\n\t"
 		".L2%=:\n"
 		: "=a"(ret),
 		  "+c"(len),
