@@ -165,6 +165,9 @@ JSON:
 10. New Global Constants
 ========================================
 
+Curl:
+  . CURLOPT_REQUEST_TARGET
+
 JSON:
   . JSON_THROW_ON_ERROR
 
