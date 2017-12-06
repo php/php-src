@@ -220,6 +220,7 @@ static zend_bool can_replace_op1(
 		case ZEND_FETCH_OBJ_RW:
 		case ZEND_FETCH_OBJ_UNSET:
 		case ZEND_FETCH_OBJ_FUNC_ARG:
+		case ZEND_FETCH_LIST_W:
 		case ZEND_UNSET_DIM:
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
@@ -286,7 +287,7 @@ static zend_bool try_replace_op1(
 		} else {
 			// TODO: check the following special cases ???
 			switch (opline->opcode) {
-				case ZEND_FETCH_LIST:
+				case ZEND_FETCH_LIST_R:
 				case ZEND_CASE:
 				case ZEND_SWITCH_STRING:
 				case ZEND_SWITCH_LONG:
@@ -1521,11 +1522,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			break;
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_DIM_IS:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST)) == SUCCESS) {
+			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;

@@ -172,7 +172,7 @@ END_EXTERN_C()
 #define ZEND_FETCH_UNSET                      95
 #define ZEND_FETCH_DIM_UNSET                  96
 #define ZEND_FETCH_OBJ_UNSET                  97
-#define ZEND_FETCH_LIST                       98
+#define ZEND_FETCH_LIST_R                     98
 #define ZEND_FETCH_CONSTANT                   99
 #define ZEND_EXT_STMT                        101
 #define ZEND_EXT_FCALL_BEGIN                 102
@@ -270,7 +270,8 @@ END_EXTERN_C()
 #define ZEND_FUNC_GET_ARGS                   195
 #define ZEND_UNSET_CV                        196
 #define ZEND_ISSET_ISEMPTY_CV                197
+#define ZEND_FETCH_LIST_W                    198
 
-#define ZEND_VM_LAST_OPCODE                  197
+#define ZEND_VM_LAST_OPCODE                  198
 
 #endif

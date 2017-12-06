@@ -771,7 +771,8 @@ void zend_do_free(znode *op1) /* {{{ */
 			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
-				if (opline->opcode == ZEND_FETCH_LIST &&
+				if ((opline->opcode == ZEND_FETCH_LIST_R ||
+                     opline->opcode == ZEND_FETCH_LIST_W) &&
 				    opline->op1_type == IS_VAR &&
 				    opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -2078,7 +2079,8 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			       opline->opcode == ZEND_ROPE_ADD ||
 			       opline->opcode == ZEND_ROPE_END ||
 			       opline->opcode == ZEND_END_SILENCE ||
-			       opline->opcode == ZEND_FETCH_LIST ||
+			       opline->opcode == ZEND_FETCH_LIST_R ||
+			       opline->opcode == ZEND_FETCH_LIST_W ||
 			       opline->opcode == ZEND_VERIFY_RETURN_TYPE ||
 			       opline->opcode == ZEND_BIND_LEXICAL) {
 			/* these opcodes are handled separately */
@@ -2793,6 +2795,32 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 }
 /* }}} */
 
+static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node);
+
+static zend_bool zend_compile_list_assign_requires_w(zend_ast *ast) { /* {{{ */
+	zend_ast_list *list;
+	uint32_t i;
+
+	if (ast->kind != ZEND_AST_ARRAY) {
+		return 0;
+	}
+
+	list = zend_ast_get_list(ast);
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *elem_ast = list->child[i];
+
+		if (elem_ast) {
+			zend_ast *var_ast = elem_ast->child[0];
+			if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
+				return 1;
+			}
+		}
+	}
+
+	return 0;
+}
+/* }}} */
+
 static void zend_compile_list_assign(
 		znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
 {
@@ -2818,10 +2846,6 @@ static void zend_compile_list_assign(
 			} else {
 				continue;
 			}
-		}
-
-		if (elem_ast->attr) {
-			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
 		}
 
 		var_ast = elem_ast->child[0];
@@ -2851,8 +2875,18 @@ static void zend_compile_list_assign(
 
 		zend_verify_list_assign_target(var_ast, old_style);
 
-		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
-		zend_emit_assign_znode(var_ast, &fetch_result);
+		if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
+			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_W, expr_node, &dim_node);
+			zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+		} else {
+			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_R, expr_node, &dim_node);
+		}
+
+		if (elem_ast->attr) {
+			zend_emit_assign_ref_znode(var_ast, &fetch_result);
+		} else {
+			zend_emit_assign_znode(var_ast, &fetch_result);
+		}
 	}
 
 	if (has_elems == 0) {
@@ -3005,17 +3039,31 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_ARRAY:
-			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
-				/* list($a, $b) = $a should evaluate the right $a first */
-				znode cv_node;
+			if (zend_compile_list_assign_requires_w(var_ast)) {
+				if (!zend_is_variable(expr_ast)) {
+					zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign reference to non referencable value");
+				}
 
-				if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
-					zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
-				} else {
-					zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+				zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
+				/* MAKE_REF is usually not necessary for CVs. However, if there are
+				 * self-assignments, this forces the RHS to evaluate first. */
+				if (expr_node.op_type != IS_CV
+						|| zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
 				}
 			} else {
-				zend_compile_expr(&expr_node, expr_ast);
+				if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					/* list($a, $b) = $a should evaluate the right $a first */
+					znode cv_node;
+
+					if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
+						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+					} else {
+						zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+					}
+				} else {
+					zend_compile_expr(&expr_node, expr_ast);
+				}
 			}
 
 			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr);
@@ -4735,6 +4783,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_ast *key_ast = ast->child[2];
 	zend_ast *stmt_ast = ast->child[3];
 	zend_bool by_ref = value_ast->kind == ZEND_AST_REF;
+	zend_bool list_ref = 0;
 	zend_bool is_variable = zend_is_variable(expr_ast) && !zend_is_call(expr_ast)
 		&& zend_can_write_to_variable(expr_ast);
 
@@ -4755,28 +4804,32 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		value_ast = value_ast->child[0];
 	}
 
-	if (by_ref && is_variable) {
+	if (value_ast->kind == ZEND_AST_ARRAY && zend_compile_list_assign_requires_w(value_ast)) {
+		list_ref = 1;
+	}
+
+	if ((by_ref || list_ref) && is_variable) {
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	if (by_ref) {
+	if (by_ref || list_ref) {
 		zend_separate_if_call_and_write(&expr_node, expr_ast, BP_VAR_W);
 	}
 
 	opnum_reset = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
+	opline = zend_emit_op(&reset_node, (by_ref || list_ref) ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
 	zend_begin_loop(ZEND_FE_FREE, &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
+	opline = zend_emit_op(NULL, (by_ref || list_ref) ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
 	if (is_this_fetch(value_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	} else if (value_ast->kind == ZEND_AST_VAR &&
-	    zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
+		zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
 		SET_NODE(opline->op2, &value_node);
 	} else {
 		opline->op2_type = IS_VAR;
