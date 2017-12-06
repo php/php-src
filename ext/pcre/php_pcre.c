@@ -67,7 +67,7 @@ PHPAPI ZEND_DECLARE_MODULE_GLOBALS(pcre)
 #define PCRE_JIT_STACK_MAX_SIZE (64 * 1024)
 ZEND_TLS pcre_jit_stack *jit_stack = NULL;
 #endif
-#if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
+#if defined(ZTS)
 static MUTEX_T pcre_mt = NULL;
 #define php_pcre_mutex_alloc() if (!pcre_mt) pcre_mt = tsrm_mutex_alloc();
 #define php_pcre_mutex_free() if (pcre_mt) tsrm_mutex_free(pcre_mt); pcre_mt = NULL;
@@ -538,7 +538,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	/* If study option was specified, study the pattern and
 	   store the result in extra for passing to pcre_exec. */
 	if (do_study) {
+		php_pcre_mutex_lock();
 		extra = pcre_study(re, soptions, &error);
+		php_pcre_mutex_unlock();
 		if (extra) {
 			extra->flags |= PCRE_EXTRA_MATCH_LIMIT | PCRE_EXTRA_MATCH_LIMIT_RECURSION;
 			extra->match_limit = (unsigned long)PCRE_G(backtrack_limit);
