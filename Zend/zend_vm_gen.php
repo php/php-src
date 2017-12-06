@@ -151,12 +151,12 @@ $op_types = array(
 $op_types_ex = array(
 	"ANY",
 	"CONST",
+	"TMPVARCV",
+	"TMPVAR",
 	"TMP",
 	"VAR",
 	"UNUSED",
 	"CV",
-	"TMPVAR",
-	"TMPVARCV",
 );
 
 $prefix = array(
@@ -633,13 +633,33 @@ function helper_name($name, $spec, $op1, $op2, $extra_spec) {
 	if (isset($helpers[$name])) {
 		// If we haven't helper with specified spicialized operands then
 		// using unspecialized helper
-		if (!isset($helpers[$name]["op1"][$op1]) &&
-		    isset($helpers[$name]["op1"]["ANY"])) {
-			$op1 = "ANY";
+		if (!isset($helpers[$name]["op1"][$op1])) {
+			if (($op1 == 'TMP' || $op1 == 'VAR') &&
+			    isset($helpers[$name]["op1"]["TMPVAR"])) {
+				$op1 = "TMPVAR";
+			} else if (($op1 == 'TMP' || $op1 == 'VAR') &&
+			    isset($helpers[$name]["op1"]["TMPVARCV"])) {
+				$op1 = "TMPVARCV";
+			} else if ($op1 == 'CV' &&
+			    isset($helpers[$name]["op1"]["TMPVARCV"])) {
+				$op1 = "TMPVARCV";
+			} else if (isset($helpers[$name]["op1"]["ANY"])) {
+				$op1 = "ANY";
+			}
 		}
-		if (!isset($helpers[$name]["op2"][$op2]) &&
-		    isset($helpers[$name]["op2"]["ANY"])) {
-			$op2 = "ANY";
+		if (!isset($helpers[$name]["op2"][$op2])) {
+			if (($op2 == 'TMP' || $op2 == 'VAR') &&
+			    isset($helpers[$name]["op2"]["TMPVAR"])) {
+				$op2 = "TMPVAR";
+			} else if (($op2 == 'TMP' || $op2 == 'VAR') &&
+			    isset($helpers[$name]["op2"]["TMPVARCV"])) {
+				$op2 = "TMPVARCV";
+			} else if ($op2 == 'CV' &&
+			    isset($helpers[$name]["op2"]["TMPVARCV"])) {
+				$op2 = "TMPVARCV";
+			} else if (isset($helpers[$name]["op2"]["ANY"])) {
+				$op2 = "ANY";
+			}
 		}
 		/* forward common specs (e.g. in ZEND_VM_DISPATCH_TO_HELPER) */
 		if (isset($extra_spec, $helpers[$name]["spec"])) {
@@ -656,13 +676,39 @@ function opcode_name($name, $spec, $op1, $op2) {
 		$opcode = $opcodes[$opnames[$name]];
 		// If we haven't helper with specified spicialized operands then
 		// using unspecialized helper
-		if (!isset($opcode["op1"][$op1]) &&
-		    isset($opcode["op1"]["ANY"])) {
-			$op1 = "ANY";
+		if (!isset($opcode["op1"][$op1])) {
+			if (($op1 == 'TMP' || $op1 == 'VAR') &&
+			    isset($opcode["op1"]["TMPVAR"])) {
+				$op1 = "TMPVAR";
+			} else if (($op1 == 'TMP' || $op1 == 'VAR') &&
+			    isset($opcode["op1"]["TMPVARCV"])) {
+				$op1 = "TMPVARCV";
+			} else if ($op1 == 'CV' &&
+			    isset($opcode["op1"]["TMPVARCV"])) {
+				$op1 = "TMPVARCV";
+			} else if (isset($opcode["op1"]["ANY"])) {
+				$op1 = "ANY";
+			} else if ($spec) {
+				/* dispatch to invalid handler from unreachable code */
+				return "ZEND_NULL";
+			}
 		}
-		if (!isset($opcode["op2"][$op2]) &&
-		    isset($opcode["op2"]["ANY"])) {
-			$op2 = "ANY";
+		if (!isset($opcode["op2"][$op2])) {
+			if (($op2 == 'TMP' || $op2 == 'VAR') &&
+			    isset($opcode["op2"]["TMPVAR"])) {
+				$op2 = "TMPVAR";
+			} else if (($op2 == 'TMP' || $op2 == 'VAR') &&
+			    isset($opcode["op2"]["TMPVARCV"])) {
+				$op2 = "TMPVARCV";
+			} else if ($op2 == 'CV' &&
+			    isset($opcode["op2"]["TMPVARCV"])) {
+				$op2 = "TMPVARCV";
+			} else if (isset($opcode["op2"]["ANY"])) {
+				$op2 = "ANY";
+			} else if ($spec) {
+				/* dispatch to unkonwn handler in unreachable code */
+				return "ZEND_NULL";
+			}
 		}
 	}
 	return $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2];
@@ -1695,7 +1741,8 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								out($f,"#define ZEND_VM_DISPATCH(opcode, opline) ZEND_VM_TAIL_CALL(((opcode_handler_t)zend_vm_get_opcode_handler(opcode, opline))(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));\n");
 							}
 							out($f,"\n");
-							out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);");
+							out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper".($spec?"_SPEC":"")."(ZEND_OPCODE_HANDLER_ARGS);\n");
+							out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);\n");
 							out($f,"\n");
 							break;
 						case ZEND_VM_KIND_SWITCH:

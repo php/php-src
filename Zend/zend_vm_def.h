@@ -1670,40 +1670,28 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV, NUM)
 {
 	USE_OPLINE
-	zval *container;
-	zend_free_op free_op1, free_op2;
-
-	SAVE_OPLINE();
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
         if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
+			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP1();
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
         }
-		container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-		zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE EXECUTE_DATA_CC);
-		if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
-			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
-		}
-		FREE_OP2();
-		FREE_OP1_VAR_PTR();
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_DIM_W);
 	} else {
 		if (OP2_TYPE == IS_UNUSED) {
+			SAVE_OPLINE();
 			zend_throw_error(NULL, "Cannot use [] for reading");
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP1();
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			HANDLE_EXCEPTION();
 		}
-		container = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
-		zend_fetch_dimension_address_read_R(EX_VAR(opline->result.var), container, GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R), OP2_TYPE EXECUTE_DATA_CC);
-		FREE_OP2();
-		FREE_OP1();
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_DIM_R);
 	}
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
 ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMPVAR|CV)
@@ -1724,7 +1712,7 @@ ZEND_VM_HANDLER(96, ZEND_FETCH_DIM_UNSET, VAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
+ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
@@ -1975,15 +1963,11 @@ ZEND_VM_C_LABEL(fetch_obj_is_no_object):
 ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, NUM)
 {
 	USE_OPLINE
-	zval *container;
 
 	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
 		/* Behave like FETCH_OBJ_W */
-		zend_free_op free_op1, free_op2;
-		zval *property;
-
-		SAVE_OPLINE();
 		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
+			SAVE_OPLINE();
 			zend_throw_error(NULL, "Cannot use temporary expression in write context");
 			FREE_UNFETCHED_OP2();
 			FREE_UNFETCHED_OP1();
@@ -1991,18 +1975,7 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 			HANDLE_EXCEPTION();
 		}
 
-		container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
-		if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-			ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
-		}
-		property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-		zend_fetch_property_address(EX_VAR(opline->result.var), container, OP1_TYPE, property, OP2_TYPE, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
-		FREE_OP2();
-		if (OP1_TYPE == IS_VAR && READY_TO_DESTROY(free_op1)) {
-			EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
-		}
-		FREE_OP1_VAR_PTR();
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_OBJ_W);
 	} else {
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_OBJ_R);
 	}
