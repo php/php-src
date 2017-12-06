@@ -322,27 +322,27 @@ ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_str
 	zend_ulong ret;
 
 	__asm__ (
-		"ll0%=:\n\t"
+		".L0%=:\n\t"
 		"movl (%2,%3), %0\n\t"
 		"xorl (%2), %0\n\t"
-		"jne ll1%=\n\t"
+		"jne .L1%=\n\t"
 		"addl $0x4, %2\n\t"
 		"subl $0x4, %1\n\t"
-		"ja ll0%=\n\t"
+		"ja .L0%=\n\t"
 		"movl $0x1, %0\n\t"
-		"jmp ll3%=\n\t"
-		"ll1%=:\n\t"
+		"jmp .L3%=\n\t"
+		".L1%=:\n\t"
 		"cmpl $0x4,%1\n\t"
-		"jb ll2%=\n\t"
+		"jb .L2%=\n\t"
 		"xorl %0, %0\n\t"
-		"jmp ll3%=\n\t"
-		"ll2%=:\n\t"
+		"jmp .L3%=\n\t"
+		".L2%=:\n\t"
 		"negl %1\n\t"
 		"lea 0x1c(,%1,8), %1\n\t"
 		"shll %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		"ll3%=:\n"
+		".L3%=:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
@@ -361,16 +361,16 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 
 	__asm__ (
 		"test %1, %1\n\t"
-		"jnz ll1%=\n\t"
+		"jnz .L1%=\n\t"
 		"movl $0x1, %0\n\t"
-		"jmp ll2%=\n\t"
-		"ll1%=:\n\t"
+		"jmp .L2%=\n\t"
+		".L1%=:\n\t"
 		"cld\n\t"
 		"rep\n\t"
 		"cmpsb\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		"ll2%=:\n"
+		".L2%=:\n"
 		: "=a"(ret),
 		  "+c"(len),
 		  "+D"(ptr1),
@@ -390,27 +390,27 @@ ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_str
 	zend_ulong ret;
 
 	__asm__ (
-		"ll0%=:\n\t"
+		".L0%=:\n\t"
 		"movq (%2,%3), %0\n\t"
 		"xorq (%2), %0\n\t"
-		"jne ll1%=\n\t"
+		"jne .L1%=\n\t"
 		"addq $0x8, %2\n\t"
 		"subq $0x8, %1\n\t"
-		"ja ll0%=\n\t"
+		"ja .L0%=\n\t"
 		"movq $0x1, %0\n\t"
-		"jmp ll3%=\n\t"
-		"ll1%=:\n\t"
+		"jmp .L3%=\n\t"
+		".L1%=:\n\t"
 		"cmpq $0x8,%1\n\t"
-		"jb ll2%=\n\t"
+		"jb .L2%=\n\t"
 		"xorq %0, %0\n\t"
-		"jmp ll3%=\n\t"
-		"ll2%=:\n\t"
+		"jmp .L3%=\n\t"
+		".L2%=:\n\t"
 		"negq %1\n\t"
 		"lea 0x3c(,%1,8), %1\n\t"
 		"shlq %b1, %0\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		"ll3%=:\n"
+		".L3%=:\n"
 		: "=&a"(ret),
 		  "+c"(len),
 		  "+r"(ptr)
@@ -429,16 +429,16 @@ ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_
 
 	__asm__ (
 		"test %1, %1\n\t"
-		"jnz ll1%=\n\t"
+		"jnz .L1%=\n\t"
 		"movq $0x1, %0\n\t"
-		"jmp ll2%=\n\t"
-		"ll1%=:\n\t"
+		"jmp .L2%=\n\t"
+		".L1%=:\n\t"
 		"cld\n\t"
 		"rep\n\t"
 		"cmpsb\n\t"
 		"sete %b0\n\t"
 		"movzbl %b0, %0\n\t"
-		"ll2%=:\n"
+		".L2%=:\n"
 		: "=a"(ret),
 		  "+c"(len),
 		  "+D"(ptr1),
