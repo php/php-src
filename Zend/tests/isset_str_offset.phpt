@@ -16,8 +16,8 @@ var_dump(isset($str[5])); // 1
 var_dump(isset($str[8]));
 var_dump(isset($str[10000]));
 // non-numeric offsets
-print "- string ---\n";
-var_dump(isset($str['-1']));
+print "- string literal ---\n";
+var_dump(isset($str['-1'])); // 3
 var_dump(isset($str['-10']));
 var_dump(isset($str['0']));
 var_dump(isset($str['1']));
@@ -25,6 +25,15 @@ var_dump(isset($str['4'])); // 0
 var_dump(isset($str['1.5']));
 var_dump(isset($str['good']));
 var_dump(isset($str['3 and a half']));
+print "- string variable ---\n";
+var_dump(isset($str[$key = '-1'])); // 3
+var_dump(isset($str[$key = '-10']));
+var_dump(isset($str[$key = '0']));
+var_dump(isset($str[$key = '1']));
+var_dump(isset($str[$key = '4'])); // 0
+var_dump(isset($str[$key = '1.5']));
+var_dump(isset($str[$key = 'good']));
+var_dump(isset($str[$key = '3 and a half']));
 print "- bool ---\n";
 var_dump(isset($str[true]));
 var_dump(isset($str[false]));
@@ -61,7 +70,16 @@ bool(true)
 bool(true)
 bool(false)
 bool(false)
-- string ---
+- string literal ---
+bool(true)
+bool(false)
+bool(true)
+bool(true)
+bool(true)
+bool(false)
+bool(false)
+bool(false)
+- string variable ---
 bool(true)
 bool(false)
 bool(true)
