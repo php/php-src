@@ -167,6 +167,7 @@ ZEND_API void ZEND_FASTCALL _zval_copy_ctor_func(zval *zvalue ZEND_FILE_LINE_DC)
 	if (EXPECTED(Z_TYPE_P(zvalue) == IS_ARRAY)) {
 		ZVAL_ARR(zvalue, zend_array_dup(Z_ARRVAL_P(zvalue)));
 	} else if (EXPECTED(Z_TYPE_P(zvalue) == IS_STRING)) {
+		ZEND_ASSERT(!ZSTR_IS_INTERNED(Z_STR_P(zvalue)));
 		CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
 		ZVAL_NEW_STR(zvalue, zend_string_dup(Z_STR_P(zvalue), 0));
 	}
