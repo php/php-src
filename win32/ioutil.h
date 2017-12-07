@@ -241,6 +241,7 @@ PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
+PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
@@ -314,19 +315,17 @@ __forceinline static int php_win32_ioutil_open(const char *path, int flags, ...)
 __forceinline static int php_win32_ioutil_unlink(const char *path)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
-	int ret = 0;
-	DWORD err = 0;
+	int ret = -1;
+	DWORD err;
 
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
-
-	if (!DeleteFileW(pathw)) {
+	ret = php_win32_ioutil_unlink_w(pathw);
+	if (0 > ret) {
 		err = GetLastError();
-		ret = -1;
 	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 

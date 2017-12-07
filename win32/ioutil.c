@@ -359,16 +359,72 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
+	HANDLE h;
+	BY_HANDLE_FILE_INFORMATION info;
+	FILE_DISPOSITION_INFO disposition;
+	BOOL status;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
-	if (!DeleteFileW(path)) {
+	h = CreateFileW(path,
+					FILE_READ_ATTRIBUTES | FILE_WRITE_ATTRIBUTES | DELETE,
+					PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+					NULL,
+					OPEN_EXISTING,
+					FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
+
+	if (INVALID_HANDLE_VALUE == h) {
 		err = GetLastError();
-		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
 	}
 
-	return ret;
+	if (!GetFileInformationByHandle(h, &info)) {
+		err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	if (info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) {
+		/* TODO Handle possible reparse point. */
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_DIRECTORY_NOT_SUPPORTED);
+		return -1;
+	}
+
+#if 0
+	/* XXX BC breach! */
+	if (info.dwFileAttributes & FILE_ATTRIBUTE_READONLY) {
+		/* Remove read-only attribute */
+		FILE_BASIC_INFO basic = { 0 };
+
+		basic.FileAttributes = info.dwFileAttributes & ~(FILE_ATTRIBUTE_READONLY);
+
+		status = SetFileInformationByHandle(h, FileBasicInfo, &basic, sizeof basic);
+		if (!status) {
+			err = GetLastError();
+			SET_ERRNO_FROM_WIN32_CODE(err);
+			CloseHandle(h);
+			return -1;
+		}
+	}
+#endif
+
+	/* Try to set the delete flag. */
+	disposition.DeleteFile = TRUE;
+	status = SetFileInformationByHandle(h, FileDispositionInfo, &disposition, sizeof disposition);
+	if (!status) {
+		err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	CloseHandle(h);
+
+	return 0;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
