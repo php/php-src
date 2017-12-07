@@ -58,9 +58,9 @@
 ; An empty string can be denoted by simply not writing anything after the equal
 ; sign, or by using the None keyword:
 
-;  foo =         ; sets foo to an empty string
-;  foo = None    ; sets foo to an empty string
-;  foo = "None"  ; sets foo to the string 'None'
+; foo =         ; sets foo to an empty string
+; foo = None    ; sets foo to an empty string
+; foo = "None"  ; sets foo to the string 'None'
 
 ; If you use constants in your value, and these constants belong to a
 ; dynamically loaded extension (either a PHP extension or a Zend extension),
@@ -392,7 +392,7 @@ max_input_time = 60
 ;max_input_nesting_level = 64
 
 ; How many GET/POST/COOKIE input variables may be accepted
-; max_input_vars = 1000
+;max_input_vars = 1000
 
 ; Maximum amount of memory a script may consume (128MB)
 ; http://php.net/memory-limit
@@ -727,13 +727,13 @@ user_dir =
 
 ; Directory in which the loadable extensions (modules) reside.
 ; http://php.net/extension-dir
-; extension_dir = "./"
+;extension_dir = "./"
 ; On windows:
-; extension_dir = "ext"
+;extension_dir = "ext"
 
 ; Directory where the temporary files should be placed.
 ; Defaults to the system default (see sys_get_temp_dir)
-; sys_temp_dir = "/tmp"
+;sys_temp_dir = "/tmp"
 
 ; Whether or not to enable the dl() function.  The dl() function does NOT work
 ; properly in multithreaded servers, such as IIS or Zeus, and is automatically
@@ -979,19 +979,19 @@ cli_server.color = On
 ;sqlite3.extension_dir =
 
 [Pcre]
-;PCRE library backtracking limit.
+; PCRE library backtracking limit.
 ; http://php.net/pcre.backtrack-limit
 ;pcre.backtrack_limit=100000
 
-;PCRE library recursion limit.
-;Please note that if you set this value to a high number you may consume all
-;the available process stack and eventually crash PHP (due to reaching the
-;stack size limit imposed by the Operating System).
+; PCRE library recursion limit.
+; Please note that if you set this value to a high number you may consume all
+; the available process stack and eventually crash PHP (due to reaching the
+; stack size limit imposed by the Operating System).
 ; http://php.net/pcre.recursion-limit
 ;pcre.recursion_limit=100000
 
-;Enables or disables JIT compilation of patterns. This requires the PCRE
-;library to be compiled with JIT support.
+; Enables or disables JIT compilation of patterns. This requires the PCRE
+; library to be compiled with JIT support.
 ;pcre.jit=1
 
 [Pdo]
