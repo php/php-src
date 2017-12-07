@@ -672,8 +672,8 @@ static void cgi_php_import_environment_variables(zval *array_ptr)
 
 	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
 		return;
 	}
 
