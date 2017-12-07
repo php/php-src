@@ -6280,7 +6280,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DECLARE_CONST_SPEC_CONST_CONST
 			HANDLE_EXCEPTION();
 		}
 	}
-	c.flags = CONST_CS; /* non persistent, case sensetive */
+	c.flags = CONST_CS; /* non persistent, case sensitive */
 	c.name = zend_string_copy(Z_STR_P(name));
 	c.module_number = PHP_USER_CONSTANT;
 
