@@ -1070,10 +1070,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 #define SEPARATE_STRING(zv) do {						\
 		zval *_zv = (zv);								\
 		if (Z_REFCOUNT_P(_zv) > 1) {					\
-			if (Z_REFCOUNTED_P(_zv)) {					\
-				Z_DELREF_P(_zv);						\
-			}											\
-			zval_copy_ctor_func(_zv);					\
+			zend_string *_str = Z_STR_P(_zv);			\
+			ZEND_ASSERT(Z_REFCOUNTED_P(_zv));			\
+			ZEND_ASSERT(!ZSTR_IS_INTERNED(_str));		\
+			Z_DELREF_P(_zv);							\
+			ZVAL_NEW_STR(_zv, zend_string_init(			\
+				ZSTR_VAL(_str),	ZSTR_LEN(_str), 0));	\
 		}												\
 	} while (0)
 
