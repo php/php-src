@@ -2812,7 +2812,7 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 
 	ZVAL_UNDEF(&tmp_inc_filename);
 	if (Z_TYPE_P(inc_filename) != IS_STRING) {
-		ZVAL_STR(&tmp_inc_filename, zval_get_string(inc_filename));
+		ZVAL_STR(&tmp_inc_filename, zval_get_string_func(inc_filename));
 		inc_filename = &tmp_inc_filename;
 	}
 

@@ -3237,7 +3237,7 @@ try_again:
 			callable = Z_REFVAL_P(callable);
 			goto try_again;
 		default:
-			return zval_get_string(callable);
+			return zval_get_string_func(callable);
 	}
 }
 /* }}} */

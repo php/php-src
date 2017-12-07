@@ -88,7 +88,7 @@
 #define GET_VER_OPT_STRING(name, str) \
 	if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
 #define GET_VER_OPT_LONG(name, num) \
-	if (GET_VER_OPT(name)) { convert_to_long_ex(val); num = Z_LVAL_P(val); }
+	if (GET_VER_OPT(name)) { num = zval_get_long(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
@@ -1109,8 +1109,7 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "reneg_limit"))
 	) {
-		convert_to_long(val);
-		limit = Z_LVAL_P(val);
+		limit = zval_get_long(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -1121,8 +1120,7 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "reneg_window"))
 	) {
-		convert_to_long(val);
-		window = Z_LVAL_P(val);
+		window = zval_get_long(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
@@ -1618,11 +1616,11 @@ int php_openssl_setup_crypto(php_stream *stream,
 
 	if (GET_VER_OPT("security_level")) {
 #ifdef HAVE_SEC_LEVEL
-		convert_to_long(val);
-		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > 5) {
+		zend_long lval = zval_get_long(val);
+		if (lval < 0 || lval > 5) {
 			php_error_docref(NULL, E_WARNING, "Security level must be between 0 and 5");
 		}
-		SSL_CTX_set_security_level(sslsock->ctx, Z_LVAL_P(val));
+		SSL_CTX_set_security_level(sslsock->ctx, lval);
 #else
 		php_error_docref(NULL, E_WARNING,
 				"security_level is not supported by the linked OpenSSL library "
@@ -2557,8 +2555,7 @@ static zend_long php_openssl_get_crypto_method(
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
-		convert_to_long_ex(val);
-		crypto_method = (zend_long)Z_LVAL_P(val);
+		crypto_method = zval_get_long(val);
 		crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 

@@ -194,9 +194,8 @@ err:
 	zval tmp_member;							\
 	if( Z_TYPE_P( member ) != IS_STRING )		\
 	{											\
-		tmp_member = *member;					\
-		zval_copy_ctor( &tmp_member );			\
-		convert_to_string( &tmp_member );		\
+		ZVAL_STR(&tmp_member,					\
+			zval_get_string_func(member));		\
 		member = &tmp_member;					\
 		cache_slot = NULL;						\
     }

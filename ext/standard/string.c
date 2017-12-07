@@ -2478,7 +2478,7 @@ PHP_FUNCTION(substr_replace)
 	if (argc > 3) {
 		if (Z_TYPE_P(len) != IS_ARRAY) {
 			convert_to_long_ex(len);
-			l = zval_get_long(len);
+			l = Z_LVAL_P(len);
 		}
 	} else {
 		if (Z_TYPE_P(str) != IS_ARRAY) {

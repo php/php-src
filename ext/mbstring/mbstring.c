@@ -3932,8 +3932,7 @@ php_mb_numericentity_exec(INTERNAL_FUNCTION_PARAMETERS, int type)
 			mapelm = convmap;
 			mapsize = 0;
 			ZEND_HASH_FOREACH_VAL(target_hash, hash_entry) {
-				convert_to_long_ex(hash_entry);
-				*mapelm++ = Z_LVAL_P(hash_entry);
+				*mapelm++ = zval_get_long(hash_entry);
 				mapsize++;
 			} ZEND_HASH_FOREACH_END();
 		}

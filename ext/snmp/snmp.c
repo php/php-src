@@ -1924,8 +1924,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 	obj = Z_SNMP_P(object);
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -1960,8 +1959,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, void **cac
 	php_snmp_prop_handler *hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -2130,29 +2128,20 @@ static int php_snmp_write_info(php_snmp_object *snmp_object, zval *newval)
 /* {{{ */
 static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 {
-	zval ztmp;
 	int ret = SUCCESS;
+	zend_long lval;
 
 	if (Z_TYPE_P(newval) == IS_NULL) {
 		snmp_object->max_oids = 0;
 		return ret;
 	}
 
-	if (Z_TYPE_P(newval) != IS_LONG) {
-		ztmp = *newval;
-		zval_copy_ctor(&ztmp);
-		convert_to_long(&ztmp);
-		newval = &ztmp;
-	}
+	lval = zval_get_long(newval);
 
-	if (Z_LVAL_P(newval) > 0) {
-		snmp_object->max_oids = Z_LVAL_P(newval);
+	if (lval > 0) {
+		snmp_object->max_oids = lval;
 	} else {
-		php_error_docref(NULL, E_WARNING, "max_oids should be positive integer or NULL, got " ZEND_LONG_FMT, Z_LVAL_P(newval));
-	}
-
-	if (newval == &ztmp) {
-		zval_dtor(newval);
+		php_error_docref(NULL, E_WARNING, "max_oids should be positive integer or NULL, got " ZEND_LONG_FMT, lval);
 	}
 
 	return ret;
@@ -2164,23 +2153,13 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 {
 	zval ztmp;
 	int ret = SUCCESS;
+	zend_long lval = zval_get_long(newval);
 
-	if (Z_TYPE_P(newval) != IS_LONG) {
-		ztmp = *newval;
-		zval_copy_ctor(&ztmp);
-		convert_to_long(&ztmp);
-		newval = &ztmp;
-	}
-
-	if (Z_LVAL_P(newval) >= 0 && Z_LVAL_P(newval) <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
-		snmp_object->valueretrieval = Z_LVAL_P(newval);
+	if (lval >= 0 && lval <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
+		snmp_object->valueretrieval = lval;
 	} else {
 		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '" ZEND_LONG_FMT "'", Z_LVAL_P(newval));
 		ret = FAILURE;
-	}
-
-	if (newval == &ztmp) {
-		zval_dtor(newval);
 	}
 
 	return ret;
@@ -2207,32 +2186,24 @@ PHP_SNMP_BOOL_PROPERTY_WRITER_FUNCTION(oid_increasing_check)
 /* {{{ */
 static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *newval)
 {
-	zval ztmp;
 	int ret = SUCCESS;
-	if (Z_TYPE_P(newval) != IS_LONG) {
-		ZVAL_COPY(&ztmp, newval);
-		convert_to_long(&ztmp);
-		newval = &ztmp;
-	}
+	zend_long lval = zval_get_long(newval);
 
-	switch(Z_LVAL_P(newval)) {
+	switch(lval) {
 		case NETSNMP_OID_OUTPUT_SUFFIX:
 		case NETSNMP_OID_OUTPUT_MODULE:
 		case NETSNMP_OID_OUTPUT_FULL:
 		case NETSNMP_OID_OUTPUT_NUMERIC:
 		case NETSNMP_OID_OUTPUT_UCD:
 		case NETSNMP_OID_OUTPUT_NONE:
-			snmp_object->oid_output_format = Z_LVAL_P(newval);
+			snmp_object->oid_output_format = lval;
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unknown SNMP output print format '" ZEND_LONG_FMT "'", Z_LVAL_P(newval));
+			php_error_docref(NULL, E_WARNING, "Unknown SNMP output print format '" ZEND_LONG_FMT "'", lval);
 			ret = FAILURE;
 			break;
 	}
 
-	if (newval == &ztmp) {
-		zval_ptr_dtor(newval);
-	}
 	return ret;
 }
 /* }}} */
@@ -2240,19 +2211,10 @@ static int php_snmp_write_oid_output_format(php_snmp_object *snmp_object, zval *
 /* {{{ */
 static int php_snmp_write_exceptions_enabled(php_snmp_object *snmp_object, zval *newval)
 {
-	zval ztmp;
 	int ret = SUCCESS;
-	if (Z_TYPE_P(newval) != IS_LONG) {
-		ZVAL_COPY(&ztmp, newval);
-		convert_to_long(&ztmp);
-		newval = &ztmp;
-	}
 
-	snmp_object->exceptions_enabled = Z_LVAL_P(newval);
+	snmp_object->exceptions_enabled = zval_get_long(newval);
 
-	if (newval == &ztmp) {
-		zval_ptr_dtor(newval);
-	}
 	return ret;
 }
 /* }}} */

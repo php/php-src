@@ -130,6 +130,7 @@ PHP_FUNCTION(datefmt_parse)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
+	zend_long   long_parse_pos;
 	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -146,13 +147,13 @@ PHP_FUNCTION(datefmt_parse)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_long(z_parse_pos);
-		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
+		long_parse_pos = zval_get_long(z_parse_pos);
+		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
 			RETURN_FALSE;
 		}
-		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
+		parse_pos = (int32_t)long_parse_pos;
 		if((size_t)parse_pos > text_len) {
 			RETURN_FALSE;
 		}
@@ -174,6 +175,7 @@ PHP_FUNCTION(datefmt_localtime)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
+	zend_long   long_parse_pos;
 	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -190,13 +192,13 @@ PHP_FUNCTION(datefmt_localtime)
 
 	if (z_parse_pos) {
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_long(z_parse_pos);
-		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
+		long_parse_pos = zval_get_long(z_parse_pos);
+		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
 			RETURN_FALSE;
 		}
-		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
+		parse_pos = (int32_t)long_parse_pos;
 		if((size_t)parse_pos > text_len) {
 			RETURN_FALSE;
 		}

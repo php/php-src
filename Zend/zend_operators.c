@@ -922,7 +922,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 					return SUCCESS;
 				}
 				if (result != op1) {
-					ZVAL_DUP(result, op1);
+					ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
 				} else {
 					SEPARATE_ARRAY(result);
 				}

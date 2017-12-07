@@ -2568,7 +2568,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 			name = zval_make_interned_string(zv);
 		} else {
-			name = zend_new_interned_string(zval_get_string(zv));
+			name = zend_new_interned_string(zval_get_string_func(zv));
 		}
 
 		if (zend_is_auto_global(name)) {
