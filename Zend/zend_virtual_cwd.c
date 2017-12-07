@@ -187,8 +187,8 @@ CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_l
 	}
 
 	hFile = CreateFileW(linkw,            // file to open
-				 GENERIC_READ,          // open for reading
-				 FILE_SHARE_READ,       // share for reading
+				 0,  // query possible attributes
+				 PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
 				 NULL,                  // default security
 				 OPEN_EXISTING,         // existing file only
 				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
@@ -299,7 +299,13 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		REPARSE_DATA_BUFFER * pbuffer;
 		DWORD retlength = 0;
 
-		hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		hLink = CreateFileW(pathw,
+				FILE_READ_ATTRIBUTES,
+				PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+				NULL,
+				OPEN_EXISTING,
+				FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,
+				NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
 			free(pathw);
 			return -1;
@@ -879,7 +885,13 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 				return (size_t)-1;
 			}
 
-			hLink = CreateFileW(pathw, 0, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+			hLink = CreateFileW(pathw,
+					0,
+					PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+					NULL,
+					OPEN_EXISTING,
+					FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
 				free_alloca(tmp, use_heap);
 				FREE_PATHW()
