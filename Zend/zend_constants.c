@@ -44,21 +44,19 @@ void free_zend_constant(zval *zv)
 }
 
 
+#ifdef ZTS
 static void copy_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
 
-	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), c->flags & CONST_PERSISTENT);
+	ZEND_ASSERT(c->flags & CONST_PERSISTENT);
+	Z_PTR_P(zv) = pemalloc(sizeof(zend_constant), 1);
 	memcpy(Z_PTR_P(zv), c, sizeof(zend_constant));
 
 	c = Z_PTR_P(zv);
 	c->name = zend_string_copy(c->name);
-	if (!(c->flags & CONST_PERSISTENT)) {
-		zval_copy_ctor(&c->value);
-	} else {
-		if (Z_TYPE(c->value) == IS_STRING) {
-			Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
-		}
+	if (Z_TYPE(c->value) == IS_STRING) {
+		Z_STR(c->value) = zend_string_dup(Z_STR(c->value), 1);
 	}
 }
 
@@ -67,6 +65,7 @@ void zend_copy_constants(HashTable *target, HashTable *source)
 {
 	zend_hash_copy(target, source, copy_zend_constant);
 }
+#endif
 
 
 static int clean_module_constant(zval *el, void *arg)
