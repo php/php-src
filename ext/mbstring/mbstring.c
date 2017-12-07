@@ -3734,7 +3734,9 @@ static int mb_recursive_convert_variable(mbfl_buffer_converter *convd, zval *var
 			efree(ret->val);
 		}
 	} else if (Z_TYPE_P(var) == IS_ARRAY || Z_TYPE_P(var) == IS_OBJECT) {
-		SEPARATE_ZVAL_NOREF(var);
+		if (Z_TYPE_P(var) == IS_ARRAY) {
+			SEPARATE_ARRAY(var);
+		}
 		if (Z_REFCOUNTED_P(var)) {
 			if (Z_IS_RECURSIVE_P(var)) {
 				return 1;
