@@ -22442,8 +22442,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	increment_function(var_ptr);
 
@@ -22475,8 +22474,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_VAR_HANDLER(ZEND
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -24639,8 +24637,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -27069,8 +27066,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -30931,8 +30927,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -33305,8 +33300,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -35155,8 +35149,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -37531,8 +37524,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -39224,8 +39216,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	increment_function(var_ptr);
 
@@ -39256,8 +39247,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_DEC_SPEC_CV_HANDLER(ZEND_
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	decrement_function(var_ptr);
 
@@ -41993,8 +41983,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -46085,8 +46074,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -51873,8 +51861,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {

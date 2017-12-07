@@ -1147,8 +1147,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 					}
 				} else {
 					ZVAL_DEREF(zptr);
-					ZVAL_COPY_VALUE(EX_VAR(opline->result.var), zptr);
-					zval_opt_copy_ctor(zptr);
+					ZVAL_COPY(EX_VAR(opline->result.var), zptr);
 					if (inc) {
 						increment_function(zptr);
 					} else {
@@ -1278,8 +1277,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	increment_function(var_ptr);
 
@@ -1311,8 +1309,7 @@ ZEND_VM_HANDLER(37, ZEND_POST_DEC, VAR|CV, ANY)
 		var_ptr = GET_OP1_UNDEF_CV(var_ptr, BP_VAR_RW);
 	}
 	ZVAL_DEREF(var_ptr);
-	ZVAL_COPY_VALUE(EX_VAR(opline->result.var), var_ptr);
-	zval_opt_copy_ctor(var_ptr);
+	ZVAL_COPY(EX_VAR(opline->result.var), var_ptr);
 
 	decrement_function(var_ptr);
 
