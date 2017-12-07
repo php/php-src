@@ -7157,7 +7157,7 @@ ZEND_VM_HANDLER(143, ZEND_DECLARE_CONST, CONST, CONST)
 		}
 	}
 	c.flags = CONST_CS; /* non persistent, case sensetive */
-	c.name = zend_string_dup(Z_STR_P(name), 0);
+	c.name = zend_string_copy(Z_STR_P(name));
 	c.module_number = PHP_USER_CONSTANT;
 
 	if (zend_register_constant(&c) == FAILURE) {
