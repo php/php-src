@@ -74,6 +74,20 @@ extern "C" {
 typedef unsigned short mode_t;
 #endif
 
+/* these are not defined in win32 headers */
+#ifndef W_OK
+#define W_OK 0x02
+#endif
+#ifndef R_OK
+#define R_OK 0x04
+#endif
+#ifndef X_OK
+#define X_OK 0x01
+#endif
+#ifndef F_OK
+#define F_OK 0x00
+#endif
+
 typedef struct {
 	DWORD access;
 	DWORD share;
