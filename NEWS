@@ -19,6 +19,8 @@ PHP                                                                        NEWS
     (Daniel Ciochiu)
   . Fixed bug #75074 (php-process crash when is_file() is used with strings
     longer 260 chars). (Anatol)
+  . Fixed bug #69727 (Remove timestamps from build to make it reproducible).
+    (jelle van der Waa)
 
 - CLI Server:
   . Fixed bug #60471 (Random "Invalid request (unexpected EOF)" using a router
