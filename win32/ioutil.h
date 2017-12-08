@@ -258,15 +258,6 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 
-#if 0
-PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
-PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
-#endif
-
-#define php_win32_ioutil_access_cond(path, mode) _waccess(pathw, mode)
-#define php_win32_ioutil_unlink_cond(path) php_win32_ioutil_unlink_w(pathw)
-#define php_win32_ioutil_rmdir_cond(path) php_win32_ioutil_rmdir_w(pathw)
-
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
 	PHP_WIN32_IOUTIL_INIT_W(path)
