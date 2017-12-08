@@ -491,10 +491,10 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Free memory", buf);
 			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
-			if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
-				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
+			if (ZCSG(interned_strings).start && ZCSG(interned_strings).end) {
+				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, (char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).start);
 				php_info_print_table_row(2, "Interned Strings Used memory", buf);
-				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, (char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).top);
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
 			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_direct_entries);
@@ -633,13 +633,13 @@ static ZEND_FUNCTION(opcache_get_status)
 	add_assoc_double(&memory_usage, "current_wasted_percentage", (((double) ZSMMG(wasted_shared_memory))/ZCG(accel_directives).memory_consumption)*100.0);
 	add_assoc_zval(return_value, "memory_usage", &memory_usage);
 
-	if (ZCSG(interned_strings_start) && ZCSG(interned_strings_end) && ZCSG(interned_strings_top)) {
+	if (ZCSG(interned_strings).start && ZCSG(interned_strings).end) {
 		zval interned_strings_usage;
 
 		array_init(&interned_strings_usage);
-		add_assoc_long(&interned_strings_usage, "buffer_size", ZCSG(interned_strings_end) - ZCSG(interned_strings_start));
-		add_assoc_long(&interned_strings_usage, "used_memory", ZCSG(interned_strings_top) - ZCSG(interned_strings_start));
-		add_assoc_long(&interned_strings_usage, "free_memory", ZCSG(interned_strings_end) - ZCSG(interned_strings_top));
+		add_assoc_long(&interned_strings_usage, "buffer_size", (char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).start);
+		add_assoc_long(&interned_strings_usage, "used_memory", (char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).start);
+		add_assoc_long(&interned_strings_usage, "free_memory", (char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).top);
 		add_assoc_long(&interned_strings_usage, "number_of_strings", ZCSG(interned_strings).nNumOfElements);
 		add_assoc_zval(return_value, "interned_strings_usage", &interned_strings_usage);
 	}

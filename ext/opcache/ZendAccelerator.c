@@ -349,47 +349,61 @@ static inline void accel_unlock_all(void)
  * Such interned strings are shared across all PHP processes
  */
 
+#define STRTAB_INVALID_POS 0
+
+#define STRTAB_HASH_TO_SLOT(tab, h) \
+	((uint32_t*)((char*)(tab) + sizeof(*(tab)) + ((h) & (tab)->nTableMask)))
+#define STRTAB_STR_TO_POS(tab, s) \
+	((uint32_t)((char*)s - (char*)(tab)))
+#define STRTAB_POS_TO_STR(tab, pos) \
+	((zend_string*)((char*)(tab) + (pos)))
+#define STRTAB_COLLISION(s) \
+	(*((uint32_t*)((char*)s - sizeof(uint32_t))))
+#define STRTAB_STR_SIZE(s) \
+	ZEND_MM_ALIGNED_SIZE_EX(_ZSTR_HEADER_SIZE + ZSTR_LEN(s) + 5, 8)
+#define STRTAB_NEXT(s) \
+	((zend_string*)((char*)(s) + STRTAB_STR_SIZE(s)))
+
 static void accel_interned_strings_restore_state(void)
 {
-    uint32_t idx = ZCSG(interned_strings).nNumUsed;
-    uint32_t nIndex;
-    Bucket *p;
+	zend_string *s, *top;
+	uint32_t *hash_slot, n;
 
-	memset(ZCSG(interned_strings_saved_top),
-			0, ZCSG(interned_strings_top) - ZCSG(interned_strings_saved_top));
-	ZCSG(interned_strings_top) = ZCSG(interned_strings_saved_top);
-    while (idx > 0) {
-    	idx--;
-		p = ZCSG(interned_strings).arData + idx;
-		if ((char*)p->key < ZCSG(interned_strings_top)) break;
-		ZCSG(interned_strings).nNumUsed--;
-		ZCSG(interned_strings).nNumOfElements--;
+	/* clear removed content */
+	memset(ZCSG(interned_strings).saved_top,
+			0, (char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).saved_top);
 
-		nIndex = p->h | ZCSG(interned_strings).nTableMask;
-		if (HT_HASH(&ZCSG(interned_strings), nIndex) == HT_IDX_TO_HASH(idx)) {
-			HT_HASH(&ZCSG(interned_strings), nIndex) = Z_NEXT(p->val);
-		} else {
-			uint32_t prev = HT_HASH(&ZCSG(interned_strings), nIndex);
-			while (Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) != idx) {
-				prev = Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val);
- 			}
-			Z_NEXT(HT_HASH_TO_BUCKET(&ZCSG(interned_strings), prev)->val) = Z_NEXT(p->val);
- 		}
+	/* rehash */
+	memset((char*)&ZCSG(interned_strings) + sizeof(zend_string_table),
+		STRTAB_INVALID_POS,
+		(char*)ZCSG(interned_strings).start -
+			((char*)&ZCSG(interned_strings) + sizeof(zend_string_table)));
+	s = ZCSG(interned_strings).start;
+	top = ZCSG(interned_strings).top;
+	n = 0;
+	if (EXPECTED(s < top)) {
+		do {
+			hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), ZSTR_H(s));
+			STRTAB_COLLISION(s) = *hash_slot;
+			*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
+			s = STRTAB_NEXT(s);
+			n++;
+		} while (s < top);
 	}
+	ZCSG(interned_strings).nNumOfElements = n;
 }
 
 static void accel_interned_strings_save_state(void)
 {
-	ZCSG(interned_strings_saved_top) = ZCSG(interned_strings_top);
+	ZCSG(interned_strings).saved_top = ZCSG(interned_strings).top;
 }
 
-static zend_string *accel_find_interned_string(zend_string *str)
+static zend_always_inline zend_string *accel_find_interned_string(zend_string *str)
 {
 /* for now interned strings are supported only for non-ZTS build */
-	zend_ulong h;
-	uint32_t nIndex;
-	uint32_t idx;
-	Bucket *arData, *p;
+	zend_ulong   h;
+	uint32_t     pos;
+	zend_string *s;
 
 	if (IS_ACCEL_INTERNED(str)) {
 		/* this is already an interned string */
@@ -404,17 +418,17 @@ static zend_string *accel_find_interned_string(zend_string *str)
 	}
 
 	h = zend_string_hash_val(str);
-	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
-	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
-	arData = ZCSG(interned_strings).arData;
-	while (idx != HT_INVALID_IDX) {
-		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if (p->h == h && zend_string_equal_content(p->key, str)) {
-			return p->key;
-		}
-		idx = Z_NEXT(p->val);
+	pos = *STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
+	if (EXPECTED(pos != STRTAB_INVALID_POS)) {
+		do {
+			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
+			if (EXPECTED(ZSTR_H(s) == h) && zend_string_equal_content(s, str)) {
+				return s;
+			}
+			pos = STRTAB_COLLISION(s);
+		} while (pos != STRTAB_INVALID_POS);
 	}
 
 	return NULL;
@@ -422,13 +436,12 @@ static zend_string *accel_find_interned_string(zend_string *str)
 
 zend_string *accel_new_interned_string(zend_string *str)
 {
-	zend_ulong h;
-	uint32_t nIndex;
-	uint32_t idx;
-	Bucket *p;
+	zend_ulong   h;
+	uint32_t     pos, *hash_slot;
+	zend_string *s;
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
-	if (ZCG(accel_directives).file_cache_only) {
+	if (UNEXPECTED(ZCG(accel_directives).file_cache_only)) {
 		return str;
 	}
 #endif
@@ -439,50 +452,48 @@ zend_string *accel_new_interned_string(zend_string *str)
 	}
 
 	h = zend_string_hash_val(str);
-	nIndex = h | ZCSG(interned_strings).nTableMask;
 
 	/* check for existing interned string */
-	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
-	while (idx != HT_INVALID_IDX) {
-		p = HT_HASH_TO_BUCKET(&ZCSG(interned_strings), idx);
-		if (p->h == h && zend_string_equal_content(p->key, str)) {
-			zend_string_release(str);
-			return p->key;
-		}
-		idx = Z_NEXT(p->val);
+	hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
+	pos = *hash_slot;
+	if (EXPECTED(pos != STRTAB_INVALID_POS)) {
+		do {
+			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
+			if (EXPECTED(ZSTR_H(s) == h) && zend_string_equal_content(s, str)) {
+				zend_string_release(str);
+				return s;
+			}
+			pos = STRTAB_COLLISION(s);
+		} while (pos != STRTAB_INVALID_POS);
 	}
 
-	if (ZCSG(interned_strings_top) + ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str))) >=
-	    ZCSG(interned_strings_end)) {
+	if (UNEXPECTED(ZCSG(interned_strings).end - ZCSG(interned_strings).top < STRTAB_STR_SIZE(str))) {
 	    /* no memory, return the same non-interned string */
 		zend_accel_error(ACCEL_LOG_WARNING, "Interned string buffer overflow");
 		return str;
 	}
 
 	/* create new interning string in shared interned strings buffer */
-
-	idx = ZCSG(interned_strings).nNumUsed++;
 	ZCSG(interned_strings).nNumOfElements++;
-	p = ZCSG(interned_strings).arData + idx;
-	p->key = (zend_string*) ZCSG(interned_strings_top);
-	ZCSG(interned_strings_top) += ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(ZSTR_LEN(str)));
-	p->h = h;
-	GC_SET_REFCOUNT(p->key, 1);
+	s = ZCSG(interned_strings).top;
+	hash_slot = STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
+	STRTAB_COLLISION(s) = *hash_slot;
+	*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
+	GC_SET_REFCOUNT(s, 1);
 #if 1
 	/* optimized single assignment */
-	GC_TYPE_INFO(p->key) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
+	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
 #else
-	GC_TYPE(p->key) = IS_STRING;
-	GC_FLAGS(p->key) = IS_STR_INTERNED | IS_STR_PERMANENT;
+	GC_TYPE(s) = IS_STRING;
+	GC_FLAGS(s) = IS_STR_INTERNED | IS_STR_PERMANENT;
 #endif
-	ZSTR_H(p->key) = ZSTR_H(str);
-	ZSTR_LEN(p->key) = ZSTR_LEN(str);
-	memcpy(ZSTR_VAL(p->key), ZSTR_VAL(str), ZSTR_LEN(str));
-	ZVAL_INTERNED_STR(&p->val, p->key);
-	Z_NEXT(p->val) = HT_HASH(&ZCSG(interned_strings), nIndex);
-	HT_HASH(&ZCSG(interned_strings), nIndex) = HT_IDX_TO_HASH(idx);
+	ZSTR_H(s) = h;
+	ZSTR_LEN(s) = ZSTR_LEN(str);
+	memcpy(ZSTR_VAL(s), ZSTR_VAL(str), ZSTR_LEN(s) + 1);
+	ZCSG(interned_strings).top = STRTAB_NEXT(s);
+
 	zend_string_release(str);
-	return p->key;
+	return s;
 }
 
 static zend_string *accel_new_interned_string_for_php(zend_string *str)
@@ -499,27 +510,24 @@ static zend_string *accel_new_interned_string_for_php(zend_string *str)
 	return str;
 }
 
-static zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
+static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong h, const char *str, size_t size)
 {
-	uint32_t nIndex;
-	uint32_t idx;
-	Bucket *arData, *p;
-
-	nIndex = h | ZCSG(interned_strings).nTableMask;
+	uint32_t     pos;
+	zend_string *s;
 
 	/* check for existing interned string */
-	idx = HT_HASH(&ZCSG(interned_strings), nIndex);
-	arData = ZCSG(interned_strings).arData;
-	while (idx != HT_INVALID_IDX) {
-		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if ((p->h == h) && (ZSTR_LEN(p->key) == size)) {
-			if (!memcmp(ZSTR_VAL(p->key), str, size)) {
-				return p->key;
+	pos = *STRTAB_HASH_TO_SLOT(&ZCSG(interned_strings), h);
+	if (EXPECTED(pos != STRTAB_INVALID_POS)) {
+		do {
+			s = STRTAB_POS_TO_STR(&ZCSG(interned_strings), pos);
+			if (EXPECTED(ZSTR_H(s) == h) && EXPECTED(ZSTR_LEN(s) == size)) {
+				if (!memcmp(ZSTR_VAL(s), str, size)) {
+					return s;
+				}
 			}
-		}
-		idx = Z_NEXT(p->val);
+			pos = STRTAB_COLLISION(s);
+		} while (pos != STRTAB_INVALID_POS);
 	}
-
 	return NULL;
 }
 
@@ -568,7 +576,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 			Z_FUNC(p->val)->common.function_name = new_interned_string(Z_FUNC(p->val)->common.function_name);
 		}
 		if (Z_FUNC(p->val)->common.arg_info &&
-		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (Z_FUNC(p->val)->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = Z_FUNC(p->val)->common.num_args + 1;
 			zend_arg_info *arg_info = Z_FUNC(p->val)->common.arg_info - 1;
@@ -733,7 +741,7 @@ static void accel_use_shm_interned_strings(void)
 	SHM_UNPROTECT();
 	zend_shared_alloc_lock();
 
-	if (ZCSG(interned_strings_saved_top) == NULL) {
+	if (ZCSG(interned_strings).saved_top == NULL) {
 		accel_copy_permanent_strings(accel_new_interned_string);
 	} else {
 		accel_copy_permanent_strings(accel_replace_string_by_shm_permanent);
@@ -1160,7 +1168,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 					}
 					if (str) {
 						char buf[32];
-						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, ZSTR_VAL(str) - ZCSG(interned_strings_start));
+						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, STRTAB_STR_TO_POS(&ZCSG(interned_strings), str));
 
 						cwd_len = ZCG(cwd_key_len) = buf + sizeof(buf) - 1 - res;
 						cwd = ZCG(cwd_key);
@@ -1199,7 +1207,7 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 					}
 					if (str) {
 						char buf[32];
-						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, ZSTR_VAL(str) - ZCSG(interned_strings_start));
+						char *res = zend_print_long_to_buf(buf + sizeof(buf) - 1, STRTAB_STR_TO_POS(&ZCSG(interned_strings), str));
 
 						include_path_len = ZCG(include_path_key_len) = buf + sizeof(buf) - 1 - res;
 						include_path = ZCG(include_path_key);
@@ -2127,7 +2135,7 @@ static zend_string* persistent_zend_resolve_path(const char *filename, size_t fi
 			zend_string *resolved_path;
 			int key_length;
 			char *key = NULL;
-			
+
 			if (!ZCG(accel_directives).revalidate_path) {
 				/* lookup by "not-real" path */
 				key = accel_make_persistent_key(filename, filename_len, &key_length);
@@ -2435,7 +2443,11 @@ static int zend_accel_init_shm(void)
 {
 	zend_shared_alloc_lock();
 
-	accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
+	if (ZCG(accel_directives).interned_strings_buffer) {
+		accel_shared_globals = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
+	} else {
+		accel_shared_globals = zend_shared_alloc(sizeof(zend_accel_shared_globals));
+	}
 	if (!accel_shared_globals) {
 		zend_accel_error(ACCEL_LOG_FATAL, "Insufficient shared memory!");
 		zend_shared_alloc_unlock();
@@ -2446,24 +2458,36 @@ static int zend_accel_init_shm(void)
 
 	zend_accel_hash_init(&ZCSG(hash), ZCG(accel_directives).max_accelerated_files);
 
-	ZCSG(interned_strings_start) = ZCSG(interned_strings_end) = NULL;
-	zend_hash_init(&ZCSG(interned_strings), (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024) / _ZSTR_STRUCT_SIZE(8 /* average string length */), NULL, NULL, 1);
 	if (ZCG(accel_directives).interned_strings_buffer) {
-		void *data;
+		uint32_t hash_size;
 
-		ZCSG(interned_strings).nTableMask = -ZCSG(interned_strings).nTableSize;
-		data = zend_shared_alloc(HT_SIZE(&ZCSG(interned_strings)));
-		ZCSG(interned_strings_start) = zend_shared_alloc((ZCG(accel_directives).interned_strings_buffer * 1024 * 1024));
-		if (!data || !ZCSG(interned_strings_start)) {
-			zend_accel_error(ACCEL_LOG_FATAL, ACCELERATOR_PRODUCT_NAME " cannot allocate buffer for interned strings");
-			zend_shared_alloc_unlock();
-			return FAILURE;
-		}
-		HT_SET_DATA_ADDR(&ZCSG(interned_strings), data);
-		HT_HASH_RESET(&ZCSG(interned_strings));
-		ZCSG(interned_strings_end)   = ZCSG(interned_strings_start) + (ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
-		ZCSG(interned_strings_top)   = ZCSG(interned_strings_start);
-		ZCSG(interned_strings_saved_top) = NULL;
+		/* must be a power of two */
+		hash_size = ZCG(accel_directives).interned_strings_buffer * (32 * 1024);
+		hash_size |= (hash_size >> 1);
+		hash_size |= (hash_size >> 2);
+		hash_size |= (hash_size >> 4);
+		hash_size |= (hash_size >> 8);
+		hash_size |= (hash_size >> 16);
+
+		ZCSG(interned_strings).nTableMask = hash_size << 2;
+		ZCSG(interned_strings).nNumOfElements = 0;
+		ZCSG(interned_strings).start =
+			(zend_string*)((char*)&ZCSG(interned_strings) +
+				sizeof(zend_string_table) +
+				((hash_size + 1) * sizeof(uint32_t))) +
+				8;
+		ZCSG(interned_strings).top =
+			ZCSG(interned_strings).start;
+		ZCSG(interned_strings).end =
+			(zend_string*)((char*)accel_shared_globals +
+				ZCG(accel_directives).interned_strings_buffer * 1024 * 1024);
+		ZCSG(interned_strings).saved_top = NULL;
+
+		memset((char*)&ZCSG(interned_strings) + sizeof(zend_string_table),
+			STRTAB_INVALID_POS,
+			(char*)ZCSG(interned_strings).start -
+				((char*)&ZCSG(interned_strings) + sizeof(zend_string_table)));
+
 		zend_interned_strings_set_permanent_storage_copy_handlers(accel_use_shm_interned_strings, accel_use_permanent_interned_strings);
 	}
 
