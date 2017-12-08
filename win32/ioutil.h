@@ -242,6 +242,7 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname);
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
+PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
@@ -264,14 +265,14 @@ __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
 
-	ret = _waccess(pathw, mode);
+	ret = php_win32_ioutil_access_w(pathw, mode);
 	if (0 > ret) {
-		_get_errno(&err);
+		err = GetLastError();
 	}
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
-		_set_errno(err);
+		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
 	return ret;

@@ -655,13 +655,33 @@ BOOL php_win32_ioutil_init(void)
 	return TRUE;
 }/*}}}*/
 
-/* an extended version could be implemented, for now direct functions can be used. */
-#if 0
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
-{
-	return _waccess(path, mode);
-}
-#endif
+{/*{{{*/
+	DWORD attr, err;
+
+	if ((mode & X_OK) == X_OK) {
+		DWORD type;
+		return GetBinaryTypeW(path, &type) ? 0 : -1;
+	}
+
+	attr = GetFileAttributesW(path);
+	if (attr == INVALID_FILE_ATTRIBUTES) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return -1;
+	}
+
+	if (F_OK == mode) {
+		return 0;
+	}
+
+	if ((mode &W_OK) == W_OK && (attr & FILE_ATTRIBUTE_READONLY) == FILE_ATTRIBUTE_READONLY) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_ACCESS_DENIED);
+		return -1;
+	}
+
+	return 0;
+}/*}}}*/
 
 #if 0
 PW32IO HANDLE php_win32_ioutil_findfirstfile_w(char *path, WIN32_FIND_DATA *data)
