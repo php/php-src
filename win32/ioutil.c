@@ -683,36 +683,6 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 	return 0;
 }/*}}}*/
 
-#if 0
-PW32IO HANDLE php_win32_ioutil_findfirstfile_w(char *path, WIN32_FIND_DATA *data)
-{
-	HANDLE ret = INVALID_HANDLE_VALUE;
-	DWORD err;
-
-	if (!path) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return ret;
-	}
-
-	pathw = php_win32_ioutil_any_to_w(path);
-
-	if (!pathw) {
-		err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(ret);
-		return ret;
-	}
-
-		ret = FindFirstFileW(pathw, data);
-	
-	if (INVALID_HANDLE_VALUE == ret && path) {
-		ret = FindFirstFileA(path, data);
-	}
-
-	/* XXX set errno */
-	return ret;
-}
-#endif
-
 /*
  * Local variables:
  * tab-width: 4
