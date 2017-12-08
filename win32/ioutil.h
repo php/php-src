@@ -248,7 +248,6 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 
 PW32IO int php_win32_ioutil_close(int fd);
 PW32IO BOOL php_win32_ioutil_posix_to_open_opts(int flags, mode_t mode, php_ioutil_open_opts *opts);
-PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode);
 PW32IO size_t php_win32_ioutil_dirname(char *buf, size_t len);
 
 PW32IO int php_win32_ioutil_open_w(const wchar_t *path, int flags, ...);
@@ -257,6 +256,7 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
+PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 
 #if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
@@ -549,6 +549,31 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 
 	if (0 > ret) {
 		_set_errno(err);
+	}
+
+	return ret;
+}/*}}}*/
+
+__forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
+{/*{{{*/
+	int ret;
+	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
+	DWORD err = 0;
+
+	if (!pathw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
+
+	ret = php_win32_ioutil_mkdir_w(pathw, mode);
+	if (0 > ret) {
+		err = GetLastError();
+	}
+
+	free(pathw);
+
+	if (0 > ret) {
+		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
 
 	return ret;

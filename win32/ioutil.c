@@ -282,33 +282,20 @@ PW32IO int php_win32_ioutil_close(int fd)
 	return result;
 }/*}}}*/
 
-#if 0
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	int ret = 0;
-	DWORD err = 0;
+	size_t path_len;
+	wchar_t *my_path;
+
+	if (!path) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return -1;
+	}
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
-	/* TODO extend with mode usage */
-	if (!CreateDirectoryW(path, NULL)) {
-		err = GetLastError();
-		ret = -1;
-		SET_ERRNO_FROM_WIN32_CODE(err);
-	}
-
-	return ret;
-}/*}}}*/
-#endif
-
-PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
-{/*{{{*/
-	size_t pathw_len = 0;
-	wchar_t *pathw = php_win32_ioutil_conv_any_to_w(path, 0, &pathw_len);
-	int ret = 0;
-	DWORD err = 0;
-
-	if (pathw_len < _MAX_PATH && pathw_len > _MAX_PATH - 12) {
+	path_len = wcslen(path);
+	if (path_len < _MAX_PATH && path_len > _MAX_PATH - 12) {
 		/* Special case here. From the doc:
 
 		 "When using an API to create a directory, the specified path cannot be
@@ -318,41 +305,36 @@ PW32IO int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 		 already needs to be a long path. The given path is already normalized
 		 and prepared, need only to prefix it.
 		 */
-		wchar_t *tmp = (wchar_t *) malloc((pathw_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
+		wchar_t *tmp = (wchar_t *) malloc((path_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
 		if (!tmp) {
-			free(pathw);
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
 			return -1;
 		}
 
 		memmove(tmp, PHP_WIN32_IOUTIL_LONG_PATH_PREFIXW, PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW * sizeof(wchar_t));
-		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, pathw, pathw_len * sizeof(wchar_t));
-		pathw_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
-		tmp[pathw_len] = L'\0';
+		memmove(tmp+PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW, path, path_len * sizeof(wchar_t));
+		path_len += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		tmp[path_len] = L'\0';
 
-		free(pathw);
-		pathw = tmp;
+		my_path = tmp;
+	} else {
+		my_path = path;
 	}
 
-	/* TODO extend with mode usage */
-	if (!pathw) {
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+	if (!CreateDirectoryW(my_path, NULL)) {
+		DWORD err = GetLastError();
+		if (my_path != path) {
+			free((void *)my_path);
+		}
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return -1;
 	}
 
-	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, -1, 1)
-
-	if (!CreateDirectoryW(pathw, NULL)) {
-		err = GetLastError();
-		ret = -1;
-	}
-	free(pathw);
-
-	if (0 > ret) {
-		SET_ERRNO_FROM_WIN32_CODE(err);
+	if (my_path != path) {
+		free((void *)my_path);
 	}
 
-	return ret;
+	return 0;
 }/*}}}*/
 
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
