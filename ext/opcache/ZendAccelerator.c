@@ -840,7 +840,7 @@ static inline int accel_is_inactive(void)
 	if (ZCG(accel_directives).force_restart_timeout
 		&& ZCSG(force_restart_time)
 		&& time(NULL) >= ZCSG(force_restart_time)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
+		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", (long)time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
 		return FAILURE; /* next request should be able to restart it */
