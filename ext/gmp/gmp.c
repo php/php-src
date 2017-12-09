@@ -167,6 +167,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_prob_prime, arginfo_gmp_prob_prime)
 	ZEND_FE(gmp_gcd,		arginfo_gmp_binary)
 	ZEND_FE(gmp_gcdext,		arginfo_gmp_binary)
+	ZEND_FE(gmp_lcm,		arginfo_gmp_binary)
 	ZEND_FE(gmp_invert,		arginfo_gmp_binary)
 	ZEND_FE(gmp_jacobi,		arginfo_gmp_binary)
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
@@ -1676,6 +1677,14 @@ ZEND_FUNCTION(gmp_prob_prime)
 ZEND_FUNCTION(gmp_gcd)
 {
 	gmp_binary_ui_op(mpz_gcd, (gmp_binary_ui_op_t) mpz_gcd_ui);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_lcm(mixed a, mixed b)
+   Computes least common multiple (lcm) of a and b */
+ZEND_FUNCTION(gmp_lcm)
+{
+	gmp_binary_ui_op(mpz_lcm, (gmp_binary_ui_op_t) mpz_lcm_ui);
 }
 /* }}} */
 

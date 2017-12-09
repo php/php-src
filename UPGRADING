@@ -87,6 +87,7 @@ Date:
 
 GMP:
   . Added gmp_binomial(n, k) for calculating binomial coefficients.
+  . Added gmp_lcm(a, b) for calculating the least common multiple.
 
 Intl:
   . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
