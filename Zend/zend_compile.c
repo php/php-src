@@ -2793,27 +2793,25 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 
 static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node);
 
-static zend_bool zend_compile_list_assign_requires_w(zend_ast *ast) { /* {{{ */
-	zend_ast_list *list;
+/* Propagate refs used on leaf elements to the surrounding list() structures. */
+static zend_bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
+	zend_ast_list *list = zend_ast_get_list(ast);
+	zend_bool has_refs = 0;
 	uint32_t i;
 
-	if (ast->kind != ZEND_AST_ARRAY) {
-		return 0;
-	}
-
-	list = zend_ast_get_list(ast);
 	for (i = 0; i < list->children; ++i) {
 		zend_ast *elem_ast = list->child[i];
 
 		if (elem_ast) {
 			zend_ast *var_ast = elem_ast->child[0];
-			if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
-				return 1;
+			if (var_ast->kind == ZEND_AST_ARRAY) {
+				elem_ast->attr = zend_propagate_list_refs(var_ast);
 			}
+			has_refs |= elem_ast->attr;
 		}
 	}
 
-	return 0;
+	return has_refs;
 }
 /* }}} */
 
@@ -2871,14 +2869,14 @@ static void zend_compile_list_assign(
 
 		zend_verify_list_assign_target(var_ast, old_style);
 
-		if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
+		if (elem_ast->attr) {
 			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_W, expr_node, &dim_node);
 
-			if (elem_ast->attr) {
-				zend_emit_assign_ref_znode(var_ast, &fetch_result);
-			} else {
+			if (var_ast->kind == ZEND_AST_ARRAY) {
 				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
 				zend_emit_assign_znode(var_ast, &fetch_result);
+			} else {
+				zend_emit_assign_ref_znode(var_ast, &fetch_result);
 			}
 		} else {
 			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_R, expr_node, &dim_node);
@@ -3036,9 +3034,10 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_ARRAY:
-			if (zend_compile_list_assign_requires_w(var_ast)) {
+			if (zend_propagate_list_refs(var_ast)) {
 				if (!zend_is_variable(expr_ast)) {
-					zend_error_noreturn(E_COMPILE_ERROR, "Cannot assign reference to non referencable value");
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot assign reference to non referencable value");
 				}
 
 				zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
@@ -4797,7 +4796,7 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		value_ast = value_ast->child[0];
 	}
 
-	if (value_ast->kind == ZEND_AST_ARRAY && zend_compile_list_assign_requires_w(value_ast)) {
+	if (value_ast->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(value_ast)) {
 		list_ref = 1;
 	}
 
