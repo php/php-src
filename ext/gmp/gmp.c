@@ -172,6 +172,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_invert,		arginfo_gmp_binary)
 	ZEND_FE(gmp_jacobi,		arginfo_gmp_binary)
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
+	ZEND_FE(gmp_kronecker,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
 	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
@@ -1779,6 +1780,50 @@ ZEND_FUNCTION(gmp_jacobi)
 ZEND_FUNCTION(gmp_legendre)
 {
 	gmp_binary_opl(mpz_legendre);
+}
+/* }}} */
+
+/* {{{ proto int gmp_kronecker(mixed a, mixed b)
+   Computes the Kronecker symbol */
+ZEND_FUNCTION(gmp_kronecker)
+{
+	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
+	gmp_temp_t temp_a, temp_b;
+	zend_bool use_a_si = 0, use_b_si = 0;
+	int result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
+		return;
+	}
+
+	if (Z_TYPE_P(a_arg) == IS_LONG && Z_TYPE_P(b_arg) != IS_LONG) {
+		use_a_si = 1;
+		temp_a.is_used = 0;
+	} else {
+		FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	}
+
+	if (Z_TYPE_P(b_arg) == IS_LONG) {
+		use_b_si = 1;
+		temp_b.is_used = 0;
+	} else {
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	}
+
+	if (use_a_si) {
+		ZEND_ASSERT(use_b_si == 0);
+		result = mpz_si_kronecker((gmp_long) Z_LVAL_P(a_arg), gmpnum_b);
+	} else if (use_b_si) {
+		result = mpz_kronecker_si(gmpnum_a, (gmp_long) Z_LVAL_P(b_arg));
+	} else {
+		result = mpz_kronecker(gmpnum_a, gmpnum_b);
+	}
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
+
+	RETURN_LONG(result);
 }
 /* }}} */
 

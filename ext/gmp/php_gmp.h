@@ -61,6 +61,7 @@ ZEND_FUNCTION(gmp_gcdext);
 ZEND_FUNCTION(gmp_invert);
 ZEND_FUNCTION(gmp_jacobi);
 ZEND_FUNCTION(gmp_legendre);
+ZEND_FUNCTION(gmp_kronecker);
 ZEND_FUNCTION(gmp_cmp);
 ZEND_FUNCTION(gmp_sign);
 ZEND_FUNCTION(gmp_and);
