@@ -164,6 +164,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_pow,		arginfo_gmp_pow)
 	ZEND_FE(gmp_powm,		arginfo_gmp_powm)
 	ZEND_FE(gmp_perfect_square,	arginfo_gmp_unary)
+	ZEND_FE(gmp_perfect_power,	arginfo_gmp_unary)
 	ZEND_FE(gmp_prob_prime, arginfo_gmp_prob_prime)
 	ZEND_FE(gmp_gcd,		arginfo_gmp_binary)
 	ZEND_FE(gmp_gcdext,		arginfo_gmp_binary)
@@ -1648,6 +1649,25 @@ ZEND_FUNCTION(gmp_perfect_square)
 	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
 
 	RETVAL_BOOL((mpz_perfect_square_p(gmpnum_a) != 0));
+	FREE_GMP_TEMP(temp_a);
+}
+/* }}} */
+
+/* {{{ proto bool gmp_perfect_power(mixed a)
+   Checks if a is a perfect power */
+ZEND_FUNCTION(gmp_perfect_power)
+{
+	zval *a_arg;
+	mpz_ptr gmpnum_a;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
+		return;
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+
+	RETVAL_BOOL((mpz_perfect_power_p(gmpnum_a) != 0));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */

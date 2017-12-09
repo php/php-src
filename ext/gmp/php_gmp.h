@@ -54,6 +54,7 @@ ZEND_FUNCTION(gmp_rootrem);
 ZEND_FUNCTION(gmp_pow);
 ZEND_FUNCTION(gmp_powm);
 ZEND_FUNCTION(gmp_perfect_square);
+ZEND_FUNCTION(gmp_perfect_power);
 ZEND_FUNCTION(gmp_prob_prime);
 ZEND_FUNCTION(gmp_gcd);
 ZEND_FUNCTION(gmp_gcdext);
