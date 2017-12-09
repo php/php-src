@@ -2654,18 +2654,13 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 
 void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type);
 void zend_compile_assign(znode *result, zend_ast *ast);
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style);
 
 static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
 	znode dummy_node;
-	if (var_ast->kind == ZEND_AST_ARRAY) {
-		zend_compile_list_assign(&dummy_node, var_ast, value_node, var_ast->attr);
-	} else {
-		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
-			zend_ast_create_znode(value_node));
-		zend_compile_assign(&dummy_node, assign_ast);
-	}
+	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
+		zend_ast_create_znode(value_node));
+	zend_compile_assign(&dummy_node, assign_ast);
 	zend_do_free(&dummy_node);
 }
 /* }}} */
@@ -2869,17 +2864,17 @@ static void zend_compile_list_assign(
 
 		zend_verify_list_assign_target(var_ast, old_style);
 
-		if (elem_ast->attr) {
-			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_W, expr_node, &dim_node);
+		zend_emit_op(&fetch_result,
+			elem_ast->attr ? ZEND_FETCH_LIST_W : ZEND_FETCH_LIST_R, expr_node, &dim_node);
 
-			if (var_ast->kind == ZEND_AST_ARRAY) {
+		if (var_ast->kind == ZEND_AST_ARRAY) {
+			if (elem_ast->attr) {
 				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
-				zend_emit_assign_znode(var_ast, &fetch_result);
-			} else {
-				zend_emit_assign_ref_znode(var_ast, &fetch_result);
 			}
+			zend_compile_list_assign(NULL, var_ast, &fetch_result, var_ast->attr);
+		} else if (elem_ast->attr) {
+			zend_emit_assign_ref_znode(var_ast, &fetch_result);
 		} else {
-			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_R, expr_node, &dim_node);
 			zend_emit_assign_znode(var_ast, &fetch_result);
 		}
 	}
@@ -2888,7 +2883,11 @@ static void zend_compile_list_assign(
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
 
-	*result = *expr_node;
+	if (result) {
+		*result = *expr_node;
+	} else {
+		zend_do_free(expr_node);
+	}
 }
 /* }}} */
 
@@ -4775,7 +4774,6 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	zend_ast *key_ast = ast->child[2];
 	zend_ast *stmt_ast = ast->child[3];
 	zend_bool by_ref = value_ast->kind == ZEND_AST_REF;
-	zend_bool list_ref = 0;
 	zend_bool is_variable = zend_is_variable(expr_ast) && !zend_is_call(expr_ast)
 		&& zend_can_write_to_variable(expr_ast);
 
@@ -4797,26 +4795,26 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	}
 
 	if (value_ast->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(value_ast)) {
-		list_ref = 1;
+		by_ref = 1;
 	}
 
-	if ((by_ref || list_ref) && is_variable) {
+	if (by_ref && is_variable) {
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
 		zend_compile_expr(&expr_node, expr_ast);
 	}
 
-	if (by_ref || list_ref) {
+	if (by_ref) {
 		zend_separate_if_call_and_write(&expr_node, expr_ast, BP_VAR_W);
 	}
 
 	opnum_reset = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(&reset_node, (by_ref || list_ref) ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
+	opline = zend_emit_op(&reset_node, by_ref ? ZEND_FE_RESET_RW : ZEND_FE_RESET_R, &expr_node, NULL);
 
 	zend_begin_loop(ZEND_FE_FREE, &reset_node);
 
 	opnum_fetch = get_next_op_number(CG(active_op_array));
-	opline = zend_emit_op(NULL, (by_ref || list_ref) ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
+	opline = zend_emit_op(NULL, by_ref ? ZEND_FE_FETCH_RW : ZEND_FE_FETCH_R, &reset_node, NULL);
 
 	if (is_this_fetch(value_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
@@ -4827,7 +4825,9 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		opline->op2_type = IS_VAR;
 		opline->op2.var = get_temporary_variable(CG(active_op_array));
 		GET_NODE(&value_node, opline->op2);
-		if (by_ref) {
+		if (value_ast->kind == ZEND_AST_ARRAY) {
+			zend_compile_list_assign(NULL, value_ast, &value_node, value_ast->attr);
+		} else if (by_ref) {
 			zend_emit_assign_ref_znode(value_ast, &value_node);
 		} else {
 			zend_emit_assign_znode(value_ast, &value_node);
