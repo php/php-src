@@ -18598,6 +18598,34 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *retval, *container, *dim;
+
+	SAVE_OPLINE();
+	retval = EX_VAR(opline->result.var);
+	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	dim = RT_CONSTANT(opline, opline->op2);
+
+	if (IS_VAR & IS_VAR) {
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
+			container = Z_INDIRECT_P(container);
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
+			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
+			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
+		} else {
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		}
+	} else {
+		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22902,6 +22930,34 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1;
+	zval *retval, *container, *dim;
+
+	SAVE_OPLINE();
+	retval = EX_VAR(opline->result.var);
+	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	dim = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
+
+	if (IS_VAR & IS_VAR) {
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
+			container = Z_INDIRECT_P(container);
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
+			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
+			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
+		} else {
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		}
+	} else {
+		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+	}
+
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -25501,6 +25557,35 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
 	}
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_free_op free_op1, free_op2;
+	zval *retval, *container, *dim;
+
+	SAVE_OPLINE();
+	retval = EX_VAR(opline->result.var);
+	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
+
+	if (IS_VAR & IS_VAR) {
+		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
+			container = Z_INDIRECT_P(container);
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
+			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
+			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
+		} else {
+			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+		}
+	} else {
+		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
+	}
+
+	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -36598,7 +36683,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_CV_CONST_HAN
 	container = _get_zval_ptr_cv_undef(opline->op1.var EXECUTE_DATA_CC);
 	dim = RT_CONSTANT(opline, opline->op2);
 
-	if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+	if (IS_CV & IS_VAR) {
 		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
 			container = Z_INDIRECT_P(container);
 			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
@@ -43101,7 +43186,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_CV_CV_HANDLE
 	container = _get_zval_ptr_cv_undef(opline->op1.var EXECUTE_DATA_CC);
 	dim = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
 
-	if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+	if (IS_CV & IS_VAR) {
 		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
 			container = Z_INDIRECT_P(container);
 			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
@@ -46828,7 +46913,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_CV_TMPVAR_HA
 	container = _get_zval_ptr_cv_undef(opline->op1.var EXECUTE_DATA_CC);
 	dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	if (IS_CV & (IS_TMP_VAR|IS_VAR)) {
+	if (IS_CV & IS_VAR) {
 		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
 			container = Z_INDIRECT_P(container);
 			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
@@ -50031,34 +50116,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_R_SPEC_TMPVAR_CONST
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_free_op free_op1;
-	zval *retval, *container, *dim;
-
-	SAVE_OPLINE();
-	retval = EX_VAR(opline->result.var);
-	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	dim = RT_CONSTANT(opline, opline->op2);
-
-	if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
-		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
-			container = Z_INDIRECT_P(container);
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
-			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
-			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
-		} else {
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		}
-	} else {
-		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-	}
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -52444,34 +52501,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_R_SPEC_TMPVAR_CV_HA
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_free_op free_op1;
-	zval *retval, *container, *dim;
-
-	SAVE_OPLINE();
-	retval = EX_VAR(opline->result.var);
-	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	dim = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
-
-	if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
-		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
-			container = Z_INDIRECT_P(container);
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
-			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
-			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
-		} else {
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		}
-	} else {
-		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-	}
-
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -53827,35 +53856,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_R_SPEC_TMPVAR_TMPVA
 	SAVE_OPLINE();
 	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	zend_fetch_dimension_address_LIST_r(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC) EXECUTE_DATA_CC);
-	zval_ptr_dtor_nogc(free_op2);
-	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_free_op free_op1, free_op2;
-	zval *retval, *container, *dim;
-
-	SAVE_OPLINE();
-	retval = EX_VAR(opline->result.var);
-	container = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-
-	if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
-		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
-			container = Z_INDIRECT_P(container);
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
-			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
-			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
-		} else {
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		}
-	} else {
-		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-	}
-
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -59250,16 +59250,16 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
-			(void*)&&ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_CONST_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
+			(void*)&&ZEND_FETCH_LIST_W_SPEC_VAR_CV_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -61585,6 +61585,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST):
 				ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_VAR_CONST):
+				ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST):
 				ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -61912,6 +61915,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV):
 				ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_VAR_CV):
+				ZEND_FETCH_LIST_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CONST):
 				ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -62115,6 +62121,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR):
 				ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR):
+				ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST):
 				ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -63823,9 +63832,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_FETCH_LIST_R_SPEC_TMPVAR_CONST):
 				ZEND_FETCH_LIST_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST):
-				ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST):
 				ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -64003,9 +64009,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_FETCH_LIST_R_SPEC_TMPVAR_CV):
 				ZEND_FETCH_LIST_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV):
-				ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FAST_CONCAT_SPEC_TMPVAR_CV):
 				ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -64089,9 +64092,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FETCH_LIST_R_SPEC_TMPVAR_TMPVAR):
 				ZEND_FETCH_LIST_R_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR):
-				ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR):
 				ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -68283,16 +68283,16 @@ void zend_init_opcodes_handlers(void)
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_CONST_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
-		ZEND_FETCH_LIST_W_SPEC_TMPVAR_CV_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_VAR_CONST_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_VAR_TMPVAR_HANDLER,
+		ZEND_NULL_HANDLER,
+		ZEND_FETCH_LIST_W_SPEC_VAR_CV_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_NULL_HANDLER,
