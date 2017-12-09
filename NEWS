@@ -48,6 +48,7 @@ PHP                                                                        NEWS
 
 - GMP:
   . Export internal structures and accessor helpers for GMP object. (Sara)
+  . Added gmp_binomial(n, k). (Nikita)
 
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 

@@ -85,6 +85,9 @@ Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
 
+GMP:
+  . Added gmp_binomial(n, k) for calculating binomial coefficients.
+
 Intl:
   . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
     when linked with ICU >= 58.1. Levels are represented as class constants
