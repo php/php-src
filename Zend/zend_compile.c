@@ -2873,14 +2873,15 @@ static void zend_compile_list_assign(
 
 		if (elem_ast->attr || zend_compile_list_assign_requires_w(var_ast)) {
 			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_W, expr_node, &dim_node);
-			zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+
+			if (elem_ast->attr) {
+				zend_emit_assign_ref_znode(var_ast, &fetch_result);
+			} else {
+				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+				zend_emit_assign_znode(var_ast, &fetch_result);
+			}
 		} else {
 			zend_emit_op(&fetch_result, ZEND_FETCH_LIST_R, expr_node, &dim_node);
-		}
-
-		if (elem_ast->attr) {
-			zend_emit_assign_ref_znode(var_ast, &fetch_result);
-		} else {
 			zend_emit_assign_znode(var_ast, &fetch_result);
 		}
 	}
