@@ -57,6 +57,7 @@
 #include "win32/time.h"
 #include "win32/ioutil.h"
 #include "win32/codepage.h"
+#include "main/streams/php_stream_plain_wrapper.h"
 
 #include <pathcch.h>
 
@@ -663,6 +664,46 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 	}
 
 	return 0;
+}/*}}}*/
+
+PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
+{/*{{{*/
+	FILE *ret;
+	char *modea;
+	int err = 0, fd, flags;
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, NULL, 0)
+
+	/* Using the converter from streams, char only. */
+	modea = php_win32_cp_w_to_any(mode);
+	if (!modea) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+	if (SUCCESS != php_stream_parse_fopen_modes(modea, &flags)) {
+		free(modea);
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return NULL;
+	}
+	free(modea);
+
+	fd = php_win32_ioutil_open_w(path, flags, 0666);
+	if (0 > fd) {
+		err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	ret = _wfdopen(fd, mode);
+	if (!ret) {
+		err = GetLastError();
+		php_win32_ioutil_close(fd);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	return ret;
 }/*}}}*/
 
 /*

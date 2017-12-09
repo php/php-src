@@ -257,6 +257,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len);
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
+PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
@@ -369,17 +370,13 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 	return ret;
 }/*}}}*/
 
-/* This needs to be improved once long path support is implemented. Use ioutil_open() and then
-fdopen() might be the way, if we learn how to convert the mode options (maybe grab the routine
- from the streams). That will allow to split for _a and _w. */
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {/*{{{*/
 	FILE *ret;
-	wchar_t *pathw;
 	wchar_t *modew;
 	int err = 0;
 
-	pathw = php_win32_ioutil_any_to_w(patha);
+	PHP_WIN32_IOUTIL_INIT_W(patha)
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
@@ -387,23 +384,25 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL, 1)
 
-	modew = php_win32_ioutil_ascii_to_w(modea);
-	if (!modew) {
-		free(pathw);
+	modew = php_win32_cp_ascii_to_w(modea);
+	if (!patha) {
+		PHP_WIN32_IOUTIL_CLEANUP_W()
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
 
-	ret = _wfopen(pathw, modew);
+	ret = php_win32_ioutil_fopen_w(pathw, modew);
 	if (!ret) {
-		_get_errno(&err);
+		err = GetLastError();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		free(modew);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
 	}
-	free(pathw);
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 	free(modew);
 
-	if (!ret) {
-		_set_errno(err);
-	}
 	return ret;
 }/*}}}*/
 
@@ -548,9 +547,9 @@ __forceinline static int php_win32_ioutil_chmod(const char *patha, int mode)
 __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 {/*{{{*/
 	int ret;
-	wchar_t *pathw = php_win32_ioutil_any_to_w(path);
 	DWORD err = 0;
 
+	PHP_WIN32_IOUTIL_INIT_W(path)
 	if (!pathw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return -1;
@@ -561,7 +560,7 @@ __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 		err = GetLastError();
 	}
 
-	free(pathw);
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	if (0 > ret) {
 		SET_ERRNO_FROM_WIN32_CODE(err);
