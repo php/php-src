@@ -188,6 +188,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_popcount,	arginfo_gmp_unary)
 	ZEND_FE(gmp_hamdist,	arginfo_gmp_binary)
 	ZEND_FE(gmp_nextprime,	arginfo_gmp_unary)
+	ZEND_FE(gmp_binomial,	arginfo_gmp_binary)
 	PHP_FE_END
 };
 /* }}} */
@@ -1379,6 +1380,36 @@ ZEND_FUNCTION(gmp_fact)
 	}
 
 	gmp_zval_unary_ui_op(return_value, a_arg, mpz_fac_ui);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_binomial(mixed n, int k)
+ * Calculates binomial coefficient */
+ZEND_FUNCTION(gmp_binomial)
+{
+	zval *n_arg;
+	zend_long k;
+	mpz_ptr gmpnum_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &n_arg, &k) == FAILURE) {
+		return;
+	}
+
+	if (k < 0) {
+		php_error_docref(NULL, E_WARNING, "k cannot be negative");
+		RETURN_FALSE;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	if (Z_TYPE_P(n_arg) == IS_LONG && Z_LVAL_P(n_arg) >= 0) {
+		mpz_bin_uiui(gmpnum_result, (gmp_ulong) Z_LVAL_P(n_arg), (gmp_ulong) k);
+	} else {
+		mpz_ptr gmpnum_n;
+		gmp_temp_t temp_n;
+		FETCH_GMP_ZVAL(gmpnum_n, n_arg, temp_n);
+		mpz_bin_ui(gmpnum_result, gmpnum_n, (gmp_ulong) k);
+		FREE_GMP_TEMP(temp_n);
+	}
 }
 /* }}} */
 
