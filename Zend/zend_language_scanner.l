@@ -2302,7 +2302,11 @@ skip_escape_conversion:
 					indentation = spacing = 0;
 
 					while (YYCURSOR < YYLIMIT && (*YYCURSOR == ' ' || *YYCURSOR == '\t')) {
-						spacing |= 1 << (*YYCURSOR == '\t');
+						if (*YYCURSOR == '\t') {
+							spacing |= HEREDOC_USING_TABS;
+						} else {
+							spacing |= HEREDOC_USING_SPACES;
+						}
 						++YYCURSOR;
 						++indentation;
 					}
