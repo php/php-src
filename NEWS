@@ -51,6 +51,7 @@ PHP                                                                        NEWS
   . Added gmp_binomial(n, k). (Nikita)
   . Added gmp_lcm(a, b). (Nikita)
   . Added gmp_perfect_power(a). (Nikita)
+  . Added gmp_kronecker(a, b). (Nikita)
 
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 

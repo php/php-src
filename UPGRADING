@@ -89,6 +89,7 @@ GMP:
   . Added gmp_binomial(n, k) for calculating binomial coefficients.
   . Added gmp_lcm(a, b) for calculating the least common multiple.
   . Added gmp_perfect_power(a) to check if number is a perfect power.
+  . Added gmp_kronecker(a, b) to compute the Kronecker symbol.
 
 Intl:
   . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
