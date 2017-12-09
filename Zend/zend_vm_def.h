@@ -2068,19 +2068,15 @@ ZEND_VM_HANDLER(198, ZEND_FETCH_LIST_W, VAR|CV, CONST|TMPVAR|CV)
 
 	SAVE_OPLINE();
 	retval = EX_VAR(opline->result.var);
-	container = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_W);
+	container = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
 	dim = GET_OP2_ZVAL_PTR_UNDEF(BP_VAR_R);
 
-	if (OP1_TYPE & IS_VAR) {
-		if (Z_TYPE_P(EX_VAR(opline->op1.var)) == IS_INDIRECT) {
-			container = Z_INDIRECT_P(container);
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		} else if (UNEXPECTED(!Z_ISREF_P(container))) {
-			zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
-			zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
-		} else {
-			zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
-		}
+	if (OP1_TYPE == IS_VAR
+		&& Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT
+		&& UNEXPECTED(!Z_ISREF_P(container))
+	) {
+		zend_error(E_NOTICE, "Attempting to set reference to non referenceable value");
+		zend_fetch_dimension_address_LIST_r(retval, container, dim EXECUTE_DATA_CC);
 	} else {
 		zend_fetch_dimension_address_LIST_w(retval, container, dim EXECUTE_DATA_CC);
 	}
