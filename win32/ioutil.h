@@ -373,8 +373,11 @@ __forceinline static int php_win32_ioutil_rmdir(const char *path)
 __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char *modea)
 {/*{{{*/
 	FILE *ret;
+	wchar_t modew[16] = {0};
+#if 0
 	wchar_t *modew;
-	int err = 0;
+#endif
+	int err = 0, i = 0;
 
 	PHP_WIN32_IOUTIL_INIT_W(patha)
 	if (!pathw) {
@@ -384,24 +387,34 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL, 1)
 
+	while (i < (sizeof(modew)-1)/sizeof(wchar_t) && modea[i]) {
+		modew[i] = (wchar_t)modea[i];
+		i++;
+	}
+#if 0
 	modew = php_win32_cp_ascii_to_w(modea);
-	if (!patha) {
+	if (!modew) {
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
+#endif
 
 	ret = php_win32_ioutil_fopen_w(pathw, modew);
 	if (!ret) {
 		err = GetLastError();
 		PHP_WIN32_IOUTIL_CLEANUP_W()
+#if 0
 		free(modew);
+#endif
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return NULL;
 	}
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
+#if 0
 	free(modew);
+#endif
 
 	return ret;
 }/*}}}*/
