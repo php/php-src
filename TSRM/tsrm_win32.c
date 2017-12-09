@@ -207,10 +207,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL fAccess = FALSE;
 
 	realpath_cache_bucket * bucket = NULL;
-	char * real_path = NULL;
+	char real_path[MAXPATHLEN] = {0};
 
 	if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
-		real_path = (char *)malloc(MAXPATHLEN);
 		if(tsrm_realpath(pathname, real_path) == NULL) {
 			SET_ERRNO_FROM_WIN32_CODE(ERROR_FILE_NOT_FOUND);
 			return -1;
@@ -220,7 +219,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 
 	PHP_WIN32_IOUTIL_INIT_W(pathname)
 	if (!pathw) {
-		free(real_path);
 		return -1;
 	}
 
@@ -228,7 +226,6 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	int ret = php_win32_ioutil_access_w(pathw, mode);
 	if (0 > ret || X_OK == mode || F_OK == mode) {
 		PHP_WIN32_IOUTIL_CLEANUP_W()
-		free(real_path);
 		return ret;
 	}
 
@@ -280,10 +277,9 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	if (CWDG(realpath_cache_size_limit)) {
 		t = time(0);
 		bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
-		if(bucket == NULL && real_path == NULL) {
+		if(bucket == NULL && !real_path[0]) {
 			/* We used the pathname directly. Call tsrm_realpath */
 			/* so that entry is created in realpath cache */
-			real_path = (char *)malloc(MAXPATHLEN);
 			if(tsrm_realpath(pathname, real_path) != NULL) {
 				pathname = real_path;
 				bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
@@ -366,10 +362,6 @@ Finished_Impersonate:
 Finished:
 	if(thread_token != NULL) {
 		CloseHandle(thread_token);
-	}
-	if(real_path != NULL) {
-		free(real_path);
-		real_path = NULL;
 	}
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
