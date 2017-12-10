@@ -174,6 +174,7 @@ void init_executor(void) /* {{{ */
 
 	EG(fake_scope) = NULL;
 	EG(trampoline).common.function_name = NULL;
+	EG(namespace_declares) = NULL;
 
 	EG(ht_iterators_count) = sizeof(EG(ht_iterators_slots)) / sizeof(HashTableIterator);
 	EG(ht_iterators_used) = 0;
@@ -412,6 +413,11 @@ void shutdown_executor(void) /* {{{ */
 
 		if (EG(ht_iterators) != EG(ht_iterators_slots)) {
 			efree(EG(ht_iterators));
+		}
+
+		if (EG(namespace_declares)) {
+			zend_hash_destroy(EG(namespace_declares));
+			FREE_HASHTABLE(EG(namespace_declares));
 		}
 	}
 
