@@ -2427,34 +2427,39 @@ static zend_bool check_declare_directive(zend_string *name, zval *val) {
 	}
 }
 
+static zend_bool check_declare_directives(HashTable *declares) {
+	zend_string *name;
+	zval *val;
+
+	ZEND_HASH_FOREACH_STR_KEY_VAL(declares, name, val) {
+		if (!name) {
+			zend_throw_error(NULL, "Declare directive array must have string keys");
+			return 0;
+		}
+
+		ZVAL_DEREF(val);
+		if (!check_declare_directive(name, val)) {
+			return 0;
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	return 1;
+}
+
 /* {{{ proto void namespace_declare(string namespace, array declares)
    Defines per-namespace declare directives */
 ZEND_FUNCTION(namespace_declare)
 {
 	zend_string *namespace, *namespace_lc;
 	zval *declares;
-	zend_string *name;
-	zval *val;
 
 	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "Sa", &namespace, &declares) == FAILURE) {
 		return;
 	}
 
-	if (!check_namespace(namespace)) {
+	if (!check_namespace(namespace) || !check_declare_directives(Z_ARRVAL_P(declares))) {
 		return;
 	}
-
-	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(declares), name, val) {
-		if (!name) {
-			zend_throw_error(NULL, "Declare directive array must have string keys");
-			return;
-		}
-
-		ZVAL_DEREF(val);
-		if (!check_declare_directive(name, val)) {
-			return;
-		}
-	} ZEND_HASH_FOREACH_END();
 
 	if (!EG(namespace_declares)) {
 		EG(namespace_declares) = zend_new_array(0);
@@ -2464,8 +2469,21 @@ ZEND_FUNCTION(namespace_declare)
 	if (zend_hash_add(EG(namespace_declares), namespace_lc, declares)) {
 		Z_TRY_ADDREF_P(declares);
 	} else {
+		zend_string_release(namespace_lc);
 		zend_throw_error(NULL,
 			"Declares for namespace \"%s\" already defined", ZSTR_VAL(namespace));
+		return;
+	}
+
+	/* During computation we also add explicit entries for all parent namespace,
+	 * as such this check also takes into account used child namespaces. */
+	if (EG(computed_namespace_declares)
+			&& zend_hash_exists(EG(computed_namespace_declares), namespace_lc)) {
+		zend_string_release(namespace_lc);
+		zend_throw_error(NULL,
+			"Cannot add declares to namespace \"%s\", as it is already in use",
+			ZSTR_VAL(namespace));
+		return;
 	}
 
 	zend_string_release(namespace_lc);

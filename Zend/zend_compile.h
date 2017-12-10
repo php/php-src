@@ -98,9 +98,15 @@ static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
 }
 
+/* Used in the declares_set field for declares that were explicitly specified, rather
+ * than just being defaults */
+#define ZEND_DECLARE_TICKS        (1 << 0)
+#define ZEND_DECLARE_STRICT_TYPES (1 << 1)
+
 typedef struct _zend_declarables {
 	zend_long ticks;
 	zend_bool strict_types;
+	uint32_t declares_set;
 } zend_declarables;
 
 /* Compilation context that is different for each file, but shared between op arrays. */
@@ -110,6 +116,7 @@ typedef struct _zend_file_context {
 	zend_string *current_namespace;
 	zend_bool in_namespace;
 	zend_bool has_bracketed_namespaces;
+	const zend_declarables *ns_declares;
 
 	HashTable *imports;
 	HashTable *imports_function;
@@ -701,6 +708,7 @@ BEGIN_EXTERN_C()
 void init_compiler(void);
 void shutdown_compiler(void);
 void zend_init_compiler_data_structures(void);
+const zend_declarables *zend_get_namespace_declares(zend_string *namespace_lc);
 
 void zend_oparray_context_begin(zend_oparray_context *prev_context);
 void zend_oparray_context_end(zend_oparray_context *prev_context);
