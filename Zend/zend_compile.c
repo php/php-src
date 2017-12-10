@@ -446,7 +446,7 @@ static const zend_declarables *compute_namespace_declares(zend_string *namespace
 	}
 }
 
-const zend_declarables *zend_get_namespace_declares(zend_string *namespace_lc) {
+ZEND_API const zend_declarables *zend_get_namespace_declares(zend_string *namespace_lc) {
 	const zend_declarables *declares;
 
 	if (!EG(computed_namespace_declares)) {
@@ -477,6 +477,14 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(ns_declares) = NULL;
 	FC(declarables) = default_declarables;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
+
+	/* Not part of file states, as it's supposed to be available after compilation */
+	if (CG(last_namespaces)) {
+		efree(CG(last_namespaces));
+	}
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 }
 /* }}} */
 
@@ -7076,7 +7084,7 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 {
 	zend_ast *name_ast = ast->child[0];
 	zend_ast *stmt_ast = ast->child[1];
-	zend_string *name = NULL;
+	zend_string *name = NULL, *name_lc = NULL;
 	zend_bool with_bracket = stmt_ast != NULL;
 	const zend_declarables *ns_declares;
 
@@ -7134,9 +7142,8 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 	zend_reset_import_tables();
 
 	if (name) {
-		zend_string *name_lc = zend_string_tolower(name);
+		name_lc = zend_string_tolower(name);
 		ns_declares = zend_get_namespace_declares(name_lc);
-		zend_string_release(name_lc);
 	} else {
 		ns_declares = &default_declarables;
 	}
@@ -7152,6 +7159,20 @@ void zend_compile_namespace(zend_ast *ast) /* {{{ */
 		FC(ns_declares) = ns_declares;
 		combine_declares(&FC(declarables), ns_declares);
 		apply_declares(&FC(declarables));
+	}
+
+	/* Collect namespace information, so opcaches can distinguish files compiled using using
+	 * different namespace_declare configurations. */
+	if (name_lc && (CG(compiler_options) & ZEND_COMPILE_COLLECT_NS_INFO)) {
+		CG(last_ns_declares) = ns_declares;
+		CG(last_namespaces) =
+			erealloc(CG(last_namespaces), (CG(last_num_namespaces) + 1) * sizeof(zend_string *));
+		CG(last_namespaces)[CG(last_num_namespaces)] = zend_string_copy(name_lc);
+		CG(last_num_namespaces)++;
+	}
+
+	if (name_lc) {
+		zend_string_release(name_lc);
 	}
 
 	FC(in_namespace) = 1;

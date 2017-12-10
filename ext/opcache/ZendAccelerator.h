@@ -118,6 +118,10 @@ typedef struct _zend_persistent_script {
 	zend_bool      is_phar;
 	zend_bool      empty;
 
+	const zend_declarables *ns_declares;
+	zend_string  **namespaces;
+	uint32_t       num_namespaces;
+
 	void          *mem;                    /* shared memory area used by script structures */
 	size_t         size;                   /* size of used shared memory */
 	void          *arena_mem;              /* part that should be copied into process */

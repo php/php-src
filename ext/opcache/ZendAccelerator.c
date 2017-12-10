@@ -1661,6 +1661,25 @@ static void zend_accel_init_auto_globals(void)
 	}
 }
 
+static inline zend_bool check_ns_declares_consistency(zend_persistent_script *script) {
+	uint32_t i;
+
+	if (!script->ns_declares) {
+		return 1;
+	}
+
+	/* Check that all namespace declares are identical */
+	for (i = 0; i < script->num_namespaces; i++) {
+		zend_string *ns = script->namespaces[i];
+		const zend_declarables *ns_declares = zend_get_namespace_declares(ns);
+		if (memcmp(script->ns_declares, ns_declares, sizeof(zend_declarables)) != 0) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, const char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
@@ -1747,6 +1766,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_OTHER_FILES;
+		CG(compiler_options) |= ZEND_COMPILE_COLLECT_NS_INFO;
 		if (ZCG(accel_directives).file_cache) {
 			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 		}
@@ -1769,6 +1789,14 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		}
 		return NULL;
 	}
+
+	/* Take ownership of namespace information */
+	new_persistent_script->ns_declares = CG(last_ns_declares);
+	new_persistent_script->namespaces = CG(last_namespaces);
+	new_persistent_script->num_namespaces = CG(last_num_namespaces);
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 
 	/* Build the persistent_script structure.
 	   Here we aren't sure we would store it, but we will need it
@@ -2096,6 +2124,23 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 			zend_shared_alloc_unlock();
 			persistent_script = NULL;
 		}
+	}
+
+	if (persistent_script && !check_ns_declares_consistency(persistent_script)) {
+		/* The namespace declares for this script changed, invalidate it */
+		zend_shared_alloc_lock();
+		if (!persistent_script->corrupted) {
+			persistent_script->corrupted = 1;
+			persistent_script->timestamp = 0;
+			ZSMMG(wasted_shared_memory) += persistent_script->dynamic_members.memory_consumption;
+			if (ZSMMG(memory_exhausted)) {
+				zend_accel_restart_reason reason =
+					zend_accel_hash_is_full(&ZCSG(hash)) ? ACCEL_RESTART_HASH : ACCEL_RESTART_OOM;
+				zend_accel_schedule_restart_if_necessary(reason);
+			}
+		}
+		zend_shared_alloc_unlock();
+		persistent_script = NULL;
 	}
 
 	/* Check the second level cache */

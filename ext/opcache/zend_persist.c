@@ -1078,6 +1078,21 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	} ZEND_HASH_FOREACH_END();
 }
 
+static void zend_accel_persist_namespace_info(zend_persistent_script *script)
+{
+	if (script->ns_declares) {
+		script->ns_declares = zend_accel_memdup(script->ns_declares, sizeof(zend_declarables));
+	}
+
+	if (script->namespaces) {
+		uint32_t i;
+		for (i = 0; i < script->num_namespaces; i++) {
+			zend_accel_store_interned_string(script->namespaces[i]);
+		}
+		zend_accel_store(script->namespaces, sizeof(zend_string *) * script->num_namespaces);
+	}
+}
+
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)
 {
 	Bucket *p;
@@ -1127,6 +1142,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		zend_persist_op_array(&p->val);
 	} ZEND_HASH_FOREACH_END();
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+	zend_accel_persist_namespace_info(script);
 
 	if (for_shm) {
 		ZCSG(map_ptr_last) = CG(map_ptr_last);
