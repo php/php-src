@@ -392,6 +392,11 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 	if (!IS_SERIALIZED(op_array->opcodes)) {
 		zend_op *opline, *end;
 
+#if !ZEND_USE_ABS_CONST_ADDR
+		zval *literals = op_array->literals;
+		UNSERIALIZE_PTR(literals);
+#endif
+
 		SERIALIZE_PTR(op_array->opcodes);
 		opline = op_array->opcodes;
 		UNSERIALIZE_PTR(opline);
@@ -406,10 +411,10 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 			}
 #else
 			if (opline->op1_type == IS_CONST) {
-				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op1);
+				opline->op1.constant = RT_CONSTANT(opline, opline->op1) - literals;
 			}
 			if (opline->op2_type == IS_CONST) {
-				ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
+				opline->op2.constant = RT_CONSTANT(opline, opline->op2) - literals;
 			}
 #endif
 #if ZEND_USE_ABS_JMP_ADDR
