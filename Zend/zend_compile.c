@@ -363,6 +363,7 @@ void zend_file_context_begin(zend_file_context *prev_context) /* {{{ */
 	FC(in_namespace) = 0;
 	FC(has_bracketed_namespaces) = 0;
 	FC(declarables).ticks = 0;
+	FC(declarables).strict_types = 0;
 	zend_hash_init(&FC(seen_symbols), 8, NULL, NULL, 0);
 }
 /* }}} */
@@ -5446,6 +5447,7 @@ void zend_compile_declare(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "strict_types declaration must have 0 or 1 as its value");
 			}
 
+			FC(declarables).strict_types = Z_LVAL(value_zv);
 			if (Z_LVAL(value_zv) == 1) {
 				CG(active_op_array)->fn_flags |= ZEND_ACC_STRICT_TYPES;
 			}
