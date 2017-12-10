@@ -1661,25 +1661,6 @@ static void zend_accel_init_auto_globals(void)
 	}
 }
 
-static inline zend_bool check_ns_declares_consistency(zend_persistent_script *script) {
-	uint32_t i;
-
-	if (!script->ns_declares) {
-		return 1;
-	}
-
-	/* Check that all namespace declares are identical */
-	for (i = 0; i < script->num_namespaces; i++) {
-		zend_string *ns = script->namespaces[i];
-		const zend_declarables *ns_declares = zend_get_namespace_declares(ns);
-		if (memcmp(script->ns_declares, ns_declares, sizeof(zend_declarables)) != 0) {
-			return 0;
-		}
-	}
-
-	return 1;
-}
-
 static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handle, int type, const char *key, zend_op_array **op_array_p)
 {
 	zend_persistent_script *new_persistent_script;
@@ -2126,7 +2107,7 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		}
 	}
 
-	if (persistent_script && !check_ns_declares_consistency(persistent_script)) {
+	if (persistent_script && !zend_accel_check_ns_declares_consistency(persistent_script)) {
 		/* The namespace declares for this script changed, invalidate it */
 		zend_shared_alloc_lock();
 		if (!persistent_script->corrupted) {

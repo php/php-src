@@ -507,6 +507,9 @@ void zend_init_compiler_data_structures(void) /* {{{ */
 	CG(encoding_declared) = 0;
 	CG(memoized_exprs) = NULL;
 	CG(memoize_mode) = 0;
+	CG(last_ns_declares) = NULL;
+	CG(last_namespaces) = NULL;
+	CG(last_num_namespaces) = 0;
 }
 /* }}} */
 
@@ -565,6 +568,9 @@ void shutdown_compiler(void) /* {{{ */
 		zend_hash_destroy(CG(delayed_autoloads));
 		FREE_HASHTABLE(CG(delayed_autoloads));
 		CG(delayed_autoloads) = NULL;
+	}
+	if (CG(last_namespaces)) {
+		efree(CG(last_namespaces));
 	}
 }
 /* }}} */

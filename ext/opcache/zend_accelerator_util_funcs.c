@@ -921,3 +921,22 @@ unsigned int zend_accel_script_checksum(zend_persistent_script *persistent_scrip
 	}
 	return checksum;
 }
+
+zend_bool zend_accel_check_ns_declares_consistency(zend_persistent_script *script) {
+	uint32_t i;
+
+	if (!script->ns_declares) {
+		return 1;
+	}
+
+	/* Check that all namespace declares are identical */
+	for (i = 0; i < script->num_namespaces; i++) {
+		zend_string *ns = script->namespaces[i];
+		const zend_declarables *ns_declares = zend_get_namespace_declares(ns);
+		if (memcmp(script->ns_declares, ns_declares, sizeof(zend_declarables)) != 0) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
