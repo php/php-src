@@ -320,9 +320,6 @@ class SplFileObject extends SplFileInfo implements RecursiveIterator, SeekableIt
 			$this->freeLine();
 			throw new RuntimeException("Cannot read from file " . $this->fname);
 		}
-		if ($this->line) {
-			$this->lnum++;
-		}
 		$this->freeLine();
 		$this->line = fgets($this->fp, $this->max_len);
 		return $this->line;
