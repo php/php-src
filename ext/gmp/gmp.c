@@ -164,12 +164,15 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_pow,		arginfo_gmp_pow)
 	ZEND_FE(gmp_powm,		arginfo_gmp_powm)
 	ZEND_FE(gmp_perfect_square,	arginfo_gmp_unary)
+	ZEND_FE(gmp_perfect_power,	arginfo_gmp_unary)
 	ZEND_FE(gmp_prob_prime, arginfo_gmp_prob_prime)
 	ZEND_FE(gmp_gcd,		arginfo_gmp_binary)
 	ZEND_FE(gmp_gcdext,		arginfo_gmp_binary)
+	ZEND_FE(gmp_lcm,		arginfo_gmp_binary)
 	ZEND_FE(gmp_invert,		arginfo_gmp_binary)
 	ZEND_FE(gmp_jacobi,		arginfo_gmp_binary)
 	ZEND_FE(gmp_legendre,	arginfo_gmp_binary)
+	ZEND_FE(gmp_kronecker,	arginfo_gmp_binary)
 	ZEND_FE(gmp_cmp,		arginfo_gmp_binary)
 	ZEND_FE(gmp_sign,		arginfo_gmp_unary)
 	ZEND_DEP_FE(gmp_random,		arginfo_gmp_random)
@@ -188,6 +191,7 @@ const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_popcount,	arginfo_gmp_unary)
 	ZEND_FE(gmp_hamdist,	arginfo_gmp_binary)
 	ZEND_FE(gmp_nextprime,	arginfo_gmp_unary)
+	ZEND_FE(gmp_binomial,	arginfo_gmp_binary)
 	PHP_FE_END
 };
 /* }}} */
@@ -1382,6 +1386,36 @@ ZEND_FUNCTION(gmp_fact)
 }
 /* }}} */
 
+/* {{{ proto GMP gmp_binomial(mixed n, int k)
+ * Calculates binomial coefficient */
+ZEND_FUNCTION(gmp_binomial)
+{
+	zval *n_arg;
+	zend_long k;
+	mpz_ptr gmpnum_result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zl", &n_arg, &k) == FAILURE) {
+		return;
+	}
+
+	if (k < 0) {
+		php_error_docref(NULL, E_WARNING, "k cannot be negative");
+		RETURN_FALSE;
+	}
+
+	INIT_GMP_RETVAL(gmpnum_result);
+	if (Z_TYPE_P(n_arg) == IS_LONG && Z_LVAL_P(n_arg) >= 0) {
+		mpz_bin_uiui(gmpnum_result, (gmp_ulong) Z_LVAL_P(n_arg), (gmp_ulong) k);
+	} else {
+		mpz_ptr gmpnum_n;
+		gmp_temp_t temp_n;
+		FETCH_GMP_ZVAL(gmpnum_n, n_arg, temp_n);
+		mpz_bin_ui(gmpnum_result, gmpnum_n, (gmp_ulong) k);
+		FREE_GMP_TEMP(temp_n);
+	}
+}
+/* }}} */
+
 /* {{{ proto GMP gmp_pow(mixed base, int exp)
    Raise base to power exp */
 ZEND_FUNCTION(gmp_pow)
@@ -1620,6 +1654,25 @@ ZEND_FUNCTION(gmp_perfect_square)
 }
 /* }}} */
 
+/* {{{ proto bool gmp_perfect_power(mixed a)
+   Checks if a is a perfect power */
+ZEND_FUNCTION(gmp_perfect_power)
+{
+	zval *a_arg;
+	mpz_ptr gmpnum_a;
+	gmp_temp_t temp_a;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &a_arg) == FAILURE){
+		return;
+	}
+
+	FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+
+	RETVAL_BOOL((mpz_perfect_power_p(gmpnum_a) != 0));
+	FREE_GMP_TEMP(temp_a);
+}
+/* }}} */
+
 /* {{{ proto int gmp_prob_prime(mixed a[, int reps])
    Checks if a is "probably prime" */
 ZEND_FUNCTION(gmp_prob_prime)
@@ -1645,6 +1698,14 @@ ZEND_FUNCTION(gmp_prob_prime)
 ZEND_FUNCTION(gmp_gcd)
 {
 	gmp_binary_ui_op(mpz_gcd, (gmp_binary_ui_op_t) mpz_gcd_ui);
+}
+/* }}} */
+
+/* {{{ proto GMP gmp_lcm(mixed a, mixed b)
+   Computes least common multiple (lcm) of a and b */
+ZEND_FUNCTION(gmp_lcm)
+{
+	gmp_binary_ui_op(mpz_lcm, (gmp_binary_ui_op_t) mpz_lcm_ui);
 }
 /* }}} */
 
@@ -1719,6 +1780,50 @@ ZEND_FUNCTION(gmp_jacobi)
 ZEND_FUNCTION(gmp_legendre)
 {
 	gmp_binary_opl(mpz_legendre);
+}
+/* }}} */
+
+/* {{{ proto int gmp_kronecker(mixed a, mixed b)
+   Computes the Kronecker symbol */
+ZEND_FUNCTION(gmp_kronecker)
+{
+	zval *a_arg, *b_arg;
+	mpz_ptr gmpnum_a, gmpnum_b;
+	gmp_temp_t temp_a, temp_b;
+	zend_bool use_a_si = 0, use_b_si = 0;
+	int result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz", &a_arg, &b_arg) == FAILURE){
+		return;
+	}
+
+	if (Z_TYPE_P(a_arg) == IS_LONG && Z_TYPE_P(b_arg) != IS_LONG) {
+		use_a_si = 1;
+		temp_a.is_used = 0;
+	} else {
+		FETCH_GMP_ZVAL(gmpnum_a, a_arg, temp_a);
+	}
+
+	if (Z_TYPE_P(b_arg) == IS_LONG) {
+		use_b_si = 1;
+		temp_b.is_used = 0;
+	} else {
+		FETCH_GMP_ZVAL_DEP(gmpnum_b, b_arg, temp_b, temp_a);
+	}
+
+	if (use_a_si) {
+		ZEND_ASSERT(use_b_si == 0);
+		result = mpz_si_kronecker((gmp_long) Z_LVAL_P(a_arg), gmpnum_b);
+	} else if (use_b_si) {
+		result = mpz_kronecker_si(gmpnum_a, (gmp_long) Z_LVAL_P(b_arg));
+	} else {
+		result = mpz_kronecker(gmpnum_a, gmpnum_b);
+	}
+
+	FREE_GMP_TEMP(temp_a);
+	FREE_GMP_TEMP(temp_b);
+
+	RETURN_LONG(result);
 }
 /* }}} */
 

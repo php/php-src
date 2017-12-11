@@ -54,12 +54,14 @@ ZEND_FUNCTION(gmp_rootrem);
 ZEND_FUNCTION(gmp_pow);
 ZEND_FUNCTION(gmp_powm);
 ZEND_FUNCTION(gmp_perfect_square);
+ZEND_FUNCTION(gmp_perfect_power);
 ZEND_FUNCTION(gmp_prob_prime);
 ZEND_FUNCTION(gmp_gcd);
 ZEND_FUNCTION(gmp_gcdext);
 ZEND_FUNCTION(gmp_invert);
 ZEND_FUNCTION(gmp_jacobi);
 ZEND_FUNCTION(gmp_legendre);
+ZEND_FUNCTION(gmp_kronecker);
 ZEND_FUNCTION(gmp_cmp);
 ZEND_FUNCTION(gmp_sign);
 ZEND_FUNCTION(gmp_and);
@@ -78,6 +80,8 @@ ZEND_FUNCTION(gmp_testbit);
 ZEND_FUNCTION(gmp_popcount);
 ZEND_FUNCTION(gmp_hamdist);
 ZEND_FUNCTION(gmp_nextprime);
+ZEND_FUNCTION(gmp_binomial);
+ZEND_FUNCTION(gmp_lcm);
 
 ZEND_BEGIN_MODULE_GLOBALS(gmp)
 	zend_bool rand_initialized;
