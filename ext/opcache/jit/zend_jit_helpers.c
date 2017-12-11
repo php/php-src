@@ -97,7 +97,7 @@ static zval* ZEND_FASTCALL zend_jit_hash_index_lookup_rw(HashTable *ht, zend_lon
 	zval *retval = zend_hash_index_find(ht, idx);
 
 	if (!retval) {
-		zend_error(E_NOTICE,"Undefined index: %s", idx);
+		zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, idx);
 		retval = zend_hash_index_update(ht, idx, &EG(uninitialized_zval));
 	}
 	return retval;
