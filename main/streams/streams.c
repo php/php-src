@@ -1763,7 +1763,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 		}
 	}
 	/* TODO: curl based streams probably support file:// properly */
-	if (!protocol || !strncasecmp(protocol, ZSTR_KNOWN(ZEND_STR_FILE), n))	{
+	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		/* fall back on regular file access */
 		php_stream_wrapper *plain_files_wrapper = &php_plain_files_wrapper;
 
