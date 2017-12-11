@@ -7288,24 +7288,12 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 		zend_jit_reset_opline(Dst, NULL);
 
 		|	// fbc->internal_function.handler(call, ret);
-		|.if X64
-			|	mov FCARG1a, RX
-			if (func) {
-				|	EXT_CALL func->internal_function.handler, r0
-			} else {
-				|	call aword [r0 + offsetof(zend_internal_function, handler)]
-			}
-		|.else
-			|	sub r4, 8
-			|	push FCARG2a
-			|	push RX
-			if (func) {
-				|	EXT_CALL func->internal_function.handler, r0
-			} else {
-				|	call aword [r0 + offsetof(zend_internal_function, handler)]
-			}
-			|	add r4, 16
-		|.endif
+		|	mov FCARG1a, RX
+		if (func) {
+			|	EXT_CALL func->internal_function.handler, r0
+		} else {
+			|	call aword [r0 + offsetof(zend_internal_function, handler)]
+		}
 
 		|	// EG(current_execute_data) = execute_data;
 		|	MEM_OP2_1 mov, aword, &EG(current_execute_data), FP, r0
