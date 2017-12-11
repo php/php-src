@@ -2549,10 +2549,13 @@ double_quotes_scan_done:
 						newline = 1;
 					}
 
-					SCNG(heredoc_indentation) = indentation;
-					SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
+					if (SCNG(heredoc_scan_ahead)) {
+						SCNG(heredoc_indentation) = indentation;
+						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
+					} else {
+						CG(increment_lineno) = 1;
+					}
 
-					CG(increment_lineno) = 1;
 					BEGIN(ST_END_HEREDOC);
 
 					goto heredoc_scan_done;
