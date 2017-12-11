@@ -408,7 +408,7 @@ struct _zend_op_array {
 #define ZEND_RETURN_REFERENCE			1
 
 /* zend_internal_function_handler */
-typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
+typedef void ZEND_FASTCALL (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef struct _zend_internal_function {
 	/* Common elements */
