@@ -7941,7 +7941,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 	zend_bool smart_branch = 0;
 	zend_jit_addr op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, NULL, -1);
 
-	if (opline->extended_value == IS_RESOURCE) {
+	if (opline->extended_value & MAY_BE_RESOURCE) {
 		// TODO: support for is_resource() ???
 		goto fallback;
 	}
@@ -7965,7 +7965,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 		|	SAVE_VALID_OPLINE opline
 		|	mov FCARG1d, opline->op1.var
 		|	EXT_CALL zend_jit_undefined_op_helper, r0
-		if (opline->extended_value == IS_NULL) {
+		if (opline->extended_value & MAY_BE_NULL) {
 			if (!zend_jit_smart_true(Dst, opline, b, op_array, ssa, (op1_info & (MAY_BE_ANY|MAY_BE_REF)) != 0)) {
 				return 0;
 			}
@@ -7980,11 +7980,18 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 	}
 
 	if (op1_info & (MAY_BE_ANY|MAY_BE_REF)) {
-		type = opline->extended_value;
-		if (type == _IS_BOOL) {
-			mask = MAY_BE_FALSE | MAY_BE_TRUE;
-		} else {
-			mask = (1 << type);
+		mask = opline->extended_value;
+		switch (mask) {
+			case MAY_BE_NULL:   type = IS_NULL;   break;
+			case MAY_BE_FALSE:  type = IS_FALSE;  break;
+			case MAY_BE_TRUE:   type = IS_TRUE;   break;
+			case MAY_BE_LONG:   type = IS_LONG;   break;
+			case MAY_BE_DOUBLE: type = IS_DOUBLE; break;
+			case MAY_BE_STRING: type = IS_STRING; break;
+			case MAY_BE_ARRAY:  type = IS_ARRAY;  break;
+			case MAY_BE_OBJECT: type = IS_OBJECT; break;
+			default:
+				type = 0;
 		}
 
 		if (!(op1_info & (MAY_BE_ANY - mask))) {
@@ -8002,7 +8009,7 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 				|	LOAD_ZVAL_ADDR r0, op1_addr
 				|	ZVAL_DEREF r0, op1_info
 			}
-			if (opline->extended_value == _IS_BOOL) {
+			if (type == 0) {
 				if (smart_branch &&
 				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
 				    (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
@@ -8050,9 +8057,9 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 						|	mov cl, byte [FP + opline->op1.var + 8]
 					}
 				}
-				|	mov al, 1
-				|	shl al, cl
-				|	test al, 0xc
+				|	mov eax, 1
+				|	shl eax, cl
+				|	test eax, mask
 				if ((opline+1)->opcode == ZEND_JMPZ &&
 				    (opline+1)->op1_type == IS_TMP_VAR &&
 				    (opline+1)->op1.var == opline->result.var) {
@@ -8079,8 +8086,6 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 					|	SET_ZVAL_TYPE_INFO res_addr, eax
 					|	FREE_OP opline->op1_type, opline->op1, op1_info, 1, op_array, opline
 				}
-			} else if (opline->extended_value == IS_RESOURCE) {
-				ZEND_ASSERT(0);
 			} else {
 				if (smart_branch &&
 				    (opline->op1_type & (IS_VAR|IS_TMP_VAR)) &&
@@ -8122,12 +8127,12 @@ static int zend_jit_type_check(dasm_State **Dst, const zend_op *opline, int b, i
 						|	mov cl, byte [FP + opline->op1.var + 8]
 					}
 					|2:
-					|	cmp cl, opline->extended_value
+					|	cmp cl, type
 				} else {
 					if (op1_info & MAY_BE_REF) {
-						|	cmp byte [r0 + 8], opline->extended_value
+						|	cmp byte [r0 + 8], type
 					} else {
-						|	cmp byte [FP + opline->op1.var + 8], opline->extended_value
+						|	cmp byte [FP + opline->op1.var + 8], type
 					}
 				}
 				if ((opline+1)->opcode == ZEND_JMPZ &&
