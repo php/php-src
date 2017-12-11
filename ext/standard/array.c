@@ -3855,14 +3855,15 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 			} ZEND_HASH_FILL_END();
 		} else {
 			zend_string *string_key;
+			zend_hash_real_init(dest, 0);
 			ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 				if (UNEXPECTED(Z_ISREF_P(src_entry) &&
 					Z_REFCOUNT_P(src_entry) == 1)) {
 					ZVAL_UNREF(src_entry);
 				}
 				Z_TRY_ADDREF_P(src_entry);
-				if (string_key) {
-					zend_hash_add_new(dest, string_key, src_entry);
+				if (EXPECTED(string_key)) {
+					_zend_hash_append(dest, string_key, src_entry);
 				} else {
 					zend_hash_next_index_insert_new(dest, src_entry);
 				}
@@ -6053,12 +6054,13 @@ PHP_FUNCTION(array_map)
 		maxlen = zend_hash_num_elements(Z_ARRVAL(arrays[0]));
 
 		/* Short-circuit: if no callback and only one array, just return it. */
-		if (!ZEND_FCI_INITIALIZED(fci)) {
+		if (!ZEND_FCI_INITIALIZED(fci) || !maxlen) {
 			ZVAL_COPY(return_value, &arrays[0]);
 			return;
 		}
 
 		array_init_size(return_value, maxlen);
+		zend_hash_real_init(Z_ARRVAL_P(return_value), Z_ARRVAL(arrays[0])->u.flags & HASH_FLAG_PACKED);
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
 			fci.retval = &result;
@@ -6074,7 +6076,7 @@ PHP_FUNCTION(array_map)
 				RETURN_NULL();
 			}
 			if (str_key) {
-				zend_hash_add_new(Z_ARRVAL_P(return_value), str_key, &result);
+				_zend_hash_append(Z_ARRVAL_P(return_value), str_key, &result);
 			} else {
 				zend_hash_index_add_new(Z_ARRVAL_P(return_value), num_key, &result);
 			}
