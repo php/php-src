@@ -458,11 +458,10 @@ static int firebird_bind_blob(pdo_stmt_t *stmt, ISC_QUAD *blob_id, zval *param)
 		return 0;
 	}
 
-	data = *param;
-
 	if (Z_TYPE_P(param) != IS_STRING) {
-		zval_copy_ctor(&data);
-		convert_to_string(&data);
+		ZVAL_STR(&data, zval_get_string_func(param));
+	} else {
+		ZVAL_COPY_VALUE(&data, param);
 	}
 
 	for (rem_cnt = Z_STRLEN(data); rem_cnt > 0; rem_cnt -= chunk_size) {

@@ -21,6 +21,10 @@
 #include "zend.h"
 #include "zend_globals.h"
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str);
 ZEND_API zend_string *(*zend_string_init_interned)(const char *str, size_t size, int permanent);
 
@@ -30,7 +34,7 @@ static zend_string *zend_string_init_interned_permanent(const char *str, size_t 
 static zend_string *zend_string_init_interned_request(const char *str, size_t size, int permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
-   won't be free'd until process exit. If we want an ability to 
+   won't be free'd until process exit. If we want an ability to
    add permanent strings even after startup, it would be still
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
@@ -129,7 +133,22 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 
 static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
-	return zend_interned_string_ht_lookup_ex(ZSTR_H(str), ZSTR_VAL(str), ZSTR_LEN(str), interned_strings);
+	zend_ulong h = ZSTR_H(str);
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *p;
+
+	nIndex = h | interned_strings->nTableMask;
+	idx = HT_HASH(interned_strings, nIndex);
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET(interned_strings, idx);
+		if ((p->h == h) && zend_string_equal_content(p->key, str)) {
+			return p->key;
+		}
+		idx = Z_NEXT(p->val);
+	}
+
+	return NULL;
 }
 
 /* This function might be not thread safe at least because it would update the
@@ -293,6 +312,144 @@ ZEND_API void zend_interned_strings_switch_storage(zend_bool request)
 		}
 	}
 }
+
+#if defined(__GNUC__) && defined(__i386__)
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	char *ptr = ZSTR_VAL(s1);
+	size_t delta = (char*)s2 - (char*)s1;
+	size_t len = ZSTR_LEN(s1);
+	zend_ulong ret;
+
+	__asm__ (
+		".L0%=:\n\t"
+		"movl (%2,%3), %0\n\t"
+		"xorl (%2), %0\n\t"
+		"jne .L1%=\n\t"
+		"addl $0x4, %2\n\t"
+		"subl $0x4, %1\n\t"
+		"ja .L0%=\n\t"
+		"movl $0x1, %0\n\t"
+		"jmp .L3%=\n\t"
+		".L1%=:\n\t"
+		"cmpl $0x4,%1\n\t"
+		"jb .L2%=\n\t"
+		"xorl %0, %0\n\t"
+		"jmp .L3%=\n\t"
+		".L2%=:\n\t"
+		"negl %1\n\t"
+		"lea 0x1c(,%1,8), %1\n\t"
+		"shll %b1, %0\n\t"
+		"sete %b0\n\t"
+		"movzbl %b0, %0\n\t"
+		".L3%=:\n"
+		: "=&a"(ret),
+		  "+c"(len),
+		  "+r"(ptr)
+		: "r"(delta)
+		: "cc");
+	return ret;
+}
+
+#ifdef HAVE_VALGRIND
+ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+{
+	size_t len = ZSTR_LEN(s1);
+	char *ptr1 = ZSTR_VAL(s1);
+	char *ptr2 = ZSTR_VAL(s2);
+	zend_ulong ret;
+
+	__asm__ (
+		"test %1, %1\n\t"
+		"jnz .L1%=\n\t"
+		"movl $0x1, %0\n\t"
+		"jmp .L2%=\n\t"
+		".L1%=:\n\t"
+		"cld\n\t"
+		"rep\n\t"
+		"cmpsb\n\t"
+		"sete %b0\n\t"
+		"movzbl %b0, %0\n\t"
+		".L2%=:\n"
+		: "=a"(ret),
+		  "+c"(len),
+		  "+D"(ptr1),
+		  "+S"(ptr2)
+		:
+		: "cc");
+	return ret;
+}
+#endif
+
+#elif defined(__GNUC__) && defined(__x86_64__)
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	char *ptr = ZSTR_VAL(s1);
+	size_t delta = (char*)s2 - (char*)s1;
+	size_t len = ZSTR_LEN(s1);
+	zend_ulong ret;
+
+	__asm__ (
+		".L0%=:\n\t"
+		"movq (%2,%3), %0\n\t"
+		"xorq (%2), %0\n\t"
+		"jne .L1%=\n\t"
+		"addq $0x8, %2\n\t"
+		"subq $0x8, %1\n\t"
+		"ja .L0%=\n\t"
+		"movq $0x1, %0\n\t"
+		"jmp .L3%=\n\t"
+		".L1%=:\n\t"
+		"cmpq $0x8,%1\n\t"
+		"jb .L2%=\n\t"
+		"xorq %0, %0\n\t"
+		"jmp .L3%=\n\t"
+		".L2%=:\n\t"
+		"negq %1\n\t"
+		"lea 0x3c(,%1,8), %1\n\t"
+		"shlq %b1, %0\n\t"
+		"sete %b0\n\t"
+		"movzbq %b0, %0\n\t"
+		".L3%=:\n"
+		: "=&a"(ret),
+		  "+c"(len),
+		  "+r"(ptr)
+		: "r"(delta)
+		: "cc");
+	return ret;
+}
+
+#ifdef HAVE_VALGRIND
+ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+{
+	size_t len = ZSTR_LEN(s1);
+	char *ptr1 = ZSTR_VAL(s1);
+	char *ptr2 = ZSTR_VAL(s2);
+	zend_ulong ret;
+
+	__asm__ (
+		"test %1, %1\n\t"
+		"jnz .L1%=\n\t"
+		"movq $0x1, %0\n\t"
+		"jmp .L2%=\n\t"
+		".L1%=:\n\t"
+		"cld\n\t"
+		"rep\n\t"
+		"cmpsb\n\t"
+		"sete %b0\n\t"
+		"movzbq %b0, %0\n\t"
+		".L2%=:\n"
+		: "=a"(ret),
+		  "+c"(len),
+		  "+D"(ptr1),
+		  "+S"(ptr2)
+		:
+		: "cc");
+	return ret;
+}
+#endif
+
+#endif
 
 /*
  * Local variables:

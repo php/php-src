@@ -125,9 +125,7 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
 	zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -160,9 +158,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
 	zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -199,9 +195,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, void **ca
 	zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -389,7 +383,7 @@ zend_object *xmlreader_objects_new(zend_class_entry *class_type)
 {
 	xmlreader_object *intern;
 
-	intern = ecalloc(1, sizeof(xmlreader_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(xmlreader_object), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->prop_handler = &xmlreader_prop_handlers;

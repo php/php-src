@@ -2035,8 +2035,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	int retval = 0;
 
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -2185,30 +2184,21 @@ static void date_register_classes(void) /* {{{ */
 	REGISTER_PERIOD_CLASS_CONST_STRING("EXCLUDE_START_DATE", PHP_DATE_PERIOD_EXCLUDE_START_DATE);
 } /* }}} */
 
-static inline zend_object *date_object_new_date_ex(zend_class_entry *class_type, int init_props) /* {{{ */
+static zend_object *date_object_new_date(zend_class_entry *class_type) /* {{{ */
 {
-	php_date_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_date_obj) + zend_object_properties_size(class_type));
+	php_date_obj *intern = zend_object_alloc(sizeof(php_date_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (init_props) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_date;
 
 	return &intern->std;
 } /* }}} */
 
-static zend_object *date_object_new_date(zend_class_entry *class_type) /* {{{ */
-{
-	return date_object_new_date_ex(class_type, 1);
-} /* }}} */
-
 static zend_object *date_object_clone_date(zval *this_ptr) /* {{{ */
 {
 	php_date_obj *old_obj = Z_PHPDATE_P(this_ptr);
-	php_date_obj *new_obj = php_date_obj_from_obj(date_object_new_date_ex(old_obj->std.ce, 0));
+	php_date_obj *new_obj = php_date_obj_from_obj(date_object_new_date(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
 	if (!old_obj->time) {
@@ -2316,30 +2306,21 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 	return props;
 } /* }}} */
 
-static inline zend_object *date_object_new_timezone_ex(zend_class_entry *class_type, int init_props) /* {{{ */
+static zend_object *date_object_new_timezone(zend_class_entry *class_type) /* {{{ */
 {
-	php_timezone_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_timezone_obj) + zend_object_properties_size(class_type));
+	php_timezone_obj *intern = zend_object_alloc(sizeof(php_timezone_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (init_props) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_timezone;
 
 	return &intern->std;
 } /* }}} */
 
-static zend_object *date_object_new_timezone(zend_class_entry *class_type) /* {{{ */
-{
-	return date_object_new_timezone_ex(class_type, 1);
-} /* }}} */
-
 static zend_object *date_object_clone_timezone(zval *this_ptr) /* {{{ */
 {
 	php_timezone_obj *old_obj = Z_PHPTIMEZONE_P(this_ptr);
-	php_timezone_obj *new_obj = php_timezone_obj_from_obj(date_object_new_timezone_ex(old_obj->std.ce, 0));
+	php_timezone_obj *new_obj = php_timezone_obj_from_obj(date_object_new_timezone(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
 	if (!old_obj->initialized) {
@@ -2407,30 +2388,21 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 	return props;
 } /* }}} */
 
-static inline zend_object *date_object_new_interval_ex(zend_class_entry *class_type, int init_props) /* {{{ */
+static zend_object *date_object_new_interval(zend_class_entry *class_type) /* {{{ */
 {
-	php_interval_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_interval_obj) + zend_object_properties_size(class_type));
+	php_interval_obj *intern = zend_object_alloc(sizeof(php_interval_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (init_props) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &date_object_handlers_interval;
 
 	return &intern->std;
 } /* }}} */
 
-static zend_object *date_object_new_interval(zend_class_entry *class_type) /* {{{ */
-{
-	return date_object_new_interval_ex(class_type, 1);
-} /* }}} */
-
 static zend_object *date_object_clone_interval(zval *this_ptr) /* {{{ */
 {
 	php_interval_obj *old_obj = Z_PHPINTERVAL_P(this_ptr);
-	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval_ex(old_obj->std.ce, 0));
+	php_interval_obj *new_obj = php_interval_obj_from_obj(date_object_new_interval(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
 	new_obj->initialized = old_obj->initialized;
@@ -2493,31 +2465,22 @@ static HashTable *date_object_get_properties_interval(zval *object) /* {{{ */
 	return props;
 } /* }}} */
 
-static inline zend_object *date_object_new_period_ex(zend_class_entry *class_type, int init_props) /* {{{ */
+static zend_object *date_object_new_period(zend_class_entry *class_type) /* {{{ */
 {
-	php_period_obj *intern;
-
-	intern = ecalloc(1, sizeof(php_period_obj) + zend_object_properties_size(class_type));
+	php_period_obj *intern = zend_object_alloc(sizeof(php_period_obj), class_type);
 
 	zend_object_std_init(&intern->std, class_type);
-	if (init_props) {
-		object_properties_init(&intern->std, class_type);
-	}
+	object_properties_init(&intern->std, class_type);
 
 	intern->std.handlers = &date_object_handlers_period;
 
 	return &intern->std;
 } /* }}} */
 
-static zend_object *date_object_new_period(zend_class_entry *class_type) /* {{{ */
-{
-	return date_object_new_period_ex(class_type, 1);
-} /* }}} */
-
 static zend_object *date_object_clone_period(zval *this_ptr) /* {{{ */
 {
 	php_period_obj *old_obj = Z_PHPPERIOD_P(this_ptr);
-	php_period_obj *new_obj = php_period_obj_from_obj(date_object_new_period_ex(old_obj->std.ce, 0));
+	php_period_obj *new_obj = php_period_obj_from_obj(date_object_new_period(old_obj->std.ce));
 
 	zend_objects_clone_members(&new_obj->std, &old_obj->std);
 	new_obj->initialized = old_obj->initialized;
@@ -4160,9 +4123,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	double      fvalue = -1;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -4230,9 +4191,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	zval tmp_member;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -4281,9 +4240,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 	zval tmp_member, *ret;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		tmp_member = *member;
-		zval_copy_ctor(&tmp_member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}

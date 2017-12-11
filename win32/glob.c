@@ -837,7 +837,7 @@ g_opendir(str, pglob)
 	char buf[MAXPATHLEN];
 
 	if (!*str)
-		strlcpy(buf, ".", sizeof buf);
+		strlcpy(buf, ".", sizeof(buf));
 	else {
 		if (g_Ctoc(str, buf, sizeof(buf)))
 			return(NULL);

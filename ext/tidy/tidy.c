@@ -499,9 +499,8 @@ static void TIDY_CALL php_tidy_panic(ctmbstr msg)
 static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 {
 	TidyOption opt = tidyGetOptionByName(doc, optname);
-	zval conv;
-
-	ZVAL_COPY_VALUE(&conv, value);
+	zend_string *str, *tmp_str;
+	zend_long lval;
 
 	if (!opt) {
 		php_error_docref(NULL, E_NOTICE, "Unknown Tidy Configuration Option '%s'", optname);
@@ -515,37 +514,24 @@ static int _php_tidy_set_tidy_opt(TidyDoc doc, char *optname, zval *value)
 
 	switch(tidyOptGetType(opt)) {
 		case TidyString:
-			if (Z_TYPE(conv) != IS_STRING) {
-				zval_copy_ctor(&conv);
-				convert_to_string(&conv);
-			}
-			if (tidyOptSetValue(doc, tidyOptGetId(opt), Z_STRVAL(conv))) {
-				if (Z_TYPE(conv) != Z_TYPE_P(value)) {
-					zval_dtor(&conv);
-				}
+			str = zval_get_tmp_string(value, &tmp_str);
+			if (tidyOptSetValue(doc, tidyOptGetId(opt), ZSTR_VAL(str))) {
+				zend_tmp_string_release(tmp_str);
 				return SUCCESS;
 			}
-			if (Z_TYPE(conv) != Z_TYPE_P(value)) {
-				zval_dtor(&conv);
-			}
+			zend_tmp_string_release(tmp_str);
 			break;
 
 		case TidyInteger:
-			if (Z_TYPE(conv) != IS_LONG) {
-				zval_copy_ctor(&conv);
-				convert_to_long(&conv);
-			}
-			if (tidyOptSetInt(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
+			lval = zval_get_long(value);
+			if (tidyOptSetInt(doc, tidyOptGetId(opt), lval)) {
 				return SUCCESS;
 			}
 			break;
 
 		case TidyBoolean:
-			if (Z_TYPE(conv) != IS_LONG) {
-				zval_copy_ctor(&conv);
-				convert_to_long(&conv);
-			}
-			if (tidyOptSetBool(doc, tidyOptGetId(opt), Z_LVAL(conv))) {
+			lval = zval_get_long(value);
+			if (tidyOptSetBool(doc, tidyOptGetId(opt), lval)) {
 				return SUCCESS;
 			}
 			break;
@@ -685,7 +671,7 @@ static zend_object *tidy_object_new(zend_class_entry *class_type, zend_object_ha
 {
 	PHPTidyObj *intern;
 
-	intern = ecalloc(1, sizeof(PHPTidyObj) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(PHPTidyObj), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 

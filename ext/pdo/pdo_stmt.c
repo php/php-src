@@ -2223,9 +2223,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	zend_string *lc_method_name;
 	zend_object *object = *object_pp;
 
-	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
-
+	lc_method_name = zend_string_tolower(method_name);
 
 	if ((fbc = zend_hash_find_ptr(&object->ce->function_table, lc_method_name)) == NULL) {
 		pdo_stmt_t *stmt = php_pdo_stmt_fetch_object(object);
@@ -2267,7 +2265,7 @@ static zend_object *dbstmt_clone_obj(zval *zobject)
 	pdo_stmt_t *stmt;
 	pdo_stmt_t *old_stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(Z_OBJCE_P(zobject)));
+	stmt = zend_object_alloc(sizeof(pdo_stmt_t), Z_OBJCE_P(zobject));
 	zend_object_std_init(&stmt->std, Z_OBJCE_P(zobject));
 	object_properties_init(&stmt->std, Z_OBJCE_P(zobject));
 
@@ -2375,7 +2373,7 @@ zend_object *pdo_dbstmt_new(zend_class_entry *ce)
 {
 	pdo_stmt_t *stmt;
 
-	stmt = ecalloc(1, sizeof(pdo_stmt_t) + zend_object_properties_size(ce));
+	stmt = zend_object_alloc(sizeof(pdo_stmt_t), ce);
 	zend_object_std_init(&stmt->std, ce);
 	object_properties_init(&stmt->std, ce);
 
@@ -2637,8 +2635,7 @@ static union _zend_function *row_method_get(
 	zend_function *fbc;
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_alloc(ZSTR_LEN(method_name), 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
+	lc_method_name = zend_string_tolower(method_name);
 
 	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
 		zend_string_release(lc_method_name);

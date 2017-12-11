@@ -962,6 +962,9 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
+ZEND_BEGIN_ARG_INFO(arginfo_net_get_interfaces, 0)
+ZEND_END_ARG_INFO()
+
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
@@ -2955,7 +2958,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fmod,															arginfo_fmod)
 	PHP_FE(intdiv,															arginfo_intdiv)
 #ifdef HAVE_INET_NTOP
-	PHP_RAW_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
+	PHP_RAW_NAMED_FE(inet_ntop,		zif_inet_ntop,								arginfo_inet_ntop)
 #endif
 #ifdef HAVE_INET_PTON
 	PHP_RAW_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
@@ -3058,6 +3061,10 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 #ifdef HAVE_GETHOSTNAME
 	PHP_FE(gethostname,													arginfo_gethostname)
+#endif
+
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
+	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
 #endif
 
 #if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
@@ -3897,7 +3904,7 @@ PHP_FUNCTION(constant)
 #ifdef HAVE_INET_NTOP
 /* {{{ proto string inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
-PHP_NAMED_FUNCTION(php_inet_ntop)
+PHP_NAMED_FUNCTION(zif_inet_ntop)
 {
 	char *address;
 	size_t address_len;
@@ -4072,33 +4079,45 @@ PHP_FUNCTION(getenv)
 	}
 #ifdef PHP_WIN32
 	{
-		char dummybuf;
-		int size;
+		wchar_t dummybuf;
+		DWORD size;
+		wchar_t *keyw, *valw;
+
+		keyw = php_win32_cp_conv_any_to_w(str, str_len, PHP_WIN32_CP_IGNORE_LEN_P);
+		if (!keyw) {
+				RETURN_FALSE;
+		}
 
 		SetLastError(0);
 		/*If the given bugger is not large enough to hold the data, the return value is
 		the buffer size,  in characters, required to hold the string and its terminating
 		null character. We use this return value to alloc the final buffer. */
-		size = GetEnvironmentVariableA(str, &dummybuf, 0);
+		size = GetEnvironmentVariableW(keyw, &dummybuf, 0);
 		if (GetLastError() == ERROR_ENVVAR_NOT_FOUND) {
 				/* The environment variable doesn't exist. */
+				free(keyw);
 				RETURN_FALSE;
 		}
 
 		if (size == 0) {
 				/* env exists, but it is empty */
+				free(keyw);
 				RETURN_EMPTY_STRING();
 		}
 
-		ptr = emalloc(size);
-		size = GetEnvironmentVariableA(str, ptr, size);
+		valw = emalloc((size + 1) * sizeof(wchar_t));
+		size = GetEnvironmentVariableW(keyw, valw, size);
 		if (size == 0) {
 				/* has been removed between the two calls */
-				efree(ptr);
+				free(keyw);
+				efree(valw);
 				RETURN_EMPTY_STRING();
 		} else {
+			ptr = php_win32_cp_w_to_any(valw);
 			RETVAL_STRING(ptr);
-			efree(ptr);
+			free(ptr);
+			free(keyw);
+			efree(valw);
 			return;
 		}
 	}
@@ -4183,7 +4202,22 @@ PHP_FUNCTION(putenv)
 # ifndef PHP_WIN32
 	if (putenv(pe.putenv_string) == 0) { /* success */
 # else
-	error_code = SetEnvironmentVariable(pe.key, value);
+		wchar_t *keyw, *valw = NULL;
+
+		keyw = php_win32_cp_any_to_w(pe.key);
+		if (value) {
+			valw = php_win32_cp_any_to_w(value);
+		}
+		/* valw may be NULL, but the failed conversion still needs to be checked. */
+		if (!keyw || !valw && value) {
+			efree(pe.putenv_string);
+			efree(pe.key);
+			free(keyw);
+			free(valw);
+			RETURN_FALSE;
+		}
+
+	error_code = SetEnvironmentVariableW(keyw, valw);
 
 	if (error_code != 0
 # ifndef ZTS
@@ -4192,7 +4226,7 @@ PHP_FUNCTION(putenv)
 		Obviously the CRT version will be useful more often. But
 		generally, doing both brings us on the safe track at least
 		in NTS build. */
-	&& _putenv_s(pe.key, value ? value : "") == 0
+	&& _wputenv_s(keyw, valw ? valw : L"") == 0
 # endif
 	) { /* success */
 # endif
@@ -4203,10 +4237,18 @@ PHP_FUNCTION(putenv)
 			tzset();
 		}
 #endif
+#if defined(PHP_WIN32)
+		free(keyw);
+		free(valw);
+#endif
 		RETURN_TRUE;
 	} else {
 		efree(pe.putenv_string);
 		efree(pe.key);
+#if defined(PHP_WIN32)
+		free(keyw);
+		free(valw);
+#endif
 		RETURN_FALSE;
 	}
 }
@@ -4319,8 +4361,8 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
 	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
-		((args = zend_hash_str_find_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
-		(args = zend_hash_str_find_ind(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL)
+		((args = zend_hash_find_ex_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL ||
+		(args = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL)
 	) {
 		int pos = 0;
 		zval *entry;
@@ -5921,12 +5963,12 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
-					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
+					find_hash = zend_hash_index_add_new(Z_ARRVAL_P(arr), key, &hash);
 				}
 			} else {
 				if ((find_hash = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(arg1))) == NULL) {
 					array_init(&hash);
-					find_hash = zend_hash_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
+					find_hash = zend_hash_add_new(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
 				}
 			}
 

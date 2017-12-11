@@ -3250,16 +3250,13 @@ sdlPtr get_sdl(zval *this_ptr, char *uri, zend_long cache_wsdl)
 	    Z_TYPE_P(proxy_host) == IS_STRING &&
 	    (proxy_port = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "_proxy_port", sizeof("_proxy_port")-1)) != NULL &&
 	    Z_TYPE_P(proxy_port) == IS_LONG) {
-	    	zval str_port, str_proxy;
+	        zval str_proxy;
 	    	smart_str proxy = {0};
-		ZVAL_DUP(&str_port, proxy_port);
-		convert_to_string(&str_port);
 		smart_str_appends(&proxy,"tcp://");
 		smart_str_appends(&proxy,Z_STRVAL_P(proxy_host));
 		smart_str_appends(&proxy,":");
-		smart_str_appends(&proxy,Z_STRVAL(str_port));
+		smart_str_append_long(&proxy,Z_LVAL_P(proxy_port));
 		smart_str_0(&proxy);
-		zval_dtor(&str_port);
 		ZVAL_NEW_STR(&str_proxy, proxy.s);
 
 		if (!context) {

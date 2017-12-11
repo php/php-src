@@ -522,9 +522,8 @@ long_dim:
 			case IS_DOUBLE:
 			case IS_NULL:
 				if (Z_TYPE_P(value) != IS_STRING) {
-					ZVAL_COPY(&zval_copy, value);
+					ZVAL_STR(&zval_copy, zval_get_string_func(value));
 					value = &zval_copy;
-					convert_to_string(value);
 					new_value = 1;
 				}
 				break;
@@ -2166,7 +2165,7 @@ static php_sxe_object* php_sxe_object_new(zend_class_entry *ce, zend_function *f
 {
 	php_sxe_object *intern;
 
-	intern = ecalloc(1, sizeof(php_sxe_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(php_sxe_object), ce);
 
 	intern->iter.type = SXE_ITER_NONE;
 	intern->iter.nsprefix = NULL;

@@ -47,8 +47,7 @@ DBA_OPEN_FUNC(lmdb)
 	int rc, mode = 0644, flags = MDB_NOSUBDIR;
 
 	if(info->argc > 0) {
-		convert_to_long_ex(&info->argv[0]);
-		mode = Z_LVAL(info->argv[0]);
+		mode = zval_get_long(&info->argv[0]);
 
 		/* TODO implement handling of the additional flags. */
 	}

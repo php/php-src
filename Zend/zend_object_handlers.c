@@ -502,8 +502,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		if (EXPECTED(str == member) ||
 		     /* hash values are always pred-calculated here */
 		    (EXPECTED(ZSTR_H(str) == ZSTR_H(member)) &&
-		     EXPECTED(ZSTR_LEN(str) == ZSTR_LEN(member)) &&
-		     EXPECTED(memcmp(ZSTR_VAL(str), ZSTR_VAL(member), ZSTR_LEN(member)) == 0))) {
+		     EXPECTED(zend_string_equal_content(str, member)))) {
 			return &zv->u2.property_guard;
 		} else if (EXPECTED(zv->u2.property_guard == 0)) {
 			zend_string_release(Z_STR_P(zv));
@@ -551,7 +550,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_STR(&tmp_member, zval_get_string(member));
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -580,8 +579,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 				        (EXPECTED(p->key == Z_STR_P(member)) ||
 				         (EXPECTED(p->h == ZSTR_H(Z_STR_P(member))) &&
 				          EXPECTED(p->key != NULL) &&
-				          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(member)) &&
-				          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0)))) {
+				          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(member)))))) {
 						retval = &p->val;
 						goto exit;
 					}
@@ -660,13 +658,11 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			}
 			zval_ptr_dtor(&tmp_object);
 			goto exit;
-		} else {
-			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
-				zval_ptr_dtor(&tmp_object);
-				zend_throw_error(NULL, "Cannot access property started with '\\0'");
-				retval = &EG(uninitialized_zval);
-				goto exit;
-			}
+		} else if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
+			zval_ptr_dtor(&tmp_object);
+			zend_throw_error(NULL, "Cannot access property started with '\\0'");
+			retval = &EG(uninitialized_zval);
+			goto exit;
 		}
 	}
 
@@ -697,7 +693,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_STR(&tmp_member, zval_get_string(member));
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -957,7 +953,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_STR(&tmp_member, zval_get_string(member));
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -1541,7 +1537,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 
 	ZVAL_UNDEF(&tmp_member);
 	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
-		ZVAL_STR(&tmp_member, zval_get_string(member));
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 		cache_slot = NULL;
 	}
@@ -1565,8 +1561,7 @@ static int zend_std_has_property(zval *object, zval *member, int has_set_exists,
 				        (EXPECTED(p->key == Z_STR_P(member)) ||
 				         (EXPECTED(p->h == ZSTR_H(Z_STR_P(member))) &&
 				          EXPECTED(p->key != NULL) &&
-				          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(member)) &&
-				          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0)))) {
+				          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(member)))))) {
 						value = &p->val;
 						goto found;
 					}

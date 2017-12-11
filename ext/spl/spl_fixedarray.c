@@ -210,7 +210,7 @@ static zend_object *spl_fixedarray_object_new_ex(zend_class_entry *class_type, z
 	zend_class_entry     *parent = class_type;
 	int                   inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_fixedarray_object) + zend_object_properties_size(parent));
+	intern = zend_object_alloc(sizeof(spl_fixedarray_object), parent);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);

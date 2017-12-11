@@ -87,6 +87,18 @@ ZEND_TLS pcre2_match_context   *mctx = NULL;
 ZEND_TLS pcre2_match_data      *mdata = NULL;
 ZEND_TLS zend_bool              mdata_used = 0;
 ZEND_TLS uint8_t pcre2_init_ok = 0;
+#if defined(ZTS) && defined(HAVE_PCRE_JIT_SUPPORT)
+static MUTEX_T pcre_mt = NULL;
+#define php_pcre_mutex_alloc() if (tsrm_is_main_thread() && !pcre_mt) pcre_mt = tsrm_mutex_alloc();
+#define php_pcre_mutex_free() if (tsrm_is_main_thread() && pcre_mt) tsrm_mutex_free(pcre_mt); pcre_mt = NULL;
+#define php_pcre_mutex_lock() tsrm_mutex_lock(pcre_mt);
+#define php_pcre_mutex_unlock() tsrm_mutex_unlock(pcre_mt);
+#else
+#define php_pcre_mutex_alloc()
+#define php_pcre_mutex_free()
+#define php_pcre_mutex_lock()
+#define php_pcre_mutex_unlock()
+#endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
 {
@@ -239,6 +251,8 @@ static void php_pcre_shutdown_pcre2(void)
 
 static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 {
+	php_pcre_mutex_alloc();
+
 	zend_hash_init(&pcre_globals->pcre_cache, 0, NULL, php_free_pcre_cache, 1);
 	pcre_globals->backtrack_limit = 0;
 	pcre_globals->recursion_limit = 0;
@@ -256,6 +270,8 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
 	php_pcre_shutdown_pcre2();
+
+	php_pcre_mutex_free();
 }
 /* }}} */
 
@@ -420,10 +436,13 @@ static PHP_RINIT_FUNCTION(pcre)
 {
 	if (!pcre2_init_ok) {
 		/* Retry. */
+		php_pcre_mutex_lock();
 		php_pcre_init_pcre2(PCRE_G(jit));
 		if (!pcre2_init_ok) {
+			php_pcre_mutex_unlock();
 			return FAILURE;
 		}
+		php_pcre_mutex_unlock();
 	}
 
 	mdata_used = 0;
@@ -558,6 +577,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 		php_error_docref(NULL, E_WARNING,
 						 p < ZSTR_VAL(regex) + ZSTR_LEN(regex) ? "Null byte in regex" : "Empty regular expression");
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -571,6 +591,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL,E_WARNING, "Delimiter must not be alphanumeric or backslash");
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -621,6 +642,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		} else {
 			php_error_docref(NULL,E_WARNING, "No ending matching delimiter '%c' found", delimiter);
 		}
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -670,6 +692,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 				} else {
 					php_error_docref(NULL,E_WARNING, "Null byte in regex");
 				}
+				pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 				efree(pattern);
 #if HAVE_SETLOCALE
 				if (key != regex) {
@@ -714,6 +737,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 #endif
 		pcre2_get_error_message(errnumber, error, sizeof(error));
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		efree(pattern);
 		if (tables) {
 			pefree((void*)tables, 1);
@@ -733,6 +757,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		} else {
 			pcre2_get_error_message(rc, error, sizeof(error));
 			php_error_docref(NULL, E_WARNING, "JIT compilation failed: %s", error);
+			pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		}
 	}
 #endif
@@ -766,6 +791,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre2_pattern_info() error %d", rc);
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -777,6 +803,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		}
 #endif
 		php_error_docref(NULL, E_WARNING, "Internal pcre_pattern_info() error %d", rc);
+		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		return NULL;
 	}
 
@@ -2746,7 +2773,7 @@ PHPAPI void  php_pcre_grep_impl(pcre_cache_entry *pce, zval *input, zval *return
 
 		/* Perform the match */
 #ifdef HAVE_PCRE_JIT_SUPPORT
-		if (PCRE_G(jit) && (pce->preg_options && PREG_JIT)
+		if (PCRE_G(jit) && (pce->preg_options & PREG_JIT)
 		 && no_utf_check) {
 			count = pcre2_jit_match(pce->re, (PCRE2_SPTR)ZSTR_VAL(subject_str), ZSTR_LEN(subject_str), 0,
 					PCRE2_NO_UTF_CHECK, match_data, mctx);

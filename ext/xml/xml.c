@@ -1589,20 +1589,17 @@ PHP_FUNCTION(xml_parser_set_option)
 
 	switch (opt) {
 		case PHP_XML_OPTION_CASE_FOLDING:
-			convert_to_long_ex(val);
-			parser->case_folding = Z_LVAL_P(val);
+			parser->case_folding = zval_get_long(val);
 			break;
 		case PHP_XML_OPTION_SKIP_TAGSTART:
-			convert_to_long_ex(val);
-			parser->toffset = Z_LVAL_P(val);
+			parser->toffset = zval_get_long(val);
 			if (parser->toffset < 0) {
 				php_error_docref(NULL, E_NOTICE, "tagstart ignored, because it is out of range");
 				parser->toffset = 0;
 			}
 			break;
 		case PHP_XML_OPTION_SKIP_WHITE:
-			convert_to_long_ex(val);
-			parser->skipwhite = Z_LVAL_P(val);
+			parser->skipwhite = zval_get_long(val);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {
 			xml_encoding *enc;

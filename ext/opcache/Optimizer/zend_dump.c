@@ -500,6 +500,42 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 				fprintf(stderr, " (\?\?\?)");
 				break;
 		}
+	} else if (ZEND_VM_EXT_TYPE_MASK == (flags & ZEND_VM_EXT_MASK)) {
+		switch (opline->extended_value) {
+			case (1<<IS_NULL):
+				fprintf(stderr, " (null)");
+				break;
+			case (1<<IS_FALSE):
+				fprintf(stderr, " (false)");
+				break;
+			case (1<<IS_TRUE):
+				fprintf(stderr, " (true)");
+				break;
+			case (1<<IS_LONG):
+				fprintf(stderr, " (long)");
+				break;
+			case (1<<IS_DOUBLE):
+				fprintf(stderr, " (double)");
+				break;
+			case (1<<IS_STRING):
+				fprintf(stderr, " (string)");
+				break;
+			case (1<<IS_ARRAY):
+				fprintf(stderr, " (array)");
+				break;
+			case (1<<IS_OBJECT):
+				fprintf(stderr, " (object)");
+				break;
+			case (1<<IS_RESOURCE):
+				fprintf(stderr, " (resource)");
+				break;
+			case ((1<<IS_FALSE)||(1<<IS_TRUE)):
+				fprintf(stderr, " (bool)");
+				break;
+			default:
+				fprintf(stderr, " (\?\?\?)");
+				break;
+		}
 	} else if (ZEND_VM_EXT_EVAL == (flags & ZEND_VM_EXT_MASK)) {
 		switch (opline->extended_value) {
 			case ZEND_EVAL:

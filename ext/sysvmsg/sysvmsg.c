@@ -173,20 +173,16 @@ PHP_FUNCTION(msg_set_queue)
 
 		/* now pull out members of data and set them in the stat buffer */
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.uid", sizeof("msg_perm.uid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.uid = Z_LVAL_P(item);
+			stat.msg_perm.uid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.gid", sizeof("msg_perm.gid") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.gid = Z_LVAL_P(item);
+			stat.msg_perm.gid = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_perm.mode", sizeof("msg_perm.mode") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_perm.mode = Z_LVAL_P(item);
+			stat.msg_perm.mode = zval_get_long(item);
 		}
 		if ((item = zend_hash_str_find(Z_ARRVAL_P(data), "msg_qbytes", sizeof("msg_qbytes") - 1)) != NULL) {
-			convert_to_long_ex(item);
-			stat.msg_qbytes = Z_LVAL_P(item);
+			stat.msg_qbytes = zval_get_long(item);
 		}
 		if (msgctl(mq->id, IPC_SET, &stat) == 0) {
 			RETVAL_TRUE;

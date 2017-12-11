@@ -922,7 +922,7 @@ ZEND_API int ZEND_FASTCALL add_function(zval *result, zval *op1, zval *op2) /* {
 					return SUCCESS;
 				}
 				if (result != op1) {
-					ZVAL_DUP(result, op1);
+					ZVAL_ARR(result, zend_array_dup(Z_ARR_P(op1)));
 				} else {
 					SEPARATE_ARRAY(result);
 				}
@@ -2143,9 +2143,7 @@ ZEND_API int ZEND_FASTCALL zend_is_identical(zval *op1, zval *op2) /* {{{ */
 		case IS_DOUBLE:
 			return (Z_DVAL_P(op1) == Z_DVAL_P(op2));
 		case IS_STRING:
-			return (Z_STR_P(op1) == Z_STR_P(op2) ||
-				(Z_STRLEN_P(op1) == Z_STRLEN_P(op2) &&
-				 memcmp(Z_STRVAL_P(op1), Z_STRVAL_P(op2), Z_STRLEN_P(op1)) == 0));
+			return zend_string_equals(Z_STR_P(op1), Z_STR_P(op2));
 		case IS_ARRAY:
 			return (Z_ARRVAL_P(op1) == Z_ARRVAL_P(op2) ||
 				zend_hash_compare(Z_ARRVAL_P(op1), Z_ARRVAL_P(op2), (compare_func_t) hash_zval_identical_function, 1) == 0);
@@ -2606,14 +2604,14 @@ ZEND_API char* ZEND_FASTCALL zend_str_tolower_dup_ex(const char *source, size_t 
 }
 /* }}} */
 
-ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower(zend_string *str) /* {{{ */
+ZEND_API zend_string* ZEND_FASTCALL zend_string_tolower_ex(zend_string *str, int persistent) /* {{{ */
 {
 	register unsigned char *p = (unsigned char*)ZSTR_VAL(str);
 	register unsigned char *end = p + ZSTR_LEN(str);
 
 	while (p < end) {
 		if (*p != zend_tolower_ascii(*p)) {
-			zend_string *res = zend_string_alloc(ZSTR_LEN(str), 0);
+			zend_string *res = zend_string_alloc(ZSTR_LEN(str), persistent);
 			register unsigned char *r;
 
 			if (p != (unsigned char*)ZSTR_VAL(str)) {
@@ -3049,7 +3047,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const c
 	register size_t i;
 	register const char *p;
 
-	if (needle_len == 0 || (end - haystack) == 0) {
+	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;
 	}
 
@@ -3083,7 +3081,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 	register size_t i;
 	register const char *p;
 
-	if (needle_len == 0 || (end - haystack) == 0) {
+	if (needle_len == 0 || (end - haystack) < needle_len) {
 		return NULL;
 	}
 

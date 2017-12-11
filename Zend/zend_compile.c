@@ -408,8 +408,7 @@ static int lookup_cv(zend_op_array *op_array, zend_string *name) /* {{{ */{
 	while (i < op_array->last_var) {
 		if (ZSTR_VAL(op_array->vars[i]) == ZSTR_VAL(name) ||
 		    (ZSTR_H(op_array->vars[i]) == hash_value &&
-		     ZSTR_LEN(op_array->vars[i]) == ZSTR_LEN(name) &&
-		     memcmp(ZSTR_VAL(op_array->vars[i]), ZSTR_VAL(name), ZSTR_LEN(name)) == 0)) {
+		     zend_string_equal_content(op_array->vars[i], name))) {
 			return (int)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, i);
 		}
 		i++;
@@ -772,7 +771,8 @@ void zend_do_free(znode *op1) /* {{{ */
 			}
 		} else {
 			while (opline >= CG(active_op_array)->opcodes) {
-				if (opline->opcode == ZEND_FETCH_LIST &&
+				if ((opline->opcode == ZEND_FETCH_LIST_R ||
+                     opline->opcode == ZEND_FETCH_LIST_W) &&
 				    opline->op1_type == IS_VAR &&
 				    opline->op1.var == op1->u.op.var) {
 					zend_emit_op(NULL, ZEND_FREE, op1, NULL);
@@ -1062,7 +1062,7 @@ ZEND_API void function_add_ref(zend_function *function) /* {{{ */
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time) /* {{{ */
 {
 	zend_function *function, *new_function;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1072,15 +1072,18 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		rtd_key = lcname + 1;
 	}
 
-	function = zend_hash_find_ptr(function_table, Z_STR_P(rtd_key));
+	zv = zend_hash_find_ex(function_table, Z_STR_P(rtd_key), 1);
+	function = (zend_function*)Z_PTR_P(zv);
 	new_function = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
 	memcpy(new_function, function, sizeof(zend_op_array));
 	if (zend_hash_add_ptr(function_table, Z_STR_P(lcname), new_function) == NULL) {
 		int error_level = compile_time ? E_COMPILE_ERROR : E_ERROR;
 		zend_function *old_function;
 
-		if ((old_function = zend_hash_find_ptr(function_table, Z_STR_P(lcname))) != NULL
-			&& old_function->type == ZEND_USER_FUNCTION
+		zv = zend_hash_find_ex(function_table, Z_STR_P(lcname), 1);
+		ZEND_ASSERT(zv != NULL);
+		old_function = (zend_function*)Z_PTR_P(zv);
+		if (old_function->type == ZEND_USER_FUNCTION
 			&& old_function->op_array.last > 0) {
 			zend_error_noreturn(error_level, "Cannot redeclare %s() (previously declared in %s:%d)",
 						ZSTR_VAL(function->common.function_name),
@@ -1103,7 +1106,7 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1112,8 +1115,9 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 		lcname = RT_CONSTANT(opline, opline->op1);
 		rtd_key = lcname + 1;
 	}
-	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
-	ZEND_ASSERT(ce);
+	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
+	ZEND_ASSERT(zv);
+	ce = (zend_class_entry*)Z_PTR_P(zv);
 	ce->refcount++;
 	if (zend_hash_add_ptr(class_table, Z_STR_P(lcname), ce) == NULL) {
 		ce->refcount--;
@@ -1138,7 +1142,7 @@ ZEND_API zend_class_entry *do_bind_class(const zend_op_array* op_array, const ze
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time) /* {{{ */
 {
 	zend_class_entry *ce;
-	zval *lcname, *rtd_key;
+	zval *lcname, *rtd_key, *zv;
 
 	if (compile_time) {
 		lcname = CT_CONSTANT_EX(op_array, opline->op1.constant);
@@ -1148,9 +1152,9 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		rtd_key = lcname + 1;
 	}
 
-	ce = zend_hash_find_ptr(class_table, Z_STR_P(rtd_key));
+	zv = zend_hash_find_ex(class_table, Z_STR_P(rtd_key), 1);
 
-	if (!ce) {
+	if (!zv) {
 		if (!compile_time) {
 			/* If we're in compile time, in practice, it's quite possible
 			 * that we'll never reach this class declaration at runtime,
@@ -1161,6 +1165,8 @@ ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array
 		}
 		return NULL;
 	}
+
+	ce = (zend_class_entry*)Z_PTR_P(zv);
 
 	if (zend_hash_exists(class_table, Z_STR_P(lcname))) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot declare %s %s, because the name is already in use", zend_get_object_type(ce), ZSTR_VAL(ce->name));
@@ -1664,13 +1670,12 @@ int zend_register_auto_global(zend_string *name, zend_bool jit, zend_auto_global
 	zend_auto_global auto_global;
 	int retval;
 
-	auto_global.name = zend_new_interned_string(name);
+	auto_global.name = name;
 	auto_global.auto_global_callback = auto_global_callback;
 	auto_global.jit = jit;
 
 	retval = zend_hash_add_mem(CG(auto_globals), auto_global.name, &auto_global, sizeof(zend_auto_global)) != NULL ? SUCCESS : FAILURE;
 
-	zend_string_release(name);
 	return retval;
 }
 /* }}} */
@@ -2074,7 +2079,8 @@ static void zend_check_live_ranges(zend_op *opline) /* {{{ */
 			       opline->opcode == ZEND_ROPE_ADD ||
 			       opline->opcode == ZEND_ROPE_END ||
 			       opline->opcode == ZEND_END_SILENCE ||
-			       opline->opcode == ZEND_FETCH_LIST ||
+			       opline->opcode == ZEND_FETCH_LIST_R ||
+			       opline->opcode == ZEND_FETCH_LIST_W ||
 			       opline->opcode == ZEND_VERIFY_RETURN_TYPE ||
 			       opline->opcode == ZEND_BIND_LEXICAL) {
 			/* these opcodes are handled separately */
@@ -2564,7 +2570,7 @@ static int zend_try_compile_cv(znode *result, zend_ast *ast) /* {{{ */
 		if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 			name = zval_make_interned_string(zv);
 		} else {
-			name = zend_new_interned_string(zval_get_string(zv));
+			name = zend_new_interned_string(zval_get_string_func(zv));
 		}
 
 		if (zend_is_auto_global(name)) {
@@ -2652,18 +2658,13 @@ static void zend_separate_if_call_and_write(znode *node, zend_ast *ast, uint32_t
 
 void zend_delayed_compile_var(znode *result, zend_ast *ast, uint32_t type);
 void zend_compile_assign(znode *result, zend_ast *ast);
-static void zend_compile_list_assign(znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style);
 
 static inline void zend_emit_assign_znode(zend_ast *var_ast, znode *value_node) /* {{{ */
 {
 	znode dummy_node;
-	if (var_ast->kind == ZEND_AST_ARRAY) {
-		zend_compile_list_assign(&dummy_node, var_ast, value_node, var_ast->attr);
-	} else {
-		zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
-			zend_ast_create_znode(value_node));
-		zend_compile_assign(&dummy_node, assign_ast);
-	}
+	zend_ast *assign_ast = zend_ast_create(ZEND_AST_ASSIGN, var_ast,
+		zend_ast_create_znode(value_node));
+	zend_compile_assign(&dummy_node, assign_ast);
 	zend_do_free(&dummy_node);
 }
 /* }}} */
@@ -2789,6 +2790,30 @@ static void zend_verify_list_assign_target(zend_ast *var_ast, zend_bool old_styl
 }
 /* }}} */
 
+static inline void zend_emit_assign_ref_znode(zend_ast *var_ast, znode *value_node);
+
+/* Propagate refs used on leaf elements to the surrounding list() structures. */
+static zend_bool zend_propagate_list_refs(zend_ast *ast) { /* {{{ */
+	zend_ast_list *list = zend_ast_get_list(ast);
+	zend_bool has_refs = 0;
+	uint32_t i;
+
+	for (i = 0; i < list->children; ++i) {
+		zend_ast *elem_ast = list->child[i];
+
+		if (elem_ast) {
+			zend_ast *var_ast = elem_ast->child[0];
+			if (var_ast->kind == ZEND_AST_ARRAY) {
+				elem_ast->attr = zend_propagate_list_refs(var_ast);
+			}
+			has_refs |= elem_ast->attr;
+		}
+	}
+
+	return has_refs;
+}
+/* }}} */
+
 static void zend_compile_list_assign(
 		znode *result, zend_ast *ast, znode *expr_node, zend_bool old_style) /* {{{ */
 {
@@ -2814,10 +2839,6 @@ static void zend_compile_list_assign(
 			} else {
 				continue;
 			}
-		}
-
-		if (elem_ast->attr) {
-			zend_error(E_COMPILE_ERROR, "[] and list() assignments cannot be by reference");
 		}
 
 		var_ast = elem_ast->child[0];
@@ -2847,15 +2868,30 @@ static void zend_compile_list_assign(
 
 		zend_verify_list_assign_target(var_ast, old_style);
 
-		zend_emit_op(&fetch_result, ZEND_FETCH_LIST, expr_node, &dim_node);
-		zend_emit_assign_znode(var_ast, &fetch_result);
+		zend_emit_op(&fetch_result,
+			elem_ast->attr ? ZEND_FETCH_LIST_W : ZEND_FETCH_LIST_R, expr_node, &dim_node);
+
+		if (var_ast->kind == ZEND_AST_ARRAY) {
+			if (elem_ast->attr) {
+				zend_emit_op(&fetch_result, ZEND_MAKE_REF, &fetch_result, NULL);
+			}
+			zend_compile_list_assign(NULL, var_ast, &fetch_result, var_ast->attr);
+		} else if (elem_ast->attr) {
+			zend_emit_assign_ref_znode(var_ast, &fetch_result);
+		} else {
+			zend_emit_assign_znode(var_ast, &fetch_result);
+		}
 	}
 
 	if (has_elems == 0) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use empty list");
 	}
 
-	*result = *expr_node;
+	if (result) {
+		*result = *expr_node;
+	} else {
+		zend_do_free(expr_node);
+	}
 }
 /* }}} */
 
@@ -3001,17 +3037,32 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_ARRAY:
-			if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
-				/* list($a, $b) = $a should evaluate the right $a first */
-				znode cv_node;
+			if (zend_propagate_list_refs(var_ast)) {
+				if (!zend_is_variable(expr_ast)) {
+					zend_error_noreturn(E_COMPILE_ERROR,
+						"Cannot assign reference to non referencable value");
+				}
 
-				if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
-					zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
-				} else {
-					zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+				zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
+				/* MAKE_REF is usually not necessary for CVs. However, if there are
+				 * self-assignments, this forces the RHS to evaluate first. */
+				if (expr_node.op_type != IS_CV
+						|| zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					zend_emit_op(&expr_node, ZEND_MAKE_REF, &expr_node, NULL);
 				}
 			} else {
-				zend_compile_expr(&expr_node, expr_ast);
+				if (zend_list_has_assign_to_self(var_ast, expr_ast)) {
+					/* list($a, $b) = $a should evaluate the right $a first */
+					znode cv_node;
+
+					if (zend_try_compile_cv(&cv_node, expr_ast) == FAILURE) {
+						zend_compile_simple_var_no_cv(&expr_node, expr_ast, BP_VAR_R, 0);
+					} else {
+						zend_emit_op(&expr_node, ZEND_QM_ASSIGN, &cv_node, NULL);
+					}
+				} else {
+					zend_compile_expr(&expr_node, expr_ast);
+				}
 			}
 
 			zend_compile_list_assign(result, var_ast, &expr_node, var_ast->attr);
@@ -3389,7 +3440,11 @@ int zend_compile_func_typecheck(znode *result, zend_ast_list *args, uint32_t typ
 
 	zend_compile_expr(&arg_node, args->child[0]);
 	opline = zend_emit_op_tmp(result, ZEND_TYPE_CHECK, &arg_node, NULL);
-	opline->extended_value = type;
+	if (type != _IS_BOOL) {
+		opline->extended_value = (1 << type);
+	} else {
+		opline->extended_value = (1 << IS_FALSE) | (1 << IS_TRUE);
+	}
 	return SUCCESS;
 }
 /* }}} */
@@ -4747,6 +4802,10 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 		value_ast = value_ast->child[0];
 	}
 
+	if (value_ast->kind == ZEND_AST_ARRAY && zend_propagate_list_refs(value_ast)) {
+		by_ref = 1;
+	}
+
 	if (by_ref && is_variable) {
 		zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
 	} else {
@@ -4768,13 +4827,15 @@ void zend_compile_foreach(zend_ast *ast) /* {{{ */
 	if (is_this_fetch(value_ast)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 	} else if (value_ast->kind == ZEND_AST_VAR &&
-	    zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
+		zend_try_compile_cv(&value_node, value_ast) == SUCCESS) {
 		SET_NODE(opline->op2, &value_node);
 	} else {
 		opline->op2_type = IS_VAR;
 		opline->op2.var = get_temporary_variable(CG(active_op_array));
 		GET_NODE(&value_node, opline->op2);
-		if (by_ref) {
+		if (value_ast->kind == ZEND_AST_ARRAY) {
+			zend_compile_list_assign(NULL, value_ast, &value_node, value_ast->attr);
+		} else if (by_ref) {
 			zend_emit_assign_ref_znode(value_ast, &value_node);
 		} else {
 			zend_emit_assign_znode(value_ast, &value_node);
@@ -6060,9 +6121,6 @@ void zend_compile_class_const_decl(zend_ast *ast) /* {{{ */
 		}
 
 		zend_const_expr_to_zval(&value_zv, value_ast);
-		if (Z_TYPE(value_zv) == IS_STRING && !ZSTR_IS_INTERNED(Z_STR(value_zv))) {
-			zval_make_interned_string(&value_zv);
-		}
 		zend_declare_class_constant_ex(ce, name, &value_zv, ast->attr, doc_comment);
 	}
 }
@@ -6551,7 +6609,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 			zend_string *ns_name = zend_string_alloc(ZSTR_LEN(current_ns) + 1 + ZSTR_LEN(new_name), 0);
 			zend_str_tolower_copy(ZSTR_VAL(ns_name), ZSTR_VAL(current_ns), ZSTR_LEN(current_ns));
 			ZSTR_VAL(ns_name)[ZSTR_LEN(current_ns)] = '\\';
-			memcpy(ZSTR_VAL(ns_name) + ZSTR_LEN(current_ns) + 1, ZSTR_VAL(lookup_name), ZSTR_LEN(lookup_name));
+			memcpy(ZSTR_VAL(ns_name) + ZSTR_LEN(current_ns) + 1, ZSTR_VAL(lookup_name), ZSTR_LEN(lookup_name) + 1);
 
 			if (zend_have_seen_symbol(ns_name, type)) {
 				zend_check_already_in_use(type, old_name, new_name, ns_name);

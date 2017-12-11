@@ -753,6 +753,20 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
+dnl Check for asm goto support
+AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
+[AC_TRY_RUN([
+int main(void) {
+    __asm__ goto("jmp %l0\n" :::: end);
+end:
+    return 0;
+}
+  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+
+if test "$ac_cv__asm_goto" = yes; then
+  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+fi
+
 PHP_CHECK_VALGRIND
 
 dnl General settings.

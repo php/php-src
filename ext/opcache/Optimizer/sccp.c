@@ -220,6 +220,7 @@ static zend_bool can_replace_op1(
 		case ZEND_FETCH_OBJ_RW:
 		case ZEND_FETCH_OBJ_UNSET:
 		case ZEND_FETCH_OBJ_FUNC_ARG:
+		case ZEND_FETCH_LIST_W:
 		case ZEND_UNSET_DIM:
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
@@ -241,6 +242,7 @@ static zend_bool can_replace_op1(
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
 		case ZEND_ISSET_ISEMPTY_CV:
+		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
@@ -285,7 +287,7 @@ static zend_bool try_replace_op1(
 		} else {
 			// TODO: check the following special cases ???
 			switch (opline->opcode) {
-				case ZEND_FETCH_LIST:
+				case ZEND_FETCH_LIST_R:
 				case ZEND_CASE:
 				case ZEND_SWITCH_STRING:
 				case ZEND_SWITCH_LONG:
@@ -613,12 +615,8 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 	return SUCCESS;
 }
 
-static inline void ct_eval_type_check(zval *result, uint32_t type, zval *op1) {
-	if (type == _IS_BOOL) {
-		ZVAL_BOOL(result, Z_TYPE_P(op1) == IS_TRUE || Z_TYPE_P(op1) == IS_FALSE);
-	} else {
-		ZVAL_BOOL(result, Z_TYPE_P(op1) == type);
-	}
+static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op1) {
+	ZVAL_BOOL(result, (1 << Z_TYPE_P(op1)) & type_mask);
 }
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {
@@ -961,14 +959,13 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			 * even if we don't know the precise value. */
 			if (!value_known(op1)) {
 				uint32_t type = ctx->scdf.ssa->var_info[ssa_op->op1_use].type;
-				uint32_t expected_type = opline->extended_value == _IS_BOOL
-					? (MAY_BE_TRUE|MAY_BE_FALSE) : (1 << opline->extended_value);
-				if (!(type & expected_type) && !(type & MAY_BE_UNDEF)) {
+				uint32_t expected_type_mask = opline->extended_value;
+				if (!(type & expected_type_mask) && !(type & MAY_BE_UNDEF)) {
 					ZVAL_FALSE(&zv);
 					SET_RESULT(result, &zv);
 					return;
-				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type))
-						   && opline->extended_value != IS_RESOURCE) {
+				} else if (!(type & ((MAY_BE_ANY|MAY_BE_UNDEF) - expected_type_mask))
+						   && !(expected_type_mask & MAY_BE_RESOURCE)) {
 					ZVAL_TRUE(&zv);
 					SET_RESULT(result, &zv);
 					return;
@@ -1525,11 +1522,11 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			break;
 		case ZEND_FETCH_DIM_R:
 		case ZEND_FETCH_DIM_IS:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
 			SKIP_IF_TOP(op1);
 			SKIP_IF_TOP(op2);
 
-			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST)) == SUCCESS) {
+			if (ct_eval_fetch_dim(&zv, op1, op2, (opline->opcode != ZEND_FETCH_LIST_R)) == SUCCESS) {
 				SET_RESULT(result, &zv);
 				zval_ptr_dtor_nogc(&zv);
 				break;

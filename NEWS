@@ -7,6 +7,11 @@ PHP                                                                        NEWS
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
+  . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
+  . Add net_get_interfaces(). (Sara, Joe, Anatol)
+  . Added support for references in list() and array destructuring, per
+    RFC https://wiki.php.net/rfc/list_reference_assignment.
+    (David Walker)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
@@ -16,6 +21,8 @@ PHP                                                                        NEWS
     files). (petk)
   . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
     properties). (pmmaga)
+  . Fixed bug #63911 (identical trait methods raise errors during composition). 
+    (pmmaga)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -121,15 +128,23 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
     (Andrew Nester)
-  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach loop).
-    (jhdxr)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach
+    loop). (jhdxr)
+  . Fixed bug #74372 (autoloading file with syntax error uses next autoloader,
+    may hide parse error). (Nikita)
 
 - SQLite3:
   . Updated bundled libsqlite to 3.21.0. (cmb)
 
+- Soap:
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
+
 - Standard:
   . Fixed unzserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+    that getrandom() is missing). (sarciszewski)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).

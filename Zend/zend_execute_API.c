@@ -906,9 +906,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_hash_find_ptr(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
-		if (func) {
-			EG(autoload_func) = func;
+		zval *zv = zend_hash_find_ex(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD), 1);
+		if (zv) {
+			EG(autoload_func) = (zend_function*)Z_PTR_P(zv);
 		} else {
 			if (!key) {
 				zend_string_release(lc_name);
@@ -1536,7 +1536,7 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 		zval *var = EX_VAR_NUM(0);
 
 		do {
-			zval *zv = zend_hash_find(ht, *str);
+			zval *zv = zend_hash_find_ex(ht, *str, 1);
 
 			if (zv) {
 				if (Z_TYPE_P(zv) == IS_INDIRECT) {
@@ -1602,8 +1602,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 
 				do {
 					if (ZSTR_H(*str) == h &&
-					    ZSTR_LEN(*str) == ZSTR_LEN(name) &&
-					    memcmp(ZSTR_VAL(*str), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+					    zend_string_equal_content(*str, name)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
 						ZVAL_COPY_VALUE(var, value);
 						return SUCCESS;

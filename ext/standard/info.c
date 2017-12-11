@@ -235,26 +235,20 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 					zend_print_zval_r(tmp, 0);
 				}
 			} else {
-				ZVAL_COPY_VALUE(&tmp2, tmp);
-				if (Z_TYPE(tmp2) != IS_STRING) {
-					tmp = NULL;
-					zval_copy_ctor(&tmp2);
-					convert_to_string(&tmp2);
-				}
+				zend_string *tmp2;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp2);
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (ZSTR_LEN(str) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					}
 				} else {
-					php_info_print(Z_STRVAL(tmp2));
+					php_info_print(ZSTR_VAL(str));
 				}
 
-				if (!tmp) {
-					zval_dtor(&tmp2);
-				}
+				zend_tmp_string_release(tmp2);
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -766,7 +760,7 @@ PHPAPI void php_print_info_htmlhead(void)
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
 	php_info_print("<head>\n");
 	php_info_print_style();
-	php_info_print("<title>phpinfo()</title>");
+	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
@@ -1365,7 +1359,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 		return;
 	}
 
-	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
+	if (php_ini_scanned_files) {
 		RETURN_STRING(php_ini_scanned_files);
 	} else {
 		RETURN_FALSE;

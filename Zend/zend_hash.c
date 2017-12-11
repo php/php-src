@@ -465,14 +465,18 @@ ZEND_API void ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, HashPosit
 	}
 }
 
-static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key)
+static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zend_string *key, zend_bool known_hash)
 {
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
 	Bucket *p, *arData;
 
-	h = zend_string_hash_val(key);
+	if (known_hash) {
+		h = ZSTR_H(key);
+	} else {
+		h = zend_string_hash_val(key);
+	}
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
@@ -482,8 +486,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 			return p;
 		} else if (EXPECTED(p->h == h) &&
 		     EXPECTED(p->key) &&
-		     EXPECTED(ZSTR_LEN(p->key) == ZSTR_LEN(key)) &&
-		     EXPECTED(memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+		     EXPECTED(zend_string_equal_content(p->key, key))) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
@@ -546,11 +549,21 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 
 	if (UNEXPECTED(!(ht->u.flags & HASH_FLAG_INITIALIZED))) {
 		CHECK_INIT(ht, 0);
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+			zend_string_hash_val(key);
+		}
 		goto add_to_hash;
 	} else if (ht->u.flags & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+			zend_string_hash_val(key);
+		}
 	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_find_bucket(ht, key);
+		p = zend_hash_find_bucket(ht, key, 0);
 
 		if (p) {
 			zval *data;
@@ -582,6 +595,14 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 			ZVAL_COPY_VALUE(data, pData);
 			return data;
 		}
+		if (!ZSTR_IS_INTERNED(key)) {
+			zend_string_addref(key);
+			ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		}
+	} else if (!ZSTR_IS_INTERNED(key)) {
+		zend_string_addref(key);
+		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		zend_string_hash_val(key);
 	}
 
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
@@ -595,11 +616,6 @@ add_to_hash:
 	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
 	p = ht->arData + idx;
 	p->key = key;
-	if (!ZSTR_IS_INTERNED(key)) {
-		zend_string_addref(key);
-		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
-		zend_string_hash_val(key);
-	}
 	p->h = h = ZSTR_H(key);
 	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h | ht->nTableMask;
@@ -1108,8 +1124,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del(HashTable *ht, zend_string *key)
 		if ((p->key == key) ||
 			(p->h == h &&
 		     p->key &&
-		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
-		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+		     zend_string_equal_content(p->key, key))) {
 			_zend_hash_del_el_ex(ht, idx, p, prev);
 			return SUCCESS;
 		}
@@ -1139,8 +1154,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 		if ((p->key == key) ||
 			(p->h == h &&
 		     p->key &&
-		     ZSTR_LEN(p->key) == ZSTR_LEN(key) &&
-		     memcmp(ZSTR_VAL(p->key), ZSTR_VAL(key), ZSTR_LEN(key)) == 0)) {
+		     zend_string_equal_content(p->key, key))) {
 			if (Z_TYPE(p->val) == IS_INDIRECT) {
 				zval *data = Z_INDIRECT(p->val);
 
@@ -2006,7 +2020,17 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_find(const HashTable *ht, zend_string *ke
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
+	return p ? &p->val : NULL;
+}
+
+ZEND_API zval* ZEND_FASTCALL _zend_hash_find_known_hash(const HashTable *ht, zend_string *key)
+{
+	Bucket *p;
+
+	IS_CONSISTENT(ht);
+
+	p = zend_hash_find_bucket(ht, key, 1);
 	return p ? &p->val : NULL;
 }
 
@@ -2028,7 +2052,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_exists(const HashTable *ht, zend_stri
 
 	IS_CONSISTENT(ht);
 
-	p = zend_hash_find_bucket(ht, key);
+	p = zend_hash_find_bucket(ht, key, 0);
 	return p ? 1 : 0;
 }
 

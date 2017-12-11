@@ -187,7 +187,11 @@ credits files in ext/standard.
 
 9. run: ``PHPROOT=. ./makedist php 5.4.1``, this will export the tag, create configure
 and build three tarballs (gz, bz2 and xz).
-Check if the pear files are updated (phar).
+   Check if the pear files are updated (phar).
+   On some systems the behavior of GNU tar can default to produce POSIX complaint archives
+with PAX headers. As not every application is compatible with that format, creation of
+archives with PAX headers should be avoided. When packaging on such a system, the GNU tar
+can be influenced by defining the environment variable TAR_OPTIONS='--format=gnu'.
 
 10. Generate the GPG signature files for the archives.
   ``gpg -u YOUREMAIL --armor --detach-sign php-X.Y.Z.tar.xxx``
@@ -197,7 +201,8 @@ Check if the pear files are updated (phar).
     ``git submodule init;
     git submodule update;
     cd distributions;
-    git pull origin master;
+    git fetch;
+    git pull --rebase origin master;
     cd ..;
     git commit distributions;
     git push;``

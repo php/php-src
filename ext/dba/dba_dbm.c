@@ -60,8 +60,7 @@ DBA_OPEN_FUNC(dbm)
 	int filemode = 0644;
 
 	if(info->argc > 0) {
-		convert_to_long_ex(&info->argv[0]);
-		filemode = Z_LVAL(info->argv[0]);
+		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	if(info->mode == DBA_TRUNC) {

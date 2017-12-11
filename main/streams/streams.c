@@ -1742,10 +1742,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	}
 
 	if (protocol) {
-		char *tmp = estrndup(protocol, n);
-		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, (char*)tmp, n))) {
+		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, protocol, n))) {
+			char *tmp = estrndup(protocol, n);
+
 			php_strtolower(tmp, n);
-			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, (char*)tmp, n))) {
+			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, tmp, n))) {
 				char wrapper_name[32];
 
 				if (n >= sizeof(wrapper_name)) {
@@ -1758,8 +1759,8 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				wrapper = NULL;
 				protocol = NULL;
 			}
+			efree(tmp);
 		}
-		efree(tmp);
 	}
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
@@ -1833,13 +1834,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	       PG(in_user_include)) && !PG(allow_url_include)))) {
 		if (options & REPORT_ERRORS) {
 			/* protocol[n] probably isn't '\0' */
-			char *protocol_dup = estrndup(protocol, n);
 			if (!PG(allow_url_fopen)) {
-				php_error_docref(NULL, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_fopen=0", protocol_dup);
+				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_fopen=0", (int)n, protocol);
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_include=0", protocol_dup);
+				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_include=0", (int)n, protocol);
 			}
-			efree(protocol_dup);
 		}
 		return NULL;
 	}

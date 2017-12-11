@@ -69,8 +69,7 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 
@@ -157,8 +156,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 

@@ -547,14 +547,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
-	file = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_FILE));
+	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "Function name is no string");
 			smart_str_appends(str, "[unknown function]");
 		} else{
 			zend_long line;
-			tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_LINE));
+			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
@@ -577,7 +577,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
 	smart_str_appendc(str, '(');
-	tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);

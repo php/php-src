@@ -270,10 +270,7 @@ static HashTable *reflection_get_gc(zval *obj, zval **gc_data, int *gc_data_coun
 
 static zend_object *reflection_objects_new(zend_class_entry *class_type) /* {{{ */
 {
-	reflection_object *intern;
-
-	intern = ecalloc(1, sizeof(reflection_object) + zend_object_properties_size(class_type));
-	intern->zo.ce = class_type;
+	reflection_object *intern = zend_object_alloc(sizeof(reflection_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -734,7 +731,6 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 	smart_str param_indent = {0};
 	zend_function *overwrites;
 	zend_string *lc_name;
-	size_t lc_name_len;
 
 	/* TBD: Repair indenting of doc comment (or is this to be done in the parser?)
 	 * What's "wrong" is that any whitespace before the doc comment start is
@@ -758,15 +754,13 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 		if (fptr->common.scope != scope) {
 			smart_str_append_printf(str, ", inherits %s", ZSTR_VAL(fptr->common.scope->name));
 		} else if (fptr->common.scope->parent) {
-			lc_name_len = ZSTR_LEN(fptr->common.function_name);
-			lc_name = zend_string_alloc(lc_name_len, 0);
-			zend_str_tolower_copy(ZSTR_VAL(lc_name), ZSTR_VAL(fptr->common.function_name), lc_name_len);
+			lc_name = zend_string_tolower(fptr->common.function_name);
 			if ((overwrites = zend_hash_find_ptr(&fptr->common.scope->parent->function_table, lc_name)) != NULL) {
 				if (fptr->common.scope != overwrites->common.scope) {
 					smart_str_append_printf(str, ", overwrites %s", ZSTR_VAL(overwrites->common.scope->name));
 				}
 			}
-			efree(lc_name);
+			zend_string_release(lc_name);
 		}
 	}
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {

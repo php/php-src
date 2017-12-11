@@ -10,7 +10,7 @@ if (PHP_OPCACHE != "no") {
 		AC_DEFINE('HAVE_OPCACHE_FILE_CACHE', 1, 'Define to enable file based caching (experimental)');
 	}
 
-	EXTENSION('opcache', "\
+	ZEND_EXTENSION('opcache', "\
 		ZendAccelerator.c \
 		zend_accelerator_blacklist.c \
 		zend_accelerator_debug.c \

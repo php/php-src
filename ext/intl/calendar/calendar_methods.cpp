@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "../intl_cppshims.h"
 
 #include <unicode/locid.h>
