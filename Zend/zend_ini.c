@@ -496,6 +496,19 @@ ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig) /* {{{ 
 }
 /* }}} */
 
+ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_find_ptr(EG(ini_directives), name);
+	if (ini_entry) {
+		return ini_entry->value ? ini_entry->value : ZSTR_EMPTY_ALLOC();
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
 #if TONY_20070307
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 {

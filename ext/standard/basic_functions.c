@@ -5352,26 +5352,29 @@ PHP_FUNCTION(highlight_string)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	char *varname, *str;
-	size_t varname_len, len;
+	zend_string *varname, *val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(varname, varname_len)
+		Z_PARAM_STR(varname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	str = zend_ini_string(varname, (uint32_t)varname_len, 0);
+	val = zend_ini_get_value(varname);
 
-	if (!str) {
+	if (!val) {
 		RETURN_FALSE;
 	}
 
-	len = strlen(str);
-	if (len == 0) {
-		RETURN_EMPTY_STRING();
-	} else if (len == 1) {
-		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)str[0]));
+	if (ZSTR_IS_INTERNED(val)) {
+		RETVAL_INTERNED_STR(val);
+	} else if (ZSTR_LEN(val) == 0) {
+		RETVAL_EMPTY_STRING();
+	} else if (ZSTR_LEN(val) == 1) {
+		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+		ZVAL_NEW_STR(return_value, zend_string_copy(val));
+	} else {
+		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 	}
-	RETURN_STRINGL(str, len);
 }
 /* }}} */
 
@@ -5471,25 +5474,27 @@ PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
 	zend_string *new_value;
-	char *old_value;
+	zend_string *val;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(varname)
 		Z_PARAM_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string(ZSTR_VAL(varname), ZSTR_LEN(varname), 0);
+	val = zend_ini_get_value(varname);
 
 	/* copy to return here, because alter might free it! */
-	if (old_value) {
-		size_t len = strlen(old_value);
-
-		if (len == 0) {
+	if (val) {
+		if (ZSTR_IS_INTERNED(val)) {
+			RETVAL_INTERNED_STR(val);
+		} else if (ZSTR_LEN(val) == 0) {
 			RETVAL_EMPTY_STRING();
-		} else if (len == 1) {
-			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)old_value[0]));
+		} else if (ZSTR_LEN(val) == 1) {
+			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+		} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+			ZVAL_NEW_STR(return_value, zend_string_copy(val));
 		} else {
-			RETVAL_STRINGL(old_value, len);
+			ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 		}
 	} else {
 		RETVAL_FALSE;
