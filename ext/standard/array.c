@@ -4814,7 +4814,7 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 		ZVAL_UNDEF(&list->val);
 		if (hash->nNumOfElements > 1) {
 			if (behavior == INTERSECT_NORMAL) {
-				zend_sort((void *) lists[i], hash->nNumOfElements, 
+				zend_sort((void *) lists[i], hash->nNumOfElements,
 						sizeof(Bucket), intersect_data_compare_func, (swap_func_t)zend_hash_bucket_swap);
 			} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 				zend_sort((void *) lists[i], hash->nNumOfElements,
@@ -5388,6 +5388,66 @@ PHP_FUNCTION(array_diff)
 	if (Z_TYPE(args[0]) != IS_ARRAY) {
 		php_error_docref(NULL, E_WARNING, "Argument #1 is not an array");
 		RETURN_NULL();
+	}
+
+	num = zend_hash_num_elements(Z_ARRVAL(args[0]));
+	if (num == 0) {
+		for (i = 1; i < argc; i++) {
+			if (Z_TYPE(args[i]) != IS_ARRAY) {
+				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				RETURN_NULL();
+			}
+		}
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	} else if (num == 1) {
+		int found = 0;
+		zend_string *search_str, *tmp_search_str;
+
+		value = NULL;
+		ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[0]), value) {
+			break;
+		} ZEND_HASH_FOREACH_END();
+
+		if (!value) {
+			for (i = 1; i < argc; i++) {
+				if (Z_TYPE(args[i]) != IS_ARRAY) {
+					php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+					RETURN_NULL();
+				}
+			}
+			ZVAL_EMPTY_ARRAY(return_value);
+			return;
+		}
+
+		search_str = zval_get_tmp_string(value, &tmp_search_str);
+
+		for (i = 1; i < argc; i++) {
+			if (Z_TYPE(args[i]) != IS_ARRAY) {
+				php_error_docref(NULL, E_WARNING, "Argument #%d is not an array", i + 1);
+				RETURN_NULL();
+			}
+			if (!found) {
+				ZEND_HASH_FOREACH_VAL_IND(Z_ARRVAL(args[i]), value) {
+					str = zval_get_tmp_string(value, &tmp_str);
+					if (zend_string_equals(search_str, str)) {
+						zend_tmp_string_release(tmp_str);
+						found = 1;
+						break;
+					}
+					zend_tmp_string_release(tmp_str);
+				} ZEND_HASH_FOREACH_END();
+			}
+		}
+
+		zend_tmp_string_release(tmp_search_str);
+
+		if (found) {
+			ZVAL_EMPTY_ARRAY(return_value);
+		} else {
+			ZVAL_COPY(return_value, &args[0]);
+		}
+		return;
 	}
 
 	/* count number of elements */
