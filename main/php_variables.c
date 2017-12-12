@@ -534,7 +534,7 @@ static zend_always_inline int valid_environment_name(const char *name, const cha
 	const char *s;
 
 	for (s = name; s < end; s++) {
-		if (*s == ' ' | *s == '.' || *s == '[') {
+		if (*s == ' ' || *s == '.' || *s == '[') {
 			return 0;
 		}
 	}
