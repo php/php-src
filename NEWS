@@ -23,6 +23,8 @@ PHP                                                                        NEWS
     properties). (pmmaga)
   . Fixed bug #63911 (identical trait methods raise errors during composition). 
     (pmmaga)
+  . Fixed bug #75677 (Clang ignores fastcall calling convention on variadic
+    function). (Li-Wen Hsu)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
