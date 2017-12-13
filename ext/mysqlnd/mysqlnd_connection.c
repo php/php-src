@@ -2757,6 +2757,9 @@ int mysqlnd_process_tls_version(const char *tls_version)
 	// Based on process_tls_version from mysql-server
 	// see here: https://github.com/mysql/mysql-server/blob/5.7/vio/viosslfactories.c#L433
 	// Difference is that MySQL allows with negative values, basically disallowing a certain tls version instead of allowing
+	// Another difference is that the MySQL implementation allows holes in the list while we do not, taking the highest
+	// and lowest version listed and building the set between them. The reason for this can be found in the OpenSSL
+	// Documentation here: https://www.openssl.org/docs/man1.1.0/ssl/SSL_CTX_new.html
 	const char* separator = ",";
 	char *token, *lasts = NULL;
 
