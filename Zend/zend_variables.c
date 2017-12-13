@@ -36,7 +36,7 @@ ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC
 				CHECK_ZVAL_STRING_REL(str);
 				ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
 				ZEND_ASSERT(GC_REFCOUNT(str) == 0);
-				pefree(str, GC_FLAGS(str) & IS_STR_PERSISTENT);
+				pefree(str, UNEXPECTED(GC_FLAGS(str) & IS_STR_PERSISTENT));
 				break;
 			}
 		case IS_ARRAY: {
