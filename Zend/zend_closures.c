@@ -242,7 +242,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	zval params[2];
 
 	memset(&fci, 0, sizeof(zend_fcall_info));
-	memset(&fci, 0, sizeof(zend_fcall_info_cache));
+	memset(&fcc, 0, sizeof(zend_fcall_info_cache));
 
 	fci.size = sizeof(zend_fcall_info);
 	fci.retval = return_value;
