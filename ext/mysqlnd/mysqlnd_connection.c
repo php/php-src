@@ -2764,7 +2764,7 @@ int mysqlnd_process_tls_version(const char *tls_version)
 	const char *tls_version_name_list[3] = {"TLSv1", "TLSv1.1", "TLSv1.2"};
 	const char default_versions[] = "TLSv1,TLSv1.1,TLSv1.2";
 	const int tls_method_list[3] = {STREAM_CRYPTO_METHOD_TLSv1_0_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_1_CLIENT, STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT};
-	int result = 0;
+	int result = 0, lowest = -1, highest = -1;
 
 	unsigned int index = 0;
 	char tls_version_option[256] = "";
@@ -2783,11 +2783,21 @@ int mysqlnd_process_tls_version(const char *tls_version)
 	while (token) {
 		for (index = 0; index < tls_versions_count; index++) {
 			if (strcasecmp(tls_version_name_list[index], token) == 0) {
-				result |= tls_method_list[index];
+				if (lowest == -1 || index < lowest) {
+					lowest = index;
+				}
+
+				if (highest == -1 || index > highest) {
+					highest = index;
+				}
 				break;
 			}
 		}
 		token = php_strtok_r(NULL, separator, &lasts);
+	}
+
+	for (index = lowest; index <= highest; index++) {
+		result |= tls_method_list[index];
 	}
 
 	return result;
