@@ -2351,7 +2351,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 		if (clone) {
 			clone->common.fn_flags |= ZEND_ACC_CLONE;
 			if (clone->common.fn_flags & ZEND_ACC_STATIC) {
-				zend_error(error_type, "Constructor %s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
+				zend_error(error_type, "%s::%s() cannot be static", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
 			}
 			clone->common.fn_flags &= ~ZEND_ACC_ALLOW_STATIC;
 		}
@@ -2411,7 +2411,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			zend_error_noreturn(E_CORE_ERROR, "Destructor %s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(dtor->common.function_name));
 		}
 
-		if (clone && clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE && dtor->common.fn_flags & ZEND_ACC_DTOR) {
+		if (clone && (clone->common.fn_flags & ZEND_ACC_HAS_RETURN_TYPE)) {
 			zend_error_noreturn(E_CORE_ERROR, "%s::%s() cannot declare a return type", ZSTR_VAL(scope->name), ZSTR_VAL(clone->common.function_name));
 		}
 		efree((char*)lc_class_name);
