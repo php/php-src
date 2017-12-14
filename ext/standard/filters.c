@@ -1816,7 +1816,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-const const php_stream_filter_factory consumed_filter_factory = {
+static const php_stream_filter_factory consumed_filter_factory = {
 	consumed_filter_create
 };
 
