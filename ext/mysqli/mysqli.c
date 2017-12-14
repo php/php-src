@@ -498,7 +498,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API mysqli_reverse_api = {
+static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };

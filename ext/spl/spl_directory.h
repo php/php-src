@@ -61,7 +61,7 @@ typedef struct {
 
 struct _spl_filesystem_object {
 	void               *oth;
-	spl_other_handler  *oth_handler;
+	const spl_other_handler  *oth_handler;
 	char               *_path;
 	size_t             _path_len;
 	char               *orig_path;
