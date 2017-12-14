@@ -1356,7 +1356,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
 		return stream;
 	}
 
-	return PHPDBG_G(orig_url_wrap_php)->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
@@ -1399,6 +1399,7 @@ int main(int argc, char **argv) /* {{{ */
 	void* (*_malloc)(size_t);
 	void (*_free)(void*);
 	void* (*_realloc)(void*, size_t);
+	php_stream_wrapper wrapper;
 	php_stream_wrapper_ops wops;
 
 
@@ -1868,11 +1869,14 @@ phpdbg_main:
 		}
 
 		{
-			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
-			PHPDBG_G(orig_url_wrap_php) = wrapper->wops;
-			memcpy(&wops, wrapper->wops, sizeof(wops));
+			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			php_stream_wrapper *tmp_wrapper = Z_PTR_P(zv);
+			PHPDBG_G(orig_url_wrap_php) = tmp_wrapper;
+			memcpy(&wrapper, tmp_wrapper, sizeof(wrapper));
+			memcpy(&wops, tmp_wrapper->wops, sizeof(wops));
 			wops.stream_opener = phpdbg_stream_url_wrap_php;
-			wrapper->wops = &wops;
+			wrapper.wops = (const php_stream_wrapper_ops*)&wops;
+			Z_PTR_P(zv) = &wrapper;
 		}
 
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
@@ -2151,8 +2155,8 @@ phpdbg_out:
 		}
 
 		{
-			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
-			wrapper->wops = PHPDBG_G(orig_url_wrap_php);
+			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			Z_PTR_P(zv) = (void*)PHPDBG_G(orig_url_wrap_php);
 		}
 
 		zend_hash_destroy(&PHPDBG_G(file_sources));

@@ -308,7 +308,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
 
 	FILE *stdin_file;                            /* FILE pointer to stdin source file */
-	const php_stream_wrapper_ops *orig_url_wrap_php;
+	const php_stream_wrapper *orig_url_wrap_php;
 
 	char input_buffer[PHPDBG_MAX_CMD];           /* stdin input buffer */
 	int input_buflen;                            /* length of stdin input buffer */
