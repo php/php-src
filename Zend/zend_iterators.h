@@ -57,12 +57,12 @@ typedef struct _zend_object_iterator_funcs {
 struct _zend_object_iterator {
 	zend_object std;
 	zval data;
-	zend_object_iterator_funcs *funcs;
+	const zend_object_iterator_funcs *funcs;
 	zend_ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
 typedef struct _zend_class_iterator_funcs {
-	zend_object_iterator_funcs  *funcs;
+	const zend_object_iterator_funcs  *funcs;
 	union _zend_function *zf_new_iterator;
 	union _zend_function *zf_valid;
 	union _zend_function *zf_current;

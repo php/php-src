@@ -126,7 +126,7 @@ static int com_iter_move_forwards(zend_object_iterator *iter)
 }
 
 
-static zend_object_iterator_funcs com_iter_funcs = {
+static const zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_dtor,
 	com_iter_valid,
 	com_iter_get_data,

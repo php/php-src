@@ -2454,7 +2454,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 	I->key++;
 }
 
-static zend_object_iterator_funcs pdo_stmt_iter_funcs = {
+static const zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	pdo_stmt_iter_dtor,
 	pdo_stmt_iter_valid,
 	pdo_stmt_iter_get_data,

@@ -1986,7 +1986,7 @@ static void date_period_it_rewind(zend_object_iterator *iter)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs date_period_it_funcs = {
+static const zend_object_iterator_funcs date_period_it_funcs = {
 	date_period_it_dtor,
 	date_period_it_has_more,
 	date_period_it_current_data,

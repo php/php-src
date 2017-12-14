@@ -465,7 +465,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	return (zend_object_iterator*)iterator;
 }
 
-zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
+static const zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_dtor,
 	spl_recursive_it_valid,
 	spl_recursive_it_get_current_data,

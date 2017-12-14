@@ -995,7 +995,7 @@ SPL_METHOD(SplFixedArray, current)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_fixedarray_it_funcs = {
+static const zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 	spl_fixedarray_it_dtor,
 	spl_fixedarray_it_valid,
 	spl_fixedarray_it_get_current_data,

@@ -1155,7 +1155,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_array_it_funcs = {
+static const zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_dtor,
 	spl_array_it_valid,
 	spl_array_it_get_current_data,

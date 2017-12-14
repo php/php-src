@@ -1060,7 +1060,7 @@ SPL_METHOD(SplPriorityQueue, current)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_heap_it_funcs = {
+static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_heap_it_get_current_data,
@@ -1070,7 +1070,7 @@ zend_object_iterator_funcs spl_heap_it_funcs = {
 	NULL
 };
 
-zend_object_iterator_funcs spl_pqueue_it_funcs = {
+static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_pqueue_it_get_current_data,

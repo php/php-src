@@ -127,7 +127,7 @@ static void string_enum_destroy_it(zend_object_iterator *iter)
 	delete (StringEnumeration*)Z_PTR(iter->data);
 }
 
-static zend_object_iterator_funcs string_enum_object_iterator_funcs = {
+static const zend_object_iterator_funcs string_enum_object_iterator_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,

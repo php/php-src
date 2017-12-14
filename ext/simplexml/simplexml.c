@@ -2335,7 +2335,7 @@ SXE_METHOD(__construct)
 }
 /* }}} */
 
-zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
+static const zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_dtor,
 	php_sxe_iterator_valid,
 	php_sxe_iterator_current_data,

@@ -243,7 +243,7 @@ err:
 }
 /* }}} */
 
-zend_object_iterator_funcs php_dom_iterator_funcs = {
+static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_dtor,
 	php_dom_iterator_valid,
 	php_dom_iterator_current_data,

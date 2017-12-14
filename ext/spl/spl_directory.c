@@ -1621,7 +1621,7 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter);
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter);
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
+static const zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_dtor,
 	spl_filesystem_dir_it_valid,
 	spl_filesystem_dir_it_current_data,
@@ -1820,7 +1820,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ iterator handler table */
-zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
+static const zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_dtor,
 	spl_filesystem_dir_it_valid,
 	spl_filesystem_tree_it_current_data,

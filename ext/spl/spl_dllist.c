@@ -1282,7 +1282,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 } /* }}} */
 
 /* {{{ iterator handler table */
-zend_object_iterator_funcs spl_dllist_it_funcs = {
+static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_dtor,
 	spl_dllist_it_valid,
 	spl_dllist_it_get_current_data,

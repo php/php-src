@@ -1165,7 +1165,7 @@ static void zend_generator_iterator_rewind(zend_object_iterator *iterator) /* {{
 }
 /* }}} */
 
-static zend_object_iterator_funcs zend_generator_iterator_functions = {
+static const zend_object_iterator_funcs zend_generator_iterator_functions = {
 	zend_generator_iterator_dtor,
 	zend_generator_iterator_valid,
 	zend_generator_iterator_get_data,

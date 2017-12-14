@@ -224,7 +224,7 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 }
 /* }}} */
 
-zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
+static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
 	zend_user_it_valid,
 	zend_user_it_get_current_data,
