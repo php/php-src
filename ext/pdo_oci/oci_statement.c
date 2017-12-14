@@ -795,7 +795,7 @@ static int oci_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr, size_t *len
 	}
 } /* }}} */
 
-struct pdo_stmt_methods oci_stmt_methods = {
+const struct pdo_stmt_methods oci_stmt_methods = {
 	oci_stmt_dtor,
 	oci_stmt_execute,
 	oci_stmt_fetch,

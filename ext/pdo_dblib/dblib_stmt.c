@@ -554,7 +554,7 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 }
 
 
-struct pdo_stmt_methods dblib_stmt_methods = {
+const struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
 	pdo_dblib_stmt_execute,
 	pdo_dblib_stmt_fetch,

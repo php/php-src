@@ -563,7 +563,7 @@ struct pdo_bound_param_data {
 /* represents a prepared statement */
 struct _pdo_stmt_t {
 	/* driver specifics */
-	struct pdo_stmt_methods *methods;
+	const struct pdo_stmt_methods *methods;
 	void *driver_data;
 
 	/* if true, we've already successfully executed this statement at least
