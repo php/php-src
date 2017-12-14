@@ -31,7 +31,7 @@ ZEND_API int le_index_ptr;
 /* true global */
 static HashTable list_destructors;
 
-ZEND_API zval *zend_list_insert(void *ptr, int type)
+ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
 	int index;
 	zval zv;
@@ -44,7 +44,7 @@ ZEND_API zval *zend_list_insert(void *ptr, int type)
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int zend_list_delete(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
 	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -53,7 +53,7 @@ ZEND_API int zend_list_delete(zend_resource *res)
 	}
 }
 
-ZEND_API int zend_list_free(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_free(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -81,7 +81,7 @@ static void zend_resource_dtor(zend_resource *res)
 }
 
 
-ZEND_API int zend_list_close(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		return zend_list_free(res);

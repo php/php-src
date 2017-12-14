@@ -27,7 +27,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
+ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
@@ -156,7 +156,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	}
 }
 
-ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
+ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
@@ -165,7 +165,7 @@ ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;

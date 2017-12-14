@@ -26,7 +26,7 @@
 #include "zend_API.h"
 #include "zend_objects_API.h"
 
-ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
+ZEND_API void ZEND_FASTCALL zend_objects_store_init(zend_objects_store *objects, uint32_t init_size)
 {
 	objects->object_buckets = (zend_object **) emalloc(init_size * sizeof(zend_object*));
 	objects->top = 1; /* Skip 0 so that handles are true */
@@ -35,13 +35,13 @@ ZEND_API void zend_objects_store_init(zend_objects_store *objects, uint32_t init
 	memset(&objects->object_buckets[0], 0, sizeof(zend_object*));
 }
 
-ZEND_API void zend_objects_store_destroy(zend_objects_store *objects)
+ZEND_API void ZEND_FASTCALL zend_objects_store_destroy(zend_objects_store *objects)
 {
 	efree(objects->object_buckets);
 	objects->object_buckets = NULL;
 }
 
-ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
+ZEND_API void ZEND_FASTCALL zend_objects_store_call_destructors(zend_objects_store *objects)
 {
 	if (objects->top > 1) {
 		uint32_t i;
@@ -64,7 +64,7 @@ ZEND_API void zend_objects_store_call_destructors(zend_objects_store *objects)
 	}
 }
 
-ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
+ZEND_API void ZEND_FASTCALL zend_objects_store_mark_destructed(zend_objects_store *objects)
 {
 	if (objects->object_buckets && objects->top > 1) {
 		zend_object **obj_ptr = objects->object_buckets + 1;
@@ -81,7 +81,7 @@ ZEND_API void zend_objects_store_mark_destructed(zend_objects_store *objects)
 	}
 }
 
-ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown)
+ZEND_API void ZEND_FASTCALL zend_objects_store_free_object_storage(zend_objects_store *objects, zend_bool fast_shutdown)
 {
 	zend_object **obj_ptr, **end, *obj;
 
@@ -129,7 +129,7 @@ ZEND_API void zend_objects_store_free_object_storage(zend_objects_store *objects
 
 /* Store objects API */
 
-ZEND_API void zend_objects_store_put(zend_object *object)
+ZEND_API void ZEND_FASTCALL zend_objects_store_put(zend_object *object)
 {
 	int handle;
 
@@ -154,7 +154,7 @@ ZEND_API void zend_objects_store_put(zend_object *object)
             SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[handle], EG(objects_store).free_list_head);	\
 			EG(objects_store).free_list_head = handle;
 
-ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
+ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ */
 {
 	/*	Make sure we hold a reference count during the destructor call
 		otherwise, when the destructor ends the storage might be freed
@@ -200,7 +200,7 @@ ZEND_API void zend_objects_store_del(zend_object *object) /* {{{ */
 }
 /* }}} */
 
-ZEND_API zend_object_handlers *zend_get_std_object_handlers(void)
+ZEND_API zend_object_handlers* ZEND_FASTCALL zend_get_std_object_handlers(void)
 {
 	return &std_object_handlers;
 }
