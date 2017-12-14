@@ -2103,8 +2103,8 @@ ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{
 static zend_always_inline void i_free_compiled_variables(zend_execute_data *execute_data) /* {{{ */
 {
 	zval *cv = EX_VAR_NUM(0);
-	zval *end = cv + EX(func)->op_array.last_var;
-	while (EXPECTED(cv != end)) {
+	int count = EX(func)->op_array.last_var;
+	while (EXPECTED(count != 0)) {
 		if (Z_REFCOUNTED_P(cv)) {
 			zend_refcounted *r = Z_COUNTED_P(cv);
 			if (!GC_DELREF(r)) {
@@ -2115,7 +2115,8 @@ static zend_always_inline void i_free_compiled_variables(zend_execute_data *exec
 			}
 		}
 		cv++;
- 	}
+		count--;
+	}
 }
 /* }}} */
 
@@ -2201,13 +2202,13 @@ static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 static zend_always_inline void zend_init_cvs(uint32_t first, uint32_t last EXECUTE_DATA_DC)
 {
 	if (EXPECTED(first < last)) {
+		uint32_t count = last - first;
 		zval *var = EX_VAR_NUM(first);
-		zval *end = EX_VAR_NUM(last);
 
 		do {
 			ZVAL_UNDEF(var);
 			var++;
-		} while (var != end);
+		} while (--count);
 	}
 }
 
