@@ -203,7 +203,7 @@ ZEND_API void zend_register_string_constant(const char *name, size_t name_len, c
 static zend_constant *zend_get_special_constant(const char *name, size_t name_len)
 {
 	zend_constant *c;
-	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
+	static const char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 	if (!EG(current_execute_data)) {
 		return NULL;

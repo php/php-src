@@ -176,7 +176,7 @@ static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
 	return pos >= 0 ? 0 : -1;
 }
 
-php_stream_ops pdo_pgsql_lob_stream_ops = {
+const php_stream_ops pdo_pgsql_lob_stream_ops = {
 	pgsql_lob_write,
 	pgsql_lob_read,
 	pgsql_lob_close,

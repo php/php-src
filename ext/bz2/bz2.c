@@ -211,7 +211,7 @@ static int php_bz2iop_flush(php_stream *stream)
 }
 /* }}} */
 
-php_stream_ops php_stream_bz2io_ops = {
+const php_stream_ops php_stream_bz2io_ops = {
 	php_bz2iop_write, php_bz2iop_read,
 	php_bz2iop_close, php_bz2iop_flush,
 	"BZip2",
@@ -317,7 +317,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 
 /* }}} */
 
-static php_stream_wrapper_ops bzip2_stream_wops = {
+static const php_stream_wrapper_ops bzip2_stream_wops = {
 	_php_stream_bz2open,
 	NULL, /* close */
 	NULL, /* fstat */

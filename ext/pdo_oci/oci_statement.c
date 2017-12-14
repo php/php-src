@@ -719,7 +719,7 @@ static int oci_blob_seek(php_stream *stream, zend_off_t offset, int whence, zend
 	}
 }
 
-static php_stream_ops oci_blob_stream_ops = {
+static const php_stream_ops oci_blob_stream_ops = {
 	oci_blob_write,
 	oci_blob_read,
 	oci_blob_close,

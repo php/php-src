@@ -2889,7 +2889,7 @@ PHP_FUNCTION(ucwords)
 
 /* {{{ php_strtr
  */
-PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
+PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen)
 {
 	size_t i;
 
@@ -2924,7 +2924,7 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 
 /* {{{ php_strtr_ex
  */
-static zend_string *php_strtr_ex(zend_string *str, char *str_from, char *str_to, size_t trlen)
+static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const char *str_to, size_t trlen)
 {
 	zend_string *new_str = NULL;
 	size_t i;
@@ -5443,8 +5443,8 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
-static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
 /* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */

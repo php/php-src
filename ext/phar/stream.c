@@ -22,7 +22,7 @@
 #include "stream.h"
 #include "dirstream.h"
 
-php_stream_ops phar_ops = {
+const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
 	phar_stream_read,  /* read */
 	phar_stream_close, /* close */
@@ -34,7 +34,7 @@ php_stream_ops phar_ops = {
 	NULL, /* set option */
 };
 
-php_stream_wrapper_ops phar_stream_wops = {
+const php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_open_url,
 	NULL,                  /* phar_wrapper_close */
 	NULL,                  /* phar_wrapper_stat, */

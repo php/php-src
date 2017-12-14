@@ -106,7 +106,7 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
 
-php_stream_ops php_openssl_socket_ops;
+const php_stream_ops php_openssl_socket_ops;
 
 /* Certificate contexts used for server-side SNI selection */
 typedef struct _php_openssl_sni_cert_t {
@@ -2539,7 +2539,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 }
 /* }}} */
 
-php_stream_ops php_openssl_socket_ops = {
+const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_write, php_openssl_sockop_read,
 	php_openssl_sockop_close, php_openssl_sockop_flush,
 	"tcp_socket/ssl",

@@ -25,7 +25,7 @@ BEGIN_EXTERN_C()
 void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
 END_EXTERN_C()
 
-php_stream_ops phar_dir_ops = {
+const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */

@@ -713,7 +713,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (persistent_script->compiler_halt_offset != 0 &&
 		    persistent_script->script.filename) {
 			zend_string *name;
-			char haltoff[] = "__COMPILER_HALT_OFFSET__";
+			static const char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {

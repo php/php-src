@@ -1003,7 +1003,7 @@ static int php_stream_http_stream_stat(php_stream_wrapper *wrapper, php_stream *
 }
 /* }}} */
 
-static php_stream_wrapper_ops http_stream_wops = {
+static const php_stream_wrapper_ops http_stream_wops = {
 	php_stream_url_wrap_http,
 	NULL, /* stream_close */
 	php_stream_http_stream_stat,

@@ -669,7 +669,7 @@ static int php_ftp_dirstream_close(php_stream *stream, int close_handle)
 
 /* ftp dirstreams only need to support read and close operations,
    They can't be rewound because the underlying ftp stream can't be rewound. */
-static php_stream_ops php_ftp_dirstream_ops = {
+static const php_stream_ops php_ftp_dirstream_ops = {
 	NULL, /* write */
 	php_ftp_dirstream_read, /* read */
 	php_ftp_dirstream_close, /* close */
@@ -1170,7 +1170,7 @@ rmdir_errexit:
 }
 /* }}} */
 
-static php_stream_wrapper_ops ftp_stream_wops = {
+static const php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,

@@ -52,8 +52,8 @@
 # define PRINTF_DEBUG(arg)
 #endif
 
-static char hexchars[] = "0123456789abcdef";
-static char HEXCHARS[] = "0123456789ABCDEF";
+static const char hexchars[] = "0123456789abcdef";
+static const char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
 inline static void
@@ -309,7 +309,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 inline static void
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
-					 char *chartable, int expprec)
+					 const char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register zend_ulong num;

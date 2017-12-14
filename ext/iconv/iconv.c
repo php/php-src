@@ -221,7 +221,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 /* }}} */
 
 /* {{{ static globals */
-static char _generic_superset_name[] = ICONV_UCS4_ENCODING;
+static const char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 #define GENERIC_SUPERSET_NAME _generic_superset_name
 #define GENERIC_SUPERSET_NBYTES 4
 /* }}} */
@@ -2828,7 +2828,7 @@ static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 }
 /* }}} */
 
-static php_stream_filter_ops php_iconv_stream_filter_ops = {
+static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 	php_iconv_stream_filter_do_filter,
 	php_iconv_stream_filter_cleanup,
 	"convert.iconv.*"
@@ -2880,7 +2880,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 /* {{{ php_iconv_stream_register_factory */
 static php_iconv_err_t php_iconv_stream_filter_register_factory(void)
 {
-	static php_stream_filter_factory filter_factory = {
+	static const php_stream_filter_factory filter_factory = {
 		php_iconv_stream_filter_factory_create
 	};
 

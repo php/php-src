@@ -881,6 +881,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 	}
 }
 
+/* This should be "const", but phpdbg overwrite it */
 PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
 	php_stdiop_close, php_stdiop_flush,
@@ -923,7 +924,7 @@ static int php_plain_files_dirstream_rewind(php_stream *stream, zend_off_t offse
 	return 0;
 }
 
-static php_stream_ops	php_plain_files_dirstream_ops = {
+static const php_stream_ops	php_plain_files_dirstream_ops = {
 	NULL, php_plain_files_dirstream_read,
 	php_plain_files_dirstream_close, NULL,
 	"dir",
@@ -1409,7 +1410,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 }
 
 
-static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
+static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
 	NULL,

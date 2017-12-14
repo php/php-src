@@ -55,7 +55,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
-static php_stream_wrapper_ops user_stream_wops = {
+static const php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
 	NULL, /* close - the streams themselves know how */
 	NULL, /* stat - the streams themselves know how */
@@ -1542,7 +1542,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	return ret;
 }
 
-php_stream_ops php_stream_userspace_ops = {
+const php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_write, php_userstreamop_read,
 	php_userstreamop_close, php_userstreamop_flush,
 	"user-space",
@@ -1552,7 +1552,7 @@ php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_set_option,
 };
 
-php_stream_ops php_stream_userspace_dir_ops = {
+const php_stream_ops php_stream_userspace_dir_ops = {
 	NULL, /* write */
 	php_userstreamop_readdir,
 	php_userstreamop_closedir,

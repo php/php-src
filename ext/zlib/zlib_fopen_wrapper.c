@@ -100,7 +100,7 @@ static int php_gziop_flush(php_stream *stream)
 	return gzflush(self->gz_file, Z_SYNC_FLUSH);
 }
 
-php_stream_ops php_stream_gzio_ops = {
+const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
 	"ZLIB",
@@ -167,7 +167,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	return NULL;
 }
 
-static php_stream_wrapper_ops gzip_stream_wops = {
+static const php_stream_wrapper_ops gzip_stream_wops = {
 	php_stream_gzopen,
 	NULL, /* close */
 	NULL, /* stat */

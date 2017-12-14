@@ -193,7 +193,7 @@ static void php_bz2_decompress_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_bz2_decompress_ops = {
+static const php_stream_filter_ops php_bz2_decompress_ops = {
 	php_bz2_decompress_filter,
 	php_bz2_decompress_dtor,
 	"bzip2.decompress"
@@ -297,7 +297,7 @@ static void php_bz2_compress_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_bz2_compress_ops = {
+static const php_stream_filter_ops php_bz2_compress_ops = {
 	php_bz2_compress_filter,
 	php_bz2_compress_dtor,
 	"bzip2.compress"
@@ -309,7 +309,7 @@ static php_stream_filter_ops php_bz2_compress_ops = {
 
 static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_bz2_filter_data *data;
 	int status = BZ_OK;
 
@@ -399,7 +399,7 @@ static php_stream_filter *php_bz2_filter_create(const char *filtername, zval *fi
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory php_bz2_filter_factory = {
+const php_stream_filter_factory php_bz2_filter_factory = {
 	php_bz2_filter_create
 };
 /* }}} */

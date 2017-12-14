@@ -100,7 +100,7 @@ typedef struct {
 	int fd;
 } ps_files;
 
-ps_module ps_mod_files = {
+const ps_module ps_mod_files = {
 	/* New save handlers MUST use PS_MOD_UPDATE_TIMESTAMP macro */
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };

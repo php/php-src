@@ -199,7 +199,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 }
 /* }}} */
 
-php_stream_ops php_stream_zipio_ops = {
+const php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
 	php_zip_ops_close, php_zip_ops_flush,
 	"zip",
@@ -348,7 +348,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 }
 /* }}} */
 
-static php_stream_wrapper_ops zip_stream_wops = {
+static const php_stream_wrapper_ops zip_stream_wops = {
 	php_stream_zip_opener,
 	NULL,	/* close */
 	NULL,	/* fstat */

@@ -1205,7 +1205,7 @@ static int php_sqlite3_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 	return 0;
 }
 
-static php_stream_ops php_stream_sqlite3_ops = {
+static const php_stream_ops php_stream_sqlite3_ops = {
 	php_sqlite3_stream_write,
 	php_sqlite3_stream_read,
 	php_sqlite3_stream_close,

@@ -52,7 +52,7 @@ static int php_stream_output_close(php_stream *stream, int close_handle) /* {{{ 
 }
 /* }}} */
 
-php_stream_ops php_stream_output_ops = {
+const php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
 	php_stream_output_read,
 	php_stream_output_close,
@@ -137,7 +137,7 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 }
 /* }}} */
 
-php_stream_ops php_stream_input_ops = {
+const php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
 	php_stream_input_read,
 	php_stream_input_close,
@@ -423,7 +423,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 }
 /* }}} */
 
-static php_stream_wrapper_ops php_stdio_wops = {
+static const php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
 	NULL, /* close */
 	NULL, /* fstat */

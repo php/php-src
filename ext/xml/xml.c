@@ -270,7 +270,7 @@ zend_module_entry xml_module_entry = {
 /* All the encoding functions are set to NULL right now, since all
  * the encoding is currently done internally by expat/xmltok.
  */
-xml_encoding xml_encodings[] = {
+const xml_encoding xml_encodings[] = {
 	{ (XML_Char *)"ISO-8859-1", xml_decode_iso_8859_1, xml_encode_iso_8859_1 },
 	{ (XML_Char *)"US-ASCII",   xml_decode_us_ascii,   xml_encode_us_ascii   },
 	{ (XML_Char *)"UTF-8",      NULL,                  NULL                  },
@@ -537,9 +537,9 @@ inline static char xml_decode_us_ascii(unsigned short c)
 /* }}} */
 
 /* {{{ xml_get_encoding() */
-static xml_encoding *xml_get_encoding(const XML_Char *name)
+static const xml_encoding *xml_get_encoding(const XML_Char *name)
 {
-	xml_encoding *enc = &xml_encodings[0];
+	const xml_encoding *enc = &xml_encodings[0];
 
 	while (enc && enc->name) {
 		if (strcasecmp((char *)name, (char *)enc->name) == 0) {
@@ -558,7 +558,7 @@ PHP_XML_API zend_string *xml_utf8_encode(const char *s, size_t len, const XML_Ch
 	zend_string *str;
 	unsigned int c;
 	unsigned short (*encoder)(unsigned char) = NULL;
-	xml_encoding *enc = xml_get_encoding(encoding);
+	const xml_encoding *enc = xml_get_encoding(encoding);
 
 	if (enc) {
 		encoder = enc->encoding_function;
@@ -608,7 +608,7 @@ PHP_XML_API zend_string *xml_utf8_decode(const XML_Char *s, size_t len, const XM
 	size_t pos = 0;
 	unsigned int c;
 	char (*decoder)(unsigned short) = NULL;
-	xml_encoding *enc = xml_get_encoding(encoding);
+	const xml_encoding *enc = xml_get_encoding(encoding);
 	zend_string *str;
 
 	if (enc) {
@@ -1602,7 +1602,7 @@ PHP_FUNCTION(xml_parser_set_option)
 			parser->skipwhite = zval_get_long(val);
 			break;
 		case PHP_XML_OPTION_TARGET_ENCODING: {
-			xml_encoding *enc;
+			const xml_encoding *enc;
 			convert_to_string_ex(val);
 			enc = xml_get_encoding((XML_Char*)Z_STRVAL_P(val));
 			if (enc == NULL) {

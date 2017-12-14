@@ -185,17 +185,17 @@ typedef void (*cal_from_jd_func_t) (zend_long jd, int *year, int *month, int *da
 typedef char *(*cal_as_string_func_t) (int year, int month, int day);
 
 struct cal_entry_t {
-	char *name;
-	char *symbol;
+	const char *name;
+	const char *symbol;
 	cal_to_jd_func_t to_jd;
 	cal_from_jd_func_t from_jd;
 	int num_months;
 	int max_days_in_month;
-	char **month_name_short;
-	char **month_name_long;
+	const char * const * month_name_short;
+	const char * const * month_name_long;
 };
 
-static struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
+static const struct cal_entry_t cal_conversion_table[CAL_NUM_CALS] = {
 	{"Gregorian", "CAL_GREGORIAN", GregorianToSdn, SdnToGregorian, 12, 31,
 	 MonthNameShort, MonthNameLong},
 	{"Julian", "CAL_JULIAN", JulianToSdn, SdnToJulian, 12, 31,
@@ -266,7 +266,7 @@ static void _php_cal_info(int cal, zval *ret)
 {
 	zval months, smonths;
 	int i;
-	struct cal_entry_t *calendar;
+	const struct cal_entry_t *calendar;
 
 	calendar = &cal_conversion_table[cal];
 	array_init(ret);
@@ -327,7 +327,7 @@ PHP_FUNCTION(cal_info)
 PHP_FUNCTION(cal_days_in_month)
 {
 	zend_long cal, month, year;
-	struct cal_entry_t *calendar;
+	const struct cal_entry_t *calendar;
 	zend_long sdn_start, sdn_next;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lll", &cal, &month, &year) == FAILURE) {
@@ -396,7 +396,7 @@ PHP_FUNCTION(cal_from_jd)
 	zend_long jd, cal;
 	int month, day, year, dow;
 	char date[16];
-	struct cal_entry_t *calendar;
+	const struct cal_entry_t *calendar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
 		RETURN_FALSE;
@@ -695,7 +695,7 @@ PHP_FUNCTION(jddayofweek)
 {
 	zend_long julday, mode = CAL_DOW_DAYNO;
 	int day;
-	char *daynamel, *daynames;
+	const char *daynamel, *daynames;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|l", &julday, &mode) == FAILURE) {
 		RETURN_FALSE;
@@ -725,7 +725,7 @@ PHP_FUNCTION(jddayofweek)
 PHP_FUNCTION(jdmonthname)
 {
 	zend_long julday, mode;
-	char *monthname = NULL;
+	const char *monthname = NULL;
 	int month, day, year;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &julday, &mode) == FAILURE) {

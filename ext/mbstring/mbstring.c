@@ -588,7 +588,7 @@ zend_module_entry mbstring_module_entry = {
 /* }}} */
 
 /* {{{ static sapi_post_entry php_post_entries[] */
-static sapi_post_entry php_post_entries[] = {
+static const sapi_post_entry php_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
@@ -678,7 +678,7 @@ static mbfl_allocators _php_mb_allocators = {
 /* }}} */
 
 /* {{{ static sapi_post_entry mbstr_post_entries[] */
-static sapi_post_entry mbstr_post_entries[] = {
+static const sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mb_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }

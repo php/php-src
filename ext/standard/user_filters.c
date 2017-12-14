@@ -254,7 +254,7 @@ php_stream_filter_status_t userfilter_filter(
 	return ret;
 }
 
-static php_stream_filter_ops userfilter_ops = {
+static const php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
 	userfilter_dtor,
 	"user-filter"
@@ -380,7 +380,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	return filter;
 }
 
-static php_stream_filter_factory user_filter_factory = {
+static const php_stream_filter_factory user_filter_factory = {
 	user_filter_factory_create
 };
 

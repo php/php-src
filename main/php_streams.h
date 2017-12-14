@@ -161,7 +161,7 @@ typedef struct _php_stream_wrapper_ops {
 } php_stream_wrapper_ops;
 
 struct _php_stream_wrapper	{
-	php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
+	const php_stream_wrapper_ops *wops;	/* operations the wrapper can perform */
 	void *abstract;					/* context for the wrapper */
 	int is_url;						/* so that PG(allow_url_fopen) can be respected */
 };
@@ -188,7 +188,7 @@ struct _php_stream_wrapper	{
 #define PHP_STREAM_FLAG_WAS_WRITTEN					0x80000000
 
 struct _php_stream  {
-	php_stream_ops *ops;
+	const php_stream_ops *ops;
 	void *abstract;			/* convenience pointer for abstraction */
 
 	php_stream_filter_chain readfilters, writefilters;
@@ -246,7 +246,7 @@ struct _php_stream  {
 
 /* allocate a new stream for a particular ops */
 BEGIN_EXTERN_C()
-PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract,
+PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract,
 		const char *persistent_id, const char *mode STREAMS_DC);
 END_EXTERN_C()
 #define php_stream_alloc(ops, thisptr, persistent_id, mode)	_php_stream_alloc((ops), (thisptr), (persistent_id), (mode) STREAMS_CC)
@@ -593,7 +593,7 @@ PHPAPI HashTable *php_stream_get_url_stream_wrappers_hash_global(void);
 PHPAPI HashTable *_php_get_stream_filters_hash(void);
 #define php_get_stream_filters_hash()	_php_get_stream_filters_hash()
 PHPAPI HashTable *php_get_stream_filters_hash_global(void);
-extern php_stream_wrapper_ops *php_stream_user_wrapper_ops;
+extern const php_stream_wrapper_ops *php_stream_user_wrapper_ops;
 END_EXTERN_C()
 #endif
 
