@@ -576,7 +576,7 @@ int phar_zip_flush(phar_archive_data *archive, char *user_stub, zend_long len, i
 
 #ifdef PHAR_MAIN
 static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, int is_data, char **error);
-extern php_stream_wrapper php_stream_phar_wrapper;
+extern const php_stream_wrapper php_stream_phar_wrapper;
 #else
 extern HashTable cached_phars;
 extern HashTable cached_alias;

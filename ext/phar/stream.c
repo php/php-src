@@ -48,7 +48,7 @@ const php_stream_wrapper_ops phar_stream_wops = {
 	NULL
 };
 
-php_stream_wrapper php_stream_phar_wrapper = {
+const php_stream_wrapper php_stream_phar_wrapper = {
 	&phar_stream_wops,
 	NULL,
 	0 /* is_url */

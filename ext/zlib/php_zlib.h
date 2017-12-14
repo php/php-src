@@ -68,7 +68,7 @@ ZEND_END_MODULE_GLOBALS(zlib);
 
 php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 extern const php_stream_ops php_stream_gzio_ops;
-extern php_stream_wrapper php_stream_gzip_wrapper;
+extern const php_stream_wrapper php_stream_gzip_wrapper;
 extern const php_stream_filter_factory php_zlib_filter_factory;
 extern zend_module_entry php_zlib_module_entry;
 #define zlib_module_ptr &php_zlib_module_entry

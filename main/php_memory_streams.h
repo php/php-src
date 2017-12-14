@@ -59,7 +59,7 @@ END_EXTERN_C()
 extern PHPAPI const php_stream_ops php_stream_memory_ops;
 extern PHPAPI const php_stream_ops php_stream_temp_ops;
 extern PHPAPI const php_stream_ops php_stream_rfc2397_ops;
-extern PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper;
+extern PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper;
 
 #define PHP_STREAM_IS_MEMORY &php_stream_memory_ops
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops

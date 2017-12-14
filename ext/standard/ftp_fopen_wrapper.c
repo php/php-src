@@ -1184,7 +1184,7 @@ static const php_stream_wrapper_ops ftp_stream_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_ftp_wrapper =	{
 	&ftp_stream_wops,
 	NULL,
 	1 /* is_url */

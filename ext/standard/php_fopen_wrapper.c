@@ -437,7 +437,7 @@ static const php_stream_wrapper_ops php_stdio_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_php_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_php_wrapper =	{
 	&php_stdio_wops,
 	NULL,
 	0, /* is_url */

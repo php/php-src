@@ -362,7 +362,7 @@ static const php_stream_wrapper_ops zip_stream_wops = {
 	NULL	/* metadata */
 };
 
-php_stream_wrapper php_stream_zip_wrapper = {
+const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
 	0 /* is_url */

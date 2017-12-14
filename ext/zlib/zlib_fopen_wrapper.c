@@ -181,7 +181,7 @@ static const php_stream_wrapper_ops gzip_stream_wops = {
 	NULL
 };
 
-php_stream_wrapper php_stream_gzip_wrapper =	{
+const php_stream_wrapper php_stream_gzip_wrapper =	{
 	&gzip_stream_wops,
 	NULL,
 	0, /* is_url */

@@ -561,7 +561,7 @@ void php_shutdown_stream_hashes(void);
 PHP_RSHUTDOWN_FUNCTION(streams);
 
 BEGIN_EXTERN_C()
-PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper);
+PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol);
 PHPAPI int php_register_url_stream_wrapper_volatile(zend_string *protocol, php_stream_wrapper *wrapper);
 PHPAPI int php_unregister_url_stream_wrapper_volatile(zend_string *protocol);
@@ -573,7 +573,7 @@ PHPAPI const char *php_stream_locate_eol(php_stream *stream, zend_string *buf);
 #define php_stream_open_wrapper_ex(path, mode, options, opened, context)	_php_stream_open_wrapper_ex((path), (mode), (options), (opened), (context) STREAMS_CC)
 
 /* pushes an error message onto the stack for a wrapper instance */
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
 
 #define PHP_STREAM_UNCHANGED	0 /* orig stream was seekable anyway */
 #define PHP_STREAM_RELEASED		1 /* newstream should be used; origstream is no longer valid */

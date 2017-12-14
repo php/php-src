@@ -221,7 +221,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
-			stream->wrapper = &php_plain_files_wrapper;
+			stream->wrapper = (php_stream_wrapper*)&php_plain_files_wrapper;
 			stream->orig_path = estrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path));
 
 			self->temp_name = opened_path;
@@ -942,7 +942,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef HAVE_GLOB
 	if (options & STREAM_USE_GLOB_DIR_OPEN) {
-		return php_glob_stream_wrapper.wops->dir_opener(&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
+		return php_glob_stream_wrapper.wops->dir_opener((php_stream_wrapper*)&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
 	}
 #endif
 
@@ -1424,7 +1424,7 @@ static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_metadata
 };
 
-PHPAPI php_stream_wrapper php_plain_files_wrapper = {
+PHPAPI const php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
 	0

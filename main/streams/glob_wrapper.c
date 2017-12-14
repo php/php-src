@@ -275,7 +275,7 @@ static const php_stream_wrapper_ops  php_glob_stream_wrapper_ops = {
 	NULL
 };
 
-php_stream_wrapper  php_glob_stream_wrapper = {
+const php_stream_wrapper  php_glob_stream_wrapper = {
 	&php_glob_stream_wrapper_ops,
 	NULL,
 	0

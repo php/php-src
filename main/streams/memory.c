@@ -786,7 +786,7 @@ PHPAPI const php_stream_wrapper_ops php_stream_rfc2397_wops = {
 	NULL, /* stream_metadata */
 };
 
-PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper =	{
 	&php_stream_rfc2397_wops,
 	NULL,
 	1, /* is_url */

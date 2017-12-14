@@ -331,7 +331,7 @@ static const php_stream_wrapper_ops bzip2_stream_wops = {
 	NULL
 };
 
-static php_stream_wrapper php_stream_bzip2_wrapper = {
+static const php_stream_wrapper php_stream_bzip2_wrapper = {
 	&bzip2_stream_wops,
 	NULL,
 	0 /* is_url */
