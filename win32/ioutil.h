@@ -184,7 +184,7 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 	}
 
 	/* Only prefix with long if it's needed. */
-	if (mb_len > _MAX_PATH) {
+	if (mb_len >= _MAX_PATH) {
 		size_t new_mb_len;
 
 		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
