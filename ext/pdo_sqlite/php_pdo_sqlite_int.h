@@ -68,7 +68,7 @@ typedef struct {
 	unsigned done:1;
 } pdo_sqlite_stmt;
 
-extern pdo_driver_t pdo_sqlite_driver;
+extern const pdo_driver_t pdo_sqlite_driver;
 
 extern int _pdo_sqlite_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_sqlite_error(s) _pdo_sqlite_error(s, NULL, __FILE__, __LINE__)

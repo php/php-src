@@ -1533,7 +1533,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	sdlBindingPtr *bindings;
 	sdlTypePtr *types;
 	encodePtr *encoders;
-	encodePtr enc;
+	const encode *enc;
 
 	int f;
 	struct stat st;
@@ -1614,7 +1614,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	i = num_encoders;
 	enc = defaultEncoding;
 	while (enc->details.type != END_KNOWN_TYPES) {
-		encoders[++i] = enc++;
+		encoders[++i] = (encodePtr)enc++;
 	}
 
 	i = 1;
@@ -2103,7 +2103,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	int type_num = 1;
 	int encoder_num = 1;
 	int f;
-	encodePtr enc;
+	const encode *enc;
 	HashTable tmp_types;
 	HashTable tmp_encoders;
 	HashTable tmp_bindings;

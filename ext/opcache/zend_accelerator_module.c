@@ -71,7 +71,7 @@ static ZEND_FUNCTION(opcache_get_status);
 static ZEND_FUNCTION(opcache_compile_file);
 static ZEND_FUNCTION(opcache_get_configuration);
 
-static zend_function_entry accel_functions[] = {
+static const zend_function_entry accel_functions[] = {
 	/* User functions */
 	ZEND_FE(opcache_reset,					arginfo_opcache_none)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)

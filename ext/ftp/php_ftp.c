@@ -249,7 +249,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-const zend_function_entry php_ftp_functions[] = {
+static const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			arginfo_ftp_connect)
 #ifdef HAVE_FTP_SSL
 	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)

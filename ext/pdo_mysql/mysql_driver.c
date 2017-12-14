@@ -512,7 +512,7 @@ static int pdo_mysql_check_liveness(pdo_dbh_t *dbh)
 /* }}} */
 
 /* {{{ mysql_methods */
-static struct pdo_dbh_methods mysql_methods = {
+static const struct pdo_dbh_methods mysql_methods = {
 	mysql_handle_closer,
 	mysql_handle_preparer,
 	mysql_handle_doer,
@@ -819,7 +819,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_mysql_driver = {
+const pdo_driver_t pdo_mysql_driver = {
 	PDO_DRIVER_HEADER(mysql),
 	pdo_mysql_handle_factory
 };

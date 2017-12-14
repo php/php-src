@@ -783,7 +783,7 @@ ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-zend_function_entry phpdbg_user_functions[] = {
+static const zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
 	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
 	PHP_FE(phpdbg_break_file, phpdbg_break_file_arginfo)

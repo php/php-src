@@ -77,7 +77,7 @@ typedef struct {
 	Oid     oid;
 } pdo_pgsql_bound_param;
 
-extern pdo_driver_t pdo_pgsql_driver;
+extern const pdo_driver_t pdo_pgsql_driver;
 
 extern int _pdo_pgsql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, int errcode, const char *sqlstate, const char *msg, const char *file, int line);
 #define pdo_pgsql_error(d,e,z)	_pdo_pgsql_error(d, NULL, e, z, NULL, __FILE__, __LINE__)

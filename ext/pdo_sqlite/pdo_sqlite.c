@@ -32,7 +32,7 @@
 #include "zend_exceptions.h"
 
 /* {{{ pdo_sqlite_functions[] */
-const zend_function_entry pdo_sqlite_functions[] = {
+static const zend_function_entry pdo_sqlite_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

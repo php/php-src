@@ -457,7 +457,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ openssl_functions[]
  */
-const zend_function_entry openssl_functions[] = {
+static const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
 
 /* spki functions */

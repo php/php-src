@@ -743,7 +743,7 @@ ZEND_METHOD(exception, __toString)
 /* }}} */
 
 /** {{{ Throwable method definition */
-const zend_function_entry zend_funcs_throwable[] = {
+static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
 	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
 	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)

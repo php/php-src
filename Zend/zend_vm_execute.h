@@ -319,7 +319,7 @@ static const uint32_t *zend_spec_handlers;
 static const void **zend_opcode_handlers;
 static int zend_handlers_count;
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-static const void **zend_opcode_handler_funcs;
+static const void * const * zend_opcode_handler_funcs;
 static zend_op hybrid_halt_op;
 #endif
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
@@ -54485,7 +54485,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 	if (UNEXPECTED(execute_data == NULL)) {
-		static const void* labels[] = {
+		static const void * const labels[] = {
 			(void*)&&ZEND_NOP_SPEC_LABEL,
 			(void*)&&ZEND_ADD_SPEC_CONST_CONST_LABEL,
 			(void*)&&ZEND_ADD_SPEC_CONST_TMPVAR_LABEL,
@@ -63509,7 +63509,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 
 void zend_init_opcodes_handlers(void)
 {
-	static const void *labels[] = {
+	static const void * const labels[] = {
 		ZEND_NOP_SPEC_HANDLER,
 		ZEND_ADD_SPEC_CONST_CONST_HANDLER,
 		ZEND_ADD_SPEC_CONST_TMPVAR_HANDLER,

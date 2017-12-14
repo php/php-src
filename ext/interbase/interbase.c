@@ -318,7 +318,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ extension definition structures */
-const zend_function_entry ibase_functions[] = {
+static const zend_function_entry ibase_functions[] = {
 	PHP_FE(ibase_connect, 		arginfo_ibase_connect)
 	PHP_FE(ibase_pconnect, 		arginfo_ibase_pconnect)
 	PHP_FE(ibase_close, 		arginfo_ibase_close)

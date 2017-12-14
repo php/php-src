@@ -863,7 +863,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ gd_functions[]
  */
-const zend_function_entry gd_functions[] = {
+static const zend_function_entry gd_functions[] = {
 	PHP_FE(gd_info,                                 arginfo_gd_info)
 	PHP_FE(imagearc,								arginfo_imagearc)
 	PHP_FE(imageellipse,							arginfo_imageellipse)

@@ -1358,7 +1358,7 @@ PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(litespeed);
 
-zend_function_entry litespeed_functions[] = {
+static const zend_function_entry litespeed_functions[] = {
     PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
     PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
     PHP_FE(apache_get_modules,          arginfo_litespeed__void)

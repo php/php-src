@@ -624,7 +624,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in intl_functions[].
  */
-zend_function_entry intl_functions[] = {
+static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
 	PHP_FE( collator_create, collator_static_1_arg )

@@ -111,7 +111,7 @@
 
 /* {{{ php_builtin_extensions[]
  */
-static zend_module_entry *php_builtin_extensions[] = {
+static zend_module_entry * const php_builtin_extensions[] = {
 	phpext_standard_ptr
 #if HAVE_BCMATH
 	,phpext_bcmath_ptr

@@ -368,7 +368,7 @@ struct objid_query {
 
 /* {{{ snmp_functions[]
  */
-const zend_function_entry snmp_functions[] = {
+static const zend_function_entry snmp_functions[] = {
 	PHP_FE(snmpget,					arginfo_snmpget)
 	PHP_FE(snmpgetnext, 				arginfo_snmpgetnext)
 	PHP_FE(snmpwalk, 				arginfo_snmpwalk)
@@ -2226,7 +2226,7 @@ static void free_php_snmp_properties(zval *el)  /* {{{ */
 /* }}} */
 
 /* {{{ php_snmp_class_methods[] */
-static zend_function_entry php_snmp_class_methods[] = {
+static const zend_function_entry php_snmp_class_methods[] = {
 	PHP_ME(snmp,	 __construct,		arginfo_snmp_create,		ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 close,				arginfo_snmp_void,			ZEND_ACC_PUBLIC)
 	PHP_ME(snmp,	 setSecurity,		arginfo_snmp_setSecurity,	ZEND_ACC_PUBLIC)

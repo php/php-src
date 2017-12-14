@@ -131,7 +131,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ dba_functions[]
  */
-const zend_function_entry dba_functions[] = {
+static const zend_function_entry dba_functions[] = {
 	PHP_FE(dba_open, arginfo_dba_open)
 	PHP_FE(dba_popen, arginfo_dba_popen)
 	PHP_FE(dba_close, arginfo_dba_close)

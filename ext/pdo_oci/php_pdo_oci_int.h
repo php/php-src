@@ -85,7 +85,7 @@ typedef struct {
 } pdo_oci_bound_param;
 
 extern const ub4 PDO_OCI_INIT_MODE;
-extern pdo_driver_t pdo_oci_driver;
+extern const pdo_driver_t pdo_oci_driver;
 extern OCIEnv *pdo_oci_Env;
 
 ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, sword status, int isinit, const char *file, int line);

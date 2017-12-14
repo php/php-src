@@ -2713,7 +2713,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
-const zend_function_entry basic_functions[] = { /* {{{ */
+static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
 	PHP_FE(hex2bin,															arginfo_hex2bin)

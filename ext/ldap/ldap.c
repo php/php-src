@@ -4777,7 +4777,7 @@ ZEND_END_ARG_INFO()
 */
 /* {{{ ldap_functions[]
  */
-const zend_function_entry ldap_functions[] = {
+static const zend_function_entry ldap_functions[] = {
 	PHP_FE(ldap_connect,								arginfo_ldap_connect)
 	PHP_FALIAS(ldap_close,		ldap_unbind,			arginfo_ldap_resource)
 	PHP_FE(ldap_bind,									arginfo_ldap_bind)

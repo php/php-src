@@ -132,7 +132,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ wddx_functions[]
  */
-const zend_function_entry wddx_functions[] = {
+static const zend_function_entry wddx_functions[] = {
 	PHP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
 	PHP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
 	PHP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)

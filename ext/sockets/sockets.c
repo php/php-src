@@ -339,7 +339,7 @@ PHP_FUNCTION(socket_addrinfo_explain);
 
 /* {{{ sockets_functions[]
  */
-const zend_function_entry sockets_functions[] = {
+static const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			arginfo_socket_select)
 	PHP_FE(socket_create,			arginfo_socket_create)
 	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)

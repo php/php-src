@@ -96,7 +96,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-const zend_function_entry bcmath_functions[] = {
+static const zend_function_entry bcmath_functions[] = {
 	PHP_FE(bcadd,									arginfo_bcadd)
 	PHP_FE(bcsub,									arginfo_bcsub)
 	PHP_FE(bcmul,									arginfo_bcmul)

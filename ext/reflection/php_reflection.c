@@ -6705,7 +6705,7 @@ static const zend_function_entry reflection_zend_extension_functions[] = {
 };
 /* }}} */
 
-const zend_function_entry reflection_ext_functions[] = { /* {{{ */
+static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	PHP_FE_END
 }; /* }}} */
 

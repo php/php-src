@@ -59,7 +59,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in tokenizer_functions[].
  */
-const zend_function_entry tokenizer_functions[] = {
+static const zend_function_entry tokenizer_functions[] = {
 	PHP_FE(token_get_all,	arginfo_token_get_all)
 	PHP_FE(token_name,		arginfo_token_name)
 	PHP_FE_END

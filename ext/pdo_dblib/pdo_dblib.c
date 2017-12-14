@@ -35,7 +35,7 @@
 ZEND_DECLARE_MODULE_GLOBALS(dblib)
 static PHP_GINIT_FUNCTION(dblib);
 
-const zend_function_entry pdo_dblib_functions[] = {
+static const zend_function_entry pdo_dblib_functions[] = {
 	PHP_FE_END
 };
 

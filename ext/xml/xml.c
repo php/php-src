@@ -212,7 +212,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xml_parser_get_option, 0, 0, 2)
 	ZEND_ARG_INFO(0, option)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry xml_functions[] = {
+static const zend_function_entry xml_functions[] = {
 	PHP_FE(xml_parser_create,					arginfo_xml_parser_create)
 	PHP_FE(xml_parser_create_ns,				arginfo_xml_parser_create_ns)
 	PHP_FE(xml_set_object, 						arginfo_xml_set_object)

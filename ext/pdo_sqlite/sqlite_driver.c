@@ -722,7 +722,7 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 	}
 }
 
-static struct pdo_dbh_methods sqlite_methods = {
+static const struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
 	sqlite_handle_doer,
@@ -845,7 +845,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_sqlite_driver = {
+const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),
 	pdo_sqlite_handle_factory
 };

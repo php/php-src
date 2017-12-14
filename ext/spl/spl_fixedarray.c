@@ -1052,7 +1052,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_splfixedarray_void, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
+static const zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
 	SPL_ME(SplFixedArray, __construct,     arginfo_splfixedarray_construct,ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, __wakeup,        arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, count,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)

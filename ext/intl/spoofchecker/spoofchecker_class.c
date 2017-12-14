@@ -95,7 +95,7 @@ ZEND_END_ARG_INFO()
  * Every 'Spoofchecker' class method has an entry in this table
  */
 
-zend_function_entry Spoofchecker_class_functions[] = {
+static const zend_function_entry Spoofchecker_class_functions[] = {
 	PHP_ME(Spoofchecker, __construct, spoofchecker_0_args, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
 	PHP_ME(Spoofchecker, isSuspicious, spoofchecker_is_suspicous, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)

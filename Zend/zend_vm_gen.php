@@ -1630,7 +1630,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"static int zend_handlers_count;\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
 						out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-						out($f,"static const void **zend_opcode_handler_funcs;\n");
+						out($f,"static const void * const * zend_opcode_handler_funcs;\n");
 						out($f,"static zend_op hybrid_halt_op;\n");
 						out($f,"#endif\n");
 					}
@@ -1857,7 +1857,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					    }
 						$prolog = $m[1];
 						out($f,$prolog."if (UNEXPECTED(execute_data == NULL)) {\n");
-						out($f,$prolog."\tstatic const void* labels[] = {\n");
+						out($f,$prolog."\tstatic const void * const labels[] = {\n");
 						gen_labels($f, $spec, ZEND_VM_KIND_GOTO, $prolog."\t\t", $specs);
 						out($f,$prolog."\t};\n");
 						out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
@@ -1972,7 +1972,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,$prolog."zend_spec_handlers = specs;\n");
 						out($f,$prolog.$executor_name."_ex(NULL);\n");
 					} else {
-						out($f,$prolog."static const void *labels[] = {\n");
+						out($f,$prolog."static const void * const labels[] = {\n");
 						gen_labels($f, $spec, ZEND_VM_KIND_CALL, $prolog."\t", $specs, $switch_labels);
 						out($f,$prolog."};\n");
 						out($f,$prolog."static const uint32_t specs[] = {\n");

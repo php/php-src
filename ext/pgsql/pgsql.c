@@ -594,7 +594,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ pgsql_functions[]
  */
-const zend_function_entry pgsql_functions[] = {
+static const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
 	PHP_FE(pg_connect,		arginfo_pg_connect)
 	PHP_FE(pg_pconnect,		arginfo_pg_pconnect)

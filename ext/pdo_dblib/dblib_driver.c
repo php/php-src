@@ -406,7 +406,7 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 	return 1;
 }
 
-static struct pdo_dbh_methods dblib_methods = {
+static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
 	dblib_handle_doer,
@@ -600,7 +600,7 @@ cleanup:
 	return ret;
 }
 
-pdo_driver_t pdo_dblib_driver = {
+const pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)

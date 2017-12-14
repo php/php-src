@@ -226,7 +226,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 /* }}} */
 
 /* {{{ pdo_mysql_functions[] */
-const zend_function_entry pdo_mysql_functions[] = {
+static const zend_function_entry pdo_mysql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

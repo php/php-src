@@ -296,7 +296,7 @@ static PHP_METHOD(IntlIterator, valid)
 ZEND_BEGIN_ARG_INFO_EX(ainfo_se_void, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry IntlIterator_class_functions[] = {
+static const zend_function_entry IntlIterator_class_functions[] = {
 	PHP_ME(IntlIterator,	current,	ainfo_se_void,			ZEND_ACC_PUBLIC)
 	PHP_ME(IntlIterator,	key,		ainfo_se_void,			ZEND_ACC_PUBLIC)
 	PHP_ME(IntlIterator,	next,		ainfo_se_void,			ZEND_ACC_PUBLIC)

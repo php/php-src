@@ -5296,7 +5296,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_phar__void, 0)
 ZEND_END_ARG_INFO()
 
 
-zend_function_entry php_archive_methods[] = {
+static const zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
@@ -5365,7 +5365,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_data___construct, 0, 0, 1)
     ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
 
-zend_function_entry php_data_methods[] = {
+static const zend_function_entry php_data_methods[] = {
     PHP_ME(Phar, __construct,           arginfo_data___construct,  ZEND_ACC_PUBLIC)
     PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
     PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
@@ -5434,7 +5434,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_chmod, 0, 0, 1)
 	ZEND_ARG_INFO(0, perms)
 ZEND_END_ARG_INFO()
 
-zend_function_entry php_entry_methods[] = {
+static const zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, __destruct,         arginfo_phar__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        ZEND_ACC_PUBLIC)
@@ -5453,7 +5453,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_FE_END
 };
 
-zend_function_entry phar_exception_methods[] = {
+static const zend_function_entry phar_exception_methods[] = {
 	PHP_FE_END
 };
 /* }}} */

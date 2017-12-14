@@ -139,7 +139,7 @@ static ZEND_GINIT_FUNCTION(gmp);
 
 /* {{{ gmp_functions[]
  */
-const zend_function_entry gmp_functions[] = {
+static const zend_function_entry gmp_functions[] = {
 	ZEND_FE(gmp_init,		arginfo_gmp_init)
 	ZEND_FE(gmp_import,		arginfo_gmp_import)
 	ZEND_FE(gmp_export,		arginfo_gmp_export)

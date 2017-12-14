@@ -1166,7 +1166,7 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
-static struct pdo_dbh_methods pgsql_methods = {
+static const struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
 	pgsql_handle_preparer,
 	pgsql_handle_doer,
@@ -1263,7 +1263,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_pgsql_driver = {
+const pdo_driver_t pdo_pgsql_driver = {
 	PDO_DRIVER_HEADER(pgsql),
 	pdo_pgsql_handle_factory
 };

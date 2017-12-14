@@ -887,7 +887,7 @@ static PHP_METHOD(HashContext, __construct) {
 }
 /* }}} */
 
-static zend_function_entry php_hashcontext_methods[] = {
+static const zend_function_entry php_hashcontext_methods[] = {
 	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
 	PHP_FE_END
 };
@@ -1430,7 +1430,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ hash_functions[]
  */
-const zend_function_entry hash_functions[] = {
+static const zend_function_entry hash_functions[] = {
 	PHP_FE(hash,									arginfo_hash)
 	PHP_FE(hash_file,								arginfo_hash_file)
 

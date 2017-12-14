@@ -518,7 +518,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ zend_function_entry mbstring_functions[] */
-const zend_function_entry mbstring_functions[] = {
+static const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,			arginfo_mb_convert_case)
 	PHP_FE(mb_strtoupper,			arginfo_mb_strtoupper)
 	PHP_FE(mb_strtolower,			arginfo_mb_strtolower)

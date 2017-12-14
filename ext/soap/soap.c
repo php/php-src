@@ -529,7 +529,7 @@ static HashTable defEnc, defEncIndex, defEncNs;
 static void php_soap_prepare_globals()
 {
 	int i;
-	encodePtr enc;
+	const encode* enc;
 
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
@@ -544,15 +544,15 @@ static void php_soap_prepare_globals()
 			if (defaultEncoding[i].details.ns != NULL) {
 				char *ns_type;
 				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), enc);
+				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), (void*)enc);
 				efree(ns_type);
 			} else {
-				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), enc);
+				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
 			}
 		}
 		/* Index everything by number */
 		if (!zend_hash_index_exists(&defEncIndex, defaultEncoding[i].details.type)) {
-			zend_hash_index_update_ptr(&defEncIndex, defaultEncoding[i].details.type, enc);
+			zend_hash_index_update_ptr(&defEncIndex, defaultEncoding[i].details.type, (void*)enc);
 		}
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);

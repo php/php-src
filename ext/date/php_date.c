@@ -399,7 +399,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
-const zend_function_entry date_functions[] = {
+static const zend_function_entry date_functions[] = {
 	PHP_FE(strtotime, arginfo_strtotime)
 	PHP_FE(date, arginfo_date)
 	PHP_FE(idate, arginfo_idate)
@@ -474,7 +474,7 @@ static const zend_function_entry date_funcs_interface[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_date[] = {
+static const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -497,7 +497,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_immutable[] = {
+static const zend_function_entry date_funcs_immutable[] = {
 	PHP_ME(DateTimeImmutable, __construct,   arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime, __wakeup,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeImmutable, __set_state,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -520,7 +520,7 @@ const zend_function_entry date_funcs_immutable[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_timezone[] = {
+static const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME(DateTimeZone,              __construct,                 arginfo_timezone_open, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeZone,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeZone,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -533,7 +533,7 @@ const zend_function_entry date_funcs_timezone[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_interval[] = {
+static const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __construct,                 arginfo_date_interval_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateInterval,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateInterval,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -542,7 +542,7 @@ const zend_function_entry date_funcs_interval[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_period[] = {
+static const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)

@@ -435,7 +435,7 @@ enum pdo_placeholder_support {
 
 struct _pdo_dbh_t {
 	/* driver specific methods */
-	struct pdo_dbh_methods *methods;
+	const struct pdo_dbh_methods *methods;
 	/* driver specific data */
 	void *driver_data;
 
@@ -661,9 +661,9 @@ struct _pdo_row_t {
 };
 
 /* call this in MINIT to register your PDO driver */
-PDO_API int php_pdo_register_driver(pdo_driver_t *driver);
+PDO_API int php_pdo_register_driver(const pdo_driver_t *driver);
 /* call this in MSHUTDOWN to unregister your PDO driver */
-PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver);
+PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver);
 
 /* For the convenience of drivers, this function will parse a data source
  * string, of the form "name=value; name2=value2" and populate variables

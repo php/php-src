@@ -65,7 +65,7 @@ PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry spl_funcs_RecursiveIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  arginfo_recursive_it_void)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  arginfo_recursive_it_void)
 	PHP_FE_END

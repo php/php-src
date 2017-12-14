@@ -1873,9 +1873,9 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 
 /* {{{ php_register_extensions
  */
-int php_register_extensions(zend_module_entry **ptr, int count)
+int php_register_extensions(zend_module_entry * const * ptr, int count)
 {
-	zend_module_entry **end = ptr + count;
+	zend_module_entry * const * end = ptr + count;
 
 	while (ptr < end) {
 		if (*ptr) {

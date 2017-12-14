@@ -323,7 +323,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ odbc_functions[]
  */
-const zend_function_entry odbc_functions[] = {
+static const zend_function_entry odbc_functions[] = {
 	PHP_FE(odbc_autocommit, arginfo_odbc_autocommit)
 	PHP_FE(odbc_binmode, arginfo_odbc_binmode)
 	PHP_FE(odbc_close, arginfo_odbc_close)

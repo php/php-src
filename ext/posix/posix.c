@@ -224,7 +224,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ posix_functions[]
  */
-const zend_function_entry posix_functions[] = {
+static const zend_function_entry posix_functions[] = {
     /* POSIX.1, 3.3 */
 	PHP_FE(posix_kill,		arginfo_posix_kill)
 
@@ -1284,7 +1284,7 @@ PHP_FUNCTION(posix_getpwuid)
 
 /* {{{ posix_addlimit
  */
-static int posix_addlimit(int limit, char *name, zval *return_value) {
+static int posix_addlimit(int limit, const char *name, zval *return_value) {
 	int result;
 	struct rlimit rl;
 	char hard[80];
@@ -1317,9 +1317,9 @@ static int posix_addlimit(int limit, char *name, zval *return_value) {
 
 /* {{{ limits[]
  */
-struct limitlist {
+static const struct limitlist {
 	int limit;
-	char *name;
+	const char *name;
 } limits[] = {
 #ifdef RLIMIT_CORE
 	{ RLIMIT_CORE,	"core" },
@@ -1378,7 +1378,7 @@ struct limitlist {
    Get system resource consumption limits (This is not a POSIX function, but a BSDism and a SVR4ism. We compile conditionally) */
 PHP_FUNCTION(posix_getrlimit)
 {
-	struct limitlist *l = NULL;
+	const struct limitlist *l = NULL;
 
 	PHP_POSIX_NO_ARGS;
 

@@ -170,7 +170,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry pcntl_functions[] = {
+static const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,			arginfo_pcntl_void)
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)

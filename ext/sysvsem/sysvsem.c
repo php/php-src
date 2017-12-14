@@ -80,7 +80,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ sysvsem_functions[]
  */
-const zend_function_entry sysvsem_functions[] = {
+static const zend_function_entry sysvsem_functions[] = {
 	PHP_FE(sem_get,			arginfo_sem_get)
 	PHP_FE(sem_acquire,		arginfo_sem_acquire)
 	PHP_FE(sem_release,		arginfo_sem_release)

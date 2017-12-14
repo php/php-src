@@ -1753,7 +1753,7 @@ PHP_FUNCTION(apache_response_headers) /* {{{ */
 ZEND_BEGIN_ARG_INFO(arginfo_no_args, 0)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry cgi_functions[] = {
+static const zend_function_entry cgi_functions[] = {
 	PHP_FE(apache_child_terminate, arginfo_no_args)
 	PHP_FE(apache_request_headers, arginfo_no_args)
 	PHP_FE(apache_response_headers, arginfo_no_args)

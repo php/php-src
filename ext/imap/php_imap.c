@@ -468,7 +468,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ imap_functions[]
  */
-const zend_function_entry imap_functions[] = {
+static const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_open,								arginfo_imap_open)
 	PHP_FE(imap_reopen,								arginfo_imap_reopen)
 	PHP_FE(imap_close,								arginfo_imap_close)

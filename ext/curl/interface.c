@@ -454,7 +454,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ curl_functions[]
  */
-const zend_function_entry curl_functions[] = {
+static const zend_function_entry curl_functions[] = {
 	PHP_FE(curl_init,                arginfo_curl_init)
 	PHP_FE(curl_copy_handle,         arginfo_curl_copy_handle)
 	PHP_FE(curl_version,             arginfo_curl_version)

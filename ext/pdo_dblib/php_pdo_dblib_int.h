@@ -104,7 +104,7 @@ int pdo_dblib_error_handler(DBPROCESS *dbproc, int severity, int dberr,
 int pdo_dblib_msg_handler(DBPROCESS *dbproc, DBINT msgno, int msgstate,
 	int severity, char *msgtext, char *srvname, char *procname, DBUSMALLINT line);
 
-extern pdo_driver_t pdo_dblib_driver;
+extern const pdo_driver_t pdo_dblib_driver;
 extern struct pdo_stmt_methods dblib_stmt_methods;
 
 typedef struct {

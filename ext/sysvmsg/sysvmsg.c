@@ -87,7 +87,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in sysvmsg_functions[].
  */
-const zend_function_entry sysvmsg_functions[] = {
+static const zend_function_entry sysvmsg_functions[] = {
 	PHP_FE(msg_get_queue,				arginfo_msg_get_queue)
 	PHP_FE(msg_send,					arginfo_msg_send)
 	PHP_FE(msg_receive,					arginfo_msg_receive)

@@ -947,7 +947,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ spl_functions
  */
-const zend_function_entry spl_functions[] = {
+static const zend_function_entry spl_functions[] = {
 	PHP_FE(spl_classes,             arginfo_spl_classes)
 	PHP_FE(spl_autoload,            arginfo_spl_autoload)
 	PHP_FE(spl_autoload_extensions, arginfo_spl_autoload_extensions)

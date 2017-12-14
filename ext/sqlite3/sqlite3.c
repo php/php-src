@@ -1995,7 +1995,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ php_sqlite3_class_methods */
-static zend_function_entry php_sqlite3_class_methods[] = {
+static const zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		open,				arginfo_sqlite3_open, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		close,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		exec,				arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
@@ -2024,7 +2024,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 /* }}} */
 
 /* {{{ php_sqlite3_stmt_class_methods */
-static zend_function_entry php_sqlite3_stmt_class_methods[] = {
+static const zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, paramCount,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, close,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, reset,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
@@ -2039,7 +2039,7 @@ static zend_function_entry php_sqlite3_stmt_class_methods[] = {
 /* }}} */
 
 /* {{{ php_sqlite3_result_class_methods */
-static zend_function_entry php_sqlite3_result_class_methods[] = {
+static const zend_function_entry php_sqlite3_result_class_methods[] = {
 	PHP_ME(sqlite3result, numColumns,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, columnName,		arginfo_sqlite3result_columnname, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, columnType,		arginfo_sqlite3result_columntype, ZEND_ACC_PUBLIC)

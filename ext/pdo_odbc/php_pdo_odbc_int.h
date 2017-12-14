@@ -164,7 +164,7 @@ typedef struct {
 	unsigned _spare:31;
 } pdo_odbc_param;
 
-extern pdo_driver_t pdo_odbc_driver;
+extern const pdo_driver_t pdo_odbc_driver;
 extern struct pdo_stmt_methods odbc_stmt_methods;
 
 void pdo_odbc_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, PDO_ODBC_HSTMT statement, char *what, const char *file, int line);

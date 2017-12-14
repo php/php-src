@@ -78,7 +78,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ sysvshm_functions[]
  */
-const zend_function_entry sysvshm_functions[] = {
+static const zend_function_entry sysvshm_functions[] = {
 	PHP_FE(shm_attach,		arginfo_shm_attach)
 	PHP_FE(shm_remove,		arginfo_shm_detach)
 	PHP_FE(shm_detach, 		arginfo_shm_remove)

@@ -149,7 +149,7 @@ typedef struct {
 	unsigned				max_length:1;
 } pdo_mysql_stmt;
 
-extern pdo_driver_t pdo_mysql_driver;
+extern const pdo_driver_t pdo_mysql_driver;
 
 extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
