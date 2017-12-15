@@ -21,23 +21,38 @@
 #ifndef HRTIME_H
 #define HRTIME_H
 
+#define PHP_HRTIME_PLATFORM_POSIX   0
+#define PHP_HRTIME_PLATFORM_WINDOWS 0
+#define PHP_HRTIME_PLATFORM_APPLE   0
+#define PHP_HRTIME_PLATFORM_HPUX    0
+#define PHP_HRTIME_PLATFORM_AIX     0
+
 #if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) && defined(CLOCK_MONOTONIC)
-#define HRTIME_AVAILABLE 1
+/* XXX might need additional sysconf check. */
+# undef  PHP_HRTIME_PLATFORM_POSIX
+# define PHP_HRTIME_PLATFORM_POSIX 1
 #elif defined(_WIN32) || defined(_WIN64)
-#define HRTIME_AVAILABLE 1
+# undef  PHP_HRTIME_PLATFORM_WINDOWS
+# define PHP_HRTIME_PLATFORM_WINDOWS 1
 #elif defined(__APPLE__)
-#define HRTIME_AVAILABLE 1
+# undef  PHP_HRTIME_PLATFORM_APPLE
+# define PHP_HRTIME_PLATFORM_APPLE 1
 #elif (defined(__hpux) || defined(hpux)) || ((defined(__sun__) || defined(__sun) || defined(sun)) && (defined(__SVR4) || defined(__svr4__)))
-#define HRTIME_AVAILABLE 1
-#else
-#define HRTIME_AVAILABLE 0
+# undef  PHP_HRTIME_PLATFORM_HPUX
+# define PHP_HRTIME_PLATFORM_HPUX 1
+#elif defined(_AIX)
+# undef  PHP_HRTIME_PLATFORM_AIX
+# define PHP_HRTIME_PLATFORM_AIX 1
 #endif
 
-#if HRTIME_AVAILABLE
-	PHP_MINIT_FUNCTION(hrtime);
-	PHP_MSHUTDOWN_FUNCTION(hrtime);
+#define HRTIME_AVAILABLE (PHP_HRTIME_PLATFORM_POSIX || PHP_HRTIME_PLATFORM_WINDOWS || PHP_HRTIME_PLATFORM_APPLE || PHP_HRTIME_PLATFORM_HPUX || PHP_HRTIME_PLATFORM_AIX)
 
-	PHP_FUNCTION(hrtime);
-#endif /* HRTIME_AVAILABLE */
+typedef uint64_t php_hrtime_t;
+
+PHPAPI php_hrtime_t php_hrtime_current(void);
+
+PHP_MINIT_FUNCTION(hrtime);
+
+PHP_FUNCTION(hrtime);
 
 #endif /* HRTIME_H */

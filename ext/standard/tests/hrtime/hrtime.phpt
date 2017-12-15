@@ -3,20 +3,24 @@ Test hrtime() aligns with microtime()
 --FILE--
 <?php
 
-$hrtime = hrtime();
-$microtime = microtime(1);
+$m0 = microtime(true);
+$h0 = hrtime(true);
+for ($i = 0; $i < 1024*1024; $i++);
+$h1 = hrtime(true);
+$m1 = microtime(true);
 
-usleep(500000);
+$d0 = ($m1 - $m0)*1000000000.0;
+$d1 = $h1 - $h0;
 
-$hrdiff = hrtime() - $hrtime;
-$microdiff = microtime(1) - $microtime;
+/* Relative uncertainty. */
+$d = abs($d0 - $d1)/$d1;
 
-if (abs($hrdiff - $microdiff) > 0.0001) {
-    print "fail";
+if ($d > 0.05) {
+	print "FAIL, $d";
 } else {
-    print "OK";
+	print "OK, $d";
 }
 
 ?>
---EXPECT--
-OK
+--EXPECTF--
+OK, %f
