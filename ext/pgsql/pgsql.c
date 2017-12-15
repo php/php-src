@@ -1659,26 +1659,21 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
-				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
-				add_assoc_string(return_value, "server_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
-				add_assoc_string(return_value, "client_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
-				add_assoc_string(return_value, "is_superuser", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
-				add_assoc_string(return_value, "session_authorization", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
-				add_assoc_string(return_value, "DateStyle", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
-				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
-				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
-				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
-				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "application_name");
-				add_assoc_string(return_value, "application_name", tmp ? tmp : "");
+
+#define PHP_PQ_COPY_PARAM(_x) tmp = (char*)PQparameterStatus(pgsql, _x); \
+	if(tmp) add_assoc_string(return_value, _x, tmp); \
+	else add_assoc_null(return_value, _x);
+
+				PHP_PQ_COPY_PARAM("server_encoding");
+				PHP_PQ_COPY_PARAM("client_encoding");
+				PHP_PQ_COPY_PARAM("is_superuser");
+				PHP_PQ_COPY_PARAM("session_authorization");
+				PHP_PQ_COPY_PARAM("DateStyle");
+				PHP_PQ_COPY_PARAM("IntervalStyle");
+				PHP_PQ_COPY_PARAM("TimeZone");
+				PHP_PQ_COPY_PARAM("integer_datetimes");
+				PHP_PQ_COPY_PARAM("standard_conforming_strings");
+				PHP_PQ_COPY_PARAM("application_name");
 			}
 #endif
 #endif
