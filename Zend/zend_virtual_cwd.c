@@ -1226,19 +1226,6 @@ static size_t tsrm_win32_realpath_quick(char *path, size_t len, time_t *t) /* {{
 		return bucket->realpath_len;
 	}
 
-#if 0
-		if (!php_win32_ioutil_realpath_ex0(resolved_path, tmp_resolved_path, &info)) {
-			if (CWD_REALPATH == use_realpath) {
-				DWORD err = GetLastError();
-				SET_ERRNO_FROM_WIN32_CODE(err);
-				return 1;
-			} else {
-				/* Fallback to expand only to retain BC. */
-				path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
-			}
-		} else {
-#endif
-
 	if (!php_win32_ioutil_realpath_ex0(path, tmp_resolved_path, &info)) {
 		DWORD err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
