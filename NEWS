@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #75679 (Path 260 character problem). (Anatol)
 
+- PGSQL:
+  . Fixed bug #75671 (pg_version() crashes when called on a connection to
+    cockroach). (magicaltux at gmail dot com)
+
 04 Jan 2018, PHP 7.1.13
 
 - Core:
