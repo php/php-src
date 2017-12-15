@@ -225,7 +225,7 @@ static const char *zend_vm_opcodes_names[199] = {
 
 static uint32_t zend_vm_opcodes_flags[199] = {
 	0x00000000,
-	0x80000707,
+	0x00000707,
 	0x00000707,
 	0x80000707,
 	0x00000707,
