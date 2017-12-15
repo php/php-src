@@ -317,7 +317,7 @@ static zend_uchar zend_user_opcodes[256] = {0,
 #define SPEC_RULE_COMMUTATIVE  0x00800000
 
 static const uint32_t *zend_spec_handlers;
-static const void **zend_opcode_handlers;
+static const void * const *zend_opcode_handlers;
 static int zend_handlers_count;
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 static const void * const * zend_opcode_handler_funcs;
