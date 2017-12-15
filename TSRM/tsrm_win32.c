@@ -766,15 +766,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 	}
 }/*}}}*/
 
-TSRM_API char *realpath(char *orig_path, char *buffer)
-{/*{{{*/
-	int ret = GetFullPathName(orig_path, _MAX_PATH, buffer, NULL);
-	if(!ret || ret > _MAX_PATH) {
-		return NULL;
-	}
-	return buffer;
-}/*}}}*/
-
 #if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
 {

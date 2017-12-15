@@ -40,6 +40,7 @@
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
 #include "win32/time.h"
+#include "win32/ioutil.h"
 #endif
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;

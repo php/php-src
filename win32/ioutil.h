@@ -258,6 +258,8 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
+PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved);
+PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
@@ -580,6 +582,59 @@ __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	}
 
 	return ret;
+}/*}}}*/
+
+#define HAVE_REALPATH 1
+PW32IO char *realpath(const char *path, char *resolved);
+
+__forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)
+{/*{{{*/
+	wchar_t retw[PHP_WIN32_IOUTIL_MAXPATHLEN];
+	char *reta;
+	size_t reta_len;
+
+	PHP_WIN32_IOUTIL_INIT_W(path)
+	if (!pathw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return NULL;
+	}
+
+	if (NULL == php_win32_ioutil_realpath_w_ex0(pathw, retw, info)) {
+		DWORD err = GetLastError();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	reta = php_win32_cp_conv_w_to_any(retw, PHP_WIN32_CP_IGNORE_LEN, &reta_len);
+	if (!reta || reta_len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
+		DWORD err = GetLastError();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	if (NULL == resolved) {
+		/* ret is expected to be either NULL or a buffer of capable size. */
+		resolved = (char *) malloc(reta_len + 1);
+		if (!resolved) {
+			free(reta);
+			PHP_WIN32_IOUTIL_CLEANUP_W()
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return NULL;
+		}
+	}
+	memmove(resolved, reta, reta_len+1);
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+	free(reta);
+
+	return resolved;
+}/*}}}*/
+
+__forceinline static char *php_win32_ioutil_realpath(const char *path, char *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath_ex0(path, resolved, NULL);
 }/*}}}*/
 
 #ifdef __cplusplus

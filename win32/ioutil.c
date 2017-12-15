@@ -719,6 +719,95 @@ PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
 	return ret;
 }/*}}}*/
 
+static size_t php_win32_ioutil_realpath_h(HANDLE *h, wchar_t **resolved)
+{/*{{{*/
+	wchar_t ret[PHP_WIN32_IOUTIL_MAXPATHLEN], *ret_real;
+	DWORD ret_len, ret_real_len;
+
+	ret_len = GetFinalPathNameByHandleW(h, ret, PHP_WIN32_IOUTIL_MAXPATHLEN-1, FILE_NAME_NORMALIZED | VOLUME_NAME_DOS);
+	if (0 == ret_len) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return (size_t)-1;
+	} else if (ret_len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return (size_t)-1;
+	}
+
+	if (NULL == *resolved) {
+		/* ret is expected to be either NULL or a buffer of capable size. */
+		*resolved = (wchar_t *) malloc((ret_len + 1)*sizeof(wchar_t));
+		if (!*resolved) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return (size_t)-1;
+		}
+	}
+
+	ret_real = ret;
+	ret_real_len = ret_len;
+	if (0 == wcsncmp(ret, PHP_WIN32_IOUTIL_UNC_PATH_PREFIXW, PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW)) {
+		ret_real += (PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW - 2);
+		ret_real[0] = L'\\';
+		ret_real_len -= (PHP_WIN32_IOUTIL_UNC_PATH_PREFIX_LENW - 2);
+	} else if (PHP_WIN32_IOUTIL_IS_LONG_PATHW(ret, ret_len)) {
+		ret_real += PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+		ret_real_len -= PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW;
+	}
+	memmove(*resolved, ret_real, (ret_real_len+1)*sizeof(wchar_t));
+
+	return ret_real_len;
+}/*}}}*/
+
+PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath_w_ex0(path, resolved, NULL);
+}/*}}}*/
+
+PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info)
+{/*{{{*/
+	HANDLE h;
+	size_t ret_len;
+
+	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, NULL, 0)
+
+	h = CreateFileW(path,
+					0,
+					0,
+					NULL,
+					OPEN_EXISTING,
+					FILE_ATTRIBUTE_NORMAL | FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
+	if (INVALID_HANDLE_VALUE == h) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	ret_len = php_win32_ioutil_realpath_h(h, &resolved);
+	if ((size_t)-1 == ret_len) {
+		DWORD err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	if (NULL != info && !GetFileInformationByHandle(h, info)) {
+		DWORD err = GetLastError();
+		CloseHandle(h);
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	CloseHandle(h);
+
+	return resolved;
+}/*}}}*/
+
+PW32IO char *realpath(const char *path, char *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath(path, resolved);
+}/*}}}*/
+
 /*
  * Local variables:
  * tab-width: 4

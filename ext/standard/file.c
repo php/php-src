@@ -50,6 +50,7 @@
 # include "win32/param.h"
 # include "win32/winutil.h"
 # include "win32/fnmatch.h"
+# include "win32/ioutil.h"
 #else
 # if HAVE_SYS_PARAM_H
 #  include <sys/param.h>

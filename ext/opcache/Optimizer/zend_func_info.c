@@ -28,6 +28,9 @@
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
 #include "zend_inference.h"
+#ifdef _WIN32
+#include "win32/ioutil.h"
+#endif
 
 typedef uint32_t (*info_func_t)(const zend_call_info *call_info, const zend_ssa *ssa);
 

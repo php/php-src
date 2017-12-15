@@ -6,7 +6,6 @@
 
 #define HAVE_UTIME 1
 #define HAVE_ALLOCA 1
-#define HAVE_REALPATH 1
 
 #include <malloc.h>
 #include <stdlib.h>
