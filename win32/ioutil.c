@@ -670,9 +670,6 @@ PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
 {/*{{{*/
 	FILE *ret;
 	char modea[16] = {0};
-#if 0
-	char *modea;
-#endif
 	int err = 0, fd, flags, i = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, NULL, 0)
@@ -682,24 +679,10 @@ PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode)
 		modea[i] = (char)mode[i];
 		i++;
 	}
-#if 0
-	modea = php_win32_cp_w_to_any(mode);
-	if (!modea) {
-		err = GetLastError();
-		SET_ERRNO_FROM_WIN32_CODE(err);
-		return NULL;
-	}
-#endif
 	if (SUCCESS != php_stream_parse_fopen_modes(modea, &flags)) {
-#if 0
-		free(modea);
-#endif
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
 		return NULL;
 	}
-#if 0
-	free(modea);
-#endif
 
 	fd = php_win32_ioutil_open_w(path, flags, 0666);
 	if (0 > fd) {
