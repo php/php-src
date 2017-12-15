@@ -1006,7 +1006,7 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 	}
 
 	if (isset($extra_spec["COMMUTATIVE"]) &&
-	    $commutative_order[$op1] > $commutative_order[$op2]) {
+	    $commutative_order[$op1] < $commutative_order[$op2]) {
 	    // Skip duplicate commutative handlers
 		return true;
 	}
@@ -1162,7 +1162,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			$spec_extra = call_user_func_array("array_merge", extra_spec_handler($dsc) ?: array(array()));
 			$flags = extra_spec_flags($spec_extra);
 			if ($flags) {
-				$specs[$num] .= " | ".implode("|", $flags);
+				$specs[$num] .= " | " . implode(" | ", $flags);
 			}
 			if ($num >= 256) {
 				$opcodes[$num]['spec_code'] = $specs[$num];
@@ -1463,6 +1463,9 @@ function extra_spec_flags($extra_spec) {
 	if (isset($extra_spec["DIM_OBJ"])) {
 		$s[] = "SPEC_RULE_DIM_OBJ";
 	}
+	if (isset($extra_spec["COMMUTATIVE"])) {
+		$s[] = "SPEC_RULE_COMMUTATIVE";
+	}
 	return $s;
 }
 
@@ -1624,6 +1627,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
 					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
 					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
+					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void **zend_opcode_handlers;\n");
@@ -2193,7 +2197,7 @@ function gen_vm($def, $skel) {
 			}
 			$opcodes[$orig_code]['type_spec'][$code] = $condition;
 			$used_extra_spec["TYPE"] = 1;
-			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot);
+			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot,"is_type_spec"=>true);
 			if (isset($m[10])) {
 				$opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[10]);
 				if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
@@ -2575,7 +2579,17 @@ function gen_vm($def, $skel) {
 	// Generate zend_vm_get_opcode_handler() function
 	out($f, "ZEND_API void zend_vm_set_opcode_handler(zend_op* op)\n");
 	out($f, "{\n");
-	out($f, "\top->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);\n");
+	if (!ZEND_VM_SPEC) {
+		out($f, "\top->handler = zend_vm_get_opcode_handler(op->opcode, op);\n");
+	} else {
+		out($f, "\tuint32_t spec = zend_spec_handlers[op->opcode];\n\n");
+		out($f, "\tif (spec & SPEC_RULE_COMMUTATIVE) {\n");
+		out($f, "\t\tif (op->op1_type < op->op2_type) {\n");
+		out($f, "\t\t\tzend_swap_operands(op);\n");
+		out($f, "\t\t}\n");
+		out($f, "\t}\n");
+		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(spec, op);\n");
+	}
 	out($f, "}\n\n");
 
 	// Generate zend_vm_set_opcode_handler_ex() function
@@ -2592,6 +2606,11 @@ function gen_vm($def, $skel) {
 				if (isset($dsc['type_spec'])) {
 					$orig_op = $dsc['op'];
 					out($f, "\t\tcase $orig_op:\n");
+					if (isset($dsc["spec"]["COMMUTATIVE"])) {
+						out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+						out($f, "\t\t\t\tzend_swap_operands(op);\n");
+						out($f, "\t\t\t}\n");
+					}
 					$first = true;
 					foreach($dsc['type_spec'] as $code => $condition) {
 						$condition = format_condition($condition);
@@ -2608,8 +2627,8 @@ function gen_vm($def, $skel) {
 							out($f, "\t\t\t\t}\n");
 						}
 						out($f, "\t\t\t\tspec = ${spec_dsc['spec_code']};\n");
-						if (isset($spec_dsc["spec"]["COMMUTATIVE"])) {
-							out($f, "\t\t\t\tif (op->op1_type > op->op2_type) {\n");
+						if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
+							out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
 							out($f, "\t\t\t\t\tzend_swap_operands(op);\n");
 							out($f, "\t\t\t\t}\n");
 						}
@@ -2619,6 +2638,22 @@ function gen_vm($def, $skel) {
 					}
 					out($f, "\t\t\tbreak;\n");
 				}
+			}
+			$has_commutative = false;
+			foreach($opcodes as $code => $dsc) {
+				if (!isset($dsc['is_type_spec']) &&
+				    !isset($dsc['type_spec']) &&
+				    isset($dsc["spec"]["COMMUTATIVE"])) {
+					$orig_op = $dsc['op'];
+					out($f, "\t\tcase $orig_op:\n");
+					$has_commutative = true;
+				}
+			}
+			if ($has_commutative) {
+				out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+				out($f, "\t\t\t\tzend_swap_operands(op);\n");
+				out($f, "\t\t\t}\n");
+				out($f, "\t\t\tbreak;\n");
 			}
 			out($f, "\t\tdefault:\n");
 			out($f, "\t\t\tbreak;\n");
