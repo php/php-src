@@ -14,7 +14,7 @@ if test "$PHP_CURL" != "no"; then
     dnl using pkg-config output
 
     AC_MSG_CHECKING(for libcurl.pc)
-    if test "$PHP_CURL" == "yes" -o "$PHP_CURL" == "/usr"; then
+    if test "$PHP_CURL" = "yes" -o "$PHP_CURL" = "/usr"; then
       PKNAME=libcurl
       AC_MSG_RESULT(using default path)
     elif test -r $PHP_CURL/$PHP_LIBDIR/pkgconfig/libcurl.pc; then
