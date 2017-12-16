@@ -1569,8 +1569,13 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* flags are identical, now the value needs to be checked */
 						if (flags & ZEND_ACC_STATIC) {
-							not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
-											  &ce->traits[i]->default_static_members_table[property_info->offset]);
+							if (Z_ISREF(ce->default_static_members_table[coliding_prop->offset])) {
+								not_compatible = fast_is_not_identical_function(Z_REFVAL(ce->default_static_members_table[coliding_prop->offset]),
+												  &ce->traits[i]->default_static_members_table[property_info->offset]);
+							} else {
+								not_compatible = fast_is_not_identical_function(&ce->default_static_members_table[coliding_prop->offset],
+												  &ce->traits[i]->default_static_members_table[property_info->offset]);
+							}
 						} else {
 							not_compatible = fast_is_not_identical_function(&ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)],
 											  &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
