@@ -39,6 +39,8 @@ PHP                                                                        NEWS
     (Laruence, Dmitry)
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
+  . Fixed bug #75681 (Warning: Narrowing occurred during type inference,
+    specific case). (Nikita)
   . Fixed bug #75556 (Invalid opcode 138/1/1). (Laruence)
 
 - PCRE:
