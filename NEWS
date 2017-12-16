@@ -111,10 +111,6 @@ PHP                                                                        NEWS
 - PDO SQLite
   . Add support for additional open flags
 
-- PCRE:
-  . Fixed bug #75355 (preg_quote() does not quote # control character).
-    (Majkl578)
-
 - phar:
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
