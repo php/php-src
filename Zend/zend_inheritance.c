@@ -1599,27 +1599,39 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* the flags are identical, thus, the properties may be compatible */
-						zval op1, op2;
+						zval *op1, *op2;
+						zval op1_tmp, op2_tmp;
 
 						if (flags & ZEND_ACC_STATIC) {
-							ZVAL_COPY_OR_DUP(&op1, &ce->default_static_members_table[coliding_prop->offset]);
-							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_static_members_table[property_info->offset]);
+							op1 = &ce->default_static_members_table[coliding_prop->offset];
+							op2 = &ce->traits[i]->default_static_members_table[property_info->offset];
+							ZVAL_DEREF(op1);
+							ZVAL_DEREF(op2);
 						} else {
-							ZVAL_COPY_OR_DUP(&op1, &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)]);
-							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
+							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)];
+							op2 = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
 
 						/* if any of the values is a constant, we try to resolve it */
-						if (UNEXPECTED(Z_TYPE(op1) == IS_CONSTANT_AST)) {
-							zval_update_constant_ex(&op1, ce);
+						if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
+							ZVAL_COPY_OR_DUP(&op1_tmp, op1);
+							zval_update_constant_ex(&op1_tmp, ce);
+							op1 = &op1_tmp;
 						}
-						if (UNEXPECTED(Z_TYPE(op2) == IS_CONSTANT_AST)) {
-							zval_update_constant_ex(&op2, ce);
+						if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
+							ZVAL_COPY_OR_DUP(&op2_tmp, op2);
+							zval_update_constant_ex(&op2_tmp, ce);
+							op2 = &op2_tmp;
 						}
 
-						not_compatible = fast_is_not_identical_function(&op1, &op2);
-						zval_ptr_dtor_nogc(&op1);
-						zval_ptr_dtor_nogc(&op2);
+						not_compatible = fast_is_not_identical_function(op1, op2);
+
+						if (op1 == &op1_tmp) {
+							zval_ptr_dtor_nogc(&op1_tmp);
+						}
+						if (op2 == &op2_tmp) {
+							zval_ptr_dtor_nogc(&op2_tmp);
+						}
 					}
 
 					if (not_compatible) {
