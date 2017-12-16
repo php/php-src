@@ -1814,7 +1814,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			}
 
 			/* Check again, the original check might have not known the protocol name */
-			if ((wrapper = zend_hash_str_find_ptr(wrapper_hash, "file", sizeof("file")-1)) != NULL) {
+			if ((wrapper = zend_hash_find_ptr(wrapper_hash, ZSTR_KNOWN(ZEND_STR_FILE))) != NULL) {
 				return wrapper;
 			}
 
