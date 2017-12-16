@@ -1179,12 +1179,6 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
 }
 
-static int copy_state_stack(void *void_state)
-{
-	zend_stack_push(&SCNG(state_stack), void_state);
-	return SUCCESS;
-}
-
 #define RETURN_TOKEN(token) return emit_token(token, start_line);
 
 #define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
@@ -2314,7 +2308,6 @@ skip_escape_conversion:
 		SCNG(heredoc_scan_ahead) = 1;
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
-		zend_stack_apply(&current_state.state_stack, ZEND_STACK_APPLY_BOTTOMUP, copy_state_stack); // necessary?
 
 		while (heredoc_nesting_level) {
 			zval zv;
@@ -2326,7 +2319,7 @@ skip_escape_conversion:
 
 			if (EG(exception)) {
 				zend_restore_lexical_state(&current_state);
-				RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE); // return something else on error? perhaps retval?
+				RETURN_TOKEN(retval);
 			}
 
 			switch (retval) {
