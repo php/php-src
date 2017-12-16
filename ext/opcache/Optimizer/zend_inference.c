@@ -3338,6 +3338,9 @@ int zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script
 							/* Ignore the constraint (either ce instanceof constraint->ce or
 							 * they are unrelated, as far as we can statically determine) */
 						}
+					} else if ((tmp & MAY_BE_ANY) == 0) {
+						/* FIXME: usage in unreachable block */
+						tmp |= MAY_BE_UNDEF;
 					}
 				}
 
