@@ -8,7 +8,7 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #75687 (var 8 (TMP) has array key type but not value type).
-    (Laruence)
+    (Nikita, Laruence)
   . Fixed bug #75698 (Using @ crashes php7.2-fpm). (Nikita)
 
 - PGSQL:
