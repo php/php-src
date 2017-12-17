@@ -874,6 +874,10 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		zend_op *opline;
 		zval tmp;
 
+#if ZEND_DEBUG_DFA
+		ssa_verify_integrity(op_array, ssa, "before dfa");
+#endif
+
 		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
 			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
 				remove_nops = 1;
