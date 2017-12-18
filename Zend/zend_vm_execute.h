@@ -323,7 +323,9 @@ static int zend_handlers_count;
 static const void * const * zend_opcode_handler_funcs;
 static zend_op hybrid_halt_op;
 #endif
+#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID)
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);
+#endif
 
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op);
@@ -67695,10 +67697,12 @@ static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* o
 	return zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];
 }
 
+#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)
 {
 	return zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);
 }
+#endif
 
 #if ZEND_VM_KIND == ZEND_VM_KIND_HYBRID
 static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op)

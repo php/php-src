@@ -1638,7 +1638,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,"static zend_op hybrid_halt_op;\n");
 						out($f,"#endif\n");
 					}
-					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
+					out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID)\n");
+					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n");
+					out($f,"#endif\n\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
 						out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
 						out($f,"static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op);\n");
@@ -2501,6 +2503,7 @@ function gen_vm($def, $skel) {
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");
+	out($f, "#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID\n");
 	out($f, "static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
@@ -2508,7 +2511,8 @@ function gen_vm($def, $skel) {
 	} else {
 		out($f, "\treturn zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
 	}
-	out($f, "}\n\n");
+	out($f, "}\n");
+	out($f, "#endif\n\n");
 
 	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		// Generate zend_vm_get_opcode_handler_func() function
