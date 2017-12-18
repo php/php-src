@@ -165,7 +165,7 @@ static zend_object_handlers reflection_object_handlers;
 
 static zval *_default_load_name(zval *object) /* {{{ */
 {
-	return zend_hash_find_ind(Z_OBJPROP_P(object), ZSTR_KNOWN(ZEND_STR_NAME));
+	return zend_hash_find_ex_ind(Z_OBJPROP_P(object), ZSTR_KNOWN(ZEND_STR_NAME), 1);
 }
 /* }}} */
 

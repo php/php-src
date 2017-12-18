@@ -807,6 +807,19 @@ static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_str
 	}
 }
 
+static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, zend_bool known_hash)
+{
+	zval *zv;
+
+	zv = zend_hash_find_ex(ht, key, known_hash);
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
+}
+
 static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
