@@ -227,8 +227,17 @@ static void *zend_file_cache_unserialize_interned(zend_string *str, int in_shm)
 	if (in_shm) {
 		ret = accel_new_interned_string(str);
 		if (ret == str) {
+			/* We have to create new SHM allocated string */
+			size_t size = _ZSTR_STRUCT_SIZE(ZSTR_LEN(str));
+			ret = zend_shared_alloc(size);
+			if (!ret) {
+				zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
+				LONGJMP(*EG(bailout), FAILURE);
+			}
+			memcpy(ret, str, size);
 			/* String wasn't interned but we will use it as interned anyway */
-			GC_FLAGS(ret) |= IS_STR_INTERNED | IS_STR_PERMANENT;
+			GC_SET_REFCOUNT(ret, 1);
+			GC_TYPE_INFO(ret) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERSISTENT | IS_STR_PERMANENT) << 8);
 		}
 	} else {
 		ret = str;
@@ -1454,7 +1463,16 @@ use_process_mem:
 	ZCG(mem) = ((char*)mem + info.mem_size);
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
 	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
-	zend_file_cache_unserialize(script, buf);
+
+	zend_try {
+		zend_file_cache_unserialize(script, buf);
+	} zend_catch {
+		zend_shared_alloc_unlock();
+		zend_arena_release(&CG(arena), checkpoint);
+		efree(filename);
+		return NULL;
+	} zend_end_try();
+
 	script->corrupted = 0;
 
 	if (cache_it) {
