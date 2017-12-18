@@ -375,6 +375,7 @@ NO_PROC_OPEN_ERROR;
 							error("'$workers' is not a valid number of workers, try e.g. -j16 for 16 workers");
 						}
 						$workers = intval($workers, 10);
+						$environment['SKIP_IO_CAPTURE_TESTS'] = 1;
 						break;
 					case 'r':
 					case 'l':
