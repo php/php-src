@@ -356,6 +356,11 @@ See also: https://wiki.php.net/rfc/deprecations_php_7_2
 - realpath_cache_size
   . Set to 4096k by default
 
+- opcache.fast_shutdown
+  . This INI directive has been removed. A variant of the fast_shutdown
+    process has been integrated into PHP core and is always enabled for
+    production builds if possible.
+
 ========================================
 12. Windows Support
 ========================================
