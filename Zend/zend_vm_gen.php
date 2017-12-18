@@ -1630,7 +1630,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
-					out($f,"static const void **zend_opcode_handlers;\n");
+					out($f,"static const void * const *zend_opcode_handlers;\n");
 					out($f,"static int zend_handlers_count;\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
 						out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
