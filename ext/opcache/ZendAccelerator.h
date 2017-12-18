@@ -177,7 +177,6 @@ typedef struct _zend_accel_directives {
 	zend_bool      save_comments;
 	zend_bool      protect_memory;
 	zend_bool      file_override_enabled;
-	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
 #ifndef ZEND_WIN32

@@ -1784,7 +1784,6 @@ ldap.max_links = -1
 ; passes
 ;opcache.optimization_level=0xffffffff
 
-;opcache.inherited_hack=1
 ;opcache.dups_fix=0
 
 ; The location of the OPcache blacklist file (wildcards allowed).

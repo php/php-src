@@ -160,6 +160,10 @@ PGSQL:
 - birdstep.max_links
   . This INI directive has been removed.
 
+- opcache.inherited_hack
+  . This INI directive has been removed. The value has already been ignored
+    since PHP 5.3.0.
+
 ========================================
 12. Windows Support
 ========================================
