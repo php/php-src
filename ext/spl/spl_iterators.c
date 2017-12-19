@@ -1808,7 +1808,6 @@ SPL_METHOD(dual_it, current)
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
-	spl_dual_it_fetch(intern, 1);
 	if (Z_TYPE(intern->current.data) != IS_UNDEF) {
 		zval *value = &intern->current.data;
 

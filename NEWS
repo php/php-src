@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
+- SPL:
+  . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
+
 - Standard:
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
