@@ -2286,12 +2286,12 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
 				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-				timelib_sll utc_offset = dateobj->time->z;
+				int utc_offset = dateobj->time->z;
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 					utc_offset < 0 ? '-' : '+',
-					abs((int)(utc_offset / 3600)),
-					abs(((int)(utc_offset % 3600) / 60)));
+					abs(utc_offset / 3600),
+					abs(((utc_offset % 3600) / 60)));
 
 				ZVAL_NEW_STR(&zv, tmpstr);
 				}
