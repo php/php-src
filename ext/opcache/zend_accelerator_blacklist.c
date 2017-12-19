@@ -170,7 +170,6 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 				i++;
 			}
 			*p++ = ')';
-			*p++ = '\0';
 
 			it = (zend_regexp_list*)malloc(sizeof(zend_regexp_list));
 			if (!it) {
@@ -179,7 +178,7 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
+			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, p - regexp, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
 				free(it);
 				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
 				blacklist_report_regexp_error((char *)pcre_error, pcre_error_offset);
