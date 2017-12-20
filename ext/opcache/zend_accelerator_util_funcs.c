@@ -606,7 +606,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	__asm__ volatile (
 		".align 16\n\t"
-		".L0%=:\n\t"
+		".LL0%=:\n\t"
 		"prefetchnta 0x40(%1)\n\t"
 		"movdqa (%1), %%xmm0\n\t"
 		"movdqa 0x10(%1), %%xmm1\n\t"
@@ -618,7 +618,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
 		"addl $0x40, %1\n\t"
 		"subl $0x40, %0\n\t"
-		"ja .L0%="
+		"ja .LL0%="
 		: "+r"(size),
 		  "+r"(src)
 		: "r"(delta)
@@ -631,7 +631,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	__asm__ volatile (
 		".align 16\n\t"
-		".L0%=:\n\t"
+		".LL0%=:\n\t"
 		"prefetchnta 0x40(%1)\n\t"
 		"movdqa (%1), %%xmm0\n\t"
 		"movdqa 0x10(%1), %%xmm1\n\t"
@@ -643,7 +643,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
 		"addq $0x40, %1\n\t"
 		"subq $0x40, %0\n\t"
-		"ja .L0%="
+		"ja .LL0%="
 		: "+r"(size),
 		  "+r"(src)
 		: "r"(delta)
