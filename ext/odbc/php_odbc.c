@@ -1592,7 +1592,11 @@ PHP_FUNCTION(odbc_data_source)
 			(SQLSMALLINT)sizeof(desc),
 			&len2);
 
-	if (rc != SQL_SUCCESS) {
+	if (SQL_NO_DATA == rc) {
+		/* System has no data sources, no error. Signal it by returning NULL,
+			not false. */
+		RETURN_NULL();
+	} else if (rc != SQL_SUCCESS) {
 		/* ummm.... he did it */
 		odbc_sql_error(conn, SQL_NULL_HSTMT, "SQLDataSources");
 		RETURN_FALSE;
