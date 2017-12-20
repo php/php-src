@@ -2909,7 +2909,7 @@ apprentice_map(struct magic_set *ms, const char *fn)
 	if (dbname == NULL)
 		goto error;
 
-		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
+	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
 
 	if (!stream) {
 		goto error;
