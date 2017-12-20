@@ -1621,7 +1621,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
     }
 
 	/* check blacklist right after ensuring that file was opened */
-	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, ZSTR_VAL(file_handle->opened_path))) {
+	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
 		ZCSG(blacklist_misses)++;
 		*op_array_p = accelerator_orig_compile_file(file_handle, type);
 		return NULL;

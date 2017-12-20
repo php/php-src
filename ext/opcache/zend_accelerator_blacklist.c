@@ -343,7 +343,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 }
 #endif
 
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path)
+zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
@@ -358,7 +358,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 			/* Alloc failed, but next one could still come through and match. */
 			continue;
 		}
-		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, strlen(verify_path), 0, 0, match_data, mctx);
+		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, verify_path_len, 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;
 			php_pcre_free_match_data(match_data);

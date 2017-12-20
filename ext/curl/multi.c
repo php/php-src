@@ -439,7 +439,6 @@ PHP_FUNCTION(curl_multi_errno)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
 /* {{{ proto bool curl_multi_strerror(int code)
          return string describing error code */
 PHP_FUNCTION(curl_multi_strerror)
@@ -459,7 +458,6 @@ PHP_FUNCTION(curl_multi_strerror)
 	}
 }
 /* }}} */
-#endif
 
 #if LIBCURL_VERSION_NUM >= 0x072C00 /* Available since 7.44.0 */
 

@@ -125,6 +125,9 @@ JSON:
 9. Other Changes to Extensions
 ========================================
 
+ Curl:
+  . libcurl >= 7.12.1 is now required
+
  FTP:
   . Set default transfer mode to binary
 
