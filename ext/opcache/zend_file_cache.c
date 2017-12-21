@@ -1322,6 +1322,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 	zend_accel_hash_entry *bucket;
 	void *mem, *checkpoint, *buf;
 	int cache_it = 1;
+	int ok;
 
 	if (!full_path) {
 		return NULL;
@@ -1414,6 +1415,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 
 	if (!ZCG(accel_directives).file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
+		!ZSMMG(memory_exhausted) &&
 	    accelerator_shm_read_lock() == SUCCESS) {
 		/* exclusive lock */
 		zend_shared_alloc_lock();
@@ -1464,14 +1466,22 @@ use_process_mem:
 	script = (zend_persistent_script*)((char*)buf + info.script_offset);
 	script->corrupted = !cache_it; /* used to check if script restored to SHM or process memory */
 
+	ok = 1;
 	zend_try {
 		zend_file_cache_unserialize(script, buf);
 	} zend_catch {
-		zend_shared_alloc_unlock();
-		zend_arena_release(&CG(arena), checkpoint);
-		efree(filename);
-		return NULL;
+		ok = 0;
 	} zend_end_try();
+	if (!ok) {
+		if (cache_it) {
+			zend_shared_alloc_unlock();
+			goto use_process_mem;
+		} else {
+			zend_arena_release(&CG(arena), checkpoint);
+			efree(filename);
+			return NULL;
+		}
+	}
 
 	script->corrupted = 0;
 
