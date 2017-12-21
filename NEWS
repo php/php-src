@@ -18,6 +18,10 @@ PHP                                                                        NEWS
 - PDO MySQL:
   . Fixed bug #75615 (PDO Mysql module can't be built as module). (jdolecek)
 
+- Opcache:
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
+
 - PGSQL:
   . Fixed bug #75671 (pg_version() crashes when called on a connection to
     cockroach). (magicaltux at gmail dot com)
