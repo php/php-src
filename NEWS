@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2017 PHP 7.0.28
 
-
+- Opcache:
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
 
 04 Jan 2017 PHP 7.0.27
 
