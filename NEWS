@@ -3,6 +3,10 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.1
 
 
+- Opcache:
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
+
 14 Dec 2017, PHP 7.2.1RC1
 
 - Core:
