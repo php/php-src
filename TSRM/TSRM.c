@@ -781,6 +781,21 @@ TSRM_API uint8_t tsrm_is_main_thread(void)
 	return in_main_thread;
 }/*}}}*/
 
+TSRM_API const char *tsrm_api_name(void)
+{/*{{{*/
+#if defined(GNUPTH)
+	return "GNU Pth";
+#elif defined(PTHREADS)
+	return "POSIX Threads";
+#elif defined(TSRM_ST)
+	return "State Threads";
+#elif defined(TSRM_WIN32)
+	return "Windows Threads";
+#else
+	return "Unknown";
+#endif
+}/*}}}*/
+
 #endif /* ZTS */
 
 /*

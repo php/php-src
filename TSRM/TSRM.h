@@ -143,6 +143,7 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
+TSRM_API const char *tsrm_api_name(void);
 
 #if defined(__cplusplus) && __cplusplus > 199711L
 # define TSRM_TLS thread_local

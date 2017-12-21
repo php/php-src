@@ -870,6 +870,7 @@ PHPAPI void php_print_info(int flag)
 
 #ifdef ZTS
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
+		php_info_print_table_row(2, "Thread API", tsrm_api_name() );
 #else
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
