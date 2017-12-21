@@ -1,6 +1,6 @@
 diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
 --- libmagic.orig/apprentice.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/apprentice.c	2017-10-23 19:16:23.937911800 +0200
++++ libmagic/apprentice.c	2017-12-21 15:19:13.441294900 +0100
 @@ -29,6 +29,8 @@
   * apprentice - make one pass through /etc/magic, learning its secrets.
   */
@@ -687,7 +687,7 @@ diff -u libmagic.orig/apprentice.c libmagic/apprentice.c
  		goto error;
  
 -	if ((fd = open(dbname, O_RDONLY|O_BINARY)) == -1)
-+		stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
++	stream = php_stream_open_wrapper((char *)fn, "rb", REPORT_ERRORS, NULL);
 +
 +	if (!stream) {
  		goto error;
@@ -950,7 +950,7 @@ diff -u libmagic.orig/ascmagic.c libmagic/ascmagic.c
  }
 diff -u libmagic.orig/cdf.c libmagic/cdf.c
 --- libmagic.orig/cdf.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/cdf.c	2017-10-18 14:05:31.846245300 +0200
++++ libmagic/cdf.c	2017-11-30 13:21:54.096926600 +0100
 @@ -43,7 +43,17 @@
  #include <err.h>
  #endif
@@ -1075,7 +1075,7 @@ diff -u libmagic.orig/cdf.c libmagic/cdf.c
  		return -1;
 diff -u libmagic.orig/cdf.h libmagic/cdf.h
 --- libmagic.orig/cdf.h	2017-03-16 16:06:24.000000000 +0100
-+++ libmagic/cdf.h	2017-10-18 14:05:31.846245300 +0200
++++ libmagic/cdf.h	2017-11-30 13:21:54.112572000 +0100
 @@ -35,10 +35,12 @@
  #ifndef _H_CDF_
  #define _H_CDF_
@@ -1105,7 +1105,7 @@ diff -u libmagic.orig/cdf.h libmagic/cdf.h
  void cdf_unpack_header(cdf_header_t *, char *);
 diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
 --- libmagic.orig/cdf_time.c	2017-03-29 17:57:48.000000000 +0200
-+++ libmagic/cdf_time.c	2017-10-18 14:05:31.846245300 +0200
++++ libmagic/cdf_time.c	2017-11-30 13:21:54.112572000 +0100
 @@ -96,7 +96,7 @@
  }
  
@@ -1156,7 +1156,7 @@ diff -u libmagic.orig/cdf_time.c libmagic/cdf_time.c
  	static const char *ref = "Sat Apr 23 01:30:00 1977";
 diff -u libmagic.orig/compress.c libmagic/compress.c
 --- libmagic.orig/compress.c	2017-03-29 17:57:48.000000000 +0200
-+++ libmagic/compress.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/compress.c	2017-11-30 13:21:54.128198700 +0100
 @@ -45,15 +45,13 @@
  #endif
  #include <string.h>
@@ -1323,7 +1323,7 @@ diff -u libmagic.orig/compress.c libmagic/compress.c
 +#endif /* if PHP_FILEINFO_UNCOMPRESS */
 diff -u libmagic.orig/der.c libmagic/der.c
 --- libmagic.orig/der.c	2017-03-07 23:20:58.000000000 +0100
-+++ libmagic/der.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/der.c	2017-11-30 13:21:54.128198700 +0100
 @@ -51,7 +51,9 @@
  #include "magic.h"
  #include "der.h"
@@ -1383,7 +1383,7 @@ diff -u libmagic.orig/elfclass.h libmagic/elfclass.h
  		    (int)elf_getu16(swap, elfhdr.e_shstrndx),
 diff -u libmagic.orig/file.h libmagic/file.h
 --- libmagic.orig/file.h	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/file.h	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/file.h	2017-11-30 13:21:54.143819800 +0100
 @@ -33,15 +33,9 @@
  #ifndef __file_h__
  #define __file_h__
@@ -1950,7 +1950,7 @@ diff -u libmagic.orig/fsmagic.c libmagic/fsmagic.c
  	case S_IFSOCK:
 diff -u libmagic.orig/funcs.c libmagic/funcs.c
 --- libmagic.orig/funcs.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/funcs.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/funcs.c	2017-11-30 13:21:54.143819800 +0100
 @@ -31,7 +31,6 @@
  #endif	/* lint */
  
@@ -2315,7 +2315,7 @@ diff -u libmagic.orig/funcs.c libmagic/funcs.c
  
 diff -u libmagic.orig/magic.c libmagic/magic.c
 --- libmagic.orig/magic.c	2016-07-18 13:43:05.000000000 +0200
-+++ libmagic/magic.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/magic.c	2017-11-30 13:21:54.159443900 +0100
 @@ -25,11 +25,6 @@
   * SUCH DAMAGE.
   */
@@ -2813,7 +2813,7 @@ diff -u libmagic.orig/magic.c libmagic/magic.c
  magic_error(struct magic_set *ms)
 diff -u libmagic.orig/print.c libmagic/print.c
 --- libmagic.orig/print.c	2017-03-07 23:20:58.000000000 +0100
-+++ libmagic/print.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/print.c	2017-11-30 13:21:54.175075200 +0100
 @@ -28,6 +28,8 @@
  /*
   * print.c - debugging printout routines
@@ -3078,7 +3078,7 @@ diff -u libmagic.orig/print.c libmagic/print.c
  		goto out;
 diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
 --- libmagic.orig/readcdf.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/readcdf.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/readcdf.c	2017-11-30 13:21:54.195206000 +0100
 @@ -1,5 +1,5 @@
  /*-
 - * Copyright (c) 2008, 2016 Christos Zoulas
@@ -3185,7 +3185,7 @@ diff -u libmagic.orig/readcdf.c libmagic/readcdf.c
  						*ec = '\0';
 diff -u libmagic.orig/softmagic.c libmagic/softmagic.c
 --- libmagic.orig/softmagic.c	2017-05-08 20:10:13.000000000 +0200
-+++ libmagic/softmagic.c	2017-10-18 14:05:31.861865200 +0200
++++ libmagic/softmagic.c	2017-11-30 13:21:54.196704800 +0100
 @@ -43,6 +43,10 @@
  #include <time.h>
  #include "der.h"
