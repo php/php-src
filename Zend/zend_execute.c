@@ -1245,6 +1245,46 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 	zend_throw_error(NULL, "%s", msg);
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_inc_dec(zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_unset(zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_NOTICE, "Trying to unset property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(zval *property)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+}
+
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result EXECUTE_DATA_DC)
 {
 	zend_string *old_str;
