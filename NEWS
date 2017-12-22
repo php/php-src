@@ -35,6 +35,8 @@ PHP                                                                        NEWS
     reference). (Nikita)
   . Fixed bug #75242 (RecursiveArrayIterator doesn't have constants from parent
     class). (Nikita)
+  . Fixed bug #73209 (RecursiveArrayIterator does not iterate object
+    properties). (Nikita)
 
 - Zip:
   . Display headers (buildtime) and library (runtime) versions in phpinfo

@@ -1666,6 +1666,10 @@ SPL_METHOD(Array, hasChildren)
 		RETURN_FALSE;
 	}
 
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
+	}
+
 	ZVAL_DEREF(entry);
 	RETURN_BOOL(Z_TYPE_P(entry) == IS_ARRAY || (Z_TYPE_P(entry) == IS_OBJECT && (intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) == 0));
 }
@@ -1691,6 +1695,11 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
+	}
+
+	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_OBJECT) {
 		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
 			return;
