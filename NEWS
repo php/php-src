@@ -20,6 +20,8 @@ PHP                                                                        NEWS
 - SPL:
   . Fixed bug #75717 (RecursiveArrayIterator does not traverse arrays by
     reference). (Nikita)
+  . Fixed bug #75242 (RecursiveArrayIterator doesn't have constants from parent
+    class). (Nikita)
 
 04 Jan 2018, PHP 7.1.13
 
