@@ -347,7 +347,7 @@ static int odbc_handle_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 			strcpy(H->einfo.last_err_msg, "Unknown Attribute");
 			H->einfo.what = "setAttribute";
 			strcpy(H->einfo.last_state, "IM001");
-			return -1;
+			return 0;
 	}
 }
 
