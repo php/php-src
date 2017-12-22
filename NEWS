@@ -22,6 +22,8 @@ PHP                                                                        NEWS
     reference). (Nikita)
   . Fixed bug #75242 (RecursiveArrayIterator doesn't have constants from parent
     class). (Nikita)
+  . Fixed bug #73209 (RecursiveArrayIterator does not iterate object
+    properties). (Nikita)
 
 04 Jan 2018, PHP 7.1.13
 
