@@ -1642,6 +1642,7 @@ SPL_METHOD(Array, hasChildren)
 		RETURN_FALSE;
 	}
 
+	ZVAL_DEREF(entry);
 	RETURN_BOOL(Z_TYPE_P(entry) == IS_ARRAY || (Z_TYPE_P(entry) == IS_OBJECT && (intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) == 0));
 }
 /* }}} */
