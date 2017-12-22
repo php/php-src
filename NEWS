@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #75671 (pg_version() crashes when called on a connection to
     cockroach). (magicaltux at gmail dot com)
 
+- SOAP:
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
+
 - Zip:
   . Display headers (buildtime) and library (runtime) versions in phpinfo
     (with libzip >= 1.3.1). (Remi)
