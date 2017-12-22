@@ -5,6 +5,7 @@ PDO Common: PDO::quote()
 if (!extension_loaded('pdo')) die('skip');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'odbc', strlen('odbc'))) die('skip odbc driver doesn\'t have escape API, use prepared statements');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>
