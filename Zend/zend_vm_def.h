@@ -789,9 +789,7 @@ ZEND_VM_HELPER(zend_binary_assign_op_obj_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			ZVAL_DEREF(object);
 			if (UNEXPECTED(!make_real_object(object))) {
-				zend_string *property_name = zval_get_string(property);
-				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-				zend_string_release(property_name);
+				zend_wrong_property_assignment(property);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
@@ -1045,9 +1043,7 @@ ZEND_VM_HELPER(zend_pre_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV, 
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			ZVAL_DEREF(object);
 			if (UNEXPECTED(!make_real_object(object))) {
-				zend_string *property_name = zval_get_string(property);
-				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
-				zend_string_release(property_name);
+				zend_wrong_property_inc_dec(property);
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
 				}
@@ -1123,9 +1119,7 @@ ZEND_VM_HELPER(zend_post_incdec_property_helper, VAR|UNUSED|CV, CONST|TMPVAR|CV,
 		if (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
 			ZVAL_DEREF(object);
 			if (UNEXPECTED(!make_real_object(object))) {
-				zend_string *property_name = zval_get_string(property);
-				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
-				zend_string_release(property_name);
+				zend_wrong_property_inc_dec(property);
 				ZVAL_NULL(EX_VAR(opline->result.var));
 				break;
 			}
@@ -1795,11 +1789,8 @@ ZEND_VM_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST|TMPVAR|
 		}
 
 		if (UNEXPECTED(zobj->handlers->read_property == NULL)) {
-			zend_string *property_name;
 ZEND_VM_C_LABEL(fetch_obj_r_no_object):
-			property_name = zval_get_string(offset);
-			zend_error(E_NOTICE, "Trying to get property '%s' of non-object", ZSTR_VAL(property_name));
-			zend_string_release(property_name);
+			zend_wrong_property_read(offset);
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		} else {
 			retval = zobj->handlers->read_property(container, offset, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
@@ -2085,9 +2076,7 @@ ZEND_VM_HANDLER(136, ZEND_ASSIGN_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SPEC(
 				Z_DELREF_P(object);
 			} else {
 				if (OP1_TYPE != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
-					zend_string *property_name = zval_get_string(property);
-					zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-					zend_string_release(property_name);
+					zend_wrong_property_assignment(property);
 				}
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 					ZVAL_NULL(EX_VAR(opline->result.var));
@@ -2167,9 +2156,7 @@ ZEND_VM_C_LABEL(fast_assign_obj):
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_string *property_name = zval_get_string(property);
-		zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-		zend_string_release(property_name);
+		zend_wrong_property_assignment(property);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
@@ -5618,9 +5605,7 @@ ZEND_VM_HANDLER(76, ZEND_UNSET_OBJ, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV)
 		if (Z_OBJ_HT_P(container)->unset_property) {
 			Z_OBJ_HT_P(container)->unset_property(container, offset, ((OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(offset)) : NULL));
 		} else {
-			zend_string *property_name = zval_get_string(offset);
-			zend_error(E_NOTICE, "Trying to unset property '%s' of non-object", ZSTR_VAL(property_name));
-			zend_string_release(property_name);
+			zend_wrong_property_unset(offset);
 		}
 	} while (0);
 
@@ -6518,9 +6503,7 @@ ZEND_VM_HANDLER(148, ZEND_ISSET_ISEMPTY_PROP_OBJ, CONST|TMPVAR|UNUSED|THIS|CV, C
 		}
 	}
 	if (UNEXPECTED(!Z_OBJ_HT_P(container)->has_property)) {
-		zend_string *property_name = zval_get_string(offset);
-		zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
-		zend_string_release(property_name);
+		zend_wrong_property_check(offset);
 ZEND_VM_C_LABEL(isset_no_object):
 		result = ((opline->extended_value & ZEND_ISSET) == 0);
 	} else {
