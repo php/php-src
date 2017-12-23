@@ -1074,8 +1074,8 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		PG(last_error_lineno) = error_lineno;
 	}
 
-	/* according to error handling mode, suppress error, throw exception or show it */
-	if (EG(error_handling) != EH_NORMAL) {
+	/* according to error handling mode, throw exception or show it */
+	if (EG(error_handling) == EH_THROW) {
 		switch (type) {
 			case E_ERROR:
 			case E_CORE_ERROR:
@@ -1097,7 +1097,7 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
 				 */
-				if (EG(error_handling) == EH_THROW && !EG(exception)) {
+				if (!EG(exception)) {
 					zend_throw_error_exception(EG(exception_class), buffer, 0, type);
 				}
 				efree(buffer);
