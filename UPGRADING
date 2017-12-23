@@ -24,6 +24,10 @@ Core:
     some old options removed. This is now written in PHP and has no external 
 	dependencies.
   . Support for BeOS has been dropped.
+  . Exceptions thrown due to automatic conversion of warnings into exceptions
+    in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
+    error_get_last() state. As such, they now work the same way as manually
+    thrown exceptions.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.

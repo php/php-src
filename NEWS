@@ -25,11 +25,13 @@ PHP                                                                        NEWS
     (pmmaga)
   . Fixed bug #75677 (Clang ignores fastcall calling convention on variadic
     function). (Li-Wen Hsu)
+  . Fixed bug #54043 (Remove inconsitency of internal exceptions and user
+    defined exceptions). (Nikita)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
-	. Implemented request #67855 (No way to get current scale in use). (Chris
-	  Wright, cmb)
+  . Implemented request #67855 (No way to get current scale in use). (Chris
+    Wright, cmb)
   . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
   . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 

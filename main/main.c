@@ -1053,27 +1053,6 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		display = 1;
 	}
 
-	/* store the error if it has changed */
-	if (display) {
-		if (PG(last_error_message)) {
-			char *s = PG(last_error_message);
-			PG(last_error_message) = NULL;
-			free(s);
-		}
-		if (PG(last_error_file)) {
-			char *s = PG(last_error_file);
-			PG(last_error_file) = NULL;
-			free(s);
-		}
-		if (!error_filename) {
-			error_filename = "Unknown";
-		}
-		PG(last_error_type) = type;
-		PG(last_error_message) = strdup(buffer);
-		PG(last_error_file) = strdup(error_filename);
-		PG(last_error_lineno) = error_lineno;
-	}
-
 	/* according to error handling mode, throw exception or show it */
 	if (EG(error_handling) == EH_THROW) {
 		switch (type) {
@@ -1103,6 +1082,27 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				efree(buffer);
 				return;
 		}
+	}
+
+	/* store the error if it has changed */
+	if (display) {
+		if (PG(last_error_message)) {
+			char *s = PG(last_error_message);
+			PG(last_error_message) = NULL;
+			free(s);
+		}
+		if (PG(last_error_file)) {
+			char *s = PG(last_error_file);
+			PG(last_error_file) = NULL;
+			free(s);
+		}
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
+		PG(last_error_type) = type;
+		PG(last_error_message) = strdup(buffer);
+		PG(last_error_file) = strdup(error_filename);
+		PG(last_error_lineno) = error_lineno;
 	}
 
 	/* display/log the error if necessary */
