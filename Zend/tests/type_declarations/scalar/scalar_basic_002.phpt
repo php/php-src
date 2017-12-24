@@ -1,22 +1,19 @@
 --TEST--
-scalar function return type constraint
---DESCRIPTION--
-Verifies that a function can have a scalar return type constraint and that
-it is possible to return all compatible types.
+scalar parameter type constraint (strict mode)
 --FILE--
 <?php
 
-function f($p): scalar {
-    return $p;
+declare(strict_types = 1);
+
+function f(scalar $scalar) {
+    var_dump($scalar);
 }
 
-var_dump(
-    f(true),
-    f(false),
-    f(4.2),
-    f(42),
-    f('str')
-);
+f(true);
+f(false);
+f(4.2);
+f(42);
+f('str');
 
 ?>
 --EXPECT--

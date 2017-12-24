@@ -817,6 +817,10 @@ static zend_bool zend_verify_weak_scalar_type_hint(zend_uchar type_hint, zval *a
 static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, zend_bool strict)
 {
 	if (UNEXPECTED(strict)) {
+		if (type_hint == IS_SCALAR) {
+			return zend_is_scalar(arg);
+		}
+
 		/* SSTH Exception: IS_LONG may be accepted as IS_DOUBLE (converted) */
 		if (type_hint != IS_DOUBLE || Z_TYPE_P(arg) != IS_LONG) {
 			return 0;
@@ -825,6 +829,17 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		/* NULL may be accepted only by nullable hints (this is already checked) */
 		return 0;
 	}
+
+	if (type_hint == IS_SCALAR) {
+		/* Treat scalar like string constraint for objects in weak mode.
+		 * This ensures that objects with a magic __toString method are accepted. */
+		if (Z_TYPE_P(arg) == IS_OBJECT) {
+			type_hint = IS_STRING;
+		} else {
+			return zend_is_scalar(arg);
+		}
+	}
+
 	return zend_verify_weak_scalar_type_hint(type_hint, arg);
 }
 
@@ -866,8 +881,6 @@ static zend_always_inline zend_bool zend_check_type(
 		return zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL);
 	} else if (ZEND_TYPE_CODE(type) == IS_ITERABLE) {
 		return zend_is_iterable(arg);
-	} else if (ZEND_TYPE_CODE(type) == IS_SCALAR) {
-		return zend_is_scalar(arg);
 	} else if (ZEND_TYPE_CODE(type) == _IS_BOOL &&
 			   EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1;

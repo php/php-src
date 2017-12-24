@@ -1,8 +1,5 @@
 --TEST--
-scalar type function reflection
---DESCRIPTION--
-Tests that it is possible to reflect the scalar type constraints of a static
-method.
+scalar type static method reflection
 --FILE--
 <?php
 

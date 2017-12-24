@@ -1,31 +1,24 @@
 --TEST--
-nullable scalar static method return type constraint
---DESCRIPTION--
-Verifies that a static method can have a nullable scalar return type
-constraint and that it is possible to return all compatible types.
+nullable scalar return type covariance
 --FILE--
 <?php
 
-class C {
-    static function f($p): ?scalar {
-        return $p;
-    }
-}
+         interface I { function f(): ?scalar; }
+class A implements I { function f(): ?bool   { return null; } }
+class B implements I { function f(): ?float  { return null; } }
+class C implements I { function f(): ?int    { return null; } }
+class D implements I { function f(): ?string { return null; } }
 
 var_dump(
-    C::f(true),
-    C::f(false),
-    C::f(4.2),
-    C::f(42),
-    C::f('str'),
-    C::f(null)
+    (new A)->f(),
+    (new B)->f(),
+    (new C)->f(),
+    (new D)->f()
 );
 
 ?>
 --EXPECT--
-bool(true)
-bool(false)
-float(4.2)
-int(42)
-string(3) "str"
+NULL
+NULL
+NULL
 NULL

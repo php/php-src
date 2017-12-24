@@ -1,27 +1,31 @@
 --TEST--
-scalar static method parameter type constraint
---DESCRIPTION--
-Verifies that a static method can have a scalar parameter type constraint and
-that it is possible to call it with all compatible types.
+scalar parameter type contravariance
 --FILE--
 <?php
 
-class C {
-    static function f(scalar $scalar) {
-        var_dump($scalar);
-    }
+interface I {
+    function f1(bool   $p);
+    function f2(float  $p);
+    function f3(int    $p);
+    function f4(string $p);
 }
 
-C::f(true);
-C::f(false);
-C::f(4.2);
-C::f(42);
-C::f('str');
+class C implements I {
+    function f1(scalar $p) { var_dump($p); }
+    function f2(scalar $p) { var_dump($p); }
+    function f3(scalar $p) { var_dump($p); }
+    function f4(scalar $p) { var_dump($p); }
+}
+
+$c = new C;
+$c->f1('bool');
+$c->f2('float');
+$c->f3('int');
+$c->f4('string');
 
 ?>
 --EXPECT--
-bool(true)
-bool(false)
-float(4.2)
-int(42)
-string(3) "str"
+string(4) "bool"
+string(5) "float"
+string(3) "int"
+string(6) "string"

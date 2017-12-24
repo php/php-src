@@ -1,7 +1,5 @@
 --TEST--
 scalar type function reflection
---DESCRIPTION--
-Tests that it is possible to reflect the scalar type constraints of a function.
 --FILE--
 <?php
 

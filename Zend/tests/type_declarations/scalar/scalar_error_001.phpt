@@ -1,8 +1,5 @@
 --TEST--
-scalar function parameter type constraint
---DESCRIPTION--
-Tests that a function that has a scalar parameter type constraint accepts only
-compatible types.
+invalid scalar parameter type constraint values (weak mode)
 --FILE--
 <?php
 

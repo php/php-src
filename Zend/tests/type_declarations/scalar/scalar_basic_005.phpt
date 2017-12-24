@@ -1,24 +1,21 @@
 --TEST--
-scalar instance method parameter type constraint
---DESCRIPTION--
-Verifies that an instance method can have a scalar parameter type constraint
-and that it is possible to call it with all compatible types.
+scalar return type constraint (strict mode)
 --FILE--
 <?php
 
-class C {
-    function f(scalar $scalar) {
-        var_dump($scalar);
-    }
+declare(strict_types = 1);
+
+function f($p): scalar {
+    return $p;
 }
 
-$c = new C;
-
-$c->f(true);
-$c->f(false);
-$c->f(4.2);
-$c->f(42);
-$c->f('str');
+var_dump(
+    f(true),
+    f(false),
+    f(4.2),
+    f(42),
+    f('str')
+);
 
 ?>
 --EXPECT--

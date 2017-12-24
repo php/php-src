@@ -1,21 +1,19 @@
 --TEST--
-scalar static method return type constraint
---DESCRIPTION--
-Tests that a static method that has a scalar return type constraint permits
-only compatible types to be returned.
+invalid scalar return type constraint values (strict mode)
 --FILE--
 <?php
 
-class C {
-    static function f($p): scalar {
-        return $p;
-    }
+declare(strict_types = 1);
+
+function f($p): scalar {
+    return $p;
 }
 
 function provide_non_scalar_types() {
     yield [];
     yield null;
     yield new stdClass;
+    yield new class { function __toString() { return 'obj'; }};
     $h = fopen('php://stdout', 'w');
     yield $h;
     fclose($h);
@@ -24,7 +22,7 @@ function provide_non_scalar_types() {
 
 foreach (provide_non_scalar_types() as $t) {
     try {
-        C::f($t);
+        f($t);
     }
     catch (TypeError $e) {
         echo "{$e->getMessage()}\n";
@@ -33,8 +31,9 @@ foreach (provide_non_scalar_types() as $t) {
 
 ?>
 --EXPECTF--
-Return value of C::f() must be of the type scalar, array returned
-Return value of C::f() must be of the type scalar, null returned
-Return value of C::f() must be of the type scalar, object returned
-Return value of C::f() must be of the type scalar, resource returned
-Return value of C::f() must be of the type scalar, resource returned
+Return value of f() must be of the type scalar, array returned
+Return value of f() must be of the type scalar, null returned
+Return value of f() must be of the type scalar, object returned
+Return value of f() must be of the type scalar, object returned
+Return value of f() must be of the type scalar, resource returned
+Return value of f() must be of the type scalar, resource returned

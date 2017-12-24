@@ -1,13 +1,10 @@
 --TEST--
-scalar static method parameter type constraint
---DESCRIPTION--
-Tests that a static method that has a scalar parameter type constraint accepts
-only compatible types.
+invalid scalar return type constraint values (weak mode)
 --FILE--
 <?php
 
-class C {
-    static function f(scalar $p) {}
+function f($p): scalar {
+    return $p;
 }
 
 function provide_non_scalar_types() {
@@ -22,7 +19,7 @@ function provide_non_scalar_types() {
 
 foreach (provide_non_scalar_types() as $t) {
     try {
-        C::f($t);
+        f($t);
     }
     catch (TypeError $e) {
         echo "{$e->getMessage()}\n";
@@ -31,8 +28,8 @@ foreach (provide_non_scalar_types() as $t) {
 
 ?>
 --EXPECTF--
-Argument 1 passed to C::f() must be of the type scalar, array given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, null given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, object given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, resource given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, resource given, called in %s
+Return value of f() must be of the type scalar, array returned
+Return value of f() must be of the type scalar, null returned
+Return value of f() must be of the type scalar, object returned
+Return value of f() must be of the type scalar, resource returned
+Return value of f() must be of the type scalar, resource returned

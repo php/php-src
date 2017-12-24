@@ -1,34 +1,26 @@
 --TEST--
-scalar parameter type contravariance
---DESCRIPTION--
-Tests that it is possible in subtypes to broaden the constraint on parameter
-types that their supertype defined.
+nullable scalar parameter type constraint (strict mode)
 --FILE--
 <?php
 
-interface I {
-    function f1(bool   $p);
-    function f2(float  $p);
-    function f3(int    $p);
-    function f4(string $p);
+declare(strict_types = 1);
+
+function f(?scalar $scalar) {
+    var_dump($scalar);
 }
 
-class C implements I {
-    function f1(scalar $p) { var_dump($p); }
-    function f2(scalar $p) { var_dump($p); }
-    function f3(scalar $p) { var_dump($p); }
-    function f4(scalar $p) { var_dump($p); }
-}
-
-$c = new C;
-$c->f1('bool');
-$c->f2('float');
-$c->f3('int');
-$c->f4('string');
+f(true);
+f(false);
+f(4.2);
+f(42);
+f('str');
+f(null);
 
 ?>
 --EXPECT--
-string(4) "bool"
-string(5) "float"
-string(3) "int"
-string(6) "string"
+bool(true)
+bool(false)
+float(4.2)
+int(42)
+string(3) "str"
+NULL

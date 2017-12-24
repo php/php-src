@@ -1,19 +1,17 @@
 --TEST--
-scalar function return type constraint
---DESCRIPTION--
-Tests that a function that has a scalar return type constraint permits only
-compatible types to be returned.
+invalid scalar parameter type constraint values (strict mode)
 --FILE--
 <?php
 
-function f($p): scalar {
-    return $p;
-}
+declare(strict_types = 1);
+
+function f(scalar $p) {}
 
 function provide_non_scalar_types() {
     yield [];
     yield null;
     yield new stdClass;
+    yield new class { function __toString() { return 'obj'; }};
     $h = fopen('php://stdout', 'w');
     yield $h;
     fclose($h);
@@ -31,8 +29,9 @@ foreach (provide_non_scalar_types() as $t) {
 
 ?>
 --EXPECTF--
-Return value of f() must be of the type scalar, array returned
-Return value of f() must be of the type scalar, null returned
-Return value of f() must be of the type scalar, object returned
-Return value of f() must be of the type scalar, resource returned
-Return value of f() must be of the type scalar, resource returned
+Argument 1 passed to f() must be of the type scalar, array given, called in %s
+Argument 1 passed to f() must be of the type scalar, null given, called in %s
+Argument 1 passed to f() must be of the type scalar, object given, called in %s
+Argument 1 passed to f() must be of the type scalar, object given, called in %s
+Argument 1 passed to f() must be of the type scalar, resource given, called in %s
+Argument 1 passed to f() must be of the type scalar, resource given, called in %s

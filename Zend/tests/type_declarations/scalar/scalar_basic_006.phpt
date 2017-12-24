@@ -1,30 +1,24 @@
 --TEST--
-scalar instance method return type constraint
---DESCRIPTION--
-Verifies that an instance method can have a scalar return type constraint and
-that it is possible to return all compatible types.
+scalar return type covariance
 --FILE--
 <?php
 
-class C {
-    function f($p): scalar {
-        return $p;
-    }
-}
+         interface I { function f(): scalar; }
+class A implements I { function f(): bool   { return true;  }}
+class B implements I { function f(): float  { return 4.2;   }}
+class C implements I { function f(): int    { return 42;    }}
+class D implements I { function f(): string { return 'str'; }}
 
-$c = new C;
 var_dump(
-    $c->f(true),
-    $c->f(false),
-    $c->f(4.2),
-    $c->f(42),
-    $c->f('str')
+    (new A)->f(),
+    (new B)->f(),
+    (new C)->f(),
+    (new D)->f()
 );
 
 ?>
 --EXPECT--
 bool(true)
-bool(false)
 float(4.2)
 int(42)
 string(3) "str"

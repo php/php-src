@@ -1,40 +1,10 @@
 --TEST--
-scalar instance method parameter type constraint
---DESCRIPTION--
-Tests that a instance method that has a scalar parameter type constraint
-accepts only compatible types.
+invalid array scalar type constraint parameter default value
 --FILE--
 <?php
 
-class C {
-    function f(scalar $p) {}
-}
-
-function provide_non_scalar_types() {
-    yield [];
-    yield null;
-    yield new stdClass;
-    $h = fopen('php://stdout', 'w');
-    yield $h;
-    fclose($h);
-    yield $h;
-}
-
-$c = new C;
-
-foreach (provide_non_scalar_types() as $t) {
-    try {
-        $c->f($t);
-    }
-    catch (TypeError $e) {
-        echo "{$e->getMessage()}\n";
-    }
-}
+function f(scalar $p = []) {}
 
 ?>
 --EXPECTF--
-Argument 1 passed to C::f() must be of the type scalar, array given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, null given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, object given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, resource given, called in %s
-Argument 1 passed to C::f() must be of the type scalar, resource given, called in %s
+Fatal error: Default value for parameters with scalar type can only be bool, float, integer, string, or NULL in %s

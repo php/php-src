@@ -1,23 +1,22 @@
 --TEST--
-nullable scalar static method parameter type constraint
---DESCRIPTION--
-Verifies that a static method can have a nullable scalar parameter type
-constraint and that it is possible to call it with all compatible types.
+nullable scalar return type constraint (strict mode)
 --FILE--
 <?php
 
-class C {
-    static function f(?scalar $scalar) {
-        var_dump($scalar);
-    }
+declare(strict_types = 1);
+
+function f($p): ?scalar {
+    return $p;
 }
 
-C::f(true);
-C::f(false);
-C::f(4.2);
-C::f(42);
-C::f('str');
-C::f(null);
+var_dump(
+    f(true),
+    f(false),
+    f(4.2),
+    f(42),
+    f('str'),
+    f(null)
+);
 
 ?>
 --EXPECT--
