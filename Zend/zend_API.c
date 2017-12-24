@@ -122,6 +122,8 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 			return "callable";
 		case IS_ITERABLE:
 			return "iterable";
+		case IS_SCALAR:
+			return "scalar";
 		case IS_ARRAY:
 			return "array";
 		case IS_VOID:
@@ -4271,6 +4273,22 @@ ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
 			return 1;
 		case IS_OBJECT:
 			return instanceof_function(Z_OBJCE_P(iterable), zend_ce_traversable);
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
+ZEND_API zend_bool zend_is_scalar(zval *scalar) /* {{{ */
+{
+	switch (Z_TYPE_P(scalar)) {
+		case IS_TRUE:
+		case IS_FALSE:
+		case IS_DOUBLE:
+		case IS_LONG:
+		case IS_STRING:
+			return 1;
+
 		default:
 			return 0;
 	}

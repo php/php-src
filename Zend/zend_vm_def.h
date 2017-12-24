@@ -3783,6 +3783,7 @@ ZEND_VM_HANDLER(124, ZEND_VERIFY_RETURN_TYPE, CONST|TMP|VAR|UNUSED|CV, UNUSED)
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)

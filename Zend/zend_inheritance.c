@@ -181,6 +181,33 @@ static zend_always_inline zend_bool zend_iterable_compatibility_check(zend_arg_i
 }
 /* }}} */
 
+/*
+This function is used to allow some degree of co-/contravariance with the
+scalar type constraint, e.g.:
+
+	interface A {
+		function f(string $p): scalar;
+	}
+
+	interface B extends A {
+		function f(scalar $p): string;
+	}
+*/
+static zend_always_inline zend_bool zend_scalar_compatibility_check(zend_arg_info *arg_info) /* {{{ */
+{
+	switch (ZEND_TYPE_CODE(arg_info->type)) {
+		case _IS_BOOL:
+		case IS_DOUBLE:
+		case IS_LONG:
+		case IS_STRING:
+			return 1;
+
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
 static int zend_do_perform_type_hint_check(const zend_function *fe, zend_arg_info *fe_arg_info, const zend_function *proto, zend_arg_info *proto_arg_info) /* {{{ */
 {
 	ZEND_ASSERT(ZEND_TYPE_IS_SET(fe_arg_info->type) && ZEND_TYPE_IS_SET(proto_arg_info->type));
@@ -337,6 +364,12 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 					}
 					break;
 
+				case IS_SCALAR:
+					if (!zend_scalar_compatibility_check(proto_arg_info)) {
+						return 0;
+					}
+					break;
+
 				default:
 					return 0;
 			}
@@ -366,6 +399,12 @@ static zend_bool zend_do_perform_implementation_check(const zend_function *fe, c
 			switch (ZEND_TYPE_CODE(proto->common.arg_info[-1].type)) {
 				case IS_ITERABLE:
 					if (!zend_iterable_compatibility_check(fe->common.arg_info - 1)) {
+						return 0;
+					}
+					break;
+
+				case IS_SCALAR:
+					if (!zend_scalar_compatibility_check(fe->common.arg_info - 1)) {
 						return 0;
 					}
 					break;

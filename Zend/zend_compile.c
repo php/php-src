@@ -142,6 +142,7 @@ static const struct reserved_class_name reserved_class_names[] = {
 	{ZEND_STRL("true")},
 	{ZEND_STRL("void")},
 	{ZEND_STRL("iterable")},
+	{ZEND_STRL("scalar")},
 	{ZEND_STRL("object")},
 	{NULL, 0}
 };
@@ -188,6 +189,7 @@ static const builtin_type_info builtin_types[] = {
 	{ZEND_STRL("bool"), _IS_BOOL},
 	{ZEND_STRL("void"), IS_VOID},
 	{ZEND_STRL("iterable"), IS_ITERABLE},
+	{ZEND_STRL("scalar"), IS_SCALAR},
 	{ZEND_STRL("object"), IS_OBJECT},
 	{NULL, 0, IS_UNDEF}
 };
@@ -5614,7 +5616,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 									"with a float type can only be float, integer, or NULL");
 							}
 							break;
-						
+
 						case IS_ITERABLE:
 							if (Z_TYPE(default_node.u.constant) != IS_ARRAY) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
@@ -5622,11 +5624,24 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 							}
 							break;
 
+						case IS_SCALAR:
+							if (
+								Z_TYPE(default_node.u.constant) != IS_TRUE   &&
+								Z_TYPE(default_node.u.constant) != IS_FALSE  &&
+								Z_TYPE(default_node.u.constant) != IS_DOUBLE &&
+								Z_TYPE(default_node.u.constant) != IS_LONG   &&
+								Z_TYPE(default_node.u.constant) != IS_STRING
+							) {
+								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
+									"with scalar type can only be bool, float, integer, string, or NULL");
+							}
+							break;
+
 						case IS_OBJECT:
 							zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "
 								"with an object type can only be NULL");
 							break;
-							
+
 						default:
 							if (!ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(arg_info->type), Z_TYPE(default_node.u.constant))) {
 								zend_error_noreturn(E_COMPILE_ERROR, "Default value for parameters "

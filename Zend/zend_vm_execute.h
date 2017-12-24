@@ -9271,6 +9271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)
@@ -20498,6 +20499,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_TMP_UN
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)
@@ -28965,6 +28967,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_VAR_UN
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)
@@ -35875,6 +35878,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_UNUSED
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)
@@ -48808,6 +48812,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_VERIFY_RETURN_TYPE_SPEC_CV_UNU
 		if (UNEXPECTED(!ZEND_TYPE_IS_CLASS(ret_info->type)
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_CALLABLE
 			&& ZEND_TYPE_CODE(ret_info->type) != IS_ITERABLE
+			&& ZEND_TYPE_CODE(ret_info->type) != IS_SCALAR
 			&& !ZEND_SAME_FAKE_TYPE(ZEND_TYPE_CODE(ret_info->type), Z_TYPE_P(retval_ptr))
 			&& !(EX(func)->op_array.fn_flags & ZEND_ACC_RETURN_REFERENCE)
 			&& retval_ref != retval_ptr)

@@ -691,6 +691,9 @@ static ZEND_COLD void zend_verify_type_error_common(
 				*need_msg = "be iterable";
 				*need_kind = "";
 				break;
+			case IS_SCALAR:
+				*need_msg = "be scalar";
+				*need_kind = "bool, float, integer, string";
 			default:
 				*need_msg = "be of the type ";
 				*need_kind = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
@@ -863,6 +866,8 @@ static zend_always_inline zend_bool zend_check_type(
 		return zend_is_callable(arg, IS_CALLABLE_CHECK_SILENT, NULL);
 	} else if (ZEND_TYPE_CODE(type) == IS_ITERABLE) {
 		return zend_is_iterable(arg);
+	} else if (ZEND_TYPE_CODE(type) == IS_SCALAR) {
+		return zend_is_scalar(arg);
 	} else if (ZEND_TYPE_CODE(type) == _IS_BOOL &&
 			   EXPECTED(Z_TYPE_P(arg) == IS_FALSE || Z_TYPE_P(arg) == IS_TRUE)) {
 		return 1;
