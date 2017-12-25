@@ -27,6 +27,10 @@ PHP                                                                        NEWS
     function). (Li-Wen Hsu)
   . Fixed bug #54043 (Remove inconsitency of internal exceptions and user
     defined exceptions). (Nikita)
+  . Fixed bug #53033 (Mathematical operations convert objects to integers).
+    (Nikita)
+  . Fixed bug #73108 (Internal class cast handler uses integer instead of
+    float). (Nikita)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -131,6 +135,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
+
+- SimpleXML:
+  . Fixed bug #54973 (SimpleXML casts integers wrong). (Nikita)
 
 - SOAP:
   . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)

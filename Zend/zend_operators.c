@@ -136,6 +136,26 @@ ZEND_API zend_long ZEND_FASTCALL zend_atol(const char *str, size_t str_len) /* {
 }
 /* }}} */
 
+/* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
+#define convert_object_to_type(op, dst, ctype, conv_func)									\
+	ZVAL_UNDEF(dst);																		\
+	if (Z_OBJ_HT_P(op)->cast_object) {														\
+		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE) {				\
+			zend_error(E_RECOVERABLE_ERROR,													\
+				"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
+			zend_get_type_by_const(ctype));													\
+		} 																					\
+	} else if (Z_OBJ_HT_P(op)->get) {														\
+		zval *newop = Z_OBJ_HT_P(op)->get(op, dst);								\
+		if (Z_TYPE_P(newop) != IS_OBJECT) {													\
+			/* for safety - avoid loop */													\
+			ZVAL_COPY_VALUE(dst, newop);													\
+			conv_func(dst);																	\
+		}																					\
+	}
+
+/* }}} */
+
 void ZEND_FASTCALL _convert_scalar_to_number(zval *op, zend_bool silent) /* {{{ */
 {
 try_again:
@@ -172,7 +192,18 @@ try_again:
 			}
 			break;
 		case IS_OBJECT:
-			convert_to_long_base(op, 10);
+			{
+				zval dst;
+
+				convert_object_to_type(op, &dst, _IS_NUMBER, convert_scalar_to_number);
+				zval_dtor(op);
+
+				if (Z_TYPE(dst) == IS_LONG || Z_TYPE(dst) == IS_DOUBLE) {
+					ZVAL_COPY_VALUE(op, &dst);
+				} else {
+					ZVAL_LONG(op, 1);
+				}
+			}
 			break;
 	}
 }
@@ -215,17 +246,17 @@ ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op) /* {{{ */
 					break;											\
 				case IS_OBJECT:										\
 					ZVAL_COPY(&(holder), op);						\
-					convert_to_long_base(&(holder), 10);			\
+					_convert_scalar_to_number(&(holder), silent);	\
 					if (UNEXPECTED(EG(exception))) {				\
 						if (result != op1) {						\
 							ZVAL_UNDEF(result);						\
 						}											\
 						return FAILURE;								\
 					}												\
-					if (Z_TYPE(holder) == IS_LONG) {				\
+					if (Z_TYPE(holder) == IS_LONG || Z_TYPE(holder) == IS_DOUBLE) { \
 						if (op == result) {							\
 							zval_ptr_dtor(op);						\
-							ZVAL_LONG(op, Z_LVAL(holder));			\
+							ZVAL_COPY(op, &(holder));				\
 						} else {									\
 							(op) = &(holder);						\
 						}											\
@@ -233,26 +264,6 @@ ZEND_API void ZEND_FASTCALL convert_scalar_to_number(zval *op) /* {{{ */
 					break;											\
 			}														\
 		}															\
-	}
-
-/* }}} */
-
-/* {{{ convert_object_to_type: dst will be either ctype or UNDEF */
-#define convert_object_to_type(op, dst, ctype, conv_func)									\
-	ZVAL_UNDEF(dst);																		\
-	if (Z_OBJ_HT_P(op)->cast_object) {														\
-		if (Z_OBJ_HT_P(op)->cast_object(op, dst, ctype) == FAILURE) {				\
-			zend_error(E_RECOVERABLE_ERROR,													\
-				"Object of class %s could not be converted to %s", ZSTR_VAL(Z_OBJCE_P(op)->name),\
-			zend_get_type_by_const(ctype));													\
-		} 																					\
-	} else if (Z_OBJ_HT_P(op)->get) {														\
-		zval *newop = Z_OBJ_HT_P(op)->get(op, dst);								\
-		if (Z_TYPE_P(newop) != IS_OBJECT) {													\
-			/* for safety - avoid loop */													\
-			ZVAL_COPY_VALUE(dst, newop);													\
-			conv_func(dst);																	\
-		}																					\
 	}
 
 /* }}} */

@@ -31,7 +31,7 @@ Core:
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
-	  Formerly some warnings have directly been written to stderr.
+    Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
 
@@ -39,6 +39,11 @@ SPL:
   . If an SPL autoloader throws an exception, following autoloaders will not be
     executed. Previously all autoloaders were executed and exceptions were
     chained.
+
+SimpleXML:
+  . Mathematic operations involving SimpleXML objects will now treat the text as
+    an integer or float, whichever is more appropriate. Previously values were
+    treated as integers unconditionally.
 
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
@@ -140,7 +145,7 @@ JSON:
   . Support for Birdstep has been removed.
 
  ZIP:
-  . Bunled libzip has been dropped,
+  . Bundled libzip has been dropped,
     system library is now required.
 
 ========================================
