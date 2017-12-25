@@ -1675,16 +1675,10 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					return FAILURE;
 				}
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
 				} else {
 					zval_ptr_dtor(&retval);
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
 					ZVAL_EMPTY_STRING(writeobj);
 					zend_error(E_RECOVERABLE_ERROR, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
 					return SUCCESS;
@@ -1692,22 +1686,16 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			}
 			return FAILURE;
 		case _IS_BOOL:
-			ZVAL_BOOL(writeobj, 1);
+			ZVAL_TRUE(writeobj);
 			return SUCCESS;
 		case IS_LONG:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ZSTR_VAL(ce->name));
-			if (readobj == writeobj) {
-				zval_dtor(readobj);
-			}
 			ZVAL_LONG(writeobj, 1);
 			return SUCCESS;
 		case IS_DOUBLE:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to float", ZSTR_VAL(ce->name));
-			if (readobj == writeobj) {
-				zval_dtor(readobj);
-			}
 			ZVAL_DOUBLE(writeobj, 1);
 			return SUCCESS;
 		default:

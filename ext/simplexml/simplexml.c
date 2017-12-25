@@ -1904,10 +1904,6 @@ static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type)
 		}
 	}
 
-	if (readobj == writeobj) {
-		zval_ptr_dtor(readobj);
-	}
-
 	rv = cast_object(writeobj, type, (char *)contents);
 
 	if (contents) {
