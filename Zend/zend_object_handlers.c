@@ -1709,13 +1709,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
 	zval *func;
-	zend_class_entry *ce;
-
-	if (Z_TYPE_P(obj) != IS_OBJECT) {
-		return FAILURE;
-	}
-
-	ce = Z_OBJCE_P(obj);
+	zend_class_entry *ce = Z_OBJCE_P(obj);
 
 	if ((func = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE), 1)) == NULL) {
 		return FAILURE;
