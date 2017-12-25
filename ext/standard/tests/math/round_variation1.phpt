@@ -159,7 +159,7 @@ float(0)
 
 -- Iteration 23 --
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Notice: Object of class classA could not be converted to number in %s on line %d
 float(1)
 
 -- Iteration 24 --
