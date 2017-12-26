@@ -1213,7 +1213,11 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 	zend_string  *str;
 	char         *cptr;
 	size_t        len = 0;
-	zend_string **strings, **strptr;
+	struct {
+		zend_string *str;
+		zend_long    lval;
+	} *strings, *ptr;
+	ALLOCA_FLAG(use_heap)
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(pieces));
 
@@ -1226,15 +1230,20 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	strings = emalloc((sizeof(zend_long) + sizeof(zend_string *)) * numelems);
-	strptr = strings - 1;
+	ptr = strings = do_alloca((sizeof(*strings)) * numelems, use_heap);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
-		if (Z_TYPE_P(tmp) == IS_LONG) {
+		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
+			ptr->str = Z_STR_P(tmp);
+			len += ZSTR_LEN(ptr->str);
+			ptr->lval = 0;
+			ptr++;
+		} else if (UNEXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 			zend_long val = Z_LVAL_P(tmp);
 
-			*++strptr = NULL;
-			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
+			ptr->str = NULL;
+			ptr->lval = val;
+			ptr++;
 			if (val <= 0) {
 				len++;
 			}
@@ -1243,43 +1252,42 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 				len++;
 			}
 		} else {
-			*++strptr = zval_get_string(tmp);
-			len += ZSTR_LEN(*strptr);
+			ptr->str = zval_get_string_func(tmp);
+			len += ZSTR_LEN(ptr->str);
+			ptr->lval = 1;
+			ptr++;
 		}
 	} ZEND_HASH_FOREACH_END();
+
 	/* numelems can not be 0, we checked above */
 	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
-	do {
-		if (*strptr) {
-			cptr -= ZSTR_LEN(*strptr);
-			memcpy(cptr, ZSTR_VAL(*strptr), ZSTR_LEN(*strptr));
-			zend_string_release(*strptr);
+	while (1) {
+		ptr--;
+		if (EXPECTED(ptr->str)) {
+			cptr -= ZSTR_LEN(ptr->str);
+			memcpy(cptr, ZSTR_VAL(ptr->str), ZSTR_LEN(ptr->str));
+			if (ptr->lval) {
+				zend_string_release(ptr->str);
+			}
 		} else {
 			char *oldPtr = cptr;
 			char oldVal = *cptr;
-			zend_long val = ((zend_long *) (strings + numelems))[strptr - strings];
-			cptr = zend_print_long_to_buf(cptr, val);
+			cptr = zend_print_long_to_buf(cptr, ptr->lval);
 			*oldPtr = oldVal;
+		}
+
+		if (ptr == strings) {
+			break;
 		}
 
 		cptr -= ZSTR_LEN(glue);
 		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
-	} while (--strptr > strings);
-
-	if (*strptr) {
-		memcpy(ZSTR_VAL(str), ZSTR_VAL(*strptr), ZSTR_LEN(*strptr));
-		zend_string_release(*strptr);
-	} else {
-		char *oldPtr = cptr;
-		char oldVal = *cptr;
-		zend_print_long_to_buf(cptr, ((zend_long *) (strings + numelems))[strptr - strings]);
-		*oldPtr = oldVal;
 	}
 
-	efree(strings);
+	free_alloca(strings, use_heap);
 	RETURN_NEW_STR(str);
 }
 /* }}} */
