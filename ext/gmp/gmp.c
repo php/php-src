@@ -425,6 +425,14 @@ static int gmp_cast_object(zval *readobj, zval *writeobj, int type) /* {{{ */
 		gmpnum = GET_GMP_FROM_ZVAL(readobj);
 		ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
 		return SUCCESS;
+	case _IS_NUMBER:
+		gmpnum = GET_GMP_FROM_ZVAL(readobj);
+		if (mpz_fits_slong_p(gmpnum)) {
+			ZVAL_LONG(writeobj, mpz_get_si(gmpnum));
+		} else {
+			ZVAL_DOUBLE(writeobj, mpz_get_d(gmpnum));
+		}
+		return SUCCESS;
 	default:
 		return FAILURE;
 	}

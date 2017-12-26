@@ -1698,6 +1698,11 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			zend_error(E_NOTICE, "Object of class %s could not be converted to float", ZSTR_VAL(ce->name));
 			ZVAL_DOUBLE(writeobj, 1);
 			return SUCCESS;
+		case _IS_NUMBER:
+			ce = Z_OBJCE_P(readobj);
+			zend_error(E_NOTICE, "Object of class %s could not be converted to number", ZSTR_VAL(ce->name));
+			ZVAL_LONG(writeobj, 1);
+			return SUCCESS;
 		default:
 			ZVAL_NULL(writeobj);
 			break;

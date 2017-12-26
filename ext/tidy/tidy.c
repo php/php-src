@@ -733,6 +733,7 @@ static int tidy_doc_cast_handler(zval *in, zval *out, int type)
 
 	switch (type) {
 		case IS_LONG:
+		case _IS_NUMBER:
 			ZVAL_LONG(out, 0);
 			break;
 
@@ -766,6 +767,7 @@ static int tidy_node_cast_handler(zval *in, zval *out, int type)
 
 	switch(type) {
 		case IS_LONG:
+		case _IS_NUMBER:
 			ZVAL_LONG(out, 0);
 			break;
 
