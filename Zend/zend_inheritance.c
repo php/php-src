@@ -896,18 +896,24 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			do {
 				dst--;
 				src--;
-				ZVAL_MAKE_REF(src);
-				ZVAL_COPY_VALUE(dst, src);
-				Z_ADDREF_P(dst);
+				if (Z_ISREF_P(src)) {
+					Z_ADDREF_P(src);
+				} else {
+					ZVAL_MAKE_REF_EX(src, 2);
+				}
+				ZVAL_REF(dst, Z_REF_P(src));
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
 			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
 			do {
 				dst--;
 				src--;
-				ZVAL_MAKE_REF(src);
-				ZVAL_COPY_VALUE(dst, src);
-				Z_ADDREF_P(dst);
+				if (Z_ISREF_P(src)) {
+					Z_ADDREF_P(src);
+				} else {
+					ZVAL_MAKE_REF_EX(src, 2);
+				}
+				ZVAL_REF(dst, Z_REF_P(src));
 				if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
