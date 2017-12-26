@@ -23770,17 +23770,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23788,17 +23787,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_CONST_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23833,17 +23831,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_VAR_CONST
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23851,8 +23848,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -23862,12 +23858,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23875,8 +23871,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -23885,12 +23880,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CONST_HA
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -23919,7 +23914,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -23929,13 +23924,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CONST
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26208,17 +26202,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26226,17 +26219,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_TMPVAR_H
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26271,17 +26263,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_VAR_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26289,8 +26280,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -26300,12 +26290,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26313,8 +26303,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -26323,12 +26312,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_TMPVAR_H
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -26357,7 +26346,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -26367,13 +26356,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_TMPVA
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -28464,17 +28452,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, NULL, IS_UNUSED EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, NULL, IS_UNUSED EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -28482,17 +28469,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_UNUSED_H
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, NULL, IS_UNUSED EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, NULL, IS_UNUSED EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30059,17 +30045,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30077,17 +30062,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_VAR_CV_HANDL
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30122,17 +30106,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_VAR_CV_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30140,8 +30123,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -30151,12 +30133,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30164,8 +30146,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -30174,12 +30155,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_VAR_CV_HANDL
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -30208,7 +30189,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -30218,13 +30199,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_VAR_CV_HA
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_VAR == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_VAR == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -32542,8 +32522,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -32553,12 +32532,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -32566,8 +32545,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -32576,12 +32554,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CONST
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -32704,7 +32682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -32714,13 +32692,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CO
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -34369,8 +34346,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -34380,12 +34356,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -34393,8 +34369,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -34403,12 +34378,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_TMPVA
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -34532,7 +34507,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -34542,13 +34517,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_TM
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -36728,8 +36702,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -36739,12 +36712,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -36752,8 +36725,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -36762,12 +36734,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_UNUSED_CV_HA
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -36890,7 +36862,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
@@ -36900,13 +36872,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_UNUSED_CV
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_UNUSED == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_UNUSED == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41165,17 +41136,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_CV_CONST_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41183,17 +41153,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_CV_CONST_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41242,17 +41211,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_CV_CONST_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, RT_CONSTANT(opline, opline->op2), IS_CONST EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41362,8 +41330,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -41373,12 +41340,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41386,8 +41353,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
@@ -41396,12 +41362,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CONST_HAN
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = RT_CONSTANT(opline, opline->op2);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -41524,7 +41490,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
@@ -41534,13 +41500,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CONST_
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45189,17 +45154,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45207,17 +45171,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_CV_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45266,17 +45229,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_CV_TMPVAR
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
-
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC), (IS_TMP_VAR|IS_VAR) EXECUTE_DATA_CC);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45387,8 +45349,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -45398,12 +45359,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45411,8 +45372,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
@@ -45421,12 +45381,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_TMPVAR_HA
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -45550,7 +45510,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
@@ -45560,13 +45520,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_TMPVAR
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
-
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 	zval_ptr_dtor_nogc(free_op2);
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -48526,17 +48485,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, NULL, IS_UNUSED EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, NULL, IS_UNUSED EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -48544,17 +48502,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_CV_UNUSED_HA
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, NULL, IS_UNUSED EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, NULL, IS_UNUSED EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -50997,17 +50954,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_W(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_W(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51015,17 +50971,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_RW_SPEC_CV_CV_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_RW(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_RW(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51074,17 +51029,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_UNSET_SPEC_CV_CV_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container;
+	zval *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_undef_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_dimension_address_UNSET(result, container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
 
-	zend_fetch_dimension_address_UNSET(EX_VAR(opline->result.var), container, _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC), IS_CV EXECUTE_DATA_CC);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51194,8 +51148,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 
@@ -51205,12 +51158,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_W);
 
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51218,8 +51171,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *property;
-	zval *container;
+	zval *property, *container, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
@@ -51228,12 +51180,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_RW_SPEC_CV_CV_HANDLE
 		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_RW);
 
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -51356,7 +51308,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *container, *property;
+	zval *container, *property, *result;
 
 	SAVE_OPLINE();
 	container = _get_zval_ptr_cv_BP_VAR_UNSET(opline->op1.var EXECUTE_DATA_CC);
@@ -51366,13 +51318,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_UNSET_SPEC_CV_CV_HAN
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
+	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
 
-	zend_fetch_property_address(EX_VAR(opline->result.var), container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL), BP_VAR_UNSET);
-
-	if (IS_CV == IS_VAR && READY_TO_DESTROY(free_op1)) {
-		EXTRACT_ZVAL_PTR(EX_VAR(opline->result.var));
+	if (IS_CV == IS_VAR) {
+		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
