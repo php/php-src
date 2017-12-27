@@ -416,7 +416,6 @@ PHP_FUNCTION(spl_autoload_call)
 		fci.no_separation = 1;
 
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
-		fcic.initialized = 1;
 
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
 		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {

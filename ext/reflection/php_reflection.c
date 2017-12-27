@@ -1353,7 +1353,6 @@ static void _reflection_export(INTERNAL_FUNCTION_PARAMETERS, zend_class_entry *c
 	fci.params = params;
 	fci.no_separation = 1;
 
-	fcc.initialized = 1;
 	fcc.function_handler = ce_ptr->constructor;
 	fcc.calling_scope = ce_ptr;
 	fcc.called_scope = Z_OBJCE(reflector);
@@ -1880,7 +1879,6 @@ ZEND_METHOD(reflection_function, invoke)
 	fci.params = params;
 	fci.no_separation = 1;
 
-	fcc.initialized = 1;
 	fcc.function_handler = fptr;
 	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = NULL;
@@ -1941,7 +1939,6 @@ ZEND_METHOD(reflection_function, invokeArgs)
 	fci.params = params;
 	fci.no_separation = 1;
 
-	fcc.initialized = 1;
 	fcc.function_handler = fptr;
 	fcc.calling_scope = zend_get_executed_scope();
 	fcc.called_scope = NULL;
@@ -3208,7 +3205,6 @@ static void reflection_method_invoke(INTERNAL_FUNCTION_PARAMETERS, int variadic)
 	fci.params = params;
 	fci.no_separation = 1;
 
-	fcc.initialized = 1;
 	fcc.function_handler = mptr;
 	fcc.calling_scope = obj_ce;
 	fcc.called_scope = intern->ce;
@@ -4770,7 +4766,6 @@ ZEND_METHOD(reflection_class, newInstance)
 		fci.params = params;
 		fci.no_separation = 1;
 
-		fcc.initialized = 1;
 		fcc.function_handler = constructor;
 		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(return_value);
@@ -4872,7 +4867,6 @@ ZEND_METHOD(reflection_class, newInstanceArgs)
 		fci.params = params;
 		fci.no_separation = 1;
 
-		fcc.initialized = 1;
 		fcc.function_handler = constructor;
 		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(return_value);

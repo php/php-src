@@ -2082,7 +2082,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fci.no_separation = 1;
 	ZVAL_STR(&fci.function_name, func_ptr->common.function_name);
 
-	fcic.initialized = 1;
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
 	fcic.called_scope = NULL;

@@ -11,6 +11,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   h. zend_register_persistent_resource()
   i. RAND_RANGE()
   j. cast_object() with _IS_NUMBER
+  k. zend_fcall_info_cache.initialized
 
 2. Build system changes
   a. Unix build system changes
@@ -90,6 +91,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   j. The cast_object() object handler now also accepts the _IS_NUMBER type. The
      handler should return either an integer or float value in this case,
      whichever is more appropriate.
+
+  k. zend_fcall_info_cache.initialized is removed. zend_fcall_info_cache is
+     initialized if zend_fcall_info_cache.function_handler is set.
 
 ========================
 2. Build system changes

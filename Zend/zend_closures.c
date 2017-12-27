@@ -141,7 +141,6 @@ ZEND_METHOD(Closure, call)
 	fci.params = my_params;
 	fci.param_count = my_param_count;
 	fci.object = fci_cache.object = newobj;
-	fci_cache.initialized = 1;
 	fci_cache.called_scope = Z_OBJCE_P(newthis);
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
@@ -247,7 +246,6 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fci.size = sizeof(zend_fcall_info);
 	fci.retval = return_value;
 
-	fcc.initialized = 1;
 	fcc.function_handler = (zend_function *) EX(func)->common.arg_info;
 	fci.params = params;
 	fci.param_count = 2;

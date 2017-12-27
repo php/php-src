@@ -668,7 +668,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 
 				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
 					fci->size = 0;
-					fcc->initialized = 0;
+					fcc->function_handler = 0;
 					break;
 				}
 
@@ -2931,7 +2931,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		zv = zend_hash_find(EG(function_table), lmname);
 		if (EXPECTED(zv != NULL)) {
 			fcc->function_handler = Z_PTR_P(zv);
-			fcc->initialized = 1;
 			if (lmname != Z_STR_P(callable)) {
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
@@ -2946,7 +2945,6 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 			zv = zend_hash_find(EG(function_table), lmname);
 			if (zv != NULL) {
 				fcc->function_handler = Z_PTR_P(zv);
-				fcc->initialized = 1;
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 				return 1;
 			}
@@ -3178,7 +3176,7 @@ get_function_via_handler:
 		fcc->called_scope = fcc->object->ce;
 	}
 	if (retval) {
-		fcc->initialized = 1;
+//???		fcc->initialized = 1;
 	}
 	return retval;
 }
@@ -3271,7 +3269,6 @@ static zend_bool zend_is_callable_impl(zval *callable, zend_object *object, uint
 		*error = NULL;
 	}
 
-	fcc->initialized = 0;
 	fcc->calling_scope = NULL;
 	fcc->called_scope = NULL;
 	fcc->function_handler = NULL;
@@ -3380,7 +3377,6 @@ again:
 		case IS_OBJECT:
 			if (Z_OBJ_HANDLER_P(callable, get_closure) && Z_OBJ_HANDLER_P(callable, get_closure)(callable, &fcc->calling_scope, &fcc->function_handler, &fcc->object) == SUCCESS) {
 				fcc->called_scope = fcc->calling_scope;
-				fcc->initialized = 1;
 				return 1;
 			}
 			if (error) zend_spprintf(error, 0, "no array or string given");

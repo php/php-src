@@ -52,7 +52,6 @@ typedef struct _zend_fcall_info {
 } zend_fcall_info;
 
 typedef struct _zend_fcall_info_cache {
-	zend_bool initialized;
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
@@ -1290,7 +1289,7 @@ static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *de
 {
 	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		dest_fci->size = 0;
-		dest_fcc->initialized = 0;
+		dest_fcc->function_handler = NULL;
 		*error = NULL;
 	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;

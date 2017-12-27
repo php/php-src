@@ -311,7 +311,6 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fci.params = NULL;
 		fci.no_separation = 1;
 
-		fcc.initialized = 1;
 		fcc.function_handler = uwrap->ce->constructor;
 		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);

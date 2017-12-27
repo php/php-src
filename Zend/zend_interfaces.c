@@ -63,7 +63,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		zend_fcall_info_cache fcic;
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
 
-		fcic.initialized = 1;
 		if (!obj_ce) {
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
