@@ -535,7 +535,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
 	const uint8_t       *tables = NULL;
-	pcre_cache_entry	*pce;
+	zval                *zv;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
 	zend_string 		*key;
@@ -554,14 +554,14 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 	/* Try to lookup the cached regex entry, and if successful, just pass
 	   back the compiled pattern, otherwise go on and compile it. */
-	pce = zend_hash_find_ptr(&PCRE_G(pcre_cache), key);
-	if (pce) {
+	zv = zend_hash_find(&PCRE_G(pcre_cache), key);
+	if (zv) {
 #if HAVE_SETLOCALE
 		if (key != regex) {
 			zend_string_release(key);
 		}
 #endif
-		return pce;
+		return (pcre_cache_entry*)Z_PTR_P(zv);
 	}
 
 	p = ZSTR_VAL(regex);
@@ -768,7 +768,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	 * these are supposedly the oldest ones (but not necessarily the least used
 	 * ones).
 	 */
-	if (!pce && zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
+	if (zend_hash_num_elements(&PCRE_G(pcre_cache)) == PCRE_CACHE_SIZE) {
 		int num_clean = PCRE_CACHE_SIZE / 8;
 		zend_hash_apply_with_argument(&PCRE_G(pcre_cache), pcre_clean_cache, &num_clean);
 	}
@@ -827,9 +827,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		key = str;
 	}
 
-	pce = zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
-
-	return pce;
+	return zend_hash_add_new_mem(&PCRE_G(pcre_cache), key, &new_entry, sizeof(pcre_cache_entry));
 }
 /* }}} */
 
