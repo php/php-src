@@ -174,8 +174,10 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
 #if ZEND_DEBUG
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()
 #else
 #define TSRMLS_CACHE_UPDATE() if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()  TSRMLS_CACHE = NULL
 #endif
 #define TSRMLS_CACHE _tsrm_ls_cache
 
