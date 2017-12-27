@@ -47,7 +47,7 @@ ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *re
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
+ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
