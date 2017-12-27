@@ -26,6 +26,10 @@ PHP                                                                        NEWS
   . Fixed bug #75671 (pg_version() crashes when called on a connection to
     cockroach). (magicaltux at gmail dot com)
 
+- SAPI:
+  . Fixed bug #75735 ([embed SAPI] Segmentation fault in
+    sapi_register_post_entry). (Laruence)
+
 - SOAP:
   . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
     used). (Anton Artamonov)
