@@ -296,6 +296,8 @@ void shutdown_executor(void) /* {{{ */
 				break;
 			}
 		} ZEND_HASH_FOREACH_END_DEL();
+
+		zend_cleanup_internal_classes();
 	} else {
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
@@ -358,6 +360,8 @@ void shutdown_executor(void) /* {{{ */
 			} ZEND_HASH_FOREACH_END_DEL();
 		}
 
+		zend_cleanup_internal_classes();
+
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
@@ -387,8 +391,6 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 	EG(ht_iterators_used) = 0;
-
-	zend_cleanup_internal_classes();
 
 	zend_shutdown_fpu();
 }
