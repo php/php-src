@@ -21,6 +21,7 @@ PHP                                                                        NEWS
   . Fixed bug #75615 (PDO Mysql module can't be built as module). (jdolecek)
 
 - Opcache:
+  . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
 
