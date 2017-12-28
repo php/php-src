@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.2
 
 - Core:
+  . Fixed bug #75742 (potential memleak in internal classes's static members).
+    (Laruence)
   . Fixed bug #75679 (Path 260 character problem). (Anatol)
   . Fixed bug #75614 (Some non-portable == in shell scripts). (jdolecek)
 
