@@ -7096,6 +7096,9 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 			if (right_node.op_type == IS_CONST) {
 				convert_to_string(&right_node.u.constant);
 			}
+			if (left_node.op_type == IS_CONST && right_node.op_type == IS_CONST) {
+				opcode = ZEND_FAST_CONCAT;
+			}
 		}
 		zend_emit_op_tmp(result, opcode, &left_node, &right_node);
 	} while (0);

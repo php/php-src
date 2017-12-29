@@ -4426,68 +4426,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POW_SPEC_CONST_CONST_HANDLER(Z
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CONCAT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-
-	zval *op1, *op2;
-
-	op1 = RT_CONSTANT(opline, opline->op1);
-	op2 = RT_CONSTANT(opline, opline->op2);
-
-	if ((IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op1) == IS_STRING)) &&
-	    (IS_CONST == IS_CONST || EXPECTED(Z_TYPE_P(op2) == IS_STRING))) {
-		zend_string *op1_str = Z_STR_P(op1);
-		zend_string *op2_str = Z_STR_P(op2);
-		zend_string *str;
-
-		if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op1_str) == 0)) {
-			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), op2_str);
-			} else {
-				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-			}
-
-		} else if (IS_CONST != IS_CONST && UNEXPECTED(ZSTR_LEN(op2_str) == 0)) {
-			if (IS_CONST == IS_CONST || IS_CONST == IS_CV) {
-				ZVAL_STR_COPY(EX_VAR(opline->result.var), op1_str);
-			} else {
-				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-			}
-
-		} else if (IS_CONST != IS_CONST && IS_CONST != IS_CV &&
-		    !ZSTR_IS_INTERNED(op1_str) && GC_REFCOUNT(op1_str) == 1) {
-		    size_t len = ZSTR_LEN(op1_str);
-
-			str = zend_string_extend(op1_str, len + ZSTR_LEN(op2_str), 0);
-			memcpy(ZSTR_VAL(str) + len, ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
-			ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-
-		} else {
-			str = zend_string_alloc(ZSTR_LEN(op1_str) + ZSTR_LEN(op2_str), 0);
-			memcpy(ZSTR_VAL(str), ZSTR_VAL(op1_str), ZSTR_LEN(op1_str));
-			memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
-			ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
-
-
-		}
-		ZEND_VM_NEXT_OPCODE();
-	} else {
-		SAVE_OPLINE();
-
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op1) == IS_UNDEF)) {
-			op1 = GET_OP1_UNDEF_CV(op1, BP_VAR_R);
-		}
-		if (IS_CONST == IS_CV && UNEXPECTED(Z_TYPE_P(op2) == IS_UNDEF)) {
-			op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
-		}
-		concat_function(EX_VAR(opline->result.var), op1, op2);
-
-
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -53107,7 +53045,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_SR_SPEC_CV_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_SR_SPEC_CV_CV_LABEL,
-			(void*)&&ZEND_CONCAT_SPEC_CONST_CONST_LABEL,
+			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_CONCAT_SPEC_CONST_TMPVAR_LABEL,
 			(void*)&&ZEND_CONCAT_SPEC_CONST_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
@@ -58178,9 +58116,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_POW_SPEC_CONST_CONST):
 				ZEND_POW_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_CONCAT_SPEC_CONST_CONST):
-				ZEND_CONCAT_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_CONST_CONST):
 				ZEND_IS_IDENTICAL_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -61999,7 +61934,7 @@ void zend_init_opcodes_handlers(void)
 		ZEND_SR_SPEC_CV_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_SR_SPEC_CV_CV_HANDLER,
-		ZEND_CONCAT_SPEC_CONST_CONST_HANDLER,
+		ZEND_NULL_HANDLER,
 		ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_CONCAT_SPEC_CONST_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
