@@ -287,8 +287,10 @@ static zend_bool try_replace_op1(
 		} else {
 			// TODO: check the following special cases ???
 			switch (opline->opcode) {
-				case ZEND_FETCH_LIST_R:
 				case ZEND_CASE:
+					opline->opcode = ZEND_IS_EQUAL;
+					/* break missing intentionally */
+				case ZEND_FETCH_LIST_R:
 				case ZEND_SWITCH_STRING:
 				case ZEND_SWITCH_LONG:
 					if (Z_TYPE(zv) == IS_STRING) {

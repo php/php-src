@@ -663,6 +663,10 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 									|| m->opcode == ZEND_SWITCH_LONG
 									|| m->opcode == ZEND_SWITCH_STRING) {
 								zval v;
+
+								if (m->opcode == ZEND_CASE) {
+									m->opcode = ZEND_IS_EQUAL;
+								}
 								ZVAL_COPY_VALUE(&v, val);
 								zval_copy_ctor(&v);
 								if (Z_TYPE(v) == IS_STRING) {
