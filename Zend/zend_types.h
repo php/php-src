@@ -249,16 +249,6 @@ typedef struct _zend_array HashTable;
 
 struct _zend_array {
 	zend_refcounted_gc_h gc;
-	union {
-		struct {
-			ZEND_ENDIAN_LOHI_4(
-				zend_uchar    flags,
-				zend_uchar    _unused,
-				zend_uchar    _unused2,
-				zend_uchar    _unused3)
-		} v;
-		uint32_t flags;
-	} u;
 	uint32_t          nTableMask;
 	Bucket           *arData;
 	uint32_t          nNumUsed;

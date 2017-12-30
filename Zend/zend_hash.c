@@ -159,9 +159,8 @@ static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 
 ZEND_API const HashTable zend_empty_array = {
 	.gc.rc.refcount = 2,
-	.gc.rc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
+	.gc.rc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT) | (HASH_FLAG_STATIC_KEYS << 16),
 	.gc.gc_root = 0,
-	.u.flags = HASH_FLAG_STATIC_KEYS,
 	.nTableMask = HT_MIN_MASK,
 	.arData = (Bucket*)&uninitialized_bucket[2],
 	.nNumUsed = 0,
@@ -1364,7 +1363,8 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 
 	/* break possible cycles */
 	GC_REMOVE_FROM_BUFFER(ht);
-	GC_TYPE_INFO(ht) = IS_NULL | (GC_WHITE << GC_FLAGS_SHIFT);
+	GC_TYPE(ht) = IS_NULL;
+	GC_FLAGS(ht) = GC_WHITE;
 
 	if (ht->nNumUsed) {
 		/* In some rare cases destructors of regular arrays may be changed */

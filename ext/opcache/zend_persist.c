@@ -367,7 +367,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			zend_accel_store(op_array->static_variables, sizeof(HashTable));
 			/* make immutable array */
 			GC_SET_REFCOUNT(op_array->static_variables, 2);
-			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
+			GC_TYPE(op_array->static_variables) = IS_ARRAY;
+			GC_FLAGS(op_array->static_variables) = IS_ARRAY_IMMUTABLE;
 			HT_FLAGS(op_array->static_variables) |= HASH_FLAG_STATIC_KEYS;
 		}
 	}
