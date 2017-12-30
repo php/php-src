@@ -62,7 +62,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object);
 /* Called when the ctor was terminated by an exception */
 static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 {
-	GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+	GC_EXTRA_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 }
 
 #define ZEND_OBJECTS_STORE_HANDLERS 0, zend_object_std_dtor, zend_objects_destroy_object, zend_objects_clone_obj
@@ -74,8 +74,8 @@ static zend_always_inline void zend_object_release(zend_object *obj)
 {
 	if (GC_DELREF(obj) == 0) {
 		zend_objects_store_del(obj);
-	} else if (UNEXPECTED(GC_MAY_LEAK((zend_refcounted*)obj))) {
-		gc_possible_root((zend_refcounted*)obj);
+	} else if (UNEXPECTED(GC_MAY_LEAK(obj))) {
+		gc_possible_root((zend_refcounted *) obj);
 	}
 }
 

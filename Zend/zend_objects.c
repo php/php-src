@@ -31,11 +31,12 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
+	object->gc.gc_root = 0;
 	object->ce = ce;
 	object->properties = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
-		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
+		GC_EXTRA_FLAGS(object) |= IS_OBJ_USE_GUARDS;
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
 }
@@ -59,7 +60,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			p++;
 		} while (p != end);
 	}
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
+	if (UNEXPECTED(GC_EXTRA_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
 			zend_string_release(Z_STR_P(p));
 		} else {
