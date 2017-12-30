@@ -451,7 +451,14 @@ fi
 dnl
 dnl net_get_interfaces
 dnl
-AC_CHECK_HEADERS([net/if.h netdb.h])
+AC_CHECK_HEADERS([net/if.h],[], [],
+[
+  #ifdef HAVE_SYS_SOCKET_H
+  #include <sys/socket.h>
+  #endif
+  #include <net/if.h>
+])
+AC_CHECK_HEADERS([netdb.h])
 AC_MSG_CHECKING([for usable getifaddrs])
 AC_TRY_LINK([
   #include <sys/types.h>
