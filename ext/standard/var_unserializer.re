@@ -603,7 +603,7 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		return 0;
 	}
 
-	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
