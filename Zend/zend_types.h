@@ -254,7 +254,7 @@ struct _zend_array {
 				zend_uchar    flags,
 				zend_uchar    _unused,
 				zend_uchar    _unused2,
-				zend_uchar    consistency)
+				zend_uchar    _unused3)
 		} v;
 		uint32_t flags;
 	} u;
