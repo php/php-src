@@ -8,7 +8,7 @@ if (setlocale(LC_NUMERIC, "de_DE") === false) {
 }
 ?>
 --INI--
-precision=14
+serialize_precision=-1
 --FILE--
 <?php
 
