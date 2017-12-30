@@ -320,7 +320,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_FUNC_ARG:
 			TO_STRING_NOWARN(val);
 			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
-				opline->opcode == ZEND_FAST_CONCAT;
+				opline->opcode = ZEND_FAST_CONCAT;
 			}
 			/* break missing intentionally */
 		default:
@@ -472,7 +472,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FAST_CONCAT:
 			TO_STRING_NOWARN(val);
 			if (opline->opcode == ZEND_CONCAT && opline->op1_type == IS_CONST) {
-				opline->opcode == ZEND_FAST_CONCAT;
+				opline->opcode = ZEND_FAST_CONCAT;
 			}
 			/* break missing intentionally */
 		default:
