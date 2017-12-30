@@ -254,8 +254,8 @@ struct _zend_array {
 			ZEND_ENDIAN_LOHI_4(
 				zend_uchar    flags,
 				zend_uchar    _unused,
-				zend_uchar    nIteratorsCount,
-				zend_uchar    _unused2)
+				zend_uchar    _unused2,
+				zend_uchar    _unused3)
 		} v;
 		uint32_t flags;
 	} u;
