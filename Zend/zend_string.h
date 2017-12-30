@@ -138,7 +138,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 	GC_SET_REFCOUNT(ret, 1);
 #if 1
 	/* optimized single assignment */
-	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
 #else
 	GC_TYPE(ret) = IS_STRING;
 	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
@@ -156,7 +156,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 	GC_SET_REFCOUNT(ret, 1);
 #if 1
 	/* optimized single assignment */
-	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << 8);
+	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
 #else
 	GC_TYPE(ret) = IS_STRING;
 	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
