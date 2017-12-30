@@ -158,8 +158,9 @@ static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
 
 ZEND_API const HashTable zend_empty_array = {
-	.gc.refcount = 2,
-	.gc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
+	.gc.rc.refcount = 2,
+	.gc.rc.u.type_info = IS_ARRAY | (GC_IMMUTABLE << GC_FLAGS_SHIFT),
+	.gc.gc_root = 0,
 	.u.flags = HASH_FLAG_STATIC_KEYS,
 	.nTableMask = HT_MIN_MASK,
 	.arData = (Bucket*)&uninitialized_bucket[2],
@@ -175,6 +176,7 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 {
 	GC_SET_REFCOUNT(ht, 1);
 	GC_TYPE_INFO(ht) = IS_ARRAY | (persistent ? (GC_PERSISTENT << GC_FLAGS_SHIFT) : (GC_COLLECTABLE << GC_FLAGS_SHIFT));
+	ht->gc.gc_root = 0;
 	HT_FLAGS(ht) = HASH_FLAG_STATIC_KEYS;
 	ht->nTableMask = HT_MIN_MASK;
 	HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
@@ -1362,7 +1364,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 
 	/* break possible cycles */
 	GC_REMOVE_FROM_BUFFER(ht);
-	GC_TYPE_INFO(ht) = IS_NULL | (GC_WHITE << 16);
+	GC_TYPE_INFO(ht) = IS_NULL | (GC_WHITE << GC_FLAGS_SHIFT);
 
 	if (ht->nNumUsed) {
 		/* In some rare cases destructors of regular arrays may be changed */
@@ -1828,6 +1830,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	ALLOC_HASHTABLE(target);
 	GC_SET_REFCOUNT(target, 1);
 	GC_TYPE_INFO(target) = IS_ARRAY | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
+	GC_SET_ADDRESS(target, 0);
 
 	target->nTableSize = source->nTableSize;
 	target->pDestructor = source->pDestructor;

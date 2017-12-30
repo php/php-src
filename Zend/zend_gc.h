@@ -40,26 +40,6 @@
 # define GC_BENCH_PEAK(peak, counter)
 #endif
 
-#define GC_COLOR  0xc000
-
-#define GC_BLACK  0x0000
-#define GC_WHITE  0x8000
-#define GC_GREY   0x4000
-#define GC_PURPLE 0xc000
-
-#define GC_ADDRESS(v) \
-	((v) & ~GC_COLOR)
-#define GC_INFO_GET_COLOR(v) \
-	(((zend_uintptr_t)(v)) & GC_COLOR)
-#define GC_INFO_SET_ADDRESS(v, a) \
-	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
-#define GC_INFO_SET_COLOR(v, c) \
-	do {(v) = ((v) & ~GC_COLOR) | (c);} while (0)
-#define GC_INFO_SET_BLACK(v) \
-	do {(v) = (v) & ~GC_COLOR;} while (0)
-#define GC_INFO_SET_PURPLE(v) \
-	do {(v) = (v) | GC_COLOR;} while (0)
-
 typedef struct _gc_root_buffer {
 	zend_refcounted          *ref;
 	struct _gc_root_buffer   *next;     /* double-linked list               */
@@ -133,16 +113,14 @@ ZEND_API int  zend_gc_collect_cycles(void);
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
-		zend_refcounted *_p = (zend_refcounted*)(p); \
-		if (GC_ADDRESS(GC_INFO(_p))) { \
+		zend_refcounted *_p = (zend_refcounted *)(p); \
+		if (GC_ADDRESS(_p)) { \
 			gc_remove_from_buffer(_p); \
 		} \
 	} while (0)
 
 #define GC_MAY_LEAK(ref) \
-	((GC_TYPE_INFO(ref) & \
-		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
-	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+	((GC_FLAGS(ref) & GC_COLLECTABLE) && GC_ADDRESS(ref) == 0)
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
