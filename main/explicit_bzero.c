@@ -34,7 +34,7 @@ PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
 #ifdef __GNUC__
 	memset(dst, 0, siz);
-	asm __volatile__("" :: "r"(dst) : "memory"); 
+	asm __volatile__("" :: "r"(dst) : "memory");
 #else
 	size_t i = 0;
 	volatile unsigned char *buf = (volatile unsigned char *)dst;
