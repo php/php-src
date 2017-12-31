@@ -1744,7 +1744,12 @@ ftp_getdata(ftpbuf_t *ftp)
 	/* send the PORT */
 	ipbox.ia[0] = ((struct sockaddr_in*) sa)->sin_addr;
 	ipbox.s[2] = ((struct sockaddr_in*) &addr)->sin_port;
-	arg_len = snprintf(arg, sizeof(arg), "%u,%u,%u,%u,%u,%u", ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3], ipbox.c[4], ipbox.c[5]);
+	if(ftp->externalip.s_addr != FTP_DEFAULT_EXTERNALIP){
+		unsigned char *bytes = (unsigned char *)&ftp->externalip.s_addr;
+		arg_len = snprintf(arg, sizeof(arg), "%u,%u,%u,%u,%u,%u", bytes[0], bytes[1], bytes[2], bytes[3], ipbox.c[4], ipbox.c[5]);
+	}else{
+		arg_len = snprintf(arg, sizeof(arg), "%u,%u,%u,%u,%u,%u", ipbox.c[0], ipbox.c[1], ipbox.c[2], ipbox.c[3], ipbox.c[4], ipbox.c[5]);
+	}
 
 	if (arg_len < 0) {
 		goto bail;

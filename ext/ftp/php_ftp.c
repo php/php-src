@@ -340,6 +340,7 @@ PHP_MINIT_FUNCTION(ftp)
 	REGISTER_LONG_CONSTANT("FTP_FAILED", PHP_FTP_FAILED, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_FINISHED", PHP_FTP_FINISHED, CONST_PERSISTENT | CONST_CS);
 	REGISTER_LONG_CONSTANT("FTP_MOREDATA", PHP_FTP_MOREDATA, CONST_PERSISTENT | CONST_CS);
+	REGISTER_LONG_CONSTANT("FTP_EXTERNALIP", PHP_FTP_OPT_EXTERNALIP, CONST_PERSISTENT | CONST_CS);
 	return SUCCESS;
 }
 
@@ -373,6 +374,7 @@ PHP_FUNCTION(ftp_connect)
 	size_t		host_len;
 	zend_long 		port = 0;
 	zend_long		timeout_sec = FTP_DEFAULT_TIMEOUT;
+	struct in_addr externalip;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
 		return;
@@ -391,6 +393,7 @@ PHP_FUNCTION(ftp_connect)
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
+	ftp->externalip.s_addr = FTP_DEFAULT_EXTERNALIP;
 #ifdef HAVE_FTP_SSL
 	/* disable ssl */
 	ftp->use_ssl = 0;
@@ -428,6 +431,7 @@ PHP_FUNCTION(ftp_ssl_connect)
 	/* autoseek for resuming */
 	ftp->autoseek = FTP_DEFAULT_AUTOSEEK;
 	ftp->usepasvaddress = FTP_DEFAULT_USEPASVADDRESS;
+	ftp->externalip.s_addr = FTP_DEFAULT_EXTERNALIP;
 	/* enable ssl */
 	ftp->use_ssl = 1;
 
@@ -1572,6 +1576,21 @@ PHP_FUNCTION(ftp_set_option)
 			ftp->usepasvaddress = Z_TYPE_P(z_value) == IS_TRUE ? 1 : 0;
 			RETURN_TRUE;
 			break;
+		case PHP_FTP_OPT_EXTERNALIP:
+			if (Z_TYPE_P(z_value) == IS_STRING) {
+				struct in_addr ip;
+				if(inet_aton(Z_STRVAL_P(z_value), &ip)!=1){
+					ftp->externalip.s_addr = FTP_DEFAULT_EXTERNALIP;
+					RETURN_FALSE;
+				}else{
+					ftp->externalip = ip;
+					RETURN_TRUE;
+				}
+			}else{
+				ftp->externalip.s_addr = FTP_DEFAULT_EXTERNALIP;
+				RETURN_FALSE;
+			}
+			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
 			RETURN_FALSE;
@@ -1596,6 +1615,8 @@ PHP_FUNCTION(ftp_get_option)
 		RETURN_FALSE;
 	}
 
+	char returnbuffer[18];
+	unsigned char *bytes = (unsigned char *) &ftp->externalip.s_addr;
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			RETURN_LONG(ftp->timeout_sec);
@@ -1605,6 +1626,10 @@ PHP_FUNCTION(ftp_get_option)
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			RETURN_BOOL(ftp->usepasvaddress);
+			break;
+		case PHP_FTP_OPT_EXTERNALIP:
+			snprintf(returnbuffer, sizeof(returnbuffer), "%d.%d.%d.%d",bytes[0],bytes[1],bytes[2],bytes[3]);
+			RETURN_STRING(returnbuffer);
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
