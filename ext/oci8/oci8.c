@@ -1872,7 +1872,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								if ((tmp_val != NULL) && (Z_TYPE_P(tmp_val) == IS_RESOURCE)) {
 									tmp = Z_RES_VAL_P(tmp_val);
 								}
-							
+
 								if ((tmp_val != NULL) && (tmp != NULL) &&
 									(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
 									(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s),

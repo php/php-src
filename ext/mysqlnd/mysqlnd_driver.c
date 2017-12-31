@@ -206,7 +206,7 @@ MYSQLND_METHOD(mysqlnd_object_factory, get_prepared_statement)(MYSQLND_CONN_DATA
 		}
 
 		if (FAIL == mysqlnd_error_info_init(&stmt->error_info_impl, 0)) {
-			break;		
+			break;
 		}
 		stmt->error_info = &stmt->error_info_impl;
 
