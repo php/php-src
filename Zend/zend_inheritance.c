@@ -1601,7 +1601,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					flags |= ZEND_ACC_CHANGED;
 				} else {
 					not_compatible = 1;
-					
+
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* the flags are identical, thus, the properties may be compatible */
