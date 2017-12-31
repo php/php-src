@@ -618,7 +618,7 @@ int phpdbg_compile(void) /* {{{ */
 			data->len += start_line_len;
 			for (i = 1; i <= data->lines; i++) {
 				data->line[i] += start_line_len;
-			}		
+			}
 			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
 		}
 
