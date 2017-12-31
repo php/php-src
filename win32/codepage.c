@@ -102,7 +102,7 @@ PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, si
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret = NULL;
-	const char *idx = in, *end; 
+	const char *idx = in, *end;
 	size_t i = 0;
 	int k = 0;
 	wchar_t *ret_idx;
@@ -414,7 +414,7 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 
 	} while (NULL != (cur = strchr(prev, '\0')) && cur++ && *cur && bin_len + (cur - prev) < 32760);
 
-	envw = (wchar_t *) malloc((bin_len + 3) * sizeof(wchar_t));	
+	envw = (wchar_t *) malloc((bin_len + 3) * sizeof(wchar_t));
 	if (!envw) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_OUTOFMEMORY);
 		return NULL;
@@ -553,7 +553,7 @@ PW32CP const struct php_win32_cp *php_win32_cp_cli_do_restore(DWORD id)
 
 /* {{{ proto bool sapi_windows_cp_set(int cp)
  * Set process codepage. */
-PHP_FUNCTION(sapi_windows_cp_set) 
+PHP_FUNCTION(sapi_windows_cp_set)
 {
 	zend_long id;
 	const struct php_win32_cp *cp;
@@ -634,12 +634,12 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 		php_error_docref(NULL, E_WARNING, "String is too long");
 		RETURN_NULL();
 	}
-	
+
 	if (IS_LONG == Z_TYPE_P(z_in_cp)) {
 		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_in_cp))) {
 			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_in_cp));
 			RETURN_NULL();
-		} 
+		}
 
 		in_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_in_cp));
 		if (!in_cp) {
@@ -660,7 +660,7 @@ PHP_FUNCTION(sapi_windows_cp_conv)
 		if (ZEND_LONG_UINT_OVFL(Z_LVAL_P(z_out_cp))) {
 			php_error_docref(NULL, E_WARNING, "Argument %d is out of range", Z_LVAL_P(z_out_cp));
 			RETURN_NULL();
-		} 
+		}
 
 		out_cp = php_win32_cp_get_by_id((DWORD)Z_LVAL_P(z_out_cp));
 		if (!out_cp) {
