@@ -2244,11 +2244,11 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
-	/* round to two decimals and keep the 100x multiplication to use it in the common square angles 
+	/* round to two decimals and keep the 100x multiplication to use it in the common square angles
 	   case later. Keep the two decimal precisions so smaller rotation steps can be done, useful for
 	   slow animations, f.e. */
 	const int angle_rounded = fmod((int) floorf(angle * 100), 360 * 100);
-	   
+
 	if (bgcolor < 0) {
 		return NULL;
 	}
