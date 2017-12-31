@@ -146,7 +146,7 @@ void gdImageWebpCtx (gdImagePtr im, gdIOCtx * outfile, int quantization)
 			}
 			*(p++) = gdTrueColorGetRed(c);
 			*(p++) = gdTrueColorGetGreen(c);
-			*(p++) = gdTrueColorGetBlue(c); 
+			*(p++) = gdTrueColorGetBlue(c);
 			*(p++) = a;
 		}
 	}

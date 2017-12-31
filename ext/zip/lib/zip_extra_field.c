@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -41,16 +41,16 @@ zip_extra_field_t *
 _zip_ef_clone(const zip_extra_field_t *ef, zip_error_t *error)
 {
     zip_extra_field_t *head, *prev, *def;
-    
+
     head = prev = NULL;
-    
+
     while (ef) {
         if ((def=_zip_ef_new(ef->id, ef->size, ef->data, ef->flags)) == NULL) {
             zip_error_set(error, ZIP_ER_MEMORY, 0);
             _zip_ef_free(head);
             return NULL;
         }
-        
+
         if (head == NULL)
             head = def;
         if (prev)
@@ -59,7 +59,7 @@ _zip_ef_clone(const zip_extra_field_t *ef, zip_error_t *error)
 
 	ef = ef->next;
     }
-    
+
     return head;
 }
 
@@ -89,7 +89,7 @@ _zip_ef_delete_by_id(zip_extra_field_t *ef, zip_uint16_t id, zip_uint16_t id_idx
 			continue;
 		}
 	    }
-	    
+
 	    i++;
 	    if (i > id_idx)
 		break;
@@ -120,7 +120,7 @@ const zip_uint8_t *
 _zip_ef_get_by_id(const zip_extra_field_t *ef, zip_uint16_t *lenp, zip_uint16_t id, zip_uint16_t id_idx, zip_flags_t flags, zip_error_t *error)
 {
     static const zip_uint8_t empty[1] = { '\0' };
-    
+
     int i;
 
     i = 0;
@@ -215,13 +215,13 @@ _zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_
         zip_error_set(error, ZIP_ER_MEMORY, 0);
         return false;
     }
-    
+
     ef_head = ef = NULL;
-    
+
     while (_zip_buffer_ok(buffer) && _zip_buffer_left(buffer) >= 4) {
         zip_uint16_t fid, flen;
         zip_uint8_t *ef_data;
-        
+
         fid = _zip_buffer_get_16(buffer);
 	flen = _zip_buffer_get_16(buffer);
         ef_data = _zip_buffer_get(buffer, flen);
@@ -232,7 +232,7 @@ _zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_
 	    _zip_ef_free(ef_head);
 	    return false;
         }
-        
+
 	if ((ef2=_zip_ef_new(fid, flen, ef_data, flags)) == NULL) {
 	    zip_error_set(error, ZIP_ER_MEMORY, 0);
             _zip_buffer_free(buffer);
@@ -270,7 +270,7 @@ _zip_ef_parse(const zip_uint8_t *data, zip_uint16_t len, zip_flags_t flags, zip_
     else {
         _zip_ef_free(ef_head);
     }
-    
+
     return true;
 }
 
@@ -280,10 +280,10 @@ _zip_ef_remove_internal(zip_extra_field_t *ef)
 {
     zip_extra_field_t *ef_head;
     zip_extra_field_t *prev, *next;
-    
+
     ef_head = ef;
     prev = NULL;
-    
+
     while (ef) {
         if (ZIP_EF_IS_INTERNAL(ef->id)) {
             next = ef->next;
@@ -300,7 +300,7 @@ _zip_ef_remove_internal(zip_extra_field_t *ef)
             ef = ef->next;
         }
     }
-    
+
     return ef_head;
 }
 
@@ -352,7 +352,7 @@ _zip_ef_write(zip_t *za, const zip_extra_field_t *ef, zip_flags_t flags)
 	    }
 	}
     }
-    
+
     _zip_buffer_free(buffer);
     return 0;
 }
@@ -379,28 +379,28 @@ _zip_read_local_ef(zip_t *za, zip_uint64_t idx)
     if (e->orig->offset + 26 > ZIP_INT64_MAX) {
 	zip_error_set(&za->error, ZIP_ER_SEEK, EFBIG);
 	return -1;
-    }	
+    }
 
     if (zip_source_seek(za->src, (zip_int64_t)(e->orig->offset + 26), SEEK_SET) < 0) {
 	_zip_error_set_from_source(&za->error, za->src);
 	return -1;
     }
-    
+
     if ((buffer = _zip_buffer_new_from_source(za->src, sizeof(b), b, &za->error)) == NULL) {
         return -1;
     }
-    
+
     fname_len = _zip_buffer_get_16(buffer);
     ef_len = _zip_buffer_get_16(buffer);
-    
+
     if (!_zip_buffer_eof(buffer)) {
         _zip_buffer_free(buffer);
         zip_error_set(&za->error, ZIP_ER_INTERNAL, 0);
         return -1;
     }
-    
+
     _zip_buffer_free(buffer);
-    
+
     if (ef_len > 0) {
 	zip_extra_field_t *ef;
 	zip_uint8_t *ef_raw;
@@ -428,7 +428,7 @@ _zip_read_local_ef(zip_t *za, zip_uint64_t idx)
     }
 
     e->orig->local_extra_fields_read = 1;
-    
+
     if (e->changes && e->changes->local_extra_fields_read == 0) {
 	e->changes->extra_fields = e->orig->extra_fields;
 	e->changes->local_extra_fields_read = 1;

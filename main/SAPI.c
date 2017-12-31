@@ -868,7 +868,7 @@ SAPI_API int sapi_send_headers(void)
 
 			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
 			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
-			
+
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {
 			efree(default_mimetype);

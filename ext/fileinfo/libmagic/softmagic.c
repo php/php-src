@@ -537,7 +537,7 @@ mprint(struct magic_set *ms, struct magic *m)
   	case FILE_BESTRING16:
   	case FILE_LESTRING16:
 		if (m->reln == '=' || m->reln == '!') {
-			if (file_printf(ms, F(ms, m, "%s"), 
+			if (file_printf(ms, F(ms, m, "%s"),
 			    file_printable(sbuf, sizeof(sbuf), m->value.s))
 			    == -1)
 				return -1;
@@ -706,7 +706,7 @@ mprint(struct magic_set *ms, struct magic *m)
 		t = ms->offset;
 		break;
 	case FILE_DER:
-		if (file_printf(ms, F(ms, m, "%s"), 
+		if (file_printf(ms, F(ms, m, "%s"),
 		    file_printable(sbuf, sizeof(sbuf), ms->ms_value.s)) == -1)
 			return -1;
 		t = ms->offset;
@@ -1064,7 +1064,7 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 			 * string by p->s, so we need to deduct sz.
 			 * Because we can use one of the bytes of the length
 			 * after we shifted as NUL termination.
-			 */ 
+			 */
 			len = sz;
 		}
 		while (len--)
@@ -1138,7 +1138,7 @@ mconvert(struct magic_set *ms, struct magic *m, int flip)
 			goto out;
 		return 1;
 	case FILE_BEDOUBLE:
-		p->q = BE64(p); 
+		p->q = BE64(p);
 		if (cvt_double(p, m) == -1)
 			goto out;
 		return 1;
@@ -1729,7 +1729,7 @@ convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
 	}
 	ZSTR_VAL(t)[j++] = '~';
 
-	if (options & PCRE2_CASELESS) 
+	if (options & PCRE2_CASELESS)
 		ZSTR_VAL(t)[j++] = 'i';
 
 	if (options & PCRE2_MULTILINE)

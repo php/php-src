@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -39,7 +39,7 @@
 
 struct deflate {
     zip_error_t error;
-    
+
     bool eof;
     bool can_store;
     bool is_stored;
@@ -102,11 +102,11 @@ compress_read(zip_source_t *src, struct deflate *ctx, void *data, zip_uint64_t l
 
     if (zip_error_code_zip(&ctx->error) != ZIP_ER_OK)
 	return -1;
-    
+
     if (len == 0 || ctx->is_stored) {
 	return 0;
     }
-	
+
     out_offset = 0;
     out_len = (uInt)ZIP_MIN(UINT_MAX, len);
     ctx->zstr.next_out = (Bytef *)data;
@@ -202,7 +202,7 @@ decompress_read(zip_source_t *src, struct deflate *ctx, void *data, zip_uint64_t
 
     if (zip_error_code_zip(&ctx->error) != ZIP_ER_OK)
 	return -1;
-    
+
     if (len == 0)
 	return 0;
 
@@ -229,7 +229,7 @@ decompress_read(zip_source_t *src, struct deflate *ctx, void *data, zip_uint64_t
 		}
 	    }
 	    break;
-	    
+
 	case Z_STREAM_END:
 	    ctx->eof = 1;
 	    end = 1;
@@ -333,7 +333,7 @@ deflate_compress(zip_source_t *src, void *ud, void *data, zip_uint64_t len, zip_
 
     case ZIP_SOURCE_SUPPORTS:
         return ZIP_SOURCE_SUPPORTS_READABLE;
-            
+
     default:
         zip_error_set(&ctx->error, ZIP_ER_INTERNAL, 0);
 	return -1;
@@ -381,13 +381,13 @@ deflate_decompress(zip_source_t *src, void *ud, void *data,
         case ZIP_SOURCE_STAT:
         {
             zip_stat_t *st;
-            
+
             st = (zip_stat_t *)data;
-            
+
             st->comp_method = ZIP_CM_STORE;
             if (st->comp_size > 0 && st->size > 0)
                 st->comp_size = st->size;
-            
+
             return 0;
         }
 
@@ -397,7 +397,7 @@ deflate_decompress(zip_source_t *src, void *ud, void *data,
         case ZIP_SOURCE_FREE:
             free(ctx);
             return 0;
-            
+
         case ZIP_SOURCE_SUPPORTS:
             return zip_source_make_command_bitmap(ZIP_SOURCE_OPEN, ZIP_SOURCE_READ, ZIP_SOURCE_CLOSE, ZIP_SOURCE_STAT, ZIP_SOURCE_ERROR, ZIP_SOURCE_FREE, -1);
 

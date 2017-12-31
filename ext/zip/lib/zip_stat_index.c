@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -47,7 +47,7 @@ zip_stat_index(zip_t *za, zip_uint64_t index, zip_flags_t flags,
 
     if ((name=zip_get_name(za, index, flags)) == NULL)
 	return -1;
-    
+
 
     if ((flags & ZIP_FL_UNCHANGED) == 0
 	&& ZIP_ENTRY_DATA_CHANGED(za->entry+index)) {
@@ -81,6 +81,6 @@ zip_stat_index(zip_t *za, zip_uint64_t index, zip_flags_t flags,
     st->index = index;
     st->name = name;
     st->valid |= ZIP_STAT_INDEX|ZIP_STAT_NAME;
-    
+
     return 0;
 }

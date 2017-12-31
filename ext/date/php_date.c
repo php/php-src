@@ -2049,9 +2049,9 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		}
 		return retval;
 	}
-	
+
 	prop = date_interval_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
-	
+
 	if (prop != &EG(uninitialized_zval)) {
 		if (type == 2) {
 			retval = 1;
@@ -2069,7 +2069,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	return retval;
-	
+
 }
 /* }}} */
 
