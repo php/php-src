@@ -41,11 +41,17 @@
 #endif
 
 typedef struct _gc_root_buffer {
-	zend_refcounted          *ref;
-	struct _gc_root_buffer   *next;     /* double-linked list               */
-	struct _gc_root_buffer   *prev;
-	uint32_t                 refcount;
+	zend_refcounted *ref;
+	uint32_t         next;     /* double-linked list */
+	uint32_t         prev;
+	uint32_t         refcount;
 } gc_root_buffer;
+
+/* Doubly linked list of root buffers, lists are terminated with GC_INVALID */
+typedef struct _gc_root_list {
+	uint32_t next;
+	uint32_t prev;
+} gc_root_list;
 
 #define GC_NUM_ADDITIONAL_ENTRIES \
 	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
@@ -64,13 +70,13 @@ typedef struct _zend_gc_globals {
 	zend_bool         gc_full;
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
-	gc_root_buffer    roots;			/* list of possible roots of cycles */
-	gc_root_buffer   *unused;			/* list of unused buffers           */
-	gc_root_buffer   *first_unused;		/* pointer to first unused buffer   */
-	gc_root_buffer   *last_unused;		/* pointer to last unused buffer    */
+	//gc_root_list      roots;			/* list of possible roots of cycles */
+	uint32_t          unused;			/* linked list of unused buffers    */
+	uint32_t          first_unused;		/* first unused buffer              */
+	uint32_t          last_unused;		/* last unused buffer               */
 
-	gc_root_buffer    to_free;			/* list to free                     */
-	gc_root_buffer   *next_to_free;
+	//gc_root_list      to_free;			/* list to free                     */
+	uint32_t          next_to_free;     /* next to free in to_free list     */
 
 	uint32_t gc_runs;
 	uint32_t collected;
