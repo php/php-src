@@ -21,6 +21,7 @@ PHP                                                                        NEWS
 - SOAP:
   . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
     used). (Anton Artamonov)
+  . Fixed bug #75502 (Segmentation fault in zend_string_release). (Nikita)
 
 - SPL:
   . Fixed bug #75717 (RecursiveArrayIterator does not traverse arrays by
