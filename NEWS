@@ -2,6 +2,12 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ?? 2017, PHP 5.6.33
 
+- GD:
+  . Fixed bug #75571 (Potential infinite loop in gdImageCreateFromGifCtx). (cmb)
+
+- Phar:
+  . Fixed bug #74782 (Reflected XSS in .phar 404 page). (Stas)
+
 26 Sep 2017, PHP 5.6.32
 
 - Date:
@@ -22,7 +28,7 @@ PHP                                                                        NEWS
     unserialize). (Nikita)
   . Fixed bug #74603 (PHP INI Parsing Stack Buffer Overflow Vulnerability).
     (Stas)
-  . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via 
+  . Fixed bug #74819 (wddx_deserialize() heap out-of-bound read via
     php_parse_date()). (Derick)
 
 - GD:
