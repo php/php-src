@@ -20,6 +20,9 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 	case 'dblib':
 		$sql = 'SELECT TOP :limit * FROM test';
 		break;
+	case 'odbc':
+		$sql = 'SELECT TOP (:limit) * FROM test';
+		break;
 	case 'firebird':
 		$sql = 'SELECT FIRST :limit * FROM test';
 		break;
