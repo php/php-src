@@ -3,12 +3,6 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.1
 
 
-- Opcache:
-  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
-    (Dmitry)
-
-14 Dec 2017, PHP 7.2.1RC1
-
 - Core:
   . Fixed bug #75573 (Segmentation fault in 7.1.12 and 7.0.26). (Laruence)
   . Fixed bug #75384 (PHP seems incompatible with OneDrive files on demand).
@@ -29,6 +23,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #75608 ("Narrowing occurred during type inference" error).
     (Laruence, Dmitry)
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
   . Fixed bug #75556 (Invalid opcode 138/1/1). (Laruence)
