@@ -1079,9 +1079,6 @@ static int php_array_user_key_compare(const void *a, const void *b) /* {{{ */
 	zval retval;
 	zend_long result;
 
-	ZVAL_NULL(&args[0]);
-	ZVAL_NULL(&args[1]);
-
 	f = (Bucket *) a;
 	s = (Bucket *) b;
 
