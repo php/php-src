@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ?? 2017, PHP 5.6.33
+?? ?? 2017, PHP 5.6.34
+
+04 Jan 2017, PHP 5.6.33
 
 - GD:
   . Fixed bug #75571 (Potential infinite loop in gdImageCreateFromGifCtx). (cmb)
