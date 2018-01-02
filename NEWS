@@ -17,6 +17,9 @@ PHP                                                                        NEWS
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared between
     requests). (Remi)
 
+- GD:
+  . Fixed bug #75571 (Potential infinite loop in gdImageCreateFromGifCtx). (cmb)
+
 - Opcache:
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
@@ -24,6 +27,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #74183 (preg_last_error not returning error code after error).
     (Andrew Nester)
+
+- Phar:
+  . Fixed bug #74782 (Reflected XSS in .phar 404 page). (Stas)
 
 - Standard:
   . Fixed bug #75535 (Inappropriately parsing HTTP response leads to PHP
