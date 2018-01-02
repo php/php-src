@@ -22,6 +22,9 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 		// this is a bug, to be addressed separately from adding these tests to pdo_dblib
 		$sql = 'SELECT TOP 1 * FROM test';
 		break;
+	case 'odbc':
+		$sql = 'SELECT TOP (:limit) * FROM test';
+		break;
 	case 'firebird':
 		$sql = 'SELECT FIRST :limit * FROM test';
 		break;
