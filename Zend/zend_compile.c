@@ -7468,8 +7468,10 @@ void zend_compile_instanceof(znode *result, zend_ast *ast) /* {{{ */
 
 	zend_compile_expr(&obj_node, obj_ast);
 	if (obj_node.op_type == IS_CONST) {
-		zend_error_noreturn(E_COMPILE_ERROR,
-			"instanceof expects an object instance, constant given");
+		zend_do_free(&obj_node);
+		result->op_type = IS_CONST;
+		ZVAL_FALSE(&result->u.constant);
+		return;
 	}
 
 	zend_compile_class_ref_ex(&class_node, class_ast,
