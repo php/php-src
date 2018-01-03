@@ -75,11 +75,13 @@ static int _timer_init()
 
 #elif PHP_HRTIME_PLATFORM_POSIX
 
-	struct timespec ts = { .tv_sec = 0, .tv_nsec = 0 };
-
-	if (clock_gettime(CLOCK_MONOTONIC, &ts)) {
+#if !_POSIX_MONOTONIC_CLOCK
+#ifdef _SC_MONOTONIC_CLOCK
+	if (0 >= sysconf(_SC_MONOTONIC_CLOCK)) {
 		return -1;
 	}
+#endif
+#endif
 
 #elif PHP_HRTIME_PLATFORM_HPUX
 

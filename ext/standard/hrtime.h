@@ -27,7 +27,7 @@
 #define PHP_HRTIME_PLATFORM_HPUX    0
 #define PHP_HRTIME_PLATFORM_AIX     0
 
-#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) && defined(CLOCK_MONOTONIC)
+#if defined(_POSIX_TIMERS) && (_POSIX_TIMERS > 0) && defined(_POSIX_MONOTONIC_CLOCK) && defined(CLOCK_MONOTONIC)
 /* XXX might need additional sysconf check. */
 # undef  PHP_HRTIME_PLATFORM_POSIX
 # define PHP_HRTIME_PLATFORM_POSIX 1
