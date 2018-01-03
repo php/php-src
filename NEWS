@@ -50,7 +50,7 @@ PHP                                                                        NEWS
   . Display headers (buildtime) and library (runtime) versions in phpinfo
     (with libzip >= 1.3.1). (Remi)
 
-14 Dec 2017, PHP 7.2.1RC1
+04 Jan 2018, PHP 7.2.1
 
 - Core:
   . Fixed bug #75573 (Segmentation fault in 7.1.12 and 7.0.26). (Laruence)
@@ -71,9 +71,15 @@ PHP                                                                        NEWS
   . Fixed bug #64938 (libxml_disable_entity_loader setting is shared between
     requests). (Remi)
 
+- GD:
+  . Fixed bug #75571 (Potential infinite loop in gdImageCreateFromGifCtx).
+    (Christoph)
+
 - Opcache:
   . Fixed bug #75608 ("Narrowing occurred during type inference" error).
     (Laruence, Dmitry)
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
   . Fixed bug #75570 ("Narrowing occurred during type inference" error).
     (Dmitry)
   . Fixed bug #75681 (Warning: Narrowing occurred during type inference,
@@ -83,6 +89,9 @@ PHP                                                                        NEWS
 - PCRE:
   . Fixed bug #74183 (preg_last_error not returning error code after error).
     (Andrew Nester)
+
+- Phar:
+  . Fixed bug #74782 (remove file name from output to avoid XSS). (stas)
 
 - Standard:
   . Fixed bug #75511 (fread not free unused buffer). (Laruence)
