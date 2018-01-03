@@ -19,7 +19,6 @@
 /* $Id$ */
 
 #include "php.h"
-#include "zend_exceptions.h"
 #include "hrtime.h"
 
 /* {{{ */
@@ -35,7 +34,6 @@
 #elif PHP_HRTIME_PLATFORM_WINDOWS
 
 # define WIN32_LEAN_AND_MEAN
-# include <windows.h>
 
 static uint64_t _timer_freq = 0;
 static double _timer_int = .0;
@@ -116,9 +114,13 @@ PHP_MINIT_FUNCTION(hrtime)
 static zend_always_inline php_hrtime_t _timer_current(void)
 {/*{{{*/
 #if PHP_HRTIME_PLATFORM_WINDOWS
-	uint64_t cur;
-	QueryPerformanceCounter((LARGE_INTEGER*) &cur);
-	return (php_hrtime_t)((double)cur * _timer_int * (double)NANO_IN_SEC);
+	uint64_t cur = 0;
+	LARGE_INTEGER lt;
+	if (QueryPerformanceCounter(&lt)) {
+		cur = lt.QuadPart;
+		return (php_hrtime_t)((double)cur * _timer_int * (double)NANO_IN_SEC);
+	}
+	return 0;
 #elif PHP_HRTIME_PLATFORM_APPLE
 	return (php_hrtime_t)mach_absolute_time() * _timerlib_info.numer / _timerlib_info.denom;
 #elif PHP_HRTIME_PLATFORM_POSIX
@@ -160,7 +162,7 @@ static zend_always_inline php_hrtime_t _timer_current(void)
 	} while (0)
 #endif
 
-/* {{{ proto mixed hrtime([bool get_as_numu = false])
+/* {{{ proto mixed hrtime([bool get_as_number = false])
 	Returns an array of integers in form [seconds, nanoseconds] counted
 	from an arbitrary point in time. If an optional boolean argument is
 	passed, returns an integer on 64-bit platforms or float on 32-bit
@@ -176,16 +178,15 @@ PHP_FUNCTION(hrtime)
 		Z_PARAM_BOOL(get_as_num)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (!get_as_num) {
-		/* TODO On 32-bit care about millenium bug. */
+	if (UNEXPECTED(get_as_num)) {
+		PHP_RETURN_HRTIME(t);
+	} else {
 		array_init(return_value);
 		add_next_index_long(return_value, (zend_long)(t / (php_hrtime_t)NANO_IN_SEC));
 		add_next_index_long(return_value, (zend_long)(t % (php_hrtime_t)NANO_IN_SEC));
-	} else {
-		PHP_RETURN_HRTIME(t);
 	}
 #else
-	RETURN_LONG(0);
+	RETURN_FALSE
 #endif
 }
 /* }}} */
