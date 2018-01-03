@@ -1455,7 +1455,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ hrtime.c */
 ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
-	ZEND_ARG_INFO(0, get_as_numeric)
+	ZEND_ARG_INFO(0, get_as_number)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ html.c */
