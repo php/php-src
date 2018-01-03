@@ -242,7 +242,6 @@ static zend_bool can_replace_op1(
 		case ZEND_MAKE_REF:
 		case ZEND_UNSET_CV:
 		case ZEND_ISSET_ISEMPTY_CV:
-		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
@@ -299,6 +298,22 @@ static zend_bool try_replace_op1(
 					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
 					opline->op1_type = IS_CONST;
 					return 1;
+				case ZEND_INSTANCEOF:
+					zval_ptr_dtor_nogc(&zv);
+					ZVAL_FALSE(&zv);
+					opline->opcode = ZEND_QM_ASSIGN;
+					opline->op1_type = IS_CONST;
+					opline->op1.constant = zend_optimizer_add_literal(ctx->scdf.op_array, &zv);
+					opline->op2_type = IS_UNUSED;
+					if (ssa_op->op2_use >= 0) {
+						ZEND_ASSERT(ssa_op->op2_def == -1);
+						zend_ssa_unlink_use_chain(ctx->scdf.ssa, ssa_op - ctx->scdf.ssa->ops, ssa_op->op2_use);
+						ssa_op->op2_use = -1;
+						ssa_op->op2_use_chain = -1;
+					}
+					return 1;
+				default:
+					break;
 			}
 			zval_ptr_dtor_nogc(&zv);
 		}

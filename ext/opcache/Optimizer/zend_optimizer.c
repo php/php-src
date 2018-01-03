@@ -272,6 +272,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_LIST_W:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_RETURN_BY_REF:
+		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
