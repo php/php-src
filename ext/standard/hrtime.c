@@ -35,7 +35,7 @@
 
 # define WIN32_LEAN_AND_MEAN
 
-static LARGE_INTEGER _timer_freq;
+static uint64_t _timer_freq = {0};
 
 #elif PHP_HRTIME_PLATFORM_APPLE
 
@@ -61,11 +61,11 @@ static int _timer_init()
 {/*{{{*/
 #if PHP_HRTIME_PLATFORM_WINDOWS
 
-	_timer_freq.LowPart = 0;
-	_timer_freq.HighPart = 0;
-	if (!QueryPerformanceFrequency(&_timer_freq) || 0 == _timer_freq.QuadPart) {
+	LARGE_INTEGER tf = {0};
+	if (!QueryPerformanceFrequency(&tf) || 0 == tf.QuadPart) {
 		return -1;
 	}
+	_timer_freq = (uint64_t)tf.QuadPart;
 
 #elif PHP_HRTIME_PLATFORM_APPLE
 
@@ -114,11 +114,13 @@ PHP_MINIT_FUNCTION(hrtime)
 static zend_always_inline php_hrtime_t _timer_current(void)
 {/*{{{*/
 #if PHP_HRTIME_PLATFORM_WINDOWS
-	LARGE_INTEGER lt;
+	php_hrtime_t ret;
+	LARGE_INTEGER lt = {0};
 	QueryPerformanceCounter(&lt);
-	lt.QuadPart *= NANO_IN_SEC;
-	lt.QuadPart /= _timer_freq.QuadPart;
-	return (php_hrtime_t)lt.QuadPart;
+	ret = (php_hrtime_t)lt.QuadPart;
+	ret *= (php_hrtime_t)NANO_IN_SEC;
+	ret /= _timer_freq;
+	return ret;
 #elif PHP_HRTIME_PLATFORM_APPLE
 	return (php_hrtime_t)mach_absolute_time() * _timerlib_info.numer / _timerlib_info.denom;
 #elif PHP_HRTIME_PLATFORM_POSIX
