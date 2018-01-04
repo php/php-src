@@ -20,7 +20,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -127,7 +127,7 @@ extern "C" {
 #define ZIP_ER_REMOVE        22  /* S Can't remove file */
 #define ZIP_ER_DELETED       23  /* N Entry has been deleted */
 #define ZIP_ER_ENCRNOTSUPP   24  /* N Encryption method not supported */
-#define ZIP_ER_RDONLY        25  /* N Read-only archive */ 
+#define ZIP_ER_RDONLY        25  /* N Read-only archive */
 #define ZIP_ER_NOPASSWD      26  /* N No password provided */
 #define ZIP_ER_WRONGPASSWD   27  /* N Wrong password provided */
 #define ZIP_ER_OPNOTSUPP     28  /* N Operation not supported */
@@ -299,7 +299,7 @@ typedef struct zip_file zip_file_t;
 typedef struct zip_source zip_source_t;
 typedef struct zip_stat zip_stat_t;
 
-typedef zip_uint32_t zip_flags_t;    
+typedef zip_uint32_t zip_flags_t;
 
 typedef zip_int64_t (*zip_source_callback)(void *, void *, zip_uint64_t, zip_source_cmd_t);
 

@@ -62,7 +62,7 @@ typedef void (*info_func_t)(char*);
 #endif
 
 #if defined(_LP64) || defined(__LP64__) || defined(__arch64__) || defined(_WIN64)
-# define PDO_FIREBIRD_HANDLE_INITIALIZER 0U 
+# define PDO_FIREBIRD_HANDLE_INITIALIZER 0U
 #else
 # define PDO_FIREBIRD_HANDLE_INITIALIZER NULL
 #endif

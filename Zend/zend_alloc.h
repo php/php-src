@@ -64,7 +64,7 @@ typedef struct _zend_mm_debug_info {
 } zend_mm_debug_info;
 
 # define ZEND_MM_OVERHEAD ZEND_MM_ALIGNED_SIZE(sizeof(zend_mm_debug_info))
-#else 
+#else
 # define ZEND_MM_OVERHEAD 0
 #endif
 
@@ -376,7 +376,7 @@ static void apc_init_heap(void)
 
 	// Preallocate properly aligned SHM chunks (64MB)
 	tmp_data.mem = shm_memalign(ZEND_MM_CHUNK_SIZE, ZEND_MM_CHUNK_SIZE * 32);
-	
+
 	// Initialize temporary storage data
 	tmp_data.free_pages = 0;
 
@@ -389,7 +389,7 @@ static void apc_init_heap(void)
 	zend_hash_init(apc_ht, 64, NULL, ZVAL_PTR_DTOR, 0);
 	zend_mm_set_heap(old_heap);
 }
- 
+
 */
 
 END_EXTERN_C()
