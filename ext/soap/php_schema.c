@@ -2000,7 +2000,15 @@ static int schema_attributeGroup(sdlPtr sdl, xmlAttrPtr tns, xmlNodePtr attrGrou
 			nsptr = xmlSearchNs(attrGroup->doc, attrGroup, BAD_CAST(ns));
 			if (nsptr != NULL) {
 				smart_str_appends(&key, (char*)nsptr->href);
-			}
+			} else {
+                xmlAttrPtr ns = get_attribute(attrGroup->properties, "targetNamespace");
+                if (ns == NULL) {
+                    ns = tns;
+                }
+                if (ns) {
+                    smart_str_appends(&key, (char*)ns->children->content);
+                }
+            }
 			smart_str_appendc(&key, ':');
 			smart_str_appends(&key, group_name);
 			smart_str_0(&key);
