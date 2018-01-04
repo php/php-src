@@ -374,7 +374,6 @@ PHP_FUNCTION(ftp_connect)
 	size_t		host_len;
 	zend_long 		port = 0;
 	zend_long		timeout_sec = FTP_DEFAULT_TIMEOUT;
-	struct in_addr externalip;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|ll", &host, &host_len, &port, &timeout_sec) == FAILURE) {
 		return;
@@ -1606,6 +1605,8 @@ PHP_FUNCTION(ftp_get_option)
 	zval		*z_ftp;
 	zend_long		option;
 	ftpbuf_t	*ftp;
+	char		returnbuffer[18];
+	unsigned char	*bytes = (unsigned char *)&ftp->externalip.s_addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &z_ftp, &option) == FAILURE) {
 		return;
@@ -1615,8 +1616,6 @@ PHP_FUNCTION(ftp_get_option)
 		RETURN_FALSE;
 	}
 
-	char returnbuffer[18];
-	unsigned char *bytes = (unsigned char *) &ftp->externalip.s_addr;
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			RETURN_LONG(ftp->timeout_sec);

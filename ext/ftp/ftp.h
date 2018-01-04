@@ -74,7 +74,7 @@ typedef struct ftpbuf
 	zend_long	timeout_sec;	/* User configurable timeout (seconds) */
 	int			autoseek;	/* User configurable autoseek flag */
 	int			usepasvaddress;	/* Use the address returned by the pasv command */
-	struct in_addr externalip;
+	struct		in_addr externalip;
 
 	int				nb;		/* "nonblocking" transfer in progress */
 	databuf_t		*data;	/* Data connection for "nonblocking" transfers */
