@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,10 +49,10 @@ zip_file_extra_field_delete(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_idx, zi
 	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-    
+
     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)
 	return -1;
-    
+
     if (ZIP_IS_RDONLY(za)) {
 	zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
@@ -60,9 +60,9 @@ zip_file_extra_field_delete(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_idx, zi
 
     if (_zip_file_extra_field_prepare_for_change(za, idx) < 0)
         return -1;
-    
+
     de = za->entry[idx].changes;
-    
+
     de->extra_fields = _zip_ef_delete_by_id(de->extra_fields, ZIP_EXTRA_FIELD_ALL, ef_idx, flags);
     return 0;
 }
@@ -82,7 +82,7 @@ zip_file_extra_field_delete_by_id(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_i
 	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-    
+
     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)
 	return -1;
 
@@ -90,10 +90,10 @@ zip_file_extra_field_delete_by_id(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_i
 	zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
-    
+
     if (_zip_file_extra_field_prepare_for_change(za, idx) < 0)
         return -1;
-    
+
     de = za->entry[idx].changes;
 
     de->extra_fields = _zip_ef_delete_by_id(de->extra_fields, ef_id, ef_idx, flags);
@@ -239,12 +239,12 @@ zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_ui
 
     if (_zip_get_dirent(za, idx, 0, NULL) == NULL)
 	return -1;
-    
+
     if (ZIP_IS_RDONLY(za)) {
 	zip_error_set(&za->error, ZIP_ER_RDONLY, 0);
 	return -1;
     }
-    
+
     if (ZIP_EF_IS_INTERNAL(ef_id)) {
 	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
@@ -252,7 +252,7 @@ zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_ui
 
     if (_zip_file_extra_field_prepare_for_change(za, idx) < 0)
         return -1;
-    
+
     de = za->entry[idx].changes;
 
     ef = de->extra_fields;
@@ -294,7 +294,7 @@ zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_ui
 	zip_error_set(&za->error, ZIP_ER_INVAL, 0);
 	return -1;
     }
-    
+
     if ((ef_new=_zip_ef_new(ef_id, len, data, flags)) == NULL) {
 	zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
 	return -1;
@@ -314,7 +314,7 @@ zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_ui
 	    ef->flags &= ~(flags & ZIP_EF_BOTH);
 	    ef_new->next = ef->next;
 	    ef->next = ef_new;
-	}	    
+	}
     }
     else if (ef_prev) {
 	ef_new->next = ef_prev->next;
@@ -322,7 +322,7 @@ zip_file_extra_field_set(zip_t *za, zip_uint64_t idx, zip_uint16_t ef_id, zip_ui
     }
     else
 	de->extra_fields = ef_new;
-    
+
     return 0;
 }
 
@@ -332,14 +332,14 @@ int
 _zip_file_extra_field_prepare_for_change(zip_t *za, zip_uint64_t idx)
 {
     zip_entry_t *e;
-    
+
     if (idx >= za->nentry) {
         zip_error_set(&za->error, ZIP_ER_INVAL, 0);
         return -1;
     }
-    
+
     e = za->entry+idx;
-    
+
     if (e->changes && (e->changes->changed & ZIP_DIRENT_EXTRA_FIELD))
         return 0;
 
@@ -347,20 +347,20 @@ _zip_file_extra_field_prepare_for_change(zip_t *za, zip_uint64_t idx)
 	if (_zip_read_local_ef(za, idx) < 0)
 	    return -1;
     }
-    
+
     if (e->changes == NULL) {
         if ((e->changes=_zip_dirent_clone(e->orig)) == NULL) {
             zip_error_set(&za->error, ZIP_ER_MEMORY, 0);
             return -1;
         }
     }
-    
+
     if (e->orig && e->orig->extra_fields) {
 	if ((e->changes->extra_fields=_zip_ef_clone(e->orig->extra_fields, &za->error)) == NULL)
 	    return -1;
     }
     e->changes->changed |= ZIP_DIRENT_EXTRA_FIELD;
-    
+
     return 0;
 }
 

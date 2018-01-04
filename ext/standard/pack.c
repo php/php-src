@@ -600,7 +600,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'g': {
 				/* pack little endian float */
 				while (arg-- > 0) {
@@ -608,7 +608,7 @@ PHP_FUNCTION(pack)
 					php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
-				
+
 				break;
 			}
 			case 'G': {
@@ -629,7 +629,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
@@ -639,7 +639,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
@@ -1119,7 +1119,7 @@ PHP_FUNCTION(unpack)
 					}
 #endif
 
-					case 'f': /* float */ 
+					case 'f': /* float */
 					case 'g': /* little endian float*/
 					case 'G': /* big endian float*/
 					{
@@ -1132,15 +1132,15 @@ PHP_FUNCTION(unpack)
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
-						
+
 						add_assoc_double(return_value, n, (double)v);
 						break;
 					}
-					
+
 
 					case 'd': /* double */
 					case 'e': /* little endian float */
-					case 'E': /* big endian float */ 
+					case 'E': /* big endian float */
 					{
 						double v;
 						if (type == 'e') {

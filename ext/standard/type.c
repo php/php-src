@@ -105,7 +105,7 @@ PHP_FUNCTION(intval)
 		RETVAL_LONG(zval_get_long(num));
 		return;
 	}
-	
+
 
 	if (base == 0 || base == 2) {
 		char *strval = Z_STRVAL_P(num);
@@ -122,7 +122,7 @@ PHP_FUNCTION(intval)
 			if (strval[0] == '-' || strval[0] == '+') {
 				offset = 1;
 			}
-	
+
 			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
 				char *tmpval;
 				strlen -= 2; /* Removing "0b" */
@@ -132,7 +132,7 @@ PHP_FUNCTION(intval)
 				if (offset) {
 					tmpval[0] = strval[0];
 				}
-	
+
 				/* Copy the data from after "0b" to the end of the buffer */
 				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
 				tmpval[strlen] = 0;
@@ -392,8 +392,8 @@ PHP_FUNCTION(is_iterable)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(var)
-	ZEND_PARSE_PARAMETERS_END();	
-	
+	ZEND_PARSE_PARAMETERS_END();
+
 	RETURN_BOOL(zend_is_iterable(var));
 }
 /* }}} */

@@ -1051,7 +1051,7 @@ mysqlnd_fetch_stmt_row_cursor(MYSQLND_RES * result, void * param, const unsigned
 
 		ret = conn->run_command(COM_STMT_FETCH, conn, payload);
 		if (ret == FAIL) {
-			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);	
+			COPY_CLIENT_ERROR(stmt->error_info, *conn->error_info);
 			DBG_RETURN(FAIL);
 		}
 

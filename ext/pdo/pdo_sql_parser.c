@@ -50,7 +50,7 @@ static int scan(Scanner *s)
 	#line 55 "ext/pdo/pdo_sql_parser.re"
 
 
-	
+
 #line 55 "ext/pdo/pdo_sql_parser.c"
 {
 	YYCTYPE yych;

@@ -224,7 +224,7 @@ static int firebird_stmt_describe(pdo_stmt_t *stmt, int colno) /* {{{ */
 		switch (var->sqltype & ~1) {
 			case SQL_SHORT:
 			case SQL_LONG:
-#if SIZEOF_ZEND_LONG >= 8 
+#if SIZEOF_ZEND_LONG >= 8
 			case SQL_INT64:
 #endif
 				col->param_type = PDO_PARAM_INT;
@@ -399,7 +399,7 @@ static int firebird_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,  /* {{
 					*(zend_long *)*ptr = *(ISC_LONG*)var->sqldata;
 					break;
 				case SQL_INT64:
-#if SIZEOF_ZEND_LONG >= 8 
+#if SIZEOF_ZEND_LONG >= 8
 					*len = sizeof(zend_long);
 					*ptr = FETCH_BUF(S->fetch_buf[colno], zend_long, 1, NULL);
 					*(zend_long *)*ptr = *(ISC_INT64*)var->sqldata;

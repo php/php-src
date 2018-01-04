@@ -1526,9 +1526,9 @@ static const func_info_t func_infos[] = {
 	F0("filter_id",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 
 	/* ext/gettext */
-	F1("textdomain",							MAY_BE_NULL | MAY_BE_STRING),	
-	F1("gettext",								MAY_BE_NULL | MAY_BE_STRING),	
-	F1("_",										MAY_BE_NULL | MAY_BE_STRING),	
+	F1("textdomain",							MAY_BE_NULL | MAY_BE_STRING),
+	F1("gettext",								MAY_BE_NULL | MAY_BE_STRING),
+	F1("_",										MAY_BE_NULL | MAY_BE_STRING),
 	F1("dgettext",								MAY_BE_NULL | MAY_BE_STRING),
 	F1("dcgettext",								MAY_BE_NULL | MAY_BE_STRING),
 	F1("bindtextdomain",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),

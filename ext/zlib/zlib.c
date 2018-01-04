@@ -936,7 +936,7 @@ PHP_FUNCTION(inflate_add)
 				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
 			RETURN_FALSE;
 	}
-	
+
 	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
 	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
 	{
@@ -1036,7 +1036,7 @@ PHP_FUNCTION(inflate_get_status)
 		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_LONG(((php_zlib_context *) ctx)->status);
 }
 /* }}} */
