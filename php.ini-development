@@ -15,7 +15,7 @@
 ; 5. The web server's directory (for SAPI modules), or directory of PHP
 ; (otherwise in Windows)
 ; 6. The directory from the --with-config-file-path compile time option, or the
-; Windows directory (C:\windows or C:\winnt)
+; Windows directory (usually C:\windows)
 ; See the PHP docs for more specific information.
 ; http://php.net/configuration.file
 
@@ -772,7 +772,7 @@ enable_dl = Off
 ; of the web tree and people will not be able to circumvent .htaccess security.
 ;cgi.discard_path=1
 
-; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
+; FastCGI under IIS supports the ability to impersonate
 ; security tokens of the calling client.  This allows IIS to define the
 ; security context that the request runs under.  mod_fastcgi under Apache
 ; does not currently support this feature (03/17/2002)
