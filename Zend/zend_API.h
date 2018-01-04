@@ -1034,7 +1034,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_error(zend_bool throw_
 	Z_PARAM_RESOURCE_EX2(dest, check_null, separate, separate)
 
 #define Z_PARAM_RESOURCE(dest) \
-	Z_PARAM_RESOURCE_EX(dest, 1, 0)
+	Z_PARAM_RESOURCE_EX(dest, 0, 0)
 
 /* old "s" */
 #define Z_PARAM_STRING_EX2(dest, dest_len, check_null, deref, separate) \
