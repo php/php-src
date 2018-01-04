@@ -575,6 +575,21 @@ function DEFINE(name, value)
 	configure_subst.Add(name, value);
 }
 
+function verbalize_deps_path(path)
+{
+	var absolute_path = FSO.GetAbsolutePathName(path);
+
+	if (absolute_path.indexOf(PHP_PHP_BUILD) == 0) {
+		absolute_path = absolute_path.substring(PHP_PHP_BUILD.length).split('\\');
+
+		if (absolute_path[1] == 'include' || absolute_path[1] == 'lib') {
+			return "<in deps path> " + absolute_path.join('\\');
+		}
+	}
+
+	return path;
+}
+
 // Searches a set of paths for a file;
 // returns the dir in which the file was found,
 // true if it was found in the default env path,
@@ -621,7 +636,7 @@ function search_paths(thing_to_find, explicit_path, env_name)
 	if (found && place == true) {
 		STDOUT.WriteLine(" <in default path>");
 	} else if (found) {
-		STDOUT.WriteLine(" " + place);
+		STDOUT.WriteLine(" " + verbalize_deps_path(place));
 	} else {
 		STDOUT.WriteLine(" <not found>");
 	}
@@ -815,7 +830,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			ADD_FLAG("ARFLAGS" + target, '/libpath:"' + libdir + '" ');
 			ADD_FLAG("LIBS" + target, libname);
 
-			STDOUT.WriteLine(location);
+			STDOUT.WriteLine(verbalize_deps_path(location));
 
 			copy_dep_pdb_into_build_dir(location);
 
