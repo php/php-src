@@ -40,6 +40,12 @@ set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% 
 "C:\Program Files\PostgreSQL\9.6\bin\createdb.exe" test
 if %errorlevel% neq 0 exit /b 3
 
+rem setup ODBC related exts
+set ODBC_TEST_USER=sa
+set ODBC_TEST_PASS=Password12!
+set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=(local)\SQL2017;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
+set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
+
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win64 >NUL 2>NUL
