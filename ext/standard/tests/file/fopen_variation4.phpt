@@ -93,12 +93,6 @@ $inputs = array(
       // object data
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
-
-      // undefined data
-      'undefined var' => @$undefined_var,
-
-      // unset data
-      'unset var' => @$unset_var,
       
       //file resource
       'file resource' => $fileresource
@@ -223,14 +217,6 @@ bool(false)
 
 --instance of classWithoutToString--
 Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
-bool(false)
-
---undefined var--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
-
---unset var--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
 bool(false)
 
 --file resource--
