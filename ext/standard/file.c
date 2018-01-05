@@ -881,7 +881,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		Z_PARAM_STRING(mode, mode_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	context = php_stream_context_from_zval(zcontext, 0);
