@@ -347,6 +347,10 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FAST_CALL:
 			return 0;
 		case ZEND_FETCH_CLASS:
+			if ((opline + 1)->opcode == ZEND_INSTANCEOF &&
+				(opline + 1)->op2.var == opline->result.var) {
+				return 0;
+			}
 		case ZEND_INIT_FCALL_BY_NAME:
 		/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
 		case ZEND_ADD_INTERFACE:
