@@ -1605,8 +1605,6 @@ PHP_FUNCTION(ftp_get_option)
 	zval		*z_ftp;
 	zend_long		option;
 	ftpbuf_t	*ftp;
-	char		returnbuffer[18];
-	unsigned char	*bytes = (unsigned char *)&ftp->externalip.s_addr;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &z_ftp, &option) == FAILURE) {
 		return;
@@ -1626,9 +1624,12 @@ PHP_FUNCTION(ftp_get_option)
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			RETURN_BOOL(ftp->usepasvaddress);
 			break;
-		case PHP_FTP_OPT_EXTERNALIP:
-			snprintf(returnbuffer, sizeof(returnbuffer), "%d.%d.%d.%d",bytes[0],bytes[1],bytes[2],bytes[3]);
-			RETURN_STRING(returnbuffer);
+		case PHP_FTP_OPT_EXTERNALIP: {
+				char		returnbuffer[18];
+				unsigned char	*bytes = (unsigned char *)&ftp->externalip.s_addr;
+				snprintf(returnbuffer, sizeof(returnbuffer), "%d.%d.%d.%d", bytes[0], bytes[1], bytes[2], bytes[3]);
+				RETURN_STRING(returnbuffer);
+			}
 			break;
 		default:
 			php_error_docref(NULL, E_WARNING, "Unknown option '" ZEND_LONG_FMT "'", option);
