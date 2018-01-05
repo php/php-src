@@ -74,10 +74,6 @@ $inputs = array(
       'associative array' => $assoc_array,
       'nested arrays' => array('foo', $index_array, $assoc_array),
 
-      // null data
-      'uppercase NULL' => NULL,
-      'lowercase null' => null,
-
       // boolean data
       'lowercase true' => true,
       'lowercase false' =>false,
@@ -179,14 +175,6 @@ bool(false)
 
 --nested arrays--
 Error: 2 - fopen() expects parameter 4 to be resource, array given, %s(%d)
-bool(false)
-
---uppercase NULL--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
-
---lowercase null--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
 bool(false)
 
 --lowercase true--
