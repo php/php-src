@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
@@ -36,7 +36,7 @@ function print_help() {
 	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
 	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
 	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author <name>       Your name, this is used if --header is passed and%s', PHP_EOL);
+	printf('  --author <name>       Your name, this is used if --std is passed and%s', PHP_EOL);
 	printf('                        for the CREDITS file%s', PHP_EOL);
 	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
 	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
