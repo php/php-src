@@ -333,7 +333,7 @@ static zend_bool try_replace_op2(
 				case ZEND_FETCH_CLASS:
 					if (Z_TYPE(zv) == IS_STRING) {
 						ZEND_ASSERT((opline + 1)->opcode == ZEND_INSTANCEOF);
-						ZEND_ASSERT((opline + 1)->op2.var == opline->result.var);
+						ZEND_ASSERT(ssa_op->result_def == (ssa_op + 1)->op2_use);
 						if (zend_optimizer_update_op2_const(ctx->scdf.op_array, opline + 1, &zv)) {
 							zend_ssa_op *next_op = ssa_op + 1;
 							zend_optimizer_remove_live_range_ex(ctx->scdf.op_array, opline->result.var, ssa_op - ctx->scdf.ssa->ops);
