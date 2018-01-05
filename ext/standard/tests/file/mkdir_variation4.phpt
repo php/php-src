@@ -167,10 +167,10 @@ Error: 2 - mkdir() expects parameter 4 to be resource, array given, %s(%d)
 Error: 2 - mkdir() expects parameter 4 to be resource, array given, %s(%d)
 
 --uppercase NULL--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --lowercase null--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --lowercase true--
 Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
@@ -209,10 +209,10 @@ Error: 2 - mkdir() expects parameter 4 to be resource, object given, %s(%d)
 Error: 2 - mkdir() expects parameter 4 to be resource, object given, %s(%d)
 
 --undefined var--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --unset var--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --file resource--
 Error: 2 - mkdir(): supplied resource is not a valid Stream-Context resource, %s(%d)

@@ -182,12 +182,10 @@ Error: 2 - fopen() expects parameter 4 to be resource, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
+ok
 
 --lowercase null--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
+ok
 
 --lowercase true--
 Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
@@ -238,12 +236,10 @@ Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
+ok
 
 --unset var--
-Error: 2 - fopen() expects parameter 4 to be resource, null given, %s(%d)
-bool(false)
+ok
 
 --file resource--
 Error: 2 - fopen(): supplied resource is not a valid Stream-Context resource, %s(%d)
