@@ -1249,8 +1249,10 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				if (result) {
 					ZVAL_COPY_VALUE(&zv, result);
 					ZVAL_NULL(result);
-				} else {
+				} else if (op1 && !IS_PARTIAL_ARRAY(op1)) {
 					array_init(&zv);
+				} else {
+					empty_partial_array(&zv);
 				}
 
 				if (op1) {
