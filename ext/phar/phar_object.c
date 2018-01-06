@@ -4308,11 +4308,13 @@ PHP_METHOD(Phar, extractTo)
 	php_stream *fp;
 	php_stream_statbuf ssb;
 	phar_entry_info *entry;
-	char *pathto, *filename;
+	char *pathto, *filename = NULL;
 	size_t pathto_len, filename_len;
 	int ret, i;
 	int nelems;
+	int extracted;
 	zval *zval_files = NULL;
+	zval *zval_file = NULL;
 	zend_bool overwrite = 0;
 
 	PHAR_ARCHIVE_OBJECT();
@@ -4372,7 +4374,6 @@ PHP_METHOD(Phar, extractTo)
 					RETURN_FALSE;
 				}
 				for (i = 0; i < nelems; i++) {
-					zval *zval_file;
 					if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(zval_files), i)) != NULL) {
 						switch (Z_TYPE_P(zval_file)) {
 							case IS_STRING:
@@ -4383,8 +4384,9 @@ PHP_METHOD(Phar, extractTo)
 								return;
 						}
 						if (NULL == (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, Z_STR_P(zval_file)))) {
-							zend_throw_exception_ex(phar_ce_PharException, 0,
-								"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", Z_STRVAL_P(zval_file), phar_obj->archive->fname);
+							goto all_files; /* potential directory match */
+dropstop: 
+							continue;
 						}
 						if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
 							zend_throw_exception_ex(phar_ce_PharException, 0,
@@ -4402,9 +4404,7 @@ PHP_METHOD(Phar, extractTo)
 		}
 
 		if (NULL == (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, filename, filename_len))) {
-			zend_throw_exception_ex(phar_ce_PharException, 0,
-				"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", filename, phar_obj->archive->fname);
-			return;
+			goto all_files; /* potential directory match */
 		}
 
 		if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
@@ -4417,19 +4417,40 @@ PHP_METHOD(Phar, extractTo)
 		phar_archive_data *phar;
 all_files:
 		phar = phar_obj->archive;
-		/* Extract all files */
+		/* Extract all files, or if we have jumped here from a potential
+		   directory match, just those manifest entries matching the dir */
 		if (!zend_hash_num_elements(&(phar->manifest))) {
 			RETURN_TRUE;
 		}
 
+		extracted = 0;
 		ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
+			/* handle earlier possible directory, see if this leaf entry matches the leading directory */
+			if (NULL != zval_file) {
+				filename = ZSTR_VAL(Z_STR_P(zval_file));
+			}
+			if (NULL != filename) {
+			    if (strncmp(filename, entry->filename, strlen(filename)) || '/' != entry->filename[strlen(filename)]) {
+					continue;
+				}
+			}
+
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, &error)) {
 				zend_throw_exception_ex(phar_ce_PharException, 0,
 					"Extraction from phar \"%s\" failed: %s", phar->fname, error);
 				efree(error);
 				return;
 			}
+			extracted++;
 		} ZEND_HASH_FOREACH_END();
+
+        if (NULL != filename && 0 == extracted) {
+			zend_throw_exception_ex(phar_ce_PharException, 0,
+				"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"", filename, phar_obj->archive->fname);
+		}
+		if (NULL != zval_file) {
+			goto dropstop;
+		}
 	}
 	RETURN_TRUE;
 }
