@@ -14,8 +14,8 @@ implement RFCs. Please be sure to include tests as appropriate!
 If you are fixing a bug, then please submit your PR against the lowest actively
 supported branch of PHP that the bug affects (only green branches on
 [the supported version page](http://php.net/supported-versions.php) are supported).
-For example, at the time of writing in mid-2017, the lowest supported version is
-PHP 7.0, which corresponds to the `PHP-7.0` branch in Git. Please also make sure you
+For example, at the time of writing in early-2018, the lowest supported version is
+PHP 7.1, which corresponds to the `PHP-7.1` branch in Git. Please also make sure you
 add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
 
 Pull requests implementing RFCs should be submitted against `master`.
