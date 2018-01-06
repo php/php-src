@@ -31,21 +31,21 @@
 #endif
 #include <stdio.h>
 
-char *mon_full_names[] = {
+static const char * const mon_full_names[] = {
 	"January", "February", "March", "April",
 	"May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
 
-char *mon_short_names[] = {
+static const char * const mon_short_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-char *day_full_names[] = {
+static const char * const day_full_names[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 };
 
-char *day_short_names[] = {
+static const char * const day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
@@ -92,9 +92,10 @@ PHP_FUNCTION(strptime)
 	struct tm  parsed_time;
 	char      *unparsed_part;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ss", &ts, &ts_length, &format, &format_length) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STRING(ts, ts_length)
+		Z_PARAM_STRING(format, format_length)
+	ZEND_PARSE_PARAMETERS_END();
 
 	memset(&parsed_time, 0, sizeof(parsed_time));
 

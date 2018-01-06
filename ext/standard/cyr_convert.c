@@ -274,9 +274,11 @@ PHP_FUNCTION(convert_cyr_string)
 	size_t input_len, fr_cs_len, to_cs_len;
 	zend_string *str;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sss", &input, &input_len, &fr_cs, &fr_cs_len, &to_cs, &to_cs_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(3, 3)
+		Z_PARAM_STRING(input, input_len)
+		Z_PARAM_STRING(fr_cs, fr_cs_len)
+		Z_PARAM_STRING(to_cs, to_cs_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	str = zend_string_init(input, input_len, 0);
 

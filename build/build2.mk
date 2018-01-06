@@ -44,11 +44,11 @@ $(config_h_in): configure
 $(TOUCH_FILES):
 	touch $(TOUCH_FILES)
 
-aclocal.m4: configure.in acinclude.m4
+aclocal.m4: configure.ac acinclude.m4
 	@echo rebuilding $@
 	cat acinclude.m4 ./build/libtool.m4 > $@
 
-configure: aclocal.m4 configure.in $(config_m4_files)
+configure: aclocal.m4 configure.ac $(config_m4_files)
 	@echo rebuilding $@
 	@rm -f $@
 	$(PHP_AUTOCONF) -f $(SUPPRESS_WARNINGS)

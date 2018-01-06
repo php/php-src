@@ -249,7 +249,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_enter)(MYSQLND_DEBUG * self,
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return FALSE;
 	}
-	if ((uint) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
+	if ((uint32_t) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return FALSE;
 	}
 
@@ -320,7 +320,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 	if ((self->flags & MYSQLND_DEBUG_DUMP_TRACE) == 0 || self->file_name == NULL) {
 		return PASS;
 	}
-	if ((uint) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
+	if ((uint32_t) zend_stack_count(&self->call_stack) >= self->nest_level_limit) {
 		return PASS;
 	}
 
@@ -349,7 +349,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 			struct st_mysqlnd_dbg_function_profile f_profile_stack = {0};
 			struct st_mysqlnd_dbg_function_profile * f_profile = NULL;
 			uint64_t own_time = call_time - mine_non_own_time;
-			uint func_name_len = strlen(*func_name);
+			uint32_t func_name_len = strlen(*func_name);
 
 			self->m->log_va(self, line, file, zend_stack_count(&self->call_stack) - 1, NULL, "<%s (total=%u own=%u in_calls=%u)",
 						*func_name, (unsigned int) call_time, (unsigned int) own_time, (unsigned int) mine_non_own_time
@@ -401,7 +401,7 @@ MYSQLND_METHOD(mysqlnd_debug, func_leave)(MYSQLND_DEBUG * self, unsigned int lin
 				f_profile->calls = 1;
 				zend_hash_str_add_mem(&self->function_profiles, *func_name, func_name_len, f_profile, sizeof(struct st_mysqlnd_dbg_function_profile));
 			}
-			if ((uint) zend_stack_count(&self->call_time_stack)) {
+			if ((uint32_t) zend_stack_count(&self->call_time_stack)) {
 				uint64_t parent_non_own_time = 0;
 
 				parent_non_own_time_ptr = zend_stack_top(&self->call_time_stack);

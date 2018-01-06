@@ -21,12 +21,12 @@
 #include "getrusage.h"
 
 /*
- * Parts of this file is based on code from the OpenVSwitch project, that 
- * is released under the Apache 2.0 license and is copyright 2014 Nicira, Inc. 
+ * Parts of this file is based on code from the OpenVSwitch project, that
+ * is released under the Apache 2.0 license and is copyright 2014 Nicira, Inc.
  * and have been modified to work with PHP.
  */
 
-static void usage_to_timeval(FILETIME *ft, struct timeval *tv)
+static zend_always_inline void usage_to_timeval(FILETIME *ft, struct timeval *tv)
 {
 	ULARGE_INTEGER time;
 

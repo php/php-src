@@ -75,30 +75,30 @@ Emulated Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 Native Prepared Statements...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"2 * 2"]=>
-    %unicode|string%(1) "4"
+    ["2 * 2"]=>
+    string(1) "4"
   }
 }
 done!

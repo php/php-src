@@ -39,9 +39,10 @@ PHP_FUNCTION(ftok)
 	size_t pathname_len, proj_len;
 	key_t k;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ps", &pathname, &pathname_len, &proj, &proj_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_PATH(pathname, pathname_len)
+		Z_PARAM_STRING(proj, proj_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (pathname_len == 0){
 		php_error_docref(NULL, E_WARNING, "Pathname is invalid");

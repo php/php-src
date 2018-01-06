@@ -196,7 +196,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_com_load_typelib, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry com_dotnet_functions[] = {
+static const zend_function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_set, arginfo_variant_set)
 	PHP_FE(variant_add, arginfo_variant_add)
 	PHP_FE(variant_cat, arginfo_variant_cat)

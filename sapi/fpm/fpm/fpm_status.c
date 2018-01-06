@@ -151,9 +151,9 @@ int fpm_status_handle_request(void) /* {{{ */
 					"<tr><th>start since</th><td>%lu</td></tr>\n"
 					"<tr><th>accepted conn</th><td>%lu</td></tr>\n"
 #ifdef HAVE_FPM_LQ
-					"<tr><th>listen queue</th><td>%u</td></tr>\n"
-					"<tr><th>max listen queue</th><td>%u</td></tr>\n"
-					"<tr><th>listen queue len</th><td>%d</td></tr>\n"
+					"<tr><th>listen queue</th><td>%d</td></tr>\n"
+					"<tr><th>max listen queue</th><td>%d</td></tr>\n"
+					"<tr><th>listen queue len</th><td>%u</td></tr>\n"
 #endif
 					"<tr><th>idle processes</th><td>%d</td></tr>\n"
 					"<tr><th>active processes</th><td>%d</td></tr>\n"
@@ -223,9 +223,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"<start-since>%lu</start-since>\n"
 				"<accepted-conn>%lu</accepted-conn>\n"
 #ifdef HAVE_FPM_LQ
-				"<listen-queue>%u</listen-queue>\n"
-				"<max-listen-queue>%u</max-listen-queue>\n"
-				"<listen-queue-len>%d</listen-queue-len>\n"
+				"<listen-queue>%d</listen-queue>\n"
+				"<max-listen-queue>%d</max-listen-queue>\n"
+				"<listen-queue-len>%u</listen-queue-len>\n"
 #endif
 				"<idle-processes>%d</idle-processes>\n"
 				"<active-processes>%d</active-processes>\n"
@@ -273,9 +273,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"\"start since\":%lu,"
 				"\"accepted conn\":%lu,"
 #ifdef HAVE_FPM_LQ
-				"\"listen queue\":%u,"
-				"\"max listen queue\":%u,"
-				"\"listen queue len\":%d,"
+				"\"listen queue\":%d,"
+				"\"max listen queue\":%d,"
+				"\"listen queue len\":%u,"
 #endif
 				"\"idle processes\":%d,"
 				"\"active processes\":%d,"
@@ -323,9 +323,9 @@ int fpm_status_handle_request(void) /* {{{ */
 				"start since:          %lu\n"
 				"accepted conn:        %lu\n"
 #ifdef HAVE_FPM_LQ
-				"listen queue:         %u\n"
-				"max listen queue:     %u\n"
-				"listen queue len:     %d\n"
+				"listen queue:         %d\n"
+				"max listen queue:     %d\n"
+				"listen queue len:     %u\n"
 #endif
 				"idle processes:       %d\n"
 				"active processes:     %d\n"
@@ -362,7 +362,7 @@ int fpm_status_handle_request(void) /* {{{ */
 				scoreboard.pool,
 				PM2STR(scoreboard.pm),
 				time_buffer,
-				now_epoch - scoreboard.start_epoch,
+				(unsigned long) (now_epoch - scoreboard.start_epoch),
 				scoreboard.requests,
 #ifdef HAVE_FPM_LQ
 				scoreboard.lq,
@@ -443,10 +443,10 @@ int fpm_status_handle_request(void) /* {{{ */
 				}
 				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
 				spprintf(&buffer, 0, full_syntax,
-					proc.pid,
+					(int) proc.pid,
 					fpm_request_get_stage_name(proc.request_stage),
 					time_buffer,
-					now_epoch - proc.start_epoch,
+					(unsigned long) (now_epoch - proc.start_epoch),
 					proc.requests,
 					duration.tv_sec * 1000000UL + duration.tv_usec,
 					proc.request_method[0] != '\0' ? proc.request_method : "-",

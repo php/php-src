@@ -128,14 +128,14 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"valid"]=>
-  %unicode|string%(30) "this is sql but with semicolon"
+  ["valid"]=>
+  string(30) "this is sql but with semicolon"
 }
 array(1) {
-  [%u|b%""]=>
-  %unicode|string%(1) "a"
+  [""]=>
+  string(1) "a"
 }
-%unicode|string%(1) "a"
+string(1) "a"
 
 Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
 done!

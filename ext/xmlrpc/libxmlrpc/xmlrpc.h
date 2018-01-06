@@ -36,6 +36,7 @@
 /* includes */
 #include "xml_element.h"
 #include <time.h> /* for time_t */
+#include <php.h>
 
 #ifdef __cplusplus
 extern "C" {

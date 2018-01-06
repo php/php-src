@@ -92,7 +92,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ php_gettext_functions[]
  */
-const zend_function_entry php_gettext_functions[] = {
+static const zend_function_entry php_gettext_functions[] = {
 	PHP_NAMED_FE(textdomain,		zif_textdomain,		arginfo_textdomain)
 	PHP_NAMED_FE(gettext,			zif_gettext,		arginfo_gettext)
 	/* Alias for gettext() */

@@ -15,5 +15,7 @@ test();
 
 ?>
 --EXPECTF--
-Notice: Object of class stdClass could not be converted to int in %s on line %d
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
+
+Notice: Object of class stdClass could not be converted to number in %s on line %d
 int(2)

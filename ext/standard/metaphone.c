@@ -35,9 +35,11 @@ PHP_FUNCTION(metaphone)
 	zend_string *result = NULL;
 	zend_long phones = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|l", &str, &phones) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(str)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(phones)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (metaphone((unsigned char *)ZSTR_VAL(str), ZSTR_LEN(str), phones, &result, 1) == 0) {
 		RETVAL_STR(result);
@@ -76,7 +78,7 @@ PHP_FUNCTION(metaphone)
 /* Metachar.h ... little bits about characters for metaphone */
 /*-- Character encoding array & accessing macros --*/
 /* Stolen directly out of the book... */
-char _codes[26] =
+static const char _codes[26] =
 {
 	1, 16, 4, 16, 9, 2, 4, 16, 9, 2, 0, 2, 2, 2, 1, 4, 0, 2, 4, 4, 1, 0, 0, 0, 8, 0
 /*  a  b c  d e f g  h i j k l m n o p q r s t u v w x y z */

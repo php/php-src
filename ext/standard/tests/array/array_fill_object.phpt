@@ -1,7 +1,5 @@
 --TEST--
 Test array_fill() function : usage variations - various object values for 'val' argument
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.4.0', '>=')) die('skip ZendEngine 2.3 or below needed'); ?>
 --FILE--
 <?php
 /* Prototype  : array array_fill(int $start_key, int $num, mixed $val)
@@ -290,23 +288,23 @@ array(2) {
   object(Child_test2)#%d (4) {
     ["member1":"Child_test2":private]=>
     int(102)
-    ["member1":"Test2":private]=>
-    int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
+    ["member1":"Test2":private]=>
+    int(100)
   }
   [1]=>
   object(Child_test2)#%d (4) {
     ["member1":"Child_test2":private]=>
     int(102)
-    ["member1":"Test2":private]=>
-    int(100)
     ["var1"]=>
     int(30)
     ["var2"]=>
     int(101)
+    ["member1":"Test2":private]=>
+    int(100)
   }
 }
 -- Iteration 6 --

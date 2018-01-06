@@ -11,7 +11,8 @@ function x() {
 x();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: parse_str(): Calling parse_str() without the result argument is deprecated in %s on line %d
 array(2) {
   [1]=>
   string(0) ""

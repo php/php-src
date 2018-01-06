@@ -55,9 +55,18 @@ PHPAPI int nanosleep( const struct timespec * rqtp, struct timespec * rmtp );
 PHPAPI int usleep(unsigned int useconds);
 
 #ifdef PHP_EXPORTS
-/* This symbols are needed only for the DllMain, but should not be exported 
+/* This symbols are needed only for the DllMain, but should not be exported
 	or be available when used with PHP binaries. */
-BOOL php_win32_init_gettimeofday(void);
+void php_win32_init_gettimeofday(void);
 #endif
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

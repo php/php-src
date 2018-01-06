@@ -127,7 +127,9 @@ static const mbfl_encoding mbfl_encoding_auto = {
 	NULL,
 	(const char *(*)[])&mbfl_encoding_auto_aliases,
 	NULL,
-	0
+	0,
+	NULL,
+	NULL
 };
 
 static const mbfl_encoding *mbfl_encoding_ptr_list[] = {

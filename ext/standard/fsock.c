@@ -51,9 +51,14 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	RETVAL_FALSE;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s|lz/z/d", &host, &host_len, &port, &zerrno, &zerrstr, &timeout) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 5)
+		Z_PARAM_STRING(host, host_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(port)
+		Z_PARAM_ZVAL_DEREF(zerrno)
+		Z_PARAM_ZVAL_DEREF(zerrstr)
+		Z_PARAM_DOUBLE(timeout)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (persistent) {
 		spprintf(&hashkey, 0, "pfsockopen__%s:" ZEND_LONG_FMT, host, port);
@@ -77,11 +82,11 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 	tv.tv_usec = conv % 1000000;
 
 	if (zerrno)	{
-		zval_dtor(zerrno);
+		zval_ptr_dtor(zerrno);
 		ZVAL_LONG(zerrno, 0);
 	}
 	if (zerrstr) {
-		zval_dtor(zerrstr);
+		zval_ptr_dtor(zerrstr);
 		ZVAL_EMPTY_STRING(zerrstr);
 	}
 
@@ -101,12 +106,12 @@ static void php_fsockopen_stream(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 	if (stream == NULL)	{
 		if (zerrno) {
-			zval_dtor(zerrno);
+			zval_ptr_dtor(zerrno);
 			ZVAL_LONG(zerrno, err);
 		}
 		if (zerrstr && errstr) {
 			/* no need to dup; we need to efree buf anyway */
-			zval_dtor(zerrstr);
+			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (!zerrstr && errstr) {
 			zend_string_release(errstr);

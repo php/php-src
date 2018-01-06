@@ -648,9 +648,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zend_string *opened_path = NULL;
 
 	if (Z_TYPE_P(filename) != IS_STRING) {
-		tmp = *filename;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(filename));
 		filename = &tmp;
 	}
 	file_handle.filename = Z_STRVAL_P(filename);
@@ -1958,6 +1956,9 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
+	if (yytext[yyleng-1] != '>') {
+		CG(increment_lineno) = 1;
+	}
 	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
 }
 

@@ -43,6 +43,6 @@ Create a new mailbox for test
 Create a temporary mailbox and add 1 msgs
 .. mailbox '%s' created
 Msg Count in new mailbox: 1
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
 ===Done===

@@ -446,7 +446,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		"size", "atime", "mtime", "ctime", "blksize", "blocks"
 	};
 
-#ifndef NETWARE
 	if (type >= FS_IS_W && type <= FS_IS_X) {
 		if(stat_sb->st_uid==getuid()) {
 			rmask=S_IRUSR;
@@ -476,7 +475,6 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 			}
 		}
 	}
-#endif
 
 	switch (type) {
 	case FS_PERMS:
@@ -490,23 +488,11 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 	case FS_GROUP:
 		RETURN_LONG((zend_long)stat_sb->st_gid);
 	case FS_ATIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_atime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_atime);
-#endif
 	case FS_MTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_mtime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_mtime);
-#endif
 	case FS_CTIME:
-#ifdef NETWARE
-		RETURN_LONG((zend_long)stat_sb->st_ctime.tv_sec);
-#else
 		RETURN_LONG((zend_long)stat_sb->st_ctime);
-#endif
 	case FS_TYPE:
 		if (S_ISLNK(stat_sb->st_mode)) {
 			RETURN_STRING("link");
@@ -548,15 +534,9 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 		ZVAL_LONG(&stat_rdev, -1);
 #endif
 		ZVAL_LONG(&stat_size, stat_sb->st_size);
-#ifdef NETWARE
-		ZVAL_LONG(&stat_atime, (stat_sb->st_atime).tv_sec);
-		ZVAL_LONG(&stat_mtime, (stat_sb->st_mtime).tv_sec);
-		ZVAL_LONG(&stat_ctime, (stat_sb->st_ctime).tv_sec);
-#else
 		ZVAL_LONG(&stat_atime, stat_sb->st_atime);
 		ZVAL_LONG(&stat_mtime, stat_sb->st_mtime);
 		ZVAL_LONG(&stat_ctime, stat_sb->st_ctime);
-#endif
 #ifdef HAVE_ST_BLKSIZE
 		ZVAL_LONG(&stat_blksize, stat_sb->st_blksize);
 #else
@@ -605,7 +585,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 }
 /* }}} */
 
-static void phar_file_stat(const char *filename, php_stat_len filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void phar_file_stat(const char *filename, size_t filename_length, int type, zif_handler orig_stat_func, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -669,15 +649,9 @@ splitted:
 				sb.st_size = 0;
 				sb.st_mode = 0777;
 				sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = phar->max_timestamp;
-				sb.st_atime.tv_sec = phar->max_timestamp;
-				sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 				sb.st_mtime = phar->max_timestamp;
 				sb.st_atime = phar->max_timestamp;
 				sb.st_ctime = phar->max_timestamp;
-#endif
 				goto statme_baby;
 			} else {
 				char *save;
@@ -715,15 +689,9 @@ notfound:
 					sb.st_size = 0;
 					sb.st_mode = 0777;
 					sb.st_mode |= S_IFDIR; /* regular directory */
-#ifdef NETWARE
-					sb.st_mtime.tv_sec = phar->max_timestamp;
-					sb.st_atime.tv_sec = phar->max_timestamp;
-					sb.st_ctime.tv_sec = phar->max_timestamp;
-#else
 					sb.st_mtime = phar->max_timestamp;
 					sb.st_atime = phar->max_timestamp;
 					sb.st_ctime = phar->max_timestamp;
-#endif
 					goto statme_baby;
 				}
 				PHAR_G(cwd) = save;
@@ -747,15 +715,9 @@ stat_entry:
 					sb.st_mode |= S_IFREG; /* regular file */
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			} else {
 				sb.st_size = 0;
 				sb.st_mode = data->flags & PHAR_ENT_PERM_MASK;
@@ -764,15 +726,9 @@ stat_entry:
 					sb.st_mode |= S_IFLNK;
 				}
 				/* timestamp is just the timestamp when this was added to the phar */
-#ifdef NETWARE
-				sb.st_mtime.tv_sec = data->timestamp;
-				sb.st_atime.tv_sec = data->timestamp;
-				sb.st_ctime.tv_sec = data->timestamp;
-#else
 				sb.st_mtime = data->timestamp;
 				sb.st_atime = data->timestamp;
 				sb.st_ctime = data->timestamp;
-#endif
 			}
 
 statme_baby:
@@ -803,7 +759,7 @@ skip_phar:
 /* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
-void fname(INTERNAL_FUNCTION_PARAMETERS) { \
+ZEND_NAMED_FUNCTION(fname) { \
 	if (!PHAR_G(intercepted)) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
@@ -814,7 +770,7 @@ void fname(INTERNAL_FUNCTION_PARAMETERS) { \
 			return; \
 		} \
 		\
-		phar_file_stat(filename, (php_stat_len) filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
+		phar_file_stat(filename, filename_len, funcnum, PHAR_G(orig), INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} \
 }
 /* }}} */
@@ -1124,28 +1080,28 @@ void phar_intercept_functions_shutdown(void)
 /* }}} */
 
 static struct _phar_orig_functions {
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 } phar_orig_functions = {NULL};
 
 void phar_save_orig_functions(void) /* {{{ */

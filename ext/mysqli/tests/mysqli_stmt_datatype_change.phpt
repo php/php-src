@@ -81,7 +81,7 @@ NULL
 ALTER
 bool(true)
 bool(false)
-%unicode|string%(34) "Unknown column 'a' in 'field list'"
+string(34) "Unknown column 'a' in 'field list'"
 ---- Row 1
 bool(false)
 int(2)

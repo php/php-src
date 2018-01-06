@@ -3,9 +3,9 @@ Testing call_user_func() with autoload and passing invalid params
 --FILE--
 <?php
 
-function __autoload($class) {
+spl_autoload_register(function ($class) {
 	var_dump($class);
-}
+});
 
 call_user_func(array('foo', 'bar'));
 call_user_func(array('', 'bar'));
@@ -14,7 +14,7 @@ call_user_func(array($foo, ''));
 
 ?>
 --EXPECTF--
-%unicode|string%(3) "foo"
+string(3) "foo"
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, class 'foo' not found in %s on line %d
 

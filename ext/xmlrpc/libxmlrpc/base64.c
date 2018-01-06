@@ -15,7 +15,7 @@ static const char rcsid[] = "#(@) $Id$";
 /*  ENCODE  --	Encode binary file into base64.  */
 #include <stdlib.h>
 #include <ctype.h>
-#include <limits.h>
+#include <php.h>
 
 #include "base64.h"
 
@@ -24,7 +24,7 @@ static unsigned char dtable[512];
 void buffer_new(struct buffer_st *b)
 {
   b->length = 512;
-  b->data = malloc(sizeof(char)*(b->length));
+  b->data = emalloc(sizeof(char)*(b->length));
   b->data[0] = 0;
   b->ptr = b->data;
   b->offset = 0;
@@ -39,14 +39,14 @@ void buffer_add(struct buffer_st *b, char c)
   b->offset++;
   if (b->offset == b->length) {
     b->length += 512;
-    b->data = realloc(b->data, b->length);
+    b->data = erealloc(b->data, b->length);
     b->ptr = b->data + b->offset;
   }
 }
 
 void buffer_delete(struct buffer_st *b)
 {
-  free(b->data);
+  efree(b->data);
   b->length = 0;
   b->offset = 0;
   b->ptr = NULL;

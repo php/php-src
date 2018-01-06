@@ -38,7 +38,10 @@ function run_fpm($config, &$out = false, $extra_args = '') /* {{{ */
     /* Since it's not possible to spawn a process under linux without using a
      * shell in php (why?!?) we need a little shell trickery, so that we can
      * actually kill php-fpm */
-    $fpm = proc_open('killit () { kill $child; }; trap killit TERM; '.get_fpm_path().' -F -O -y '.$cfg.' '.$extra_args.' 2>&1 & child=$!; wait', $desc, $pipes);
+    $asroot = getenv('TEST_FPM_RUN_AS_ROOT') ? '--allow-to-run-as-root' : '';
+    $cmd = get_fpm_path()." $asroot -F -O -y $cfg $extra_args";
+    $fpm = proc_open("killit () { kill \$child; }; trap killit TERM; $cmd 2>&1 & child=\$!; wait",
+                     $desc, $pipes);
     register_shutdown_function(
             function($fpm) use($cfg) {
                     @unlink($cfg);
@@ -124,6 +127,7 @@ function run_request($host, $port, $uri='/ping', $query='', $headers=array()) { 
 		'SERVER_NAME'       => php_uname('n'),
 		'SERVER_PROTOCOL'   => 'HTTP/1.1',
 		'CONTENT_TYPE'      => '',
+		'DOCUMENT_ROOT'     => __DIR__,
 		'CONTENT_LENGTH'    => 0
 	), $headers);
 	return $client->request($params, false)."\n";

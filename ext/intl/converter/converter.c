@@ -62,7 +62,7 @@ static inline void php_converter_throw_failure(php_converter_object *objval, UEr
 /* {{{ php_converter_default_callback */
 static void php_converter_default_callback(zval *return_value, zval *zobj, zend_long reason, zval *error) {
 	ZVAL_DEREF(error);
-	zval_dtor(error);
+	zval_ptr_dtor(error);
 	ZVAL_LONG(error, U_ZERO_ERROR);
 	/* Basic functionality so children can call parent::toUCallback() */
 	switch (reason) {
@@ -963,7 +963,7 @@ static PHP_METHOD(UConverter, getStandards) {
 }
 /* }}} */
 
-static zend_function_entry php_converter_methods[] = {
+static const zend_function_entry php_converter_methods[] = {
 	PHP_ME(UConverter, __construct,            php_converter_arginfo,                   ZEND_ACC_PUBLIC | ZEND_ACC_CTOR)
 
 	/* Encoding selection */
@@ -1018,9 +1018,10 @@ static void php_converter_dtor_object(zend_object *obj) {
 static zend_object *php_converter_object_ctor(zend_class_entry *ce, php_converter_object **pobjval) {
 	php_converter_object *objval;
 
-	objval = ecalloc(1, sizeof(php_converter_object) + zend_object_properties_size(ce));
+	objval = zend_object_alloc(sizeof(php_converter_object), ce);
 
-	zend_object_std_init(&objval->obj, ce );
+	zend_object_std_init(&objval->obj, ce);
+	object_properties_init(&objval->obj, ce);
 	intl_error_init(&(objval->error));
 
 	objval->obj.handlers = &php_converter_object_handlers;

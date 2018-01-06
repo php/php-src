@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -43,7 +43,7 @@ zip_source_function(zip_t *za, zip_source_callback zcb, void *ud)
     if (za == NULL) {
         return NULL;
     }
-    
+
     return zip_source_function_create(zcb, ud, &za->error);
 }
 
@@ -58,12 +58,12 @@ zip_source_function_create(zip_source_callback zcb, void *ud, zip_error_t *error
 
     zs->cb.f = zcb;
     zs->ud = ud;
-    
+
     zs->supports = zcb(ud, NULL, 0, ZIP_SOURCE_SUPPORTS);
     if (zs->supports < 0) {
         zs->supports = ZIP_SOURCE_SUPPORTS_READABLE;
     }
-    
+
     return zs;
 }
 

@@ -74,8 +74,10 @@ struct	sockaddr_un {
 PHP_SOCKETS_API int php_sockets_le_socket(void);
 PHP_SOCKETS_API php_socket *php_create_socket(void);
 PHP_SOCKETS_API void php_destroy_socket(zend_resource *rsrc);
+PHP_SOCKETS_API void php_destroy_sockaddr(zend_resource *rsrc);
 
 #define php_sockets_le_socket_name "Socket"
+#define php_sockets_le_addrinfo_name "AddressInfo"
 
 #define PHP_SOCKET_ERROR(socket, msg, errn) \
 		do { \

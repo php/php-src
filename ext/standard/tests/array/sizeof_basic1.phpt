@@ -45,16 +45,28 @@ echo "Done";
 --EXPECTF--
 *** Testing sizeof() : basic functionality ***
 -- Testing sizeof() for integer type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: int(1)
+default mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL mode: int(1)
+COUNT_NORMAL mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE mode: int(1)
+COUNT_RECURSIVE mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
 -- Testing sizeof() for float  type in default, COUNT_NORMAL and COUNT_RECURSIVE modes --
-default mode: int(1)
+default mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_NORMAL mode: int(1)
+COUNT_NORMAL mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 
-COUNT_RECURSIVE mode: int(1)
+COUNT_RECURSIVE mode: 
+Warning: sizeof(): Parameter must be an array or an object that implements Countable in %s on line %d
+int(1)
 Done

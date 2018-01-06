@@ -184,7 +184,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
-	} else 
+	} else
 #endif
 	p_sig = SIGG(handlers)[signo-1];
 
@@ -443,6 +443,6 @@ void zend_signal_startup(void)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
- * vim600: fdm=marker
- * vim: noet sw=4 ts=4
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

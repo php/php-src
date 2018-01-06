@@ -36,6 +36,9 @@
 # ifndef __STDC_CONSTANT_MACROS
 #  define __STDC_CONSTANT_MACROS
 # endif
+# ifndef __STDC_FORMAT_MACROS
+#  define __STDC_FORMAT_MACROS
+# endif
 #endif
 
 #if defined(_MSC_VER)

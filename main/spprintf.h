@@ -16,35 +16,22 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
-/*
-
-The pbuf parameter of all spprintf version receives a pointer to the allocated
-buffer. This buffer must be freed manually after usage using efree() function.
-The buffer will always be terminated by a zero character. When pbuf is NULL
-the function can be used to calculate the required size of the buffer but for
-that purpose snprintf is faster. When both pbuf and the return value are 0
-than you are out of memory.
-
-There is also snprintf: See difference explained in snprintf.h
-
-*/
-
 #ifndef SPPRINTF_H
 #define SPPRINTF_H
 
 #include "snprintf.h"
+#include "zend_smart_str_public.h"
+#include "zend_smart_string_public.h"
 
 BEGIN_EXTERN_C()
-PHPAPI size_t spprintf( char **pbuf, size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 3, 4);
-
-PHPAPI size_t vspprintf(char **pbuf, size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 3, 0);
-
-PHPAPI zend_string *vstrpprintf(size_t max_len, const char *format, va_list ap) PHP_ATTRIBUTE_FORMAT(printf, 2, 0);
-
-PHPAPI zend_string *strpprintf(size_t max_len, const char *format, ...) PHP_ATTRIBUTE_FORMAT(printf, 2, 3);
+PHPAPI void php_printf_to_smart_string(smart_string *buf, const char *format, va_list ap);
+PHPAPI void php_printf_to_smart_str(smart_str *buf, const char *format, va_list ap);
 END_EXTERN_C()
+
+#define spprintf zend_spprintf
+#define strpprintf zend_strpprintf
+#define vspprintf zend_vspprintf
+#define vstrpprintf zend_vstrpprintf
 
 #endif /* SNPRINTF_H */
 
@@ -53,4 +40,6 @@ END_EXTERN_C()
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

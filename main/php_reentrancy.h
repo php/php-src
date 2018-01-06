@@ -91,7 +91,7 @@ char *asctime_r(const struct tm *tm, char *buf);
 #endif
 
 
-#if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME) || defined(__BEOS__)
+#if !defined(HAVE_GMTIME_R) && defined(HAVE_GMTIME)
 #define PHP_NEED_REENTRANCY 1
 PHPAPI struct tm *php_gmtime_r(const time_t *const timep, struct tm *p_tm);
 #else
@@ -131,3 +131,11 @@ void reentrancy_shutdown(void);
 #endif
 
 #endif
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

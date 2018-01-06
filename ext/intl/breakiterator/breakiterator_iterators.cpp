@@ -80,7 +80,7 @@ static void _breakiterator_rewind(zend_object_iterator *iter)
 	ZVAL_LONG(&zoi_iter->current, (zend_long)pos);
 }
 
-static zend_object_iterator_funcs breakiterator_iterator_funcs = {
+static const zend_object_iterator_funcs breakiterator_iterator_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,
@@ -197,7 +197,7 @@ static void _breakiterator_parts_rewind(zend_object_iterator *iter)
 	iter->funcs->move_forward(iter);
 }
 
-static zend_object_iterator_funcs breakiterator_parts_it_funcs = {
+static const zend_object_iterator_funcs breakiterator_parts_it_funcs = {
 	zoi_with_current_dtor,
 	zoi_with_current_valid,
 	zoi_with_current_get_current_data,

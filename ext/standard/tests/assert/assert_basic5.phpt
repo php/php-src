@@ -24,9 +24,13 @@ var_dump($r2=assert($sa));
 var_dump($rao=assert_options(ASSERT_WARNING, 0));
 --EXPECTF--
 int(0)
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f1 called
 
 Warning: assert(): assert($sa): "0 != 0" failed in %s on line 10
 bool(false)
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 bool(true)
 int(1)

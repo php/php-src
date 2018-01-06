@@ -28,13 +28,6 @@
 #ifdef PHP_WIN32
 #define O_RDONLY _O_RDONLY
 #include "win32/param.h"
-#elif defined(NETWARE)
-#ifdef USE_WINSOCK
-#include <novsock2.h>
-#else
-#include <sys/socket.h>
-#endif
-#include <sys/param.h>
 #else
 #include <sys/param.h>
 #endif
@@ -247,9 +240,10 @@ PHP_FUNCTION(pack)
 	int outputpos = 0, outputsize = 0;
 	zend_string *output;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s*", &format, &formatlen, &argv, &num_args) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_STRING(format, formatlen)
+		Z_PARAM_VARIADIC('*', argv, num_args)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* We have a maximum of <formatlen> format codes to deal with */
 	formatcodes = safe_emalloc(formatlen, sizeof(*formatcodes), 0);
@@ -468,15 +462,15 @@ PHP_FUNCTION(pack)
 			case 'A':
 			case 'Z': {
 				size_t arg_cp = (code != 'Z') ? arg : MAX(0, arg - 1);
-
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(&argv[currentarg++], &tmp_str);
 
 				memset(&ZSTR_VAL(output)[outputpos], (code == 'a' || code == 'Z') ? '\0' : ' ', arg);
 				memcpy(&ZSTR_VAL(output)[outputpos], ZSTR_VAL(str),
 					   (ZSTR_LEN(str) < arg_cp) ? ZSTR_LEN(str) : arg_cp);
 
 				outputpos += arg;
-				zend_string_release(str);
+				zend_tmp_string_release(tmp_str);
 				break;
 			}
 
@@ -484,8 +478,8 @@ PHP_FUNCTION(pack)
 			case 'H': {
 				int nibbleshift = (code == 'h') ? 0 : 4;
 				int first = 1;
-
-				zend_string *str = zval_get_string(&argv[currentarg++]);
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(&argv[currentarg++], &tmp_str);
 				char *v = ZSTR_VAL(str);
 
 				outputpos--;
@@ -519,7 +513,7 @@ PHP_FUNCTION(pack)
 				}
 
 				outputpos++;
-				zend_string_release(str);
+				zend_tmp_string_release(tmp_str);
 				break;
 			}
 
@@ -606,7 +600,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'g': {
 				/* pack little endian float */
 				while (arg-- > 0) {
@@ -614,7 +608,7 @@ PHP_FUNCTION(pack)
 					php_pack_copy_float(1, &ZSTR_VAL(output)[outputpos], v);
 					outputpos += sizeof(v);
 				}
-				
+
 				break;
 			}
 			case 'G': {
@@ -635,7 +629,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'e': {
 				/* pack little endian double */
 				while (arg-- > 0) {
@@ -645,7 +639,7 @@ PHP_FUNCTION(pack)
 				}
 				break;
 			}
-			
+
 			case 'E': {
 				/* pack big endian double */
 				while (arg-- > 0) {
@@ -727,10 +721,12 @@ PHP_FUNCTION(unpack)
 	int i;
 	zend_long offset = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS|l", &formatarg,
-		&inputarg, &offset) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 3)
+		Z_PARAM_STR(formatarg)
+		Z_PARAM_STR(inputarg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(offset)
+	ZEND_PARSE_PARAMETERS_END();
 
 	format = ZSTR_VAL(formatarg);
 	formatlen = ZSTR_LEN(formatarg);
@@ -977,7 +973,7 @@ PHP_FUNCTION(unpack)
 						zend_long len = (inputlen - inputpos) * 2;	/* Remaining */
 						int nibbleshift = (type == 'h') ? 0 : 4;
 						int first = 1;
-						char *buf;
+						zend_string *buf;
 						zend_long ipos, opos;
 
 						/* If size was given take minimum of len and size */
@@ -989,7 +985,7 @@ PHP_FUNCTION(unpack)
 							len -= argb % 2;
 						}
 
-						buf = emalloc(len + 1);
+						buf = zend_string_alloc(len, 0);
 
 						for (ipos = opos = 0; opos < len; opos++) {
 							char cc = (input[inputpos + ipos] >> nibbleshift) & 0xf;
@@ -1000,7 +996,7 @@ PHP_FUNCTION(unpack)
 								cc += 'a' - 10;
 							}
 
-							buf[opos] = cc;
+							ZSTR_VAL(buf)[opos] = cc;
 							nibbleshift = (nibbleshift + 4) & 7;
 
 							if (first-- == 0) {
@@ -1009,9 +1005,8 @@ PHP_FUNCTION(unpack)
 							}
 						}
 
-						buf[len] = '\0';
-						add_assoc_stringl(return_value, n, buf, len);
-						efree(buf);
+						ZSTR_VAL(buf)[len] = '\0';
+						add_assoc_str(return_value, n, buf);
 						break;
 					}
 
@@ -1124,7 +1119,7 @@ PHP_FUNCTION(unpack)
 					}
 #endif
 
-					case 'f': /* float */ 
+					case 'f': /* float */
 					case 'g': /* little endian float*/
 					case 'G': /* big endian float*/
 					{
@@ -1137,15 +1132,15 @@ PHP_FUNCTION(unpack)
 						} else {
 							memcpy(&v, &input[inputpos], sizeof(float));
 						}
-						
+
 						add_assoc_double(return_value, n, (double)v);
 						break;
 					}
-					
+
 
 					case 'd': /* double */
 					case 'e': /* little endian float */
-					case 'E': /* big endian float */ 
+					case 'E': /* big endian float */
 					{
 						double v;
 						if (type == 'e') {

@@ -30,10 +30,6 @@ require_once('skipifconnectfailure.inc');
 	if (!is_string($tmp = mysqli_info($link)) || ('' == $tmp))
 		printf("[006] Expecting string/any_non_empty, got %s/%s\n", gettype($tmp), $tmp);
 
-	if ((version_compare(PHP_VERSION, '6.0', '==') == 1) &&
-	    !is_unicode($tmp))
-		printf("[007] Expecting unicode, because unicode mode it on. Got binary string\n");
-
 	if (!$res = mysqli_query($link, 'INSERT INTO test(id, label) SELECT id + 200, label FROM test'))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
@@ -67,9 +63,9 @@ require_once('skipifconnectfailure.inc');
 				/* ignore this error */
 				break;
 
-			if (!fwrite($fp, b"100;'a';\n") ||
-				!fwrite($fp, b"101;'b';\n") ||
-				!fwrite($fp, b"102;'c';\n")) {
+			if (!fwrite($fp, "100;'a';\n") ||
+				!fwrite($fp, "101;'b';\n") ||
+				!fwrite($fp, "102;'c';\n")) {
 				@unlink($file);
 				break;
 			}

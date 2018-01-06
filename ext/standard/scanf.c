@@ -921,7 +921,7 @@ literal:
 					if (numVars) {
 						char __buf[2];
 						__buf[0] = sch;
-						__buf[1] = '\0';;
+						__buf[1] = '\0';
 						current = args[objIndex++];
 						zval_dtor(*current);
 						ZVAL_STRINGL( *current, __buf, 1);
@@ -1189,8 +1189,8 @@ done:
 		scan_set_error_return( numVars, return_value );
 		result = SCAN_ERROR_EOF;
 	} else if (numVars) {
-		convert_to_long(return_value );
-		Z_LVAL_P(return_value) = nconversions;
+		zval_ptr_dtor(return_value );
+		ZVAL_LONG(return_value, nconversions);
 	} else if (nconversions < totalVars) {
 		/* TODO: not all elements converted. we need to prune the list - cc */
 	}

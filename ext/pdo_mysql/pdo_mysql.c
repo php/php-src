@@ -82,7 +82,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
+static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 	&pdo_mysql_module_entry,
 	pdo_mysql_convert_zv_to_mysqlnd
 };
@@ -226,7 +226,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 /* }}} */
 
 /* {{{ pdo_mysql_functions[] */
-const zend_function_entry pdo_mysql_functions[] = {
+static const zend_function_entry pdo_mysql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

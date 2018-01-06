@@ -467,18 +467,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 				}
 			case Formattable::kDouble:
 				{
-					double d;
-					if (Z_TYPE_P(elem) == IS_DOUBLE) {
-						d = Z_DVAL_P(elem);
-					} else if (Z_TYPE_P(elem) == IS_LONG) {
-						d = (double)Z_LVAL_P(elem);
-					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						d = (Z_TYPE_P(elem) == IS_DOUBLE)
-							? Z_DVAL_P(elem)
-							: (double)Z_LVAL_P(elem);
-					}
+					double d = zval_get_double(elem);
 					formattable.setDouble(d);
 					break;
 				}

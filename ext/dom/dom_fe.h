@@ -172,6 +172,7 @@ PHP_METHOD(domnode, getLineNo);
 
 /* domnodelist methods */
 PHP_FUNCTION(dom_nodelist_item);
+PHP_FUNCTION(dom_nodelist_count);
 
 /* domnamednodemap methods */
 PHP_FUNCTION(dom_namednodemap_get_named_item);
@@ -181,6 +182,7 @@ PHP_FUNCTION(dom_namednodemap_item);
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns);
 PHP_FUNCTION(dom_namednodemap_set_named_item_ns);
 PHP_FUNCTION(dom_namednodemap_remove_named_item_ns);
+PHP_FUNCTION(dom_namednodemap_count);
 
 /* domcharacterdata methods */
 PHP_FUNCTION(dom_characterdata_substring_data);

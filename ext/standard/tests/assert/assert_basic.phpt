@@ -22,8 +22,11 @@ var_dump($r2=assert($sa));
 var_dump($r2=assert(0));
 var_dump($r2=assert(1));
 --EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f1 called
 bool(false)
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 bool(true)
 f1 called
 bool(false)

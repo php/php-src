@@ -27,7 +27,7 @@ static int phpdbg_is_auto_global(char *name, int len) {
 	return ret;
 }
 
-PHPDBG_API void phpdbg_webdata_compress(char **msg, int *len) {
+PHPDBG_API void phpdbg_webdata_compress(char **msg, size_t *len) {
 	zval array;
 	HashTable *ht;
 	zval zv[9] = {{{0}}};

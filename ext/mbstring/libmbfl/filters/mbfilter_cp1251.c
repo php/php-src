@@ -45,7 +45,9 @@ const mbfl_encoding mbfl_encoding_cp1251 = {
 	"Windows-1251",
 	(const char *(*)[])&mbfl_encoding_cp1251_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_cp1251_wchar,
+	&vtbl_wchar_cp1251
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp1251 = {

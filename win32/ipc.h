@@ -19,11 +19,24 @@
 #ifndef PHP_WIN32_IPC_H
 #define PHP_WIN32_IPC_H 1
 
-#include "php.h"
+#ifdef PHP_EXPORTS
+# define PHP_WIN32_IPC_API __declspec(dllexport)
+#else
+# define PHP_WIN32_IPC_API __declspec(dllimport)
+#endif
 
 typedef int key_t;
 
-PHPAPI key_t ftok(const char *path, int id);
+PHP_WIN32_IPC_API key_t ftok(const char *path, int id);
 
 
 #endif /* PHP_WIN32_IPC_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -157,13 +157,13 @@ static void copy_ini_entry(zval *zv) /* {{{ */
 	Z_PTR_P(zv) = new_entry;
 	memcpy(new_entry, old_entry, sizeof(zend_ini_entry));
 	if (old_entry->name) {
-		new_entry->name = zend_string_init(ZSTR_VAL(old_entry->name), ZSTR_LEN(old_entry->name), 1);
+		new_entry->name = zend_string_dup(old_entry->name, 1);
 	}
 	if (old_entry->value) {
-		new_entry->value = zend_string_init(ZSTR_VAL(old_entry->value), ZSTR_LEN(old_entry->value), 1);
+		new_entry->value = zend_string_dup(old_entry->value, 1);
 	}
 	if (old_entry->orig_value) {
-		new_entry->orig_value = zend_string_init(ZSTR_VAL(old_entry->orig_value), ZSTR_LEN(old_entry->orig_value), 1);
+		new_entry->orig_value = zend_string_dup(old_entry->orig_value, 1);
 	}
 }
 /* }}} */
@@ -189,7 +189,12 @@ static int ini_key_compare(const void *a, const void *b) /* {{{ */
 	s = (const Bucket *) b;
 
 	if (!f->key && !s->key) { /* both numeric */
-		return ZEND_NORMALIZE_BOOL(f->h - s->h);
+		if (f->h > s->h) {
+			return -1;
+		} else if (f->h < s->h) {
+			return 1;
+		}
+		return 0;
 	} else if (!f->key) { /* f is numeric, s is not */
 		return -1;
 	} else if (!s->key) { /* s is numeric, f is not */
@@ -231,7 +236,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 	while (ini_entry->name) {
 		p = pemalloc(sizeof(zend_ini_entry), 1);
-		p->name = zend_string_init(ini_entry->name, ini_entry->name_length, 1);
+		p->name = zend_string_init_interned(ini_entry->name, ini_entry->name_length, 1);
 		p->on_modify = ini_entry->on_modify;
 		p->mh_arg1 = ini_entry->mh_arg1;
 		p->mh_arg2 = ini_entry->mh_arg2;
@@ -255,10 +260,10 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 		if (((default_value = zend_get_configuration_directive(p->name)) != NULL) &&
             (!p->on_modify || p->on_modify(p, Z_STR_P(default_value), p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP) == SUCCESS)) {
 
-			p->value = zend_string_copy(Z_STR_P(default_value));
+			p->value = zend_new_interned_string(zend_string_copy(Z_STR_P(default_value)));
 		} else {
 			p->value = ini_entry->value ?
-				zend_string_init(ini_entry->value, ini_entry->value_length, 1) : NULL;
+				zend_string_init_interned(ini_entry->value, ini_entry->value_length, 1) : NULL;
 
 			if (p->on_modify) {
 				p->on_modify(p, p->value, p->mh_arg1, p->mh_arg2, p->mh_arg3, ZEND_INI_STAGE_STARTUP);
@@ -308,7 +313,7 @@ ZEND_API int zend_alter_ini_entry_chars(zend_string *name, const char *value, si
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, 0);
 	zend_string_release(new_value);
 	return ret;
@@ -320,7 +325,7 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
     int ret;
     zend_string *new_value;
 
-	new_value = zend_string_init(value, value_length, stage != ZEND_INI_STAGE_RUNTIME);
+	new_value = zend_string_init(value, value_length, !(stage & ZEND_INI_STAGE_IN_REQUEST));
 	ret = zend_alter_ini_entry_ex(name, new_value, modify_type, stage, force_change);
 	zend_string_release(new_value);
 	return ret;
@@ -359,7 +364,7 @@ ZEND_API int zend_alter_ini_entry_ex(zend_string *name, zend_string *new_value, 
 		ini_entry->orig_value = ini_entry->value;
 		ini_entry->orig_modifiable = modifiable;
 		ini_entry->modified = 1;
-		zend_hash_add_ptr(EG(modified_ini_directives), name, ini_entry);
+		zend_hash_add_ptr(EG(modified_ini_directives), ini_entry->name, ini_entry);
 	}
 
 	duplicate = zend_string_copy(new_value);
@@ -400,7 +405,7 @@ ZEND_API int zend_restore_ini_entry(zend_string *name, int stage) /* {{{ */
 }
 /* }}} */
 
-ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
+ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type)) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -418,7 +423,7 @@ ZEND_API int zend_ini_register_displayer(char *name, uint name_length, void (*di
  * Data retrieval
  */
 
-ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -435,7 +440,7 @@ ZEND_API zend_long zend_ini_long(char *name, uint name_length, int orig) /* {{{ 
 }
 /* }}} */
 
-ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API double zend_ini_double(char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -452,7 +457,7 @@ ZEND_API double zend_ini_double(char *name, uint name_length, int orig) /* {{{ *
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_bool *exists) /* {{{ */
+ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists) /* {{{ */
 {
 	zend_ini_entry *ini_entry;
 
@@ -476,7 +481,7 @@ ZEND_API char *zend_ini_string_ex(char *name, uint name_length, int orig, zend_b
 }
 /* }}} */
 
-ZEND_API char *zend_ini_string(char *name, uint name_length, int orig) /* {{{ */
+ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig) /* {{{ */
 {
 	zend_bool exists = 1;
 	char *return_value;
@@ -491,6 +496,19 @@ ZEND_API char *zend_ini_string(char *name, uint name_length, int orig) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_find_ptr(EG(ini_directives), name);
+	if (ini_entry) {
+		return ini_entry->value ? ini_entry->value : ZSTR_EMPTY_ALLOC();
+	} else {
+		return NULL;
+	}
+}
+/* }}} */
+
 #if TONY_20070307
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 {
@@ -498,7 +516,7 @@ static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 		ini_entry->displayer(ini_entry, type);
 	} else {
 		char *display_string;
-		uint display_string_length;
+		uint32_t display_string_length;
 
 		if (type == ZEND_INI_DISPLAY_ORIG && ini_entry->modified) {
 			if (ini_entry->orig_value) {
@@ -658,7 +676,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLong) /* {{{ */
 
 	p = (zend_long *) (base+(size_t) mh_arg1);
 
-	*p = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	*p = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	return SUCCESS;
 }
 /* }}} */
@@ -674,7 +692,7 @@ ZEND_API ZEND_INI_MH(OnUpdateLongGEZero) /* {{{ */
 	base = (char *) ts_resource(*((int *) mh_arg2));
 #endif
 
-	tmp = zend_atol(ZSTR_VAL(new_value), (int)ZSTR_LEN(new_value));
+	tmp = zend_atol(ZSTR_VAL(new_value), ZSTR_LEN(new_value));
 	if (tmp < 0) {
 		return FAILURE;
 	}
@@ -750,4 +768,6 @@ ZEND_API ZEND_INI_MH(OnUpdateStringUnempty) /* {{{ */
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

@@ -16,15 +16,18 @@ $key = 'secret';
 
 echo "\n-- Testing hash_hmac() function with less than expected no. of arguments --\n";
 var_dump(hash_hmac());
-var_dump(hash_hmac('crc32'));
-var_dump(hash_hmac('crc32', $data));
+var_dump(hash_hmac('md5'));
+var_dump(hash_hmac('md5', $data));
 
 echo "\n-- Testing hash_hmac() function with more than expected no. of arguments --\n";
 $extra_arg = 10;
-var_dump(hash_hmac('crc32', $data, $key, TRUE, $extra_arg));
+var_dump(hash_hmac('md5', $data, $key, TRUE, $extra_arg));
 
 echo "\n-- Testing hash_hmac() function with invalid hash algorithm --\n";
 var_dump(hash_hmac('foo', $data, $key));
+
+echo "\n-- Testing hash_hmac() function with non-cryptographic hash algorithm --\n";
+var_dump(hash_hmac('crc32', $data, $key));
 
 ?>
 ===Done===
@@ -50,5 +53,10 @@ NULL
 -- Testing hash_hmac() function with invalid hash algorithm --
 
 Warning: hash_hmac(): Unknown hashing algorithm: foo in %s on line %d
+bool(false)
+
+-- Testing hash_hmac() function with non-cryptographic hash algorithm --
+
+Warning: hash_hmac(): Non-cryptographic hashing algorithm: crc32 in %s on line %d
 bool(false)
 ===Done===

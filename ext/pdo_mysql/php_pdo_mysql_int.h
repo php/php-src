@@ -104,11 +104,11 @@ typedef struct {
 typedef struct {
 	MYSQL 		*server;
 
+	unsigned assume_national_character_set_strings:1;
 	unsigned attached:1;
 	unsigned buffered:1;
 	unsigned emulate_prepare:1;
 	unsigned fetch_table_names:1;
-	unsigned _reserved:31;
 #if !PDO_USE_MYSQLND
 	zend_ulong max_buffer_size;
 #endif
@@ -149,13 +149,13 @@ typedef struct {
 	unsigned				max_length:1;
 } pdo_mysql_stmt;
 
-extern pdo_driver_t pdo_mysql_driver;
+extern const pdo_driver_t pdo_mysql_driver;
 
 extern int _pdo_mysql_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, const char *file, int line);
 #define pdo_mysql_error(s) _pdo_mysql_error(s, NULL, __FILE__, __LINE__)
 #define pdo_mysql_error_stmt(s) _pdo_mysql_error(stmt->dbh, stmt, __FILE__, __LINE__)
 
-extern struct pdo_stmt_methods mysql_stmt_methods;
+extern const struct pdo_stmt_methods mysql_stmt_methods;
 
 enum {
 	PDO_MYSQL_ATTR_USE_BUFFERED_QUERY = PDO_ATTR_DRIVER_SPECIFIC,

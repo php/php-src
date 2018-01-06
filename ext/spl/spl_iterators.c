@@ -60,13 +60,12 @@ PHPAPI zend_class_entry *spl_ce_EmptyIterator;
 PHPAPI zend_class_entry *spl_ce_AppendIterator;
 PHPAPI zend_class_entry *spl_ce_RegexIterator;
 PHPAPI zend_class_entry *spl_ce_RecursiveRegexIterator;
-PHPAPI zend_class_entry *spl_ce_Countable;
 PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry spl_funcs_RecursiveIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  arginfo_recursive_it_void)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  arginfo_recursive_it_void)
 	PHP_FE_END
@@ -466,7 +465,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	return (zend_object_iterator*)iterator;
 }
 
-zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
+static const zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_dtor,
 	spl_recursive_it_valid,
 	spl_recursive_it_get_current_data,
@@ -962,7 +961,7 @@ static zend_object *spl_RecursiveIteratorIterator_new_ex(zend_class_entry *class
 {
 	spl_recursive_it_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_recursive_it_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(spl_recursive_it_object), class_type);
 
 	if (init_prefix) {
 		smart_str_appendl(&intern->prefix[0], "",    0);
@@ -1568,7 +1567,7 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				/* pcre_get_compiled_regex_cache has already sent error */
 				return NULL;
 			}
-			intern->u.regex.pce->refcount++;
+			php_pcre_pce_incref(intern->u.regex.pce);
 			break;
 		}
 #endif
@@ -1580,11 +1579,9 @@ static spl_dual_it_object* spl_dual_it_construct(INTERNAL_FUNCTION_PARAMETERS, z
 				efree(cfi);
 				return NULL;
 			}
-			if (Z_REFCOUNTED_P(&cfi->fci.function_name)) {
-				Z_ADDREF(cfi->fci.function_name);
-			}
+			Z_TRY_ADDREF(cfi->fci.function_name);
 			cfi->object = cfi->fcc.object;
-			if (cfi->object) GC_REFCOUNT(cfi->object)++;
+			if (cfi->object) GC_ADDREF(cfi->object);
 			intern->u.cbfilter = cfi;
 			break;
 		}
@@ -2034,8 +2031,11 @@ SPL_METHOD(RegexIterator, accept)
 {
 	spl_dual_it_object *intern;
 	zend_string *result, *subject;
-	int count = 0;
+	size_t count = 0;
 	zval zcount, *replacement, tmp_replacement, rv;
+	pcre2_match_data *match_data;
+	pcre2_code *re;
+	int rc;
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
@@ -2060,13 +2060,14 @@ SPL_METHOD(RegexIterator, accept)
 	{
 		case REGIT_MODE_MAX: /* won't happen but makes compiler happy */
 		case REGIT_MODE_MATCH:
-#ifdef PCRE_EXTRA_MARK
-			if (intern->u.regex.pce->extra) {
-				intern->u.regex.pce->extra->flags &= ~PCRE_EXTRA_MARK;
+			re = php_pcre_pce_re(intern->u.regex.pce);
+			match_data = php_pcre_create_match_data(0, re);
+			if (!match_data) {
+				RETURN_FALSE;
 			}
-#endif
-			count = pcre_exec(intern->u.regex.pce->re, intern->u.regex.pce->extra, ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, NULL, 0);
-			RETVAL_BOOL(count >= 0);
+			rc = pcre2_match(re, (PCRE2_SPTR)ZSTR_VAL(subject), ZSTR_LEN(subject), 0, 0, match_data, php_pcre_mctx());
+			RETVAL_BOOL(rc >= 0);
+			php_pcre_free_match_data(match_data);
 			break;
 
 		case REGIT_MODE_ALL_MATCHES:
@@ -2081,7 +2082,7 @@ SPL_METHOD(RegexIterator, accept)
 		case REGIT_MODE_SPLIT:
 			zval_ptr_dtor(&intern->current.data);
 			ZVAL_UNDEF(&intern->current.data);
-			php_pcre_split_impl(intern->u.regex.pce, ZSTR_VAL(subject), ZSTR_LEN(subject), &intern->current.data, -1, intern->u.regex.preg_flags);
+			php_pcre_split_impl(intern->u.regex.pce, subject, &intern->current.data, -1, intern->u.regex.preg_flags);
 			count = zend_hash_num_elements(Z_ARRVAL(intern->current.data));
 			RETVAL_BOOL(count > 1);
 			break;
@@ -2093,7 +2094,7 @@ SPL_METHOD(RegexIterator, accept)
 				convert_to_string(&tmp_replacement);
 				replacement = &tmp_replacement;
 			}
-			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), replacement, 0, -1, &count);
+			result = php_pcre_replace_impl(intern->u.regex.pce, subject, ZSTR_VAL(subject), ZSTR_LEN(subject), Z_STR_P(replacement), -1, &count);
 
 			if (intern->u.regex.flags & REGIT_USE_KEY) {
 				zval_ptr_dtor(&intern->current.key);
@@ -2330,7 +2331,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 #if HAVE_PCRE || HAVE_BUNDLED_PCRE
 	if (object->dit_type == DIT_RegexIterator || object->dit_type == DIT_RecursiveRegexIterator) {
 		if (object->u.regex.pce) {
-			object->u.regex.pce->refcount--;
+			php_pcre_pce_decref(object->u.regex.pce);
 		}
 		if (object->u.regex.regex) {
 			zend_string_release(object->u.regex.regex);
@@ -2359,7 +2360,7 @@ static zend_object *spl_dual_it_new(zend_class_entry *class_type)
 {
 	spl_dual_it_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_dual_it_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(spl_dual_it_object), class_type);
 	intern->dit_type = DIT_Unknown;
 
 	zend_object_std_init(&intern->std, class_type);
@@ -2700,8 +2701,8 @@ static inline void spl_caching_it_next(spl_dual_it_object *intern)
 			use_copy = zend_make_printable_zval(&intern->u.caching.zstr, &expr_copy);
 			if (use_copy) {
 				ZVAL_COPY_VALUE(&intern->u.caching.zstr, &expr_copy);
-			} else if (Z_REFCOUNTED(intern->u.caching.zstr)) {
-				Z_ADDREF(intern->u.caching.zstr);
+			} else {
+				Z_TRY_ADDREF(intern->u.caching.zstr);
 			}
 		}
 		spl_dual_it_next(intern, 0);
@@ -2831,9 +2832,7 @@ SPL_METHOD(CachingIterator, offsetSet)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
+	Z_TRY_ADDREF_P(value);
 	zend_symtable_update(Z_ARRVAL(intern->u.caching.zcache), key, value);
 }
 /* }}} */
@@ -3572,9 +3571,7 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser)
 	if (data == NULL) {
 		return ZEND_HASH_APPLY_STOP;
 	}
-	if (Z_REFCOUNTED_P(data)) {
-		Z_ADDREF_P(data);
-	}
+	Z_TRY_ADDREF_P(data);
 	add_next_index_zval(return_value, data);
 	return ZEND_HASH_APPLY_KEEP;
 }
@@ -3676,11 +3673,6 @@ static const zend_function_entry spl_funcs_OuterIterator[] = {
 	PHP_FE_END
 };
 
-static const zend_function_entry spl_funcs_Countable[] = {
-	SPL_ABSTRACT_ME(Countable, count,   arginfo_recursive_it_void)
-	PHP_FE_END
-};
-
 /* {{{ PHP_MINIT_FUNCTION(spl_iterators)
  */
 PHP_MINIT_FUNCTION(spl_iterators)
@@ -3735,7 +3727,6 @@ PHP_MINIT_FUNCTION(spl_iterators)
 
 	REGISTER_SPL_SUB_CLASS_EX(ParentIterator, RecursiveFilterIterator, spl_dual_it_new, spl_funcs_ParentIterator);
 
-	REGISTER_SPL_INTERFACE(Countable);
 	REGISTER_SPL_INTERFACE(SeekableIterator);
 	REGISTER_SPL_ITERATOR(SeekableIterator);
 

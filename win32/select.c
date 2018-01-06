@@ -1,4 +1,4 @@
-/*
+﻿/*
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
@@ -19,8 +19,6 @@
 #include "php.h"
 #include "php_network.h"
 
-#ifdef PHP_WIN32
-
 /* $Id$ */
 
 /* Win32 select() will only work with sockets, so we roll our own implementation here.
@@ -34,7 +32,7 @@
  * - Calling this with NULL sets as a portable way to sleep with sub-second
  *   accuracy is not supported.
  * */
-PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
+PHPAPI int php_select(php_socket_t max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, struct timeval *tv)
 {
 	ULONGLONG ms_total, limit;
 	HANDLE handles[MAXIMUM_WAIT_OBJECTS];
@@ -45,6 +43,11 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	int sock_max_fd = -1;
 	struct timeval tvslice;
 	int retcode;
+
+	/* As max_fd is unsigned, non socket might overflow. */
+	if (max_fd > (php_socket_t)INT_MAX) {
+		return -1;
+	}
 
 #define SAFE_FD_ISSET(fd, set)	(set != NULL && FD_ISSET(fd, set))
 
@@ -61,7 +64,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 	FD_ZERO(&sock_except);
 
 	/* build an array of handles for non-sockets */
-	for (i = 0; i < max_fd; i++) {
+	for (i = 0; (uint32_t)i < max_fd; i++) {
 		if (SAFE_FD_ISSET(i, rfds) || SAFE_FD_ISSET(i, wfds) || SAFE_FD_ISSET(i, efds)) {
 			handles[n_handles] = (HANDLE)(zend_uintptr_t)_get_osfhandle(i);
 			if (handles[n_handles] == INVALID_HANDLE_VALUE) {
@@ -87,7 +90,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 
 	if (n_handles == 0) {
 		/* plain sockets only - let winsock handle the whole thing */
-		return select(max_fd, rfds, wfds, efds, tv);
+		return select(-1, rfds, wfds, efds, tv);
 	}
 
 	/* mixture of handles and sockets; lets multiplex between
@@ -111,7 +114,7 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 			tvslice.tv_sec = 0;
 			tvslice.tv_usec = 100000;
 
-			retcode = select(sock_max_fd+1, &aread, &awrite, &aexcept, &tvslice);
+			retcode = select(-1, &aread, &awrite, &aexcept, &tvslice);
 		}
 		if (n_handles > 0) {
 			/* check handles */
@@ -163,8 +166,6 @@ PHPAPI int php_select(int max_fd, fd_set *rfds, fd_set *wfds, fd_set *efds, stru
 
 	return retcode;
 }
-
-#endif
 
 /*
  * Local variables:

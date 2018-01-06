@@ -26,7 +26,6 @@
 #define PHP_HASH_EXTNAME	"hash"
 #define PHP_HASH_VERSION	"1.0"
 #define PHP_MHASH_VERSION	"1.0"
-#define PHP_HASH_RESNAME	"Hash Context"
 
 #define PHP_HASH_HMAC		0x0001
 
@@ -46,15 +45,22 @@ typedef struct _php_hash_ops {
 	int digest_size;
 	int block_size;
 	int context_size;
+	unsigned is_crypto: 1;
 } php_hash_ops;
 
-typedef struct _php_hash_data {
+typedef struct _php_hashcontext_object {
 	const php_hash_ops *ops;
 	void *context;
 
 	zend_long options;
 	unsigned char *key;
-} php_hash_data;
+
+	zend_object std;
+} php_hashcontext_object;
+
+static inline php_hashcontext_object *php_hashcontext_from_object(zend_object *obj) {
+	return ((php_hashcontext_object*)(obj + 1)) - 1;
+}
 
 extern const php_hash_ops php_hash_md2_ops;
 extern const php_hash_ops php_hash_md4_ops;
@@ -142,6 +148,7 @@ PHP_FUNCTION(hash_algos);
 PHP_FUNCTION(hash_pbkdf2);
 PHP_FUNCTION(hash_equals);
 
+extern PHP_HASH_API zend_class_entry *php_hashcontext_ce;
 PHP_HASH_API const php_hash_ops *php_hash_fetch_ops(const char *algo, size_t algo_len);
 PHP_HASH_API void php_hash_register_algo(const char *algo, const php_hash_ops *ops);
 PHP_HASH_API int php_hash_copy(const void *ops, void *orig_context, void *dest_context);

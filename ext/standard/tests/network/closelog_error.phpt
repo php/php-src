@@ -12,7 +12,7 @@ echo "*** Testing closelog() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing closelog() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( closelog($extra_arg) );
 
 ?>

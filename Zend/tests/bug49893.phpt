@@ -20,7 +20,7 @@ class B {
 try {
 	$b = new B();
 } catch(Exception $e) {
-	echo $e->getMessage() . "\n";;
+	echo $e->getMessage() . "\n";
 }
 ?>
 --EXPECT--

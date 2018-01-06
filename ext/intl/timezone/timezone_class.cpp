@@ -83,8 +83,8 @@ U_CFUNC zval *timezone_convert_to_datetimezone(const TimeZone *timeZone,
 		 * so we must mess with DateTimeZone structure ourselves */
 		tzobj->initialized	  = 1;
 		tzobj->type			  = TIMELIB_ZONETYPE_OFFSET;
-		//convert offset from milliseconds to minutes
-		tzobj->tzi.utc_offset = -1 * timeZone->getRawOffset() / (60 * 1000);
+		//convert offset from milliseconds to seconds
+		tzobj->tzi.utc_offset = timeZone->getRawOffset() / 1000;
 	} else {
 		zend_string *u8str;
 		/* Call the constructor! */
@@ -295,8 +295,7 @@ static HashTable *TimeZone_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	to = Z_INTL_TIMEZONE_P(object);
 	tz = to->utimezone;
@@ -455,7 +454,7 @@ ZEND_END_ARG_INFO()
 /* {{{ TimeZone_class_functions
  * Every 'IntlTimeZone' class method has an entry in this table
  */
-static zend_function_entry TimeZone_class_functions[] = {
+static const zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

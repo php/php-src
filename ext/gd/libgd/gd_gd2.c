@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_errors.h"
 #include "gdhelpers.h"
 
 #include <zlib.h>
@@ -60,7 +61,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	int sidx;
 	int nc;
 
-	GD2_DBG(php_gd_error("Reading gd2 header info"));
+	GD2_DBG(gd_error("Reading gd2 header info"));
 
 	for (i = 0; i < 4; i++) {
 		ch = gdGetC(in);
@@ -71,11 +72,11 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	}
 	id[4] = 0;
 
-	GD2_DBG(php_gd_error("Got file code: %s", id));
+	GD2_DBG(gd_error("Got file code: %s", id));
 
 	/* Equiv. of 'magick'.  */
 	if (strcmp(id, GD2_ID) != 0) {
-		GD2_DBG(php_gd_error("Not a valid gd2 file"));
+		GD2_DBG(gd_error("Not a valid gd2 file"));
 		goto fail1;
 	}
 
@@ -83,32 +84,32 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	if (gdGetWord(vers, in) != 1) {
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("Version: %d", *vers));
+	GD2_DBG(gd_error("Version: %d", *vers));
 
 	if ((*vers != 1) && (*vers != 2)) {
-		GD2_DBG(php_gd_error("Bad version: %d", *vers));
+		GD2_DBG(gd_error("Bad version: %d", *vers));
 		goto fail1;
 	}
 
 	/* Image Size */
 	if (!gdGetWord(sx, in)) {
-		GD2_DBG(php_gd_error("Could not get x-size"));
+		GD2_DBG(gd_error("Could not get x-size"));
 		goto fail1;
 	}
 	if (!gdGetWord(sy, in)) {
-		GD2_DBG(php_gd_error("Could not get y-size"));
+		GD2_DBG(gd_error("Could not get y-size"));
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("Image is %dx%d", *sx, *sy));
+	GD2_DBG(gd_error("Image is %dx%d", *sx, *sy));
 
 	/* Chunk Size (pixels, not bytes!) */
 	if (gdGetWord(cs, in) != 1) {
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("ChunkSize: %d", *cs));
+	GD2_DBG(gd_error("ChunkSize: %d", *cs));
 
 	if ((*cs < GD2_CHUNKSIZE_MIN) || (*cs > GD2_CHUNKSIZE_MAX)) {
-		GD2_DBG(php_gd_error("Bad chunk size: %d", *cs));
+		GD2_DBG(gd_error("Bad chunk size: %d", *cs));
 		goto fail1;
 	}
 
@@ -116,10 +117,10 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	if (gdGetWord(fmt, in) != 1) {
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("Format: %d", *fmt));
+	GD2_DBG(gd_error("Format: %d", *fmt));
 
 	if ((*fmt != GD2_FMT_RAW) && (*fmt != GD2_FMT_COMPRESSED) && (*fmt != GD2_FMT_TRUECOLOR_RAW) && (*fmt != GD2_FMT_TRUECOLOR_COMPRESSED)) {
-		GD2_DBG(php_gd_error("Bad data format: %d", *fmt));
+		GD2_DBG(gd_error("Bad data format: %d", *fmt));
 		goto fail1;
 	}
 
@@ -127,13 +128,13 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 	if (gdGetWord(ncx, in) != 1) {
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("%d Chunks Wide", *ncx));
+	GD2_DBG(gd_error("%d Chunks Wide", *ncx));
 
 	/* # of chunks high */
 	if (gdGetWord(ncy, in) != 1) {
 		goto fail1;
 	}
-	GD2_DBG(php_gd_error("%d Chunks vertically", *ncy));
+	GD2_DBG(gd_error("%d Chunks vertically", *ncy));
 
 	if (gd2_compressed(*fmt)) {
 		if (*ncx <= 0 || *ncy <= 0 || *ncx > INT_MAX / *ncy) {
@@ -141,7 +142,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 			goto fail1;
 		}
 		nc = (*ncx) * (*ncy);
-		GD2_DBG(php_gd_error("Reading %d chunk index entries", nc));
+		GD2_DBG(gd_error("Reading %d chunk index entries", nc));
 		if (overflow2(sizeof(t_chunk_info), nc)) {
 			goto fail1;
 		}
@@ -171,7 +172,7 @@ static int _gd2GetHeader(gdIOCtxPtr in, int *sx, int *sy, int *cs, int *vers, in
 		*chunkIdx = cidx;
 	}
 
-	GD2_DBG(php_gd_error("gd2 header complete"));
+	GD2_DBG(gd_error("gd2 header complete"));
 
 	return 1;
 
@@ -184,7 +185,7 @@ static gdImagePtr _gd2CreateFromFile (gdIOCtxPtr in, int *sx, int *sy, int *cs, 
 	gdImagePtr im;
 
 	if (_gd2GetHeader (in, sx, sy, cs, vers, fmt, ncx, ncy, cidx) != 1) {
-		GD2_DBG(php_gd_error("Bad GD2 header"));
+		GD2_DBG(gd_error("Bad GD2 header"));
 		goto fail1;
 	}
 
@@ -194,15 +195,15 @@ static gdImagePtr _gd2CreateFromFile (gdIOCtxPtr in, int *sx, int *sy, int *cs, 
 		im = gdImageCreate(*sx, *sy);
 	}
 	if (im == NULL) {
-		GD2_DBG(php_gd_error("Could not create gdImage"));
+		GD2_DBG(gd_error("Could not create gdImage"));
 		goto fail2;
 	}
 
 	if (!_gdGetColors(in, im, (*vers) == 2)) {
-		GD2_DBG(php_gd_error("Could not read color palette"));
+		GD2_DBG(gd_error("Could not read color palette"));
 		goto fail3;
 	}
-	GD2_DBG(php_gd_error("Image palette completed: %d colours", im->colorsTotal));
+	GD2_DBG(gd_error("Image palette completed: %d colours", im->colorsTotal));
 
 	return im;
 
@@ -219,24 +220,24 @@ static int _gd2ReadChunk (int offset, char *compBuf, int compSize, char *chunkBu
 	int zerr;
 
 	if (gdTell(in) != offset) {
-		GD2_DBG(php_gd_error("Positioning in file to %d", offset));
+		GD2_DBG(gd_error("Positioning in file to %d", offset));
 		gdSeek(in, offset);
 	} else {
-		GD2_DBG(php_gd_error("Already Positioned in file to %d", offset));
+		GD2_DBG(gd_error("Already Positioned in file to %d", offset));
 	}
 
 	/* Read and uncompress an entire chunk. */
-	GD2_DBG(php_gd_error("Reading file"));
+	GD2_DBG(gd_error("Reading file"));
 	if (gdGetBuf(compBuf, compSize, in) != compSize) {
 		return FALSE;
 	}
-	GD2_DBG(php_gd_error("Got %d bytes. Uncompressing into buffer of %d bytes", compSize, (int)*chunkLen));
+	GD2_DBG(gd_error("Got %d bytes. Uncompressing into buffer of %d bytes", compSize, (int)*chunkLen));
 	zerr = uncompress((unsigned char *) chunkBuf, chunkLen, (unsigned char *) compBuf, compSize);
 	if (zerr != Z_OK) {
-		GD2_DBG(php_gd_error("Error %d from uncompress", zerr));
+		GD2_DBG(gd_error("Error %d from uncompress", zerr));
 		return FALSE;
 	}
-	GD2_DBG(php_gd_error("Got chunk"));
+	GD2_DBG(gd_error("Got chunk"));
 
 	return TRUE;
 }
@@ -308,7 +309,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 		chunkBuf = gdCalloc(chunkMax, 1);
 		compBuf = gdCalloc(compMax, 1);
 
-		GD2_DBG(php_gd_error("Largest compressed chunk is %d bytes", compMax));
+		GD2_DBG(gd_error("Largest compressed chunk is %d bytes", compMax));
 	}
 
 	/* Read the data... */
@@ -320,13 +321,13 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 				yhi = im->sy;
 			}
 
-			GD2_DBG(php_gd_error("Processing Chunk %d (%d, %d), y from %d to %d", chunkNum, cx, cy, ylo, yhi));
+			GD2_DBG(gd_error("Processing Chunk %d (%d, %d), y from %d to %d", chunkNum, cx, cy, ylo, yhi));
 
 			if (gd2_compressed(fmt)) {
 				chunkLen = chunkMax;
 
 				if (!_gd2ReadChunk(chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *) chunkBuf, &chunkLen, in)) {
-					GD2_DBG(php_gd_error("Error reading comproessed chunk"));
+					GD2_DBG(gd_error("Error reading comproessed chunk"));
 					goto fail2;
 				}
 
@@ -344,14 +345,14 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 					for (x = xlo; x < xhi; x++) {
 						if (im->trueColor) {
 							if (!gdGetInt(&im->tpixels[y][x], in)) {
-								php_gd_error("gd2: EOF while reading\n");
+								gd_error("gd2: EOF while reading\n");
 								gdImageDestroy(im);
 								return NULL;
 							}
 						} else {
 							int ch;
 							if (!gdGetByte(&ch, in)) {
-								php_gd_error("gd2: EOF while reading\n");
+								gd_error("gd2: EOF while reading\n");
 								gdImageDestroy(im);
 								return NULL;
 							}
@@ -377,7 +378,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 		}
 	}
 
-	GD2_DBG(php_gd_error("Freeing memory"));
+	GD2_DBG(gd_error("Freeing memory"));
 
 	if (chunkBuf) {
 		gdFree(chunkBuf);
@@ -389,7 +390,7 @@ gdImagePtr gdImageCreateFromGd2Ctx (gdIOCtxPtr in)
 		gdFree(chunkIdx);
 	}
 
-	GD2_DBG(php_gd_error("Done"));
+	GD2_DBG(gd_error("Done"));
 
 	return im;
 
@@ -463,7 +464,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 		goto fail1;
 	}
 
-	GD2_DBG(php_gd_error("File size is %dx%d", fsx, fsy));
+	GD2_DBG(gd_error("File size is %dx%d", fsx, fsy));
 
 	/* This is the difference - make a file based on size of chunks. */
 	if (gd2_truecolor(fmt)) {
@@ -478,7 +479,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 	if (!_gdGetColors(in, im, vers == 2)) {
 		goto fail2;
 	}
-	GD2_DBG(php_gd_error("Image palette completed: %d colours", im->colorsTotal));
+	GD2_DBG(gd_error("Image palette completed: %d colours", im->colorsTotal));
 
 	/* Process the header info */
 	nc = ncx * ncy;
@@ -527,7 +528,7 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 
 	/* Remember file position of image data. */
 	dstart = gdTell(in);
-	GD2_DBG(php_gd_error("Data starts at %d", dstart));
+	GD2_DBG(gd_error("Data starts at %d", dstart));
 
 	/* Loop through the chunks. */
 	for (cy = scy; (cy <= ecy); cy++) {
@@ -545,10 +546,10 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 				xhi = fsx;
 			}
 
-			GD2_DBG(php_gd_error("Processing Chunk (%d, %d), from %d to %d", cx, cy, ylo, yhi));
+			GD2_DBG(gd_error("Processing Chunk (%d, %d), from %d to %d", cx, cy, ylo, yhi));
 
 			if (!gd2_compressed(fmt)) {
-				GD2_DBG(php_gd_error("Using raw format data"));
+				GD2_DBG(gd_error("Using raw format data"));
 				if (im->trueColor) {
 					dpos = (cy * (cs * fsx) * 4 + cx * cs * (yhi - ylo) * 4) + dstart;
 				} else {
@@ -557,23 +558,23 @@ gdImagePtr gdImageCreateFromGd2PartCtx (gdIOCtx * in, int srcx, int srcy, int w,
 
 				/* gd 2.0.11: gdSeek returns TRUE on success, not 0. Longstanding bug. 01/16/03 */
 				if (!gdSeek(in, dpos)) {
-					php_gd_error_ex(E_WARNING, "Error from seek: %d", errno);
+					gd_error_ex(E_WARNING, "Error from seek: %d", errno);
 					goto fail2;
 				}
-				GD2_DBG(php_gd_error("Reading (%d, %d) from position %d", cx, cy, dpos - dstart));
+				GD2_DBG(gd_error("Reading (%d, %d) from position %d", cx, cy, dpos - dstart));
 			} else {
 				chunkNum = cx + cy * ncx;
 
 				chunkLen = chunkMax;
 				if (!_gd2ReadChunk (chunkIdx[chunkNum].offset, compBuf, chunkIdx[chunkNum].size, (char *)chunkBuf, &chunkLen, in)) {
-					php_gd_error("Error reading comproessed chunk");
+					gd_error("Error reading comproessed chunk");
 					goto fail2;
 				}
 				chunkPos = 0;
-				GD2_DBG(php_gd_error("Reading (%d, %d) from chunk %d", cx, cy, chunkNum));
+				GD2_DBG(gd_error("Reading (%d, %d) from chunk %d", cx, cy, chunkNum));
 			}
 
-			GD2_DBG(php_gd_error("   into (%d, %d) - (%d, %d)", xlo, ylo, xhi, yhi));
+			GD2_DBG(gd_error("   into (%d, %d) - (%d, %d)", xlo, ylo, xhi, yhi));
 
 			for (y = ylo; (y < yhi); y++) {
 				for (x = xlo; x < xhi; x++) {
@@ -726,7 +727,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 		 */
 		idxPos = gdTell(out);
 		idxSize = ncx * ncy * sizeof(t_chunk_info);
-		GD2_DBG(php_gd_error("Index size is %d", idxSize));
+		GD2_DBG(gd_error("Index size is %d", idxSize));
 		gdSeek(out, idxPos + idxSize);
 
 		chunkIdx = safe_emalloc(idxSize, sizeof(t_chunk_info), 0);
@@ -735,8 +736,8 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 	_gdPutColors (im, out);
 
-	GD2_DBG(php_gd_error("Size: %dx%d", im->sx, im->sy));
-	GD2_DBG(php_gd_error("Chunks: %dx%d", ncx, ncy));
+	GD2_DBG(gd_error("Size: %dx%d", im->sx, im->sy));
+	GD2_DBG(gd_error("Chunks: %dx%d", ncx, ncy));
 
 	for (cy = 0; (cy < ncy); cy++) {
 		for (cx = 0; (cx < ncx); cx++) {
@@ -746,10 +747,10 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 				yhi = im->sy;
 			}
 
-			GD2_DBG(php_gd_error("Processing Chunk (%dx%d), y from %d to %d", cx, cy, ylo, yhi));
+			GD2_DBG(gd_error("Processing Chunk (%dx%d), y from %d to %d", cx, cy, ylo, yhi));
 			chunkLen = 0;
 			for (y = ylo; (y < yhi); y++) {
-				GD2_DBG(php_gd_error("y=%d: ",y));
+				GD2_DBG(gd_error("y=%d: ",y));
 				xlo = cx * cs;
 				xhi = xlo + cs;
 				if (xhi > im->sx) {
@@ -758,7 +759,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 				if (gd2_compressed(fmt)) {
 					for (x = xlo; x < xhi; x++) {
-						GD2_DBG(php_gd_error("%d...",x));
+						GD2_DBG(gd_error("%d...",x));
 						if (im->trueColor) {
 							int p = im->tpixels[y][x];
 							chunkData[chunkLen++] = gdTrueColorGetAlpha(p);
@@ -771,7 +772,7 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 					}
 				} else {
 					for (x = xlo; x < xhi; x++) {
-						GD2_DBG(php_gd_error("%d, ",x));
+						GD2_DBG(gd_error("%d, ",x));
 
 						if (im->trueColor) {
 							gdPutInt(im->tpixels[y][x], out);
@@ -780,21 +781,21 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 						}
 					}
 				}
-				GD2_DBG(php_gd_error("y=%d done.",y));
+				GD2_DBG(gd_error("y=%d done.",y));
 			}
 
 			if (gd2_compressed(fmt)) {
 				compLen = compMax;
 				if (compress((unsigned char *) &compData[0], &compLen, (unsigned char *) &chunkData[0], chunkLen) != Z_OK) {
-					php_gd_error("Error from compressing");
+					gd_error("Error from compressing");
 				} else {
 					chunkIdx[chunkNum].offset = gdTell(out);
 					chunkIdx[chunkNum++].size = compLen;
-					GD2_DBG(php_gd_error("Chunk %d size %d offset %d", chunkNum, chunkIdx[chunkNum - 1].size, chunkIdx[chunkNum - 1].offset));
+					GD2_DBG(gd_error("Chunk %d size %d offset %d", chunkNum, chunkIdx[chunkNum - 1].size, chunkIdx[chunkNum - 1].offset));
 
 					if (gdPutBuf (compData, compLen, out) <= 0) {
 						/* Any alternate suggestions for handling this? */
-						php_gd_error_ex(E_WARNING, "Error %d on write", errno);
+						gd_error_ex(E_WARNING, "Error %d on write", errno);
 					}
 				}
 			}
@@ -803,19 +804,19 @@ static void _gdImageGd2 (gdImagePtr im, gdIOCtx * out, int cs, int fmt)
 
 	if (gd2_compressed(fmt)) {
 		/* Save the position, write the index, restore position (paranoia). */
-		GD2_DBG(php_gd_error("Seeking %d to write index", idxPos));
+		GD2_DBG(gd_error("Seeking %d to write index", idxPos));
 		posSave = gdTell(out);
 		gdSeek(out, idxPos);
-		GD2_DBG(php_gd_error("Writing index"));
+		GD2_DBG(gd_error("Writing index"));
 		for (x = 0; x < chunkNum; x++) {
-			GD2_DBG(php_gd_error("Chunk %d size %d offset %d", x, chunkIdx[x].size, chunkIdx[x].offset));
+			GD2_DBG(gd_error("Chunk %d size %d offset %d", x, chunkIdx[x].size, chunkIdx[x].offset));
 			gdPutInt(chunkIdx[x].offset, out);
 			gdPutInt(chunkIdx[x].size, out);
 		}
 		gdSeek(out, posSave);
 	}
 fail:
-	GD2_DBG(php_gd_error("Freeing memory"));
+	GD2_DBG(gd_error("Freeing memory"));
 	if (chunkData) {
 		gdFree(chunkData);
 	}
@@ -825,7 +826,7 @@ fail:
 	if (chunkIdx) {
 		gdFree(chunkIdx);
 	}
-	GD2_DBG(php_gd_error("Done"));
+	GD2_DBG(gd_error("Done"));
 }
 
 void gdImageGd2 (gdImagePtr im, FILE * outFile, int cs, int fmt)

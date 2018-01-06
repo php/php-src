@@ -38,19 +38,19 @@ ob_end_flush();
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)

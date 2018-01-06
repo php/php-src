@@ -50,7 +50,7 @@ Warning: SessionHandler::close(): Parent session handler is not open in %ssessio
 
 Warning: session_start(): Failed to read session data: user (%s) in %ssession_set_save_handler_class_005.php on line %d
 bool(false)
-string(%d) "%s"
+string(0) ""
 string(4) "user"
 array(0) {
 }

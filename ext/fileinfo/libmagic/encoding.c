@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.10 2014/09/11 12:08:52 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.13 2015/06/04 19:16:28 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -47,6 +47,7 @@ FILE_RCSID("@(#)$File: encoding.c,v 1.10 2014/09/11 12:08:52 christos Exp $")
 private int looks_ascii(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_utf8_with_BOM(const unsigned char *, size_t, unichar *,
     size_t *);
+private int looks_utf7(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_ucs16(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_latin1(const unsigned char *, size_t, unichar *, size_t *);
 private int looks_extended(const unsigned char *, size_t, unichar *, size_t *);
@@ -88,9 +89,15 @@ file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, uni
 	}
 
 	if (looks_ascii(buf, nbytes, *ubuf, ulen)) {
-		DPRINTF(("ascii %" SIZE_T_FORMAT "u\n", *ulen));
-		*code = "ASCII";
-		*code_mime = "us-ascii";
+		if (looks_utf7(buf, nbytes, *ubuf, ulen) > 0) {
+			DPRINTF(("utf-7 %" SIZE_T_FORMAT "u\n", *ulen));
+			*code = "UTF-7 Unicode";
+			*code_mime = "utf-7";
+		} else {
+			DPRINTF(("ascii %" SIZE_T_FORMAT "u\n", *ulen));
+			*code = "ASCII";
+			*code_mime = "us-ascii";
+		}
 	} else if (looks_utf8_with_BOM(buf, nbytes, *ubuf, ulen) > 0) {
 		DPRINTF(("utf8/bom %" SIZE_T_FORMAT "u\n", *ulen));
 		*code = "UTF-8 Unicode (with BOM)";
@@ -367,6 +374,25 @@ looks_utf8_with_BOM(const unsigned char *buf, size_t nbytes, unichar *ubuf,
 {
 	if (nbytes > 3 && buf[0] == 0xef && buf[1] == 0xbb && buf[2] == 0xbf)
 		return file_looks_utf8(buf + 3, nbytes - 3, ubuf, ulen);
+	else
+		return -1;
+}
+
+private int
+looks_utf7(const unsigned char *buf, size_t nbytes, unichar *ubuf, size_t *ulen)
+{
+	if (nbytes > 4 && buf[0] == '+' && buf[1] == '/' && buf[2] == 'v')
+		switch (buf[3]) {
+		case '8':
+		case '9':
+		case '+':
+		case '/':
+			if (ubuf)
+				*ulen = 0;
+			return 1;
+		default:
+			return -1;
+		}
 	else
 		return -1;
 }

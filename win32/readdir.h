@@ -8,25 +8,32 @@ extern "C" {
 
 /*
  * Structures and types used to implement opendir/readdir/closedir
- * on Windows 95/NT.
+ * on Windows.
  */
 
 #include <config.w32.h>
 
-#include <stdlib.h>
-#include <sys/types.h>
+#include "ioutil.h"
 
 #define php_readdir_r readdir_r
 
 /* struct dirent - same as Unix */
 struct dirent {
 	long d_ino;					/* inode (always 1 in WIN32) */
-	off_t d_off;				/* offset to this dirent */
-	unsigned short d_reclen;	/* length of d_name */
-	char d_name[_MAX_FNAME + 1];	/* filename (null terminated) */
+	off_t d_off;					/* offset to this dirent */
+	unsigned short d_reclen;			/* length of d_name */
+	char d_name[1];	/* null terminated filename in the current encoding, glyph number <= 255 wchar_t's + \0 byte */
 };
 
 /* typedef DIR - not the same as Unix */
+struct DIR_W32 {
+	HANDLE handle;			/* _findfirst/_findnext handle */
+	uint16_t offset;		/* offset into directory */
+	uint8_t finished;		/* 1 if there are not more files */
+	WIN32_FIND_DATAW fileinfo;	/* from _findfirst/_findnext */
+	wchar_t *dirw;			/* the dir we are reading */
+	struct dirent dent;		/* the dirent to return */
+};
 typedef struct DIR_W32 DIR;
 
 /* Function prototypes */
@@ -41,3 +48,12 @@ int rewinddir(DIR *);
 #endif
 
 #endif /* READDIR_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

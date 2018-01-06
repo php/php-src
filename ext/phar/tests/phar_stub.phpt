@@ -33,7 +33,7 @@ echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 
 $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phartmp.php';
-$file = b'<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
+$file = '<?php echo "third stub\n"; __HALT_COMPILER(); ?>';
 $fp = fopen($fname2, 'wb');
 fwrite($fp, $file);
 fclose($fp);
@@ -48,7 +48,7 @@ echo fread($fp, strlen($file)) . "\n";
 fclose($fp);
 
 $fp = fopen($fname2, 'ab');
-fwrite($fp, b'booya');
+fwrite($fp, 'booya');
 fclose($fp);
 echo file_get_contents($fname2) . "\n";
 

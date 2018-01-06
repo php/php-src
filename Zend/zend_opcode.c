@@ -110,6 +110,23 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
+
+		if (function->common.arg_info &&
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+			uint32_t i;
+			uint32_t num_args = function->common.num_args + 1;
+			zend_arg_info *arg_info = function->common.arg_info - 1;
+
+			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+				}
+			}
+			free(arg_info);
+		}
 	}
 }
 
@@ -125,47 +142,28 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
+#ifndef ZTS
+		if ((function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
+		    !function->common.scope && function->common.arg_info) {
+
+			uint32_t i;
+			uint32_t num_args = function->common.num_args + 1;
+			zend_arg_info *arg_info = function->common.arg_info - 1;
+
+			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
+				num_args++;
+			}
+			for (i = 0 ; i < num_args; i++) {
+				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+				}
+			}
+			free(arg_info);
+		}
+#endif
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
-	}
-}
-
-ZEND_API void zend_cleanup_op_array_data(zend_op_array *op_array)
-{
-	if (op_array->static_variables &&
-	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		zend_hash_clean(op_array->static_variables);
-	}
-}
-
-ZEND_API void zend_cleanup_user_class_data(zend_class_entry *ce)
-{
-	/* Clean all parts that can contain run-time data */
-	/* Note that only run-time accessed data need to be cleaned up, pre-defined data can
-	   not contain objects and thus are not probelmatic */
-	if (ce->ce_flags & ZEND_HAS_STATIC_IN_METHODS) {
-		zend_function *func;
-
-		ZEND_HASH_FOREACH_PTR(&ce->function_table, func) {
-			if (func->type == ZEND_USER_FUNCTION) {
-				zend_cleanup_op_array_data((zend_op_array *) func);
-			}
-		} ZEND_HASH_FOREACH_END();
-	}
-	if (ce->static_members_table) {
-		zval *static_members = ce->static_members_table;
-		zval *p = static_members;
-		zval *end = p + ce->default_static_members_count;
-
-
-		ce->default_static_members_count = 0;
-		ce->default_static_members_table = ce->static_members_table = NULL;
-		while (p != end) {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
-			p++;
-		}
-		efree(static_members);
 	}
 }
 
@@ -248,6 +246,9 @@ ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
+#ifndef ZTS
+	zend_function *fn;
+#endif
 
 	if (--ce->refcount > 0) {
 		return;
@@ -290,7 +291,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
-						zval_ptr_dtor(&c->value);
+						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
 							zend_string_release(c->doc_comment);
 						}
@@ -331,15 +332,27 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
+#ifndef ZTS
+			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
+				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
+				    fn->common.scope == ce) {
+					/* reset function scope to allow arg_info removing */
+					fn->common.scope = NULL;
+				}
+			} ZEND_HASH_FOREACH_END();
+#endif
 			zend_hash_destroy(&ce->function_table);
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					zval_internal_ptr_dtor(&c->value);
-					if (c->doc_comment && c->ce == ce) {
-						zend_string_release(c->doc_comment);
+					if (c->ce == ce) {
+						zval_internal_ptr_dtor(&c->value);
+						if (c->doc_comment) {
+							zend_string_release(c->doc_comment);
+						}
 					}
+					free(c);
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
@@ -366,7 +379,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 
 	if (op_array->static_variables &&
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+		if (GC_DELREF(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
 		}
 	}
@@ -397,7 +410,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			zval_ptr_dtor_nogc(literal);
 			literal++;
 		}
-		efree(op_array->literals);
+		if (ZEND_USE_ABS_CONST_ADDR
+		 || !(op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
+			efree(op_array->literals);
+		}
 	}
 	efree(op_array->opcodes);
 
@@ -433,8 +449,8 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 			if (arg_info[i].name) {
 				zend_string_release(arg_info[i].name);
 			}
-			if (arg_info[i].class_name) {
-				zend_string_release(arg_info[i].class_name);
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
 			}
 		}
 		efree(arg_info);
@@ -566,6 +582,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
+
+#if ZEND_USE_ABS_CONST_ADDR
 	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
 		CG(context).opcodes_size = op_array->last;
@@ -574,6 +592,20 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+#else
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes,
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16) +
+		sizeof(zval) * op_array->last_literal);
+	if (op_array->literals) {
+		memcpy(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16),
+			op_array->literals, sizeof(zval) * op_array->last_literal);
+		efree(op_array->literals);
+		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
+	}
+	CG(context).opcodes_size = op_array->last;
+	CG(context).literals_size = op_array->last_literal;
+#endif
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -646,14 +678,27 @@ ZEND_API int pass_two(zend_op_array *op_array)
 					opline->opcode = ZEND_GENERATOR_RETURN;
 				}
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				/* absolute indexes to relative offsets */
+				HashTable *jumptable = Z_ARRVAL_P(CT_CONSTANT(opline->op2));
+				zval *zv;
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					Z_LVAL_P(zv) = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, Z_LVAL_P(zv));
+				} ZEND_HASH_FOREACH_END();
+
+				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
+			}
 		}
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
 		}
@@ -703,6 +748,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_ASSIGN_MUL:
 			return (binary_op_type) mul_function;
 		case ZEND_POW:
+		case ZEND_ASSIGN_POW:
 			return (binary_op_type) pow_function;
 		case ZEND_DIV:
 		case ZEND_ASSIGN_DIV:
@@ -725,6 +771,7 @@ ZEND_API binary_op_type get_binary_op(int opcode)
 		case ZEND_IS_NOT_IDENTICAL:
 			return (binary_op_type) is_not_identical_function;
 		case ZEND_IS_EQUAL:
+		case ZEND_CASE:
 			return (binary_op_type) is_equal_function;
 		case ZEND_IS_NOT_EQUAL:
 			return (binary_op_type) is_not_equal_function;
@@ -756,4 +803,6 @@ ZEND_API binary_op_type get_binary_op(int opcode)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

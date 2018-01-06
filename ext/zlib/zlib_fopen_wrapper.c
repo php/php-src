@@ -100,7 +100,7 @@ static int php_gziop_flush(php_stream *stream)
 	return gzflush(self->gz_file, Z_SYNC_FLUSH);
 }
 
-php_stream_ops php_stream_gzio_ops = {
+const php_stream_ops php_stream_gzio_ops = {
 	php_gziop_write, php_gziop_read,
 	php_gziop_close, php_gziop_flush,
 	"ZLIB",
@@ -141,6 +141,11 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 			self->gz_file = gzdopen(dup(fd), mode);
 
 			if (self->gz_file) {
+				zval *zlevel = context ? php_stream_context_get_option(context, "zlib", "level") : NULL;
+				if (zlevel && (Z_OK != gzsetparams(self->gz_file, zval_get_long(zlevel), Z_DEFAULT_STRATEGY))) {
+					php_error(E_WARNING, "failed setting compression level");
+				}
+
 				stream = php_stream_alloc_rel(&php_stream_gzio_ops, self, 0, mode);
 				if (stream) {
 					stream->flags |= PHP_STREAM_FLAG_NO_BUFFER;
@@ -162,7 +167,7 @@ php_stream *php_stream_gzopen(php_stream_wrapper *wrapper, const char *path, con
 	return NULL;
 }
 
-static php_stream_wrapper_ops gzip_stream_wops = {
+static const php_stream_wrapper_ops gzip_stream_wops = {
 	php_stream_gzopen,
 	NULL, /* close */
 	NULL, /* stat */
@@ -176,7 +181,7 @@ static php_stream_wrapper_ops gzip_stream_wops = {
 	NULL
 };
 
-php_stream_wrapper php_stream_gzip_wrapper =	{
+const php_stream_wrapper php_stream_gzip_wrapper =	{
 	&gzip_stream_wops,
 	NULL,
 	0, /* is_url */

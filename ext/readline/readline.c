@@ -326,7 +326,7 @@ PHP_FUNCTION(readline_info)
 			if (value) {
 				/* XXX if (rl_readline_name) free(rl_readline_name); */
 				convert_to_string_ex(value);
-				rl_readline_name = strdup(Z_STRVAL_P(value));;
+				rl_readline_name = strdup(Z_STRVAL_P(value));
 			}
 			RETVAL_STRING(SAFE_STRING(oldstr));
 		} else if (!strcasecmp(what, "attempted_completion_over")) {
@@ -507,7 +507,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 					return NULL;
 				}
 				matches[0] = strdup("");
-				matches[1] = '\0';
+				matches[1] = NULL;
 			}
 		}
 	}
@@ -522,19 +522,18 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 
 PHP_FUNCTION(readline_completion_function)
 {
-	zval *arg = NULL;
-	zend_string *name = NULL;
+	zval *arg;
 
 	if (FAILURE == zend_parse_parameters(ZEND_NUM_ARGS(), "z", &arg)) {
 		RETURN_FALSE;
 	}
 
-	if (!zend_is_callable(arg, 0, &name)) {
+	if (!zend_is_callable(arg, 0, NULL)) {
+		zend_string *name = zend_get_callable_name(arg);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	zend_string_release(name);
 
 	zval_ptr_dtor(&_readline_completion);
 	ZVAL_COPY(&_readline_completion, arg);
@@ -570,7 +569,6 @@ static void php_rl_callback_handler(char *the_line)
 PHP_FUNCTION(readline_callback_handler_install)
 {
 	zval *callback;
-	zend_string *name = NULL;
 	char *prompt;
 	size_t prompt_len;
 
@@ -578,12 +576,12 @@ PHP_FUNCTION(readline_callback_handler_install)
 		return;
 	}
 
-	if (!zend_is_callable(callback, 0, &name)) {
+	if (!zend_is_callable(callback, 0, NULL)) {
+		zend_string *name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
-	zend_string_release(name);
 
 	if (Z_TYPE(_prepped_callback) != IS_UNDEF) {
 		rl_callback_handler_remove();

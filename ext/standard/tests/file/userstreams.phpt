@@ -67,7 +67,7 @@ for ($i = 0; $i < 30; $i++) {
 /* store the data in a regular file so that we can compare
  * the results */
 $tf = tmpfile();
-fwrite($tf, (binary)$DATA);
+fwrite($tf, $DATA);
 $n = ftell($tf);
 rewind($tf) or die("failed to rewind tmp file!");
 if (ftell($tf) != 0)

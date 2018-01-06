@@ -21,8 +21,8 @@
 
 /*
  * Note
- * 
- * RUSAGE_CHILDREN is not implemented, and the RUSAGE_THREAD will 
+ *
+ * RUSAGE_CHILDREN is not implemented, and the RUSAGE_THREAD will
  * therefore instead be used instead to emulate the behavior.
  */
 
@@ -115,3 +115,11 @@ PHPAPI int getrusage(int who, struct rusage *usage);
 
 #endif
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

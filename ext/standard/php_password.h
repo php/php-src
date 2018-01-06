@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Anthony Ferrara <ircmaxell@php.net>                         |
+   |          Charles R. Portwood II <charlesportwoodii@erianna.com>      |
    +----------------------------------------------------------------------+
 */
 
@@ -28,13 +29,21 @@ PHP_FUNCTION(password_get_info);
 
 PHP_MINIT_FUNCTION(password);
 
-#define PHP_PASSWORD_DEFAULT	PHP_PASSWORD_BCRYPT
-
+#define PHP_PASSWORD_DEFAULT    PHP_PASSWORD_BCRYPT
 #define PHP_PASSWORD_BCRYPT_COST 10
 
+#if HAVE_ARGON2LIB
+#define PHP_PASSWORD_ARGON2_MEMORY_COST 1<<10
+#define PHP_PASSWORD_ARGON2_TIME_COST 2
+#define PHP_PASSWORD_ARGON2_THREADS 2
+#endif
+
 typedef enum {
-	PHP_PASSWORD_UNKNOWN,
-	PHP_PASSWORD_BCRYPT
+    PHP_PASSWORD_UNKNOWN,
+    PHP_PASSWORD_BCRYPT,
+#if HAVE_ARGON2LIB
+    PHP_PASSWORD_ARGON2I,
+#endif
 } php_password_algo;
 
 #endif

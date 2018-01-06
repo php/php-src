@@ -8,9 +8,9 @@ Test class_exists() function : usage variations  - unexpected types for argument
  * Alias to functions: 
  */
 
-function __autoload($className) {
-	echo "In __autoload($className)\n";
-}
+spl_autoload_register(function ($className) {
+	echo "In autoload($className)\n";
+});
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -95,35 +95,35 @@ Arg value 0
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 12345 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value -2345 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 10.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value -10.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 101234567000 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 1.07654321E-9 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 0.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 Error: 8 - Array to string conversion, %sclass_exists_variation_002.php(%d)
 
@@ -158,14 +158,14 @@ Arg value
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value  
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value  
@@ -178,11 +178,11 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value string 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(80)
 

@@ -3,8 +3,7 @@ Reflection Bug #26640 (__autoload() not invoked by Reflection classes)
 --FILE--
 <?php
 
-function __autoload($c)
-{
+spl_autoload_register(function ($c) {
 	class autoload_class
 	{
 		public function __construct()
@@ -12,7 +11,7 @@ function __autoload($c)
 			print "autoload success\n";
 		}
 	}
-}
+});
 
 $a = new ReflectionClass('autoload_class');
 

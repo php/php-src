@@ -81,84 +81,84 @@ mysqli_fetch_assoc() - utf8
 --EXPECTF--
 [003]
 array(3) {
-  [%u|b%"Андрей Христов"]=>
-  %unicode|string%(%r[1|3]%r) "1"
-  [%u|b%"Улф Вендел"]=>
-  %unicode|string%(1) "2"
-  [%u|b%"Георг Рихтер"]=>
-  %unicode|string%(1) "3"
+  ["Андрей Христов"]=>
+  string(%r[1|3]%r) "1"
+  ["Улф Вендел"]=>
+  string(1) "2"
+  ["Георг Рихтер"]=>
+  string(1) "3"
 }
 [009]
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "4"
-  [%u|b%"име"]=>
-  %unicode|string%(6) "Andrey"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(7) "Hristov"
+  ["id"]=>
+  string(1) "4"
+  ["име"]=>
+  string(6) "Andrey"
+  ["фамилия"]=>
+  string(7) "Hristov"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "7"
-  [%u|b%"име"]=>
-  %unicode|string%(9) "安德烈"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(7) "Hristov"
+  ["id"]=>
+  string(1) "7"
+  ["име"]=>
+  string(9) "安德烈"
+  ["фамилия"]=>
+  string(7) "Hristov"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "5"
-  [%u|b%"име"]=>
-  %unicode|string%(5) "Georg"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(7) "Richter"
+  ["id"]=>
+  string(1) "5"
+  ["име"]=>
+  string(5) "Georg"
+  ["фамилия"]=>
+  string(7) "Richter"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "8"
-  [%u|b%"име"]=>
-  %unicode|string%(9) "格奥尔"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(7) "Richter"
+  ["id"]=>
+  string(1) "8"
+  ["име"]=>
+  string(9) "格奥尔"
+  ["фамилия"]=>
+  string(7) "Richter"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "6"
-  [%u|b%"име"]=>
-  %unicode|string%(3) "Ulf"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(6) "Wendel"
+  ["id"]=>
+  string(1) "6"
+  ["име"]=>
+  string(3) "Ulf"
+  ["фамилия"]=>
+  string(6) "Wendel"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "9"
-  [%u|b%"име"]=>
-  %unicode|string%(9) "乌尔夫"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(6) "Wendel"
+  ["id"]=>
+  string(1) "9"
+  ["име"]=>
+  string(9) "乌尔夫"
+  ["фамилия"]=>
+  string(6) "Wendel"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "3"
-  [%u|b%"име"]=>
-  %unicode|string%(6) "Улф"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(12) "Вендел"
+  ["id"]=>
+  string(1) "3"
+  ["име"]=>
+  string(6) "Улф"
+  ["фамилия"]=>
+  string(12) "Вендел"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "2"
-  [%u|b%"име"]=>
-  %unicode|string%(10) "Георг"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(12) "Рихтер"
+  ["id"]=>
+  string(1) "2"
+  ["име"]=>
+  string(10) "Георг"
+  ["фамилия"]=>
+  string(12) "Рихтер"
 }
 array(3) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"име"]=>
-  %unicode|string%(12) "Андрей"
-  [%u|b%"фамилия"]=>
-  %unicode|string%(14) "Христов"
+  ["id"]=>
+  string(1) "1"
+  ["име"]=>
+  string(12) "Андрей"
+  ["фамилия"]=>
+  string(14) "Христов"
 }
 done!

@@ -26,65 +26,78 @@
 
 static void zend_mark_reachable(zend_op *opcodes, zend_cfg *cfg, zend_basic_block *b) /* {{{ */
 {
-	zend_uchar opcode;
-	zend_basic_block *b0;
-	int successor_0, successor_1;
 	zend_basic_block *blocks = cfg->blocks;
 
 	while (1) {
+		int i;
+
 		b->flags |= ZEND_BB_REACHABLE;
-		successor_0 = b->successors[0];
-		if (successor_0 >= 0) {
-			successor_1 = b->successors[1];
-			if (successor_1 >= 0) {
-				b0 = blocks + successor_0;
-				b0->flags |= ZEND_BB_TARGET;
-				if (!(b0->flags & ZEND_BB_REACHABLE)) {
-					zend_mark_reachable(opcodes, cfg, b0);
-				}
+		if (b->successors_count == 0) {
+			b->flags |= ZEND_BB_EXIT;
+			return;
+		}
 
-				ZEND_ASSERT(b->len != 0);
-				opcode = opcodes[b->start + b->len - 1].opcode;
-				b = blocks + successor_1;
-				if (opcode == ZEND_JMPZNZ) {
-					b->flags |= ZEND_BB_TARGET;
-				} else {
-					b->flags |= ZEND_BB_FOLLOW;
-				}
-			} else if (b->len != 0) {
-				opcode = opcodes[b->start + b->len - 1].opcode;
-				b = blocks + successor_0;
-				if (opcode == ZEND_JMP) {
-					b->flags |= ZEND_BB_TARGET;
-				} else {
-					b->flags |= ZEND_BB_FOLLOW;
+		for (i = 0; i < b->successors_count; i++) {
+			zend_basic_block *succ = blocks + b->successors[i];
 
-					if (cfg->split_at_calls) {
-						if (opcode == ZEND_INCLUDE_OR_EVAL ||
-						    opcode == ZEND_GENERATOR_CREATE ||
-						    opcode == ZEND_YIELD ||
-						    opcode == ZEND_YIELD_FROM ||
-						    opcode == ZEND_DO_FCALL ||
-						    opcode == ZEND_DO_UCALL ||
-						    opcode == ZEND_DO_FCALL_BY_NAME) {
-							b->flags |= ZEND_BB_ENTRY;
+			if (b->len != 0) {
+				zend_uchar opcode = opcodes[b->start + b->len - 1].opcode;
+				if (b->successors_count == 1) {
+					if (opcode == ZEND_JMP) {
+						succ->flags |= ZEND_BB_TARGET;
+					} else {
+						succ->flags |= ZEND_BB_FOLLOW;
+
+						if ((cfg->flags & ZEND_CFG_STACKLESS)) {
+							if (opcode == ZEND_INCLUDE_OR_EVAL ||
+								opcode == ZEND_GENERATOR_CREATE ||
+								opcode == ZEND_YIELD ||
+								opcode == ZEND_YIELD_FROM ||
+								opcode == ZEND_DO_FCALL ||
+								opcode == ZEND_DO_UCALL ||
+								opcode == ZEND_DO_FCALL_BY_NAME) {
+								succ->flags |= ZEND_BB_ENTRY;
+							}
+						}
+						if ((cfg->flags & ZEND_CFG_RECV_ENTRY)) {
+							if (opcode == ZEND_RECV ||
+								opcode == ZEND_RECV_INIT) {
+								succ->flags |= ZEND_BB_RECV_ENTRY;
+							}
 						}
 					}
-					if (cfg->split_at_recv) {
-						if (opcode == ZEND_RECV ||
-						    opcode == ZEND_RECV_INIT) {
-							b->flags |= ZEND_BB_RECV_ENTRY;
-						}
+				} else if (b->successors_count == 2) {
+					if (i == 0 || opcode == ZEND_JMPZNZ) {
+						succ->flags |= ZEND_BB_TARGET;
+					} else {
+						succ->flags |= ZEND_BB_FOLLOW;
+					}
+				} else {
+					ZEND_ASSERT(opcode == ZEND_SWITCH_LONG || opcode == ZEND_SWITCH_STRING);
+					if (i == b->successors_count) {
+						succ->flags |= ZEND_BB_FOLLOW;
+					} else {
+						succ->flags |= ZEND_BB_TARGET;
 					}
 				}
 			} else {
-				b = blocks + successor_0;
-				b->flags |= ZEND_BB_FOLLOW;
+				succ->flags |= ZEND_BB_FOLLOW;
 			}
-			if (b->flags & ZEND_BB_REACHABLE) return;
-		} else {
-			b->flags |= ZEND_BB_EXIT;
-			return;
+
+			if (i == b->successors_count - 1) {
+				/* Tail call optimization */
+				if (succ->flags & ZEND_BB_REACHABLE) {
+					return;
+				}
+
+				b = succ;
+				break;
+			} else {
+				/* Recusively check reachability */
+				if (!(succ->flags & ZEND_BB_REACHABLE)) {
+					zend_mark_reachable(opcodes, cfg, succ);
+				}
+			}
 		}
 	}
 }
@@ -136,7 +149,7 @@ static void zend_mark_reachable_blocks(const zend_op_array *op_array, zend_cfg *
 					b = blocks + block_map[live_range->end];
 					b->flags |= ZEND_BB_KILL_VAR;
 					if (!(b->flags & (ZEND_BB_REACHABLE|ZEND_BB_UNREACHABLE_FREE))) {
-						if (cfg->split_at_live_ranges) {
+						if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
 							changed = 1;
 							zend_mark_reachable(op_array->opcodes, cfg, b);
 						} else {
@@ -251,15 +264,10 @@ void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *c
 }
 /* }}} */
 
-static void record_successor(zend_basic_block *blocks, int pred, int n, int succ)
-{
-	blocks[pred].successors[n] = succ;
-}
-
 static void initialize_block(zend_basic_block *block) {
 	block->flags = 0;
-	block->successors[0] = -1;
-	block->successors[1] = -1;
+	block->successors = block->successors_storage;
+	block->successors_count = 0;
 	block->predecessors_count = 0;
 	block->predecessor_offset = -1;
 	block->idom = -1;
@@ -274,7 +282,7 @@ static void initialize_block(zend_basic_block *block) {
 		block_map[i]++; \
 	} while (0)
 
-int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg, uint32_t *func_flags) /* {{{ */
+int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg) /* {{{ */
 {
 	uint32_t flags = 0;
 	uint32_t i;
@@ -286,20 +294,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	zval *zv;
 	zend_bool extra_entry_block = 0;
 
-	cfg->split_at_live_ranges = (build_flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES) != 0;
-	cfg->split_at_calls = (build_flags & ZEND_CFG_STACKLESS) != 0;
-	cfg->split_at_recv = (build_flags & ZEND_CFG_RECV_ENTRY) != 0 && (op_array->fn_flags & ZEND_ACC_HAS_TYPE_HINTS) == 0;
+	cfg->flags = build_flags & (ZEND_CFG_SPLIT_AT_LIVE_RANGES|ZEND_CFG_STACKLESS|ZEND_CFG_RECV_ENTRY);
 
 	cfg->map = block_map = zend_arena_calloc(arena, op_array->last, sizeof(uint32_t));
-	if (!block_map) {
-		return FAILURE;
-	}
 
 	/* Build CFG, Step 1: Find basic blocks starts, calculate number of blocks */
 	BB_START(0);
 	for (i = 0; i < op_array->last; i++) {
 		zend_op *opline = op_array->opcodes + i;
-		switch(opline->opcode) {
+		switch (opline->opcode) {
 			case ZEND_RECV:
 			case ZEND_RECV_INIT:
 				if (build_flags & ZEND_CFG_RECV_ENTRY) {
@@ -399,10 +402,21 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				BB_START(i + 1);
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
+				zval *zv;
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv)));
+				} ZEND_HASH_FOREACH_END();
+				BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+				BB_START(i + 1);
+				break;
+			}
 			case ZEND_UNSET_VAR:
 			case ZEND_ISSET_ISEMPTY_VAR:
-				if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) &&
-				    !(opline->extended_value & ZEND_QUICK_SET)) {
+				if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_LOCAL) {
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				} else if (((opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL ||
 				            (opline->extended_value & ZEND_FETCH_TYPE_MASK) == ZEND_FETCH_GLOBAL_LOCK) &&
@@ -424,6 +438,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 					flags |= ZEND_FUNC_INDIRECT_VAR_ACCESS;
 				}
 				break;
+			case ZEND_FUNC_GET_ARGS:
+				flags |= ZEND_FUNC_VARARG;
+				break;
+			case ZEND_EXT_NOP:
+			case ZEND_EXT_STMT:
+			case ZEND_EXT_FCALL_BEGIN:
+			case ZEND_EXT_FCALL_END:
+				flags |= ZEND_FUNC_HAS_EXTENDED_INFO;
+				break;
 		}
 	}
 
@@ -433,7 +456,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 		extra_entry_block = 1;
 	}
 
-	if (cfg->split_at_live_ranges) {
+	if ((cfg->flags & ZEND_CFG_SPLIT_AT_LIVE_RANGES)) {
 		for (j = 0; j < op_array->last_live_range; j++) {
 			BB_START(op_array->live_range[j].start);
 			BB_START(op_array->live_range[j].end);
@@ -460,9 +483,6 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Build CFG, Step 2: Build Array of Basic Blocks */
 	cfg->blocks = blocks = zend_arena_calloc(arena, sizeof(zend_basic_block), blocks_count);
-	if (!blocks) {
-		return FAILURE;
-	}
 
 	blocks_count = -1;
 
@@ -490,13 +510,15 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 	/* Build CFG, Step 3: Calculate successors */
 	for (j = 0; j < blocks_count; j++) {
+		zend_basic_block *block = &blocks[j];
 		zend_op *opline;
-		if (blocks[j].len == 0) {
-			record_successor(blocks, j, 0, j + 1);
+		if (block->len == 0) {
+			block->successors_count = 1;
+			block->successors[0] = j + 1;
 			continue;
 		}
 
-		opline = op_array->opcodes + blocks[j].start + blocks[j].len - 1;
+		opline = op_array->opcodes + block->start + block->len - 1;
 		switch (opline->opcode) {
 			case ZEND_FAST_RET:
 			case ZEND_RETURN:
@@ -506,11 +528,13 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_THROW:
 				break;
 			case ZEND_JMP:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes]);
+				block->successors_count = 1;
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes];
 				break;
 			case ZEND_JMPZNZ:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes]);
-				record_successor(blocks, j, 1, block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
+				block->successors_count = 2;
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
+				block->successors[1] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
 				break;
 			case ZEND_JMPZ:
 			case ZEND_JMPNZ:
@@ -519,35 +543,60 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 			case ZEND_JMP_SET:
 			case ZEND_COALESCE:
 			case ZEND_ASSERT_CHECK:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes]);
-				record_successor(blocks, j, 1, j + 1);
+				block->successors_count = 2;
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
+				block->successors[1] = j + 1;
 				break;
 			case ZEND_CATCH:
 				if (!opline->result.num) {
-					record_successor(blocks, j, 0, block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-					record_successor(blocks, j, 1, j + 1);
+					block->successors_count = 2;
+					block->successors[0] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+					block->successors[1] = j + 1;
 				} else {
-					record_successor(blocks, j, 0, j + 1);
+					block->successors_count = 1;
+					block->successors[0] = j + 1;
 				}
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
-				record_successor(blocks, j, 0, block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
-				record_successor(blocks, j, 1, j + 1);
+				block->successors_count = 2;
+				block->successors[0] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				block->successors[1] = j + 1;
 				break;
 			case ZEND_FE_RESET_R:
 			case ZEND_FE_RESET_RW:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes]);
-				record_successor(blocks, j, 1, j + 1);
+				block->successors_count = 2;
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
+				block->successors[1] = j + 1;
 				break;
 			case ZEND_FAST_CALL:
-				record_successor(blocks, j, 0, block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes]);
-				record_successor(blocks, j, 1, j + 1);
+				block->successors_count = 2;
+				block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op1) - op_array->opcodes];
+				block->successors[1] = j + 1;
 				break;
+			case ZEND_SWITCH_LONG:
+			case ZEND_SWITCH_STRING:
+			{
+				HashTable *jumptable = Z_ARRVAL_P(CRT_CONSTANT(opline->op2));
+				zval *zv;
+				uint32_t s = 0;
+
+				block->successors_count = 2 + zend_hash_num_elements(jumptable);
+				block->successors = zend_arena_calloc(arena, block->successors_count, sizeof(int));
+
+				ZEND_HASH_FOREACH_VAL(jumptable, zv) {
+					block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, Z_LVAL_P(zv))];
+				} ZEND_HASH_FOREACH_END();
+
+				block->successors[s++] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+				block->successors[s++] = j + 1;
+				break;
+			}
 			default:
-				record_successor(blocks, j, 0, j + 1);
+				block->successors_count = 1;
+				block->successors[0] = j + 1;
 				break;
 		}
 	}
@@ -555,9 +604,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 	/* Build CFG, Step 4, Mark Reachable Basic Blocks */
 	zend_mark_reachable_blocks(op_array, cfg, 0);
 
-	if (func_flags) {
-		*func_flags |= flags;
-	}
+	cfg->flags |= flags;
 
 	return SUCCESS;
 }
@@ -565,7 +612,7 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 
 int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 {
-	int j, edges;
+	int j, s, edges;
 	zend_basic_block *b;
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
@@ -577,26 +624,18 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 	}
 	for (b = blocks; b < end; b++) {
 		if (!(b->flags & ZEND_BB_REACHABLE)) {
-			b->successors[0] = -1;
-			b->successors[1] = -1;
+			b->successors_count = 0;
 			b->predecessors_count = 0;
 		} else {
-			if (b->successors[0] >= 0) {
+			for (s = 0; s < b->successors_count; s++) {
 				edges++;
-				blocks[b->successors[0]].predecessors_count++;
-				if (b->successors[1] >= 0 && b->successors[1] != b->successors[0]) {
-					edges++;
-					blocks[b->successors[1]].predecessors_count++;
-				}
+				blocks[b->successors[s]].predecessors_count++;
 			}
 		}
 	}
 
+	cfg->edges_count = edges;
 	cfg->predecessors = predecessors = (int*)zend_arena_calloc(arena, sizeof(int), edges);
-
-	if (!predecessors) {
-		return FAILURE;
-	}
 
 	edges = 0;
 	for (b = blocks; b < end; b++) {
@@ -609,13 +648,20 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 
 	for (j = 0; j < cfg->blocks_count; j++) {
 		if (blocks[j].flags & ZEND_BB_REACHABLE) {
-			if (blocks[j].successors[0] >= 0) {
-				zend_basic_block *b = blocks + blocks[j].successors[0];
-				predecessors[b->predecessor_offset + b->predecessors_count] = j;
-				b->predecessors_count++;
-				if (blocks[j].successors[1] >= 0
-						&& blocks[j].successors[1] != blocks[j].successors[0]) {
-					zend_basic_block *b = blocks + blocks[j].successors[1];
+			/* SWITCH_STRING/LONG may have few identical successors */
+			for (s = 0; s < blocks[j].successors_count; s++) {
+				int duplicate = 0;
+				int p;
+
+				for (p = 0; p < s; p++) {
+					if (blocks[j].successors[p] == blocks[j].successors[s]) {
+						duplicate = 1;
+						break;
+					}
+				}
+				if (!duplicate) {
+					zend_basic_block *b = blocks + blocks[j].successors[s];
+
 					predecessors[b->predecessor_offset + b->predecessors_count] = j;
 					b->predecessors_count++;
 				}
@@ -631,17 +677,15 @@ int zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg) /* {{{ */
 static void compute_postnum_recursive(
 		int *postnum, int *cur, const zend_cfg *cfg, int block_num) /* {{{ */
 {
+	int s;
 	zend_basic_block *block = &cfg->blocks[block_num];
 	if (postnum[block_num] != -1) {
 		return;
 	}
 
 	postnum[block_num] = -2; /* Marker for "currently visiting" */
-	if (block->successors[0] >= 0) {
-		compute_postnum_recursive(postnum, cur, cfg, block->successors[0]);
-		if (block->successors[1] >= 0) {
-			compute_postnum_recursive(postnum, cur, cfg, block->successors[1]);
-		}
+	for (s = 0; s < block->successors_count; s++) {
+		compute_postnum_recursive(postnum, cur, cfg, block->successors[s]);
 	}
 	postnum[block_num] = (*cur)++;
 }
@@ -762,7 +806,7 @@ static void swap_blocks(block_info *a, block_info *b) {
 	*b = tmp;
 }
 
-int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags) /* {{{ */
+int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg) /* {{{ */
 {
 	int i, j, k, n;
 	int time;
@@ -798,11 +842,9 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 			}
 		}
 		/* Visit join edges.  */
-		for (j = 0; j < 2; j++) {
+		for (j = 0; j < blocks[i].successors_count; j++) {
 			int succ = blocks[i].successors[j];
-			if (succ < 0) {
-				continue;
-			} else if (blocks[succ].idom == i) {
+			if (blocks[succ].idom == i) {
 				continue;
 			} else if (zend_worklist_push(&work, succ)) {
 				goto next;
@@ -870,7 +912,8 @@ int zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32
 	free_alloca(sorted_blocks, sorted_blocks_use_heap);
 	free_alloca(entry_times, tree_use_heap);
 	ZEND_WORKLIST_FREE_ALLOCA(&work, list_use_heap);
-	*flags |= flag;
+
+	cfg->flags |= flag;
 
 	return SUCCESS;
 }

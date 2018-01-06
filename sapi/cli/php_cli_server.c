@@ -415,7 +415,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 				do {
 					p++;
 				} while (*p == ' ' || *p == '\t');
-				add_assoc_stringl_ex(return_value, s, (uint)len, p, h->header_len - (p - h->header));
+				add_assoc_stringl_ex(return_value, s, (uint32_t)len, p, h->header_len - (p - h->header));
 				free_alloca(s, use_heap);
 			}
 		}
@@ -609,7 +609,7 @@ static int sapi_cli_server_register_entry_cb(char **entry, int num_args, va_list
 	zval *track_vars_array = va_arg(args, zval *);
 	if (hash_key->key) {
 		char *real_key, *key;
-		uint i;
+		uint32_t i;
 		key = estrndup(ZSTR_VAL(hash_key->key), ZSTR_LEN(hash_key->key));
 		for(i=0; i<ZSTR_LEN(hash_key->key); i++) {
 			if (key[i] == '-') {
@@ -933,9 +933,6 @@ static size_t php_cli_server_buffer_size(const php_cli_server_buffer *buffer) /*
 static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, size_t len) /* {{{ */
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
-	if (!chunk) {
-		return NULL;
-	}
 
 	chunk->type = PHP_CLI_SERVER_CHUNK_IMMORTAL;
 	chunk->next = NULL;
@@ -947,9 +944,6 @@ static php_cli_server_chunk *php_cli_server_chunk_immortal_new(const char *buf, 
 static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *buf, size_t len) /* {{{ */
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk), 1);
-	if (!chunk) {
-		return NULL;
-	}
 
 	chunk->type = PHP_CLI_SERVER_CHUNK_HEAP;
 	chunk->next = NULL;
@@ -962,9 +956,6 @@ static php_cli_server_chunk *php_cli_server_chunk_heap_new(void *block, char *bu
 static php_cli_server_chunk *php_cli_server_chunk_heap_new_self_contained(size_t len) /* {{{ */
 {
 	php_cli_server_chunk *chunk = pemalloc(sizeof(php_cli_server_chunk) + len, 1);
-	if (!chunk) {
-		return NULL;
-	}
 
 	chunk->type = PHP_CLI_SERVER_CHUNK_HEAP;
 	chunk->next = NULL;
@@ -1220,12 +1211,6 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 #if HAVE_GETADDRINFO && HAVE_IPV6
 		case AF_INET6:
 			sa = pemalloc(sizeof(struct sockaddr_in6), 1);
-			if (!sa) {
-				closesocket(retval);
-				retval = SOCK_ERR;
-				*errstr = NULL;
-				goto out;
-			}
 			*(struct sockaddr_in6 *)sa = *(struct sockaddr_in6 *)*p;
 			((struct sockaddr_in6 *)sa)->sin6_port = htons(*port);
 			*socklen = sizeof(struct sockaddr_in6);
@@ -1233,12 +1218,6 @@ static php_socket_t php_network_listen_socket(const char *host, int *port, int s
 #endif
 		case AF_INET:
 			sa = pemalloc(sizeof(struct sockaddr_in), 1);
-			if (!sa) {
-				closesocket(retval);
-				retval = SOCK_ERR;
-				*errstr = NULL;
-				goto out;
-			}
 			*(struct sockaddr_in *)sa = *(struct sockaddr_in *)*p;
 			((struct sockaddr_in *)sa)->sin_port = htons(*port);
 			*socklen = sizeof(struct sockaddr_in);
@@ -1375,10 +1354,6 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	size_t prev_path_len = 0;
 	int  is_static_file = 0;
 
-	if (!buf) {
-		return;
-	}
-
 	memmove(p, document_root, document_root_len);
 	p += document_root_len;
 	vpath = p;
@@ -1463,7 +1438,7 @@ static void php_cli_server_request_translate_vpath(php_cli_server_request *reque
 	}
 #ifdef PHP_WIN32
 	{
-		uint i = 0;
+		uint32_t i = 0;
 		for (;i<request->vpath_len;i++) {
 			if (request->vpath[i] == '\\') {
 				request->vpath[i] = '/';
@@ -1599,10 +1574,13 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* strip off the colon */
 	zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
-	char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-	zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, client->current_header_value);
+	zend_string *lc_header_name = zend_string_alloc(client->current_header_name_len, 1);
+	zend_str_tolower_copy(ZSTR_VAL(lc_header_name), client->current_header_name, client->current_header_name_len);
+	GC_MAKE_PERSISTENT_LOCAL(orig_header_name);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
+	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
 	zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, client->current_header_value);
-	efree(lc_header_name);
+	zend_string_release(lc_header_name);
 	zend_string_release(orig_header_name);
 
 	if (client->current_header_name_allocated) {
@@ -1700,9 +1678,6 @@ static int php_cli_server_client_read_request_on_body(php_http_parser *parser, c
 	php_cli_server_client *client = parser->data;
 	if (!client->request.content) {
 		client->request.content = pemalloc(parser->content_length, 1);
-		if (!client->request.content) {
-			return -1;
-		}
 		client->request.content_len = 0;
 	}
 	client->request.content = perealloc(client->request.content, client->request.content_len + length, 1);
@@ -1778,9 +1753,6 @@ static int php_cli_server_client_read_request(php_cli_server_client *client, cha
 	}
 	if (client->current_header_name) {
 		char *header_name = safe_pemalloc(client->current_header_name_len, 1, 1, 1);
-		if (!header_name) {
-			return -1;
-		}
 		memmove(header_name, client->current_header_name, client->current_header_name_len);
 		client->current_header_name = header_name;
 		client->current_header_name_allocated = 1;
@@ -2456,9 +2428,6 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 		php_socket_t client_sock;
 		socklen_t socklen = server->socklen;
 		struct sockaddr *sa = pemalloc(server->socklen, 1);
-		if (!sa) {
-			return FAILURE;
-		}
 		client_sock = accept(server->server_sock, sa, &socklen);
 		if (!ZEND_VALID_SOCKET(client_sock)) {
 			char *errstr;
@@ -2473,7 +2442,8 @@ static int php_cli_server_do_event_for_each_fd_callback(void *_params, php_socke
 			closesocket(client_sock);
 			return SUCCESS;
 		}
-		if (!(client = pemalloc(sizeof(php_cli_server_client), 1)) || FAILURE == php_cli_server_client_ctor(client, server, client_sock, sa, socklen)) {
+		client = pemalloc(sizeof(php_cli_server_client), 1);
+		if (FAILURE == php_cli_server_client_ctor(client, server, client_sock, sa, socklen)) {
 			php_cli_server_logf("Failed to create a new request object");
 			pefree(sa, 1);
 			closesocket(client_sock);

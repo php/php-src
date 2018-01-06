@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,10 +42,10 @@ zip_uint32_t
 _zip_string_crc32(const zip_string_t *s)
 {
     zip_uint32_t crc;
-    
+
     crc = (zip_uint32_t)crc32(0L, Z_NULL, 0);
 
-    if (s != NULL)    
+    if (s != NULL)
 	crc = (zip_uint32_t)crc32(crc, s->raw, s->length);
 
     return crc;
@@ -108,7 +108,7 @@ _zip_string_get(zip_string_t *string, zip_uint32_t *lenp, zip_flags_t flags, zip
 	    return string->converted;
 	}
     }
-    
+
     if (lenp)
 	*lenp = string->length;
     return string->raw;
@@ -130,7 +130,7 @@ _zip_string_new(const zip_uint8_t *raw, zip_uint16_t length, zip_flags_t flags, 
 {
     zip_string_t *s;
     zip_encoding_type_t expected_encoding;
-    
+
     if (length == 0)
 	return NULL;
 
@@ -148,7 +148,7 @@ _zip_string_new(const zip_uint8_t *raw, zip_uint16_t length, zip_flags_t flags, 
 	zip_error_set(error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
-	
+
     if ((s=(zip_string_t *)malloc(sizeof(*s))) == NULL) {
 	zip_error_set(error, ZIP_ER_MEMORY, 0);
 	return NULL;
@@ -173,7 +173,7 @@ _zip_string_new(const zip_uint8_t *raw, zip_uint16_t length, zip_flags_t flags, 
 	    return NULL;
 	}
     }
-    
+
     return s;
 }
 
@@ -183,6 +183,6 @@ _zip_string_write(zip_t *za, const zip_string_t *s)
 {
     if (s == NULL)
 	return 0;
-    
+
     return _zip_write(za, s->raw, s->length);
 }

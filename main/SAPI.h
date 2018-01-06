@@ -27,7 +27,6 @@
 #include "zend_llist.h"
 #include "zend_operators.h"
 #ifdef PHP_WIN32
-#include "win95nt.h"
 #include "win32/php_stdint.h"
 #endif
 #include <sys/stat.h>
@@ -191,9 +190,9 @@ SAPI_API int sapi_send_headers(void);
 SAPI_API void sapi_free_header(sapi_header_struct *sapi_header);
 SAPI_API void sapi_handle_post(void *arg);
 SAPI_API size_t sapi_read_post_block(char *buffer, size_t buflen);
-SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entry);
-SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry);
-SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry);
+SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entry);
+SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry);
+SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry);
 SAPI_API int sapi_register_default_post_reader(void (*default_post_reader)(void));
 SAPI_API int sapi_register_treat_data(void (*treat_data)(int arg, char *str, zval *destArray));
 SAPI_API int sapi_register_input_filter(unsigned int (*input_filter)(int arg, char *var, char **val, size_t val_len, size_t *new_val_len), unsigned int (*input_filter_init)(void));
@@ -273,7 +272,7 @@ struct _sapi_module_struct {
 
 struct _sapi_post_entry {
 	char *content_type;
-	uint content_type_len;
+	uint32_t content_type_len;
 	void (*post_reader)(void);
 	void (*post_handler)(char *content_type_dup, void *arg);
 };
@@ -328,4 +327,6 @@ END_EXTERN_C()
  * tab-width: 4
  * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

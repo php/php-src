@@ -47,7 +47,6 @@ opcache.memory_consumption=128
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
 opcache.revalidate_freq=60
-opcache.fast_shutdown=1
 opcache.enable_cli=1
 
 You also may add the following, but it may break some applications and
@@ -137,30 +136,12 @@ opcache.save_comments (default "1")
 	size of the optimized code. Disabling "Doc Comments" may break some
 	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
 
-opcache.fast_shutdown (default "0")
-	If enabled, a fast shutdown sequence is used for the accelerated code
-	The fast shutdown sequence doesn't free each allocated block, but lets
-	the Zend Engine Memory Manager do the work.
-
 opcache.enable_file_override (default "0")
 	Allow file existence override (file_exists, etc.) performance feature.
 
 opcache.optimization_level (default "0xffffffff")
 	A bitmask, where each bit enables or disables the appropriate OPcache
 	passes
-
-opcache.inherited_hack (default "1")
-	Enable this hack as a workaround for "Cannot redeclare class" errors.
-	The OPcache stores the places where DECLARE_CLASS opcodes use
-	inheritance (These are the only opcodes that can be executed by PHP,
-	but which may not be executed because the parent class is missing due to
-	optimization). When the file is loaded, OPcache tries to bind the
-	inherited classes by using the current environment. The problem with this
-	scenario is that, while the DECLARE_CLASS opcode may not be needed for the
-	current script, if the script requires that the opcode at least be defined,
-	it may not run. The default for this directive is disabled, which means
-	that optimization is active. In php-5.3 and above this hack is not needed
-	anymore and this setting has no effect.
 
 opcache.dups_fix (default "0")
 	Enable this hack as a workaround for "Cannot redeclare class" errors.

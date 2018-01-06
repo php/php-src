@@ -26,7 +26,7 @@ typedef struct _http_response_status_code_pair {
 	const char *str;
 } http_response_status_code_pair;
 
-static http_response_status_code_pair http_status_map[] = {
+static const http_response_status_code_pair http_status_map[] = {
 	{ 100, "Continue" },
 	{ 101, "Switching Protocols" },
 	{ 200, "OK" },
@@ -82,3 +82,11 @@ static http_response_status_code_pair http_status_map[] = {
 static const size_t http_status_map_len = (sizeof(http_status_map) / sizeof(http_response_status_code_pair)) - 1;
 
 #endif /* HTTP_STATUS_CODES_H */
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -531,7 +531,7 @@ string(6) "object"
 string(5) "array"
 bool(true)
 object(stdClass)#4 (1) {
-  [0]=>
+  ["0"]=>
   NULL
 }
 string(6) "object"
@@ -539,13 +539,13 @@ string(6) "object"
 string(5) "array"
 bool(true)
 object(stdClass)#4 (4) {
-  [0]=>
+  ["0"]=>
   int(1)
-  [1]=>
+  ["1"]=>
   int(2)
-  [2]=>
+  ["2"]=>
   int(3)
-  [3]=>
+  ["3"]=>
   int(4)
 }
 string(6) "object"
@@ -553,11 +553,11 @@ string(6) "object"
 string(5) "array"
 bool(true)
 object(stdClass)#4 (4) {
-  [1]=>
+  ["1"]=>
   string(3) "one"
-  [2]=>
+  ["2"]=>
   string(3) "two"
-  [3]=>
+  ["3"]=>
   string(5) "three"
   ["four"]=>
   int(4)
@@ -567,11 +567,11 @@ string(6) "object"
 string(5) "array"
 bool(true)
 object(stdClass)#4 (3) {
-  [0]=>
+  ["0"]=>
   float(1.5)
-  [1]=>
+  ["1"]=>
   float(2.4)
-  [2]=>
+  ["2"]=>
   float(6500000)
 }
 string(6) "object"

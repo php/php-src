@@ -28,7 +28,7 @@ foreach($offsets as $i) {
 	echo "--Multibyte String:--\n";
 	var_dump( mb_strpos($string_mb, $needle, $i, 'UTF-8') );
 	echo"--ASCII String:--\n";
-	var_dump(mb_strpos(b'This is na English ta', b'a', $i));
+	var_dump(mb_strpos('This is na English ta', 'a', $i));
 }
 ?>
 --EXPECTF--

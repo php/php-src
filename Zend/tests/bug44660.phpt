@@ -28,22 +28,22 @@ var_dump($a);
 ?>
 --EXPECTF--
 --> read access: 
-Notice: Trying to get property of non-object in %sbug44660.php on line 6
+Notice: Trying to get property 'p' of non-object in %sbug44660.php on line 6
 
 --> direct assignment: 
-Warning: Attempt to assign property of non-object in %sbug44660.php on line 9
+Warning: Attempt to assign property 'p' of non-object in %sbug44660.php on line 9
 
 --> increment: 
-Warning: Attempt to increment/decrement property of non-object in %sbug44660.php on line 12
+Warning: Attempt to increment/decrement property 'p' of non-object in %sbug44660.php on line 12
 
 --> reference assignment:
-Warning: Attempt to modify property of non-object in %sbug44660.php on line 15
+Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 15
 
 --> reference assignment:
-Warning: Attempt to modify property of non-object in %sbug44660.php on line 18
+Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 18
 
 --> indexed assignment:
-Warning: Attempt to modify property of non-object in %sbug44660.php on line 21
+Warning: Attempt to modify property 'p' of non-object in %sbug44660.php on line 21
 
 --> Confirm assignments have had no impact:
 bool(true)

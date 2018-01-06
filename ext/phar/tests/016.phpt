@@ -9,14 +9,14 @@ phar.require_hash=0
 <?php
 $fname = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.php';
 $pname = 'phar://' . $fname;
-$file = b"<?php __HALT_COMPILER(); ?>";
+$file = "<?php __HALT_COMPILER(); ?>";
 // file length is too short
 
 $files = array();
 // "hi" gzdeflated
-$files['a'] = array('cont'=>b'a','comp'=> (binary)pack('H*', 'cbc80400'),'flags'=>0x00001000, 'ulen' => 1, 'clen' => 4);
+$files['a'] = array('cont'=>'a','comp'=> pack('H*', 'cbc80400'),'flags'=>0x00001000, 'ulen' => 1, 'clen' => 4);
 $files['b'] = $files['a'];
-$files['c'] = array('cont'=>b'*');
+$files['c'] = array('cont'=>'*');
 $files['d'] = $files['a'];
 include 'files/phar_test.inc';
 

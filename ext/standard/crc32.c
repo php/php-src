@@ -31,9 +31,10 @@ PHP_NAMED_FUNCTION(php_if_crc32)
 	uint32_t crcinit = 0;
 	register uint32_t crc;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &p, &nr) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_STRING(p, nr)
+	ZEND_PARSE_PARAMETERS_END();
+
 	crc = crcinit^0xFFFFFFFF;
 
 	for (; nr--; ++p) {

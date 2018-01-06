@@ -85,6 +85,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	char *file = NULL;
 	size_t file_len = 0;
 	zend_long quality, basefilter;
+	zend_bool compressed = 1;
 	gdImagePtr im;
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i;
@@ -98,27 +99,34 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 	 * The third (quality) parameter for Wbmp and Xbm stands for the foreground color index when called
 	 * from imagey<type>().
 	 */
-	if (image_type == PHP_GDIMG_TYPE_XBM) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
-			return;
-		}
-	} else {
-		/* PHP_GDIMG_TYPE_GIF
-		 * PHP_GDIMG_TYPE_PNG
-		 * PHP_GDIMG_TYPE_JPG
-		 * PHP_GDIMG_TYPE_WBM
-		 * PHP_GDIMG_TYPE_WEBP
-		 * */
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
-			return;
-		}
+	switch (image_type) {
+		case PHP_GDIMG_TYPE_XBM:
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "rp!|ll", &imgind, &file, &file_len, &quality, &basefilter) == FAILURE) {
+				return;
+			}
+			break;
+		case PHP_GDIMG_TYPE_BMP:
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!b", &imgind, &to_zval, &compressed) == FAILURE) {
+				return;
+			}
+			break;
+		default:
+			/* PHP_GDIMG_TYPE_GIF
+			 * PHP_GDIMG_TYPE_PNG
+			 * PHP_GDIMG_TYPE_JPG
+			 * PHP_GDIMG_TYPE_WBM
+			 * PHP_GDIMG_TYPE_WEBP
+			 * */
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
+				return;
+			}
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(imgind), "Image", phpi_get_le_gd())) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (argc >= 3) {
+	if (image_type != PHP_GDIMG_TYPE_BMP && argc >= 3) {
 		q = quality; /* or colorindex for foreground of BW images (defaults to black) */
 		if (argc == 4) {
 			f = basefilter;
@@ -206,6 +214,9 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			} else {
 				(*func_p)(im, q, ctx);
 			}
+			break;
+		case PHP_GDIMG_TYPE_BMP:
+			(*func_p)(im, ctx, (int) compressed);
 			break;
 		default:
 			(*func_p)(im, ctx);

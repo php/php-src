@@ -314,7 +314,7 @@ void php_filter_boolean(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (ret == -1) {
 		RETURN_VALIDATION_FAILED
 	} else {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_BOOL(value, ret);
 	}
 }
@@ -428,11 +428,10 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	zval *option_val;
 	zend_string *regexp;
 	int regexp_set;
-	pcre *re = NULL;
-	pcre_extra *pcre_extra = NULL;
-	int preg_options = 0;
-	int ovector[3];
-	int matches;
+	pcre2_code *re = NULL;
+	pcre2_match_data *match_data = NULL;
+	uint32_t preg_options, capture_count;
+	int rc;
 
 	/* Parse options */
 	FETCH_STR_OPTION(regexp, "regexp");
@@ -442,14 +441,19 @@ void php_filter_validate_regexp(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	re = pcre_get_compiled_regex(regexp, &pcre_extra, &preg_options);
+	re = pcre_get_compiled_regex(regexp, &capture_count, &preg_options);
 	if (!re) {
 		RETURN_VALIDATION_FAILED
 	}
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
+	match_data = php_pcre_create_match_data(capture_count, re);
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
-	if (matches < 0) {
+	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
 }
@@ -532,7 +536,8 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		RETURN_VALIDATION_FAILED
 	}
 
-	if (url->scheme != NULL && (!strcasecmp(url->scheme, "http") || !strcasecmp(url->scheme, "https"))) {
+	if (url->scheme != NULL &&
+		(zend_string_equals_literal_ci(url->scheme, "http") || zend_string_equals_literal_ci(url->scheme, "https"))) {
 		char *e, *s, *t;
 		size_t l;
 
@@ -540,9 +545,9 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			goto bad_url;
 		}
 
-		s = url->host;
-		l = strlen(s);
-		e = url->host + l;
+		s = ZSTR_VAL(url->host);
+		l = ZSTR_LEN(url->host);
+		e = s + l;
 		t = e - 1;
 
 		/* An IPv6 enclosed by square brackets is a valid hostname */
@@ -552,7 +557,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		}
 
 		// Validate domain
-		if (!_php_filter_validate_domain(url->host, l, FILTER_FLAG_HOSTNAME)) {
+		if (!_php_filter_validate_domain(ZSTR_VAL(url->host), l, FILTER_FLAG_HOSTNAME)) {
 			php_url_free(url);
 			RETURN_VALIDATION_FAILED
 		}
@@ -561,7 +566,7 @@ void php_filter_validate_url(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	if (
 		url->scheme == NULL ||
 		/* some schemas allow the host to be empty */
-		(url->host == NULL && (strcmp(url->scheme, "mailto") && strcmp(url->scheme, "news") && strcmp(url->scheme, "file"))) ||
+		(url->host == NULL && (strcmp(ZSTR_VAL(url->scheme), "mailto") && strcmp(ZSTR_VAL(url->scheme), "news") && strcmp(ZSTR_VAL(url->scheme), "file"))) ||
 		((flags & FILTER_FLAG_PATH_REQUIRED) && url->path == NULL) || ((flags & FILTER_FLAG_QUERY_REQUIRED) && url->query == NULL)
 	) {
 bad_url:
@@ -598,12 +603,11 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	 * Feel free to use and redistribute this code. But please keep this copyright notice.
 	 *
 	 */
-	pcre       *re = NULL;
-	pcre_extra *pcre_extra = NULL;
-	int preg_options = 0;
-	int         ovector[150]; /* Needs to be a multiple of 3 */
-	int         matches;
+	pcre2_code *re = NULL;
+	pcre2_match_data *match_data = NULL;
+	uint32_t preg_options = 0, capture_count;
 	zend_string *sregexp;
+	int rc;
 	const char regexp0[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E\\pL\\pN]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F\\pL\\pN]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E\\pL\\pN]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F\\pL\\pN]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iDu";
 	const char regexp1[] = "/^(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){255,})(?!(?:(?:\\x22?\\x5C[\\x00-\\x7E]\\x22?)|(?:\\x22?[^\\x5C\\x22]\\x22?)){65,}@)(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22))(?:\\.(?:(?:[\\x21\\x23-\\x27\\x2A\\x2B\\x2D\\x2F-\\x39\\x3D\\x3F\\x5E-\\x7E]+)|(?:\\x22(?:[\\x01-\\x08\\x0B\\x0C\\x0E-\\x1F\\x21\\x23-\\x5B\\x5D-\\x7F]|(?:\\x5C[\\x00-\\x7F]))*\\x22)))*@(?:(?:(?!.*[^.]{64,})(?:(?:(?:xn--)?[a-z0-9]+(?:-+[a-z0-9]+)*\\.){1,126}){1,}(?:(?:[a-z][a-z0-9]*)|(?:(?:xn--)[a-z0-9]+))(?:-+[a-z0-9]+)*)|(?:\\[(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){7})|(?:(?!(?:.*[a-f0-9][:\\]]){7,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,5})?)))|(?:(?:IPv6:(?:(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){5}:)|(?:(?!(?:.*[a-f0-9]:){5,})(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3})?::(?:[a-f0-9]{1,4}(?::[a-f0-9]{1,4}){0,3}:)?)))?(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))(?:\\.(?:(?:25[0-5])|(?:2[0-4][0-9])|(?:1[0-9]{2})|(?:[1-9]?[0-9]))){3}))\\]))$/iD";
 	const char *regexp;
@@ -623,16 +627,21 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	}
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
-	re = pcre_get_compiled_regex(sregexp, &pcre_extra, &preg_options);
+	re = pcre_get_compiled_regex(sregexp, &capture_count, &preg_options);
 	if (!re) {
 		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
 	zend_string_release(sregexp);
-	matches = pcre_exec(re, NULL, Z_STRVAL_P(value), (int)Z_STRLEN_P(value), 0, 0, ovector, 3);
+	match_data = php_pcre_create_match_data(capture_count, re);
+	if (!match_data) {
+		RETURN_VALIDATION_FAILED
+	}
+	rc = pcre2_match(re, (PCRE2_SPTR)Z_STRVAL_P(value), Z_STRLEN_P(value), 0, preg_options, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
 
 	/* 0 means that the vector is too small to hold all the captured substring offsets */
-	if (matches < 0) {
+	if (rc < 0) {
 		RETURN_VALIDATION_FAILED
 	}
 

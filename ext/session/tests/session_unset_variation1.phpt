@@ -32,7 +32,7 @@ ob_end_flush();
 *** Testing session_unset() : variation ***
 bool(false)
 bool(true)
-NULL
+bool(true)
 array(1) {
   ["foo"]=>
   string(12) "Hello World!"

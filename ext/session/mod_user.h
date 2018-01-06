@@ -21,7 +21,7 @@
 #ifndef MOD_USER_H
 #define MOD_USER_H
 
-extern ps_module ps_mod_user;
+extern const ps_module ps_mod_user;
 #define ps_user_ptr &ps_mod_user
 
 PS_FUNCS_UPDATE_TIMESTAMP(user);

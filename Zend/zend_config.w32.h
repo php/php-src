@@ -58,19 +58,14 @@ typedef unsigned int uint;
 
 #define zend_sprintf sprintf
 
+#ifndef __cplusplus
 /* This will cause the compilation process to be MUCH longer, but will generate
  * a much quicker PHP binary
  */
 #ifdef ZEND_WIN32_FORCE_INLINE
-/* _ALLOW_KEYWORD_MACROS is only relevant for C++ */
-# ifndef _ALLOW_KEYWORD_MACROS
-#  define _ALLOW_KEYWORD_MACROS
-# endif
 # undef inline
 # define inline __forceinline
-#elif !defined(ZEND_WIN32_KEEP_INLINE)
-# undef inline
-# define inline
+#endif
 #endif
 
 #ifdef LIBZEND_EXPORTS
@@ -90,4 +85,6 @@ typedef unsigned int uint;
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

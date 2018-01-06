@@ -3,6 +3,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include "gd.h"
+#include "gd_errors.h"
 
 #include "php.h"
 
@@ -364,7 +365,7 @@ GetDataBlock(gdIOCtx *fd, unsigned char *buf, int *ZeroDataBlockP)
 		} else {
 			tmp = estrdup("");
 		}
-		php_gd_error_ex(E_NOTICE, "[GetDataBlock returning %d: %s]", rv, tmp);
+		gd_error_ex(GD_NOTICE, "[GetDataBlock returning %d: %s]", rv, tmp);
 		efree(tmp);
 	}
 	return(rv);

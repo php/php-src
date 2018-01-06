@@ -31,22 +31,22 @@ echo "Done\n";
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 
-%unicode|string%(3) "111"
+string(3) "111"
 "
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 
-%unicode|string%(3) "500"
+string(3) "500"
 "
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 
-%unicode|string%(3) "555"
+string(3) "555"
 "
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 
-%unicode|string%(3) "555"
-%unicode|string%(10) "/test/path"
+string(3) "555"
+string(10) "/test/path"
 "
 Done

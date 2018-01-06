@@ -1,4 +1,4 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
@@ -13,7 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Rasmus Lerdorf <rasmus@php.net>                             |
-   |          Stig Sæther Bakken <ssb@php.net>                            |
+   |          Stig SÃ¦ther Bakken <ssb@php.net>                            |
    +----------------------------------------------------------------------+
 */
 
@@ -93,6 +93,8 @@ PHP_FUNCTION(str_word_count);
 PHP_FUNCTION(str_split);
 PHP_FUNCTION(strpbrk);
 PHP_FUNCTION(substr_compare);
+PHP_FUNCTION(utf8_encode);
+PHP_FUNCTION(utf8_decode);
 #ifdef HAVE_STRCOLL
 PHP_FUNCTION(strcoll);
 #endif
@@ -122,7 +124,7 @@ PHPAPI char *php_strtoupper(char *s, size_t len);
 PHPAPI char *php_strtolower(char *s, size_t len);
 PHPAPI zend_string *php_string_toupper(zend_string *s);
 PHPAPI zend_string *php_string_tolower(zend_string *s);
-PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen);
+PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free);
 PHPAPI zend_string *php_addcslashes(zend_string *str, int freeit, char *what, size_t what_len);
 PHPAPI void php_stripslashes(zend_string *str);
@@ -133,13 +135,13 @@ PHPAPI char *php_stristr(char *s, char *t, size_t s_len, size_t t_len);
 PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle,
 		size_t needle_len, char *str, size_t str_len);
 PHPAPI zend_string *php_trim(zend_string *str, char *what, size_t what_len, int mode);
-PHPAPI size_t php_strip_tags(char *rbuf, size_t len, int *state, const char *allow, size_t allow_len);
-PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, int *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
+PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *state, const char *allow, size_t allow_len);
+PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces);
 PHPAPI void php_implode(const zend_string *delim, zval *arr, zval *return_value);
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit);
 
-PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end); 
-PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end); 
+PHPAPI size_t php_strspn(char *s1, char *s2, char *s1_end, char *s2_end);
+PHPAPI size_t php_strcspn(char *s1, char *s2, char *s1_end, char *s2_end);
 
 PHPAPI int string_natural_compare_function_ex(zval *result, zval *op1, zval *op2, zend_bool case_insensitive);
 PHPAPI int string_natural_compare_function(zval *result, zval *op1, zval *op2);

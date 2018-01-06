@@ -225,12 +225,12 @@ DBA_DELETE_FUNC(cdb)
 /* {{{ cdb_file_lseek
  php_stream_seek does not return actual position */
 #if DBA_CDB_BUILTIN
-int cdb_file_lseek(php_stream *fp, off_t offset, int whence) {
+zend_off_t cdb_file_lseek(php_stream *fp, zend_off_t offset, int whence) {
 	php_stream_seek(fp, offset, whence);
 	return php_stream_tell(fp);
 }
 #else
-int cdb_file_lseek(int fd, off_t offset, int whence) {
+zend_off_t cdb_file_lseek(int fd, zend_off_t offset, int whence) {
 	return lseek(fd, offset, whence);
 }
 #endif
@@ -238,7 +238,7 @@ int cdb_file_lseek(int fd, off_t offset, int whence) {
 
 #define CSEEK(n) do { \
 	if (n >= cdb->eod) return NULL; \
-	if (cdb_file_lseek(cdb->file, (off_t)n, SEEK_SET) != (off_t) n) return NULL; \
+	if (cdb_file_lseek(cdb->file, (zend_off_t)n, SEEK_SET) != (zend_off_t) n) return NULL; \
 } while (0)
 
 

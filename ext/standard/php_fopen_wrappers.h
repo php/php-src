@@ -25,9 +25,9 @@
 
 php_stream *php_stream_url_wrap_http(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 php_stream *php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
-extern PHPAPI php_stream_wrapper php_stream_http_wrapper;
-extern PHPAPI php_stream_wrapper php_stream_ftp_wrapper;
-extern PHPAPI php_stream_wrapper php_stream_php_wrapper;
-extern PHPAPI php_stream_wrapper php_plain_files_wrapper;
+extern PHPAPI const php_stream_wrapper php_stream_http_wrapper;
+extern PHPAPI const php_stream_wrapper php_stream_ftp_wrapper;
+extern PHPAPI const php_stream_wrapper php_stream_php_wrapper;
+extern PHPAPI const php_stream_wrapper php_plain_files_wrapper;
 
 #endif

@@ -3,9 +3,9 @@ Testing class_alias() using autoload
 --FILE--
 <?php
 
-function __autoload($a) {
+spl_autoload_register(function ($a) {
 	class foo { }
-}
+});
 
 class_alias('foo', 'bar', 1);
 

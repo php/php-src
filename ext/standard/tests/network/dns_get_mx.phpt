@@ -14,7 +14,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 ?>
 --FILE--
 <?php
-$domains = array('yahoo.co.jp', 'yahoo.com', 'es.yahoo.com', 'fr.yahoo.com', 'it.yahoo.com');
+$domains = array('php.net', 'doc.php.net', 'wiki.php.net');
 foreach ($domains as $domain) {
     if (getmxrr($domain, $hosts, $weights)) {
         echo "Hosts: " . count($hosts) . ", weights: " . count($weights) . "\n";
@@ -22,8 +22,6 @@ foreach ($domains as $domain) {
 }
 ?>
 --EXPECTF--
-Hosts: %i, weights: %i
-Hosts: %i, weights: %i
 Hosts: %i, weights: %i
 Hosts: %i, weights: %i
 Hosts: %i, weights: %i

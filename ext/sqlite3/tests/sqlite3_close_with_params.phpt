@@ -4,7 +4,7 @@ SQLite3::close test with parameters
 Thijs Feryn <thijs@feryn.eu>
 #TestFest PHPBelgium 2009
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

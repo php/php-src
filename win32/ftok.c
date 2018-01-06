@@ -23,9 +23,9 @@
 
 #include "ioutil.h"
 
-PHPAPI key_t
+PHP_WIN32_IPC_API key_t
 ftok(const char *pathname, int proj_id)
-{
+{/*{{{*/
 	HANDLE fh;
 	struct _stat st;
 	BY_HANDLE_FILE_INFORMATION bhfi;
@@ -41,7 +41,7 @@ ftok(const char *pathname, int proj_id)
 		return (key_t)-1;
 	}
 
-	if ((fh = CreateFileW(pathw, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0)) == INVALID_HANDLE_VALUE) {
+	if ((fh = CreateFileW(pathw, FILE_GENERIC_READ, PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE, 0, OPEN_EXISTING, 0, 0)) == INVALID_HANDLE_VALUE) {
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return (key_t)-1;
 	}
@@ -58,5 +58,13 @@ ftok(const char *pathname, int proj_id)
 	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	return ret;
-}
+}/*}}}*/
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

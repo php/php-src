@@ -93,6 +93,7 @@ typedef struct _dom_nnodemap_object {
 typedef struct {
 	zend_object_iterator intern;
 	zval curobj;
+	HashPosition pos;
 } php_dom_iterator;
 
 #include "dom_fe.h"

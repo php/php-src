@@ -3,7 +3,6 @@ imagefilledpolygon()
 --SKIPIF--
 <?php 
 	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available'); 
-	if (!(imagetype() & IMG_PNG)) die('skip PNG Support is not enabled');
 ?>
 --FILE--
 <?php

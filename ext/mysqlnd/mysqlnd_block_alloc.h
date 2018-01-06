@@ -22,6 +22,8 @@
 
 PHPAPI MYSQLND_MEMORY_POOL *	mysqlnd_mempool_create(size_t arena_size);
 PHPAPI void 					mysqlnd_mempool_destroy(MYSQLND_MEMORY_POOL * pool);
+PHPAPI void						mysqlnd_mempool_save_state(MYSQLND_MEMORY_POOL * pool);
+PHPAPI void						mysqlnd_mempool_restore_state(MYSQLND_MEMORY_POOL * pool);
 
 #endif	/* MYSQLND_BLOCK_ALLOC_H */
 

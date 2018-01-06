@@ -107,7 +107,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src);
 PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_array_replace_recursive(HashTable *dest, HashTable *src);
 PHPAPI int php_multisort_compare(const void *a, const void *b);
-PHPAPI zend_long php_count_recursive(zval *array, zend_long mode);
+PHPAPI zend_long php_count_recursive(HashTable *ht);
 
 #define PHP_SORT_REGULAR            0
 #define PHP_SORT_NUMERIC            1

@@ -80,7 +80,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ shmop_functions[]
  */
-const zend_function_entry shmop_functions[] = {
+static const zend_function_entry shmop_functions[] = {
 	PHP_FE(shmop_open, 		arginfo_shmop_open)
 	PHP_FE(shmop_read, 		arginfo_shmop_read)
 	PHP_FE(shmop_close, 	arginfo_shmop_close)

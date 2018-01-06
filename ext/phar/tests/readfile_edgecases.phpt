@@ -2,7 +2,6 @@
 Phar: test edge cases of readfile() function interception
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (version_compare(PHP_VERSION, "6.0", ">=")) die("skip requires php older than 6.0"); ?>
 --INI--
 phar.readonly=0
 --FILE--

@@ -21,17 +21,17 @@ var_dump(C::$p, D::$p, E::$p);
 ==Done==
 --EXPECTF--
 Inherited static properties refer to the same value across classes:
-%unicode|string%(8) "original"
-%unicode|string%(8) "original"
-%unicode|string%(8) "original"
+string(8) "original"
+string(8) "original"
+string(8) "original"
 
 Changing one changes all the others:
-%unicode|string%(11) "changed.all"
-%unicode|string%(11) "changed.all"
-%unicode|string%(11) "changed.all"
+string(11) "changed.all"
+string(11) "changed.all"
+string(11) "changed.all"
 
 But because this is implemented using PHP references, the reference set can easily be split:
-%unicode|string%(11) "changed.all"
-%unicode|string%(11) "changed.one"
-%unicode|string%(11) "changed.all"
+string(11) "changed.all"
+string(11) "changed.one"
+string(11) "changed.all"
 ==Done==

@@ -34,7 +34,7 @@
 #endif
 
 /* TODO check to undef this option, this might
-	make more perf. destroy_freelist() 
+	make more perf. destroy_freelist()
 	should be adapted then. */
 #define Omit_Private_Memory 1
 
@@ -140,9 +140,18 @@ typedef unsigned long int uint32_t;
 	} else if (1 == x) { \
 		tsrm_mutex_unlock(pow5mult_mutex); \
 	}
-	
+
 
 #endif
 
 #endif /* ZEND_STRTOD_INT_H */
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

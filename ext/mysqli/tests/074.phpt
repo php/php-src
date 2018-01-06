@@ -25,10 +25,10 @@ require_once('skipifconnectfailure.inc');
 bool(true)
 array(1) {
   [0]=>
-  %unicode|string%(1) "0"
+  string(1) "0"
 }
 bool(true)
 array(1) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }

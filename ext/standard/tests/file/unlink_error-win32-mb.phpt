@@ -108,6 +108,6 @@ bool(false)
 
 -- Testing unlink() on directory --
 
-Warning: unlink(%s/unlink_error): Permission denied in %s on line %d
+Warning: unlink(%s/unlink_error): Is a directory in %s on line %d
 bool(false)
 Done

@@ -596,7 +596,7 @@ PHP_FUNCTION(mysqli_stmt_bind_result)
 
 	MYSQLI_FETCH_RESOURCE_STMT(stmt, mysql_stmt, MYSQLI_STATUS_VALID);
 
-	if ((uint)argc != mysql_stmt_field_count(stmt->stmt)) {
+	if ((uint32_t)argc != mysql_stmt_field_count(stmt->stmt)) {
 		php_error_docref(NULL, E_WARNING, "Number of bind variables doesn't match number of fields in prepared statement");
 		RETURN_FALSE;
 	}
@@ -1332,7 +1332,7 @@ PHP_FUNCTION(mysqli_field_seek)
 	}
 	MYSQLI_FETCH_RESOURCE(result, MYSQL_RES *, mysql_result, "mysqli_result", MYSQLI_STATUS_VALID);
 
-	if (fieldnr < 0 || (uint)fieldnr >= mysql_num_fields(result)) {
+	if (fieldnr < 0 || (uint32_t)fieldnr >= mysql_num_fields(result)) {
 		php_error_docref(NULL, E_WARNING, "Invalid field offset");
 		RETURN_FALSE;
 	}
@@ -1714,14 +1714,12 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
-#ifdef MYSQL_OPT_READ_TIMEOUT
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
 		case MYSQL_OPT_GUESS_CONNECTION:
 		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
 		case MYSQL_OPT_USE_REMOTE_CONNECTION:
 		case MYSQL_SECURE_AUTH:
-#endif /* MySQL 4.1.1 */
 #ifdef MYSQL_OPT_RECONNECT
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */
@@ -1872,6 +1870,9 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
 			MYSQLND_ERROR_INFO error_info = *mysql->mysql->data->error_info;
+			mysql->mysql->data->error_info->error_list.head = NULL;
+			mysql->mysql->data->error_info->error_list.tail = NULL;
+			mysql->mysql->data->error_info->error_list.count = 0;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;
@@ -1882,6 +1883,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
 #else
+			zend_llist_clean(&mysql->mysql->data->error_info->error_list);
 			*mysql->mysql->data->error_info = error_info;
 #endif
 		}
@@ -2540,7 +2542,7 @@ PHP_FUNCTION(mysqli_stmt_store_result)
 #if MYSQL_VERSION_ID >= 50107
 				my_bool	tmp=1;
 #else
-				uint tmp=1;
+				uint32_t tmp=1;
 #endif
 				mysql_stmt_attr_set(stmt->stmt, STMT_ATTR_UPDATE_MAX_LENGTH, &tmp);
 				break;
