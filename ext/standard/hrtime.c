@@ -178,7 +178,8 @@ PHP_FUNCTION(hrtime)
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
 	} else {
-		array_init(return_value);
+		array_init_size(return_value, 2);
+		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		add_next_index_long(return_value, (zend_long)(t / (php_hrtime_t)NANO_IN_SEC));
 		add_next_index_long(return_value, (zend_long)(t % (php_hrtime_t)NANO_IN_SEC));
 	}
