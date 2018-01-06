@@ -31,6 +31,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #73108 (Internal class cast handler uses integer instead of
     float). (Nikita)
+  . Fixed bug #75765 (Fatal error instead of Error exception when base class is
+    not found). (Timur Ibragimov)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
