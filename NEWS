@@ -6,7 +6,11 @@ PHP                                                                        NEWS
   . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
 
 - PGSQL:
-  . Fixed #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
+  . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
+
+- Phar:
+  . Fixed bug #54289 (Phar::extractTo() does not accept specific directories to
+    be extracted). (bishop)
 
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
