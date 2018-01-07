@@ -2,7 +2,7 @@
 Test array_push() function : error conditions - Pass incorrect number of args
 --FILE--
 <?php
-/* Prototype  : int array_push(array $stack, mixed $var [, mixed $...])
+/* Prototype  : int array_push(array $stack[, mixed $...])
  * Description: Pushes elements onto the end of the array 
  * Source code: ext/standard/array.c
  */
@@ -15,8 +15,7 @@ echo "*** Testing array_push() : error conditions ***\n";
 
 // Testing array_push with one less than the expected number of arguments
 echo "\n-- Testing array_push() function with less than expected no. of arguments --\n";
-$stack = array(1, 2);
-var_dump( array_push($stack) );
+var_dump( array_push() );
 
 echo "Done";
 ?>
@@ -25,6 +24,6 @@ echo "Done";
 
 -- Testing array_push() function with less than expected no. of arguments --
 
-Warning: array_push() expects at least 2 parameters, 1 given in %s on line %d
+Warning: array_push() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 Done
