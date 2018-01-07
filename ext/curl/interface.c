@@ -1451,8 +1451,8 @@ static size_t curl_write(char *data, size_t size, size_t nmemb, void *ctx)
 			int  error;
 			zend_fcall_info fci;
 
+			GC_ADDREF(ch->res);
 			ZVAL_RES(&argv[0], ch->res);
-			Z_ADDREF(argv[0]);
 			ZVAL_STRINGL(&argv[1], data, length);
 
 			fci.size = sizeof(fci);
@@ -1499,8 +1499,8 @@ static int curl_fnmatch(void *ctx, const char *pattern, const char *string)
 			int  error;
 			zend_fcall_info fci;
 
+			GC_ADDREF(ch->res);
 			ZVAL_RES(&argv[0], ch->res);
-			Z_ADDREF(argv[0]);
 			ZVAL_STRING(&argv[1], pattern);
 			ZVAL_STRING(&argv[2], string);
 
@@ -1552,8 +1552,8 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 			int  error;
 			zend_fcall_info fci;
 
+			GC_ADDREF(ch->res);
 			ZVAL_RES(&argv[0], ch->res);
-			Z_ADDREF(argv[0]);
 			ZVAL_LONG(&argv[1], (zend_long)dltotal);
 			ZVAL_LONG(&argv[2], (zend_long)dlnow);
 			ZVAL_LONG(&argv[3], (zend_long)ultotal);
@@ -1610,11 +1610,11 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 			int  error;
 			zend_fcall_info fci;
 
+			GC_ADDREF(ch->res);
 			ZVAL_RES(&argv[0], ch->res);
-			Z_ADDREF(argv[0]);
 			if (t->res) {
+				GC_ADDREF(t->res);
 				ZVAL_RES(&argv[1], t->res);
-				Z_ADDREF(argv[1]);
 			} else {
 				ZVAL_NULL(&argv[1]);
 			}
@@ -1680,8 +1680,8 @@ static size_t curl_write_header(char *data, size_t size, size_t nmemb, void *ctx
 			int  error;
 			zend_fcall_info fci;
 
+			GC_ADDREF(ch->res);
 			ZVAL_RES(&argv[0], ch->res);
-			Z_ADDREF(argv[0]);
 			ZVAL_STRINGL(&argv[1], data, length);
 
 			fci.size = sizeof(fci);
@@ -1747,8 +1747,8 @@ static size_t curl_passwd(void *ctx, char *prompt, char *buf, int buflen)
 	int   error;
 	int   ret = -1;
 
+	GC_ADDREF(ch->res);
 	ZVAL_RES(&argv[0], ch->res);
-	Z_ADDREF(argv[0]);
 	ZVAL_STRING(&argv[1], prompt);
 	ZVAL_LONG(&argv[2], buflen);
 
