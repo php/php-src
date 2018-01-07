@@ -360,7 +360,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_shuffle, 0)
 	ZEND_ARG_INFO(1, arg) /* ARRAY_INFO(1, arg, 0) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_push, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_push, 0, 0, 1)
 	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, vars)
 ZEND_END_ARG_INFO()
@@ -373,7 +373,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_array_shift, 0)
 	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_unshift, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_unshift, 0, 0, 1)
 	ZEND_ARG_INFO(1, stack) /* ARRAY_INFO(1, stack, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, vars)
 ZEND_END_ARG_INFO()

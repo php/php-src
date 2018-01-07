@@ -3217,7 +3217,7 @@ PHP_FUNCTION(array_push)
 		argc;			/* Number of function arguments */
 
 
-	ZEND_PARSE_PARAMETERS_START(2, -1)
+	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_ARRAY_EX(stack, 0, 1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();
@@ -3417,7 +3417,7 @@ PHP_FUNCTION(array_unshift)
 	zend_string *key;
 	zval *value;
 
-	ZEND_PARSE_PARAMETERS_START(2, -1)
+	ZEND_PARSE_PARAMETERS_START(1, -1)
 		Z_PARAM_ARRAY_EX(stack, 0, 1)
 		Z_PARAM_VARIADIC('+', args, argc)
 	ZEND_PARSE_PARAMETERS_END();

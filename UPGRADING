@@ -87,6 +87,8 @@ JSON:
 Standard:
   . debug_zval_dump() was changed to display recursive arrays and objects
     in the same way as var_dump(). Now, it doesn't display them twice.
+  . array_push() and array_unshift() can now also be called with a single
+    argument, which is particularly convenient wrt. the spread operator.
 
 PCRE:
   . preg_quote() now also escapes the '#' character.
