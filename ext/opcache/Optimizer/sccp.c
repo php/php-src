@@ -97,30 +97,33 @@ typedef struct _sccp_ctx {
 #define IS_PARTIAL_ARRAY(zv) (Z_TYPE_P(zv) == PARTIAL_ARRAY)
 #define IS_PARTIAL_OBJECT(zv) (Z_TYPE_P(zv) == PARTIAL_OBJECT)
 
+#define MAKE_PARTIAL_ARRAY(zv) (Z_TYPE_INFO_P(zv) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+#define MAKE_PARTIAL_OBJECT(zv) (Z_TYPE_INFO_P(zv) = PARTIAL_OBJECT | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT))
+
 #define MAKE_TOP(zv) (Z_TYPE_INFO_P(zv) = TOP)
 #define MAKE_BOT(zv) (Z_TYPE_INFO_P(zv) = BOT)
 
 static void empty_partial_array(zval *zv)
 {
-	Z_TYPE_INFO_P(zv) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+	MAKE_PARTIAL_ARRAY(zv);
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_array(zval *dst, zval *src)
 {
-	Z_TYPE_INFO_P(dst) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+	MAKE_PARTIAL_ARRAY(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
 }
 
 static void empty_partial_object(zval *zv)
 {
-	Z_TYPE_INFO_P(zv) = PARTIAL_OBJECT | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+	MAKE_PARTIAL_OBJECT(zv);
 	Z_ARR_P(zv) = zend_new_array(8);
 }
 
 static void dup_partial_object(zval *dst, zval *src)
 {
-	Z_TYPE_INFO_P(dst) = PARTIAL_OBJECT | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+	MAKE_PARTIAL_OBJECT(dst);
 	Z_ARR_P(dst) = zend_array_dup(Z_ARR_P(src));
 }
 
@@ -1245,7 +1248,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 					if (!result) {
 						empty_partial_array(&zv);
 					} else {
-						Z_TYPE_INFO_P(result) = PARTIAL_ARRAY | (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT);
+						MAKE_PARTIAL_ARRAY(result);
 						ZVAL_COPY_VALUE(&zv, result);
 						ZVAL_NULL(result);
 					}
@@ -1268,10 +1271,8 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				if (result) {
 					ZVAL_COPY_VALUE(&zv, result);
 					ZVAL_NULL(result);
-				} else if (op1 && !IS_PARTIAL_ARRAY(op1)) {
-					array_init(&zv);
 				} else {
-					empty_partial_array(&zv);
+					array_init(&zv);
 				}
 
 				if (op1) {
@@ -1279,6 +1280,9 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 						/* We can't add NEXT element into partial array (skip it) */
 						SET_RESULT(result, &zv);
 					} else if (ct_eval_add_array_elem(&zv, op1, op2) == SUCCESS) {
+						if (IS_PARTIAL_ARRAY(op1)) {
+							MAKE_PARTIAL_ARRAY(&zv);
+						}
 						SET_RESULT(result, &zv);
 					} else {
 						SET_RESULT_BOT(result);
