@@ -858,7 +858,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, int b_len, const void* b) /* {{{ */
 {
 	php_sqlite3_collation *collation = (php_sqlite3_collation*)coll;
-	zval *zargs = NULL;
+	zval zargs[2];
 	zval retval;
 	int ret;
 
@@ -868,7 +868,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	collation->fci.fci.retval = &retval;
 	collation->fci.fci.param_count = 2;
 
-	zargs = safe_emalloc(2, sizeof(zval), 0);
 	ZVAL_STRINGL(&zargs[0], a, a_len);
 	ZVAL_STRINGL(&zargs[1], b, b_len);
 
@@ -885,7 +884,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
-	efree(zargs);
 
 	if (EG(exception)) {
 		ret = 0;
