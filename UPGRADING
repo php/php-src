@@ -95,6 +95,17 @@ PCRE:
 6. New Functions
 ========================================
 
+Core:
+  . Added monotonic timer function hrtime([bool get_as_num]). It returns an
+    array of the form [seconds, nanoseconds] with the timestamp starting at
+    an unspecified point in the past. If the optional argument is passed as
+    true, the return value is an integer on 64-bit systems or float on
+    32-bit systems, representing the nanoseconds. The timestamp is not
+    adjustable and is not related to wall clock or time of day. The timers
+    are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
+    derivatives. If no required timers are provided by a corresponding
+    platform, the function returns false.
+
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
