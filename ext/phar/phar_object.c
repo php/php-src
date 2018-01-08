@@ -4346,7 +4346,7 @@ PHP_METHOD(Phar, extractTo)
 	zval *zval_file;
 	zval *zval_files = NULL;
 	zend_bool overwrite = 0;
-	char *error;
+	char *error = NULL;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -4416,6 +4416,7 @@ PHP_METHOD(Phar, extractTo)
 							case -1:
 								zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
 									phar_obj->archive->fname, error);
+								efree(error);
 								return;
 							case 0:
 								zend_throw_exception_ex(phar_ce_PharException, 0,
@@ -4439,6 +4440,7 @@ PHP_METHOD(Phar, extractTo)
 	if (-1 == ret) {
 		zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
 			phar_obj->archive->fname, error);
+		efree(error);
 	} else if (0 == ret && NULL != filename) {
 		zend_throw_exception_ex(phar_ce_PharException, 0,
 			"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
