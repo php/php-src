@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -473,7 +473,7 @@ PHP_FUNCTION(password_hash)
 			{
 				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
-				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 				argon2_type type = Argon2_i;

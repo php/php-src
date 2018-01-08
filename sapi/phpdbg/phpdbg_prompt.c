@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -618,7 +618,7 @@ int phpdbg_compile(void) /* {{{ */
 			data->len += start_line_len;
 			for (i = 1; i <= data->lines; i++) {
 				data->line[i] += start_line_len;
-			}		
+			}
 			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
 		}
 

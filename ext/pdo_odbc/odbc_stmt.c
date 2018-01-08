@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -578,7 +578,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	may affect others as well.  If we are SQL_VARCHAR,
 	SQL_VARBINARY, or SQL_WVARCHAR (or any of the long variations)
 	and zero is returned from colsize then consider it long */
-	if (0 == colsize && 
+	if (0 == colsize &&
 		(S->cols[colno].coltype == SQL_VARCHAR ||
 		 S->cols[colno].coltype == SQL_LONGVARCHAR ||
 #ifdef SQL_WVARCHAR

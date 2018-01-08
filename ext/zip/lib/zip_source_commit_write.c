@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,7 +42,7 @@ zip_source_commit_write(zip_source_t *src)
         zip_error_set(&src->error, ZIP_ER_INVAL, 0);
         return -1;
     }
-    
+
     if (src->open_count > 1) {
 	zip_error_set(&src->error, ZIP_ER_INUSE, 0);
 	return -1;
@@ -52,13 +52,13 @@ zip_source_commit_write(zip_source_t *src)
 	    return -1;
 	}
     }
-    
+
     if (_zip_source_call(src, NULL, 0, ZIP_SOURCE_COMMIT_WRITE) < 0) {
         src->write_state = ZIP_SOURCE_WRITE_FAILED;
         return -1;
     }
-    
+
     src->write_state = ZIP_SOURCE_WRITE_CLOSED;
-    
+
     return 0;
 }

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2017 The PHP Group                                     |
+  | Copyright (c) 2017-2018 The PHP Group                                     |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -107,7 +107,7 @@ DBA_FETCH_FUNC(lmdb)
 	int rc;
 	MDB_val k, v;
 	char *ret = NULL;
-	
+
 	if (LMDB_IT(cur)) {
 		rc = mdb_txn_renew(LMDB_IT(txn));
 	} else {
@@ -124,7 +124,7 @@ DBA_FETCH_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc)); 
+			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return NULL;
@@ -200,7 +200,7 @@ DBA_EXISTS_FUNC(lmdb)
 	rc = mdb_get(LMDB_IT(txn), LMDB_IT(dbi), &k, &v);
 	if (rc) {
 		if (MDB_NOTFOUND != rc) {
-			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc)); 
+			php_error_docref1(NULL, key, E_WARNING, "%s", mdb_strerror(rc));
 		}
 		mdb_txn_abort(LMDB_IT(txn));
 		return FAILURE;
@@ -264,7 +264,7 @@ DBA_FIRSTKEY_FUNC(lmdb)
 		return NULL;
 	}
 
-	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_FIRST); 
+	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_FIRST);
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
 		mdb_cursor_close(LMDB_IT(cur));
@@ -297,7 +297,7 @@ DBA_NEXTKEY_FUNC(lmdb)
 		return NULL;
 	}
 
-	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_NEXT); 
+	rc = mdb_cursor_get(LMDB_IT(cur), &k, &v, MDB_NEXT);
 	if (rc) {
 		mdb_txn_abort(LMDB_IT(txn));
 		mdb_cursor_close(LMDB_IT(cur));

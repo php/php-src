@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1696,7 +1696,7 @@ ZEND_FUNCTION(gmp_prob_prime)
 
 	FETCH_GMP_ZVAL(gmpnum_a, gmpnumber_arg, temp_a);
 
-	RETVAL_LONG(mpz_probab_prime_p(gmpnum_a, reps));
+	RETVAL_LONG(mpz_probab_prime_p(gmpnum_a, (int)reps));
 	FREE_GMP_TEMP(temp_a);
 }
 /* }}} */
@@ -2076,6 +2076,10 @@ ZEND_FUNCTION(gmp_setbit)
 		php_error_docref(NULL, E_WARNING, "Index must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
+    if (index / GMP_NUMB_BITS >= INT_MAX ) {
+        php_error_docref(NULL, E_WARNING, "Index must be less than %ld * %ld", INT_MAX, GMP_NUMB_BITS);
+        RETURN_FALSE;
+    }
 
 	gmpnum_a = GET_GMP_FROM_ZVAL(a_arg);
 

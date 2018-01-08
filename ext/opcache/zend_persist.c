@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -371,7 +371,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			zend_accel_store(op_array->static_variables, sizeof(HashTable));
 			/* make immutable array */
 			GC_SET_REFCOUNT(op_array->static_variables, 2);
-			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << 8);
+			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
 			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
 		}
 	}

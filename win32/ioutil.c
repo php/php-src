@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */ 
+ */
 
 #include <assert.h>
 #include <stdlib.h>
@@ -430,7 +430,7 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
-	
+
 	if (!SetCurrentDirectoryW(path)) {
 		err = GetLastError();
 		ret = -1;
@@ -444,7 +444,7 @@ PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newn
 {/*{{{*/
 	int ret = 0;
 	DWORD err = 0;
-	
+
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
 
@@ -483,7 +483,7 @@ PW32IO wchar_t *php_win32_ioutil_getcwd_w(wchar_t *buf, size_t len)
 		}
 		buf = tmp_buf;
 	}
-	
+
 	if (!GetCurrentDirectoryW(tmp_len, buf)) {
 		err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
@@ -504,7 +504,7 @@ PW32IO size_t php_win32_ioutil_dirname(char *path, size_t len)
 	if (len == 0) {
 		return 0;
 	}
-	
+
 	start = path;
 
 	/* Don't really care about the path normalization, pure parsing here. */

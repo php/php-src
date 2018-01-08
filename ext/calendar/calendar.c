@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -278,13 +278,13 @@ static void _php_cal_info(int cal, zval *ret)
 		add_index_string(&months, i, calendar->month_name_long[i]);
 		add_index_string(&smonths, i, calendar->month_name_short[i]);
 	}
-	
+
 	add_assoc_zval(ret, "months", &months);
 	add_assoc_zval(ret, "abbrevmonths", &smonths);
 	add_assoc_long(ret, "maxdaysinmonth", calendar->max_days_in_month);
 	add_assoc_string(ret, "calname", calendar->name);
 	add_assoc_string(ret, "calsymbol", calendar->symbol);
-	
+
 }
 
 /* {{{ proto array cal_info([int calendar])
@@ -512,21 +512,21 @@ PHP_FUNCTION(juliantojd)
 /*
 caution: the Hebrew format produces non unique result.
 for example both: year '5' and year '5000' produce 'ä'.
-use the numeric one for calculations. 
+use the numeric one for calculations.
  */
 static char *heb_number_to_chars(int n, int fl, char **ret)
 {
 	char *p, old[18], *endofalafim;
 
 	p = endofalafim = old;
-/* 
-   prevents the option breaking the jewish beliefs, and some other 
+/*
+   prevents the option breaking the jewish beliefs, and some other
    critical resources ;)
  */
 	if (n > 9999 || n < 1) {
 		*ret = NULL;
 		return NULL;
-	}	
+	}
 
 /* alafim (thousands) case */
 	if (n / 1000) {

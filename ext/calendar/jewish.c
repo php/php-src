@@ -301,7 +301,7 @@ static const int yearOffset[19] =
 /* names for leap (13-month) year */
 const char * const JewishMonthNameLeap[14] =
 {
-	"", 
+	"",
 	"Tishri",
 	"Heshvan",
 	"Kislev",
@@ -320,7 +320,7 @@ const char * const JewishMonthNameLeap[14] =
 /* names for regular year */
 const char * const JewishMonthName[14] =
 {
-	"", 
+	"",
 	"Tishri",
 	"Heshvan",
 	"Kislev",
@@ -339,7 +339,7 @@ const char * const JewishMonthName[14] =
 /* names for leap (13-month) year */
 const char * const JewishMonthHebNameLeap[14] =
 {
-	"", 
+	"",
 	"תשרי",
 	"חשון",
 	"כסלו",
@@ -358,7 +358,7 @@ const char * const JewishMonthHebNameLeap[14] =
 /* names for regular year */
 const char * const JewishMonthHebName[14] =
 {
-	"", 
+	"",
 	"תשרי",
 	"חשון",
 	"כסלו",

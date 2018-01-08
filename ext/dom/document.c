@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2038,7 +2038,7 @@ static void dom_load_html(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		RETURN_FALSE;
 	}
 
-	
+
 	ctxt->vctxt.error = php_libxml_ctx_error;
 	ctxt->vctxt.warning = php_libxml_ctx_warning;
 	if (ctxt->sax != NULL) {
@@ -2247,7 +2247,7 @@ PHP_METHOD(domdocument, registerNodeClass)
 		dom_set_doc_classmap(intern->document, basece, ce);
 		RETURN_TRUE;
 	}
-	
+
 	zend_throw_error(NULL, "Class %s is not derived from %s.", ZSTR_VAL(ce->name), ZSTR_VAL(basece->name));
 	RETURN_FALSE;
 }

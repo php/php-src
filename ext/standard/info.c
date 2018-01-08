@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -321,8 +321,8 @@ char* php_get_windows_name()
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
-					- if PHP DLL loaded under some binary that doesn't use the correct manifest 
-					
+					- if PHP DLL loaded under some binary that doesn't use the correct manifest
+
 					So keep the handling here as is for now, even if we know 6.2 is win8 and nothing else, and think about an improvement. */
 				OSVERSIONINFOEX osvi81;
 				DWORDLONG dwlConditionMask = 0;

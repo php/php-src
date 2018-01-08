@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -5837,7 +5837,7 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 /* }}} */
 
 
-/* {{{ proto string utf8_encode(string data) 
+/* {{{ proto string utf8_encode(string data)
    Encodes an ISO-8859-1 string to UTF-8 */
 PHP_FUNCTION(utf8_encode)
 {
@@ -5852,7 +5852,7 @@ PHP_FUNCTION(utf8_encode)
 }
 /* }}} */
 
-/* {{{ proto string utf8_decode(string data) 
+/* {{{ proto string utf8_decode(string data)
    Converts a UTF-8 encoded string to ISO-8859-1 */
 PHP_FUNCTION(utf8_decode)
 {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -484,7 +484,7 @@ ZEND_FUNCTION(func_get_args)
 					q = p;
 					if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
 						ZVAL_DEREF(q);
-						if (Z_OPT_REFCOUNTED_P(q)) { 
+						if (Z_OPT_REFCOUNTED_P(q)) {
 							Z_ADDREF_P(q);
 						}
 					} else {
@@ -500,7 +500,7 @@ ZEND_FUNCTION(func_get_args)
 				q = p;
 				if (EXPECTED(Z_TYPE_INFO_P(q) != IS_UNDEF)) {
 					ZVAL_DEREF(q);
-					if (Z_OPT_REFCOUNTED_P(q)) { 
+					if (Z_OPT_REFCOUNTED_P(q)) {
 						Z_ADDREF_P(q);
 					}
 				} else {
@@ -1273,7 +1273,7 @@ ZEND_FUNCTION(method_exists)
 		Z_PARAM_ZVAL(klass)
 		Z_PARAM_STR(method_name)
 	ZEND_PARSE_PARAMETERS_END();
-	
+
 	if (Z_TYPE_P(klass) == IS_OBJECT) {
 		ce = Z_OBJCE_P(klass);
 	} else if (Z_TYPE_P(klass) == IS_STRING) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -482,7 +482,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	GC_SET_REFCOUNT(s, 1);
 #if 1
 	/* optimized single assignment */
-	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
+	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 #else
 	GC_TYPE(s) = IS_STRING;
 	GC_FLAGS(s) = IS_STR_INTERNED | IS_STR_PERMANENT;
@@ -2993,7 +2993,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2017",				/* copyright */
+	"Copyright (c) 1999-2018",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

@@ -12,6 +12,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   i. RAND_RANGE()
   j. cast_object() with _IS_NUMBER
   k. zend_fcall_info_cache.initialized
+  l. php_hrtime_current()
 
 2. Build system changes
   a. Unix build system changes
@@ -94,6 +95,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   k. zend_fcall_info_cache.initialized is removed. zend_fcall_info_cache is
      initialized if zend_fcall_info_cache.function_handler is set.
+
+  l. php_hrtime_current() delivers the number of nanoseconds since an uncertain
+     point in the past.
 
 ========================
 2. Build system changes

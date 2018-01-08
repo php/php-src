@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1391,7 +1391,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	size_t prealloc_more_bytes;
 
 	DBG_ENTER("php_mysqlnd_read_row_ex");
-	
+
 	/*
 	  To ease the process the server splits everything in packets up to 2^24 - 1.
 	  Even in the case the payload is evenly divisible by this value, the last
@@ -1405,7 +1405,7 @@ php_mysqlnd_read_row_ex(MYSQLND_PFC * pfc,
 	  needs to be able to append a terminating \0 for atoi/atof.
 	*/
 	prealloc_more_bytes = 1;
-	
+
 	*data_size = 0;
 	while (1) {
 		if (FAIL == mysqlnd_read_header(pfc, vio, &header, stats, error_info)) {

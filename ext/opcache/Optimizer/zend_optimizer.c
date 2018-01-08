@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -272,6 +272,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_LIST_W:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_RETURN_BY_REF:
+		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
@@ -320,7 +321,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_FUNC_ARG:
 			TO_STRING_NOWARN(val);
 			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
-				opline->opcode == ZEND_FAST_CONCAT;
+				opline->opcode = ZEND_FAST_CONCAT;
 			}
 			/* break missing intentionally */
 		default:
@@ -346,6 +347,10 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FAST_CALL:
 			return 0;
 		case ZEND_FETCH_CLASS:
+			if ((opline + 1)->opcode == ZEND_INSTANCEOF &&
+				(opline + 1)->op2.var == opline->result.var) {
+				return 0;
+			}
 		case ZEND_INIT_FCALL_BY_NAME:
 		/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
 		case ZEND_ADD_INTERFACE:
@@ -472,7 +477,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FAST_CONCAT:
 			TO_STRING_NOWARN(val);
 			if (opline->opcode == ZEND_CONCAT && opline->op1_type == IS_CONST) {
-				opline->opcode == ZEND_FAST_CONCAT;
+				opline->opcode = ZEND_FAST_CONCAT;
 			}
 			/* break missing intentionally */
 		default:

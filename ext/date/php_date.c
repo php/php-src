@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2049,9 +2049,9 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		}
 		return retval;
 	}
-	
+
 	prop = date_interval_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
-	
+
 	if (prop != &EG(uninitialized_zval)) {
 		if (type == 2) {
 			retval = 1;
@@ -2069,7 +2069,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	return retval;
-	
+
 }
 /* }}} */
 
@@ -2286,7 +2286,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
 				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-				timelib_sll utc_offset = dateobj->time->z;
+				int utc_offset = dateobj->time->z;
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 					utc_offset < 0 ? '-' : '+',
@@ -2373,8 +2373,8 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				abs(tzobj->tzi.utc_offset / 3600),
-				abs(((tzobj->tzi.utc_offset % 3600) / 60)));
+				abs((int)(tzobj->tzi.utc_offset / 3600)),
+				abs(((int)(tzobj->tzi.utc_offset % 3600) / 60)));
 
 			ZVAL_NEW_STR(&zv, tmpstr);
 			}
@@ -3899,8 +3899,8 @@ PHP_FUNCTION(timezone_name_get)
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
+				abs((int)(utc_offset / 3600)),
+				abs(((int)(utc_offset % 3600) / 60)));
 
 			RETURN_NEW_STR(tmpstr);
 			}

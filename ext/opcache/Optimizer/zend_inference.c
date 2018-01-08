@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, e-SSA based Type & Range Inference                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2162,15 +2162,15 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		tmp = 0;
 		if (ssa_ops[i].result_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
-		} 
-		if (ssa_ops[i].op1_def >= 0) { 
+		}
+		if (ssa_ops[i].op1_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
-		} 
-		if (ssa_ops[i].op2_def >= 0) { 
+		}
+		if (ssa_ops[i].op2_def >= 0) {
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
-		} 
+		}
 		return 1;
-	} 
+	}
 
 	switch (opline->opcode) {
 		case ZEND_ADD:

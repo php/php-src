@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -3911,7 +3911,7 @@ PHP_FUNCTION(imagesetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	zend_long x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll", &im_zval, &x1, &y1, &x2, &y2) == FAILURE) {
 		return;
 	}
@@ -3932,7 +3932,7 @@ PHP_FUNCTION(imagegetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	int x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &im_zval) == FAILURE) {
 		return;
 	}
@@ -3942,7 +3942,7 @@ PHP_FUNCTION(imagegetclip)
 	}
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
-	
+
 	array_init(return_value);
 	add_next_index_long(return_value, x1);
 	add_next_index_long(return_value, y1);

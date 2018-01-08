@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1451,6 +1451,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
+ZEND_END_ARG_INFO()
+/* }}} */
+/* {{{ hrtime.c */
+ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
+	ZEND_ARG_INFO(0, get_as_number)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ html.c */
@@ -2986,6 +2991,8 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(getrusage,														arginfo_getrusage)
 #endif
 
+	PHP_FE(hrtime,															arginfo_hrtime)
+
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(uniqid,															arginfo_uniqid)
 #endif
@@ -3716,6 +3723,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BASIC_MINIT_SUBMODULE(random)
 
+	BASIC_MINIT_SUBMODULE(hrtime)
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4048,7 +4057,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {

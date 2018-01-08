@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2166,8 +2166,8 @@ consult the installation file that came with this distribution, or visit \n\
 			int i;
 
 			ZeroMemory(&kid_cgi_ps, sizeof(kid_cgi_ps));
-			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN; 
-			
+			kids = children < WIN32_MAX_SPAWN_CHILDREN ? children : WIN32_MAX_SPAWN_CHILDREN;
+
 			SetConsoleCtrlHandler(fastcgi_cleanup, TRUE);
 
 			/* kids will inherit the env, don't let them spawn */
@@ -2264,10 +2264,10 @@ consult the installation file that came with this distribution, or visit \n\
 						fprintf(stderr, "unable to spawn: [0x%08lx]: %s\n", err, err_text);
 					}
 				}
-				
+
 				WaitForMultipleObjects(kids, kid_cgi_ps, FALSE, INFINITE);
 			}
-			
+
 			/* restore my env */
 			SetEnvironmentVariable("PHP_FCGI_CHILDREN", kid_buf);
 
@@ -2415,9 +2415,9 @@ consult the installation file that came with this distribution, or visit \n\
 								SG(request_info).no_headers = 1;
 							}
 #if ZEND_DEBUG
-							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else
-							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2017 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
+							php_printf("PHP %s (%s) (built: %s %s)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #endif
 							php_request_shutdown((void *) 0);
 							fcgi_shutdown();
@@ -2748,7 +2748,7 @@ fastcgi_request_done:
 			}
 			/* end of fastcgi loop */
 		}
-		
+
 		if (request) {
 			fcgi_destroy_request(request);
 		}

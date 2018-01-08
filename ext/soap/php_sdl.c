@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -2397,12 +2397,6 @@ static void make_persistent_restriction_char_int(sdlRestrictionCharPtr *rest)
 }
 
 
-static void make_persistent_restriction_char(zval *zv)
-{
-	make_persistent_restriction_char_int((sdlRestrictionCharPtr*)&Z_PTR_P(zv));
-}
-
-
 static void make_persistent_sdl_type_ref(sdlTypePtr *type, HashTable *ptr_map, HashTable *bp_types)
 {
 	sdlTypePtr tmp;
@@ -2764,9 +2758,15 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		}
 
 		if (type->restrictions->enumeration) {
+			sdlRestrictionCharPtr tmp, penum;
 			ptype->restrictions->enumeration = malloc(sizeof(HashTable));
 			zend_hash_init(ptype->restrictions->enumeration, zend_hash_num_elements(type->restrictions->enumeration), NULL, delete_restriction_var_char_persistent, 1);
-			zend_hash_copy(ptype->restrictions->enumeration, type->restrictions->enumeration, make_persistent_restriction_char);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
+				penum = tmp;
+				make_persistent_restriction_char_int(&penum);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(ptype->restrictions->enumeration, ZSTR_VAL(key), ZSTR_LEN(key), penum);
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 
