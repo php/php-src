@@ -4419,10 +4419,6 @@ all_files:
 		phar = phar_obj->archive;
 		/* Extract all files, or if we have jumped here from a potential
 		   directory match, just those manifest entries matching the dir */
-		if (!zend_hash_num_elements(&(phar->manifest))) {
-			RETURN_TRUE;
-		}
-
 		extracted = 0;
 		ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
 			/* handle earlier possible directory, see if this leaf entry matches the leading directory */
@@ -4444,7 +4440,7 @@ all_files:
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 
-        if (NULL != filename && 0 == extracted) {
+		if (NULL != filename && 0 == extracted) {
 			zend_throw_exception_ex(phar_ce_PharException, 0,
 				"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"", filename, phar_obj->archive->fname);
 		}
