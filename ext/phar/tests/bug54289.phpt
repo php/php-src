@@ -17,26 +17,26 @@ $pharA->buildFromDirectory($inDir);
 // the same prefix
 $outDir = $base.'out';
 $pharB = new Phar($phar);
-$pharB->extractTo($outDir, 'dirA', true);
+$pharB->extractTo($outDir, 'dirA/', true);
 assert(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileA'));
 assert(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileB'));
 assert(! is_dir($outDir.DIRECTORY_SEPARATOR.'dirAB'));
 
 // should also not be able to pull out non-existent ones
 try {
-  $pharB->extractTo($outDir, 'dirX', true);
+  $pharB->extractTo($outDir, 'dirX/', true);
   echo 'failed to throw expected exception';
 } catch (PharException $ex) {
 }
 
 // should be able to do by array, too
 $pharB = new Phar($phar);
-$pharB->extractTo($outDir, [ 'dirA', 'dirAB' ], true);
+$pharB->extractTo($outDir, [ 'dirA/', 'dirAB/' ], true);
 
 // but not an array with a bad member in it
 try {
   $pharB = new Phar($phar);
-  $pharB->extractTo($outDir, [ 'dirA', 'dirX' ], true);
+  $pharB->extractTo($outDir, [ 'dirA/', 'dirX/' ], true);
   echo 'failed to throw expected exception';
 } catch (PharException $ex) {
 }
