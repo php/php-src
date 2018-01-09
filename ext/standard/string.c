@@ -5192,7 +5192,7 @@ PHP_FUNCTION(substr_count)
 	char *haystack, *needle;
 	zend_long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
-	int count = 0;
+	zend_long count = 0;
 	size_t haystack_len, needle_len;
 	char *p, *endp, cmp;
 

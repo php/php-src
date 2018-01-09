@@ -31,6 +31,9 @@ PHP                                                                        NEWS
   . Fixed bug #73209 (RecursiveArrayIterator does not iterate object
     properties). (Nikita)
 
+- Standard:
+   . Fixed bug #75781 (substr_count incorrect result). (Laruence)
+
 04 Jan 2018, PHP 7.1.13
 
 - Core:
