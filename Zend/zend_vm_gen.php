@@ -170,17 +170,6 @@ $prefix = array(
 	"TMPVARCV" => "_TMPVARCV",
 );
 
-$typecode = array(
-	"ANY"      => 0,
-	"TMP"      => 1,
-	"VAR"      => 2,
-	"CONST"    => 0,
-	"UNUSED"   => 3,
-	"CV"       => 4,
-	"TMPVAR"   => 0,
-	"TMPVARCV" => 0,
-);
-
 $commutative_order = array(
 	"ANY"      => 0,
 	"TMP"      => 1,
@@ -1023,7 +1012,7 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
-	global $definition_file, $prefix, $typecode, $opnames;
+	global $definition_file, $prefix, $opnames;
 
 	if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
 		return;
@@ -1256,7 +1245,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				};
 			};
 			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
-				global $typecode, $commutative_order;
+				global $commutative_order;
 
 				// Check if specialized handler is defined
 				/* TODO: figure out better way to signal "specialized and not defined" than an extra lookup */
