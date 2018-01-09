@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Laruence)
   . Fixed bug #75679 (Path 260 character problem). (Anatol)
   . Fixed bug #75614 (Some non-portable == in shell scripts). (jdolecek)
+  . Fixed bug #75786 (segfault when using spread operator on generator passed
+    by reference). (Nikita)
 
 - Opcache:
   . Fixed bug #75687 (var 8 (TMP) has array key type but not value type).
