@@ -1353,7 +1353,7 @@ ZEND_VM_HELPER(zend_fetch_var_address_helper, CONST|TMPVAR|CV, UNUSED, int type)
 	SAVE_OPLINE();
 	varname = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
 
- 	if (OP1_TYPE == IS_CONST) {
+	if (OP1_TYPE == IS_CONST) {
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
@@ -3145,7 +3145,7 @@ ZEND_VM_HANDLER(113, ZEND_INIT_STATIC_METHOD_CALL, UNUSED|CLASS_FETCH|CONST|VAR,
 					FREE_OP2();
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -4930,9 +4930,9 @@ ZEND_VM_HANDLER(110, ZEND_CLONE, CONST|TMPVAR|UNUSED|THIS|CV, ANY)
 		if (OP1_TYPE == IS_CONST ||
 		    (OP1_TYPE != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
 		    if ((OP1_TYPE & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-		    	obj = Z_REFVAL_P(obj);
-		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
-		    		break;
+				obj = Z_REFVAL_P(obj);
+				if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
+					break;
 				}
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -5904,7 +5904,7 @@ ZEND_VM_HANDLER(78, ZEND_FE_FETCH_R, VAR, ANY, JMP_ADDR)
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
 
- 			fe_ht = Z_OBJPROP_P(array);
+			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(array), fe_ht);
 			p = fe_ht->arData + pos;
 			while (1) {
@@ -6069,7 +6069,7 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
 
- 			fe_ht = Z_OBJPROP_P(array);
+			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 			p = fe_ht->arData + pos;
 			while (1) {

@@ -3329,9 +3329,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CONST_HANDLER(ZEND_
 		if (IS_CONST == IS_CONST ||
 		    (IS_CONST != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
 		    if ((IS_CONST & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-		    	obj = Z_REFVAL_P(obj);
-		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
-		    		break;
+				obj = Z_REFVAL_P(obj);
+				if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
+					break;
 				}
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -5461,7 +5461,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -7672,7 +7672,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -8691,7 +8691,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	SAVE_OPLINE();
 	varname = RT_CONSTANT(opline, opline->op1);
 
- 	if (IS_CONST == IS_CONST) {
+	if (IS_CONST == IS_CONST) {
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
@@ -8998,7 +8998,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -10809,7 +10809,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -13104,9 +13104,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_TMPVAR_HANDLER(ZEND
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST ||
 		    ((IS_TMP_VAR|IS_VAR) != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
 		    if (((IS_TMP_VAR|IS_VAR) & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-		    	obj = Z_REFVAL_P(obj);
-		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
-		    		break;
+				obj = Z_REFVAL_P(obj);
+				if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
+					break;
 				}
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -16682,7 +16682,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
- 	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
+	if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
@@ -22301,7 +22301,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SPEC_VAR_HANDLER(ZE
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
 
- 			fe_ht = Z_OBJPROP_P(array);
+			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(array), fe_ht);
 			p = fe_ht->arData + pos;
 			while (1) {
@@ -22466,7 +22466,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_RW_SPEC_VAR_HANDLER(Z
 		if ((iter = zend_iterator_unwrap(array)) == NULL) {
 			/* plain object */
 
- 			fe_ht = Z_OBJPROP_P(array);
+			fe_ht = Z_OBJPROP_P(array);
 			pos = zend_hash_iterator_pos(Z_FE_ITER_P(EX_VAR(opline->op1.var)), fe_ht);
 			p = fe_ht->arData + pos;
 			while (1) {
@@ -24809,7 +24809,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -27186,7 +27186,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -28705,7 +28705,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -31141,7 +31141,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -31813,9 +31813,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_UNUSED_HANDLER(ZEND
 		if (IS_UNUSED == IS_CONST ||
 		    (IS_UNUSED != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
 		    if ((IS_UNUSED & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-		    	obj = Z_REFVAL_P(obj);
-		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
-		    		break;
+				obj = Z_REFVAL_P(obj);
+				if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
+					break;
 				}
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -33294,7 +33294,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -35120,7 +35120,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -35639,7 +35639,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -37474,7 +37474,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 
 					HANDLE_EXCEPTION();
 				} while (0);
- 			}
+			}
 		}
 
 		if (ce->get_static_method) {
@@ -38684,9 +38684,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CLONE_SPEC_CV_HANDLER(ZEND_OPC
 		if (IS_CV == IS_CONST ||
 		    (IS_CV != IS_UNUSED && UNEXPECTED(Z_TYPE_P(obj) != IS_OBJECT))) {
 		    if ((IS_CV & (IS_VAR|IS_CV)) && Z_ISREF_P(obj)) {
-		    	obj = Z_REFVAL_P(obj);
-		    	if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
-		    		break;
+				obj = Z_REFVAL_P(obj);
+				if (EXPECTED(Z_TYPE_P(obj) == IS_OBJECT)) {
+					break;
 				}
 			}
 			ZVAL_UNDEF(EX_VAR(opline->result.var));
@@ -47830,7 +47830,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 	SAVE_OPLINE();
 	varname = _get_zval_ptr_cv_undef(opline->op1.var EXECUTE_DATA_CC);
 
- 	if (IS_CV == IS_CONST) {
+	if (IS_CV == IS_CONST) {
 		name = Z_STR_P(varname);
 	} else if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
 		name = Z_STR_P(varname);
