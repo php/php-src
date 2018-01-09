@@ -1684,6 +1684,11 @@ static zend_string *php_pcre_replace_func_impl(pcre_cache_entry *pce, zend_strin
 			   advance to the next character. */
 			g_notempty = (start_offset == offsets[0]) ? PCRE_NOTEMPTY_ATSTART | PCRE_ANCHORED : 0;
 
+#ifdef PCRE_EXTRA_MARK
+			/* replace function may use the same regex recursively */
+			extra->mark = &mark;
+			extra->flags |= PCRE_EXTRA_MARK;
+#endif
 		} else if (count == PCRE_ERROR_NOMATCH || limit == 0) {
 			/* If we previously set PCRE_NOTEMPTY_ATSTART after a null match,
 			   this is not necessarily the end. We need to advance
