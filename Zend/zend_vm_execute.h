@@ -1316,11 +1316,8 @@ send_again:
 					);
 				}
 
-				if (Z_ISREF_P(arg)) {
-					ZVAL_DUP(arg, Z_REFVAL_P(arg));
-				} else {
-					Z_TRY_ADDREF_P(arg);
-				}
+				ZVAL_DEREF(arg);
+				Z_TRY_ADDREF_P(arg);
 
 				zend_vm_stack_extend_call_frame(&EX(call), arg_num - 1, 1);
 				top = ZEND_CALL_ARG(EX(call), arg_num);
