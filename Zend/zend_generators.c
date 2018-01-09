@@ -243,8 +243,9 @@ static void zend_generator_free_storage(zend_object *object) /* {{{ */
 		zval_ptr_dtor(&generator->retval);
 	}
 
-	if (UNEXPECTED(generator->node.children > 4)) {
-		zend_hash_destroy(&generator->node.child.ht);
+	if (UNEXPECTED(generator->node.children > 1)) {
+		zend_hash_destroy(generator->node.child.ht);
+		efree(generator->node.child.ht);
 	}
 
 	zend_object_std_dtor(&generator->std);
@@ -434,57 +435,38 @@ static void zend_generator_throw_exception(zend_generator *generator, zval *exce
 
 static zend_generator *zend_generator_get_child(zend_generator_node *node, zend_generator *leaf)
 {
-	switch (node->children) {
-		case 0:
-			return NULL;
-		case 1:
-			return node->child.array[0].child;
-
-#define ZEND_GEN_GET_CHILD(x) \
-			if (node->child.array[x].leaf == leaf) { \
-				return node->child.array[x].child; \
-			}
-		case 4:
-			ZEND_GEN_GET_CHILD(3)
-		case 3:
-			ZEND_GEN_GET_CHILD(2)
-		case 2:
-			ZEND_GEN_GET_CHILD(1)
-			ZEND_GEN_GET_CHILD(0)
-			ZEND_ASSERT(0); // we never should have no matching child
+	if (node->children == 0) {
+		return NULL;
+	} else if (node->children == 1) {
+		return node->child.single.child;
+	} else {
+		return zend_hash_index_find_ptr(node->child.ht, (zend_ulong) leaf);
 	}
-
-	return zend_hash_index_find_ptr(&node->child.ht, (zend_ulong) leaf);
 }
 
 static zend_generator_node *zend_generator_search_multi_children_node(zend_generator_node *node)
 {
 	while (node->children == 1) {
-		node = &node->child.array[0].child->node;
+		node = &node->child.single.child->node;
 	}
 	return node->children > 1 ? node : NULL;
 }
 
 static void zend_generator_add_single_child(zend_generator_node *node, zend_generator *child, zend_generator *leaf)
 {
-	if (node->children < 4) {
-		node->child.array[node->children].leaf = leaf;
-		node->child.array[node->children].child = child;
-	} else if (node->children > 4) {
-		zend_hash_index_add_ptr(&node->child.ht, (zend_ulong) leaf, child);
+	if (node->children == 0) {
+		node->child.single.leaf = leaf;
+		node->child.single.child = child;
 	} else {
-		struct {
-			zend_generator *leaf;
-			zend_generator *child;
-		} array[4];
-		int i;
-
-		memcpy(&array, &node->child.array, sizeof(array));
-		zend_hash_init(&node->child.ht, 5, sigh, NULL, 0);
-		for (i = 0; i < 4; i++) {
-			zend_hash_index_add_ptr(&node->child.ht, (zend_ulong) array[i].leaf, array[i].child);
+		if (node->children == 1) {
+			HashTable *ht = emalloc(sizeof(HashTable));
+			zend_hash_init(ht, 0, NULL, NULL, 0);
+			zend_hash_index_add_ptr(ht,
+				(zend_ulong) node->child.single.leaf, node->child.single.child);
+			node->child.ht = ht;
 		}
-		zend_hash_index_add_ptr(&node->child.ht, (zend_ulong) leaf, child);
+
+		zend_hash_index_add_ptr(node->child.ht, (zend_ulong) leaf, child);
 	}
 
 	node->children++;
@@ -492,20 +474,15 @@ static void zend_generator_add_single_child(zend_generator_node *node, zend_gene
 
 static void zend_generator_merge_child_nodes(zend_generator_node *dest, zend_generator_node *src, zend_generator *child)
 {
-	if (src->children <= 4) {
-		int i = src->children;
-		while (i--) {
-			zend_generator_add_single_child(dest, child, src->child.array[i].leaf);
-		}
-	} else {
-		zend_ulong leaf;
-		ZEND_HASH_FOREACH_NUM_KEY(&src->child.ht, leaf) {
-			zend_generator_add_single_child(dest, child, (zend_generator *) leaf);
-		} ZEND_HASH_FOREACH_END();
-	}
+	zend_ulong leaf;
+	ZEND_ASSERT(src->children > 1);
+	ZEND_HASH_FOREACH_NUM_KEY(src->child.ht, leaf) {
+		zend_generator_add_single_child(dest, child, (zend_generator *) leaf);
+	} ZEND_HASH_FOREACH_END();
 }
 
-/* Make attention so that the root of each subtree of the Generators tree is referenced once per leaf */
+/* Pay attention so that the root of each subtree of the Generators tree is referenced
+ * once per leaf */
 static void zend_generator_add_child(zend_generator *generator, zend_generator *child)
 {
 	zend_generator *leaf = child->node.children ? child->node.ptr.leaf : child;
@@ -520,27 +497,9 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 
 		while (next) {
 			if (next->node.children > 1) {
-				if (next->node.children > 4) {
-					zend_generator *child = zend_hash_index_find_ptr(&next->node.child.ht, (zend_ulong) generator);
-					zend_hash_index_del(&next->node.child.ht, (zend_ulong) generator);
-					zend_hash_index_add_ptr(&next->node.child.ht, (zend_ulong) leaf, child);
-				} else {
-					switch (next->node.children) {
-#define ZEND_GEN_UPDATE_CHILD(x) \
-							if (next->node.child.array[x].leaf == generator) { \
-								next->node.child.array[x].leaf = leaf; \
-								break; \
-							}
-						case 4:
-							ZEND_GEN_UPDATE_CHILD(3)
-						case 3:
-							ZEND_GEN_UPDATE_CHILD(2)
-						case 2:
-							ZEND_GEN_UPDATE_CHILD(1)
-							ZEND_GEN_UPDATE_CHILD(0)
-							ZEND_ASSERT(0); // we never should have no matching child
-					}
-				}
+				zend_generator *child = zend_hash_index_find_ptr(next->node.child.ht, (zend_ulong) generator);
+				zend_hash_index_del(next->node.child.ht, (zend_ulong) generator);
+				zend_hash_index_add_ptr(next->node.child.ht, (zend_ulong) leaf, child);
 			}
 
 			next->node.ptr.leaf = leaf;
@@ -550,7 +509,7 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 		multi_children_node = zend_generator_search_multi_children_node(&generator->node);
 		if (multi_children_node) {
 			generator->node.children = 0;
-			zend_generator_merge_child_nodes(&generator->node, multi_children_node, generator->node.child.array[0].child);
+			zend_generator_merge_child_nodes(&generator->node, multi_children_node, generator->node.child.single.child);
 		}
 	}
 
