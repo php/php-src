@@ -3175,9 +3175,6 @@ get_function_via_handler:
 	if (fcc->object) {
 		fcc->called_scope = fcc->object->ce;
 	}
-	if (retval) {
-//???		fcc->initialized = 1;
-	}
 	return retval;
 }
 /* }}} */
