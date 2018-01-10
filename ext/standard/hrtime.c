@@ -56,6 +56,8 @@ static mach_timebase_info_data_t _timerlib_info;
 #endif
 
 #define NANO_IN_SEC 1000000000
+
+static php_hrtime_t _timer_resolution = 0;
 /* }}} */
 
 static int _timer_init()
@@ -100,9 +102,32 @@ static int _timer_init()
 	return 0;
 }/*}}}*/
 
-/* {{{ */
+
+/* {{{ ini */
+static PHP_INI_MH(OnUpdateResolution)
+{
+	zend_long _val;
+
+	ZEND_ATOL(_val, ZSTR_VAL(new_value));
+
+	if (_val < 0) {
+		return FAILURE;
+	}
+	_timer_resolution = _val;
+
+	return SUCCESS;
+}
+
+PHP_INI_BEGIN()
+	PHP_INI_ENTRY("hrtime.resolution", "0", PHP_INI_SYSTEM, OnUpdateResolution)
+PHP_INI_END()
+/* }}} */
+
+/* {{{ MINIT */
 PHP_MINIT_FUNCTION(hrtime)
 {
+	REGISTER_INI_ENTRIES();
+
 	if (0 > _timer_init()) {
 		php_error_docref(NULL, E_WARNING, "Failed to initialize high-resolution timer");
 		return FAILURE;
@@ -175,6 +200,10 @@ PHP_FUNCTION(hrtime)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(get_as_num)
 	ZEND_PARSE_PARAMETERS_END();
+
+	if (_timer_resolution) {
+		t = (php_hrtime_t)(t / _timer_resolution) * _timer_resolution;
+	}
 
 	if (UNEXPECTED(get_as_num)) {
 		PHP_RETURN_HRTIME(t);
