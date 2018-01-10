@@ -6,6 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #75679 (Path 260 character problem). (Anatol)
   . Fixed bug #75786 (segfault when using spread operator on generator passed
     by reference). (Nikita)
+  . Fixed bug #75799 (arg of get_defined_functions is optional). (carusogabriel)
 
 - Opcache:
   . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)

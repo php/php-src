@@ -220,7 +220,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_set_exception_handler, 0, 0, 1)
 	ZEND_ARG_INFO(0, exception_handler)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_functions, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_get_defined_functions, 0, 0, 0)
 	ZEND_ARG_INFO(0, exclude_disabled)
 ZEND_END_ARG_INFO()
 
