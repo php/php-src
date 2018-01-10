@@ -3475,15 +3475,13 @@ PHP_FUNCTION(strtr)
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
-			zend_string *str_key, *replace, *tmp_replace;
-			zval *entry, tmp;
+			zend_string *str_key, *tmp_str, *replace, *tmp_replace;
+			zval *entry;
 
 			ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
-				ZVAL_UNDEF(&tmp);
+				tmp_str = NULL;
 				if (UNEXPECTED(!str_key)) {
-					ZVAL_LONG(&tmp, num_key);
-					convert_to_string(&tmp);
-					str_key = Z_STR(tmp);
+					str_key = tmp_str = zend_long_to_str(num_key);
 				}
 				replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
@@ -3501,8 +3499,8 @@ PHP_FUNCTION(strtr)
 								ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 								ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
 				}
+				zend_tmp_string_release(tmp_str);
 				zend_tmp_string_release(tmp_replace);
-				zval_dtor(&tmp);
 				return;
 			} ZEND_HASH_FOREACH_END();
 		} else {
