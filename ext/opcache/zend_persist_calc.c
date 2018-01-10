@@ -419,7 +419,13 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	new_persistent_script->size = (new_persistent_script->size + 63) & ~63;
 #endif
 
+	if (new_persistent_script->script.class_table.nNumUsed != new_persistent_script->script.class_table.nNumOfElements) {
+		zend_hash_rehash(&new_persistent_script->script.class_table);
+	}
 	zend_accel_persist_class_table_calc(&new_persistent_script->script.class_table);
+	if (new_persistent_script->script.function_table.nNumUsed != new_persistent_script->script.function_table.nNumOfElements) {
+		zend_hash_rehash(&new_persistent_script->script.function_table);
+	}
 	zend_hash_persist_calc(&new_persistent_script->script.function_table, zend_persist_op_array_calc);
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 
