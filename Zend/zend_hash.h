@@ -932,7 +932,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 				uint32_t j = HT_IDX_TO_HASH(_idx - 1); \
 				uint32_t nIndex = _p->h | __ht->nTableMask; \
 				uint32_t i = HT_HASH(__ht, nIndex); \
-				if (j != i) { \
+				if (UNEXPECTED(j != i)) { \
 					Bucket *prev = HT_HASH_TO_BUCKET(__ht, i); \
 					while (Z_NEXT(prev->val) != j) { \
 						i = Z_NEXT(prev->val); \
