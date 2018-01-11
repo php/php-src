@@ -2218,7 +2218,7 @@ ZEND_METHOD(reflection_generator, getFunction)
 
 	if (ex->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 		zval closure;
-		ZVAL_OBJ(&closure, ZEND_CLOSURE_OBJECT(ex->func));
+		ZVAL_OBJ(&closure, (zend_object *) ex->func->common.prototype);
 		reflection_function_factory(ex->func, &closure, return_value);
 	} else if (ex->func->op_array.scope) {
 		reflection_method_factory(ex->func->op_array.scope, ex->func, NULL, return_value);

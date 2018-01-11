@@ -2554,7 +2554,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 				OBJ_RELEASE(Z_OBJ(call->This));
 			}
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
-				zend_object_release(ZEND_CLOSURE_OBJECT(call->func));
+				zend_object_release((zend_object *) call->func->common.prototype);
 			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				zend_string_release(call->func->common.function_name);
 				zend_free_trampoline(call->func);
@@ -2735,7 +2735,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_object(zval *
 
 		if (fbc->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(fbc));
+			ZEND_ASSERT(GC_TYPE((zend_object*)fbc->common.prototype) == IS_OBJECT);
+			GC_ADDREF((zend_object*)fbc->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (fbc->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;

@@ -2374,7 +2374,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+			OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
 		}
 		EG(vm_stack_top) = (zval*)execute_data;
 		execute_data = EX(prev_execute_data);
@@ -2405,7 +2405,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+			OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
 		}
 
 		zend_vm_stack_free_extra_args_ex(call_info, execute_data);
@@ -2447,7 +2447,7 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 			}
 			EG(current_execute_data) = EX(prev_execute_data);
 			if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-				OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
+				OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
 			}
 			ZEND_VM_RETURN();
 		} else /* if (call_kind == ZEND_CALL_TOP_CODE) */ {
@@ -3356,7 +3356,8 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 		}
 		if (func->common.fn_flags & ZEND_ACC_CLOSURE) {
 			/* Delay closure destruction until its invocation */
-			GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
+			ZEND_ASSERT(GC_TYPE((zend_object*)func->common.prototype) == IS_OBJECT);
+			GC_ADDREF((zend_object*)func->common.prototype);
 			call_info |= ZEND_CALL_CLOSURE;
 			if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 				call_info |= ZEND_CALL_FAKE_CLOSURE;
@@ -3369,7 +3370,7 @@ ZEND_VM_HANDLER(118, ZEND_INIT_USER_CALL, CONST, CONST|TMPVAR|CV, NUM)
 		FREE_OP2();
 		if ((OP2_TYPE & (IS_TMP_VAR|IS_VAR)) && UNEXPECTED(EG(exception))) {
 			if (call_info & ZEND_CALL_CLOSURE) {
-				zend_object_release(ZEND_CLOSURE_OBJECT(func));
+				zend_object_release((zend_object*)func->common.prototype);
 			}
 			if (call_info & ZEND_CALL_RELEASE_THIS) {
 				zend_object_release(object);
@@ -4531,7 +4532,7 @@ ZEND_VM_HANDLER(119, ZEND_SEND_ARRAY, ANY, ANY, NUM)
 		}
 		zend_internal_type_error(EX_USES_STRICT_TYPES(), "call_user_func_array() expects parameter 2 to be array, %s given", zend_get_type_by_const(Z_TYPE_P(args)));
 		if (ZEND_CALL_INFO(EX(call)) & ZEND_CALL_CLOSURE) {
-			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(call)->func));
+			OBJ_RELEASE((zend_object*)EX(call)->func->common.prototype);
 		}
 		if (Z_TYPE(EX(call)->This) == IS_OBJECT) {
 			OBJ_RELEASE(Z_OBJ(EX(call)->This));

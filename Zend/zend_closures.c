@@ -639,7 +639,7 @@ void zend_register_closure_ce(void) /* {{{ */
 
 static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
-	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
+	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	OBJ_RELEASE((zend_object*)closure);
 	EX(func) = NULL;
@@ -662,6 +662,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		memcpy(&closure->func, func, sizeof(zend_op_array));
+		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		if (closure->func.op_array.static_variables) {
 			closure->func.op_array.static_variables =
@@ -676,6 +677,7 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	} else {
 		memcpy(&closure->func, func, sizeof(zend_internal_function));
+		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {
