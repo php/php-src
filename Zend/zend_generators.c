@@ -24,6 +24,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 #include "zend_generators.h"
+#include "zend_closures.h"
 
 ZEND_API zend_class_entry *zend_ce_generator;
 ZEND_API zend_class_entry *zend_ce_ClosedGeneratorException;
@@ -145,7 +146,7 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 
 		/* Free closure object */
 		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-			OBJ_RELEASE((zend_object *) EX(func)->common.prototype);
+			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 
 		/* Free GC buffer. GC for closed generators doesn't need an allocated buffer */
@@ -335,7 +336,7 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 		ZVAL_OBJ(gc_buffer++, Z_OBJ(execute_data->This));
 	}
 	if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
-		ZVAL_OBJ(gc_buffer++, (zend_object *) EX(func)->common.prototype);
+		ZVAL_OBJ(gc_buffer++, ZEND_CLOSURE_OBJECT(EX(func)));
 	}
 
 	if (generator->node.children == 0) {
