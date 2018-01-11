@@ -373,22 +373,22 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	uint32_t *refcount;
+	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
+	int last_var;       /* number of CV variables */
+	uint32_t T;         /* numner of temporary variables */
+	uint32_t last;      /* number of opcodes */
 
-	uint32_t last;
 	zend_op *opcodes;
+	void **run_time_cache;
+	HashTable *static_variables;
+	zend_string **vars; /* names of CV variables */
 
-	int last_var;
-	uint32_t T;
-	zend_string **vars;
+	uint32_t *refcount;
 
 	int last_live_range;
 	int last_try_catch;
 	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
-
-	/* static variables support */
-	HashTable *static_variables;
 
 	zend_string *filename;
 	uint32_t line_start;
@@ -397,9 +397,6 @@ struct _zend_op_array {
 
 	int last_literal;
 	zval *literals;
-
-	int  cache_size;
-	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
