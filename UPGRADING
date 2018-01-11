@@ -104,8 +104,7 @@ Core:
     adjustable and is not related to wall clock or time of day. The timers
     are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
     derivatives. If no required timers are provided by a corresponding
-    platform, the function returns false. See also the description for the
-    hrtime.resolution INI directive for further configuration details.
+    platform, the function returns false.
 
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
@@ -189,16 +188,6 @@ PGSQL:
 - opcache.inherited_hack
   . This INI directive has been removed. The value has already been ignored
     since PHP 5.3.0.
-
-- hrtime.resolution
-  . This INI directive is PHP_INI_SYSTEM and controls the precision of the
-    timestamps delivered by hrtime(). It expects a positive number of
-    nanoseconds, to which the timestamp is rounded. For example, if the max
-    desired precision of the timestamp is 20us, the INI value would be 20000
-    and the timestamp is rounded to the next 20us. If the INI value is zero
-    (default), the measurement is returned without change. Note, that the
-    timestamp itself stays monotonic. The provided precision still affects,
-    in how far two adjacent timestamps can be distinquished.
 
 ========================================
 12. Windows Support
