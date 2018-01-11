@@ -373,8 +373,6 @@ void zend_class_add_ref(zval *zv)
 
 ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
-	zval *literal = op_array->literals;
-	zval *end;
 	uint32_t i;
 
 	if (op_array->static_variables &&
@@ -404,8 +402,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(op_array->vars);
 	}
 
-	if (literal) {
-	 	end = literal + op_array->last_literal;
+	if (op_array->literals) {
+		zval *literal = op_array->literals;
+		zval *end = literal + op_array->last_literal;
 	 	while (literal < end) {
 			zval_ptr_dtor_nogc(literal);
 			literal++;
