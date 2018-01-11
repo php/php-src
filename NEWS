@@ -9,6 +9,7 @@ PHP                                                                        NEWS
   . Fixed bug #75614 (Some non-portable == in shell scripts). (jdolecek)
   . Fixed bug #75786 (segfault when using spread operator on generator passed
     by reference). (Nikita)
+  . Fixed bug #75799 (arg of get_defined_functions is optional). (carusogabriel)
 
 - Opcache:
   . Fixed bug #75687 (var 8 (TMP) has array key type but not value type).
