@@ -203,7 +203,6 @@ typedef struct _zend_oparray_context {
  * Free flags:
  * 0x10
  * 0x20
- * 0x8000
  * 0x2000000
  */
 
@@ -226,6 +225,9 @@ typedef struct _zend_oparray_context {
 /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
+
+/* "main" op_array with ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes */
+#define ZEND_ACC_EARLY_BINDING 0x8000
 
 /* method flag used by Closure::__invoke() */
 #define ZEND_ACC_USER_ARG_INFO 0x80
@@ -392,7 +394,6 @@ struct _zend_op_array {
 	uint32_t line_start;
 	uint32_t line_end;
 	zend_string *doc_comment;
-	uint32_t early_binding; /* the linked list of delayed declarations */
 
 	int last_literal;
 	zval *literals;
@@ -723,7 +724,8 @@ void zend_do_free(znode *op1);
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
-ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
+ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
+ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline);
 
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);

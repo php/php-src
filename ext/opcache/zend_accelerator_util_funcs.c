@@ -733,10 +733,10 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-	if (op_array->early_binding != (uint32_t)-1) {
+	if (persistent_script->script.first_early_binding_opline != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->script.filename;
-		zend_do_delayed_early_binding(op_array);
+		zend_do_delayed_early_binding(op_array, persistent_script->script.first_early_binding_opline);
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 

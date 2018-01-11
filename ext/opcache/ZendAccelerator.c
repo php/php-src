@@ -1723,6 +1723,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	   further anyway.
 	*/
 	zend_accel_move_user_functions(&ZCG(function_table), &new_persistent_script->script.function_table);
+	new_persistent_script->script.first_early_binding_opline =
+		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
+			zend_build_delayed_early_binding_list(op_array) :
+			(uint32_t)-1;
 	new_persistent_script->script.main_op_array = *op_array;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */

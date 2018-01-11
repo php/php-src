@@ -1217,12 +1217,7 @@ void zend_do_early_binding(void) /* {{{ */
 				    ((CG(compiler_options) & ZEND_COMPILE_IGNORE_INTERNAL_CLASSES) &&
 				     (ce->type == ZEND_INTERNAL_CLASS))) {
 					if (CG(compiler_options) & ZEND_COMPILE_DELAYED_BINDING) {
-						uint32_t *opline_num = &CG(active_op_array)->early_binding;
-
-						while (*opline_num != (uint32_t)-1) {
-							opline_num = &CG(active_op_array)->opcodes[*opline_num].result.opline_num;
-						}
-						*opline_num = opline - CG(active_op_array)->opcodes;
+						CG(active_op_array)->fn_flags |= ZEND_ACC_EARLY_BINDING;
 						opline->opcode = ZEND_DECLARE_INHERITED_CLASS_DELAYED;
 						opline->result_type = IS_UNUSED;
 						opline->result.opline_num = -1;
@@ -1287,11 +1282,33 @@ static void zend_mark_function_as_generator() /* {{{ */
 }
 /* }}} */
 
-ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array) /* {{{ */
+ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array) /* {{{ */
 {
-	if (op_array->early_binding != (uint32_t)-1) {
+	if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+		uint32_t  first_early_binding_opline = (uint32_t)-1;
+		uint32_t *prev_opline_num = &first_early_binding_opline;
+		zend_op  *opline = op_array->opcodes;
+		zend_op  *end = opline + op_array->last;
+
+		while (opline < end) {
+			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
+				*prev_opline_num = opline - op_array->opcodes;
+				prev_opline_num = &opline->result.opline_num;
+			}
+			++opline;
+		}
+		*prev_opline_num = -1;
+		return first_early_binding_opline;
+	}
+	return (uint32_t)-1;
+}
+/* }}} */
+
+ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline) /* {{{ */
+{
+	if (first_early_binding_opline != (uint32_t)-1) {
 		zend_bool orig_in_compilation = CG(in_compilation);
-		uint32_t opline_num = op_array->early_binding;
+		uint32_t opline_num = first_early_binding_opline;
 		zend_class_entry *ce;
 
 		CG(in_compilation) = 1;
