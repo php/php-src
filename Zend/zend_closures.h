@@ -24,6 +24,10 @@
 
 BEGIN_EXTERN_C()
 
+/* This macro depends on zend_closure structure layout */
+#define ZEND_CLOSURE_OBJECT(op_array) \
+	((zend_object*)((char*)(op_array) - sizeof(zend_object)))
+
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
 
