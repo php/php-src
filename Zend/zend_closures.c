@@ -114,12 +114,13 @@ ZEND_METHOD(Closure, call)
 	zend_closure *closure;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	zval *my_params;
-	int my_param_count = 0;
 	zend_function my_function;
 	zend_object *newobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
+	fci.param_count = 0;
+	fci.params = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
 
@@ -132,24 +133,14 @@ ZEND_METHOD(Closure, call)
 		return;
 	}
 
-	/* This should never happen as closures will always be callable */
-	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL) != SUCCESS) {
-		ZEND_ASSERT(0);
-	}
-
-	fci.retval = &closure_result;
-	fci.params = my_params;
-	fci.param_count = my_param_count;
-	fci.object = fci_cache.object = newobj;
-	fci_cache.called_scope = Z_OBJCE_P(newthis);
-
-	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
+	if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;
-		zend_create_closure(&new_closure, fci_cache.function_handler, Z_OBJCE_P(newthis), closure->called_scope, newthis);
+		zend_create_closure(&new_closure, &closure->func, Z_OBJCE_P(newthis), closure->called_scope, newthis);
 		closure = (zend_closure *) Z_OBJ(new_closure);
 		fci_cache.function_handler = &closure->func;
 	} else {
-		memcpy(&my_function, fci_cache.function_handler, fci_cache.function_handler->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		memcpy(&my_function, &closure->func, closure->func.type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		my_function.common.fn_flags &= ~ZEND_ACC_CLOSURE;
 		/* use scope of passed object */
 		my_function.common.scope = Z_OBJCE_P(newthis);
 		fci_cache.function_handler = &my_function;
@@ -160,6 +151,15 @@ ZEND_METHOD(Closure, call)
 			memset(my_function.op_array.run_time_cache, 0, my_function.op_array.cache_size);
 		}
 	}
+
+	fci_cache.calling_scope = closure->called_scope;
+	fci_cache.called_scope = newobj->ce;
+	fci_cache.object = fci.object = newobj;
+
+	fci.size = sizeof(fci);
+	ZVAL_COPY_VALUE(&fci.function_name, zclosure);
+	fci.retval = &closure_result;
+	fci.no_separation = 1;
 
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		if (Z_ISREF(closure_result)) {
