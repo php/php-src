@@ -40,7 +40,21 @@ try {
   echo 'failed to throw expected exception';
 } catch (PharException $ex) {
 }
+
 echo 'done';
 ?>
---EXPECTF--
+--CLEAN--
+<?php
+$base   = __DIR__.DIRECTORY_SEPARATOR.'bug54289'.DIRECTORY_SEPARATOR;
+$phar   = $base.'test.phar';
+$outDir = $base.'out';
+unlink($phar);
+$iter = new \RecursiveIteratorIterator(new \RecursiveDirectoryIterator(
+  $outDir, \FilesystemIterator::SKIP_DOTS|\FilesystemIterator::UNIX_PATHS),
+  \RecursiveIteratorIterator::CHILD_FIRST);
+foreach ($iter as $value) {
+    $value->isFile() ? unlink($value) : rmdir($value);
+}
+?>
+--EXPECT--
 done
