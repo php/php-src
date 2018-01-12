@@ -51,6 +51,7 @@ PHP                                                                        NEWS
 
 - Standard:
    . Fixed bug #75781 (substr_count incorrect result). (Laruence)
+   . Fixed bug #75653 (array_values don't work on empty array). (Nikita)
 
 - Zip:
   . Display headers (buildtime) and library (runtime) versions in phpinfo

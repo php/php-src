@@ -4028,7 +4028,7 @@ PHP_FUNCTION(array_values)
 
 	/* Return empty input as is */
 	arrlen = zend_hash_num_elements(arrval);
-	if (!arrlen) {
+	if (!arrlen && arrval->nNextFreeElement == arrlen) {
 		RETURN_ZVAL(input, 1, 0);
 	}
 
