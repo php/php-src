@@ -179,10 +179,11 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		zend_generator *root = generator->node.ptr.root, *next;
 		while (UNEXPECTED(root != generator)) {
 			next = zend_generator_get_child(&root->node, generator);
+			generator->node.ptr.root = next;
+			next->node.parent = NULL;
 			OBJ_RELEASE(&root->std);
 			root = next;
 		}
-		generator->node.parent = NULL;
 	}
 
 	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
@@ -664,11 +665,12 @@ ZEND_API zend_generator *zend_generator_update_current(zend_generator *generator
 		}
 	}
 
+	leaf->node.ptr.root = root;
 	if (old_root) {
 		OBJ_RELEASE(&old_root->std);
 	}
 
-	return leaf->node.ptr.root = root;
+	return root;
 }
 
 static int zend_generator_get_next_delegated_value(zend_generator *generator) /* {{{ */
