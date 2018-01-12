@@ -546,8 +546,6 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 			next->node.ptr.leaf = leaf;
 			next = next->node.parent;
 		}
-
-		zend_generator_add_single_child(&generator->node, child, leaf);
 	} else if (generator->node.children == 1) {
 		multi_children_node = zend_generator_search_multi_children_node(&generator->node);
 		if (multi_children_node) {
