@@ -1439,6 +1439,10 @@ case $host_alias in
   ;;
 esac
 
+dnl Silence warning: `ar: 'u' modifier ignored since 'D' is the default`
+dnl SEE https://www.mail-archive.com/automake-patches@gnu.org/msg07705.html
+AC_SUBST(AR_FLAGS, [cr])
+
 dnl Only allow AC_PROG_CXX and AC_PROG_CXXCPP if they are explicitly called (by PHP_REQUIRE_CXX).
 dnl Otherwise AC_PROG_LIBTOOL fails if there is no working C++ compiler.
 AC_PROVIDE_IFELSE([PHP_REQUIRE_CXX], [], [
