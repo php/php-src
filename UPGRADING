@@ -193,6 +193,13 @@ PGSQL:
 12. Windows Support
 ========================================
 
+- Core
+  . File descriptors are opened in shared read/write/delete mode by default.
+    This effectively maps the UNIX semantics and allows to delete files with
+    handles in use. It is not a 100% same, some platform differences still
+    persist. After the delition, the filename entry is blocked, until all
+    the opened handles to it are closed.
+
 ========================================
 13. Other Changes
 ========================================
