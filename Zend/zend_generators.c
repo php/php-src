@@ -185,7 +185,8 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		generator->node.parent = NULL;
 	}
 
-	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))) {
+	if (EXPECTED(!ex) || EXPECTED(!(ex->func->op_array.fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK))
+			|| CG(unclean_shutdown)) {
 		return;
 	}
 
