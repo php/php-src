@@ -509,9 +509,8 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 {
 	zend_generator *leaf = child->node.children ? child->node.ptr.leaf : child;
 	zend_generator_node *multi_children_node;
-	zend_bool was_leaf = generator->node.children == 0;
 
-	if (was_leaf) {
+	if (generator->node.children == 0) {
 		zend_generator *next = generator->node.parent;
 		leaf->node.ptr.root = generator->node.ptr.root;
 		++GC_REFCOUNT(&generator->std); /* we need to increment the generator refcount here as it became integrated into the tree (no leaf), but we must not increment the refcount of the *whole* path in tree */
@@ -547,7 +546,10 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 		}
 
 		zend_generator_add_single_child(&generator->node, child, leaf);
-	} else if (generator->node.children == 1) {
+		return;
+	}
+
+	if (generator->node.children == 1) {
 		multi_children_node = zend_generator_search_multi_children_node(&generator->node);
 		if (multi_children_node) {
 			generator->node.children = 0;
@@ -555,25 +557,18 @@ static void zend_generator_add_child(zend_generator *generator, zend_generator *
 		}
 	}
 
-	if (!was_leaf) {
-		multi_children_node = zend_generator_search_multi_children_node(&child->node);
-	} else {
-		multi_children_node = (zend_generator_node *) 0x1;
-	}
-
 	{
 		zend_generator *parent = generator->node.parent, *cur = generator;
 
-		if (multi_children_node > (zend_generator_node *) 0x1) {
+		multi_children_node = zend_generator_search_multi_children_node(&child->node);
+		if (multi_children_node) {
 			zend_generator_merge_child_nodes(&generator->node, multi_children_node, child);
 		} else {
 			zend_generator_add_single_child(&generator->node, child, leaf);
 		}
+
 		while (parent) {
 			if (parent->node.children > 1) {
-				if (multi_children_node == (zend_generator_node *) 0x1) {
-					multi_children_node = zend_generator_search_multi_children_node(&child->node);
-				}
 				if (multi_children_node) {
 					zend_generator_merge_child_nodes(&parent->node, multi_children_node, cur);
 				} else {
