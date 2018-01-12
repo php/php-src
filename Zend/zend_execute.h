@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -217,8 +217,8 @@ static zend_always_inline zend_execute_data *zend_vm_stack_push_call_frame(uint3
 static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_info, zend_execute_data *call)
 {
 	if (UNEXPECTED(call_info & ZEND_CALL_FREE_EXTRA_ARGS)) {
-		zval *end = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
- 		zval *p = end + (ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args);
+		uint32_t count = ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args;
+		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T + count);
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
@@ -230,7 +230,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 					gc_check_possible_root(r);
 				}
 			}
-		} while (p != end);
+		} while (--count);
  	}
 }
 

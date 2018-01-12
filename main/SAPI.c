@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -868,7 +868,7 @@ SAPI_API int sapi_send_headers(void)
 
 			memcpy(default_header.header, "Content-type: ", sizeof("Content-type: ") - 1);
 			memcpy(default_header.header + sizeof("Content-type: ") - 1, SG(sapi_headers).mimetype, len + 1);
-			
+
 			sapi_header_add_op(SAPI_HEADER_ADD, &default_header);
 		} else {
 			efree(default_mimetype);
@@ -932,9 +932,9 @@ SAPI_API int sapi_send_headers(void)
 }
 
 
-SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
+SAPI_API int sapi_register_post_entries(const sapi_post_entry *post_entries)
 {
-	sapi_post_entry *p=post_entries;
+	const sapi_post_entry *p=post_entries;
 
 	while (p->content_type) {
 		if (sapi_register_post_entry(p) == FAILURE) {
@@ -946,7 +946,7 @@ SAPI_API int sapi_register_post_entries(sapi_post_entry *post_entries)
 }
 
 
-SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
+SAPI_API int sapi_register_post_entry(const sapi_post_entry *post_entry)
 {
 	int ret;
 	zend_string *key;
@@ -961,7 +961,7 @@ SAPI_API int sapi_register_post_entry(sapi_post_entry *post_entry)
 	return ret;
 }
 
-SAPI_API void sapi_unregister_post_entry(sapi_post_entry *post_entry)
+SAPI_API void sapi_unregister_post_entry(const sapi_post_entry *post_entry)
 {
 	if (SG(sapi_started) && EG(current_execute_data)) {
 		return;

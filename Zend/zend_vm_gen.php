@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,7 +24,7 @@ const HEADER_TEXT = <<< DATA
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -168,17 +168,6 @@ $prefix = array(
 	"CV"       => "_CV",
 	"TMPVAR"   => "_TMPVAR",
 	"TMPVARCV" => "_TMPVARCV",
-);
-
-$typecode = array(
-	"ANY"      => 0,
-	"TMP"      => 1,
-	"VAR"      => 2,
-	"CONST"    => 0,
-	"UNUSED"   => 3,
-	"CV"       => 4,
-	"TMPVAR"   => 0,
-	"TMPVARCV" => 0,
 );
 
 $commutative_order = array(
@@ -1006,7 +995,7 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 	}
 
 	if (isset($extra_spec["COMMUTATIVE"]) &&
-	    $commutative_order[$op1] > $commutative_order[$op2]) {
+	    $commutative_order[$op1] < $commutative_order[$op2]) {
 	    // Skip duplicate commutative handlers
 		return true;
 	}
@@ -1021,9 +1010,19 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 	return false;
 }
 
+function is_hot_handler($hot, $op1, $op2) {
+	if ($hot === 'HOT_') {
+		return true;
+	} else if ($hot === 'HOT_OBJ_') {
+		return (($op1 === 'UNUSED') || ($op1 === 'CV')) && ($op2 === 'CONST');
+	} else {
+		return false;
+	}
+}
+
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
-	global $definition_file, $prefix, $typecode, $opnames;
+	global $definition_file, $prefix, $opnames;
 
 	if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
 		return;
@@ -1042,7 +1041,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 			out($f,"\t\t\t\tHYBRID_BREAK();\n");
 			return;
 		case ZEND_VM_KIND_CALL:
-			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
+			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2)) {
 				out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 			} else {
 				out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
@@ -1162,7 +1161,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			$spec_extra = call_user_func_array("array_merge", extra_spec_handler($dsc) ?: array(array()));
 			$flags = extra_spec_flags($spec_extra);
 			if ($flags) {
-				$specs[$num] .= " | ".implode("|", $flags);
+				$specs[$num] .= " | " . implode(" | ", $flags);
 			}
 			if ($num >= 256) {
 				$opcodes[$num]['spec_code'] = $specs[$num];
@@ -1256,7 +1255,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				};
 			};
 			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
-				global $typecode, $commutative_order;
+				global $commutative_order;
 
 				// Check if specialized handler is defined
 				/* TODO: figure out better way to signal "specialized and not defined" than an extra lookup */
@@ -1463,6 +1462,9 @@ function extra_spec_flags($extra_spec) {
 	if (isset($extra_spec["DIM_OBJ"])) {
 		$s[] = "SPEC_RULE_DIM_OBJ";
 	}
+	if (isset($extra_spec["COMMUTATIVE"])) {
+		$s[] = "SPEC_RULE_COMMUTATIVE";
+	}
 	return $s;
 }
 
@@ -1624,17 +1626,20 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_QUICK_ARG    0x00100000\n");
 					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
 					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
+					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
-					out($f,"static const void **zend_opcode_handlers;\n");
+					out($f,"static const void * const *zend_opcode_handlers;\n");
 					out($f,"static int zend_handlers_count;\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
 						out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-						out($f,"static const void **zend_opcode_handler_funcs;\n");
+						out($f,"static const void * const * zend_opcode_handler_funcs;\n");
 						out($f,"static zend_op hybrid_halt_op;\n");
 						out($f,"#endif\n");
 					}
-					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n\n");
+					out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID)\n");
+					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n");
+					out($f,"#endif\n\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
 						out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
 						out($f,"static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend_op* op);\n");
@@ -1857,7 +1862,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					    }
 						$prolog = $m[1];
 						out($f,$prolog."if (UNEXPECTED(execute_data == NULL)) {\n");
-						out($f,$prolog."\tstatic const void* labels[] = {\n");
+						out($f,$prolog."\tstatic const void * const labels[] = {\n");
 						gen_labels($f, $spec, ZEND_VM_KIND_GOTO, $prolog."\t\t", $specs);
 						out($f,$prolog."\t};\n");
 						out($f,$prolog."\tzend_opcode_handlers = (const void **) labels;\n");
@@ -1972,7 +1977,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,$prolog."zend_spec_handlers = specs;\n");
 						out($f,$prolog.$executor_name."_ex(NULL);\n");
 					} else {
-						out($f,$prolog."static const void *labels[] = {\n");
+						out($f,$prolog."static const void * const labels[] = {\n");
 						gen_labels($f, $spec, ZEND_VM_KIND_CALL, $prolog."\t", $specs, $switch_labels);
 						out($f,$prolog."};\n");
 						out($f,$prolog."static const uint32_t specs[] = {\n");
@@ -2118,15 +2123,16 @@ function gen_vm($def, $skel) {
 	foreach ($in as $line) {
 		++$lineno;
 		if (strpos($line,"ZEND_VM_HANDLER(") === 0 ||
-		    strpos($line,"ZEND_VM_HOT_HANDLER(") === 0) {
+		    strpos($line,"ZEND_VM_HOT_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_HOT_OBJ_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|HOT_OBJ_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
 			}
-			$hot = !empty($m[1]);
+			$hot = !empty($m[1]) ? $m[1] : false;
 			$code = (int)$m[2];
 			$op   = $m[3];
 			$len  = strlen($op);
@@ -2164,15 +2170,16 @@ function gen_vm($def, $skel) {
 			$helper = null;
 			$list[$lineno] = array("handler"=>$handler);
 		} else if (strpos($line,"ZEND_VM_TYPE_SPEC_HANDLER(") === 0 ||
-		           strpos($line,"ZEND_VM_HOT_TYPE_SPEC_HANDLER(") === 0) {
+		           strpos($line,"ZEND_VM_HOT_TYPE_SPEC_HANDLER(") === 0 ||
+		           strpos($line,"ZEND_VM_HOT_OBJ_TYPE_SPEC_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*([^,]+),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|HOT_OBJ_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_TYPE_HANDLER_HANDLER definition.\n");
 			}
-			$hot = !empty($m[1]);
+			$hot = !empty($m[1]) ? $m[1] : false;
 			$orig_op = $m[2];
 			if (!isset($opnames[$orig_op])) {
 				die("ERROR ($def:$lineno): Opcode with name '$orig_op' is not defined.\n");
@@ -2193,7 +2200,7 @@ function gen_vm($def, $skel) {
 			}
 			$opcodes[$orig_code]['type_spec'][$code] = $condition;
 			$used_extra_spec["TYPE"] = 1;
-			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot);
+			$opcodes[$code] = array("op"=>$op,"op1"=>$op1,"op2"=>$op2,"code"=>"","flags"=>$flags,"hot"=>$hot,"is_type_spec"=>true);
 			if (isset($m[10])) {
 				$opcodes[$code]["spec"] = parse_spec_rules($def, $lineno, $m[10]);
 				if (isset($opcodes[$code]["spec"]["NO_CONST_CONST"])) {
@@ -2497,6 +2504,7 @@ function gen_vm($def, $skel) {
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");
+	out($f, "#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID\n");
 	out($f, "static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
@@ -2504,7 +2512,8 @@ function gen_vm($def, $skel) {
 	} else {
 		out($f, "\treturn zend_vm_get_opcode_handler_ex(zend_spec_handlers[opcode], op);\n");
 	}
-	out($f, "}\n\n");
+	out($f, "}\n");
+	out($f, "#endif\n\n");
 
 	if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 		// Generate zend_vm_get_opcode_handler_func() function
@@ -2575,7 +2584,17 @@ function gen_vm($def, $skel) {
 	// Generate zend_vm_get_opcode_handler() function
 	out($f, "ZEND_API void zend_vm_set_opcode_handler(zend_op* op)\n");
 	out($f, "{\n");
-	out($f, "\top->handler = zend_vm_get_opcode_handler(zend_user_opcodes[op->opcode], op);\n");
+	if (!ZEND_VM_SPEC) {
+		out($f, "\top->handler = zend_vm_get_opcode_handler(op->opcode, op);\n");
+	} else {
+		out($f, "\tuint32_t spec = zend_spec_handlers[op->opcode];\n\n");
+		out($f, "\tif (spec & SPEC_RULE_COMMUTATIVE) {\n");
+		out($f, "\t\tif (op->op1_type < op->op2_type) {\n");
+		out($f, "\t\t\tzend_swap_operands(op);\n");
+		out($f, "\t\t}\n");
+		out($f, "\t}\n");
+		out($f, "\top->handler = zend_vm_get_opcode_handler_ex(spec, op);\n");
+	}
 	out($f, "}\n\n");
 
 	// Generate zend_vm_set_opcode_handler_ex() function
@@ -2592,6 +2611,11 @@ function gen_vm($def, $skel) {
 				if (isset($dsc['type_spec'])) {
 					$orig_op = $dsc['op'];
 					out($f, "\t\tcase $orig_op:\n");
+					if (isset($dsc["spec"]["COMMUTATIVE"])) {
+						out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+						out($f, "\t\t\t\tzend_swap_operands(op);\n");
+						out($f, "\t\t\t}\n");
+					}
 					$first = true;
 					foreach($dsc['type_spec'] as $code => $condition) {
 						$condition = format_condition($condition);
@@ -2608,8 +2632,8 @@ function gen_vm($def, $skel) {
 							out($f, "\t\t\t\t}\n");
 						}
 						out($f, "\t\t\t\tspec = ${spec_dsc['spec_code']};\n");
-						if (isset($spec_dsc["spec"]["COMMUTATIVE"])) {
-							out($f, "\t\t\t\tif (op->op1_type > op->op2_type) {\n");
+						if (isset($spec_dsc["spec"]["COMMUTATIVE"]) && !isset($dsc["spec"]["COMMUTATIVE"])) {
+							out($f, "\t\t\t\tif (op->op1_type < op->op2_type) {\n");
 							out($f, "\t\t\t\t\tzend_swap_operands(op);\n");
 							out($f, "\t\t\t\t}\n");
 						}
@@ -2619,6 +2643,22 @@ function gen_vm($def, $skel) {
 					}
 					out($f, "\t\t\tbreak;\n");
 				}
+			}
+			$has_commutative = false;
+			foreach($opcodes as $code => $dsc) {
+				if (!isset($dsc['is_type_spec']) &&
+				    !isset($dsc['type_spec']) &&
+				    isset($dsc["spec"]["COMMUTATIVE"])) {
+					$orig_op = $dsc['op'];
+					out($f, "\t\tcase $orig_op:\n");
+					$has_commutative = true;
+				}
+			}
+			if ($has_commutative) {
+				out($f, "\t\t\tif (op->op1_type < op->op2_type) {\n");
+				out($f, "\t\t\t\tzend_swap_operands(op);\n");
+				out($f, "\t\t\t}\n");
+				out($f, "\t\t\tbreak;\n");
 			}
 			out($f, "\t\tdefault:\n");
 			out($f, "\t\t\tbreak;\n");

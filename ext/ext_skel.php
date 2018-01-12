@@ -1,9 +1,9 @@
-<?php
+﻿<?php
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,7 @@ function print_help() {
 	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
 	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
 	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author <name>       Your name, this is used if --header is passed and%s', PHP_EOL);
+	printf('  --author <name>       Your name, this is used if --std is passed and%s', PHP_EOL);
 	printf('                        for the CREDITS file%s', PHP_EOL);
 	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
 	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);

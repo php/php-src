@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -350,7 +350,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 			}
 			switch (Z_TYPE(op_array->literals[i])) {
 				case IS_NULL:
-					/* Only checking MAY_MERGE for IS_NULL here 
+					/* Only checking MAY_MERGE for IS_NULL here
 					 * is because only IS_NULL can be default value for class type hinting(RECV_INIT). */
 					if ((info[i].flags & LITERAL_MAY_MERGE)) {
 						if (l_null < 0) {

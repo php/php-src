@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -346,7 +346,7 @@ static zval *spl_fixedarray_object_read_dimension(zval *object, zval *offset, in
 
 	if (type == BP_VAR_IS && intern->fptr_offset_has) {
 		SEPARATE_ARG_IF_REF(offset);
-		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetexists", rv, offset); 
+		zend_call_method_with_1_params(object, intern->std.ce, &intern->fptr_offset_has, "offsetexists", rv, offset);
 		if (UNEXPECTED(Z_ISUNDEF_P(rv))) {
 			zval_ptr_dtor(offset);
 			return NULL;
@@ -995,7 +995,7 @@ SPL_METHOD(SplFixedArray, current)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_fixedarray_it_funcs = {
+static const zend_object_iterator_funcs spl_fixedarray_it_funcs = {
 	spl_fixedarray_it_dtor,
 	spl_fixedarray_it_valid,
 	spl_fixedarray_it_get_current_data,
@@ -1052,7 +1052,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_splfixedarray_void, 0)
 ZEND_END_ARG_INFO()
 
-static zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
+static const zend_function_entry spl_funcs_SplFixedArray[] = { /* {{{ */
 	SPL_ME(SplFixedArray, __construct,     arginfo_splfixedarray_construct,ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, __wakeup,        arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)
 	SPL_ME(SplFixedArray, count,           arginfo_splfixedarray_void,     ZEND_ACC_PUBLIC)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -339,7 +339,7 @@ PHP_FUNCTION(socket_addrinfo_explain);
 
 /* {{{ sockets_functions[]
  */
-const zend_function_entry sockets_functions[] = {
+static const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			arginfo_socket_select)
 	PHP_FE(socket_create,			arginfo_socket_create)
 	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)

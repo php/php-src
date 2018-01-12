@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * IN THE SOFTWARE.
- */ 
+ */
 
 #ifndef PHP_WIN32_IOUTIL_H
 #define PHP_WIN32_IOUTIL_H
@@ -166,7 +166,7 @@ typedef enum {
 
 PW32IO php_win32_ioutil_normalization_result php_win32_ioutil_normalize_path_w(wchar_t **buf, size_t len, size_t *new_len);
 #ifdef PHP_EXPORTS
-/* This symbols are needed only for the DllMain, but should not be exported 
+/* This symbols are needed only for the DllMain, but should not be exported
 	or be available when used with PHP binaries. */
 BOOL php_win32_ioutil_init(void);
 #endif
@@ -177,14 +177,14 @@ __forceinline static wchar_t *php_win32_ioutil_conv_any_to_w(const char* in, siz
 {/*{{{*/
 	wchar_t *mb, *ret;
 	size_t mb_len;
-	
+
 	mb = php_win32_cp_conv_any_to_w(in, in_len, &mb_len);
 	if (!mb) {
 		return NULL;
 	}
 
 	/* Only prefix with long if it's needed. */
-	if (mb_len > _MAX_PATH) {
+	if (mb_len >= _MAX_PATH) {
 		size_t new_mb_len;
 
 		ret = (wchar_t *) malloc((mb_len + PHP_WIN32_IOUTIL_LONG_PATH_PREFIX_LENW + 1) * sizeof(wchar_t));
@@ -258,6 +258,8 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path);
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode);
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode);
 PW32IO FILE *php_win32_ioutil_fopen_w(const wchar_t *path, const wchar_t *mode);
+PW32IO wchar_t *php_win32_ioutil_realpath_w(const wchar_t *path, wchar_t *resolved);
+PW32IO wchar_t *php_win32_ioutil_realpath_w_ex0(const wchar_t *path, wchar_t *resolved, PBY_HANDLE_FILE_INFORMATION info);
 
 __forceinline static int php_win32_ioutil_access(const char *path, mode_t mode)
 {/*{{{*/
@@ -374,9 +376,6 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 {/*{{{*/
 	FILE *ret;
 	wchar_t modew[16] = {0};
-#if 0
-	wchar_t *modew;
-#endif
 	int err = 0, i = 0;
 
 	PHP_WIN32_IOUTIL_INIT_W(patha)
@@ -391,30 +390,16 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 		modew[i] = (wchar_t)modea[i];
 		i++;
 	}
-#if 0
-	modew = php_win32_cp_ascii_to_w(modea);
-	if (!modew) {
-		PHP_WIN32_IOUTIL_CLEANUP_W()
-		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-		return NULL;
-	}
-#endif
 
 	ret = php_win32_ioutil_fopen_w(pathw, modew);
 	if (!ret) {
 		err = GetLastError();
 		PHP_WIN32_IOUTIL_CLEANUP_W()
-#if 0
-		free(modew);
-#endif
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return NULL;
 	}
 
 	PHP_WIN32_IOUTIL_CLEANUP_W()
-#if 0
-	free(modew);
-#endif
 
 	return ret;
 }/*}}}*/
@@ -580,6 +565,59 @@ __forceinline static int php_win32_ioutil_mkdir(const char *path, mode_t mode)
 	}
 
 	return ret;
+}/*}}}*/
+
+#define HAVE_REALPATH 1
+PW32IO char *realpath(const char *path, char *resolved);
+
+__forceinline static char *php_win32_ioutil_realpath_ex0(const char *path, char *resolved, PBY_HANDLE_FILE_INFORMATION info)
+{/*{{{*/
+	wchar_t retw[PHP_WIN32_IOUTIL_MAXPATHLEN];
+	char *reta;
+	size_t reta_len;
+
+	PHP_WIN32_IOUTIL_INIT_W(path)
+	if (!pathw) {
+		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
+		return NULL;
+	}
+
+	if (NULL == php_win32_ioutil_realpath_w_ex0(pathw, retw, info)) {
+		DWORD err = GetLastError();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	reta = php_win32_cp_conv_w_to_any(retw, PHP_WIN32_CP_IGNORE_LEN, &reta_len);
+	if (!reta || reta_len > PHP_WIN32_IOUTIL_MAXPATHLEN) {
+		DWORD err = GetLastError();
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return NULL;
+	}
+
+	if (NULL == resolved) {
+		/* ret is expected to be either NULL or a buffer of capable size. */
+		resolved = (char *) malloc(reta_len + 1);
+		if (!resolved) {
+			free(reta);
+			PHP_WIN32_IOUTIL_CLEANUP_W()
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_NOT_ENOUGH_MEMORY);
+			return NULL;
+		}
+	}
+	memmove(resolved, reta, reta_len+1);
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+	free(reta);
+
+	return resolved;
+}/*}}}*/
+
+__forceinline static char *php_win32_ioutil_realpath(const char *path, char *resolved)
+{/*{{{*/
+	return php_win32_ioutil_realpath_ex0(path, resolved, NULL);
 }/*}}}*/
 
 #ifdef __cplusplus

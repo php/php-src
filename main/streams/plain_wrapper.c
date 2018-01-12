@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -221,7 +221,7 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
 		stream = php_stream_fopen_from_fd_int_rel(fd, "r+b", NULL);
 		if (stream) {
 			php_stdio_stream_data *self = (php_stdio_stream_data*)stream->abstract;
-			stream->wrapper = &php_plain_files_wrapper;
+			stream->wrapper = (php_stream_wrapper*)&php_plain_files_wrapper;
 			stream->orig_path = estrndup(ZSTR_VAL(opened_path), ZSTR_LEN(opened_path));
 
 			self->temp_name = opened_path;
@@ -881,6 +881,7 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 	}
 }
 
+/* This should be "const", but phpdbg overwrite it */
 PHPAPI php_stream_ops	php_stream_stdio_ops = {
 	php_stdiop_write, php_stdiop_read,
 	php_stdiop_close, php_stdiop_flush,
@@ -923,7 +924,7 @@ static int php_plain_files_dirstream_rewind(php_stream *stream, zend_off_t offse
 	return 0;
 }
 
-static php_stream_ops	php_plain_files_dirstream_ops = {
+static const php_stream_ops	php_plain_files_dirstream_ops = {
 	NULL, php_plain_files_dirstream_read,
 	php_plain_files_dirstream_close, NULL,
 	"dir",
@@ -941,7 +942,7 @@ static php_stream *php_plain_files_dir_opener(php_stream_wrapper *wrapper, const
 
 #ifdef HAVE_GLOB
 	if (options & STREAM_USE_GLOB_DIR_OPEN) {
-		return php_glob_stream_wrapper.wops->dir_opener(&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
+		return php_glob_stream_wrapper.wops->dir_opener((php_stream_wrapper*)&php_glob_stream_wrapper, path, mode, options, opened_path, context STREAMS_REL_CC);
 	}
 #endif
 
@@ -1409,7 +1410,7 @@ static int php_plain_files_metadata(php_stream_wrapper *wrapper, const char *url
 }
 
 
-static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
+static const php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_stream_opener,
 	NULL,
 	NULL,
@@ -1423,7 +1424,7 @@ static php_stream_wrapper_ops php_plain_files_wrapper_ops = {
 	php_plain_files_metadata
 };
 
-PHPAPI php_stream_wrapper php_plain_files_wrapper = {
+PHPAPI const php_stream_wrapper php_plain_files_wrapper = {
 	&php_plain_files_wrapper_ops,
 	NULL,
 	0

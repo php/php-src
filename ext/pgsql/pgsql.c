@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -594,7 +594,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ pgsql_functions[]
  */
-const zend_function_entry pgsql_functions[] = {
+static const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
 	PHP_FE(pg_connect,		arginfo_pg_connect)
 	PHP_FE(pg_pconnect,		arginfo_pg_pconnect)
@@ -1658,26 +1658,21 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
-				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
-				add_assoc_string(return_value, "server_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
-				add_assoc_string(return_value, "client_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
-				add_assoc_string(return_value, "is_superuser", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
-				add_assoc_string(return_value, "session_authorization", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
-				add_assoc_string(return_value, "DateStyle", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
-				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
-				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
-				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
-				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "application_name");
-				add_assoc_string(return_value, "application_name", tmp ? tmp : "");
+
+#define PHP_PQ_COPY_PARAM(_x) tmp = (char*)PQparameterStatus(pgsql, _x); \
+	if(tmp) add_assoc_string(return_value, _x, tmp); \
+	else add_assoc_null(return_value, _x);
+
+				PHP_PQ_COPY_PARAM("server_encoding");
+				PHP_PQ_COPY_PARAM("client_encoding");
+				PHP_PQ_COPY_PARAM("is_superuser");
+				PHP_PQ_COPY_PARAM("session_authorization");
+				PHP_PQ_COPY_PARAM("DateStyle");
+				PHP_PQ_COPY_PARAM("IntervalStyle");
+				PHP_PQ_COPY_PARAM("TimeZone");
+				PHP_PQ_COPY_PARAM("integer_datetimes");
+				PHP_PQ_COPY_PARAM("standard_conforming_strings");
+				PHP_PQ_COPY_PARAM("application_name");
 			}
 #endif
 #endif
@@ -2845,7 +2840,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				}
 			}
 
-			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);

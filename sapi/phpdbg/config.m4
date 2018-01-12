@@ -46,6 +46,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
+                \$(PHP_FRAMEWORKS) \
          -o \$(BUILD_BINARY)"
 
   BUILD_PHPDBG_SHARED="\$(LIBTOOL) --mode=link \

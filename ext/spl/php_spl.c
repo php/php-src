@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -416,7 +416,6 @@ PHP_FUNCTION(spl_autoload_call)
 		fci.no_separation = 1;
 
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
-		fcic.initialized = 1;
 
 		zend_hash_internal_pointer_reset_ex(SPL_G(autoload_functions), &pos);
 		while (zend_hash_get_current_key_ex(SPL_G(autoload_functions), &func_name, &num_idx, &pos) == HASH_KEY_IS_STRING) {
@@ -947,7 +946,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ spl_functions
  */
-const zend_function_entry spl_functions[] = {
+static const zend_function_entry spl_functions[] = {
 	PHP_FE(spl_classes,             arginfo_spl_classes)
 	PHP_FE(spl_autoload,            arginfo_spl_autoload)
 	PHP_FE(spl_autoload_extensions, arginfo_spl_autoload_extensions)

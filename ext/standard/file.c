@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,6 +50,7 @@
 # include "win32/param.h"
 # include "win32/winutil.h"
 # include "win32/fnmatch.h"
+# include "win32/ioutil.h"
 #else
 # if HAVE_SYS_PARAM_H
 #  include <sys/param.h>

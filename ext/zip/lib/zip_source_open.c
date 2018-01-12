@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -58,7 +58,7 @@ zip_source_open(zip_source_t *src)
 		return -1;
 	    }
 	}
-	
+
 	if (_zip_source_call(src, NULL, 0, ZIP_SOURCE_OPEN) < 0) {
 	    if (ZIP_SOURCE_IS_LAYERED(src)) {
 		zip_source_close(src->src);
@@ -68,6 +68,6 @@ zip_source_open(zip_source_t *src)
     }
 
     src->open_count++;
-    
+
     return 0;
 }

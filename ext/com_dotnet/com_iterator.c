@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -126,7 +126,7 @@ static int com_iter_move_forwards(zend_object_iterator *iter)
 }
 
 
-static zend_object_iterator_funcs com_iter_funcs = {
+static const zend_object_iterator_funcs com_iter_funcs = {
 	com_iter_dtor,
 	com_iter_valid,
 	com_iter_get_data,

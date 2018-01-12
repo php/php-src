@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -25,7 +25,7 @@ BEGIN_EXTERN_C()
 void phar_dostat(phar_archive_data *phar, phar_entry_info *data, php_stream_statbuf *ssb, zend_bool is_dir);
 END_EXTERN_C()
 
-php_stream_ops phar_dir_ops = {
+const php_stream_ops phar_dir_ops = {
 	phar_dir_write, /* write */
 	phar_dir_read,  /* read  */
 	phar_dir_close, /* close */

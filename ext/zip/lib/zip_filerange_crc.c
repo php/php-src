@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -55,7 +55,7 @@ _zip_filerange_crc(zip_source_t *src, zip_uint64_t start, zip_uint64_t len, uLon
 	_zip_error_set_from_source(error, src);
 	return -1;
     }
-    
+
     while (len > 0) {
 	n = (zip_int64_t)(len > BUFSIZE ? BUFSIZE : len);
 	if ((n = zip_source_read(src, buf, (zip_uint64_t)n)) < 0) {

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -170,7 +170,6 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 				i++;
 			}
 			*p++ = ')';
-			*p++ = '\0';
 
 			it = (zend_regexp_list*)malloc(sizeof(zend_regexp_list));
 			if (!it) {
@@ -179,12 +178,19 @@ static void zend_accel_blacklist_update_regexp(zend_blacklist *blacklist)
 			}
 			it->next = NULL;
 
-			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, PCRE2_ZERO_TERMINATED, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
+			if ((it->re = pcre2_compile((PCRE2_SPTR)regexp, p - regexp, PCRE2_NO_AUTO_CAPTURE, &errnumber, &pcre_error_offset, cctx)) == NULL) {
 				free(it);
 				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
 				blacklist_report_regexp_error((char *)pcre_error, pcre_error_offset);
 				return;
 			}
+#ifdef HAVE_PCRE_JIT_SUPPORT
+			if (0 > pcre2_jit_compile(it->re, PCRE2_JIT_COMPLETE)) {
+				/* Don't return here, even JIT could fail to compile, the pattern is still usable. */
+				pcre2_get_error_message(errnumber, pcre_error, sizeof(pcre_error));
+				zend_accel_error(ACCEL_LOG_WARNING, "Blacklist JIT compilation failed, %s\n", pcre_error);
+			}
+#endif
 			/* prepare for the next iteration */
 			p = regexp + 2;
 			*regexp_list_it = it;
@@ -337,7 +343,7 @@ void zend_accel_blacklist_load(zend_blacklist *blacklist, char *filename)
 }
 #endif
 
-zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path)
+zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *verify_path, size_t verify_path_len)
 {
 	int ret = 0;
 	zend_regexp_list *regexp_list_it = blacklist->regexp_list;
@@ -352,7 +358,7 @@ zend_bool zend_accel_blacklist_is_blacklisted(zend_blacklist *blacklist, char *v
 			/* Alloc failed, but next one could still come through and match. */
 			continue;
 		}
-		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, strlen(verify_path), 0, 0, match_data, mctx);
+		int rc = pcre2_match(regexp_list_it->re, (PCRE2_SPTR)verify_path, verify_path_len, 0, 0, match_data, mctx);
 		if (rc >= 0) {
 			ret = 1;
 			php_pcre_free_match_data(match_data);

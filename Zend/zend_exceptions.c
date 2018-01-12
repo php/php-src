@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -743,7 +743,7 @@ ZEND_METHOD(exception, __toString)
 /* }}} */
 
 /** {{{ Throwable method definition */
-const zend_function_entry zend_funcs_throwable[] = {
+static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
 	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
 	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)

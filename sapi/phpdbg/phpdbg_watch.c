@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -429,7 +429,7 @@ void phpdbg_update_watch_ref(phpdbg_watchpoint_t *watch) {
 			phpdbg_store_watchpoint_btree(&coll->ref);
 			phpdbg_activate_watchpoint(&coll->ref);
 			phpdbg_watch_backup_data(&coll->ref);
-			
+
 			zend_hash_init(&coll->parents, 8, shitty stupid parameter, NULL, 0);
 			zend_hash_index_add_ptr(&PHPDBG_G(watch_collisions), (zend_ulong) watch->ref, coll);
 		}

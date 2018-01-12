@@ -1,8 +1,8 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,7 +64,7 @@
 #endif
 
 #ifndef ZEND_EXT_API
-# if WIN32|WINNT
+# ifdef ZEND_WIN32
 #  define ZEND_EXT_API __declspec(dllexport)
 # elif defined(__GNUC__) && __GNUC__ >= 4
 #  define ZEND_EXT_API __attribute__ ((visibility("default")))
@@ -177,7 +177,6 @@ typedef struct _zend_accel_directives {
 	zend_bool      save_comments;
 	zend_bool      protect_memory;
 	zend_bool      file_override_enabled;
-	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
 #ifndef ZEND_WIN32

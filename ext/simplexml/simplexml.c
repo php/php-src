@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1857,6 +1857,9 @@ static int cast_object(zval *object, int type, char *contents)
 		case IS_DOUBLE:
 			convert_to_double(object);
 			break;
+		case _IS_NUMBER:
+			convert_scalar_to_number(object);
+			break;
 		default:
 			return FAILURE;
 	}
@@ -1902,10 +1905,6 @@ static int sxe_object_cast_ex(zval *readobj, zval *writeobj, int type)
 				contents = xmlNodeListGetString((xmlDocPtr) sxe->document->ptr, sxe->node->node->children, 1);
 			}
 		}
-	}
-
-	if (readobj == writeobj) {
-		zval_ptr_dtor(readobj);
 	}
 
 	rv = cast_object(writeobj, type, (char *)contents);
@@ -2335,7 +2334,7 @@ SXE_METHOD(__construct)
 }
 /* }}} */
 
-zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
+static const zend_object_iterator_funcs php_sxe_iterator_funcs = { /* {{{ */
 	php_sxe_iterator_dtor,
 	php_sxe_iterator_valid,
 	php_sxe_iterator_current_data,
@@ -2653,7 +2652,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_addchild, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry simplexml_functions[] = { /* {{{ */
+static const zend_function_entry simplexml_functions[] = { /* {{{ */
 	PHP_FE(simplexml_load_file, 	arginfo_simplexml_load_file)
 	PHP_FE(simplexml_load_string,	arginfo_simplexml_load_string)
 	PHP_FE(simplexml_import_dom,	arginfo_simplexml_import_dom)

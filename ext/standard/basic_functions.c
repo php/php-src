@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,6 +40,7 @@
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
 #include "win32/time.h"
+#include "win32/ioutil.h"
 #endif
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -1452,6 +1453,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
 ZEND_END_ARG_INFO()
 /* }}} */
+/* {{{ hrtime.c */
+ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
+	ZEND_ARG_INFO(0, get_as_number)
+ZEND_END_ARG_INFO()
+/* }}} */
 /* {{{ html.c */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_htmlspecialchars, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
@@ -2713,7 +2719,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
-const zend_function_entry basic_functions[] = { /* {{{ */
+static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
 	PHP_FE(hex2bin,															arginfo_hex2bin)
@@ -2984,6 +2990,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #ifdef HAVE_GETRUSAGE
 	PHP_FE(getrusage,														arginfo_getrusage)
 #endif
+
+	PHP_FE(hrtime,															arginfo_hrtime)
 
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(uniqid,															arginfo_uniqid)
@@ -3715,6 +3723,8 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 
 	BASIC_MINIT_SUBMODULE(random)
 
+	BASIC_MINIT_SUBMODULE(hrtime)
+
 	return SUCCESS;
 }
 /* }}} */
@@ -4047,7 +4057,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
@@ -5352,26 +5362,29 @@ PHP_FUNCTION(highlight_string)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	char *varname, *str;
-	size_t varname_len, len;
+	zend_string *varname, *val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(varname, varname_len)
+		Z_PARAM_STR(varname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	str = zend_ini_string(varname, (uint32_t)varname_len, 0);
+	val = zend_ini_get_value(varname);
 
-	if (!str) {
+	if (!val) {
 		RETURN_FALSE;
 	}
 
-	len = strlen(str);
-	if (len == 0) {
-		RETURN_EMPTY_STRING();
-	} else if (len == 1) {
-		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)str[0]));
+	if (ZSTR_IS_INTERNED(val)) {
+		RETVAL_INTERNED_STR(val);
+	} else if (ZSTR_LEN(val) == 0) {
+		RETVAL_EMPTY_STRING();
+	} else if (ZSTR_LEN(val) == 1) {
+		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+		ZVAL_NEW_STR(return_value, zend_string_copy(val));
+	} else {
+		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 	}
-	RETURN_STRINGL(str, len);
 }
 /* }}} */
 
@@ -5471,25 +5484,27 @@ PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
 	zend_string *new_value;
-	char *old_value;
+	zend_string *val;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(varname)
 		Z_PARAM_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string(ZSTR_VAL(varname), ZSTR_LEN(varname), 0);
+	val = zend_ini_get_value(varname);
 
 	/* copy to return here, because alter might free it! */
-	if (old_value) {
-		size_t len = strlen(old_value);
-
-		if (len == 0) {
+	if (val) {
+		if (ZSTR_IS_INTERNED(val)) {
+			RETVAL_INTERNED_STR(val);
+		} else if (ZSTR_LEN(val) == 0) {
 			RETVAL_EMPTY_STRING();
-		} else if (len == 1) {
-			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)old_value[0]));
+		} else if (ZSTR_LEN(val) == 1) {
+			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+		} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+			ZVAL_NEW_STR(return_value, zend_string_copy(val));
 		} else {
-			RETVAL_STRINGL(old_value, len);
+			ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 		}
 	} else {
 		RETVAL_FALSE;

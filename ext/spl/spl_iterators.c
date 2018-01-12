@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,7 @@ PHPAPI zend_class_entry *spl_ce_RecursiveTreeIterator;
 ZEND_BEGIN_ARG_INFO(arginfo_recursive_it_void, 0)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry spl_funcs_RecursiveIterator[] = {
+static const zend_function_entry spl_funcs_RecursiveIterator[] = {
 	SPL_ABSTRACT_ME(RecursiveIterator, hasChildren,  arginfo_recursive_it_void)
 	SPL_ABSTRACT_ME(RecursiveIterator, getChildren,  arginfo_recursive_it_void)
 	PHP_FE_END
@@ -465,7 +465,7 @@ static zend_object_iterator *spl_recursive_it_get_iterator(zend_class_entry *ce,
 	return (zend_object_iterator*)iterator;
 }
 
-zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
+static const zend_object_iterator_funcs spl_recursive_it_iterator_funcs = {
 	spl_recursive_it_dtor,
 	spl_recursive_it_valid,
 	spl_recursive_it_get_current_data,

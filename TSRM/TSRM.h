@@ -143,6 +143,7 @@ TSRM_API void tsrm_free_interpreter_context(void *context);
 
 TSRM_API void *tsrm_get_ls_cache(void);
 TSRM_API uint8_t tsrm_is_main_thread(void);
+TSRM_API const char *tsrm_api_name(void);
 
 #if defined(__cplusplus) && __cplusplus > 199711L
 # define TSRM_TLS thread_local
@@ -168,8 +169,10 @@ TSRM_API uint8_t tsrm_is_main_thread(void);
 #define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
 #if ZEND_DEBUG
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()
 #else
 #define TSRMLS_CACHE_UPDATE() if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()  TSRMLS_CACHE = NULL
 #endif
 #define TSRMLS_CACHE _tsrm_ls_cache
 

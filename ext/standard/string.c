@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1213,7 +1213,11 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 	zend_string  *str;
 	char         *cptr;
 	size_t        len = 0;
-	zend_string **strings, **strptr;
+	struct {
+		zend_string *str;
+		zend_long    lval;
+	} *strings, *ptr;
+	ALLOCA_FLAG(use_heap)
 
 	numelems = zend_hash_num_elements(Z_ARRVAL_P(pieces));
 
@@ -1226,15 +1230,20 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	strings = emalloc((sizeof(zend_long) + sizeof(zend_string *)) * numelems);
-	strptr = strings - 1;
+	ptr = strings = do_alloca((sizeof(*strings)) * numelems, use_heap);
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pieces), tmp) {
-		if (Z_TYPE_P(tmp) == IS_LONG) {
+		if (EXPECTED(Z_TYPE_P(tmp) == IS_STRING)) {
+			ptr->str = Z_STR_P(tmp);
+			len += ZSTR_LEN(ptr->str);
+			ptr->lval = 0;
+			ptr++;
+		} else if (UNEXPECTED(Z_TYPE_P(tmp) == IS_LONG)) {
 			zend_long val = Z_LVAL_P(tmp);
 
-			*++strptr = NULL;
-			((zend_long *) (strings + numelems))[strptr - strings] = Z_LVAL_P(tmp);
+			ptr->str = NULL;
+			ptr->lval = val;
+			ptr++;
 			if (val <= 0) {
 				len++;
 			}
@@ -1243,43 +1252,42 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 				len++;
 			}
 		} else {
-			*++strptr = zval_get_string(tmp);
-			len += ZSTR_LEN(*strptr);
+			ptr->str = zval_get_string_func(tmp);
+			len += ZSTR_LEN(ptr->str);
+			ptr->lval = 1;
+			ptr++;
 		}
 	} ZEND_HASH_FOREACH_END();
+
 	/* numelems can not be 0, we checked above */
 	str = zend_string_safe_alloc(numelems - 1, ZSTR_LEN(glue), len, 0);
 	cptr = ZSTR_VAL(str) + ZSTR_LEN(str);
 	*cptr = 0;
 
-	do {
-		if (*strptr) {
-			cptr -= ZSTR_LEN(*strptr);
-			memcpy(cptr, ZSTR_VAL(*strptr), ZSTR_LEN(*strptr));
-			zend_string_release(*strptr);
+	while (1) {
+		ptr--;
+		if (EXPECTED(ptr->str)) {
+			cptr -= ZSTR_LEN(ptr->str);
+			memcpy(cptr, ZSTR_VAL(ptr->str), ZSTR_LEN(ptr->str));
+			if (ptr->lval) {
+				zend_string_release(ptr->str);
+			}
 		} else {
 			char *oldPtr = cptr;
 			char oldVal = *cptr;
-			zend_long val = ((zend_long *) (strings + numelems))[strptr - strings];
-			cptr = zend_print_long_to_buf(cptr, val);
+			cptr = zend_print_long_to_buf(cptr, ptr->lval);
 			*oldPtr = oldVal;
+		}
+
+		if (ptr == strings) {
+			break;
 		}
 
 		cptr -= ZSTR_LEN(glue);
 		memcpy(cptr, ZSTR_VAL(glue), ZSTR_LEN(glue));
-	} while (--strptr > strings);
-
-	if (*strptr) {
-		memcpy(ZSTR_VAL(str), ZSTR_VAL(*strptr), ZSTR_LEN(*strptr));
-		zend_string_release(*strptr);
-	} else {
-		char *oldPtr = cptr;
-		char oldVal = *cptr;
-		zend_print_long_to_buf(cptr, ((zend_long *) (strings + numelems))[strptr - strings]);
-		*oldPtr = oldVal;
 	}
 
-	efree(strings);
+	free_alloca(strings, use_heap);
 	RETURN_NEW_STR(str);
 }
 /* }}} */
@@ -2889,7 +2897,7 @@ PHP_FUNCTION(ucwords)
 
 /* {{{ php_strtr
  */
-PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size_t trlen)
+PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen)
 {
 	size_t i;
 
@@ -2924,7 +2932,7 @@ PHPAPI char *php_strtr(char *str, size_t len, char *str_from, char *str_to, size
 
 /* {{{ php_strtr_ex
  */
-static zend_string *php_strtr_ex(zend_string *str, char *str_from, char *str_to, size_t trlen)
+static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const char *str_to, size_t trlen)
 {
 	zend_string *new_str = NULL;
 	size_t i;
@@ -3467,15 +3475,13 @@ PHP_FUNCTION(strtr)
 			RETURN_STR_COPY(str);
 		} else if (zend_hash_num_elements(pats) == 1) {
 			zend_long num_key;
-			zend_string *str_key, *replace, *tmp_replace;
-			zval *entry, tmp;
+			zend_string *str_key, *tmp_str, *replace, *tmp_replace;
+			zval *entry;
 
 			ZEND_HASH_FOREACH_KEY_VAL(pats, num_key, str_key, entry) {
-				ZVAL_UNDEF(&tmp);
+				tmp_str = NULL;
 				if (UNEXPECTED(!str_key)) {
-					ZVAL_LONG(&tmp, num_key);
-					convert_to_string(&tmp);
-					str_key = Z_STR(tmp);
+					str_key = tmp_str = zend_long_to_str(num_key);
 				}
 				replace = zval_get_tmp_string(entry, &tmp_replace);
 				if (ZSTR_LEN(str_key) < 1) {
@@ -3493,8 +3499,8 @@ PHP_FUNCTION(strtr)
 								ZSTR_VAL(str_key), ZSTR_LEN(str_key),
 								ZSTR_VAL(replace), ZSTR_LEN(replace), &dummy));
 				}
+				zend_tmp_string_release(tmp_str);
 				zend_tmp_string_release(tmp_replace);
-				zval_dtor(&tmp);
 				return;
 			} ZEND_HASH_FOREACH_END();
 		} else {
@@ -5276,7 +5282,7 @@ PHP_FUNCTION(substr_count)
 	char *haystack, *needle;
 	zend_long offset = 0, length = 0;
 	int ac = ZEND_NUM_ARGS();
-	int count = 0;
+	zend_long count = 0;
 	size_t haystack_len, needle_len;
 	char *p, *endp, cmp;
 
@@ -5443,8 +5449,8 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
-static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
 /* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */
@@ -5829,7 +5835,7 @@ static zend_string *php_utf8_decode(const char *s, size_t len)
 /* }}} */
 
 
-/* {{{ proto string utf8_encode(string data) 
+/* {{{ proto string utf8_encode(string data)
    Encodes an ISO-8859-1 string to UTF-8 */
 PHP_FUNCTION(utf8_encode)
 {
@@ -5844,7 +5850,7 @@ PHP_FUNCTION(utf8_encode)
 }
 /* }}} */
 
-/* {{{ proto string utf8_decode(string data) 
+/* {{{ proto string utf8_decode(string data)
    Converts a UTF-8 encoded string to ISO-8859-1 */
 PHP_FUNCTION(utf8_decode)
 {

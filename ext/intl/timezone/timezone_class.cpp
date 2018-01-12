@@ -454,7 +454,7 @@ ZEND_END_ARG_INFO()
 /* {{{ TimeZone_class_functions
  * Every 'IntlTimeZone' class method has an entry in this table
  */
-static zend_function_entry TimeZone_class_functions[] = {
+static const zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)

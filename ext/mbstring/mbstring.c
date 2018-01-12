@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -518,7 +518,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ zend_function_entry mbstring_functions[] */
-const zend_function_entry mbstring_functions[] = {
+static const zend_function_entry mbstring_functions[] = {
 	PHP_FE(mb_convert_case,			arginfo_mb_convert_case)
 	PHP_FE(mb_strtoupper,			arginfo_mb_strtoupper)
 	PHP_FE(mb_strtolower,			arginfo_mb_strtolower)
@@ -588,7 +588,7 @@ zend_module_entry mbstring_module_entry = {
 /* }}} */
 
 /* {{{ static sapi_post_entry php_post_entries[] */
-static sapi_post_entry php_post_entries[] = {
+static const sapi_post_entry php_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data,	php_std_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
@@ -666,7 +666,7 @@ static void _php_mb_allocators_pfree(void *ptr)
 	pefree(ptr, 1);
 }
 
-static mbfl_allocators _php_mb_allocators = {
+static const mbfl_allocators _php_mb_allocators = {
 	_php_mb_allocators_malloc,
 	_php_mb_allocators_realloc,
 	_php_mb_allocators_calloc,
@@ -678,7 +678,7 @@ static mbfl_allocators _php_mb_allocators = {
 /* }}} */
 
 /* {{{ static sapi_post_entry mbstr_post_entries[] */
-static sapi_post_entry mbstr_post_entries[] = {
+static const sapi_post_entry mbstr_post_entries[] = {
 	{ DEFAULT_POST_CONTENT_TYPE, sizeof(DEFAULT_POST_CONTENT_TYPE)-1, sapi_read_standard_form_data, php_mb_post_handler },
 	{ MULTIPART_CONTENT_TYPE,    sizeof(MULTIPART_CONTENT_TYPE)-1,    NULL,                         rfc1867_post_handler },
 	{ NULL, 0, NULL, NULL }
@@ -1562,7 +1562,7 @@ PHP_MINIT_FUNCTION(mbstring)
 #if defined(COMPILE_DL_MBSTRING) && defined(ZTS)
 ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	__mbfl_allocators = &_php_mb_allocators;
+	__mbfl_allocators = (mbfl_allocators*)&_php_mb_allocators;
 
 	REGISTER_INI_ENTRIES();
 

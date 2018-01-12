@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -243,7 +243,7 @@ err:
 }
 /* }}} */
 
-zend_object_iterator_funcs php_dom_iterator_funcs = {
+static const zend_object_iterator_funcs php_dom_iterator_funcs = {
 	php_dom_iterator_dtor,
 	php_dom_iterator_valid,
 	php_dom_iterator_current_data,

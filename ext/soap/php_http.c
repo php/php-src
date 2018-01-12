@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -826,7 +826,7 @@ try_again:
 					zend_ulong numindx;
 					int res = zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, &numindx);
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-					
+
 					if (res == HASH_KEY_IS_STRING && Z_TYPE_P(data) == IS_ARRAY) {
 					  zval *value;
 

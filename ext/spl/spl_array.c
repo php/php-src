@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1155,7 +1155,7 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_array_it_funcs = {
+static const zend_object_iterator_funcs spl_array_it_funcs = {
 	spl_array_it_dtor,
 	spl_array_it_valid,
 	spl_array_it_get_current_data,
@@ -1662,6 +1662,11 @@ SPL_METHOD(Array, hasChildren)
 		RETURN_FALSE;
 	}
 
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
+	}
+
+	ZVAL_DEREF(entry);
 	RETURN_BOOL(Z_TYPE_P(entry) == IS_ARRAY || (Z_TYPE_P(entry) == IS_OBJECT && (intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) == 0));
 }
 /* }}} */
@@ -1686,6 +1691,11 @@ SPL_METHOD(Array, getChildren)
 		return;
 	}
 
+	if (Z_TYPE_P(entry) == IS_INDIRECT) {
+		entry = Z_INDIRECT_P(entry);
+	}
+
+	ZVAL_DEREF(entry);
 	if (Z_TYPE_P(entry) == IS_OBJECT) {
 		if ((intern->ar_flags & SPL_ARRAY_CHILD_ARRAYS_ONLY) != 0) {
 			return;
@@ -2024,15 +2034,15 @@ PHP_MINIT_FUNCTION(spl_array)
 	memcpy(&spl_handler_ArrayIterator, &spl_handler_ArrayObject, sizeof(zend_object_handlers));
 	spl_ce_ArrayIterator->get_iterator = spl_array_get_iterator;
 
-	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, spl_funcs_RecursiveArrayIterator);
-	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
-	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
-
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayObject,   "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
 
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "STD_PROP_LIST",    SPL_ARRAY_STD_PROP_LIST);
 	REGISTER_SPL_CLASS_CONST_LONG(ArrayIterator, "ARRAY_AS_PROPS",   SPL_ARRAY_ARRAY_AS_PROPS);
+
+	REGISTER_SPL_SUB_CLASS_EX(RecursiveArrayIterator, ArrayIterator, spl_array_object_new, spl_funcs_RecursiveArrayIterator);
+	REGISTER_SPL_IMPLEMENTS(RecursiveArrayIterator, RecursiveIterator);
+	spl_ce_RecursiveArrayIterator->get_iterator = spl_array_get_iterator;
 
 	REGISTER_SPL_CLASS_CONST_LONG(RecursiveArrayIterator, "CHILD_ARRAYS_ONLY", SPL_ARRAY_CHILD_ARRAYS_ONLY);
 

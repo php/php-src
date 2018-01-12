@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,9 @@
 #include "zend_call_graph.h"
 #include "zend_func_info.h"
 #include "zend_inference.h"
+#ifdef _WIN32
+#include "win32/ioutil.h"
+#endif
 
 typedef uint32_t (*info_func_t)(const zend_call_info *call_info, const zend_ssa *ssa);
 
@@ -1523,9 +1526,9 @@ static const func_info_t func_infos[] = {
 	F0("filter_id",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 
 	/* ext/gettext */
-	F1("textdomain",							MAY_BE_NULL | MAY_BE_STRING),	
-	F1("gettext",								MAY_BE_NULL | MAY_BE_STRING),	
-	F1("_",										MAY_BE_NULL | MAY_BE_STRING),	
+	F1("textdomain",							MAY_BE_NULL | MAY_BE_STRING),
+	F1("gettext",								MAY_BE_NULL | MAY_BE_STRING),
+	F1("_",										MAY_BE_NULL | MAY_BE_STRING),
 	F1("dgettext",								MAY_BE_NULL | MAY_BE_STRING),
 	F1("dcgettext",								MAY_BE_NULL | MAY_BE_STRING),
 	F1("bindtextdomain",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -157,8 +157,8 @@ typedef struct _php_ps_globals {
 	char *cookie_domain;
 	zend_bool  cookie_secure;
 	zend_bool  cookie_httponly;
-	ps_module *mod;
-	ps_module *default_mod;
+	const ps_module *mod;
+	const ps_module *default_mod;
 	void *mod_data;
 	php_session_status session_status;
 	zend_long gc_probability;
@@ -260,7 +260,7 @@ PHPAPI void php_add_session_var(zend_string *name);
 PHPAPI zval *php_set_session_var(zend_string *name, zval *state_val, php_unserialize_data_t *var_hash);
 PHPAPI zval *php_get_session_var(zend_string *name);
 
-PHPAPI int php_session_register_module(ps_module *);
+PHPAPI int php_session_register_module(const ps_module *);
 
 PHPAPI int php_session_register_serializer(const char *name,
 	        zend_string *(*encode)(PS_SERIALIZER_ENCODE_ARGS),
@@ -270,7 +270,7 @@ PHPAPI void php_session_set_id(char *id);
 PHPAPI int php_session_start(void);
 PHPAPI int php_session_flush(int write);
 
-PHPAPI ps_module *_php_find_ps_module(char *name);
+PHPAPI const ps_module *_php_find_ps_module(char *name);
 PHPAPI const ps_serializer *_php_find_ps_serializer(char *name);
 
 PHPAPI int php_session_valid_key(const char *key);

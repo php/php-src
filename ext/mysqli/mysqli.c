@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -498,7 +498,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API mysqli_reverse_api = {
+static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };
@@ -1303,7 +1303,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				}
 			}
 
-			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);

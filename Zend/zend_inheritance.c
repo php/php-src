@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -896,18 +896,24 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			do {
 				dst--;
 				src--;
-				ZVAL_MAKE_REF(src);
-				ZVAL_COPY_VALUE(dst, src);
-				Z_ADDREF_P(dst);
+				if (Z_ISREF_P(src)) {
+					Z_ADDREF_P(src);
+				} else {
+					ZVAL_MAKE_REF_EX(src, 2);
+				}
+				ZVAL_REF(dst, Z_REF_P(src));
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
 			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
 			do {
 				dst--;
 				src--;
-				ZVAL_MAKE_REF(src);
-				ZVAL_COPY_VALUE(dst, src);
-				Z_ADDREF_P(dst);
+				if (Z_ISREF_P(src)) {
+					Z_ADDREF_P(src);
+				} else {
+					ZVAL_MAKE_REF_EX(src, 2);
+				}
+				ZVAL_REF(dst, Z_REF_P(src));
 				if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
@@ -1595,31 +1601,43 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 					flags |= ZEND_ACC_CHANGED;
 				} else {
 					not_compatible = 1;
-					
+
 					if ((coliding_prop->flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))
 						== (flags & (ZEND_ACC_PPP_MASK | ZEND_ACC_STATIC))) {
 						/* the flags are identical, thus, the properties may be compatible */
-						zval op1, op2;
+						zval *op1, *op2;
+						zval op1_tmp, op2_tmp;
 
 						if (flags & ZEND_ACC_STATIC) {
-							ZVAL_COPY_OR_DUP(&op1, &ce->default_static_members_table[coliding_prop->offset]);
-							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_static_members_table[property_info->offset]);
+							op1 = &ce->default_static_members_table[coliding_prop->offset];
+							op2 = &ce->traits[i]->default_static_members_table[property_info->offset];
+							ZVAL_DEREF(op1);
+							ZVAL_DEREF(op2);
 						} else {
-							ZVAL_COPY_OR_DUP(&op1, &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)]);
-							ZVAL_COPY_OR_DUP(&op2, &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)]);
+							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)];
+							op2 = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 						}
 
 						/* if any of the values is a constant, we try to resolve it */
-						if (UNEXPECTED(Z_TYPE(op1) == IS_CONSTANT_AST)) {
-							zval_update_constant_ex(&op1, ce);
+						if (UNEXPECTED(Z_TYPE_P(op1) == IS_CONSTANT_AST)) {
+							ZVAL_COPY_OR_DUP(&op1_tmp, op1);
+							zval_update_constant_ex(&op1_tmp, ce);
+							op1 = &op1_tmp;
 						}
-						if (UNEXPECTED(Z_TYPE(op2) == IS_CONSTANT_AST)) {
-							zval_update_constant_ex(&op2, ce);
+						if (UNEXPECTED(Z_TYPE_P(op2) == IS_CONSTANT_AST)) {
+							ZVAL_COPY_OR_DUP(&op2_tmp, op2);
+							zval_update_constant_ex(&op2_tmp, ce);
+							op2 = &op2_tmp;
 						}
 
-						not_compatible = fast_is_not_identical_function(&op1, &op2);
-						zval_ptr_dtor_nogc(&op1);
-						zval_ptr_dtor_nogc(&op2);
+						not_compatible = fast_is_not_identical_function(op1, op2);
+
+						if (op1 == &op1_tmp) {
+							zval_ptr_dtor_nogc(&op1_tmp);
+						}
+						if (op2 == &op2_tmp) {
+							zval_ptr_dtor_nogc(&op2_tmp);
+						}
 					}
 
 					if (not_compatible) {

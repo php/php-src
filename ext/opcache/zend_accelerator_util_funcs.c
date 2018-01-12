@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -195,7 +195,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		nIndex = p->h | ht->nTableMask;
 
 		/* Insert into hash collision list */
@@ -246,7 +246,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -304,7 +304,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -478,7 +478,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -522,7 +522,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -565,7 +565,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -606,7 +606,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	__asm__ volatile (
 		".align 16\n\t"
-		".L0%=:\n\t"
+		".LL0%=:\n\t"
 		"prefetchnta 0x40(%1)\n\t"
 		"movdqa (%1), %%xmm0\n\t"
 		"movdqa 0x10(%1), %%xmm1\n\t"
@@ -618,7 +618,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
 		"addl $0x40, %1\n\t"
 		"subl $0x40, %0\n\t"
-		"ja .L0%="
+		"ja .LL0%="
 		: "+r"(size),
 		  "+r"(src)
 		: "r"(delta)
@@ -631,7 +631,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 
 	__asm__ volatile (
 		".align 16\n\t"
-		".L0%=:\n\t"
+		".LL0%=:\n\t"
 		"prefetchnta 0x40(%1)\n\t"
 		"movdqa (%1), %%xmm0\n\t"
 		"movdqa 0x10(%1), %%xmm1\n\t"
@@ -643,7 +643,7 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 		"movdqa %%xmm3, 0x30(%1,%2)\n\t"
 		"addq $0x40, %1\n\t"
 		"subq $0x40, %0\n\t"
-		"ja .L0%="
+		"ja .LL0%="
 		: "+r"(size),
 		  "+r"(src)
 		: "r"(delta)
@@ -713,7 +713,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		if (persistent_script->compiler_halt_offset != 0 &&
 		    persistent_script->script.filename) {
 			zend_string *name;
-			char haltoff[] = "__COMPILER_HALT_OFFSET__";
+			static const char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 			name = zend_mangle_property_name(haltoff, sizeof(haltoff) - 1, ZSTR_VAL(persistent_script->script.filename), ZSTR_LEN(persistent_script->script.filename), 0);
 			if (!zend_hash_exists(EG(zend_constants), name)) {
@@ -733,10 +733,10 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-	if (op_array->early_binding != (uint32_t)-1) {
+	if (persistent_script->script.first_early_binding_opline != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->script.filename;
-		zend_do_delayed_early_binding(op_array);
+		zend_do_delayed_early_binding(op_array, persistent_script->script.first_early_binding_opline);
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 

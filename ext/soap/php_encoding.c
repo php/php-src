@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -140,7 +140,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 	} \
 }
 
-encode defaultEncoding[] = {
+const encode defaultEncoding[] = {
 	{{UNKNOWN_TYPE, NULL, NULL, NULL, NULL}, guess_zval_convert, guess_xml_convert},
 
 	{{IS_NULL, "nil", XSI_NAMESPACE, NULL, NULL}, to_zval_null, to_xml_null},
@@ -1343,6 +1343,7 @@ static void model_to_zval_object(zval *ret, sdlContentModelPtr model, xmlNodePtr
 						array_init(&array);
 						add_next_index_zval(&array, &val);
 						do {
+							ZVAL_NULL(&val);
 							if (node && node->children && node->children->content) {
 								if (model->u.element->fixed && strcmp(model->u.element->fixed, (char*)node->children->content) != 0) {
 									soap_error3(E_ERROR, "Encoding: Element '%s' has fixed value '%s' (value '%s' is not allowed)", model->u.element->name, model->u.element->fixed, node->children->content);

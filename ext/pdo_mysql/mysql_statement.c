@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -923,7 +923,7 @@ static int pdo_mysql_stmt_cursor_closer(pdo_stmt_t *stmt) /* {{{ */
 }
 /* }}} */
 
-struct pdo_stmt_methods mysql_stmt_methods = {
+const struct pdo_stmt_methods mysql_stmt_methods = {
 	pdo_mysql_stmt_dtor,
 	pdo_mysql_stmt_execute,
 	pdo_mysql_stmt_fetch,

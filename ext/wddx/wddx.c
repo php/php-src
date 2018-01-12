@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -132,7 +132,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ wddx_functions[]
  */
-const zend_function_entry wddx_functions[] = {
+static const zend_function_entry wddx_functions[] = {
 	PHP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
 	PHP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
 	PHP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)

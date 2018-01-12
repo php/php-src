@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -246,7 +246,7 @@ ZEND_END_ARG_INFO()
 # define crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
 #endif
 
-const zend_function_entry sodium_functions[] = {
+static const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, AI_None)
 #ifdef HAVE_AESGCM
 	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, AI_StringAndADAndNonceAndKey)

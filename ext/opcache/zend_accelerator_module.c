@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -75,7 +75,7 @@ static ZEND_FUNCTION(opcache_get_status);
 static ZEND_FUNCTION(opcache_compile_file);
 static ZEND_FUNCTION(opcache_get_configuration);
 
-static zend_function_entry accel_functions[] = {
+static const zend_function_entry accel_functions[] = {
 	/* User functions */
 	ZEND_FE(opcache_reset,					arginfo_opcache_none)
 	ZEND_FE(opcache_invalidate,				arginfo_opcache_invalidate)
@@ -284,7 +284,6 @@ ZEND_INI_BEGIN()
 #ifndef ZEND_WIN32
 	STD_PHP_INI_BOOLEAN("opcache.validate_root"      , "0", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.validate_root      , zend_accel_globals, accel_globals)
 #endif
-	STD_PHP_INI_BOOLEAN("opcache.inherited_hack"     , "1", PHP_INI_SYSTEM, OnUpdateBool, accel_directives.inherited_hack     , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.dups_fix"           , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.ignore_dups        , zend_accel_globals, accel_globals)
 	STD_PHP_INI_BOOLEAN("opcache.revalidate_path"    , "0", PHP_INI_ALL   , OnUpdateBool, accel_directives.revalidate_path    , zend_accel_globals, accel_globals)
 
@@ -496,14 +495,14 @@ void zend_accel_info(ZEND_MODULE_INFO_FUNC_ARGS)
 			php_info_print_table_row(2, "Cache misses", buf);
 			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZCG(accel_directives).memory_consumption-zend_shared_alloc_get_free_memory()-ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Used memory", buf);
-			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, zend_shared_alloc_get_free_memory());
+			snprintf(buf, sizeof(buf), "%zu", zend_shared_alloc_get_free_memory());
 			php_info_print_table_row(2, "Free memory", buf);
-			snprintf(buf, sizeof(buf), ZEND_LONG_FMT, ZSMMG(wasted_shared_memory));
+			snprintf(buf, sizeof(buf), "%zu", ZSMMG(wasted_shared_memory));
 			php_info_print_table_row(2, "Wasted memory", buf);
 			if (ZCSG(interned_strings).start && ZCSG(interned_strings).end) {
-				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, (char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).start);
+				snprintf(buf, sizeof(buf), "%zu", (size_t)((char*)ZCSG(interned_strings).top - (char*)ZCSG(interned_strings).start));
 				php_info_print_table_row(2, "Interned Strings Used memory", buf);
-				snprintf(buf, sizeof(buf), ZEND_LONG_FMT, (char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).top);
+				snprintf(buf, sizeof(buf), "%zu", (size_t)((char*)ZCSG(interned_strings).end - (char*)ZCSG(interned_strings).top));
 				php_info_print_table_row(2, "Interned Strings Free memory", buf);
 			}
 			snprintf(buf, sizeof(buf), "%d", ZCSG(hash).num_direct_entries);
@@ -714,7 +713,6 @@ static ZEND_FUNCTION(opcache_get_configuration)
 #ifndef ZEND_WIN32
 	add_assoc_bool(&directives, "opcache.validate_root",       ZCG(accel_directives).validate_root);
 #endif
-	add_assoc_bool(&directives, "opcache.inherited_hack",      ZCG(accel_directives).inherited_hack);
 	add_assoc_bool(&directives, "opcache.dups_fix",            ZCG(accel_directives).ignore_dups);
 	add_assoc_bool(&directives, "opcache.revalidate_path",     ZCG(accel_directives).revalidate_path);
 

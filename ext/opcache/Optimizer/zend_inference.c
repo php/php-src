@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, e-SSA based Type & Range Inference                      |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -2153,6 +2153,24 @@ static int zend_update_type_info(const zend_op_array *op_array,
 
 	t1 = OP1_INFO();
 	t2 = OP2_INFO();
+
+	/* If one of the operands cannot have any type, this means the operand derives from
+	 * unreachable code. Propagate the empty result early, so that that the following
+	 * code may assume that operands have at least one type. */
+	if (!(t1 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS|MAY_BE_ERROR))
+		|| !(t2 & (MAY_BE_ANY|MAY_BE_UNDEF|MAY_BE_CLASS|MAY_BE_ERROR))) {
+		tmp = 0;
+		if (ssa_ops[i].result_def >= 0) {
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+		}
+		if (ssa_ops[i].op1_def >= 0) {
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+		}
+		if (ssa_ops[i].op2_def >= 0) {
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op2_def);
+		}
+		return 1;
+	}
 
 	switch (opline->opcode) {
 		case ZEND_ADD:

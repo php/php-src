@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -386,6 +386,7 @@ struct _zend_ast_ref {
 #define IS_CALLABLE					17
 #define IS_ITERABLE					18
 #define IS_VOID						19
+#define _IS_NUMBER					20
 
 static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	return pz->u1.v.type;
@@ -806,6 +807,17 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
+	} while (0)
+
+#define ZVAL_MAKE_REF_EX(z, refcount) do {						\
+		zval *_z = (z);											\
+		zend_reference *_ref =									\
+			(zend_reference *) emalloc(sizeof(zend_reference));	\
+		GC_SET_REFCOUNT(_ref, (refcount));						\
+		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
+		ZVAL_COPY_VALUE(&_ref->val, _z);						\
+		Z_REF_P(_z) = _ref;										\
+		Z_TYPE_INFO_P(_z) = IS_REFERENCE_EX;					\
 	} while (0)
 
 #define ZVAL_NEW_PERSISTENT_REF(z, r) do {						\

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 
 /* operations for a plain file; use the php_stream_fopen_XXX funcs below */
 PHPAPI extern php_stream_ops php_stream_stdio_ops;
-PHPAPI extern php_stream_wrapper php_plain_files_wrapper;
+PHPAPI extern const php_stream_wrapper php_plain_files_wrapper;
 
 BEGIN_EXTERN_C()
 

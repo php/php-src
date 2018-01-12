@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -156,7 +156,7 @@ static PHP_GINIT_FUNCTION(pdo)
 }
 /* }}} */
 
-PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
+PDO_API int php_pdo_register_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (driver->api_version != PDO_DRIVER_API) {
 		zend_error(E_ERROR, "PDO: driver %s requires PDO API version " ZEND_ULONG_FMT "; this is PDO version %d",
@@ -168,11 +168,11 @@ PDO_API int php_pdo_register_driver(pdo_driver_t *driver) /* {{{ */
 		return FAILURE;	/* NOTREACHED */
 	}
 
-	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, driver) != NULL;
+	return zend_hash_str_add_ptr(&pdo_driver_hash, (char*)driver->driver_name, driver->driver_name_len, (void*)driver) != NULL;
 }
 /* }}} */
 
-PDO_API void php_pdo_unregister_driver(pdo_driver_t *driver) /* {{{ */
+PDO_API void php_pdo_unregister_driver(const pdo_driver_t *driver) /* {{{ */
 {
 	if (!zend_hash_str_exists(&module_registry, "pdo", sizeof("pdo") - 1)) {
 		return;

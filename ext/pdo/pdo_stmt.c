@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -731,7 +731,6 @@ static int do_fetch_class_prepare(pdo_stmt_t *stmt) /* {{{ */
 
 		zend_fcall_info_args_ex(fci, ce->constructor, &stmt->fetch.cls.ctor_args);
 
-		fcc->initialized = 1;
 		fcc->function_handler = ce->constructor;
 		fcc->calling_scope = zend_get_executed_scope();
 		fcc->called_scope = ce;
@@ -2454,7 +2453,7 @@ static void pdo_stmt_iter_move_forwards(zend_object_iterator *iter)
 	I->key++;
 }
 
-static zend_object_iterator_funcs pdo_stmt_iter_funcs = {
+static const zend_object_iterator_funcs pdo_stmt_iter_funcs = {
 	pdo_stmt_iter_dtor,
 	pdo_stmt_iter_valid,
 	pdo_stmt_iter_get_data,

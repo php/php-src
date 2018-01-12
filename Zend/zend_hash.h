@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,7 +154,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_graceful_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_graceful_reverse_destroy(HashTable *ht);
 ZEND_API void ZEND_FASTCALL zend_hash_apply(HashTable *ht, apply_func_t apply_func);
 ZEND_API void ZEND_FASTCALL zend_hash_apply_with_argument(HashTable *ht, apply_func_arg_t apply_func, void *);
-ZEND_API void ZEND_FASTCALL zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
+ZEND_API void zend_hash_apply_with_arguments(HashTable *ht, apply_func_args_t apply_func, int, ...);
 
 /* This function should be used with special care (in other words,
  * it should usually not be used).  When used with the ZEND_HASH_APPLY_STOP
@@ -337,7 +337,7 @@ static zend_always_inline zval *zend_hash_find_ind(const HashTable *ht, zend_str
 	zval *zv;
 
 	zv = zend_hash_find(ht, key);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ?
 		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
@@ -367,7 +367,7 @@ static zend_always_inline zval *zend_hash_str_find_ind(const HashTable *ht, cons
 	zval *zv;
 
 	zv = zend_hash_str_find(ht, str, len);
-	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ? 
+	return (zv && Z_TYPE_P(zv) == IS_INDIRECT) ?
 		((Z_TYPE_P(Z_INDIRECT_P(zv)) != IS_UNDEF) ? Z_INDIRECT_P(zv) : NULL) : zv;
 }
 
@@ -807,6 +807,19 @@ static zend_always_inline void *zend_hash_find_ptr(const HashTable *ht, zend_str
 	}
 }
 
+static zend_always_inline void *zend_hash_find_ex_ptr(const HashTable *ht, zend_string *key, zend_bool known_hash)
+{
+	zval *zv;
+
+	zv = zend_hash_find_ex(ht, key, known_hash);
+	if (zv) {
+		ZEND_ASSUME(Z_PTR_P(zv));
+		return Z_PTR_P(zv);
+	} else {
+		return NULL;
+	}
+}
+
 static zend_always_inline void *zend_hash_str_find_ptr(const HashTable *ht, const char *str, size_t len)
 {
 	zval *zv;
@@ -900,10 +913,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
-		uint32_t _idx; \
+		uint32_t _idx = __ht->nNumUsed; \
+		Bucket *_p = __ht->arData + _idx; \
+		zval *_z; \
 		for (_idx = __ht->nNumUsed; _idx > 0; _idx--) { \
-			Bucket *_p = __ht->arData + (_idx - 1); \
-			zval *_z = &_p->val; \
+			_p--; \
+			_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
 			} \
@@ -919,7 +934,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 				uint32_t j = HT_IDX_TO_HASH(_idx - 1); \
 				uint32_t nIndex = _p->h | __ht->nTableMask; \
 				uint32_t i = HT_HASH(__ht, nIndex); \
-				if (j != i) { \
+				if (UNEXPECTED(j != i)) { \
 					Bucket *prev = HT_HASH_TO_BUCKET(__ht, i); \
 					while (Z_NEXT(prev->val) != j) { \
 						i = Z_NEXT(prev->val); \
@@ -1075,7 +1090,7 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);
@@ -1097,7 +1112,7 @@ static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);
@@ -1119,7 +1134,7 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 	if (!ZSTR_IS_INTERNED(key)) {
 		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
-		zend_string_hash_val(key);		
+		zend_string_hash_val(key);
 	}
 	p->key = key;
 	p->h = ZSTR_H(key);

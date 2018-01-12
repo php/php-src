@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -42,7 +42,7 @@ zip_source_file(zip_t *za, const char *fname, zip_uint64_t start, zip_int64_t le
 {
     if (za == NULL)
 	return NULL;
-    
+
     return zip_source_file_create(fname, start, len, &za->error);
 }
 

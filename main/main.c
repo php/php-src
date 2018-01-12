@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1053,29 +1053,8 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		display = 1;
 	}
 
-	/* store the error if it has changed */
-	if (display) {
-		if (PG(last_error_message)) {
-			char *s = PG(last_error_message);
-			PG(last_error_message) = NULL;
-			free(s);
-		}
-		if (PG(last_error_file)) {
-			char *s = PG(last_error_file);
-			PG(last_error_file) = NULL;
-			free(s);
-		}
-		if (!error_filename) {
-			error_filename = "Unknown";
-		}
-		PG(last_error_type) = type;
-		PG(last_error_message) = strdup(buffer);
-		PG(last_error_file) = strdup(error_filename);
-		PG(last_error_lineno) = error_lineno;
-	}
-
-	/* according to error handling mode, suppress error, throw exception or show it */
-	if (EG(error_handling) != EH_NORMAL) {
+	/* according to error handling mode, throw exception or show it */
+	if (EG(error_handling) == EH_THROW) {
 		switch (type) {
 			case E_ERROR:
 			case E_CORE_ERROR:
@@ -1097,12 +1076,33 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 				/* throw an exception if we are in EH_THROW mode
 				 * but DO NOT overwrite a pending exception
 				 */
-				if (EG(error_handling) == EH_THROW && !EG(exception)) {
+				if (!EG(exception)) {
 					zend_throw_error_exception(EG(exception_class), buffer, 0, type);
 				}
 				efree(buffer);
 				return;
 		}
+	}
+
+	/* store the error if it has changed */
+	if (display) {
+		if (PG(last_error_message)) {
+			char *s = PG(last_error_message);
+			PG(last_error_message) = NULL;
+			free(s);
+		}
+		if (PG(last_error_file)) {
+			char *s = PG(last_error_file);
+			PG(last_error_file) = NULL;
+			free(s);
+		}
+		if (!error_filename) {
+			error_filename = "Unknown";
+		}
+		PG(last_error_type) = type;
+		PG(last_error_message) = strdup(buffer);
+		PG(last_error_file) = strdup(error_filename);
+		PG(last_error_lineno) = error_lineno;
 	}
 
 	/* display/log the error if necessary */
@@ -1873,9 +1873,9 @@ PHP_MINFO_FUNCTION(php_core) { /* {{{ */
 
 /* {{{ php_register_extensions
  */
-int php_register_extensions(zend_module_entry **ptr, int count)
+int php_register_extensions(zend_module_entry * const * ptr, int count)
 {
-	zend_module_entry **end = ptr + count;
+	zend_module_entry * const * end = ptr + count;
 
 	while (ptr < end) {
 		if (*ptr) {

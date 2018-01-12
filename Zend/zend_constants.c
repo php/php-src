@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -203,7 +203,7 @@ ZEND_API void zend_register_string_constant(const char *name, size_t name_len, c
 static zend_constant *zend_get_special_constant(const char *name, size_t name_len)
 {
 	zend_constant *c;
-	static char haltoff[] = "__COMPILER_HALT_OFFSET__";
+	static const char haltoff[] = "__COMPILER_HALT_OFFSET__";
 
 	if (!EG(current_execute_data)) {
 		return NULL;
@@ -262,13 +262,17 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 
 ZEND_API zval *zend_get_constant(zend_string *name)
 {
+    zval *zv;
 	zend_constant *c;
 	ALLOCA_FLAG(use_heap)
 
-	if ((c = zend_hash_find_ptr(EG(zend_constants), name)) == NULL) {
+	zv = zend_hash_find(EG(zend_constants), name);
+	if (zv == NULL) {
 		char *lcname = do_alloca(ZSTR_LEN(name) + 1, use_heap);
 		zend_str_tolower_copy(lcname, ZSTR_VAL(name), ZSTR_LEN(name));
-		if ((c = zend_hash_str_find_ptr(EG(zend_constants), lcname, ZSTR_LEN(name))) != NULL) {
+		zv = zend_hash_str_find(EG(zend_constants), lcname, ZSTR_LEN(name));
+		if (zv != NULL) {
+			c = Z_PTR_P(zv);
 			if (c->flags & CONST_CS) {
 				c = NULL;
 			}
@@ -276,9 +280,10 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 			c = zend_get_special_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 		}
 		free_alloca(lcname, use_heap);
+		return c ? &c->value : NULL;
+	} else {
+		return &((zend_constant*)Z_PTR_P(zv))->value;
 	}
-
-	return c ? &c->value : NULL;
 }
 
 ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)

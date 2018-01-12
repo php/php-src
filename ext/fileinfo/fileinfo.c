@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -162,7 +162,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-zend_function_entry finfo_class_functions[] = {
+static const zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -196,7 +196,7 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-zend_function_entry fileinfo_functions[] = {
+static const zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)

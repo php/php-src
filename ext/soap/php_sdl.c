@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -1533,7 +1533,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	sdlBindingPtr *bindings;
 	sdlTypePtr *types;
 	encodePtr *encoders;
-	encodePtr enc;
+	const encode *enc;
 
 	int f;
 	struct stat st;
@@ -1614,7 +1614,7 @@ static sdlPtr get_sdl_from_cache(const char *fn, const char *uri, time_t t, time
 	i = num_encoders;
 	enc = defaultEncoding;
 	while (enc->details.type != END_KNOWN_TYPES) {
-		encoders[++i] = enc++;
+		encoders[++i] = (encodePtr)enc++;
 	}
 
 	i = 1;
@@ -2103,7 +2103,7 @@ static void add_sdl_to_cache(const char *fn, const char *uri, time_t t, sdlPtr s
 	int type_num = 1;
 	int encoder_num = 1;
 	int f;
-	encodePtr enc;
+	const encode *enc;
 	HashTable tmp_types;
 	HashTable tmp_encoders;
 	HashTable tmp_bindings;
@@ -2394,12 +2394,6 @@ static void make_persistent_restriction_char_int(sdlRestrictionCharPtr *rest)
 	prest->value = strdup((*rest)->value);
 	prest->fixed = (*rest)->fixed;
 	*rest = prest;
-}
-
-
-static void make_persistent_restriction_char(zval *zv)
-{
-	make_persistent_restriction_char_int((sdlRestrictionCharPtr*)&Z_PTR_P(zv));
 }
 
 
@@ -2764,9 +2758,15 @@ static sdlTypePtr make_persistent_sdl_type(sdlTypePtr type, HashTable *ptr_map, 
 		}
 
 		if (type->restrictions->enumeration) {
+			sdlRestrictionCharPtr tmp, penum;
 			ptype->restrictions->enumeration = malloc(sizeof(HashTable));
 			zend_hash_init(ptype->restrictions->enumeration, zend_hash_num_elements(type->restrictions->enumeration), NULL, delete_restriction_var_char_persistent, 1);
-			zend_hash_copy(ptype->restrictions->enumeration, type->restrictions->enumeration, make_persistent_restriction_char);
+			ZEND_HASH_FOREACH_STR_KEY_PTR(type->restrictions->enumeration, key, tmp) {
+				penum = tmp;
+				make_persistent_restriction_char_int(&penum);
+				/* We have to duplicate key emalloc->malloc */
+				zend_hash_str_add_ptr(ptype->restrictions->enumeration, ZSTR_VAL(key), ZSTR_LEN(key), penum);
+			} ZEND_HASH_FOREACH_END();
 		}
 	}
 

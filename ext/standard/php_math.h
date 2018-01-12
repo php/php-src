@@ -1,8 +1,8 @@
-/* 
+/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,7 +68,7 @@ PHP_FUNCTION(rad2deg);
 PHP_FUNCTION(intdiv);
 
    /*
-   WARNING: these functions are expermental: they could change their names or 
+   WARNING: these functions are expermental: they could change their names or
    disappear in the next version of PHP!
    */
 PHP_FUNCTION(hypot);

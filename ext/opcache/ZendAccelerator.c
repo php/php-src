@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -486,7 +486,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	GC_SET_REFCOUNT(s, 1);
 #if 1
 	/* optimized single assignment */
-	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << 8);
+	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
 #else
 	GC_TYPE(s) = IS_STRING;
 	GC_FLAGS(s) = IS_STR_INTERNED | IS_STR_PERMANENT;
@@ -844,7 +844,7 @@ static inline int accel_is_inactive(void)
 	if (ZCG(accel_directives).force_restart_timeout
 		&& ZCSG(force_restart_time)
 		&& time(NULL) >= ZCSG(force_restart_time)) {
-		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
+		zend_accel_error(ACCEL_LOG_WARNING, "Forced restart at %ld (after " ZEND_LONG_FMT " seconds), locked by %d", (long)time(NULL), ZCG(accel_directives).force_restart_timeout, mem_usage_check.l_pid);
 		kill_all_lockers(&mem_usage_check);
 
 		return FAILURE; /* next request should be able to restart it */
@@ -1352,18 +1352,9 @@ static void zend_accel_add_key(const char *key, unsigned int key_length, zend_ac
 }
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
-static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
+static zend_persistent_script *store_script_in_file_cache(zend_persistent_script *new_persistent_script)
 {
 	uint32_t memory_used;
-
-	/* Check if script may be stored in shared memory */
-	if (!zend_accel_script_persistable(new_persistent_script)) {
-		return new_persistent_script;
-	}
-
-	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
-		return new_persistent_script;
-	}
 
 	zend_shared_alloc_init_xlat_table();
 
@@ -1404,8 +1395,22 @@ static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script
 
 	zend_file_cache_script_store(new_persistent_script, 0);
 
-	*from_shared_memory = 1;
 	return new_persistent_script;
+}
+
+static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
+{
+	/* Check if script may be stored in shared memory */
+	if (!zend_accel_script_persistable(new_persistent_script)) {
+		return new_persistent_script;
+	}
+
+	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
+		return new_persistent_script;
+	}
+
+	*from_shared_memory = 1;
+	return store_script_in_file_cache(new_persistent_script);
 }
 #endif
 
@@ -1426,14 +1431,6 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* exclusive lock */
 	zend_shared_alloc_lock();
 
-	if (zend_accel_hash_is_full(&ZCSG(hash))) {
-		zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
-		ZSMMG(memory_exhausted) = 1;
-		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH);
-		zend_shared_alloc_unlock();
-		return new_persistent_script;
-	}
-
 	/* Check if we still need to put the file into the cache (may be it was
 	 * already stored by another process. This final check is done under
 	 * exclusive lock) */
@@ -1452,6 +1449,19 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		}
 	}
 
+	if (zend_accel_hash_is_full(&ZCSG(hash))) {
+		zend_accel_error(ACCEL_LOG_DEBUG, "No more entries in hash table!");
+		ZSMMG(memory_exhausted) = 1;
+		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_HASH);
+		zend_shared_alloc_unlock();
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		if (ZCG(accel_directives).file_cache) {
+			new_persistent_script = store_script_in_file_cache(new_persistent_script);
+			*from_shared_memory = 1;
+		}
+#endif
+		return new_persistent_script;
+	}
 
 	zend_shared_alloc_init_xlat_table();
 
@@ -1476,6 +1486,12 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		zend_shared_alloc_destroy_xlat_table();
 		zend_accel_schedule_restart_if_necessary(ACCEL_RESTART_OOM);
 		zend_shared_alloc_unlock();
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		if (ZCG(accel_directives).file_cache) {
+			new_persistent_script = store_script_in_file_cache(new_persistent_script);
+			*from_shared_memory = 1;
+		}
+#endif
 		return new_persistent_script;
 	}
 
@@ -1625,7 +1641,7 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
     }
 
 	/* check blacklist right after ensuring that file was opened */
-	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, ZSTR_VAL(file_handle->opened_path))) {
+	if (file_handle->opened_path && zend_accel_blacklist_is_blacklisted(&accel_blacklist, ZSTR_VAL(file_handle->opened_path), ZSTR_LEN(file_handle->opened_path))) {
 		ZCSG(blacklist_misses)++;
 		*op_array_p = accelerator_orig_compile_file(file_handle, type);
 		return NULL;
@@ -1711,6 +1727,10 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 	   further anyway.
 	*/
 	zend_accel_move_user_functions(&ZCG(function_table), &new_persistent_script->script.function_table);
+	new_persistent_script->script.first_early_binding_opline =
+		(op_array->fn_flags & ZEND_ACC_EARLY_BINDING) ?
+			zend_build_delayed_early_binding_list(op_array) :
+			(uint32_t)-1;
 	new_persistent_script->script.main_op_array = *op_array;
 
 	efree(op_array); /* we have valid persistent_script, so it's safe to free op_array */
@@ -2011,6 +2031,11 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type)
 		if (ZSMMG(memory_exhausted) || ZCSG(restart_pending)) {
 			SHM_PROTECT();
 			HANDLE_UNBLOCK_INTERRUPTIONS();
+#ifdef HAVE_OPCACHE_FILE_CACHE
+			if (ZCG(accel_directives).file_cache) {
+				return file_cache_compile_file(file_handle, type);
+			}
+#endif
 			return accelerator_orig_compile_file(file_handle, type);
 		}
 
@@ -2997,7 +3022,7 @@ ZEND_EXT_API zend_extension zend_extension_entry = {
 	PHP_VERSION,							/* version */
 	"Zend Technologies",					/* author */
 	"http://www.zend.com/",					/* URL */
-	"Copyright (c) 1999-2017",				/* copyright */
+	"Copyright (c) 1999-2018",				/* copyright */
 	accel_startup,					   		/* startup */
 	NULL,									/* shutdown */
 	accel_activate,							/* per-script activation */

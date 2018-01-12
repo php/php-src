@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -764,15 +764,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 		default:
 			return -1;
 	}
-}/*}}}*/
-
-TSRM_API char *realpath(char *orig_path, char *buffer)
-{/*{{{*/
-	int ret = GetFullPathName(orig_path, _MAX_PATH, buffer, NULL);
-	if(!ret || ret > _MAX_PATH) {
-		return NULL;
-	}
-	return buffer;
 }/*}}}*/
 
 #if HAVE_UTIME

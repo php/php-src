@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -887,7 +887,7 @@ static PHP_METHOD(HashContext, __construct) {
 }
 /* }}} */
 
-static zend_function_entry php_hashcontext_methods[] = {
+static const zend_function_entry php_hashcontext_methods[] = {
 	PHP_ME(HashContext, __construct, NULL, ZEND_ACC_PRIVATE | ZEND_ACC_CTOR)
 	PHP_FE_END
 };
@@ -1430,7 +1430,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ hash_functions[]
  */
-const zend_function_entry hash_functions[] = {
+static const zend_function_entry hash_functions[] = {
 	PHP_FE(hash,									arginfo_hash)
 	PHP_FE(hash_file,								arginfo_hash_file)
 

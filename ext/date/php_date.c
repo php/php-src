@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -399,7 +399,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ Function table */
-const zend_function_entry date_functions[] = {
+static const zend_function_entry date_functions[] = {
 	PHP_FE(strtotime, arginfo_strtotime)
 	PHP_FE(date, arginfo_date)
 	PHP_FE(idate, arginfo_idate)
@@ -474,7 +474,7 @@ static const zend_function_entry date_funcs_interface[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_date[] = {
+static const zend_function_entry date_funcs_date[] = {
 	PHP_ME(DateTime,			__construct,		arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__wakeup,			NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime,			__set_state,		NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -497,7 +497,7 @@ const zend_function_entry date_funcs_date[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_immutable[] = {
+static const zend_function_entry date_funcs_immutable[] = {
 	PHP_ME(DateTimeImmutable, __construct,   arginfo_date_create, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTime, __wakeup,       NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeImmutable, __set_state,   NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -520,7 +520,7 @@ const zend_function_entry date_funcs_immutable[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_timezone[] = {
+static const zend_function_entry date_funcs_timezone[] = {
 	PHP_ME(DateTimeZone,              __construct,                 arginfo_timezone_open, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeZone,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateTimeZone,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -533,7 +533,7 @@ const zend_function_entry date_funcs_timezone[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_interval[] = {
+static const zend_function_entry date_funcs_interval[] = {
 	PHP_ME(DateInterval,              __construct,                 arginfo_date_interval_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DateInterval,              __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DateInterval,              __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -542,7 +542,7 @@ const zend_function_entry date_funcs_interval[] = {
 	PHP_FE_END
 };
 
-const zend_function_entry date_funcs_period[] = {
+static const zend_function_entry date_funcs_period[] = {
 	PHP_ME(DatePeriod,                __construct,                 arginfo_date_period_construct, ZEND_ACC_CTOR|ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __wakeup,                    NULL, ZEND_ACC_PUBLIC)
 	PHP_ME(DatePeriod,                __set_state,                 NULL, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC)
@@ -1041,21 +1041,21 @@ PHPAPI timelib_tzinfo *get_timezone_info(void)
 /* {{{ date() and gmdate() data */
 #include "zend_smart_str.h"
 
-static char *mon_full_names[] = {
+static const char * const mon_full_names[] = {
 	"January", "February", "March", "April",
 	"May", "June", "July", "August",
 	"September", "October", "November", "December"
 };
 
-static char *mon_short_names[] = {
+static const char * const mon_short_names[] = {
 	"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
 };
 
-static char *day_full_names[] = {
+static const char * const day_full_names[] = {
 	"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"
 };
 
-static char *day_short_names[] = {
+static const char * const day_short_names[] = {
 	"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
 };
 
@@ -1075,7 +1075,7 @@ static char *english_suffix(timelib_sll number)
 /* }}} */
 
 /* {{{ day of week helpers */
-char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+static const char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 {
 	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
 	if (day_of_week < 0) {
@@ -1084,7 +1084,7 @@ char *php_date_full_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 	return day_full_names[day_of_week];
 }
 
-char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
+static const char *php_date_short_day_name(timelib_sll y, timelib_sll m, timelib_sll d)
 {
 	timelib_sll day_of_week = timelib_day_of_week(y, m, d);
 	if (day_of_week < 0) {
@@ -1986,7 +1986,7 @@ static void date_period_it_rewind(zend_object_iterator *iter)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs date_period_it_funcs = {
+static const zend_object_iterator_funcs date_period_it_funcs = {
 	date_period_it_dtor,
 	date_period_it_has_more,
 	date_period_it_current_data,
@@ -2049,9 +2049,9 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		}
 		return retval;
 	}
-	
+
 	prop = date_interval_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
-	
+
 	if (prop != &EG(uninitialized_zval)) {
 		if (type == 2) {
 			retval = 1;
@@ -2069,7 +2069,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	return retval;
-	
+
 }
 /* }}} */
 
@@ -2286,7 +2286,7 @@ static HashTable *date_object_get_properties(zval *object) /* {{{ */
 				break;
 			case TIMELIB_ZONETYPE_OFFSET: {
 				zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-				timelib_sll utc_offset = dateobj->time->z;
+				int utc_offset = dateobj->time->z;
 
 				ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 					utc_offset < 0 ? '-' : '+',
@@ -2373,8 +2373,8 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				abs(tzobj->tzi.utc_offset / 3600),
-				abs(((tzobj->tzi.utc_offset % 3600) / 60)));
+				abs((int)(tzobj->tzi.utc_offset / 3600)),
+				abs(((int)(tzobj->tzi.utc_offset % 3600) / 60)));
 
 			ZVAL_NEW_STR(&zv, tmpstr);
 			}
@@ -3899,8 +3899,8 @@ PHP_FUNCTION(timezone_name_get)
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
+				abs((int)(utc_offset / 3600)),
+				abs(((int)(utc_offset % 3600) / 60)));
 
 			RETURN_NEW_STR(tmpstr);
 			}

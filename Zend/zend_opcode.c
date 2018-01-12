@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -87,8 +87,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->fn_flags = 0;
 
-	op_array->early_binding = -1;
-
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
 
@@ -112,7 +110,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		zend_string_release(function->common.function_name);
 
 		if (function->common.arg_info &&
-		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = function->common.num_args + 1;
 			zend_arg_info *arg_info = function->common.arg_info - 1;
@@ -373,8 +371,6 @@ void zend_class_add_ref(zval *zv)
 
 ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
-	zval *literal = op_array->literals;
-	zval *end;
 	uint32_t i;
 
 	if (op_array->static_variables &&
@@ -404,8 +400,9 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(op_array->vars);
 	}
 
-	if (literal) {
-	 	end = literal + op_array->last_literal;
+	if (op_array->literals) {
+		zval *literal = op_array->literals;
+		zval *end = literal + op_array->last_literal;
 	 	while (literal < end) {
 			zval_ptr_dtor_nogc(literal);
 			literal++;

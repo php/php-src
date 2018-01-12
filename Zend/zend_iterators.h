@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,12 +57,12 @@ typedef struct _zend_object_iterator_funcs {
 struct _zend_object_iterator {
 	zend_object std;
 	zval data;
-	zend_object_iterator_funcs *funcs;
+	const zend_object_iterator_funcs *funcs;
 	zend_ulong index; /* private to fe_reset/fe_fetch opcodes */
 };
 
 typedef struct _zend_class_iterator_funcs {
-	zend_object_iterator_funcs  *funcs;
+	const zend_object_iterator_funcs  *funcs;
 	union _zend_function *zf_new_iterator;
 	union _zend_function *zf_valid;
 	union _zend_function *zf_current;

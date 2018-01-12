@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -78,7 +78,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 						zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
 					}
 
-					_zend_hash_append_ind(zobj->properties, prop_info->name, 
+					_zend_hash_append_ind(zobj->properties, prop_info->name,
 						OBJ_PROP(zobj, prop_info->offset));
 				}
 			} ZEND_HASH_FOREACH_END();
@@ -618,7 +618,7 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 			*guard |= IN_ISSET;
 			zend_std_call_issetter(&tmp_object, member, &tmp_result);
 			*guard &= ~IN_ISSET;
-	
+
 			if (!zend_is_true(&tmp_result)) {
 				retval = &EG(uninitialized_zval);
 				zval_ptr_dtor(&tmp_object);
@@ -1675,16 +1675,10 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 					return FAILURE;
 				}
 				if (EXPECTED(Z_TYPE(retval) == IS_STRING)) {
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
 					ZVAL_COPY_VALUE(writeobj, &retval);
 					return SUCCESS;
 				} else {
 					zval_ptr_dtor(&retval);
-					if (readobj == writeobj) {
-						zval_ptr_dtor(readobj);
-					}
 					ZVAL_EMPTY_STRING(writeobj);
 					zend_error(E_RECOVERABLE_ERROR, "Method %s::__toString() must return a string value", ZSTR_VAL(ce->name));
 					return SUCCESS;
@@ -1692,23 +1686,22 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 			}
 			return FAILURE;
 		case _IS_BOOL:
-			ZVAL_BOOL(writeobj, 1);
+			ZVAL_TRUE(writeobj);
 			return SUCCESS;
 		case IS_LONG:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to int", ZSTR_VAL(ce->name));
-			if (readobj == writeobj) {
-				zval_dtor(readobj);
-			}
 			ZVAL_LONG(writeobj, 1);
 			return SUCCESS;
 		case IS_DOUBLE:
 			ce = Z_OBJCE_P(readobj);
 			zend_error(E_NOTICE, "Object of class %s could not be converted to float", ZSTR_VAL(ce->name));
-			if (readobj == writeobj) {
-				zval_dtor(readobj);
-			}
 			ZVAL_DOUBLE(writeobj, 1);
+			return SUCCESS;
+		case _IS_NUMBER:
+			ce = Z_OBJCE_P(readobj);
+			zend_error(E_NOTICE, "Object of class %s could not be converted to number", ZSTR_VAL(ce->name));
+			ZVAL_LONG(writeobj, 1);
 			return SUCCESS;
 		default:
 			ZVAL_NULL(writeobj);
@@ -1721,15 +1714,9 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
 	zval *func;
-	zend_class_entry *ce;
+	zend_class_entry *ce = Z_OBJCE_P(obj);
 
-	if (Z_TYPE_P(obj) != IS_OBJECT) {
-		return FAILURE;
-	}
-
-	ce = Z_OBJCE_P(obj);
-
-	if ((func = zend_hash_find(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE))) == NULL) {
+	if ((func = zend_hash_find_ex(&ce->function_table, ZSTR_KNOWN(ZEND_STR_MAGIC_INVOKE), 1)) == NULL) {
 		return FAILURE;
 	}
 	*fptr_ptr = Z_FUNC_P(func);

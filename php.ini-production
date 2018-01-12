@@ -15,7 +15,7 @@
 ; 5. The web server's directory (for SAPI modules), or directory of PHP
 ; (otherwise in Windows)
 ; 6. The directory from the --with-config-file-path compile time option, or the
-; Windows directory (C:\windows or C:\winnt)
+; Windows directory (usually C:\windows)
 ; See the PHP docs for more specific information.
 ; http://php.net/configuration.file
 
@@ -779,7 +779,7 @@ enable_dl = Off
 ; of the web tree and people will not be able to circumvent .htaccess security.
 ;cgi.discard_path=1
 
-; FastCGI under IIS (on WINNT based OS) supports the ability to impersonate
+; FastCGI under IIS supports the ability to impersonate
 ; security tokens of the calling client.  This allows IIS to define the
 ; security context that the request runs under.  mod_fastcgi under Apache
 ; does not currently support this feature (03/17/2002)
@@ -1784,10 +1784,6 @@ ldap.max_links = -1
 ; size of the optimized code.
 ;opcache.save_comments=1
 
-; If enabled, a fast shutdown sequence is used for the accelerated code
-; Depending on the used Memory Manager this may cause some incompatibilities.
-;opcache.fast_shutdown=0
-
 ; Allow file existence override (file_exists, etc.) performance feature.
 ;opcache.enable_file_override=0
 
@@ -1795,7 +1791,6 @@ ldap.max_links = -1
 ; passes
 ;opcache.optimization_level=0xffffffff
 
-;opcache.inherited_hack=1
 ;opcache.dups_fix=0
 
 ; The location of the OPcache blacklist file (wildcards allowed).

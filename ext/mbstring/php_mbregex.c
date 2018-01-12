@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -183,7 +183,7 @@ typedef struct _php_mb_regex_enc_name_map_t {
 	OnigEncoding code;
 } php_mb_regex_enc_name_map_t;
 
-php_mb_regex_enc_name_map_t enc_name_map[] = {
+static const php_mb_regex_enc_name_map_t enc_name_map[] = {
 #ifdef ONIG_ENCODING_EUC_JP
 	{
 		"EUC-JP\0EUCJP\0X-EUC-JP\0UJIS\0EUCJP\0EUCJP-WIN\0",
@@ -366,7 +366,7 @@ php_mb_regex_enc_name_map_t enc_name_map[] = {
 static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 {
 	const char *p;
-	php_mb_regex_enc_name_map_t *mapping;
+	const php_mb_regex_enc_name_map_t *mapping;
 
 	if (pname == NULL || !*pname) {
 		return ONIG_ENCODING_UNDEF;
@@ -387,7 +387,7 @@ static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 /* {{{ php_mb_regex_mbctype2name */
 static const char *_php_mb_regex_mbctype2name(OnigEncoding mbctype)
 {
-	php_mb_regex_enc_name_map_t *mapping;
+	const php_mb_regex_enc_name_map_t *mapping;
 
 	for (mapping = enc_name_map; mapping->names != NULL; mapping++) {
 		if (mapping->code == mbctype) {
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	if ((position < 0) && (!Z_ISUNDEF(MBREX(search_str))) && (Z_TYPE(MBREX(search_str)) == IS_STRING)) {
 		position += Z_STRLEN(MBREX(search_str));
 	}
-		
+
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position > Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;

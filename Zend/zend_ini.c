@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -493,6 +493,19 @@ ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig) /* {{{ 
 		return_value = "";
 	}
 	return return_value;
+}
+/* }}} */
+
+ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
+{
+	zend_ini_entry *ini_entry;
+
+	ini_entry = zend_hash_find_ptr(EG(ini_directives), name);
+	if (ini_entry) {
+		return ini_entry->value ? ini_entry->value : ZSTR_EMPTY_ALLOC();
+	} else {
+		return NULL;
+	}
 }
 /* }}} */
 

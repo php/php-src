@@ -23,11 +23,19 @@ PHP                                                                        NEWS
     properties). (pmmaga)
   . Fixed bug #63911 (identical trait methods raise errors during composition). 
     (pmmaga)
+  . Fixed bug #75677 (Clang ignores fastcall calling convention on variadic
+    function). (Li-Wen Hsu)
+  . Fixed bug #54043 (Remove inconsitency of internal exceptions and user
+    defined exceptions). (Nikita)
+  . Fixed bug #53033 (Mathematical operations convert objects to integers).
+    (Nikita)
+  . Fixed bug #73108 (Internal class cast handler uses integer instead of
+    float). (Nikita)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
-	. Implemented request #67855 (No way to get current scale in use). (Chris
-	  Wright, cmb)
+  . Implemented request #67855 (No way to get current scale in use). (Chris
+    Wright, cmb)
   . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
   . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
@@ -48,6 +56,10 @@ PHP                                                                        NEWS
 
 - GMP:
   . Export internal structures and accessor helpers for GMP object. (Sara)
+  . Added gmp_binomial(n, k). (Nikita)
+  . Added gmp_lcm(a, b). (Nikita)
+  . Added gmp_perfect_power(a). (Nikita)
+  . Added gmp_kronecker(a, b). (Nikita)
 
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
@@ -87,6 +99,8 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
+  . Fixed bug #75355 (preg_quote() does not quote # control character).
+    (Michael Moravec)
 
 - PDO_DBlib:
   . Implemented request #69592 (allow 0-column rowsets to be skipped
@@ -121,6 +135,9 @@ PHP                                                                        NEWS
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
+
+- SimpleXML:
+  . Fixed bug #54973 (SimpleXML casts integers wrong). (Nikita)
 
 - SOAP:
   . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)

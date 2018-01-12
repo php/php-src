@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	return SUCCESS;
 }
 
-static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
+static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_basic_block *end = blocks + ssa->cfg.blocks_count;
@@ -161,7 +161,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 					shiftlist[i] = i - target;
 					i++;
 				}
-				
+
 				if (b->flags & ZEND_BB_UNREACHABLE_FREE) {
 					/* Only keep the FREE for the loop var */
 					ZEND_ASSERT(op_array->opcodes[b->start].opcode == ZEND_FREE
@@ -263,9 +263,10 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
@@ -874,6 +875,10 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 		zend_op *opline;
 		zval tmp;
 
+#if ZEND_DEBUG_DFA
+		ssa_verify_integrity(op_array, ssa, "before dfa");
+#endif
+
 		if (ZEND_OPTIMIZER_PASS_8 & ctx->optimization_level) {
 			if (sccp_optimize_op_array(ctx, op_array, ssa, call_map)) {
 				remove_nops = 1;
@@ -1173,7 +1178,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 #endif
 
 		if (remove_nops) {
-			zend_ssa_remove_nops(op_array, ssa);
+			zend_ssa_remove_nops(op_array, ssa, ctx);
 #if ZEND_DEBUG_DFA
 			ssa_verify_integrity(op_array, ssa, "after nop");
 #endif

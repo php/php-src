@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -170,7 +170,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_pcntl_async_signals, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry pcntl_functions[] = {
+static const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_fork,			arginfo_pcntl_void)
 	PHP_FE(pcntl_waitpid,		arginfo_pcntl_waitpid)
 	PHP_FE(pcntl_wait,			arginfo_pcntl_wait)
@@ -187,7 +187,7 @@ const zend_function_entry pcntl_functions[] = {
 	PHP_FE(pcntl_alarm,			arginfo_pcntl_alarm)
 	PHP_FE(pcntl_get_last_error,	arginfo_pcntl_void)
 	PHP_FALIAS(pcntl_errno, pcntl_get_last_error,	NULL)
-	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror) 
+	PHP_FE(pcntl_strerror,		arginfo_pcntl_strerror)
 #ifdef HAVE_GETPRIORITY
 	PHP_FE(pcntl_getpriority,	arginfo_pcntl_getpriority)
 #endif
@@ -764,7 +764,7 @@ PHP_FUNCTION(pcntl_wait)
 #undef PHP_RUSAGE_COMMON
 #undef PHP_RUSAGE_TO_ARRAY
 
-/* {{{ proto bool pcntl_wifexited(int status) 
+/* {{{ proto bool pcntl_wifexited(int status)
    Returns true if the child status code represents a successful exit */
 PHP_FUNCTION(pcntl_wifexited)
 {
