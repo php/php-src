@@ -338,10 +338,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	zend_op *persist_ptr;
 	zval *orig_literals = NULL;
 
-	if (op_array->type != ZEND_USER_FUNCTION) {
-		return;
-	}
-
 	if (op_array->refcount && --(*op_array->refcount) == 0) {
 		efree(op_array->refcount);
 	}
@@ -588,7 +584,21 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 static void zend_persist_op_array(zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
-	zend_op_array *old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+
+	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_op_array));
+	Z_PTR_P(zv) = ZCG(arena_mem);
+	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
+	zend_persist_op_array_ex(Z_PTR_P(zv), NULL);
+}
+
+static void zend_persist_class_method(zval *zv)
+{
+	zend_op_array *op_array = Z_PTR_P(zv);
+	zend_op_array *old_op_array;
+
+	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
 	if (old_op_array) {
 		Z_PTR_P(zv) = old_op_array;
 		if (op_array->refcount && --(*op_array->refcount) == 0) {
@@ -673,7 +683,7 @@ static void zend_persist_class_entry(zval *zv)
 		ce = Z_PTR_P(zv) = ZCG(arena_mem);
 		ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_class_entry)));
 		zend_accel_store_interned_string(ce->name);
-		zend_hash_persist(&ce->function_table, zend_persist_op_array);
+		zend_hash_persist(&ce->function_table, zend_persist_class_method);
 		if (ce->default_properties_table) {
 		    int i;
 
