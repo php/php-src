@@ -1247,14 +1247,7 @@ static void* dasm_labels[zend_lb_MAX];
 ||				if (opline) {
 |					SAVE_VALID_OPLINE opline
 ||				}
-|				.if X64
-|					EXT_CALL zend_objects_store_del, r0
-|				.else
-|					sub r4, 12
-|					push FCARG1a
-|					EXT_CALL zend_objects_store_del, r0
-|					add r4, 16
-|				.endif
+|				EXT_CALL zend_objects_store_del, r0
 ||				break;
 ||			}
 ||		}
@@ -1467,15 +1460,8 @@ static void* dasm_labels[zend_lb_MAX];
 |	GC_DELREF reg
 |	jne >1
 |	// zend_objects_store_del(obj);
-|	.if X64
-|		mov CARG1, reg
-|		EXT_CALL zend_objects_store_del, r0
-|	.else
-|		sub r4, 12
-|		push reg
-|		EXT_CALL zend_objects_store_del, r0
-|		add r4, 16
-|	.endif
+|	mov FCARG1a, reg
+|	EXT_CALL zend_objects_store_del, r0
 |	jmp exit_label
 |1:
 |	IF_GC_MAY_NOT_LEAK reg, tmp_reg, >1
@@ -8278,9 +8264,9 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 			|	jnz >3
 			|.cold_code
 			|3:
-			|	// OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+			|	// OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 			|	mov r0, EX->func
-			|	mov r0, aword [r0 + offsetof(zend_op_array, prototype)]
+			|	sub r0, sizeof(zend_object)
 			|	OBJ_RELEASE r0, ecx, >4
 			|	jmp >4
 			|.code

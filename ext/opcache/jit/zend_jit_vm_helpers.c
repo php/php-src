@@ -20,6 +20,7 @@
 #include "Zend/zend_execute.h"
 #include "Zend/zend_exceptions.h"
 #include "Zend/zend_vm.h"
+#include "Zend/zend_closures.h"
 
 #include <ZendAccelerator.h>
 #include "Optimizer/zend_func_info.h"
@@ -52,7 +53,7 @@ void ZEND_FASTCALL zend_jit_leave_nested_func_helper(uint32_t call_info)
 		}
 		OBJ_RELEASE(object);
 	} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-		OBJ_RELEASE((zend_object*)execute_data->func->op_array.prototype);
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 	}
 
 	zend_vm_stack_free_extra_args_ex(call_info, execute_data);
@@ -82,7 +83,7 @@ void ZEND_FASTCALL zend_jit_leave_top_func_helper(uint32_t call_info)
 	}
 	EG(current_execute_data) = EX(prev_execute_data);
 	if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
-		OBJ_RELEASE((zend_object*)EX(func)->op_array.prototype);
+		OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 	}
 	execute_data = EG(current_execute_data);
 	opline = zend_jit_halt_op;
