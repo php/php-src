@@ -10,6 +10,9 @@ PHP                                                                        NEWS
   . Fixed bug #75396 (Exit inside generator finally results in fatal error).
     (Nikita)
 
+- IMAP:
+  . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
+
 - Opcache:
   . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
@@ -18,6 +21,10 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed bug #75671 (pg_version() crashes when called on a connection to
     cockroach). (magicaltux at gmail dot com)
+
+- Readline:
+  . Fixed bug #75775 (readline_read_history segfaults with empty file).
+    (Anatol)
 
 - SAPI:
   . Fixed bug #75735 ([embed SAPI] Segmentation fault in
