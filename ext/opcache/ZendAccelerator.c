@@ -2767,14 +2767,18 @@ static int accel_post_startup(void)
 		}
 	}
 
+	/* Initialize zend_func_info_rid */
+	zend_optimizer_startup();
+
 /********************************************/
 /* End of non-SHM dependent initializations */
 /********************************************/
 #ifdef HAVE_OPCACHE_FILE_CACHE
-	if (!ZCG(accel_directives).file_cache_only) {
+	if (!ZCG(accel_directives).file_cache_only)
 #else
-	if (1) {
+	if (1)
 #endif
+	{
 		switch (zend_shared_alloc_startup(ZCG(accel_directives).memory_consumption)) {
 			case ALLOC_SUCCESS:
 				if (zend_accel_init_shm() == FAILURE) {
@@ -2818,8 +2822,6 @@ static int accel_post_startup(void)
 
 		/* Init auto-global strings */
 		zend_accel_init_auto_globals();
-
-		zend_optimizer_startup();
 
 		zend_shared_alloc_lock();
 #ifdef HAVE_JIT
