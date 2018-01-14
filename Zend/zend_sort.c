@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -231,58 +231,58 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
 }
 /* }}} */
 
-/* {{{ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp) 
+/* {{{ ZEND_API void zend_sort(void *base, size_t nmemb, size_t siz, compare_func_t cmp, swap_func_t swp)
  *
  * Derived from LLVM's libc++ implementation of std::sort.
  *
  * ===========================================================================
  * libc++ License
  * ===========================================================================
- * 
+ *
  * The libc++ library is dual licensed under both the University of Illinois
  * "BSD-Like" license and the MIT license. As a user of this code you may
  * choose to use it under either license. As a contributor, you agree to allow
  * your code to be used under both.
- * 
+ *
  * Full text of the relevant licenses is included below.
- * 
+ *
  * ===========================================================================
- * 
+ *
  * University of Illinois/NCSA
  * Open Source License
- * 
+ *
  * Copyright (c) 2009-2012 by the contributors listed at
  * http://llvm.org/svn/llvm-project/libcxx/trunk/CREDITS.TXT
- * 
+ *
  * All rights reserved.
- * 
+ *
  * Developed by:
- * 
+ *
  *     LLVM Team
- * 
+ *
  *     University of Illinois at Urbana-Champaign
- * 
+ *
  *     http://llvm.org
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal with the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  *     * Redistributions of source code must retain the above copyright notice,
  *       this list of conditions and the following disclaimers.
- * 
+ *
  *     * Redistributions in binary form must reproduce the above copyright
  *       notice, this list of conditions and the following disclaimers in the
  *       documentation and/or other materials provided with the distribution.
- * 
+ *
  *     * Neither the names of the LLVM Team, University of Illinois at
  *       Urbana-Champaign, nor the names of its contributors may be used to
  *       endorse or promote products derived from this Software without
  *       specific prior written permission.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -290,22 +290,22 @@ ZEND_API void zend_insert_sort(void *base, size_t nmemb, size_t siz, compare_fun
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
  * FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
  * WITH THE SOFTWARE.
- * 
+ *
  * ===========================================================================
- * 
+ *
  * Copyright (c) 2009-2012 by the contributors listed at
  * http://llvm.org/svn/llvm-project/libcxx/trunk/CREDITS.TXT
- * 
+ *
  * Permission is hereby granted, free of charge, to any person obtaining a copy
  * of this software and associated documentation files (the "Software"), to
  * deal in the Software without restriction, including without limitation the
  * rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
  * sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
- * 
+ *
  * The above copyright notice and this permission notice shall be included in
  * all copies or substantial portions of the Software.
- * 
+ *
  * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE

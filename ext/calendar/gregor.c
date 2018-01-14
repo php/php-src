@@ -235,7 +235,7 @@ zend_long GregorianToSdn(
 			- GREGOR_SDN_OFFSET);
 }
 
-char *MonthNameShort[13] =
+const char * const MonthNameShort[13] =
 {
 	"",
 	"Jan",
@@ -252,7 +252,7 @@ char *MonthNameShort[13] =
 	"Dec"
 };
 
-char *MonthNameLong[13] =
+const char * const MonthNameLong[13] =
 {
 	"",
 	"January",

@@ -25,7 +25,7 @@ prompt> [L0 %s HANDLE_EXCEPTION                                                 
  00005: }
  00006: 
 prompt> [L0 %s HANDLE_EXCEPTION                                                                       %s]
-[L9 %s CATCH<-128>             "Exception"          $e                   1                    %s]
+[L9 %s CATCH<-%d>             "Exception"          $e                   1                    %s]
 >00008: 	foo();
  00009: } catch (Exception $e) {
  00010: 	echo "ok";

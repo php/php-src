@@ -3,7 +3,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2008 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -39,6 +39,8 @@ var INTELVERS = -1;
 var COMPILER_NUMERIC_VERSION = -1;
 var COMPILER_NAME = "unknown";
 var PHP_OBJECT_OUT_DIR = "";
+var PHP_CONFIG_PROFILE = "no";
+var PHP_SANITIZER = "no";
 
 var PHP_TEST_INI_PATH = "";
 var PHP_TEST_INI = "";
@@ -72,6 +74,7 @@ VC_VERSIONS[1800] = 'MSVC12 (Visual C++ 2013)';
 VC_VERSIONS[1900] = 'MSVC14 (Visual C++ 2015)';
 VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1911] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1912] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
@@ -79,6 +82,7 @@ VC_VERSIONS_SHORT[1800] = 'VC12';
 VC_VERSIONS_SHORT[1900] = 'VC14';
 VC_VERSIONS_SHORT[1910] = 'VC15';
 VC_VERSIONS_SHORT[1911] = 'VC15';
+VC_VERSIONS_SHORT[1912] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -571,6 +575,21 @@ function DEFINE(name, value)
 	configure_subst.Add(name, value);
 }
 
+function verbalize_deps_path(path)
+{
+	var absolute_path = FSO.GetAbsolutePathName(path);
+
+	if (absolute_path.indexOf(PHP_PHP_BUILD) == 0) {
+		absolute_path = absolute_path.substring(PHP_PHP_BUILD.length).split('\\');
+
+		if (absolute_path[1] == 'include' || absolute_path[1] == 'lib') {
+			return "<in deps path> " + absolute_path.join('\\');
+		}
+	}
+
+	return path;
+}
+
 // Searches a set of paths for a file;
 // returns the dir in which the file was found,
 // true if it was found in the default env path,
@@ -617,7 +636,7 @@ function search_paths(thing_to_find, explicit_path, env_name)
 	if (found && place == true) {
 		STDOUT.WriteLine(" <in default path>");
 	} else if (found) {
-		STDOUT.WriteLine(" " + place);
+		STDOUT.WriteLine(" " + verbalize_deps_path(place));
 	} else {
 		STDOUT.WriteLine(" <not found>");
 	}
@@ -811,7 +830,7 @@ function CHECK_LIB(libnames, target, path_to_check, common_name)
 			ADD_FLAG("ARFLAGS" + target, '/libpath:"' + libdir + '" ');
 			ADD_FLAG("LIBS" + target, libname);
 
-			STDOUT.WriteLine(location);
+			STDOUT.WriteLine(verbalize_deps_path(location));
 
 			copy_dep_pdb_into_build_dir(location);
 
@@ -1120,7 +1139,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	 */
 	if (FSO.FileExists(creditspath + '\\template.rc')) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + creditspath + "\\template.rc");
-		MFO.WriteLine("\t$(RC) /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' +
 			makefiletarget + '\\"" /d PRODUCT_NAME="\\"' + res_prod_name +
 			versioning + '\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" ' +
@@ -1129,14 +1148,14 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	}
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": $(PHP_DIR)\\build\\template.rc");
-		MFO.WriteLine("\t$(RC)  /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
 			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" $(PHP_DIR)\\build\\template.rc');
 	} else {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
-		MFO.WriteLine("\t$(RC) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
@@ -1371,6 +1390,13 @@ function ADD_EXTENSION_DEP(extname, dependson, optional)
 
 var static_pgo_enabled = false;
 
+function ZEND_EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
+{
+	EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir);
+
+	extensions_enabled[extensions_enabled.length - 1][2] = true;
+}
+
 function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 {
 	var objs = null;
@@ -1507,7 +1533,8 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
 
-	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static'];
+	// [extname, shared, zend]
+	extensions_enabled[extensions_enabled.length] = [extname, shared ? 'shared' : 'static', false];
 }
 
 function ADD_SOURCES(dir, file_list, target, obj_dir)
@@ -1641,7 +1668,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				vc_ver = probe_binary(PATH_PROG('cl', null));
 			}
 
-			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions";
+			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions -Xclang -analyzer-output=text";
 		} else if (PHP_ANALYZER == "cppcheck") {
 			var analyzer_base_args = "";
 			var analyzer_base_flags = "";
@@ -1868,14 +1895,42 @@ function output_as_table(header, ar_out)
 	STDOUT.WriteLine(sep);
 }
 
+function write_extensions_summary()
+{
+	var exts = new Array();
+	var zend_exts = new Array();
+
+	for(var x = 0; x < extensions_enabled.length; ++x)
+	{
+		var l = extensions_enabled[x];
+
+		if(l[2])
+		{
+			zend_exts.push([l[0], l[1]]);
+		}
+		else
+		{
+			exts.push([l[0], l[1]]);
+		}
+	}
+
+	STDOUT.WriteLine('Enabled extensions:');
+	output_as_table(['Extension', 'Mode'], exts.sort());
+
+	if(zend_exts.length)
+	{
+		STDOUT.WriteBlankLines(2);
+		STDOUT.WriteLine('Enabled Zend extensions:');
+		output_as_table(['Extension', 'Mode'], zend_exts.sort());
+	}
+}
+
 function write_summary()
 {
 	var ar = new Array();
 
 	STDOUT.WriteBlankLines(2);
-
-	STDOUT.WriteLine("Enabled extensions:");
-	output_as_table(["Extension", "Mode"], extensions_enabled.sort());
+	write_extensions_summary();
 	STDOUT.WriteBlankLines(2);
 	if (!MODE_PHPIZE) {
 		STDOUT.WriteLine("Enabled SAPI:");
@@ -1945,8 +2000,10 @@ function generate_tmp_php_ini()
 			continue;
 		}
 		
-		var directive = "extension";
-		if ("opcache" == extensions_enabled[i][0]) {
+		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
+
+		// FIXME: Remove this once ZEND_EXTENSION() is merged to XDEBUG
+		if ("xdebug" == extensions_enabled[i][0]) {
 			directive = "zend_extension";
 		}
 
@@ -1960,7 +2017,7 @@ function generate_tmp_php_ini()
 		}
 	}
 
-	INI.Close();;
+	INI.Close();
 }
 
 function generate_files()
@@ -2224,11 +2281,16 @@ function generate_config_h()
 		outfile.WriteLine("#define " + keys[i] + " " + pieces);
 	}
 
-	if (VS_TOOLSET && VCVERS >= 1800) {
-		outfile.WriteLine("");
-		outfile.WriteLine("#define HAVE_ACOSH 1");
-		outfile.WriteLine("#define HAVE_ASINH 1");
-		outfile.WriteLine("#define HAVE_ATANH 1");
+	if (VS_TOOLSET) {
+		if (VCVERS >= 1800) {
+			outfile.WriteLine("");
+			outfile.WriteLine("#define HAVE_ACOSH 1");
+			outfile.WriteLine("#define HAVE_ASINH 1");
+			outfile.WriteLine("#define HAVE_ATANH 1");
+		}
+		if (VCVERS >= 1900) {
+			outfile.WriteLine("#define HAVE_LOG1P 1");
+		}
 	}
 
 	
@@ -2914,28 +2976,24 @@ function toolset_setup_project_tools()
 
 	RE2C = PATH_PROG('re2c');
 	if (RE2C) {
-		var intvers, intmin;
-		var pattern = /\./g;
-
-		RE2CVERS = probe_binary(RE2C, "version");
+		var RE2CVERS = probe_binary(RE2C, "version");
 		STDOUT.WriteLine('  Detected re2c version ' + RE2CVERS);
 
 		if (RE2CVERS.match(/^\d+.\d+$/)) {
 			RE2CVERS += ".0";
 		}
 
-		intvers = RE2CVERS.replace(pattern, '') - 0;
-		intmin = MINRE2C.replace(pattern, '') - 0;
+		var hm = RE2CVERS.match(/(\d+)\.(\d+)\.(\d+)/);
+		var nm = MINRE2C.match(/(\d+)\.(\d+)\.(\d+)/);
+
+		var intvers =  (hm[1]-0)*10000 + (hm[2]-0)*100 + (hm[3]-0);
+		var intmin =  (nm[1]-0)*10000 + (nm[2]-0)*100 + (nm[3]-0);
 
 		if (intvers < intmin) {
-			STDOUT.WriteLine('WARNING: The minimum RE2C version requirement is ' + MINRE2C);
-			STDOUT.WriteLine('Parsers will not be generated. Upgrade your copy at http://sf.net/projects/re2c');
-			DEFINE('RE2C', '');
-		} else {
-			DEFINE('RE2C_FLAGS', '');
+			ERROR('The minimum RE2C version requirement is ' + MINRE2C);
 		}
 	} else {
-		STDOUT.WriteLine('Parsers will not be regenerated');
+		ERROR('re2c is required')
 	}
 	PATH_PROG('zip');
 	PATH_PROG('lemon');

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -594,7 +594,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ pgsql_functions[]
  */
-const zend_function_entry pgsql_functions[] = {
+static const zend_function_entry pgsql_functions[] = {
 	/* connection functions */
 	PHP_FE(pg_connect,		arginfo_pg_connect)
 	PHP_FE(pg_pconnect,		arginfo_pg_pconnect)
@@ -923,7 +923,7 @@ static inline char * _php_pgsql_trim_result(PGconn * pgsql, char **buf)
  */
 static void php_pgsql_set_default_link(zend_resource *res)
 {
-	GC_REFCOUNT(res)++;
+	GC_ADDREF(res);
 
 	if (PGG(default_link) != NULL) {
 		zend_list_delete(PGG(default_link));
@@ -1335,8 +1335,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		connstring = Z_STRVAL(args[0]);
 	} else if (ZEND_NUM_ARGS() == 2 ) { /* Safe to add conntype_option, since 2 args was illegal */
 		connstring = Z_STRVAL(args[0]);
-		convert_to_long_ex(&args[1]);
-		connect_type = (int)Z_LVAL(args[1]);
+		connect_type = (int)zval_get_long(&args[1]);
 	} else {
 		host = Z_STRVAL(args[0]);
 		port = Z_STRVAL(args[1]);
@@ -1357,8 +1356,6 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 
 		/* try to find if we already have this link in our persistent list */
 		if ((le = zend_hash_find_ptr(&EG(persistent_list), str.s)) == NULL) {  /* we don't */
-			zend_resource new_le;
-
 			if (PGG(max_links) != -1 && PGG(num_links) >= PGG(max_links)) {
 				php_error_docref(NULL, E_WARNING,
 								 "Cannot create new link. Too many open links (" ZEND_LONG_FMT ")", PGG(num_links));
@@ -1385,9 +1382,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			}
 
 			/* hash it up */
-			new_le.type = le_plink;
-			new_le.ptr = pgsql;
-			if (zend_hash_str_update_mem(&EG(persistent_list), ZSTR_VAL(str.s), ZSTR_LEN(str.s), &new_le, sizeof(zend_resource)) == NULL) {
+			if (zend_register_persistent_resource(ZSTR_VAL(str.s), ZSTR_LEN(str.s), pgsql, le_plink) == NULL) {
 				goto err;
 			}
 			PGG(num_links)++;
@@ -1451,7 +1446,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 			link = (zend_resource *)index_ptr->ptr;
 			if (link->ptr && (link->type == le_link || link->type == le_plink)) {
 				php_pgsql_set_default_link(link);
-				GC_REFCOUNT(link)++;
+				GC_ADDREF(link);
 				RETVAL_RES(link);
 				goto cleanup;
 			} else {
@@ -1572,32 +1567,27 @@ PHP_FUNCTION(pg_close)
 {
 	zval *pgsql_link = NULL;
 	zend_resource *link;
-	int argc = ZEND_NUM_ARGS();
-	PGconn *pgsql;
 
-	if (zend_parse_parameters(argc, "|r", &pgsql_link) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|r", &pgsql_link) == FAILURE) {
 		return;
 	}
 
-	if (argc == 0) {
+	if (pgsql_link) {
+		link = Z_RES_P(pgsql_link);
+	} else {
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
-	} else {
-		link = Z_RES_P(pgsql_link);
 	}
 
-	if ((pgsql = (PGconn *)zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink)) == NULL) {
+	if (zend_fetch_resource2(link, "PostgreSQL link", le_link, le_plink) == NULL) {
 		RETURN_FALSE;
 	}
 
-	if (argc == 0) { /* explicit resource number */
-		zend_list_close(link);
-	}
-
-	if (argc || (pgsql_link && Z_RES_P(pgsql_link) == PGG(default_link))) {
-		zend_list_close(link);
+	if (link == PGG(default_link)) {
+		zend_list_delete(link);
 		PGG(default_link) = NULL;
 	}
+	zend_list_close(link);
 
 	RETURN_TRUE;
 }
@@ -1668,26 +1658,21 @@ static void php_pgsql_get_link_info(INTERNAL_FUNCTION_PARAMETERS, int entry_type
 				/* 8.0 or grater supports protorol version 3 */
 				char *tmp;
 				add_assoc_string(return_value, "server", (char*)PQparameterStatus(pgsql, "server_version"));
-				tmp = (char*)PQparameterStatus(pgsql, "server_encoding");
-				add_assoc_string(return_value, "server_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "client_encoding");
-				add_assoc_string(return_value, "client_encoding", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "is_superuser");
-				add_assoc_string(return_value, "is_superuser", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "session_authorization");
-				add_assoc_string(return_value, "session_authorization", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "DateStyle");
-				add_assoc_string(return_value, "DateStyle", tmp);
-				tmp = (char*)PQparameterStatus(pgsql, "IntervalStyle");
-				add_assoc_string(return_value, "IntervalStyle", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "TimeZone");
-				add_assoc_string(return_value, "TimeZone", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "integer_datetimes");
-				add_assoc_string(return_value, "integer_datetimes", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "standard_conforming_strings");
-				add_assoc_string(return_value, "standard_conforming_strings", tmp ? tmp : "");
-				tmp = (char*)PQparameterStatus(pgsql, "application_name");
-				add_assoc_string(return_value, "application_name", tmp ? tmp : "");
+
+#define PHP_PQ_COPY_PARAM(_x) tmp = (char*)PQparameterStatus(pgsql, _x); \
+	if(tmp) add_assoc_string(return_value, _x, tmp); \
+	else add_assoc_null(return_value, _x);
+
+				PHP_PQ_COPY_PARAM("server_encoding");
+				PHP_PQ_COPY_PARAM("client_encoding");
+				PHP_PQ_COPY_PARAM("is_superuser");
+				PHP_PQ_COPY_PARAM("session_authorization");
+				PHP_PQ_COPY_PARAM("DateStyle");
+				PHP_PQ_COPY_PARAM("IntervalStyle");
+				PHP_PQ_COPY_PARAM("TimeZone");
+				PHP_PQ_COPY_PARAM("integer_datetimes");
+				PHP_PQ_COPY_PARAM("standard_conforming_strings");
+				PHP_PQ_COPY_PARAM("application_name");
 			}
 #endif
 #endif
@@ -2855,7 +2840,6 @@ static void php_pgsql_fetch_hash(INTERNAL_FUNCTION_PARAMETERS, zend_long result_
 				}
 			}
 
-			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);
@@ -3586,7 +3570,7 @@ PHP_FUNCTION(pg_lo_write)
 
 	if (argc > 2) {
 		if (z_len > (zend_long)str_len) {
-			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %d. Tried to write " ZEND_LONG_FMT, str_len, z_len);
+			php_error_docref(NULL, E_WARNING, "Cannot write more than buffer size %zu. Tried to write " ZEND_LONG_FMT, str_len, z_len);
 			RETURN_FALSE;
 		}
 		if (z_len < 0) {
@@ -5771,11 +5755,13 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
  */
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase)
 {
-	pcre *re;
-	const char *err_msg;
-	int err_offset;
-	int options = PCRE_NO_AUTO_CAPTURE, res;
+	pcre2_code *re;
+	PCRE2_UCHAR	         err_msg[256];
+	PCRE2_SIZE           err_offset;
+	int res, errnumber;
+	uint32_t options = PCRE2_NO_AUTO_CAPTURE;
 	size_t i;
+	pcre2_match_data *match_data;
 
 	/* Check invalid chars for POSIX regex */
 	for (i = 0; i < str_len; i++) {
@@ -5787,20 +5773,29 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 	}
 
 	if (icase) {
-		options |= PCRE_CASELESS;
+		options |= PCRE2_CASELESS;
 	}
 
-	if ((re = pcre_compile(regex, options, &err_msg, &err_offset, NULL)) == NULL) {
-		php_error_docref(NULL, E_WARNING, "Cannot compile regex");
+	re = pcre2_compile((PCRE2_SPTR)regex, PCRE2_ZERO_TERMINATED, options, &errnumber, &err_offset, php_pcre_cctx());
+	if (NULL == re) {
+		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
+		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
 		return FAILURE;
 	}
 
-	res = pcre_exec(re, NULL, str, str_len, 0, 0, NULL, 0);
-	pcre_free(re);
-
-	if (res == PCRE_ERROR_NOMATCH) {
+	match_data = php_pcre_create_match_data(0, re);
+	if (NULL == match_data) {
+		pcre2_code_free(re);
+		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
 		return FAILURE;
-	} else if (res) {
+	}
+	res = pcre2_match(re, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
+	pcre2_code_free(re);
+
+	if (res == PCRE2_ERROR_NOMATCH) {
+		return FAILURE;
+	} else if (res < 0) {
 		php_error_docref(NULL, E_WARNING, "Cannot exec regex");
 		return FAILURE;
 	}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -197,17 +197,13 @@ char *alloca();
 # define ZEND_ATTRIBUTE_ALLOC_SIZE2(X,Y)
 #endif
 
-/* Format string checks are disabled by default, because we use custom format modifiers (like %p),
- * which cause a large amount of false positives. You can enable format checks by adding
- * -DZEND_CHECK_FORMAT_STRINGS to CFLAGS. */
-
-#if defined(ZEND_CHECK_FORMAT_STRINGS) && (ZEND_GCC_VERSION >= 2007 || __has_attribute(format))
+#if ZEND_GCC_VERSION >= 2007 || __has_attribute(format)
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_FORMAT(type, idx, first)
 #endif
 
-#if defined(ZEND_CHECK_FORMAT_STRINGS) && ((ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER)) || __has_attribute(format))
+#if (ZEND_GCC_VERSION >= 3001 && !defined(__INTEL_COMPILER)) || __has_attribute(format)
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first) __attribute__ ((format(type, idx, first)))
 #else
 # define ZEND_ATTRIBUTE_PTR_FORMAT(type, idx, first)
@@ -223,14 +219,22 @@ char *alloca();
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 4003
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
-# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
 # define ZEND_COLD __attribute__((cold))
 # define ZEND_HOT __attribute__((hot))
 #else
 # define ZEND_ATTRIBUTE_UNUSED
-# define ZEND_ATTRIBUTE_UNUSED_LABEL
 # define ZEND_COLD
 # define ZEND_HOT
+#endif
+
+#if defined(__GNUC__) && ZEND_GCC_VERSION >= 5000
+# define ZEND_ATTRIBUTE_UNUSED_LABEL __attribute__((cold, unused));
+# define ZEND_ATTRIBUTE_COLD_LABEL __attribute__((cold));
+# define ZEND_ATTRIBUTE_HOT_LABEL __attribute__((hot));
+#else
+# define ZEND_ATTRIBUTE_UNUSED_LABEL
+# define ZEND_ATTRIBUTE_COLD_LABEL
+# define ZEND_ATTRIBUTE_HOT_LABEL
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 3004 && defined(__i386__)

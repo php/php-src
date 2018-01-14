@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0,
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry xmlrpc_functions[] = {
+static const zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
 	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
 	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
@@ -279,9 +279,9 @@ static void destroy_server_data(xmlrpc_server_data *server)
 static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
-		rsrc->gc.refcount++;
+		GC_ADDREF(rsrc);
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
-		rsrc->gc.refcount--;
+		GC_DELREF(rsrc);
 	}
 }
 
@@ -556,9 +556,12 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_VECTOR_TYPE vtype;
 
 						ht = HASH_OF(&val);
-						if (ht && ht->u.v.nApplyCount > 1) {
-							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
-							return NULL;
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							if (GC_IS_RECURSIVE(ht)) {
+								zend_throw_error(NULL, "XML-RPC doesn't support circular references");
+								return NULL;
+							}
+							GC_PROTECT_RECURSION(ht);
 						}
 
 						ZVAL_COPY(&val_arr, &val);
@@ -569,10 +572,6 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
 							ZVAL_DEREF(pIter);
-							ht = HASH_OF(pIter);
-							if (ht) {
-								ht->u.v.nApplyCount++;
-							}
 							if (my_key == NULL) {
 								char *num_str = NULL;
 
@@ -587,10 +586,10 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							} else {
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(ZSTR_VAL(my_key), pIter, depth++));
 							}
-							if (ht) {
-								ht->u.v.nApplyCount--;
-							}
 						} ZEND_HASH_FOREACH_END();
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							GC_UNPROTECT_RECURSION(ht);
+						}
 						zval_ptr_dtor(&val_arr);
 					}
 					break;
@@ -982,9 +981,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
 		/* save for later use */
 
-		if (Z_REFCOUNTED_P(method_name)) {
-			Z_ADDREF_P(method_name);
-		}
+		Z_TRY_ADDREF_P(method_name);
 		/* register our php method */
 		add_zval(&server->method_map, method_key, method_name);
 
@@ -1008,9 +1005,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 		RETURN_FALSE;
 	}
 
-	if (Z_REFCOUNTED_P(method_name)) {
-		Z_ADDREF_P(method_name);
-	}
+	Z_TRY_ADDREF_P(method_name);
 	/* register our php method */
 	add_zval(&server->introspection_map, NULL, method_name);
 
@@ -1339,9 +1334,6 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 				break;
 			case IS_DOUBLE:
 				type = xmlrpc_double;
-				break;
-			case IS_CONSTANT:
-				type = xmlrpc_string;
 				break;
 			case IS_STRING:
 				type = xmlrpc_string;

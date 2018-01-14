@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,15 +37,14 @@ BEGIN_EXTERN_C()
 #define TS_HASH(table) (&(table->hash))
 
 /* startup/shutdown */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC);
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC);
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent);
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht);
 ZEND_API void zend_ts_hash_clean(TsHashTable *ht);
 
 #define zend_ts_hash_init(ht, nSize, pHashFunction, pDestructor, persistent)	\
-	_zend_ts_hash_init(ht, nSize, pDestructor, persistent ZEND_FILE_LINE_CC)
+	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 #define zend_ts_hash_init_ex(ht, nSize, pHashFunction, pDestructor, persistent, bApplyProtection)	\
-	_zend_ts_hash_init_ex(ht, nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_CC)
+	_zend_ts_hash_init(ht, nSize, pDestructor, persistent)
 
 
 /* additions/updates/changes */

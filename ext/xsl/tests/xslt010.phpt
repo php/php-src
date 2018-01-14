@@ -6,6 +6,7 @@ require_once dirname(__FILE__) .'/skipif.inc';
 $proc = new xsltprocessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
 if (LIBXSLT_VERSION < 10117) die('skip too old libxsl');
+if (LIBXSLT_VERSION > 10129) die('skip for libxsl < 10130');
 ?>
 --FILE--
 <?php

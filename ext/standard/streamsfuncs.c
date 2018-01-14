@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -208,7 +208,7 @@ PHP_FUNCTION(stream_socket_server)
 	context = php_stream_context_from_zval(zcontext, flags & PHP_FILE_NO_DEFAULT_CONTEXT);
 
 	if (context) {
-		GC_REFCOUNT(context->res)++;
+		GC_ADDREF(context->res);
 	}
 
 	if (zerrno)	{
@@ -330,7 +330,7 @@ PHP_FUNCTION(stream_socket_get_name)
 		RETURN_FALSE;
 	}
 
-	if (!ZSTR_LEN(name)) {
+	if ((ZSTR_LEN(name) == 0) || (ZSTR_VAL(name)[0] == 0)) {
 		zend_string_release(name);
 		RETURN_FALSE;
 	}
@@ -665,8 +665,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	ZVAL_NEW_ARR(&new_array);
-	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		php_socket_t this_fd;
@@ -714,8 +713,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	ZVAL_NEW_ARR(&new_array);
-	zend_hash_init(Z_ARRVAL(new_array), zend_hash_num_elements(Z_ARRVAL_P(stream_array)), NULL, ZVAL_PTR_DTOR, 0);
+	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
 		ZVAL_DEREF(elem);
@@ -1077,10 +1075,10 @@ PHP_FUNCTION(stream_context_get_params)
 
 	array_init(return_value);
 	if (context->notifier && Z_TYPE(context->notifier->ptr) != IS_UNDEF && context->notifier->func == user_space_stream_notifier) {
+		Z_TRY_ADDREF(context->notifier->ptr);
 		add_assoc_zval_ex(return_value, "notification", sizeof("notification")-1, &context->notifier->ptr);
-		if (Z_REFCOUNTED(context->notifier->ptr)) Z_ADDREF(context->notifier->ptr);
 	}
-	if (Z_REFCOUNTED(context->options)) Z_ADDREF(context->options);
+	Z_TRY_ADDREF(context->options);
 	add_assoc_zval_ex(return_value, "options", sizeof("options")-1, &context->options);
 }
 /* }}} */
@@ -1231,7 +1229,7 @@ static void apply_filter_to_stream(int append, INTERNAL_FUNCTION_PARAMETERS)
 
 	if (filter) {
 		filter->res = zend_register_resource(filter, php_file_le_stream_filter());
-		GC_REFCOUNT(filter->res)++;
+		GC_ADDREF(filter->res);
 		RETURN_RES(filter->res);
 	} else {
 		RETURN_FALSE;
@@ -1620,7 +1618,7 @@ PHP_FUNCTION(stream_supports_lock)
 	RETURN_TRUE;
 }
 
-/* {{{ proto proto stream_isatty(resource stream)
+/* {{{ proto bool stream_isatty(resource stream)
 Check if a stream is a TTY.
 */
 PHP_FUNCTION(stream_isatty)
@@ -1658,7 +1656,7 @@ PHP_FUNCTION(stream_isatty)
 }
 
 #ifdef PHP_WIN32
-/* {{{ proto proto sapi_windows_vt100_support(resource stream[, bool enable])
+/* {{{ proto bool sapi_windows_vt100_support(resource stream[, bool enable])
    Get or set VT100 support for the specified stream associated to an
    output buffer of a Windows console.
 */

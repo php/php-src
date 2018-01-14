@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,6 @@ typedef struct _zend_fcall_info {
 } zend_fcall_info;
 
 typedef struct _zend_fcall_info_cache {
-	zend_bool initialized;
 	zend_function *function_handler;
 	zend_class_entry *calling_scope;
 	zend_class_entry *called_scope;
@@ -63,7 +62,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define ZEND_FN(name) zif_##name
 #define ZEND_MN(name) zim_##name
-#define ZEND_NAMED_FUNCTION(name)		void name(INTERNAL_FUNCTION_PARAMETERS)
+#define ZEND_NAMED_FUNCTION(name)		void ZEND_FASTCALL name(INTERNAL_FUNCTION_PARAMETERS)
 #define ZEND_FUNCTION(name)				ZEND_NAMED_FUNCTION(ZEND_FN(name))
 #define ZEND_METHOD(classname, name)	ZEND_NAMED_FUNCTION(ZEND_MN(classname##_##name))
 
@@ -193,9 +192,7 @@ typedef struct _zend_fcall_info_cache {
 
 #define INIT_OVERLOADED_CLASS_ENTRY_EX(class_container, class_name, class_name_len, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	{															\
-		zend_string *cl_name;									\
-		cl_name = zend_string_init(class_name, class_name_len, 1);		\
-		class_container.name = zend_new_interned_string(cl_name);	\
+		class_container.name = zend_string_init_interned(class_name, class_name_len, 1); \
 		INIT_CLASS_ENTRY_INIT_METHODS(class_container, functions, handle_fcall, handle_propget, handle_propset, handle_propunset, handle_propisset) \
 	}
 
@@ -255,8 +252,6 @@ typedef struct _zend_fcall_info_cache {
 ZEND_API int zend_next_free_module(void);
 
 BEGIN_EXTERN_C()
-ZEND_API int zend_get_parameters(int ht, int param_count, ...);
-ZEND_API ZEND_ATTRIBUTE_DEPRECATED int zend_get_parameters_ex(int param_count, ...);
 ZEND_API int _zend_get_parameters_array_ex(int param_count, zval *argument_array);
 
 /* internal function to efficiently copy parameters when executing __call() */
@@ -304,12 +299,12 @@ ZEND_API zend_class_entry *zend_register_internal_class_ex(zend_class_entry *cla
 ZEND_API zend_class_entry *zend_register_internal_interface(zend_class_entry *orig_class_entry);
 ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_interfaces, ...);
 
-ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce);
+ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent);
 
-#define zend_register_class_alias(name, ce) \
-	zend_register_class_alias_ex(name, sizeof(name)-1, ce)
-#define zend_register_ns_class_alias(ns, name, ce) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce)
+#define zend_register_class_alias(name, ce, persistent) \
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce, persistent)
+#define zend_register_ns_class_alias(ns, name, ce, persistent) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, persistent)
 
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
@@ -390,12 +385,11 @@ ZEND_API char *zend_get_type_by_const(int type);
 #define DLEXPORT
 #endif
 
-#define array_init(arg)			_array_init((arg), 0 ZEND_FILE_LINE_CC)
-#define array_init_size(arg, size) _array_init((arg), (size) ZEND_FILE_LINE_CC)
+#define array_init(arg)				ZVAL_ARR((arg), zend_new_array(0))
+#define array_init_size(arg, size)	ZVAL_ARR((arg), zend_new_array(size))
 #define object_init(arg)		_object_init((arg) ZEND_FILE_LINE_CC)
 #define object_init_ex(arg, ce)	_object_init_ex((arg), (ce) ZEND_FILE_LINE_CC)
 #define object_and_properties_init(arg, ce, properties)	_object_and_properties_init((arg), (ce), (properties) ZEND_FILE_LINE_CC)
-ZEND_API int _array_init(zval *arg, uint32_t size ZEND_FILE_LINE_DC);
 ZEND_API int _object_init(zval *arg ZEND_FILE_LINE_DC);
 ZEND_API int _object_init_ex(zval *arg, zend_class_entry *ce ZEND_FILE_LINE_DC);
 ZEND_API int _object_and_properties_init(zval *arg, zend_class_entry *ce, HashTable *properties ZEND_FILE_LINE_DC);
@@ -1253,7 +1247,7 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 		 && Z_OBJ_P(arg)->properties
 		 && UNEXPECTED(GC_REFCOUNT(Z_OBJ_P(arg)->properties) > 1)) {
 			if (EXPECTED(!(GC_FLAGS(Z_OBJ_P(arg)->properties) & IS_ARRAY_IMMUTABLE))) {
-				GC_REFCOUNT(Z_OBJ_P(arg)->properties)--;
+				GC_DELREF(Z_OBJ_P(arg)->properties);
 			}
 			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
 		}
@@ -1295,7 +1289,7 @@ static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *de
 {
 	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
 		dest_fci->size = 0;
-		dest_fcc->initialized = 0;
+		dest_fcc->function_handler = NULL;
 		*error = NULL;
 	} else if (UNEXPECTED(zend_fcall_info_init(arg, 0, dest_fci, dest_fcc, NULL, error) != SUCCESS)) {
 		return 0;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,7 +28,7 @@
 PHP_MINIT_FUNCTION(ps_mm);
 PHP_MSHUTDOWN_FUNCTION(ps_mm);
 
-extern ps_module ps_mod_mm;
+extern const ps_module ps_mod_mm;
 #define ps_mm_ptr &ps_mod_mm
 
 PS_FUNCS(mm);

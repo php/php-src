@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -110,7 +110,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	char *libpath;
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
-	int error_type, slash_suffix;
+	int error_type, slash_suffix = 0;
 	char *extension_dir;
 	char *err1, *err2;
 

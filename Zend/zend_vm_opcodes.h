@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,6 +60,7 @@
 #define ZEND_VM_EXT_CONST_FETCH  0x06000000
 #define ZEND_VM_EXT_TYPE         0x07000000
 #define ZEND_VM_EXT_EVAL         0x08000000
+#define ZEND_VM_EXT_TYPE_MASK    0x09000000
 #define ZEND_VM_EXT_SRC          0x0b000000
 #define ZEND_VM_NO_CONST_CONST   0x40000000
 #define ZEND_VM_COMMUTATIVE      0x80000000
@@ -171,7 +172,7 @@ END_EXTERN_C()
 #define ZEND_FETCH_UNSET                      95
 #define ZEND_FETCH_DIM_UNSET                  96
 #define ZEND_FETCH_OBJ_UNSET                  97
-#define ZEND_FETCH_LIST                       98
+#define ZEND_FETCH_LIST_R                     98
 #define ZEND_FETCH_CONSTANT                   99
 #define ZEND_EXT_STMT                        101
 #define ZEND_EXT_FCALL_BEGIN                 102
@@ -269,7 +270,8 @@ END_EXTERN_C()
 #define ZEND_FUNC_GET_ARGS                   195
 #define ZEND_UNSET_CV                        196
 #define ZEND_ISSET_ISEMPTY_CV                197
+#define ZEND_FETCH_LIST_W                    198
 
-#define ZEND_VM_LAST_OPCODE                  197
+#define ZEND_VM_LAST_OPCODE                  198
 
 #endif

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, DCE - Dead Code Elimination                             |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Authors: Nikita Popov <nikic@php.net>                                |
+   |          Dmitry Stogov <dmitry@zend.com>                             |
    +----------------------------------------------------------------------+
 */
 
@@ -42,6 +43,8 @@
  *    zend_may_throw().
  *  * We often cannot DCE assignments and unsets while guaranteeing that dtors run in the same
  *    order. There is an optimization option to allow reordering of dtor effects.
+ *  * The algorithm is able to eliminate dead modifications of non-escaping arrays
+ *    and objects as well as dead arrays and objects allocations.
  */
 
 typedef struct {
@@ -120,6 +123,8 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_ISSET_ISEMPTY_VAR:
 		case ZEND_FETCH_IS:
 		case ZEND_IN_ARRAY:
+		case ZEND_FUNC_NUM_ARGS:
+		case ZEND_FUNC_GET_ARGS:
 			/* No side effects */
 			return 0;
 		case ZEND_JMP:
@@ -219,11 +224,19 @@ static inline zend_bool may_have_side_effects(
 				opline++;
 				ssa_op++;
 				if (opline->op1_type != IS_CONST
-					&& (OP1_INFO() & MAY_HAVE_DTOR)
-					&& ssa->vars[ssa_op->op1_use].escape_state != ESCAPE_STATE_NO_ESCAPE) {
+					&& (OP1_INFO() & MAY_HAVE_DTOR)) {
 					/* DCE might shorten lifetime */
 					return 1;
 				}
+			}
+			return 0;
+		case ZEND_PRE_INC_OBJ:
+		case ZEND_PRE_DEC_OBJ:
+		case ZEND_POST_INC_OBJ:
+		case ZEND_POST_DEC_OBJ:
+			if (is_bad_mod(ssa, ssa_op->op1_use, ssa_op->op1_def)
+				|| ssa->vars[ssa_op->op1_def].escape_state != ESCAPE_STATE_NO_ESCAPE) {
+				return 1;
 			}
 			return 0;
 		default:
@@ -328,9 +341,7 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 				case ZEND_ASSIGN_BW_XOR:
 				case ZEND_ASSIGN_POW:
 				case ZEND_PRE_INC:
-				case ZEND_POST_INC:
 				case ZEND_PRE_DEC:
-				case ZEND_POST_DEC:
 				case ZEND_PRE_INC_OBJ:
 				case ZEND_POST_INC_OBJ:
 				case ZEND_PRE_DEC_OBJ:
@@ -411,112 +422,6 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 	return 1;
 }
 
-// TODO Move this somewhere else (CFG simplification?)
-static int simplify_jumps(zend_ssa *ssa, zend_op_array *op_array) {
-	int removed_ops = 0;
-	zend_basic_block *block;
-	FOREACH_BLOCK(block) {
-		int block_num = block - ssa->cfg.blocks;
-		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
-		zend_ssa_op *ssa_op = &ssa->ops[block->start + block->len - 1];
-		zval *op1;
-
-		if (block->len == 0) {
-			continue;
-		}
-
-		/* Convert jump-and-set into jump if result is not used */
-		switch (opline->opcode) {
-			case ZEND_JMPZ_EX:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					opline->opcode = ZEND_JMPZ;
-					opline->result_type = IS_UNUSED;
-					zend_ssa_remove_result_def(ssa, ssa_op);
-				}
-				break;
-			case ZEND_JMPNZ_EX:
-			case ZEND_JMP_SET:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain < 0
-						&& ssa->vars[ssa_op->result_def].phi_use_chain == NULL) {
-					opline->opcode = ZEND_JMPNZ;
-					opline->result_type = IS_UNUSED;
-					zend_ssa_remove_result_def(ssa, ssa_op);
-				}
-				break;
-		}
-
-		/* Convert jump-and-set to QM_ASSIGN/BOOL if the "else" branch is not taken. */
-		switch (opline->opcode) {
-			case ZEND_JMPZ_EX:
-			case ZEND_JMPNZ_EX:
-				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
-					opline->opcode = ZEND_BOOL;
-				}
-				break;
-			case ZEND_JMP_SET:
-			case ZEND_COALESCE:
-				if (block->successors_count == 1 && block->successors[0] != block_num + 1) {
-					opline->opcode = ZEND_QM_ASSIGN;
-				}
-				break;
-		}
-
-		if (opline->op1_type != IS_CONST) {
-			continue;
-		}
-
-		/* Convert constant conditional jump to unconditional jump */
-		op1 = &ZEND_OP1_LITERAL(opline);
-		switch (opline->opcode) {
-			case ZEND_JMPZ:
-				if (!zend_is_true(op1)) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-			case ZEND_JMPNZ:
-				if (zend_is_true(op1)) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-			case ZEND_COALESCE:
-				ZEND_ASSERT(ssa_op->result_def >= 0);
-				if (ssa->vars[ssa_op->result_def].use_chain >= 0
-						|| ssa->vars[ssa_op->result_def].phi_use_chain != NULL) {
-					break;
-				}
-
-				zend_ssa_remove_result_def(ssa, ssa_op);
-				if (Z_TYPE_P(op1) != IS_NULL) {
-					literal_dtor(op1);
-					opline->op1_type = IS_UNUSED;
-					opline->op1.num = opline->op2.num;
-					opline->opcode = ZEND_JMP;
-					opline->result_type = IS_UNUSED;
-				} else {
-					MAKE_NOP(opline);
-					removed_ops++;
-				}
-				break;
-		}
-	} FOREACH_BLOCK_END();
-	return removed_ops;
-}
-
 static inline int get_common_phi_source(zend_ssa *ssa, zend_ssa_phi *phi) {
 	int common_source = -1;
 	int source;
@@ -581,6 +486,12 @@ static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa
 			uint32_t var = live_range->var & ~ZEND_LIVE_MASK;
 			uint32_t def = live_range->start - 1;
 
+			if ((op_array->opcodes[def].result_type == IS_UNUSED) &&
+					(UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_STMT) ||
+					UNEXPECTED(op_array->opcodes[def].opcode == ZEND_EXT_FCALL_END))) {
+				def--;
+			}
+
 			if (op_array->opcodes[def].result_type == IS_UNUSED) {
 				if (op_array->opcodes[def].opcode == ZEND_DO_FCALL) {
 					/* constructor call */
@@ -628,6 +539,10 @@ static void dce_live_ranges(context *ctx, zend_op_array *op_array, zend_ssa *ssa
 		i++;
 	}
 	op_array->last_live_range = j;
+	if (op_array->last_live_range == 0) {
+		efree(op_array->live_range);
+		op_array->live_range = NULL;
+	}
 }
 
 int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reorder_dtor_effects) {
@@ -636,7 +551,7 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 	int removed_ops = 0;
 
 	/* DCE of CV operations that changes arguments may affect vararg functions. */
-	zend_bool has_varargs = ssa->cfg.vararg;
+	zend_bool has_varargs = (ssa->cfg.flags & ZEND_FUNC_VARARG) != 0;
 
 	context ctx;
 	ctx.ssa = ssa;
@@ -687,9 +602,17 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			} else if (may_have_side_effects(op_array, ssa, &op_array->opcodes[i], &ssa->ops[i], ctx.reorder_dtor_effects)
 					|| zend_may_throw(&op_array->opcodes[i], op_array, ssa)
 					|| (has_varargs && may_break_varargs(op_array, ssa, &ssa->ops[i]))) {
-				add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
-				if (op_data >= 0) {
-					add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+				if (op_array->opcodes[i].opcode == ZEND_NEW
+						&& op_array->opcodes[i+1].opcode == ZEND_DO_FCALL
+						&& ssa->ops[i].result_def >= 0
+						&& ssa->vars[ssa->ops[i].result_def].escape_state == ESCAPE_STATE_NO_ESCAPE) {
+					zend_bitset_incl(ctx.instr_dead, i);
+					zend_bitset_incl(ctx.instr_dead, i+1);
+				} else {
+					add_operands_to_worklists(&ctx, &op_array->opcodes[i], &ssa->ops[i], 0);
+					if (op_data >= 0) {
+						add_operands_to_worklists(&ctx, &op_array->opcodes[op_data], &ssa->ops[op_data], 0);
+					}
 				}
 			} else {
 				zend_bitset_incl(ctx.instr_dead, i);
@@ -751,8 +674,6 @@ int dce_optimize_op_array(zend_op_array *op_array, zend_ssa *ssa, zend_bool reor
 			try_remove_trivial_phi(&ctx, phi);
 		}
 	} FOREACH_PHI_END();
-
-	removed_ops += simplify_jumps(ssa, op_array);
 
 	return removed_ops;
 }

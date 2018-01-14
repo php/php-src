@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -441,7 +441,6 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 			pfc->cmd_buffer.buffer = NULL;
 		}
 
-		mnd_pefree(pfc->data, pfc->data->persistent);
 		mnd_pefree(pfc, pfc->persistent);
 	}
 	DBG_VOID_RETURN;

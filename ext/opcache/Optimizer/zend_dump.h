@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Bytecode Visualisation                                  |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,9 @@ void zend_dump_phi_placement(const zend_op_array *op_array, const zend_ssa *ssa)
 void zend_dump_variables(const zend_op_array *op_array);
 void zend_dump_ssa_variables(const zend_op_array *op_array, const zend_ssa *ssa, uint32_t dump_flags);
 void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num);
+void zend_dump_op_array_name(const zend_op_array *op_array);
+void zend_dump_const(const zval *zv);
+void zend_dump_ht(HashTable *ht);
 
 END_EXTERN_C()
 

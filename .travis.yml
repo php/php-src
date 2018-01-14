@@ -1,3 +1,4 @@
+dist: trusty
 language: c
 sudo: false
 addons:
@@ -16,6 +17,7 @@ addons:
       - libsasl2-dev
       - libxpm-dev
       - libt1-dev
+      - libzip-dev
 
 notifications:
     email: 

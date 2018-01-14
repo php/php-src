@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,8 +52,8 @@
 # define PRINTF_DEBUG(arg)
 #endif
 
-static char hexchars[] = "0123456789abcdef";
-static char HEXCHARS[] = "0123456789ABCDEF";
+static const char hexchars[] = "0123456789abcdef";
+static const char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
 inline static void
@@ -309,7 +309,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 inline static void
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
-					 char *chartable, int expprec)
+					 const char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register zend_ulong num;
@@ -564,14 +564,15 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 			tmp = &args[argnum];
 			switch (format[inpos]) {
 				case 's': {
-					zend_string *str = zval_get_string(tmp);
+					zend_string *t;
+					zend_string *str = zval_get_tmp_string(tmp, &t);
 					php_sprintf_appendstring(&result, &outpos,
 											 ZSTR_VAL(str),
 											 width, precision, padding,
 											 alignment,
 											 ZSTR_LEN(str),
 											 0, expprec, 0);
-					zend_string_release(str);
+					zend_tmp_string_release(t);
 					break;
 				}
 

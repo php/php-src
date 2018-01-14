@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,12 +59,10 @@ typedef struct _zend_op zend_op;
 #if SIZEOF_SIZE_T == 4
 # define ZEND_USE_ABS_JMP_ADDR      1
 # define ZEND_USE_ABS_CONST_ADDR    1
-# define ZEND_EX_USE_LITERALS       0
 # define ZEND_EX_USE_RUN_TIME_CACHE 1
 #else
 # define ZEND_USE_ABS_JMP_ADDR      0
 # define ZEND_USE_ABS_CONST_ADDR    0
-# define ZEND_EX_USE_LITERALS       1
 # define ZEND_EX_USE_RUN_TIME_CACHE 1
 #endif
 
@@ -205,7 +203,6 @@ typedef struct _zend_oparray_context {
  * Free flags:
  * 0x10
  * 0x20
- * 0x8000
  * 0x2000000
  */
 
@@ -228,6 +225,9 @@ typedef struct _zend_oparray_context {
 /* method flags (special method detection) */
 #define ZEND_ACC_CTOR		0x2000
 #define ZEND_ACC_DTOR		0x4000
+
+/* "main" op_array with ZEND_DECLARE_INHERITED_CLASS_DELAYED opcodes */
+#define ZEND_ACC_EARLY_BINDING 0x8000
 
 /* method flag used by Closure::__invoke() */
 #define ZEND_ACC_USER_ARG_INFO 0x80
@@ -373,34 +373,30 @@ struct _zend_op_array {
 	zend_arg_info *arg_info;
 	/* END of common elements */
 
-	uint32_t *refcount;
+	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
+	int last_var;       /* number of CV variables */
+	uint32_t T;         /* numner of temporary variables */
+	uint32_t last;      /* number of opcodes */
 
-	uint32_t last;
 	zend_op *opcodes;
+	void **run_time_cache;
+	HashTable *static_variables;
+	zend_string **vars; /* names of CV variables */
 
-	int last_var;
-	uint32_t T;
-	zend_string **vars;
+	uint32_t *refcount;
 
 	int last_live_range;
 	int last_try_catch;
 	zend_live_range *live_range;
 	zend_try_catch_element *try_catch_array;
 
-	/* static variables support */
-	HashTable *static_variables;
-
 	zend_string *filename;
 	uint32_t line_start;
 	uint32_t line_end;
 	zend_string *doc_comment;
-	uint32_t early_binding; /* the linked list of delayed declarations */
 
 	int last_literal;
 	zval *literals;
-
-	int  cache_size;
-	void **run_time_cache;
 
 	void *reserved[ZEND_MAX_RESERVED_RESOURCES];
 };
@@ -410,7 +406,7 @@ struct _zend_op_array {
 #define ZEND_RETURN_REFERENCE			1
 
 /* zend_internal_function_handler */
-typedef void (*zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
+typedef void (ZEND_FASTCALL *zif_handler)(INTERNAL_FUNCTION_PARAMETERS);
 
 typedef struct _zend_internal_function {
 	/* Common elements */
@@ -469,9 +465,6 @@ struct _zend_execute_data {
 	zend_array          *symbol_table;
 #if ZEND_EX_USE_RUN_TIME_CACHE
 	void               **run_time_cache;   /* cache op_array->run_time_cache */
-#endif
-#if ZEND_EX_USE_LITERALS
-	zval                *literals;         /* cache op_array->literals       */
 #endif
 };
 
@@ -616,63 +609,37 @@ struct _zend_execute_data {
 #if ZEND_USE_ABS_CONST_ADDR
 
 /* run-time constant */
-# define RT_CONSTANT_EX(base, node) \
+# define RT_CONSTANT(opline, node) \
 	(node).zv
 
 /* convert constant from compile-time to run-time */
-# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, node) do { \
 		(node).zv = CT_CONSTANT_EX(op_array, (node).constant); \
 	} while (0)
 
-/* convert constant back from run-time to compile-time */
-# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
-		(node).constant = (node).zv - (op_array)->literals; \
-	} while (0)
-
 #else
 
+/* At run-time, constants are allocated together with op_array->opcodes
+ * and addressed relatively to current opline.
+ */
+
 /* run-time constant */
-# define RT_CONSTANT_EX(base, node) \
-	((zval*)(((char*)(base)) + (node).constant))
+# define RT_CONSTANT(opline, node) \
+	((zval*)(((char*)(opline)) + (int32_t)(node).constant))
 
 /* convert constant from compile-time to run-time */
-# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, node) do { \
-		(node).constant *= sizeof(zval); \
-	} while (0)
-
-/* convert constant back from run-time to compile-time (do nothing) */
-# define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, node) do { \
-		(node).constant /= sizeof(zval); \
+# define ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, node) do { \
+		(node).constant = \
+			(((char*)CT_CONSTANT_EX(op_array, (node).constant)) - \
+			((char*)opline)); \
 	} while (0)
 
 #endif
 
-#if ZEND_EX_USE_LITERALS
-
-# define EX_LITERALS() \
-	EX(literals)
-
-# define EX_LOAD_LITERALS(op_array) do { \
-		EX(literals) = (op_array)->literals; \
+/* convert constant back from run-time to compile-time */
+#define ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, node) do { \
+		(node).constant = RT_CONSTANT(opline, node) - (op_array)->literals; \
 	} while (0)
-
-#else
-
-# define EX_LITERALS() \
-	EX(func)->op_array.literals
-
-# define EX_LOAD_LITERALS(op_array) do { \
-	} while (0)
-
-#endif
-
-/* run-time constant */
-#define RT_CONSTANT(op_array, node) \
-	RT_CONSTANT_EX((op_array)->literals, node)
-
-/* constant in currently executed function */
-#define EX_CONSTANT(node) \
-	RT_CONSTANT_EX(EX_LITERALS(), node)
 
 #if ZEND_EX_USE_RUN_TIME_CACHE
 
@@ -754,7 +721,8 @@ void zend_do_free(znode *op1);
 ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opline, HashTable *function_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_bool compile_time);
 ZEND_API zend_class_entry *do_bind_inherited_class(const zend_op_array *op_array, const zend_op *opline, HashTable *class_table, zend_class_entry *parent_ce, zend_bool compile_time);
-ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array);
+ZEND_API uint32_t zend_build_delayed_early_binding_list(const zend_op_array *op_array);
+ZEND_API void zend_do_delayed_early_binding(const zend_op_array *op_array, uint32_t first_early_binding_opline);
 
 void zend_do_extended_info(void);
 void zend_do_extended_fcall_begin(void);
@@ -916,6 +884,10 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_SEND_PREFER_REF 2
 
 #define ZEND_DIM_IS 1
+
+#define IS_CONSTANT_UNQUALIFIED     0x010
+#define IS_CONSTANT_CLASS           0x080  /* __CLASS__ in trait */
+#define IS_CONSTANT_IN_NAMESPACE    0x100
 
 static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, uint32_t arg_num, uint32_t mask)
 {

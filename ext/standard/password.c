@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -415,9 +415,6 @@ PHP_FUNCTION(password_hash)
 	zend_long algo = PHP_PASSWORD_DEFAULT;
 	HashTable *options = NULL;
 
-#if HAVE_ARGON2LIB
-#endif
-
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(password)
 		Z_PARAM_LONG(algo)
@@ -476,7 +473,7 @@ PHP_FUNCTION(password_hash)
 			{
 				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
-				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 				argon2_type type = Argon2_i;
@@ -526,7 +523,7 @@ PHP_FUNCTION(password_hash)
 #endif
 				);
 
-				encoded = zend_string_alloc(encoded_len, 0);
+				encoded = zend_string_alloc(encoded_len - 1, 0);
 				status = argon2_hash(
 					time_cost,
 					memory_cost,
@@ -538,7 +535,7 @@ PHP_FUNCTION(password_hash)
 					ZSTR_VAL(out),
 					ZSTR_LEN(out),
 					ZSTR_VAL(encoded),
-					ZSTR_LEN(encoded),
+					encoded_len,
 					type,
 					ARGON2_VERSION_NUMBER
 				);

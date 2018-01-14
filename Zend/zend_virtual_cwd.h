@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -160,21 +160,6 @@ CWD_API int virtual_rmdir(const char *pathname);
 CWD_API DIR *virtual_opendir(const char *pathname);
 CWD_API FILE *virtual_popen(const char *command, const char *type);
 CWD_API int virtual_access(const char *pathname, int mode);
-#if defined(ZEND_WIN32)
-/* these are not defined in win32 headers */
-#ifndef W_OK
-#define W_OK 0x02
-#endif
-#ifndef R_OK
-#define R_OK 0x04
-#endif
-#ifndef X_OK
-#define X_OK 0x01
-#endif
-#ifndef F_OK
-#define F_OK 0x00
-#endif
-#endif
 
 #if HAVE_UTIME
 CWD_API int virtual_utime(const char *filename, struct utimbuf *buf);

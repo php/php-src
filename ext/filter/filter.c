@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -503,21 +503,21 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
 
-		if (Z_ARRVAL_P(value)->u.v.nApplyCount > 1) {
+		if (Z_IS_RECURSIVE_P(value)) {
 			return;
 		}
+		Z_PROTECT_RECURSION_P(value);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 			ZVAL_DEREF(element);
 			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
-				Z_ARRVAL_P(element)->u.v.nApplyCount++;
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
-				Z_ARRVAL_P(element)->u.v.nApplyCount--;
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
 			}
 		} ZEND_HASH_FOREACH_END();
+		Z_UNPROTECT_RECURSION_P(value);
 	} else {
 		php_zval_filter(value, filter, flags, options, charset, copy);
 	}

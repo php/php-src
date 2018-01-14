@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -328,7 +328,7 @@ PHP_FUNCTION(ibase_set_event_handler)
 	event = (ibase_event *) safe_emalloc(sizeof(ibase_event), 1, 0);
 	TSRMLS_SET_CTX(event->thread_ctx);
 	event->link_res = link_res;
-	GC_REFCOUNT(link_res)++;
+	GC_ADDREF(link_res);
 	event->link = ib_link;
 	event->event_count = 0;
 	event->state = NEW;

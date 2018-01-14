@@ -9,6 +9,7 @@ if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite', strlen('sqlite'))) die('skip n
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'pgsql', strlen('pgsql'))) die('skip not relevant for pgsql driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'oci', strlen('oci'))) die('skip not relevant for oci driver - Hyphen is not legal for bind names in Oracle DB');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'firebird', strlen('firebird'))) die('skip not relevant for firebird driver');
+if (!strncasecmp(getenv('PDOTEST_DSN'), 'odbc', strlen('odbc'))) die('skip not relevant for odbc driver');
 require_once $dir . 'pdo_test.inc';
 PDOTest::skip();
 ?>

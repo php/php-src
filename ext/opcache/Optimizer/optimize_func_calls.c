@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -123,7 +123,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 				i = fcall->extended_value;
 
 				do {
-					if (Z_CONSTANT_P(RT_CONSTANT(&func->op_array, func->op_array.opcodes[i].op2))) {
+					if (Z_TYPE_P(RT_CONSTANT(&func->op_array.opcodes[i], func->op_array.opcodes[i].op2)) == IS_CONSTANT_AST) {
 						return;
 					}
 					i++;
@@ -133,7 +133,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
-				ZVAL_DUP(&zv, RT_CONSTANT(&func->op_array, ret_opline->op1));
+				ZVAL_DUP(&zv, RT_CONSTANT(ret_opline, ret_opline->op1));
 				opline->opcode = ZEND_QM_ASSIGN;
 				opline->op1_type = IS_CONST;
 				opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);

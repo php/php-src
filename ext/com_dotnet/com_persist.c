@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -281,7 +281,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->refcount = 1;
 	stm->stream = stream;
 
-	GC_REFCOUNT(stream->res)++;
+	GC_ADDREF(stream->res);
 	tmp = zend_list_insert(stm, le_istream);
 	stm->res = Z_RES_P(tmp);
 

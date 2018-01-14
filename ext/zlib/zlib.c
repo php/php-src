@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -936,7 +936,7 @@ PHP_FUNCTION(inflate_add)
 				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
 			RETURN_FALSE;
 	}
-	
+
 	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
 	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
 	{
@@ -1036,7 +1036,7 @@ PHP_FUNCTION(inflate_get_status)
 		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_LONG(((php_zlib_context *) ctx)->status);
 }
 /* }}} */
@@ -1366,11 +1366,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, flush_behavior)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, encoded_data)
+	ZEND_ARG_INFO(0, flush_mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)

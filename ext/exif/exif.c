@@ -1,8 +1,8 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -18,20 +18,6 @@
  */
 
 /* $Id$ */
-
-/*  ToDos
- *
- * 	See if example images from http://www.exif.org have illegal
- * 		thumbnail sizes or if code is corrupt.
- * 	Create/Update exif headers.
- * 	Create/Remove/Update image thumbnails.
- */
-
-/*  Security
- *
- *  At current time i do not see any security problems but a potential
- *  attacker could generate an image with recursive ifd pointers...(Marcus)
- */
 
 #ifdef HAVE_CONFIG_H
 #include "config.h"
@@ -70,13 +56,6 @@
 #include <sys/types.h>
 
 typedef unsigned char uchar;
-
-#ifndef safe_emalloc
-# define safe_emalloc(a,b,c) emalloc((a)*(b)+(c))
-#endif
-#ifndef safe_erealloc
-# define safe_erealloc(p,a,b,c) erealloc(p, (a)*(b)+(c))
-#endif
 
 #ifndef TRUE
 #	define TRUE 1
@@ -118,7 +97,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ exif_functions[]
  */
-const zend_function_entry exif_functions[] = {
+static const zend_function_entry exif_functions[] = {
 	PHP_FE(exif_read_data, arginfo_exif_read_data)
 	PHP_DEP_FALIAS(read_exif_data, exif_read_data, arginfo_exif_read_data)
 	PHP_FE(exif_tagname, arginfo_exif_tagname)
@@ -138,7 +117,7 @@ PHP_MINFO_FUNCTION(exif)
 	php_info_print_table_row(2, "Supported EXIF Version", "0220");
 	php_info_print_table_row(2, "Supported filetypes", "JPEG, TIFF");
 
-	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) { 
+	if (zend_hash_str_exists(&module_registry, "mbstring", sizeof("mbstring")-1)) {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "enabled");
 	} else {
 		php_info_print_table_row(2, "Multibyte decoding support using mbstring", "disabled");
@@ -965,36 +944,36 @@ static tag_info_array tag_table_VND_OLYMPUS = {
 };
 
 static tag_info_array tag_table_VND_SAMSUNG = {
-  { 0x0001, "Version"}, 
-  { 0x0021, "PictureWizard"}, 
-  { 0x0030, "LocalLocationName"}, 
-  { 0x0031, "LocationName"}, 
-  { 0x0035, "Preview"}, 
-  { 0x0043, "CameraTemperature"}, 
-  { 0xa001, "FirmwareName"}, 
-  { 0xa003, "LensType"}, 
-  { 0xa004, "LensFirmware"}, 
-  { 0xa010, "SensorAreas"}, 
-  { 0xa011, "ColorSpace"}, 
-  { 0xa012, "SmartRange"}, 
-  { 0xa013, "ExposureBiasValue"}, 
-  { 0xa014, "ISO"}, 
-  { 0xa018, "ExposureTime"}, 
-  { 0xa019, "FNumber"}, 
-  { 0xa01a, "FocalLengthIn35mmFormat"}, 
-  { 0xa020, "EncryptionKey"}, 
-  { 0xa021, "WB_RGGBLevelsUncorrected"}, 
-  { 0xa022, "WB_RGGBLevelsAuto"}, 
-  { 0xa023, "WB_RGGBLevelsIlluminator1"}, 
-  { 0xa024, "WB_RGGBLevelsIlluminator2"}, 
-  { 0xa028, "WB_RGGBLevelsBlack"}, 
-  { 0xa030, "ColorMatrix"}, 
-  { 0xa031, "ColorMatrixSRGB"}, 
-  { 0xa032, "ColorMatrixAdobeRGB"}, 
-  { 0xa040, "ToneCurve1"}, 
-  { 0xa041, "ToneCurve2"}, 
-  { 0xa042, "ToneCurve3"}, 
-  { 0xa043, "ToneCurve4"}, 
+  { 0x0001, "Version"},
+  { 0x0021, "PictureWizard"},
+  { 0x0030, "LocalLocationName"},
+  { 0x0031, "LocationName"},
+  { 0x0035, "Preview"},
+  { 0x0043, "CameraTemperature"},
+  { 0xa001, "FirmwareName"},
+  { 0xa003, "LensType"},
+  { 0xa004, "LensFirmware"},
+  { 0xa010, "SensorAreas"},
+  { 0xa011, "ColorSpace"},
+  { 0xa012, "SmartRange"},
+  { 0xa013, "ExposureBiasValue"},
+  { 0xa014, "ISO"},
+  { 0xa018, "ExposureTime"},
+  { 0xa019, "FNumber"},
+  { 0xa01a, "FocalLengthIn35mmFormat"},
+  { 0xa020, "EncryptionKey"},
+  { 0xa021, "WB_RGGBLevelsUncorrected"},
+  { 0xa022, "WB_RGGBLevelsAuto"},
+  { 0xa023, "WB_RGGBLevelsIlluminator1"},
+  { 0xa024, "WB_RGGBLevelsIlluminator2"},
+  { 0xa028, "WB_RGGBLevelsBlack"},
+  { 0xa030, "ColorMatrix"},
+  { 0xa031, "ColorMatrixSRGB"},
+  { 0xa032, "ColorMatrixAdobeRGB"},
+  { 0xa040, "ToneCurve1"},
+  { 0xa041, "ToneCurve2"},
+  { 0xa042, "ToneCurve3"},
+  { 0xa043, "ToneCurve4"},
   TAG_TABLE_END
 };
 
@@ -1105,72 +1084,72 @@ static tag_info_array tag_table_VND_PANASONIC = {
 };
 
 static tag_info_array tag_table_VND_DJI = {
-  { 0x0001, "Make"}, 
-  { 0x0003, "SpeedX"}, 
-  { 0x0004, "SpeedY"}, 
-  { 0x0005, "SpeedZ"}, 
-  { 0x0006, "Pitch"}, 
-  { 0x0007, "Yaw"}, 
-  { 0x0008, "Roll"}, 
-  { 0x0009, "CameraPitch"}, 
-  { 0x000a, "CameraYaw"}, 
-  { 0x000b, "CameraRoll"}, 
+  { 0x0001, "Make"},
+  { 0x0003, "SpeedX"},
+  { 0x0004, "SpeedY"},
+  { 0x0005, "SpeedZ"},
+  { 0x0006, "Pitch"},
+  { 0x0007, "Yaw"},
+  { 0x0008, "Roll"},
+  { 0x0009, "CameraPitch"},
+  { 0x000a, "CameraYaw"},
+  { 0x000b, "CameraRoll"},
   TAG_TABLE_END
 };
 
 static tag_info_array tag_table_VND_SONY = {
-  { 0x0102, "Quality"}, 
-  { 0x0104, "FlashExposureComp"}, 
-  { 0x0105, "Teleconverter"}, 
-  { 0x0112, "WhiteBalanceFineTune"}, 
-  { 0x0114, "CameraSettings"}, 
-  { 0x0115, "WhiteBalance"}, 
-  { 0x0116, "0x0116"}, 
-  { 0x0e00, "PrintIM"}, 
-  { 0x1000, "MultiBurstMode"}, 
-  { 0x1001, "MultiBurstImageWidth"}, 
-  { 0x1002, "MultiBurstImageHeight"}, 
-  { 0x1003, "Panorama"}, 
-  { 0x2000, "0x2000"}, 
-  { 0x2001, "PreviewImage"}, 
-  { 0x2002, "0x2002"}, 
-  { 0x2003, "0x2003"}, 
-  { 0x2004, "Contrast"}, 
-  { 0x2005, "Saturation"}, 
-  { 0x2006, "0x2006"}, 
-  { 0x2007, "0x2007"}, 
-  { 0x2008, "0x2008"}, 
-  { 0x2009, "0x2009"}, 
-  { 0x200a, "AutoHDR"}, 
-  { 0x3000, "ShotInfo"}, 
-  { 0xb000, "FileFormat"}, 
-  { 0xb001, "SonyModelID"}, 
-  { 0xb020, "ColorReproduction"}, 
-  { 0xb021, "ColorTemperature"}, 
-  { 0xb022, "ColorCompensationFilter"}, 
-  { 0xb023, "SceneMode"}, 
-  { 0xb024, "ZoneMatching"}, 
-  { 0xb025, "DynamicRangeOptimizer"}, 
-  { 0xb026, "ImageStabilization"}, 
-  { 0xb027, "LensID"}, 
-  { 0xb028, "MinoltaMakerNote"}, 
-  { 0xb029, "ColorMode"}, 
-  { 0xb02b, "FullImageSize"}, 
-  { 0xb02c, "PreviewImageSize"}, 
-  { 0xb040, "Macro"}, 
-  { 0xb041, "ExposureMode"}, 
-  { 0xb042, "FocusMode"}, 
-  { 0xb043, "AFMode"}, 
-  { 0xb044, "AFIlluminator"}, 
-  { 0xb047, "JPEGQuality"}, 
-  { 0xb048, "FlashLevel"}, 
-  { 0xb049, "ReleaseMode"}, 
-  { 0xb04a, "SequenceNumber"}, 
-  { 0xb04b, "AntiBlur"}, 
-  { 0xb04e, "LongExposureNoiseReduction"}, 
-  { 0xb04f, "DynamicRangeOptimizer"}, 
-  { 0xb052, "IntelligentAuto"}, 
-  { 0xb054, "WhiteBalance2"}, 
+  { 0x0102, "Quality"},
+  { 0x0104, "FlashExposureComp"},
+  { 0x0105, "Teleconverter"},
+  { 0x0112, "WhiteBalanceFineTune"},
+  { 0x0114, "CameraSettings"},
+  { 0x0115, "WhiteBalance"},
+  { 0x0116, "0x0116"},
+  { 0x0e00, "PrintIM"},
+  { 0x1000, "MultiBurstMode"},
+  { 0x1001, "MultiBurstImageWidth"},
+  { 0x1002, "MultiBurstImageHeight"},
+  { 0x1003, "Panorama"},
+  { 0x2000, "0x2000"},
+  { 0x2001, "PreviewImage"},
+  { 0x2002, "0x2002"},
+  { 0x2003, "0x2003"},
+  { 0x2004, "Contrast"},
+  { 0x2005, "Saturation"},
+  { 0x2006, "0x2006"},
+  { 0x2007, "0x2007"},
+  { 0x2008, "0x2008"},
+  { 0x2009, "0x2009"},
+  { 0x200a, "AutoHDR"},
+  { 0x3000, "ShotInfo"},
+  { 0xb000, "FileFormat"},
+  { 0xb001, "SonyModelID"},
+  { 0xb020, "ColorReproduction"},
+  { 0xb021, "ColorTemperature"},
+  { 0xb022, "ColorCompensationFilter"},
+  { 0xb023, "SceneMode"},
+  { 0xb024, "ZoneMatching"},
+  { 0xb025, "DynamicRangeOptimizer"},
+  { 0xb026, "ImageStabilization"},
+  { 0xb027, "LensID"},
+  { 0xb028, "MinoltaMakerNote"},
+  { 0xb029, "ColorMode"},
+  { 0xb02b, "FullImageSize"},
+  { 0xb02c, "PreviewImageSize"},
+  { 0xb040, "Macro"},
+  { 0xb041, "ExposureMode"},
+  { 0xb042, "FocusMode"},
+  { 0xb043, "AFMode"},
+  { 0xb044, "AFIlluminator"},
+  { 0xb047, "JPEGQuality"},
+  { 0xb048, "FlashLevel"},
+  { 0xb049, "ReleaseMode"},
+  { 0xb04a, "SequenceNumber"},
+  { 0xb04b, "AntiBlur"},
+  { 0xb04e, "LongExposureNoiseReduction"},
+  { 0xb04f, "DynamicRangeOptimizer"},
+  { 0xb052, "IntelligentAuto"},
+  { 0xb054, "WhiteBalance2"},
   TAG_TABLE_END
 };
 
@@ -1319,16 +1298,16 @@ static tag_info_array tag_table_VND_SIGMA = {
 };
 
 static tag_info_array tag_table_VND_KYOCERA = {
-  { 0x0001, "FormatThumbnail"}, 
-  { 0x0E00, "PrintImageMatchingInfo"}, 
+  { 0x0001, "FormatThumbnail"},
+  { 0x0E00, "PrintImageMatchingInfo"},
   TAG_TABLE_END
 };
 
 static tag_info_array tag_table_VND_RICOH = {
-  { 0x0001, "MakerNoteDataType"}, 
-  { 0x0002, "Version"}, 
-  { 0x0E00, "PrintImageMatchingInfo"}, 
-  { 0x2001, "RicohCameraInfoMakerNoteSubIFD"}, 
+  { 0x0001, "MakerNoteDataType"},
+  { 0x0002, "Version"},
+  { 0x0E00, "PrintImageMatchingInfo"},
+  { 0x2001, "RicohCameraInfoMakerNoteSubIFD"},
   TAG_TABLE_END
 };
 
@@ -1349,7 +1328,6 @@ typedef enum mn_offset_mode_t {
 typedef struct {
 	tag_table_type   tag_table;
 	char *           make;
-	char *           model;
 	char *           id_string;
 	int              id_string_len;
 	int              offset;
@@ -1359,27 +1337,27 @@ typedef struct {
 
 /* Remember to update PHP_MINFO if updated */
 static const maker_note_type maker_note_array[] = {
-  { tag_table_VND_CANON,     "Canon",                   NULL,  NULL,							 0,  0,  MN_ORDER_INTEL,    MN_OFFSET_NORMAL},
-  { tag_table_VND_CASIO,     "CASIO",                   NULL,  NULL,							 0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
-  { tag_table_VND_FUJI,      "FUJIFILM",                NULL,  "FUJIFILM\x0C\x00\x00\x00",		 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
-  { tag_table_VND_NIKON,     "NIKON",                   NULL,  "Nikon\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_NIKON_990, "NIKON",                   NULL,  NULL,							 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", NULL,  "OLYMP\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
-  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL, NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PANASONIC, "Panasonic",               NULL, "Panasonic\x00\x00\x00",			 12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_DJI,       "DJI",                     NULL, NULL,								 0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SONY,      "SONY",                    NULL, "SONY DSC \x00\x00\x00",	         12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_PENTAX,    "PENTAX",                  NULL, "AOC\x00",						 6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL, NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "SIGMA\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           NULL, "FOVEON\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_KYOCERA,   "KYOCERA, CONTAX",			NULL, "KYOCERA            \x00\x00\x00", 22, 22, MN_ORDER_NORMAL,   MN_OFFSET_MAKER}, 
-  { tag_table_VND_RICOH,	 "RICOH",					NULL, "Ricoh",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL}, 
-  { tag_table_VND_RICOH,     "RICOH",					NULL, "RICOH",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL}, 
+  { tag_table_VND_CANON,     "Canon",                   NULL,								 0,  0,  MN_ORDER_INTEL,    MN_OFFSET_NORMAL},
+  { tag_table_VND_CASIO,     "CASIO",                   NULL,								 0,  0,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
+  { tag_table_VND_FUJI,      "FUJIFILM",                "FUJIFILM\x0C\x00\x00\x00",			 12, 12, MN_ORDER_INTEL,    MN_OFFSET_MAKER},
+  { tag_table_VND_NIKON,     "NIKON",                   "Nikon\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_NIKON_990, "NIKON",                   NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_OLYMPUS,   "OLYMPUS OPTICAL CO.,LTD", "OLYMP\x00\x01\x00",				 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SAMSUNG,   "SAMSUNG",                 NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_PANASONIC, "Panasonic",               "Panasonic\x00\x00\x00",			 12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_DJI,       "DJI",                     NULL,								 0, 0,   MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SONY,      "SONY",                   "SONY DSC \x00\x00\x00",				 12, 12, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_PENTAX,    "PENTAX",                  "AOC\x00",							 6,  6,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_MINOLTA,   "Minolta, KONICA MINOLTA", NULL,								 0,  0,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           "SIGMA\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_SIGMA,     "SIGMA, FOVEON",           "FOVEON\x00\x00\x00",				 10, 10, MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_KYOCERA,   "KYOCERA, CONTAX",			"KYOCERA            \x00\x00\x00",	 22, 22, MN_ORDER_NORMAL,   MN_OFFSET_MAKER},
+  { tag_table_VND_RICOH,	 "RICOH",					"Ricoh",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
+  { tag_table_VND_RICOH,     "RICOH",					"RICOH",							 5,  5,  MN_ORDER_MOTOROLA, MN_OFFSET_NORMAL},
 
   /* These re-uses existing formats */
-  { tag_table_VND_OLYMPUS,   "AGFA",					NULL, "AGFA \x00\x01",					 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}, 
-  { tag_table_VND_OLYMPUS,   "EPSON",					NULL, "EPSON\x00\x01\x00",			     8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
+  { tag_table_VND_OLYMPUS,   "AGFA",					"AGFA \x00\x01",					 8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL},
+  { tag_table_VND_OLYMPUS,   "EPSON",					"EPSON\x00\x01\x00",			     8,  8,  MN_ORDER_NORMAL,   MN_OFFSET_NORMAL}
 };
 /* }}} */
 
@@ -1529,12 +1507,12 @@ static void php_ifd_set32u(char *data, size_t value, int motorola_intel)
 {
 	if (motorola_intel) {
 		data[0] = (value & 0xFF000000) >> 24;
-		data[1] = (value & 0x00FF0000) >> 16;
+		data[1] = (char) ((value & 0x00FF0000) >> 16);
 		data[2] = (value & 0x0000FF00) >>  8;
 		data[3] = (value & 0x000000FF);
 	} else {
 		data[3] = (value & 0xFF000000) >> 24;
-		data[2] = (value & 0x00FF0000) >> 16;
+		data[2] = (char) ((value & 0x00FF0000) >> 16);
 		data[1] = (value & 0x0000FF00) >>  8;
 		data[0] = (value & 0x000000FF);
 	}
@@ -3126,7 +3104,7 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 #endif
 	const maker_note_type *maker_note;
 	char *dir_start;
-	
+
 	for (i=0; i<=sizeof(maker_note_array)/sizeof(maker_note_type); i++) {
 		if (i==sizeof(maker_note_array)/sizeof(maker_note_type)) {
 #ifdef EXIF_DEBUG
@@ -3138,16 +3116,14 @@ static int exif_process_IFD_in_MAKERNOTE(image_info_type *ImageInfo, char * valu
 
 		maker_note = maker_note_array+i;
 
-		/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "check (%s,%s)", maker_note->make?maker_note->make:"", maker_note->model?maker_note->model:"");*/
+		/*exif_error_docref(NULL EXIFERR_CC, ImageInfo, E_NOTICE, "check (%s)", maker_note->make?maker_note->make:"");*/
 		if (maker_note->make && (!ImageInfo->make || strcmp(maker_note->make, ImageInfo->make)))
-			continue;
-		if (maker_note->model && (!ImageInfo->model || strcmp(maker_note->model, ImageInfo->model)))
 			continue;
 		if (maker_note->id_string && strncmp(maker_note->id_string, value_ptr, maker_note->id_string_len))
 			continue;
 		break;
 	}
-	
+
 	if (maker_note->offset >= value_len) {
 		/* Do not go past the value end */
 		exif_error_docref("exif_read_data#error_ifd" EXIFERR_CC, ImageInfo, E_WARNING, "IFD data too short: 0x%04X offset 0x%04X", value_len, maker_note->offset);

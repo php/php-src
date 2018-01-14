@@ -218,7 +218,7 @@ static int read_types(const unsigned char **tzf, timelib_tzinfo *tz)
 	memcpy(buffer, *tzf, sizeof(unsigned char) * 6 * tz->bit32.typecnt);
 	*tzf += sizeof(unsigned char) * 6 * tz->bit32.typecnt;
 
-	tz->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
+	tz->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(ttinfo));
 	if (!tz->type) {
 		timelib_free(buffer);
 		return TIMELIB_ERROR_CANNOT_ALLOCATE;
@@ -558,8 +558,8 @@ timelib_tzinfo *timelib_tzinfo_clone(timelib_tzinfo *tz)
 		memcpy(tmp->trans_idx, tz->trans_idx, tz->bit32.timecnt * sizeof(unsigned char));
 	}
 
-	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(struct ttinfo));
-	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(struct ttinfo));
+	tmp->type = (ttinfo*) timelib_malloc(tz->bit32.typecnt * sizeof(ttinfo));
+	memcpy(tmp->type, tz->type, tz->bit32.typecnt * sizeof(ttinfo));
 
 	tmp->timezone_abbr = (char*) timelib_malloc(tz->bit32.charcnt);
 	memcpy(tmp->timezone_abbr, tz->timezone_abbr, tz->bit32.charcnt);

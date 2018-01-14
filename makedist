@@ -40,7 +40,7 @@ if test "${2}" -lt "13" -o "${2}" -eq "13" -a "${3}" -lt "5"; then
 fi
 IFS="$old_IFS"
 
-if test "x$PHPROOT" == "x"; then
+if test "x$PHPROOT" = "x"; then
     PHPROOT=git@git.php.net:php-src.git;
 fi
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -57,6 +57,14 @@ PHPAPI void php_register_variable_safe(char *var, char *strval, size_t str_len, 
 		ZVAL_NEW_STR(&new_entry, zend_string_init(strval, str_len, 0));
 	}
 	php_register_variable_ex(var, &new_entry, track_vars_array);
+}
+
+static zend_always_inline void php_register_variable_quick(const char *name, size_t name_len, zval *val, HashTable *ht)
+{
+	zend_string *key = zend_string_init_interned(name, name_len, 0);
+
+	zend_hash_update_ind(ht, key, val);
+	zend_string_release(key);
 }
 
 PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)
@@ -236,12 +244,13 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 		}
 	} else {
 plain_var:
-		ZVAL_COPY_VALUE(&gpc_element, val);
 		if (!index) {
-			if ((gpc_element_p = zend_hash_next_index_insert(symtable1, &gpc_element)) == NULL) {
-				zval_ptr_dtor(&gpc_element);
+			if (zend_hash_next_index_insert(symtable1, val) == NULL) {
+				zval_ptr_dtor(val);
 			}
 		} else {
+			zend_ulong idx;
+
 			/*
 			 * According to rfc2965, more specific paths are listed above the less specific ones.
 			 * If we encounter a duplicate cookie name, we should skip it, since it is not possible
@@ -251,9 +260,11 @@ plain_var:
 			if (Z_TYPE(PG(http_globals)[TRACK_VARS_COOKIE]) != IS_UNDEF &&
 				symtable1 == Z_ARRVAL(PG(http_globals)[TRACK_VARS_COOKIE]) &&
 				zend_symtable_str_exists(symtable1, index, index_len)) {
-				zval_ptr_dtor(&gpc_element);
+				zval_ptr_dtor(val);
+			} else if (ZEND_HANDLE_NUMERIC_STR(index, index_len, idx)) {
+				zend_hash_index_update(symtable1, idx, val);
 			} else {
-				gpc_element_p = zend_symtable_str_update_ind(symtable1, index, index_len, &gpc_element);
+				php_register_variable_quick(index, index_len, val, symtable1);
 			}
 		}
 	}
@@ -518,29 +529,48 @@ next_cookie:
 	}
 }
 
+static zend_always_inline int valid_environment_name(const char *name, const char *end)
+{
+	const char *s;
+
+	for (s = name; s < end; s++) {
+		if (*s == ' ' || *s == '.' || *s == '[') {
+			return 0;
+		}
+	}
+	return 1;
+}
+
 void _php_import_environment_variables(zval *array_ptr)
 {
-	char buf[128];
-	char **env, *p, *t = buf;
-	size_t alloc_size = sizeof(buf);
-	unsigned long nlen; /* ptrdiff_t is not portable */
+	char **env, *p;
+	size_t name_len, len;
+	zval val;
+	zend_ulong idx;
 
 	for (env = environ; env != NULL && *env != NULL; env++) {
 		p = strchr(*env, '=');
-		if (!p) {				/* malformed entry? */
+		if (!p
+		 || p == *env
+		 || !valid_environment_name(*env, p)) {
+			/* malformed entry? */
 			continue;
 		}
-		nlen = p - *env;
-		if (nlen >= alloc_size) {
-			alloc_size = nlen + 64;
-			t = (t == buf ? emalloc(alloc_size): erealloc(t, alloc_size));
+		name_len = p - *env;
+		p++;
+		len = strlen(p);
+		if (len == 0) {
+			ZVAL_EMPTY_STRING(&val);
+		} else if (len == 1) {
+			ZVAL_INTERNED_STR(&val, ZSTR_CHAR((zend_uchar)*p));
+		} else {
+			ZVAL_NEW_STR(&val, zend_string_init(p, len, 0));
 		}
-		memcpy(t, *env, nlen);
-		t[nlen] = '\0';
-		php_register_variable(t, p + 1, array_ptr);
-	}
-	if (t != buf && t != NULL) {
-		efree(t);
+		if (ZEND_HANDLE_NUMERIC_STR(*env, name_len, idx)) {
+			zend_hash_index_update(Z_ARRVAL_P(array_ptr), idx, &val);
+		} else {
+			php_register_variable_quick(*env, name_len, &val, Z_ARRVAL_P(array_ptr));
+		}
 	}
 }
 
@@ -604,13 +634,13 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 
 	if (SG(request_info).argc) {
 		Z_ADDREF(arr);
-		zend_hash_str_update(&EG(symbol_table), "argv", sizeof("argv")-1, &arr);
-		zend_hash_str_add(&EG(symbol_table), "argc", sizeof("argc")-1, &argc);
+		zend_hash_update(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), &arr);
+		zend_hash_update(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGC), &argc);
 	}
 	if (track_vars_array && Z_TYPE_P(track_vars_array) == IS_ARRAY) {
 		Z_ADDREF(arr);
-		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argv", sizeof("argv")-1, &arr);
-		zend_hash_str_update(Z_ARRVAL_P(track_vars_array), "argc", sizeof("argc")-1, &argc);
+		zend_hash_update(Z_ARRVAL_P(track_vars_array), ZSTR_KNOWN(ZEND_STR_ARGV), &arr);
+		zend_hash_update(Z_ARRVAL_P(track_vars_array), ZSTR_KNOWN(ZEND_STR_ARGC), &argc);
 	}
 	zval_ptr_dtor_nogc(&arr);
 }
@@ -620,32 +650,38 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
  */
 static inline void php_register_server_variables(void)
 {
-	zval request_time_float, request_time_long;
+	zval tmp;
+	zval *arr = &PG(http_globals)[TRACK_VARS_SERVER];
+	HashTable *ht;
 
-	zval_ptr_dtor(&PG(http_globals)[TRACK_VARS_SERVER]);
-	array_init(&PG(http_globals)[TRACK_VARS_SERVER]);
+	zval_ptr_dtor(arr);
+	array_init(arr);
 
 	/* Server variables */
 	if (sapi_module.register_server_variables) {
-		sapi_module.register_server_variables(&PG(http_globals)[TRACK_VARS_SERVER]);
+		sapi_module.register_server_variables(arr);
 	}
+	ht = Z_ARRVAL_P(arr);
 
 	/* PHP Authentication support */
 	if (SG(request_info).auth_user) {
-		php_register_variable("PHP_AUTH_USER", SG(request_info).auth_user, &PG(http_globals)[TRACK_VARS_SERVER]);
+		ZVAL_STRING(&tmp, SG(request_info).auth_user);
+		php_register_variable_quick("PHP_AUTH_USER", sizeof("PHP_AUTH_USER")-1, &tmp, ht);
 	}
 	if (SG(request_info).auth_password) {
-		php_register_variable("PHP_AUTH_PW", SG(request_info).auth_password, &PG(http_globals)[TRACK_VARS_SERVER]);
+		ZVAL_STRING(&tmp, SG(request_info).auth_password);
+		php_register_variable_quick("PHP_AUTH_PW", sizeof("PHP_AUTH_PW")-1, &tmp, ht);
 	}
 	if (SG(request_info).auth_digest) {
-		php_register_variable("PHP_AUTH_DIGEST", SG(request_info).auth_digest, &PG(http_globals)[TRACK_VARS_SERVER]);
+		ZVAL_STRING(&tmp, SG(request_info).auth_digest);
+		php_register_variable_quick("PHP_AUTH_DIGEST", sizeof("PHP_AUTH_DIGEST")-1, &tmp, ht);
 	}
 
 	/* store request init time */
-	ZVAL_DOUBLE(&request_time_float, sapi_get_request_time());
-	php_register_variable_ex("REQUEST_TIME_FLOAT", &request_time_float, &PG(http_globals)[TRACK_VARS_SERVER]);
-	ZVAL_LONG(&request_time_long, zend_dval_to_lval(Z_DVAL(request_time_float)));
-	php_register_variable_ex("REQUEST_TIME", &request_time_long, &PG(http_globals)[TRACK_VARS_SERVER]);
+	ZVAL_DOUBLE(&tmp, sapi_get_request_time());
+	php_register_variable_quick("REQUEST_TIME_FLOAT", sizeof("REQUEST_TIME_FLOAT")-1, &tmp, ht);
+	ZVAL_LONG(&tmp, zend_dval_to_lval(Z_DVAL(tmp)));
+	php_register_variable_quick("REQUEST_TIME", sizeof("REQUEST_TIME")-1, &tmp, ht);
 }
 /* }}} */
 
@@ -663,15 +699,13 @@ static void php_autoglobal_merge(HashTable *dest, HashTable *src)
 			|| (string_key && (dest_entry = zend_hash_find(dest, string_key)) == NULL)
 			|| (string_key == NULL && (dest_entry = zend_hash_index_find(dest, num_key)) == NULL)
 			|| Z_TYPE_P(dest_entry) != IS_ARRAY) {
-			if (Z_REFCOUNTED_P(src_entry)) {
-				Z_ADDREF_P(src_entry);
-			}
+			Z_TRY_ADDREF_P(src_entry);
 			if (string_key) {
 				if (!globals_check || ZSTR_LEN(string_key) != sizeof("GLOBALS") - 1
 						|| memcmp(ZSTR_VAL(string_key), "GLOBALS", sizeof("GLOBALS") - 1)) {
 					zend_hash_update(dest, string_key, src_entry);
-				} else if (Z_REFCOUNTED_P(src_entry)) {
-					Z_DELREF_P(src_entry);
+				} else {
+					Z_TRY_DELREF_P(src_entry);
 				}
 			} else {
 				zend_hash_index_update(dest, num_key, src_entry);
@@ -783,11 +817,11 @@ static zend_bool php_auto_globals_create_server(zend_string *name)
 			if (SG(request_info).argc) {
 				zval *argc, *argv;
 
-				if ((argc = zend_hash_str_find_ind(&EG(symbol_table), "argc", sizeof("argc")-1)) != NULL &&
-					(argv = zend_hash_str_find_ind(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL) {
+				if ((argc = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGC), 1)) != NULL &&
+					(argv = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL) {
 					Z_ADDREF_P(argv);
-					zend_hash_str_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1, argv);
-					zend_hash_str_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), "argc", sizeof("argc")-1, argc);
+					zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), argv);
+					zend_hash_update(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGC), argc);
 				}
 			} else {
 				php_build_argv(SG(request_info).query_string, &PG(http_globals)[TRACK_VARS_SERVER]);
@@ -873,13 +907,13 @@ static zend_bool php_auto_globals_create_request(zend_string *name)
 
 void php_startup_auto_globals(void)
 {
-	zend_register_auto_global(zend_string_init("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
-	zend_register_auto_global(zend_string_init("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
-	zend_register_auto_global(zend_string_init("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
-	zend_register_auto_global(zend_string_init("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server);
-	zend_register_auto_global(zend_string_init("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env);
-	zend_register_auto_global(zend_string_init("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request);
-	zend_register_auto_global(zend_string_init("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
+	zend_register_auto_global(zend_string_init_interned("_GET", sizeof("_GET")-1, 1), 0, php_auto_globals_create_get);
+	zend_register_auto_global(zend_string_init_interned("_POST", sizeof("_POST")-1, 1), 0, php_auto_globals_create_post);
+	zend_register_auto_global(zend_string_init_interned("_COOKIE", sizeof("_COOKIE")-1, 1), 0, php_auto_globals_create_cookie);
+	zend_register_auto_global(zend_string_init_interned("_SERVER", sizeof("_SERVER")-1, 1), PG(auto_globals_jit), php_auto_globals_create_server);
+	zend_register_auto_global(zend_string_init_interned("_ENV", sizeof("_ENV")-1, 1), PG(auto_globals_jit), php_auto_globals_create_env);
+	zend_register_auto_global(zend_string_init_interned("_REQUEST", sizeof("_REQUEST")-1, 1), PG(auto_globals_jit), php_auto_globals_create_request);
+	zend_register_auto_global(zend_string_init_interned("_FILES", sizeof("_FILES")-1, 1), 0, php_auto_globals_create_files);
 }
 
 /*

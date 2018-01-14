@@ -39,7 +39,7 @@ $tempname = tempnam(sys_get_temp_dir(), 'openssl_ec');
 var_dump(openssl_pkey_export_to_file($key, $tempname, NULL, $config_arg));
 $details = openssl_pkey_get_details(openssl_pkey_get_private('file://' . $tempname));
 var_dump(OPENSSL_KEYTYPE_EC === $details['type']);
-
+var_dump(is_resource($key));
 // Clean the temporary file
 @unlink($tempname);
 ?>
@@ -54,5 +54,6 @@ array(1) {
   ["d"]=>
   string(32) "%a"
 }
+bool(true)
 bool(true)
 bool(true)

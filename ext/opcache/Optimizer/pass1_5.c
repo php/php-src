@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,8 +34,6 @@
 #include "zend_constants.h"
 #include "zend_execute.h"
 #include "zend_vm.h"
-
-#define ZEND_IS_CONSTANT_TYPE(t)	((t) == IS_CONSTANT)
 
 void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
@@ -305,16 +303,14 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 						(Z_ACCESS_FLAGS(cc->value) & ZEND_ACC_PPP_MASK) == ZEND_ACC_PUBLIC) {
 						c = &cc->value;
 						if (Z_TYPE_P(c) == IS_CONSTANT_AST) {
-							break;
-						}
-						if (ZEND_IS_CONSTANT_TYPE(Z_TYPE_P(c))) {
-							if (!zend_optimizer_get_persistent_constant(Z_STR_P(c), &t, 1) ||
-							    ZEND_IS_CONSTANT_TYPE(Z_TYPE(t))) {
+							zend_ast *ast = Z_ASTVAL_P(c);
+							if (ast->kind != ZEND_AST_CONSTANT
+							 || !zend_optimizer_get_persistent_constant(zend_ast_get_constant_name(ast), &t, 1)
+							 || Z_TYPE(t) == IS_CONSTANT_AST) {
 								break;
 							}
 						} else {
-							ZVAL_COPY_VALUE(&t, c);
-							zval_copy_ctor(&t);
+							ZVAL_COPY_OR_DUP(&t, c);
 						}
 
 						if (opline->op1_type == IS_CONST) {

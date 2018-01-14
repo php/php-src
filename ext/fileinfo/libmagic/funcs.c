@@ -27,7 +27,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: funcs.c,v 1.90 2016/10/19 20:51:17 christos Exp $")
+FILE_RCSID("@(#)$File: funcs.c,v 1.92 2017/04/07 20:10:24 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -61,7 +61,6 @@ extern public void convert_libmagic_pattern(zval *pattern, char *val, int len, i
 protected int
 file_printf(struct magic_set *ms, const char *fmt, ...)
 {
-	int rv;
 	va_list ap;
 	int len;
 	char *buf = NULL, *newstr;
@@ -472,11 +471,11 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	pcre_cache_entry *pce;
 	zend_string *res;
 	zend_string *repl;
-	int  rep_cnt = 0;
+	size_t rep_cnt = 0;
 
 	(void)setlocale(LC_CTYPE, "C");
 
-	opts |= PCRE_MULTILINE;
+	opts |= PCRE2_MULTILINE;
 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
 	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
 		zval_ptr_dtor(&patt);

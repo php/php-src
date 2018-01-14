@@ -1,21 +1,5 @@
 <?php
 
-function get_tds_version() {
-	global $dsn;
-
-	$dsn_parts = explode(':', $dsn, 2);
-	if ($dsn_parts[0] == 'dblib') { // uri is an option, which we'll ignore
-		foreach (explode(';', $dsn_parts[1]) as $arg) {
-			$arg = explode('=', $arg);
-			if ($arg[0] == 'version') {
-				return $arg[1];
-			}
-		}
-	}
-
-	return null;
-}
-
 // bug #72969 reflects a bug with FreeTDS, not with pdo_dblib
 // this function will version detect so the relevant tests can XFAILIF
 function driver_supports_batch_statements_without_select($db) {

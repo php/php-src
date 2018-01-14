@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 	}
 
 	while (!php_readdir_r(dirp, (struct dirent *)entry, &dp) && dp) {
-		int dsize = 0;
+		size_t dsize = 0;
 		struct dirent *newdp = NULL;
 
 		if (selector && (*selector)(dp) == 0) {
@@ -95,7 +95,7 @@ PHPAPI int php_scandir(const char *dirname, struct dirent **namelist[], int (*se
 			vector = newv;
 		}
 
-		dsize = sizeof (struct dirent) + (((int)strlen(dp->d_name) + 1) * sizeof(char));
+		dsize = sizeof (struct dirent) + ((strlen(dp->d_name) + 1) * sizeof(char));
 		newdp = (struct dirent *) malloc(dsize);
 
 		if (newdp == NULL) {

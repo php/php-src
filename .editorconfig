@@ -1,16 +1,35 @@
-; http://editorconfig.org/
+# http://editorconfig.org/
 
 root = true
 
-[*.{c,h}]
-charset                  = UTF-8
-end_of_line              = LF
+[*.{c,h,awk,w32,bat,mk,frag}]
+charset                  = utf-8
+end_of_line              = lf
 indent_size              = 4
 indent_style             = tab
-insert_final_newline     = true
 tab_width                = 4
 trim_trailing_whitespace = true
+insert_final_newline     = true
 
-[*.yml]
+[*.{php,phpt}]
+charset                  = utf-8
+end_of_line              = lf
+indent_size              = 4
+indent_style             = space
+trim_trailing_whitespace = true
+insert_final_newline     = true
+
+[*.{yml,m4,sh}]
+charset                  = utf-8
+end_of_line              = lf
 indent_size              = 2
 indent_style             = space
+trim_trailing_whitespace = true
+insert_final_newline     = true
+
+[*.md]
+charset                  = utf-8
+end_of_line              = lf
+indent_style             = space
+trim_trailing_whitespace = false
+insert_final_newline     = true

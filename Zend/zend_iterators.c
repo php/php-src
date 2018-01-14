@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -81,7 +81,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
-	if (--GC_REFCOUNT(&iter->std) > 0) {
+	if (GC_DELREF(&iter->std) > 0) {
 		return;
 	}
 

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,26 +25,7 @@
 #include "zend_smart_string_public.h"
 
 #include <stdlib.h>
-#ifndef SMART_STR_USE_REALLOC
 #include <zend.h>
-#endif
-
-#ifndef SMART_STRING_PREALLOC
-#define SMART_STRING_PREALLOC 128
-#endif
-
-#ifndef SMART_STRING_START_SIZE
-#define SMART_STRING_START_SIZE 78
-#endif
-
-#ifdef SMART_STRING_USE_REALLOC
-#define SMART_STRING_REALLOC(a,b,c) realloc((a),(b))
-#else
-#define SMART_STRING_REALLOC(a,b,c) perealloc((a),(b),(c))
-#endif
-
-#define SMART_STRING_DO_REALLOC(d, what) \
-	(d)->c = (char *) SMART_STRING_REALLOC((d)->c, (d)->a + 1, (what))
 
 /* wrapper */
 
@@ -71,25 +52,18 @@
 #define smart_string_append_unsigned(str, val) \
 	smart_string_append_unsigned_ex((str), (val), 0)
 
+ZEND_API void ZEND_FASTCALL _smart_string_alloc_persistent(smart_string *str, size_t len);
+ZEND_API void ZEND_FASTCALL _smart_string_alloc(smart_string *str, size_t len);
+
 static zend_always_inline size_t smart_string_alloc(smart_string *str, size_t len, zend_bool persistent) {
-	if (!str->c) {
-		str->len = 0;
-		str->a = len < SMART_STRING_START_SIZE
-				? SMART_STRING_START_SIZE
-				: len + SMART_STRING_PREALLOC;
-		SMART_STRING_DO_REALLOC(str, persistent);
-		return len;
-	} else {
-		if (UNEXPECTED((size_t) len > SIZE_MAX - str->len)) {
-			zend_error(E_ERROR, "String size overflow");
-		}
-		len += str->len;
-		if (UNEXPECTED(len >= str->a)) {
-			str->a = len + SMART_STRING_PREALLOC;
-			SMART_STRING_DO_REALLOC(str, persistent);
+	if (UNEXPECTED(!str->c) || UNEXPECTED(len >= str->a - str->len)) {
+		if (persistent) {
+			_smart_string_alloc_persistent(str, len);
+		} else {
+			_smart_string_alloc(str, len);
 		}
 	}
-	return len;
+	return str->len + len;
 }
 
 static zend_always_inline void smart_string_free_ex(smart_string *str, zend_bool persistent) {

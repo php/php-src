@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -88,7 +88,7 @@
 #define GET_VER_OPT_STRING(name, str) \
 	if (GET_VER_OPT(name)) { convert_to_string_ex(val); str = Z_STRVAL_P(val); }
 #define GET_VER_OPT_LONG(name, num) \
-	if (GET_VER_OPT(name)) { convert_to_long_ex(val); num = Z_LVAL_P(val); }
+	if (GET_VER_OPT(name)) { num = zval_get_long(val); }
 
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) \
@@ -106,7 +106,7 @@ static struct timeval php_openssl_subtract_timeval(struct timeval a, struct time
 static int php_openssl_compare_timeval(struct timeval a, struct timeval b);
 static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, size_t count);
 
-php_stream_ops php_openssl_socket_ops;
+const php_stream_ops php_openssl_socket_ops;
 
 /* Certificate contexts used for server-side SNI selection */
 typedef struct _php_openssl_sni_cert_t {
@@ -1109,8 +1109,7 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "reneg_limit"))
 	) {
-		convert_to_long(val);
-		limit = Z_LVAL_P(val);
+		limit = zval_get_long(val);
 	}
 
 	/* No renegotiation rate-limiting */
@@ -1121,8 +1120,7 @@ static void php_openssl_init_server_reneg_limit(php_stream *stream, php_openssl_
 	if (PHP_STREAM_CONTEXT(stream) &&
 		NULL != (val = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "ssl", "reneg_window"))
 	) {
-		convert_to_long(val);
-		window = Z_LVAL_P(val);
+		window = zval_get_long(val);
 	}
 
 	sslsock->reneg = (void*)pemalloc(sizeof(php_openssl_handshake_bucket_t),
@@ -1399,15 +1397,15 @@ static int php_openssl_enable_server_sni(php_stream *stream, php_openssl_netstre
 			local_cert = zend_hash_str_find(Z_ARRVAL_P(current), "local_cert", sizeof("local_cert")-1);
 			if (local_cert == NULL) {
 				php_error_docref(NULL, E_WARNING,
-					"local_cert not present in the array",
-					Z_STRVAL_P(local_cert)
+					"local_cert not present in the array"
 				);
 				return FAILURE;
 			}
 			convert_to_string_ex(local_cert);
 			if (!VCWD_REALPATH(Z_STRVAL_P(local_cert), resolved_cert_path_buff)) {
 				php_error_docref(NULL, E_WARNING,
-					"failed setting local cert chain file `%s'; file not found"
+					"failed setting local cert chain file `%s'; file not found",
+					Z_STRVAL_P(local_cert)
 				);
 				return FAILURE;
 			}
@@ -1618,11 +1616,11 @@ int php_openssl_setup_crypto(php_stream *stream,
 
 	if (GET_VER_OPT("security_level")) {
 #ifdef HAVE_SEC_LEVEL
-		convert_to_long(val);
-		if (Z_LVAL_P(val) < 0 || Z_LVAL_P(val) > 5) {
+		zend_long lval = zval_get_long(val);
+		if (lval < 0 || lval > 5) {
 			php_error_docref(NULL, E_WARNING, "Security level must be between 0 and 5");
 		}
-		SSL_CTX_set_security_level(sslsock->ctx, Z_LVAL_P(val));
+		SSL_CTX_set_security_level(sslsock->ctx, lval);
 #else
 		php_error_docref(NULL, E_WARNING,
 				"security_level is not supported by the linked OpenSSL library "
@@ -1862,7 +1860,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 
 		do {
 			struct timeval cur_time, elapsed_time;
-			
+
 			if (sslsock->is_client) {
 				n = SSL_connect(sslsock->ssl_handle);
 			} else {
@@ -1872,7 +1870,7 @@ static int php_openssl_enable_crypto(php_stream *stream,
 			if (has_timeout) {
 				gettimeofday(&cur_time, NULL);
 				elapsed_time = php_openssl_subtract_timeval(cur_time, start_time);
-			
+
 				if (php_openssl_compare_timeval( elapsed_time, *timeout) > 0) {
 					php_error_docref(NULL, E_WARNING, "SSL: Handshake timed out");
 					return -1;
@@ -2068,7 +2066,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				if (errno == EAGAIN && err == SSL_ERROR_WANT_WRITE && read == 0) {
 					retry = 1;
 				}
-				
+
 				/* Also, on reads, we may get this condition on an EOF. We should check properly. */
 				if (read) {
 					stream->eof = (retry == 0 && errno != EAGAIN && !SSL_pending(sslsock->ssl_handle));
@@ -2112,7 +2110,7 @@ static size_t php_openssl_sockop_io(int read, php_stream *stream, char *buf, siz
 				}
 			}
 
-			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */			
+			/* Finally, we keep going until we got data, and an SSL_ERROR_NONE, unless we had an error. */
 		} while (retry);
 
 		/* Tell PHP if we read / wrote bytes. */
@@ -2261,7 +2259,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 	int clisock;
 	zend_bool nodelay = 0;
 	zval *tmpzval = NULL;
-	
+
 	xparam->outputs.client = NULL;
 
 	if ((tmpzval = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "tcp_nodelay")) != NULL &&
@@ -2291,7 +2289,7 @@ static inline int php_openssl_tcp_sockop_accept(php_stream *stream, php_openssl_
 		if (xparam->outputs.client) {
 			xparam->outputs.client->ctx = stream->ctx;
 			if (stream->ctx) {
-				GC_REFCOUNT(stream->ctx)++;
+				GC_ADDREF(stream->ctx);
 			}
 		}
 
@@ -2541,7 +2539,7 @@ static int php_openssl_sockop_cast(php_stream *stream, int castas, void **ret)  
 }
 /* }}} */
 
-php_stream_ops php_openssl_socket_ops = {
+const php_stream_ops php_openssl_socket_ops = {
 	php_openssl_sockop_write, php_openssl_sockop_read,
 	php_openssl_sockop_close, php_openssl_sockop_flush,
 	"tcp_socket/ssl",
@@ -2557,8 +2555,7 @@ static zend_long php_openssl_get_crypto_method(
 	zval *val;
 
 	if (ctx && (val = php_stream_context_get_option(ctx, "ssl", "crypto_method")) != NULL) {
-		convert_to_long_ex(val);
-		crypto_method = (zend_long)Z_LVAL_P(val);
+		crypto_method = zval_get_long(val);
 		crypto_method |= STREAM_CRYPTO_IS_CLIENT;
 	}
 

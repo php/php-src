@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -264,7 +264,7 @@ static php_stream *php_ftp_fopen_connect(php_stream_wrapper *wrapper, const char
 		if (resource->pass != NULL) {
 			ZSTR_LEN(resource->pass) = php_raw_url_decode(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass));
 
-			PHP_FTP_CNTRL_CHK(resource->pass, ZSTR_LEN(resource->pass), "Invalid password %s")
+			PHP_FTP_CNTRL_CHK(ZSTR_VAL(resource->pass), ZSTR_LEN(resource->pass), "Invalid password %s")
 
 			php_stream_printf(stream, "PASS %s\r\n", ZSTR_VAL(resource->pass));
 		} else {
@@ -475,7 +475,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 		goto errexit;
 
 	/* find out the size of the file (verifying it exists) */
-	php_stream_printf(stream, "SIZE %s\r\n", resource->path);
+	php_stream_printf(stream, "SIZE %s\r\n", ZSTR_VAL(resource->path));
 
 	/* read the response */
 	result = GET_FTP_RESULT(stream);
@@ -504,7 +504,7 @@ php_stream * php_stream_url_wrap_ftp(php_stream_wrapper *wrapper, const char *pa
 			if (allow_overwrite) {
 				/* Context permits overwriting file,
 				   so we just delete whatever's there in preparation */
-				php_stream_printf(stream, "DELE %s\r\n", resource->path);
+				php_stream_printf(stream, "DELE %s\r\n", ZSTR_VAL(resource->path));
 				result = GET_FTP_RESULT(stream);
 				if (result >= 300 || result <= 199) {
 					goto errexit;
@@ -669,7 +669,7 @@ static int php_ftp_dirstream_close(php_stream *stream, int close_handle)
 
 /* ftp dirstreams only need to support read and close operations,
    They can't be rewound because the underlying ftp stream can't be rewound. */
-static php_stream_ops php_ftp_dirstream_ops = {
+static const php_stream_ops php_ftp_dirstream_ops = {
 	NULL, /* write */
 	php_ftp_dirstream_read, /* read */
 	php_ftp_dirstream_close, /* close */
@@ -1144,7 +1144,7 @@ static int php_stream_ftp_rmdir(php_stream_wrapper *wrapper, const char *url, in
 		goto rmdir_errexit;
 	}
 
-	php_stream_printf(stream, "RMD %s\r\n", resource->path);
+	php_stream_printf(stream, "RMD %s\r\n", ZSTR_VAL(resource->path));
 	result = GET_FTP_RESULT(stream);
 
 	if (result < 200 || result > 299) {
@@ -1170,7 +1170,7 @@ rmdir_errexit:
 }
 /* }}} */
 
-static php_stream_wrapper_ops ftp_stream_wops = {
+static const php_stream_wrapper_ops ftp_stream_wops = {
 	php_stream_url_wrap_ftp,
 	php_stream_ftp_stream_close, /* stream_close */
 	php_stream_ftp_stream_stat,
@@ -1184,7 +1184,7 @@ static php_stream_wrapper_ops ftp_stream_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_ftp_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_ftp_wrapper =	{
 	&ftp_stream_wops,
 	NULL,
 	1 /* is_url */

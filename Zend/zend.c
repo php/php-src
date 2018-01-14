@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -60,7 +60,7 @@ ZEND_API zend_bool zend_dtrace_enabled;
 /* version information */
 static char *zend_version_info;
 static uint32_t zend_version_info_length;
-#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2017 Zend Technologies\n"
+#define ZEND_CORE_VERSION_INFO	"Zend Engine v" ZEND_VERSION ", Copyright (c) 1998-2018 Zend Technologies\n"
 #define PRINT_ZVAL_INDENT 4
 
 /* true multithread-shared globals */
@@ -76,11 +76,16 @@ void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_li
 void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
 ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+ZEND_API int (*zend_post_startup_cb)(void) = NULL;
 
 void (*zend_on_timeout)(int seconds);
 
 static void (*zend_message_dispatcher_p)(zend_long message, const void *data);
 static zval *(*zend_get_configuration_directive_p)(zend_string *name);
+
+#if ZEND_RC_DEBUG
+ZEND_API zend_bool zend_rc_debug = 0;
+#endif
 
 static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 {
@@ -197,6 +202,18 @@ ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format
 }
 /* }}} */
 
+ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	size_t len;
+
+	va_start(arg, format);
+	len = zend_vspprintf(message, max_len, format, arg);
+	va_end(arg);
+	return len;
+}
+/* }}} */
+
 ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap) /* {{{ */
 {
 	smart_str buf = {0};
@@ -217,6 +234,18 @@ ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_li
 /* }}} */
 
 ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) /* {{{ */
+{
+	va_list arg;
+	zend_string *str;
+
+	va_start(arg, format);
+	str = zend_vstrpprintf(max_len, format, arg);
+	va_end(arg);
+	return str;
+}
+/* }}} */
+
+ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...) /* {{{ */
 {
 	va_list arg;
 	zend_string *str;
@@ -309,7 +338,7 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 	if (Z_TYPE_P(expr) == IS_STRING) {
 		return 0;
 	} else {
-		ZVAL_STR(expr_copy, _zval_get_string_func(expr));
+		ZVAL_STR(expr_copy, zval_get_string_func(expr));
 		return 1;
 	}
 }
@@ -317,14 +346,15 @@ ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy) /* {{{ */
 
 ZEND_API size_t zend_print_zval(zval *expr, int indent) /* {{{ */
 {
-	zend_string *str = zval_get_string(expr);
+	zend_string *tmp_str;
+	zend_string *str = zval_get_tmp_string(expr, &tmp_str);
 	size_t len = ZSTR_LEN(str);
 
 	if (len != 0) {
 		zend_write(ZSTR_VAL(str), len);
 	}
 
-	zend_string_release(str);
+	zend_tmp_string_release(tmp_str);
 	return len;
 }
 /* }}} */
@@ -334,16 +364,17 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			ZEND_PUTS("Array (");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
-				ZEND_PUTS(" *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
-				return;
+			if (Z_REFCOUNTED_P(expr)) {
+				if (Z_IS_RECURSIVE_P(expr)) {
+					ZEND_PUTS(" *RECURSION*");
+					return;
+				}
+				Z_PROTECT_RECURSION_P(expr);
 			}
 			print_flat_hash(Z_ARRVAL_P(expr));
 			ZEND_PUTS(")");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (Z_REFCOUNTED_P(expr)) {
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			break;
 		case IS_OBJECT:
@@ -353,7 +384,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
 			zend_string_release(class_name);
 
-			if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+			if (Z_IS_RECURSIVE_P(expr)) {
 				ZEND_PUTS(" *RECURSION*");
 				return;
 			}
@@ -362,9 +393,9 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 				properties = Z_OBJPROP_P(expr);
 			}
 			if (properties) {
-				Z_OBJ_INC_APPLY_COUNT_P(expr);
+				Z_PROTECT_RECURSION_P(expr);
 				print_flat_hash(properties);
-				Z_OBJ_DEC_APPLY_COUNT_P(expr);
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			ZEND_PUTS(")");
 			break;
@@ -384,15 +415,16 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 	switch (Z_TYPE_P(expr)) {
 		case IS_ARRAY:
 			smart_str_appends(buf, "Array\n");
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr)) &&
-			    ++Z_ARRVAL_P(expr)->u.v.nApplyCount>1) {
-				smart_str_appends(buf, " *RECURSION*");
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
-				return;
+			if (Z_REFCOUNTED_P(expr)) {
+				if (Z_IS_RECURSIVE_P(expr)) {
+					smart_str_appends(buf, " *RECURSION*");
+					return;
+				}
+				Z_PROTECT_RECURSION_P(expr);
 			}
 			print_hash(buf, Z_ARRVAL_P(expr), indent, 0);
-			if (ZEND_HASH_APPLY_PROTECTION(Z_ARRVAL_P(expr))) {
-				Z_ARRVAL_P(expr)->u.v.nApplyCount--;
+			if (Z_REFCOUNTED_P(expr)) {
+				Z_UNPROTECT_RECURSION_P(expr);
 			}
 			break;
 		case IS_OBJECT:
@@ -405,7 +437,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 				zend_string_release(class_name);
 
 				smart_str_appends(buf, " Object\n");
-				if (Z_OBJ_APPLY_COUNT_P(expr) > 0) {
+				if (Z_IS_RECURSIVE_P(expr)) {
 					smart_str_appends(buf, " *RECURSION*");
 					return;
 				}
@@ -413,9 +445,9 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 					break;
 				}
 
-				Z_OBJ_INC_APPLY_COUNT_P(expr);
+				Z_PROTECT_RECURSION_P(expr);
 				print_hash(buf, properties, indent, 1);
-				Z_OBJ_DEC_APPLY_COUNT_P(expr);
+				Z_UNPROTECT_RECURSION_P(expr);
 
 				if (is_temp) {
 					zend_hash_destroy(properties);
@@ -429,9 +461,12 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 		case IS_REFERENCE:
 			zend_print_zval_r_to_buf(buf, Z_REFVAL_P(expr), indent);
 			break;
+		case IS_STRING:
+			smart_str_append(buf, Z_STR_P(expr));
+			break;
 		default:
 			{
-				zend_string *str = zval_get_string(expr);
+				zend_string *str = zval_get_string_func(expr);
 				smart_str_append(buf, str);
 				zend_string_release(str);
 			}
@@ -831,7 +866,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	zend_interned_strings_init();
 	zend_startup_builtin_functions();
 	zend_register_standard_constants();
-	zend_register_auto_global(zend_string_init("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
+	zend_register_auto_global(zend_string_init_interned("GLOBALS", sizeof("GLOBALS") - 1, 1), 1, php_auto_globals_create_globals);
 
 #ifndef ZTS
 	zend_init_rsrc_plist();
@@ -866,7 +901,7 @@ void zend_register_standard_ini_entries(void) /* {{{ */
 /* Unlink the global (r/o) copies of the class, function and constant tables,
  * and use a fresh r/w copy for the startup thread
  */
-void zend_post_startup(void) /* {{{ */
+int zend_post_startup(void) /* {{{ */
 {
 #ifdef ZTS
 	zend_encoding **script_encoding_list;
@@ -896,6 +931,17 @@ void zend_post_startup(void) /* {{{ */
 	global_persistent_list = &EG(persistent_list);
 	zend_copy_ini_directives();
 #endif
+
+	if (zend_post_startup_cb) {
+		int (*cb)(void) = zend_post_startup_cb;
+
+		zend_post_startup_cb = NULL;
+		if (cb() != SUCCESS) {
+			return FAILURE;
+		}
+	}
+
+	return SUCCESS;
 }
 /* }}} */
 
@@ -930,10 +976,6 @@ void zend_shutdown(void) /* {{{ */
 	GLOBAL_CONSTANTS_TABLE = NULL;
 #endif
 	zend_destroy_rsrc_list_dtors();
-
-#ifndef ZTS
-	zend_interned_strings_dtor();
-#endif
 }
 /* }}} */
 
@@ -947,6 +989,8 @@ void zend_set_utility_values(zend_utility_values *utility_values) /* {{{ */
 /* this should be compatible with the standard zenderror */
 ZEND_COLD void zenderror(const char *error) /* {{{ */
 {
+	CG(parse_error) = 0;
+
 	if (EG(exception)) {
 		/* An exception was thrown in the lexer, don't throw another in the parser. */
 		return;
@@ -1348,7 +1392,7 @@ ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const c
 {
 	va_list va;
 	char *message = NULL;
-	
+
 	if (exception_ce) {
 		if (!instanceof_function(exception_ce, zend_ce_error)) {
 			zend_error(E_NOTICE, "Error exceptions must be derived from Error");

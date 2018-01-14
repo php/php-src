@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -519,7 +519,7 @@ try_again:
 		if (stream) {
 			php_stream_auto_cleanup(stream);
 			add_property_resource(this_ptr, "httpsocket", stream->res);
-			GC_REFCOUNT(stream->res)++;
+			GC_ADDREF(stream->res);
 			add_property_long(this_ptr, "_use_proxy", use_proxy);
 		} else {
 			php_url_free(phpurl);
@@ -539,7 +539,7 @@ try_again:
 		zend_resource *ret = zend_register_resource(phpurl, le_url);
 
 		add_property_resource(this_ptr, "httpurl", ret);
-		GC_REFCOUNT(ret)++;
+		GC_ADDREF(ret);
 		/*zend_list_addref(ret);*/
 
 		if (context &&
@@ -826,7 +826,7 @@ try_again:
 					zend_ulong numindx;
 					int res = zend_hash_get_current_key(Z_ARRVAL_P(cookies), &key, &numindx);
 					data = zend_hash_get_current_data(Z_ARRVAL_P(cookies));
-					
+
 					if (res == HASH_KEY_IS_STRING && Z_TYPE_P(data) == IS_ARRAY) {
 					  zval *value;
 
@@ -1014,7 +1014,7 @@ try_again:
 			}
 			if (!zend_hash_index_exists(Z_ARRVAL(zcookie), 2)) {
 				add_index_str(&zcookie, 2, phpurl->host);
-				GC_REFCOUNT(phpurl->host)++;
+				GC_ADDREF(phpurl->host);
 			}
 
 			zend_symtable_update(Z_ARRVAL_P(cookies), name.s, &zcookie);

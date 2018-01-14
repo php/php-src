@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,7 @@ ZEND_API int le_index_ptr;
 /* true global */
 static HashTable list_destructors;
 
-ZEND_API zval *zend_list_insert(void *ptr, int type)
+ZEND_API zval* ZEND_FASTCALL zend_list_insert(void *ptr, int type)
 {
 	int index;
 	zval zv;
@@ -44,16 +44,16 @@ ZEND_API zval *zend_list_insert(void *ptr, int type)
 	return zend_hash_index_add_new(&EG(regular_list), index, &zv);
 }
 
-ZEND_API int zend_list_delete(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_delete(zend_resource *res)
 {
-	if (--GC_REFCOUNT(res) <= 0) {
+	if (GC_DELREF(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
 	} else {
 		return SUCCESS;
 	}
 }
 
-ZEND_API int zend_list_free(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_free(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		return zend_hash_index_del(&EG(regular_list), res->handle);
@@ -81,7 +81,7 @@ static void zend_resource_dtor(zend_resource *res)
 }
 
 
-ZEND_API int zend_list_close(zend_resource *res)
+ZEND_API int ZEND_FASTCALL zend_list_close(zend_resource *res)
 {
 	if (GC_REFCOUNT(res) <= 0) {
 		return zend_list_free(res);
@@ -335,6 +335,33 @@ const char *zend_rsrc_list_get_rsrc_type(zend_resource *res)
 	} else {
 		return NULL;
 	}
+}
+
+ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, void *rsrc_pointer, int rsrc_type)
+{
+	zval *zv;
+	zval tmp;
+
+	ZVAL_NEW_PERSISTENT_RES(&tmp, -1, rsrc_pointer, rsrc_type);
+	GC_MAKE_PERSISTENT_LOCAL(Z_COUNTED(tmp));
+	GC_MAKE_PERSISTENT_LOCAL(key);
+
+	zv = zend_hash_update(&EG(persistent_list), key, &tmp);
+	if (UNEXPECTED(zv == NULL)) {
+		free(Z_RES(tmp));
+		return NULL;
+	}
+
+	return Z_RES_P(zv);
+}
+
+ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_t key_len, void *rsrc_pointer, int rsrc_type)
+{
+	zend_string *str = zend_string_init(key, key_len, 1);
+	zend_resource *ret  = zend_register_persistent_resource_ex(str, rsrc_pointer, rsrc_type);
+
+	zend_string_release(str);
+	return ret;
 }
 
 /*

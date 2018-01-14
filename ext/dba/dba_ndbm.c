@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,8 +59,7 @@ DBA_OPEN_FUNC(ndbm)
 	}
 
 	if(info->argc > 0) {
-		convert_to_long_ex(&info->argv[0]);
-		filemode = Z_LVAL(info->argv[0]);
+		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	dbf = dbm_open(info->path, gmode, filemode);

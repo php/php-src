@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -172,6 +172,9 @@ typedef struct php_cli_server_client {
 	char *current_header_name;
 	size_t current_header_name_len;
 	unsigned int current_header_name_allocated:1;
+	char *current_header_value;
+	size_t current_header_value_len;
+	enum { HEADER_NONE=0, HEADER_FIELD, HEADER_VALUE } last_header_element;
 	size_t post_read_offset;
 	php_cli_server_request request;
 	unsigned int content_sender_initialized:1;
@@ -1567,50 +1570,106 @@ static int php_cli_server_client_read_request_on_fragment(php_http_parser *parse
 	return 0;
 }
 
-static int php_cli_server_client_read_request_on_header_field(php_http_parser *parser, const char *at, size_t length)
+static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
-	php_cli_server_client *client = parser->data;
+	/* strip off the colon */
+	zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
+	zend_string *lc_header_name = zend_string_alloc(client->current_header_name_len, 1);
+	zend_str_tolower_copy(ZSTR_VAL(lc_header_name), client->current_header_name, client->current_header_name_len);
+	GC_MAKE_PERSISTENT_LOCAL(orig_header_name);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
+	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
+	zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, client->current_header_value);
+	zend_string_release(lc_header_name);
+	zend_string_release(orig_header_name);
+
 	if (client->current_header_name_allocated) {
 		pefree(client->current_header_name, 1);
 		client->current_header_name_allocated = 0;
 	}
-	client->current_header_name = (char *)at;
-	client->current_header_name_len = length;
+	client->current_header_name = NULL;
+	client->current_header_name_len = 0;
+	client->current_header_value = NULL;
+	client->current_header_value_len = 0;
+}
+
+static int php_cli_server_client_read_request_on_header_field(php_http_parser *parser, const char *at, size_t length)
+{
+	php_cli_server_client *client = parser->data;
+	switch (client->last_header_element) {
+	case HEADER_VALUE:
+		php_cli_server_client_save_header(client);
+		/* break missing intentionally */
+	case HEADER_NONE:
+		client->current_header_name = (char *)at;
+		client->current_header_name_len = length;
+		break;
+	case HEADER_FIELD:
+		if (client->current_header_name_allocated) {
+			size_t new_length = client->current_header_name_len + length;
+			client->current_header_name = perealloc(client->current_header_name, new_length + 1, 1);
+			memcpy(client->current_header_name + client->current_header_name_len, at, length);
+			client->current_header_name[new_length] = '\0';
+			client->current_header_name_len = new_length;
+		} else {
+			size_t new_length = client->current_header_name_len + length;
+			char* field = pemalloc(new_length + 1, 1);
+			memcpy(field, client->current_header_name, client->current_header_name_len);
+			memcpy(field + client->current_header_name_len, at, length);
+			field[new_length] = '\0';
+			client->current_header_name = field;
+			client->current_header_name_len = new_length;
+			client->current_header_name_allocated = 1;
+		}
+		break;
+	}
+
+	client->last_header_element = HEADER_FIELD;
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_header_value(php_http_parser *parser, const char *at, size_t length)
 {
 	php_cli_server_client *client = parser->data;
-	char *value = pestrndup(at, length, 1);
-	if (!value) {
-		return 1;
+	switch (client->last_header_element) {
+	case HEADER_FIELD:
+		client->current_header_value = pestrndup(at, length, 1);
+		client->current_header_value_len = length;
+		break;
+	case HEADER_VALUE:
+		{
+			size_t new_length = client->current_header_value_len + length;
+			client->current_header_value = perealloc(client->current_header_value, new_length + 1, 1);
+			memcpy(client->current_header_value + client->current_header_value_len, at, length);
+			client->current_header_value[new_length] = '\0';
+			client->current_header_value_len = new_length;
+		}
+		break;
+	case HEADER_NONE:
+		// can't happen
+		assert(0);
+		break;
 	}
-	{
-		/* strip off the colon */
-		zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
-		char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-		zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, value);
-		zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, value);
-		efree(lc_header_name);
-		zend_string_release(orig_header_name);
-	}
-
-	if (client->current_header_name_allocated) {
-		pefree(client->current_header_name, 1);
-		client->current_header_name_allocated = 0;
-	}
+	client->last_header_element = HEADER_VALUE;
 	return 0;
 }
 
 static int php_cli_server_client_read_request_on_headers_complete(php_http_parser *parser)
 {
 	php_cli_server_client *client = parser->data;
-	if (client->current_header_name_allocated) {
-		pefree(client->current_header_name, 1);
-		client->current_header_name_allocated = 0;
+	switch (client->last_header_element) {
+	case HEADER_NONE:
+		break;
+	case HEADER_FIELD:
+		client->current_header_value = pemalloc(1, 1);
+		*client->current_header_value = '\0';
+		client->current_header_value_len = 0;
+		/* break missing intentionally */
+	case HEADER_VALUE:
+		php_cli_server_client_save_header(client);
+		break;
 	}
-	client->current_header_name = NULL;
+	client->last_header_element = HEADER_NONE;
 	return 0;
 }
 
@@ -1780,9 +1839,14 @@ static int php_cli_server_client_ctor(php_cli_server_client *client, php_cli_ser
 	}
 	php_http_parser_init(&client->parser, PHP_HTTP_REQUEST);
 	client->request_read = 0;
+
+	client->last_header_element = HEADER_NONE;
 	client->current_header_name = NULL;
 	client->current_header_name_len = 0;
 	client->current_header_name_allocated = 0;
+	client->current_header_value = NULL;
+	client->current_header_value_len = 0;
+
 	client->post_read_offset = 0;
 	if (FAILURE == php_cli_server_request_ctor(&client->request)) {
 		return FAILURE;
@@ -2460,6 +2524,10 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 	const char *server_bind_address = NULL;
 	extern const opt_struct OPTIONS[];
 	const char *document_root = NULL;
+#ifdef PHP_WIN32
+	char document_root_tmp[MAXPATHLEN];
+	size_t k;
+#endif
 	const char *router = NULL;
 	char document_root_buf[MAXPATHLEN];
 
@@ -2469,7 +2537,23 @@ int do_cli_server(int argc, char **argv) /* {{{ */
 				server_bind_address = php_optarg;
 				break;
 			case 't':
+#ifndef PHP_WIN32
 				document_root = php_optarg;
+#else
+				k = strlen(php_optarg);
+				if (k + 1 > MAXPATHLEN) {
+					fprintf(stderr, "Document root path is too long.\n");
+					return 1;
+				}
+				memmove(document_root_tmp, php_optarg, k + 1);
+				/* Clean out any trailing garbage that might have been passed
+					from a batch script. */
+				do {
+					document_root_tmp[k] = '\0';
+					k--;
+				} while ('"' == document_root_tmp[k] || ' ' == document_root_tmp[k]);
+				document_root = document_root_tmp;
+#endif
 				break;
 		}
 	}

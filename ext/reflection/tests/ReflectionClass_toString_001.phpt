@@ -265,7 +265,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Method [ <internal:Reflection> public method newInstance ] {
 
       - Parameters [1] {
-        Parameter #0 [ <optional> ...$args ]
+        Parameter #0 [ <required> $args ]
       }
     }
 

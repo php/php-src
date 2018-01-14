@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -28,49 +28,75 @@
 #endif
 
 #if defined(HAVE_BUNDLED_PCRE) || !defined(PHP_VERSION)
-#define pcre_compile			php_pcre_compile
-#define pcre_compile2			php_pcre_compile2
-#define pcre_copy_substring		php_pcre_copy_substring
-#define pcre_exec			php_pcre_exec
-#define pcre_get_substring		php_pcre_get_substring
-#define pcre_get_substring_list		php_pcre_get_substring_list
-#define pcre_maketables			php_pcre_maketables
-#define pcre_study			php_pcre_study
-#define pcre_version			php_pcre_version
-#define pcre_fullinfo			php_pcre_fullinfo
-#define pcre_free			php_pcre_free
-#define pcre_malloc			php_pcre_malloc
-#define pcre_config			php_pcre_config
-#define pcre_copy_named_substring	php_pcre_copy_named_substring
-#define pcre_free_substring		php_pcre_free_substring
-#define pcre_free_substring_list	php_pcre_free_substring_list
-#define pcre_get_named_substring	php_pcre_get_named_substring
-#define pcre_get_stringnumber		php_pcre_get_stringnumber
-#define pcre_refcount			php_pcre_refcount
-#define _pcre_ord2utf8			php__pcre_ord2utf8
-#define _pcre_try_flipped		php__pcre_try_flipped
-#define _pcre_valid_utf8		php__pcre_valid_utf8
-#define _pcre_xclass			php__pcre_xclass
-#define pcre_callout			php_pcre_callout
-#define _pcre_OP_lengths		php__pcre_OP_lengths
-#define _pcre_utt_names			php__pcre_utt_names
-#define _pcre_default_tables		php__pcre_default_tables
-#define pcre_get_stringtable_entries	php_pcre_get_stringtable_entries
-#define _pcre_is_newline		php__pcre_is_newline
-#define pcre_stack_free			php_pcre_stack_free
-#define pcre_stack_malloc		php_pcre_stack_malloc
-#define _pcre_utf8_table1		php__pcre_utf8_table1
-#define _pcre_utf8_table1_size		php__pcre_utf8_table1_size
-#define _pcre_utf8_table2		php__pcre_utf8_table2
-#define _pcre_utf8_table3		php__pcre_utf8_table3
-#define _pcre_utf8_table4		php__pcre_utf8_table4
-#define _pcre_utt			php__pcre_utt
-#define _pcre_utt_size			php__pcre_utt_size
-#define _pcre_was_newline		php__pcre_was_newline
-#define _pcre_ucd_records		php__pcre_ucd_records
-#define _pcre_ucd_stage1		php__pcre_ucd_stage1
-#define _pcre_ucd_stage2		php__pcre_ucd_stage2
-#define _pcre_ucp_gentype		php__pcre_ucp_gentype
+#define pcre2_jit_callback_8 php_pcre2_jit_callback
+#define pcre2_callout_enumerate_8 php_pcre2_callout_enumerate
+#define pcre2_code_copy_8 php_pcre2_code_copy
+#define pcre2_code_copy_with_tables_8 php_pcre2_code_copy_with_tables
+#define pcre2_code_free_8 php_pcre2_code_free
+#define pcre2_compile_8 php_pcre2_compile
+#define pcre2_compile_context_copy_8 php_pcre2_compile_context_copy
+#define pcre2_compile_context_create_8 php_pcre2_compile_context_create
+#define pcre2_compile_context_free_8 php_pcre2_compile_context_free
+#define pcre2_config_8 php_pcre2_config
+#define pcre2_convert_context_copy_8 php_pcre2_convert_context_copy
+#define pcre2_convert_context_create_8 php_pcre2_convert_context_create
+#define pcre2_convert_context_free_8 php_pcre2_convert_context_free
+#define pcre2_dfa_match_8 php_pcre2_dfa_match
+#define pcre2_general_context_copy_8 php_pcre2_general_context_copy
+#define pcre2_general_context_create_8 php_pcre2_general_context_create
+#define pcre2_general_context_free_8 php_pcre2_general_context_free
+#define pcre2_get_error_message_8 php_pcre2_get_error_message
+#define pcre2_get_mark_8 php_pcre2_get_mark
+#define pcre2_get_ovector_pointer_8 php_pcre2_get_ovector_pointer
+#define pcre2_get_ovector_count_8 php_pcre2_get_ovector_count
+#define pcre2_get_startchar_8 php_pcre2_get_startchar
+#define pcre2_jit_compile_8 php_pcre2_jit_compile
+#define pcre2_jit_match_8 php_pcre2_jit_match
+#define pcre2_jit_free_unused_memory_8 php_pcre2_jit_free_unused_memory
+#define pcre2_jit_stack_assign_8 php_pcre2_jit_stack_assign
+#define pcre2_jit_stack_create_8 php_pcre2_jit_stack_create
+#define pcre2_jit_stack_free_8 php_pcre2_jit_stack_free
+#define pcre2_maketables_8 php_pcre2_maketables
+#define pcre2_match_8 php_pcre2_match
+#define pcre2_match_context_copy_8 php_pcre2_match_context_copy
+#define pcre2_match_context_create_8 php_pcre2_match_context_create
+#define pcre2_match_context_free_8 php_pcre2_match_context_free
+#define pcre2_match_data_create_8 php_pcre2_match_data_create
+#define pcre2_match_data_create_from_pattern_8 php_pcre2_match_data_create_from_pattern
+#define pcre2_match_data_free_8 php_pcre2_match_data_free
+#define pcre2_pattern_info_8 php_pcre2_pattern_info
+#define pcre2_serialize_decode_8 php_pcre2_serialize_decode
+#define pcre2_serialize_encode_8 php_pcre2_serialize_encode
+#define pcre2_serialize_free_8 php_pcre2_serialize_free
+#define pcre2_serialize_get_number_of_codes_8 php_pcre2_serialize_get_number_of_codes
+#define pcre2_set_bsr_8 php_pcre2_set_bsr
+#define pcre2_set_callout_8 php_pcre2_set_callout
+#define pcre2_set_character_tables_8 php_pcre2_set_character_tables
+#define pcre2_set_compile_extra_options_8 php_pcre2_set_compile_extra_options
+#define pcre2_set_compile_recursion_guard_8 php_pcre2_set_compile_recursion_guard
+#define pcre2_set_depth_limit_8 php_pcre2_set_depth_limit
+#define pcre2_set_glob_escape_8 php_pcre2_set_glob_escape
+#define pcre2_set_glob_separator_8 php_pcre2_set_glob_separator
+#define pcre2_set_heap_limit_8 php_pcre2_set_heap_limit
+#define pcre2_set_match_limit_8 php_pcre2_set_match_limit
+#define pcre2_set_max_pattern_length_8 php_pcre2_set_max_pattern_length
+#define pcre2_set_newline_8 php_pcre2_set_newline
+#define pcre2_set_parens_nest_limit_8 php_pcre2_set_parens_nest_limit
+#define pcre2_set_offset_limit_8 php_pcre2_set_offset_limit
+#define pcre2_substitute_8 php_pcre2_substitute
+#define pcre2_substring_copy_byname_8 php_pcre2_substring_copy_byname
+#define pcre2_substring_copy_bynumber_8 php_pcre2_substring_copy_bynumber
+#define pcre2_substring_free_8 php_pcre2_substring_free
+#define pcre2_substring_get_byname_8 php_pcre2_substring_get_byname
+#define pcre2_substring_get_bynumber_8 php_pcre2_substring_get_bynumber
+#define pcre2_substring_length_byname_8 php_pcre2_substring_length_byname
+#define pcre2_substring_length_bynumber_8 php_pcre2_substring_length_bynumber
+#define pcre2_substring_list_get_8 php_pcre2_substring_list_get
+#define pcre2_substring_list_free_8 php_pcre2_substring_list_free
+#define pcre2_substring_nametable_scan_8 php_pcre2_substring_nametable_scan
+#define pcre2_substring_number_from_name_8 php_pcre2_substring_number_from_name
+#define pcre2_set_recursion_limit_8 php_pcre2_set_recursion_limit
+#define pcre2_set_recursion_memory_management_8 php_pcre2_set_recursion_memory_management
 #endif
 
 #define lookup				php_lookup

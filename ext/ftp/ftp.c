@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,8 +70,8 @@
  */
 static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *cmd,
-					const size_t cmd_len, 
-					const char *args, 
+					const size_t cmd_len,
+					const char *args,
 					const size_t args_len);
 
 /* wrapper around send/recv to handle timeouts */

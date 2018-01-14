@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -13,7 +13,7 @@
   | license@php.net so we can mail you a copy immediately.               |
   +----------------------------------------------------------------------+
   | Authors: Andrey Hristov <andrey@php.net>                             |
-  |          Johannes Schlüter <johannes@php.net>                        |
+  |          Johannes SchlÃ¼ter <johannes@php.net>                        |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
 */
@@ -362,19 +362,19 @@ _mysqlnd_vio_set_methods(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_vio) * methods)
 
 
 /* {{{ mysqlnd_command_factory_get */
-static func_mysqlnd__command_factory
+static func_mysqlnd__run_command
 _mysqlnd_command_factory_get()
 {
-	return mysqlnd_command_factory;
+	return mysqlnd_run_command;
 }
 /* }}} */
 
 
 /* {{{ mysqlnd_command_factory_set */
 static void
-_mysqlnd_command_factory_set(func_mysqlnd__command_factory factory)
+_mysqlnd_command_factory_set(func_mysqlnd__run_command run_command)
 {
-	mysqlnd_command_factory = factory;
+	mysqlnd_run_command = run_command;
 }
 /* }}} */
 

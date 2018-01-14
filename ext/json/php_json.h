@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -74,6 +74,7 @@ typedef enum {
 /* json_decode() and json_encode() common options */
 #define PHP_JSON_INVALID_UTF8_IGNORE        (1<<20)
 #define PHP_JSON_INVALID_UTF8_SUBSTITUTE    (1<<21)
+#define PHP_JSON_THROW_ON_ERROR             (1<<22)
 
 /* Internal flags */
 #define PHP_JSON_OUTPUT_ARRAY	0

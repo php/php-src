@@ -143,7 +143,7 @@ typedef struct {
   OnigCodePoint one_or_more_time;
   OnigCodePoint anychar_anytime;
 } OnigMetaCharTableType;
-  
+
 typedef int (*OnigApplyAllCaseFoldFunc)(OnigCodePoint from, OnigCodePoint* to, int to_len, void* arg);
 
 typedef struct OnigEncodingTypeST {
@@ -549,7 +549,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIGERR_SPECIFIED_ENCODING_CANT_CONVERT_TO_WIDE_CHAR  -22
 #define ONIGERR_FAIL_TO_INITIALIZE                            -23
 /* general error */
-#define ONIGERR_INVALID_ARGUMENT                              -30 
+#define ONIGERR_INVALID_ARGUMENT                              -30
 /* syntax error */
 #define ONIGERR_END_PATTERN_AT_LEFT_BRACE                    -100
 #define ONIGERR_END_PATTERN_AT_LEFT_BRACKET                  -101

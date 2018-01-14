@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,7 +92,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ php_gettext_functions[]
  */
-const zend_function_entry php_gettext_functions[] = {
+static const zend_function_entry php_gettext_functions[] = {
 	PHP_NAMED_FE(textdomain,		zif_textdomain,		arginfo_textdomain)
 	PHP_NAMED_FE(gettext,			zif_gettext,		arginfo_gettext)
 	/* Alias for gettext() */
@@ -161,16 +161,16 @@ PHP_MINFO_FUNCTION(php_gettext)
    Set the textdomain to "domain". Returns the current domain */
 PHP_NAMED_FUNCTION(zif_textdomain)
 {
-	char *domain, *domain_name, *retval;
-	size_t domain_len;
+	char *domain = NULL, *domain_name, *retval;
+	size_t domain_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &domain, &domain_len) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!", &domain, &domain_len) == FAILURE) {
 		return;
 	}
 
 	PHP_GETTEXT_DOMAIN_LENGTH_CHECK
 
-	if (strcmp(domain, "") && strcmp(domain, "0")) {
+	if (domain != NULL && strcmp(domain, "") && strcmp(domain, "0")) {
 		domain_name = domain;
 	} else {
 		domain_name = NULL;

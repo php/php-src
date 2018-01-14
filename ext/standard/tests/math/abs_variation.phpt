@@ -121,7 +121,7 @@ int(0)
 
 -- Iteration 13 --
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Notice: Object of class classA could not be converted to number in %s on line %d
 int(1)
 
 -- Iteration 14 --

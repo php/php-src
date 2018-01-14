@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -193,14 +193,14 @@ PHPDBG_API int phpdbg_mixed_read(int sock, char *ptr, int len, int tmo) {
 static int phpdbg_output_pager(int sock, const char *ptr, int len) {
 	int count = 0, bytes = 0;
 	const char *p = ptr, *endp = ptr + len;
-	
+
 	while ((p = memchr(p, '\n', endp - p))) {
 		count++;
 		p++;
-		
+
 		if (count % PHPDBG_G(lines) == 0) {
 			bytes += write(sock, ptr + bytes, (p - ptr) - bytes);
-			
+
 			if (memchr(p, '\n', endp - p)) {
 				char buf[PHPDBG_MAX_CMD];
 				zend_quiet_write(sock, ZEND_STRL("\r---Type <return> to continue or q <return> to quit---"));
@@ -224,7 +224,7 @@ PHPDBG_API int phpdbg_mixed_write(int sock, const char *ptr, int len) {
 	if (PHPDBG_G(flags) & PHPDBG_IS_REMOTE) {
 		return phpdbg_send_bytes(sock, ptr, len);
 	}
-	
+
 	if ((PHPDBG_G(flags) & PHPDBG_HAS_PAGINATION)
 	 && !(PHPDBG_G(flags) & PHPDBG_WRITE_XML)
 	 && PHPDBG_G(io)[PHPDBG_STDOUT].fd == sock

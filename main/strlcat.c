@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -62,7 +62,7 @@ static char *rcsid = "$OpenBSD: strlcat.c,v 1.17 2016/10/14 18:19:04 dtucker Exp
  * Appends src to string dst of size siz (unlike strncat, siz is the
  * full size of dst, not space left).  At most siz-1 characters
  * will be copied.  Always NUL terminates (unless siz <= strlen(dst)).
- * Returns strlen(src) + MIN(siz, strlen(initial dst). 
+ * Returns strlen(src) + MIN(siz, strlen(initial dst).
  * If retval >= siz, truncation occurred.
  */
 PHPAPI size_t php_strlcat(dst, src, siz)

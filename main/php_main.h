@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,10 +34,8 @@ PHPAPI int php_module_startup(sapi_module_struct *sf, zend_module_entry *additio
 PHPAPI void php_module_shutdown(void);
 PHPAPI void php_module_shutdown_for_exec(void);
 PHPAPI int php_module_shutdown_wrapper(sapi_module_struct *sapi_globals);
-PHPAPI int php_request_startup_for_hook(void);
-PHPAPI void php_request_shutdown_for_hook(void *dummy);
 
-PHPAPI int php_register_extensions(zend_module_entry **ptr, int count);
+PHPAPI int php_register_extensions(zend_module_entry * const * ptr, int count);
 
 PHPAPI int php_execute_script(zend_file_handle *primary_file);
 PHPAPI int php_execute_simple_script(zend_file_handle *primary_file, zval *ret);

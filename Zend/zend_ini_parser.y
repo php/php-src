@@ -3,7 +3,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -111,13 +111,14 @@ static void zend_ini_add_string(zval *result, zval *op1, zval *op2)
 	int length, op1_len;
 
 	if (Z_TYPE_P(op1) != IS_STRING) {
-		zend_string *str = zval_get_string(op1);
 		/* ZEND_ASSERT(!Z_REFCOUNTED_P(op1)); */
 		if (ZEND_SYSTEM_INI) {
+			zend_string *tmp_str;
+			zend_string *str = zval_get_tmp_string(op1, &tmp_str);
 			ZVAL_PSTRINGL(op1, ZSTR_VAL(str), ZSTR_LEN(str));
-			zend_string_release(str);
+			zend_tmp_string_release(tmp_str);
 		} else {
-			ZVAL_STR(op1, str);
+			ZVAL_STR(op1, zval_get_string_func(op1));
 		}
 	}
 	op1_len = (int)Z_STRLEN_P(op1);

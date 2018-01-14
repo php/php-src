@@ -1,4 +1,0 @@
-For 5.1
-1) enhance XPath functionality
-2) look at auto encoding support for in/output
-3) What DOM object types are really needed (i.e. not currently using DOMString)

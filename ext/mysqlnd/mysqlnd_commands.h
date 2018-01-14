@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -20,7 +20,7 @@
 #ifndef MYSQLND_COMMANDS_H
 #define MYSQLND_COMMANDS_H
 
-extern func_mysqlnd__command_factory mysqlnd_command_factory;
+extern func_mysqlnd__run_command mysqlnd_run_command;
 
 #endif /* MYSQLND_COMMANDS_H */
 

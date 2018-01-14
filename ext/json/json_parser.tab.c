@@ -65,7 +65,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -139,8 +139,8 @@ int json_yydebug = 1;
 
 /* In a future release of Bison, this section will be replaced
    by #include "json_parser.tab.h".  */
-#ifndef YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-# define YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+#ifndef YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+# define YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -201,7 +201,7 @@ typedef union YYSTYPE YYSTYPE;
 
 int php_json_yyparse (php_json_parser *parser);
 
-#endif /* !YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
@@ -1856,7 +1856,8 @@ yyreturn:
 
 static int php_json_parser_array_create(php_json_parser *parser, zval *array)
 {
-	return array_init(array);
+	array_init(array);
+	return SUCCESS;
 }
 
 static int php_json_parser_array_append(php_json_parser *parser, zval *array, zval *zvalue)
@@ -1868,7 +1869,8 @@ static int php_json_parser_array_append(php_json_parser *parser, zval *array, zv
 static int php_json_parser_object_create(php_json_parser *parser, zval *object)
 {
 	if (parser->scanner.options & PHP_JSON_OBJECT_AS_ARRAY) {
-		return array_init(object);
+		array_init(object);
+		return SUCCESS;
 	} else {
 		return object_init(object);
 	}
@@ -1890,10 +1892,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
-
-		if (Z_REFCOUNTED_P(zvalue)) {
-			Z_DELREF_P(zvalue);
-		}
+		Z_TRY_DELREF_P(zvalue);
 	}
 	zend_string_release(key);
 

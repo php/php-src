@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -77,12 +77,14 @@
 #define ZEND_DUMP_DFA_PHI           (1<<26)
 #define ZEND_DUMP_DFA_SSA           (1<<27)
 #define ZEND_DUMP_DFA_SSA_VARS      (1<<28)
+#define ZEND_DUMP_SCCP              (1<<29)
 
 typedef struct _zend_script {
 	zend_string   *filename;
 	zend_op_array  main_op_array;
 	HashTable      function_table;
 	HashTable      class_table;
+	uint32_t       first_early_binding_opline; /* the linked list of delayed declarations */
 } zend_script;
 
 int zend_optimize_script(zend_script *script, zend_long optimization_level, zend_long debug_level);

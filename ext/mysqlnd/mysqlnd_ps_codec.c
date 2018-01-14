@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -600,23 +600,19 @@ mysqlnd_stmt_execute_prepare_param_types(MYSQLND_STMT_DATA * stmt, zval ** copie
 				  to losing precision we need second variable. Conversion to double is to see if
 				  value is too big for a long. As said, precision could be lost.
 				*/
-				zval tmp_data_copy;
-				ZVAL_COPY(&tmp_data_copy, tmp_data);
-				convert_to_double_ex(&tmp_data_copy);
+				double d = zval_get_double(tmp_data);
 
 				/*
 				  if it doesn't fit in a long send it as a string.
 				  Check bug #52891 : Wrong data inserted with mysqli/mysqlnd when using bind_param, value > LONG_MAX
 				  We do transformation here, which will be used later when sending types. The code later relies on this.
 				*/
-				if (Z_DVAL(tmp_data_copy) > ZEND_LONG_MAX || Z_DVAL(tmp_data_copy) < ZEND_LONG_MIN) {
+				if (d > ZEND_LONG_MAX || d < ZEND_LONG_MIN) {
 					stmt->send_types_to_server = *resend_types_next_time = 1;
 					convert_to_string_ex(tmp_data);
 				} else {
-					convert_to_long_ex(tmp_data);
+					convert_to_long(tmp_data);
 				}
-
-				zval_ptr_dtor(&tmp_data_copy);
 			}
 		}
 	}

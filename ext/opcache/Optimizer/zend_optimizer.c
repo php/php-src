@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -258,42 +258,9 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zend_op       *opline,
                                     zval          *val)
 {
-	zend_op *target_opline;
-
 	switch (opline->opcode) {
-		case ZEND_JMPZ:
-			if (zend_is_true(val)) {
-				MAKE_NOP(opline);
-			} else {
-				opline->opcode = ZEND_JMP;
-				COPY_NODE(opline->op1, opline->op2);
-				opline->op2_type = IS_UNUSED;
-			}
-			zval_ptr_dtor_nogc(val);
-			return 1;
-		case ZEND_JMPNZ:
-			if (zend_is_true(val)) {
-				opline->opcode = ZEND_JMP;
-				COPY_NODE(opline->op1, opline->op2);
-				opline->op2_type = IS_UNUSED;
-			} else {
-				MAKE_NOP(opline);
-			}
-			zval_ptr_dtor_nogc(val);
-			return 1;
-		case ZEND_JMPZNZ:
-			if (zend_is_true(val)) {
-				target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
-			} else {
-				target_opline = ZEND_OP2_JMP_ADDR(opline);
-			}
-			ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
-			opline->op1_type = IS_UNUSED;
-			opline->extended_value = 0;
-			opline->opcode = ZEND_JMP;
-			zval_ptr_dtor_nogc(val);
-			return 1;
 		case ZEND_FREE:
+		case ZEND_CHECK_VAR:
 			MAKE_NOP(opline);
 			zval_ptr_dtor_nogc(val);
 			return 1;
@@ -302,8 +269,10 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
+		case ZEND_FETCH_LIST_W:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_RETURN_BY_REF:
+		case ZEND_INSTANCEOF:
 			return 0;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
@@ -340,7 +309,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			 * zend_optimizer_replace_by_const() supports this. */
 			return 0;
 		case ZEND_CASE:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
 			return 0;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -351,6 +320,9 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_UNSET:
 		case ZEND_FETCH_FUNC_ARG:
 			TO_STRING_NOWARN(val);
+			if (opline->opcode == ZEND_CONCAT && opline->op2_type == IS_CONST) {
+				opline->opcode = ZEND_FAST_CONCAT;
+			}
 			/* break missing intentionally */
 		default:
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
@@ -375,6 +347,10 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FAST_CALL:
 			return 0;
 		case ZEND_FETCH_CLASS:
+			if ((opline + 1)->opcode == ZEND_INSTANCEOF &&
+				(opline + 1)->op2.var == opline->result.var) {
+				return 0;
+			}
 		case ZEND_INIT_FCALL_BY_NAME:
 		/*case ZEND_INIT_NS_FCALL_BY_NAME:*/
 		case ZEND_ADD_INTERFACE:
@@ -483,7 +459,8 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_DIM_IS:
 		case ZEND_FETCH_DIM_FUNC_ARG:
 		case ZEND_FETCH_DIM_UNSET:
-		case ZEND_FETCH_LIST:
+		case ZEND_FETCH_LIST_R:
+		case ZEND_FETCH_LIST_W:
 			if (Z_TYPE_P(val) == IS_STRING) {
 				zend_ulong index;
 				if (ZEND_HANDLE_NUMERIC(Z_STR_P(val), index)) {
@@ -499,6 +476,9 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
 			TO_STRING_NOWARN(val);
+			if (opline->opcode == ZEND_CONCAT && opline->op1_type == IS_CONST) {
+				opline->opcode = ZEND_FAST_CONCAT;
+			}
 			/* break missing intentionally */
 		default:
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -604,6 +584,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 				case ZEND_FETCH_DIM_RW:
 				case ZEND_FETCH_DIM_FUNC_ARG:
 				case ZEND_FETCH_DIM_UNSET:
+				case ZEND_FETCH_LIST_W:
 				case ZEND_ASSIGN_DIM:
 				case ZEND_SEPARATE:
 				case ZEND_RETURN_BY_REF:
@@ -626,15 +607,15 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					break;
 				/* In most cases IS_TMP_VAR operand may be used only once.
 				 * The operands are usually destroyed by the opcode handler.
-				 * ZEND_CASE and ZEND_FETCH_LIST are exceptions, they keeps operand
+				 * ZEND_CASE and ZEND_FETCH_LIST_R are exceptions, they keeps operand
 				 * unchanged, and allows its reuse. these instructions
 				 * usually terminated by ZEND_FREE that finally kills the value.
 				 */
-				case ZEND_FETCH_LIST: {
+				case ZEND_FETCH_LIST_R: {
 					zend_op *m = opline;
 
 					do {
-						if (m->opcode == ZEND_FETCH_LIST &&
+						if (m->opcode == ZEND_FETCH_LIST_R &&
 							m->op1_type == type &&
 							m->op1.var == var) {
 							zval v;
@@ -693,6 +674,10 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 									|| m->opcode == ZEND_SWITCH_LONG
 									|| m->opcode == ZEND_SWITCH_STRING) {
 								zval v;
+
+								if (m->opcode == ZEND_CASE) {
+									m->opcode = ZEND_IS_EQUAL;
+								}
 								ZVAL_COPY_VALUE(&v, val);
 								zval_copy_ctor(&v);
 								if (Z_TYPE(v) == IS_STRING) {
@@ -845,7 +830,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 static zend_class_entry *get_class_entry_from_op1(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants) {
 	if (opline->op1_type == IS_CONST) {
-		zval *op1 = CRT_CONSTANT_EX(op_array, opline->op1, rt_constants);
+		zval *op1 = CRT_CONSTANT_EX(op_array, opline, opline->op1, rt_constants);
 		if (Z_TYPE_P(op1) == IS_STRING) {
 			zend_string *class_name = Z_STR_P(op1 + 1);
 			zend_class_entry *ce;
@@ -872,7 +857,7 @@ static zend_class_entry *get_class_entry_from_op1(
 zend_function *zend_optimizer_get_called_func(
 		zend_script *script, zend_op_array *op_array, zend_op *opline, zend_bool rt_constants)
 {
-#define GET_OP(op) CRT_CONSTANT_EX(op_array, opline->op, rt_constants)
+#define GET_OP(op) CRT_CONSTANT_EX(op_array, opline, opline->op, rt_constants)
 	switch (opline->opcode) {
 		case ZEND_INIT_FCALL:
 		{
@@ -1070,7 +1055,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - remove NOPs
 	 */
 	if (((ZEND_OPTIMIZER_PASS_10|ZEND_OPTIMIZER_PASS_5) & ctx->optimization_level) == ZEND_OPTIMIZER_PASS_10) {
-		zend_optimizer_nop_removal(op_array);
+		zend_optimizer_nop_removal(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_10) {
 			zend_dump_op_array(op_array, 0, "after pass 10", NULL);
 		}
@@ -1114,28 +1099,88 @@ static void zend_revert_pass_two(zend_op_array *op_array)
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UNDO_CONSTANT(op_array, opline, opline->op2);
 		}
 		opline++;
 	}
+#if !ZEND_USE_ABS_CONST_ADDR
+	if (op_array->literals) {
+		zval *literals = emalloc(sizeof(zval) * op_array->last_literal);
+		memcpy(literals, op_array->literals, sizeof(zval) * op_array->last_literal);
+		op_array->literals = literals;
+	}
+#endif
 }
 
 static void zend_redo_pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
+	zend_op *old_opcodes = op_array->opcodes;
+#endif
+
+#if !ZEND_USE_ABS_CONST_ADDR
+	if (op_array->last_literal) {
+		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes,
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16) +
+			sizeof(zval) * op_array->last_literal);
+		memcpy(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16),
+			op_array->literals, sizeof(zval) * op_array->last_literal);
+		efree(op_array->literals);
+		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
+	} else {
+		if (op_array->literals) {
+			efree(op_array->literals);
+		}
+		op_array->literals = NULL;
+	}
+#endif
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
+		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
+			/* fix jumps to point to new array */
+			switch (opline->opcode) {
+				case ZEND_JMP:
+				case ZEND_FAST_CALL:
+					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
+					break;
+				case ZEND_JMPZNZ:
+					/* relative extended_value don't have to be changed */
+					/* break omitted intentionally */
+				case ZEND_JMPZ:
+				case ZEND_JMPNZ:
+				case ZEND_JMPZ_EX:
+				case ZEND_JMPNZ_EX:
+				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
+				case ZEND_FE_RESET_R:
+				case ZEND_FE_RESET_RW:
+				case ZEND_ASSERT_CHECK:
+					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
+					/* relative extended_value don't have to be changed */
+					break;
+			}
+		}
+#endif
 		ZEND_VM_SET_OPCODE_HANDLER(opline);
 		opline++;
 	}
@@ -1145,6 +1190,26 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 {
 	zend_op *opline, *end;
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
+	zend_op *old_opcodes = op_array->opcodes;
+#endif
+
+#if !ZEND_USE_ABS_CONST_ADDR
+	if (op_array->last_literal) {
+		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes,
+			ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16) +
+			sizeof(zval) * op_array->last_literal);
+		memcpy(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16),
+			op_array->literals, sizeof(zval) * op_array->last_literal);
+		efree(op_array->literals);
+		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
+	} else {
+		if (op_array->literals) {
+			efree(op_array->literals);
+		}
+		op_array->literals = NULL;
+	}
+#endif
 
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
@@ -1159,11 +1224,44 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				((ssa->ops[opline - op_array->opcodes].op1_def >= 0) ? (OP1_DEF_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)) : MAY_BE_ANY) :
 				(opline->result_type == IS_UNUSED ? 0 : (RES_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY))));
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		}
+#if ZEND_USE_ABS_JMP_ADDR && !ZEND_USE_ABS_CONST_ADDR
+		if (op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO) {
+			/* fix jumps to point to new array */
+			switch (opline->opcode) {
+				case ZEND_JMP:
+				case ZEND_FAST_CALL:
+					opline->op1.jmp_addr = &op_array->opcodes[opline->op1.jmp_addr - old_opcodes];
+					break;
+				case ZEND_JMPZNZ:
+					/* relative extended_value don't have to be changed */
+					/* break omitted intentionally */
+				case ZEND_JMPZ:
+				case ZEND_JMPNZ:
+				case ZEND_JMPZ_EX:
+				case ZEND_JMPNZ_EX:
+				case ZEND_JMP_SET:
+				case ZEND_COALESCE:
+				case ZEND_FE_RESET_R:
+				case ZEND_FE_RESET_RW:
+				case ZEND_ASSERT_CHECK:
+					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+					break;
+				case ZEND_DECLARE_ANON_CLASS:
+				case ZEND_DECLARE_ANON_INHERITED_CLASS:
+				case ZEND_FE_FETCH_R:
+				case ZEND_FE_FETCH_RW:
+				case ZEND_SWITCH_LONG:
+				case ZEND_SWITCH_STRING:
+					/* relative extended_value don't have to be changed */
+					break;
+			}
+		}
+#endif
 		opline++;
 	}
 }
@@ -1193,7 +1291,7 @@ static void zend_adjust_fcall_stack_size(zend_op_array *op_array, zend_optimizer
 		if (opline->opcode == ZEND_INIT_FCALL) {
 			func = zend_hash_find_ptr(
 				&ctx->script->function_table,
-				Z_STR_P(RT_CONSTANT(op_array, opline->op2)));
+				Z_STR_P(RT_CONSTANT(opline, opline->op2)));
 			if (func) {
 				opline->op1.num = zend_vm_calc_used_stack(opline->extended_value, func);
 			}
@@ -1285,7 +1383,8 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		for (i = 0; i < call_graph.op_arrays_count; i++) {
 			func_info = ZEND_FUNC_INFO(call_graph.op_arrays[i]);
 			if (func_info) {
-				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa, &func_info->flags);
+				zend_dfa_analyze_op_array(call_graph.op_arrays[i], &ctx, &func_info->ssa);
+				func_info->flags = func_info->ssa.cfg.flags;
 			}
 		}
 
@@ -1340,6 +1439,19 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 			ZEND_SET_FUNC_INFO(call_graph.op_arrays[i], NULL);
 		}
 
+		ZEND_HASH_FOREACH_PTR(&script->class_table, ce) {
+			ZEND_HASH_FOREACH_STR_KEY_PTR(&ce->function_table, name, op_array) {
+				if (op_array->scope != ce) {
+					zend_op_array *orig_op_array;
+					if ((orig_op_array = zend_hash_find_ptr(&op_array->scope->function_table, name)) != NULL) {
+						HashTable *ht = op_array->static_variables;
+						*op_array = *orig_op_array;
+						op_array->static_variables = ht;
+					}
+				}
+			} ZEND_HASH_FOREACH_END();
+		} ZEND_HASH_FOREACH_END();
+
 		zend_arena_release(&ctx.arena, checkpoint);
 	} else
 #endif
@@ -1367,7 +1479,8 @@ int zend_optimize_script(zend_script *script, zend_long optimization_level, zend
 		} ZEND_HASH_FOREACH_END();
 	}
 
-	if (debug_level & ZEND_DUMP_AFTER_OPTIMIZER) {
+	if ((debug_level & ZEND_DUMP_AFTER_OPTIMIZER) &&
+	    (ZEND_OPTIMIZER_PASS_7 & optimization_level)) {
 		zend_dump_op_array(&script->main_op_array, ZEND_DUMP_RT_CONSTANTS, "after optimizer", NULL);
 
 		ZEND_HASH_FOREACH_PTR(&script->function_table, op_array) {

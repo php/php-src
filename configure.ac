@@ -753,6 +753,20 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
+dnl Check for asm goto support
+AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
+[AC_TRY_RUN([
+int main(void) {
+    __asm__ goto("jmp %l0\n" :::: end);
+end:
+    return 0;
+}
+  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+
+if test "$ac_cv__asm_goto" = yes; then
+  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+fi
+
 PHP_CHECK_VALGRIND
 
 dnl General settings.
@@ -1268,7 +1282,8 @@ fi
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
-PHP_BUILD_DATE=`date '+%Y-%m-%d'`
+# SOURCE_DATE_EPOCH for reproducible builds https://reproducible-builds.org/specs/source-date-epoch/
+PHP_BUILD_DATE=`date --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d`
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
 PHP_UNAME=`uname -a | xargs`
@@ -1544,15 +1559,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
-    echo "+--------------------------------------------------------------------+"
-    echo "|                        *** WARNING ***                             |"
-    echo "|                                                                    |"
-    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
-    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
-    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
-  fi
-
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
@@ -1578,7 +1584,7 @@ cat <<X
 X
   fi
 
-    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+    if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then
         if test -z "$APACHE_THREADED_MPM"; then
 cat <<X

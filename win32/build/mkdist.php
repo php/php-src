@@ -37,7 +37,8 @@ function get_depends($module)
 		'odbc32.dll', 'ole32.dll', 'oleaut32.dll', 'rpcrt4.dll',
 		'shell32.dll', 'shlwapi.dll', 'user32.dll', 'ws2_32.dll', 'ws2help.dll',
 		'comctl32.dll', 'winmm.dll', 'wsock32.dll', 'winspool.drv', 'msasn1.dll',
-		'secur32.dll', 'netapi32.dll',
+		'secur32.dll', 'netapi32.dll', 'dnsapi.dll', 'psapi.dll', 'normaliz.dll',
+		'iphlpapi.dll', 'bcrypt.dll',
 
 		/* apache */
 		'apachecore.dll',
@@ -59,8 +60,13 @@ function get_depends($module)
 		 * (msvcrt7x.dll) are not */
 		'msvcrt.dll',
 		'msvcr90.dll',
-		'wldap32.dll'
+		'wldap32.dll',
+		'vcruntime140.dll',
+		'msvcp140.dll',
 		);
+	static $no_dist_re = array(
+		"api-ms-win-crt-.+\.dll",
+	);
 	global $build_dir, $extra_dll_deps, $ext_targets, $sapi_targets, $pecl_targets, $phpdll, $per_module_deps, $pecl_dll_deps;
 	
 	$bd = strtolower(realpath($build_dir));
@@ -88,6 +94,17 @@ function get_depends($module)
 		/* ignore some well-known system dlls */
 		if (in_array(basename($dep), $no_dist)) {
 			continue;
+		} else {
+			$skip = false;
+			foreach ($no_dist_re as $re) {
+				if (preg_match(",$re,", basename($dep)) > 0) {
+					$skip = true;
+					break;
+				}
+			}
+			if ($skip) {
+				continue;
+			}
 		}
 		
 		if ($is_pecl) {
@@ -204,7 +221,8 @@ function extract_file_from_tarball($pkg, $filename, $dest_dir) /* {{{ */
 
 /* the core dll */
 copy("$build_dir/php.exe", "$dist_dir/php.exe");
-copy("$build_dir/$phpdll", "$dist_dir/$phpdll");
+/* copy dll and its dependencies */
+copy_file_list($build_dir, "$dist_dir", [$phpdll]);
 
 /* and the .lib goes into dev */
 $phplib = str_replace(".dll", ".lib", $phpdll);

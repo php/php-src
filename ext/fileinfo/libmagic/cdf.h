@@ -129,9 +129,9 @@ typedef struct {
 
 typedef struct {
 	void *sst_tab;
-	size_t sst_len;
-	size_t sst_dirlen;
-	size_t sst_ss;
+	size_t sst_len;		/* Number of sectors */
+	size_t sst_dirlen;	/* Directory sector size */
+	size_t sst_ss;		/* Sector size */
 } cdf_stream_t;
 
 typedef struct {
@@ -274,7 +274,7 @@ typedef struct {
 typedef struct {
 	uint16_t ce_namlen;
 	uint32_t ce_num;
-	uint64_t ce_timestamp; 
+	uint64_t ce_timestamp;
 	uint16_t ce_name[256];
 } cdf_catalog_entry_t;
 

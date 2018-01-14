@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -40,7 +40,7 @@
 #include "php_oci8.h"
 #include "php_oci8_int.h"
 
-/* {{{ callback_fn() 
+/* {{{ callback_fn()
    OCI TAF callback function, calling userspace function */
 sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_event)
 {
@@ -75,10 +75,10 @@ sb4 callback_fn(void *svchp, void *envhp, void *fo_ctx, ub4 fo_type, ub4 fo_even
 	ZVAL_NULL(&params[0]);
 
 	/* Cleanup */
-	zval_dtor(&retval);
-	zval_dtor(&params[0]);
-	zval_dtor(&params[1]);
-	zval_dtor(&params[2]);
+	zval_ptr_dtor(&retval);
+	zval_ptr_dtor(&params[0]);
+	zval_ptr_dtor(&params[1]);
+	zval_ptr_dtor(&params[2]);
 
 	return returnValue;
 }
@@ -106,7 +106,7 @@ int php_oci_register_taf_callback(php_oci_connection *connection, zval *callback
 	if (!callback) {
 		/* Unregister callback */
 		if (Z_ISUNDEF(connection->taf_callback) || Z_ISNULL(connection->taf_callback)) {
-			return 0; // Nothing to unregister 
+			return 0; // Nothing to unregister
 		}
 
 		registered = 1;

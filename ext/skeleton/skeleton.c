@@ -71,7 +71,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ %EXTNAME%_functions[]
  */
-const zend_function_entry %EXTNAME%_functions[] = {
+static const zend_function_entry %EXTNAME%_functions[] = {
 	PHP_FE(%EXTNAME%_test1,		arginfo_%EXTNAME%_test1)
 	PHP_FE(%EXTNAME%_test2,		arginfo_%EXTNAME%_test2)
 	PHP_FE_END

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -195,6 +195,52 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						VAR_SOURCE(op1) = NULL;
 						literal_dtor(&ZEND_OP1_LITERAL(src));
 						MAKE_NOP(src);
+						switch (opline->opcode) {
+							case ZEND_JMPZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									MAKE_NOP(opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors_count = 1;
+									block->successors[0] = block->successors[1];
+								} else {
+									opline->opcode = ZEND_JMP;
+									COPY_NODE(opline->op1, opline->op2);
+									DEL_SOURCE(block, block->successors[1]);
+									block->successors_count = 1;
+								}
+								break;
+							case ZEND_JMPNZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									opline->opcode = ZEND_JMP;
+									COPY_NODE(opline->op1, opline->op2);
+									DEL_SOURCE(block, block->successors[1]);
+									block->successors_count = 1;
+								} else {
+									MAKE_NOP(opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors_count = 1;
+									block->successors[0] = block->successors[1];
+								}
+								break;
+							case ZEND_JMPZNZ:
+								if (zend_is_true(&ZEND_OP1_LITERAL(opline))) {
+									zend_op *target_opline = ZEND_OFFSET_TO_OPLINE(opline, opline->extended_value);
+									ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
+									DEL_SOURCE(block, block->successors[0]);
+									block->successors[0] = block->successors[1];
+								} else {
+									zend_op *target_opline = ZEND_OP2_JMP_ADDR(opline);
+									ZEND_SET_OP_JMP_ADDR(opline, opline->op1, target_opline);
+									DEL_SOURCE(block, block->successors[0]);
+								}
+								block->successors_count = 1;
+								opline->op1_type = IS_UNUSED;
+								opline->extended_value = 0;
+								opline->opcode = ZEND_JMP;
+								break;
+							default:
+								break;
+						}
 					} else {
 						zval_ptr_dtor_nogc(&c);
 					}
@@ -364,7 +410,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 		}
 #endif
 
-			case ZEND_FETCH_LIST:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
@@ -829,7 +876,7 @@ optimize_const_unary_op:
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
-static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
+static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
@@ -1046,20 +1093,10 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	}
 
 	/* adjust early binding list */
-	if (op_array->early_binding != (uint32_t)-1) {
-		uint32_t *opline_num = &op_array->early_binding;
-		zend_op *end;
-
-		opline = op_array->opcodes;
-		end = opline + op_array->last;
-		while (opline < end) {
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				*opline_num = opline - op_array->opcodes;
-				opline_num = &opline->result.opline_num;
-			}
-			++opline;
-		}
-		*opline_num = -1;
+	if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+		ZEND_ASSERT(op_array == &ctx->script->main_op_array);
+		ctx->script->first_early_binding_opline =
+			zend_build_delayed_early_binding_list(op_array);
 	}
 
 	/* rebuild map (just for printing) */
@@ -1704,6 +1741,8 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
 							opline->opcode -= 2;
 							opline->result_type = IS_UNUSED;
 							break;
@@ -1842,7 +1881,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
@@ -1904,7 +1943,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 	zend_bitset_clear(usage, bitset_len);
 	zend_t_usage(&cfg, op_array, usage, ctx);
-	assemble_code_blocks(&cfg, op_array);
+	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	e = src + src_len;
 
 	while (s < e) {
-		if ((len = PHP_UU_DEC(*s++)) <= 0) {
+		if ((len = PHP_UU_DEC(*s++)) == 0) {
 			break;
 		}
 		/* sanity check */

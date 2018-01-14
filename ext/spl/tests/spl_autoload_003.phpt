@@ -40,6 +40,5 @@ catch(Exception $e)
 --EXPECTF--
 TestFunc1(TestClass)
 TestFunc2(TestClass)
-TestFunc3(TestClass)
 Exception: Class TestClass missing
 ===DONE===

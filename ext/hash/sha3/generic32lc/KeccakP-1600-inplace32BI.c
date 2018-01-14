@@ -1049,7 +1049,7 @@ void KeccakP1600_Permute_Nrounds(void *state, unsigned int nRounds)
             SwapPI13( &Abo0, &Amo0, &Aso0, &Ago0, 1, 0, 1, 0 );
             SwapEO( Ako0, Ako1 );
             SwapPI13( &Abu0, &Asu0, &Aku0, &Amu0, 0, 1, 0, 1 );
-            break;        
+            break;
 
         case 2:
             SwapPI2( &Aga0, &Asa0, &Aka0, &Ama0 );
@@ -1057,7 +1057,7 @@ void KeccakP1600_Permute_Nrounds(void *state, unsigned int nRounds)
             SwapPI2( &Abi0, &Agi0, &Aki0, &Asi0 );
             SwapPI2( &Abo0, &Aso0, &Ago0, &Amo0 );
             SwapPI2( &Abu0, &Aku0, &Amu0, &Asu0 );
-            break;        
+            break;
 
         case 3:
             SwapPI13( &Aga0, &Ama0, &Asa0, &Aka0, 0, 1, 0, 1 );
@@ -1067,7 +1067,7 @@ void KeccakP1600_Permute_Nrounds(void *state, unsigned int nRounds)
             SwapPI13( &Abo0, &Ago0, &Aso0, &Amo0, 0, 1, 0, 1 );
             SwapEO( Ako0, Ako1 );
             SwapPI13( &Abu0, &Amu0, &Aku0, &Asu0, 1, 0, 1, 0 );
-            break;        
+            break;
         #undef I0
         #undef I1
         #undef T0

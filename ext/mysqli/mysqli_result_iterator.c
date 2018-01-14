@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #include "zend_interfaces.h"
 
 
-extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
+extern const zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 
 typedef struct {
 	zend_object_iterator  intern;
@@ -146,7 +146,7 @@ static void php_mysqli_result_iterator_current_key(zend_object_iterator *iter, z
 /* }}} */
 
 /* {{{ php_mysqli_result_iterator_funcs */
-zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
+const zend_object_iterator_funcs php_mysqli_result_iterator_funcs = {
 	php_mysqli_result_iterator_dtor,
 	php_mysqli_result_iterator_valid,
 	php_mysqli_result_iterator_current_data,

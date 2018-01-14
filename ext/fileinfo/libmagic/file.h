@@ -27,7 +27,7 @@
  */
 /*
  * file.h - definitions for file(1) program
- * @(#)$File: file.h,v 1.180 2016/07/20 11:27:08 christos Exp $
+ * @(#)$File: file.h,v 1.182 2017/04/07 19:46:44 christos Exp $
  */
 
 #ifndef __file_h__
@@ -553,7 +553,11 @@ static const char *rcsid(const char *p) { \
 #endif
 
 #ifdef PHP_WIN32
+#ifdef _WIN64
+#define FINFO_LSEEK_FUNC _lseeki64
+#else
 #define FINFO_LSEEK_FUNC _lseek
+#endif
 #define FINFO_READ_FUNC _read
 #else
 #define FINFO_LSEEK_FUNC lseek

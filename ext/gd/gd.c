@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -381,6 +381,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_imagewebp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, to)
+	ZEND_ARG_INFO(0, quality)
 ZEND_END_ARG_INFO()
 #endif
 
@@ -862,7 +863,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ gd_functions[]
  */
-const zend_function_entry gd_functions[] = {
+static const zend_function_entry gd_functions[] = {
 	PHP_FE(gd_info,                                 arginfo_gd_info)
 	PHP_FE(imagearc,								arginfo_imagearc)
 	PHP_FE(imageellipse,							arginfo_imageellipse)
@@ -1323,7 +1324,7 @@ PHP_MINFO_FUNCTION(gd)
 PHP_FUNCTION(gd_info)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -3036,7 +3037,7 @@ PHP_FUNCTION(imagecolorexact)
 }
 /* }}} */
 
-/* {{{ proto void imagecolorset(resource im, int col, int red, int green, int blue)
+/* {{{ proto bool imagecolorset(resource im, int col, int red, int green, int blue)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
@@ -3910,7 +3911,7 @@ PHP_FUNCTION(imagesetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	zend_long x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll", &im_zval, &x1, &y1, &x2, &y2) == FAILURE) {
 		return;
 	}
@@ -3931,7 +3932,7 @@ PHP_FUNCTION(imagegetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	int x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &im_zval) == FAILURE) {
 		return;
 	}
@@ -3941,7 +3942,7 @@ PHP_FUNCTION(imagegetclip)
 	}
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
-	
+
 	array_init(return_value);
 	add_next_index_long(return_value, x1);
 	add_next_index_long(return_value, y1);
@@ -4396,10 +4397,6 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageBrightness(im_src, (int)brightness) == 1) {
 		RETURN_TRUE;
 	}
@@ -4418,10 +4415,6 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4444,10 +4437,6 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4528,10 +4517,6 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageSmooth(im_src, (float)weight)==1) {
 		RETURN_TRUE;
 	}
@@ -4551,10 +4536,6 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4654,7 +4635,7 @@ PHP_FUNCTION(imageconvolution)
 /* }}} */
 /* End section: Filters */
 
-/* {{{ proto void imageflip(resource im, int mode)
+/* {{{ proto bool imageflip(resource im, int mode)
    Flip an image (in place) horizontally, vertically or both directions. */
 PHP_FUNCTION(imageflip)
 {
@@ -4712,7 +4693,7 @@ PHP_FUNCTION(imageantialias)
 }
 /* }}} */
 
-/* {{{ proto void imagecrop(resource im, array rect)
+/* {{{ proto resource imagecrop(resource im, array rect)
    Crop an image using the given coordinates and size, x, y, width and height. */
 PHP_FUNCTION(imagecrop)
 {
@@ -4769,7 +4750,7 @@ PHP_FUNCTION(imagecrop)
 }
 /* }}} */
 
-/* {{{ proto void imagecropauto(resource im [, int mode [, float threshold [, int color]]])
+/* {{{ proto resource imagecropauto(resource im [, int mode [, float threshold [, int color]]])
    Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
 {

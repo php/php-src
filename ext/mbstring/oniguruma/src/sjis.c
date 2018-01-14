@@ -188,7 +188,7 @@ is_mbc_ambiguous(OnigCaseFoldType flag,
 		 const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_SJIS, flag, pp, end);
-                                      
+
 }
 #endif
 
@@ -223,7 +223,7 @@ left_adjust_char_head(const UChar* start, const UChar* s)
 	p++;
 	break;
       }
-    } 
+    }
   }
   len = enclen(ONIG_ENCODING_SJIS, p);
   if (p + len > s) return (UChar* )p;
