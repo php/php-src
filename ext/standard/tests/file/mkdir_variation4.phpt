@@ -167,10 +167,10 @@ Error: 2 - mkdir() expects parameter 4 to be resource, array given, %s(%d)
 Error: 2 - mkdir() expects parameter 4 to be resource, array given, %s(%d)
 
 --uppercase NULL--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --lowercase null--
-Error: 2 - mkdir() expects parameter 4 to be resource, null given, %s(%d)
+Directory created
 
 --lowercase true--
 Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
