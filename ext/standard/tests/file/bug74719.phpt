@@ -1,5 +1,5 @@
 --TEST--
-Bug #74719 Allow NULL as context
+Bug #74719 Allow NULL as context, testing fopen, rename, unlink, mkdir and rmdir
 --CREDITS--
 Alexander Holman <alexander@holman.org.uk>
 --FILE--
@@ -19,10 +19,31 @@ chdir($thisTestDir);
 $newpath = relative_include_path();
 set_include_path($newpath);
 
+// fopen
 $tmpfile =  basename(__FILE__, ".php") . ".tmp";
-$h = fopen($tmpfile, "r", true, NULL);
+$h = fopen($tmpfile, "w", true, NULL);
 if ($h !== false) {
-    echo "opened with NULL context\n";
+    echo "ok\n";
+    fclose($h);
+}
+$newTmpFile = "renamed_" . $tmpfile;
+
+if (rename($tmpfile, $newTmpFile, NULL)) {
+    echo "ok\n";
+}
+
+if (unlink($newTmpFile, NULL)) {
+    echo "ok\n";
+}
+
+$tmpDir = "tmpDir";
+
+if (mkdir($tmpDir, 0777, false, NULL)) {
+    echo "ok\n";
+}
+
+if (rmdir($tmpDir, NULL)) {
+    echo "ok\n";
 }
 
 teardown_relative_path();
@@ -32,5 +53,9 @@ rmdir($thisTestDir);
 ?>
 ===DONE===
 --EXPECT--
-opened with NULL context
+ok
+ok
+ok
+ok
+ok
 ===DONE===
