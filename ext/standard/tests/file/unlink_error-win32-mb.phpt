@@ -97,9 +97,7 @@ bool(false)
 
 Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d
 bool(false)
-
-Warning: unlink() expects parameter 2 to be resource, null given in %s on line %d
-bool(false)
+bool(true)
 
 -- Testing unlink() on non-existent file --
 
