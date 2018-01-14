@@ -229,12 +229,10 @@ Error: 2 - rmdir() expects parameter 2 to be resource, object given, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --unset var--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --0--
 Error: 2 - rmdir(): supplied resource is not a valid Stream-Context resource, %s(%d)
