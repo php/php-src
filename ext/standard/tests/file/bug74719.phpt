@@ -20,35 +20,17 @@ $newpath = relative_include_path();
 set_include_path($newpath);
 
 $tmpfile =  basename(__FILE__, ".php") . ".tmp";
-$h = fopen($tmpfile, "w", true, NULL);
-if ($h === false) {
-    echo "Unable to open file to write\n";
-}
-else {
-    echo "open and write okay\n";
-    fwrite($h, "This is the test file");
-	fclose($h);
-	$h = fopen($tmpfile, "r", false, NULL);
-	if ($h === false) {
-	   echo "Unable to open file to read file\n";
-	}
-	else {
-	   echo "open and read okay\n";
-	   fclose($h);
-	}
-	unlink($tmpfile);
+$h = fopen($tmpfile, "r", true, NULL);
+if ($h !== false) {
+    echo "opened with NULL context\n";
 }
 
 teardown_relative_path();
 restore_include_path();
 chdir("..");
 rmdir($thisTestDir);
-
-function runtest() {
-}
 ?>
 ===DONE===
 --EXPECT--
-open and write okay
-open and read okay
+opened with NULL context
 ===DONE===
