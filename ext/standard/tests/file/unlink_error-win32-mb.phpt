@@ -45,7 +45,6 @@ var_dump( file_exists(false) );  // confirm file doesnt exist
 
 var_dump( unlink($filename, '') );  // $context as empty string
 var_dump( unlink($filename, false) );  // $context as boolean false
-var_dump( unlink($filename, NULL) );  // $context as NULL
 
 
 echo "\n-- Testing unlink() on non-existent file --\n";
@@ -97,7 +96,6 @@ bool(false)
 
 Warning: unlink() expects parameter 2 to be resource, boolean given in %s on line %d
 bool(false)
-bool(true)
 
 -- Testing unlink() on non-existent file --
 
