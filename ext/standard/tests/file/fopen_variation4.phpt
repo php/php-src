@@ -231,15 +231,15 @@ bool(false)
 Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
 bool(false)
 
+--instance of classWithoutToString--
+Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
+bool(false)
+
 --undefined var--
 ok
 
 --unset var--
 ok
-
---instance of classWithoutToString--
-Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
-bool(false)
 
 --file resource--
 Error: 2 - fopen(): supplied resource is not a valid Stream-Context resource, %s(%d)
