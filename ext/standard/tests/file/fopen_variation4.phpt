@@ -74,6 +74,10 @@ $inputs = array(
       'associative array' => $assoc_array,
       'nested arrays' => array('foo', $index_array, $assoc_array),
 
+      // null data
+      'uppercase NULL' => NULL,
+      'lowercase null' => null,
+
       // boolean data
       'lowercase true' => true,
       'lowercase false' =>false,
@@ -93,6 +97,12 @@ $inputs = array(
       // object data
       'instance of classWithToString' => new classWithToString(),
       'instance of classWithoutToString' => new classWithoutToString(),
+
+      // undefined data
+      'undefined var' => @$undefined_var,
+
+      // unset data
+      'unset var' => @$unset_var,
       
       //file resource
       'file resource' => $fileresource
@@ -171,6 +181,12 @@ bool(false)
 Error: 2 - fopen() expects parameter 4 to be resource, array given, %s(%d)
 bool(false)
 
+--uppercase NULL--
+ok
+
+--lowercase null--
+ok
+
 --lowercase true--
 Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
 bool(false)
@@ -214,6 +230,12 @@ bool(false)
 --instance of classWithToString--
 Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
 bool(false)
+
+--undefined var--
+ok
+
+--unset var--
+ok
 
 --instance of classWithoutToString--
 Error: 2 - fopen() expects parameter 4 to be resource, object given, %s(%d)
