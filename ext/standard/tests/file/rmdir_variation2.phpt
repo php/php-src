@@ -175,12 +175,10 @@ Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase null--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase true--
 Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
