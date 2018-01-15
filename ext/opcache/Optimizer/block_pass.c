@@ -876,7 +876,7 @@ optimize_const_unary_op:
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
-static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
+static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
@@ -1093,20 +1093,10 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	}
 
 	/* adjust early binding list */
-	if (op_array->early_binding != (uint32_t)-1) {
-		uint32_t *opline_num = &op_array->early_binding;
-		zend_op *end;
-
-		opline = op_array->opcodes;
-		end = opline + op_array->last;
-		while (opline < end) {
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				*opline_num = opline - op_array->opcodes;
-				opline_num = &opline->result.opline_num;
-			}
-			++opline;
-		}
-		*opline_num = -1;
+	if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+		ZEND_ASSERT(op_array == &ctx->script->main_op_array);
+		ctx->script->first_early_binding_opline =
+			zend_build_delayed_early_binding_list(op_array);
 	}
 
 	/* rebuild map (just for printing) */
@@ -1953,7 +1943,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 	zend_bitset_clear(usage, bitset_len);
 	zend_t_usage(&cfg, op_array, usage, ctx);
-	assemble_code_blocks(&cfg, op_array);
+	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);

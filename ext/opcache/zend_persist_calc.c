@@ -153,10 +153,6 @@ static void zend_persist_zval_calc(zval *z)
 
 static void zend_persist_op_array_calc_ex(zend_op_array *op_array)
 {
-	if (op_array->type != ZEND_USER_FUNCTION) {
-		return;
-	}
-
 	if (op_array->static_variables) {
 		if (!zend_shared_alloc_get_xlat_entry(op_array->static_variables)) {
 			HashTable *old = op_array->static_variables;
@@ -262,19 +258,24 @@ static void zend_persist_op_array_calc(zval *zv)
 {
 	zend_op_array *op_array = Z_PTR_P(zv);
 
-	if (op_array->type == ZEND_USER_FUNCTION/* &&
-	    (!op_array->refcount || *(op_array->refcount) > 1)*/) {
-		zend_op_array *old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
-		if (old_op_array) {
-			Z_PTR_P(zv) = old_op_array;
-		} else {
-			ADD_ARENA_SIZE(sizeof(zend_op_array));
-			zend_persist_op_array_calc_ex(Z_PTR_P(zv));
-			zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
-		}
+	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+	ADD_ARENA_SIZE(sizeof(zend_op_array));
+	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+}
+
+static void zend_persist_class_method_calc(zval *zv)
+{
+	zend_op_array *op_array = Z_PTR_P(zv);
+	zend_op_array *old_op_array;
+
+	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
+	old_op_array = zend_shared_alloc_get_xlat_entry(op_array);
+	if (old_op_array) {
+		Z_PTR_P(zv) = old_op_array;
 	} else {
 		ADD_ARENA_SIZE(sizeof(zend_op_array));
 		zend_persist_op_array_calc_ex(Z_PTR_P(zv));
+		zend_shared_alloc_register_xlat_entry(op_array, Z_PTR_P(zv));
 	}
 }
 
@@ -314,7 +315,7 @@ static void zend_persist_class_entry_calc(zval *zv)
 	if (ce->type == ZEND_USER_CLASS) {
 		ADD_ARENA_SIZE(sizeof(zend_class_entry));
 		ADD_INTERNED_STRING(ce->name, 0);
-		zend_hash_persist_calc(&ce->function_table, zend_persist_op_array_calc);
+		zend_hash_persist_calc(&ce->function_table, zend_persist_class_method_calc);
 		if (ce->default_properties_table) {
 		    int i;
 
@@ -419,7 +420,13 @@ uint32_t zend_accel_script_persist_calc(zend_persistent_script *new_persistent_s
 	new_persistent_script->size = (new_persistent_script->size + 63) & ~63;
 #endif
 
+	if (new_persistent_script->script.class_table.nNumUsed != new_persistent_script->script.class_table.nNumOfElements) {
+		zend_hash_rehash(&new_persistent_script->script.class_table);
+	}
 	zend_accel_persist_class_table_calc(&new_persistent_script->script.class_table);
+	if (new_persistent_script->script.function_table.nNumUsed != new_persistent_script->script.function_table.nNumOfElements) {
+		zend_hash_rehash(&new_persistent_script->script.function_table);
+	}
 	zend_hash_persist_calc(&new_persistent_script->script.function_table, zend_persist_op_array_calc);
 	zend_persist_op_array_calc_ex(&new_persistent_script->script.main_op_array);
 

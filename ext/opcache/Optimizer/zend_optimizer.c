@@ -1055,7 +1055,7 @@ static void zend_optimize(zend_op_array      *op_array,
 	 * - remove NOPs
 	 */
 	if (((ZEND_OPTIMIZER_PASS_10|ZEND_OPTIMIZER_PASS_5) & ctx->optimization_level) == ZEND_OPTIMIZER_PASS_10) {
-		zend_optimizer_nop_removal(op_array);
+		zend_optimizer_nop_removal(op_array, ctx);
 		if (ctx->debug_level & ZEND_DUMP_AFTER_PASS_10) {
 			zend_dump_op_array(op_array, 0, "after pass 10", NULL);
 		}

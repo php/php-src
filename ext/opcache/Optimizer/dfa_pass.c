@@ -125,7 +125,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 	return SUCCESS;
 }
 
-static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
+static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_basic_block *end = blocks + ssa->cfg.blocks_count;
@@ -263,9 +263,10 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &op_array->opcodes[*opline_num].result.opline_num;
@@ -1177,7 +1178,7 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 #endif
 
 		if (remove_nops) {
-			zend_ssa_remove_nops(op_array, ssa);
+			zend_ssa_remove_nops(op_array, ssa, ctx);
 #if ZEND_DEBUG_DFA
 			ssa_verify_integrity(op_array, ssa, "after nop");
 #endif

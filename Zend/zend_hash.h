@@ -913,10 +913,12 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 
 #define ZEND_HASH_REVERSE_FOREACH(_ht, indirect) do { \
 		HashTable *__ht = (_ht); \
-		uint32_t _idx; \
+		uint32_t _idx = __ht->nNumUsed; \
+		Bucket *_p = __ht->arData + _idx; \
+		zval *_z; \
 		for (_idx = __ht->nNumUsed; _idx > 0; _idx--) { \
-			Bucket *_p = __ht->arData + (_idx - 1); \
-			zval *_z = &_p->val; \
+			_p--; \
+			_z = &_p->val; \
 			if (indirect && Z_TYPE_P(_z) == IS_INDIRECT) { \
 				_z = Z_INDIRECT_P(_z); \
 			} \
@@ -932,7 +934,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 				uint32_t j = HT_IDX_TO_HASH(_idx - 1); \
 				uint32_t nIndex = _p->h | __ht->nTableMask; \
 				uint32_t i = HT_HASH(__ht, nIndex); \
-				if (j != i) { \
+				if (UNEXPECTED(j != i)) { \
 					Bucket *prev = HT_HASH_TO_BUCKET(__ht, i); \
 					while (Z_NEXT(prev->val) != j) { \
 						i = Z_NEXT(prev->val); \

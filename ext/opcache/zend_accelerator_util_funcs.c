@@ -195,7 +195,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		nIndex = p->h | ht->nTableMask;
 
 		/* Insert into hash collision list */
@@ -246,7 +246,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -304,7 +304,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 
 		nIndex = p->h | ht->nTableMask;
 
@@ -478,7 +478,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -522,7 +522,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -565,7 +565,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	p = source->arData;
 	end = p + source->nNumUsed;
 	for (; p != end; p++) {
-		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
+		ZEND_ASSERT(Z_TYPE(p->val) != IS_UNDEF);
 		ZEND_ASSERT(p->key);
 		t = zend_hash_find_ex(target, p->key, 1);
 		if (UNEXPECTED(t != NULL)) {
@@ -733,10 +733,10 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		}
 	}
 
-	if (op_array->early_binding != (uint32_t)-1) {
+	if (persistent_script->script.first_early_binding_opline != (uint32_t)-1) {
 		zend_string *orig_compiled_filename = CG(compiled_filename);
 		CG(compiled_filename) = persistent_script->script.filename;
-		zend_do_delayed_early_binding(op_array);
+		zend_do_delayed_early_binding(op_array, persistent_script->script.first_early_binding_opline);
 		CG(compiled_filename) = orig_compiled_filename;
 	}
 

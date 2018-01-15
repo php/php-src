@@ -4049,7 +4049,8 @@ PHP_FUNCTION(array_values)
 	/* Return empty input as is */
 	arrlen = zend_hash_num_elements(arrval);
 	if (!arrlen) {
-		RETURN_ZVAL(input, 1, 0);
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
 	}
 
 	/* Return vector-like packed arrays as-is */
