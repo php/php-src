@@ -275,8 +275,7 @@ esac
 
 dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 dnl supports it. This can help reduce the binary size and startup time.
-AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
-                       [CFLAGS="$CFLAGS -fvisibility=hidden"])
+dnl AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
 case $host_alias in
   *solaris*)
@@ -495,7 +494,8 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h
+assert.h \
+nmmintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -565,6 +565,8 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_init
+PHP_CHECK_BUILTIN_CPU_INIT
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -584,6 +586,10 @@ AC_TYPE_UID_T
 
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
+
+AC_MSG_CHECKING([checking building environment])
+AX_GCC_FUNC_ATTRIBUTE([ifunc])
+AX_GCC_FUNC_ATTRIBUTE([target])
 
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
