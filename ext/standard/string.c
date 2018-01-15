@@ -4074,7 +4074,7 @@ do_escape:
  */
 zend_string *php_addslashes_default(zend_string *str, int should_free)
 #else
-zend_string *php_addslashes(zend_string *str, int should_free)
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 #endif
 {
 	/* maximum string length, worst case situation */
