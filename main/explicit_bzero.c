@@ -32,7 +32,9 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
-#ifdef __GNUC__
+#if HAVE_EXPLICIT_MEMSET
+    explicit_memset(dst, 0, siz);
+#elif defined(__GNUC__)
 	memset(dst, 0, siz);
 	asm __volatile__("" :: "r"(dst) : "memory");
 #else
