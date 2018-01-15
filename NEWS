@@ -12,6 +12,10 @@ PHP                                                                        NEWS
   . Fixed bug #75079 (self keyword leads to incorrectly generated TypeError when
     in closure in trait). (Nikita)
 
+- FCGI:
+  . Fixed bug #75794 (getenv() crashes on Windows 7.2.1 when second parameter is
+    false). (Anatol)
+
 - IMAP:
   . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
 
