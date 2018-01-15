@@ -18,9 +18,9 @@ $pharA->buildFromDirectory($inDir);
 $outDir = $base.'out';
 $pharB = new Phar($phar);
 $pharB->extractTo($outDir, 'dirA/', true);
-assert(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileA'));
-assert(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileB'));
-assert(! is_dir($outDir.DIRECTORY_SEPARATOR.'dirAB'));
+var_dump(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileA'));
+var_dump(file_exists($outDir.DIRECTORY_SEPARATOR.'dirA'.DIRECTORY_SEPARATOR.'fileB'));
+var_dump(is_dir($outDir.DIRECTORY_SEPARATOR.'dirAB'));
 
 // should also not be able to pull out non-existent ones
 try {
@@ -57,4 +57,7 @@ foreach ($iter as $value) {
 }
 ?>
 --EXPECT--
+bool(true)
+bool(true)
+bool(false)
 done
