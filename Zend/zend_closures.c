@@ -183,7 +183,7 @@ ZEND_METHOD(Closure, call)
 ZEND_METHOD(Closure, bind)
 {
 	zval *newthis, *zclosure, *scope_arg = NULL;
-	zend_closure *closure, *new_closure;
+	zend_closure *closure;
 	zend_class_entry *ce, *called_scope;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo!|z", &zclosure, zend_ce_closure, &newthis, &scope_arg) == FAILURE) {
@@ -223,15 +223,6 @@ ZEND_METHOD(Closure, bind)
 	}
 
 	zend_create_closure(return_value, &closure->func, ce, called_scope, newthis);
-	new_closure = (zend_closure *) Z_OBJ_P(return_value);
-
-	/* Runtime cache relies on bound scope to be immutable, hence we need a separate rt cache in case scope changed */
-	if (ZEND_USER_CODE(closure->func.type) && (closure->func.common.scope != new_closure->func.common.scope || (closure->func.op_array.fn_flags & ZEND_ACC_NO_RT_ARENA))) {
-		new_closure->func.op_array.run_time_cache = emalloc(new_closure->func.op_array.cache_size);
-		memset(new_closure->func.op_array.run_time_cache, 0, new_closure->func.op_array.cache_size);
-
-		new_closure->func.op_array.fn_flags |= ZEND_ACC_NO_RT_ARENA;
-	}
 }
 /* }}} */
 
@@ -666,9 +657,24 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 			closure->func.op_array.static_variables =
 				zend_array_dup(closure->func.op_array.static_variables);
 		}
-		if (UNEXPECTED(!closure->func.op_array.run_time_cache)) {
-			closure->func.op_array.run_time_cache = func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
-			memset(func->op_array.run_time_cache, 0, func->op_array.cache_size);
+
+		/* Runtime cache is scope-dependent, so we cannot reuse it if the scope changed */
+		if (!closure->func.op_array.run_time_cache
+			|| func->common.scope != scope
+			|| (func->common.fn_flags & ZEND_ACC_NO_RT_ARENA)
+		) {
+			if (!func->op_array.run_time_cache && (func->common.fn_flags & ZEND_ACC_CLOSURE)) {
+				/* If a real closure is used for the first time, we create a shared runtime cache
+				 * and remember which scope it is for. */
+				func->common.scope = scope;
+				func->op_array.run_time_cache = zend_arena_alloc(&CG(arena), func->op_array.cache_size);
+				closure->func.op_array.run_time_cache = func->op_array.run_time_cache;
+			} else {
+				/* Otherwise, we use a non-shared runtime cache */
+				closure->func.op_array.run_time_cache = emalloc(func->op_array.cache_size);
+				closure->func.op_array.fn_flags |= ZEND_ACC_NO_RT_ARENA;
+			}
+			memset(closure->func.op_array.run_time_cache, 0, func->op_array.cache_size);
 		}
 		if (closure->func.op_array.refcount) {
 			(*closure->func.op_array.refcount)++;
