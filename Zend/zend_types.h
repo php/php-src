@@ -374,7 +374,7 @@ struct _zend_ast_ref {
 #define IS_REFERENCE				10
 
 /* constant expressions */
-#define IS_CONSTANT_AST				12
+#define IS_CONSTANT_AST				11
 
 /* internal types */
 #define IS_INDIRECT             	13
