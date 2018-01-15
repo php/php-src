@@ -13,6 +13,10 @@ PHP                                                                        NEWS
   . Fixed bug #75396 (Exit inside generator finally results in fatal error).
     (Nikita)
 
+- FCGI:
+  . Fixed bug #75794 (getenv() crashes on Windows 7.2.1 when second parameter is
+    false). (Anatol)
+
 - IMAP:
   . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
 
@@ -39,7 +43,7 @@ PHP                                                                        NEWS
 
 - Readline:
   . Fixed bug #75775 (readline_read_history segfaults with empty file).
-      (Anatol)
+    (Anatol)
 
 - SAPI:
   . Fixed bug #75735 ([embed SAPI] Segmentation fault in
