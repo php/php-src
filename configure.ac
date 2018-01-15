@@ -275,7 +275,8 @@ esac
 
 dnl Mark symbols hidden by default if the compiler (for example, gcc >= 4)
 dnl supports it. This can help reduce the binary size and startup time.
-dnl AX_CHECK_COMPILE_FLAG([-fvisibility=hidden], [CFLAGS="$CFLAGS -fvisibility=hidden"])
+AX_CHECK_COMPILE_FLAG([-fvisibility=hidden],
+                       [CFLAGS="$CFLAGS -fvisibility=hidden"])
 
 case $host_alias in
   *solaris*)
