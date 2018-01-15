@@ -32,6 +32,9 @@
 
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
+#ifdef __NetBSD__
+    explicit_memset(dst, 0, siz);
+#else
 #ifdef __GNUC__
 	memset(dst, 0, siz);
 	asm __volatile__("" :: "r"(dst) : "memory");
@@ -41,6 +44,7 @@ PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 
 	for (; i < siz; i ++)
 		buf[i] = 0;
+#endif
 #endif
 }
 #endif
