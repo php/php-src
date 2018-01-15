@@ -9,6 +9,8 @@ PHP                                                                        NEWS
   . Fixed bug #75799 (arg of get_defined_functions is optional). (carusogabriel)
   . Fixed bug #75396 (Exit inside generator finally results in fatal error).
     (Nikita)
+  . Fixed bug #75079 (self keyword leads to incorrectly generated TypeError when
+    in closure in trait). (Nikita)
 
 - IMAP:
   . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
