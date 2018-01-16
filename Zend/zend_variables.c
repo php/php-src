@@ -44,7 +44,7 @@ static void ZEND_FASTCALL zend_ast_ref_destroy_wrapper(zend_ast_ref *ast ZEND_FI
 # define zend_ast_ref_destroy_wrapper  zend_ast_ref_destroy
 #endif
 
-typedef void ZEND_FASTCALL (*zend_zval_dtor_func_t)(zend_refcounted *p);
+typedef void (ZEND_FASTCALL *zend_zval_dtor_func_t)(zend_refcounted *p);
 
 static const zend_zval_dtor_func_t zend_zval_dtor_func[] = {
 	/* IS_UNDEF        */ (zend_zval_dtor_func_t)zend_empty_destroy,

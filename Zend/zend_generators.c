@@ -1061,7 +1061,6 @@ static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ 
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 	generator->iterator = NULL;
 	zval_ptr_dtor(&iterator->data);
-	zend_iterator_dtor(iterator);
 }
 /* }}} */
 
