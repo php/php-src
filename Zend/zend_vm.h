@@ -23,7 +23,6 @@
 
 BEGIN_EXTERN_C()
 
-ZEND_API void zend_vm_use_old_executor(void);
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* opcode);
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* opcode, uint32_t op1_info, uint32_t op2_info, uint32_t res_info);
 ZEND_API void ZEND_FASTCALL zend_serialize_opcode_handler(zend_op *op);
