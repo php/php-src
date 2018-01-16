@@ -63,8 +63,8 @@
 
 |.define HYBRID_SPAD, 16
 
+#include "Zend/zend_cpuinfo.h"
 #include "jit/zend_jit_x86.h"
-#include "jit/zend_cpuid.h"
 
 const char* zend_reg_name[] = {
 #ifdef __x86_64__
@@ -2161,21 +2161,13 @@ static const zend_jit_stub zend_jit_stubs[] = {
 
 static int zend_jit_setup(void)
 {
-	zend_cpuid_info info;
-
-	zend_cpuid(0, 0, &info);
-	if (info.eax < 1) {
-		return FAILURE;
-	}
-	zend_cpuid(1, 0, &info);
-
 	|.if SSE
-		if (!(info.edx & ZEND_CPUID_EDX_SSE2)) {
+		if (!zend_cpu_supports(ZEND_CPU_FEATURE_SSE2)) {
 			zend_error(E_CORE_ERROR, "CPU doesn't support SSE2");
 			return FAILURE;
 		}
 		if (zend_jit_cpu_flags & ZEND_JIT_CPU_AVX) {
-			if (info.ecx & ZEND_CPUID_ECX_AVX) {
+			if (zend_cpu_supports(ZEND_CPU_FEATURE_AVX)) {
 				zend_jit_x86_flags |= ZEND_JIT_CPU_AVX;
 			}
 		}
