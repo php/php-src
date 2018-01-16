@@ -13,6 +13,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   j. cast_object() with _IS_NUMBER
   k. zend_fcall_info_cache.initialized
   l. php_hrtime_current()
+  m. zend_cpu_supports()
 
 2. Build system changes
   a. Unix build system changes
@@ -98,6 +99,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   l. php_hrtime_current() delivers the number of nanoseconds since an uncertain
      point in the past.
+
+  m. zend_cpu_supports() determines if a feature is supported by current cpu.
 
 ========================
 2. Build system changes
