@@ -441,7 +441,7 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 	Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv));
 	if (ZSTR_IS_INTERNED(Z_STR_P(zv))) {
-		Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+		Z_TYPE_FLAGS_P(zv) = 0;
 	}
 	return Z_STR_P(zv);
 }

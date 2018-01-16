@@ -330,7 +330,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 						new_value = zend_new_interned_string(zend_string_copy(new_value));
 						if (ZSTR_IS_INTERNED(new_value)) {
 							if (new_value == Z_STR_P(arg2)) {
-								Z_TYPE_FLAGS_P(arg2) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+								Z_TYPE_FLAGS_P(arg2) = 0;
 							}
 						} else {
 							zend_string_release(new_value);
@@ -361,7 +361,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 						new_key = zend_new_interned_string(zend_string_copy(new_key));
 						if (ZSTR_IS_INTERNED(new_key)) {
 							if (new_key == Z_STR_P(arg1)) {
-								Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+								Z_TYPE_FLAGS_P(arg1) = 0;
 							}
 						} else {
 							zend_string_release(new_key);
@@ -389,7 +389,7 @@ static void php_browscap_parser_cb(zval *arg1, zval *arg2, zval *arg3, int callb
 			if (persistent) {
 				pattern = zend_new_interned_string(zend_string_copy(pattern));
 				if (ZSTR_IS_INTERNED(pattern)) {
-					Z_TYPE_FLAGS_P(arg1) &= ~(IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+					Z_TYPE_FLAGS_P(arg1) = 0;
 				} else {
 					zend_string_release(pattern);
 				}
