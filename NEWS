@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.2
+18 Jan 2018, PHP 7.2.2RC1
 
 - Core:
   . Fixed bug #75742 (potential memleak in internal classes's static members).
