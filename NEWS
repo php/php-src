@@ -24,9 +24,12 @@ PHP                                                                        NEWS
   . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
 
 - Opcache:
+  . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)
   . Fixed bug #75687 (var 8 (TMP) has array key type but not value type).
     (Nikita, Laruence)
   . Fixed bug #75698 (Using @ crashes php7.2-fpm). (Nikita)
+  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
+    (Dmitry)
 
 - PDO:
   . Fixed bug #75616 (PDO extension doesn't allow to be built shared on Darwin).
@@ -34,11 +37,6 @@ PHP                                                                        NEWS
 
 - PDO MySQL:
   . Fixed bug #75615 (PDO Mysql module can't be built as module). (jdolecek)
-
-- Opcache:
-  . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)
-  . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
-    (Dmitry)
 
 - PGSQL:
   . Fixed bug #75671 (pg_version() crashes when called on a connection to
