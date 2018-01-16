@@ -3222,8 +3222,29 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
 
 ])
 
+dnl PHP_CHECK_BUILTIN_CPU_INIT
+AC_DEFUN([PHP_CHECK_BUILTIN_CPU_INIT], [
+  AC_MSG_CHECKING([for __builtin_cpu_init])
+
+  AC_TRY_LINK(, [
+    return __builtin_cpu_init()? 1 : 0;
+  ], [
+    have_builtin_cpu_init=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_cpu_init=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_INIT],
+   [$have_builtin_cpu_init], [Whether the compiler supports __builtin_cpu_init])
+
+])
+
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
+
+m4_include([build/ax_gcc_func_attribute.m4])
 
 dnl PHP_CHECK_VALGRIND
 AC_DEFUN([PHP_CHECK_VALGRIND], [

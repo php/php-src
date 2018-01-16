@@ -602,6 +602,12 @@ ZEND_API void zend_ast_destroy(zend_ast *ast) {
 	}
 }
 
+ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast)
+{
+	zend_ast_destroy(GC_AST(ast));
+	efree(ast);
+}
+
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
 	if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);

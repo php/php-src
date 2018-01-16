@@ -945,8 +945,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 			if (IBG(default_link)) {
 				zend_list_close(IBG(default_link));
 			}
-			xlink->gc.refcount++;
-			xlink->gc.refcount++;
+			GC_ADDREF(xlink);
+			GC_ADDREF(xlink);
 			IBG(default_link) = xlink;
 			RETVAL_RES(xlink);
 		} else {
