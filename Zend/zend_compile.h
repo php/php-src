@@ -765,7 +765,6 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
-uint32_t get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
@@ -774,6 +773,11 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API int zend_is_smart_branch(zend_op *opline);
+
+static zend_always_inline uint32_t get_next_op_number(zend_op_array *op_array)
+{
+	return op_array->last;
+}
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {

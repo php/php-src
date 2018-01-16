@@ -478,11 +478,6 @@ zend_op *get_next_op(zend_op_array *op_array)
 	return next_op;
 }
 
-uint32_t get_next_op_number(zend_op_array *op_array)
-{
-	return op_array->last;
-}
-
 zend_brk_cont_element *get_next_brk_cont_element(void)
 {
 	CG(context).last_brk_cont++;
