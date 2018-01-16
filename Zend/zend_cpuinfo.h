@@ -93,6 +93,8 @@ typedef enum _zend_cpu_feature {
 
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
+void zend_cpu_startup(void);
+
 #endif
 
 /*

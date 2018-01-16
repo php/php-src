@@ -33,6 +33,7 @@
 #include "zend_virtual_cwd.h"
 #include "zend_smart_str.h"
 #include "zend_smart_string.h"
+#include "zend_cpuinfo.h"
 
 #ifdef ZTS
 ZEND_API int compiler_globals_id;
@@ -751,6 +752,8 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	extern zend_ini_scanner_globals ini_scanner_globals;
 	extern zend_php_scanner_globals language_scanner_globals;
 #endif
+
+	zend_cpu_startup();
 
 #ifdef ZEND_WIN32
 	php_win32_cp_set_by_id(65001);
