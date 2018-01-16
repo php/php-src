@@ -40,7 +40,14 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
 #elif defined(ZEND_WIN32)
 # include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
-	__cpuidex(&cpuinfo, func, subfunc)
+	int regs[4];
+
+	__cpuidex(regs, func, subfunc);
+
+	cpuinfo.eax = regs[0];
+	cpuinfo.ebx = regs[1];
+	cpuinfo.ecx = regs[2];
+	cpuinfo.edx = regs[3];
 }
 #else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
