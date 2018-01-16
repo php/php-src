@@ -3865,10 +3865,12 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 /* }}} */
 
 /* {{{ php_addslashes */
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && HAVE_FUNC_ATTRIBUTE_IFUNC && HAVE_FUNC_ATTRIBUTE_TARGET && HAVE_NMMINTRIN_H
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && \
+    defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(HAVE_NMMINTRIN_H)
 
 #include <nmmintrin.h>
 #include "Zend/zend_bitset.h"
+#include "Zend/zend_cpuinfo.h"
 
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
 
@@ -3877,12 +3879,9 @@ zend_string *php_addslashes_default(zend_string *str, int should_free);
 
 /* {{{ resolve_addslashes */
 static void *resolve_addslashes() {
-#if PHP_HAVE_BUILTIN_CPU_INIT
-	__builtin_cpu_init();
-	if (__builtin_cpu_supports("sse4.2")) {
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
 		return php_addslashes_sse4;
 	}
-#endif
 	return  php_addslashes_default;
 }
 /* }}} */
