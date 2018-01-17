@@ -2041,8 +2041,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	*p = emalloc(sizeof(soapHeader));
 	memset(*p, 0, sizeof(soapHeader));
 	ZVAL_NULL(&(*p)->function_name);
-	(*p)->retval = *fault;
-	zval_copy_ctor(&(*p)->retval);
+	ZVAL_DUP(&(*p)->retval, fault);
 
 	SOAP_SERVER_END_CODE();
 }
