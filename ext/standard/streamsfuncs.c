@@ -656,7 +656,8 @@ static int stream_array_to_fd_set(zval *stream_array, fd_set *fds, php_socket_t 
 
 static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 {
-	zval *elem, *dest_elem, new_array;
+	zval *elem, *dest_elem;
+	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
 	zend_string *key;
@@ -665,7 +666,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
+	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL_P(stream_array), num_ind, key, elem) {
 		php_socket_t this_fd;
@@ -683,9 +684,9 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 		if (SUCCESS == php_stream_cast(stream, PHP_STREAM_AS_FD_FOR_SELECT | PHP_STREAM_CAST_INTERNAL, (void*)&this_fd, 1) && this_fd != SOCK_ERR) {
 			if (PHP_SAFE_FD_ISSET(this_fd, fds)) {
 				if (!key) {
-					dest_elem = zend_hash_index_update(Z_ARRVAL(new_array), num_ind, elem);
+					dest_elem = zend_hash_index_update(ht, num_ind, elem);
 				} else {
-					dest_elem = zend_hash_update(Z_ARRVAL(new_array), key, elem);
+					dest_elem = zend_hash_update(ht, key, elem);
 				}
 
 				if (dest_elem) {
@@ -698,22 +699,23 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 	} ZEND_HASH_FOREACH_END();
 
 	/* destroy old array and add new one */
-	zend_array_destroy(Z_ARR_P(stream_array));
-	Z_ARR_P(stream_array) = Z_ARR(new_array);
+	zval_ptr_dtor(stream_array);
+	ZVAL_ARR(stream_array, ht);
 
 	return ret;
 }
 
 static int stream_array_emulate_read_fd_set(zval *stream_array)
 {
-	zval *elem, *dest_elem, new_array;
+	zval *elem, *dest_elem;
+	HashTable *ht;
 	php_stream *stream;
 	int ret = 0;
 
 	if (Z_TYPE_P(stream_array) != IS_ARRAY) {
 		return 0;
 	}
-	array_init_size(&new_array, zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
+	ht = zend_new_array(zend_hash_num_elements(Z_ARRVAL_P(stream_array)));
 
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(stream_array), elem) {
 		ZVAL_DEREF(elem);
@@ -728,7 +730,7 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 			 * This branch of code also allows blocking streams with buffered data to
 			 * operate correctly in stream_select.
 			 * */
-			dest_elem = zend_hash_next_index_insert(Z_ARRVAL(new_array), elem);
+			dest_elem = zend_hash_next_index_insert(ht, elem);
 			if (dest_elem) {
 				zval_add_ref(dest_elem);
 			}
@@ -739,10 +741,10 @@ static int stream_array_emulate_read_fd_set(zval *stream_array)
 
 	if (ret > 0) {
 		/* destroy old array and add new one */
-		zend_array_destroy(Z_ARR_P(stream_array));
-		Z_ARR_P(stream_array) = Z_ARR(new_array);
+		zval_ptr_dtor(stream_array);
+		ZVAL_ARR(stream_array, ht);
 	} else {
-		zend_array_destroy(Z_ARR(new_array));
+		zend_array_destroy(ht);
 	}
 
 	return ret;
@@ -763,9 +765,9 @@ PHP_FUNCTION(stream_select)
 	int set_count, max_set_count = 0;
 
 	ZEND_PARSE_PARAMETERS_START(4, 5)
-		Z_PARAM_ARRAY_EX(r_array, 1, 1)
-		Z_PARAM_ARRAY_EX(w_array, 1, 1)
-		Z_PARAM_ARRAY_EX(e_array, 1, 1)
+		Z_PARAM_ARRAY_EX2(r_array, 1, 1, 0)
+		Z_PARAM_ARRAY_EX2(w_array, 1, 1, 0)
+		Z_PARAM_ARRAY_EX2(e_array, 1, 1, 0)
 		Z_PARAM_LONG_EX(sec, secnull, 1, 0)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(usec)
@@ -826,10 +828,12 @@ PHP_FUNCTION(stream_select)
 		retval = stream_array_emulate_read_fd_set(r_array);
 		if (retval > 0) {
 			if (w_array != NULL) {
-				zend_hash_clean(Z_ARRVAL_P(w_array));
+				zval_ptr_dtor(w_array);
+				ZVAL_EMPTY_ARRAY(w_array);
 			}
 			if (e_array != NULL) {
-				zend_hash_clean(Z_ARRVAL_P(e_array));
+				zval_ptr_dtor(e_array);
+				ZVAL_EMPTY_ARRAY(e_array);
 			}
 			RETURN_LONG(retval);
 		}
