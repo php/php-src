@@ -648,7 +648,6 @@ zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_
 				retval = rv;
 				if (!Z_ISREF_P(rv) &&
 				    (type == BP_VAR_W || type == BP_VAR_RW  || type == BP_VAR_UNSET)) {
-					SEPARATE_ZVAL_NOREF(rv);
 					if (UNEXPECTED(Z_TYPE_P(rv) != IS_OBJECT)) {
 						zend_error(E_NOTICE, "Indirect modification of overloaded property %s::$%s has no effect", ZSTR_VAL(zobj->ce->name), Z_STRVAL_P(member));
 					}
