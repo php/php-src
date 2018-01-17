@@ -1528,18 +1528,15 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 			return NULL;
 		}
 	} else {
-		zval tmp;
+		zend_long tmp;
 		/* NB: for PHP4 compat only, it should be using 'Z' instead */
-		tmp = *column_index;
-		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
-		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0);
+
+		tmp = zval_get_long(column_index);
+		column = php_oci_statement_get_column(statement, tmp, NULL, 0);
 		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", Z_LVAL(tmp));
-			zval_ptr_dtor(&tmp);
+			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", tmp);
 			return NULL;
 		}
-		zval_ptr_dtor(&tmp);
 	}
 	return column;
 }
