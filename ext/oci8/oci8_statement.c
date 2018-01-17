@@ -993,8 +993,7 @@ int php_oci_bind_post_exec(zval *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-		SEPARATE_STRING(zv);
-		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0);
+		ZVAL_NEW_STR(zv, zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0));
 		Z_STRVAL_P(zv)[ Z_STRLEN_P(zv) ] = '\0';
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		int i;
