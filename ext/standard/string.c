@@ -3865,30 +3865,38 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 /* }}} */
 
 /* {{{ php_addslashes */
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && \
-    defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(HAVE_NMMINTRIN_H)
 
-#include <nmmintrin.h>
-#include "Zend/zend_bitset.h"
-#include "Zend/zend_cpuinfo.h"
+#if defined(__GNUC__) && defined(__SSE4_2__)
+# include <nmmintrin.h>
+# include "Zend/zend_bitset.h"
+# define PHP_ADDSLASHES_LEVEL 2
+#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && \
+      defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(HAVE_NMMINTRIN_H)
+# include <nmmintrin.h>
+# include "Zend/zend_bitset.h"
+# include "Zend/zend_cpuinfo.h"
+# define PHP_ADDSLASHES_LEVEL 1
 
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
-
-zend_string *php_addslashes_sse4(zend_string *str, int should_free) __attribute__((target("sse4.2")));
+zend_string *php_addslashes_sse42(zend_string *str, int should_free) __attribute__((target("sse4.2")));
 zend_string *php_addslashes_default(zend_string *str, int should_free);
 
-/* {{{ resolve_addslashes */
 static void *resolve_addslashes() {
 	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
-		return php_addslashes_sse4;
+		return php_addslashes_sse42;
 	}
 	return  php_addslashes_default;
 }
-/* }}} */
+#else
+# define PHP_ADDSLASHES_LEVEL 0
+#endif
 
-/* {{{ php_addslashes_sse4
- */
-zend_string *php_addslashes_sse4(zend_string *str, int should_free)
+#if PHP_ADDSLASHES_LEVEL
+# if PHP_ADDSLASHES_LEVEL == 2
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
+# else
+zend_string *php_addslashes_sse42(zend_string *str, int should_free)
+# endif
 {
 	SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
 	__m128i w128, s128;
@@ -4068,13 +4076,14 @@ do_escape:
 	return new_str;
 }
 /* }}} */
-
-/* {{{ php_addslashes_default
- */
-zend_string *php_addslashes_default(zend_string *str, int should_free)
-#else
-PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 #endif
+
+#if PHP_ADDSLASHES_LEVEL != 2
+# if PHP_ADDSLASHES_LEVEL == 1
+zend_string *php_addslashes_default(zend_string *str, int should_free) /* {{{ */
+# else
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
+# endif
 {
 	/* maximum string length, worst case situation */
 	char *source, *target;
@@ -4145,7 +4154,7 @@ do_escape:
 
 	return new_str;
 }
-/* }}} */
+#endif
 /* }}} */
 
 #define _HEB_BLOCK_TYPE_ENG 1
