@@ -1102,47 +1102,40 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
+		zval *__zv = (zv);								\
+		if (Z_COPYABLE_P(__zv)) {						\
+			if (Z_REFCOUNT_P(__zv) > 1) {				\
+				if (Z_REFCOUNTED_P(__zv)) {				\
+					Z_DELREF_P(__zv);					\
+				}										\
+				zval_copy_ctor_func(__zv);				\
+			}											\
+		}												\
+	} while (0)
+
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
-		if (Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_REFCOUNTED_P(_zv)) {				\
-					Z_DELREF_P(_zv);					\
-				}										\
-				zval_copy_ctor_func(_zv);				\
-			}											\
-		}												\
+		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNTED_P(_zv) ||						\
-		    Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_COPYABLE_P(_zv)) {				\
-					if (Z_REFCOUNTED_P(_zv)) {			\
-						Z_DELREF_P(_zv);				\
-					}									\
-					zval_copy_ctor_func(_zv);			\
-				} else if (Z_ISREF_P(_zv)) {			\
-					Z_DELREF_P(_zv);					\
-					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
-				}										\
-			}											\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
-		zval *_zv = (zv);								\
-		if (Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_REFCOUNTED_P(_zv)) {				\
-					Z_DELREF_P(_zv);					\
-				}										\
+		if (Z_ISREF_P(_zv)) {							\
+			zend_reference *_r = Z_REF_P(_zv);			\
+			ZVAL_COPY_VALUE(_zv, &_r->val);				\
+			if (GC_DELREF(_r) == 0) {					\
+				efree_size(_r, sizeof(zend_reference));	\
+			} else if (Z_OPT_COPYABLE_P(_zv)) {			\
 				zval_copy_ctor_func(_zv);				\
+				break;									\
+			} else if (Z_OPT_REFCOUNTED_P(_zv)) {		\
+				Z_ADDREF_P(_zv);						\
+				break;									\
 			}											\
 		}												\
+		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
 	} while (0)
 
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\
