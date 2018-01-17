@@ -379,10 +379,6 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		filter_func = php_find_filter(FILTER_DEFAULT);
 	}
 
-	if (copy) {
-		SEPARATE_ZVAL(value);
-	}
-
 	/* #49274, fatal error with object without a toString method
 	  Fails nicely instead of getting a recovarable fatal error. */
 	if (Z_TYPE_P(value) == IS_OBJECT) {
@@ -634,9 +630,6 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
-			if (copy) {
-				SEPARATE_ZVAL(filtered);
-			}
 			zval_ptr_dtor(filtered);
 			if (filter_flags & FILTER_NULL_ON_FAILURE) {
 				ZVAL_NULL(filtered);
@@ -649,9 +642,6 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 		return;
 	}
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
-		if (copy) {
-			SEPARATE_ZVAL(filtered);
-		}
 		zval_ptr_dtor(filtered);
 		if (filter_flags & FILTER_NULL_ON_FAILURE) {
 			ZVAL_NULL(filtered);

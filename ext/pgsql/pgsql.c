@@ -2139,13 +2139,13 @@ PHP_FUNCTION(pg_execute)
 	pgsql_result_handle *pg_result;
 
 	if (argc == 2) {
-		if (zend_parse_parameters(argc, "sa/", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
+		if (zend_parse_parameters(argc, "sa", &stmtname, &stmtname_len, &pv_param_arr)==FAILURE) {
 			return;
 		}
 		link = FETCH_DEFAULT_LINK();
 		CHECK_DEFAULT_LINK(link);
 	} else {
-		if (zend_parse_parameters(argc, "rsa/", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
+		if (zend_parse_parameters(argc, "rsa", &pgsql_link, &stmtname, &stmtname_len, &pv_param_arr) == FAILURE) {
 			return;
 		}
 		link = Z_RES_P(pgsql_link);
@@ -2177,18 +2177,11 @@ PHP_FUNCTION(pg_execute)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zval tmp_val;
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp_str);
 
-				ZVAL_COPY(&tmp_val, tmp);
-				convert_to_string(&tmp_val);
-				if (Z_TYPE(tmp_val) != IS_STRING) {
-					php_error_docref(NULL, E_WARNING,"Error converting parameter");
-					zval_ptr_dtor(&tmp_val);
-					_php_pgsql_free_params(params, num_params);
-					RETURN_FALSE;
-				}
-				params[i] = estrndup(Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
-				zval_ptr_dtor(&tmp_val);
+				params[i] = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
+				zend_tmp_string_release(tmp_str);
 			}
 
 			i++;
@@ -4965,7 +4958,7 @@ PHP_FUNCTION(pg_send_query_params)
 	int is_non_blocking;
 	int ret;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa/", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rsa", &pgsql_link, &query, &query_len, &pv_param_arr) == FAILURE) {
 		return;
 	}
 
@@ -4995,17 +4988,11 @@ PHP_FUNCTION(pg_send_query_params)
 			if (Z_TYPE_P(tmp) == IS_NULL) {
 				params[i] = NULL;
 			} else {
-				zval tmp_val;
-				ZVAL_COPY(&tmp_val, tmp);
-				convert_to_string(&tmp_val);
-				if (Z_TYPE(tmp_val) != IS_STRING) {
-					php_error_docref(NULL, E_WARNING,"Error converting parameter");
-					zval_ptr_dtor(&tmp_val);
-					_php_pgsql_free_params(params, num_params);
-					RETURN_FALSE;
-				}
-				params[i] = estrndup(Z_STRVAL(tmp_val), Z_STRLEN(tmp_val));
-				zval_ptr_dtor(&tmp_val);
+				zend_string *tmp_str;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp_str);
+
+				params[i] = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
+				zend_tmp_string_release(tmp_str);
 			}
 
 			i++;

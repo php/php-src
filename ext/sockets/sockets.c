@@ -919,7 +919,7 @@ PHP_FUNCTION(socket_select)
 	int				retval, sets = 0;
 	zend_long			usec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!a/!a/!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
 		return;
 	}
 
