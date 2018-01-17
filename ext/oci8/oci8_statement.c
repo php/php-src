@@ -1602,8 +1602,8 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	ZEND_ASSERT(Z_ISREF_P(var));
 	val = Z_REFVAL_P(var);
-	SEPARATE_ZVAL_NOREF(val);
 	convert_to_array(val);
+	SEPARATE_ARRAY(val);
 
 	if (maxlength < -1) {
 		php_error_docref(NULL, E_WARNING, "Invalid max length value (" ZEND_LONG_FMT ")", maxlength);
