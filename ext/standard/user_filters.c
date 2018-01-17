@@ -180,7 +180,7 @@ php_stream_filter_status_t userfilter_filter(
 
 		/* Give the userfilter class a hook back to the stream */
 		php_stream_to_zval(stream, &tmp);
-		zval_copy_ctor(&tmp);
+		Z_ADDREF(tmp);
 		add_property_zval(obj, "stream", &tmp);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&tmp);
