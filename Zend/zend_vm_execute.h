@@ -1234,19 +1234,19 @@ send_again:
 
 			top = ZEND_CALL_ARG(EX(call), arg_num);
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-				if (Z_REFCOUNT_P(args) == 1) {
-					if (Z_ISREF_P(arg)) {
-						Z_ADDREF_P(arg);
-					} else {
-						ZVAL_MAKE_REF_EX(arg, 2);
-					}
+				if (Z_ISREF_P(arg)) {
+					Z_ADDREF_P(arg);
+					ZVAL_REF(top, Z_REF_P(arg));
+				} else if (opline->op1_type & (IS_VAR|IS_CV)) {
+					/* array is already separated above */
+					ZVAL_MAKE_REF_EX(arg, 2);
 					ZVAL_REF(top, Z_REF_P(arg));
 				} else {
-					ZVAL_DUP(top, arg);
+					Z_TRY_ADDREF_P(arg);
+					ZVAL_NEW_REF(top, arg);
 				}
-			} else if (Z_ISREF_P(arg)) {
-				ZVAL_COPY(top, Z_REFVAL_P(arg));
 			} else {
+				ZVAL_DEREF(arg);
 				ZVAL_COPY(top, arg);
 			}
 
