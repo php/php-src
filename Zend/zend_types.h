@@ -1007,7 +1007,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 		if ((_t & ((IS_TYPE_REFCOUNTED|IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT)) != 0) { \
 			if ((_t & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0) { \
-				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); \
+				zval_copy_ctor_func(_z1);				\
 			} else {									\
 				GC_ADDREF(_gc);							\
 			}											\
@@ -1029,7 +1029,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
 				GC_ADDREF(_gc);											\
 			} else {													\
-				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); 			\
+				zval_copy_ctor_func(_z1);								\
 			}															\
 		}																\
 	} while (0)
