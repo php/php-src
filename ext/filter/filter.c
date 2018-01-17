@@ -510,8 +510,8 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 			ZVAL_DEREF(element);
-			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
+				SEPARATE_ARRAY(element);
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
