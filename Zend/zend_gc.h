@@ -47,35 +47,15 @@ typedef struct _gc_root_buffer {
 	uint32_t         refcount;
 } gc_root_buffer;
 
-/* Doubly linked list of root buffers, lists are terminated with GC_INVALID */
-typedef struct _gc_root_list {
-	uint32_t next;
-	uint32_t prev;
-} gc_root_list;
-
-#define GC_NUM_ADDITIONAL_ENTRIES \
-	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
-
-typedef struct _gc_additional_bufer gc_additional_buffer;
-
-struct _gc_additional_bufer {
-	uint32_t              used;
-	gc_additional_buffer *next;
-	gc_root_buffer        buf[GC_NUM_ADDITIONAL_ENTRIES];
-};
-
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
 	zend_bool         gc_active;
 	zend_bool         gc_full;
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
-	//gc_root_list      roots;			/* list of possible roots of cycles */
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
 	uint32_t          last_unused;		/* last unused buffer               */
-
-	//gc_root_list      to_free;			/* list to free                     */
 	uint32_t          next_to_free;     /* next to free in to_free list     */
 
 	uint32_t gc_runs;
@@ -89,9 +69,6 @@ typedef struct _zend_gc_globals {
 	uint32_t zval_remove_from_buffer;
 	uint32_t zval_marked_grey;
 #endif
-
-	gc_additional_buffer *additional_buffer;
-
 } zend_gc_globals;
 
 #ifdef ZTS
