@@ -160,10 +160,11 @@ PHP                                                                        NEWS
     used). (Anton Artamonov)
 
 - Standard:
-  . Fixed unzserialize(), to disable creation of unsupported data structures
+  . Fixed unserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
   . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
     that getrandom() is missing). (sarciszewski)
+  . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).

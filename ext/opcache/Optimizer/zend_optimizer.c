@@ -619,8 +619,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 							m->op1_type == type &&
 							m->op1.var == var) {
 							zval v;
-							ZVAL_COPY_VALUE(&v, val);
-							zval_copy_ctor(&v);
+							ZVAL_DUP(&v, val);
 							if (Z_TYPE(v) == IS_STRING) {
 								zend_string_hash_val(Z_STR(v));
 							}
@@ -678,8 +677,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 								if (m->opcode == ZEND_CASE) {
 									m->opcode = ZEND_IS_EQUAL;
 								}
-								ZVAL_COPY_VALUE(&v, val);
-								zval_copy_ctor(&v);
+								ZVAL_DUP(&v, val);
 								if (Z_TYPE(v) == IS_STRING) {
 									zend_string_hash_val(Z_STR(v));
 								}

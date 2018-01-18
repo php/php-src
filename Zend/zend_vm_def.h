@@ -4404,19 +4404,19 @@ ZEND_VM_C_LABEL(send_again):
 
 			top = ZEND_CALL_ARG(EX(call), arg_num);
 			if (ARG_SHOULD_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
-				if (Z_REFCOUNT_P(args) == 1) {
-					if (Z_ISREF_P(arg)) {
-						Z_ADDREF_P(arg);
-					} else {
-						ZVAL_MAKE_REF_EX(arg, 2);
-					}
+				if (Z_ISREF_P(arg)) {
+					Z_ADDREF_P(arg);
+					ZVAL_REF(top, Z_REF_P(arg));
+				} else if (OP1_TYPE & (IS_VAR|IS_CV)) {
+					/* array is already separated above */
+					ZVAL_MAKE_REF_EX(arg, 2);
 					ZVAL_REF(top, Z_REF_P(arg));
 				} else {
-					ZVAL_DUP(top, arg);
+					Z_TRY_ADDREF_P(arg);
+					ZVAL_NEW_REF(top, arg);
 				}
-			} else if (Z_ISREF_P(arg)) {
-				ZVAL_COPY(top, Z_REFVAL_P(arg));
 			} else {
+				ZVAL_DEREF(arg);
 				ZVAL_COPY(top, arg);
 			}
 
@@ -5739,7 +5739,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			array_ptr = Z_REFVAL_P(array_ref);
 		}
 		if (OP1_TYPE == IS_CONST) {
-			zval_copy_ctor_func(array_ptr);
+			ZVAL_ARR(array_ptr, zend_array_dup(Z_ARRVAL_P(array_ptr)));
 		} else {
 			SEPARATE_ARRAY(array_ptr);
 		}
@@ -8353,6 +8353,14 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 		ZVAL_EMPTY_ARRAY(EX_VAR(opline->result.var));
 	}
 	ZEND_VM_NEXT_OPCODE();
+}
+
+ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
+{
+	USE_OPLINE
+
+	OPLINE = OP_JMP_ADDR(opline, opline->op1);
+	ZEND_VM_CONTINUE();
 }
 
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_ADD, (res_info == MAY_BE_LONG && op1_info == MAY_BE_LONG && op2_info == MAY_BE_LONG), ZEND_ADD_LONG_NO_OVERFLOW, CONST|TMPVARCV, CONST|TMPVARCV, SPEC(NO_CONST_CONST,COMMUTATIVE))

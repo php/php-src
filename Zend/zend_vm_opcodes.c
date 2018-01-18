@@ -425,9 +425,9 @@ static uint32_t zend_vm_opcodes_flags[199] = {
 	0x00000701,
 };
 
-ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {
+ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {
 	return zend_vm_opcodes_names[opcode];
 }
-ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode) {
+ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {
 	return zend_vm_opcodes_flags[opcode];
 }

@@ -2500,7 +2500,7 @@ PHP_FUNCTION(extract)
 
 	extract_refs = (extract_type & EXTR_REFS);
 	if (extract_refs) {
-		SEPARATE_ZVAL_NOREF(var_array_param);
+		SEPARATE_ARRAY(var_array_param);
 	}
 	extract_type &= 0xff;
 

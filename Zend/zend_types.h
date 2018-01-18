@@ -470,24 +470,19 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
-#define IS_CONSTANT_VISITED_MARK    (1<<0)
 #define IS_TYPE_COPYABLE			(1<<1)
 #define IS_TYPE_REFCOUNTED			(1<<2) /* equal to ZEND_CALL_FREE_EXTRA_ARGS */
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
 
-#define IS_STRING_EX				(IS_STRING         | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
+#define IS_STRING_EX				(IS_STRING         | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 #define IS_ARRAY_EX					(IS_ARRAY          | ((IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT))
 #define IS_OBJECT_EX				(IS_OBJECT         | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 #define IS_RESOURCE_EX				(IS_RESOURCE       | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 #define IS_REFERENCE_EX				(IS_REFERENCE      | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
 
 #define IS_CONSTANT_AST_EX			(IS_CONSTANT_AST   | ((IS_TYPE_REFCOUNTED                   ) << Z_TYPE_FLAGS_SHIFT))
-
-#define IS_CONSTANT_VISITED(p)         (Z_TYPE_FLAGS_P(p) & IS_CONSTANT_VISITED_MARK)
-#define MARK_CONSTANT_VISITED(p)       Z_TYPE_FLAGS_P(p) |= IS_CONSTANT_VISITED_MARK
-#define RESET_CONSTANT_VISITED(p)      Z_TYPE_FLAGS_P(p) &= ~IS_CONSTANT_VISITED_MARK
 
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
@@ -1007,7 +1002,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
 		if ((_t & ((IS_TYPE_REFCOUNTED|IS_TYPE_COPYABLE) << Z_TYPE_FLAGS_SHIFT)) != 0) { \
 			if ((_t & (IS_TYPE_COPYABLE << Z_TYPE_FLAGS_SHIFT)) != 0) { \
-				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); \
+				zval_copy_ctor_func(_z1);				\
 			} else {									\
 				GC_ADDREF(_gc);							\
 			}											\
@@ -1029,7 +1024,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
 				GC_ADDREF(_gc);											\
 			} else {													\
-				_zval_copy_ctor_func(_z1 ZEND_FILE_LINE_CC); 			\
+				zval_copy_ctor_func(_z1);								\
 			}															\
 		}																\
 	} while (0)
@@ -1102,47 +1097,40 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
+		zval *__zv = (zv);								\
+		if (Z_COPYABLE_P(__zv)) {						\
+			if (Z_REFCOUNT_P(__zv) > 1) {				\
+				if (Z_REFCOUNTED_P(__zv)) {				\
+					Z_DELREF_P(__zv);					\
+				}										\
+				zval_copy_ctor_func(__zv);				\
+			}											\
+		}												\
+	} while (0)
+
 #define SEPARATE_ZVAL_NOREF(zv) do {					\
 		zval *_zv = (zv);								\
 		ZEND_ASSERT(Z_TYPE_P(_zv) != IS_REFERENCE);		\
-		if (Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_REFCOUNTED_P(_zv)) {				\
-					Z_DELREF_P(_zv);					\
-				}										\
-				zval_copy_ctor_func(_zv);				\
-			}											\
-		}												\
+		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
 	} while (0)
 
 #define SEPARATE_ZVAL(zv) do {							\
 		zval *_zv = (zv);								\
-		if (Z_REFCOUNTED_P(_zv) ||						\
-		    Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_COPYABLE_P(_zv)) {				\
-					if (Z_REFCOUNTED_P(_zv)) {			\
-						Z_DELREF_P(_zv);				\
-					}									\
-					zval_copy_ctor_func(_zv);			\
-				} else if (Z_ISREF_P(_zv)) {			\
-					Z_DELREF_P(_zv);					\
-					ZVAL_DUP(_zv, Z_REFVAL_P(_zv));		\
-				}										\
-			}											\
-		}												\
-	} while (0)
-
-#define SEPARATE_ZVAL_IF_NOT_REF(zv) do {				\
-		zval *_zv = (zv);								\
-		if (Z_COPYABLE_P(_zv)) {						\
-			if (Z_REFCOUNT_P(_zv) > 1) {				\
-				if (Z_REFCOUNTED_P(_zv)) {				\
-					Z_DELREF_P(_zv);					\
-				}										\
+		if (Z_ISREF_P(_zv)) {							\
+			zend_reference *_r = Z_REF_P(_zv);			\
+			ZVAL_COPY_VALUE(_zv, &_r->val);				\
+			if (GC_DELREF(_r) == 0) {					\
+				efree_size(_r, sizeof(zend_reference));	\
+			} else if (Z_OPT_COPYABLE_P(_zv)) {			\
 				zval_copy_ctor_func(_zv);				\
+				break;									\
+			} else if (Z_OPT_REFCOUNTED_P(_zv)) {		\
+				Z_ADDREF_P(_zv);						\
+				break;									\
 			}											\
 		}												\
+		SEPARATE_ZVAL_IF_NOT_REF(_zv);					\
 	} while (0)
 
 #define SEPARATE_ARG_IF_REF(varptr) do { 				\

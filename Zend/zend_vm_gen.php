@@ -2348,8 +2348,8 @@ function gen_vm($def, $skel) {
 	fputs($f, "#define ZEND_VM_OP2_FLAGS(flags) ((flags >> 8) & 0xff)\n");
 	fputs($f, "\n");
 	fputs($f, "BEGIN_EXTERN_C()\n\n");
-	fputs($f, "ZEND_API const char *zend_get_opcode_name(zend_uchar opcode);\n");
-	fputs($f, "ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode);\n\n");
+	fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode);\n");
+	fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode);\n\n");
 	fputs($f, "END_EXTERN_C()\n\n");
 	
 	foreach ($opcodes as $code => $dsc) {
@@ -2388,11 +2388,11 @@ function gen_vm($def, $skel) {
 	}
 	fputs($f, "};\n\n");
 
-	fputs($f, "ZEND_API const char* zend_get_opcode_name(zend_uchar opcode) {\n");
+	fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {\n");
 	fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
 	fputs($f, "}\n");
 
-	fputs($f, "ZEND_API uint32_t zend_get_opcode_flags(zend_uchar opcode) {\n");
+	fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {\n");
 	fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
 	fputs($f, "}\n");
     
@@ -2582,7 +2582,7 @@ function gen_vm($def, $skel) {
 	}
 
 	// Generate zend_vm_get_opcode_handler() function
-	out($f, "ZEND_API void zend_vm_set_opcode_handler(zend_op* op)\n");
+	out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
 		out($f, "\top->handler = zend_vm_get_opcode_handler(op->opcode, op);\n");
@@ -2598,7 +2598,7 @@ function gen_vm($def, $skel) {
 	out($f, "}\n\n");
 
 	// Generate zend_vm_set_opcode_handler_ex() function
-	out($f, "ZEND_API void zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)\n");
+	out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler_ex(zend_op* op, uint32_t op1_info, uint32_t op2_info, uint32_t res_info)\n");
 	out($f, "{\n");
 	out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
 	if (!ZEND_VM_SPEC) {
@@ -2670,7 +2670,7 @@ function gen_vm($def, $skel) {
 
 	// Generate zend_vm_call_opcode_handler() function
 	if (ZEND_VM_KIND == ZEND_VM_KIND_CALL || ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
-		out($f, "ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
+		out($f, "ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
 		out($f, "{\n");
 		if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 			out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
@@ -2722,7 +2722,7 @@ function gen_vm($def, $skel) {
 		out($f, "\treturn ret;\n");
 		out($f, "}\n\n");
 	} else {
-		out($f, "ZEND_API int zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
+		out($f, "ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data* ex)\n");
 		out($f, "{\n");
 		out($f, "\tzend_error_noreturn(E_CORE_ERROR, \"zend_vm_call_opcode_handler() is not supported\");\n");
 		out($f, "\treturn 0;\n");

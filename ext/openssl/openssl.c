@@ -6009,7 +6009,7 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|sz/", &data, &data_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a|sz/", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}

@@ -386,6 +386,7 @@ ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp(const char *s1, size_t len1, 
 ZEND_API int ZEND_FASTCALL zend_binary_strcasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2);
 ZEND_API int ZEND_FASTCALL zend_binary_strncasecmp_l(const char *s1, size_t len1, const char *s2, size_t len2, size_t length);
 
+ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zendi_smart_strcmp(zend_string *s1, zend_string *s2);
 ZEND_API int ZEND_FASTCALL zend_compare_symbol_tables(HashTable *ht1, HashTable *ht2);
 ZEND_API int ZEND_FASTCALL zend_compare_arrays(zval *a1, zval *a2);
@@ -728,7 +729,7 @@ static zend_always_inline int zend_fast_equal_strings(zend_string *s1, zend_stri
 	} else if (ZSTR_VAL(s1)[0] > '9' || ZSTR_VAL(s2)[0] > '9') {
 		return zend_string_equal_content(s1, s2);
 	} else {
-		return zendi_smart_strcmp(s1, s2) == 0;
+		return zendi_smart_streq(s1, s2);
 	}
 }
 

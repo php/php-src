@@ -27,7 +27,7 @@ typedef struct _zend_cpu_info {
 	uint32_t initialized;
 } zend_cpu_info;
 
-static zend_cpu_info cpuinfo;
+static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
@@ -40,7 +40,14 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
 #elif defined(ZEND_WIN32)
 # include <intrin.h>
 static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
-	__cpuidex(&cpuinfo, func, subfunc)
+	int regs[4];
+
+	__cpuidex(regs, func, subfunc);
+
+	cpuinfo.eax = regs[0];
+	cpuinfo.ebx = regs[1];
+	cpuinfo.ecx = regs[2];
+	cpuinfo.edx = regs[3];
 }
 #else
 static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
@@ -48,15 +55,23 @@ static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
 }
 #endif
 
-ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
+void zend_cpu_startup(void)
+{
 	if (!cpuinfo.initialized) {
 		cpuinfo.initialized = 1;
 		__zend_cpuid(0, 0);
 		if (cpuinfo.eax == 0) {
-			return 0;
+			return;
 		}
 		__zend_cpuid(1, 0);
 	}
+}
+
+ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
+#ifdef HAVE_FUNC_ATTRIBUTE_IFUNC
+	/* The resolver is invoked before zend_startup(). */
+	zend_cpu_startup();
+#endif
 	if (feature & ZEND_CPU_EDX_MASK) {
 		return (cpuinfo.edx & (feature & ~ZEND_CPU_EDX_MASK));
 	} else {

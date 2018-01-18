@@ -184,12 +184,10 @@ Error: 2 - rename() expects parameter 3 to be resource, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - rename() expects parameter 3 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase null--
-Error: 2 - rename() expects parameter 3 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase true--
 Error: 2 - rename() expects parameter 3 to be resource, boolean given, %s(%d)
@@ -240,12 +238,10 @@ Error: 2 - rename() expects parameter 3 to be resource, object given, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - rename() expects parameter 3 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --unset var--
-Error: 2 - rename() expects parameter 3 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --file resource--
 Error: 2 - rename(): supplied resource is not a valid Stream-Context resource, %s(%d)

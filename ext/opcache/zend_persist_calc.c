@@ -124,7 +124,7 @@ static void zend_persist_zval_calc(zval *z)
 		case IS_STRING:
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
-				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+				Z_TYPE_FLAGS_P(z) = 0;
 			}
 			break;
 		case IS_ARRAY:

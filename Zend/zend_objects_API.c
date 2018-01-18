@@ -160,42 +160,39 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 		otherwise, when the destructor ends the storage might be freed
 		when the refcount reaches 0 a second time
 	 */
-	if (EG(objects_store).object_buckets &&
-	    IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle])) {
-		if (GC_REFCOUNT(object) == 0) {
-			if (!(GC_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
-				GC_FLAGS(object) |= IS_OBJ_DESTRUCTOR_CALLED;
+	ZEND_ASSERT(EG(objects_store).object_buckets != NULL);
+	ZEND_ASSERT(IS_OBJ_VALID(EG(objects_store).object_buckets[object->handle]));
+	ZEND_ASSERT(GC_REFCOUNT(object) == 0);
 
-				if (object->handlers->dtor_obj
-				 && (object->handlers->dtor_obj != zend_objects_destroy_object
-				  || object->ce->destructor)) {
-					GC_ADDREF(object);
-					object->handlers->dtor_obj(object);
-					GC_DELREF(object);
-				}
-			}
+	if (!(GC_FLAGS(object) & IS_OBJ_DESTRUCTOR_CALLED)) {
+		GC_FLAGS(object) |= IS_OBJ_DESTRUCTOR_CALLED;
 
-			if (GC_REFCOUNT(object) == 0) {
-				uint32_t handle = object->handle;
-				void *ptr;
-
-				EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
-				if (!(GC_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
-					GC_FLAGS(object) |= IS_OBJ_FREE_CALLED;
-					if (object->handlers->free_obj) {
-						GC_ADDREF(object);
-						object->handlers->free_obj(object);
-						GC_DELREF(object);
-					}
-				}
-				ptr = ((char*)object) - object->handlers->offset;
-				GC_REMOVE_FROM_BUFFER(object);
-				efree(ptr);
-				ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
-			}
-		} else {
+		if (object->handlers->dtor_obj
+		 && (object->handlers->dtor_obj != zend_objects_destroy_object
+		  || object->ce->destructor)) {
+			GC_ADDREF(object);
+			object->handlers->dtor_obj(object);
 			GC_DELREF(object);
 		}
+	}
+
+	if (GC_REFCOUNT(object) == 0) {
+		uint32_t handle = object->handle;
+		void *ptr;
+
+		EG(objects_store).object_buckets[handle] = SET_OBJ_INVALID(object);
+		if (!(GC_FLAGS(object) & IS_OBJ_FREE_CALLED)) {
+			GC_FLAGS(object) |= IS_OBJ_FREE_CALLED;
+			if (object->handlers->free_obj) {
+				GC_ADDREF(object);
+				object->handlers->free_obj(object);
+				GC_DELREF(object);
+			}
+		}
+		ptr = ((char*)object) - object->handlers->offset;
+		GC_REMOVE_FROM_BUFFER(object);
+		efree(ptr);
+		ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(handle);
 	}
 }
 /* }}} */

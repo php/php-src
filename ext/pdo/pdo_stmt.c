@@ -1304,7 +1304,7 @@ static PHP_METHOD(PDOStatement, fetchObject)
 
 	if (ctor_args) {
 		if (Z_TYPE_P(ctor_args) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL_P(ctor_args))) {
-			ZVAL_DUP(&stmt->fetch.cls.ctor_args, ctor_args);
+			ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL_P(ctor_args)));
 		} else {
 			ZVAL_UNDEF(&stmt->fetch.cls.ctor_args);
 		}
@@ -1941,7 +1941,7 @@ int pdo_stmt_setup_fetch_mode(INTERNAL_FUNCTION_PARAMETERS, pdo_stmt_t *stmt, in
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "ctor_args must be either NULL or an array");
 						retval = FAILURE;
 					} else if (Z_TYPE(args[skip+2]) == IS_ARRAY && zend_hash_num_elements(Z_ARRVAL(args[skip+2]))) {
-						ZVAL_DUP(&stmt->fetch.cls.ctor_args, &args[skip+2]);
+						ZVAL_ARR(&stmt->fetch.cls.ctor_args, zend_array_dup(Z_ARRVAL(args[skip+2])));
 					}
 				}
 
