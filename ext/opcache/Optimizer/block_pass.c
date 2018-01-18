@@ -57,7 +57,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 		if (c->flags & CONST_PERSISTENT) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
-				zval_copy_ctor(result);
+				Z_TRY_ADDREF_P(result);
 			}
 		} else {
 			retval = 0;
@@ -189,7 +189,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					MAKE_NOP(src);
 				} else {
 					zval c;
-					ZVAL_DUP(&c, &ZEND_OP1_LITERAL(src));
+					ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						zend_optimizer_remove_live_range(op_array, op1.var);
 						VAR_SOURCE(op1) = NULL;
@@ -258,7 +258,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 				znode_op op2 = opline->op2;
 				zval c;
 
-				ZVAL_DUP(&c, &ZEND_OP1_LITERAL(src));
+				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
 					zend_optimizer_remove_live_range(op_array, op2.var);
 					VAR_SOURCE(op2) = NULL;
@@ -1152,7 +1152,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
 						zval zv;
-						ZVAL_DUP(&zv, &ZEND_OP1_LITERAL(last_op));
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
@@ -1169,7 +1169,7 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
 						zval zv;
-						ZVAL_DUP(&zv, &ZEND_OP1_LITERAL(last_op));
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);

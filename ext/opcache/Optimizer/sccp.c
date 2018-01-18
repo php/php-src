@@ -474,6 +474,7 @@ static inline int ct_eval_del_array_elem(zval *result, zval *key) {
 
 static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 	if (!key) {
+		SEPARATE_ARRAY(result);
 		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
 			Z_TRY_ADDREF_P(value);
 			return SUCCESS;
@@ -483,22 +484,28 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 
 	switch (Z_TYPE_P(key)) {
 		case IS_NULL:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_update(Z_ARR_P(result), ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_FALSE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), 0, value);
 			break;
 		case IS_TRUE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), 1, value);
 			break;
 		case IS_LONG:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(
 				Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)), value);
 			break;
 		case IS_STRING:
+			SEPARATE_ARRAY(result);
 			value = zend_symtable_update(Z_ARR_P(result), Z_STR_P(key), value);
 			break;
 		default:
@@ -1081,7 +1088,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				if (IS_PARTIAL_ARRAY(op1)) {
 					dup_partial_array(&zv, op1);
 				} else {
-					ZVAL_DUP(&zv, op1);
+					ZVAL_COPY(&zv, op1);
 				}
 
 				if (!op2 && IS_PARTIAL_ARRAY(&zv)) {
@@ -1398,7 +1405,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							if (IS_PARTIAL_ARRAY(op1)) {
 								dup_partial_array(&zv, op1);
 							} else {
-								ZVAL_DUP(&zv, op1);
+								ZVAL_COPY(&zv, op1);
 							}
 						}
 

@@ -133,7 +133,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			if (RETURN_VALUE_USED(opline)) {
 				zval zv;
 
-				ZVAL_DUP(&zv, RT_CONSTANT(ret_opline, ret_opline->op1));
+				ZVAL_COPY(&zv, RT_CONSTANT(ret_opline, ret_opline->op1));
 				opline->opcode = ZEND_QM_ASSIGN;
 				opline->op1_type = IS_CONST;
 				opline->op1.constant = zend_optimizer_add_literal(op_array, &zv);

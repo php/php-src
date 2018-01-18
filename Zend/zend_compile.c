@@ -5009,7 +5009,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 			jumptable_type == IS_LONG ? ZEND_SWITCH_LONG : ZEND_SWITCH_STRING,
 			&expr_node, &jumptable_op);
 		if (opline->op1_type == IS_CONST) {
-			zval_copy_ctor(CT_CONSTANT(opline->op1));
+			Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
 		}
 		opnum_switch = opline - CG(active_op_array)->opcodes;
 	}
@@ -5044,7 +5044,7 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 				&expr_node, &cond_node);
 			SET_NODE(opline->result, &case_node);
 			if (opline->op1_type == IS_CONST) {
-				zval_copy_ctor(CT_CONSTANT(opline->op1));
+				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
 			}
 
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &case_node, 0);
