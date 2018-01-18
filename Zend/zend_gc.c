@@ -108,6 +108,7 @@ ZEND_API int (*gc_collect_cycles)(void);
 #define GC_ROOTS_SENTINEL   ((uint32_t) 0)
 #define GC_TO_FREE_SENTINEL ((uint32_t) 1)
 #define GC_FIRST_REAL_ROOT  ((uint32_t) 2)
+#define GC_DUMMY_BUF_SIZE   GC_FIRST_REAL_ROOT
 
 #define GC_TO_BUF(addr) (GC_G(buf) + (addr))
 #define GC_TO_ADDR(buffer) ((buffer) - GC_G(buf))
@@ -166,7 +167,7 @@ static void gc_trace_ref(zend_refcounted *ref) {
 }
 #endif
 
-static const gc_root_buffer gc_dummy_buffer[2] = {
+static const gc_root_buffer gc_dummy_buffer[GC_DUMMY_BUF_SIZE] = {
 	{ NULL, GC_ROOTS_SENTINEL, GC_ROOTS_SENTINEL, 0 },
 	{ NULL, GC_TO_FREE_SENTINEL, GC_TO_FREE_SENTINEL, 0 },
 };
@@ -198,7 +199,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 
 	gc_globals->unused = GC_INVALID;
 	gc_globals->first_unused = GC_FIRST_REAL_ROOT;
-	gc_globals->last_unused = GC_FIRST_REAL_ROOT;
+	gc_globals->buf_size = GC_DUMMY_BUF_SIZE;
 	gc_globals->next_to_free = GC_INVALID;
 
 	gc_globals->gc_runs = 0;
@@ -261,10 +262,10 @@ ZEND_API void gc_init(void)
 	if (GC_G(buf) == GC_DUMMY_BUF() && GC_G(gc_enabled)) {
 		GC_G(buf) = malloc(sizeof(gc_root_buffer) * GC_ROOT_BUFFER_DEFAULT_SIZE);
 		if (GC_G(buf)) {
-			GC_G(last_unused) = GC_ROOT_BUFFER_DEFAULT_SIZE;
+			GC_G(buf_size) = GC_ROOT_BUFFER_DEFAULT_SIZE;
 		} else {
 			GC_G(buf) = GC_DUMMY_BUF();
-			GC_G(last_unused) = GC_FIRST_REAL_ROOT;
+			GC_G(buf_size) = GC_DUMMY_BUF_SIZE;
 		}
 		gc_reset();
 	}
@@ -272,14 +273,14 @@ ZEND_API void gc_init(void)
 
 static void gc_resize_root_buffer(size_t new_size) {
 	/* Only allow increasing for now */
-	ZEND_ASSERT(new_size > GC_G(last_unused));
+	ZEND_ASSERT(new_size > GC_G(buf_size));
 	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
 	GC_G(buf) = realloc(GC_G(buf), sizeof(gc_root_buffer) * new_size);
-	GC_G(last_unused) = new_size;
+	GC_G(buf_size) = new_size;
 }
 
 static void gc_grow_root_buffer() {
-	gc_resize_root_buffer(GC_G(last_unused) + GC_ROOT_BUFFER_SIZE_INCREMENT);
+	gc_resize_root_buffer(GC_G(buf_size) + GC_ROOT_BUFFER_SIZE_INCREMENT);
 }
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
@@ -301,7 +302,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	if (newRootAddr != GC_INVALID) {
 		newRoot = GC_TO_BUF(newRootAddr);
 		GC_G(unused) = newRoot->prev;
-	} else if (GC_G(first_unused) != GC_G(last_unused)) {
+	} else if (GC_G(first_unused) != GC_G(buf_size)) {
 		newRootAddr = GC_G(first_unused);
 		newRoot = GC_TO_BUF(newRootAddr);
 		GC_G(first_unused)++;
@@ -718,7 +719,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 		addr = GC_G(unused);
 		buf = GC_TO_BUF(addr);
 		GC_G(unused) = buf->prev;
-	} else if (GC_G(first_unused) != GC_G(last_unused)) {
+	} else if (GC_G(first_unused) != GC_G(buf_size)) {
 		addr = GC_G(first_unused);
 		buf = GC_TO_BUF(addr);
 		GC_G(first_unused)++;
