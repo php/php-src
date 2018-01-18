@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.1.15
 
-
+- PGSQL:
+  . Fixed #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
 
 01 Feb 2018, PHP 7.1.14
 
