@@ -28,6 +28,13 @@
 #include "zend_globals.h"
 #include "zend_API.h"
 
+/* Protection from recursive self-referencing class constants */
+#define IS_CONSTANT_VISITED_MARK    0x80
+
+#define IS_CONSTANT_VISITED(zv)     (Z_ACCESS_FLAGS_P(zv) & IS_CONSTANT_VISITED_MARK)
+#define MARK_CONSTANT_VISITED(zv)   Z_ACCESS_FLAGS_P(zv) |= IS_CONSTANT_VISITED_MARK
+#define RESET_CONSTANT_VISITED(zv)  Z_ACCESS_FLAGS_P(zv) &= ~IS_CONSTANT_VISITED_MARK
+
 void free_zend_constant(zval *zv)
 {
 	zend_constant *c = Z_PTR_P(zv);
@@ -353,20 +360,22 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		}
 
 		if (ret_constant && Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-			if (Z_TYPE_P(ret_constant) == IS_CONSTANT_AST) {
-				if (IS_CONSTANT_VISITED(ret_constant)) {
-					zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
-					ret_constant = NULL;
-					goto failure;
-				}
-				MARK_CONSTANT_VISITED(ret_constant);
-			}
-			if (UNEXPECTED(zval_update_constant_ex(ret_constant, c->ce) != SUCCESS)) {
-				RESET_CONSTANT_VISITED(ret_constant);
+			int ret;
+
+			if (IS_CONSTANT_VISITED(ret_constant)) {
+				zend_throw_error(NULL, "Cannot declare self-referencing constant '%s::%s'", ZSTR_VAL(class_name), ZSTR_VAL(constant_name));
 				ret_constant = NULL;
 				goto failure;
 			}
+
+			MARK_CONSTANT_VISITED(ret_constant);
+			ret = zval_update_constant_ex(ret_constant, c->ce);
 			RESET_CONSTANT_VISITED(ret_constant);
+
+			if (UNEXPECTED(ret != SUCCESS)) {
+				ret_constant = NULL;
+				goto failure;
+			}
 		}
 failure:
 		zend_string_release(class_name);
