@@ -72,6 +72,7 @@
 #include "zend.h"
 #include "zend_API.h"
 
+#define GC_COLLECTION_THRESHOLD 10000
 #define GC_ROOT_BUFFER_DEFAULT_SIZE 10002
 #define GC_ROOT_BUFFER_SIZE_INCREMENT 4000 // TODO Arbitrary number
 
@@ -179,6 +180,8 @@ static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 	GC_PREV_BUF(root)->next = root->next;
 	root->prev = GC_G(unused);
 	GC_G(unused) = GC_TO_ADDR(root);
+
+	GC_G(num_roots)--;
 	GC_BENCH_DEC(root_buf_length);
 }
 
@@ -196,10 +199,11 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->gc_active = 0;
 
 	gc_globals->buf = GC_DUMMY_BUF();
+	gc_globals->buf_size = GC_DUMMY_BUF_SIZE;
 
+	gc_globals->num_roots = 0;
 	gc_globals->unused = GC_INVALID;
 	gc_globals->first_unused = GC_FIRST_REAL_ROOT;
-	gc_globals->buf_size = GC_DUMMY_BUF_SIZE;
 	gc_globals->next_to_free = GC_INVALID;
 
 	gc_globals->gc_runs = 0;
@@ -298,6 +302,21 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 	GC_BENCH_INC(zval_possible_root);
 
+	/* TODO It would be more elegant to move this to the end and avoid all the
+	 * special cases here. I'm keeping it for now to preserve exact collection point. */
+	if (UNEXPECTED(GC_G(num_roots) >= GC_COLLECTION_THRESHOLD && GC_G(gc_enabled))) {
+		GC_ADDREF(ref);
+		gc_collect_cycles();
+		GC_DELREF(ref);
+		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+			zval_dtor_func(ref);
+			return;
+		}
+		if (UNEXPECTED(GC_ADDRESS(ref))) {
+			return;
+		}
+	}
+
 	newRootAddr = GC_G(unused);
 	if (newRootAddr != GC_INVALID) {
 		newRoot = GC_TO_BUF(newRootAddr);
@@ -311,6 +330,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 			/* TODO Resize here */
 			return;
 		}
+		ZEND_ASSERT(0);
 		GC_ADDREF(ref);
 		gc_collect_cycles();
 		GC_DELREF(ref);
@@ -350,6 +370,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		roots->next = newRootAddr;
 	}
 
+	GC_G(num_roots)++;
 	GC_BENCH_INC(zval_buffered);
 	GC_BENCH_INC(root_buf_length);
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
@@ -739,6 +760,8 @@ static void gc_add_garbage(zend_refcounted *ref)
 	buf->prev = GC_ROOTS_SENTINEL;
 	GC_NEXT_BUF(roots)->prev = addr;
 	roots->next = addr;
+
+	GC_G(num_roots)++;
 }
 
 static int gc_collect_white(zend_refcounted *ref, uint32_t *flags)
@@ -1159,6 +1182,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 			p = current->ref;
 			current->prev = GC_G(unused);
 			GC_G(unused) = GC_TO_ADDR(current);
+			GC_G(num_roots)--;
+
 			efree(p);
 			current = next;
 		}

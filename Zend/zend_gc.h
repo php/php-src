@@ -54,6 +54,7 @@ typedef struct _zend_gc_globals {
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	uint32_t          buf_size;			/* size of the GC buffer            */
+	uint32_t          num_roots;        /* number of roots in GC buffer     */
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
 	uint32_t          next_to_free;     /* next to free in to_free list     */
