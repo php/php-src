@@ -103,10 +103,12 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   m. zend_cpu_supports() determines if a feature is supported by current cpu.
 
-  n. IS_STRING zvals don't set IS_TYPE_COPYALE anymore. This prevents string
+  n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
      duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.
      Interned strings didn't set IS_TYPE_COPYALE, so they aren't affected at
-     all.
+     all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
+     IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
+     macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
 
 ========================
 2. Build system changes

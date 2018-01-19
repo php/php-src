@@ -289,7 +289,7 @@ static void zend_persist_zval(zval *z)
 			new_ptr = zend_shared_alloc_get_xlat_entry(Z_ARR_P(z));
 			if (new_ptr) {
 				Z_ARR_P(z) = new_ptr;
-				Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
+				Z_TYPE_FLAGS_P(z) = 0;
 			} else {
 				if (!Z_REFCOUNTED_P(z)) {
 					Z_ARR_P(z) = zend_accel_memdup(Z_ARR_P(z), sizeof(zend_array));
@@ -299,7 +299,7 @@ static void zend_persist_zval(zval *z)
 					zend_accel_store(Z_ARR_P(z), sizeof(zend_array));
 					zend_hash_persist(Z_ARRVAL_P(z), zend_persist_zval);
 					/* make immutable array */
-					Z_TYPE_FLAGS_P(z) = IS_TYPE_COPYABLE;
+					Z_TYPE_FLAGS_P(z) = 0;
 					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
 					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
