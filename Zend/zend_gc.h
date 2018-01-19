@@ -49,8 +49,8 @@ typedef struct _gc_root_buffer {
 
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
-	zend_bool         gc_active;
-	zend_bool         gc_full;
+	zend_bool         gc_active;        /* GC currently running, forbid nested GC */
+	zend_bool         gc_protected;     /* GC collecting roots, forbid root additions */
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	uint32_t          buf_size;			/* size of the GC buffer            */
