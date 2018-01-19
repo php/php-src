@@ -2586,6 +2586,10 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_is_iterable, 0, 0, 1)
 	ZEND_ARG_INFO(0, var)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_is_countable, 0)
+	ZEND_ARG_INFO(0, var)
+ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ uniqid.c */
 #ifdef HAVE_GETTIMEOFDAY
@@ -3111,6 +3115,7 @@ static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(is_scalar,														arginfo_is_scalar)
 	PHP_FE(is_callable,														arginfo_is_callable)
 	PHP_FE(is_iterable,														arginfo_is_iterable)
+	PHP_FE(is_countable,													arginfo_is_countable)
 
 	/* functions from file.c */
 	PHP_FE(pclose,															arginfo_pclose)

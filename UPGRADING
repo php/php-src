@@ -129,8 +129,10 @@ Intl:
     URestrictionLevel under
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
 
-SPL:
-  . Added spl_object_id().
+Standard:
+  . Added is_countable() function, to check whether a value may be passed to
+    count().
+    (RFC: https://wiki.php.net/rfc/is-countable)
 
 ========================================
 7. New Classes and Interfaces

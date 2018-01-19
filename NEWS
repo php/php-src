@@ -171,6 +171,7 @@ PHP                                                                        NEWS
   . Updated bundled libsqlite to 3.22.0. (cmb)
 
 - Standard:
+  . Added is_countable() function. (Gabriel Caruso)
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
   . Fixed unserialize(), to disable creation of unsupported data structures
