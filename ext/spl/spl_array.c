@@ -1118,9 +1118,13 @@ static void spl_array_set_array(zval *object, spl_array_object *intern, zval *ar
 	}
 
 	if (Z_TYPE_P(array) == IS_ARRAY) {
-		//??? TODO: try to avoid array duplication
 		zval_ptr_dtor(&intern->array);
-		ZVAL_DUP(&intern->array, array);
+		if (Z_REFCOUNT_P(array) == 1) {
+			ZVAL_COPY(&intern->array, array);
+		} else {
+			//??? TODO: try to avoid array duplication
+			ZVAL_ARR(&intern->array, zend_array_dup(Z_ARR_P(array)));
+		}
 	} else {
 		if (Z_OBJ_HT_P(array) == &spl_handler_ArrayObject || Z_OBJ_HT_P(array) == &spl_handler_ArrayIterator) {
 			zval_ptr_dtor(&intern->array);

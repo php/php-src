@@ -732,8 +732,9 @@ static zend_bool php_auto_globals_create_globals(zend_string *name) /* {{{ */
 {
 	zval globals;
 
+	/* IS_TYPE_COPYABLE, but with ref-counter 1 and not IS_TYPE_REFCOUNTED */
 	ZVAL_ARR(&globals, &EG(symbol_table));
-	Z_TYPE_INFO_P(&globals) = IS_ARRAY;
+	Z_TYPE_FLAGS_P(&globals) = IS_TYPE_COPYABLE;
 	ZVAL_NEW_REF(&globals, &globals);
 	zend_hash_update(&EG(symbol_table), name, &globals);
 	return 0;
