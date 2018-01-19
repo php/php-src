@@ -4379,6 +4379,23 @@ ZEND_API zend_bool zend_is_iterable(zval *iterable) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_bool zend_is_countable(zval *countable) /* {{{ */
+{
+	switch (Z_TYPE_P(countable)) {
+		case IS_ARRAY:
+			return 1;
+		case IS_OBJECT:
+			if (Z_OBJ_HT_P(countable)->count_elements) {
+				return 1;
+			}
+
+			return instanceof_function(Z_OBJCE_P(countable), zend_ce_countable);
+		default:
+			return 0;
+	}
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4
