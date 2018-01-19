@@ -2989,7 +2989,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	hash = Z_ARRVAL_P(array);
 	n_left = n_elems;
 
-	if (EXPECTED(hash->u.v.nIteratorsCount == 0)) {
+	if (EXPECTED(!HT_HAS_ITERATORS(hash))) {
 		if (hash->nNumUsed != hash->nNumOfElements) {
 			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
 				p = hash->arData + idx;
@@ -3047,7 +3047,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 		p->key = NULL;
 	}
 	hash->nNextFreeElement = n_elems;
-	if (!(hash->u.flags & HASH_FLAG_PACKED)) {
+	if (!(HT_FLAGS(hash) & HASH_FLAG_PACKED)) {
 		zend_hash_to_packed(hash);
 	}
 }
@@ -3190,11 +3190,11 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	}
 
 	/* replace HashTable data */
-	in_hash->u.v.nIteratorsCount = 0;
+	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);
 
-	in_hash->u.v.flags         = out_hash.u.v.flags;
+	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
 	in_hash->nTableSize        = out_hash.nTableSize;
 	in_hash->nTableMask        = out_hash.nTableMask;
 	in_hash->nNumUsed          = out_hash.nNumUsed;
@@ -3342,10 +3342,10 @@ PHP_FUNCTION(array_shift)
 	}
 
 	/* re-index like it did before */
-	if (Z_ARRVAL_P(stack)->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(Z_ARRVAL_P(stack)) & HASH_FLAG_PACKED) {
 		uint32_t k = 0;
 
-		if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+		if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 			for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
 				p = Z_ARRVAL_P(stack)->arData + idx;
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
@@ -3428,7 +3428,7 @@ PHP_FUNCTION(array_unshift)
 		Z_TRY_ADDREF(args[i]);
 		zend_hash_next_index_insert_new(&new_hash, &args[i]);
 	}
-	if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+	if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
 			if (key) {
 				zend_hash_add_new(&new_hash, key, value);
@@ -3457,11 +3457,11 @@ PHP_FUNCTION(array_unshift)
 	}
 
 	/* replace HashTable data */
-	Z_ARRVAL_P(stack)->u.v.nIteratorsCount = 0;
+	HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 
-	Z_ARRVAL_P(stack)->u.v.flags         = new_hash.u.v.flags;
+	HT_FLAGS(Z_ARRVAL_P(stack))          = HT_FLAGS(&new_hash);
 	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
 	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
 	Z_ARRVAL_P(stack)->nNumUsed          = new_hash.nNumUsed;
@@ -3716,7 +3716,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 	zval *src_entry;
 	zend_string *string_key;
 
-	if ((dest->u.flags & HASH_FLAG_PACKED) && (src->u.flags & HASH_FLAG_PACKED)) {
+	if ((HT_FLAGS(dest) & HASH_FLAG_PACKED) && (HT_FLAGS(src) & HASH_FLAG_PACKED)) {
 		zend_hash_extend(dest, zend_hash_num_elements(dest) + zend_hash_num_elements(src), 1);
 		ZEND_HASH_FILL_PACKED(dest) {
 			ZEND_HASH_FOREACH_VAL(src, src_entry) {
@@ -3874,7 +3874,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 		/* copy first array */
 		array_init_size(return_value, count);
 		dest = Z_ARRVAL_P(return_value);
-		if (src->u.flags & HASH_FLAG_PACKED) {
+		if (HT_FLAGS(src) & HASH_FLAG_PACKED) {
 			zend_hash_real_init(dest, 1);
 			ZEND_HASH_FILL_PACKED(dest) {
 				ZEND_HASH_FOREACH_VAL(src, src_entry) {
@@ -4276,7 +4276,7 @@ PHP_FUNCTION(array_reverse)
 
 	/* Initialize return array */
 	array_init_size(return_value, zend_hash_num_elements(Z_ARRVAL_P(input)));
-	if ((Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED) && !preserve_keys) {
+	if ((HT_FLAGS(Z_ARRVAL_P(input)) & HASH_FLAG_PACKED) && !preserve_keys) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
@@ -4345,7 +4345,7 @@ PHP_FUNCTION(array_pad)
 	}
 
 	array_init_size(return_value, pad_size_abs);
-	if (Z_ARRVAL_P(input)->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(Z_ARRVAL_P(input)) & HASH_FLAG_PACKED) {
 		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 
 		if (pad_size < 0) {
@@ -5756,7 +5756,7 @@ PHP_FUNCTION(array_multisort)
 		hash = Z_ARRVAL_P(arrays[i]);
 		hash->nNumUsed = array_size;
 		hash->nInternalPointer = 0;
-		repack = !(hash->u.flags & HASH_FLAG_PACKED);
+		repack = !(HT_FLAGS(hash) & HASH_FLAG_PACKED);
 
 		for (n = 0, k = 0; k < array_size; k++) {
 			hash->arData[k] = indirect[k][i];
@@ -6154,7 +6154,7 @@ PHP_FUNCTION(array_map)
 		}
 
 		array_init_size(return_value, maxlen);
-		zend_hash_real_init(Z_ARRVAL_P(return_value), Z_ARRVAL(arrays[0])->u.flags & HASH_FLAG_PACKED);
+		zend_hash_real_init(Z_ARRVAL_P(return_value), HT_FLAGS(Z_ARRVAL(arrays[0])) & HASH_FLAG_PACKED);
 
 		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
 			fci.retval = &result;

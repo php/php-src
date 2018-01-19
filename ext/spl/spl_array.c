@@ -560,7 +560,7 @@ try_again:
 					} else {
 						zval_ptr_dtor(data);
 						ZVAL_UNDEF(data);
-						ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+						HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 						zend_hash_move_forward_ex(ht, spl_array_get_pos_ptr(ht, intern));
 						if (spl_array_is_object(intern)) {
 							spl_array_skip_protected(intern, ht);

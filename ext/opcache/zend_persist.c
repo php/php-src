@@ -86,7 +86,7 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	uint32_t idx, nIndex;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
 	}
@@ -94,10 +94,10 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
-		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
@@ -170,7 +170,7 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	uint32_t idx, nIndex;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
 	}
@@ -178,10 +178,10 @@ static void zend_hash_persist_immutable(HashTable *ht)
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
-		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
+		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
-	if (ht->u.flags & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
 	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
@@ -302,7 +302,7 @@ static void zend_persist_zval(zval *z)
 					Z_TYPE_FLAGS_P(z) = 0;
 					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
 					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
-					Z_ARRVAL_P(z)->u.flags |= HASH_FLAG_STATIC_KEYS;
+					HT_FLAGS(Z_ARRVAL_P(z)) |= HASH_FLAG_STATIC_KEYS;
 				}
 			}
 			break;
@@ -367,8 +367,9 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			zend_accel_store(op_array->static_variables, sizeof(HashTable));
 			/* make immutable array */
 			GC_SET_REFCOUNT(op_array->static_variables, 2);
-			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
-			op_array->static_variables->u.flags |= HASH_FLAG_STATIC_KEYS;
+			GC_TYPE(op_array->static_variables) = IS_ARRAY;
+			GC_FLAGS(op_array->static_variables) = IS_ARRAY_IMMUTABLE;
+			HT_FLAGS(op_array->static_variables) |= HASH_FLAG_STATIC_KEYS;
 		}
 	}
 

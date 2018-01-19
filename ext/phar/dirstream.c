@@ -44,9 +44,9 @@ static int phar_dir_close(php_stream *stream, int close_handle)  /* {{{ */
 {
 	HashTable *data = (HashTable *)stream->abstract;
 
-	if (data && data->u.flags) {
+	if (data && HT_FLAGS(data)) {
 		zend_hash_destroy(data);
-		data->u.flags = 0;
+		HT_FLAGS(data) = 0;
 		FREE_HASHTABLE(data);
 		stream->abstract = NULL;
 	}
@@ -361,7 +361,7 @@ php_stream *phar_wrapper_open_dir(php_stream_wrapper *wrapper, const char *path,
 		return ret;
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_FLAGS(&phar->manifest)) {
 		php_url_free(resource);
 		return NULL;
 	}
