@@ -72,10 +72,6 @@
 #include "zend.h"
 #include "zend_API.h"
 
-#define GC_COLLECTION_THRESHOLD 10000
-#define GC_ROOT_BUFFER_DEFAULT_SIZE 10002
-#define GC_ROOT_BUFFER_SIZE_INCREMENT 4000 // TODO Arbitrary number
-
 #define GC_HAS_DESTRUCTORS  (1<<0)
 
 #ifndef ZEND_GC_DEBUG
@@ -110,6 +106,10 @@ ZEND_API int (*gc_collect_cycles)(void);
 #define GC_TO_FREE_SENTINEL ((uint32_t) 1)
 #define GC_FIRST_REAL_ROOT  ((uint32_t) 2)
 #define GC_DUMMY_BUF_SIZE   GC_FIRST_REAL_ROOT
+
+#define GC_DEFAULT_COLLECTION_THRESHOLD 10000
+#define GC_ROOT_BUFFER_DEFAULT_SIZE \
+	(GC_DEFAULT_COLLECTION_THRESHOLD + GC_FIRST_REAL_ROOT)
 
 #define GC_TO_BUF(addr) (GC_G(buf) + (addr))
 #define GC_TO_ADDR(buffer) ((buffer) - GC_G(buf))
@@ -201,6 +201,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 
 	gc_globals->buf = GC_DUMMY_BUF();
 	gc_globals->buf_size = GC_DUMMY_BUF_SIZE;
+	gc_globals->gc_threshold = GC_DEFAULT_COLLECTION_THRESHOLD;
 
 	gc_globals->num_roots = 0;
 	gc_globals->unused = GC_INVALID;
@@ -275,16 +276,11 @@ ZEND_API void gc_init(void)
 	}
 }
 
-static void gc_resize_root_buffer(size_t new_size) {
-	/* Only allow increasing for now */
-	ZEND_ASSERT(new_size > GC_G(buf_size));
-	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
-	GC_G(buf) = realloc(GC_G(buf), sizeof(gc_root_buffer) * new_size);
-	GC_G(buf_size) = new_size;
-}
-
 static void gc_grow_root_buffer() {
-	gc_resize_root_buffer(GC_G(buf_size) + GC_ROOT_BUFFER_SIZE_INCREMENT);
+	/* Double the buffer size, taking into account the reserved roots */
+	size_t new_size = (GC_G(buf_size) - GC_FIRST_REAL_ROOT) * 2 + GC_FIRST_REAL_ROOT;
+	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
+	GC_G(buf_size) = new_size;
 }
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
@@ -304,7 +300,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 	/* TODO It would be more elegant to move this to the end and avoid all the
 	 * special cases here. I'm keeping it for now to preserve exact collection point. */
-	if (UNEXPECTED(GC_G(num_roots) >= GC_COLLECTION_THRESHOLD
+	if (UNEXPECTED(GC_G(num_roots) >= GC_G(gc_threshold)
 			&& GC_G(gc_enabled) && !GC_G(gc_active))) {
 		GC_ADDREF(ref);
 		gc_collect_cycles();
@@ -1023,6 +1019,17 @@ tail_call:
 	}
 }
 
+static void gc_adjust_threshold(int count) {
+	/* TODO Very simple heuristic for dynamic GC buffer resizing:
+	 * If there are "too few" collections, increase the collection threshold
+	 * by a factor of two. */
+	if (count < 100) {
+		GC_G(gc_threshold) *= 2;
+	} else if (GC_G(gc_threshold) > GC_DEFAULT_COLLECTION_THRESHOLD) {
+		GC_G(gc_threshold) /= 2;
+	}
+}
+
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
@@ -1058,6 +1065,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
 			GC_G(gc_active) = 0;
+			gc_adjust_threshold(count);
 			return 0;
 		}
 
@@ -1167,6 +1175,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_G(next_to_free) = GC_INVALID;
 		GC_G(gc_protected) = 0;
 		GC_G(gc_active) = 0;
+
+		gc_adjust_threshold(count);
 	}
 
 	return count;

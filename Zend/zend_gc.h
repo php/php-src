@@ -42,7 +42,7 @@
 
 typedef struct _gc_root_buffer {
 	zend_refcounted *ref;
-	uint32_t         next;     /* double-linked list */
+	uint32_t         next;
 	uint32_t         prev;
 	uint32_t         refcount;
 } gc_root_buffer;
@@ -50,7 +50,7 @@ typedef struct _gc_root_buffer {
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
 	zend_bool         gc_active;        /* GC currently running, forbid nested GC */
-	zend_bool         gc_protected;     /* GC collecting roots, forbid root additions */
+	zend_bool         gc_protected;     /* GC protected, forbid root additions */
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	uint32_t          buf_size;			/* size of the GC buffer            */
@@ -58,6 +58,7 @@ typedef struct _zend_gc_globals {
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
 	uint32_t          next_to_free;     /* next to free in to_free list     */
+	uint32_t          gc_threshold;     /* GC collection threshold          */
 
 	uint32_t gc_runs;
 	uint32_t collected;
