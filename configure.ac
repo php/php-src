@@ -610,6 +610,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+explicit_memset \
 flock \
 ftok \
 funopen \
