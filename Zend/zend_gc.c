@@ -327,8 +327,9 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 		newRoot = GC_TO_BUF(newRootAddr);
 		GC_G(first_unused)++;
 	} else {
-		if (!GC_G(gc_enabled)) {
-			/* TODO Resize here */
+		if (GC_G(buf) == GC_DUMMY_BUF()) {
+			/* This means that the GC is completely disabled, rather than just disabled
+			 * temporarily at run-time. In this case we just let things leak. */
 			return;
 		}
 
