@@ -5984,7 +5984,7 @@ PHP_FUNCTION(array_reduce)
 
 
 	if (ZEND_NUM_ARGS() > 2) {
-		ZVAL_DUP(&result, initial);
+		ZVAL_COPY(&result, initial);
 	} else {
 		ZVAL_NULL(&result);
 	}
