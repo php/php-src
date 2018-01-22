@@ -38,16 +38,16 @@
 #if ZEND_DEBUG
 
 #define HT_OK					0x00
-#define HT_IS_DESTROYING		0x40
-#define HT_DESTROYED			0x80
-#define HT_CLEANING				0xc0
+#define HT_IS_DESTROYING		0x01
+#define HT_DESTROYED			0x02
+#define HT_CLEANING				0x03
 
 static void _zend_is_inconsistent(const HashTable *ht, const char *file, int line)
 {
-	if (ht->u.v.consistency == HT_OK) {
+	if ((HT_FLAGS(ht) & HASH_FLAG_CONSISTENCY) == HT_OK) {
 		return;
 	}
-	switch (ht->u.v.consistency) {
+	switch (HT_FLAGS(ht) & HASH_FLAG_CONSISTENCY) {
 		case HT_IS_DESTROYING:
 			zend_output_debug_string(1, "%s(%d) : ht=%p is being destroyed", file, line, ht);
 			break;
@@ -65,7 +65,7 @@ static void _zend_is_inconsistent(const HashTable *ht, const char *file, int lin
 }
 #define IS_CONSISTENT(a) _zend_is_inconsistent(a, __FILE__, __LINE__);
 #define SET_INCONSISTENT(n) do { \
-		(ht)->u.v.consistency = n; \
+		HT_FLAGS(ht) = (HT_FLAGS(ht) & ~HASH_FLAG_CONSISTENCY) | (n); \
 	} while (0)
 #else
 #define IS_CONSISTENT(a)
