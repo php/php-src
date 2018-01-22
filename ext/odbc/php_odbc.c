@@ -1027,6 +1027,13 @@ int odbc_bindcols(odbc_result *result)
 					break;
 				}
 #endif
+				/* Workaround for drivers that report VARCHAR(MAX) columns as SQL_VARCHAR (bug #73725) */
+				if (SQL_VARCHAR == result->values[i].coltype && displaysize == 0) {
+					result->values[i].coltype = SQL_LONGVARCHAR;
+					result->values[i].value = NULL;
+					break;
+				}
+
 				/* Workaround for Oracle ODBC Driver bug (#50162) when fetching TIMESTAMP column */
 				if (result->values[i].coltype == SQL_TIMESTAMP) {
 					displaysize += 3;
