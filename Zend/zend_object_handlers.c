@@ -495,7 +495,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 	zval *zv;
 	uint32_t *ptr;
 
-	ZEND_ASSERT(GC_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
+	ZEND_ASSERT(OBJ_FLAGS(zobj) & IS_OBJ_USE_GUARDS);
 	zv = zobj->properties_table + zobj->ce->default_properties_count;
 	if (EXPECTED(Z_TYPE_P(zv) == IS_STRING)) {
 		zend_string *str = Z_STR_P(zv);
@@ -526,7 +526,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
-		GC_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
+		OBJ_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
 		ZVAL_STR_COPY(zv, member);
 		zv->u2.property_guard = 0;
 		return &zv->u2.property_guard;

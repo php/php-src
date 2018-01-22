@@ -379,7 +379,7 @@ tail_call:
 		zend_object_get_gc_t get_gc;
 		zend_object *obj = (zend_object*)ref;
 
-		if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+		if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
 		             (get_gc = obj->handlers->get_gc) != NULL)) {
 			int n;
 			zval *zv, *end;
@@ -489,7 +489,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
 		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -602,7 +602,7 @@ tail_call:
 				zend_object_get_gc_t get_gc;
 				zend_object *obj = (zend_object*)ref;
 
-				if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+				if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
 				             (get_gc = obj->handlers->get_gc) != NULL)) {
 					int n;
 					zval *zv, *end;
@@ -764,7 +764,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
 			             (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -956,7 +956,7 @@ tail_call:
 			zend_object_get_gc_t get_gc;
 			zend_object *obj = (zend_object*)ref;
 
-			if (EXPECTED(!(GC_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
+			if (EXPECTED(!(OBJ_FLAGS(ref) & IS_OBJ_FREE_CALLED) &&
 		                 (get_gc = obj->handlers->get_gc) != NULL)) {
 				int n;
 				zval *zv, *end;
@@ -1112,9 +1112,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 				if (GC_TYPE(p) == IS_OBJECT) {
 					zend_object *obj = (zend_object*)p;
 
-					if (!(GC_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
+					if (!(OBJ_FLAGS(obj) & IS_OBJ_DESTRUCTOR_CALLED)) {
 						GC_TRACE_REF(obj, "calling destructor");
-						GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
+						OBJ_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
 						if (obj->handlers->dtor_obj
 						 && (obj->handlers->dtor_obj != zend_objects_destroy_object
 						  || obj->ce->destructor)) {
@@ -1151,8 +1151,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 				EG(objects_store).object_buckets[obj->handle] = SET_OBJ_INVALID(obj);
 				GC_TYPE(obj) = IS_NULL;
-				if (!(GC_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
-					GC_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
+				if (!(OBJ_FLAGS(obj) & IS_OBJ_FREE_CALLED)) {
+					OBJ_FLAGS(obj) |= IS_OBJ_FREE_CALLED;
 					if (obj->handlers->free_obj) {
 						GC_ADDREF(obj);
 						obj->handlers->free_obj(obj);
