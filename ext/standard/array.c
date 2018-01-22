@@ -2989,7 +2989,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	hash = Z_ARRVAL_P(array);
 	n_left = n_elems;
 
-	if (EXPECTED(hash->u.v.nIteratorsCount == 0)) {
+	if (EXPECTED(!HT_HAS_ITERATORS(hash))) {
 		if (hash->nNumUsed != hash->nNumOfElements) {
 			for (j = 0, idx = 0; idx < hash->nNumUsed; idx++) {
 				p = hash->arData + idx;
@@ -3190,7 +3190,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	}
 
 	/* replace HashTable data */
-	in_hash->u.v.nIteratorsCount = 0;
+	HT_SET_ITERATORS_COUNT(in_hash, 0);
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);
 
@@ -3345,7 +3345,7 @@ PHP_FUNCTION(array_shift)
 	if (HT_FLAGS(Z_ARRVAL_P(stack)) & HASH_FLAG_PACKED) {
 		uint32_t k = 0;
 
-		if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+		if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 			for (idx = 0; idx < Z_ARRVAL_P(stack)->nNumUsed; idx++) {
 				p = Z_ARRVAL_P(stack)->arData + idx;
 				if (Z_TYPE(p->val) == IS_UNDEF) continue;
@@ -3428,7 +3428,7 @@ PHP_FUNCTION(array_unshift)
 		Z_TRY_ADDREF(args[i]);
 		zend_hash_next_index_insert_new(&new_hash, &args[i]);
 	}
-	if (EXPECTED(Z_ARRVAL_P(stack)->u.v.nIteratorsCount == 0)) {
+	if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
 			if (key) {
 				zend_hash_add_new(&new_hash, key, value);
@@ -3457,7 +3457,7 @@ PHP_FUNCTION(array_unshift)
 	}
 
 	/* replace HashTable data */
-	Z_ARRVAL_P(stack)->u.v.nIteratorsCount = 0;
+	HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 

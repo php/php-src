@@ -319,8 +319,8 @@ ZEND_API uint32_t ZEND_FASTCALL zend_hash_iterator_add(HashTable *ht, HashPositi
 	HashTableIterator *end  = iter + EG(ht_iterators_count);
 	uint32_t idx;
 
-	if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
-		ht->u.v.nIteratorsCount++;
+	if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
+		HT_INC_ITERATORS_COUNT(ht);
 	}
 	while (iter != end) {
 		if (iter->ht == NULL) {
@@ -359,11 +359,11 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos(uint32_t idx, HashTab
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
 		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
-				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
-			iter->ht->u.v.nIteratorsCount--;
+				&& EXPECTED(!HT_ITERATORS_OVERFLOW(iter->ht))) {
+			HT_DEC_ITERATORS_COUNT(iter->ht);
 		}
-		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
-			ht->u.v.nIteratorsCount++;
+		if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
+			HT_INC_ITERATORS_COUNT(ht);
 		}
 		iter->ht = ht;
 		iter->pos = ht->nInternalPointer;
@@ -381,13 +381,13 @@ ZEND_API HashPosition ZEND_FASTCALL zend_hash_iterator_pos_ex(uint32_t idx, zval
 		return HT_INVALID_IDX;
 	} else if (UNEXPECTED(iter->ht != ht)) {
 		if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
-				&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
-			iter->ht->u.v.nIteratorsCount--;
+				&& EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
+			HT_DEC_ITERATORS_COUNT(iter->ht);
 		}
 		SEPARATE_ARRAY(array);
 		ht = Z_ARRVAL_P(array);
-		if (EXPECTED(ht->u.v.nIteratorsCount != 255)) {
-			ht->u.v.nIteratorsCount++;
+		if (EXPECTED(!HT_ITERATORS_OVERFLOW(ht))) {
+			HT_INC_ITERATORS_COUNT(ht);
 		}
 		iter->ht = ht;
 		iter->pos = ht->nInternalPointer;
@@ -402,8 +402,8 @@ ZEND_API void ZEND_FASTCALL zend_hash_iterator_del(uint32_t idx)
 	ZEND_ASSERT(idx != (uint32_t)-1);
 
 	if (EXPECTED(iter->ht) && EXPECTED(iter->ht != HT_POISONED_PTR)
-			&& EXPECTED(iter->ht->u.v.nIteratorsCount != 255)) {
-		iter->ht->u.v.nIteratorsCount--;
+			&& EXPECTED(!HT_ITERATORS_OVERFLOW(iter->ht))) {
+		HT_DEC_ITERATORS_COUNT(iter->ht);
 	}
 	iter->ht = NULL;
 
@@ -430,7 +430,7 @@ static zend_never_inline void ZEND_FASTCALL _zend_hash_iterators_remove(HashTabl
 
 static zend_always_inline void zend_hash_iterators_remove(HashTable *ht)
 {
-	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 		_zend_hash_iterators_remove(ht);
 	}
 }
@@ -978,7 +978,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht)
 				uint32_t j = i;
 				Bucket *q = p;
 
-				if (EXPECTED(ht->u.v.nIteratorsCount == 0)) {
+				if (EXPECTED(!HT_HAS_ITERATORS(ht))) {
 					while (++i < ht->nNumUsed) {
 						p++;
 						if (EXPECTED(Z_TYPE_INFO(p->val) != IS_UNDEF)) {
@@ -1046,7 +1046,7 @@ static zend_always_inline void _zend_hash_del_el_ex(HashTable *ht, uint32_t idx,
 		} while (ht->nNumUsed > 0 && (UNEXPECTED(Z_TYPE(ht->arData[ht->nNumUsed-1].val) == IS_UNDEF)));
 	}
 	ht->nNumOfElements--;
-	if (HT_IDX_TO_HASH(ht->nInternalPointer) == idx || UNEXPECTED(ht->u.v.nIteratorsCount)) {
+	if (HT_IDX_TO_HASH(ht->nInternalPointer) == idx || UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 		uint32_t new_idx;
 
 		new_idx = idx = HT_HASH_TO_IDX(idx);

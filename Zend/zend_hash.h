@@ -58,6 +58,17 @@
 # define HT_ALLOW_COW_VIOLATION(ht)
 #endif
 
+#define HT_ITERATORS_COUNT(ht) (ht)->u.v.nIteratorsCount
+#define HT_ITERATORS_OVERFLOW(ht) (HT_ITERATORS_COUNT(ht) == 0xff)
+#define HT_HAS_ITERATORS(ht) (HT_ITERATORS_COUNT(ht) != 0)
+
+#define HT_SET_ITERATORS_COUNT(ht, iters) \
+	do { HT_ITERATORS_COUNT(ht) = (iters); } while (0)
+#define HT_INC_ITERATORS_COUNT(ht) \
+	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) + 1)
+#define HT_DEC_ITERATORS_COUNT(ht) \
+	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) - 1)
+
 extern ZEND_API const HashTable zend_empty_array;
 
 #define ZVAL_EMPTY_ARRAY(z) do {						\
@@ -295,7 +306,7 @@ ZEND_API void         ZEND_FASTCALL _zend_hash_iterators_update(HashTable *ht, H
 
 static zend_always_inline void zend_hash_iterators_update(HashTable *ht, HashPosition from, HashPosition to)
 {
-	if (UNEXPECTED(ht->u.v.nIteratorsCount)) {
+	if (UNEXPECTED(HT_HAS_ITERATORS(ht))) {
 		_zend_hash_iterators_update(ht, from, to);
 	}
 }
