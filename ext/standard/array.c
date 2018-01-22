@@ -3194,7 +3194,7 @@ static void php_splice(HashTable *in_hash, zend_long offset, zend_long length, H
 	in_hash->pDestructor = NULL;
 	zend_hash_destroy(in_hash);
 
-	in_hash->u.v.flags         = out_hash.u.v.flags;
+	HT_FLAGS(in_hash)          = HT_FLAGS(&out_hash);
 	in_hash->nTableSize        = out_hash.nTableSize;
 	in_hash->nTableMask        = out_hash.nTableMask;
 	in_hash->nNumUsed          = out_hash.nNumUsed;
@@ -3461,7 +3461,7 @@ PHP_FUNCTION(array_unshift)
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 
-	Z_ARRVAL_P(stack)->u.v.flags         = new_hash.u.v.flags;
+	HT_FLAGS(Z_ARRVAL_P(stack))          = HT_FLAGS(&new_hash);
 	Z_ARRVAL_P(stack)->nTableSize        = new_hash.nTableSize;
 	Z_ARRVAL_P(stack)->nTableMask        = new_hash.nTableMask;
 	Z_ARRVAL_P(stack)->nNumUsed          = new_hash.nNumUsed;

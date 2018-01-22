@@ -299,10 +299,10 @@ static uint32_t zend_array_recalc_elements(HashTable *ht)
 ZEND_API uint32_t zend_array_count(HashTable *ht)
 {
 	uint32_t num;
-	if (UNEXPECTED(ht->u.v.flags & HASH_FLAG_HAS_EMPTY_IND)) {
+	if (UNEXPECTED(HT_FLAGS(ht) & HASH_FLAG_HAS_EMPTY_IND)) {
 		num = zend_array_recalc_elements(ht);
 		if (UNEXPECTED(ht->nNumOfElements == num)) {
-			ht->u.v.flags &= ~HASH_FLAG_HAS_EMPTY_IND;
+			HT_FLAGS(ht) &= ~HASH_FLAG_HAS_EMPTY_IND;
 		}
 	} else if (UNEXPECTED(ht == &EG(symbol_table))) {
 		num = zend_array_recalc_elements(ht);
@@ -1169,7 +1169,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_del_ind(HashTable *ht, zend_string *key)
 					} else {
 						ZVAL_UNDEF(data);
 					}
-					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);
@@ -1213,7 +1213,7 @@ ZEND_API int ZEND_FASTCALL zend_hash_str_del_ind(HashTable *ht, const char *str,
 						ht->pDestructor(data);
 					}
 					ZVAL_UNDEF(data);
-					ht->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+					HT_FLAGS(ht) |= HASH_FLAG_HAS_EMPTY_IND;
 				}
 			} else {
 				_zend_hash_del_el_ex(ht, idx, p, prev);

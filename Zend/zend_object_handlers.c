@@ -75,7 +75,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 
 					if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-						zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+						HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 					}
 
 					_zend_hash_append_ind(zobj->properties, prop_info->name,
@@ -91,7 +91,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 						zval zv;
 
 						if (UNEXPECTED(Z_TYPE_P(OBJ_PROP(zobj, prop_info->offset)) == IS_UNDEF)) {
-							zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+							HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 						}
 
 						ZVAL_INDIRECT(&zv, OBJ_PROP(zobj, prop_info->offset));
@@ -966,7 +966,7 @@ static void zend_std_unset_property(zval *object, zval *member, void **cache_slo
 			zval_ptr_dtor(slot);
 			ZVAL_UNDEF(slot);
 			if (zobj->properties) {
-				zobj->properties->u.v.flags |= HASH_FLAG_HAS_EMPTY_IND;
+				HT_FLAGS(zobj->properties) |= HASH_FLAG_HAS_EMPTY_IND;
 			}
 			goto exit;
 		}
