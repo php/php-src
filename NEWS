@@ -5,6 +5,9 @@ PHP                                                                        NEWS
 - PGSQL:
   . Fixed #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
 
+- ODBC:
+  . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
+
 01 Feb 2018, PHP 7.1.14
 
 - Core:
