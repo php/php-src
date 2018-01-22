@@ -444,7 +444,7 @@ string_key:
 						&& zend_hash_num_elements(&Z_OBJCE_P(rval)->properties_info) > 0) {
 					zend_property_info *existing_propinfo;
 					zend_string *new_key;
-					const char *unmangled_class = NULL; 
+					const char *unmangled_class = NULL;
 					const char *unmangled_prop;
 					size_t unmangled_prop_len;
 					zend_string *unmangled;
@@ -457,7 +457,7 @@ string_key:
 					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
 
 					existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled);
-					if ((existing_propinfo != NULL) 
+					if ((existing_propinfo != NULL)
 							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
 						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
 							new_key = zend_mangle_property_name(
