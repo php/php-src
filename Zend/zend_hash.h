@@ -41,17 +41,19 @@
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 #define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
+#define HT_FLAGS(ht) (ht)->u.flags
+
 #define HT_IS_PACKED(ht) \
-	(((ht)->u.flags & HASH_FLAG_PACKED) != 0)
+	((HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0)
 
 #define HT_IS_WITHOUT_HOLES(ht) \
 	((ht)->nNumUsed == (ht)->nNumOfElements)
 
 #define HT_HAS_STATIC_KEYS_ONLY(ht) \
-	(((ht)->u.flags & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
+	((HT_FLAGS(ht) & (HASH_FLAG_PACKED|HASH_FLAG_STATIC_KEYS)) != 0)
 
 #if ZEND_DEBUG
-# define HT_ALLOW_COW_VIOLATION(ht) (ht)->u.flags |= HASH_FLAG_ALLOW_COW_VIOLATION
+# define HT_ALLOW_COW_VIOLATION(ht) HT_FLAGS(ht) |= HASH_FLAG_ALLOW_COW_VIOLATION
 #else
 # define HT_ALLOW_COW_VIOLATION(ht)
 #endif
@@ -192,7 +194,7 @@ static zend_always_inline zval *zend_hash_find_ex(const HashTable *ht, zend_stri
 }
 
 #define ZEND_HASH_INDEX_FIND(_ht, _h, _ret, _not_found) do { \
-		if (EXPECTED((_ht)->u.flags & HASH_FLAG_PACKED)) { \
+		if (EXPECTED(HT_FLAGS(_ht) & HASH_FLAG_PACKED)) { \
 			if (EXPECTED((zend_ulong)(_h) < (zend_ulong)(_ht)->nNumUsed)) { \
 				_ret = &_ht->arData[_h].val; \
 				if (UNEXPECTED(Z_TYPE_P(_ret) == IS_UNDEF)) { \
@@ -1063,7 +1065,7 @@ static zend_always_inline void *zend_hash_get_current_data_ptr_ex(HashTable *ht,
 		HashTable *__fill_ht = (ht); \
 		Bucket *__fill_bkt = __fill_ht->arData + __fill_ht->nNumUsed; \
 		uint32_t __fill_idx = __fill_ht->nNumUsed; \
-		ZEND_ASSERT(__fill_ht->u.flags & HASH_FLAG_PACKED);
+		ZEND_ASSERT(HT_FLAGS(__fill_ht) & HASH_FLAG_PACKED);
 
 #define ZEND_HASH_FILL_ADD(_val) do { \
 		ZVAL_COPY_VALUE(&__fill_bkt->val, _val); \
@@ -1088,7 +1090,7 @@ static zend_always_inline zval *_zend_hash_append(HashTable *ht, zend_string *ke
 
 	ZVAL_COPY_VALUE(&p->val, zv);
 	if (!ZSTR_IS_INTERNED(key)) {
-		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
@@ -1110,7 +1112,7 @@ static zend_always_inline zval *_zend_hash_append_ptr(HashTable *ht, zend_string
 
 	ZVAL_PTR(&p->val, ptr);
 	if (!ZSTR_IS_INTERNED(key)) {
-		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
@@ -1132,7 +1134,7 @@ static zend_always_inline void _zend_hash_append_ind(HashTable *ht, zend_string 
 
 	ZVAL_INDIRECT(&p->val, ptr);
 	if (!ZSTR_IS_INTERNED(key)) {
-		ht->u.flags &= ~HASH_FLAG_STATIC_KEYS;
+		HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
 		zend_string_addref(key);
 		zend_string_hash_val(key);
 	}
