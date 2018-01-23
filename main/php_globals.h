@@ -106,12 +106,7 @@ struct _php_core_globals {
 	HashTable rfc1867_protected_variables;
 
 	short connection_status;
-
-	/* In 7.1/7.2 branches, this was initially a short,
-	 * maintain struct alignment with subsequent padding.
-	 */
 	zend_bool ignore_user_abort;
-	char ignore_user_abort_reserved_padding;
 
 	unsigned char header_is_being_sent;
 
