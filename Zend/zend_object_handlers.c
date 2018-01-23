@@ -503,17 +503,17 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		     /* hash values are always pred-calculated here */
 		    (EXPECTED(ZSTR_H(str) == ZSTR_H(member)) &&
 		     EXPECTED(zend_string_equal_content(str, member)))) {
-			return &zv->u2.property_guard;
-		} else if (EXPECTED(zv->u2.property_guard == 0)) {
+			return &Z_PROPERTY_GUARD_P(zv);
+		} else if (EXPECTED(Z_PROPERTY_GUARD_P(zv) == 0)) {
 			zend_string_release(Z_STR_P(zv));
 			ZVAL_STR_COPY(zv, member);
-			return &zv->u2.property_guard;
+			return &Z_PROPERTY_GUARD_P(zv);
 		} else {
 			ALLOC_HASHTABLE(guards);
 			zend_hash_init(guards, 8, NULL, zend_property_guard_dtor, 0);
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
-				(void*)(((zend_uintptr_t)&zv->u2.property_guard) | 1));
+				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
 			zend_string_release(Z_STR_P(zv));
 			ZVAL_ARR(zv, guards);
 		}
@@ -528,8 +528,8 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		ZEND_ASSERT(Z_TYPE_P(zv) == IS_UNDEF);
 		OBJ_FLAGS(zobj) |= IS_OBJ_HAS_GUARDS;
 		ZVAL_STR_COPY(zv, member);
-		zv->u2.property_guard = 0;
-		return &zv->u2.property_guard;
+		Z_PROPERTY_GUARD_P(zv) = 0;
+		return &Z_PROPERTY_GUARD_P(zv);
 	}
 	/* we have to allocate uint32_t separately because ht->arData may be reallocated */
 	ptr = (uint32_t*)emalloc(sizeof(uint32_t));

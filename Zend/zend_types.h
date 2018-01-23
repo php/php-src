@@ -193,6 +193,7 @@ struct _zval_struct {
 	union {
 		uint32_t     next;                 /* hash collision chain */
 		uint32_t     cache_slot;           /* literal cache slot */
+		uint32_t     opline_num;           /* opline number (for FAST_CALL) */
 		uint32_t     lineno;               /* line number (for ast nodes) */
 		uint32_t     num_args;             /* arguments number for EX(This) */
 		uint32_t     fe_pos;               /* foreach position */
@@ -413,6 +414,12 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
 #define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))
 
+#define Z_LINENO(zval)				(zval).u2.lineno
+#define Z_LINENO_P(zval_p)			Z_LINENO(*(zval_p))
+
+#define Z_OPLINE_NUM(zval)			(zval).u2.opline_num
+#define Z_OPLINE_NUM_P(zval_p)		Z_OPLINE_NUM(*(zval_p))
+
 #define Z_FE_POS(zval)				(zval).u2.fe_pos
 #define Z_FE_POS_P(zval_p)			Z_FE_POS(*(zval_p))
 
@@ -421,6 +428,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_ACCESS_FLAGS(zval)		(zval).u2.access_flags
 #define Z_ACCESS_FLAGS_P(zval_p)	Z_ACCESS_FLAGS(*(zval_p))
+
+#define Z_PROPERTY_GUARD(zval)		(zval).u2.property_guard
+#define Z_PROPERTY_GUARD_P(zval_p)	Z_PROPERTY_GUARD(*(zval_p))
 
 #define Z_EXTRA(zval)				(zval).u2.extra
 #define Z_EXTRA_P(zval_p)			Z_EXTRA(*(zval_p))

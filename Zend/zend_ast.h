@@ -248,7 +248,7 @@ static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
-		return zv->u2.lineno;
+		return Z_LINENO_P(zv);
 	} else {
 		return ast->lineno;
 	}
