@@ -1627,7 +1627,7 @@ PHP_FUNCTION(stream_isatty)
 {
 	zval *zsrc;
 	php_stream *stream;
-	zend_long fileno;
+	php_socket_t fileno;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_RESOURCE(zsrc)
