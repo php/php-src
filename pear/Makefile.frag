@@ -2,8 +2,14 @@
 
 peardir=$(PEAR_INSTALLDIR)
 
-# Skip all php.ini files altogether
-PEAR_INSTALL_FLAGS = -n -dshort_open_tag=0 -dopen_basedir= -derror_reporting=1803 -dmemory_limit=-1 -ddetect_unicode=0
+# Skip all php.ini files altogether and add possible shared XML extension
+PEAR_INSTALL_FLAGS = ` \
+	echo -n -dshort_open_tag=0 -dopen_basedir= -derror_reporting=1803 -dmemory_limit=-1 -ddetect_unicode=0; \
+	for i in $(CONFIGURE_COMMAND); do \
+		if test "$$i" = "--enable-xml=shared"; then \
+			echo " " -dextension_dir="$(top_builddir)/modules" -dextension=xml.$(SHLIB_DL_SUFFIX_NAME); \
+		fi; \
+	done`
 
 WGET = `which wget 2>/dev/null`
 FETCH = `which fetch 2>/dev/null`
@@ -34,4 +40,3 @@ install-pear:
 	else \
 		cat $(srcdir)/install-pear.txt; \
 	fi
-
