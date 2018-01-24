@@ -1189,23 +1189,6 @@ static void* dasm_labels[zend_lb_MAX];
 |	EXT_CALL _zval_copy_ctor_func, r0
 |.endmacro
 
-// zval should be in FCARG1a
-|.macro ZVAL_COPY_CTOR, val_info, type_flags_reg, value_ptr_reg, filename, lineno
-||	if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-||		if (val_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-|			IF_NOT_FLAGS type_flags_reg, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
-|			IF_NOT_FLAGS type_flags_reg, IS_TYPE_COPYABLE, >1
-|			GC_ADDREF value_ptr_reg
-|			jmp >2
-|1:
-|			ZVAL_COPY_CTOR_FUNC filename, lineno
-|2:
-||		} else {
-|			TRY_ADDREF val_info, type_flags_reg, value_ptr_reg
-||		}
-||	}
-|.endmacro
-
 |.macro ZVAL_DEREF, reg, info
 ||	if (info & MAY_BE_REF) {
 |		IF_NOT_Z_TYPE, reg, IS_REFERENCE, >1
@@ -1337,11 +1320,11 @@ static void* dasm_labels[zend_lb_MAX];
 |.macro SEPARATE_ZVAL_NOREF, addr, op_info, cold, filename, lineno
 ||	if ((op_info & (MAY_BE_STRING|MAY_BE_ARRAY)) && RC_MAY_BE_N(op_info)) {
 ||		if (cold) {
-|			IF_ZVAL_FLAGS addr, IS_TYPE_COPYABLE, >1
+|			IF_ZVAL_TYPE addr, IS_ARRAY, >1
 |.cold_code
 |1:
 ||		} else {
-|			IF_NOT_ZVAL_FLAGS addr, IS_TYPE_COPYABLE, >2
+|			IF_NOT_ZVAL_TYPE addr, IS_ARRAY, >2
 ||		}
 |		GET_ZVAL_PTR r0, addr
 ||		if (RC_MAY_BE_1(op_info)) {
@@ -2653,27 +2636,8 @@ static int zend_jit_inc_dec(dasm_State **Dst, const zend_op *opline, zend_op_arr
 					zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 
 					|	ZVAL_COPY_VALUE res_addr, res_use_info, val_addr, op1_info, ZREG_R0, ZREG_R2
-					|	//ZVAL_COPY_CTOR op1_info, ah, r2, op_array->filename, opline->lineno
-					if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
-						if (op1_info & (MAY_BE_STRING|MAY_BE_ARRAY)) {
-							|	IF_NOT_FLAGS ah, IS_TYPE_REFCOUNTED + IS_TYPE_COPYABLE, >2
-							|	IF_FLAGS ah, IS_TYPE_COPYABLE, >1
-							|	GC_ADDREF r2
-							|	jmp >2
-							|1:
-							|	mov aword [r4], FCARG1a // save
-							|	ZVAL_COPY_CTOR_FUNC op_array->filename, opline->lineno
-							|	mov FCARG1a, aword [r4] // restore
-							|2:
-						} else {
-							|	TRY_ADDREF op1_info, ah, r2
-						}
-					}
+					|	TRY_ADDREF op1_info, ah, r2
 				}
-			} else {
-				zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
-
-				|	SEPARATE_ZVAL_NOREF var_addr, op1_info, 0, op_array->filename, opline->lineno
 			}
 			if (opline->opcode == ZEND_PRE_INC || opline->opcode == ZEND_POST_INC) {
 				|	EXT_CALL increment_function, r0
