@@ -3866,17 +3866,15 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 
 /* {{{ php_addslashes */
 
-#if defined(__GNUC__) && defined(__SSE4_2__)
+#if ZEND_INTRIN_SSE4_2_NATIVE
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
-# define PHP_ADDSLASHES_LEVEL 2
-#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && \
-      defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(HAVE_NMMINTRIN_H)
+#elif ZEND_INTRIN_SSE4_2_RESOLVER
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
 # include "Zend/zend_cpuinfo.h"
-# define PHP_ADDSLASHES_LEVEL 1
 
+# if ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
 zend_string *php_addslashes_sse42(zend_string *str, int should_free) __attribute__((target("sse4.2")));
 zend_string *php_addslashes_default(zend_string *str, int should_free);
@@ -3887,14 +3885,31 @@ static void *resolve_addslashes() {
 	}
 	return  php_addslashes_default;
 }
-#else
-# define PHP_ADDSLASHES_LEVEL 0
+# else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
+zend_string *php_addslashes_sse42(zend_string *str, int should_free);
+zend_string *php_addslashes_default(zend_string *str, int should_free);
+
+PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
+
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(string_intrin)
+{
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
+		php_addslashes = php_addslashes_sse42;
+	} else {
+		php_addslashes = php_addslashes_default;
+	}
+	return SUCCESS;
+}
+/* }}} */
+# endif
 #endif
 
-#if PHP_ADDSLASHES_LEVEL
-# if PHP_ADDSLASHES_LEVEL == 2
+#if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
+# if ZEND_INTRIN_SSE4_2_NATIVE
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
-# else
+# elif ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 # endif
 {
@@ -4078,8 +4093,8 @@ do_escape:
 /* }}} */
 #endif
 
-#if PHP_ADDSLASHES_LEVEL != 2
-# if PHP_ADDSLASHES_LEVEL == 1
+#if !ZEND_INTRIN_SSE4_2_NATIVE
+# if ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_default(zend_string *str, int should_free) /* {{{ */
 # else
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)

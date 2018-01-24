@@ -3688,6 +3688,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
+#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(string_intrin)
+#endif
+
 	BASIC_MINIT_SUBMODULE(crypt)
 	BASIC_MINIT_SUBMODULE(lcg)
 
