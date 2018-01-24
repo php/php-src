@@ -9,7 +9,7 @@
  *
  * Usage: php phar_create_from_dir.php \<archive\> \<directory\> [\<regex\>]
  *
- * Create phar archive \<archive\> using entries from \<directory\> that 
+ * Create phar archive \<archive\> using entries from \<directory\> that
  * optionally match \<regex\>.
  */
 
