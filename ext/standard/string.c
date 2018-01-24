@@ -3922,7 +3922,7 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 	end = source + ZSTR_LEN(str);
 
 	if (ZSTR_LEN(str) > 15) {
-		char *aligned = (char*)(((zend_uintptr_t)source + 15) & ~15);
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
 
 		if (UNEXPECTED(source != aligned)) {
 			do {
@@ -3997,7 +3997,7 @@ do_escape:
 		}
 		source += 16;
 	} else if (end - source > 15) {
-		char *aligned = (char*)(((zend_uintptr_t)source + 15) & ~15);
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
 
 		if (source != aligned) {
 			do {

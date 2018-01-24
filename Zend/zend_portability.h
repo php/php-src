@@ -540,6 +540,9 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_SET_ALIGNED(alignment, decl) decl
 #endif
 
+#define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((zend_uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))
+#define ZEND_SLIDE_TO_ALIGNED16(ptr) ZEND_SLIDE_TO_ALIGNED(Z_UL(16), ptr)
+
 #endif /* ZEND_PORTABILITY_H */
 
 /*
