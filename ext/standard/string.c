@@ -118,16 +118,8 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 int php_tag_find(char *tag, size_t len, const char *set);
 
-#ifdef PHP_WIN32
-# define SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
-#elif HAVE_ATTRIBUTE_ALIGNED
-# define SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
-#else
-# define SET_ALIGNED(alignment, decl) decl
-#endif
-
 /* this is read-only, so it's ok */
-SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
 
 /* localeconv mutex */
 #ifdef ZTS
@@ -3913,7 +3905,7 @@ PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
 zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 # endif
 {
-	SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
+	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
 	__m128i w128, s128;
 	uint32_t res = 0;
 	/* maximum string length, worst case situation */

@@ -521,7 +521,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #if defined(__GNUC__) && defined(__SSE4_2__)
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
-#elif (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_NMMINTRIN_H) || defined(PHP_WIN32)
+#elif (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_NMMINTRIN_H) || defined(ZEND_WIN32)
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
@@ -530,6 +530,14 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSE4_2_RESOLVER
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_WIN32
+# define ZEND_SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
+#elif HAVE_ATTRIBUTE_ALIGNED
+# define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
+#else
+# define ZEND_SET_ALIGNED(alignment, decl) decl
 #endif
 
 #endif /* ZEND_PORTABILITY_H */
