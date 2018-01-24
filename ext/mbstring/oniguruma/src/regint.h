@@ -528,7 +528,7 @@ typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
 typedef int MemNumType;
-typedef short int StateCheckNumType;
+typedef int StateCheckNumType;
 typedef void* PointerType;
 
 #define SIZE_OPCODE           1
