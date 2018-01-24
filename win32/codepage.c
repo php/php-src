@@ -104,7 +104,6 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	wchar_t *ret = NULL;
 	const char *idx = in, *end;
 	size_t i = 0;
-	int k = 0;
 	wchar_t *ret_idx;
 
 
@@ -116,41 +115,17 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	} else if (0 == in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
-		if (in_len > (size_t)INT_MAX) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-			return NULL;
-		}
 	}
 
 	end = in + in_len;
 
-	/* The ASCII check part can be moved into a separate function. */
 	while (end - idx > 16) {
-		__m128i block = _mm_loadu_si128((__m128i *)idx);
+		const __m128i block = _mm_loadu_si128((__m128i *)idx);
 		if (_mm_movemask_epi8(block)) {
 			ASCII_FAIL_RETURN()
 		}
 		idx += 16;
 	}
-
-	while (end - idx > 8) {
-		char ch0 = *idx;
-		char ch1 = *(idx + 1);
-		char ch2 = *(idx + 2);
-		char ch3 = *(idx + 3);
-		char ch4 = *(idx + 4);
-		char ch5 = *(idx + 5);
-		char ch6 = *(idx + 6);
-		char ch7 = *(idx + 7);
-
-		if (!__isascii(ch0) || !__isascii(ch1) || !__isascii(ch2) || !__isascii(ch3) ||
-			!__isascii(ch4) || !__isascii(ch5) || !__isascii(ch6) || !__isascii(ch7)) {
-			ASCII_FAIL_RETURN()
-		}
-
-		idx += 8;
-	}
-
 	/* Finish the job on remaining chars. */
 	while (idx != end) {
 		if (!__isascii(*idx) && '\0' != *idx) {
@@ -165,26 +140,29 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 		return NULL;
 	}
 
+
 	ret_idx = ret;
-	do {
-		k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)(in_len - i), in);
+	idx = in;
+	const __m128i mask = _mm_set1_epi32(0);
+	while (i < in_len && in_len - i > 16) {
+		__m128i hl;
+		const __m128i block = _mm_loadu_si128((__m128i *)idx);
 
-		if (-1 == k) {
-			free(ret);
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-			return NULL;
-		}
+		hl = _mm_unpacklo_epi8(block, mask);
+		_mm_storeu_si128((__m128i *)ret_idx, hl);
 
-		i += k + 1;
+		ret_idx += 8;
+		hl = _mm_unpackhi_epi8(block, mask);
+		_mm_storeu_si128((__m128i *)ret_idx, hl);
 
-		if (i < in_len) {
-			/* Advance as this seems to be a string with \0 in it. */
-			in += k + 1;
-			ret_idx += k + 1;
-		}
-
-
-	} while (i < in_len);
+		i += 16;
+		idx += 16;
+		ret_idx += 8;
+	}
+	/* Finish the job on remaining chars. */
+	while (in_len > i++) {
+		*ret_idx++ = (wchar_t)*idx++;
+	}
 	ret[in_len] = L'\0';
 
 	assert(ret ? wcslen(ret) == in_len : 1);

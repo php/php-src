@@ -49,7 +49,7 @@ void zend_optimizer_collect_constant(zend_optimizer_ctx *ctx, zval *name, zval* 
 		ctx->constants = zend_arena_alloc(&ctx->arena, sizeof(HashTable));
 		zend_hash_init(ctx->constants, 16, NULL, zend_optimizer_zval_dtor_wrapper, 0);
 	}
-	ZVAL_DUP(&val, value);
+	ZVAL_COPY(&val, value);
 	zend_hash_add(ctx->constants, Z_STR_P(name), &val);
 }
 
@@ -194,7 +194,7 @@ int zend_optimizer_get_collected_constant(HashTable *constants, zval *name, zval
 	zval *val;
 
 	if ((val = zend_hash_find(constants, Z_STR_P(name))) != NULL) {
-		ZVAL_DUP(value, val);
+		ZVAL_COPY(value, val);
 		return 1;
 	}
 	return 0;
@@ -619,7 +619,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 							m->op1_type == type &&
 							m->op1.var == var) {
 							zval v;
-							ZVAL_DUP(&v, val);
+							ZVAL_COPY(&v, val);
 							if (Z_TYPE(v) == IS_STRING) {
 								zend_string_hash_val(Z_STR(v));
 							}
@@ -677,7 +677,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 								if (m->opcode == ZEND_CASE) {
 									m->opcode = ZEND_IS_EQUAL;
 								}
-								ZVAL_DUP(&v, val);
+								ZVAL_COPY(&v, val);
 								if (Z_TYPE(v) == IS_STRING) {
 									zend_string_hash_val(Z_STR(v));
 								}

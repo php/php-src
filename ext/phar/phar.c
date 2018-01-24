@@ -82,7 +82,7 @@ ZEND_INI_MH(phar_ini_modify_handler) /* {{{ */
 
 	if (ZSTR_LEN(entry->name) == sizeof("phar.readonly")-1) {
 		PHAR_G(readonly) = ini;
-		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags)) {
+		if (PHAR_G(request_init) && HT_FLAGS(&PHAR_G(phar_fname_map))) {
 			zend_hash_apply_with_argument(&(PHAR_G(phar_fname_map)), phar_set_writeable_bit, (void *)&ini);
 		}
 	} else {
@@ -146,9 +146,9 @@ finish_error:
 				PHAR_G(manifest_cached) = 0;
 				efree(tmp);
 				zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-				PHAR_G(phar_fname_map.u.flags) = 0;
+				HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
 				zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-				PHAR_G(phar_alias_map.u.flags) = 0;
+				HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
 				zend_hash_destroy(&cached_phars);
 				zend_hash_destroy(&cached_alias);
 				zend_hash_graceful_reverse_destroy(&EG(regular_list));
@@ -173,8 +173,8 @@ finish_error:
 	zend_hash_destroy(&cached_alias);
 	cached_phars = PHAR_G(phar_fname_map);
 	cached_alias = PHAR_G(phar_alias_map);
-	PHAR_G(phar_fname_map.u.flags) = 0;
-	PHAR_G(phar_alias_map.u.flags) = 0;
+	HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
+	HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
 	zend_hash_graceful_reverse_destroy(&EG(regular_list));
 	memset(&EG(regular_list), 0, sizeof(HashTable));
 	efree(tmp);
@@ -220,19 +220,19 @@ void phar_destroy_phar_data(phar_archive_data *phar) /* {{{ */
 		phar->signature = NULL;
 	}
 
-	if (phar->manifest.u.flags) {
+	if (HT_FLAGS(&phar->manifest)) {
 		zend_hash_destroy(&phar->manifest);
-		phar->manifest.u.flags = 0;
+		HT_FLAGS(&phar->manifest) = 0;
 	}
 
-	if (phar->mounted_dirs.u.flags) {
+	if (HT_FLAGS(&phar->mounted_dirs)) {
 		zend_hash_destroy(&phar->mounted_dirs);
-		phar->mounted_dirs.u.flags = 0;
+		HT_FLAGS(&phar->mounted_dirs) = 0;
 	}
 
-	if (phar->virtual_dirs.u.flags) {
+	if (HT_FLAGS(&phar->virtual_dirs)) {
 		zend_hash_destroy(&phar->virtual_dirs);
-		phar->virtual_dirs.u.flags = 0;
+		HT_FLAGS(&phar->virtual_dirs) = 0;
 	}
 
 	if (Z_TYPE(phar->metadata) != IS_UNDEF) {
@@ -3515,11 +3515,11 @@ PHP_RSHUTDOWN_FUNCTION(phar) /* {{{ */
 	{
 		phar_release_functions();
 		zend_hash_destroy(&(PHAR_G(phar_alias_map)));
-		PHAR_G(phar_alias_map.u.flags) = 0;
+		HT_FLAGS(&PHAR_G(phar_alias_map)) = 0;
 		zend_hash_destroy(&(PHAR_G(phar_fname_map)));
-		PHAR_G(phar_fname_map.u.flags) = 0;
+		HT_FLAGS(&PHAR_G(phar_fname_map)) = 0;
 		zend_hash_destroy(&(PHAR_G(phar_persist_map)));
-		PHAR_G(phar_persist_map.u.flags) = 0;
+		HT_FLAGS(&PHAR_G(phar_persist_map)) = 0;
 		PHAR_G(phar_SERVER_mung_list) = 0;
 
 		if (PHAR_G(cached_fp)) {

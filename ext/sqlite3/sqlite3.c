@@ -724,7 +724,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		if (Z_ISUNDEF(agg_context->zval_context)) {
 			ZVAL_NULL(&agg_context->zval_context);
 		}
-		ZVAL_DUP(&zargs[0], &agg_context->zval_context);
+		ZVAL_COPY(&zargs[0], &agg_context->zval_context);
 		ZVAL_LONG(&zargs[1], agg_context->row_count);
 	}
 

@@ -65,7 +65,7 @@ ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
-	ast->val.u2.lineno = lineno;
+	Z_LINENO(ast->val) = lineno;
 	return (zend_ast *) ast;
 }
 
@@ -80,7 +80,7 @@ ZEND_API zend_ast *zend_ast_create_constant(zend_string *name, zend_ast_attr att
 	ast->kind = ZEND_AST_CONSTANT;
 	ast->attr = attr;
 	ZVAL_STR(&ast->val, name);
-	ast->val.u2.lineno = CG(zend_lineno);
+	Z_LINENO(ast->val) = CG(zend_lineno);
 	return (zend_ast *) ast;
 }
 
