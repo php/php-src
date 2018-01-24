@@ -39,7 +39,7 @@ class gtMethod  extends gtTestSubject {
     }
   }
 
-  
+
   /**
    * Set the names of the mandatory and optional arguments to the method
    *
@@ -87,14 +87,14 @@ class gtMethod  extends gtTestSubject {
   public function getClassName() {
     return $this->className;
   }
-  
+
   /**
    * Set the list of arguments to be passed to the constructor
    *
    */
   public function setConstructorArgumentList() {
     if(count ($this->constructorArgumentNames) > 0) {
-      
+
       for( $i = 0; $i < count( $this->constructorArgumentNames ); $i++) {
         $this->constructorArgumentList .= "\$".$this->constructorArgumentNames[$i].", ";
       }
@@ -112,7 +112,7 @@ class gtMethod  extends gtTestSubject {
     return $this->constructorArgumentList;
   }
 
-  
+
   /**
    * Set up the source statements that initialise constructor arguments;
    *
@@ -126,7 +126,7 @@ class gtMethod  extends gtTestSubject {
 
   }
 
-  
+
   /**
    * Return the constructor initialisation statements
    *

@@ -22,13 +22,13 @@ class gtBasicTestCaseFunction extends gtBasicTestCase {
 
   public function constructTestCase() {
     $this->constructCommonHeaders();
-    
+
     $this->addBasicEcho();
-    
+
     $this->constructSubjectCalls();
-    
+
     $this->constructCommonClosing();
-   
+
   }
 
 

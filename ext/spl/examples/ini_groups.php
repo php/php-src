@@ -11,7 +11,7 @@
  * Show all groups in the ini file specified by \<file\>.
  * The regular expression \<regex\> is used to filter the result.
  *
- * Note: configure with --enable-dba 
+ * Note: configure with --enable-dba
  */
 
 if ($argc < 2) {
