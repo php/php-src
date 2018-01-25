@@ -246,9 +246,7 @@ static PHP_FUNCTION(tidy_repair_file);
 static PHP_FUNCTION(tidy_diagnose);
 static PHP_FUNCTION(tidy_get_output);
 static PHP_FUNCTION(tidy_get_error_buffer);
-#if HAVE_TIDYRELEASEDATE
 static PHP_FUNCTION(tidy_get_release);
-#endif
 static PHP_FUNCTION(tidy_get_config);
 static PHP_FUNCTION(tidy_get_status);
 static PHP_FUNCTION(tidy_get_html_ver);
@@ -329,10 +327,8 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_diagnose, 0)
 ZEND_END_ARG_INFO()
 
-#if HAVE_TIDYRELEASEDATE
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_release, 0)
 ZEND_END_ARG_INFO()
-#endif
 
 #if HAVE_TIDYOPTGETDOC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
@@ -396,9 +392,7 @@ static const zend_function_entry tidy_functions[] = {
 	PHP_FE(tidy_repair_string,	arginfo_tidy_repair_string)
 	PHP_FE(tidy_repair_file,	arginfo_tidy_repair_file)
 	PHP_FE(tidy_diagnose,           arginfo_tidy_diagnose)
-#if HAVE_TIDYRELEASEDATE
 	PHP_FE(tidy_get_release,	arginfo_tidy_get_release)
-#endif
 	PHP_FE(tidy_get_config,		arginfo_tidy_get_config)
 	PHP_FE(tidy_get_status,		arginfo_tidy_get_status)
 	PHP_FE(tidy_get_html_ver,	arginfo_tidy_get_html_ver)
@@ -426,9 +420,7 @@ static const zend_function_entry tidy_funcs_doc[] = {
 	TIDY_METHOD_MAP(repairString, tidy_repair_string, NULL)
 	TIDY_METHOD_MAP(repairFile, tidy_repair_file, NULL)
 	TIDY_METHOD_MAP(diagnose, tidy_diagnose, NULL)
-#if HAVE_TIDYRELEASEDATE
 	TIDY_METHOD_MAP(getRelease, tidy_get_release, NULL)
-#endif
 	TIDY_METHOD_MAP(getConfig, tidy_get_config, NULL)
 	TIDY_METHOD_MAP(getStatus, tidy_get_status, NULL)
 	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, NULL)
@@ -1085,8 +1077,10 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_header(2, "Tidy support", "enabled");
 #if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
+#elif HAVE_TIDYP_H
+	php_info_print_table_row(2, "libTidy Version", (char *)tidyVersion());
 #endif
-#if HAVE_TIDYRELEASEDATE
+#if HAVE_TIDY_P
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
 	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
@@ -1348,7 +1342,6 @@ static PHP_FUNCTION(tidy_diagnose)
 }
 /* }}} */
 
-#if HAVE_TIDYRELEASEDATE
 /* {{{ proto string tidy_get_release()
    Get release date (version) for Tidy library */
 static PHP_FUNCTION(tidy_get_release)
@@ -1357,10 +1350,13 @@ static PHP_FUNCTION(tidy_get_release)
 		return;
 	}
 
+#if HAVE_TIDYRELEASEDATE
 	RETURN_STRING((char *)tidyReleaseDate());
+#else
+    RETURN_STRING((char *)"unknown");
+#endif
 }
 /* }}} */
-#endif
 
 
 #if HAVE_TIDYOPTGETDOC
