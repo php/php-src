@@ -1,18 +1,18 @@
 --TEST--
-Test getdate() function : usage variation - Verifyig with different timezones on Unix epoch timestamp  
+Test getdate() function : usage variation - Verifyig with different timezones on Unix epoch timestamp
 --FILE--
 <?php
 /* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information 
+ * Description: Get date/time information
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing getdate() : usage variation ***\n";
 
 //Timezones with required data for date_sunrise
 $inputs = array (
-		//GMT-11		
+		//GMT-11
 		"Pacific/Samoa",
 		//GMT-9
 		"US/Alaska",

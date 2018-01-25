@@ -70,7 +70,7 @@ $needle = array(
   "456HEE",  //numerics + chars
   $haystack  //haystack as needle
 );
- 
+
 /* loop through to get the position of the needle in haystack string */
 $count = 1;
 for($index=0; $index<count($needle); $index++) {

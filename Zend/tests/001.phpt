@@ -44,7 +44,7 @@ var_dump(func_num_args());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(1)
 Exception: Too few arguments to function test2(), 0 passed in %s001.php on line 18 and exactly 1 expected

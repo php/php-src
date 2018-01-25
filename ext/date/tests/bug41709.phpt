@@ -30,5 +30,5 @@ Array
             [11] => Unexpected character
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )

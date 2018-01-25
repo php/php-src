@@ -3,7 +3,7 @@ Testing imagetruecolortopalette(): wrong types for first parameter
 --CREDITS--
 Rafael Dohms <rdohms [at] gmail [dot] com>
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

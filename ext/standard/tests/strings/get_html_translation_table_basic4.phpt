@@ -17,7 +17,7 @@ asort( $tt );
 var_dump( $tt );
 
 echo "-- with table = HTML_SPECIALCHARS --\n";
-$table = HTML_SPECIALCHARS; 
+$table = HTML_SPECIALCHARS;
 $tt = get_html_translation_table($table, ENT_COMPAT, "WINDOWS-1252");
 asort( $tt );
 var_dump( $tt );

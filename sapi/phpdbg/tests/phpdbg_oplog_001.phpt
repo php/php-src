@@ -32,7 +32,7 @@ prompt> halloarray(2) {
   }
 }
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

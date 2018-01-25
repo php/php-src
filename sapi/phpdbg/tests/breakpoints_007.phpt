@@ -11,7 +11,7 @@ prompt> [Breakpoint #0 in bar::foo() at %s:5, hits: 1]
 >00005: 		var_dump($bar);
  00006: 	}
  00007: }
-prompt> 
+prompt>
 --FILE--
 <?php
 

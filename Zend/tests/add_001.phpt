@@ -29,7 +29,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {
   [0]=>
   int(1)

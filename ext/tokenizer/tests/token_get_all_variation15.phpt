@@ -1,5 +1,5 @@
 --TEST--
-Test token_get_all() function : usage variations - heredoc string for 'source' 
+Test token_get_all() function : usage variations - heredoc string for 'source'
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --INI--
@@ -20,11 +20,11 @@ short_open_tag=On
 echo "*** Testing token_get_all() : with heredoc source string ***\n";
 
 $source = <<<EOT
-<?= 
+<?=
   \$a = 2;
   \$b = 1;
   \$c = <<<EOS
-  This is to test 
+  This is to test
   heredoc string
 EOS;
   echo \$a + \$b;
@@ -65,7 +65,7 @@ array(103) {
     [0]=>
     int(%d)
     [1]=>
-    string(4) " 
+    string(4) "
   "
     [2]=>
     int(1)
@@ -214,7 +214,7 @@ array(103) {
     [0]=>
     int(%d)
     [1]=>
-    string(36) "  This is to test 
+    string(36) "  This is to test
   heredoc string
 "
     [2]=>

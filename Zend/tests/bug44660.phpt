@@ -27,13 +27,13 @@ echo "\n--> Confirm assignments have had no impact:\n";
 var_dump($a);
 ?>
 --EXPECTF--
---> read access: 
+--> read access:
 Notice: Trying to get property 'p' of non-object in %sbug44660.php on line 6
 
---> direct assignment: 
+--> direct assignment:
 Warning: Attempt to assign property 'p' of non-object in %sbug44660.php on line 9
 
---> increment: 
+--> increment:
 Warning: Attempt to increment/decrement property 'p' of non-object in %sbug44660.php on line 12
 
 --> reference assignment:

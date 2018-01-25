@@ -7,7 +7,7 @@ class Test{
 	{
         echo $method . PHP_EOL;
     }
-    public function __call($method, $arguments) 
+    public function __call($method, $arguments)
 	{
         echo $method . PHP_EOL;
     }

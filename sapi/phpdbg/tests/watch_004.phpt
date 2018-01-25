@@ -19,17 +19,17 @@ prompt> [Breakpoint #0 at %s:3, hits: 1]
  00005: $a[1] = "b";
 prompt> [Added watchpoint #0 for $a]
 prompt> [Breaking on watchpoint $a]
-Old value: 
+Old value:
 New value: aa
 >00005: $a[1] = "b";
- 00006: 
+ 00006:
 prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab
->00006: 
+>00006:
 prompt> [$a has been removed, removing watchpoint]
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

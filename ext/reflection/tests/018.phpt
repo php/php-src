@@ -6,7 +6,7 @@ Reflection::getModifierNames
 <?php
 var_dump(Reflection::getModifierNames(ReflectionMethod::IS_FINAL | ReflectionMethod::IS_PROTECTED));
 ?>
---EXPECT--	
+--EXPECT--
 array(2) {
   [0]=>
   string(5) "final"

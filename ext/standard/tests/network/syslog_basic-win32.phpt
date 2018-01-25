@@ -1,5 +1,5 @@
 --TEST--
-Test syslog() function : basic functionality 
+Test syslog() function : basic functionality
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) != "WIN")
@@ -8,9 +8,9 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 --FILE--
 <?php
 /* Prototype  : bool syslog(int priority, string message)
- * Description: Generate a system log message 
+ * Description: Generate a system log message
  * Source code: ext/standard/syslog.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing syslog() : basic functionality ***\n";

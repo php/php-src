@@ -1,7 +1,7 @@
 --TEST--
 Test ngettext() functionality
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("SKIP extension gettext not loaded\n");
 	}

@@ -31,7 +31,7 @@ class bad4 implements IteratorAggregate {
 function f($className) {
 	try {
 		foreach (new $className as $k=>$v) {
-			echo "$k => $v\n";	
+			echo "$k => $v\n";
 		}
 	} catch (Exception $e) {
 			echo $e->getLine() . ": " . $e->getMessage() ."\n";

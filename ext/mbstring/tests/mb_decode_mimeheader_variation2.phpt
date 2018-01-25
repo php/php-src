@@ -1,5 +1,5 @@
 --TEST--
-Test mb_decode_mimeheader() function : variation 
+Test mb_decode_mimeheader() function : variation
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,9 +8,9 @@ function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is n
 --FILE--
 <?php
 /* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string 
+ * Description: Decodes the MIME "encoded-word" in the string
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_decode_mimeheader() : variation ***\n";
@@ -33,7 +33,7 @@ $encoded_words = array(
 "=?EUC-JP?Q?=C6=FC=CB=DC=B8=EC=A5=C6=A5=AD=A5=B9=A5=C8=A4=C7=A4=B9=A1=A3?=
 =?EUC-JP?Q?=30=31=32=33=34=A3=B5=A3=B6=A3=B7=A3=B8=A3=B9=A1=A3?="
  );
- 
+
  foreach ($encoded_words as $word) {
     var_dump(bin2hex(mb_decode_mimeheader($word)));
 }

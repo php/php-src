@@ -19,7 +19,7 @@ include ("file.inc");
 echo "*** Testing ftruncate() : usage variations ***\n";
 
 /* test ftruncate with file opened in different modes */
-$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t", 
+$file_modes = array("r", "rb", "rt", "r+", "r+b", "r+t",
                     "w", "wb", "wt", "w+", "w+b", "w+t",
                     "x", "xb", "xt", "x+", "x+b", "x+t",
                     "a", "ab", "at", "a+", "a+b", "a+t");
@@ -44,7 +44,7 @@ foreach($file_content_types as $file_content_type) {
      $file_handle = fopen($filename, $file_modes[$mode_counter]);
    }
    if (!$file_handle) {
-     echo "Error: failed to open file $filename!\n"; 
+     echo "Error: failed to open file $filename!\n";
      exit();
    }
 
@@ -62,7 +62,7 @@ foreach($file_content_types as $file_content_type) {
    clearstatcache(); // clear previous size value in cache
    var_dump( filesize($filename) ); // check the file size, should be 0
 
-   //delete all files created 
+   //delete all files created
    delete_file($filename);
  } //end of inner for loop
 }//end of outer foreach loop

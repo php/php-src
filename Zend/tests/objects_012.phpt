@@ -11,5 +11,5 @@ interface bar extends foo {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: bar cannot implement foo - it is not an interface in %s on line %d

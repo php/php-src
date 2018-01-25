@@ -3,14 +3,14 @@ Test getdate() function : usage variation - Passing unexpected values to first a
 --FILE--
 <?php
 /* Prototype  : array getdate([int timestamp])
- * Description: Get date/time information 
+ * Description: Get date/time information
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing getdate() : usage variation ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Asia/Calcutta");
 
 //get an unset variable

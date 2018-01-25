@@ -1,11 +1,11 @@
 --TEST--
-Test compact() function : basic functionality 
+Test compact() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array compact(mixed var_names [, mixed ...])
- * Description: Creates a hash containing variables and their values 
+ * Description: Creates a hash containing variables and their values
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*

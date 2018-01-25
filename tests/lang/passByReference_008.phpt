@@ -1,5 +1,5 @@
 --TEST--
-Pass same variable by ref and by value. 
+Pass same variable by ref and by value.
 --FILE--
 <?php
 function valRef($x, &$y) {

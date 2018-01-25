@@ -3,7 +3,7 @@ collator_get_sort_key()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
 <?php if(version_compare(INTL_ICU_VERSION, '4.8') < 0) print 'skip ICU >= 4.8 only'; ?>
-<?php /* XXX Obviously it fails somewhere between >= 4.8 and < 51.2 */ 
+<?php /* XXX Obviously it fails somewhere between >= 4.8 and < 51.2 */
 if (version_compare(INTL_ICU_VERSION, '51.2') >=  0) die('skip for ICU < 51.2'); ?>
 --FILE--
 <?php
@@ -70,9 +70,9 @@ source: а
 key: 5c0a01050105
 source: z
 key: 5901050105
-source: 
+source:
 key: 0101
-source: 
+source:
 key: 0101
 source: 3
 key: 1801050105

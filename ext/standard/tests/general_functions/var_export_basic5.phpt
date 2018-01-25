@@ -5,14 +5,14 @@ serialize_precision=17
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
 echo "*** Testing var_export() with valid arrays ***\n";
-// different valid  arrays 
+// different valid  arrays
 $valid_arrays = array(
            "array()" => array(),
            "array(NULL)" => array(NULL),
@@ -120,26 +120,26 @@ string(20) "array (
 
 --Iteration: array(array(), array()) --
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 string(55) "array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )"
@@ -147,36 +147,36 @@ string(55) "array (
 
 --Iteration: array(array(1, 2), array('a', 'b')) --
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 string(107) "array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',

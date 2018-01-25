@@ -5,11 +5,11 @@ Closure 039: Rebinding closures, change scope, same runtime type
 
 class A {
 	private $x;
-	
+
 	public function __construct($v) {
 		$this->x = $v;
 	}
-	
+
 	public function getIncrementor() {
 		return function() { return ++$this->x; };
 	}

@@ -9,7 +9,7 @@ if (!extension_loaded('intl'))
 
 class foo extends IntlTimeZone {
 		public $foo = 'test';
-			
+
 				public function __construct() { }
 }
 

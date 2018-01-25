@@ -11,7 +11,7 @@ Test token_get_all() function : usage variations - with exception keywords
 
 /*
  * Testing token_get_all() with different exception keywords
- *   try - T_TRY(336), 
+ *   try - T_TRY(336),
  *   catch - T_CATCH(337),
  *   throw - T_THROW(338)
 */

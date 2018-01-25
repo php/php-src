@@ -3,7 +3,7 @@ HTML entities of ISO-8859 chars
 --INI--
 output_handler=
 --FILE--
-<?php 
+<?php
 setlocale (LC_CTYPE, "C");
 $sc_encoded = htmlspecialchars ("<>\"&åÄ\n",ENT_COMPAT,"ISO-8859-1");
 echo $sc_encoded;

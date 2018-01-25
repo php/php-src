@@ -41,7 +41,7 @@ class test {
       return NULL;
     }
   }
-  
+
   static public function count() {
     return test::$cnt;
   }

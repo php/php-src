@@ -5,7 +5,7 @@ Bug #40509 (key() function changed behaviour if global array is used within func
 function foo()
 {
 	global $arr;
-	
+
 	$c = $arr["v"];
 	foreach ($c as $v) {}
 }

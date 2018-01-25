@@ -1,5 +1,5 @@
 --TEST--
-Test str_shuffle() function : basic functionality 
+Test str_shuffle() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string str_shuffle  ( string $str  )
@@ -19,7 +19,7 @@ var_dump(str_shuffle($str));
 
 
 // For a given i/p string ensure that all combinations are
-// generated given a reasonable sample of calls 
+// generated given a reasonable sample of calls
 $a = array();
 $trys = 1000;
 $ip = 'abcd';
@@ -27,17 +27,17 @@ $len_ip = strlen($ip);
 
 for ($i = 0; $i < $trys; $i++) {
     $op = str_shuffle($ip);
-    
+
     if (!is_string($op) || strlen($op) != $len_ip) {
-    	echo "TEST FAILED\n"; 
-    }	 
-    
+    	echo "TEST FAILED\n";
+    }
+
     // Combination already hit ?
     if (empty($a[$op])) {
-    	// No first time init 
+    	// No first time init
      	$a[$op] = 0;
     }
-     	
+
     // Increment count for this combination
     $a[$op]++;
 }

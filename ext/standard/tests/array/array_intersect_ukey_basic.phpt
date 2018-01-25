@@ -1,5 +1,5 @@
 --TEST--
-array_intersect_ukey(): Basic test.  
+array_intersect_ukey(): Basic test.
 --FILE--
 <?php
 /*

@@ -6,7 +6,7 @@ namespace test;
 {
 	class inner
 	{
-		
+
 	}
 }
 

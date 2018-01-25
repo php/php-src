@@ -1,5 +1,5 @@
 --TEST--
-Test preg_quote() function : error conditions  - wrong numbers of parameters 
+Test preg_quote() function : error conditions  - wrong numbers of parameters
 --FILE--
 <?php
 /*

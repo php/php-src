@@ -26,7 +26,7 @@ var_dump(file_exists(dirname(__FILE__) . '/buildfromdirectory6.phar'));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromdirectory6.phar');
 foreach(range(1, 4) as $i) {
     unlink(dirname(__FILE__) . "/testdir6/file$i.txt");

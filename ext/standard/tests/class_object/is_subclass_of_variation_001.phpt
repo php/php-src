@@ -3,9 +3,9 @@ Test is_subclass_of() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
 /* Prototype  : proto bool is_subclass_of(object object, string class_name)
- * Description: Returns true if the object has this class as one of its parents 
+ * Description: Returns true if the object has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 // Note: basic use cases in Zend/tests/is_a.phpt
 spl_autoload_register(function ($className) {
@@ -89,88 +89,88 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(69)
 Error: 8 - Undefined variable: unset_var, %s(72)
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
-bool(false)
-Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
-
-Arg value Array 
+Arg value 0.5
 bool(false)
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
+bool(false)
+Error: 8 - Array to string conversion, %sis_subclass_of_variation_001.php(%d)
+
+Arg value Array
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value string 
+Arg value string
 In autoload(string)
 bool(false)
 
-Arg value String 
+Arg value String
 In autoload(String)
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

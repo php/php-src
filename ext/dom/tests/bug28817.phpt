@@ -17,7 +17,7 @@ class z extends domDocument{
 		$this->p_array[] = 'tiro';
 
 		$this->p_variable = 'Cessante causa cessat effectus';
-	}	
+	}
 }
 
 $z=new z();

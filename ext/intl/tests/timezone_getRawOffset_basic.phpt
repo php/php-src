@@ -18,4 +18,4 @@ var_dump(intltz_get_raw_offset($lsb));
 --EXPECT--
 int(3600000)
 int(0)
-==DONE==
+==DONE==

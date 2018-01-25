@@ -13,7 +13,7 @@ foreach ($diriter as $key => $file) {
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s"
 string(%d) "%s"
 ===DONE===

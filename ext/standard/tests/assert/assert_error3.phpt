@@ -19,7 +19,7 @@ Stack trace:
 #0 %s(%d): assert('0 $ 0')
 #1 {main}
 
-Next Error: Failure evaluating code: 
+Next Error: Failure evaluating code:
 0 $ 0 in %s:%d
 Stack trace:
 #0 %s(%d): assert('0 $ 0')

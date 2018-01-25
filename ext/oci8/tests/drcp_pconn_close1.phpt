@@ -40,5 +40,5 @@ echo "Done\n";
 This is with a OCI_PCONNECT
 resource(%d) of type (oci8 persistent connection)
 resource(%d) of type (oci8 persistent connection)
-Both connections share a resource : OK 
+Both connections share a resource : OK
 Done

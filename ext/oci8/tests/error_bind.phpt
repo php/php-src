@@ -50,7 +50,7 @@ echo "Done\n";
 --EXPECTF--
 Insert value
 bool(true)
-Test 1 - Assign a resource to the bind variable and execute 
+Test 1 - Assign a resource to the bind variable and execute
 
 Warning: oci_execute(): Invalid variable used for bind in %s on line %d
 bool(false)

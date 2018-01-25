@@ -29,7 +29,7 @@ $str_array = array(
   '"testing",ucword,"test"',
   '"t""t",test, t',
   '\'t \'t\',test',
-  
+
   // using other white spaces
   '\ttesting\ttesting\tucwords',
   'testing\rucwords testing ucwords',
@@ -41,7 +41,7 @@ $str_array = array(
   't@@#$% %test ^test &test *test +test -test',
   '!test ~test `test` =test= @test@test.com',
   '/test/r\test\ucwords\t\y\y\u\3 \yy\ /uu/',
-  
+
   //only special chars
   '!@#$%^&*()_+=-`~'
 );

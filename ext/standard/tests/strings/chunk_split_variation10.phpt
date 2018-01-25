@@ -28,12 +28,12 @@ $values = array (
   'ENDING',  //String
   '@#$%^',  //Special chars
 
-  
-  '\t',  
+
+  '\t',
   '\n',
   '\r',
   '\r\n',
-  
+
   '\0',  //Null char
   '123',  //Numeric
   '(MSG)',  //With ( and )

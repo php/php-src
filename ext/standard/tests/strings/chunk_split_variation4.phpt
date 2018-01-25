@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - different heredoc strings as 'str' argument 
+Test chunk_split() function : usage variations - different heredoc strings as 'str' argument
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -9,7 +9,7 @@ Test chunk_split() function : usage variations - different heredoc strings as 's
 */
 
 /*
-* Passing different heredoc strings as 'str' argument to the chunk_split() 
+* Passing different heredoc strings as 'str' argument to the chunk_split()
 * with 'chunklen' 4 and default value of 'ending' that is "\r\n"
 */
 
@@ -81,7 +81,7 @@ foreach($heredoc_arr as $str) {
   var_dump( chunk_split( $str, $chunklen) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
 --EXPECTF--
@@ -97,7 +97,7 @@ string(3) "a
 "
 -- Iteration 4 --
 string(45) "This
- is 
+ is
 simp
 le h
 ered
@@ -107,7 +107,7 @@ g
 "
 -- Iteration 5 --
 string(90) "This
- is 
+ is
 to c
 heck
  chu
@@ -127,11 +127,11 @@ edoc
 -- Iteration 6 --
 string(59) "This
  che
-cks 
+cks
 here
-doc 
+doc
 with
- $, 
+ $,
 %, &
 , ch
 ars
@@ -139,7 +139,7 @@ ars
 -- Iteration 7 --
 string(59) "This
  che
-cks	
+cks
  chu
 nk_s
 plit
@@ -150,18 +150,18 @@ ech
 ars
 "
 -- Iteration 8 --
-string(117) ""To 
+string(117) ""To
 chec
-k " 
+k "
 in h
 ered
 oc"
 
-I'm 
+I'm
 sure
  it'
 ll w
-ork 
+ork
 also
  wit
 h \
@@ -169,7 +169,7 @@ h \
 whic
 h is
  sin
-gle 
+gle
 slas
 h
 "

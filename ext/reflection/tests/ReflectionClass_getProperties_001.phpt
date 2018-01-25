@@ -14,7 +14,7 @@ class subpubf extends pubf {
 
 class protf {
 	protected $a;
-	static protected $s;	
+	static protected $s;
 }
 class subprotf extends protf {
 }
@@ -26,7 +26,7 @@ class privf {
 class subprivf extends privf  {
 }
 
-$classes = array("pubf", "subpubf", "protf", "subprotf", 
+$classes = array("pubf", "subpubf", "protf", "subprotf",
 				 "privf", "subprivf");
 foreach($classes as $class) {
 	echo "Reflecting on class $class: \n";
@@ -36,7 +36,7 @@ foreach($classes as $class) {
 
 ?>
 --EXPECTF--
-Reflecting on class pubf: 
+Reflecting on class pubf:
 array(2) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
@@ -53,7 +53,7 @@ array(2) {
     string(4) "pubf"
   }
 }
-Reflecting on class subpubf: 
+Reflecting on class subpubf:
 array(2) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
@@ -70,7 +70,7 @@ array(2) {
     string(4) "pubf"
   }
 }
-Reflecting on class protf: 
+Reflecting on class protf:
 array(2) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
@@ -87,7 +87,7 @@ array(2) {
     string(5) "protf"
   }
 }
-Reflecting on class subprotf: 
+Reflecting on class subprotf:
 array(2) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
@@ -104,7 +104,7 @@ array(2) {
     string(5) "protf"
   }
 }
-Reflecting on class privf: 
+Reflecting on class privf:
 array(2) {
   [0]=>
   object(ReflectionProperty)#%d (2) {
@@ -121,6 +121,6 @@ array(2) {
     string(5) "privf"
   }
 }
-Reflecting on class subprivf: 
+Reflecting on class subprivf:
 array(0) {
 }

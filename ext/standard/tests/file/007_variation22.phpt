@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "a+b" mode 
+Test fopen and fclose() functions - usage variations - "a+b" mode
 --FILE--
 <?php
 /*
@@ -40,7 +40,7 @@ var_dump( get_resource_type($file_handle) );  //Check whether resource is lost a
 unlink($file);  //Deleting the file
 fclose( fopen($file, "a+b") );  //Opening the non-existing file in "a+b" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation22.tmp");

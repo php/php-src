@@ -4,7 +4,7 @@ php://input is empty when enable_post_data_reading=Off
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include __DIR__."/../../sapi/cli/tests/skipif.inc"; 
+include __DIR__."/../../sapi/cli/tests/skipif.inc";
 ?>
 --FILE--
 <?php

@@ -32,7 +32,7 @@ var_dump($a['dir']->isReadable());
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.phar.php');
 ?>
 --EXPECT--

@@ -55,6 +55,6 @@ Array
     [dow] => 1
     [abbrevdayname] => Mon
     [dayname] => Monday
-    [abbrevmonth] => 
-    [monthname] => 
+    [abbrevmonth] =>
+    [monthname] =>
 )

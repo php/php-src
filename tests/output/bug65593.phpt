@@ -1,7 +1,7 @@
 --TEST--
 Bug #65593 (ob_start(function(){ob_start();});)
 --FILE--
-<?php 
+<?php
 echo "Test\n";
 
 ob_start(function(){ob_start();});

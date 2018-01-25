@@ -7,7 +7,7 @@ if (!extension_loaded('%EXTNAME%')) {
 }
 ?>
 --FILE--
-<?php 
+<?php
 $ret = %EXTNAME%_test1();
 
 var_dump($ret);

@@ -1,7 +1,7 @@
 --TEST--
 Bug #61058 (array_fill leaks if start index is PHP_INT_MAX)
 --FILE--
-<?php 
+<?php
 array_fill(PHP_INT_MAX, 2, '*');
 ?>
 --EXPECTF--

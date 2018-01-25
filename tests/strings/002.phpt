@@ -1,7 +1,7 @@
 --TEST--
 Formatted print functions
 --FILE--
-<?php 
+<?php
 error_reporting(0);
 
 $fp = fopen("php://stdout", "w") or die("Arrggsgg!!");
@@ -52,7 +52,7 @@ printf test 1:simple string
 printf test 2:42
 printf test 3:3.333333
 printf test 4:3.3333333333
-printf test 5:2.50      
+printf test 5:2.50
 printf test 6:2.50000000
 printf test 7:0000002.50
 printf test 8:<                 foo>

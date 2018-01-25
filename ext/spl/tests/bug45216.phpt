@@ -4,7 +4,7 @@ SPL: SplFileObject::fgetss (bug 45216)
 Perrick Penet <perrick@noparking.net>
 #testfest phpcampparis 2008-06-07
 --FILE--
-<?php 
+<?php
 $file = dirname(__FILE__) . '/foo.html';
 file_put_contents($file, 'text 0<div class="tested">text 1</div>');
 $handle = fopen($file, 'r');

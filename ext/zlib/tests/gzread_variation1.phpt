@@ -1,9 +1,9 @@
 --TEST--
 Test function gzread() by calling it while file open for writing
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -30,5 +30,5 @@ unlink($filename);
 string(0) ""
 string(0) ""
 string(0) ""
-Here is the string to be written. 
+Here is the string to be written.
 ===DONE===

@@ -15,8 +15,8 @@ require_once getenv('REDIR_TEST_DIR') . 'pdo_test.inc';
 $db = PDOTest::factory();
 
 $db->exec('CREATE TABLE test(id int NOT NULL PRIMARY KEY, val VARCHAR(10), val2 VARCHAR(20))');
-$db->exec('INSERT INTO test VALUES(1, \'A\', \'A2\')'); 
-$db->exec('INSERT INTO test VALUES(2, \'A\', \'B2\')'); 
+$db->exec('INSERT INTO test VALUES(1, \'A\', \'A2\')');
+$db->exec('INSERT INTO test VALUES(2, \'A\', \'B2\')');
 
 $select1 = $db->prepare('SELECT id, val, val2 FROM test');
 $select2 = $db->prepare('SELECT val, val2 FROM test');

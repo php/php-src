@@ -1,7 +1,7 @@
 --TEST--
 Check how dgettext() with wrong parameter types and wrong parameter cou types and wrong parameter count behaves.
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip extension gettext not loaded\n");
 	}
@@ -11,7 +11,7 @@ Check how dgettext() with wrong parameter types and wrong parameter cou types an
 
 ?>
 --FILE--
-<?php 
+<?php
     chdir(dirname(__FILE__));
     setlocale(LC_ALL, 'en_US.UTF-8');
     dgettext ('foo');

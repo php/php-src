@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fseek(resource fp, int offset [, int whence])
- * Description: Seek on a file pointer 
+ * Description: Seek on a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzseek
  */
@@ -62,9 +62,9 @@ $values = array(
       // string data
       "string",
       'string',
-      
+
       // object data
-      new testClass(),      
+      new testClass(),
 
       // undefined data
       $undefined_var,
@@ -87,111 +87,111 @@ echo "Done";
 --EXPECTF--
 *** Testing fseek() : usage variations ***
 
-Arg value 10.5 
+Arg value 10.5
 int(0)
 int(10)
 
-Arg value -10.5 
+Arg value -10.5
 int(-1)
 int(10)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 int(0)
 int(0)
 
-Arg value 0.5 
+Arg value 0.5
 int(0)
 int(0)
 
-Arg value Array 
+Arg value Array
 
 Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 int(0)
 
-Arg value Array 
+Arg value Array
 
 Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 int(0)
 
-Arg value Array 
+Arg value Array
 
 Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 int(0)
 
-Arg value Array 
+Arg value Array
 
 Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 int(0)
 
-Arg value Array 
+Arg value Array
 
 Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 int(0)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 
-Arg value 1 
+Arg value 1
 int(0)
 int(1)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 
-Arg value 1 
+Arg value 1
 int(0)
 int(1)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 
-Arg value  
+Arg value
 
 Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 int(0)
 
-Arg value  
+Arg value
 
 Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 int(0)
 
-Arg value string 
+Arg value string
 
 Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 int(0)
 
-Arg value string 
+Arg value string
 
 Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 int(0)
 
-Arg value testClass 
+Arg value testClass
 
 Warning: fseek() expects parameter 2 to be integer, object given in %s on line %d
 bool(false)
 int(0)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 
-Arg value  
+Arg value
 int(0)
 int(0)
 Done

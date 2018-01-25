@@ -19,11 +19,11 @@ prompt> [Breakpoint #0 added at ZEND_THROW]
 prompt> [Breakpoint #0 in ZEND_THROW at %s:4, hits: 1]
 >00004: 	throw new Exception;
  00005: }
- 00006: 
+ 00006:
 prompt> [L0 %s HANDLE_EXCEPTION                                                                       %s]
 >00004: 	throw new Exception;
  00005: }
- 00006: 
+ 00006:
 prompt> [L0 %s HANDLE_EXCEPTION                                                                       %s]
 [L9 %s CATCH<-%d>             "Exception"          $e                   1                    %s]
 >00008: 	foo();
@@ -41,7 +41,7 @@ prompt> ok
 prompt> [L12 %s ECHO                    " ... ok"                                                      %s]
 >00012: 	echo " ... ok";
  00013: }
- 00014: 
+ 00014:
 prompt>  ... ok
 [L12 %s FAST_RET                ~%d                                                             %s]
 [L11 %s JMP                     J10                                                            %s]
@@ -49,8 +49,8 @@ prompt>  ... ok
  00012: 	echo " ... ok";
  00013: }
 prompt> [L14 %s RETURN<-1>              1                                                              %s]
->00014: 
-prompt> 
+>00014:
+prompt>
 --FILE--
 <?php
 

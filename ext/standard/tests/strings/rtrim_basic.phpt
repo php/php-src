@@ -1,5 +1,5 @@
 --TEST--
-Test rtrim() function : basic functionality 
+Test rtrim() function : basic functionality
 --FILE--
 <?php
 
@@ -20,13 +20,13 @@ $binary = "Example string\x0A\x0D";
 echo "\n-- Trim string with all white space characters --\n";
 var_dump(rtrim($text));
 
-echo "\n-- Trim non-whitespace from a string --\n"; 
+echo "\n-- Trim non-whitespace from a string --\n";
 var_dump(rtrim($hello, "=!"));
 
-echo "\n-- Trim some non-white space characters from a string --\n"; 
+echo "\n-- Trim some non-white space characters from a string --\n";
 var_dump(rtrim($hello, "!dlWro="));
 
-echo "\n-- Trim some non-white space characters from a string using a character range --\n"; 
+echo "\n-- Trim some non-white space characters from a string using a character range --\n";
 var_dump(rtrim($alpha, "A..Z"));
 
 echo "\n-- Trim the ASCII control characters at the beginning of a string --\n";

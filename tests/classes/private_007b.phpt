@@ -12,7 +12,7 @@ class Bar {
 	}
 }
 class Foo extends Bar {
-	public function priv()	{ 
+	public function priv()	{
 		echo "Foo::priv()\n";
 	}
 }

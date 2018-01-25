@@ -43,7 +43,7 @@ $file_arr = array (
   "$name_prefix/./realpath_variation_私はガラスを食べられます/home/../home//tests//..//..//..//home//realpath_variation_私はガラスを食べられます.tmp/"
 );
 
-var_dump( realpath($file_arr[0]) ); 
+var_dump( realpath($file_arr[0]) );
 var_dump( realpath($file_arr[1]) );
 
 echo "\n*** Testing realpath() with filename as empty string, NULL and single space ***\n";
@@ -62,7 +62,7 @@ for($loop_counter = 0; $loop_counter < count($file_string); $loop_counter++) {
   echo "-- Iteration";
   echo $loop_counter + 1;
   echo " --\n";
-  var_dump( realpath($file_string[$loop_counter]) ); 
+  var_dump( realpath($file_string[$loop_counter]) );
 }
 
 echo "Done\n";

@@ -5,7 +5,7 @@ Sebastian Schürmann
 --FILE--
 <?php
 class myRecursiveIteratorIterator extends RecursiveIteratorIterator {
-	
+
 }
 
 try {

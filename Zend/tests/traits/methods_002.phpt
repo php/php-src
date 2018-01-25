@@ -3,7 +3,7 @@ Testing collision with magic methods
 --FILE--
 <?php
 
-trait foo {	
+trait foo {
 	public function __clone() {
 		var_dump(__FUNCTION__);
 	}

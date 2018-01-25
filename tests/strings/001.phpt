@@ -1,7 +1,7 @@
 --TEST--
 String functions
 --FILE--
-<?php 
+<?php
 
 error_reporting(0);
 

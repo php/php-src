@@ -21,7 +21,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
    Description: Gets information about a link
 */
 
-/* Variation 9 : Check lstat of soft/hard link created 
+/* Variation 9 : Check lstat of soft/hard link created
                  Check linkinfo() value with lstat['dev']
 */
 // temp file used
@@ -34,7 +34,7 @@ $soft_link = "$dirname/symlink_link_linkinfo_is_link_softlink_variation9.tmp";
 // hard link name used
 $hard_link = "$dirname/symlink_link_linkinfo_is_link_hardlink_variation9.tmp";
 
-// create the file 
+// create the file
 $fp = fopen($filename, "w");
 fclose($fp);
 

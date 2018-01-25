@@ -28,7 +28,7 @@ $xml = <<< EOXML
 EOXML;
 
 function dumpcourse($current) {
-	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title"; 
+	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
 	echo "Course: $title:";echo(get_class($current)), "\n";
 	echo "~";var_dump($current->textContent);
 }
@@ -77,18 +77,18 @@ Start cloneNode test
 node 0
 Course: new title3:DOMElement
 ~string(24) "
-		
+
 			c1n1
 			c1n2
-		
+
 	"
 node 1
 Course: two:DOMElement
 ~string(24) "
-		
+
 			c2n1
 			c2n2
-		
+
 	"
 node 2
 Course: new title default:DOMElement
@@ -96,10 +96,10 @@ Course: new title default:DOMElement
 node 3
 Course: new title true:DOMElement
 ~string(24) "
-		
+
 			c1n1
 			c1n2
-		
+
 	"
 node 4
 Course: new title false:DOMElement

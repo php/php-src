@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_open() function : basic functionality 
+Test timezone_open() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : DateTimeZone timezone_open  ( string $timezone  )

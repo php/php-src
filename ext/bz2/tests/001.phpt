@@ -18,7 +18,7 @@ var_dump(bzopen($fp, "r"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

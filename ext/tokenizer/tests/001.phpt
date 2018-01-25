@@ -131,7 +131,7 @@ echo token_name(array()), "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 T_INCLUDE
 T_INCLUDE_ONCE
 T_EVAL

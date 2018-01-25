@@ -4,7 +4,7 @@ Testing wrong parameter passing imagecopymerge() of GD library
 Cleston Viel Vieira de Sousa <cleston [dot] vs [at] gmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

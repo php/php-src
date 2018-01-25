@@ -19,7 +19,7 @@ var_dump($c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Object of class stdClass could not be converted to number in %sadd_002.php on line %d
 
 Exception: Unsupported operand types

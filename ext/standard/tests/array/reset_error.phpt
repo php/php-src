@@ -3,7 +3,7 @@ Test reset() function : error conditions - Pass incorrect number of args
 --FILE--
 <?php
 /* Prototype  : mixed reset(array $array_arg)
- * Description: Set array argument's internal pointer to the first element and return it 
+ * Description: Set array argument's internal pointer to the first element and return it
  * Source code: ext/standard/array.c
  */
 

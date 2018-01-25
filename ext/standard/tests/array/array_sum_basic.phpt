@@ -1,9 +1,9 @@
 --TEST--
-Test array_sum() function : basic functionality 
+Test array_sum() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array &input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 

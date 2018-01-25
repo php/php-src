@@ -5,12 +5,12 @@ Static keyword - basic tests
 
 echo "\nSame variable used as static and non static.\n";
 function staticNonStatic() {
-	echo "---------\n";	
+	echo "---------\n";
 	$a=0;
-	echo "$a\n";	
+	echo "$a\n";
 	static $a=10;
 	echo "$a\n";
-	$a++;	
+	$a++;
 }
 staticNonStatic();
 staticNonStatic();
@@ -60,10 +60,10 @@ Same variable used as static and non static.
 
 Lots of initialisations in the same statement.
 ------------- Call 0 --------------
-Unitialised      : 
+Unitialised      :
 Initialised to 10: 10
 Initialised to 20: 20
-Unitialised      : 
+Unitialised      :
 Initialised to 30: 30
 ------------- Call 1 --------------
 Unitialised      : 1

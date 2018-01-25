@@ -7,7 +7,7 @@ Test fgetss() function : usage variations - read modes
  Description: Gets line from file pointer and strip HTML tags
 */
 
-// include the common file related test functions 
+// include the common file related test functions
 include ("file.inc");
 
 /*Test fgetss() with all read modes , reading line by line with allowable tags: <test>, <html>, <?> */
@@ -22,12 +22,12 @@ is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
 <html> html </html> <?php echo "php"; ?>
 this line is without any html and php tags
 this is a line with more than eighty character,want to check line splitting correctly after 80 characters
-this is the text containing \r character 
+this is the text containing \r character
 this text contains some html tags <body> body </body> <br> br </br>
-this is the line with \n character. 
+this is the line with \n character.
 EOT;
 
-$filename = dirname(__FILE__)."/fgetss_variation2.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation2.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("r","rb", "rt","r+", "r+b", "r+t");
@@ -37,7 +37,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
 
   /* create an empty file and write the strings with tags */
   create_file ($filename); //create an empty file
-  file_put_contents($filename, $string_with_tags); 
+  file_put_contents($filename, $string_with_tags);
   $file_handle = fopen($filename, $file_modes[$mode_counter]);
   if(!$file_handle) {
     echo "Error: failed to open file $filename!\n";
@@ -49,7 +49,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
   var_dump( rewind($file_handle) );
   var_dump( ftell($file_handle) );
   var_dump( feof($file_handle) );
-   
+
   /* rewind the file and read the file  line by line with allowable tags */
   echo "-- Reading line by line with allowable tags: <test>, <html>, <?> --\n";
   rewind($file_handle);
@@ -60,10 +60,10 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
      var_dump( ftell($file_handle) );  // check the file pointer position
      var_dump( feof($file_handle) );  // check if eof reached
   }
- 
-  // close the file 
-  fclose($file_handle); 
-  // delete the file 
+
+  // close the file
+  fclose($file_handle);
+  // delete the file
   delete_file($filename);
 } // end of for - mode_counter
 
@@ -94,7 +94,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -113,17 +113,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)
@@ -154,7 +154,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -173,17 +173,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)
@@ -214,7 +214,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -233,17 +233,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)
@@ -274,7 +274,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -293,17 +293,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)
@@ -334,7 +334,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -353,17 +353,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)
@@ -394,7 +394,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -413,17 +413,17 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(41) "this is the text containing  character 
+string(41) "this is the text containing  character
 "
 int(383)
 bool(false)
 -- Line 9 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(451)
 bool(false)
 -- Line 10 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(474)
 bool(false)

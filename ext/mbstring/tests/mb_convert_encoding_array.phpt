@@ -8,7 +8,7 @@ function_exists('mb_convert_encoding') or die("skip mb_convert_encoding() is not
 --FILE--
 <?php
 /* Prototype  : string mb_convert_encoding(string $str, string $to_encoding [, mixed $from_encoding])
- * Description: Returns converted string in desired encoding 
+ * Description: Returns converted string in desired encoding
  * Source code: ext/mbstring/mbstring.c
  */
 

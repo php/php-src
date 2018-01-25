@@ -12,7 +12,7 @@ Class Test
 	static public    $pub = 'pub';
 	static protected $pro = 'pro';
 	static private   $pri = 'pri';
-	
+
 	static function testing()
 	{
 		$ref = new ReflectionClass('Test');

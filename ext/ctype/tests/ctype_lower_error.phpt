@@ -5,7 +5,7 @@ Test ctype_lower() function : error conditions - incorrect number of args
 --FILE--
 <?php
 /* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)  
+ * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 

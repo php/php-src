@@ -18,7 +18,7 @@ feof($fp);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: feof(): wrapper::stream_eof is not implemented! Assuming EOF in %s on line %d
 
 Fatal error: Uncaught Exception in %s:%d

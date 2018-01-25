@@ -20,4 +20,4 @@ var_dump(in_array('pt', $locales));
 --EXPECT--
 bool(true)
 bool(true)
-==DONE==
+==DONE==

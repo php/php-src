@@ -33,7 +33,7 @@ echo shell_exec("$php -n $test_file");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%sbug74589_新建文件夹"
 string(%d) "%sbug74589_新建文件夹%etest.php"
 bool(true)

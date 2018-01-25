@@ -1,5 +1,5 @@
 --TEST--
-PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback) 
+PECL Bug #10194 (segfault in Instant Client when memory_limit is reached inside the callback)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
@@ -9,14 +9,14 @@ if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 if (getenv("USE_ZEND_ALLOC") === "0") {
     die("skip Zend MM disabled");
 }
-?> 
+?>
 --INI--
 memory_limit=3M
 --FILE--
 <?php
 
 // This test is dependent on the behavior of the memory manager
-    
+
 require(dirname(__FILE__).'/connect.inc');
 require(dirname(__FILE__).'/create_table.inc');
 
@@ -52,7 +52,7 @@ require dirname(__FILE__).'/drop_table.inc';
 
 echo "Done\n";
 ?>
---EXPECTF-- 
+--EXPECTF--
 Before load()
 
 Fatal error: Allowed memory size of %d bytes exhausted%s(tried to allocate %d bytes) in %s on line %d

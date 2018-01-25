@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : bool rmdir(string dirname[, resource context])
- * Description: Remove a directory 
+ * Description: Remove a directory
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing rmdir() : usage variation ***\n";
@@ -102,7 +102,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // non stream context resource
       $fileres,
 );

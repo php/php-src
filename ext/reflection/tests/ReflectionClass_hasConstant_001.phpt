@@ -22,7 +22,7 @@ echo "Check absent constant: ";
 var_dump($rc->hasConstant("doesntExist"));
 
 
-$rd = new ReflectionClass("D");  
+$rd = new ReflectionClass("D");
 echo "Check inherited constant: ";
 var_dump($rd->hasConstant("myConst"));
 echo "Check absent constant: ";

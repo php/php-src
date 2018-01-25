@@ -49,11 +49,11 @@ try {
 	print_exception($e);
 	$fmt = null;
 }
-err($fmt); 
+err($fmt);
 $fmt = numfmt_create();
-err($fmt); 
+err($fmt);
 $fmt = NumberFormatter::create();
-err($fmt); 
+err($fmt);
 
 foreach($args as $arg) {
 	$fmt = crt("O", $arg[0], $arg[1]);

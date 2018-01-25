@@ -23,7 +23,7 @@ print "\n";
 --EXPECT--
 Test 2: Transform To HTML String
 <html><body>bar
-a1 b1 c1 <br> 
-a2 c2 <br> 
-ä3 b3 c3 <br> 
+a1 b1 c1 <br>
+a2 c2 <br>
+ä3 b3 c3 <br>
 </body></html>

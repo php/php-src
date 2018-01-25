@@ -3,9 +3,9 @@ Test parse_url() function : usage variations  - unexpected type for arg 1.
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components 
+ * Description: Parse a URL and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
@@ -80,145 +80,145 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(60)
 Error: 8 - Undefined variable: unset_var, %s(63)
 
-Arg value 0 
+Arg value 0
 array(1) {
   ["path"]=>
   string(1) "0"
 }
 
-Arg value 1 
+Arg value 1
 array(1) {
   ["path"]=>
   string(1) "1"
 }
 
-Arg value 12345 
+Arg value 12345
 array(1) {
   ["path"]=>
   string(5) "12345"
 }
 
-Arg value -2345 
+Arg value -2345
 array(1) {
   ["path"]=>
   string(5) "-2345"
 }
 
-Arg value 10.5 
+Arg value 10.5
 array(1) {
   ["path"]=>
   string(4) "10.5"
 }
 
-Arg value -10.5 
+Arg value -10.5
 array(1) {
   ["path"]=>
   string(5) "-10.5"
 }
 
-Arg value 101234567000 
+Arg value 101234567000
 array(1) {
   ["path"]=>
   string(12) "101234567000"
 }
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 array(1) {
   ["path"]=>
   string(13) "1.07654321E-9"
 }
 
-Arg value 0.5 
+Arg value 0.5
 array(1) {
   ["path"]=>
   string(3) "0.5"
 }
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 Error: 8 - Array to string conversion, %sparse_url_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 1 to be string, array given, %s(70)
 NULL
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value 1 
+Arg value 1
 array(1) {
   ["path"]=>
   string(1) "1"
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value 1 
+Arg value 1
 array(1) {
   ["path"]=>
   string(1) "1"
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 Error: 4096 - Object of class stdClass could not be converted to string, %s(69)
 
-Arg value  
+Arg value
 Error: 2 - parse_url() expects parameter 1 to be string, object given, %s(70)
 NULL
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""
 }
 
-Arg value  
+Arg value
 array(1) {
   ["path"]=>
   string(0) ""

@@ -18,7 +18,7 @@ var_dump(file_get_contents($filename));
 echo "Done\n";
 
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 string(6) "mydata"
 Done

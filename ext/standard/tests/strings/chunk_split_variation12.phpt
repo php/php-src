@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : usage variations - different heredoc strings for 'ending' argument 
+Test chunk_split() function : usage variations - different heredoc strings for 'ending' argument
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -9,7 +9,7 @@ Test chunk_split() function : usage variations - different heredoc strings for '
 */
 
 /*
-* passing different heredoc strings as 'ending' argument to chunk_split() 
+* passing different heredoc strings as 'ending' argument to chunk_split()
 * 'chunklen' argument is set to 10
 */
 
@@ -80,7 +80,7 @@ foreach($heredoc_arr as $value) {
   var_dump( chunk_split( $str, $chunklen, $value) );
   $count++;
 };
- 
+
 echo "Done"
 ?>
 --EXPECTF--
@@ -126,18 +126,18 @@ heredoc"
 string(443) "This is stThis checks with $, %, &, charsr to checkThis checks with $, %, &, chars with hereThis checks with $, %, &, charsdoc endingThis checks with $, %, &, chars.This	contThis checks with $, %, &, charsains,
 specThis checks with $, %, &, charsi@! ch@r$ This checks with $, %, &, chars__with wroThis checks with $, %, &, charsng \k escaThis checks with $, %, &, charspe char 22This checks with $, %, &, chars2.This checks with $, %, &, chars"
 -- Iteration 7 --
-string(487) "This is stThis checks	 and 
-white space charsr to checkThis checks	 and 
-white space chars with hereThis checks	 and 
-white space charsdoc endingThis checks	 and 
-white space chars.This	contThis checks	 and 
+string(487) "This is stThis checks	 and
+white space charsr to checkThis checks	 and
+white space chars with hereThis checks	 and
+white space charsdoc endingThis checks	 and
+white space chars.This	contThis checks	 and
 white space charsains,
-specThis checks	 and 
-white space charsi@! ch@r$ This checks	 and 
-white space chars__with wroThis checks	 and 
-white space charsng \k escaThis checks	 and 
-white space charspe char 22This checks	 and 
-white space chars2.This checks	 and 
+specThis checks	 and
+white space charsi@! ch@r$ This checks	 and
+white space chars__with wroThis checks	 and
+white space charsng \k escaThis checks	 and
+white space charspe char 22This checks	 and
+white space chars2.This checks	 and
 white space chars"
 -- Iteration 8 --
 string(597) "This is st"To check " in heredoc".I'm sure it'll \work!r to check"To check " in heredoc".I'm sure it'll \work! with here"To check " in heredoc".I'm sure it'll \work!doc ending"To check " in heredoc".I'm sure it'll \work!.This	cont"To check " in heredoc".I'm sure it'll \work!ains,

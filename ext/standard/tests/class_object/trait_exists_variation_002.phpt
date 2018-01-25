@@ -3,9 +3,9 @@ Test trait_exists() function : usage variations  - unexpected types for argument
 --FILE--
 <?php
 /* Prototype  : proto bool trait_exists(string traitname [, bool autoload])
- * Description: Checks if the trait exists 
+ * Description: Checks if the trait exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($traitName) {
@@ -91,108 +91,108 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(71)
 Error: 8 - Undefined variable: unset_var, %s(74)
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(string_val)
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 In autoload(string_val)
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 In autoload(string_val)
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 In autoload(string_val)
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 In autoload(string_val)
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 In autoload(string_val)
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 In autoload(string_val)
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 In autoload(string_val)
 bool(false)
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
 NULL
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(string_val)
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 In autoload(string_val)
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value string 
+Arg value string
 In autoload(string_val)
 bool(false)
 
-Arg value string 
+Arg value string
 In autoload(string_val)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(80)
 
-Arg value  
+Arg value
 Error: 2 - trait_exists() expects parameter 2 to be boolean, object given, %s(81)
 NULL
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

@@ -21,7 +21,7 @@ mbstring.func_overload=0
 			print "ok\n";
 		} else {
 			print count($result1).'-'.count($result2)."\n";
-		}	
+		}
 	}
 
 	var_dump( mb_split( " ", "a b c d e f g" )

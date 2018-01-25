@@ -5,8 +5,8 @@ Test ctype_punct() function : error conditions - incorrect number of args
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)
- * Description: Checks for any printable character which is not whitespace 
- * or an alphanumeric character 
+ * Description: Checks for any printable character which is not whitespace
+ * or an alphanumeric character
  * Source code: ext/ctype/ctype.c
  */
 
@@ -16,7 +16,7 @@ Test ctype_punct() function : error conditions - incorrect number of args
 
 echo "*** Testing ctype_punct() : error conditions ***\n";
 
-$orig = setlocale(LC_CTYPE, "C"); 
+$orig = setlocale(LC_CTYPE, "C");
 
 // Zero arguments
 echo "\n-- Testing ctype_punct() function with Zero arguments --\n";
@@ -28,7 +28,7 @@ $c = 1;
 $extra_arg = 10;
 var_dump( ctype_punct($c, $extra_arg) );
 
-setlocale(LC_CTYPE, $orig); 
+setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
 --EXPECTF--

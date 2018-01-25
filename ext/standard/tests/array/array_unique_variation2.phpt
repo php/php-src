@@ -3,7 +3,7 @@ Test array_unique() function : usage variations - different arrays for 'input' a
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
@@ -77,7 +77,7 @@ foreach($inputs as $input) {
   var_dump( array_unique($input, SORT_STRING) );
   $iterator++;
 }
-  
+
 echo "Done";
 ?>
 --EXPECTF--
@@ -144,8 +144,8 @@ The quick brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }

@@ -6,7 +6,7 @@ class privateCtorOld {
 	private function privateCtorOld() {}
 	public static function reflectionObjectFactory() {
 		return new ReflectionObject(new self);
-	}	
+	}
 }
 $reflectionObject =  privateCtorOld::reflectionObjectFactory();
 

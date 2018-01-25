@@ -16,7 +16,7 @@ $begin_array = array(
   array( -2.44444 => 12),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL,	"d" => -2.344),
   array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL,1 => -2.344),
-  array( NULL, 1.23 => "Hi", "string" => "hello", 
+  array( NULL, 1.23 => "Hi", "string" => "hello",
   array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -26,8 +26,8 @@ $end_array   = array(
   array( "" => "string"),
   array( -2.44444 => 12),
   array( "a" => 1, "b" => -2.344, "b" => "string", "c" => NULL, "d" => -2.344),
-  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344), 
-  array( NULL, 1.23 => "Hi", "string" => "hello", 
+  array( 4 => 1, 3 => -2.344, "3" => "string", "2" => NULL, 1=> -2.344),
+  array( NULL, 1.23 => "Hi", "string" => "hello",
          array("" => "World", "-2.34" => "a", "0" => "b"))
 );
 
@@ -41,22 +41,22 @@ foreach($begin_array as $first) {
     $result = array_merge($first, $second);
     print_r($result);
     $count_inner++;
-  }			
+  }
   $count_outer++;
 }
 
 
 echo "\n*** Testing array_merge() with three or more arrays ***\n";
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
                        $end_array[4],
                        $end_array[6]
                      )
         );
 
-var_dump( array_merge( $end_array[0], 
-                       $end_array[5], 
-                       array("array on fly"), 
+var_dump( array_merge( $end_array[0],
+                       $end_array[5],
+                       array("array on fly"),
                        array("nullarray" => array())
                      )
         );
@@ -64,7 +64,7 @@ var_dump( array_merge( $end_array[0],
 
 echo "\n*** Testing single array argument ***\n";
 /* Empty array */
-var_dump(array_merge(array())); 
+var_dump(array_merge(array()));
 
 /* associative array with string keys, which will not be re-indexed */
 var_dump(array_merge($begin_array[4]));
@@ -86,7 +86,7 @@ var_dump(array_merge($begin_array[0], $begin_array[1], 100));
 var_dump(array_merge($begin_array[0], $begin_array[1], $arr4));
 
 echo "Done\n";
-?> 
+?>
 --EXPECTF--
 *** Testing array_merge() basic functionality ***
 
@@ -119,7 +119,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -128,14 +128,14 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 0 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -182,7 +182,7 @@ Array
     [0] => string
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -192,7 +192,7 @@ Array
     [0] => string
     [1] => 1
     [2] => string
-    [3] => 
+    [3] =>
     [4] => -2.344
 )
 
@@ -200,7 +200,7 @@ Array
 Array
 (
     [0] => string
-    [1] => 
+    [1] =>
     [2] => Hi
     [string] => hello
     [3] => Array
@@ -246,7 +246,7 @@ Array
     [] => string
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -256,7 +256,7 @@ Array
     [] => string
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
 )
 
@@ -264,7 +264,7 @@ Array
 Array
 (
     [] => string
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -311,7 +311,7 @@ Array
     [0] => 12
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -321,7 +321,7 @@ Array
     [0] => 12
     [1] => 1
     [2] => string
-    [3] => 
+    [3] =>
     [4] => -2.344
 )
 
@@ -329,7 +329,7 @@ Array
 Array
 (
     [0] => 12
-    [1] => 
+    [1] =>
     [2] => Hi
     [string] => hello
     [3] => Array
@@ -348,7 +348,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -357,7 +357,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
     [0] => string
 )
@@ -367,7 +367,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
     [] => string
 )
@@ -377,7 +377,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
     [0] => 12
 )
@@ -387,7 +387,7 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -396,11 +396,11 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
 )
 
@@ -409,9 +409,9 @@ Array
 (
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -430,7 +430,7 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
 )
 
@@ -439,7 +439,7 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
     [4] => string
 )
@@ -449,7 +449,7 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
     [] => string
 )
@@ -459,7 +459,7 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
     [4] => 12
 )
@@ -469,11 +469,11 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
@@ -482,11 +482,11 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
     [4] => 1
     [5] => string
-    [6] => 
+    [6] =>
     [7] => -2.344
 )
 
@@ -495,9 +495,9 @@ Array
 (
     [0] => 1
     [1] => string
-    [2] => 
+    [2] =>
     [3] => -2.344
-    [4] => 
+    [4] =>
     [5] => Hi
     [string] => hello
     [6] => Array
@@ -514,7 +514,7 @@ Array
 -- Inner iteration 0 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -529,7 +529,7 @@ Array
 -- Inner iteration 1 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -545,7 +545,7 @@ Array
 -- Inner iteration 2 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -561,7 +561,7 @@ Array
 -- Inner iteration 3 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -577,7 +577,7 @@ Array
 -- Inner iteration 4 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -589,14 +589,14 @@ Array
 
     [a] => 1
     [b] => string
-    [c] => 
+    [c] =>
     [d] => -2.344
 )
 
 -- Inner iteration 5 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -608,14 +608,14 @@ Array
 
     [3] => 1
     [4] => string
-    [5] => 
+    [5] =>
     [6] => -2.344
 )
 
 -- Inner iteration 6 of Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => Hi
     [string] => hello
     [2] => Array
@@ -625,7 +625,7 @@ Array
             [0] => b
         )
 
-    [3] => 
+    [3] =>
     [4] => Hi
     [5] => Array
         (

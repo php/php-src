@@ -4,7 +4,7 @@ JSON (http://www.crockford.com/JSON/JSON_checker/test/pass2.json)
 <?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
-    
+
 $test = '[[[[[[[[[[[[[[[[[[["Not too deep"]]]]]]]]]]]]]]]]]]]';
 echo 'Testing: ' . $test . "\n";
 echo "DECODE: AS OBJECT\n";

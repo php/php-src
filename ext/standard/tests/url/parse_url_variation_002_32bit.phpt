@@ -5,9 +5,9 @@ Test parse_url() function : usage variations  - unexpected type for arg 2.
 --FILE--
 <?php
 /* Prototype  : proto mixed parse_url(string url, [int url_component])
- * Description: Parse a URL and return its components 
+ * Description: Parse a URL and return its components
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
@@ -83,11 +83,11 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(%d)
 Error: 8 - Undefined variable: unset_var, %s(%d)
 
-Arg value 10.5 
+Arg value 10.5
 Error: 2 - parse_url(): Invalid URL component identifier 10, %s(%d)
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 array(8) {
   ["scheme"]=>
   string(4) "http"
@@ -107,83 +107,83 @@ array(8) {
   string(16) "some_page_ref123"
 }
 
-Arg value 101234567000 
+Arg value 101234567000
 Error: 2 - parse_url() expects parameter 2 to be integer, float given, %s(%d)
 NULL
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string(4) "http"
 
-Arg value 0.5 
+Arg value 0.5
 string(4) "http"
 Error: 8 - Array to string conversion, %s(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
 NULL
 
-Arg value  
+Arg value
 string(4) "http"
 
-Arg value  
+Arg value
 string(4) "http"
 
-Arg value 1 
+Arg value 1
 string(%d) "www.php.net"
 
-Arg value  
+Arg value
 string(4) "http"
 
-Arg value 1 
+Arg value 1
 string(%d) "www.php.net"
 
-Arg value  
+Arg value
 string(4) "http"
 
-Arg value  
+Arg value
 Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
-Arg value  
+Arg value
 Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
-Arg value string 
+Arg value string
 Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 
-Arg value string 
+Arg value string
 Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
-Arg value  
+Arg value
 Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(%d)
 NULL
 
-Arg value  
+Arg value
 string(4) "http"
 
-Arg value  
+Arg value
 string(4) "http"
 Done

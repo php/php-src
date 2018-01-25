@@ -64,7 +64,7 @@ $values = array(
       'int indexed array' => $index_array,
       'associative array' => $assoc_array,
 	  'nested arrays' => array('foo', $index_array, $assoc_array),
-      
+
       // null data
 	  'uppercase NULL' => NULL,
       'lowercase null' => null,
@@ -94,8 +94,8 @@ $values = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      //resource 
+
+      //resource
       "file resource" => $fp
 );
 // loop through each element of the array for red

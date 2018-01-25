@@ -29,7 +29,7 @@ function ut_main()
 	$char_fi_ligature = "\xEF\xAC\x81";  // 'LATIN SMALL LIGATURE FI' (U+FB01)
 
 	$char_long_s_dot = "\xE1\xBA\x9B";	// 'LATIN SMALL LETTER LONG S WITH DOT ABOVE' (U+1E9B)
-	
+
 	// the word 'hindi' using Devanagari characters:
 	$hindi = "\xe0\xa4\xb9\xe0\xa4\xbf\xe0\xa4\xa8\xe0\xa5\x8d\xe0\xa4\xa6\xe0\xa5\x80";
 
@@ -42,7 +42,7 @@ function ut_main()
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strlen($string) {}' . "\n\n";
 
-	
+
 	$res_str .= "\"hindi\" in devanagari strlen " . grapheme_strlen($hindi) . "\n";
 	$res_str .= "\"ab\" + \"hindi\" + \"cde\" strlen " . grapheme_strlen('ab' . $hindi . 'cde') . "\n";
 	$res_str .= "\"\" strlen " . grapheme_strlen("") . "\n";
@@ -50,7 +50,7 @@ function ut_main()
 	$res_str .= "char_a_ring_nfd + \"bc\" strlen " . grapheme_strlen($char_a_ring_nfd . 'bc') . "\n";
 	$res_str .= "\"abc\" strlen " . grapheme_strlen('abc') . "\n";
 
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strpos($haystack, $needle, $offset = 0) {}' . "\n\n";
 
@@ -75,7 +75,7 @@ function ut_main()
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", -5, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, -4, 3 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "op", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "opq", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -119,10 +119,10 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_stripos($haystack, $needle, $offset = 0) {}' . "\n\n";
-	
+
 	$tests = array(
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 2, 6 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Oo", "o", -6, 6 ),
@@ -142,7 +142,7 @@ function ut_main()
 		array( "abc", "A", 0, 0 ),
 		array( "Abc", "a", 1, "false" ),
 		array( "ababc", "A", 1, 2 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "oP", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "opQ", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -187,7 +187,7 @@ function ut_main()
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
 
-	
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strrpos($haystack, $needle, $offset = 0) {}' . "\n\n";
 
@@ -209,7 +209,7 @@ function ut_main()
 		array( "ababc", "a", 1, 2 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", 2, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "op", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "opq", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -252,11 +252,11 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] .  check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strripos($haystack, $needle, $offset = 0) {}' . "\n\n";
-	
+
 	$tests = array(
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 2, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_A_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
@@ -274,7 +274,7 @@ function ut_main()
 		array( "abc", "A", 0, 0 ),
 		array( "Abc", "a", 1, "false" ),
 		array( "ababc", "A", 1, 2 ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "oP", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", "opQ", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "abc", "false" ),
@@ -317,8 +317,8 @@ function ut_main()
 		}
 		$res_str .= " == " . $test[count($test)-1] . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
-	
+
+
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_substr($string, $start, $length = -1) {}' . "\n\n";
 
@@ -343,7 +343,7 @@ function ut_main()
 		array( "Abc", -4, 1, "false" ),
 		array( "ababc", 1, 2, "ba" ),
 		array( "ababc", 0, 10, "ababc" ),
-		
+
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 0, 10 , "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, "Opq" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", 5, -1, "Op" ),
@@ -392,7 +392,7 @@ function ut_main()
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -7, "a" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -8, "" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Opq", -8, -9, "false" ),
-		
+
 	);
 
 	foreach( $tests as $test ) {
@@ -414,7 +414,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}' . "\n\n";
@@ -441,7 +441,7 @@ function ut_main()
 		array( "ababc", "bab", TRUE, "a" ),
 		array( "ababc", "abc", TRUE, "ab" ),
 		array( "ababc", "abc", FALSE, "abc" ),
-		
+
 		array( "ab" . $char_a_ring_nfd . "c", "d", "false" ),
 		array( "bc" . $char_a_ring_nfd . "a", "a", "a" ),
 		array( "a" . $char_a_ring_nfd . "bc", "b", "bc" ),
@@ -479,7 +479,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_stristr($haystack, $needle, $before_needle = FALSE) {}' . "\n\n";
@@ -506,7 +506,7 @@ function ut_main()
 		array( "aBabc", "bab", TRUE, "a" ),
 		array( "ababc", "aBc", TRUE, "ab" ),
 		array( "ababc", "abC", FALSE, "abc" ),
-		
+
 		array( "ab" . $char_a_ring_nfd . "c", "d", "false" ),
 		array( "bc" . $char_a_ring_nfd . "A", "a", "A" ),
 		array( "a" . $char_a_ring_nfd . "bc", "B", "bc" ),
@@ -544,7 +544,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT, $start = 0[, $next])' . "\n\n";
@@ -635,7 +635,7 @@ function ut_main()
 		}
 		$res_str .= "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXBYTES, $start = 0)' . "\n\n";
@@ -693,7 +693,7 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
+
 
 	//=====================================================================================
 	$res_str .= "\n" . 'function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXCHARS, $start = 0)' . "\n\n";
@@ -757,10 +757,10 @@ function ut_main()
 		}
 		$res_str .= " == " . urlencode($test[count($test)-1]) . check_result($result, $test[count($test)-1]) . "\n";
 	}
-	
-	
+
+
 	//=====================================================================================
-	
+
 	return $res_str;
 }
 
@@ -980,7 +980,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length 10 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr = Opq == Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -1 = Op == Op
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -2 = O == O
-substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -3 =  == 
+substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -3 =  ==
 substring of "aa%CC%8Abco%CC%88Opq" from "5" - grapheme_substr with length -4 = false == false
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -1 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
@@ -990,7 +990,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -4 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -5 = aa%CC%8Ab == aa%CC%8Ab
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -7 = a == a
-substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -8 =  == 
+substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -8 =  ==
 substring of "aa%CC%8Abco%CC%88Opq" from "0" - grapheme_substr with length -9 = false == false
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr = aa%CC%8Abco%CC%88Opq == aa%CC%8Abco%CC%88Opq
 substring of "aa%CC%8Abco%CC%88Opq" from "-7" - grapheme_substr = a%CC%8Abco%CC%88Opq == a%CC%8Abco%CC%88Opq
@@ -1009,7 +1009,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 4 = 
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 3 = aa%CC%8Ab == aa%CC%8Ab
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 2 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 1 = a == a
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 0 =  == 
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length 0 =  ==
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -999 = false == false
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -1 = aa%CC%8Abco%CC%88Op == aa%CC%8Abco%CC%88Op
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -2 = aa%CC%8Abco%CC%88O == aa%CC%8Abco%CC%88O
@@ -1018,7 +1018,7 @@ substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -4 =
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -5 = aa%CC%8Ab == aa%CC%8Ab
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -6 = aa%CC%8A == aa%CC%8A
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -7 = a == a
-substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -8 =  == 
+substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -8 =  ==
 substring of "aa%CC%8Abco%CC%88Opq" from "-8" - grapheme_substr with length -9 = false == false
 
 function grapheme_strstr($haystack, $needle, $before_needle = FALSE) {}
@@ -1038,7 +1038,7 @@ find "ab" in "abc" - grapheme_strstr = abc == abc
 find "abc" in "abc" - grapheme_strstr = abc == abc
 find "bc" in "abc" - grapheme_strstr = bc == bc
 find "a" in "abc" - grapheme_strstr before flag is FALSE = abc == abc
-find "a" in "abc" - grapheme_strstr before flag is TRUE =  == 
+find "a" in "abc" - grapheme_strstr before flag is TRUE =  ==
 find "b" in "abc" - grapheme_strstr before flag is TRUE = a == a
 find "c" in "abc" - grapheme_strstr before flag is TRUE = ab == ab
 find "bab" in "ababc" - grapheme_strstr before flag is TRUE = a == a
@@ -1052,7 +1052,7 @@ find "ab" in "a%CC%8Aabc" - grapheme_strstr = abc == abc
 find "abc" in "abca%CC%8A" - grapheme_strstr = abca%CC%8A == abca%CC%8A
 find "a%CC%8Abc" in "aa%CC%8Abc" - grapheme_strstr = a%CC%8Abc == a%CC%8Abc
 find "a%CC%8A" in "aa%CC%8Abc" - grapheme_strstr before flag is FALSE = a%CC%8Abc == a%CC%8Abc
-find "a" in "aa%CC%8Abc" - grapheme_strstr before flag is TRUE =  == 
+find "a" in "aa%CC%8Abc" - grapheme_strstr before flag is TRUE =  ==
 find "b" in "a%CC%8Aabc" - grapheme_strstr before flag is TRUE = a%CC%8Aa == a%CC%8Aa
 find "c" in "aba%CC%8Ac" - grapheme_strstr before flag is TRUE = aba%CC%8A == aba%CC%8A
 find "baa%CC%8Ab" in "abaa%CC%8Abc" - grapheme_strstr before flag is TRUE = a == a
@@ -1076,7 +1076,7 @@ find "ab" in "abC" - grapheme_stristr = abC == abC
 find "aBc" in "abc" - grapheme_stristr = abc == abc
 find "bc" in "abC" - grapheme_stristr = bC == bC
 find "A" in "abc" - grapheme_stristr before flag is FALSE = abc == abc
-find "a" in "abc" - grapheme_stristr before flag is TRUE =  == 
+find "a" in "abc" - grapheme_stristr before flag is TRUE =  ==
 find "b" in "aBc" - grapheme_stristr before flag is TRUE = a == a
 find "C" in "abc" - grapheme_stristr before flag is TRUE = ab == ab
 find "bab" in "aBabc" - grapheme_stristr before flag is TRUE = a == a
@@ -1090,7 +1090,7 @@ find "Ab" in "a%CC%8Aabc" - grapheme_stristr = abc == abc
 find "abc" in "abcA%CC%8A" - grapheme_stristr = abcA%CC%8A == abcA%CC%8A
 find "A%CC%8Abc" in "aa%CC%8Abc" - grapheme_stristr = a%CC%8Abc == a%CC%8Abc
 find "a%CC%8A" in "aA%CC%8Abc" - grapheme_stristr before flag is FALSE = A%CC%8Abc == A%CC%8Abc
-find "A" in "aa%CC%8Abc" - grapheme_stristr before flag is TRUE =  == 
+find "A" in "aa%CC%8Abc" - grapheme_stristr before flag is TRUE =  ==
 find "b" in "a%CC%8AaBc" - grapheme_stristr before flag is TRUE = a%CC%8Aa == a%CC%8Aa
 find "C" in "aba%CC%8Ac" - grapheme_stristr before flag is TRUE = aba%CC%8A == aba%CC%8A
 find "baa%CC%8Ab" in "abaA%CC%8Abc" - grapheme_stristr before flag is TRUE = a == a
@@ -1102,33 +1102,33 @@ function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_COUNT,
 extract from "abc" "3" graphemes - grapheme_extract = abc == abc
 extract from "abc" "2" graphemes - grapheme_extract = ab == ab
 extract from "abc" "1" graphemes - grapheme_extract = a == a
-extract from "abc" "0" graphemes - grapheme_extract =  == 
+extract from "abc" "0" graphemes - grapheme_extract =  ==
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 = a == a
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 1 = b == b
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 2 = c == c
-extract from "abc" "0" graphemes - grapheme_extract starting at byte position 2 =  == 
-extract from "abc" "3" graphemes - grapheme_extract starting at byte position 0 with $next = abc == abc $next=3 == 3 
-extract from "abc" "2" graphemes - grapheme_extract starting at byte position 0 with $next = ab == ab $next=2 == 2 
-extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=1 == 1 
-extract from "abc" "0" graphemes - grapheme_extract starting at byte position 0 with $next =  ==  $next=0 == 0 
-extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=1 == 1 
-extract from "abc" "1" graphemes - grapheme_extract starting at byte position 1 with $next = b == b $next=2 == 2 
-extract from "abc" "1" graphemes - grapheme_extract starting at byte position 2 with $next = c == c $next=3 == 3 
-extract from "abc" "1" graphemes - grapheme_extract starting at byte position -2 with $next = b == b $next=2 == 2 
-extract from "abc" "0" graphemes - grapheme_extract starting at byte position 2 with $next =  ==  $next=2 == 2 
-extract from "http%3A%2F%2Fnews.bbc.co.uk%2F2%2Fhi%2Fmiddle_east%2F7831588.stm" "48" graphemes - grapheme_extract starting at byte position 48 with $next = tm == tm $next=50 == 50 
+extract from "abc" "0" graphemes - grapheme_extract starting at byte position 2 =  ==
+extract from "abc" "3" graphemes - grapheme_extract starting at byte position 0 with $next = abc == abc $next=3 == 3
+extract from "abc" "2" graphemes - grapheme_extract starting at byte position 0 with $next = ab == ab $next=2 == 2
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=1 == 1
+extract from "abc" "0" graphemes - grapheme_extract starting at byte position 0 with $next =  ==  $next=0 == 0
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=1 == 1
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position 1 with $next = b == b $next=2 == 2
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position 2 with $next = c == c $next=3 == 3
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position -2 with $next = b == b $next=2 == 2
+extract from "abc" "0" graphemes - grapheme_extract starting at byte position 2 with $next =  ==  $next=2 == 2
+extract from "http%3A%2F%2Fnews.bbc.co.uk%2F2%2Fhi%2Fmiddle_east%2F7831588.stm" "48" graphemes - grapheme_extract starting at byte position 48 with $next = tm == tm $next=50 == 50
 extract from "a%CC%8Abc" "3" graphemes - grapheme_extract = a%CC%8Abc == a%CC%8Abc
 extract from "a%CC%8Abc" "2" graphemes - grapheme_extract = a%CC%8Ab == a%CC%8Ab
 extract from "a%CC%8Abc" "1" graphemes - grapheme_extract = a%CC%8A == a%CC%8A
-extract from "a%CC%8Abc" "3" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8Abc == a%CC%8Abc $next=5 == 5 
-extract from "a%CC%8Abc" "2" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4 
-extract from "a%CC%8Abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8A == a%CC%8A $next=3 == 3 
-extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 3 with $next = bc == bc $next=5 == 5 
-extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -4 with $next = bc == bc $next=5 == 5 
-extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 4 with $next = cd == cd $next=6 == 6 
-extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -7 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4 
-extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position 5 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
-extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position -6 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
+extract from "a%CC%8Abc" "3" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8Abc == a%CC%8Abc $next=5 == 5
+extract from "a%CC%8Abc" "2" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4
+extract from "a%CC%8Abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8A == a%CC%8A $next=3 == 3
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 3 with $next = bc == bc $next=5 == 5
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -4 with $next = bc == bc $next=5 == 5
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 4 with $next = cd == cd $next=6 == 6
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -7 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4
+extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position 5 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11
+extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position -6 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11
 extract from "a%CC%8Ao%CC%88o%CC%88" "3" graphemes - grapheme_extract = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "2" graphemes - grapheme_extract = a%CC%8Ao%CC%88 == a%CC%8Ao%CC%88
 extract from "a%CC%8Ao%CC%88c" "1" graphemes - grapheme_extract = a%CC%8A == a%CC%8A
@@ -1150,10 +1150,10 @@ function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXBYT
 extract from "abc" "3" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = abc == abc
 extract from "abc" "2" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = ab == ab
 extract from "abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a == a
-extract from "abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES =  == 
+extract from "abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES =  ==
 extract from "a%CC%8Abc" "5" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a%CC%8Abc == a%CC%8Abc
 extract from "a%CC%8Abc" "4" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a%CC%8Ab == a%CC%8Ab
-extract from "a%CC%8Abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES =  == 
+extract from "a%CC%8Abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES =  ==
 extract from "a%CC%8Ao%CC%88o%CC%88" "9" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "10" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "11" graphemes - grapheme_extract GRAPHEME_EXTR_MAXBYTES = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
@@ -1181,16 +1181,16 @@ function grapheme_extract($haystack, $size, $extract_type = GRAPHEME_EXTR_MAXCHA
 extract from "abc" "3" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = abc == abc
 extract from "abc" "2" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = ab == ab
 extract from "abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = a == a
-extract from "abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  == 
-extract from "abco%CC%88" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  == 
+extract from "abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  ==
+extract from "abco%CC%88" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  ==
 extract from "abco%CC%88" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = a == a
 extract from "abco%CC%88" "2" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = ab == ab
 extract from "abco%CC%88" "3" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = abc == abc
 extract from "abco%CC%88" "4" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = abc == abc
 extract from "abco%CC%88" "5" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = abco%CC%88 == abco%CC%88
 extract from "abco%CC%88" "6" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = abco%CC%88 == abco%CC%88
-extract from "o%CC%88abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  == 
-extract from "o%CC%88abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  == 
+extract from "o%CC%88abc" "0" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  ==
+extract from "o%CC%88abc" "1" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS =  ==
 extract from "o%CC%88abc" "2" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = o%CC%88 == o%CC%88
 extract from "o%CC%88abc" "3" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = o%CC%88a == o%CC%88a
 extract from "o%CC%88abc" "4" graphemes - grapheme_extract GRAPHEME_EXTR_MAXCHARS = o%CC%88ab == o%CC%88ab

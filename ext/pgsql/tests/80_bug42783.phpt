@@ -1,14 +1,14 @@
 --TEST--
 Bug #42783 (pg_insert() does not support an empty value array)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ("Could not connect to the server");

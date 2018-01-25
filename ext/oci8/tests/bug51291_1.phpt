@@ -29,7 +29,7 @@ echo "\nTest 3 - Execute\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error($s));
     echo "2nd call\n";
     var_dump(oci_error($s));
@@ -39,7 +39,7 @@ echo "\nTest 4 - Execute - consecutive oci_error calls of different kinds\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     echo "2nd call\n";
     var_dump(oci_error(), oci_error($c), oci_error($s));
@@ -50,7 +50,7 @@ echo "\nTest 5 - Execute - after oci_rollback\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $r = oci_rollback($c);
     echo "Rollback status is ";
@@ -68,7 +68,7 @@ echo "\nTest 6 - Execute - after successful 2nd query with new handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s2 = oci_parse($c, 'select 1 from dual');
     $r = oci_execute($s2, OCI_DEFAULT);
@@ -87,7 +87,7 @@ echo "\nTest 7 - Execute - after successful 2nd query with same handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s = oci_parse($c, 'select 1 from dual');
     $r = oci_execute($s, OCI_DEFAULT);
@@ -106,7 +106,7 @@ echo "\nTest 8 - Execute - after unsuccessful 2nd query with new handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s2 = oci_parse($c, 'select reallynothere from dual');
     $r = oci_execute($s2, OCI_DEFAULT);
@@ -124,7 +124,7 @@ echo "\nTest 9 - Execute - after unsuccessful 2nd query with same handle\n";
 
 $s = @oci_parse($c, 'select doesnotexist from dual');
 $r = @oci_execute($s, OCI_DEFAULT);
-if (!$r) { 
+if (!$r) {
     var_dump(oci_error(), oci_error($c), oci_error($s));
     $s = oci_parse($c, 'select reallynothere from dual');
     $r = oci_execute($s, OCI_DEFAULT);

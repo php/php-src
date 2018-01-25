@@ -3,14 +3,14 @@ Test posix_getpwuid() function : usage variations  - parameter types
 --SKIPIF--
 <?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto array posix_getpwuid(long uid)
- * Description: User database access (POSIX.1, 9.2.2) 
+ * Description: User database access (POSIX.1, 9.2.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_getpwuid() : usage variations ***\n";
@@ -61,7 +61,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -71,8 +71,8 @@ $values = array(
 foreach($values as $value) {
       echo "\nArg value $value \n";
       $result = posix_getpwuid($value);
-      if ((is_array($result) && (count($result) == 7)) 
-          || 
+      if ((is_array($result) && (count($result) == 7))
+          ||
           ($result === false)) {
           echo "valid output\n";
       } else {
@@ -89,100 +89,100 @@ Notice: Undefined variable: undefined_var in %s on line %d
 
 Notice: Undefined variable: unset_var in %s on line %d
 
-Arg value 10.5 
+Arg value 10.5
 valid output
 
-Arg value -10.5 
+Arg value -10.5
 valid output
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, float given in %s on line %d
 valid output
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 valid output
 
-Arg value 0.5 
+Arg value 0.5
 valid output
 
 Notice: Array to string conversion in %sposix_getpwuid_variation.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpwuid_variation.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpwuid_variation.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpwuid_variation.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpwuid_variation.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, array given in %s on line %d
 valid output
 
-Arg value  
+Arg value
 valid output
 
-Arg value  
+Arg value
 valid output
 
-Arg value 1 
+Arg value 1
 valid output
 
-Arg value  
+Arg value
 valid output
 
-Arg value 1 
+Arg value 1
 valid output
 
-Arg value  
+Arg value
 valid output
 
-Arg value  
+Arg value
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, string given in %s on line %d
 valid output
 
-Arg value  
+Arg value
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, string given in %s on line %d
 valid output
 
-Arg value string 
+Arg value string
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, string given in %s on line %d
 valid output
 
-Arg value string 
+Arg value string
 
 Warning: posix_getpwuid() expects parameter 1 to be integer, string given in %s on line %d
 valid output
 
-Arg value  
+Arg value
 valid output
 
-Arg value  
+Arg value
 valid output
 
 Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

@@ -26,7 +26,7 @@ $a->b->a = $a;
 $i = 0;
 
 $c = new A;
-$array = array($c); 
+$array = array($c);
 unset($c);
 
 while ($i++ < 9998) {

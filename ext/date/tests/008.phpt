@@ -12,7 +12,7 @@ var_dump(getdate());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: getdate() expects at most 1 parameter, 2 given in %s on line %d
 bool(false)
 array(11) {

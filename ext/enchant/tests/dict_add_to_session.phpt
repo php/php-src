@@ -17,24 +17,24 @@ $newWord = "iLoveJavaScript";
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         echo("OK\n");
         $AddtoSessionDict = enchant_dict_add_to_session($requestDict,$newWord);
-        
+
         if (NULL === $AddtoSessionDict) {
             var_dump($AddtoSessionDict);
         } else {
             echo("dict add to session failed\n");
-        
+
         }
-        
+
     } else {
         echo("broker request dict failed\n");
     }
 } else {
     echo("broker is not a resource; failed;\n");
-    
+
 }
 echo "OK\n";
 ?>

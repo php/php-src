@@ -8,7 +8,7 @@ Test rename() function: error conditions
 
 echo "*** Testing rename() for error conditions ***\n";
 //Zero argument
-var_dump( rename() );  
+var_dump( rename() );
 
 // less than expected,1 argument
 var_dump( rename(__FILE__) );
@@ -17,7 +17,7 @@ var_dump( rename(__FILE__) );
 $context = stream_context_create();
 $filename = __FILE__;
 $new_filename = __FILE__.".tmp";
-var_dump( rename($filename, $new_filename, $context, "extra_args") ); 
+var_dump( rename($filename, $new_filename, $context, "extra_args") );
 
 echo "Done\n";
 ?>

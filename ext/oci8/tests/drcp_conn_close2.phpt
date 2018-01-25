@@ -42,5 +42,5 @@ echo "Done\n";
 This is with a OCI_CONNECT
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
-Both connections are different : OK 
+Both connections are different : OK
 Done

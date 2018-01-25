@@ -4,7 +4,7 @@ Test exception doesn't cause RSHUTDOWN bypass, variation 1
 assert.bail=1
 assert.exception=1
 --FILE--
-<?php 
+<?php
 
 $func = create_function('', 'define("Mommy", 1); assert(false);');
 $func();

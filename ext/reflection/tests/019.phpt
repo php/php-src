@@ -7,5 +7,5 @@ ReflectionFunction::getExtensionName
 $f = new ReflectionFunction("sleep");
 var_dump($f->getExtensionName());
 ?>
---EXPECT--	
+--EXPECT--
 string(8) "standard"

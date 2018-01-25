@@ -1,11 +1,11 @@
 --TEST--
 levenshtein() function test
 --FILE--
-<?php 
+<?php
 
 function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) {
 
-  if($cost1==0) 
+  if($cost1==0)
 	  $result=levenshtein($text1,$text2);
 	else
     $result=levenshtein($text1,$text2,$cost1,$cost2,$cost3);
@@ -16,8 +16,8 @@ function test_me($title,$expect,$text1,$text2,$cost1=0,$cost2=0,$cost3=0) {
 	echo "for '$text1'/'$text2' ";
 	if($cost1) echo "($cost1:$cost2:$cost3)";
 	echo "\n";
-	
-	return 1;		
+
+	return 1;
 }
 
 $n=0;

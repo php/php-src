@@ -1,8 +1,8 @@
 --TEST--
-CLI php --ri 
+CLI php --ri
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }

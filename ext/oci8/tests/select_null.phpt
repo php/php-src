@@ -15,7 +15,7 @@ var_dump(oci_fetch_array($stmt, OCI_RETURN_NULLS));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(2) {
   [0]=>
   NULL

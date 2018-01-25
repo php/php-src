@@ -19,23 +19,23 @@ $dictTypeValue2 = 2;
 
 if (is_resource($broker)) {
     echo("OK\n");
-    
+
     if (enchant_broker_set_dict_path($broker, $dictTypeValue1, $backEndDictType1)) {
         echo("OK\n");
-        
+
         if (enchant_broker_set_dict_path($broker, $dictTypeValue2, $backEndDictType2)) {
             echo("OK\n");
-                
-            if ( 
-                  (enchant_broker_get_dict_path($broker,$dictTypeValue1) == $backEndDictType1) && 
-                  (enchant_broker_get_dict_path($broker,$dictTypeValue2) == $backEndDictType2)            
+
+            if (
+                  (enchant_broker_get_dict_path($broker,$dictTypeValue1) == $backEndDictType1) &&
+                  (enchant_broker_get_dict_path($broker,$dictTypeValue2) == $backEndDictType2)
               ) {
                    echo("OK\n");
 
             } else {
                    echo("broker get dict path has failed \n");
-            }                    
-        
+            }
+
         } else {
            echo("broker set dict path {$backEndDictType2} has failed \n");
         }

@@ -35,9 +35,9 @@ echo "Error Report Above\n";
 
 ?>
 --EXPECTF--
-validateOnParse set to FALSE: 
+validateOnParse set to FALSE:
 No Error Report Above
-validateOnParse set to TRUE: 
+validateOnParse set to TRUE:
 
 Warning: DOMDocument::loadXML(): No declaration for element NYPHP in Entity, line: %d in %s on line %d
 

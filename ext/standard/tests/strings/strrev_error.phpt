@@ -1,9 +1,9 @@
 --TEST--
-Test strrev() function : error conditions 
+Test strrev() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string strrev(string $str);
- * Description: Reverse a string 
+ * Description: Reverse a string
  * Source code: ext/standard/string.c
 */
 

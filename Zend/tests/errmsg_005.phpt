@@ -14,5 +14,5 @@ $t->foo() = 1;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Can't use method return value in write context in %s on line %d

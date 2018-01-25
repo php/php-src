@@ -127,7 +127,7 @@ class Extract_Phar
         } while (strlen($last) && strlen($m) < $L[1]);
 
         if (strlen($m) < $L[1]) {
-            die('ERROR: manifest length read was "' . 
+            die('ERROR: manifest length read was "' .
                 strlen($m) .'" should be "' .
                 $L[1] . '"');
         }

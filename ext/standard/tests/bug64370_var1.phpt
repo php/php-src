@@ -1,5 +1,5 @@
 --TEST--
-Test bug #64370 microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT'] 
+Test bug #64370 microtime(true) less than $_SERVER['REQUEST_TIME_FLOAT']
 --FILE--
 <?php
 echo "\$_SERVER['REQUEST_TIME']: {$_SERVER['REQUEST_TIME']}\n";

@@ -43,7 +43,7 @@ var_dump(bzerrno($fd2));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(2) {
   ["errno"]=>
   int(0)

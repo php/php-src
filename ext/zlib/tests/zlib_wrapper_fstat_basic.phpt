@@ -1,9 +1,9 @@
 --TEST--
-Test function fstat() on zlib wrapper 
+Test function fstat() on zlib wrapper
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--

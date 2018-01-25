@@ -7,17 +7,17 @@ error_reporting(E_ALL);
 
 class foo {
 	public $x = array();
-		
+
 	public function b() {
 		return $this->x;
 	}
-	
+
 	public function c() {
 		return $x;
 	}
-	
+
 	static public function d() {
-		
+
 	}
 }
 

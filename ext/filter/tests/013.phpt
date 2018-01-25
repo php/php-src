@@ -40,7 +40,7 @@ var_dump(filter_var("010", FILTER_VALIDATE_INT));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 int(234)
 int(234)
 int(234)

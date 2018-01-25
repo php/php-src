@@ -1,5 +1,5 @@
 --TEST--
-Test strlen() function :  error conditions 
+Test strlen() function :  error conditions
 --FILE--
 <?php
 

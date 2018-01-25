@@ -94,7 +94,7 @@ for($index = 0; $index < count($values); $index ++) {
   $counter ++;
 }
 
-//closing the resource 
+//closing the resource
 fclose($file_handle);
 
 echo "Done\n";

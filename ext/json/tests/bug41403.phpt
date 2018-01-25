@@ -2,7 +2,7 @@
 Bug #41403 (json_decode cannot decode floats if localeconv decimal_point is not '.')
 --SKIPIF--
 <?php
-if (!extension_loaded('json')) die('skip'); 
+if (!extension_loaded('json')) die('skip');
 if (setlocale(LC_NUMERIC, "de_DE") === false) {
 	die("skip no de_DE locale");
 }
@@ -20,7 +20,7 @@ var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(1) {
   [0]=>
   float(2,1)

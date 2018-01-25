@@ -10,14 +10,14 @@ q
 prompt> [Breakpoint #0 added at %s:10]
 prompt> [Breakpoint #0 at %s:10, hits: 1]
 >00010: print B;
- 00011: 
+ 00011:
 prompt> [User-defined constants (2)]
 Address            Refs    Type      Constant
 %s 1       integer   A
 int (10)
 %s 1       integer   B
 int (100)
-prompt> 
+prompt>
 --FILE--
 <?php
 

@@ -1,5 +1,5 @@
 --TEST--
-Test mkdir() function : usage variation: try invalid pathname 
+Test mkdir() function : usage variation: try invalid pathname
 --CREDITS--
 Dave Kelsey <d_kelsey@uk.ibm.com>
 --SKIPIF--
@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory 
+ * Description: Create a directory
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mkdir() : usage variation ***\n";
@@ -71,7 +71,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       // other
       'single space' => ' ',
 );

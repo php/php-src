@@ -26,11 +26,11 @@ start: 0 num: 0 value: 1
 array(0) {
 }
 ===========================
-start: 0 num: 0 value: 
+start: 0 num: 0 value:
 array(0) {
 }
 ===========================
-start: 0 num: 0 value: 
+start: 0 num: 0 value:
 array(0) {
 }
 ===========================
@@ -52,13 +52,13 @@ array(1) {
   bool(true)
 }
 ===========================
-start: 0 num: 1 value: 
+start: 0 num: 1 value:
 array(1) {
   [0]=>
   bool(false)
 }
 ===========================
-start: 0 num: 1 value: 
+start: 0 num: 1 value:
 array(1) {
   [0]=>
   NULL
@@ -90,7 +90,7 @@ array(2) {
   bool(true)
 }
 ===========================
-start: 0 num: 2.5 value: 
+start: 0 num: 2.5 value:
 array(2) {
   [0]=>
   bool(false)
@@ -98,7 +98,7 @@ array(2) {
   bool(false)
 }
 ===========================
-start: 0 num: 2.5 value: 
+start: 0 num: 2.5 value:
 array(2) {
   [0]=>
   NULL
@@ -134,11 +134,11 @@ start: 1 num: 0 value: 1
 array(0) {
 }
 ===========================
-start: 1 num: 0 value: 
+start: 1 num: 0 value:
 array(0) {
 }
 ===========================
-start: 1 num: 0 value: 
+start: 1 num: 0 value:
 array(0) {
 }
 ===========================
@@ -160,13 +160,13 @@ array(1) {
   bool(true)
 }
 ===========================
-start: 1 num: 1 value: 
+start: 1 num: 1 value:
 array(1) {
   [1]=>
   bool(false)
 }
 ===========================
-start: 1 num: 1 value: 
+start: 1 num: 1 value:
 array(1) {
   [1]=>
   NULL
@@ -198,7 +198,7 @@ array(2) {
   bool(true)
 }
 ===========================
-start: 1 num: 2.5 value: 
+start: 1 num: 2.5 value:
 array(2) {
   [1]=>
   bool(false)
@@ -206,7 +206,7 @@ array(2) {
   bool(false)
 }
 ===========================
-start: 1 num: 2.5 value: 
+start: 1 num: 2.5 value:
 array(2) {
   [1]=>
   NULL
@@ -242,11 +242,11 @@ start: 2.5 num: 0 value: 1
 array(0) {
 }
 ===========================
-start: 2.5 num: 0 value: 
+start: 2.5 num: 0 value:
 array(0) {
 }
 ===========================
-start: 2.5 num: 0 value: 
+start: 2.5 num: 0 value:
 array(0) {
 }
 ===========================
@@ -268,13 +268,13 @@ array(1) {
   bool(true)
 }
 ===========================
-start: 2.5 num: 1 value: 
+start: 2.5 num: 1 value:
 array(1) {
   [2]=>
   bool(false)
 }
 ===========================
-start: 2.5 num: 1 value: 
+start: 2.5 num: 1 value:
 array(1) {
   [2]=>
   NULL
@@ -306,7 +306,7 @@ array(2) {
   bool(true)
 }
 ===========================
-start: 2.5 num: 2.5 value: 
+start: 2.5 num: 2.5 value:
 array(2) {
   [2]=>
   bool(false)
@@ -314,7 +314,7 @@ array(2) {
   bool(false)
 }
 ===========================
-start: 2.5 num: 2.5 value: 
+start: 2.5 num: 2.5 value:
 array(2) {
   [2]=>
   NULL

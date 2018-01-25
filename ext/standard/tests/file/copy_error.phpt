@@ -7,7 +7,7 @@ Test copy() function: error conditions
  *              Returns TRUE on success or FALSE on failure.
  */
 
-echo "*** Testing copy() function: error conditions --\n"; 
+echo "*** Testing copy() function: error conditions --\n";
 /* Invalid args */
 var_dump( copy("/no/file", "file") );
 

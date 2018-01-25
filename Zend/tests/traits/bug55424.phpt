@@ -11,7 +11,7 @@ Bug #55424 (Method got missing from class when a trait defined an abstract metho
 		}
 
 		abstract function setAttribute();
-	}	
+	}
 
 	class Base
 	{

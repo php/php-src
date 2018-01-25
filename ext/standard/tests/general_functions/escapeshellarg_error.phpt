@@ -38,7 +38,7 @@ var_dump( escapeshellarg($fp));
 fclose($fp);
 
 echo "\n-- Testing escapeshellarg() function with a array supplied for argument --\n";
-$arg = array(1,2,3); 
+$arg = array(1,2,3);
 var_dump( escapeshellarg($arg));
 
 ?>

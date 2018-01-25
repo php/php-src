@@ -15,7 +15,7 @@ Test fseek(), ftell() & rewind() functions : usage variations - all r & a modes,
 // include the file.inc for common functions for test
 include ("file.inc");
 
-/* Testing fseek(),ftell(),rewind() functions 
+/* Testing fseek(),ftell(),rewind() functions
      1. All read and append modes
      2. Testing fseek() with whence = SEEK_CUR
 */
@@ -32,7 +32,7 @@ $filename = dirname(__FILE__)."/fseek_ftell_rewind_variation5.tmp"; // this is n
 /* open the file using $files_modes and perform fseek(),ftell() and rewind() on it */
 foreach($file_content_types as $file_content_type){
   echo "-- File having data of type ". $file_content_type ." --\n";
- 
+
   foreach($file_modes as $file_mode) {
     echo "-- File opened in mode ".$file_mode." --\n";
     create_files ( dirname(__FILE__), 1, $file_content_type, 0755, 512, "w", "fseek_ftell_rewind_variation"
@@ -44,7 +44,7 @@ foreach($file_content_types as $file_content_type){
     }
     rewind($file_handle);
     foreach($offset as $count){
-      var_dump( fseek($file_handle,$count,SEEK_CUR) ); 
+      var_dump( fseek($file_handle,$count,SEEK_CUR) );
       var_dump( ftell($file_handle) ); // confirm the file pointer position
       var_dump( feof($file_handle) ); //ensure that file pointer is not at end
     } //end of offset loop

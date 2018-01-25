@@ -53,7 +53,7 @@ NULL
 
 Warning: ReflectionClass::setStaticPropertyValue() expects exactly 2 parameters, 1 given in %s on line 18
 NULL
-Class C does not have a property named 
+Class C does not have a property named
 Class C does not have a property named 1.5
 
 Warning: ReflectionClass::setStaticPropertyValue() expects parameter 1 to be string, array given in %s on line 33

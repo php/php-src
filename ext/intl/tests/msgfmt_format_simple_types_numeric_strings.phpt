@@ -25,7 +25,7 @@ $mf = new MessageFormatter('en_US',"
 	ordinal			{i,ordinal}
 	duration		{j,duration}
 	");
-	
+
 $ex = "1336317965.5 str";
 var_dump($mf->format(array(
 'a' => $ex,

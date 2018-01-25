@@ -1,7 +1,7 @@
 --TEST--
 Bug #30234 (__autoload() not invoked for interfaces)
 --SKIPIF--
-<?php 
+<?php
 	if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
 ?>
 --FILE--

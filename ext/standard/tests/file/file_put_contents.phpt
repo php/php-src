@@ -21,7 +21,7 @@ var_dump(file_put_contents($file, "string", 0, $fp));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: file_put_contents(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 bool(false)

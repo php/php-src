@@ -6,7 +6,7 @@ Closure 018: Assigning lambda to static var and returning by ref
 class foo {
 	public function test(&$x) {
 		static $lambda;
-		$lambda = function &() use (&$x) { 
+		$lambda = function &() use (&$x) {
 			return $x = $x * $x;
 		};
 		return $lambda();

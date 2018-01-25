@@ -13,7 +13,7 @@ prompt> handle first
 >00016: 		foo(); // Error
  00017: 	} catch (\Exception $e) {
  00018: 		var_dump($e);
-prompt> 
+prompt>
 Fatal error: Uncaught Error: Call to undefined function next_error() in eval()'d code:1
 Stack trace:
 #0 %s(16): unknown()
@@ -27,7 +27,7 @@ Stack trace:
 #1 {main}
 [Script ended normally]
 prompt> [The stack contains nothing !]
-prompt> 
+prompt>
 --FILE--
 <?php
 

@@ -7,9 +7,9 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 --FILE--
 <?php
 /* Prototype  : array str_split(string $str [, int $split_length])
- * Description: Convert a string to an array. If split_length is 
-                specified, break the string down into chunks each 
-                split_length characters long. 
+ * Description: Convert a string to an array. If split_length is
+                specified, break the string down into chunks each
+                split_length characters long.
  * Source code: ext/standard/string.c
  * Alias to functions: none
 */
@@ -24,7 +24,7 @@ $str = <<<EOT
 string with 123,escape char \t.
 EOT;
 
-//different values for 'split_length' 
+//different values for 'split_length'
 $values = array (
   0,
   1,

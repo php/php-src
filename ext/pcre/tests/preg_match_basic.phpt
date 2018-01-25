@@ -1,8 +1,8 @@
 --TEST--
-Test preg_match() function : basic functionality 
+Test preg_match() function : basic functionality
 --FILE--
 <?php
-/* 
+/*
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c
 */

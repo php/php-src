@@ -16,7 +16,7 @@ prompt> [Breakpoint #0 in foo\bar::foo() at %s:6, hits: 1]
  00008: 	}
 prompt> string(4) "test"
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

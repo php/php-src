@@ -8,7 +8,7 @@ assert.bail = 0
 assert.quiet_eval = 0
 --FILE--
 <?php
-function f1() 
+function f1()
 {
 	echo "f1 called\n";
 }

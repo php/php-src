@@ -12,6 +12,6 @@ stream_filter_append($fp, 'bzip2.decompress', STREAM_FILTER_WRITE);
 fwrite($fp, $text);
 fclose($fp);
 
-?> 
---EXPECT-- 
+?>
+--EXPECT--
 I am the very model of a modern major general, I've information vegetable, animal, and mineral.

@@ -30,7 +30,7 @@ function ut_main()
         'fr',
         'ja',
         'i-enochian', //(example of a grandfathered tag)
-//Language subtag plus Script subtag:	
+//Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
         'sr-Cyrl',
@@ -53,7 +53,7 @@ function ut_main()
 //Private use subtags:
         'de-CH-x-phonebk',
         'az-Arab-x-AZE-derbend',
-//Extended language subtags 
+//Extended language subtags
         'zh-min',
         'zh-min-nan-Hant-CN',
 //Private use registry values
@@ -99,11 +99,11 @@ ut_run();
 
 ?>
 --EXPECT--
-de_DE@currency=EUR;collation=PHONEBOOK: Key is collation and Value is PHONEBOOK 
-Key is currency and Value is EUR 
+de_DE@currency=EUR;collation=PHONEBOOK: Key is collation and Value is PHONEBOOK
+Key is currency and Value is EUR
 
 root: No keywords found.
-uk@currency=EURO: Key is currency and Value is EURO 
+uk@currency=EURO: Key is currency and Value is EURO
 
 Hindi: No keywords found.
 de: No keywords found.

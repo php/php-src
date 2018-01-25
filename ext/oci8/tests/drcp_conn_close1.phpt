@@ -41,5 +41,5 @@ echo "Done\n";
 This is with a OCI_CONNECT
 resource(%d) of type (oci8 connection)
 resource(%d) of type (oci8 connection)
-Both connections share a resource : OK 
+Both connections share a resource : OK
 Done

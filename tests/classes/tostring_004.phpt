@@ -23,7 +23,7 @@ echo "\n\nObject with bad __toString():\n";
 class badToString {
 	function __toString() {
 		return 0;
-	}	
+	}
 }
 $obj = new badToString;
 echo "Try 1:\n";

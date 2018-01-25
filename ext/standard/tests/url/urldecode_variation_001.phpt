@@ -3,9 +3,9 @@ Test urldecode() function : usage variations  - <type here specifics of this var
 --FILE--
 <?php
 /* Prototype  : proto string urldecode(string str)
- * Description: Decodes URL-encoded string 
+ * Description: Decodes URL-encoded string
  * Source code: ext/standard/url.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // NB: basic functionality tested in tests/strings/001.phpt
@@ -84,90 +84,90 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(64)
 Error: 8 - Undefined variable: unset_var, %s(67)
 
-Arg value 0 
+Arg value 0
 string(1) "0"
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value 12345 
+Arg value 12345
 string(5) "12345"
 
-Arg value -2345 
+Arg value -2345
 string(5) "-2345"
 
-Arg value 10.5 
+Arg value 10.5
 string(4) "10.5"
 
-Arg value -10.5 
+Arg value -10.5
 string(5) "-10.5"
 
-Arg value 101234567000 
+Arg value 101234567000
 string(12) "101234567000"
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string(13) "1.07654321E-9"
 
-Arg value 0.5 
+Arg value 0.5
 string(3) "0.5"
 Error: 8 - Array to string conversion, %surldecode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - urldecode() expects parameter 1 to be string, array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %surldecode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - urldecode() expects parameter 1 to be string, array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %surldecode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - urldecode() expects parameter 1 to be string, array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %surldecode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - urldecode() expects parameter 1 to be string, array given, %s(74)
 NULL
 Error: 8 - Array to string conversion, %surldecode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - urldecode() expects parameter 1 to be string, array given, %s(74)
 NULL
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(73)
 
-Arg value  
+Arg value
 Error: 2 - urldecode() expects parameter 1 to be string, object given, %s(74)
 NULL
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 Done

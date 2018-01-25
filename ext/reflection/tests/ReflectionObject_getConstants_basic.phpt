@@ -1,5 +1,5 @@
 --TEST--
-ReflectionObject::getConstants() - basic function test 
+ReflectionObject::getConstants() - basic function test
 --FILE--
 <?php
 class C {
@@ -24,26 +24,26 @@ foreach($classes as $class) {
 
 ?>
 --EXPECTF--
-Reflecting on instance of class C: 
+Reflecting on instance of class C:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Reflecting on instance of class D: 
+Reflecting on instance of class D:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Reflecting on instance of class E: 
+Reflecting on instance of class E:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Reflecting on instance of class F: 
+Reflecting on instance of class F:
 array(1) {
   ["a"]=>
   string(12) "hello from F"
 }
-Reflecting on instance of class X: 
+Reflecting on instance of class X:
 array(0) {
 }

@@ -1,5 +1,5 @@
 --TEST--
-Test hash_hmac() function : basic functionality 
+Test hash_hmac() function : basic functionality
 --SKIPIF--
 <?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
 --FILE--

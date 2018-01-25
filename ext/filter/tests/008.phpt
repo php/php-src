@@ -10,7 +10,7 @@ var_dump(filter_list(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(21) {
   [0]=>
   string(3) "int"

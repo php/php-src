@@ -24,7 +24,7 @@ $rege = '/^a/';
 
 $r = new TestRegexIterator(new myIterator, $rege);
 
-try{	
+try{
 	$r->setFlags();
 }catch (Exception $e) {
 	echo $e->getMessage();

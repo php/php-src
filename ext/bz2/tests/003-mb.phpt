@@ -16,7 +16,7 @@ var_dump(bzread($fd, 100000));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: bzread() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 

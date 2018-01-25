@@ -20,7 +20,7 @@ Rick Buitenman <rick@meritos.nl>
   curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
   curl_setopt($ch, CURLOPT_USERAGENT, 'cURL phpt');
   curl_setopt($ch, CURLOPT_URL, $url); //set the url we want to use
-  
+
   $copy = curl_copy_handle($ch);
 
   var_dump( curl_exec($ch) );
@@ -35,4 +35,4 @@ Rick Buitenman <rick@meritos.nl>
 *** Testing curl copy handle with User Agent ***
 string(9) "cURL phpt"
 string(9) "cURL phpt"
-===DONE===  
+===DONE===

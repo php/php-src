@@ -1,5 +1,5 @@
 --TEST--
-Test chop() function : error conditions 
+Test chop() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string chop ( string $str [, string $charlist] )

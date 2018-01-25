@@ -15,7 +15,7 @@ class A extends B
 		var_dump(is_callable('parent::foo'));
 		var_dump(is_callable(array('parent', 'foo')));
 	}
-	
+
 	function __call($func, $args)
 	{
 	}

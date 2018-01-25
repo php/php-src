@@ -12,6 +12,6 @@ $t = new test;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: test() has been disabled for security reasons in %s on line %d
 Done

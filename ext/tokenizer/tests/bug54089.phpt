@@ -15,7 +15,7 @@ $codes = array(
 foreach ($codes as $code) {
 	$tokens = token_get_all($code);
 	var_dump($tokens);
-	
+
 	$code = '';
 	foreach ($tokens as $t)
 	{

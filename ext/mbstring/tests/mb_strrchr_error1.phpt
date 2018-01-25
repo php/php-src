@@ -4,13 +4,13 @@ Test mb_strrchr() function : error conditions
 <?php
 extension_loaded('mbstring') or die('skip');
 function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this build");
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : string mb_strrchr(string haystack, string needle[, bool part[, string encoding]])
- * Description: Finds the last occurrence of a character in a string within another 
+ * Description: Finds the last occurrence of a character in a string within another
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_strrchr() : error conditions ***\n";

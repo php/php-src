@@ -8,7 +8,7 @@ if (!extension_loaded('zlib')) die ('skip zlib extension not available in this b
 <?php
 
 
-$use_include_path = 
+$use_include_path =
 
 
 $variation = array(

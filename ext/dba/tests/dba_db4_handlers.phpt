@@ -1,7 +1,7 @@
 --TEST--
 DBA DB4 Handler Test
 --SKIPIF--
-<?php 
+<?php
 $handler="db4";
 require(dirname(__FILE__) .'/skipif.inc');
 die("info $HND handler used");
@@ -39,8 +39,8 @@ foreach ($h as $key => $val) {
 
 ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTREGEX--
 database handler: db4

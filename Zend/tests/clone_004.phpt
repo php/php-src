@@ -1,7 +1,7 @@
 --TEST--
 Testing usage of object as array on clone statement
 --FILE--
-<?php 
+<?php
 
 error_reporting(E_ALL|E_STRICT);
 

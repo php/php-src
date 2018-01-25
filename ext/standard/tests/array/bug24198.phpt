@@ -2,9 +2,9 @@
 Bug #24198 (array_merge_recursive() invalid recursion detection)
 --FILE--
 <?php
-$c = array('a' => 'aa','b' => 'bb'); 
+$c = array('a' => 'aa','b' => 'bb');
 
-var_dump(array_merge_recursive($c, $c)); 
+var_dump(array_merge_recursive($c, $c));
 ?>
 --EXPECT--
 array(2) {

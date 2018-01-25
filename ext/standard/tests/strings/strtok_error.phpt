@@ -1,5 +1,5 @@
 --TEST--
-Test strtok() function : error conditions 
+Test strtok() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string strtok ( string $str, string $token )
@@ -26,10 +26,10 @@ $extra_arg = 10;
 var_dump( strtok($str, $token, $extra_arg) );
 var_dump( $str );
 
-// Less than expected number of arguments 
+// Less than expected number of arguments
 echo "\n-- Testing strtok() with less than expected no. of arguments --\n";
 $str = 'string val';
- 
+
 var_dump( strtok($str));
 var_dump( $str );
 

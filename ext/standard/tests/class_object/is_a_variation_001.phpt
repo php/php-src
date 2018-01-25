@@ -1,15 +1,15 @@
 --TEST--
 Test is_a() function : usage variations  - wrong type for arg 1
 --INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED 
+error_reporting=E_ALL | E_STRICT | E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name)
- * Description: Returns true if the object is of this class or has this class as one of its parents 
+ * Description: Returns true if the object is of this class or has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
-// Note: basic use cases in Zend/tests/is_a.phpt 
+// Note: basic use cases in Zend/tests/is_a.phpt
 echo "*** Testing is_a() : usage variations ***\n";
 
 // Initialise function arguments not being substituted (if any)
@@ -59,7 +59,7 @@ $values = array(
       // string data
       "string",
       'String',
-      
+
       // undefined data
       $undefined_var,
 
@@ -83,81 +83,81 @@ Notice: Undefined variable: undefined_var in %s on line 59
 
 Notice: Undefined variable: unset_var in %s on line 62
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value Array 
+Arg value Array
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value string 
+Arg value string
 bool(false)
 
-Arg value String 
+Arg value String
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

@@ -30,7 +30,7 @@ function ut_main()
         'fr',
         'ja',
         'i-enochian', //(example of a grandfathered tag)
-//Language subtag plus Script subtag:	
+//Language subtag plus Script subtag:
         'zh-Hant',
         'zh-Hans',
         'sr-Cyrl',
@@ -53,7 +53,7 @@ function ut_main()
 //Private use subtags:
         'de-CH-x-phonebk',
         'az-Arab-x-AZE-derbend',
-//Extended language subtags 
+//Extended language subtags
         'zh-min',
         'zh-min-nan-Hant-CN',
 //Private use registry values
@@ -99,17 +99,17 @@ ut_run();
 
 ?>
 --EXPECT--
-de_DE@currency=EUR;collation=PHONEBOOK: Key is collation and Value is PHONEBOOK 
-Key is currency and Value is EUR 
+de_DE@currency=EUR;collation=PHONEBOOK: Key is collation and Value is PHONEBOOK
+Key is currency and Value is EUR
 
 root: No keywords found.
-uk@currency=EURO: Key is currency and Value is EURO 
+uk@currency=EURO: Key is currency and Value is EURO
 
 Hindi: No keywords found.
 de: No keywords found.
 fr: No keywords found.
 ja: No keywords found.
-i-enochian: Key is x and Value is i-enochian 
+i-enochian: Key is x and Value is i-enochian
 
 zh-Hant: No keywords found.
 zh-Hans: No keywords found.
@@ -125,27 +125,27 @@ sl-Latn-IT-nedis: No keywords found.
 de-DE: No keywords found.
 en-US: No keywords found.
 es-419: No keywords found.
-de-CH-x-phonebk: Key is x and Value is phonebk 
+de-CH-x-phonebk: Key is x and Value is phonebk
 
-az-Arab-x-AZE-derbend: Key is x and Value is aze-derbend 
+az-Arab-x-AZE-derbend: Key is x and Value is aze-derbend
 
 zh-min: No keywords found.
 zh-min-nan-Hant-CN: No keywords found.
-x-whatever: Key is x and Value is whatever 
+x-whatever: Key is x and Value is whatever
 
-qaa-Qaaa-QM-x-southern: Key is x and Value is southern 
+qaa-Qaaa-QM-x-southern: Key is x and Value is southern
 
 sr-Latn-QM: No keywords found.
 sr-Qaaa-CS: No keywords found.
-en-US-u-islamCal: Key is attribute and Value is islamcal 
+en-US-u-islamCal: Key is attribute and Value is islamcal
 
-zh-CN-a-myExt-x-private: Key is a and Value is myext 
-Key is x and Value is private 
+zh-CN-a-myExt-x-private: Key is a and Value is myext
+Key is x and Value is private
 
-en-a-myExt-b-another: Key is a and Value is myext 
-Key is b and Value is another 
+en-a-myExt-b-another: Key is a and Value is myext
+Key is b and Value is another
 
 de-419-DE: No keywords found.
 a-DE: No keywords found.
-ar-a-aaa-b-bbb-a-ccc: Key is a and Value is aaa 
+ar-a-aaa-b-bbb-a-ccc: Key is a and Value is aaa
 Key is b and Value is bbb

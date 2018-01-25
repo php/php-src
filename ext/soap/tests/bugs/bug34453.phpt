@@ -29,7 +29,7 @@ class LocalSoapClient extends SoapClient {
 
 }
 
-$client = new LocalSoapClient(dirname(__FILE__)."/bug34453.wsdl", array("trace"=>1)); 
+$client = new LocalSoapClient(dirname(__FILE__)."/bug34453.wsdl", array("trace"=>1));
 $client->EchoString(array("value"=>"hello","lang"=>"en"));
 echo $client->__getLastRequest();
 echo $client->__getLastResponse();

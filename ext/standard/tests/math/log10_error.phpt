@@ -4,10 +4,10 @@ Test wrong number of arguments for log10()
 precision = 14
 --FILE--
 <?php
-/* 
+/*
  * proto float log10(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 $arg_0 = 1.0;
 $extra_arg = 1;

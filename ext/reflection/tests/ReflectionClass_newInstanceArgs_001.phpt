@@ -7,8 +7,8 @@ Steve Seear <stevseea@php.net>
 <?php
 class A {
 	public function A() {
-		echo "In constructor of class A\n"; 
-	}	
+		echo "In constructor of class A\n";
+	}
 }
 
 class B {
@@ -19,16 +19,16 @@ class B {
 
 class C {
 	protected function __construct() {
-		echo "In constructor of class C\n"; 
+		echo "In constructor of class C\n";
 	}
 }
 
 class D {
 	private function __construct() {
-		echo "In constructor of class D\n";		
+		echo "In constructor of class D\n";
 	}
 }
-class E {	
+class E {
 }
 
 

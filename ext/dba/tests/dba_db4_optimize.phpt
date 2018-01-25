@@ -28,8 +28,8 @@ if (($db_file=dba_open($db_filename, "n", $handler))!==FALSE) {
 ===DONE===
 <?php exit(0); ?>
 --CLEAN--
-<?php 
-require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: db4

@@ -1,5 +1,5 @@
 --TEST--
-Omitting optional arg in method inherited from abstract class 
+Omitting optional arg in method inherited from abstract class
 --FILE--
 <?php
 

@@ -33,7 +33,7 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: preg_replace_callback_array() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

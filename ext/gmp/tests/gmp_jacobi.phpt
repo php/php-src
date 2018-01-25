@@ -30,7 +30,7 @@ var_dump(gmp_jacobi());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "0"
 string(2) "-1"
 string(1) "0"

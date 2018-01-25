@@ -1,5 +1,5 @@
 --TEST--
-imap_undelete() function : basic functionality 
+imap_undelete() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
@@ -20,7 +20,7 @@ imap_close($stream_id);
 
 ?>
 --CLEAN--
-<?php 
+<?php
 require_once('clean.inc');
 ?>
 --EXPECTF--

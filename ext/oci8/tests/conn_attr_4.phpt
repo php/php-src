@@ -10,7 +10,7 @@ if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to 
 if ($test_drcp) die("skip output might vary with DRCP");
 
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
@@ -22,7 +22,7 @@ if (!(isset($matches[0]) &&
 <?php
 
 $testuser     = 'testuser_attr_4';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
 require(dirname(__FILE__)."/conn_attr.inc");
 
@@ -62,7 +62,7 @@ foreach($values_array as $val ) {
 	oci_set_module_name($c1,$val);
 	oci_set_client_identifier($c1,$val);
 	oci_set_client_info($c1,$val);
-	$r = oci_set_action($c1,$val);	
+	$r = oci_set_action($c1,$val);
 	if ($r) {
 		echo "Values set successfully to $val\n";
 		foreach($attr_array as $attr) {
@@ -87,29 +87,29 @@ Invalid Connection resource 2
 Warning: oci_set_client_info() expects parameter 1 to be resource, %s given in %s on line %d
 NULL
 
-Invalid Value 
+Invalid Value
 
 Warning: oci_set_action() expects parameter 2 to be %s, resource given in %s on line %d
 NULL
 
-Set Values multiple times 
+Set Values multiple times
 bool(true)
 bool(true)
 bool(true)
 bool(true)
 The value of ACTION is ACTION1
 
-Setting to different values 
+Setting to different values
 Values set successfully to 1000
 The value of MODULE is 1000
 The value of ACTION is 1000
 The value of CLIENT_INFO is 1000
 The value of CLIENT_IDENTIFIER is 1000
-Values set successfully to 
-The value of MODULE is 
-The value of ACTION is 
-The value of CLIENT_INFO is 
-The value of CLIENT_IDENTIFIER is 
+Values set successfully to
+The value of MODULE is
+The value of ACTION is
+The value of CLIENT_INFO is
+The value of CLIENT_IDENTIFIER is
 
 Warning: oci_set_module_name(): ORA-24960: %s OCI_ATTR_MODULE %s on line %d
 

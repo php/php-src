@@ -12,7 +12,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
      Returns TRUE on success or FALSE on failure.
 */
 
-/* Test copy() function: Trying to create copy of source file 
+/* Test copy() function: Trying to create copy of source file
      into different destination dir paths given in various notations */
 
 echo "*** Testing copy() function: copying data file across directories ***\n";
@@ -130,7 +130,7 @@ Size of destination file => int(3500)
 
 -- Iteration 7 --
 Size of source file => int(3500)
-Copy operation => 
+Copy operation =>
 Warning: copy(%s): failed to open stream: No such file or directory in %s on line %s
 bool(false)
 Existence of destination file => bool(false)

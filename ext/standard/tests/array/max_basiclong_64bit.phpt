@@ -6,7 +6,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
- 
+
 define("MAX_64Bit", 9223372036854775807);
 define("MAX_32Bit", 2147483647);
 define("MIN_64Bit", -MAX_64Bit - 1);
@@ -25,8 +25,8 @@ $longVals = array(
 );
 
    var_dump(max($arrayVals));
-   var_dump(max($longVals));   
-   
+   var_dump(max($longVals));
+
 ?>
 ===DONE===
 --EXPECT--

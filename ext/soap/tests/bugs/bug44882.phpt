@@ -12,7 +12,7 @@ class TestSoapClient extends SoapClient
 	{
 		return <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
-<SOAP-ENV:Envelope 
+<SOAP-ENV:Envelope
   xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"
   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
   xmlns:ns="urn:ebay:api:PayPalAPI">

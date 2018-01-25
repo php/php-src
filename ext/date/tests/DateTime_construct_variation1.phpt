@@ -10,7 +10,7 @@ Test new DateTime() function : usage variation - Passing unexpected values to fi
 
 echo "*** Testing new DateTime(): usage variation -  unexpected values to first argument \$time***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 
@@ -99,20 +99,20 @@ $timezone = new DateTimeZone("Europe/London");
 
 foreach($inputs as $variation =>$time) {
       echo "\n-- $variation --\n";
-      
+
       try {
       	var_dump( new DateTime($time) );
       } catch (Throwable $e) {
       	  $msg = $e->getMessage();
       	  echo "FAILED: " . $msg . "\n";
-      }	
-      
+      }
+
       try {
       	var_dump( new DateTime($time, $timezone) );
       } catch (Throwable $e) {
       	 $msg = $e->getMessage();
       	 echo "FAILED: " . $msg . "\n";
-      }	
+      }
 };
 
 // closing the resource

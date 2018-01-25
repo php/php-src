@@ -1,17 +1,17 @@
 --TEST--
 Test xml_parser_set_option() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_parser_set_option(resource parser, int option, mixed value)
- * Description: Set options in an XML parser 
+ * Description: Set options in an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_set_option() : usage variations ***\n";
@@ -78,7 +78,7 @@ $values = array(
       new aClass(),
 
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -101,87 +101,87 @@ echo "Done";
 --EXPECTF--
 *** Testing xml_parser_set_option() : usage variations ***
 
-Arg value 0 
+Arg value 0
 bool(true)
 
-Arg value 1 
+Arg value 1
 bool(true)
 
-Arg value 12345 
+Arg value 12345
 bool(true)
 
-Arg value -2345 
+Arg value -2345
 bool(true)
 
-Arg value 10.5 
+Arg value 10.5
 bool(true)
 
-Arg value -10.5 
+Arg value -10.5
 bool(true)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(true)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(true)
 
-Arg value 0.5 
+Arg value 0.5
 bool(true)
 
-Arg value Array 
+Arg value Array
 bool(true)
 
-Arg value Array 
+Arg value Array
 bool(true)
 
-Arg value Array 
+Arg value Array
 bool(true)
 
-Arg value Array 
+Arg value Array
 bool(true)
 
-Arg value Array 
+Arg value Array
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value 1 
+Arg value 1
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value 1 
+Arg value 1
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value string 
+Arg value string
 bool(true)
 
-Arg value string 
+Arg value string
 bool(true)
 
-Arg value Some Ascii Data 
+Arg value Some Ascii Data
 bool(true)
 
 Arg value Resource id %s
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 
-Arg value  
+Arg value
 bool(true)
 Done

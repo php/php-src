@@ -15,4 +15,4 @@ echo "Done\n";
 ?>
 --EXPECTF--
 bool(false)
-Done	
+Done

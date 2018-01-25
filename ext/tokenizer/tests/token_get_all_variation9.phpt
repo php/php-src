@@ -20,7 +20,7 @@ echo "*** Testing token_get_all() : 'source' string with different comments ***\
 
 // types of comments: '//', '/* */', '#' & /** */
 
-$source = '<?php 
+$source = '<?php
 /** Performing addition operation on given values :
   * a, b
   */
@@ -30,8 +30,8 @@ $a = 10;
 $b = 20;
 $c = true; // bool value
 
-/* 
- * Performing operation on $a,$b 
+/*
+ * Performing operation on $a,$b
  * display result
  */
 $c = $a + $b;
@@ -271,8 +271,8 @@ array(51) {
     [0]=>
     int(%d)
     [1]=>
-    string(59) "/* 
- * Performing operation on $a,$b 
+    string(59) "/*
+ * Performing operation on $a,$b
  * display result
  */"
     [2]=>

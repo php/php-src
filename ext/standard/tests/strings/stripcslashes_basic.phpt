@@ -1,10 +1,10 @@
 --TEST--
-Test stripcslashes() function : basic functionality 
+Test stripcslashes() function : basic functionality
 --FILE--
 <?php
 
 /* Prototype  : string stripcslashes  ( string $str  )
- * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
+ * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ...,
  *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */

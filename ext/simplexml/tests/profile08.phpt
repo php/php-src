@@ -15,4 +15,4 @@ echo $root->child['attribute'];
 echo "\n---Done---\n";
 ?>
 --EXPECT--
----Done--- 
+---Done---

@@ -45,7 +45,7 @@ NULL
 
 Warning: ReflectionClass::getStaticPropertyValue() expects at least 1 parameter, 0 given in %s on line 13
 NULL
-Class C does not have a property named 
+Class C does not have a property named
 string(3) "def"
 
 Warning: ReflectionClass::getStaticPropertyValue() expects parameter 1 to be string, array given in %s on line 28

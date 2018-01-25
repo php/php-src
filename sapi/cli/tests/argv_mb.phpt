@@ -1,8 +1,8 @@
 --TEST--
 Test basic argv multibyte API integration
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (substr(PHP_OS, 0, 3) != 'WIN') {
 	die ("skip only for Windows");
 }
@@ -21,7 +21,7 @@ var_dump(`$php -n $argv_fl 多字节字符串 マルチバイト文字列 мно
 
 ?>
 ==DONE==
---EXPECTF--	
+--EXPECTF--
 string(%d) "array(%d) {
   [0]=>
   string(%d) "%sargv_test.php"

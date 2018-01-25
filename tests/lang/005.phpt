@@ -2,7 +2,7 @@
 Simple If/ElseIf/Else Test
 --FILE--
 <?php
-$a=1; 
+$a=1;
 
 if($a==0) {
 	echo "bad";
@@ -11,6 +11,6 @@ if($a==0) {
 } else {
 	echo "good";
 }
-?>	
+?>
 --EXPECT--
 good

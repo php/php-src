@@ -20,7 +20,7 @@ var_dump(array_pad("", 2000000, 0));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_pad() expects exactly 3 parameters, 0 given in %s on line %d
 NULL
 

@@ -27,7 +27,7 @@ foreach ($jd_days as $jd_day) {
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 === 2453396
 string(3) "Jan"
 string(7) "January"
@@ -52,7 +52,7 @@ string(0) ""
 string(0) ""
 string(0) ""
 
-=== 
+===
 Notice: Array to string conversion in %sjdtomonthname.php on line %d
 Array
 

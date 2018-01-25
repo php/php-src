@@ -3,12 +3,12 @@ Test array_reverse() function : basic functionality - simple array for 'array' a
 --FILE--
 <?php
 /* Prototype  : array array_reverse(array $array [, bool $preserve_keys])
- * Description: Return input as a new array with the order of the entries reversed 
+ * Description: Return input as a new array with the order of the entries reversed
  * Source code: ext/standard/array.c
 */
 
 /*
- * Testing array_reverse() by giving a simple array for $array argument 
+ * Testing array_reverse() by giving a simple array for $array argument
 */
 
 echo "*** Testing array_reverse() : basic functionality ***\n";

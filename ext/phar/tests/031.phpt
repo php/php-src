@@ -21,7 +21,7 @@ require $pname;
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/031.phar.php');
 __halt_compiler();
 ?>

@@ -1,8 +1,8 @@
 --TEST--
 oci_set_db_operation: basic test for end-to-end tracing
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) {
@@ -13,11 +13,11 @@ if (!(isset($matches[0]) && $matches[1] >= 12)) {
     die("skip expected output only valid when using Oracle Database 12c or greater");
 }
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (!(isset($matches[0]) && $matches[0] >= 12)) { 
+if (!(isset($matches[0]) && $matches[0] >= 12)) {
     die("skip works only with Oracle 12c or greater version of Oracle client libraries");
 }
 if (!function_exists('oci_set_db_operation'))
-{ 
+{
     die("skip function oci_set_db_operation() does not exist");
 }
 ?>
@@ -66,4 +66,4 @@ array(2) {
   string(7) "db_op_2a"
 }
 ===DONE===
-    
+

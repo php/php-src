@@ -8,6 +8,6 @@ var_dump(strip_tags($html));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(26) "Bug ' Trigger Missing Text"
 Done

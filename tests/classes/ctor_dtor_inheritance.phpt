@@ -16,7 +16,7 @@ class base {
 		$this->name = 'base';
 		print_r($this);
 	}
-	
+
 	function __destruct() {
 		echo __CLASS__ . "::" . __FUNCTION__ . "\n";
 		print_r($this);

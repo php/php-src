@@ -11,6 +11,6 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
 Done

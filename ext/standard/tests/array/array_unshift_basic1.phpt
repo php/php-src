@@ -3,11 +3,11 @@ Test array_unshift() function : basic functionality - array with default keys fo
 --FILE--
 <?php
 /* Prototype  : int array_unshift(array $array, mixed $var [, mixed ...])
- * Description: Pushes elements onto the beginning of the array 
+ * Description: Pushes elements onto the beginning of the array
  * Source code: ext/standard/array.c
 */
 
-/* 
+/*
  * Testing array_unshift() by giving array with default keys for $array argument
 */
 

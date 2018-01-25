@@ -21,7 +21,7 @@ EOT;
 
 $variation_array = array(
   'session.use_cookies',
-  'session.serialize_handler', 
+  'session.serialize_handler',
   'session.save_handler'
   );
 

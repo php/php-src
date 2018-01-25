@@ -23,7 +23,7 @@ echo "*** Testing token_get_all() : with language constants ***\n";
 
 // parsing __FILE__ token
 echo "-- with FILE --\n";
-$source = "<?php 
+$source = "<?php
 \$fp =  fopen(__FILE__, 'r');
 ?>";
 var_dump( token_get_all($source));

@@ -4,7 +4,7 @@ oci_fetch_array()
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -97,7 +97,7 @@ while ($row = oci_fetch_array($s, OCI_NUM+OCI_RETURN_NULLS)) {
 }
 
 require dirname(__FILE__).'/drop_table.inc';
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

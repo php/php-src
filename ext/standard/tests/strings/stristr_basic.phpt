@@ -1,5 +1,5 @@
 --TEST--
-Test stristr() function : basic functionality 
+Test stristr() function : basic functionality
 --FILE--
 <?php
 /* Prototype:  string stristr  ( string $haystack  , mixed $needle  [, bool $before_needle  ] )

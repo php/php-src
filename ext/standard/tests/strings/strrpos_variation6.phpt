@@ -7,7 +7,7 @@ Test strrpos() function : usage variations - heredoc string containing quotes fo
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function by passing heredoc string containing quotes for haystack 
+/* Test strrpos() function by passing heredoc string containing quotes for haystack
  *  and with various needles & offsets
 */
 

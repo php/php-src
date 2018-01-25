@@ -3,9 +3,9 @@ Test var_export() function with valid objects
 --FILE--
 <?php
 /* Prototype  : mixed var_export(mixed var [, bool return])
- * Description: Outputs or returns a string representation of a variable 
+ * Description: Outputs or returns a string representation of a variable
  * Source code: ext/standard/var.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing var_export() with valid objects ***\n";
@@ -13,7 +13,7 @@ echo "*** Testing var_export() with valid objects ***\n";
 // class with no members
 class foo
 {
-// no members 
+// no members
 }
 
 // abstract class
@@ -32,28 +32,28 @@ class concreteClass extends abstractClass
   }
 }
 
-// interface class 
+// interface class
 interface iValue
 {
-   public function setVal ($name, $val); 
+   public function setVal ($name, $val);
    public function dumpVal ();
 }
 // implement the interface
 class Value implements iValue
 {
   private $vars = array ();
-  
+
   public function setVal ( $name, $val ) {
     $this->vars[$name] = $val;
   }
-  
+
   public function dumpVal () {
     var_export ( $vars );
   }
 }
 
-// a gereral class 
-class myClass 
+// a gereral class
+class myClass
 {
   var $foo_object;
   public $public_var;
@@ -67,7 +67,7 @@ class myClass
     $this->public_var1 = new foo();
     $this->private_var = new foo();
     $this->proected_var = new foo();
-  }  
+  }
 }
 
 // create a object of each class defined above
@@ -88,7 +88,7 @@ $valid_objects = array(
                   "foo_object" => $foo_object,
                   "Value_object" => $Value_object,
                   "concreteClass_object" => $concreteClass_object
-                 ); 
+                 );
 /* Loop to check for above objects with var_export() */
 echo "\n*** Output for objects ***\n";
 foreach($valid_objects as $key => $obj) {
@@ -136,17 +136,17 @@ string(36) "concreteClass::__set_state(array(
 
 -- Iteration: new Value --
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))"
@@ -154,50 +154,50 @@ string(57) "Value::__set_state(array(
 
 -- Iteration: new myClass --
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -205,50 +205,50 @@ string(293) "myClass::__set_state(array(
 
 -- Iteration: myClass_object --
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -283,17 +283,17 @@ string(26) "foo::__set_state(array(
 
 -- Iteration: Value_object --
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))"

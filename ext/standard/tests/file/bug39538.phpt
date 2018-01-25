@@ -15,7 +15,7 @@ foreach ($content as $v) {
 --EXPECT--
 Array
 (
-    [0] => 
+    [0] =>
 this is an test
     [1] => next data
     [2] => p
@@ -23,7 +23,7 @@ arsed
 )
 Array
 (
-    [0] => 
+    [0] =>
 this is an test
     [1] => next data
     [2] => p
@@ -31,7 +31,7 @@ arsed
 )
 Array
 (
-    [0] => 
+    [0] =>
 this is an test
     [1] => next data
     [2] => p

@@ -21,7 +21,7 @@ $mysql->query("INSERT INTO bug70949 VALUES ('dummy'),(NULL),('foo'),('bar')");
 $sql = "select * from bug70949";
 
 if ($stmt = $mysql->prepare($sql))
-{	
+{
 	$stmt->attr_set(MYSQLI_STMT_ATTR_CURSOR_TYPE, MYSQLI_CURSOR_TYPE_READ_ONLY);
 
 	if ($stmt->bind_result($name)) {
@@ -29,7 +29,7 @@ if ($stmt = $mysql->prepare($sql))
 			if ($stmt->execute())
 			{
 				while ($stmt->fetch())
-				{	
+				{
 					var_dump($name);
 				}
 			}

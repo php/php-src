@@ -11,8 +11,8 @@ class Test {
 
 	public function __construct() {
 		unset(
-			$this->publicProperty, 
-			$this->protectedProperty, 
+			$this->publicProperty,
+			$this->protectedProperty,
 			$this->privateProperty
 		);
 	}

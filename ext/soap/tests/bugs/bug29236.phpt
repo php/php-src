@@ -7,7 +7,7 @@ soap.wsdl_cache_enabled=1
 --FILE--
 <?php
 $client = new SoapClient(dirname(__FILE__)."/bug29236.wsdl");
-var_dump($client->__getFunctions()); 
+var_dump($client->__getFunctions());
 ?>
 --EXPECT--
 array(4) {

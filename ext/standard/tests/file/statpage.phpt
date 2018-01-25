@@ -11,7 +11,7 @@ var_dump(getmygid());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(%d)
 int(%d)
 int(%d)

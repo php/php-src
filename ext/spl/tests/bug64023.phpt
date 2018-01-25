@@ -16,5 +16,5 @@ echo $a, $a->__toString(), $a->__toString() . '', "\n";
 echo $a . '', "\n";
 
 --EXPECT--
- -expected-  -expected-  -expected- 
- -expected- 
+ -expected-  -expected-  -expected-
+ -expected-

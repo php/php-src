@@ -3,7 +3,7 @@ Test htmlspecialchars_decode() function : usage variations - unexpected values f
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 
@@ -14,7 +14,7 @@ Test htmlspecialchars_decode() function : usage variations - unexpected values f
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 // Initialise function arguments
-// value initialized = Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. " double quote string " 
+// value initialized = Roy's height > Sam's height. 13 < 15. 1111 & 0000 = 0000. " double quote string "
 $string = "<html>Roy&#039;s height &gt; Sam&#039;s height. 13 &lt; 15. 1111 &amp; 0000 = 0000. &quot; double quote string &quot;</html>";
 
 //get a class

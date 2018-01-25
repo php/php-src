@@ -13,7 +13,7 @@ if (!empty($dbase)) {
 else {
 	var_dump(oci_connect($user, $password));
 }
-	
+
 echo "Done\n";
 
 ?>

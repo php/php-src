@@ -20,7 +20,7 @@ echo $e->getMessage();
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/032.phar.php');
 __halt_compiler();
 ?>

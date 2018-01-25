@@ -4,7 +4,7 @@ Bind miscellaneous column types using default types
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -276,7 +276,7 @@ TEST86 insert all ORATYPE values
 TEST87 SELECT all values using DEFINEs
 ID is 86
 CHAR_T is C
-CHAR_T10 is char10    
+CHAR_T10 is char10
 VARCHAR2_T10 is varchar210
 NUMBER_T is -123.456
 NUMBER_T92 is 789.35
@@ -288,7 +288,7 @@ BINARY_FLOAT_T is 1.23456784E+037
 BINARY_DOUBLE_T is 1.2345678901234568E+037
 DECIMAL_T is 86
 INTEGER_T is 86
-NCHAR_T is nchar10   
+NCHAR_T is nchar10
 NVARCHAR2_T10 is nvarchar2x
 VARCHAR_T10 is varchar
 
@@ -301,7 +301,7 @@ array(1) {
   }
 }
 
-TEST53 insert numbers 
+TEST53 insert numbers
 array(1) {
   ["NUMBER_T92"]=>
   array(1) {
@@ -310,7 +310,7 @@ array(1) {
   }
 }
 
-TEST54 insert numbers 
+TEST54 insert numbers
 array(1) {
   ["NUMBER_T"]=>
   array(1) {
@@ -319,7 +319,7 @@ array(1) {
   }
 }
 
-TEST55 insert numbers 
+TEST55 insert numbers
 array(1) {
   ["NUMBER_T"]=>
   array(1) {
@@ -328,7 +328,7 @@ array(1) {
   }
 }
 
-TEST56 insert numbers 
+TEST56 insert numbers
 array(1) {
   ["NUMBER_T"]=>
   array(1) {

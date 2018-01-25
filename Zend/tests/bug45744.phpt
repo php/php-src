@@ -6,7 +6,7 @@ class Foo {
     public function __construct(array $data) {
 		var_dump(array_map(array($this, 'callback'), $data));
     }
-    
+
     private function callback($value) {
         if (!is_array($value)) {
             return stripslashes($value);
@@ -24,7 +24,7 @@ class Foo2 {
     public function __construct(array $data) {
 		var_dump(array_map(array($this, 'callBack'), $data));
     }
-    
+
     private function callBack($value) {
     }
 }

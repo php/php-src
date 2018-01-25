@@ -10,7 +10,7 @@ error_reporting = -1
 display_errors = 1
 --FILE--
 <?php
-function f1($script, $line, $message, $user_message) 
+function f1($script, $line, $message, $user_message)
 {
 	echo "f1 called\n";
 }

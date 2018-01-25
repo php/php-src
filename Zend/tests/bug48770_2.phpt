@@ -4,7 +4,7 @@ Bug #48770 (call_user_func_array() fails to call parent from inheriting class)
 See Bug #48770
 --FILE--
 <?php
- 
+
 class A {
 	public function func($str) {
 		var_dump(__METHOD__ .': '. $str);
@@ -13,10 +13,10 @@ class A {
 		var_dump(__METHOD__ .': '. $str);
 	}
 	protected function func3($str) {
-		var_dump(__METHOD__ .': '. $str);		
+		var_dump(__METHOD__ .': '. $str);
 	}
 	private function func22($str) {
-		var_dump(__METHOD__ .': '. $str);		
+		var_dump(__METHOD__ .': '. $str);
 	}
 }
 

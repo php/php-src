@@ -1,7 +1,7 @@
 --TEST--
 Testing anonymous function return as array key and accessing $GLOBALS
 --FILE--
-<?php 
+<?php
 
 $test = create_function('$v', 'return $v;');
 

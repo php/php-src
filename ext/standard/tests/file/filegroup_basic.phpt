@@ -12,7 +12,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN') {
  * Description: Returns the group ID of the file, or FALSE in case of an error.
  */
 
-echo "*** Testing filegroup(): basic functionality ***\n"; 
+echo "*** Testing filegroup(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
 

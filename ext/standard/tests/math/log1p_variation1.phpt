@@ -5,7 +5,7 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : float log1p  ( float $arg  )
- * Description: Returns log(1 + number), computed in a way that is accurate even 
+ * Description: Returns log(1 + number), computed in a way that is accurate even
  *				when the value of number is close to zero
  * Source code: ext/standard/math.c
  */
@@ -35,7 +35,7 @@ $inputs = array(
 /*1*/  0,
        1,
        12345,
-       -2345,       
+       -2345,
        2147483647,
        -2147483648,
 
@@ -55,7 +55,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*18*/ "",
        '',
@@ -65,10 +65,10 @@ $inputs = array(
 /*21*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // object data
-/*24*/ new classA(),       
-       
+/*24*/ new classA(),
+
        // undefined data
 /*25*/ @$undefined_var,
 

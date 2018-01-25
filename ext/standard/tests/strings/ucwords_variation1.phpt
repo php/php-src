@@ -8,7 +8,7 @@ Test ucwords() function : usage variations - unexpected input values
 */
 
 /*
- * Test ucwords() by passing different values including scalar and non scalar values 
+ * Test ucwords() by passing different values including scalar and non scalar values
 */
 
 echo "*** Testing ucwords() : usage variations ***\n";
@@ -36,7 +36,7 @@ $values =  array (
   12345,
   -2345,
 
-  // hex values 
+  // hex values
   0x10,
   0X20,
   0xAA,
@@ -77,12 +77,12 @@ $values =  array (
   NULL,
   null,
 
-  // hex in string 
+  // hex in string
   "0x123",
   '0x123',
   "0xFF12",
   "-0xFF12",
-  
+
   // undefined variable
   @$undefined_var,
 

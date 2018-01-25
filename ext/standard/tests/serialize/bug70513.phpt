@@ -8,7 +8,7 @@ Bug #70513: GMP Deserialization Type Confusion Vulnerability
 class obj
 {
 	var $ryat;
-	
+
 	function __wakeup()
 	{
 		$this->ryat = 1;

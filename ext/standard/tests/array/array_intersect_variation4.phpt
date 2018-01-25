@@ -3,13 +3,13 @@ Test array_intersect() function : usage variations - different arrays for 'arr2'
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
 /*
-* Passing different types of arrays to $arr2 argument and testing whether 
-* array_intersect() behaves in expected way with the other arguments passed to the function.  
+* Passing different types of arrays to $arr2 argument and testing whether
+* array_intersect() behaves in expected way with the other arguments passed to the function.
 * The $arr1 argument is a fixed array.
 */
 
@@ -189,8 +189,8 @@ array(2) {
 2222 != 1111.	 0000 = 0000
 "
   [12]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
@@ -202,8 +202,8 @@ array(2) {
 2222 != 1111.	 0000 = 0000
 "
   [12]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }

@@ -6,11 +6,11 @@ Test srand() function :  error conditions - incorrect number of args
  * Description: Seed the random number generator.
  * Source code: ext/standard/rand.c
  */
- 
+
 /*
  * Pass incorrect number of arguments to srand() to test behaviour
  */
- 
+
 echo "*** Testing srand() : error conditions ***\n";
 
 var_dump(srand(500, 0, true));

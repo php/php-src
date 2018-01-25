@@ -8,7 +8,7 @@ Test strrpos() function : usage variations - heredoc string containing special c
 */
 
 /* Test strrpos() function by passing heredoc string containing special chars for haystack
- *  and with various needles & offets 
+ *  and with various needles & offets
 */
 
 echo "*** Testing strrpos() function: with heredoc strings ***\n";

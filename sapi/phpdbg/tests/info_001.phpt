@@ -29,7 +29,7 @@ prompt> string(4) "test"
 [Breakpoint #0 in foo() at %s:15, hits: 1]
 >00015: 		var_dump(strrev($baz));
  00016: 	}
- 00017: 
+ 00017:
 prompt> [Variables in foo() (1)]
 Address            Refs    Type      Variable
 %s %d       string    $baz
@@ -56,7 +56,7 @@ prompt> [Literal Constants in foo() (2)]
 prompt> string(4) "tset"
 [Script ended normally]
 prompt> [No active op array!]
-prompt> 
+prompt>
 --FILE--
 <?php
 

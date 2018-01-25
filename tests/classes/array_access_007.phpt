@@ -1,11 +1,11 @@
 --TEST--
 ZE2 ArrayAccess and [] assignment
 --FILE--
-<?php 
+<?php
 
 class OverloadedArray implements ArrayAccess {
 	public $realArray;
-	
+
 	function __construct() {
 		$this->realArray = array();
 	}

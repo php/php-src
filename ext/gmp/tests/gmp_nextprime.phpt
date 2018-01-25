@@ -22,10 +22,10 @@ $n = gmp_nextprime("");
 var_dump(gmp_strval($n));
 $n = gmp_nextprime(new stdclass());
 var_dump(gmp_strval($n));
-	
+
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "2"
 string(1) "2"
 string(1) "2"

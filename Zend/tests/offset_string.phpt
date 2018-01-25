@@ -27,7 +27,7 @@ var_dump($str[$arr]);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "i"
 
 Notice: String offset cast occurred in %s on line %d

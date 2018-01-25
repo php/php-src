@@ -37,13 +37,13 @@ class MyAppendIterator extends AppendIterator
 		echo __METHOD__ . "\n";
 		return parent::valid();
 	}
-	
+
 	function append(Iterator $what)
 	{
 		echo __METHOD__ . "\n";
 		parent::append($what);
 	}
-	
+
 	function parent__construct()
 	{
 		parent::__construct();

@@ -46,7 +46,7 @@ echo "--------- creating a new attribute\n";
 //$attr = $dom->createAttribute("src", "picture.gif");
 //print_r($attr);
 
-//$rootnode->set_attributeNode($attr); 
+//$rootnode->set_attributeNode($attr);
 $attr = $rootnode->setAttribute("src", "picture.gif");
 $attr = $rootnode->getAttribute("src");
 print_r($attr);
@@ -113,7 +113,7 @@ Node Content: Title
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 Node Name: para
@@ -123,14 +123,14 @@ Num Children: 7
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 --------- last
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 --------- parent
@@ -147,7 +147,7 @@ Node Content: Title
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 Node Name: para
@@ -157,7 +157,7 @@ Num Children: 7
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 --------- creating a new attribute
@@ -236,7 +236,7 @@ Node Content: Title
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 Node Name: para
@@ -246,7 +246,7 @@ Num Children: 7
 Node Name: #text
 Node Type: 3
 Num Children: 0
-Node Content: 
+Node Content:
 
 
 <?xml version="1.0" standalone="yes"?>

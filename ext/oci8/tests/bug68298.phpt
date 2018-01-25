@@ -11,7 +11,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platforms only");
 require(dirname(__FILE__).'/connect.inc');
 
 $stmtarray = array(
-	"DROP TABLE BUG68298", 
+	"DROP TABLE BUG68298",
 	"CREATE TABLE BUG68298 (COL1 NUMBER(20))"
 );
 

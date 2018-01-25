@@ -4,12 +4,12 @@ Check the function date_timestamp_set() with 3 parameters.
 Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --INI--
 date.timezone = UTC;
-date_default_timezone_set("America/Sao_Paulo"); 
+date_default_timezone_set("America/Sao_Paulo");
 --FILE--
 <?php
 $dftz021 = date_default_timezone_get(); //UTC
 
-$dtms021 = new DateTime(); 
+$dtms021 = new DateTime();
 
 date_timestamp_set($dtms021, 123456789, 'error');
 ?>

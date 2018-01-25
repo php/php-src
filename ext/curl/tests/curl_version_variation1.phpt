@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -47,7 +47,7 @@ $inputs =  array (
   array(),
   array(0),
   array(1, 2),
-  
+
   //string values
   "ABC",
   'abc',

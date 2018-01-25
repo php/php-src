@@ -1,12 +1,12 @@
 --TEST--
 SPL: SimpleXMLIterator and overridden iterator methods()
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded('simplexml')) print 'skip';
 if (!extension_loaded("libxml")) print "skip LibXML not present";
 ?>
 --FILE--
-<?php 
+<?php
 
 $xml =<<<EOF
 <?xml version='1.0'?>

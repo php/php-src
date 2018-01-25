@@ -1,7 +1,7 @@
 --TEST--
 Bug #71475: openssl_seal() uninitialized memory usage
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 ?>
 --FILE--

@@ -12,12 +12,12 @@ class testClass {
 class testClass2 extends testClass {
 	function __construct() {
 		static $x = 0;
-		
+
 		if ($x) {
 			print "Infinite loop...\n";
 		} else {
 			$x++;
-			
+
 			parent::__construct(1);
 			testclass::__construct(2);
 			call_user_func(array('parent', '__construct'), 3);

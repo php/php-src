@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 /* Prototype  : bool rename(string old_name, string new_name[, resource context])
- * Description: Rename a file 
+ * Description: Rename a file
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing rename() with obscure files ***\n";
@@ -21,9 +21,9 @@ $aFile = $file_path.'/afile.tmp';
 
 mkdir($file_path);
 
-/* An array of files */ 
+/* An array of files */
 $names_arr = array(
-  /* Invalid args */ 
+  /* Invalid args */
   -1,
   TRUE,
   FALSE,
@@ -34,7 +34,7 @@ $names_arr = array(
   array(),
 
   /* prefix with path separator of a non existing directory*/
-  "/no/such/file/dir", 
+  "/no/such/file/dir",
   "php/php"
 
 );

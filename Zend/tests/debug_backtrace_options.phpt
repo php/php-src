@@ -29,8 +29,8 @@ function doit($a, $b, $how)
 }
 
 class foo {
-	protected function doCall($dowhat, $how) 
-	{  
+	protected function doCall($dowhat, $how)
+	{
 	   $dowhat('a','b', $how);
 	}
 	static function statCall($dowhat, $how)
@@ -205,7 +205,7 @@ Array
             [function] => backtrace_print
             [args] => Array
                 (
-                    [0] => 
+                    [0] =>
                 )
 
         )

@@ -15,7 +15,7 @@ class Bar extends Foo {
 $m = new ReflectionMethod("Bar::func");
 echo $m;
 ?>
---EXPECTF--	
+--EXPECTF--
 Method [ <user, overwrites Foo, prototype Foo> public method func ] {
   @@ %s010.php 7 - 8
 }

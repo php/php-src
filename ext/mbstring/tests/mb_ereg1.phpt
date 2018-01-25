@@ -19,7 +19,7 @@ foreach ($a as $args) {
 }
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(false)
 array(3) {
   [0]=>

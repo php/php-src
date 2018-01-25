@@ -3,8 +3,8 @@ apache_request_headers() stack overflow.
 --INI--
 default_charset="UTF-8"
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -29,7 +29,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 X-Powered-By: PHP/%s
 Content-type: text/%s
 

@@ -6,7 +6,7 @@ class gtErrorTestCaseMethodTest extends PHPUnit_Framework_TestCase {
 
 
   public function testTestCase() {
-   
+
     $f = new gtMethod('DOMDocument', 'createAttribute');
     $f->setArgumentNames();
     $f->setArgumentLists();
@@ -15,14 +15,14 @@ class gtErrorTestCaseMethodTest extends PHPUnit_Framework_TestCase {
 
     $f->setConstructorArgumentNames();
     $f->setConstructorInitStatements();
-    
+
     $optSect = new gtOptionalSections();
-    
+
     $btc = gtErrorTestCase::getInstance($optSect,'method');
     $btc->setMethod($f);
     $btc->constructTestCase();
-    
-    
+
+
     $fs = $btc->toString();
     $this->assertTrue(is_string($fs));
   }

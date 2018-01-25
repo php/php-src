@@ -1,11 +1,11 @@
 --TEST--
-Test intval() function : usage variation 
+Test intval() function : usage variation
 --FILE--
 <?php
 /* Prototype  : int intval(mixed var [, int base])
- * Description: Get the integer value of a variable using the optional base for the conversion 
+ * Description: Get the integer value of a variable using the optional base for the conversion
  * Source code: ext/standard/type.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing intval() : usage variation ***\n";

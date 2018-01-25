@@ -21,7 +21,7 @@ $classlist = [
   'G' => 'class G extends F { const XX = parent::XX." extended by G"; public static function get_me($x = "got ".self::XX) { return $x; } }',
 ];
 
-spl_autoload_register(function ($class) use ($classlist) { 
+spl_autoload_register(function ($class) use ($classlist) {
 	if (isset($classlist[$class])) {
 		eval($classlist[$class]);
 	} else {
@@ -36,7 +36,7 @@ printf("E::getHW() = %s\n", E::getHW());
 printf("G::get_me() = %s\n", G::get_me());
 
 ?>
---EXPECT-- 
+--EXPECT--
 B::HW = this is A extended by B
 D::HW = this is space1\C extented by D
 E::getHW() = this is A extended by B

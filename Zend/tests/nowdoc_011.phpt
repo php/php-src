@@ -6,7 +6,7 @@ Nowdocs CAN be used as static scalars.
 require_once 'nowdoc.inc';
 
 class e {
-    
+
     const E = <<<'THISMUSTNOTERROR'
 If you DON'T see this, something's wrong.
 THISMUSTNOTERROR;

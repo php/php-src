@@ -7,7 +7,7 @@ Ensure type hints are enforced for functions invoked as callbacks.
       echo "$errno: $errstr - $errfile($errline)\n";
       return true;
   }
-  
+
   echo "---> Type hints with callback function:\n";
   class A  {  }
   function f1(A $a)  {
@@ -46,7 +46,7 @@ Ensure type hints are enforced for functions invoked as callbacks.
   } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
-  
+
   echo "\n\n---> Type hints with callback static method:\n";
   class C {
       static function f1(A $a) {
@@ -95,7 +95,7 @@ Ensure type hints are enforced for functions invoked as callbacks.
   } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
-  
+
   echo "\n\n---> Type hints with callback instance method:\n";
   class D {
       function f1(A $a) {
@@ -145,7 +145,7 @@ Ensure type hints are enforced for functions invoked as callbacks.
   } catch (Error $ex) {
     echo "{$ex->getCode()}: {$ex->getMessage()} - {$ex->getFile()}({$ex->getLine()})\n\n";
   }
-  
+
 ?>
 --EXPECTF--
 ---> Type hints with callback function:

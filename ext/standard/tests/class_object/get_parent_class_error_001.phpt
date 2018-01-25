@@ -3,9 +3,9 @@ Test get_parent_class() function : error conditions - wrong number of args.
 --FILE--
 <?php
 /* Prototype  : proto string get_parent_class([mixed object])
- * Description: Retrieves the parent class name for object or class or current scope. 
+ * Description: Retrieves the parent class name for object or class or current scope.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_parent_class() : error conditions ***\n";

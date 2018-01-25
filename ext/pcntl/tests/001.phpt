@@ -2,11 +2,11 @@
 Test pcntl wait functionality
 --SKIPIF--
 <?php
-	if (!extension_loaded("pcntl")) print "skip"; 
+	if (!extension_loaded("pcntl")) print "skip";
 	elseif (!function_exists("posix_kill")) print "skip posix_kill() not available";
 ?>
 --FILE--
-<?php 
+<?php
 function test_exit_waits(){
 	print "\n\nTesting pcntl_wifexited and wexitstatus....";
 
@@ -25,7 +25,7 @@ function test_exit_signal(){
 	print "\n\nTesting pcntl_wifsignaled....";
 
 	$pid=pcntl_fork();
-    
+
 	if ($pid==0) {
 		sleep(10);
 		exit;
@@ -47,7 +47,7 @@ function test_stop_signal(){
 	print "\n\nTesting pcntl_wifstopped and pcntl_wstopsig....";
 
 	$pid=pcntl_fork();
-    
+
 	if ($pid==0) {
 		sleep(1);
 		exit;

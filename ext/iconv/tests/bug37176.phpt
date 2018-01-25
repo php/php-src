@@ -1,8 +1,8 @@
 --TEST--
 Bug #37176 (iconv_strpos() fails to find a string)
 --SKIPIF--
-<?php 
-include('skipif.inc'); 
+<?php
+include('skipif.inc');
 
 $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
 if ($test === false) {

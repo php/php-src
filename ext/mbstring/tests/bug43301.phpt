@@ -22,7 +22,7 @@ Stack trace:
 #0 %sbug43301.php(%d): mb_ereg_replace('hello', '$1', 'hello, I have g...', 'e')
 #1 {main}
 
-Next Error: Failed evaluating code: 
+Next Error: Failed evaluating code:
 $1 in %sbug43301.php:%d
 Stack trace:
 #0 %sbug43301.php(%d): mb_ereg_replace('hello', '$1', 'hello, I have g...', 'e')

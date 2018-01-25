@@ -1,5 +1,5 @@
 --TEST--
-Test preg_replace_callback() function : error 
+Test preg_replace_callback() function : error
 --FILE--
 <?php
 /*

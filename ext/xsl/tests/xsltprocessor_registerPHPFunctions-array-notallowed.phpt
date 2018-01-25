@@ -1,7 +1,7 @@
 --TEST--
 Check xsltprocessor::registerPHPFunctions with array and a not allowed function
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

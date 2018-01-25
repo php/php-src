@@ -6,7 +6,7 @@ Bug #69846 Segmenation fault (access violation) when iterating over DOMNodeList
 <?php
 
 $tmpDomDocument = new DOMDocument();
-        
+
 $xml = '<?xml version="1.0" encoding="UTF-8"?><dummy xmlns:xfa="http://www.xfa.org/schema/xfa-data/1.0/"><xfa:data>
   <form1>
     <TextField1>Value A</TextField1>

@@ -26,13 +26,13 @@ class gtErrorTestCaseFunction extends gtErrorTestCase {
    */
   public function constructTestCase() {
     $this->constructCommonHeaders();
-    
+
     $this->addErrorEcho();
-      
+
     $this->constructSubjectCalls();
-    
+
     $this->constructCommonClosing();
-    
+
   }
 
 

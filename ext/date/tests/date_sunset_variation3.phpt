@@ -3,9 +3,9 @@ Test date_sunset() function : usage variation - Passing unexpected values to thi
 --FILE--
 <?php
 /* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunset for a given day and location 
+ * Description: Returns time of sunset for a given day and location
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing date_sunset() : usage variation ***\n";
@@ -95,7 +95,7 @@ foreach($inputs as $key =>$value) {
       var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $value, $longitude, $zenith, $gmt_offset) );
       var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $value, $longitude, $zenith, $gmt_offset) );
       var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $value, $longitude, $zenith, $gmt_offset) );
-      
+
 };
 
 ?>

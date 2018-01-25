@@ -5,7 +5,7 @@ Test ctype_cntrl() function : error conditions - Incorrect number of args
 --FILE--
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)
- * Description: Checks for control character(s) 
+ * Description: Checks for control character(s)
  * Source code: ext/ctype/ctype.c
  */
 

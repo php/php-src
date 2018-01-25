@@ -40,7 +40,7 @@ $values = array(
   (float) PHP_INT_MAX + 1,
   (float) -PHP_INT_MAX - 1,
   .5,
- 
+
   // array data
   array(),
   array(0),

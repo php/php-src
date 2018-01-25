@@ -4,7 +4,7 @@ oci_fetch_object()
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -108,13 +108,13 @@ object(stdClass)#1 (3) {
 Test 2
 123
 1st row col2 string
-1 more text    
+1 more text
 456
 2nd row col2 string
-2 more text    
+2 more text
 789
 3rd row col2 string
-3 more text    
+3 more text
 Test 3
 123
 

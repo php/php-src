@@ -21,7 +21,7 @@ abstract class b extends a {
 class c extends b {
 	public function __construct() {
 		$this->test();
-	}	
+	}
 }
 
 new c;

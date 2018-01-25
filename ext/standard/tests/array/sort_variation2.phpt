@@ -3,7 +3,7 @@ Test sort() function : usage variations - unexpected values for 'sort_flags' arg
 --FILE--
 <?php
 /* Prototype  : bool sort(array &array_arg [, int $sort_flags])
- * Description: Sort an array 
+ * Description: Sort an array
  * Source code: ext/standard/array.c
 */
 
@@ -79,8 +79,8 @@ for($index = 0; $index < count($unexpected_values); $index ++) {
   // sort the array, retain a temp. copy of input array for next iteration
   $value = $unexpected_values [$index];
   $temp_array = $unsorted_values;
-  var_dump( sort($temp_array, $value) ); 
-  
+  var_dump( sort($temp_array, $value) );
+
   //dump the sorted array
   var_dump($temp_array);
   $counter++;

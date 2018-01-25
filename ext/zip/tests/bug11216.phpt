@@ -23,6 +23,6 @@ ZipArchive Object
     [statusSys] => 0
     [numFiles] => 1
     [filename] => %s
-    [comment] => 
+    [comment] =>
 )
 bool(false)

@@ -1,15 +1,15 @@
 --TEST--
-Test asort() function : object functionality - sorting objects with diff. accessibility of member vars 
+Test asort() function : object functionality - sorting objects with diff. accessibility of member vars
 --FILE--
 <?php
 /* Prototype  : bool asort ( array &$array [, int $asort_flags] )
- * Description: Sort an array and maintain index association.  
+ * Description: Sort an array and maintain index association.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
 
 /*
- * testing asort() by providing integer/string object arrays with following flag values 
+ * testing asort() by providing integer/string object arrays with following flag values
  * 1. Defualt flag value
    2. SORT_REGULAR - compare items normally
 */
@@ -21,7 +21,7 @@ class for_integer_asort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -36,7 +36,7 @@ class for_string_asort
 {
   public $public_class_value;
   private $private_class_value;
-  protected $protected_class_value; 
+  protected $protected_class_value;
   // initializing object member value
   function __construct($value1, $value2,$value3){
     $this->public_class_value = $value1;
@@ -51,13 +51,13 @@ class for_string_asort
 }
 
 // array of integer objects
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   1 => new for_integer_asort(11, 33,2), 2 =>  new for_integer_asort(44, 66,3),
   3 => new for_integer_asort(23, 32,6), 4 => new for_integer_asort(-88, -5,-4),
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "a" => new for_string_asort("axx","AXX","d"), "b" => new for_string_asort("T", "t","q"),
   "c" => new for_string_asort("w", "W","c"), "d" => new for_string_asort("PY", "py","s"),
 );

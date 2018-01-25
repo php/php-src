@@ -3,14 +3,14 @@ Test posix_strerror() function : usage variations
 --SKIPIF--
 <?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto string posix_strerror(int errno)
- * Description: Retrieve the system error message associated with the given errno. 
+ * Description: Retrieve the system error message associated with the given errno.
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_strerror() : usage variations ***\n";
@@ -61,7 +61,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -82,100 +82,100 @@ Notice: Undefined variable: undefined_var in %s on line %d
 
 Notice: Undefined variable: unset_var in %s on line %d
 
-Arg value 10.5 
+Arg value 10.5
 string
 
-Arg value -10.5 
+Arg value -10.5
 string
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: posix_strerror() expects parameter 1 to be integer, float given in %s on line %d
 boolean
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string
 
-Arg value 0.5 
+Arg value 0.5
 string
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
 Notice: Array to string conversion in %sposix_strerror_variation1.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_strerror() expects parameter 1 to be integer, array given in %s on line %d
 boolean
 
-Arg value  
+Arg value
 string
 
-Arg value  
+Arg value
 string
 
-Arg value 1 
+Arg value 1
 string
 
-Arg value  
+Arg value
 string
 
-Arg value 1 
+Arg value 1
 string
 
-Arg value  
+Arg value
 string
 
-Arg value  
+Arg value
 
 Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
-Arg value  
+Arg value
 
 Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
-Arg value string 
+Arg value string
 
 Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
-Arg value string 
+Arg value string
 
 Warning: posix_strerror() expects parameter 1 to be integer, string given in %s on line %d
 boolean
 
-Arg value  
+Arg value
 string
 
-Arg value  
+Arg value
 string
 
 Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

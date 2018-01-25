@@ -1,8 +1,8 @@
 --TEST--
 Test function posix_setuid() by calling it more than or less than its expected arguments
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com

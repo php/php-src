@@ -1,11 +1,11 @@
 --TEST--
 ZE2 ArrayAccess and sub Arrays
 --FILE--
-<?php 
+<?php
 
 class Peoples implements ArrayAccess {
 	public $person;
-	
+
 	function __construct() {
 		$this->person = array(array('name'=>'Joe'));
 	}

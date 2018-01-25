@@ -20,7 +20,7 @@ call_user_func($lambda2, "Universe");
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(true)
 bool(true)
 Hello World!

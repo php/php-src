@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -53,7 +53,7 @@ $permission_values = array(
 $iterator = 1;
 foreach ($permission_values as $perm) {
 	echo "\n-- Iteration $iterator --\n";
-	
+
 	// Remove the directory if already exists
 	if (is_dir($dir_path)){
 		chmod ($dir_path, 0777); // change dir permission to allow all operation
@@ -63,7 +63,7 @@ foreach ($permission_values as $perm) {
 
 	// change the dir permisson to test dir on it
 	var_dump( chmod($dir_path, $perm) );
-	
+
 	var_dump(scandir($dir_path));
 	$iterator++;
 }

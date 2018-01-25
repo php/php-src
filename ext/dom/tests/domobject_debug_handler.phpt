@@ -20,41 +20,41 @@ DOMDocument Object
         (
         )
 
-    [doctype] => 
+    [doctype] =>
     [implementation] => (object value omitted)
     [documentElement] => (object value omitted)
-    [actualEncoding] => 
-    [encoding] => 
-    [xmlEncoding] => 
+    [actualEncoding] =>
+    [encoding] =>
+    [xmlEncoding] =>
     [standalone] => 1
     [xmlStandalone] => 1
     [version] => 1.0
     [xmlVersion] => 1.0
     [strictErrorChecking] => 1
     [documentURI] => %s
-    [config] => 
-    [formatOutput] => 
-    [validateOnParse] => 
-    [resolveExternals] => 
+    [config] =>
+    [formatOutput] =>
+    [validateOnParse] =>
+    [resolveExternals] =>
     [preserveWhiteSpace] => 1
-    [recover] => 
-    [substituteEntities] => 
+    [recover] =>
+    [substituteEntities] =>
     [nodeName] => #document
-    [nodeValue] => 
+    [nodeValue] =>
     [nodeType] => 9
-    [parentNode] => 
+    [parentNode] =>
     [childNodes] => (object value omitted)
     [firstChild] => (object value omitted)
     [lastChild] => (object value omitted)
-    [previousSibling] => 
-    [nextSibling] => 
-    [attributes] => 
-    [ownerDocument] => 
-    [namespaceURI] => 
-    [prefix] => 
-    [localName] => 
+    [previousSibling] =>
+    [nextSibling] =>
+    [attributes] =>
+    [ownerDocument] =>
+    [namespaceURI] =>
+    [prefix] =>
+    [localName] =>
     [baseURI] => %s
-    [textContent] => 
+    [textContent] =>
 	foobar
 
 )

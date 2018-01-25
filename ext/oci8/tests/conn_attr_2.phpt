@@ -1,7 +1,7 @@
 --TEST--
 Set and get of connection attributes across persistent connections and sysdba connection.
 --SKIPIF--
-<?php 
+<?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 
@@ -20,7 +20,7 @@ oci8.privileged_connect = On
 <?php
 
 $testuser     = 'testuser_attr_2';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
 require(dirname(__FILE__)."/conn_attr.inc");
 
@@ -97,9 +97,9 @@ The value of CLIENT_IDENTIFIER is ID00100
 **Get values using pconnect-3**
 resource(%d) of type (oci8 persistent connection)
 The value of MODULE is %s
-The value of ACTION is 
-The value of CLIENT_INFO is 
-The value of CLIENT_IDENTIFIER is 
+The value of ACTION is
+The value of CLIENT_INFO is
+The value of CLIENT_IDENTIFIER is
 
 **Re-open a pconnect()**
 resource(%d) of type (oci8 persistent connection)

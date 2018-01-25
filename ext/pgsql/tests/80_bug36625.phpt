@@ -8,7 +8,7 @@ require_once('skipif.inc');
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ('Could not connect to the server');

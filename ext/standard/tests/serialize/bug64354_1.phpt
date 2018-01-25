@@ -10,13 +10,13 @@ spl_autoload_register(
 
 try {
     var_dump(unserialize('O:1:"A":0:{}'));
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
 
 try {
     var_dump(unserialize('a:2:{i:0;O:1:"A":0:{}i:1;O:1:"A":0:{}}'));
-} catch (Exception $e) { 
+} catch (Exception $e) {
     var_dump($e->getMessage());
 }
 ?>

@@ -9,7 +9,7 @@ $lambda = function &(&$x) {
 
 function test() {
 	global $lambda;
-	
+
 	$y = 3;
 	var_dump($GLOBALS['lambda']($y));
 	var_dump($lambda($y));

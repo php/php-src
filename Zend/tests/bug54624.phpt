@@ -11,7 +11,7 @@ class A
 
 class_alias('A', 'AliasA');
 
-eval(' 
+eval('
 	class B extends A
 	{
 		function foo(AliasA $param) {

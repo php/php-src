@@ -17,11 +17,11 @@ function Test()
 	echo "$a $c ";
 }
 
-Test();	
+Test();
 echo "$a $b $c ";
-Test();	
+Test();
 echo "$a $b $c ";
 Test();
 ?>
 --EXPECT--
-1 5 2 2 10 5  2 5 3 2 10 5  3 5 4 2 
+1 5 2 2 10 5  2 5 3 2 10 5  3 5 4 2

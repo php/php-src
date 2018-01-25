@@ -8,5 +8,5 @@ unset($a[]);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Cannot use [] for unsetting in %s on line %d

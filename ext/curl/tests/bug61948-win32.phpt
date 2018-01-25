@@ -1,7 +1,7 @@
 --TEST--
 Bug #61948 (CURLOPT_COOKIEFILE '' raises open_basedir restriction)
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; 
+<?php if (!extension_loaded("curl")) print "skip";
 if(substr(PHP_OS, 0, 3) != 'WIN' )
   die("skip Not Valid for Linux");
 ?>

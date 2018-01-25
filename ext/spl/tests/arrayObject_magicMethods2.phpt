@@ -8,24 +8,24 @@ class UsesMagic {
 	public $c = 3;
 
 	private $priv = 'secret';
-	
-	function __get($name) { 
+
+	function __get($name) {
 		$args = func_get_args();
 		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 	}
-	function __set($name, $value) { 
+	function __set($name, $value) {
 		$args = func_get_args();
 		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 	}
-	function __isset($name) { 
+	function __isset($name) {
 		$args = func_get_args();
 		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 	}
-	function __unset($name) { 
+	function __unset($name) {
 		$args = func_get_args();
 		echo "In " . __METHOD__ . "(" . implode($args, ',') . ")\n";
 	}
-	
+
 }
 
 $obj = new UsesMagic;

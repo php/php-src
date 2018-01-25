@@ -1,7 +1,7 @@
 --TEST--
 ZE2 ArrayAccess and ArrayProxyAccess, ArrayProxy
 --FILE--
-<?php 
+<?php
 
 // NOTE: This will become part of SPL
 
@@ -16,7 +16,7 @@ class ArrayProxy implements ArrayAccess
 {
 	private $object;
 	private $element;
-	
+
 	function __construct(ArrayProxyAccess $object, $element)
 	{
 		echo __METHOD__ . "($element)\n";
@@ -53,7 +53,7 @@ class ArrayProxy implements ArrayAccess
 class Peoples implements ArrayProxyAccess
 {
 	public $person;
-	
+
 	function __construct()
 	{
 		$this->person = array(array('name'=>'Foo'));
@@ -88,7 +88,7 @@ class Peoples implements ArrayProxyAccess
 	{
 		$this->person[$element][$index] = $value;
 	}
-	
+
 	function proxyUnset($element, $index)
 	{
 		unset($this->person[$element][$index]);

@@ -1,9 +1,9 @@
---TEST--                                 
+--TEST--
 Bug #40854 (imap_mail_compose() creates an invalid terminator for multipart e-mails)
 --SKIPIF--
 <?php
-        if (!extension_loaded("imap")) { 
-                die("skip imap extension not available");  
+        if (!extension_loaded("imap")) {
+                die("skip imap extension not available");
         }
 ?>
 --FILE--
@@ -53,5 +53,5 @@ Content-Description: description3
 contents.data3
 
 
-	
+
 --%s--

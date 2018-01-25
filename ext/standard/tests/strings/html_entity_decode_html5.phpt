@@ -2440,7 +2440,7 @@ foreach ($map as $str) {
 &NegativeVeryThinSpace; => ​ e2808b
 &NestedGreaterGreater; => ≫ e289ab
 &NestedLessLess; => ≪ e289aa
-&NewLine; => 
+&NewLine; =>
  0a
 &Nfr; => 𝔑 f09d9491
 &NoBreak; => ⁠ e281a0

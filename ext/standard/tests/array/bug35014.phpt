@@ -22,7 +22,7 @@ foreach ($tests as $v) {
 	var_dump(array_product($v));
 }
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_product() expects parameter 1 to be array, string given in %s on line %d
 NULL
 int(1)

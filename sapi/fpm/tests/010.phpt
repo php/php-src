@@ -22,7 +22,7 @@ error_log = $logfile
 [unconfined]
 listen = 127.0.0.1:$port
 pm.status_path = /status
-pm = static 
+pm = static
 pm.max_children = 1
 EOT;
 

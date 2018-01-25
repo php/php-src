@@ -1,5 +1,5 @@
 --TEST--
-array_udiff():Test return type and value for expected input 
+array_udiff():Test return type and value for expected input
 --FILE--
 <?php
 /*

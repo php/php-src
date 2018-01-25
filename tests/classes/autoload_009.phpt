@@ -1,5 +1,5 @@
 --TEST--
-Ensure type hints for unknown types do not trigger autoload. 
+Ensure type hints for unknown types do not trigger autoload.
 --FILE--
 <?php
 spl_autoload_register(function ($name) {

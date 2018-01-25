@@ -18,7 +18,7 @@ unlink($filename);
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -55,7 +55,7 @@ $permission_values = array(
 $iterator = 1;
 foreach($permission_values as $perm) {
 	echo "\n-- Iteration $iterator --\n";
-	
+
 	if (is_dir($dir_path)) {
 		chmod ($dir_path, 0777); // change dir permission to allow all operation
 		rmdir ($dir_path);

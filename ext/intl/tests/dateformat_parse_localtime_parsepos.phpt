@@ -16,7 +16,7 @@ function ut_main()
 	$locale_arr = array (
 		'en_US_CA'
 	);
-	
+
 	$datetype_arr = array (
                 IntlDateFormatter::FULL,
                 IntlDateFormatter::LONG,
@@ -37,7 +37,7 @@ function ut_main()
 	$fmt2 = ut_datefmt_create( 'en_US_CA', IntlDateFormatter::MEDIUM, IntlDateFormatter::MEDIUM);
 	$fmt3 = ut_datefmt_create( 'en_US_CA', IntlDateFormatter::FULL, IntlDateFormatter::FULL);
 	$fmt_array  = array(
-		$fmt1 , $fmt2 ,$fmt3 
+		$fmt1 , $fmt2 ,$fmt3
 	);
 	$fmt_desc_array  = array(
 		"DateType::LONG, TimeType::LONG",
@@ -52,7 +52,7 @@ function ut_main()
                 foreach( $fmt_array as $fmt_entry ){
 			$res_str .= "\n------------";
 			$res_str .= "\nIntlDateFormatter : ".$fmt_desc_array[$cnt];
-			$cnt++;		
+			$cnt++;
 			$parsed_arr = ut_datefmt_localtime( $fmt_entry , $text_entry);
 
 				if( $parsed_arr){
@@ -89,15 +89,15 @@ IntlDateFormatter : DateType::LONG, TimeType::LONG	Error : 'Date parsing failed:
 IntlDateFormatter : DateType::MEDIUM, TimeType::MEDIUM	Error : 'Date parsing failed: U_PARSE_ERROR'
 ------------
 IntlDateFormatter : DateType::FULL, TimeType::FULL
-tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '4' , tm_yday : '352' , tm_mon : '11' , tm_isdst : '0' , 
+tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '4' , tm_yday : '352' , tm_mon : '11' , tm_isdst : '0' ,
 -------------------------------
 
-Input text is : June 18, 1969 8:49:59 AM 
+Input text is : June 18, 1969 8:49:59 AM
 ------------
 IntlDateFormatter : DateType::LONG, TimeType::LONG	Error : 'Date parsing failed: U_PARSE_ERROR'
 ------------
 IntlDateFormatter : DateType::MEDIUM, TimeType::MEDIUM
-tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '3' , tm_yday : '169' , tm_mon : '5' , tm_isdst : '%d' , 
+tm_sec : '59' , tm_min : '49' , tm_hour : '8' , tm_year : '69' , tm_mday : '18' , tm_wday : '3' , tm_yday : '169' , tm_mon : '5' , tm_isdst : '%d' ,
 ------------
 IntlDateFormatter : DateType::FULL, TimeType::FULL	Error : 'Date parsing failed: U_PARSE_ERROR'
 -------------------------------

@@ -8,12 +8,12 @@ class Container
 	{
 		return $this->_p[ $what ];
 	}
-	
+
 	public function __set( $what, $value )
 	{
 		$this->_p[ $what ] = $value;
 	}
-	
+
 	private $_p = array();
 }
 

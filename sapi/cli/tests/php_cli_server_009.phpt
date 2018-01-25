@@ -5,7 +5,7 @@ After this fix(#60112), previously 404 request like "localhost/foo/bar"
 now could serve correctly with request_uri "index.php" and PATH_INFO "/foo/bar/"
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php

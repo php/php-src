@@ -7,7 +7,7 @@ Test strrchr() function : usage variations - heredoc string containing escape se
  * Source code: ext/standard/string.c
 */
 
-/* Test strrchr() function by passing heredoc string containing 
+/* Test strrchr() function by passing heredoc string containing
  *  escape sequences for haystack and with various needles
 */
 

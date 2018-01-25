@@ -38,7 +38,7 @@ var_dump(isset($cache[$id]));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: Uncaught ErrorException: Undefined variable: id in %s:%d
 Stack trace:
 #0 %s(%d): env::errorHandler(8, '%s', '%s', 34, Array)

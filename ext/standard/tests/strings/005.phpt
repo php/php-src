@@ -16,7 +16,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 hello
 int(8192)
 bool(false)

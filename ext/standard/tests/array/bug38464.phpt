@@ -5,7 +5,7 @@ Bug #38464 (array_count_values() mishandles numeric strings)
 $array = array('-000', ' 001', 1, ' 123', '+123');
 var_dump(array_count_values($array));
 ?>
---EXPECT--	
+--EXPECT--
 array(5) {
   ["-000"]=>
   int(1)

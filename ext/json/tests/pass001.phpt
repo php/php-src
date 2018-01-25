@@ -92,7 +92,7 @@ var_dump($arr);
 
 ?>
 --EXPECT--
-Testing: 
+Testing:
 [
     "JSON Test Pattern pass1",
     {"object with 1 member":["array with 1 element"]},
@@ -199,7 +199,7 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "
 	"
     ["slash"]=>
     string(5) "/ & /"
@@ -271,7 +271,7 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"쫾몾ꮘﳞ볚
 	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
@@ -335,7 +335,7 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "
 	"
     ["slash"]=>
     string(5) "/ & /"
@@ -407,7 +407,7 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"쫾몾ꮘﳞ볚
 	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
@@ -475,7 +475,7 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "
 	"
     ["slash"]=>
     string(5) "/ & /"
@@ -547,7 +547,7 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"쫾몾ꮘﳞ볚
 	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }
@@ -611,7 +611,7 @@ array(14) {
     ["backslash"]=>
     string(1) "\"
     ["controls"]=>
-    string(5) "
+    string(5) "
 	"
     ["slash"]=>
     string(5) "/ & /"
@@ -683,7 +683,7 @@ array(14) {
     string(49) "{"object with 1 member":["array with 1 element"]}"
     ["quotes"]=>
     string(27) "&#34; " %22 0x22 034 &#x22;"
-    ["/\"쫾몾ꮘﳞ볚
+    ["/\"쫾몾ꮘﳞ볚
 	`1~!@#$%^&*()_+-=[]{}|;:',./<>?"]=>
     string(23) "A key can be any string"
   }

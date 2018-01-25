@@ -75,7 +75,7 @@ array(3) {
 }
 Array
 (
-    [name] => 
+    [name] =>
     [control] => Array
         (
             [0] => Array

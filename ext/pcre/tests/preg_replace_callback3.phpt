@@ -17,7 +17,7 @@ var_dump(preg_replace_callback($a,$a,$a,$a,$a));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: preg_replace_callback() expects at least 3 parameters, 0 given in %s on line %d
 NULL
 

@@ -1,5 +1,5 @@
 --TEST--
-Test is_callable() function : usage variations - on invalid function names  
+Test is_callable() function : usage variations - on invalid function names
 --INI--
 precision=14
 error_reporting = E_ALL & ~E_NOTICE | E_STRICT

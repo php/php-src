@@ -1,5 +1,5 @@
 --TEST--
-imap_list() function : basic functionality 
+imap_list() function : basic functionality
 --CREDITS--
 Olivier Doucet
 --SKIPIF--
@@ -16,7 +16,7 @@ imap_list('');
 imap_list(false);
 
 require_once(dirname(__FILE__).'/imap_include.inc');
-$stream_id = imap_open($default_mailbox, $username, $password) or 
+$stream_id = imap_open($default_mailbox, $username, $password) or
 	die("Cannot connect to mailbox $default_mailbox: " . imap_last_error());
 
 imap_list($stream_id);

@@ -32,7 +32,7 @@ array_intersect_key (
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Notice: Only variables should be passed by reference in %s on line %d
 object(Test)#%d (4) {
   ["_table"]=>

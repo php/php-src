@@ -28,7 +28,7 @@ $xml = <<< EOXML
 EOXML;
 
 function dumpcourse($current) {
-	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title"; 
+	$title = ($current->nodeType != XML_TEXT_NODE && $current->hasAttribute('title')) ? $current->getAttribute('title'):"no title";
 	echo "Course: $title:";echo get_class($current), "\n";
 	echo "~";var_dump($current->textContent);
 }
@@ -66,10 +66,10 @@ Course: no title:DOMText
 node 3
 Course: two:DOMElement
 ~string(24) "
-		
+
 			c2n1
 			c2n2
-		
+
 	"
 node 2
 Course: no title:DOMText
@@ -78,10 +78,10 @@ Course: no title:DOMText
 node 1
 Course: one:DOMElement
 ~string(24) "
-		
+
 			c1n1
 			c1n2
-		
+
 	"
 node 0
 Course: no title:DOMText
@@ -91,16 +91,16 @@ after text removed it now has 2 nodes
 node 0
 Course: one:DOMElement
 ~string(24) "
-		
+
 			c1n1
 			c1n2
-		
+
 	"
 node 1
 Course: two:DOMElement
 ~string(24) "
-		
+
 			c2n1
 			c2n2
-		
+
 	"

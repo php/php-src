@@ -5,14 +5,14 @@ Testing call_user_func() with closures
 
 $foo = function() {
 	static $instance;
-	
+
 	if (is_null($instance)) {
 		$instance = function () {
 			return 'OK!';
 		};
 	}
-		
-	return $instance;	
+
+	return $instance;
 };
 
 var_dump(call_user_func(array($foo, '__invoke'))->__invoke());

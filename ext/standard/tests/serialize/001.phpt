@@ -3,7 +3,7 @@ serialize()/unserialize()/var_dump()
 --INI--
 serialize_precision=100
 --FILE--
-<?php 
+<?php
 class t
 {
 	function __construct()

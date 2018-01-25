@@ -19,4 +19,4 @@ var_dump(intlcal_get_minimal_days_in_first_week($intlcal));
 --EXPECT--
 int(4)
 int(4)
-==DONE==
+==DONE==

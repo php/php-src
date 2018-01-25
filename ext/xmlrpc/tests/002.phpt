@@ -27,7 +27,7 @@ var_dump($method);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(0) {
 }
 string(6) "method"

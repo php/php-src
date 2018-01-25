@@ -17,4 +17,4 @@ echo "\n---Done---\n";
 ?>
 --EXPECT--
 Sample
----Done--- 
+---Done---

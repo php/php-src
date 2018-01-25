@@ -69,9 +69,9 @@ source: а
 key: 5c0a01050105
 source: z
 key: 5901050105
-source: 
+source:
 key: 0101
-source: 
+source:
 key: 0101
 source: 3
 key: 1801050105

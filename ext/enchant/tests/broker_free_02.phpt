@@ -16,23 +16,23 @@ $newWord = array("iLoveJava","iLoveJavascript","iLoveRuby","iLovePerl","iLoveAwk
 
 if (is_resource($broker)) {
     echo("OK\n");
-    $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);    
-    
+    $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
+
     if ($requestDict) {
         echo("OK\n");
         for($x=0;$x<count($newWord);$x++) {
             $AddtoPersonalDict = enchant_dict_add_to_personal($requestDict,$newWord[$x]);
         }
-        
+
         if (NULL === $AddtoPersonalDict) {
             var_dump($AddtoPersonalDict);
-         
+
             if (enchant_broker_free_dict($requestDict)) {
                 echo("OK\n");
-                
+
                 if (enchant_broker_free($broker)) {
                     echo("OK\n");
-                    
+
                 } else {
                     echo("broker free failed\n");
                 }
@@ -43,8 +43,8 @@ if (is_resource($broker)) {
             echo("dict add to personal failed\n");
         }
     } else {
-        echo("broker request dict failed\n");        
-    }    
+        echo("broker request dict failed\n");
+    }
 } else {
     echo("init failed\n");
 }

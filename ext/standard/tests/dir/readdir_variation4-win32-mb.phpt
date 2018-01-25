@@ -9,12 +9,12 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
 /*
- * Pass a directory handle pointing to a directory that contains 
+ * Pass a directory handle pointing to a directory that contains
  * files with different file names to test how readdir() reads them
  */
 
@@ -42,7 +42,7 @@ $inputs = array(
        12.3456789000e10,
        12.3456789000E-10,
        .5,
-       
+
        // empty data
 /*10*/ "",
        array(),
@@ -66,11 +66,11 @@ foreach($inputs as $key => $input) {
 echo "\n-- Call to readdir() --\n";
 $dir_handle = opendir($dir_path);
 while(FALSE !== ($file = readdir($dir_handle))){
-	
+
 	// different OS order files differently so will
 	// store file names into an array so can use sorted in expected output
 	$contents[] = $file;
-	
+
 	// remove files while going through directory
 	@unlink($dir_path . $file);
 }

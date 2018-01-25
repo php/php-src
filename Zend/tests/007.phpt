@@ -21,7 +21,7 @@ var_dump(each($a));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: each() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 

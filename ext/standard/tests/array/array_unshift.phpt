@@ -14,7 +14,7 @@ var_dump($a);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(1)
 array(1) {
   [0]=>

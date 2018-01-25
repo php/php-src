@@ -43,14 +43,14 @@ unlink($data_file);
 
 -- Iteration 1 --
 
-     
+
   abc
   aaa
 -- Iteration 2 --
 
-     
-abc  
-aaa  
+
+abc
+aaa
 -- Iteration 3 --
 
 00000

@@ -44,7 +44,7 @@ class NumericArrayIterator implements Iterator
 		echo __METHOD__ . "\n";
 		$this->i++;
 	}
-	
+
 	public function greaterThan($comp)
 	{
 		echo get_class($this) . '::' . __FUNCTION__ . '(' . $comp . ")\n";

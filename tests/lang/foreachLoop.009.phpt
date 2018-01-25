@@ -28,7 +28,7 @@ $count=0;
 foreach ($refedArray as $k=>$v3) {
 	array_push($refedArray, "new.$k");
 	echo "key: $k; value: $v3\n";
-	
+
 	if ($count++>5) {
 		echo "Loop detected, as expected.\n";
 		break;
@@ -42,7 +42,7 @@ $count=0;
 foreach ($refedArray as $k=>&$v4) {
 	array_push($refedArray, "new.$k");
 	echo "key: $k; value: $v4\n";
-	
+
 	if ($count++>5) {
 		echo "Loop detected, as expected.\n";
 		break;

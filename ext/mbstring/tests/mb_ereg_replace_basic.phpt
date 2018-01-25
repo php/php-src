@@ -1,5 +1,5 @@
 --TEST--
-Test mb_ereg_replace() function : basic 
+Test mb_ereg_replace() function : basic
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -7,9 +7,9 @@ function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not availab
 ?>
 --FILE--
 <?php
-/* Prototype  : string mb_ereg_replace(string $pattern, string $replacement, 
+/* Prototype  : string mb_ereg_replace(string $pattern, string $replacement,
  * string $string [, string o$ption])
- * Description: Replace regular expression for multibyte string 
+ * Description: Replace regular expression for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 

@@ -4,10 +4,10 @@ Test str_replace() function error conditions
 precision=14
 --FILE--
 <?php
-/* 
-  Prototype: mixed str_replace(mixed $search, mixed $replace, 
+/*
+  Prototype: mixed str_replace(mixed $search, mixed $replace,
                                mixed $subject [, int &$count]);
-  Description: Replace all occurrences of the search string with 
+  Description: Replace all occurrences of the search string with
                the replacement string
 */
 
@@ -22,7 +22,7 @@ var_dump( str_replace(1,2,3,$var,5) );
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 *** Testing str_replace error conditions ***
 Warning: str_replace() expects at least 3 parameters, 0 given in %sstr_replace_error.php on line 12
 NULL

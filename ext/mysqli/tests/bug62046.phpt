@@ -16,14 +16,14 @@ require_once('skipifconnectfailure.inc');
 		printf("[002] Prepare failed, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	}
 	if (FALSE === $stmt->execute()) {
-		printf("[003] Execute failed, [%d] %s\n", $stmt->errorno, $stmt->error);	
+		printf("[003] Execute failed, [%d] %s\n", $stmt->errorno, $stmt->error);
 	}
 	if (FALSE === $stmt->store_result()) {
-		printf("[004] store_result failed, [%d] %s\n", $stmt->errorno, $stmt->error);	
+		printf("[004] store_result failed, [%d] %s\n", $stmt->errorno, $stmt->error);
 	}
 	$one = NULL;
 	if (FALSE === $stmt->bind_result($one)) {
-		printf("[005] bind_result failed, [%d] %s\n", $stmt->errorno, $stmt->error);	
+		printf("[005] bind_result failed, [%d] %s\n", $stmt->errorno, $stmt->error);
 	}
 	if (FALSE === $stmt->reset()) {
 		printf("[006] bind_result failed, [%d] %s\n", $stmt->errorno, $stmt->error);

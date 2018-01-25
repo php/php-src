@@ -1,7 +1,7 @@
 --TEST--
 Testinh heredoc syntax
 --FILE--
-<?php 
+<?php
 
 $a = <<<A
 	A;

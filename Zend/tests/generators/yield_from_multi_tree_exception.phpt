@@ -29,7 +29,7 @@ for ($level = 1; $level < $levels; $level++) {
 	}
 }
 
-for ($i = 0; $i < 2; $i++) { 
+for ($i = 0; $i < 2; $i++) {
 	try {
 		foreach ($all as $gen) {
 			var_dump($gen->current());

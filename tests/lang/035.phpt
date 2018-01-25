@@ -4,18 +4,18 @@ ZE2: set_exception_handler()
 <?php
 class MyException extends Exception {
 	function __construct($_error) {
-		$this->error = $_error;	
+		$this->error = $_error;
 	}
-	
+
 	function getException()
 	{
-		return $this->error;	
+		return $this->error;
 	}
 }
 
 function ThrowException()
 {
-	throw new MyException("'This is an exception!'");	
+	throw new MyException("'This is an exception!'");
 }
 
 
@@ -26,7 +26,7 @@ try {
 }
 
 try {
-	ThrowException();	
+	ThrowException();
 } catch (MyException $exception) {
 	print "There was an exception: " . $exception->getException();
 	print "\n";

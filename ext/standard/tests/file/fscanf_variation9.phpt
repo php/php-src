@@ -18,7 +18,7 @@ if (PHP_INT_SIZE != 4) {
 
 $file_path = dirname(__FILE__);
 
-echo "*** Test fscanf(): different float format types with integer values ***\n"; 
+echo "*** Test fscanf(): different float format types with integer values ***\n";
 
 // create a file
 $filename = "$file_path/fscanf_variation9.tmp";

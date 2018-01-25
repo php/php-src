@@ -1,5 +1,5 @@
 --TEST--
-Test htmlspecialchars() function : basic functionality 
+Test htmlspecialchars() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars  ( string $string  [, int $quote_style  [, string $charset  [, bool $double_encode  ]]] )

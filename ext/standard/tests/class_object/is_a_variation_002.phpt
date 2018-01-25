@@ -1,13 +1,13 @@
 --TEST--
 Test is_a() function : usage variations  - wrong type for arg 2
 --INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED 
+error_reporting=E_ALL | E_STRICT | E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name)
- * Description: Returns true if the object is of this class or has this class as one of its parents 
+ * Description: Returns true if the object is of this class or has this class as one of its parents
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 class C {
@@ -88,88 +88,88 @@ Notice: Undefined variable: undefined_var in %s on line 64
 
 Notice: Undefined variable: unset_var in %s on line 67
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: is_a() expects parameter 2 to be string, array given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value C Instance 
+Arg value C Instance
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

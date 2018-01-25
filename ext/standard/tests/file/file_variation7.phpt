@@ -33,10 +33,10 @@ array(5) {
   string(1) "
 "
   [2]=>
-  string(2) " 
+  string(2) "
 "
   [3]=>
-  string(3) "  
+  string(3) "
 "
   [4]=>
   string(7) "\Line 3"
@@ -65,10 +65,10 @@ array(5) {
   string(1) "
 "
   [2]=>
-  string(2) " 
+  string(2) "
 "
   [3]=>
-  string(3) "  
+  string(3) "
 "
   [4]=>
   string(7) "\Line 3"

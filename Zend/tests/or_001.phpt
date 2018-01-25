@@ -21,7 +21,7 @@ var_dump($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(8) "3337>755"
 string(8) "3337>755"
 string(4) "wou"

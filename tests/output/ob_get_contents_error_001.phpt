@@ -1,13 +1,13 @@
 --TEST--
 Test ob_get_contents() function : error cases
 --CREDITS--
-Iain Lewis <ilewis@php.net> 
+Iain Lewis <ilewis@php.net>
 --FILE--
 <?php
 /* Prototype  : proto string ob_get_contents(void)
- * Description: Return the contents of the output buffer 
+ * Description: Return the contents of the output buffer
  * Source code: main/output.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 

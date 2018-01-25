@@ -3,7 +3,7 @@ Test uasort() function : usage variations - unexpected values for 'array_arg' ar
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
@@ -60,7 +60,7 @@ $input_values = array(
        // null data
 /*10*/ NULL,
        null,
-      
+
        // boolean data
 /*12*/ true,
        false,
@@ -80,7 +80,7 @@ $input_values = array(
 
        // undefined data
        @$undefined_var,
- 
+
        // unset data
 /*22*/ @$unset_var,
 );

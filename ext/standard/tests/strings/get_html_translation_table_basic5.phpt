@@ -22,7 +22,7 @@ $tt = get_html_translation_table($table, ENT_NOQUOTES | ENT_HTML5, "UTF-8");
 var_dump( count($tt) );
 
 echo "-- with table = HTML_SPECIALCHARS, ENT_COMPAT --\n";
-$table = HTML_SPECIALCHARS; 
+$table = HTML_SPECIALCHARS;
 $tt = get_html_translation_table($table, ENT_COMPAT, "UTF-8");
 asort( $tt );
 var_dump( count($tt) );

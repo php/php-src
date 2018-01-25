@@ -3,7 +3,7 @@ Test sort() function : object functionality - sorting objects, 'sort_flags' as d
 --FILE--
 <?php
 /* Prototype  : bool sort ( array &$array [, int $sort_flags] )
- * Description: This function sorts an array. 
+ * Description: This function sorts an array.
                 Elements will be arranged from lowest to highest when this function has completed.
  * Source code: ext/standard/array.c
 */
@@ -41,14 +41,14 @@ class for_string_sort
 }
 
 // array of integer objects
-$unsorted_int_obj = array( 
+$unsorted_int_obj = array(
   new for_integer_sort(11), new for_integer_sort(66),
   new for_integer_sort(23), new for_integer_sort(-5),
   new for_integer_sort(0.001), new for_integer_sort(0)
 );
 
 // array of string objects
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   new for_string_sort("axx"), new for_string_sort("t"),
   new for_string_sort("w"), new for_string_sort("py"),
   new for_string_sort("apple"), new for_string_sort("Orange"),

@@ -45,7 +45,7 @@ $paths = array (
 
   /* Testing with homedir notation */
   "~/PHP/php5.2.0/",
-  
+
   /* Testing normal directory notation */
   "/home/example/test/",
   "http://httpd.apache.org/core.html#acceptpathinfo"

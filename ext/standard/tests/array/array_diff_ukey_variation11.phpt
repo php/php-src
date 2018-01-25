@@ -3,7 +3,7 @@ Test array_diff_ukey() function : usage variation - Passing class without string
 --FILE--
 <?php
 /* Prototype  : array array_diff_ukey(array arr1, array arr2 [, array ...], callback key_comp_func)
- * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved. 
+ * Description: Returns the entries of arr1 that have keys which are not present in any of the others arguments. User supplied function is used for comparing the keys. This function is like array_udiff() but works on the keys instead of the values. The associativity is preserved.
  * Source code: ext/standard/array.c
  */
 

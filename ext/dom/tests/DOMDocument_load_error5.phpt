@@ -1,7 +1,7 @@
 --TEST--
-Test DOMDocument::load() detects not-well formed XML 
+Test DOMDocument::load() detects not-well formed XML
 --DESCRIPTION--
-This test verifies the method detects extra content at the end of the document 
+This test verifies the method detects extra content at the end of the document
 Environment variables used in the test:
 - XML_FILE: the xml file to load
 - LOAD_OPTIONS: the second parameter to pass to the method

@@ -17,7 +17,7 @@ $p = proc_open($cmd, $descs, $pipes, '.', $environment);
 if (is_resource($p)) {
 	$data = '';
 
-	while (1) {	
+	while (1) {
 		$w = $e = NULL;
 		$n = stream_select($pipes, $w, $e, 300);
 

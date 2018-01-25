@@ -1,7 +1,7 @@
 --TEST--
 General function test
 --FILE--
-<?php 
+<?php
 
 function a()
 {

@@ -10,7 +10,7 @@ if (version_compare(PCRE_VERSION, '8.1', '<')) {
 <?php
 
 $regex = <<<'REGEX'
-/ 
+/
     _ (a) (*MARK:A_MARK) _
   | _ (b) _
   | _ (c) (*MARK:C_MARK) _

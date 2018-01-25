@@ -20,7 +20,7 @@ if (!extension_loaded('curl')) print 'skip';
 	curl_setopt($ch2, CURLOPT_URL, "file://".dirname(__FILE__). DIRECTORY_SEPARATOR . "curl_testdata2.txt");
 	curl_setopt($ch1, CURLOPT_RETURNTRANSFER, true);
 	curl_setopt($ch2, CURLOPT_RETURNTRANSFER, true);
-	
+
 	//CREATE MULTIPLE CURL HANDLE
 	$mh=curl_multi_init();
 
@@ -41,9 +41,9 @@ if (!extension_loaded('curl')) print 'skip';
 	//CLOSE
  	//curl_multi_remove_handle($mh,$ch1);
 	curl_multi_remove_handle($mh,$ch2);
-	curl_multi_close($mh);	
+	curl_multi_close($mh);
 
-	echo $results1; 
+	echo $results1;
 	echo $results2;
 
 ?>

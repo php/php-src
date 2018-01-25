@@ -13,7 +13,7 @@ var_dump( php_uname('a', true) );
 
 echo "\n-- Testing php_uname() function with invalid mode --\n";
 // am invalid mode should result in same o/p as mode 'a'
-var_dump( php_uname('z') == php_uname('z') ); 
+var_dump( php_uname('z') == php_uname('z') );
 
 class barClass {
 }

@@ -5,7 +5,7 @@ Bug #42496 (LOB fetch leaks cursors, eventually failing with ORA-1000 maximum op
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
-?> 
+?>
 --FILE--
 <?php
 

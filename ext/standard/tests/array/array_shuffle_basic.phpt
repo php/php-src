@@ -1,5 +1,5 @@
 --TEST--
-array_shuffle(): Test return type and value for expected input 
+array_shuffle(): Test return type and value for expected input
 --FILE--
 <?php
 /*
@@ -50,7 +50,7 @@ if (count($diffarray) < 350) {
 }
 ?>
 --EXPECT--
-*** testing array_shuffle  
+*** testing array_shuffle
 bool(true)
 array(0) {
 }
@@ -95,5 +95,5 @@ array(4) {
 this should be 0->....0
 this should be 4->....4
 this should be 400->....400
-*** testing pass by reference  
-test passed 
+*** testing pass by reference
+test passed

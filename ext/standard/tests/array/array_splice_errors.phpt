@@ -2,10 +2,10 @@
 Test array_splice() function : error conditions
 --FILE--
 <?php
-/* 
+/*
  * proto array array_splice(array input, int offset [, int length [, array replacement]])
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 echo "\n*** Testing error conditions of array_splice() ***\n";
 

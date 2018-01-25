@@ -17,7 +17,7 @@ function test($name, $lc, $lp)
 	var_dump($o === $c);
 	var_dump($o == $c);
 	var_dump($o->getPathname() == $c->getPathname());
-	
+
 	try {
 		$f = new SplFileObject($name);
 		var_dump($name);

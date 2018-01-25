@@ -3,7 +3,7 @@ Test array_intersect() function : usage variations - unexpected values for 'arr2
 --FILE--
 <?php
 /* Prototype  : array array_intersect(array $arr1, array $arr2 [, array $...])
- * Description: Returns the entries of arr1 that have values which are present in all the other arguments 
+ * Description: Returns the entries of arr1 that have values which are present in all the other arguments
  * Source code: ext/standard/array.c
 */
 
@@ -70,7 +70,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -93,7 +93,7 @@ $arrays = array(
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
   echo "\n-- Iterator $iterator --";
-  
+
   // Calling array_intersect() with default arguments
   var_dump( array_intersect($arr1,$unexpected_value) );
 

@@ -5,7 +5,7 @@ func_num_args with no args
 
 function foo()
 {
-	var_dump(func_num_args());	
+	var_dump(func_num_args());
 }
 foo();
 

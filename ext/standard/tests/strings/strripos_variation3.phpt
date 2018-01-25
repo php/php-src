@@ -7,7 +7,7 @@ Test strripos() function : usage variations - multi line heredoc string for 'hay
  * Source code: ext/standard/string.c
 */
 
-/* Test strripos() function by passing multi-line heredoc string for haystack and 
+/* Test strripos() function by passing multi-line heredoc string for haystack and
  *  with various needles & offsets
 */
 
@@ -41,17 +41,17 @@ var_dump( strripos($multi_line_str, " ") );
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing multi lines --
 
--- Multi line strings with +ve offsets -- 
+-- Multi line strings with +ve offsets --
 int(44)
 int(44)
 int(44)
 
--- Multi line strings with +ve offsets -- 
+-- Multi line strings with +ve offsets --
 int(44)
 int(44)
 bool(false)
 
--- Multi line strings with no offset -- 
+-- Multi line strings with no offset --
 int(18)
 int(31)
 bool(false)

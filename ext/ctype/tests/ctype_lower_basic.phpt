@@ -1,11 +1,11 @@
 --TEST--
-Test ctype_lower() function : basic functionality 
+Test ctype_lower() function : basic functionality
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_lower(mixed $c)
- * Description: Checks for lowercase character(s)  
+ * Description: Checks for lowercase character(s)
  * Source code: ext/ctype/ctype.c
  */
 

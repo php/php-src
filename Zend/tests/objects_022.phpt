@@ -1,14 +1,14 @@
 --TEST--
 Testing 'self', 'parent' as type-hint
 --FILE--
-<?php 
+<?php
 
 interface iTest { }
- 
+
 class baz implements iTest {}
- 
+
 class bar { }
- 
+
 class foo extends bar {
     public function testFoo(self $obj) {
         var_dump($obj);
@@ -20,7 +20,7 @@ class foo extends bar {
         var_dump($obj);
     }
 }
- 
+
 $foo = new foo;
 $foo->testFoo(new foo);
 $foo->testBar(new bar);

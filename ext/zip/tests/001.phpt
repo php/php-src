@@ -5,7 +5,7 @@ Check for zip presence
 --POST--
 --GET--
 --FILE--
-<?php 
+<?php
 echo "zip extension is available";
 ?>
 --EXPECT--

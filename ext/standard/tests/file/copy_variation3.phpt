@@ -30,7 +30,7 @@ $dest_files = array(
   "copy variation3.tmp",  //file name containing blank space
   " copy_variation3.tmp",  //file name starts with blank space
   "copy\tvariation3.tmp",
-  " ",  //blank space as file name 
+  " ",  //blank space as file name
 );
 
 echo "Size of the source file before copy operation => ";
@@ -43,9 +43,9 @@ foreach($dest_files as $dest_file) {
 
   echo "\n-- Iteration $count --\n";
   $dest_file_name = $dest_file;
-  
+
   echo "Copy operation => ";
-  var_dump( copy($src_file_name, $dest_file_name) );  
+  var_dump( copy($src_file_name, $dest_file_name) );
 
   echo "Existence of destination file => ";
   var_dump( file_exists($dest_file_name) );
@@ -104,7 +104,7 @@ Size of destination file => int(1500)
 -- Iteration 4 --
 Copy operation => bool(true)
 Existence of destination file => bool(true)
-Destination file name =>  
+Destination file name =>
 Size of source file => int(1500)
 Size of destination file => int(1500)
 *** Done ***

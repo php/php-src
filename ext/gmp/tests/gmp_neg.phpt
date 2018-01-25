@@ -23,7 +23,7 @@ var_dump(gmp_neg(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(-1)
 int(1)

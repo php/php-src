@@ -4,7 +4,7 @@ Test curl_error() & curl_errno() function with problematic host
 TestFest 2009 - AFUP - Perrick Penet <perrick@noparking.net>
 --SKIPIF--
 <?php
-	if (!extension_loaded("curl")) print "skip"; 
+	if (!extension_loaded("curl")) print "skip";
 	$addr = "www.".uniqid().".".uniqid();
 	if (gethostbyname($addr) != $addr) {
 		print "skip catch all dns";

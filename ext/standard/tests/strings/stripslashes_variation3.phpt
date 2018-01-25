@@ -25,7 +25,7 @@ This is line 2 \tof "heredoc" string
 EOT;
 // initialising the string array
 
-$str_array = array( 
+$str_array = array(
                     // string with newline character
                     "\n",
 		    "\\n",
@@ -36,7 +36,7 @@ $str_array = array(
                     'Hello \nworld',
                     'Hello \\nworld',
                     $heredoc_string_with_newline,
- 
+
                     // string with tab character
  		    "\t",
 		    "\\t",
@@ -70,7 +70,7 @@ string(1) "
 string(1) "n"
 
 -- Iteration 3 --
-string(12) "Hello 
+string(12) "Hello
 world"
 
 -- Iteration 4 --
@@ -89,9 +89,9 @@ string(12) "Hello nworld"
 string(12) "Hello nworld"
 
 -- Iteration 9 --
-string(71) "This is line 1 
+string(71) "This is line 1
 of 'heredoc' string
-This is line 2 
+This is line 2
 of "heredoc" string"
 
 -- Iteration 10 --

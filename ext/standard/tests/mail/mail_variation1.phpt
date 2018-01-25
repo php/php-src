@@ -10,9 +10,9 @@ if(substr(PHP_OS, 0, 3) == "WIN")
 --FILE--
 <?php
 /* Prototype  : int mail(string to, string subject, string message [, string additional_headers [, string additional_parameters]])
- * Description: Send an email message 
+ * Description: Send an email message
  * Source code: ext/standard/mail.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mail() : variation ***\n";

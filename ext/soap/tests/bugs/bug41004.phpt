@@ -9,7 +9,7 @@ ini_set('soap.wsdl_cache_enabled', false);
 class EchoBean{
 	public $mandatoryElement;
 	public $optionalElement;
-	
+
 }
 
 class EchoRequest{

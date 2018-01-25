@@ -45,9 +45,9 @@ while ($stmt->fetch()) {
 echo "Finished 1\n";
 
 $newArray = array();
-	
+
 echo "Finished 2\n";
-	
+
 ?>
 --CLEAN--
 <?php

@@ -26,4 +26,3 @@ a & b
 <?xml version="1.0"?>
 <root><node1>a &amp;#38; b</node1><node2>a &amp; b</node2></root>
 ===DONE===
-	

@@ -10,12 +10,12 @@ Ensure class properties and constants can be defined in terms of constants that 
       const ca = A::MY_CONST;
       const cc = C::MY_CONST;
   }
-  
+
   class C
   {
       const MY_CONST = "hello from C";
   }
-  
+
   var_dump(B::$a);
   var_dump(B::$c);
   var_dump(B::ca);

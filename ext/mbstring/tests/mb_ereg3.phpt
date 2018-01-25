@@ -8,19 +8,19 @@ if (!function_exists("mb_ereg")) print "skip mb_ereg() not available";
 --FILE--
 <?php
 
-$a = -1; $b = -1; $c = -1; 
-mbereg($a, $b, $c); 
-var_dump($a, $b, $c); 
+$a = -1; $b = -1; $c = -1;
+mbereg($a, $b, $c);
+var_dump($a, $b, $c);
 
-mberegi($a, $b, $c); 
-var_dump($a, $b, $c); 
+mberegi($a, $b, $c);
+var_dump($a, $b, $c);
 
-mbereg_search_init($a, $b, $c); 
+mbereg_search_init($a, $b, $c);
 var_dump($a, $b, $c);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(-1)
 int(-1)
 array(1) {

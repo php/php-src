@@ -37,7 +37,7 @@ var_dump(gmp_gcdext());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "3"
 string(1) "3"
 string(1) "1"

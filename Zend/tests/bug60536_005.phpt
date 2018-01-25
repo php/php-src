@@ -5,7 +5,7 @@ Introducing new private variables of the same name in a subclass is ok, and does
 error_reporting(E_ALL | E_STRICT);
 
 class Base {
-  protected $hello;    
+  protected $hello;
 }
 
 trait THello1 {
@@ -28,7 +28,7 @@ class Notice extends Base {
 }
 echo "POST-CLASS-GUARD2\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 POST-CLASS-GUARD2

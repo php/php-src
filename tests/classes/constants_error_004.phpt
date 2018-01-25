@@ -6,7 +6,7 @@ Class constant whose initial value references a non-existent class
   {
       const c1 = D::hello;
   }
-  
+
   $a = new C();
 ?>
 --EXPECTF--

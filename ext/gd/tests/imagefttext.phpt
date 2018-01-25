@@ -1,7 +1,7 @@
 --TEST--
 imagefttext() function test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}

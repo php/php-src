@@ -1,5 +1,5 @@
 --TEST--
-Test chop() function : usage variations  - unexpected values for str argument 
+Test chop() function : usage variations  - unexpected values for str argument
 --FILE--
 <?php
 /* Prototype  : string chop ( string $str [, string $charlist] )
@@ -72,10 +72,10 @@ $values =  array (
 
   // unset variable
   $unset_var,
- 
+
   // object
   $sample_obj,
-  
+
   // resource
   $file_handle
 );

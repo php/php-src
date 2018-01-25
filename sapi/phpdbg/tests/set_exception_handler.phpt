@@ -8,10 +8,10 @@ q
 [Successful compilation of %s]
 prompt> [Uncaught Exception in %s on line 4: test]
 >00004: throw new Exception("test");
- 00005: 
+ 00005:
 prompt> EX
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

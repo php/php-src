@@ -10,7 +10,7 @@ if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 <?php
 /* Prototype  : string mb_encode_mimeheader
  * (string $str [, string $charset [, string $transfer_encoding [, string $linefeed [, int $indent]]]])
- * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?= 
+ * Description: Converts the string to MIME "encoded-word" in the format of =?charset?(B|Q)?encoded_string?=
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -73,7 +73,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -82,7 +82,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

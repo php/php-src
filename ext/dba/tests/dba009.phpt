@@ -1,7 +1,7 @@
 --TEST--
 DBA dba_popen Test
 --SKIPIF--
-<?php 
+<?php
 	require_once(dirname(__FILE__) .'/skipif.inc');
 	print("info $HND handler used");
 ?>
@@ -25,8 +25,8 @@ DBA dba_popen Test
 	}
 ?>
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: %s

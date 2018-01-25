@@ -25,7 +25,7 @@ var_dump(file("./$test_dirname/../$filename"));
 
 echo "\nfile() on a path containing .. with invalid directories\n";
 var_dump(file("./$test_dirname/bad_dir/../../$filename"));
- 
+
 echo "\nfile() on a linked file\n";
 $linkname = "somelink";
 var_dump(symlink($filepath, $linkname));

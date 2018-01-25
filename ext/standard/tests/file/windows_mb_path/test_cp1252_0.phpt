@@ -19,9 +19,9 @@ internal_encoding=cp1252
 #vim: set encoding=cp1252
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
-$item = "gefäß"; 
+$item = "gefäß";
 $prefix = create_data("file", $item, 1252);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
@@ -34,7 +34,7 @@ remove_data("file");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\gefäß"
 bool(true)
 bool(true)

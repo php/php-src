@@ -1,5 +1,5 @@
 --TEST--
-Test wordwrap() function : error conditions 
+Test wordwrap() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string wordwrap ( string $str [, int $width [, string $break [, bool $cut]]] )
@@ -32,7 +32,7 @@ $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 
 echo "-- width = 0 & cut = true --\n";
-// width as zero and cut as true 
+// width as zero and cut as true
 $width = 0;
 $cut = true;
 var_dump( wordwrap($str, $width, $break, $cut) );
@@ -44,7 +44,7 @@ $cut = false;
 var_dump( wordwrap($str, $width, $break, $cut) );
 
 echo "-- width = -10 & cut = true --\n";
-// width as -ne and cut as true 
+// width as -ne and cut as true
 $width = -10;
 $cut = true;
 var_dump( wordwrap($str, $width, $break, $cut) );

@@ -1,14 +1,14 @@
 --TEST--
 Bug #27597 (pg_fetch_array not returning false)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 
 require_once(dirname(__FILE__) . '/config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ("Could not connect to the server");
@@ -23,7 +23,7 @@ for ($i=0; $i<4; $i++) {
 
 function xi_fetch_array($res, $type = PGSQL_ASSOC) {
 	$a = pg_fetch_array($res, NULL, $type) ;
-	return $a ;	
+	return $a ;
 }
 
 $res = pg_query("SELECT * FROM id");

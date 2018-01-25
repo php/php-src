@@ -39,17 +39,17 @@ try {
 if($options->hasOption('s')) {
   $optionalSections->setOptions($options);
 }
-  
+
 
 
 if($options->hasOption('c')) {
   $name = $options->getOption('c')."_".$options->getOption('m');
   $method = new gtMethod($options->getOption('c'), $options->getOption('m'));
-  
+
   $method->setArgumentNames();
   $method->setArgumentLists();
   $method->setInitialisationStatements();
-  
+
   $method->setConstructorArgumentNames();
   $method->setConstructorInitStatements();
   $method->setConstructorArgumentList();

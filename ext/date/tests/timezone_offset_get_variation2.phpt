@@ -7,10 +7,10 @@ Test timezone_offset_get() function : usage variation - Passing unexpected value
  * Source code: ext/date/php_date.c
  * Alias to functions: DateTimeZone::getOffset()
  */
- 
+
 echo "*** Testing timezone_offset_get() : usage variation -  unexpected values to second argument \$datetime***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 set_error_handler('handler');
@@ -98,8 +98,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

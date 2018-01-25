@@ -23,7 +23,7 @@ print "\n";
 Test 4: Checking UTF8 Output
 <?xml version="1.0" encoding="utf-8"?>
 <html><body>bar
-a1 b1 c1 <br/> 
-a2 c2 <br/> 
-ä3 b3 c3 <br/> 
+a1 b1 c1 <br/>
+a2 c2 <br/>
+ä3 b3 c3 <br/>
 </body></html>

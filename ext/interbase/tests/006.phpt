@@ -6,9 +6,9 @@ InterBase: binding (may take a while)
 <?php
 
 	require("interbase.inc");
-	
+
 	ibase_connect($test_base);
-	
+
 	ibase_query(
 		"create table test6 (
 			iter		integer,
@@ -25,7 +25,7 @@ InterBase: binding (may take a while)
 	ibase_query(
 		"create procedure add1 (arg integer)
 		returns (result integer)
-		as 
+		as
 		begin
 			result = arg +1;
 		end");
@@ -171,7 +171,7 @@ InterBase: binding (may take a while)
 			echo "VARCHAR fail\n";
 		}
 		ibase_free_result($sel);
-        
+
 	} /*for iter*/
 
 	echo "prepare and exec insert\n";
@@ -236,66 +236,66 @@ insert
 select
 prepare and exec insert
 --- test6 ---
-						0				
-						1				
-						2				
-						3				
-						4				
-						5				
-						6				
-						7				
-						8				
-						9				
+						0
+						1
+						2
+						3
+						4
+						5
+						6
+						7
+						8
+						9
 ---
 prepare and exec select
 --- test6 ---
-						2				
-						3				
-						4				
-						5				
-						6				
+						2
+						3
+						4
+						5
+						6
 ---
 --- test6 ---
-						0				
-						1				
-						2				
-						3				
-						4				
+						0
+						1
+						2
+						3
+						4
 ---
 --- test6 ---
-						5				
-						6				
-						7				
+						5
+						6
+						7
 ---
 --- proc add1 ---
-1	
+1
 ---
 --- proc add1 ---
-2	
+2
 ---
 --- proc add1 ---
-3	
+3
 ---
 --- proc add1 ---
-4	
+4
 ---
 --- proc add1 ---
-5	
+5
 ---
 --- proc add1 ---
-6	
+6
 ---
 --- proc add1 ---
-7	
+7
 ---
 --- proc add1 ---
-8	
+8
 ---
 --- proc add1 ---
-9	
+9
 ---
 --- proc add1 ---
-10	
+10
 ---
 end of test
 

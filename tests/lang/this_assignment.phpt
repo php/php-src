@@ -6,7 +6,7 @@ class first {
 
    function me() { echo "first"; }
 
-   function who() { 
+   function who() {
      global $a,$b;
      $this->me();
      $a->me();
@@ -20,7 +20,7 @@ class first {
 
 class second {
 
-   function who() { 
+   function who() {
       global $a,$b;
       $this->me();
       $a->me();

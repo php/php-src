@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - effects of touch() on link 
+Test lstat() and stat() functions: usage variations - effects of touch() on link
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

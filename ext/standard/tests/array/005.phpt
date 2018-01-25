@@ -16,7 +16,7 @@ $str = "abc";
 /* Various combinations of arrays to be used for the test */
 $mixed_array = array(
   array(),
-  array( 1,2,3,4,5,6,7,8,9 ), 
+  array( 1,2,3,4,5,6,7,8,9 ),
   array( "One", "_Two", "Three", "Four", "Five" ),
   array( 6, "six", 7, "seven", 8, "eight", 9, "nine" ),
   array( "a" => "aaa", "A" => "AAA", "c" => "ccc", "d" => "ddd", "e" => "eee" ),
@@ -52,13 +52,13 @@ var_dump( array_shift($empty_array) );
 echo "\n*** Testing with various array inputs ***\n";
 
 $counter = 1;
-foreach( $mixed_array as $sub_array ) { 
+foreach( $mixed_array as $sub_array ) {
   echo "\n-- Input Array for Iteration $counter is -- \n";
   print_r( $sub_array );
   echo "\nOutput after shift is :\n";
   var_dump( array_shift($sub_array) );
   $counter++;
-} 
+}
 
 /*Checking for internal array pointer beint reset when shift is called */
 
@@ -99,7 +99,7 @@ NULL
 
 *** Testing with various array inputs ***
 
--- Input Array for Iteration 1 is -- 
+-- Input Array for Iteration 1 is --
 Array
 (
 )
@@ -107,7 +107,7 @@ Array
 Output after shift is :
 NULL
 
--- Input Array for Iteration 2 is -- 
+-- Input Array for Iteration 2 is --
 Array
 (
     [0] => 1
@@ -124,7 +124,7 @@ Array
 Output after shift is :
 int(1)
 
--- Input Array for Iteration 3 is -- 
+-- Input Array for Iteration 3 is --
 Array
 (
     [0] => One
@@ -137,7 +137,7 @@ Array
 Output after shift is :
 string(3) "One"
 
--- Input Array for Iteration 4 is -- 
+-- Input Array for Iteration 4 is --
 Array
 (
     [0] => 6
@@ -153,7 +153,7 @@ Array
 Output after shift is :
 int(6)
 
--- Input Array for Iteration 5 is -- 
+-- Input Array for Iteration 5 is --
 Array
 (
     [a] => aaa
@@ -166,7 +166,7 @@ Array
 Output after shift is :
 string(3) "aaa"
 
--- Input Array for Iteration 6 is -- 
+-- Input Array for Iteration 6 is --
 Array
 (
     [1] => one
@@ -179,7 +179,7 @@ Array
 Output after shift is :
 string(3) "one"
 
--- Input Array for Iteration 7 is -- 
+-- Input Array for Iteration 7 is --
 Array
 (
     [1] => one
@@ -192,7 +192,7 @@ Array
 Output after shift is :
 string(3) "one"
 
--- Input Array for Iteration 8 is -- 
+-- Input Array for Iteration 8 is --
 Array
 (
     [f] => fff
@@ -201,18 +201,18 @@ Array
     [] => 3
     [2] => float
     [F] => FFF
-    [blank] => 
+    [blank] =>
     [3] => 3.7
     [5] => Five
     [6] => 8.6
     [4name] => jonny
-    [a] => 
+    [a] =>
 )
 
 Output after shift is :
 string(3) "fff"
 
--- Input Array for Iteration 9 is -- 
+-- Input Array for Iteration 9 is --
 Array
 (
     [0] => 12
@@ -224,7 +224,7 @@ Array
 Output after shift is :
 int(12)
 
--- Input Array for Iteration 10 is -- 
+-- Input Array for Iteration 10 is --
 Array
 (
     [0] => Array
@@ -259,7 +259,7 @@ array(3) {
   int(4)
 }
 
--- Input Array for Iteration 11 is -- 
+-- Input Array for Iteration 11 is --
 Array
 (
     [one] => 2

@@ -36,7 +36,7 @@ function sort_arrays( $locale, $arrays, $sort_flag = Collator::SORT_REGULAR )
         $md5 = md5( $res_dump );
 
         global $test_num;
-        
+
         $res_str .= "\n\n".
                     "Test $test_num.$md5:" .
                     $res_dump;

@@ -1,5 +1,5 @@
 --TEST--
-SPL: spl_classes() function 
+SPL: spl_classes() function
 --CREDITS--
 Sebastian Schürmann
 sebs@php.net

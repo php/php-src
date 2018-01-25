@@ -7,8 +7,8 @@ Test strrpos() function : usage variations - checking bianry safe with 'needle' 
  * Source code: ext/standard/string.c
 */
 
-/* Test strrpos() function with null terminated strings for 'needle' argument 
- *  in order to check binary safe 
+/* Test strrpos() function with null terminated strings for 'needle' argument
+ *  in order to check binary safe
 */
 
 echo "*** Test strrpos() function: binary safe ***\n";

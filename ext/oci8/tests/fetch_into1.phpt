@@ -4,7 +4,7 @@ various ocifetchinto() tests
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -58,7 +58,7 @@ var_dump(ocifetchinto($s, $all, OCI_NUM+OCI_RETURN_NULLS+OCI_RETURN_LOBS));
 var_dump($all);
 
 require dirname(__FILE__).'/drop_table.inc';
-	
+
 echo "Done\n";
 ?>
 --EXPECT--

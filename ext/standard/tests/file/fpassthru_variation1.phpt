@@ -5,7 +5,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fpassthru(resource fp)
- * Description: Output all remaining data from a file pointer 
+ * Description: Output all remaining data from a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzpassthru
  */
@@ -86,137 +86,137 @@ echo "Done";
 --EXPECTF--
 *** Testing fpassthru() : usage variations ***
 
-Arg value 0 
+Arg value 0
 
 Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 
-Arg value 1 
+Arg value 1
 
 Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 
 Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 
 Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 
 Warning: fpassthru() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 
 Warning: fpassthru() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: fpassthru() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 
 Warning: fpassthru() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 
 Warning: fpassthru() expects parameter 1 to be resource, float given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: fpassthru() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: fpassthru() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: fpassthru() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: fpassthru() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: fpassthru() expects parameter 1 to be resource, array given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 
-Arg value 1 
+Arg value 1
 
 Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 
-Arg value 1 
+Arg value 1
 
 Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Arg value string 
+Arg value string
 
 Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Arg value string 
+Arg value string
 
 Warning: fpassthru() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 
-Arg value testClass 
+Arg value testClass
 
 Warning: fpassthru() expects parameter 1 to be resource, object given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: fpassthru() expects parameter 1 to be resource, null given in %s on line %d
 bool(false)

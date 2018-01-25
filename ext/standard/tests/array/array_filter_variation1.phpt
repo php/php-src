@@ -3,7 +3,7 @@ Test array_filter() function : usage variations - Unexpected values for 'input' 
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -76,7 +76,7 @@ $input_values = array(
 
         // object data
 /*20*/  new MyClass(),
- 
+
         // resource data
         $fp,
 

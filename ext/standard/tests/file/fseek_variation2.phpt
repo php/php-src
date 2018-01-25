@@ -7,7 +7,7 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : proto int fseek(resource fp, int offset [, int whence])
- * Description: Seek on a file pointer 
+ * Description: Seek on a file pointer
  * Source code: ext/standard/file.c
  * Alias to functions: gzseek
  */
@@ -74,87 +74,87 @@ echo "Done";
 --EXPECTF--
 *** Testing fseek() : usage variations ***
 
-Arg value -100 
+Arg value -100
 int(-1)
 int(0)
 
-Arg value 100 
+Arg value 100
 int(-1)
 int(0)
 
-Arg value 10.5 
+Arg value 10.5
 int(-1)
 int(0)
 
-Arg value -10.5 
+Arg value -10.5
 int(-1)
 int(0)
 
-Arg value 101234567000 
+Arg value 101234567000
 int(-1)
 int(0)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 int(0)
 int(3)
 
-Arg value 0.5 
+Arg value 0.5
 int(0)
 int(3)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 
-Arg value 1 
+Arg value 1
 int(0)
 int(6)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 
-Arg value 1 
+Arg value 1
 int(0)
 int(6)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 
-Arg value  
+Arg value
 
 Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 int(3)
 
-Arg value  
+Arg value
 
 Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 int(3)
 
-Arg value string 
+Arg value string
 
 Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 int(3)
 
-Arg value string 
+Arg value string
 
 Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
 bool(false)
 int(3)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 
-Arg value  
+Arg value
 int(0)
 int(3)
 Done

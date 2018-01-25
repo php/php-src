@@ -3,9 +3,9 @@ Test utf8_decode() function : usage variations  - different types for data
 --FILE--
 <?php
 /* Prototype  : proto string utf8_decode(string data)
- * Description: Converts a UTF-8 encoded string to ISO-8859-1 
+ * Description: Converts a UTF-8 encoded string to ISO-8859-1
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing utf8_decode() : usage variations ***\n";
@@ -82,89 +82,89 @@ echo "Done";
 --EXPECTF--
 *** Testing utf8_decode() : usage variations ***
 
-Arg value 0 
+Arg value 0
 string(1) "0"
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value 12345 
+Arg value 12345
 string(5) "12345"
 
-Arg value -2345 
+Arg value -2345
 string(5) "-2345"
 
-Arg value 10.5 
+Arg value 10.5
 string(4) "10.5"
 
-Arg value -10.5 
+Arg value -10.5
 string(5) "-10.5"
 
-Arg value 101234567000 
+Arg value 101234567000
 string(12) "101234567000"
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string(13) "1.07654321E-9"
 
-Arg value 0.5 
+Arg value 0.5
 string(3) "0.5"
 
-Arg value Array 
+Arg value Array
 
 Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: utf8_decode() expects parameter 1 to be string, array given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(1) "1"
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value Some Ascii Data 
+Arg value Some Ascii Data
 string(15) "Some Ascii Data"
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 Done
 

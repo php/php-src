@@ -15,7 +15,7 @@ PDOTest::skip();
 
 try {
     $dbh = new PDO('oci:dbname=xxx;charset=yyy', 'abc', 'def');
-} 
+}
 catch (PDOException $e) {
     echo 'Connection failed: ' . $e->getMessage(). "\n";
     exit;

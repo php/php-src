@@ -47,7 +47,7 @@ var_dump($func->getNumberOfRequiredParameters());
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 /**
 hoho
 */

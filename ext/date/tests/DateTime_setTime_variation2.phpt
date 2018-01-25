@@ -2,15 +2,15 @@
 Test DateTime::setTime() function : usage variation - Passing unexpected values to second argument $minute.
 --FILE--
 <?php
-/* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )   
- * Description: Resets the current time of the DateTime object to a different time. 
+/* Prototype  : public DateTime DateTime::setTime  ( int $hour  , int $minute  [, int $second  ] )
+ * Description: Resets the current time of the DateTime object to a different time.
  * Source code: ext/date/php_date.c
  * Alias to functions: date_time_set
  */
 
 echo "*** Testing DateTime::setTime() : usage variation -  unexpected values to second argument \$minute***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

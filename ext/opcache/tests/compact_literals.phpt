@@ -65,7 +65,7 @@ function get_eol_define() {
 get_eol_define();
 define("EOL", MY_EOL);
 
-echo "constants define" . ":" . EOL; 
+echo "constants define" . ":" . EOL;
 
 echo "define " . "TEST" . EOL;
 define("TEST", "TEST");
@@ -150,7 +150,7 @@ var_dump($h::H);
 var_dump(CH::H);
 
 echo "-->I" . PHP_EOL;
-$h = geti(); 
+$h = geti();
 $h->H();
 var_dump($h::H);
 var_dump(CI::H);

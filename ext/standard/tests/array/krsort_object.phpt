@@ -3,7 +3,7 @@ Test krsort() function : object functionality - sort objects
 --FILE--
 <?php
 /* Prototype  : bool krsort ( array &$array [, int $sort_flags] )
- * Description: Sort an array by key in reverse order, maintaining key to data correlation  
+ * Description: Sort an array by key in reverse order, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 /*
@@ -41,14 +41,14 @@ class StringObject
 }
 
 // array of integer objects with different key values
-$unsorted_int_obj = array ( 
+$unsorted_int_obj = array (
   10 => new IntegerObject(11), 20 =>  new IntegerObject(66),
   3 => new IntegerObject(23), 4 => new IntegerObject(-5),
   50 => new IntegerObject(0.001), 6 => new IntegerObject(0)
 );
 
 // array of string objects with different key values
-$unsorted_str_obj = array ( 
+$unsorted_str_obj = array (
   "axx" => new StringObject("axx"), "t" => new StringObject("t"),
   "w" => new StringObject("w"), "py" => new StringObject("py"),
   "apple" => new StringObject("apple"), "Orange" => new StringObject("Orange"),

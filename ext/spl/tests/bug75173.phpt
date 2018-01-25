@@ -8,11 +8,11 @@ $it->append(new ArrayIterator(['foo']));
 
 foreach ($it as $item) {
     var_dump($item);
-    
+
     if ('foo' === $item) {
         $it->append(new ArrayIterator(['bar']));
     }
 }
 --EXPECT--
 string(3) "foo"
-string(3) "bar"	
+string(3) "bar"

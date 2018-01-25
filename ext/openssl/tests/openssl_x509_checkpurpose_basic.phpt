@@ -3,7 +3,7 @@ int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose [, array $cainfo 
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; 
+<?php if (!extension_loaded("openssl")) print "skip";
 if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
 ?>
 --FILE--

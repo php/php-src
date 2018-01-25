@@ -1,17 +1,17 @@
 --TEST--
-Test gzinflate() function : error conditions 
+Test gzinflate() function : error conditions
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : string gzinflate(string data [, int length])
- * Description: Unzip a gzip-compressed string 
+ * Description: Unzip a gzip-compressed string
  * Source code: ext/zlib/zlib.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 include(dirname(__FILE__) . '/data.inc');
@@ -37,7 +37,7 @@ echo "\n-- Testing with incorrect parameters --\n";
 
 class Tester {
     function Hello() {
-        echo "Hello\n"; 
+        echo "Hello\n";
     }
 }
 

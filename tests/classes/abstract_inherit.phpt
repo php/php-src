@@ -20,4 +20,4 @@ echo "Done\n"; // Shouldn't be displayed
 Fatal error: Uncaught Error: Cannot instantiate abstract class fail in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %s on line %d 
+  thrown in %s on line %d

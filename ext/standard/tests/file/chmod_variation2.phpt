@@ -32,7 +32,7 @@ var_dump(chmod($filepath, 0777));
 var_dump(chmod("./$test_dirname/bad_dir/../../$filename", 0755));
 clearstatcache();
 printf("%o\n", fileperms($filepath) & PERMISSIONS_MASK);
- 
+
 echo "\nchmod() on a linked file\n";
 $linkname = "somelink";
 var_dump(symlink($filepath, $linkname));

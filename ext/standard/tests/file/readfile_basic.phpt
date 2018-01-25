@@ -108,58 +108,58 @@ int(100)
 
 -- File filled with content type: text --
 -- File opened with mode: w --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: wt --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: wb --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: w+ --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: w+b --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: w+t --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: a --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: at --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: ab --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: a+ --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: a+b --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: a+t --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: x --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: xb --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: xt --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: x+ --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: x+b --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 -- File opened with mode: x+t --
-text text text text text text text text text text text text text text text text text text text text 
+text text text text text text text text text text text text text text text text text text text text
 int(100)
 
 -- File filled with content type: empty --
@@ -220,58 +220,58 @@ int(0)
 
 -- File filled with content type: alphanumeric --
 -- File opened with mode: w --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: wt --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: wb --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: w+ --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: w+b --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: w+t --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: a --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: at --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: ab --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: a+ --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: a+b --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: a+t --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: x --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: xb --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: xt --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: x+ --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: x+b --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 -- File opened with mode: x+t --
-ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 
+ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12 ab12
 int(100)
 
 -- File filled with content type: text_with_new_line --
@@ -287,7 +287,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: wt --
 line
@@ -301,7 +301,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: wb --
 line
@@ -315,7 +315,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: w+ --
 line
@@ -329,7 +329,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: w+b --
 line
@@ -343,7 +343,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: w+t --
 line
@@ -357,7 +357,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: a --
 line
@@ -371,7 +371,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: at --
 line
@@ -385,7 +385,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: ab --
 line
@@ -399,7 +399,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: a+ --
 line
@@ -413,7 +413,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: a+b --
 line
@@ -427,7 +427,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: a+t --
 line
@@ -441,7 +441,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: x --
 line
@@ -455,7 +455,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: xb --
 line
@@ -469,7 +469,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: xt --
 line
@@ -483,7 +483,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: x+ --
 line
@@ -497,7 +497,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: x+b --
 line
@@ -511,7 +511,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 -- File opened with mode: x+t --
 line
@@ -525,6 +525,6 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 Done

@@ -1,10 +1,10 @@
 --TEST--
 Test compress.zlib:// scheme with the file_get_contents
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
-}	 
+	print "skip - ZLIB extension not loaded";
+}
 ?>
 --FILE--
 <?php

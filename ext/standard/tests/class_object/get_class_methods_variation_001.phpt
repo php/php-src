@@ -3,9 +3,9 @@ Test get_class_methods() function : usage variations  - unexpected types
 --FILE--
 <?php
 /* Prototype  : proto array get_class_methods(mixed class)
- * Description: Returns an array of method names for class or class instance. 
+ * Description: Returns an array of method names for class or class instance.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -87,91 +87,91 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(67)
 Error: 8 - Undefined variable: unset_var, %s(70)
 
-Arg value 0 
+Arg value 0
 NULL
 
-Arg value 1 
+Arg value 1
 NULL
 
-Arg value 12345 
+Arg value 12345
 NULL
 
-Arg value -2345 
+Arg value -2345
 NULL
 
-Arg value 10.5 
+Arg value 10.5
 NULL
 
-Arg value -10.5 
+Arg value -10.5
 NULL
 
-Arg value 101234567000 
+Arg value 101234567000
 NULL
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 NULL
 
-Arg value 0.5 
-NULL
-Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
-
-Arg value Array 
+Arg value 0.5
 NULL
 Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 NULL
 Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 NULL
 Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 NULL
 Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
+NULL
+Error: 8 - Array to string conversion, %sget_class_methods_variation_001.php(%d)
+
+Arg value Array
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value 1 
+Arg value 1
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value 1 
+Arg value 1
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value  
+Arg value
 NULL
 
-Arg value string 
+Arg value string
 NULL
 
-Arg value string 
+Arg value string
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
-Arg value  
+Arg value
 array(0) {
 }
 
-Arg value  
+Arg value
 NULL
 
-Arg value  
+Arg value
 NULL
 Done

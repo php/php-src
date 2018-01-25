@@ -33,7 +33,7 @@ function errorHandler1( $errno, $errstr )
 }
 
 function errorHandler2( $errno, $errstr )
-{   
+{
     echo "Caught on second level: '$errstr'\n";
     return true;
 }

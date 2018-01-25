@@ -8,6 +8,6 @@ var_dump(strip_tags($html));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(4) "Text"
 Done
