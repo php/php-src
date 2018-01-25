@@ -1,7 +1,7 @@
 --TEST--
 Test json_encode() function : basic functionality
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo "*** Testing json_encode() : basic functionality ***\n";

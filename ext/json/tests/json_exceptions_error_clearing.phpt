@@ -1,5 +1,7 @@
 --TEST--
 JSON_THROW_ON_ERROR: global error flag untouched
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

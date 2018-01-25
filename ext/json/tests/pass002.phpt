@@ -1,7 +1,7 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass2.json)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
     

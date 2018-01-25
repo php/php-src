@@ -1,12 +1,12 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
---INI--
-serialize_precision=-1
 --SKIPIF--
 <?php
-if (!extension_loaded('json')) die('skip');
+require 'skipif.inc';
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
+--INI--
+serialize_precision=-1
 --FILE--
 <?php
 /* Modified to test unescaped UNICODE as keys and values.
@@ -103,7 +103,7 @@ var_dump($arr);
 
 ?>
 --EXPECTF--
-Testing: 
+Testing:
 [
     "JSON Test Pattern pass1",
     {"object with 1 member":["array with 1 element"]},

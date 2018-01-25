@@ -1,11 +1,9 @@
 --TEST--
 JSON (http://www.crockford.com/JSON/JSON_checker/test/pass1.json)
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --INI--
 serialize_precision=-1
---SKIPIF--
-<?php
-if (!extension_loaded('json')) die('skip');
-?>
 --FILE--
 <?php
 

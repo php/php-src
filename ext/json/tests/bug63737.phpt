@@ -1,7 +1,7 @@
 --TEST--
 Bug #63737 (json_decode does not properly decode with options parameter)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function decode($json) {

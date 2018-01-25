@@ -1,7 +1,7 @@
 --TEST--
 json_encode() tests
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -22,7 +22,7 @@ var_dump(json_encode("руссиш"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(2) """"
 string(4) "null"
 string(4) "true"

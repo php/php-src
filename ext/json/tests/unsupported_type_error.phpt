@@ -1,7 +1,7 @@
 --TEST--
 An error is thrown when an unsupported type is encoded
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

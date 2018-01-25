@@ -1,9 +1,9 @@
 --TEST--
 json_encode() Serialization tests
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --INI--
 serialize_precision=-1
---SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -61,6 +61,7 @@ foreach(array('NonSerializingTest','SerializingTest','ValueSerializingTest','Sel
 	echo json_encode(new $class($ndata)), "\n";
 	echo json_encode(new $class($odata)), "\n";
 }
+?>
 --EXPECT--
 ==NonSerializingTest==
 {"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
@@ -78,5 +79,3 @@ foreach(array('NonSerializingTest','SerializingTest','ValueSerializingTest','Sel
 {"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
 {"data":["foo",1,2.3,false,null,[1,2,3],{}]}
 {"data":{"str":"foo","int":1,"float":2.3,"bool":false,"nil":null,"arr":[1,2,3],"obj":{}}}
-
-
