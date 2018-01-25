@@ -35,147 +35,147 @@ for ($line_len= 0; $line_len < 80; ++$line_len) {
 -------- line length=0
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=1
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=2
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=3
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=4
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=5
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=6
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=7
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=8
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=9
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=10
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=11
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=12
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=13
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=14
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=15
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=16
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=17
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=18
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=19
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=20
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=21
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=22
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=23
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=24
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=25
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=26
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=27
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=28
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=29
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=30
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=31
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=32
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=33
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=34
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=35
 2: %s
 bool(false)
--------- 
+--------
 -------- line length=36
 string(396) "From: =?ISO-2022-JP?B?GyRCJTUbKEI=?=
  =?ISO-2022-JP?B?GyRCJXMlVxsoQg==?=

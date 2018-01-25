@@ -14,7 +14,7 @@ var_dump(gzfile(dirname(__FILE__)."/004.txt.gz", 1));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gzfile() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

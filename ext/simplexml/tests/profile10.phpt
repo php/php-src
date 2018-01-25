@@ -22,4 +22,4 @@ echo "\n---Done---\n";
 --EXPECT--
 Sample
 Test
----Done--- 
+---Done---

@@ -7,7 +7,7 @@ oci8.default_prefetch=5
 if (!extension_loaded('oci8')) die("skip no oci8 extension");
 require(dirname(__FILE__)."/connect.inc");
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
-if (!(isset($matches[0]) && 
+if (!(isset($matches[0]) &&
       (($matches[1] == 11 && $matches[2] >= 2) ||
        ($matches[1] >= 12)
        ))) {
@@ -57,7 +57,7 @@ oci_execute($s);
 $data = oci_fetch_array($s);
 oci_execute($data['CURS1']);
 
-// Calculate round-trips 
+// Calculate round-trips
 $initial_rt = print_roundtrips($c);
 for ($i = 0;$i<10;$i++) {
     echo "Fetch Row using Nested cursor Query\n";

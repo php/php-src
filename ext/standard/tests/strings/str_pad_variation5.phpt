@@ -16,7 +16,7 @@ if (getenv("USE_ZEND_ALLOC") === "0") {
  * Source code: ext/standard/string.c
 */
 
-/* Test str_pad() function: with unexpected inputs for '$pad_length' 
+/* Test str_pad() function: with unexpected inputs for '$pad_length'
  *  and expected type for '$input'
 */
 

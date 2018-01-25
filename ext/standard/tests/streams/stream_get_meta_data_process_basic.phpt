@@ -2,8 +2,8 @@
 Testing stream_get_meta_data() on a process stream.
 --FILE--
 <?php
- 
-$output_file = __FILE__.'.tmp'; 
+
+$output_file = __FILE__.'.tmp';
 $cmd = "echo here is some output";
 $mode = 'rb';
 $handle = popen($cmd, $mode);

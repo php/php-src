@@ -3,7 +3,7 @@ Test array_filter() function : usage variations - using the array keys inside 'c
 --FILE--
 <?php
 /* Prototype  : array array_filter(array $input [, callback $callback [, bool $use_type = ARRAY_FILTER_USE_VALUE]])
- * Description: Filters elements from the array via the callback. 
+ * Description: Filters elements from the array via the callback.
  * Source code: ext/standard/array.c
 */
 
@@ -61,7 +61,7 @@ echo "Done"
 4 = 100
 5 = 1000
 6 = Hello
-7 = 
+7 =
 array(0) {
 }
 *** Testing array_filter() : usage variations - 'callback' filters based on key value ***

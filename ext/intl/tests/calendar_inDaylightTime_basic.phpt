@@ -21,4 +21,4 @@ var_dump(intlcal_in_daylight_time($intlcal));
 --EXPECT--
 bool(false)
 bool(true)
-==DONE==
+==DONE==

@@ -55,7 +55,7 @@ array(8) {
   float(-0.33333333333333)
 }
 
- -- Testing arsort() -- 
+ -- Testing arsort() --
 No second argument:
 array(8) {
   [-1000]=>
@@ -165,7 +165,7 @@ array(8) {
   float(-0.33333333333333)
 }
 
- -- Testing asort() -- 
+ -- Testing asort() --
 No second argument:
 array(8) {
   [16777216]=>
@@ -273,7 +273,7 @@ array(8) {
   string(4) "test"
 }
 
- -- Testing krsort() -- 
+ -- Testing krsort() --
 No second argument:
 array(8) {
   [16777216]=>
@@ -371,7 +371,7 @@ array(8) {
   }
 }
 
- -- Testing ksort() -- 
+ -- Testing ksort() --
 No second argument:
 array(8) {
   [-1000]=>
@@ -469,7 +469,7 @@ array(8) {
   int(27)
 }
 
- -- Testing rsort() -- 
+ -- Testing rsort() --
 No second argument:
 array(8) {
   [0]=>
@@ -579,7 +579,7 @@ array(8) {
   float(-0.33333333333333)
 }
 
- -- Testing sort() -- 
+ -- Testing sort() --
 No second argument:
 array(8) {
   [0]=>

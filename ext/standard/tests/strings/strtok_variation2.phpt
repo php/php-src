@@ -24,7 +24,7 @@ class sample  {
   public function __toString() {
   return "obj-ect";
   }
-} 
+}
 
 // Defining resource
 $file_handle = fopen(__FILE__, 'r');
@@ -74,7 +74,7 @@ $values =  array (
 
   // unset variable
   $unset_var,
- 
+
   // resource
   $file_handle
 );

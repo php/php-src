@@ -22,7 +22,7 @@ class TestStream {
 	function stream_eof() {
 		return $this->s >= $this->eofth;
 	}
-	
+
 }
 
 stream_wrapper_register("test", "TestStream");

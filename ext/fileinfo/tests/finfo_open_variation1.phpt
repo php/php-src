@@ -5,9 +5,9 @@ Test finfo_open() function : variations in opening
 --FILE--
 <?php
 /* Prototype  : resource finfo_open([int options [, string arg]])
- * Description: Create a new fileinfo resource. 
+ * Description: Create a new fileinfo resource.
  * Source code: ext/fileinfo/fileinfo.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 $magicFile = dirname(__FILE__) . DIRECTORY_SEPARATOR . 'magic';

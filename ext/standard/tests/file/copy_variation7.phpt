@@ -67,7 +67,7 @@ unlink($file_path."/copy_variation7.tmp");
 
 --EXPECTF--
 *** Testing copy() with symlink and hardlink ***
-Size of source files => 
+Size of source files =>
 int(%d)
 int(3600)
 -- Now applying copy() on source link to create copies --

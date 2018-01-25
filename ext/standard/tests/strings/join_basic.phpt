@@ -1,5 +1,5 @@
 --TEST--
-Test join() function : basic functionality 
+Test join() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : string join( string $glue, array $pieces )

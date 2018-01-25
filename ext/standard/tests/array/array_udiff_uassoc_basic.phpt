@@ -1,5 +1,5 @@
 --TEST--
-array_udiff_uassoc(): Test return type and value for expected input 
+array_udiff_uassoc(): Test return type and value for expected input
 --FILE--
 <?php
 /*

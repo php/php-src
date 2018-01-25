@@ -25,7 +25,7 @@ $stmt->execute();
 
 function do_insert($db, $id, $data1, $data2)
 {
-	$db->beginTransaction(); 
+	$db->beginTransaction();
 	$stmt = $db->prepare("insert into bug57702 (id, data1, data2) values (:id, empty_blob(), empty_blob()) returning data1, data2 into :blob1, :blob2");
 	$stmt->bindParam(':id', $id);
 	$stmt->bindParam(':blob1', $blob1, PDO::PARAM_LOB);
@@ -34,10 +34,10 @@ function do_insert($db, $id, $data1, $data2)
 	$blob2 = null;
 	$stmt->execute();
 
-	fwrite($blob1, $data1);  
+	fwrite($blob1, $data1);
 	fclose($blob1);
-	fwrite($blob2, $data2);  
-	fclose($blob2);	
+	fwrite($blob2, $data2);
+	fclose($blob2);
 	$db->commit();
 }
 
@@ -84,7 +84,7 @@ while ($stmt->fetch(PDO::FETCH_BOUND)) {
 
 ////////////////////
 
-echo "\nFourth Query\n"; 
+echo "\nFourth Query\n";
 
 $a = array();
 $i = 0;
@@ -101,7 +101,7 @@ for ($i = 0; $i < count($a); $i++) {
 
 ////////////////////
 
-echo "\nFifth Query\n"; 
+echo "\nFifth Query\n";
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 
@@ -124,7 +124,7 @@ for ($i = 0; $i < count($a); $i++) {
 
 ////////////////////
 
-echo "\nSixth Query\n"; 
+echo "\nSixth Query\n";
 
 $db->setAttribute(PDO::ATTR_STRINGIFY_FETCHES, false);  // Let's use streams
 

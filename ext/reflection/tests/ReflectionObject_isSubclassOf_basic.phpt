@@ -9,7 +9,7 @@ class C extends B {}
 interface I {}
 class X implements I {}
 
-$classNames = array('A', 'B', 'C', 'I', 'X'); 
+$classNames = array('A', 'B', 'C', 'I', 'X');
 
 //Create ReflectionClasses
 foreach ($classNames as $className) {
@@ -33,84 +33,84 @@ foreach ($ros as $childName => $child) {
 			var_dump($child->isSubclassOf($ros[$parentName]));
 		}
 		echo "   - Using string argument: ";
-		var_dump($child->isSubclassOf($parentName)); 
+		var_dump($child->isSubclassOf($parentName));
 	}
 }
 ?>
 --EXPECTF--
-Is A a subclass of A? 
+Is A a subclass of A?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is A a subclass of B? 
+Is A a subclass of B?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is A a subclass of C? 
+Is A a subclass of C?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is A a subclass of I? 
+Is A a subclass of I?
    - Using ReflectionClass object argument: bool(false)
    - Using string argument: bool(false)
-Is A a subclass of X? 
+Is A a subclass of X?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is B a subclass of A? 
+Is B a subclass of A?
    - Using ReflectionClass object argument: bool(true)
    - Using ReflectionObject object argument: bool(true)
    - Using string argument: bool(true)
-Is B a subclass of B? 
+Is B a subclass of B?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is B a subclass of C? 
+Is B a subclass of C?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is B a subclass of I? 
+Is B a subclass of I?
    - Using ReflectionClass object argument: bool(false)
    - Using string argument: bool(false)
-Is B a subclass of X? 
+Is B a subclass of X?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is C a subclass of A? 
+Is C a subclass of A?
    - Using ReflectionClass object argument: bool(true)
    - Using ReflectionObject object argument: bool(true)
    - Using string argument: bool(true)
-Is C a subclass of B? 
+Is C a subclass of B?
    - Using ReflectionClass object argument: bool(true)
    - Using ReflectionObject object argument: bool(true)
    - Using string argument: bool(true)
-Is C a subclass of C? 
+Is C a subclass of C?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is C a subclass of I? 
+Is C a subclass of I?
    - Using ReflectionClass object argument: bool(false)
    - Using string argument: bool(false)
-Is C a subclass of X? 
-   - Using ReflectionClass object argument: bool(false)
-   - Using ReflectionObject object argument: bool(false)
-   - Using string argument: bool(false)
-Is X a subclass of A? 
+Is C a subclass of X?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is X a subclass of B? 
+Is X a subclass of A?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is X a subclass of C? 
+Is X a subclass of B?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)
-Is X a subclass of I? 
+Is X a subclass of C?
+   - Using ReflectionClass object argument: bool(false)
+   - Using ReflectionObject object argument: bool(false)
+   - Using string argument: bool(false)
+Is X a subclass of I?
    - Using ReflectionClass object argument: bool(true)
    - Using string argument: bool(true)
-Is X a subclass of X? 
+Is X a subclass of X?
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)
    - Using string argument: bool(false)

@@ -75,12 +75,12 @@ person: Boe
 ---22---
 person: Joe
   child: Ann
-  child: 
-person: 
+  child:
+person:
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
-  child: 
+  child:
 
 Notice: Trying to get property 'child' of non-object in %s017.php on line %d
-  child: 
+  child:
 ===DONE===

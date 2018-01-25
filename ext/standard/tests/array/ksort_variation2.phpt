@@ -3,7 +3,7 @@ Test ksort() function : usage variations - unexpected values for 'sort_flags' ar
 --FILE--
 <?php
 /* Prototype  : bool ksort(array &array_arg [, int sort_flags])
- * Description: Sort an array by key, maintaining key to data correlation 
+ * Description: Sort an array by key, maintaining key to data correlation
  * Source code: ext/standard/array.c
 */
 
@@ -77,7 +77,7 @@ for($index = 0; $index < count($unexpected_values); $index ++) {
   echo "-- Iteration $counter --\n";
   $value = $unexpected_values [$index];
   $temp_array = $unsorted_values;
-  var_dump( ksort($temp_array, $value) ); 
+  var_dump( ksort($temp_array, $value) );
   var_dump($temp_array);
   $counter++;
 }

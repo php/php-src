@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Generic timeout (wrong community)
 --CREDITS--
 Boris Lytochkin

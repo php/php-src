@@ -33,10 +33,10 @@ $e = test_explode("\x00", $str, 100);
 function test_explode($delim, $string, $limit)
 {
 	$e = explode($delim, $string, $limit);
-	foreach ( $e as $v) 
+	foreach ( $e as $v)
 	{
 		var_dump(bin2hex($v));
-	}	
+	}
 }
 ?>
 ===DONE===

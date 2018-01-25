@@ -17,13 +17,13 @@ class TestSoapClient extends SoapClient{
 </res>
 </ns1:dotest2Response></SOAP-ENV:Body></SOAP-ENV:Envelope>
 EOF;
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 
 $options=Array(

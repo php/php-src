@@ -7,7 +7,7 @@ require_once(dirname(__FILE__).'/skipif.inc');
 --FILE--
 <?php
 /* Prototype  : array imap_fetch_overview(resource $stream_id, int $msg_no [, int $options])
- * Description: Read an overview of the information in the headers of the given message sequence 
+ * Description: Read an overview of the information in the headers of the given message sequence
  * Source code: ext/imap/php_imap.c
  */
 
@@ -28,13 +28,13 @@ $msg_uid = imap_uid($stream_id, $msg_no);
 
 $options = array ('1',
                   true,
-                  1.000000000000001, 
-                  0.00001e5, 
-                  PHP_INT_MAX, 
+                  1.000000000000001,
+                  0.00001e5,
+                  PHP_INT_MAX,
                   -PHP_INT_MAX
                  );
 
-// iterate over each element of $options array 
+// iterate over each element of $options array
 $iterator = 1;
 imap_check($stream_id);
 foreach($options as $option) {

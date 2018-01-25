@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -64,7 +64,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -74,7 +74,7 @@ $inputs = array(
 /*19*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

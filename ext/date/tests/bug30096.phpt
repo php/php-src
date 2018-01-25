@@ -22,7 +22,7 @@ function gm_date_check($hour, $minute, $second, $month, $day, $year) {
 	global $ts, $tsold;
 
 	echo "gmmktime($hour,$minute,$second,$month,$day,$year): ";
-	
+
 	$tsold = $ts;
 	$ts = gmmktime($hour, $minute, $second, $month, $day, $year);
 

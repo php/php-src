@@ -1,5 +1,5 @@
 --TEST--
-Test rtrim() function : error conditions 
+Test rtrim() function : error conditions
 --FILE--
 <?php
 

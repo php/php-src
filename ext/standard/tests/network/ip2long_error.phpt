@@ -1,11 +1,11 @@
 --TEST--
-Test ip2long() function : error conditions 
+Test ip2long() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int ip2long(string ip_address)
- * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address 
+ * Description: Converts a string containing an (IPv4) Internet Protocol dotted address into a proper address
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ip2long() : error conditions ***\n";

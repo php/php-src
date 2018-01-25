@@ -36,8 +36,8 @@ $arr = array("ggg", "ddd", "aaa", "sss");
 // the only solution is to either put the absolute path here, or
 // remove variables_order= from PHP.ini (setting it in run-test's
 // default INI will fail too)
-// 
-// since we can't depend on PHP.ini being set a certain way, 
+//
+// since we can't depend on PHP.ini being set a certain way,
 // have to put the absolute path here.
 
 $sysroot = exec('echo %SYSTEMROOT%');

@@ -56,30 +56,30 @@ include_once( 'ut_common.inc' );
 ut_run();
 ?>
 --EXPECT--
-Creating IntlDateFormatter with pattern = dd-MM-YY 
+Creating IntlDateFormatter with pattern = dd-MM-YY
 After call to get_pattern :  pattern= dd-MM-YY
-Result of formatting timestamp=0 is :  
+Result of formatting timestamp=0 is :
 31-12-70
 -------------------
-Setting IntlDateFormatter with pattern = DD-MM-YYYY hh:mm:ss 
+Setting IntlDateFormatter with pattern = DD-MM-YYYY hh:mm:ss
 After call to get_pattern :  pattern= DD-MM-YYYY hh:mm:ss
-Result of formatting timestamp=0 with the new pattern is :  
+Result of formatting timestamp=0 with the new pattern is :
 365-12-1970 07:00:00
 
 -------------------
-Setting IntlDateFormatter with pattern = yyyy-DDD.hh:mm:ss z 
+Setting IntlDateFormatter with pattern = yyyy-DDD.hh:mm:ss z
 After call to get_pattern :  pattern= yyyy-DDD.hh:mm:ss z
-Result of formatting timestamp=0 with the new pattern is :  
+Result of formatting timestamp=0 with the new pattern is :
 1969-365.07:00:00 EST
 
 -------------------
-Setting IntlDateFormatter with pattern = yyyy/MM/dd 
+Setting IntlDateFormatter with pattern = yyyy/MM/dd
 After call to get_pattern :  pattern= yyyy/MM/dd
-Result of formatting timestamp=0 with the new pattern is :  
+Result of formatting timestamp=0 with the new pattern is :
 1969/12/31
 
 -------------------
-Setting IntlDateFormatter with pattern = yyyyMMdd 
+Setting IntlDateFormatter with pattern = yyyyMMdd
 After call to get_pattern :  pattern= yyyyMMdd
-Result of formatting timestamp=0 with the new pattern is :  
+Result of formatting timestamp=0 with the new pattern is :
 19691231

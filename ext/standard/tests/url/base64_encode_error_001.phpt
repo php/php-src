@@ -3,9 +3,9 @@ Test base64_encode() function : error conditions - wrong number of args
 --FILE--
 <?php
 /* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm 
+ * Description: Encodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing base64_encode() : error conditions - wrong number of args ***\n";

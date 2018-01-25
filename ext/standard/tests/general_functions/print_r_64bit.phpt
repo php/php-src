@@ -29,9 +29,9 @@ function check_printr( $variables ) {
     $counter++;
   }
 }
-  
+
 echo "\n*** Testing print_r() on integer variables ***\n";
-$integers = array ( 
+$integers = array (
   0,  // zero as argument
   000000123,  //octal value of 83
   123000000,
@@ -47,7 +47,7 @@ $integers = array (
   -0x80000000,  // min range of hexadecimal integer
   017777777777,  // max posotive octal integer
   -020000000000  // min range of octal integer
-);		    
+);
 /* calling check_printr() to display contents of integer variables
    using print_r() */
 check_printr($integers);
@@ -85,7 +85,7 @@ $floats = array (
   -0x80000001,  // float value, beyond max negative int
   0x80000001,  // float value, beyond max positive int
   020000000001,  // float value, beyond max positive int
-  -020000000001  // float value, beyond max negative int 
+  -020000000001  // float value, beyond max negative int
 );
 /* calling check_printr() to display contents of float variables
    using print_r() */
@@ -117,7 +117,7 @@ $booleans = array (
   FALSE,
   true,
   false
-);	  
+);
 /* calling check_printr() to display boolean variables using print_r() */
 check_printr($booleans);
 var_dump( reset($booleans) );
@@ -232,7 +232,7 @@ print_r($recursion_obj2);
 
 echo "\n*** Testing print_r() on resources ***\n";
 /* file type resource */
-$file_handle = fopen(__FILE__, "r"); 
+$file_handle = fopen(__FILE__, "r");
 
 /* directory type resource */
 $dir_handle = opendir( dirname(__FILE__) );
@@ -245,7 +245,7 @@ $resources = array (
    using print_r() */
 check_printr($resources);
 
-echo "\n*** Testing print_r() on different combinations of scalar 
+echo "\n*** Testing print_r() on different combinations of scalar
             and non-scalar variables ***\n";
 /* a variable which is unset */
 $unset_var = 10.5;
@@ -260,9 +260,9 @@ $variations = array (
   array( new no_member_class, array(), false, 0 ),
   array( -0.00, "Where am I?", array(7,8,9), TRUE, 'A', 987654321 ),
   array( @$unset_var, 2.E+10, 100-20.9, 000004.599998 ),  //unusual data
-  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7') 
+  array( "array(1,2,3,4)1.0000002TRUE", @$file_handle, 111333.00+45e5, '/00\7')
 );
-/* calling check_printr() to display combinations of scalar and 
+/* calling check_printr() to display combinations of scalar and
    non-scalar variables using print_r() */
 check_printr($variations);
 
@@ -581,13 +581,13 @@ Array
 
 
 -- Iteration 3 --
- 
- 
- 
+
+
+
 -- Iteration 4 --
- 
- 
- 
+
+
+
 -- Iteration 5 --
 0
 0
@@ -601,9 +601,9 @@ Array
 \0
 \0
 -- Iteration 8 --
-	
-	
-	
+
+
+
 -- Iteration 9 --
 \t
 \t
@@ -625,13 +625,13 @@ abcd efgh ijkl mnop 0qrst uvwx 0yz
 abcd efgh ijkl mnop 0qrst uvwx 0yz
 abcd efgh ijkl mnop 0qrst uvwx 0yz
 -- Iteration 14 --
-1234	
+1234
 5678
 	9100abcda
-1234	
+1234
 5678
 	9100abcda
-1234	
+1234
 5678
 	9100abcda
 *** Testing print_r() on boolean variables ***
@@ -673,33 +673,33 @@ Array
 -- Iteration 2 --
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 -- Iteration 3 --
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 -- Iteration 4 --
@@ -721,33 +721,33 @@ Array
 -- Iteration 5 --
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 -- Iteration 6 --
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 Array
 (
-    [0] => 
+    [0] =>
 )
 
 -- Iteration 7 --
@@ -1492,7 +1492,7 @@ Resource id #5
 Resource id #6
 Resource id #6
 Resource id #6
-*** Testing print_r() on different combinations of scalar 
+*** Testing print_r() on different combinations of scalar
             and non-scalar variables ***
 
 -- Iteration 1 --
@@ -1529,7 +1529,7 @@ Array
         )
 
     [2] => 1
-    [3] => 
+    [3] =>
 )
 
 Array
@@ -1543,7 +1543,7 @@ Array
         )
 
     [2] => 1
-    [3] => 
+    [3] =>
 )
 
 Array
@@ -1557,7 +1557,7 @@ Array
         )
 
     [2] => 1
-    [3] => 
+    [3] =>
 )
 
 -- Iteration 3 --
@@ -1571,7 +1571,7 @@ Array
         (
         )
 
-    [2] => 
+    [2] =>
     [3] => 0
 )
 
@@ -1585,7 +1585,7 @@ Array
         (
         )
 
-    [2] => 
+    [2] =>
     [3] => 0
 )
 
@@ -1599,7 +1599,7 @@ Array
         (
         )
 
-    [2] => 
+    [2] =>
     [3] => 0
 )
 
@@ -1655,7 +1655,7 @@ Array
 -- Iteration 5 --
 Array
 (
-    [0] => 
+    [0] =>
     [1] => 20000000000
     [2] => 79.1
     [3] => 4.599998
@@ -1663,7 +1663,7 @@ Array
 
 Array
 (
-    [0] => 
+    [0] =>
     [1] => 20000000000
     [2] => 79.1
     [3] => 4.599998
@@ -1671,7 +1671,7 @@ Array
 
 Array
 (
-    [0] => 
+    [0] =>
     [1] => 20000000000
     [2] => 79.1
     [3] => 4.599998
@@ -1681,7 +1681,7 @@ Array
 Array
 (
     [0] => array(1,2,3,4)1.0000002TRUE
-    [1] => 
+    [1] =>
     [2] => 4611333
     [3] => /00\7
 )
@@ -1689,7 +1689,7 @@ Array
 Array
 (
     [0] => array(1,2,3,4)1.0000002TRUE
-    [1] => 
+    [1] =>
     [2] => 4611333
     [3] => /00\7
 )
@@ -1697,7 +1697,7 @@ Array
 Array
 (
     [0] => array(1,2,3,4)1.0000002TRUE
-    [1] => 
+    [1] =>
     [2] => 4611333
     [3] => /00\7
 )

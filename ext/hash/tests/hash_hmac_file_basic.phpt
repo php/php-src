@@ -1,5 +1,5 @@
 --TEST--
-Test hash_hmac_file() function : basic functionality 
+Test hash_hmac_file() function : basic functionality
 --SKIPIF--
 <?php extension_loaded('hash') or die('skip: hash extension not loaded.'); ?>
 --FILE--
@@ -9,7 +9,7 @@ Test hash_hmac_file() function : basic functionality
 /* Prototype  : string hash_hmac_file ( string algo, string filename, string key [, bool raw_output] )
  * Description: Generate a keyed hash value using the HMAC method and the contents of a given file
  * Source code: ext/hash/hash.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 echo "*** Testing hash_hmac_file() : basic functionality ***\n";
@@ -19,9 +19,9 @@ $file = dirname(__FILE__) . "hash_hmac_file.txt";
 if (($fp = fopen( $file, "w+")) == FALSE) {
 	echo "Cannot create file ($file)";
     exit;
-}	
+}
 
-/* Writing into file */ 
+/* Writing into file */
 $content = "This is a sample string used to test the hash_hmac_file function with various hashing algorithms";
 if (is_writable($file)) {
   if (fwrite($fp, $content) === FALSE) {
@@ -30,7 +30,7 @@ if (is_writable($file)) {
   }
 }
 
-// close the files 
+// close the files
 fclose($fp);
 
 $key = 'secret';

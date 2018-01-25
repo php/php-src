@@ -49,7 +49,7 @@ $args_array = array(
 $data_file = dirname(__FILE__) . '/vfprintf_variation19_64bit.txt';
 if (!($fp = fopen($data_file, 'wt')))
    return;
-   
+
 // looping to test vfprintf() with different scientific formats from the above $format array
 // and with non-scientific values from the above $args_array array
 $counter = 1;
@@ -63,7 +63,7 @@ fclose($fp);
 print_r(file_get_contents($data_file));
 echo "\n";
 
-unlink($data_file); 
+unlink($data_file);
 ?>
 ===DONE===
 --EXPECT--

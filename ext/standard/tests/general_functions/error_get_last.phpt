@@ -13,7 +13,7 @@ var_dump(error_get_last());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 NULL
 
 Warning: error_get_last() expects exactly 0 parameters, 1 given in %s on line %d

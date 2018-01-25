@@ -16,7 +16,7 @@ $path="ftps://127.0.0.1:" . $port."/";
 $ds=opendir($path, $context);
 var_dump($ds);
 ?>
-==DONE== 
+==DONE==
 --EXPECTF--
 Warning: opendir(ftps://127.0.0.1:%d/): failed to open dir: Server doesn't support FTPS. in %s on line %d
 bool(false)

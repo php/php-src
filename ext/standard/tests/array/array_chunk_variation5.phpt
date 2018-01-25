@@ -1,5 +1,5 @@
 --TEST--
-Test array_chunk() function : usage variations - different 'size' values  
+Test array_chunk() function : usage variations - different 'size' values
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])

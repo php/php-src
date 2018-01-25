@@ -18,7 +18,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $file_path = dirname(__FILE__);
 require "$file_path/file.inc";
 
-/* test the effects on stats by deleting file/subdir from a dir 
+/* test the effects on stats by deleting file/subdir from a dir
 */
 
 echo "*** Testing stat() for comparing stats after the deletion of subdir and file ***\n";

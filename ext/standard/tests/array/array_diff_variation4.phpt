@@ -3,8 +3,8 @@ Test array_diff() function : usage variations  - array with different data types
 --FILE--
 <?php
 /* Prototype  : array array_diff(array $arr1, array $arr2 [, array ...])
- * Description: Returns the entries of $arr1 that have values which are not 
- * present in any of the others arguments. 
+ * Description: Returns the entries of $arr1 that have values which are not
+ * present in any of the others arguments.
  * Source code: ext/standard/array.c
  */
 
@@ -50,7 +50,7 @@ $values = array(
        .5),
 
 /*4*/
-"null" => array(      
+"null" => array(
       // null data
       NULL,
       null),
@@ -64,7 +64,7 @@ $values = array(
       FALSE),
 
 /*6*/
-"empty" => array(      
+"empty" => array(
       // empty data
       "",
       ''),
@@ -75,20 +75,20 @@ $values = array(
       "string",
       'string',
       $heredoc),
-      
-/*8*/      
+
+/*8*/
 "binary" => array(
        // binary data
        b"binary",
 	   (binary)"binary"),
-	   
-/*9*/	   
+
+/*9*/
 "undefined" => array(
       // undefined data
       @$undefined_var),
 
 /*10*/
-"unset" => array(      
+"unset" => array(
       // unset data
       @$unset_var)
 );
@@ -106,7 +106,7 @@ echo "Done";
 --EXPECTF--
 *** Testing array_diff() : usage variations ***
 
- Iteration: 1 
+ Iteration: 1
 array(2) {
   [0]=>
   int(1)
@@ -114,13 +114,13 @@ array(2) {
   int(2)
 }
 
- Iteration: 2 
+ Iteration: 2
 array(1) {
   [1]=>
   int(2)
 }
 
- Iteration: 3 
+ Iteration: 3
 array(2) {
   [0]=>
   int(1)
@@ -128,7 +128,7 @@ array(2) {
   int(2)
 }
 
- Iteration: 4 
+ Iteration: 4
 array(2) {
   [0]=>
   int(1)
@@ -136,13 +136,13 @@ array(2) {
   int(2)
 }
 
- Iteration: 5 
+ Iteration: 5
 array(1) {
   [1]=>
   int(2)
 }
 
- Iteration: 6 
+ Iteration: 6
 array(2) {
   [0]=>
   int(1)
@@ -150,7 +150,7 @@ array(2) {
   int(2)
 }
 
- Iteration: 7 
+ Iteration: 7
 array(2) {
   [0]=>
   int(1)
@@ -158,7 +158,7 @@ array(2) {
   int(2)
 }
 
- Iteration: 8 
+ Iteration: 8
 array(2) {
   [0]=>
   int(1)
@@ -166,7 +166,7 @@ array(2) {
   int(2)
 }
 
- Iteration: 9 
+ Iteration: 9
 array(2) {
   [0]=>
   int(1)
@@ -174,7 +174,7 @@ array(2) {
   int(2)
 }
 
- Iteration: 10 
+ Iteration: 10
 array(2) {
   [0]=>
   int(1)

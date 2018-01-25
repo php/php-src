@@ -1,11 +1,11 @@
 --TEST--
-Test array_product() function : variation 
+Test array_product() function : variation
 --FILE--
 <?php
 /* Prototype  : mixed array_product(array input)
- * Description: Returns the product of the array entries 
+ * Description: Returns the product of the array entries
  * Source code: ext/standard/array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing array_product() : variation - using non numeric values ***\n";
@@ -15,7 +15,7 @@ class A {
 }
 $fp = fopen(__FILE__, "r");
 
-$types = array("boolean (true)" => true, "boolean (false)" => false, 
+$types = array("boolean (true)" => true, "boolean (false)" => false,
        "string" => "hello", "numeric string" =>  "12",
        "resource" => $fp, "object" => new A(), "null" => null,
        "array" => array(3,2));

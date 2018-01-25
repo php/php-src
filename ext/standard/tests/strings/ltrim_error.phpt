@@ -1,5 +1,5 @@
 --TEST--
-Test ltrim() function : error conditions 
+Test ltrim() function : error conditions
 --FILE--
 <?php
 

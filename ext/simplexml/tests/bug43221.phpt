@@ -17,4 +17,3 @@ Warning: SimpleXMLElement::addAttribute(): Attribute requires prefix for namespa
 <?xml version="1.0" encoding="utf-8"?>
 <root><node xmlns:foo="http://bar.com" a="b" foo:e="f">value</node></root>
 ===DONE===
-	

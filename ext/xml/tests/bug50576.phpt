@@ -71,7 +71,7 @@ Array
                     [XMLNS:NS1] => http://www.fpdsng.com/FPDS
                 )
 
-            [value] => 
+            [value] =>
 
         )
 
@@ -80,7 +80,7 @@ Array
             [tag] => COUNT
             [type] => open
             [level] => 2
-            [value] => 
+            [value] =>
 
         )
 
@@ -95,7 +95,7 @@ Array
     [3] => Array
         (
             [tag] => COUNT
-            [value] => 
+            [value] =>
 
             [type] => cdata
             [level] => 2
@@ -111,7 +111,7 @@ Array
     [5] => Array
         (
             [tag] => LISTOFAWARDS
-            [value] => 
+            [value] =>
 
             [type] => cdata
             [level] => 1

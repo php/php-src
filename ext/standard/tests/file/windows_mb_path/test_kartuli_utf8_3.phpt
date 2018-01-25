@@ -16,10 +16,10 @@ skip_if_no_required_exts();
 #vim: set encoding=cp874
 */
 
-include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc"; 
+include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
 
 
-$item = "ქართველები55"; 
+$item = "ქართველები55";
 $prefix = create_data("file_kartuli", $item);
 $fn = $prefix . DIRECTORY_SEPARATOR . $item;
 
@@ -32,7 +32,7 @@ remove_data("file_kartuli");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 string(%d) "%s\ქართველები55"
 bool(true)
 bool(true)

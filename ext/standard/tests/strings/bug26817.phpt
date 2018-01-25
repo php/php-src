@@ -2,7 +2,7 @@
 Bug #26817 (http_build_query() did not handle private & protected object properties)
 --FILE--
 <?php
-class test { 
+class test {
 	protected $foo;
 	private $bar;
 	public $test;

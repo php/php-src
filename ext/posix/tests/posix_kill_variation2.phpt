@@ -1,16 +1,16 @@
 --TEST--
 Test posix_kill() function : usage variations  - second parameter type
 --SKIPIF--
-<?php 
+<?php
     PHP_INT_SIZE == 4 or die("skip - 32-bit only");
-	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+	if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --FILE--
 <?php
 /* Prototype  : proto bool posix_kill(int pid, int sig)
- * Description: Send a signal to a process (POSIX.1, 3.3.2) 
+ * Description: Send a signal to a process (POSIX.1, 3.3.2)
  * Source code: ext/posix/posix.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing posix_kill() : usage variations ***\n";
@@ -62,7 +62,7 @@ $values = array(
 
       // unset data
       $unset_var,
-      
+
       // object data
       new stdclass(),
 );
@@ -83,100 +83,100 @@ Notice: Undefined variable: undefined_var in %s on line %d
 
 Notice: Undefined variable: unset_var in %s on line %d
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: posix_kill() expects parameter 2 to be integer, float given in %s on line %d
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation2.php on line %d
 
-Arg value Array 
+Arg value Array
 
 Warning: posix_kill() expects parameter 2 to be integer, array given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
-Arg value string 
+Arg value string
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
-Arg value string 
+Arg value string
 
 Warning: posix_kill() expects parameter 2 to be integer, string given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
 Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

@@ -19,7 +19,7 @@ var_dump(gmp_random("test"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Function gmp_random() is deprecated in %s on line %d
 string(%d) "%d"
 

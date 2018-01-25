@@ -4,7 +4,7 @@ Bug #68479 (Escape parameter missing from SplFileObject::fputcsv)
 <?php
 
 $method = new ReflectionMethod('SplFileObject', 'fputcsv');
-$params = $method->getParameters(); 
+$params = $method->getParameters();
 var_dump($params);
 
 ?>

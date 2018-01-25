@@ -1,5 +1,5 @@
 --TEST--
-Test chunk_split() function : error conditions 
+Test chunk_split() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
@@ -9,8 +9,8 @@ Test chunk_split() function : error conditions
 */
 
 /*
-* Testing error conditions of chunk_split() with zero arguments 
-* and for more than expected number of arguments 
+* Testing error conditions of chunk_split() with zero arguments
+* and for more than expected number of arguments
 */
 
 echo "*** Testing chunk_split() : error conditions ***\n";

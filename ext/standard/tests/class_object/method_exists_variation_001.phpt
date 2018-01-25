@@ -3,9 +3,9 @@ Test method_exists() function : usage variations  - unexpected type for arg 1
 --FILE--
 <?php
 /* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists 
+ * Description: Checks if the class method exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($className) {
@@ -88,88 +88,88 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(68)
 Error: 8 - Undefined variable: unset_var, %s(71)
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
-bool(false)
-Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
-
-Arg value Array 
+Arg value 0.5
 bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
+bool(false)
+Error: 8 - Array to string conversion, %smethod_exists_variation_001.php(%d)
+
+Arg value Array
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value string 
+Arg value string
 In autoload(string)
 bool(false)
 
-Arg value String 
+Arg value String
 In autoload(String)
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

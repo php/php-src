@@ -17,13 +17,13 @@ unlink($filename);
 ?>
 --FILE--
 <?php
-/* 
+/*
  * Prototype  : object dir(string $directory[, resource $context])
  * Description: Directory class with properties, handle and class and methods read, rewind and close
  * Source code: ext/standard/dir.c
  */
 
-/* 
+/*
  * remove the execute permission from the parent dir and test dir() on child dir
  *   1) remove write & execute permission from the 1st parent and test dir()
  *   2) remove execute permission from 2nd parent and test dir()

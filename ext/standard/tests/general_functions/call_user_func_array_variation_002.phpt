@@ -1,11 +1,11 @@
 --TEST--
-Test call_user_func_array() function : first parameter variation 
+Test call_user_func_array() function : first parameter variation
 --FILE--
 <?php
 /* Prototype  : mixed call_user_func_array(string function_name, array parameters)
- * Description: Call a user function which is the first parameter with the arguments contained in array 
+ * Description: Call a user function which is the first parameter with the arguments contained in array
  * Source code: ext/standard/basic_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing call_user_func_array() : usage variation ***\n";

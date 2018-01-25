@@ -19,7 +19,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromiterator8.phar');
 __HALT_COMPILER();
 ?>

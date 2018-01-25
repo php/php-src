@@ -1,8 +1,8 @@
 --TEST--
 #35410 (wddx_deserialize() doesn't handle large ints as keys properly)
 --SKIPIF--
-<?php 
-	if (!extension_loaded("wddx")) print "skip"; 
+<?php
+	if (!extension_loaded("wddx")) print "skip";
 	if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--

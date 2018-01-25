@@ -10,7 +10,7 @@ printflags($it);
 
 $it->setFlags(FileSystemIterator::CURRENT_AS_SELF |
 		FileSystemIterator::KEY_AS_FILENAME |
-		FileSystemIterator::SKIP_DOTS | 
+		FileSystemIterator::SKIP_DOTS |
 		FileSystemIterator::UNIX_PATHS);
 printflags($it);
 

@@ -4,7 +4,7 @@ Bug #34704 (Infinite recursion due to corrupt JPEG)
 <?php if (!extension_loaded('exif')) print 'skip exif extension not available';?>
 --INI--
 output_handler=
-zlib.output_compression=0 
+zlib.output_compression=0
 --FILE--
 <?php
 $infile = dirname(__FILE__).'/bug34704私はガラスを食べられます.jpg';

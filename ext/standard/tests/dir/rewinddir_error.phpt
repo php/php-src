@@ -3,7 +3,7 @@ Test rewinddir() function : error conditions - incorrect number of args
 --FILE--
 <?php
 /* Prototype  : void rewinddir([resource $dir_handle])
- * Description: Rewind dir_handle back to the start 
+ * Description: Rewind dir_handle back to the start
  * Source code: ext/standard/dir.c
  * Alias to functions: rewind
  */

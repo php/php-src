@@ -10,7 +10,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 <?php
 
 $prefixes = array (
-	
+
     // drive letters
 	"A:/",
     "Z:/",
@@ -31,7 +31,7 @@ $paths = array (
 
 	"foo",
 	"foo/",
-    "foo\\",    
+    "foo\\",
     "foo.bar",
     "foo.bar/",
     "foo.bar\\",

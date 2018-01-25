@@ -33,7 +33,7 @@ for($i = 0; $i < 10; $i++){
 	$s = fgets($pipes[1]);
 	$t1 = microtime(1);
 
-	echo $s;		
+	echo $s;
 	echo "fgets() took ", (($t1 - $t0)*1000 > $max_ms ? 'more' : 'less'), " than $max_ms ms\n";
 }
 

@@ -34,7 +34,7 @@ var_dump(strnatcmp($d1, $c2));
 
 echo "Equal too tests\n";
 var_dump(strnatcmp($b1, $b1));
-var_dump(strnatcmp($b1, $b2));	
+var_dump(strnatcmp($b1, $b2));
 
 echo "Greater than tests\n";
 var_dump(strnatcmp($b1, $a1));

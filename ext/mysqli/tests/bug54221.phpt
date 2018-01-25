@@ -30,7 +30,7 @@ mysqli.reconnect = Off
 				$warnings = $link->get_warnings();
 				if ($warnings) {
 					do {
-						echo "Warning: ".$warnings->errno.": ".$warnings->message."\n"; 
+						echo "Warning: ".$warnings->errno.": ".$warnings->message."\n";
 					} while ($warnings->next());
 				}
 			}
@@ -42,6 +42,6 @@ mysqli.reconnect = Off
 	print "done!";
 ?>
 --EXPECTF--
-Warning: : 
+Warning: :
 Warning: 1050: Table 't54221' already exists
 done!

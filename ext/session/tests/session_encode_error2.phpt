@@ -7,10 +7,10 @@ Test session_encode() function : error functionality
 
 ob_start();
 
-/* 
+/*
  * Prototype : string session_encode(void)
  * Description : Encodes the current session data as a string
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_encode() : error functionality ***\n";
@@ -57,7 +57,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // Empty strings
 /*16*/ "",
        '',
@@ -66,7 +66,7 @@ $inputs = array(
 /*18*/ "Nothing",
        'Nothing',
        $heredoc,
-       
+
        // Object data
 /*21*/ new classA(),
 

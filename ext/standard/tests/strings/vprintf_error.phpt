@@ -1,9 +1,9 @@
 --TEST--
-Test vprintf() function : error conditions 
+Test vprintf() function : error conditions
 --FILE--
 <?php
 /* Prototype  : int vprintf(string $format , array $args)
- * Description: Output a formatted string 
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
  */
 
@@ -19,7 +19,7 @@ echo "\n-- Testing vprintf() function with Zero arguments --\n";
 var_dump( vprintf() );
 
 echo "\n-- Testing vprintf() function with less than expected no. of arguments --\n";
-var_dump( vprintf($format) );  
+var_dump( vprintf($format) );
 
 echo "\n-- testing vprintf() function with more than expected no. of arguments --\n";
 var_dump( vprintf($format, $args, $extra_arg) );

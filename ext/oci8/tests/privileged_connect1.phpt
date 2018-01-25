@@ -6,7 +6,7 @@ privileged connect tests
 oci8.privileged_connect=1
 --FILE--
 <?php
-		
+
 require dirname(__FILE__)."/connect.inc";
 
 oci_connect("", "", "", false, OCI_SYSOPER);
@@ -16,7 +16,7 @@ oci_connect("", "", "", false, "qwe");
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: oci_connect(): ORA-%d: %s in %s on line %d
 
 Warning: oci_connect(): ORA-%d: %s in %s on line %d

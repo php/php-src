@@ -7,13 +7,13 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 if (substr(PHP_OS, 0, 3) == 'WIN') {
     die('skip.. Not for Windows');
 }
-?> 
+?>
 --FILE--
 <?php
 /* Prototype  : bool unlink(string filename[, context context])
- * Description: Delete a file 
+ * Description: Delete a file
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing unlink() : variation ***\n";
@@ -31,18 +31,18 @@ $dirs = array(
              $workDir.'/'.$tmpDir,
              './'.$workDir.'/'.$tmpDir,
              $workDir.'/../'.$workDir.'/'.$tmpDir,
-                         
+
              //absolute
              $cwd.'/'.$workDir.'/'.$tmpDir,
              $cwd.'/./'.$workDir.'/'.$tmpDir,
              $cwd.'/'.$workDir.'/../'.$workDir.'/'.$tmpDir,
-           
+
              // multiple separators
              $workDir.'//'.$tmpDir,
              $cwd.'//'.$workDir.'//'.$tmpDir,
-             
+
              );
-             
+
 
 foreach($dirs as $dirToUnlink) {
    test_link($workDir.'/'.$tmpDir, $dirToLinkTo, $dirToUnlink, true);  //soft link
@@ -61,9 +61,9 @@ function test_link($linkedDir, $toLinkTo, $tounlink, $softlink) {
    }
    else {
    	  link($toLinkTo, $linkedDir);
-   	  $msg = "hard link";   	  
-   }   
-   echo "-- unlinking $msg $tounlink --\n";           
+   	  $msg = "hard link";
+   }
+   echo "-- unlinking $msg $tounlink --\n";
    $res = unlink($tounlink);
    if ($res === true) {
       if (is_link($tounlink) === false) {

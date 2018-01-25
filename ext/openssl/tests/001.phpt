@@ -1,9 +1,9 @@
 --TEST--
 OpenSSL private key functions
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
-if (!@openssl_pkey_new()) die("skip cannot create private key"); 
+<?php
+if (!extension_loaded("openssl")) die("skip");
+if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--
 <?php

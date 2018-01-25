@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "wb" mode 
+Test fopen and fclose() functions - usage variations - "wb" mode
 --FILE--
 <?php
 /*
@@ -49,7 +49,7 @@ clearstatcache();
 unlink($file);  //Deleting the file
 fclose( fopen($file, "wb") );  //Opening the non-existing file in "wb" mode, which will be created
 var_dump( file_exists($file) );  //Check for the existence of file
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation19.tmp");

@@ -10,4 +10,4 @@ echo "size: ".$ar->getSize()."\n";
 --EXPECTF--
 size: 1
 
-Fatal error: Possible integer overflow in memory allocation (%d * %d + 0) in %s on line %d 
+Fatal error: Possible integer overflow in memory allocation (%d * %d + 0) in %s on line %d

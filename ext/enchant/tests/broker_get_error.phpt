@@ -13,7 +13,7 @@ $broker = enchant_broker_init();
 if (is_resource($broker)) {
     echo("OK\n");
     $enchantErr = enchant_broker_get_error($broker);
-    
+
     if ("" == $enchantErr) {
         echo("OK\n");
     } else {

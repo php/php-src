@@ -24,7 +24,7 @@ $inputs = array(
 /*1*/  0,
        1,
        -1,
-       -12,       
+       -12,
        2147483647,
 
        // float data
@@ -43,7 +43,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*17*/ "",
        '',
@@ -53,7 +53,7 @@ $inputs = array(
 /*20*/ "abcxyz",
        'abcxyz',
        $heredoc,
-       
+
        // undefined data
 /*23*/ @$undefined_var,
 

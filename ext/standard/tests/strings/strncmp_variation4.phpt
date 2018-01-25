@@ -32,7 +32,7 @@ $values =  array (
   1,
   12345,
   -2345,
- 
+
   /* float values */
   10.5,
   -10.5,
@@ -43,7 +43,7 @@ $values =  array (
   /* hexadecimal values */
   0x12,
   -0x12,
-  
+
   /* octal values */
   012,
   -012,
@@ -77,7 +77,7 @@ $values =  array (
   $unset_var,
 
   /* resource */
-  $file_handle,  
+  $file_handle,
 
   /* object */
   new sample()

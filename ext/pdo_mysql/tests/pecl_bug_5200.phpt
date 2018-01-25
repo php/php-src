@@ -30,7 +30,7 @@ Array
     [field] => phase
     [type] => enum('please_select','I','II','IIa','IIb','III','IV')
     [null] => YES
-    [key] => 
-    [default] => 
-    [extra] => 
+    [key] =>
+    [default] =>
+    [extra] =>
 )

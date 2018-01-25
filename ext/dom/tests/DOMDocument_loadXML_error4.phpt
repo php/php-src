@@ -1,5 +1,5 @@
 --TEST--
-Test DOMDocument::loadXML() detects not-well formed XML 
+Test DOMDocument::loadXML() detects not-well formed XML
 --DESCRIPTION--
 This test verifies the method detects an unsupported xml version
 Environment variables used in the test:

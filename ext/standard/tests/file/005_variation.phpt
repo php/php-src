@@ -13,12 +13,12 @@ if (getenv("SKIP_SLOW_TESTS")) {
 <?php
 /*
    Prototype: int fileatime ( string $filename );
-   Description: Returns the time the file was last accessed, or FALSE 
+   Description: Returns the time the file was last accessed, or FALSE
      in case of an error. The time is returned as a Unix timestamp.
 
    Prototype: int filemtime ( string $filename );
-   Description: Returns the time the file was last modified, or FALSE 
-     in case of an error. 
+   Description: Returns the time the file was last modified, or FALSE
+     in case of an error.
 
    Prototype: int filectime ( string $filename );
    Description: Returns the time the file was last changed, or FALSE
@@ -34,13 +34,13 @@ if (getenv("SKIP_SLOW_TESTS")) {
    Description: Prints access, modification and change times of a file
 */
 function stat_fn( $filename ) {
-  echo "-- File access time is => "; 
+  echo "-- File access time is => ";
   print( @date( 'Y:M:D:H:i:s', fileatime($filename) ) )."\n";
   clearstatcache();
-  echo "-- File modification time is => "; 
+  echo "-- File modification time is => ";
   print( @date( 'Y:M:D:H:i:s', filemtime($filename) ) )."\n";
   clearstatcache();
-  echo "-- inode change time is => "; 
+  echo "-- inode change time is => ";
   print( @date( 'Y:M:D:H:i:s', filectime($filename) ) )."\n";
   clearstatcache();
 
@@ -48,7 +48,7 @@ function stat_fn( $filename ) {
 
 echo "*** Testing fileattime(), filemtime(), filectime() & touch() : usage variations ***\n";
 $file_path = dirname(__FILE__);
-// create files 
+// create files
 $file_handle = fopen("$file_path/005_variation1.tmp", "w");
 fclose($file_handle);
 stat_fn("$file_path/005_variation1.tmp");
@@ -135,7 +135,7 @@ stat_fn($file_name2);
 sleep(2);
 
 /* set to access(creation time of the file) time */
-var_dump( touch($file_name2, @date(fileatime($file_name2))) ); 
+var_dump( touch($file_name2, @date(fileatime($file_name2))) );
 stat_fn($file_name2);
 sleep(2);
 
@@ -149,8 +149,8 @@ var_dump( touch($file_name2, 10) );
 stat_fn($file_name2);
 var_dump( touch($file_name2, 10, 20) );
 stat_fn($file_name2);
- 
-/* touch() after renaming the file */ 
+
+/* touch() after renaming the file */
 rename($file_name2, "$file_path/005_variation_touch_new.tmp");
 stat_fn("$file_path/005_variation_touch_new.tmp");
 

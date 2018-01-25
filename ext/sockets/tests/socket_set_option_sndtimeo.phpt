@@ -1,8 +1,8 @@
 --TEST--
 Test if socket_set_option() works, option:SO_SNDTIMEO
 --DESCRIPTION--
--wrong params 
--set/get params comparison 
+-wrong params
+-set/get params comparison
 --SKIPIF--
 <?php
 if (!extension_loaded('sockets')) {

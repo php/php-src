@@ -316,11 +316,11 @@ Node Object
  *RECURSION*
                         )
 
-                    [parent:protected] => 
+                    [parent:protected] =>
                     [data:protected] => HEAD
                     [uid:protected] => %s
                     [index:protected] => 0
-                    [assureUnique:protected] => 
+                    [assureUnique:protected] =>
                     [storage:ArrayIterator:private] => Array
                         (
                         )
@@ -330,7 +330,7 @@ Node Object
             [data:protected] => value1
             [uid:protected] => 1
             [index:protected] => 1
-            [assureUnique:protected] => 
+            [assureUnique:protected] =>
             [storage:ArrayIterator:private] => Array
                 (
                 )
@@ -340,7 +340,7 @@ Node Object
     [data:protected] => value2
     [uid:protected] => 2
     [index:protected] => 0
-    [assureUnique:protected] => 
+    [assureUnique:protected] =>
     [storage:ArrayIterator:private] => Array
         (
         )

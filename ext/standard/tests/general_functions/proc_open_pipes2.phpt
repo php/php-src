@@ -1,5 +1,5 @@
 --TEST--
-proc_open() with no pipes 
+proc_open() with no pipes
 --FILE--
 <?php
 

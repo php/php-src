@@ -8,9 +8,9 @@ soap.wsdl_cache_enabled=0
 --FILE--
 <?php
 $GLOBALS['HTTP_RAW_POST_DATA']="
-<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\" 
-	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" 
-	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\" 
+<env:Envelope xmlns:env=\"http://schemas.xmlsoap.org/soap/envelope/\"
+	xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"
+	xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"
 	xmlns:enc=\"http://schemas.xmlsoap.org/soap/encoding/\"
 	xmlns:ns1=\"http://schemas.nothing.com\"
 >
@@ -23,7 +23,7 @@ $GLOBALS['HTTP_RAW_POST_DATA']="
 </ns1:dotest>
  </env:Body>
 <env:Header/>
-</env:Envelope>";	
+</env:Envelope>";
 
 function book_from_xml($xml) {
 	$sxe = simplexml_load_string($xml);
@@ -37,13 +37,13 @@ class test{
 	function dotest($book){
 		$classname=get_class($book);
 		return "Object: ".$classname. "(".$book->a.",".$book->b.")";
-	}	
+	}
 }
 
 class book{
 	public $a="a";
 	public $b="c";
-		
+
 }
 $options=Array(
 		'uri'     => "http://schemas.nothing.com",

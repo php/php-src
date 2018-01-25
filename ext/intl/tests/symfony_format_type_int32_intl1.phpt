@@ -10,13 +10,13 @@ Symfony StubNumberFormatterTest#testFormatTypeInt32Intl #1
 
 // Crashes on Windows
 // Windows note: the popup '...program has stopped working'(AEDebug Popup)
-//    doesn't always show if you're rapidly running this test repeatedly. 
+//    doesn't always show if you're rapidly running this test repeatedly.
 //    regardless of that, the test always crashes every time.
 //    (it will show up the first time, or if you wait a while before running it again.)
 //    (the popup may also be disabled, which can be done with a registry setting.)
 //    you can confirm it crashed by checking the exit code OR
 //    the message this test prints at the very end (expected output for pass).
-// 
+//
 // Get Exit Code
 //  Linux: echo $?
 //  Windows: echo %ErrorLevel%

@@ -1,13 +1,13 @@
 --TEST--
-Check that SplObjectStorage::removeUncommon functions when receiving proper input 
+Check that SplObjectStorage::removeUncommon functions when receiving proper input
 --CREDITS--
 Matthew Turland (me@matthewturland.com)
 --FILE--
 <?php
 
-    $a = (object) 'a'; 
-    $b = (object) 'b'; 
-    $c = (object) 'c'; 
+    $a = (object) 'a';
+    $b = (object) 'b';
+    $c = (object) 'c';
 
    $foo = new SplObjectStorage;
     $foo->attach($a);

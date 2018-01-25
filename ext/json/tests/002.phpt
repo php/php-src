@@ -22,7 +22,7 @@ var_dump(json_encode("руссиш"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(2) """"
 string(4) "null"
 string(4) "true"

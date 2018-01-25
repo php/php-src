@@ -19,8 +19,8 @@ matchedArray
 (
     [0] => SELECT * FROM #__components
     [1] => SELECT
-    [2] => 
-    [3] => 
-    [4] => 
-    [5] => 
+    [2] =>
+    [3] =>
+    [4] =>
+    [5] =>
 )

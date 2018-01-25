@@ -1,5 +1,5 @@
 --TEST--
-Test ksort() function : error conditions 
+Test ksort() function : error conditions
 --FILE--
 <?php
 /* Prototype  : bool ksort(array &array_arg [, int sort_flags])
@@ -8,7 +8,7 @@ Test ksort() function : error conditions
 */
 
 /*
-* Testing ksort() function with all possible error conditions 
+* Testing ksort() function with all possible error conditions
 */
 
 echo "*** Testing ksort() : error conditions ***\n";

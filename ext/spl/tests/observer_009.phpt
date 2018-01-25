@@ -25,6 +25,6 @@ echo "\n";
 ===DONE===
 <?php exit(0); ?>
 --EXPECTF--
-Count storage A: 2 x  x 
-Count storage B: 2 x  x 
+Count storage A: 2 x  x
+Count storage B: 2 x  x
 ===DONE===

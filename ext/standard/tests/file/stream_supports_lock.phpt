@@ -30,7 +30,7 @@ var_dump(stream_supports_lock($sock));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 bool(true)
 resource(%d) of type (stream)

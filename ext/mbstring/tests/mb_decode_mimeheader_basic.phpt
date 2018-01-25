@@ -1,5 +1,5 @@
 --TEST--
-Test mb_decode_mimeheader() function : basic functionality 
+Test mb_decode_mimeheader() function : basic functionality
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip');
@@ -8,15 +8,15 @@ function_exists('mb_decode_mimeheader') or die("skip mb_decode_mimeheader() is n
 --FILE--
 <?php
 /* Prototype  : string mb_decode_mimeheader(string string)
- * Description: Decodes the MIME "encoded-word" in the string 
+ * Description: Decodes the MIME "encoded-word" in the string
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mb_decode_mimeheader() : basic functionality ***\n";
 mb_internal_encoding('utf-8');
 
-//the following encoded-words are identical and are UTF-8 Japanese. 
+//the following encoded-words are identical and are UTF-8 Japanese.
 $a = "=?UTF-8?b?5pel5pys6Kqe44OG44Kt44K544OI44Gn44GZ44CC?=";
 $b = mb_decode_mimeheader($a);
 var_dump(bin2hex($b));

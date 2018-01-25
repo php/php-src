@@ -21,7 +21,7 @@ var_dump($fo->fgets(8));
 $fo->rewind();
 $fo->fwrite("blahlubba");
 
-// This should throw a warning and return NULL since an argument is missing 
+// This should throw a warning and return NULL since an argument is missing
 var_dump($fo->ftruncate());
 
 ?>

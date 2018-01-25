@@ -9,7 +9,7 @@ if (! @xml_parser_create_ns('ISO-8859-1')) { die("skip xml_parser_create_ns is n
 <?php
 function start_elem($parser,$name,$attribs) {
 	print "$name ";
-    
+
     foreach($attribs as $key => $value) {
         print "$key = $value ";
     }
@@ -34,6 +34,6 @@ xml_parse($parser, $xml);
 xml_parser_free($parser);
 ?>
 --EXPECT--
-http://example.com/foo@a 
-http://example.com/bar@b foo = bar 
+http://example.com/foo@a
+http://example.com/bar@b foo = bar
 http://example.com/bar@c http://example.com/bar@nix = null foo = bar

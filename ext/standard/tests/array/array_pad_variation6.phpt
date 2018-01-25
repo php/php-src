@@ -306,8 +306,8 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [0]=>
@@ -335,8 +335,8 @@ The big brown fox jumped over;
 the lazy dog
 This is a double quoted string"
   ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
   [2]=>

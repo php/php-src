@@ -4,7 +4,7 @@ Test parse_ini_string() function
 <?php
 /* Prototype: array parse_ini_string(string $string [,bool $process_sections]);
    Description: parse_ini_string() loads in the ini file specified in filename,
-     and returns the settings in it in an associative array. 
+     and returns the settings in it in an associative array.
 */
 
 $parse_string = <<<EOD
@@ -23,7 +23,7 @@ PHP_CONSTANT = 1.2345678
 HELLO = HELLO
 
 [date]
-date = 
+date =
 time =
 
 [paths]
@@ -62,14 +62,14 @@ Non_alpha11 = /
 Non_alpha12 = \
 ;These chars have a special meaning when used in the value,
 ;  hence parser throws an error
-;Non_alpha13 = & 
+;Non_alpha13 = &
 ;Non_alpha14 = ^
 ;Non_alpha15 = {}
 ;Non_alpha16 = |
 ;Non_alpha17 = ~
 ;Non_alpha18 = !
 ;Non_alpha19 = $
-;Non_alpha20 = () 
+;Non_alpha20 = ()
 
 Non_alpha1_quotes = ";"
 Non_alpha2_quotes = "+"
@@ -170,7 +170,7 @@ Key16 = Null
 Key17 = nuLL
 Key18 = null
 
-[ReservedKeys_as_Keys] 
+[ReservedKeys_as_Keys]
 ; Expected:error, reserved key words must not be used as keys for ini file
 ;YES = 1
 ;Yes = 2
@@ -219,8 +219,8 @@ Array
     [PHP_CONSTANT] => 1.2345678
     [10] => Ten
     [HELLO] => HELLO
-    [date] => 
-    [time] => 
+    [date] =>
+    [time] =>
     [path] => /usr/local/bin
     [URL] => http://www.php.net
     [Decimal_value1] => 100
@@ -232,7 +232,7 @@ Array
     [Octal_value] => 0100
     [Hex_value1] => 0x101
     [Hex_Value2] => 0x103
-    [Non_alpha1] => 
+    [Non_alpha1] =>
     [Non_alpha2] => +
     [Non_alpha3] => *
     [Non_alpha4] => %
@@ -287,35 +287,35 @@ Array
     [Non_alpha_string21_quotes] => Hello(world)
     [String1] => Hello, world
 Good Morning
-    [String2] => 
+    [String2] =>
 Hello, world
              Good Morning
 
     [String3] => Hello, world	Good Morning
-    [String4] => 
+    [String4] =>
 
-    [String5] => 
+    [String5] =>
 
 
     [String6] => Hello, world	Good Morning
     [Key1] => 1
     [Key2] => 1
     [Key3] => 1
-    [Key4] => 
-    [Key5] => 
-    [Key6] => 
+    [Key4] =>
+    [Key5] =>
+    [Key6] =>
     [Key7] => 1
     [Key8] => 1
     [Key9] => 1
     [Key10] => 1
-    [Key11] => 
-    [Key12] => 
-    [Key13] => 
-    [Key14] => 
-    [Key15] => 
-    [Key16] => 
-    [Key17] => 
-    [Key18] => 
+    [Key11] =>
+    [Key12] =>
+    [Key13] =>
+    [Key14] =>
+    [Key15] =>
+    [Key16] =>
+    [Key17] =>
+    [Key18] =>
 )
 
 -- ini string with process_sections as TRUE --
@@ -334,8 +334,8 @@ Array
 
     [date] => Array
         (
-            [date] => 
-            [time] => 
+            [date] =>
+            [time] =>
         )
 
     [paths] => Array
@@ -367,7 +367,7 @@ Array
 
     [Non-alphanumerics_as_values] => Array
         (
-            [Non_alpha1] => 
+            [Non_alpha1] =>
             [Non_alpha2] => +
             [Non_alpha3] => *
             [Non_alpha4] => %
@@ -434,14 +434,14 @@ Array
         (
             [String1] => Hello, world
 Good Morning
-            [String2] => 
+            [String2] =>
 Hello, world
              Good Morning
 
             [String3] => Hello, world	Good Morning
-            [String4] => 
+            [String4] =>
 
-            [String5] => 
+            [String5] =>
 
 
             [String6] => Hello, world	Good Morning
@@ -452,21 +452,21 @@ Hello, world
             [Key1] => 1
             [Key2] => 1
             [Key3] => 1
-            [Key4] => 
-            [Key5] => 
-            [Key6] => 
+            [Key4] =>
+            [Key5] =>
+            [Key6] =>
             [Key7] => 1
             [Key8] => 1
             [Key9] => 1
             [Key10] => 1
-            [Key11] => 
-            [Key12] => 
-            [Key13] => 
-            [Key14] => 
-            [Key15] => 
-            [Key16] => 
-            [Key17] => 
-            [Key18] => 
+            [Key11] =>
+            [Key12] =>
+            [Key13] =>
+            [Key14] =>
+            [Key15] =>
+            [Key16] =>
+            [Key17] =>
+            [Key18] =>
         )
 
     [ReservedKeys_as_Keys] => Array

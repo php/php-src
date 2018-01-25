@@ -9,7 +9,7 @@ Testfest 2009 Munich
 class A
 {
 	protected function a() {}
-	
+
 }
 
 class B extends A

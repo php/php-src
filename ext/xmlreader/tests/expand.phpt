@@ -7,7 +7,7 @@ $reader = new XMLReader();
 if (!method_exists($reader, 'expand')) print "skip";
 ?>
 --FILE--
-<?php 
+<?php
 
 $basexml = '<?xml version="1.0" encoding="UTF-8"?>
 <books><book>base book</book></books>';

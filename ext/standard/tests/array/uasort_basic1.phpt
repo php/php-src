@@ -1,9 +1,9 @@
 --TEST--
-Test uasort() function : basic functionality 
+Test uasort() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 

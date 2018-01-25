@@ -1,11 +1,11 @@
 --TEST--
-Test get_declared_interfaces() function : basic functionality 
+Test get_declared_interfaces() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : proto array get_declared_interfaces()
- * Description: Returns an array of all declared interfaces. 
+ * Description: Returns an array of all declared interfaces.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 
@@ -17,7 +17,7 @@ var_dump(get_declared_interfaces());
 
 foreach (get_declared_interfaces() as $interface) {
 	if (!interface_exists($interface)) {
-		echo "Error: $interface is not a valid interface.\n"; 
+		echo "Error: $interface is not a valid interface.\n";
 	}
 }
 

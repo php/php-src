@@ -3,14 +3,14 @@ Test uasort() function : usage variations - built-in function as 'cmp_function'
 --FILE--
 <?php
 /* Prototype  : bool uasort(array $array_arg, string $cmp_function)
- * Description: Sort an array with a user-defined comparison function and maintain index association 
+ * Description: Sort an array with a user-defined comparison function and maintain index association
  * Source code: ext/standard/array.c
 */
 
 /*
 * Passing different built-in library functions in place of 'cmp_function'
 *   valid comparison functions: strcmp() & strcasecmp()
-*   language constructs:  echo & exit 
+*   language constructs:  echo & exit
 */
 
 echo "*** Testing uasort() : built in function as 'cmp_function' ***\n";
@@ -19,7 +19,7 @@ $array_arg = array("b" => "Banana", "m" => "Mango", "a" => "apple", "p" => "Pine
 $builtin_fun_arg = $array_arg;
 $languageConstruct_fun_arg = $array_arg;
 
-// Testing library functions as comparison function 
+// Testing library functions as comparison function
 echo "-- Testing uasort() with built-in 'cmp_function': strcasecmp() --\n";
 var_dump( uasort($builtin_fun_arg, 'strcasecmp') );  // expecting: bool(true)
 var_dump($builtin_fun_arg);

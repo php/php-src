@@ -24,18 +24,18 @@ foreach($classes as $class) {
 }
 ?>
 --EXPECTF--
-Reflecting on class C: 
+Reflecting on class C:
 string(12) "hello from C"
 bool(false)
-Reflecting on class D: 
+Reflecting on class D:
 string(12) "hello from C"
 bool(false)
-Reflecting on class E: 
+Reflecting on class E:
 string(12) "hello from C"
 bool(false)
-Reflecting on class F: 
+Reflecting on class F:
 string(12) "hello from F"
 bool(false)
-Reflecting on class X: 
+Reflecting on class X:
 bool(false)
 bool(false)

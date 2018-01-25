@@ -42,7 +42,7 @@ Notice: Undefined variable: a in %sassert02.php(%d) : assert code on line 1
 Warning: assert(): Assertion "$a" failed in %sassert02.php on line %d
 
 Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
-Failure evaluating code: 
+Failure evaluating code:
 aa=sd+as+safsafasfasafsaf
 
 Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
@@ -56,7 +56,7 @@ Stack trace:
 #0 %s(%d): assert('aa=sd+as+safsaf...')
 #1 {main}
 
-Next Error: Failure evaluating code: 
+Next Error: Failure evaluating code:
 aa=sd+as+safsafasfasafsaf in %s:%d
 Stack trace:
 #0 %s(%d): assert('aa=sd+as+safsaf...')

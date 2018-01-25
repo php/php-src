@@ -19,7 +19,7 @@ Test token_get_all() function : usage variations - with type casting operators
 echo "*** Testing token_get_all() : 'source' string with different type casting operators ***\n";
 
 // type casting operators : (int), (integer), (float), (real), (double), (string), (array), (object), (bool), (boolean),(unset)
-$source = '<?php 
+$source = '<?php
 $a = 1, $b = 10.5
 $c = (int)$b + $a;
 $d = (float)$a + $b;

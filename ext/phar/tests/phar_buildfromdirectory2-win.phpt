@@ -20,7 +20,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromdirectory2.phar');
 __HALT_COMPILER();
 ?>

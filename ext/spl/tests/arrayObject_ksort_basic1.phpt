@@ -1,12 +1,12 @@
 --TEST--
-SPL: Test ArrayObject::ksort() function : basic functionality with array based store 
+SPL: Test ArrayObject::ksort() function : basic functionality with array based store
 --FILE--
 <?php
 /* Prototype  : int ArrayObject::ksort()
  * Description: proto int ArrayIterator::ksort()
- * Sort the entries by key. 
+ * Sort the entries by key.
  * Source code: ext/spl/spl_array.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing ArrayObject::ksort() : basic functionality ***\n";

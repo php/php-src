@@ -28,7 +28,7 @@ var_dump( filesize($dir) );  //size of destination before copy
 clearstatcache();
 
 echo "\n-- Now applying copy() operation --\n";
-var_dump( copy($file, $dir) );  //expected: bool(false) 
+var_dump( copy($file, $dir) );  //expected: bool(false)
 
 var_dump( file_exists($file) );  //expected: bool(true)
 var_dump( file_exists($dir) );  //expected: bool(true)

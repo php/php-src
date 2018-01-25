@@ -19,7 +19,7 @@ class SoapFaultTest
     	//  Test #1
         return 'Test #1 exception with some special chars: Äßö';
     }
-    public function test2() {    
+    public function test2() {
         //  Test #2
 	//throw new SoapFault('Server', 'Test #2 exception with some special chars: Äßö');
         throw new Exception('Test #2 exception with some special chars: Äßö');

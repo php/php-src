@@ -6,7 +6,7 @@ Reflection properties are read only
 class ReflectionMethodEx extends ReflectionMethod
 {
 	public $foo = "xyz";
-	
+
 	function __construct($c,$m)
 	{
 		echo __METHOD__ . "\n";

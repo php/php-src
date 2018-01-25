@@ -27,7 +27,7 @@ var_dump(headers_list());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 NULL
 bool(false)
 array(0) {

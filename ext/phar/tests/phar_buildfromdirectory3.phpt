@@ -18,7 +18,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/buildfromdirectory3.phar');
 __HALT_COMPILER();
 ?>

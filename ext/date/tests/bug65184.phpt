@@ -23,6 +23,6 @@ date.timezone = UTC
 ?>
 ===DONE===
 --EXPECT--
-90 85 97 6a 93 fa 
+90 85 97 6a 93 fa
 6
 ===DONE===

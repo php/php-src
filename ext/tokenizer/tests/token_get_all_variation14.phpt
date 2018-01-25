@@ -18,7 +18,7 @@ echo "*** Testing token_get_all() : with invalid/unknown tokens ***\n";
 
 // with valid php tags and invalid tokens
 echo "-- with valid PHP tags & invlid tokens --\n";
-$source = '<?php 
+$source = '<?php
 struct myStruct {
   variable $a;
   method() { display $a; }
@@ -28,7 +28,7 @@ var_dump( token_get_all($source));
 
 // with invalid open tag for testing entire source to be unknown token
 echo "-- with invlalid PHP open tag & valid tokens --\n";
-$source = '<pli 
+$source = '<pli
 echo "hello world"; ?>';
 var_dump( token_get_all($source));
 
@@ -261,7 +261,7 @@ array(1) {
     [0]=>
     int(%d)
     [1]=>
-    string(28) "<pli 
+    string(28) "<pli
 echo "hello world"; ?>"
     [2]=>
     int(1)

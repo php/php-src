@@ -1,9 +1,9 @@
 --TEST--
-Test readdir() function : usage variations - sub-directories 
+Test readdir() function : usage variations - sub-directories
 --FILE--
 <?php
 /* Prototype  : string readdir([resource $dir_handle])
- * Description: Read directory entry from dir_handle 
+ * Description: Read directory entry from dir_handle
  * Source code: ext/standard/dir.c
  */
 
@@ -28,7 +28,7 @@ create_files($path_sub, 2);
 
 $dir_handle = opendir($path_top);
 while(FALSE !== ($file = readdir($dir_handle))) {
-	
+
 	// different OS order files differently so will
 	// store file names into an array so can use sorted in expected output
 	$contents[] = $file;

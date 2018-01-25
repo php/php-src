@@ -28,7 +28,7 @@ $files_arr = array(
   "/filegroup_variation3//filegroup_variation3.tmp",
   "//filegroup_variation3//filegroup_variation3.tmp",
   "/filegroup_variation3/*.tmp",
-  "filegroup_variation3/filegroup*.tmp", 
+  "filegroup_variation3/filegroup*.tmp",
 
   /* Testing Binary safe */
   "/filegroup_variation3/filegroup_variation3.tmp".chr(0),

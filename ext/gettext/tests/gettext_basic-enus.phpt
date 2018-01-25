@@ -1,7 +1,7 @@
 --TEST--
 Gettext basic test with en_US locale that should be on nearly every system
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}
@@ -10,7 +10,7 @@ Gettext basic test with en_US locale that should be on nearly every system
 	}
 ?>
 --FILE--
-<?php 
+<?php
 
 chdir(dirname(__FILE__));
 setlocale(LC_ALL, 'en_US.UTF-8');

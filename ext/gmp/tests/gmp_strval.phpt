@@ -33,7 +33,7 @@ var_dump(gmp_strval(new stdclass));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: gmp_strval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 

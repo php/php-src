@@ -1,5 +1,5 @@
 --TEST--
-Test strlen() function : basic functionality 
+Test strlen() function : basic functionality
 --FILE--
 <?php
 

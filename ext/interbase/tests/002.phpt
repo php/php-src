@@ -6,7 +6,7 @@ InterBase: connect, close and pconnect
 <?php
 
 	require("interbase.inc");
-    
+
 	ibase_connect($test_base);
 	out_table("test1");
 	ibase_close();
@@ -26,8 +26,8 @@ InterBase: connect, close and pconnect
 ?>
 --EXPECT--
 --- test1 ---
-1	test table not created with isql	
+1	test table not created with isql
 ---
 --- test1 ---
-1	test table not created with isql	
+1	test table not created with isql
 ---

@@ -8,7 +8,7 @@ function_exists('mb_ereg') or die("skip mb_ereg() is not available in this build
 --FILE--
 <?php
 /* Prototype  : int mb_ereg(string $pattern, string $string [, array $registers])
- * Description: Regular expression match for multibyte string 
+ * Description: Regular expression match for multibyte string
  * Source code: ext/mbstring/php_mbregex.c
  */
 
@@ -24,13 +24,13 @@ if(mb_regex_encoding('utf-8') == true) {
 	echo "Could not set regex encoding to utf-8\n";
 }
 
-$regex_char = array ('\w+' => '\w+', 
-                     '\W+' => '\W+', 
-                     '\s+' => '\s+', 
-                     '\S+' => '\S+', 
-                     '\d+' => '\d+', 
-                     '\D+' => '\D+', 
-                     '\b' =>  '\b', 
+$regex_char = array ('\w+' => '\w+',
+                     '\W+' => '\W+',
+                     '\s+' => '\s+',
+                     '\S+' => '\S+',
+                     '\d+' => '\d+',
+                     '\D+' => '\D+',
+                     '\b' =>  '\b',
                      '\B' =>  '\B');
 
 $string_ascii = 'This is an English string. 0123456789.';

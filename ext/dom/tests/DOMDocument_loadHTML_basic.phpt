@@ -1,5 +1,5 @@
 --TEST--
-DOMDocument::loadHTML 
+DOMDocument::loadHTML
 --CREDITS--
 Frank Cassedanne franck@ouarz.net
 #London TestFest 2008

@@ -23,6 +23,6 @@ $x = new myEnum();
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(false)
 Done

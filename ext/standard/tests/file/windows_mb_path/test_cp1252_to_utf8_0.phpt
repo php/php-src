@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for reading cp1252 to UTF-8 path 
+Test fopen() for reading cp1252 to UTF-8 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -28,13 +28,13 @@ if ($f) {
 	var_dump(fclose($f));
 } else {
 	echo "open utf8 failed\n";
-} 
+}
 
 remove_data("file_cp1252");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 string(%d) "hallo
 "

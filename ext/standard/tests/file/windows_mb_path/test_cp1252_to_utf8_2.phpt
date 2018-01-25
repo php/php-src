@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for write cp1252 to UTF-8 path 
+Test fopen() for write cp1252 to UTF-8 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -39,7 +39,7 @@ remove_data("dir_cp1252");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 int(25)
 bool(true)

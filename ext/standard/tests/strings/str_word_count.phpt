@@ -3,13 +3,13 @@ str_word_count()
 --FILE--
 <?php
 error_reporting(E_ALL);
-$str = "Hello friend, you're  
+$str = "Hello friend, you're
     looking          good today!";
-$b =& $str;       
+$b =& $str;
 var_dump(str_word_count($str, 1));
 var_dump(str_word_count($str, 2));
 var_dump(str_word_count($str));
-var_dump(str_word_count($str, 3)); 
+var_dump(str_word_count($str, 3));
 var_dump(str_word_count($str, 123));
 var_dump(str_word_count($str, -1));
 var_dump(str_word_count($str, 999999999));
@@ -92,7 +92,7 @@ NULL
 
 Warning: str_word_count() expects parameter 2 to be integer, string given in %s on line %d
 NULL
-string(55) "Hello friend, you're  
+string(55) "Hello friend, you're
     looking          good today!"
 int(5)
 int(6)

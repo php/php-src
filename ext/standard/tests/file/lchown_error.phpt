@@ -1,5 +1,5 @@
 --TEST--
-Test lchown() function : error functionality 
+Test lchown() function : error functionality
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) == 'WIN') die('skip no windows support');
@@ -19,7 +19,7 @@ unlink($filename);
 /* Prototype  : bool lchown (string filename, mixed user)
  * Description: Change file owner of a symlink
  * Source code: ext/standard/filestat.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing lchown() : error functionality ***\n";

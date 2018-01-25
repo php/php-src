@@ -1,11 +1,11 @@
 --TEST--
-Test get_class_vars() function : usage variation 
+Test get_class_vars() function : usage variation
 --FILE--
 <?php
 /* Prototype  : array get_class_vars(string class_name)
- * Description: Returns an array of default properties of the class. 
+ * Description: Returns an array of default properties of the class.
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_class_vars() : usage variation ***\n";

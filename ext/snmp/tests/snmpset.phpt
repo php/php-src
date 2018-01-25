@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmpset
 --CREDITS--
 Olivier Doucet Olivier Doucet Boris Lytochkin

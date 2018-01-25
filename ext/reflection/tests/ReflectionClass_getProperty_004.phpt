@@ -9,10 +9,10 @@ class A {
 	public $pubC = "pubC in A";
 	protected $protC = "protC in A";
 	private $privC = "privC in A";
-	
+
 	public $pubA = "pubA in A";
 	protected $protA = "protA in A";
-	private $privA = "privA in A";		
+	private $privA = "privA in A";
 }
 
 class B extends A {
@@ -22,7 +22,7 @@ class B extends A {
 
 	public $pubB = "pubB in B";
 	protected $protB = "protB in B";
-	private $privB = "privB in B";	
+	private $privB = "privB in B";
 }
 
 class C extends B {
@@ -34,7 +34,7 @@ class C extends B {
 class X {
 	public $pubC = "pubC in X";
 	protected $protC = "protC in X";
-	private $privC = "privC in X";	
+	private $privC = "privC in X";
 }
 
 $myC = new C;
@@ -52,10 +52,10 @@ function showInfo($name) {
 	try {
 		var_dump($rp);
 		var_dump($rp->getValue($myC));
-	} catch (Exception $e) {		
+	} catch (Exception $e) {
 		echo $e->getMessage() . "\n";
 		return;
-	}		
+	}
 }
 
 

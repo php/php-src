@@ -1,5 +1,5 @@
 --TEST--
-Test DateTimeZone::getName() function : error conditions 
+Test DateTimeZone::getName() function : error conditions
 --FILE--
 <?php
 /* Prototype  : public string DateTimeZone::getName  ( void  )
@@ -7,12 +7,12 @@ Test DateTimeZone::getName() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions: timezone_name_get()
  */
- 
-//Set the default time zone 
+
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $tz = new DateTimeZone("Europe/London");
- 
+
 echo "*** Testing DateTimeZone::getName() : error conditions ***\n";
 
 echo "\n-- Testing DateTimeZone::getName() function with more than expected no. of arguments --\n";

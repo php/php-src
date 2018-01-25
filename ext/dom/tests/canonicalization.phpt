@@ -39,12 +39,12 @@ echo $doc->c14N(TRUE, FALSE, array('query'=>'(//. | //@* | //namespace::*)'))."\
 /* exclusive/without comments first child element of doc element is context.
    using xpath query with registered namespace.
    test namespace prefix is also included. */
-echo $doc->c14N(TRUE, FALSE, 
-                array('query'=>'(//a:contain | //a:bar | .//namespace::*)', 
-                      'namespaces'=>array('a'=>'http://www.example.com/ns/foo')), 
+echo $doc->c14N(TRUE, FALSE,
+                array('query'=>'(//a:contain | //a:bar | .//namespace::*)',
+                      'namespaces'=>array('a'=>'http://www.example.com/ns/foo')),
                 array('test'))."\n\n";
 
-/* exclusive/without comments first child element of doc element is context. 
+/* exclusive/without comments first child element of doc element is context.
    test namespace prefix is also included */
 echo $doc->C14N(TRUE, FALSE, NULL, array('test'));
 ?>

@@ -70,32 +70,32 @@ print("{$aa[0]}{$aa[1]}{$aa[2]}\n"); // Converted to EUC-JP
 
 // Test for object
 echo "== OBJECT TEST ==\n";
-class foo 
+class foo
 {
 	public $s1;
 	public $s2;
 	public $s3;
 
-	function __construct() 
+	function __construct()
 	{
 		global $sjis, $jis, $euc_jp;
-		
+
 		$this->s1 = $euc_jp;
 		$this->s2 = $euc_jp;
 		$this->s3 = $euc_jp;
 	}
 }
 
-class bar 
+class bar
 {
 	public $s1;
 	public $s2;
 	public $s3;
 
-	function __construct() 
+	function __construct()
 	{
 		global $sjis, $jis, $euc_jp;
-		
+
 		$this->s1 = $euc_jp;
 		$this->s2 = $euc_jp;
 		$this->s3 = $euc_jp;

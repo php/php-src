@@ -1,5 +1,5 @@
 --TEST--
-gzcompress()/gzuncompress() and invalid params 
+gzcompress()/gzuncompress() and invalid params
 --SKIPIF--
 <?php if (!extension_loaded("zlib")) print "skip"; ?>
 --FILE--

@@ -7,10 +7,10 @@ Test session_write_close() function : variation
 
 ob_start();
 
-/* 
+/*
  * Prototype : bool session_write_close(void)
  * Description : Write session data and end session
- * Source code : ext/session/session.c 
+ * Source code : ext/session/session.c
  */
 
 echo "*** Testing session_write_close() : variation ***\n";

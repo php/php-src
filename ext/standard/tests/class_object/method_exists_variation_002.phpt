@@ -3,9 +3,9 @@ Test method_exists() function : usage variations  - unexpected type for arg 2
 --FILE--
 <?php
 /* Prototype  : proto bool method_exists(object object, string method)
- * Description: Checks if the class method exists 
+ * Description: Checks if the class method exists
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 spl_autoload_register(function ($className) {
@@ -87,90 +87,90 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(67)
 Error: 8 - Undefined variable: unset_var, %s(70)
 
-Arg value 0 
+Arg value 0
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 bool(false)
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 Error: 8 - Array to string conversion, %smethod_exists_variation_002.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - method_exists() expects parameter 2 to be string, array given, %s(77)
 NULL
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value 1 
+Arg value 1
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(76)
 
-Arg value  
+Arg value
 Error: 2 - method_exists() expects parameter 2 to be string, object given, %s(77)
 NULL
 
-Arg value  
+Arg value
 bool(false)
 
-Arg value  
+Arg value
 bool(false)
 Done

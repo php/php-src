@@ -1,9 +1,9 @@
 --TEST--
 Test function feof() by calling it with its expected arguments
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 ?>
 --FILE--
@@ -18,7 +18,7 @@ $h = gzopen($f, 'r');
 var_dump(gzeof($h));
 gzpassthru($h);
 var_dump(gzeof($h));
-gzclose($h); 
+gzclose($h);
 
 echo "\n-- test 2 --\n";
 $h = gzopen($f, 'r');
@@ -31,7 +31,7 @@ var_dump(gzeof($h));
 echo "reading 20 characters. eof should be true still\n";
 gzread($h, 20)."\n";
 var_dump(gzeof($h));
-gzclose($h); 
+gzclose($h);
 
 
 

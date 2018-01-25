@@ -3,7 +3,7 @@ Bug #46185 (importNode changes the namespace of an XML element).
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 $aDOM = new DOMDocument();
 $aDOM->loadXML('<?xml version="1.0"?>
 <ns1:a xmlns:ns1="urn::ns"/>');

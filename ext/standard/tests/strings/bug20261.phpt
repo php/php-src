@@ -19,7 +19,7 @@ Bug #20261 (str_rot13() changes too much)
 --EXPECT--
 1: boo
 2: boo
-3: 
+3:
 1: boo
 2: boo
 3: obb

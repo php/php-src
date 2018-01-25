@@ -8,7 +8,7 @@ function_exists('mb_substr') or die("skip mb_substr() is not available in this b
 --FILE--
 <?php
 /* Prototype  : string mb_substr(string $str, int $start [, int $length [, string $encoding]])
- * Description: Returns part of a string 
+ * Description: Returns part of a string
  * Source code: ext/mbstring/mbstring.c
  */
 
@@ -67,7 +67,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -76,7 +76,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 

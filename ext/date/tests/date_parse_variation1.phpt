@@ -2,14 +2,14 @@
 Test date_parse() function : usage variation - Passing unexpected values to first argument $date.
 --FILE--
 <?php
-/* Prototype  : array date_parse  ( string $date  ) 
+/* Prototype  : array date_parse  ( string $date  )
  * Description: Returns associative array with detailed info about given date.
  * Source code: ext/date/php_date.c
  */
 
 echo "*** Testing date_parse() : usage variation -  unexpected values to first argument \$date***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -89,8 +89,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 
@@ -100,8 +100,8 @@ foreach($inputs as $variation =>$date) {
       if (is_array($result)) {
       	  var_dump($result["errors"]);
       } else {
-      	  var_dump($result); 
-      }		
+      	  var_dump($result);
+      }
 };
 
 // closing the resource

@@ -31,7 +31,7 @@ class classA
 
 // heredoc string
 $heredoc = <<<EOT
- 
+
 EOT;
 
 // get a resource variable
@@ -62,7 +62,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -72,7 +72,7 @@ $inputs = array(
 /*19*/ "\n\t\r",
        ' ',
        $heredoc,
-       
+
        // object data
 /*22*/ new classA(),
 

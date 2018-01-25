@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() days -- absolute 
+DateTime::diff() days -- absolute
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

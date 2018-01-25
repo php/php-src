@@ -71,7 +71,7 @@ $arrays = array(
        // empty data
 /*16*/ "",
        '',
- 
+
        // string data
 /*18*/ "string",
        'string',
@@ -94,7 +94,7 @@ $arrays = array(
 $iterator = 1;
 foreach($arrays as $unexpected_value) {
   echo "\n-- Iteration $iterator --";
-  
+
   // Calling array_intersect_assoc() with default arguments
   var_dump( array_intersect_assoc($arr1,$unexpected_value) );
 

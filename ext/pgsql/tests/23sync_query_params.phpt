@@ -1,8 +1,8 @@
 --TEST--
 PostgreSQL sync query params
 --SKIPIF--
-<?php 
-include("skipif.inc"); 
+<?php
+include("skipif.inc");
 if (!function_exists('pg_query_params')) die('skip function pg_query_params() does not exist');
 ?>
 --FILE--
@@ -19,19 +19,19 @@ if ($version['protocol'] >= 3) {
 	{
 		echo "pg_num_row() error\n";
 	}
-	for ($i=0; $i < $rows; $i++) 
+	for ($i=0; $i < $rows; $i++)
 	{
 		pg_fetch_array($result, $i, PGSQL_NUM);
 	}
-	for ($i=0; $i < $rows; $i++) 
+	for ($i=0; $i < $rows; $i++)
 	{
 		pg_fetch_object($result);
 	}
-	for ($i=0; $i < $rows; $i++) 
+	for ($i=0; $i < $rows; $i++)
 	{
 		pg_fetch_row($result, $i);
 	}
-	for ($i=0; $i < $rows; $i++) 
+	for ($i=0; $i < $rows; $i++)
 	{
 		pg_fetch_result($result, $i, 0);
 	}

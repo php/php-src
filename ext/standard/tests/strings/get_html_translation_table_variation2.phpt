@@ -57,7 +57,7 @@ $values =  array (
   null,
 
   // resource var
-  $fp, 
+  $fp,
 
   // undefined variable
   @$undefined_var,

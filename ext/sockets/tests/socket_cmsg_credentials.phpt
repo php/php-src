@@ -64,7 +64,7 @@ bool(true)
 int(5)
 Array
 (
-    [name] => 
+    [name] =>
     [control] => Array
         (
             [0] => Array

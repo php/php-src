@@ -1,17 +1,17 @@
 --TEST--
 Test xml_set_object() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto int xml_set_object(resource parser, object &obj)
- * Description: Set up object which should be used for callbacks 
+ * Description: Set up object which should be used for callbacks
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_set_object() : usage variations ***\n";
@@ -74,9 +74,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -98,127 +98,127 @@ echo "Done";
 --EXPECTF--
 *** Testing xml_set_object() : usage variations ***
 
-Arg value 0 
+Arg value 0
 
 Warning: xml_set_object() expects parameter 1 to be resource, integer given in %s on line %d
 NULL
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_set_object() expects parameter 1 to be resource, integer given in %s on line %d
 NULL
 
-Arg value 12345 
+Arg value 12345
 
 Warning: xml_set_object() expects parameter 1 to be resource, integer given in %s on line %d
 NULL
 
-Arg value -2345 
+Arg value -2345
 
 Warning: xml_set_object() expects parameter 1 to be resource, integer given in %s on line %d
 NULL
 
-Arg value 10.5 
+Arg value 10.5
 
 Warning: xml_set_object() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
-Arg value -10.5 
+Arg value -10.5
 
 Warning: xml_set_object() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: xml_set_object() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 
 Warning: xml_set_object() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
-Arg value 0.5 
+Arg value 0.5
 
 Warning: xml_set_object() expects parameter 1 to be resource, float given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_set_object() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_set_object() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_set_object() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_set_object() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_set_object() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_set_object() expects parameter 1 to be resource, boolean given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, boolean given in %s on line %d
 NULL
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_set_object() expects parameter 1 to be resource, boolean given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, boolean given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Arg value string 
+Arg value string
 
 Warning: xml_set_object() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Arg value string 
+Arg value string
 
 Warning: xml_set_object() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
-Arg value Some Ascii Data 
+Arg value Some Ascii Data
 
 Warning: xml_set_object() expects parameter 1 to be resource, object given in %s on line %d
 NULL
@@ -228,12 +228,12 @@ Arg value Resource id %s
 Warning: xml_set_object(): supplied resource is not a valid XML Parser resource in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
-Arg value  
+Arg value
 
 Warning: xml_set_object() expects parameter 1 to be resource, null given in %s on line %d
 NULL

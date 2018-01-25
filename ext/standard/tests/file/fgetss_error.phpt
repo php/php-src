@@ -17,14 +17,14 @@ echo "-- Testing fgetss() with more than expected number of arguments --\n";
 $fp = fopen(__FILE__, "r");
 var_dump( fgetss($fp, 100, '<p><a>', $fp) );
 
-// invalid length argument 
+// invalid length argument
 echo "-- Testing fgetss() with invalid length arguments --\n";
-$len = 0; 
+$len = 0;
 $allowable_tags = '<p><a>';
 var_dump( fgetss($fp, $len, $allowable_tags) );
 $len = -10;
 var_dump( fgetss($fp, $len, $allowable_tags) );
-$len = 1; 
+$len = 1;
 var_dump( fgetss($fp, $len, $allowable_tags) ); // return length - 1 always, expect false
 
 // test invalid arguments : non-resources

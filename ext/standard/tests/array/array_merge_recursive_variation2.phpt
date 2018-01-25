@@ -8,7 +8,7 @@ Test array_merge_recursive() function : usage variations - unexpected values for
 */
 
 /*
- * Passing non array values to 'arr2' argument of array_merge_recursive() and see 
+ * Passing non array values to 'arr2' argument of array_merge_recursive() and see
  * that the function outputs proper warning messages wherever expected.
 */
 

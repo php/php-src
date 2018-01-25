@@ -10,7 +10,7 @@ $thisTestDir = dirname(__FILE__) . '/' .basename(__FILE__, ".php") . ".directory
 mkdir($thisTestDir);
 chdir($thisTestDir);
 
-$filename = basename(__FILE__, ".php") . ".tmp"; 
+$filename = basename(__FILE__, ".php") . ".tmp";
 $scriptLocFile = dirname(__FILE__)."/".$filename;
 
 $newpath = "rubbish";
@@ -35,9 +35,9 @@ function runtest() {
       echo "Fail - this is PHP52 behaviour\n";
       unlink($scriptLocFile);
    }else {
-      $line = file_get_contents($filename); 
+      $line = file_get_contents($filename);
       echo "$line\n";
-      unlink($filename);     
+      unlink($filename);
    }
 }
 ?>

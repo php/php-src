@@ -49,8 +49,8 @@ Array
 Array
 (
     [green] => 1
-    [red] => 
-    [yellow] => 
+    [red] =>
+    [yellow] =>
 )
 Array
 (
@@ -73,8 +73,8 @@ Array
 Array
 (
     [1] => 1
-    [2] => 
-    [3] => 
+    [2] =>
+    [3] =>
 )
 Array
 (
@@ -97,8 +97,8 @@ Array
 Array
 (
     [0] => 1
-    [1] => 
-    [2] => 
+    [1] =>
+    [2] =>
 )
 Array
 (
@@ -118,5 +118,5 @@ Array
 Array
 (
     [1] => 1
-    [] => 
+    [] =>
 )

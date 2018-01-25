@@ -9,8 +9,8 @@ Test array_intersect_assoc() function : usage variations - different arrays for 
 */
 
 /*
-* Passing different types of arrays to $arr2 argument and testing whether 
-* array_intersect_assoc() behaves in an expected way with the other arguments passed to the function.  
+* Passing different types of arrays to $arr2 argument and testing whether
+* array_intersect_assoc() behaves in an expected way with the other arguments passed to the function.
 * The $arr1 argument passed is a fixed array.
 */
 
@@ -156,15 +156,15 @@ array(0) {
 -- Iteration 8 --
 array(1) {
   ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }
 array(1) {
   ["h3"]=>
-  string(88) "hello world	
-1111		 != 2222
+  string(88) "hello world
+1111		 != 2222
 heredoc
 double quoted string. withdifferentwhitespaces"
 }

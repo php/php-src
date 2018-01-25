@@ -3,7 +3,7 @@ SimpleXML: Text data
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 
 $sxe = simplexml_load_string(<<<EOF
 <?xml version='1.0'?>
@@ -37,4 +37,4 @@ echo "---Done---\n";
 string(28) "Here we have some text data."
 string(19) "And here some more."
 string(15) "Wow once again."
----Done--- 
+---Done---

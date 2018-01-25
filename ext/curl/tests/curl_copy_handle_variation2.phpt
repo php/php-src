@@ -4,7 +4,7 @@ Test curl_copy_handle() add options to the handles
 Francesco Fullone ff@ideato.it
 #PHPTestFest Cesena Italia on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 ?>
 --COMMENT--

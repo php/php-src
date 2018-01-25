@@ -9,7 +9,7 @@ Test array_intersect_uassoc() function : usage variation - Passing class without
 
 echo "*** Testing array_intersect_uassoc() : usage variation ***\n";
 
-// Initialise function arguments 
+// Initialise function arguments
 $array1 = array("a" => "green", "b" => "brown", "c" => "blue", "red");
 $array2 = array("a" => "green", "yellow", "red");
 $array3 = array("a"=>"green", "brown");

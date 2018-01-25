@@ -13,7 +13,7 @@ var_dump(ob_get_contents());
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 Warning: php_strip_whitespace(%s): failed to open stream: No such file or directory in %s on line %d
 string(0) ""
 bool(false)

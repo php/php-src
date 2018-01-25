@@ -1,7 +1,7 @@
 --TEST--
 DBA DB1 handler test
 --SKIPIF--
-<?php 
+<?php
 	$handler = 'db1';
 	require_once dirname(__FILE__) .'/skipif.inc';
 ?>

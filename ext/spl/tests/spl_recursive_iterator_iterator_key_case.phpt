@@ -1,5 +1,5 @@
 --TEST--
-SPL: Test on RecursiveIteratorIterator key function checking switch statements 
+SPL: Test on RecursiveIteratorIterator key function checking switch statements
 --CREDITS--
 Rohan Abraham (rohanabrahams@gmail.com)
 TestFest London May 2009

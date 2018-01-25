@@ -3,7 +3,7 @@ Test usort() function : usage variations - referenced variables
 --FILE--
 <?php
 /* Prototype  : bool usort(array $array_arg, string $cmp_function)
- * Description: Sort an array by values using a user-defined comparison function 
+ * Description: Sort an array by values using a user-defined comparison function
  * Source code: ext/standard/array.c
  */
 
@@ -27,7 +27,7 @@ function cmp_function($value1, $value2)
 }
 
 // different variables which are used as elements of $array_arg
-$value1 = -5; 
+$value1 = -5;
 $value2 = 100;
 $value3 = 0;
 $value4 = &$value1;

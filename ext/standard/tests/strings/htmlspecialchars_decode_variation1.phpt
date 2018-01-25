@@ -3,7 +3,7 @@ Test htmlspecialchars_decode() function : usage variations - unexpected values f
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 
@@ -14,7 +14,7 @@ Test htmlspecialchars_decode() function : usage variations - unexpected values f
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
 //get a class
-class classA 
+class classA
 {
   function __toString() {
     return "ClassAObject";
@@ -158,4 +158,3 @@ string(0) ""
 Warning: htmlspecialchars_decode() expects parameter 1 to be string, resource given in %s on line %d
 NULL
 ===DONE===
-	

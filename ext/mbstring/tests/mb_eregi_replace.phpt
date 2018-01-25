@@ -22,7 +22,7 @@ function do_translit($st) {
         "Я"=>"YA","Ч"=>"CH","С"=>"C","М"=>"M","И"=>"I","Т"=>"T",
         "Ь"=>"\'","Б"=>"B","Ю"=>"YU",
     );
-   
+
     foreach($replacement as $i=>$u) {
         $st = mb_eregi_replace($i,$u,$st);
     }

@@ -1,5 +1,5 @@
 --TEST--
-Test curl option CURLOPT_RETURNTRANSFER 
+Test curl option CURLOPT_RETURNTRANSFER
 --CREDITS--
 Mathieu Kooiman <mathieuk@gmail.com>
 Dutch UG, TestFest 2009, Utrecht

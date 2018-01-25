@@ -20,7 +20,7 @@ Stack trace:
 #0 %s(%d): assert('0 $ 0', 'Describing what...')
 #1 {main}
 
-Next Error: Failure evaluating code: 
+Next Error: Failure evaluating code:
 Describing what was asserted:"0 $ 0" in %s:%d
 Stack trace:
 #0 %s(%d): assert('0 $ 0', 'Describing what...')

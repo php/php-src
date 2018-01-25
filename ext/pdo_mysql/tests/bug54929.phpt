@@ -18,7 +18,7 @@ $pdodb = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 function testQuery($query) {
 	global $pdodb;
 	$stmt = $pdodb->prepare($query);
-	
+
 	if (!$stmt->execute(array("foo"))) {
 		var_dump($stmt->errorInfo());
 	} else{

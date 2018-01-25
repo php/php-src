@@ -48,7 +48,7 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.hooba.phar');

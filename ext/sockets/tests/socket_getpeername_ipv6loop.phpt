@@ -4,14 +4,14 @@ ext/sockets - socket_getpeername_ipv6loop - basic test
 # TestFest 2009 - NorwayUG
 # $Id: socket_getpeername_ipv6loop.phpt 494 2009-06-09 20:38:05Z tatjana.andersen@redpill-linpro.com $
 --SKIPIF--
-<?php   
+<?php
 if (!extension_loaded('sockets')) {
 	die('skip sockets extension not available.');
 }
 require 'ipv6_skipif.inc';
 ?>
 --FILE--
-<?php   
+<?php
 	/* Bind and connect sockets to localhost */
 	$localhost = '::1';
 

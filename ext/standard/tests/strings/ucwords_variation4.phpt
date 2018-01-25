@@ -31,7 +31,7 @@ $str_array = array(
   "\'t \'t\',test",
   "Jack's pen",
   "P't'y 't it's ",
-  
+
   // using other white spaces
   "\ttesting\ttesting\tucwords",
   "\\ttesting\\ttesting\tucwords",
@@ -48,7 +48,7 @@ $str_array = array(
   "t@@#$% %test ^test &test *test +test -test",
   "!test ~test `test` =test= @test@test.com",
   "/test/r\test\\ucwords\t\y\y\\u\3 \yy\ /uu/",
-  
+
   //only special chars
   "!@#$%^&*()_+=-`~"
 );
@@ -96,16 +96,16 @@ string(31) "TestingUcwords Testing Ucwords"
 -- Iteration 15 --
 string(32) "Testing\rucwords Testing Ucwords"
 -- Iteration 16 --
-string(34) "TestingUcwords  Testing 
+string(34) "TestingUcwords  Testing
 Ucwords"
 -- Iteration 17 --
-string(36) "Testing\fucwords \f Testing 
+string(36) "Testing\fucwords \f Testing
 Ucwords"
 -- Iteration 18 --
 string(35) "
 Testing
 Ucwords
- Testing 
+ Testing
  Ucwords"
 -- Iteration 19 --
 string(39) "\ntesting\nucwords\n Testing \n Ucwords"

@@ -5,6 +5,6 @@ Bug #65304 (Use of max int in array_sum)
 var_dump(array_sum(array(PHP_INT_MAX, 1)));
 var_dump(PHP_INT_MAX + 1);
 ?>
---EXPECTF--	
+--EXPECTF--
 float(%s)
 float(%s)

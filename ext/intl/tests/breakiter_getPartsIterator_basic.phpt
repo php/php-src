@@ -32,7 +32,7 @@ string(26) "IntlRuleBasedBreakIterator"
 Array
 (
     [0] => foo
-    [1] =>  
+    [1] =>
     [2] => bar
 )
 int(0)

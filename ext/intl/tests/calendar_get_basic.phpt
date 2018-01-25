@@ -20,4 +20,4 @@ var_dump(intlcal_get($intlcal, IntlCalendar::FIELD_DAY_OF_MONTH));
 --EXPECT--
 int(4)
 int(4)
-==DONE==
+==DONE==

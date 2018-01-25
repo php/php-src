@@ -11,10 +11,10 @@ $array = array(
 "From",
 "that",
 "time",
-"on", 
+"on",
 "Sam",
-"thought", 
-"that", 
+"thought",
+"that",
 "he",
 "sensed",
 "a",
@@ -31,7 +31,7 @@ foreach ($array as $str) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(false)
 string(4) "0000"
 

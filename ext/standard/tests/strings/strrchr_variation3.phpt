@@ -19,14 +19,14 @@ using heredoc syntax.
 EOD;
 
 $needles = array(
-  "ing", 
-  "", 
+  "ing",
+  "",
   " ",
-  $multi_line_str //needle as haystack 
+  $multi_line_str //needle as haystack
 );
 
 //loop through to test strrchr() with each needle
-foreach($needles as $needle) {  
+foreach($needles as $needle) {
   var_dump( strrchr($multi_line_str, $needle) );
 }
 

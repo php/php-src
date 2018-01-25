@@ -10,7 +10,7 @@ Test token_get_all() function : usage variations - with control structure tokens
 */
 
 /*
- * Using different control structure keywords 
+ * Using different control structure keywords
  *   if..else, elseif - T_IF(301), T_ELSEIF(302), T_ELSE(303)
  *   while - T_WHILE(318)
  *   do...while - T_DO(317)
@@ -26,7 +26,7 @@ echo "*** Testing token_get_all() : for control structure tokens ***\n";
 // if..elseif....else
 echo "-- with if..elseif..else..tokens --\n";
 
-$source = '<?php 
+$source = '<?php
 if($a == true) {
      echo "$a = true";
 }

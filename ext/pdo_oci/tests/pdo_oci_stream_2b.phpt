@@ -27,16 +27,16 @@ $a_val = ord('a');
 foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 order by id") as $row) {
     $a = $row['d4_1'];
 	$a1 = $row['d4_2'];
-    
+
     $str1 = stream_get_contents($a);
 	$str2 = stream_get_contents($a1);
-    
+
     $str1len = strlen($str1);
 	$str2len = strlen($str2);
-    
+
     $b = ord($str1[0]);
 	$b1 = ord($str2[0]);
-    
+
     if (($b != ($a_val + $i)) && ($str1len != (4086 + $i)) &&
         ($b1 != ($a_val + $j)) && ($str2len != (4086 + $j))) {
         printf("There is a bug!\n");
@@ -45,13 +45,13 @@ foreach($db->query("select data1 as d4_1, data2 as d4_2 from pdo_oci_stream_2 or
         printf("b     = %d\n", $b);
         printf("i     = %d\n", $i);
         printf("str1len = %d\n", $str1len);
-        
+
         printf("Col2:\n");
         printf("a_val = %d\n", $a_val);
         printf("b1    = %d\n", $b1);
         printf("j     = %d\n", $j);
         printf("str2len = %d\n", $str1len);
-        
+
     }
     $i++;
     if ($i>9)

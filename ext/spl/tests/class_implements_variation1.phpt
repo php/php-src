@@ -1,11 +1,11 @@
 --TEST--
-SPL: Test class_implements() function : variation 
+SPL: Test class_implements() function : variation
 --FILE--
 <?php
 /* Prototype  : array class_implements(mixed what [, bool autoload ])
- * Description: Return all classes and interfaces implemented by SPL 
+ * Description: Return all classes and interfaces implemented by SPL
  * Source code: ext/spl/php_spl.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing class_implements() : variation ***\n";
@@ -96,7 +96,7 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
+
       //resource
       'resource' => $res,
 );

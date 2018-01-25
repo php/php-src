@@ -12,7 +12,7 @@ var_dump(filter_var('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // An invalid address likely to crash PHP due to stack exhaustion if it goes to
 // the validation regex.
 var_dump(filter_var(str_repeat('x', 8000), FILTER_VALIDATE_EMAIL));
---EXPECT--	
+--EXPECT--
 string(19) "valid@email.address"
 bool(false)
 bool(false)

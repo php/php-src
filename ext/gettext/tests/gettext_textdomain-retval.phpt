@@ -1,7 +1,7 @@
 --TEST--
 Check if textdomain() returns the new domain
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}

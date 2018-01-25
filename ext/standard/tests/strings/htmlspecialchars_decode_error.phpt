@@ -1,9 +1,9 @@
 --TEST--
-Test htmlspecialchars_decode() function : error conditions 
+Test htmlspecialchars_decode() function : error conditions
 --FILE--
 <?php
 /* Prototype  : string htmlspecialchars_decode(string $string [, int $quote_style])
- * Description: Convert special HTML entities back to characters 
+ * Description: Convert special HTML entities back to characters
  * Source code: ext/standard/html.c
 */
 

@@ -29,7 +29,7 @@ var_dump(gmstrftime("blah", $t));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: strftime() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)

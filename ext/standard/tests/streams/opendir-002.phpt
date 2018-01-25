@@ -1,5 +1,5 @@
 --TEST--
-opendir() with 'ftp://' stream. 
+opendir() with 'ftp://' stream.
 --SKIPIF--
 <?php
 if (array_search('ftp',stream_get_wrappers()) === FALSE) die("skip ftp wrapper not available.");
@@ -21,7 +21,7 @@ while ($fn=readdir($ds)) {
 
 closedir($ds);
 ?>
-==DONE== 
+==DONE==
 --EXPECTF--
 resource(%d) of type (stream)
 string(5) "file1"

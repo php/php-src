@@ -7,7 +7,7 @@ Test copy() function: basic functionality
  *              Returns TRUE on success or FALSE on failure.
  */
 
-echo "*** Testing copy() function: to copy file from source to destination --\n"; 
+echo "*** Testing copy() function: to copy file from source to destination --\n";
 
 var_dump( file_exists(__FILE__) );
 

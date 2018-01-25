@@ -1,5 +1,5 @@
 --TEST--
-Test date_create() function : error conditions 
+Test date_create() function : error conditions
 --FILE--
 <?php
 /* Prototype  : DateTime date_create  ([ string $time  [, DateTimeZone $timezone  ]] )

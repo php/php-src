@@ -23,7 +23,7 @@ $h = fopen($dir_name."/tempnam_variation5.tmp", "w");
 for($i=1; $i<=3; $i++) {
   echo "-- Iteration $i --\n";
   $created_file = tempnam("$dir_name", "tempnam_variation5.tmp");
-  
+
   if( file_exists($created_file) ) {
     echo "File name is => ";
     print($created_file);

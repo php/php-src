@@ -2,7 +2,7 @@
 Test nl_langinfo() function :  unexpected inputs for '$tem' argument
 --SKIPIF--
 <?php
-if( substr(PHP_OS, 0, 3) == 'WIN'){  
+if( substr(PHP_OS, 0, 3) == 'WIN'){
   die('skip Not for Windows');
 }
 ?>
@@ -26,7 +26,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "sample object";
-  } 
+  }
 }
 
 //getting the resource
@@ -38,15 +38,15 @@ $items =  array (
 /*1*/	  2147483647,
 		  -2147483648,
 		  -20,
-		
+
 	      // array values
 /*4*/	  array(),
 		  array(0),
 		  array(1, 2),
-		
+
 		  // objects
 /*7*/	  new sample(),
-		
+
 		  // resource
 /*8*/	  $file_handle,
 		);
@@ -63,7 +63,7 @@ foreach($items as $item) {
 }
 
 fclose($file_handle);  //closing the file handle
-setlocale(LC_ALL, $original); 
+setlocale(LC_ALL, $original);
 
 ?>
 ===DONE===

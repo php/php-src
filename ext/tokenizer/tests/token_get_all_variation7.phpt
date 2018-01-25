@@ -18,7 +18,7 @@ Test token_get_all() function : usage variations - with increment/decrement oper
 echo "*** Testing token_get_all() : 'source' string with different increment/decrement operators ***\n";
 
 // increment/decrement operators : '++' , '--'
-$source = '<?php 
+$source = '<?php
 $a = 10, $b = 5;
 $a++;
 $b--;

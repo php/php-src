@@ -16,13 +16,13 @@ display_errors=1
 <?php
   // Test with no arguments
   $server = socket_create();
-  
+
   // Test with less arguments than required
   $server = socket_create(SOCK_STREAM, getprotobyname('tcp'));
-  
+
   // Test with non integer parameters
   $server = socket_create(array(), 1, 1);
-  
+
 ?>
 --EXPECTF--
 Warning: socket_create() expects exactly 3 parameters, 0 given in %s on line %d

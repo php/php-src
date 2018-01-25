@@ -2,10 +2,10 @@
 Test wrong number of arguments for time()
 --FILE--
 <?php
-/* 
+/*
  * proto int time(void)
  * Function is implemented in ext/date/php_date.c
-*/ 
+*/
 
 // Extra arguments are ignored
 $extra_arg = 1;

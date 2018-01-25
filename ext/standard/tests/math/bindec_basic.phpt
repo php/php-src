@@ -23,10 +23,10 @@ $values = array(111000111,
 				31101.3,
 				31.1013e5,
 				0x111ABC,
-				011237,				
+				011237,
 				true,
 				false,
-				null);	
+				null);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = bindec($values[$i]);

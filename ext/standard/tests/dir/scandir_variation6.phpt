@@ -9,7 +9,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 --FILE--
 <?php
 /* Prototype  : array scandir(string $dir [, int $sorting_order [, resource $context]])
- * Description: List files & directories inside the specified path 
+ * Description: List files & directories inside the specified path
  * Source code: ext/standard/dir.c
  */
 
@@ -29,7 +29,7 @@ mkdir($sub_dir_path);
 
 // with different wildcard characters
 
-echo "\n-- Wildcard = '*' --\n"; 
+echo "\n-- Wildcard = '*' --\n";
 var_dump( scandir($file_path . "/scandir_var*") );
 var_dump( scandir($file_path . "/*") );
 

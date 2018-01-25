@@ -3,7 +3,7 @@ Testing repated SessionHandler::open() calls
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
-<?php  
+<?php
 
 ini_set('session.save_handler', 'files');
 $x = new SessionHandler;

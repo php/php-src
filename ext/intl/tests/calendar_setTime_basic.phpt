@@ -19,7 +19,7 @@ $intlcal->setTime($time * 1000);
 var_dump(
 	(float)$time*1000,
 	$intlcal->getTime());
-	
+
 $intlcal = IntlCalendar::createInstance('UTC');
 intlcal_set_time($intlcal,$time * 1000);
 var_dump(intlcal_get_time($intlcal));
@@ -30,4 +30,4 @@ var_dump(intlcal_get_time($intlcal));
 float(1330473600000)
 float(1330473600000)
 float(1330473600000)
-==DONE==
+==DONE==

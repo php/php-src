@@ -1,14 +1,14 @@
 --TEST--
 Bug #39971 (8.0+) (pg_insert/pg_update do not allow now() to be used for timestamp fields)
 --SKIPIF--
-<?php 
+<?php
 require_once('skipif.inc');
 ?>
 --FILE--
 <?php
 
 require_once('config.inc');
-	
+
 $dbh = @pg_connect($conn_str);
 if (!$dbh) {
 	die ("Could not connect to the server");

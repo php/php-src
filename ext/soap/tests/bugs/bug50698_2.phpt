@@ -15,7 +15,7 @@ try {
     } else {
         echo "Call: \"new SoapClient(dirname(__FILE__).'/bug50698_2.wsdl');\" threw a SoapFault with an incorrect faultcode or faultmessage.";
         print_r($e);
-    }    
+    }
 }
 ?>
 --EXPECT--

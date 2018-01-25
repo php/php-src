@@ -1,5 +1,5 @@
 --TEST--
-Test popen() and pclose function: basic functionality 
+Test popen() and pclose function: basic functionality
 --SKIPIF--
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' )
@@ -88,7 +88,7 @@ line of text
 line
 line of text
 line
-line 
+line
 int(100)
 *** Testing popen(): writing to the pipe ***
 aaa

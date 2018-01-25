@@ -28,7 +28,7 @@ usort ($data, 'cmp');
 var_dump ($data);
 ?>
 --EXPECT--
--- Testing uasort() -- 
+-- Testing uasort() --
 array(8) {
   [16777216]=>
   float(-0.33333333333333)
@@ -53,7 +53,7 @@ array(8) {
   string(4) "test"
 }
 
- -- Testing uksort() -- 
+ -- Testing uksort() --
 array(8) {
   [-1000]=>
   array(2) {
@@ -78,7 +78,7 @@ array(8) {
   int(27)
 }
 
- -- Testing usort() -- 
+ -- Testing usort() --
 array(8) {
   [0]=>
   float(-0.33333333333333)

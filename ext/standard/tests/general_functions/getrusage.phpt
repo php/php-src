@@ -13,7 +13,7 @@ var_dump(getrusage(array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(5) "array"
 string(5) "array"
 string(5) "array"

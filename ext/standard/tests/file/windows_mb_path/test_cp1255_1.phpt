@@ -1,5 +1,5 @@
 --TEST--
-Test mkdir/rmdir cp1255 path 
+Test mkdir/rmdir cp1255 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -40,7 +40,7 @@ remove_data("dir_cp1255");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 bool(true)

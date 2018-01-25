@@ -3,7 +3,7 @@ SimpleXML: concatenating attributes
 --SKIPIF--
 <?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
-<?php 
+<?php
 $xml =<<<EOF
 <people>
    <person name="Foo"></person>

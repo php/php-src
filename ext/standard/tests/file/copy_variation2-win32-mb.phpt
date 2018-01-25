@@ -18,7 +18,7 @@ if(substr(PHP_OS, 0, 3) != "WIN")
 
 echo "*** Test copy() function: destination file names containing special characters ***\n";
 $file_path = dirname(__FILE__);
-$src_file_name = $file_path."/copy_variation2私はガラスを食べられます.tmp"; 
+$src_file_name = $file_path."/copy_variation2私はガラスを食べられます.tmp";
 $file_handle = fopen($src_file_name, "w");
 fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
@@ -27,7 +27,7 @@ fclose($file_handle);
 $dest_files = array(
 
   /* File names containing special(non-alpha numeric) characters */
-  "_copy_variation2.tmp", 
+  "_copy_variation2.tmp",
   "@copy_variation2.tmp",
   "#copy_variation2.tmp",
   "+copy_variation2.tmp",
@@ -123,13 +123,13 @@ Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 5 --
-Copy operation => 
+Copy operation =>
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)
 
 -- Iteration 6 --
-Copy operation => 
+Copy operation =>
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)
@@ -156,7 +156,7 @@ Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 10 --
-Copy operation => 
+Copy operation =>
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)
@@ -197,7 +197,7 @@ Size of source file => int(1500)
 Size of destination file => int(1500)
 
 -- Iteration 16 --
-Copy operation => 
+Copy operation =>
 Warning: copy(%s): %s
 bool(false)
 Existence of destination file => bool(false)

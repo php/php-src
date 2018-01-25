@@ -1,11 +1,11 @@
 --TEST--
-Test token_get_all() function : error conditions 
+Test token_get_all() function : error conditions
 --SKIPIF--
 <?php if (!extension_loaded("tokenizer")) print "skip"; ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens 
+ * Description: splits the given source into an array of PHP languange tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 

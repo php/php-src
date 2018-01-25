@@ -19,7 +19,7 @@ var_dump(
 				IntlCalendar::FIELD_SECOND),
 		$intlcal->get(IntlCalendar::FIELD_HOUR_OF_DAY));
 
-				
+
 $intlcal->setTime(strtotime('2012-02-29 05:06:07 +0000') * 1000);
 var_dump(
 		intlcal_field_difference(
@@ -32,4 +32,4 @@ var_dump(
 int(3601)
 int(6)
 int(61)
-==DONE==
+==DONE==

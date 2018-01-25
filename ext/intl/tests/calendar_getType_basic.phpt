@@ -20,4 +20,4 @@ VAR_DUMP(intlcal_get_type($intlcal));
 --EXPECT--
 string(9) "gregorian"
 string(6) "hebrew"
-==DONE==
+==DONE==

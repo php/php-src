@@ -10,7 +10,7 @@ var_dump(parse_ini_file($ini_file, 1));
 echo "Done.\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {
   ["error_reporting values"]=>
   array(6) {

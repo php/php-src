@@ -25,7 +25,7 @@ var_dump(gmp_and(array(), array()));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(6) "106502"
 string(5) "40994"
 string(3) "515"

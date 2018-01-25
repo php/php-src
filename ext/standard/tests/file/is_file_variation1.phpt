@@ -7,7 +7,7 @@ Test is_file() function: usage variations - diff. files
      Returns TRUE if the filename exists and is a regular file
 */
 
-/* Testing is_file() with file containing data, truncating its size 
+/* Testing is_file() with file containing data, truncating its size
      and the file created by touch() */
 
 $file_path = dirname(__FILE__);

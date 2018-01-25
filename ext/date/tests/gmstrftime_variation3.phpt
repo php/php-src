@@ -3,9 +3,9 @@ Test gmstrftime() function : usage variation - Passing week related format strin
 --FILE--
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
+ * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmstrftime() : usage variation ***\n";
@@ -18,7 +18,7 @@ $inputs = array(
       'Abbreviated weekday name' => "%a",
       'Full weekday name' => "%A",
 	  'Week number of the year' => "%U",
-	  'Week number of the year in decimal number' => "%W",	
+	  'Week number of the year in decimal number' => "%W",
 );
 
 // loop through each element of the array for timestamp

@@ -14,7 +14,7 @@ class A {
 }
 
 class B extends A {
-  public $y; 
+  public $y;
   function __construct($a){
     parent::__construct($a);
     $this->y = $a + 1;

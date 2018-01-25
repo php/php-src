@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 Function snmp2_real_walk
 --CREDITS--
 Olivier Doucet Olivier Doucet Boris Lytochkin

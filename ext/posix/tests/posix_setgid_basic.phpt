@@ -1,8 +1,8 @@
 --TEST--
 Test function posix_setgid() by calling it with its expected arguments
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com
@@ -24,4 +24,3 @@ var_dump(posix_setgid( $gid ) );
 *** Test by calling method or function with its expected arguments ***
 bool(true)
 ===DONE===
-	

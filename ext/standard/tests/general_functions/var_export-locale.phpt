@@ -17,13 +17,13 @@ setlocale(LC_ALL, "german", "de","de_DE","de_DE.ISO8859-1","de_DE.ISO_8859-1","d
 */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues 
+// different integer vlaues
 $valid_ints = array(
                 '0',
                 '1',
                 '-1',
                 '-2147483648', // max negative integer value
-                '-2147483647', 
+                '-2147483647',
                 2147483647,  // max positive integer value
                 2147483640,
                 0x123B,      // integer as hexadecimal
@@ -53,11 +53,11 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean vlaues
 $valid_bool = array(
 		    1,
 		    TRUE,
-                true, 
+                true,
                 0,
 		    FALSE,
 		    false
@@ -77,7 +77,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float vlaues 
+// different valid  float vlaues
 $valid_floats = array(
   (float)-2147483649, // float value
   (float)2147483648,  // float value
@@ -115,7 +115,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid strings ***\n";
-// different valid  string 
+// different valid  string
 $valid_strings = array(
             "",
             " ",
@@ -148,7 +148,7 @@ $counter++;
 }
 
 echo "*** Testing var_export() with valid arrays ***\n";
-// different valid  arrays 
+// different valid  arrays
 $valid_arrays = array(
            array(),
            array(NULL),
@@ -185,7 +185,7 @@ echo "*** Testing var_export() with valid objects ***\n";
 // class with no members
 class foo
 {
-// no members 
+// no members
 }
 
 // abstract class
@@ -204,28 +204,28 @@ class concreteClass extends abstractClass
   }
 }
 
-// interface class 
+// interface class
 interface iValue
 {
-   public function setVal ($name, $val); 
+   public function setVal ($name, $val);
    public function dumpVal ();
 }
 // implement the interface
 class Value implements iValue
 {
   private $vars = array ();
-  
+
   public function setVal ( $name, $val ) {
     $this->vars[$name] = $val;
   }
-  
+
   public function dumpVal () {
     var_export ( $vars );
   }
 }
 
-// a gereral class 
-class myClass 
+// a gereral class
+class myClass
 {
   var $foo_object;
   public $public_var;
@@ -239,7 +239,7 @@ class myClass
     $this->public_var1 = new foo();
     $this->private_var = new foo();
     $this->proected_var = new foo();
-  }  
+  }
 }
 
 // create a object of each class defined above
@@ -260,7 +260,7 @@ $valid_objects = array(
                   $foo_object,
                   $Value_object,
                   $concreteClass_object
-                 ); 
+                 );
  $counter = 1;
 /* Loop to check for above objects with var_export() */
 echo "\n*** Output for objects ***\n";
@@ -274,9 +274,9 @@ var_dump( var_export( $obj, TRUE) );
 echo "\n";
 $counter++;
 }
-                 
+
 echo "*** Testing var_export() with valid null values ***\n";
-// different valid  null vlaues 
+// different valid  null vlaues
 $unset_var = array();
 unset ($unset_var); // now a null
 $null_var = NULL;
@@ -304,9 +304,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_export( var_export() );
 
-//arguments more than expected 
+//arguments more than expected
 var_export( var_export(TRUE, FALSE, TRUE) );
- 
+
 echo "\n\nDone";
 
 
@@ -753,26 +753,26 @@ string(20) "array (
 
 Iteration 7
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )
 string(55) "array (
-  0 => 
+  0 =>
   array (
   ),
-  1 => 
+  1 =>
   array (
   ),
 )"
@@ -780,36 +780,36 @@ string(55) "array (
 
 Iteration 8
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
   ),
 )
 string(107) "array (
-  0 => 
+  0 =>
   array (
     0 => 1,
     1 => 2,
   ),
-  1 => 
+  1 =>
   array (
     0 => 'a',
     1 => 'b',
@@ -942,17 +942,17 @@ string(36) "concreteClass::__set_state(array(
 
 Iteration 4
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))"
@@ -960,50 +960,50 @@ string(57) "Value::__set_state(array(
 
 Iteration 5
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -1011,50 +1011,50 @@ string(293) "myClass::__set_state(array(
 
 Iteration 6
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))
 string(293) "myClass::__set_state(array(
-   'foo_object' => 
+   'foo_object' =>
   foo::__set_state(array(
   )),
    'public_var' => 10,
-   'public_var1' => 
+   'public_var1' =>
   foo::__set_state(array(
   )),
-   'private_var' => 
+   'private_var' =>
   foo::__set_state(array(
   )),
    'protected_var' => NULL,
-   'proected_var' => 
+   'proected_var' =>
   foo::__set_state(array(
   )),
 ))"
@@ -1089,17 +1089,17 @@ string(26) "foo::__set_state(array(
 
 Iteration 10
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))
 string(57) "Value::__set_state(array(
-   'vars' => 
+   'vars' =>
   array (
   ),
 ))"

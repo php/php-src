@@ -89,16 +89,16 @@ echo 'Element Name: '.(($elem = $dom->getElementByID('n3'))?$elem->nodeName:'Not
 Tag Name: chapter
 Chapter: 1
 Attribute num exists?: Yes
-Chapter: 
+Chapter:
 Attribute num exists?: No
 Language: en
 Language: en-US
-Language: 
+Language:
 
 -- xml:lang --
 Language: en
 Attribute xml:lang exists?: Yes
-Language: 
+Language:
 Attribute xml:lang exists?: No
 Language: en-GB
 Language: en-GB

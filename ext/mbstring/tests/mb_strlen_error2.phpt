@@ -8,7 +8,7 @@ function_exists('mb_strlen') or die("skip mb_strlen() is not available in this b
 --FILE--
 <?php
 /* Prototype  : int mb_strlen(string $str [, string $encoding])
- * Description: Get character numbers of a string 
+ * Description: Get character numbers of a string
  * Source code: ext/mbstring/mbstring.c
  */
 

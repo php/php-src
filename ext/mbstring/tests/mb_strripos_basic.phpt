@@ -8,9 +8,9 @@ function_exists('mb_strripos') or die("skip mb_strripos() is not available in th
 --FILE--
 <?php
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive 
+ * Description: Finds position of last occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -34,14 +34,14 @@ $ascii_needles = array(
    'de',
    'De',
    'dE',
-   
+
    //flag a swap between good and bad
-   '!', 
-   
+   '!',
+
    // 4 bad ones
    'df',
    'Df',
-   'dF', 
+   'dF',
    'DF'
 );
 
@@ -63,11 +63,11 @@ $greek_bmixed2 = base64_decode('zrzOvs6f');
 $greek_needles = array(
    // 4 good ones
    $greek_nlower, $greek_nupper, $greek_nmixed1, $greek_nmixed2,
-   
+
    '!', // used to flag a swap between good and bad
-   
+
    // 4 bad ones
-   $greek_blower, $greek_bupper, $greek_bmixed1, $greek_bmixed2,   
+   $greek_blower, $greek_bupper, $greek_bmixed1, $greek_bmixed2,
 );
 
 // try the basic options
@@ -80,7 +80,7 @@ foreach ($ascii_needles as $needle) {
       foreach ($ascii_haystacks as $haystack) {
          var_dump(mb_strripos($haystack, $needle));
       }
-   }   
+   }
 }
 
 echo "\n -- Greek Strings, needle should be found --\n";
@@ -92,7 +92,7 @@ foreach ($greek_needles as $needle) {
       foreach ($greek_haystacks as $haystack) {
          var_dump(mb_strripos($haystack, $needle));
       }
-   }   
+   }
 }
 
 echo "Done";

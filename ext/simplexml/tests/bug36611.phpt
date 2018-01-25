@@ -24,7 +24,7 @@ var_dump($val) ;
 
 ?>
 ===DONE===
---EXPECT--	
+--EXPECT--
 int(1)
 int(1)
 ===DONE===

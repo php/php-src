@@ -5,9 +5,9 @@ Dave Kelsey <d_kelsey@uk.ibm.com>
 --FILE--
 <?php
 /* Prototype  : bool mkdir(string pathname [, int mode [, bool recursive [, resource context]]])
- * Description: Create a directory 
+ * Description: Create a directory
  * Source code: ext/standard/file.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing mkdir() : usage variation ***\n";

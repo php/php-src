@@ -1,5 +1,5 @@
 --TEST--
-Test fputcsv() : usage variations - with default enclosure & delimiter of two chars 
+Test fputcsv() : usage variations - with default enclosure & delimiter of two chars
 --FILE--
 <?php
 

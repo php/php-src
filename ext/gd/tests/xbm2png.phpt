@@ -1,7 +1,7 @@
 --TEST--
 xbm --> png conversion test
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded('gd')) {
 		die("skip gd extension not available.");
 	}
@@ -19,7 +19,7 @@ xbm --> png conversion test
 	echo "XBM to PNG conversion: ";
 	echo imagepng(imagecreatefromxbm($cwd . "/conv_test.xbm"), $cwd . "/test_xbm.png") ? 'ok' : 'failed';
 	echo "\n";
-	
+
 	@unlink($cwd . "/test_xbm.png");
 ?>
 --EXPECT--

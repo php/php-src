@@ -25,7 +25,7 @@ var_dump($p->isFileFormat(Phar::TAR));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar.tar');
 ?>
 --EXPECT--

@@ -14,8 +14,8 @@ DBA QDBM handler test
 ?>
 ===DONE===
 --CLEAN--
-<?php 
-	require(dirname(__FILE__) .'/clean.inc'); 
+<?php
+	require(dirname(__FILE__) .'/clean.inc');
 ?>
 --EXPECTF--
 database handler: qdbm

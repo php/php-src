@@ -2,8 +2,8 @@
 Bug #46918 (imap_rfc822_parse_adrlist host part not filled in correctly)
 --SKIPIF--
 <?php
-        if (!extension_loaded("imap")) { 
-                die("skip imap extension not available");  
+        if (!extension_loaded("imap")) {
+                die("skip imap extension not available");
         }
 ?>
 --FILE--
@@ -23,50 +23,50 @@ var_export($add_arr);
 ?>
 --EXPECT--
 array (
-  0 => 
+  0 =>
   stdClass::__set_state(array(
      'mailbox' => 'iane',
      'host' => 'example.ac.uk',
      'personal' => 'ian eiloart',
   )),
-  1 => 
+  1 =>
   stdClass::__set_state(array(
      'mailbox' => 'shuf6',
      'host' => 'example.ac.uk',
   )),
-  2 => 
+  2 =>
   stdClass::__set_state(array(
      'mailbox' => 'blobby',
      'host' => 'example.com',
   )),
-  3 => 
+  3 =>
   stdClass::__set_state(array(
      'mailbox' => 'ian',
      'host' => 'example.ac.uk',
      'personal' => 'ian,eiloart',
   )),
-  4 => 
+  4 =>
   stdClass::__set_state(array(
      'mailbox' => 'foo',
      'host' => 'example.ac.uk',
      'adl' => '@example.com',
   )),
-  5 => 
+  5 =>
   stdClass::__set_state(array(
      'mailbox' => 'foo',
      'host' => '#',
   )),
-  6 => 
+  6 =>
   stdClass::__set_state(array(
      'mailbox' => 'ian',
      'host' => '-example.com',
   )),
-  7 => 
+  7 =>
   stdClass::__set_state(array(
      'mailbox' => 'ian',
      'host' => 'one',
   )),
-  8 => 
+  8 =>
   stdClass::__set_state(array(
      'mailbox' => 'UNEXPECTED_DATA_AFTER_ADDRESS',
      'host' => '.SYNTAX-ERROR.',

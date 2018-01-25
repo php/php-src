@@ -17,7 +17,7 @@ var_dump($methodInfo->getDeclaringClass());
 $methodInfo = new ReflectionMethod('B', 'bar');
 var_dump($methodInfo->getDeclaringClass());
 
-?> 
+?>
 --EXPECTF--
 object(ReflectionClass)#%d (1) {
   ["name"]=>

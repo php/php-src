@@ -9,7 +9,7 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 /* Prototype  : string chunk_split(string $str [, int $chunklen [, string $ending]])
  * Description: Returns split line
  * Source code: ext/standard/string.c
- * Alias to functions: 
+ * Alias to functions:
 */
 
 /*
@@ -31,8 +31,8 @@ $ending = ':::';
 
 // different values for 'chunklen'
 $values = array (
-  0,  
-  1,  
+  0,
+  1,
   -123,  //negative integer
   0234,  //octal number
   0x1A,  //hexadecimal number
@@ -67,17 +67,17 @@ string(504) "T:::h:::i:::s:::':::s::: :::h:::e:::r:::e:::d:::o:::c::: :::s:::t::
 Warning: chunk_split(): Chunk length should be greater than zero in %s on line %d
 bool(false)
 -- Iteration 4 --
-string(129) "This's heredoc string with 	 and 
+string(129) "This's heredoc string with 	 and
  white space char.
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"
 -- Iteration 5 --
-string(141) "This's heredoc string with::: 	 and 
+string(141) "This's heredoc string with::: 	 and
  white space char.:::
 It has _speci@l ch@r$ 222:::2 !!!Now \k as escape char::: to test
 chunk_split():::"
 -- Iteration 6 --
-string(129) "This's heredoc string with 	 and 
+string(129) "This's heredoc string with 	 and
  white space char.
 It has _speci@l ch@r$ 2222 !!!Now \k as escape char to test
 chunk_split():::"

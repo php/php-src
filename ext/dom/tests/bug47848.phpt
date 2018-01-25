@@ -3,7 +3,7 @@ Bug #47848 (importNode doesn't preserve attribute namespaces)
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
 --FILE--
-<?php 
+<?php
 
 $aDOM = new DOMDocument();
 $aDOM->appendChild($aDOM->createElementNS('http://friend2friend.net/','f2f:a'));

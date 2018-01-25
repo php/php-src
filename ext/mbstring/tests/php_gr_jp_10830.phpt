@@ -1,5 +1,5 @@
 --TEST--
-php-users@php.gr.jp #10830 
+php-users@php.gr.jp #10830
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');

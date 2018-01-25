@@ -17,7 +17,7 @@ foreach ($a as $x) {
 		var_dump($x[0]);
 	} else {
 		var_dump($x);
-	}	
+	}
 }
 
 var_dump($a->getSize());

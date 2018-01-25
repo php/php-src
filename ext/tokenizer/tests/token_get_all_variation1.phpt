@@ -5,7 +5,7 @@ Test token_get_all() function : usage variations - unexpected values for 'source
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)
- * Description: splits the given source into an array of PHP languange tokens 
+ * Description: splits the given source into an array of PHP languange tokens
  * Source code: ext/tokenizer/tokenizer.c
 */
 
@@ -71,7 +71,7 @@ $source_values = array(
 
        // object data
 /*23*/ new MyClass(),
- 
+
        // resource data
        $fp,
 

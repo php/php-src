@@ -1,5 +1,5 @@
 --TEST--
-Test extract() function (error conditions) 
+Test extract() function (error conditions)
 --FILE--
 <?php
 

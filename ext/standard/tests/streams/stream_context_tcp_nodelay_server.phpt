@@ -17,11 +17,11 @@ $serverCode = <<<'CODE'
 	$client = stream_socket_accept($server);
 
 	var_dump(socket_get_option(
-				socket_import_stream($server), 
+				socket_import_stream($server),
 					SOL_TCP, TCP_NODELAY) > 0);
 
 	var_dump(socket_get_option(
-				socket_import_stream($client), 
+				socket_import_stream($client),
 					SOL_TCP, TCP_NODELAY) > 0);
 
 	fclose($client);
@@ -38,7 +38,7 @@ $clientCode = <<<'CODE'
 CODE;
 
 include sprintf(
-	"%s/../../../openssl/tests/ServerClientTestCase.inc", 
+	"%s/../../../openssl/tests/ServerClientTestCase.inc",
 	dirname(__FILE__));
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
 ?>

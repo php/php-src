@@ -1,5 +1,5 @@
 --TEST--
-DateTime::add() -- dates 
+DateTime::add() -- dates
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-mb_strtoupper() / mb_strtolower() 
+mb_strtoupper() / mb_strtolower()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');

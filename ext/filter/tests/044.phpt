@@ -5,9 +5,9 @@ Integer validation with spaces
 --INI--
 precision=14
 --FILE--
-<?php 
+<?php
 $vals = array(
-"	
+"
  ",
 " ",
 " 123",

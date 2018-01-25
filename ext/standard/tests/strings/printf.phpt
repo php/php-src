@@ -196,10 +196,10 @@ echo"\n\n*** Output for '%%' as the format parameter ***\n";
 printf("%%",1.23456789e10);
 
 echo"\n\n*** Output for precision value more than maximum ***\n";
-printf("%.988f",1.23456789e10);   
+printf("%.988f",1.23456789e10);
 
 echo"\n\n*** Output for invalid width(-15) specifier ***\n";
-printf("%030.-15s", $tempstring);  
+printf("%030.-15s", $tempstring);
 
 echo"\n\n*** Output for '%F' as the format parameter ***\n";
 printf("%F",1.23456789e10);
@@ -211,16 +211,16 @@ echo"\n\n*** Output  with no format parameter ***\n";
 printf($tempnum);
 
 echo"\n\n*** Output for multiple format parameters ***\n";
-printf("%d  %s  %d\n", $tempnum, $tempstring, $tempnum); 
+printf("%d  %s  %d\n", $tempnum, $tempstring, $tempnum);
 
 echo"\n\n*** Output for excess of mixed type arguments  ***\n";
-printf("%s", $tempstring, $tempstring, $tempstring);      
+printf("%s", $tempstring, $tempstring, $tempstring);
 
 echo"\n\n*** Output for string format parameter and integer type argument ***\n";
-printf("%s", $tempnum);          
+printf("%s", $tempnum);
 
 echo"\n\n*** Output for integer format parameter and string type argument ***\n";
-printf("%d", $tempstring);    
+printf("%d", $tempstring);
 
 
 ?>
@@ -305,14 +305,14 @@ Float Iteration 4
 -1234567%d.00
 
 Float Iteration 5
-0.00   
-1.00   
--1.00  
-0.32   
--0.32  
-3.40   
-2.54   
--2.54  
+0.00
+1.00
+-1.00
+0.32
+-0.32
+3.40
+2.54
+-2.54
 1234567%d.00
 -1234567%d.00
 
@@ -409,14 +409,14 @@ Integer Iteration 4
    1234
 
 Integer Iteration 5
-0      
-1      
--1     
-2      
--2     
+0
+1
+-1
+2
+-2
 23333333
 -23333333
-1234   
+1234
 
 Integer Iteration 6
 0000000
@@ -429,14 +429,14 @@ Integer Iteration 6
 0001234
 
 Integer Iteration 7
-0      
-1      
--1     
-2      
--2     
+0
+1
+-1
+2
+-2
 23333333
 -23333333
-1234   
+1234
 
 Integer Iteration 8
 ######0
@@ -600,17 +600,17 @@ Array
  Input strings variation array is:
 Array
 (
-    [0] => 
+    [0] =>
     [1] => abc
     [2] => aaa
 )
 
-     
+
   abc
   aaa
-     
-abc  
-aaa  
+
+abc
+aaa
 00000
 00abc
 00aaa

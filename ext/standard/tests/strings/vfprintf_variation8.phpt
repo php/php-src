@@ -17,8 +17,8 @@ error_reporting(E_ALL & ~E_NOTICE);
 echo "*** Testing vfprintf() : string formats and non-string values ***\n";
 
 // defining array of string formats
-$formats = 
-  '%s %+s %-s 
+$formats =
+  '%s %+s %-s
    %ls %Ls %4s %-4s
    %10.4s %-10.4s %04s %04.4s
    %\'#2s %\'2s %\'$2s %\'_2s
@@ -34,7 +34,7 @@ $args_array = array(
         2.1234567e10, +2.7654321e10, -2.7654321e10,
         12345.780, 12.000000011111, -12.00000111111, -123456.234,
         3.33, +4.44, 1.11,-2.22 ),
-  
+
  // array of int values
  array(2, -2, +2,
        123456, 123456234, -12346789, +12346789,
@@ -56,7 +56,7 @@ $args_array = array(
          true, false, TRUE, FALSE,
          0, 1, 1, 0,
          1, TRUE, 0, FALSE),
-  
+
 );
 
 /* creating dumping file */
@@ -78,33 +78,33 @@ print_r(file_get_contents($data_file));
 echo "\n";
 
 unlink($data_file);
- 
+
 ?>
 ===DONE===
 --EXPECT--
 *** Testing vfprintf() : string formats and non-string values ***
 
 -- Iteration 1 --
-2.2 0.2 10.2 
+2.2 0.2 10.2
    123456.234 s -1234.6789 1234.6789
          2123 2765       -27654321000 1234
    12.000000011111 -12.00000111111 -123456.234 3.33
    10.2 123456.234 2.2 0.2
 -- Iteration 2 --
-2 -2 2 
+2 -2 2
    123456 s -12346789 12346789
          1232 2000       -40000 2221
    12345780 1211111 -12111111 -12345634
    2 123456 2 -2
 -- Iteration 3 --
-Array Array Array 
+Array Array Array
    Array s Array Array
          Arra Arra       Array Arra
    Array Array Array Array
    Array Array Array Array
 -- Iteration 4 --
-1 1  
-   1 s      1   
+1 1
+   1 s      1
             1            0001 0000
    #0 1 $1 _0
     1 1 1

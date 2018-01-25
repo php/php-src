@@ -21,7 +21,7 @@ var_dump($phar['blah']->isDir(), $phar['test']->isDir());
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
 __HALT_COMPILER();

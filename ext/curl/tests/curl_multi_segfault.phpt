@@ -1,8 +1,8 @@
 --TEST--
-Segfault due to libcurl connection caching 
+Segfault due to libcurl connection caching
 --CREDITS--
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 if (false === getenv('PHP_CURL_FTP_REMOTE_SERVER'))  exit("skip PHP_CURL_FTP_REMOTE_SERVER env variable is not defined");
 if (false === getenv('PHP_CURL_FTP_REMOTE_USER'))  exit("skip PHP_CURL_FTP_REMOTE_USER env variable is not defined");
@@ -14,7 +14,7 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
   $username = getenv('PHP_CURL_FTP_REMOTE_USER');
   $password = getenv('PHP_CURL_FTP_REMOTE_PASSWD');
 
-  // FTP this script to a server 
+  // FTP this script to a server
   $fp  =  fopen ( __FILE__ ,  "r" );
   $url  =  "ftp://$username:$password@$host/" ;
 
@@ -43,8 +43,8 @@ if (false === getenv('PHP_CURL_FTP_REMOTE_PASSWD'))  exit("skip PHP_CURL_FTP_REM
 			  $mrc = curl_multi_exec($cmh, $active);
 		  } while ($mrc == CURLM_CALL_MULTI_PERFORM);
 	  }
-  }   
-    
+  }
+
   var_dump(is_string(curl_multi_getcontent($ch)));
   curl_multi_remove_handle($cmh, $ch);
   curl_close($ch);

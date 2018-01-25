@@ -3,7 +3,7 @@ Crash when function parameter modified via reference
 --FILE--
 <?php
 function usercompare($a,$b) {
-  unset($GLOBALS['my_var'][2]); 
+  unset($GLOBALS['my_var'][2]);
   return $a <=> $b;
 }
 $my_var = array(1 => "entry_1",

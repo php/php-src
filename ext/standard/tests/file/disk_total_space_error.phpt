@@ -9,8 +9,8 @@ if(substr(PHP_OS, 0, 3) == 'WIN')
 <?php
 /*
  *  Prototype: float disk_total_space( string $directory );
- *  Description: given a string containing a directory, this function 
- *               will return the total number of bytes on the corresponding 
+ *  Description: given a string containing a directory, this function
+ *               will return the total number of bytes on the corresponding
  *               filesystem or disk partition
  */
 

@@ -33,7 +33,7 @@ pg_query($db, "DROP TABLE $table");
 ?>
 ==OK==
 --EXPECT--
-trying format Y-m-d\TH:i:sO 
-trying format Y-m-d H:i:sO 
+trying format Y-m-d\TH:i:sO
+trying format Y-m-d H:i:sO
 done
 ==OK==

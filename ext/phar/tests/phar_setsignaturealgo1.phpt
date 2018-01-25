@@ -37,7 +37,7 @@ echo $e->getMessage();
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/brandnewphar.phar');
 ?>
 --EXPECTF--

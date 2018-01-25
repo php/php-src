@@ -1,5 +1,5 @@
 --TEST--
-Test get_html_translation_table() function : error conditions 
+Test get_html_translation_table() function : error conditions
 --FILE--
 <?php
 /* Prototype  : array get_html_translation_table ( [int $table [, int $quote_style [, string charset_hint]]] )

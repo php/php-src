@@ -1,5 +1,5 @@
 --TEST--
-assert() - variation  - test callback options using ini_get/ini_set/assert_options 
+assert() - variation  - test callback options using ini_get/ini_set/assert_options
 --INI--
 assert.active = 1
 assert.warning = 0
@@ -8,15 +8,15 @@ assert.bail = 0
 assert.quiet_eval = 0
 --FILE--
 <?php
-function f1() 
+function f1()
 {
 	echo "f1 called\n";
 }
-function f2() 
+function f2()
 {
 	echo "f2 called\n";
 }
-function f3() 
+function f3()
 {
 	echo "f3 called\n";
 }
@@ -78,7 +78,7 @@ Deprecated: assert(): Calling assert() with a string argument is deprecated in %
 f1 called
 bool(false)
 
-Change callback function using ini.set and test return value 
+Change callback function using ini.set and test return value
 string(2) "f1"
 assert_options(ASSERT_CALLBACK) => [f2]
 ini.get("assert.callback") => [f2]
@@ -87,7 +87,7 @@ Deprecated: assert(): Calling assert() with a string argument is deprecated in %
 f2 called
 bool(false)
 
-Change callback function using assert_options and test return value 
+Change callback function using assert_options and test return value
 string(2) "f2"
 assert_options(ASSERT_CALLBACK) => [f3]
 ini.get("assert.callback") => [f2]
@@ -104,7 +104,7 @@ ini.get("assert.callback") => [f2]
 Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 bool(false)
 
-Reset callback options to use a class method 
+Reset callback options to use a class method
 string(2) "c1"
 array(2) {
   [0]=>
@@ -121,7 +121,7 @@ Deprecated: Non-static method c1::assert() should not be called statically in %s
 Class assertion failed 53, "0 != 0"
 bool(false)
 
-Reset callback options to use an object method 
+Reset callback options to use an object method
 array(2) {
   [0]=>
   string(2) "c1"

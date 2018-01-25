@@ -55,7 +55,7 @@ var_dump($phar->getStub());
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');
 ?>
 --EXPECTF--

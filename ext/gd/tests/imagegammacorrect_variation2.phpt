@@ -26,9 +26,9 @@ function test_gamma($in, $out, $constructor)
             draw_cell($im, $i, $j);
         }
     }
-    
+
     imagegammacorrect($im, $in, $out);
-    
+
     $filename = __DIR__ . DIRECTORY_SEPARATOR
         . "imagegammacorrect_variation2_{$in}_{$out}.png";
     $kind = $constructor === 'imagecreate' ? 'palette' : 'truecolor';

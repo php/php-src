@@ -2,10 +2,10 @@
 Test array_splice() function : usage variations - references
 --FILE--
 <?php
-/* 
+/*
  * proto array array_splice(array input, int offset [, int length [, array replacement]])
  * Function is implemented in ext/standard/array.c
-*/ 
+*/
 
 
 echo "test behaviour when input array is in a reference set\n";
@@ -63,7 +63,7 @@ array(2) {
     int(1)
   }
 }
-Test behaviour of input arrays containing references 
+Test behaviour of input arrays containing references
 array(3) {
   [0]=>
   int(4)
@@ -88,7 +88,7 @@ array(7) {
   ["nine"]=>
   &int(9)
 }
-Test behaviour of replacement array containing references 
+Test behaviour of replacement array containing references
 array(4) {
   [0]=>
   int(0)
@@ -99,7 +99,7 @@ array(4) {
   [3]=>
   &int(4)
 }
-Test behaviour of replacement which is part of reference set 
+Test behaviour of replacement which is part of reference set
 array(2) {
   [0]=>
   int(1)

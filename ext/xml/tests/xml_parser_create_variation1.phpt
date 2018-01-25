@@ -1,17 +1,17 @@
 --TEST--
 Test xml_parser_create() function : usage variations
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("xml")) {
-	print "skip - XML extension not loaded"; 
-}	 
+	print "skip - XML extension not loaded";
+}
 ?>
 --FILE--
 <?php
 /* Prototype  : proto resource xml_parser_create([string encoding])
- * Description: Create an XML parser 
+ * Description: Create an XML parser
  * Source code: ext/xml/xml.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing xml_parser_create() : usage variations ***\n";
@@ -77,9 +77,9 @@ $values = array(
 
       // object data
       new aClass(),
-      
+
       // resource data
-      $fp, 
+      $fp,
 
       // undefined data
       $undefined_var,
@@ -105,129 +105,129 @@ echo "Done";
 --EXPECTF--
 *** Testing xml_parser_create() : usage variations ***
 
-Arg value 0 
+Arg value 0
 
 Warning: xml_parser_create(): unsupported source encoding "0" in %s on line %d
 bool(false)
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_parser_create(): unsupported source encoding "1" in %s on line %d
 bool(false)
 
-Arg value 12345 
+Arg value 12345
 
 Warning: xml_parser_create(): unsupported source encoding "12345" in %s on line %d
 bool(false)
 
-Arg value -2345 
+Arg value -2345
 
 Warning: xml_parser_create(): unsupported source encoding "-2345" in %s on line %d
 bool(false)
 
-Arg value 10.5 
+Arg value 10.5
 
 Warning: xml_parser_create(): unsupported source encoding "10.5" in %s on line %d
 bool(false)
 
-Arg value -10.5 
+Arg value -10.5
 
 Warning: xml_parser_create(): unsupported source encoding "-10.5" in %s on line %d
 bool(false)
 
-Arg value 101234567000 
+Arg value 101234567000
 
 Warning: xml_parser_create(): unsupported source encoding "101234567000" in %s on line %d
 bool(false)
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 
 Warning: xml_parser_create(): unsupported source encoding "1.07654321E-9" in %s on line %d
 bool(false)
 
-Arg value 0.5 
+Arg value 0.5
 
 Warning: xml_parser_create(): unsupported source encoding "0.5" in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Arg value Array 
+Arg value Array
 
 Warning: xml_parser_create() expects parameter 1 to be string, array given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_parser_create(): unsupported source encoding "1" in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value 1 
+Arg value 1
 
 Warning: xml_parser_create(): unsupported source encoding "1" in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value string 
+Arg value string
 
 Warning: xml_parser_create(): unsupported source encoding "string" in %s on line %d
 bool(false)
 
-Arg value string 
+Arg value string
 
 Warning: xml_parser_create(): unsupported source encoding "string" in %s on line %d
 bool(false)
 
-Arg value ISO-8859-1 
+Arg value ISO-8859-1
 resource(%d) of type (xml)
 
-Arg value UTF-8 
+Arg value UTF-8
 resource(%d) of type (xml)
 
-Arg value US-ASCII 
+Arg value US-ASCII
 resource(%d) of type (xml)
 
-Arg value UTF-32 
+Arg value UTF-32
 
 Warning: xml_parser_create(): unsupported source encoding "UTF-32" in %s on line %d
 bool(false)
 
-Arg value Some Ascii Data 
+Arg value Some Ascii Data
 
 Warning: xml_parser_create(): unsupported source encoding "Some Ascii Data" in %s on line %d
 bool(false)
@@ -237,9 +237,9 @@ Arg value Resource id %s
 Warning: xml_parser_create() expects parameter 1 to be string, resource given in %s on line %d
 bool(false)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 
-Arg value  
+Arg value
 resource(%d) of type (xml)
 Done

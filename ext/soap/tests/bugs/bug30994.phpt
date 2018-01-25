@@ -20,16 +20,16 @@ soap:encodingStyle="http://schemas.xmlsoap.org/soap/encoding/">
 		<function xsi:type="xsd:string">TASKTEST</function>
 		<parameter href="#id1" />
 	</q1:bassCall>
-	
+
 	<soapenc:Array id="id1" soapenc:arrayType="tns:Item[1]">
 		<Item href="#id2" />
 	</soapenc:Array>
-	
+
 	<tns:Item id="id2" xsi:type="tns:Item">
 		<key xsi:type="xsd:string">ABCabc123</key>
 		<val xsi:type="xsd:string">123456</val>
 	</tns:Item>
-	
+
 </soap:Body>
 </soap:Envelope>
 EOF;

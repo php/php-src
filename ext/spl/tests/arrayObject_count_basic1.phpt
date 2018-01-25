@@ -1,5 +1,5 @@
 --TEST--
-SPL: ArrayObject::count() and ArrayIterator::count() basic functionality. 
+SPL: ArrayObject::count() and ArrayIterator::count() basic functionality.
 --FILE--
 ==ArrayObject==
 <?php

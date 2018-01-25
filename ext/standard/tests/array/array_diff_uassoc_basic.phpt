@@ -1,5 +1,5 @@
 --TEST--
-array_diff_uassoc(): Basic test 
+array_diff_uassoc(): Basic test
 --FILE--
 <?php
 /*

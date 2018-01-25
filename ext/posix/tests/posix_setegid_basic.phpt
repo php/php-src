@@ -1,8 +1,8 @@
 --TEST--
 Test function posix_setegid() by calling it with its expected arguments
 --SKIPIF--
-<?php 
-    if(!extension_loaded("posix")) die("skip - POSIX extension not loaded"); 
+<?php
+    if(!extension_loaded("posix")) die("skip - POSIX extension not loaded");
 ?>
 --FILE--
 <?php

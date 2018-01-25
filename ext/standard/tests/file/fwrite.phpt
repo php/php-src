@@ -29,7 +29,7 @@ var_dump(file_get_contents($filename));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: fwrite() expects at least 2 parameters, 1 given in %s on line %d
 bool(false)
 

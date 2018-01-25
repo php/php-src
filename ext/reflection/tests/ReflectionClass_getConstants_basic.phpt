@@ -23,26 +23,26 @@ foreach($classes as $class) {
 }
 ?>
 --EXPECTF--
-Constants from class C: 
+Constants from class C:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Constants from class D: 
+Constants from class D:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Constants from class E: 
+Constants from class E:
 array(1) {
   ["a"]=>
   string(12) "hello from C"
 }
-Constants from class F: 
+Constants from class F:
 array(1) {
   ["a"]=>
   string(12) "hello from F"
 }
-Constants from class X: 
+Constants from class X:
 array(0) {
 }

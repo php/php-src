@@ -1,5 +1,5 @@
 --TEST--
-Test copy() function: usage variations - stat after copy 
+Test copy() function: usage variations - stat after copy
 --FILE--
 <?php
 /* Prototype: bool copy ( string $source, string $dest );
@@ -27,13 +27,13 @@ $stat_before_copy = stat($src_file_name);
 clearstatcache();
 
 echo "Copy operation => ";
-var_dump( copy($src_file_name, $dest_file_name) ); 
+var_dump( copy($src_file_name, $dest_file_name) );
 
 $stat_after_copy = stat($src_file_name);
 clearstatcache();
 
 // compare all stat fields except access time
-$stat_keys_to_compare = array("dev", "ino", "mode", "nlink", "uid", "gid", 
+$stat_keys_to_compare = array("dev", "ino", "mode", "nlink", "uid", "gid",
                        "rdev", "size", "mtime", "ctime",
                        "blksize", "blocks");
 

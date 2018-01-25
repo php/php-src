@@ -9,7 +9,7 @@ if (!extension_loaded('pdo_oci')) print 'skip'; ?>
 $config = array(
 	'TESTS' => 'ext/pdo/tests'
 );
-	
+
 
 if (false !== getenv('PDO_OCI_TEST_DSN')) {
 	# user set them from their shell

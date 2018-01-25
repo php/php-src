@@ -4,7 +4,7 @@ Testing wrong parameter resource of GAUSSIAN_BLUR in imagefilter() of GD library
 Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 #testfest PHPSP on 2009-06-20
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("gd")) die("skip GD not present");
 ?>
 --FILE--

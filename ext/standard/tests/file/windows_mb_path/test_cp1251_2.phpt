@@ -1,5 +1,5 @@
 --TEST--
-Test fopen() for write CP1251 path 
+Test fopen() for write CP1251 path
 --SKIPIF--
 <?php
 include dirname(__FILE__) . DIRECTORY_SEPARATOR . "util.inc";
@@ -42,7 +42,7 @@ remove_data("file_cp1251");
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 int(25)
 bool(true)

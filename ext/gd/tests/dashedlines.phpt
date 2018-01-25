@@ -1,5 +1,5 @@
 --TEST--
-imageline, dashed 
+imageline, dashed
 --SKIPIF--
 <?php
         if (!function_exists('imagecreatefromstring')) die("skip gd extension not available\n");

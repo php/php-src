@@ -142,7 +142,7 @@ foreach ($arr as $u => $v) {
     $res = html_entity_decode($ent, ENT_QUOTES, 'MacRoman');
     $d = unpack("H*", $res);
     echo sprintf("%s: %s => %s\n", $v[1], $ent, $d[1]);
-    
+
     $ent = sprintf("&#x%X;", $v[0]);
     $res = html_entity_decode($ent, ENT_QUOTES, 'MacRoman');
     if ($res[0] != "&" || $res[1] != "#")

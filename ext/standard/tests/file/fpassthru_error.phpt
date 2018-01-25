@@ -2,7 +2,7 @@
 Test fpassthru() function: Error conditions
 --FILE--
 <?php
-/* 
+/*
 Prototype: int fpassthru ( resource $handle );
 Description: Reads to EOF on the given file pointer from the current position
   and writes the results to the output buffer.

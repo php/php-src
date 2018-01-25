@@ -1,7 +1,7 @@
 --TEST--
 Check how textdomain() with wrong parameters behaves.
 --SKIPIF--
-<?php 
+<?php
 	if (!extension_loaded("gettext")) {
 		die("skip\n");
 	}

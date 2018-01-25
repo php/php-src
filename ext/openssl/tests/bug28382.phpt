@@ -1,8 +1,8 @@
 --TEST--
 Bug #28382 (openssl_x509_parse extensions support)
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip"); 
+<?php
+if (!extension_loaded("openssl")) die("skip");
 if (OPENSSL_VERSION_NUMBER<0x009070af) die("skip");
 ?>
 --FILE--

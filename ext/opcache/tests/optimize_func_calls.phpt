@@ -104,13 +104,13 @@ Array
 (
     [0] => A Object
         (
-            [obj] => 
+            [obj] =>
         )
 
 )
 Array
 (
-    [0] => 
+    [0] =>
 )
 string(7) "changed"
 Array

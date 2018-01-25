@@ -1,5 +1,5 @@
 --TEST--
-Test lstat() and stat() functions: usage variations - file opened using w and r mode 
+Test lstat() and stat() functions: usage variations - file opened using w and r mode
 --SKIPIF--
 <?php
 if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");

@@ -71,13 +71,13 @@ $values =  array (
 
   // resource
   $file_handle,
-  
+
   // undefined variable
   $undefined_var,
 
   // unset variable
   $unset_var
-  
+
 );
 
 

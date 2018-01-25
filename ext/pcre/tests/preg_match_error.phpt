@@ -2,7 +2,7 @@
 Test preg_match() function : error conditions - wrong numbers of parameters
 --FILE--
 <?php
-/* 
+/*
  *  proto int preg_match(string pattern, string subject [, array subpatterns [, int flags [, int offset]]])
  * Function is implemented in ext/pcre/php_pcre.c
 */

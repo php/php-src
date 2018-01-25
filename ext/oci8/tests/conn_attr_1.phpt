@@ -1,7 +1,7 @@
 --TEST--
 Set and get of connection attributes with all types of connections.
 --SKIPIF--
-<?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
+<?php if (!extension_loaded('oci8')) die("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 
@@ -18,7 +18,7 @@ if (!(isset($matches[0]) && $matches[1] >= 10)) {
 <?php
 
 $testuser     = 'testuser_attr_1';  // Used in conn_attr.inc
-$testpassword = 'testuser'; 
+$testpassword = 'testuser';
 
 require(dirname(__FILE__)."/conn_attr.inc");
 
@@ -65,9 +65,9 @@ echo "Done\n";
 **Test 1.1 - Default values for the attributes **************
 Testing with oci_connect()
 The value of MODULE is %s
-The value of ACTION is 
-The value of CLIENT_INFO is 
-The value of CLIENT_IDENTIFIER is 
+The value of ACTION is
+The value of CLIENT_INFO is
+The value of CLIENT_IDENTIFIER is
 **Test 1.2 - Set and get values for the attributes **************
 Testing with oci_connect()
 Value of MODULE has been set successfully

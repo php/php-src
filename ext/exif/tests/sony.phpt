@@ -10,7 +10,7 @@ if (!$data) {
 	exit('Error: Unable to parse EXIF data');
 }
 
-// Perhaps we should just test for SonyModelID since it seems to be 
+// Perhaps we should just test for SonyModelID since it seems to be
 // the most specific tag name that should be found in any Sony generated
 // picture
 foreach (['SonyModelID', 'Panorama', 'AntiBlur'] as $sony_tag) {

@@ -1,6 +1,6 @@
 --TEST--
 Reflection on closures: Segfaults with getParameters() and getDeclaringFunction()
---FILE-- 
+--FILE--
 <?php
 
 $closure = function($a, $b = 0) { };

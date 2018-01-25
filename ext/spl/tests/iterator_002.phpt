@@ -9,7 +9,7 @@ class RecursiceArrayIterator extends ArrayIterator implements RecursiveIterator
 	{
 		return is_array($this->current());
 	}
-	
+
 	function getChildren()
 	{
 		return new RecursiceArrayIterator($this->current());
@@ -22,12 +22,12 @@ class CrashIterator extends FilterIterator implements RecursiveIterator
 	{
 		return true;
 	}
-	
+
 	function hasChildren()
 	{
 		return $this->getInnerIterator()->hasChildren();
 	}
-	
+
 	function getChildren()
 	{
 		return new RecursiceArrayIterator($this->getInnerIterator()->current());

@@ -11,7 +11,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 
-$p = ""; 
+$p = "";
 $s = str_repeat('a', 50);
 $how_many = 32;
 
@@ -19,7 +19,7 @@ $how_many = 32;
 for ($i = 0; $i < $how_many; $i++) {
 	$p .= "$s";
 	$p .= DIRECTORY_SEPARATOR;
-} 
+}
 
 $p = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . $p;
 

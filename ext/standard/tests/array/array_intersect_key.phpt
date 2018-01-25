@@ -172,7 +172,7 @@ array(1) {
   [-20]=>
   int(-40)
 }
------ Now testing array_intersect() ------- 
+----- Now testing array_intersect() -------
 array(0) {
 }
 array(3) {

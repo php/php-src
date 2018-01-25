@@ -11,7 +11,7 @@ Test token_get_all() function : usage variations - with comparison operators
 
 /*
  * Passing 'source' argument with different comparison operators to test them for tokens
- *  == - T_IS_EQUAL(283), === - T_IS_IDENTICAL(281), 
+ *  == - T_IS_EQUAL(283), === - T_IS_IDENTICAL(281),
  *  >= - T_IS_GREATER_OR_EQUAL(284), <= - T_IS_LESS_OR_EQUAL(285)
  *  != - T_IS_NOT_EQUAL, <> - T_IS_NOT_EQUAL(282), !== - T_IS_NOT_IDENTICAL(280)
 */
@@ -19,8 +19,8 @@ Test token_get_all() function : usage variations - with comparison operators
 echo "*** Testing token_get_all() : 'source' string with different comparison operators ***\n";
 
 // comparison operators : '==', '===', '>=', '<=', '!=', '!==', '<>'
-$source = '<?php 
-if($a == 0) 
+$source = '<?php
+if($a == 0)
   echo "== 0";
 elseif($a === 2)
   echo "=== 2";
@@ -120,7 +120,7 @@ array(89) {
     [0]=>
     int(%d)
     [1]=>
-    string(4) " 
+    string(4) "
   "
     [2]=>
     int(2)

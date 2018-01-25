@@ -15,8 +15,8 @@ spl_autoload_register('spl_examples_autoload');
 function test($a, $b, $identical = false)
 {
 	var_dump(DualIterator::compareIterators(
-					new RecursiveArrayIterator($a), 
-					new RecursiveArrayIterator($b), 
+					new RecursiveArrayIterator($a),
+					new RecursiveArrayIterator($b),
 					$identical));
 }
 

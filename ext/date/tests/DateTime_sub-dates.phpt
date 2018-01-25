@@ -1,5 +1,5 @@
 --TEST--
-DateTime::sub() -- dates 
+DateTime::sub() -- dates
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

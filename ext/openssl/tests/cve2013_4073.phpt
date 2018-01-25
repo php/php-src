@@ -1,7 +1,7 @@
 --TEST--
 CVE 2013-4073: Null-byte certificate handling
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("openssl")) die("skip");
 --FILE--
 <?php

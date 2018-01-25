@@ -19,7 +19,7 @@ var_dump($foo);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(0)
 int(0)
 int(0)

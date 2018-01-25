@@ -37,4 +37,3 @@ Text Content: data><&"
 <?xml version="1.0"?>
 <root><text>data&gt;&lt;&amp;"</text></root>
 ===DONE===
-	

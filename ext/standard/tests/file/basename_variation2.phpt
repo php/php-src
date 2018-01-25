@@ -13,7 +13,7 @@ $paths = array (
 
 	"foo",
 	"foo/",
-    "foo\\",    
+    "foo\\",
     "foo.bar",
     "foo.bar/",
     "foo.bar\\",
@@ -35,13 +35,13 @@ $suffixes = array (
     "foo/bar",
     "foo\\bar",
     "/",
-    "\\",	
+    "\\",
 );
 
 foreach ($paths as $path) {
 	foreach ($suffixes as $suffix) {
 		echo "basename for path $path, supplying suffix $suffix is:\n";
-		var_dump(basename($path, $suffix));		
+		var_dump(basename($path, $suffix));
 	}
 }
 

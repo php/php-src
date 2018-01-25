@@ -1,9 +1,9 @@
 --TEST--
 Test function gzgetc() by calling it with its expected arguments zlib 1.2.7
 --SKIPIF--
-<?php 
+<?php
 if (!extension_loaded("zlib")) {
-	print "skip - ZLIB extension not loaded"; 
+	print "skip - ZLIB extension not loaded";
 }
 include 'func.inc';
 if (version_compare(get_zlib_version(), '1.2.7') < 0) {

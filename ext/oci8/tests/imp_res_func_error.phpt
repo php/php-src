@@ -1,8 +1,8 @@
 --TEST--
 Oracle Database 12c Implicit Result Sets: test with a PL/SQL function
 --SKIPIF--
-<?php 
-if (!extension_loaded('oci8')) die ("skip no oci8 extension"); 
+<?php
+if (!extension_loaded('oci8')) die ("skip no oci8 extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
 preg_match('/.*Release ([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)\.([[:digit:]]+)*/', oci_server_version($c), $matches);
@@ -10,7 +10,7 @@ if (!(isset($matches[0]) && $matches[1] >= 12)) {
     die("skip expected output only valid when using Oracle Database 12c or greater");
 }
 preg_match('/^[[:digit:]]+/', oci_client_version(), $matches);
-if (!(isset($matches[0]) && $matches[0] >= 12)) { 
+if (!(isset($matches[0]) && $matches[0] >= 12)) {
     die("skip works only with Oracle 12c or greater version of Oracle client libraries");
 }
 ?>

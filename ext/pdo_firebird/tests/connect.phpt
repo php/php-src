@@ -7,11 +7,11 @@ PDO_Firebird: connect/disconnect
 <?php /* $Id$ */
 
 	require("testdb.inc");
-    
+
 	$db = new PDO("firebird:dbname=$test_base",$user,$password) or die;
 	unset($db);
 	echo "done\n";
-	
+
 ?>
 --EXPECT--
 done

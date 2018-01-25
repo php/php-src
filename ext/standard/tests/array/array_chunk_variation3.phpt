@@ -1,14 +1,14 @@
 --TEST--
-Test array_chunk() function : usage variations - unexpected values for 'preserve_keys' 
+Test array_chunk() function : usage variations - unexpected values for 'preserve_keys'
 --FILE--
 <?php
 /* Prototype  : array array_chunk(array $array, int $size [, bool $preserve_keys])
- * Description: Split array into chunks 
+ * Description: Split array into chunks
  * Source code: ext/standard/array.c
 */
 
 /*
-* Testing array_chunk() function with unexpected values for 'preserve_keys' 
+* Testing array_chunk() function with unexpected values for 'preserve_keys'
 */
 
 echo "*** Testing array_chunk() : usage variations ***\n";

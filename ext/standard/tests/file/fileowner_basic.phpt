@@ -7,7 +7,7 @@ Test fileowner() function: basic functionality
  *              FALSE in case of an error.
  */
 
-echo "*** Testing fileowner(): basic functionality ***\n"; 
+echo "*** Testing fileowner(): basic functionality ***\n";
 
 echo "-- Testing with the file or directory created by owner --\n";
 var_dump( fileowner(__FILE__) );

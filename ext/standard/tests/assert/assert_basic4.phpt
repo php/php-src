@@ -8,7 +8,7 @@ assert.quiet_eval = 0
 assert.callback = f1
 --FILE--
 <?php
-// Check the initial settings for all assert_options 
+// Check the initial settings for all assert_options
 
 //Using assert_options;
 echo "Initial values: assert_options(ASSERT_ACTIVE) => [".assert_options(ASSERT_ACTIVE)."]\n";

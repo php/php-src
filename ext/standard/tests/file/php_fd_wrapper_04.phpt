@@ -1,7 +1,7 @@
 --TEST--
 php://fd wrapper: invalid file descriptor
 --SKIPIF--
-<?php include('skipif.inc'); 
+<?php include('skipif.inc');
 if(substr(PHP_OS, 0, 3) == "WIN")
 	die("skip Not for Windows");
 

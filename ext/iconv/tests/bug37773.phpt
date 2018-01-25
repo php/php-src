@@ -1,8 +1,8 @@
 --TEST--
 Bug #37773 (iconv_substr() gives "Unknown error" when string length = 1")
 --SKIPIF--
-<?php 
-include('skipif.inc'); 
+<?php
+include('skipif.inc');
 
 $test = @iconv_strpos("abbttt","ttt",0,"UTF-8");
 if ($test === false) {

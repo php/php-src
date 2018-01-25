@@ -21,12 +21,12 @@ var_dump(highlight_file('data:,<?php echo "test"; ?>'));
 var_dump(highlight_file('data:,<?php echo "test ?>'));
 
 $data = '
-<?php 
- class test { 
-	 public $var = 1; 
+<?php
+ class test {
+	 public $var = 1;
 	 private function foo() { echo "foo"; }
 	 public function bar() { var_dump(test::foo()); }
- }  
+ }
 ?>';
 
 file_put_contents($filename, $data);
@@ -36,7 +36,7 @@ var_dump(highlight_file($filename));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: highlight_file() expects at least 1 parameter, 0 given in %s on line %d
 bool(false)
 

@@ -1,5 +1,5 @@
 --TEST--
-Test DOMDocument::load() detects not-well formed XML 
+Test DOMDocument::load() detects not-well formed XML
 --DESCRIPTION--
 This test verifies the method detects attributes values not closed between " or '
 Environment variables used in the test:

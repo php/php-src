@@ -4,7 +4,7 @@ Test in_array() function : error conditions
 <?php
 /*
  * Prototype  : bool in_array ( mixed $needle, array $haystack [, bool $strict] )
- * Description: Searches haystack for needle and returns TRUE  
+ * Description: Searches haystack for needle and returns TRUE
  *              if it is found in the array, FALSE otherwise.
  * Source Code: ext/standard/array.c
 */

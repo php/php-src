@@ -42,7 +42,7 @@ array(3) {
   string(5) "three"
 }
 
--- negative limit (since PHP 5.1) with null string -- 
+-- negative limit (since PHP 5.1) with null string --
 array(0) {
 }
 ===DONE===

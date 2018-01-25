@@ -1,23 +1,23 @@
 --TEST--
-Test posix_times() function : basic functionality 
+Test posix_times() function : basic functionality
 --SKIPIF--
-<?php 
-	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded'); 
+<?php
+	if (!extension_loaded('posix')) die('skip - POSIX extension not loaded');
 ?>
 --FILE--
-<?php 
-  echo "Basic test of POSIX times function\n"; 
-  	
+<?php
+  echo "Basic test of POSIX times function\n";
+
   $times = posix_times();
-  
-  var_dump($times); 
-  
-  
+
+  var_dump($times);
+
+
   if ($times == FALSE) {
   	$errno= posix_get_last_error();
-  	var_dump(posix_strerror($errno)); 
+  	var_dump(posix_strerror($errno));
   }
-  
+
 ?>
 ===DONE====
 --EXPECTF--

@@ -1,4 +1,4 @@
---TEST--                                 
+--TEST--
 OO API: getErrno & getError methods
 --CREDITS--
 Boris Lytochkin

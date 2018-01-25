@@ -29,9 +29,9 @@ echo $res_str;
 
 ?>
 --EXPECTF--
-Result of formatting timestamp=0 is :  
+Result of formatting timestamp=0 is :
 31-12-69
-Result of formatting timestamp=0 is :  
+Result of formatting timestamp=0 is :
 1969-365.07:00:00 EST
-Result of clone formatting timestamp=0 is :  
+Result of clone formatting timestamp=0 is :
 31-12-69

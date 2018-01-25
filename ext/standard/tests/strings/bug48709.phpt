@@ -13,8 +13,8 @@ $exceptions = array(
 	'x',  // s
 	'wh', // w
 	'wa'  // w
-);	
-	
+);
+
 foreach ($exceptions as $letter) {
 	printf("%s => %s\n", $letter, metaphone($letter));
 }

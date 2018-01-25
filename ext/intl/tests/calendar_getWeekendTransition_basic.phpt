@@ -21,4 +21,4 @@ var_dump(intlcal_get_weekend_transition($intlcal, IntlCalendar::DOW_SUNDAY));
 --EXPECT--
 int(86400000)
 int(86400000)
-==DONE==
+==DONE==

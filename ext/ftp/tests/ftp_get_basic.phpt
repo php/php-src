@@ -1,5 +1,5 @@
 --TEST--
-FTP ftp_get file for both binary and ASCII transfer modes 
+FTP ftp_get file for both binary and ASCII transfer modes
 --CREDITS--
 Nathaniel McHugh
 --SKIPIF--
@@ -27,7 +27,7 @@ var_dump(ftp_get($ftp, $tmpfname, 'binary data.bin', FTP_BINARY));
 var_dump(urlencode(file_get_contents($tmpfname)));
 unlink($tmpfname);
 
-//test non-existent file request 
+//test non-existent file request
 ftp_get($ftp, $tmpfname ,'a warning.txt', FTP_ASCII);
 ?>
 --EXPECTF--

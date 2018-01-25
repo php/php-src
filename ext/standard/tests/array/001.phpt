@@ -100,7 +100,7 @@ array(11) {
     }
   }
 }
- -- Testing array_walk() -- 
+ -- Testing array_walk() --
 int(0)
 string(3) "PHP"
 int(1)

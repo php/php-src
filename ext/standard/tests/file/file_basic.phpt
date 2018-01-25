@@ -2,7 +2,7 @@
 Test file() function : basic functionality
 --FILE--
 <?php
-/* 
+/*
  * Prototype: array file ( string filename [,int use-include_path [,resource context]] );
  * Description: Reads entire file into an array
  *              Returns the  file in an array
@@ -36,7 +36,7 @@ Array
 )
 Array
 (
-    [0] => text text text text text text text text text text text text text text text text text text text text 
+    [0] => text text text text text text text text text text text text text text text text text text text text
 )
 Array
 (
@@ -65,7 +65,7 @@ Array
 
     [10] => line
 
-    [11] => line 
+    [11] => line
 )
 *** Testing for return type of file() function ***
 bool(true)

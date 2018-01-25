@@ -1,7 +1,7 @@
 --TEST--
 SPL: Test shape of interface Countable.
 --SKIPIF--
-<?php 
+<?php
 // Skip the test case if Standard PHP Library(spl) is not installed
   if( !extension_loaded('spl'))
   {

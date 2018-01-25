@@ -57,7 +57,7 @@ $paths = array (
   /* pathname as NULL */
   NULL,
   null,
-  
+
   /* filename as resource */
   $fp,
 

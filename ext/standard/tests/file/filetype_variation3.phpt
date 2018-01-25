@@ -16,7 +16,7 @@ if (!file_exists("/dev/ram0")) {
 /*
 Prototype: string filetype ( string $filename );
 Description: Returns the type of the file. Possible values are fifo, char,
-             dir, block, link, file, and unknown. 
+             dir, block, link, file, and unknown.
 */
 
 echo "-- Checking for block --\n";

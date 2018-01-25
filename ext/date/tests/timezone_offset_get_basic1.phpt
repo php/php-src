@@ -1,5 +1,5 @@
 --TEST--
-Test timezone_offset_get() function : basic functionality 
+Test timezone_offset_get() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : int timezone_offset_get  ( DateTimeZone $object  , DateTime $datetime  )
@@ -10,7 +10,7 @@ Test timezone_offset_get() function : basic functionality
 
 echo "*** Testing timezone_offset_get() : basic functionality ***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("GMT");
 
 $tz = timezone_open("Europe/London");

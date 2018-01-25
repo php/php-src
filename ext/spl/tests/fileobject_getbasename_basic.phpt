@@ -1,5 +1,5 @@
 --TEST--
-SPL: SplFileObject::getBasename 
+SPL: SplFileObject::getBasename
 --CREDITS--
 H�vard Eide <nucleuz at gmail.com>
 #Testfest php.no

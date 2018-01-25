@@ -13,4 +13,3 @@ Clint Priest @ PhpTek09
 --EXPECTF--
 Warning: DOMDocument::createComment() expects exactly 1 parameter, 0 given in %s
 ===DONE===
-	

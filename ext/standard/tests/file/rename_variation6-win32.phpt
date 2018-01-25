@@ -34,7 +34,7 @@ var_dump(file_exists($tmp_file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: readlink(): %s in %s on line %d
 bool(false)
 string(%d) "%srename_variation6-win32.php.tmp"

@@ -1,5 +1,5 @@
 --TEST--
-Test fopen and fclose() functions - usage variations - "x+" mode 
+Test fopen and fclose() functions - usage variations - "x+" mode
 --FILE--
 <?php
 /*
@@ -17,7 +17,7 @@ Test fopen and fclose() functions - usage variations - "x+" mode
 /* Test fopen() and fclose(): Opening the file in "x+" mode,
    checking for the file creation, write & read operations,
    checking for the file pointer position,
-   checking for the warning msg when trying to open an existing file in "x+" mode,  
+   checking for the warning msg when trying to open an existing file in "x+" mode,
    and fclose function
 */
 $file_path = dirname(__FILE__);
@@ -37,7 +37,7 @@ var_dump( ftell($file_handle) );  //File pointer position after read operation, 
 var_dump( fclose($file_handle) );  //Check for close operation on the file handle
 var_dump( get_resource_type($file_handle) );  //Check whether resource is lost after close operation
 $file_handle = fopen($file, "x+");  //Opening the existing data file in "x+" mode to check for the warning message
-echo "*** Done ***\n"; 
+echo "*** Done ***\n";
 --CLEAN--
 <?php
 unlink(dirname(__FILE__)."/007_variation8.tmp");

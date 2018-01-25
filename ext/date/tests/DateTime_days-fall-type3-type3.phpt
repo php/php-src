@@ -1,5 +1,5 @@
 --TEST--
-DateTime::diff() days -- fall type3 type3 
+DateTime::diff() days -- fall type3 type3
 --CREDITS--
 Daniel Convissor <danielc@php.net>
 --FILE--

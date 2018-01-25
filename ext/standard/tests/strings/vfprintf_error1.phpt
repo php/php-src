@@ -1,5 +1,5 @@
 --TEST--
-Test vfprintf() function : error conditions (more than expected arguments) 
+Test vfprintf() function : error conditions (more than expected arguments)
 --CREDITS--
 Felix De Vliegher <felix.devliegher@gmail.com>
 --INI--
@@ -7,9 +7,9 @@ precision=14
 --FILE--
 <?php
 /* Prototype  : int vfprintf(resource stream, string format, array args)
- * Description: Output a formatted string into a stream 
+ * Description: Output a formatted string into a stream
  * Source code: ext/standard/formatted_print.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 // Open handle

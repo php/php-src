@@ -1,5 +1,5 @@
 --TEST--
-Test function fstat() on directory wrapper 
+Test function fstat() on directory wrapper
 --FILE--
 <?php
 $d = dirname(__FILE__);

@@ -3,12 +3,12 @@ Test array_unique() function : usage variations - unexpected values for 'input' 
 --FILE--
 <?php
 /* Prototype  : array array_unique(array $input)
- * Description: Removes duplicate values from array 
+ * Description: Removes duplicate values from array
  * Source code: ext/standard/array.c
 */
 
 /*
- * Passing non array values to 'input' argument of array_unique() and see 
+ * Passing non array values to 'input' argument of array_unique() and see
  * that the function outputs proper warning messages wherever expected.
 */
 

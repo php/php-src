@@ -3,7 +3,7 @@ Test file_get_contents() and file_put_contents() functions : usage variations - 
 
 --FILE--
 <?php
-/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[, 
+/* Prototype: string file_get_contents( string $filename[, bool $use_include_path[,
  *                                      resource $context[, int $offset[, int $maxlen]]]] )
  * Description: Reads entire file into a string
  */
@@ -36,7 +36,7 @@ echo "--- Done ---";
 ?>
 --CLEAN--
 <?php
-//Deleting the temporary file 
+//Deleting the temporary file
 
 $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents_variation1.tmp");

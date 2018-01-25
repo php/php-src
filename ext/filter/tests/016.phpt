@@ -5,14 +5,14 @@ filter_var() and FILTER_VALIDATE_EMAIL
 --FILE--
 <?php
 $values = Array(
-'a@b.c',	
-'abuse@example.com',	
-'test!.!@#$%^&*@example.com',	
-'test@@#$%^&*())).com',	
-'test@.com',	
-'test@com',	
-'@',	
-'[]()/@example.com',	
+'a@b.c',
+'abuse@example.com',
+'test!.!@#$%^&*@example.com',
+'test@@#$%^&*())).com',
+'test@.com',
+'test@com',
+'@',
+'[]()/@example.com',
 'QWERTYUIOPASDFGHJKLZXCVBNM@QWERTYUIOPASDFGHJKLZXCVBNM.NET',
 'e.x.a.m.p.l.e.@example.com',
 'firstname.lastname@employee.2something.com',
@@ -27,7 +27,7 @@ foreach ($values as $value) {
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 string(5) "a@b.c"
 string(17) "abuse@example.com"
 bool(false)

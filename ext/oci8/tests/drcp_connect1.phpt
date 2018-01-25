@@ -4,7 +4,7 @@ DRCP: oci_connect()
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs (Calling PL/SQL from SQL is not supported in TimesTen)
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --INI--
 oci8.connection_class=test
 oci8.old_oci_close_semantics=0
@@ -24,7 +24,7 @@ var_dump($conn1 = oci_connect($user,$password,$dbase));
 // Create the package
 drcp_create_package($conn1);
 
-echo "Test 1b\n";     
+echo "Test 1b\n";
 // OCI_CONNECT
 echo " This is with OCI_CONNECT.....\n";
 drcp_select_packagevar($conn1); // Returns 0
@@ -80,12 +80,12 @@ Test 1b
  Connection conn1  closed....
 Test 2
 resource(%d) of type (oci8 connection)
- Select with connection 2 
+ Select with connection 2
  The value of the package variable is 0
  Package variable value set to 100
 Test 3
 resource(%d) of type (oci8 connection)
- Select with connection 3 
+ Select with connection 3
  The value of the package variable is 100
 Test 4
  This is with oci_pconnect().....
@@ -94,7 +94,7 @@ resource(%d) of type (oci8 persistent connection)
  Connection pconn1  closed....
 Test 5
 resource(%d) of type (oci8 persistent connection)
- Select with persistent connection 2 
+ Select with persistent connection 2
  The value of the package variable is 1000
 Done
 

@@ -20,7 +20,7 @@ foreach($iterator as $k=>$v) {
 
 ?>
 --EXPECT--
-Expect to see all keys in ->props here: 
+Expect to see all keys in ->props here:
 props
 hello
 props

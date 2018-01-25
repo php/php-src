@@ -7,14 +7,14 @@ Steve Seear <stevseea@php.net>
 <?php
 class pubf {
 	public function f() {}
-	static public function s() {}	
+	static public function s() {}
 }
 class subpubf extends pubf {
 }
 
 class protf {
 	protected function f() {}
-	static protected function s() {}	
+	static protected function s() {}
 }
 class subprotf extends protf {
 }
@@ -26,7 +26,7 @@ class privf {
 class subprivf extends privf  {
 }
 
-$classes = array("pubf", "subpubf", "protf", "subprotf", 
+$classes = array("pubf", "subpubf", "protf", "subprotf",
 				 "privf", "subprivf");
 foreach($classes as $class) {
 	echo "Reflecting on class $class: \n";
@@ -36,7 +36,7 @@ foreach($classes as $class) {
 
 ?>
 --EXPECTF--
-Reflecting on class pubf: 
+Reflecting on class pubf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
@@ -53,7 +53,7 @@ array(2) {
     string(4) "pubf"
   }
 }
-Reflecting on class subpubf: 
+Reflecting on class subpubf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
@@ -70,7 +70,7 @@ array(2) {
     string(4) "pubf"
   }
 }
-Reflecting on class protf: 
+Reflecting on class protf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
@@ -87,7 +87,7 @@ array(2) {
     string(5) "protf"
   }
 }
-Reflecting on class subprotf: 
+Reflecting on class subprotf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
@@ -104,7 +104,7 @@ array(2) {
     string(5) "protf"
   }
 }
-Reflecting on class privf: 
+Reflecting on class privf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
@@ -121,7 +121,7 @@ array(2) {
     string(5) "privf"
   }
 }
-Reflecting on class subprivf: 
+Reflecting on class subprivf:
 array(2) {
   [0]=>
   object(ReflectionMethod)#%d (2) {

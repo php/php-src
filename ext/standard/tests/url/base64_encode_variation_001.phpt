@@ -1,11 +1,11 @@
 --TEST--
-Test base64_encode() function : usage variations - unexpected types for argument 1 
+Test base64_encode() function : usage variations - unexpected types for argument 1
 --FILE--
 <?php
 /* Prototype  : proto string base64_encode(string str)
- * Description: Encodes string using MIME base64 algorithm 
+ * Description: Encodes string using MIME base64 algorithm
  * Source code: ext/standard/base64.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing base64_encode() : usage variations ***\n";
@@ -83,90 +83,90 @@ echo "Done";
 Error: 8 - Undefined variable: undefined_var, %s(63)
 Error: 8 - Undefined variable: unset_var, %s(66)
 
-Arg value 0 
+Arg value 0
 string(4) "MA=="
 
-Arg value 1 
+Arg value 1
 string(4) "MQ=="
 
-Arg value 12345 
+Arg value 12345
 string(8) "MTIzNDU="
 
-Arg value -2345 
+Arg value -2345
 string(8) "LTIzNDU="
 
-Arg value 10.5 
+Arg value 10.5
 string(8) "MTAuNQ=="
 
-Arg value -10.5 
+Arg value -10.5
 string(8) "LTEwLjU="
 
-Arg value 101234567000 
+Arg value 101234567000
 string(16) "MTAxMjM0NTY3MDAw"
 
-Arg value 1.07654321E-9 
+Arg value 1.07654321E-9
 string(20) "MS4wNzY1NDMyMUUtOQ=="
 
-Arg value 0.5 
+Arg value 0.5
 string(4) "MC41"
 Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 Error: 8 - Array to string conversion, %sbase64_encode_variation_001.php(%d)
 
-Arg value Array 
+Arg value Array
 Error: 2 - base64_encode() expects parameter 1 to be string, array given, %s(73)
 NULL
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(4) "MQ=="
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value 1 
+Arg value 1
 string(4) "MQ=="
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 Error: 4096 - Object of class stdClass could not be converted to string, %s(72)
 
-Arg value  
+Arg value
 Error: 2 - base64_encode() expects parameter 1 to be string, object given, %s(73)
 NULL
 
-Arg value  
+Arg value
 string(0) ""
 
-Arg value  
+Arg value
 string(0) ""
 Done

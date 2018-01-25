@@ -7,8 +7,8 @@ Test stripos() function : usage variations - unexpected inputs for 'needle' argu
  * Source code: ext/standard/string.c
 */
 
-/* Test stripos() function with unexpected inputs for 'needle' and 
- *  an expected type of input for 'haystack' argument 
+/* Test stripos() function with unexpected inputs for 'needle' and
+ *  an expected type of input for 'haystack' argument
 */
 
 echo "*** Testing stripos() function with unexpected values for needle ***\n";
@@ -21,7 +21,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
     return "object";
-  } 
+  }
 }
 
 //getting the resource

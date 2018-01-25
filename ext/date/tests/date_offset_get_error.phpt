@@ -1,5 +1,5 @@
 --TEST--
-Test date_offset_get() function : error conditions 
+Test date_offset_get() function : error conditions
 --FILE--
 <?php
 
@@ -8,8 +8,8 @@ Test date_offset_get() function : error conditions
  * Source code: ext/date/php_date.c
  * Alias to functions:  DateTimeInterface::getOffset
  */
- 
- //Set the default time zone 
+
+ //Set the default time zone
 date_default_timezone_set("Europe/London");
 
 echo "*** Testing date_offset_get() : error conditions ***\n";
@@ -24,11 +24,11 @@ var_dump( date_offset_get($datetime, $extra_arg) );
 
 echo "\n-- Testing date_offset_get() function with an invalid values for \$object argument --\n";
 $invalid_obj = new stdClass();
-var_dump( date_offset_get($invalid_obj) );  
+var_dump( date_offset_get($invalid_obj) );
 $invalid_obj = 10;
 var_dump( date_offset_get($invalid_obj) );
 $invalid_obj = null;
-var_dump( date_offset_get($invalid_obj) ); 
+var_dump( date_offset_get($invalid_obj) );
 ?>
 ===DONE===
 --EXPECTF--

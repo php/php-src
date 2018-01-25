@@ -127,7 +127,7 @@ var_dump($cache3);
 
 oci_free_statement($stmt);
 
-// Test 6: Bind IN OUT parameter within the same scope of execute 
+// Test 6: Bind IN OUT parameter within the same scope of execute
 
 $sql = "call bindproc(:var1, :var2, :var3)";
 $cache1 = 'STR1';

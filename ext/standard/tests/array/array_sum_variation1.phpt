@@ -3,12 +3,12 @@ Test array_sum() function : usage variations - unexpected values for 'input' arg
 --FILE--
 <?php
 /* Prototype  : mixed array_sum(array $input)
- * Description: Returns the sum of the array entries 
+ * Description: Returns the sum of the array entries
  * Source code: ext/standard/array.c
 */
 
 /*
-* Passing different scalar/nonscalar values as 'input' argument to array_sum() 
+* Passing different scalar/nonscalar values as 'input' argument to array_sum()
 */
 
 echo "*** Testing array_sum() : unexpected values for 'input' ***\n";

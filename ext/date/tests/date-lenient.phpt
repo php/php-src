@@ -19,10 +19,10 @@ Array
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 0
     [warnings] => Array
         (
@@ -34,17 +34,17 @@ Array
             [8] => Trailing data
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )
 Array
 (
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 1
     [warnings] => Array
         (
@@ -56,17 +56,17 @@ Array
         (
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )
 Array
 (
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 1
     [warnings] => Array
         (
@@ -78,17 +78,17 @@ Array
         (
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )
 Array
 (
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 1
     [warnings] => Array
         (
@@ -100,17 +100,17 @@ Array
         (
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )
 Array
 (
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 0
     [warnings] => Array
         (
@@ -121,17 +121,17 @@ Array
         (
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )
 Array
 (
     [year] => 2004
     [month] => 6
     [day] => 8
-    [hour] => 
-    [minute] => 
-    [second] => 
-    [fraction] => 
+    [hour] =>
+    [minute] =>
+    [second] =>
+    [fraction] =>
     [warning_count] => 0
     [warnings] => Array
         (
@@ -142,5 +142,5 @@ Array
         (
         )
 
-    [is_localtime] => 
+    [is_localtime] =>
 )

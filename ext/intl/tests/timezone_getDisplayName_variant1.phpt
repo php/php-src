@@ -23,4 +23,4 @@ var_dump($lsb->getDisplayName(true));
 string(%d) "Western European%sTime"
 string(%d) "Western European%sTime"
 string(28) "Western European Summer Time"
-==DONE==
+==DONE==

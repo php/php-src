@@ -1,8 +1,8 @@
 --TEST--
 Test function posix_setgid() by substituting argument 1 with object values.
 --SKIPIF--
-<?php 
-        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded"; 
+<?php
+        if(!extension_loaded("posix")) print "skip - POSIX extension not loaded";
 ?>
 --CREDITS--
 Marco Fabbri mrfabbri@gmail.com
@@ -55,4 +55,3 @@ bool(false)
 Error: 2 - posix_setgid() expects parameter 1 to be integer, object given, %s
 bool(false)
 ===DONE===
-	

@@ -48,7 +48,7 @@ class D1 extends C {
 class D2 extends C {
 }
 
-$classes = array('NewCtor', 'ExtendsNewCtor', 'OldCtor', 'ExtendsOldCtor', 
+$classes = array('NewCtor', 'ExtendsNewCtor', 'OldCtor', 'ExtendsOldCtor',
 				 'OldAndNewCtor', 'NewAndOldCtor', 'B', 'C', 'D1', 'D2', 'X', 'Y');
 
 foreach ($classes as $class) {
@@ -59,9 +59,9 @@ foreach ($classes as $class) {
 	}  else {
 		echo "No constructor for $class\n";
 	}
-	
-}				 
-				
+
+}
+
 ?>
 --EXPECTF--
 Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; OldCtor has a deprecated constructor in %s on line %d

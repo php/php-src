@@ -7,11 +7,11 @@ Test round() function :  error conditions - incorrect number of args
  * after the decimal point)
  * Source code: ext/standard/math.c
  */
- 
+
 /*
  * Pass incorrect number of arguments to round() to test behaviour
  */
- 
+
 echo "*** Testing round() : error conditions ***\n";
 
 echo "\n-- Wrong nmumber of arguments --\n";

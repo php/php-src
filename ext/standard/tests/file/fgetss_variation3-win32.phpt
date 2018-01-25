@@ -1,5 +1,5 @@
 --TEST--
-Test fgetss() function : usage variations - read/write modes 
+Test fgetss() function : usage variations - read/write modes
 --SKIPIF--
 <?php
 if (substr(PHP_OS, 0, 3) != 'WIN') {
@@ -32,14 +32,14 @@ is a heredoc string. <pg>ksklnm@@$$&$&^%&^%&^%&</pg>
 this line is without any html and php tags
 this is a line with more than eighty character,want to check line splitting correctly after 80 characters
 this text contains some html tags <body> body </body> <br> br </br>
-this is the line with \n character. 
+this is the line with \n character.
 EOT;
 
 if(substr(PHP_OS, 0, 3) == "WIN")  {
 	$string_with_tags = str_replace("\r",'', $string_with_tags);
 }
 
-$filename = dirname(__FILE__)."/fgetss_variation3.tmp"; 
+$filename = dirname(__FILE__)."/fgetss_variation3.tmp";
 
 /* try reading the file opened in different modes of reading */
 $file_modes = array("w+","w+b", "w+t","a+", "a+b", "a+t","x+","x+b","x+t");
@@ -54,7 +54,7 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
     echo "Error: failed to open file $filename!\n";
     exit();
   }
-  
+
   // rewind the file pointer to beginning of the file
   rewind($file_handle);
   var_dump( ftell($file_handle) );
@@ -70,11 +70,11 @@ for($mode_counter = 0; $mode_counter < count($file_modes); $mode_counter++) {
      var_dump( ftell($file_handle) );  // check the file pointer position
      var_dump( feof($file_handle) );  // check if eof reached
   }
- 
-  // close the file 
+
+  // close the file
   fclose($file_handle);
-   
-  // delete the file 
+
+  // delete the file
   unlink($filename);
 } // end of for - mode_counter
 
@@ -104,7 +104,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -123,12 +123,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -158,7 +158,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -177,12 +177,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -212,7 +212,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -231,12 +231,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -266,7 +266,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -285,12 +285,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -320,7 +320,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -339,12 +339,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -374,7 +374,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -393,12 +393,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -428,7 +428,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -447,12 +447,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -482,7 +482,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -501,12 +501,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)
@@ -536,7 +536,7 @@ string(44) "is a heredoc string. ksklnm@@$$&$&^%&^%&^%&
 int(152)
 bool(false)
 -- Line 4 --
-string(21) "<html> html </html> 
+string(21) "<html> html </html>
 "
 int(193)
 bool(false)
@@ -555,12 +555,12 @@ string(27) "rectly after 80 characters
 int(342)
 bool(false)
 -- Line 8 --
-string(46) "this text contains some html tags  body   br 
+string(46) "this text contains some html tags  body   br
 "
 int(410)
 bool(false)
 -- Line 9 --
-string(23) "this is the line with 
+string(23) "this is the line with
 "
 int(433)
 bool(false)

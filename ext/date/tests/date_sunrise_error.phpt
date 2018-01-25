@@ -1,9 +1,9 @@
 --TEST--
-Test date_sunrise() function : error conditions 
+Test date_sunrise() function : error conditions
 --FILE--
 <?php
 /* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
- * Description: Returns time of sunrise for a given day and location 
+ * Description: Returns time of sunrise for a given day and location
  * Source code: ext/date/php_date.c
  */
 

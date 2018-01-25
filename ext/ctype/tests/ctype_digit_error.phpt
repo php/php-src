@@ -5,7 +5,7 @@ Test ctype_digit() function : error conditions - incorrect number of arguments
 --FILE--
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)
- * Description: Checks for numeric character(s) 
+ * Description: Checks for numeric character(s)
  * Source code: ext/ctype/ctype.c
  */
 

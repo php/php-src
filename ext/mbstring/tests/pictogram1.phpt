@@ -154,7 +154,7 @@ Unicode to ISO-2022-JP-MOBILE#KDDI
 string(16) "1b244275411b2842"
 ISO-2022-JP-MOBILE#KDDI to Unicode
 string(8) "00002600"
-SJIS-Mobile to Unicode (Google) 
+SJIS-Mobile to Unicode (Google)
 string(8) "000fe82d"
 string(8) "000fe82d"
 string(8) "000fee70"
@@ -162,7 +162,7 @@ Unicode (Google) to SJIS-Mobile
 string(4) "f986"
 string(4) "f748"
 string(4) "fbd8"
-UTF-8-Mobile to Unicode (Google) 
+UTF-8-Mobile to Unicode (Google)
 string(8) "000fe82d"
 string(8) "000fe82d"
 string(8) "000fee70"

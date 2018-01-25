@@ -36,7 +36,7 @@ var_dump(unlink($fnw));
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECTF--
 resource(%d) of type (stream)
 int(25)
 bool(true)

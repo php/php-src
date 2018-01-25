@@ -36,7 +36,7 @@ echo "Done\n";
 $filename = dirname(__FILE__)."/fgetss1.html";
 unlink($filename);
 ?>
---EXPECTF--	
+--EXPECTF--
 string(21) "askasdfasdf<b>aaaaaa
 "
 string(6) "dddddd"
@@ -49,7 +49,7 @@ string(6) "asdasd"
 string(0) ""
 bool(false)
 bool(false)
-string(11) "some text 
+string(11) "some text
 "
 string(4) "blah"
 string(24) "some another text  hoho "
@@ -65,7 +65,7 @@ string(0) ""
 bool(false)
 bool(false)
 string(9) "some text"
-string(2) " 
+string(2) "
 "
 string(9) "some anot"
 string(9) "her text "

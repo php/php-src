@@ -18,7 +18,7 @@ class MyAutoLoader
 		echo __METHOD__ . "($className)\n";
 		throw new Exception('Bla');
 	}
-	
+
 	function dynaLoad($className)
 	{
 		echo __METHOD__ . "($className)\n";
@@ -49,9 +49,9 @@ foreach($funcs as $idx => $func)
 		if (count(spl_autoload_functions()))
 		{
 			echo "registered\n";
-			
+
 			var_dump(class_exists("NoExistingTestClass", true));
-		}		
+		}
 	}
 	catch (Exception $e)
 	{

@@ -2,10 +2,10 @@
 Test wrong number of arguments for atanh()
 --FILE--
 <?php
-/* 
+/*
  * proto float atanh(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 $arg_0 = 1.0;
 $extra_arg = 1;

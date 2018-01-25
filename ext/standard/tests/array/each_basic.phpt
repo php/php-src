@@ -1,15 +1,15 @@
 --TEST--
-Test each() function : basic functionality 
+Test each() function : basic functionality
 --FILE--
 <?php
 /* Prototype  : array each(array $arr)
- * Description: Return the currently pointed key..value pair in the passed array, 
- * and advance the pointer to the next element 
+ * Description: Return the currently pointed key..value pair in the passed array,
+ * and advance the pointer to the next element
  * Source code: Zend/zend_builtin_functions.c
  */
 
 /*
- * Test basic functionality of each() 
+ * Test basic functionality of each()
  */
 
 echo "*** Testing each() : basic functionality ***\n";

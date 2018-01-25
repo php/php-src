@@ -3,14 +3,14 @@ Test date_modify() function : usage variation - Passing unexpected values to sec
 --FILE--
 <?php
 /* Prototype  : DateTime date_modify  ( DateTime $object  , string $modify  )
- * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime(). 
+ * Description: Alter the timestamp of a DateTime object by incrementing or decrementing in a format accepted by strtotime().
  * Source code: ext/date/php_date.c
  * Alias to functions: public DateTime DateTime::modify()
  */
 
 echo "*** Testing date_modify() : usage variation -  unexpected values to second argument \$format***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

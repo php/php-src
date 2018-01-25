@@ -29,7 +29,7 @@ $supported_hash_al = array(
 
 $hc = mhash_count() + 1;
 
-$known_hash_al = array();	
+$known_hash_al = array();
 for ($i=0; $i < $hc; $i++) {
 	$known_hash_al[mhash_get_hash_name($i)] = $i;
 }
@@ -40,7 +40,7 @@ foreach ($supported_hash_al as $name => $len) {
 		echo "$name = $len\n";
 	} else {
 		echo "$name ? $len\n";
-	} 
+	}
 }
 ?>
 --EXPECTREGEX--

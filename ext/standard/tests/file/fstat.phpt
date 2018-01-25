@@ -13,7 +13,7 @@ var_dump(fstat($fp));
 @unlink($filename);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(26) {
   [0]=>
   int(%i)

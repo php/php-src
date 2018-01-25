@@ -3,14 +3,14 @@ Test DateTime::setDate() function : usage variation - Passing unexpected values 
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::setDate  ( int $year  , int $month  , int $day  )
- * Description: Resets the current date of the DateTime object to a different date. 
+ * Description: Resets the current date of the DateTime object to a different date.
  * Source code: ext/date/php_date.c
  * Alias to functions: date_date_set
  */
 
 echo "*** Testing DateTime::setDate() : usage variation -  unexpected values to first argument \$year***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 

@@ -4,10 +4,10 @@ Test variations in usage of rad2deg()
 precision = 10
 --FILE--
 <?php
-/* 
+/*
  * proto float rad2deg(float number)
  * Function is implemented in ext/standard/math.c
-*/ 
+*/
 
 
 //Test rad2deg with a different input values
@@ -21,12 +21,12 @@ $values = array(23,
 		"23",
 		"23.45",
 		"2.345e1",
-		"nonsense",				
+		"nonsense",
 		"1000",
 		"1000ABC",
 		null,
 		true,
-		false);	
+		false);
 
 for ($i = 0; $i < count($values); $i++) {
 	$res = rad2deg($values[$i]);

@@ -25,4 +25,4 @@ var_dump($lsb->getDisplayName(false, IntlTimeZone::DISPLAY_LONG, 'pt_PT'));
 string(21) "Western European Time"
 string(21) "Western European Time"
 string(24) "Hora da Europa Ocidental"
-==DONE==
+==DONE==

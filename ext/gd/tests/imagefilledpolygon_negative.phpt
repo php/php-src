@@ -1,8 +1,8 @@
 --TEST--
 imagefilledpolygon() with a negative num of points
 --SKIPIF--
-<?php 
-	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available'); 
+<?php
+	if (!function_exists('imagefilledpolygon')) die('skip imagefilledpolygon() not available');
 ?>
 --FILE--
 <?php

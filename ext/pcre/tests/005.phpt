@@ -86,7 +86,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c: In function `zif_swfbitmap_init':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c
-            [3] => 
+            [3] =>
             [4] => zif_swfbitmap_init
             [5] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c
             [6] => 323
@@ -101,7 +101,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c: In function `zif_swftextfield_setFont':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c
-            [3] => 
+            [3] =>
             [4] => zif_swftextfield_setFont
             [5] => /p2/var/php_gcov/PHP_4_4/ext/ming/ming.c
             [6] => 2597
@@ -112,10 +112,10 @@ Array
     [2] => Array
         (
             [0] => /p2/var/php_gcov/PHP_4_4/ext/oci8/oci8.c:1027: warning: `oci_ping' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => /p2/var/php_gcov/PHP_4_4/ext/oci8/oci8.c
             [6] => 1027
             [7] => warning
@@ -129,7 +129,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c: In function `zif_posix_getpgid':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c
-            [3] => 
+            [3] =>
             [4] => zif_posix_getpgid
             [5] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c
             [6] => 484
@@ -144,7 +144,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c: In function `zif_posix_getsid':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c
-            [3] => 
+            [3] =>
             [4] => zif_posix_getsid
             [5] => /p2/var/php_gcov/PHP_4_4/ext/posix/posix.c
             [6] => 506
@@ -159,7 +159,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c: In function `ps_read_files':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c
-            [3] => 
+            [3] =>
             [4] => ps_read_files
             [5] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c
             [6] => 302
@@ -174,7 +174,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c: In function `ps_write_files':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c
-            [3] => 
+            [3] =>
             [4] => ps_write_files
             [5] => /p2/var/php_gcov/PHP_4_4/ext/session/mod_files.c
             [6] => 340
@@ -189,7 +189,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c: In function `zif_socket_get_option':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c
-            [3] => 
+            [3] =>
             [4] => zif_socket_get_option
             [5] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c
             [6] => 1862
@@ -204,7 +204,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c: In function `zif_socket_set_option':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c
-            [3] => 
+            [3] =>
             [4] => zif_socket_set_option
             [5] => /p2/var/php_gcov/PHP_4_4/ext/sockets/sockets.c
             [6] => 1941
@@ -215,10 +215,10 @@ Array
     [9] => Array
         (
             [0] => /p2/var/php_gcov/PHP_4_4/regex/regexec.c:19: warning: `nope' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => /p2/var/php_gcov/PHP_4_4/regex/regexec.c
             [6] => 19
             [7] => warning
@@ -228,10 +228,10 @@ Array
     [10] => Array
         (
             [0] => /p2/var/php_gcov/PHP_4_4/ext/standard/exec.c:50: warning: `php_make_safe_mode_command' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => /p2/var/php_gcov/PHP_4_4/ext/standard/exec.c
             [6] => 50
             [7] => warning
@@ -245,7 +245,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/standard/image.c: In function `php_handle_jpc':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/standard/image.c
-            [3] => 
+            [3] =>
             [4] => php_handle_jpc
             [5] => /p2/var/php_gcov/PHP_4_4/ext/standard/image.c
             [6] => 604
@@ -260,7 +260,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/standard/parsedate.c: In function `php_gd_parse':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/standard/parsedate.c
-            [3] => 
+            [3] =>
             [4] => php_gd_parse
             [5] => /p2/var/php_gcov/PHP_4_4/ext/standard/parsedate.c
             [6] => 1138
@@ -271,10 +271,10 @@ Array
     [13] => Array
         (
             [0] => /p2/var/php_gcov/PHP_4_4/ext/standard/parsedate.y:864: warning: return type defaults to `int'
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => /p2/var/php_gcov/PHP_4_4/ext/standard/parsedate.y
             [6] => 864
             [7] => warning
@@ -288,7 +288,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/sysvmsg/sysvmsg.c: In function `zif_msg_receive':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/sysvmsg/sysvmsg.c
-            [3] => 
+            [3] =>
             [4] => zif_msg_receive
             [5] => /p2/var/php_gcov/PHP_4_4/ext/sysvmsg/sysvmsg.c
             [6] => 318
@@ -303,7 +303,7 @@ Array
             [1] => /p2/var/php_gcov/PHP_4_4/ext/yp/yp.c: In function `zif_yp_err_string':
 
             [2] => /p2/var/php_gcov/PHP_4_4/ext/yp/yp.c
-            [3] => 
+            [3] =>
             [4] => zif_yp_err_string
             [5] => /p2/var/php_gcov/PHP_4_4/ext/yp/yp.c
             [6] => 372
@@ -320,10 +320,10 @@ Zend/zend_language_scanner.c:2634: warning: `yy_more_flag' defined but not used
 Zend/zend_language_scanner.c:2635: warning: `yy_more_len' defined but not used
 Zend/zend_language_scanner.c:5483: warning: `yyunput' defined but not used
 Zend/zend_language_scanner.c:5929: warning: `yy_top_state' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => Zend/zend_language_scanner.c
             [6] => 5944
             [7] => warning
@@ -353,10 +353,10 @@ Zend/zend_language_scanner.c:5929: warning: `yy_top_state' defined but not used
             [0] => Zend/zend_ini_scanner.c:457: warning: `yy_last_accepting_state' defined but not used
 Zend/zend_ini_scanner.c:458: warning: `yy_last_accepting_cpos' defined but not used
 Zend/zend_ini_scanner.c:1361: warning: `yyunput' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => Zend/zend_ini_scanner.c
             [6] => 457
             [7] => warning
@@ -378,7 +378,7 @@ Zend/zend_ini_scanner.c:1361: warning: `yyunput' defined but not used
             [1] => /p2/var/php_gcov/PHP_4_4/Zend/zend_alloc.c: In function `_safe_emalloc':
 
             [2] => /p2/var/php_gcov/PHP_4_4/Zend/zend_alloc.c
-            [3] => 
+            [3] =>
             [4] => _safe_emalloc
             [5] => /p2/var/php_gcov/PHP_4_4/Zend/zend_alloc.c
             [6] => 237
@@ -395,10 +395,10 @@ Zend/zend_ini_scanner.c:1361: warning: `yyunput' defined but not used
     [19] => Array
         (
             [0] => /p2/var/php_gcov/PHP_4_4/Zend/zend_ini.c:338: warning: `zend_ini_displayer_cb' defined but not used
-            [1] => 
-            [2] => 
-            [3] => 
-            [4] => 
+            [1] =>
+            [2] =>
+            [3] =>
+            [4] =>
             [5] => /p2/var/php_gcov/PHP_4_4/Zend/zend_ini.c
             [6] => 338
             [7] => warning
@@ -448,13 +448,13 @@ Zend/zend_ini_scanner.c:1361: warning: `yyunput' defined but not used
             [4] => zim_swfmovie_namedAnchor
             [5] => /p2/var/php_gcov/PHP_5_2/ext/ming/ming.c
             [6] => 2207
-            [7] => 
+            [7] =>
             [8] => undefined reference to `SWFMovie_namedAnchor'
             [9] => 2209
-            [10] => 
+            [10] =>
             [11] => undefined reference to `SWFMovie_xpto'
             [12] => 2259
-            [13] => 
+            [13] =>
             [14] => undefined reference to `SWFMovie_foo'
         )
 
@@ -469,7 +469,7 @@ Zend/zend_ini_scanner.c:1361: warning: `yyunput' defined but not used
             [4] => zif_ming_setSWFCompression
             [5] => /p2/var/php_gcov/PHP_5_2/ext/ming/ming.c
             [6] => 154
-            [7] => 
+            [7] =>
             [8] => undefined reference to `Ming_setSWFCompression'
         )
 

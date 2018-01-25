@@ -1,7 +1,7 @@
 --TEST--
 Test 10: EXSLT Support
 --SKIPIF--
-<?php 
+<?php
 require_once dirname(__FILE__) .'/skipif.inc';
 $proc = new xsltprocessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
@@ -16,15 +16,15 @@ $dom = new domDocument();
   $dom->load(dirname(__FILE__)."/exslt.xsl");
   $proc = new xsltprocessor;
   $xsl = $proc->importStylesheet($dom);
-  
+
   $xml = new DomDocument();
   $xml->load(dirname(__FILE__)."/exslt.xml");
-  
+
   print $proc->transformToXml($xml);
 --EXPECT--
 Test 10: EXSLT Support
-  
-  
+
+
   Test Date : 0001-12-31Z
     year                 : 1
     leap-year            : false
@@ -38,11 +38,11 @@ Test 10: EXSLT Support
     day-in-week          : 2
     day-name             : Monday
     day-abbreviation     : Mon
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 3000-01-31
     year                 : 3000
     leap-year            : false
@@ -56,11 +56,11 @@ Test 10: EXSLT Support
     day-in-week          : 6
     day-name             : Friday
     day-abbreviation     : Fri
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 2000-02-29
     year                 : 2000
     leap-year            : true
@@ -74,11 +74,11 @@ Test 10: EXSLT Support
     day-in-week          : 3
     day-name             : Tuesday
     day-abbreviation     : Tue
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 9990001-12-31Z
     year                 : 9990001
     leap-year            : false
@@ -92,11 +92,11 @@ Test 10: EXSLT Support
     day-in-week          : 2
     day-name             : Monday
     day-abbreviation     : Mon
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : -0004-02-29
     year                 : -4
     leap-year            : true
@@ -110,11 +110,11 @@ Test 10: EXSLT Support
     day-in-week          : 1
     day-name             : Sunday
     day-abbreviation     : Sun
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 1999-01-02
     year                 : 1999
     leap-year            : false
@@ -128,11 +128,11 @@ Test 10: EXSLT Support
     day-in-week          : 7
     day-name             : Saturday
     day-abbreviation     : Sat
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 1999-01-03
     year                 : 1999
     leap-year            : false
@@ -146,11 +146,11 @@ Test 10: EXSLT Support
     day-in-week          : 1
     day-name             : Sunday
     day-abbreviation     : Sun
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 2004-01-01
     year                 : 2004
     leap-year            : true
@@ -164,11 +164,11 @@ Test 10: EXSLT Support
     day-in-week          : 5
     day-name             : Thursday
     day-abbreviation     : Thu
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 2006-01-01
     year                 : 2006
     leap-year            : false
@@ -182,11 +182,11 @@ Test 10: EXSLT Support
     day-in-week          : 1
     day-name             : Sunday
     day-abbreviation     : Sun
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN
-  
+
   Test Date : 2007-12-31
     year                 : 2007
     leap-year            : false
@@ -200,7 +200,7 @@ Test 10: EXSLT Support
     day-in-week          : 2
     day-name             : Monday
     day-abbreviation     : Mon
-    time                 : 
+    time                 :
     hour-in-day          : NaN
     minute-in-hour       : NaN
     second-in-minute     : NaN

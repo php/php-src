@@ -4,7 +4,7 @@ Bug #44206 (Test if selecting ref cursors leads to ORA-1000 maximum open cursors
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
@@ -15,7 +15,7 @@ require dirname(__FILE__).'/connect.inc';
 for ($x = 0; $x < 400; $x++)
 {
 	$stmt = "select cursor (select $x from dual) a,
-		 cursor (select $x from dual) b 
+		 cursor (select $x from dual) b
 		 from dual";
 	$s = oci_parse($c, $stmt);
 	$r = oci_execute($s);

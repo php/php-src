@@ -42,7 +42,7 @@ foreach($file_content_types as $file_content_type){
     // set the file pointer to 0
     var_dump( rewind($file_handle) ); // Confirm file pointer moves correctly
     var_dump( ftell($file_handle) ); // confirm the file pointer position
- 
+
     foreach($whence_set as $whence){
       echo "-- Testing fseek() with whence = $whence_string[$whence] --\n";
       var_dump( fseek($file_handle,10,$whence) ); //expecting int(0)

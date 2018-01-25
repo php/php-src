@@ -3,7 +3,7 @@ Test vsprintf() function : usage variations - unexpected values for the format a
 --FILE--
 <?php
 /* Prototype  : string vsprintf(string $format, array $args)
- * Description: Return a formatted string 
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -78,7 +78,7 @@ $values = array(
 
   // unset data
   @$unset_var,
- 
+
   // resource data
   $file_handle
 );
@@ -90,7 +90,7 @@ foreach($values as $value) {
   echo "\n -- Iteration $counter --\n";
   var_dump( vsprintf($value,$args) );
   $counter++;
-    
+
 };
 
 // closing the resource

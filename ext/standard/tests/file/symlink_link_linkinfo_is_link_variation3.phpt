@@ -22,7 +22,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 */
 
 /* Variation 3 : Create file and a soft link to the file
-                 Access data of the file through the soft link 
+                 Access data of the file through the soft link
                  Update the file through soft link
                  Check size of file and soft link link
 */
@@ -124,7 +124,7 @@ string(80) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext
 int(80)
 int(80)
 
-Soft link size remains same 
+Soft link size remains same
 
 -- Updating file with data through soft link --
 string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttextHello World"
@@ -133,7 +133,7 @@ string(91) "texttexttexttexttexttexttexttexttexttexttexttexttexttexttexttexttext
 int(91)
 int(91)
 
-Soft link size remains same 
+Soft link size remains same
 
 -- Updating file with data and check data through soft link --
 string(11) "Hello World"
@@ -142,5 +142,5 @@ string(11) "Hello World"
 int(11)
 int(11)
 
-Soft link size remains same 
+Soft link size remains same
 Done

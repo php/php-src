@@ -9,9 +9,9 @@ if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
 --FILE--
 <?php
 /* Prototype  : string strftime(string format [, int timestamp])
- * Description: Format a local time/date according to locale settings 
+ * Description: Format a local time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing strftime() : usage variation ***\n";
@@ -35,7 +35,7 @@ foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
 	  var_dump( strftime($value) );
 	  var_dump( strftime($value, $timestamp) );
-}	  
+}
 
 ?>
 ===DONE===

@@ -8,7 +8,7 @@ Test htmlspecialchars_decode() function : usage variations - double quoted strin
 */
 
 /*
- * testing htmlspecialchars_decode() for various double quoted strings as argument for $string 
+ * testing htmlspecialchars_decode() for various double quoted strings as argument for $string
 */
 echo "*** Testing htmlspecialchars_decode() : usage variations ***\n";
 
@@ -20,7 +20,7 @@ $strings = array (
   "\r\tRoy&#039;s height &gt\r; Sam\t&#039;s height",
   "\n 1\t3 &\tgt; 11 but 11 &\tlt; 12",
 );
-  
+
 // loop through each element of the array to check htmlspecialchars_decode() function with all possible arguments
 $iterator = 1;
 foreach($strings as $value) {

@@ -1,7 +1,7 @@
 --TEST--
 Check xsltprocessor::getParameter with undefined parameter
 --SKIPIF--
-<?php 
+<?php
         if (!extension_loaded('xsl')) {
                 die("skip\n");
         }

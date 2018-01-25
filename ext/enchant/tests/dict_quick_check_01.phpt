@@ -17,10 +17,10 @@ $word = "aspell";
 if (is_resource($broker)) {
     echo("OK\n");
     $requestDict = enchant_broker_request_dict($broker, $dicts[0]['lang_tag']);
-    
+
     if ($requestDict) {
         enchant_dict_quick_check($requestDict,$word,$sugs);
-        
+
         if (is_array($sugs)) {
             echo("OK\n");
         } else {

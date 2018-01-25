@@ -1,15 +1,15 @@
 --TEST--
-Test stripcslashes() function : usage variations  - non-string type argument 
+Test stripcslashes() function : usage variations  - non-string type argument
 --FILE--
 <?php
 /* Prototype  : string stripcslashes  ( string $str  )
- * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ..., 
+ * Description: Returns a string with backslashes stripped off. Recognizes C-like \n, \r ...,
  *              octal and hexadecimal representation.
  * Source code: ext/standard/string.c
 */
 
 /*
- * Test stripcslashes() with non-string type argument such as int, float, etc 
+ * Test stripcslashes() with non-string type argument such as int, float, etc
 */
 
 echo "*** Testing stripcslashes() : with non-string type argument ***\n";
@@ -23,7 +23,7 @@ unset($unset_var);
 class sample  {
   public function __toString() {
   return "obj'ct";
-  } 
+  }
 }
 
 // Defining resource
@@ -37,43 +37,43 @@ $values =  array (
 		  1,
 		  12345,
 		  -2345,
-		
+
 		  // float values
 /*5*/	  10.5,
 		  -10.5,
 		  10.1234567e10,
 		  10.7654321E-10,
 		  .5,
-		
+
 		  // array values
 /*10*/	  array(),
 		  array(0),
 		  array(1),
 		  array(1, 2),
 		  array('color' => 'red', 'item' => 'pen'),
-		
+
 		  // boolean values
 /*15*/	  true,
 		  false,
 		  TRUE,
 		  FALSE,
-		
+
 		  // empty string
 /*19*/	  "",
 		  '',
-		
+
 		  // undefined variable
 /*21*/	  $undefined_var,
-		
+
 		  // unset variable
 /*22*/	  $unset_var,
-		  
+
 		  // objects
 /*23*/	  new sample(),
-		
+
 		  // resource
 /*24*/	  $file_handle,
-		 
+
 		  // null values
 /*25*/	  NULL,
 		  null

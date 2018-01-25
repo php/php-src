@@ -39,7 +39,7 @@ echo "UTF-16 Encoding Read: {$dom->encoding}\n";
 
 ?>
 --EXPECTF--
-Empty Encoding Read: 
+Empty Encoding Read:
 
 Warning: main(): Invalid Document Encoding in %s on line %d
 Adding invalid encoding: NYPHP DOMinatrix
