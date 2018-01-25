@@ -27,29 +27,29 @@ class gtOptionalSectionsTest extends PHPUnit_Framework_TestCase
     $opt = new gtOptionalSections();
     $opt->setOptions($clo);
   }
-  
+
   public function testSkip() {
     $clo = new gtCommandLineOptions();
     $clo->parse(array('generate-phpt.php', '-s', 'skipif', '-x', 'standard'));
     $opt = new gtOptionalSections();
     $opt->setOptions($clo);
-    
+
     $opt = new gtOptionalSections();
     $opt->setOptions($clo);
-    
+
     $this->assertEquals('standard', $opt->getSkipifExt() );
 
   }
-  
+
   public function testSkipKey() {
     $clo = new gtCommandLineOptions();
     $clo->parse(array('generate-phpt.php', '-s', 'skipif', '-k', 'win'));
     $opt = new gtOptionalSections();
     $opt->setOptions($clo);
-    
+
     $opt = new gtOptionalSections();
     $opt->setOptions($clo);
-    
+
     $this->assertEquals('win', $opt->getSkipifKey() );
 
   }

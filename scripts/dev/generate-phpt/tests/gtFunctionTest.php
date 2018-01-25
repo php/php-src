@@ -43,25 +43,25 @@ class gtFunctionTest extends PHPUnit_Framework_TestCase
 
     $this->assertEquals('$ver1', $f->getShortArgumentList());
   }
-  
+
    public function testAllArgumentList() {
 
     $f = new gtFunction('version_compare');
     $f->setArgumentNames();
     $f->setValidArgumentLists();
     $a = $f->getValidArgumentLists();
-    
+
     $this->assertEquals('$ver1, $ver2', $a[0]);
     $this->assertEquals('$ver1, $ver2, $oper', $a[1]);
   }
-  
+
    public function testInitialisation() {
 
     $f = new gtFunction('version_compare');
     $f->setArgumentNames();
     $f->setInitialisationStatements();
     $a = $f->getInitialisationStatements();
-    
+
     $this->assertEquals('$ver1 = ', $a[0]);
     $this->assertEquals('$ver2 = ', $a[1]);
     $this->assertEquals('$oper = ', $a[2]);
