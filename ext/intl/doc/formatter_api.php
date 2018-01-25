@@ -319,7 +319,7 @@ class NumberFormatter {
 	 *
 	 * @return string Description of the last occurred error.
 	 */
-	public public function getErrorMessage() {}
+	public function getErrorMessage() {}
 
 }
 
