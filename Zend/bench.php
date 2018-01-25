@@ -5,18 +5,18 @@ if (function_exists("date_default_timezone_set")) {
 
 function simple() {
   $a = 0;
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     $a++;
 
   $thisisanotherlongname = 0;
-  for ($thisisalongname = 0; $thisisalongname < 1000000; $thisisalongname++) 
+  for ($thisisalongname = 0; $thisisalongname < 1000000; $thisisalongname++)
     $thisisanotherlongname++;
 }
 
 /****/
 
 function simplecall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     strlen("hallo");
 }
 
@@ -26,14 +26,14 @@ function hallo($a) {
 }
 
 function simpleucall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     hallo("hallo");
 }
 
 /****/
 
 function simpleudcall() {
-  for ($i = 0; $i < 1000000; $i++) 
+  for ($i = 0; $i < 1000000; $i++)
     hallo2("hallo");
 }
 
