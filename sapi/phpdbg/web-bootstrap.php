@@ -1,26 +1,26 @@
 <?php
 /**
  * The following file shows how to bootstrap phpdbg so that you can mock specific server environments
- * 
+ *
  * eval include("web-bootstrap.php")
  * exec index.php
  * compile
  * break ...
  * run
  */
-if (!defined('PHPDBG_BOOTSTRAPPED')) 
+if (!defined('PHPDBG_BOOTSTRAPPED'))
 {
     /* define these once */
     define("PHPDBG_BOOTPATH", "/opt/php-zts/htdocs");
     define("PHPDBG_BOOTSTRAP", "index.php");
-    define("PHPDBG_BOOTSTRAPPED", sprintf("/%s", PHPDBG_BOOTSTRAP)); 
+    define("PHPDBG_BOOTSTRAPPED", sprintf("/%s", PHPDBG_BOOTSTRAP));
 }
 
 /*
  * Superglobals are JIT, phpdbg will not over-write whatever you set during bootstrap
  */
 
-$_SERVER = array 
+$_SERVER = array
 (
   'HTTP_HOST' => 'localhost',
   'HTTP_CONNECTION' => 'keep-alive',
