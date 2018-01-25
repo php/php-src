@@ -697,6 +697,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	iconv_close(cd);
 
 	if (result == (size_t)(-1)) {
+		zend_string_free(out_buf);
 		switch (errno) {
 			case EINVAL:
 				retval = PHP_ICONV_ERR_ILLEGAL_CHAR;
@@ -713,7 +714,6 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 			default:
 				/* other error */
-				zend_string_free(out_buf);
 				return PHP_ICONV_ERR_UNKNOWN;
 		}
 	}
@@ -986,9 +986,6 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	err = php_iconv_string(ndl, ndl_nbytes, &ndl_buf, GENERIC_SUPERSET_NAME, enc);
 
 	if (err != PHP_ICONV_ERR_SUCCESS) {
-		if (ndl_buf != NULL) {
-			zend_string_free(ndl_buf);
-		}
 		return err;
 	}
 
@@ -2465,9 +2462,6 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != NULL) {
 		RETVAL_STR(out_buffer);
 	} else {
-		if (out_buffer != NULL) {
-			zend_string_free(out_buffer);
-		}
 		RETURN_FALSE;
 	}
 }
