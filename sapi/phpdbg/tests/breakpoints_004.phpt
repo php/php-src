@@ -24,14 +24,14 @@ prompt> 2
 [Breakpoint #0 in ZEND_ECHO at %s:5, hits: 3]
 >00005: echo $i++;
  00006: echo $i++;
- 00007: 
+ 00007:
 prompt> 3
 [Breakpoint #0 in ZEND_ECHO at %s:6, hits: 4]
 >00006: echo $i++;
- 00007: 
+ 00007:
 prompt> 4
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 $i = 1;

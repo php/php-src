@@ -24,7 +24,7 @@ string(10) "stdin
 data"
 [Breakpoint #0 at %s:6, hits: 1]
 >00006: echo "ok\n";
- 00007: 
+ 00007:
 prompt> Do you really want to restart execution? (type y or n): array(3) {
   [0]=>
   string(%d) "%s"
@@ -37,10 +37,10 @@ string(10) "stdin
 data"
 [Breakpoint #0 at %s:6, hits: 1]
 >00006: echo "ok\n";
- 00007: 
+ 00007:
 prompt> ok
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

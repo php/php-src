@@ -29,7 +29,7 @@ New value: 1
  00006: $a[0] = 2;
  00007: $a[1] = 3;
 prompt> [Breaking on watchpoint $b]
-Old value: 
+Old value:
 New value (reference): Array ([0] => 1)
 >00006: $a[0] = 2;
  00007: $a[1] = 3;
@@ -45,20 +45,20 @@ prompt> [Element 1 has been added to watchpoint]
 1 elements were added to the array
 >00008: $c = [1];
  00009: $b = &$c;
- 00010: 
+ 00010:
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed
 New value (reference): Array ([0] => 2,[1] => 3)
 >00009: $b = &$c;
- 00010: 
+ 00010:
 prompt> [Breaking on watchpoint $b]
 Old value inaccessible or destroyed
 New value (reference): Array ([0] => 1)
->00010: 
+>00010:
 prompt> [$b has been removed, removing watchpoint recursively]
 [$a[0] has been removed, removing watchpoint]
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

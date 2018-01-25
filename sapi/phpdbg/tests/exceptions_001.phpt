@@ -22,7 +22,7 @@ Stack trace:
 #0 %s(22): {closure}()
 #1 {main}
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

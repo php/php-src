@@ -10,16 +10,16 @@ q
 [Successful compilation of %s]
 prompt>  00001: #!/usr/bin/env php
  00002: <?php
- 00003: 
+ 00003:
  00004: echo 1;
- 00005: 
+ 00005:
 prompt> [Breakpoint #0 added at %s:4]
 prompt> [Breakpoint #0 at %s:4, hits: 1]
 >00004: echo 1;
- 00005: 
+ 00005:
 prompt> 1
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 #!/usr/bin/env php
 <?php

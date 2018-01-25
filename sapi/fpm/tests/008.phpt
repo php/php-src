@@ -2,7 +2,7 @@
 FPM: Test multi pool (dynamic + ondemand + static) (bug #68423)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 
 $cfg = <<<EOT
 [global]

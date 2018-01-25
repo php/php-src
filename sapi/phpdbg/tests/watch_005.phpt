@@ -18,25 +18,25 @@ prompt> [Breakpoint #0 at %s:3, hits: 1]
  00005: $c = &$a;
 prompt> [Added recursive watchpoint #0 for $a]
 prompt> [Breaking on watchpoint $a]
-Old value: 
+Old value:
 New value: aa
 >00005: $c = &$a;
  00006: $a[1] = "b";
- 00007: 
+ 00007:
 prompt> [Breaking on watchpoint $a]
 Old value inaccessible or destroyed
 New value (reference): aa
 >00006: $a[1] = "b";
- 00007: 
+ 00007:
  00008: exit;
 prompt> [Breaking on watchpoint $a]
 Old value: aa
 New value: ab
 >00008: exit;
- 00009: 
+ 00009:
 prompt> [$a has been removed, removing watchpoint recursively]
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

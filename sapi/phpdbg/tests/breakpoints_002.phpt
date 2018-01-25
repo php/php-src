@@ -29,7 +29,7 @@ prompt> 1
  00006: echo $i++;
 prompt> 234
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 $i = 1;

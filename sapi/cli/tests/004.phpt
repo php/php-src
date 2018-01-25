@@ -1,8 +1,8 @@
 --TEST--
 show information about function
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (!extension_loaded("reflection")) {
 	die("skip reflection extension required");
 }
@@ -18,7 +18,7 @@ var_dump(`$php -n --rf phpinfo`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(45) "Exception: Function unknown() does not exist
 "
 string(42) "Exception: Function echo() does not exist

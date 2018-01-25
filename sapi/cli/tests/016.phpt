@@ -1,8 +1,8 @@
 --TEST--
-CLI -a and readline 
+CLI -a and readline
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 if (!extension_loaded('readline') || readline_info('done') === NULL) {
 	die ("skip need readline support");
 }
@@ -99,7 +99,7 @@ Here
 comes
 the
 doc
-php > 
+php >
 
 --------------
 Snippet no. 4:
@@ -111,7 +111,7 @@ php {     echo "I'm not there";
 php { }
 php > echo "Done";
 Done
-php > 
+php >
 
 --------------
 Snippet no. 5:
@@ -123,6 +123,6 @@ php {     echo "I was called!";
 php { }
 php > a_function_with_some_name();
 I was called!
-php > 
+php >
 
 Done

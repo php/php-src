@@ -47,7 +47,7 @@ array(5) {
   string(1) "3"
 }
 [Script ended normally]
-prompt> 
+prompt>
 --ARGS--
 1 2 3
 --FILE--

@@ -5,4 +5,4 @@ r
 q
 --EXPECTF--
 prompt> [Nothing to execute!]
-prompt> 
+prompt>

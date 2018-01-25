@@ -6,7 +6,7 @@ q
 --EXPECTF--
 [Successful compilation of %s]
 prompt> [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

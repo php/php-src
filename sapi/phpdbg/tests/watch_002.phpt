@@ -12,15 +12,15 @@ q
 prompt> [Breakpoint #0 added at %s:6]
 prompt> [Breakpoint #0 at %s:6, hits: 1]
 >00006: $a[0] = 2;
- 00007: 
+ 00007:
  00008: $a = [0 => 3, 1 => 4];
 prompt> [Added watchpoint #0 for $a[]]
 prompt> [Breaking on watchpoint $a[]]
 1 elements were added to the array
->00009: 
+>00009:
 prompt> [$a[] has been removed, removing watchpoint]
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

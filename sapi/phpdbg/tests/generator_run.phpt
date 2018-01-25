@@ -7,7 +7,7 @@ q
 [Successful compilation of %s]
 prompt> caught Generator exception
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

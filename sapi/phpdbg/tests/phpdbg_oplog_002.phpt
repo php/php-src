@@ -5,11 +5,11 @@ r
 q
 --EXPECTF--
 [Successful compilation of %s]
-prompt> 
+prompt>
 Warning: Can not end an oplog without starting it in %s on line 3
 NULL
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

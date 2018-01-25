@@ -33,11 +33,11 @@ prompt> ok
 prompt> [L10 %s ECHO<1>                 "caught\n"                                                     %s]
 >00010: 	print "caught\n";
  00011: }
- 00012: 
+ 00012:
 prompt> caught
 [L14 %s RETURN<-1>              1                                                              %s]
->00014: 
-prompt> 
+>00014:
+prompt>
 --FILE--
 <?php
 

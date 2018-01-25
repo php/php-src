@@ -2,7 +2,7 @@
 Bug #60523 (PHP Errors are not reported in browsers using built-in SAPI)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --INI--
 display_errors=1

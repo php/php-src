@@ -27,7 +27,7 @@ prompt> 23
 [Breakpoint #1 in foo() at %s:9, hits: 1]
 >00009: 	echo 4;
  00010: }
- 00011: 
+ 00011:
 prompt> Do you really want to clean your current environment? (type y or n): Cleaning Execution Environment
 Classes    %d
 Functions  %d
@@ -43,10 +43,10 @@ prompt> 23
 [Breakpoint #1 in foo() at %s:9, hits: 1]
 >00009: 	echo 4;
  00010: }
- 00011: 
+ 00011:
 prompt> 4
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

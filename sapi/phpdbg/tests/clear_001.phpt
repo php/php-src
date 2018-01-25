@@ -30,7 +30,7 @@ Method oplines    0
 Conditionals      0
 prompt> 234
 [Script ended normally]
-prompt> prompt> 
+prompt> prompt>
 --FILE--
 <?php
 

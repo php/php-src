@@ -10,10 +10,10 @@ prompt> A
 [Breakpoint #0 added at %s]
 [Breakpoint #0 in %s at %s:5, hits: 1]
 >00005: echo 'B';
- 00006: 
+ 00006:
 prompt> B
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 

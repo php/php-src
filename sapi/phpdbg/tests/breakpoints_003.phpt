@@ -18,11 +18,11 @@ prompt> 12
 [Breakpoint #1 at %s:5, hits: 1]
 >00005: echo $i++;
  00006: echo $i++;
- 00007: 
+ 00007:
 prompt> [Deleted breakpoint #1]
 prompt> Do you really want to restart execution? (type y or n): 1234
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 $i = 1;

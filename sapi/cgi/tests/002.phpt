@@ -1,8 +1,8 @@
 --TEST--
 defining INI options with -d
 --SKIPIF--
-<?php 
-include "skipif.inc"; 
+<?php
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -27,7 +27,7 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(%d) "X-Powered-By: PHP/%s
 Content-type: text/html%r; charset=.*|%r
 

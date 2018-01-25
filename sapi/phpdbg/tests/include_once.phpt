@@ -7,7 +7,7 @@ q
 [Successful compilation of %s]
 prompt> 1
 [Script ended normally]
-prompt> 
+prompt>
 --FILE--
 <?php
 
