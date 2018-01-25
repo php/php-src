@@ -514,11 +514,11 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # endif
 #endif
 
-#if defined(__GNUC__) && defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
-#if defined(__GNUC__) && defined(__SSE4_2__)
+#ifdef __SSE4_2__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
 #elif (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_NMMINTRIN_H) || defined(ZEND_WIN32)
