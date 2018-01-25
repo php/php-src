@@ -66,14 +66,14 @@ $$x=f(): good
 ${'i'}=f(): good
 $i[0]=f(): good
 $i[0][0]=f(): good
-$i->p=f(): 
+$i->p=f():
 Warning: Creating default object from empty value in %s on line %d
 good
-$i->p->q=f(): 
+$i->p->q=f():
 Warning: Creating default object from empty value in %s on line %d
 good
 $i->p[0]=f(): good
-$i->p[0]->p=f(): 
+$i->p[0]->p=f():
 Warning: Creating default object from empty value in %s on line %d
 good
 C::$p=f(): good

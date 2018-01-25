@@ -10,7 +10,7 @@ Class C {
 	static function &returnConstantByRef() {
 		return 100;
 	}
-	
+
 	static function &returnVariableByRef() {
 		return $GLOBALS['a'];
 	}

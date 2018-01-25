@@ -1,5 +1,5 @@
 --TEST--
-Test constants with default values based on other constants. 
+Test constants with default values based on other constants.
 --FILE--
 <?php
   class C

@@ -2,10 +2,10 @@
 ob_start(): non-static method as static callbacks.
 --FILE--
 <?php
-/* 
+/*
  * proto bool ob_start([ string|array user_function [, int chunk_size [, bool erase]]])
  * Function is implemented in main/output.c
-*/ 
+*/
 
 Class C {
 	function h($string) {

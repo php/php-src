@@ -30,7 +30,7 @@ foreach ($obj as $v) {
 	if (++$count>10) {
 		echo "Loop detected.\n";
 		break;
-	}	
+	}
 }
 var_dump($obj);
 
@@ -47,7 +47,7 @@ foreach ($obj as $v) {
 	if (++$count>10) {
 		echo "Loop detected.\n";
 		break;
-	}	
+	}
 }
 var_dump($obj);
 

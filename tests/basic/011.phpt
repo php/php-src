@@ -5,7 +5,7 @@ register_argc_argv=1
 --GET--
 ab+cd+ef+123+test
 --FILE--
-<?php 
+<?php
 $argc = $_SERVER['argc'];
 $argv = $_SERVER['argv'];
 

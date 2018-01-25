@@ -9,7 +9,7 @@ class Test
         echo __METHOD__ . "($msg)\n";
         throw new Exception($msg);
     }
-    
+
     function __destruct() {
         echo __METHOD__ . "\n";
     }

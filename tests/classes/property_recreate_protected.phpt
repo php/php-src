@@ -5,10 +5,10 @@ Unsetting and recreating protected properties.
 class C {
 	protected $p = 'test';
 	function unsetProtected() {
-		unset($this->p);		
+		unset($this->p);
 	}
 	function setProtected() {
-		$this->p = 'changed';		
+		$this->p = 'changed';
 	}
 }
 

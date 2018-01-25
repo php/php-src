@@ -1,5 +1,5 @@
 --TEST--
-Implicit initialisation when passing by reference 
+Implicit initialisation when passing by reference
 --FILE--
 <?php
 function passbyVal($val) {

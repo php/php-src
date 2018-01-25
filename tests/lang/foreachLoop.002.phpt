@@ -35,7 +35,7 @@ foreach ($a as $v) {
 	//avoid infinite loop if test is failing
     if ($counter++>10) {
     	echo "Loop detected\n";
-    	break;    	
+    	break;
     }
 }
 var_dump($a);
@@ -49,8 +49,8 @@ foreach ($a as &$v) {
 	//avoid infinite loop if test is failing
     if ($counter++>10) {
     	echo "Loop detected\n";
-    	break;    	
-    }	
+    	break;
+    }
 }
 var_dump($a);
 
@@ -58,7 +58,7 @@ echo "\nPopping elements off an unreferenced array.\n";
 $a = array("original.1","original.2","original.3");
 foreach ($a as $v) {
 	array_pop($a);
-	var_dump($v);	
+	var_dump($v);
 }
 var_dump($a);
 

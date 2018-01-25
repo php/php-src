@@ -1,7 +1,7 @@
 --TEST--
 ZE2 Autoload and get_class_methods
 --SKIPIF--
-<?php 
+<?php
 	if (class_exists('autoload_root', false)) die('skip Autoload test classes exist already');
 ?>
 --FILE--

@@ -1,5 +1,5 @@
 --TEST--
-Ensure a class may not inherit two constants with the same name from two separate interfaces. 
+Ensure a class may not inherit two constants with the same name from two separate interfaces.
 --FILE--
 <?php
 interface I1 {

@@ -33,7 +33,7 @@ function foo_static() {
 /* Part 2:
  * Storing a reference to the result of a function in a static variable.
  * Same as Part 1 but:
- * The return statement transports a copy of the value to return. In other 
+ * The return statement transports a copy of the value to return. In other
  * words the return value of bar_global() is a temporary variable only valid
  * after the function call bar_global() is done in current local scope.
  */
@@ -83,8 +83,8 @@ function wow_static() {
 
 /* Part 4:
  * Storing a reference to a new instance (that's where the name of the  test
- * comes from). First there is the global counter $oop_global again which 
- * counts the calls to the constructor of oop_class and hence counts the 
+ * comes from). First there is the global counter $oop_global again which
+ * counts the calls to the constructor of oop_class and hence counts the
  * creation of oop_class instances.
  * The class oop_test uses a static reference to a oop_class instance.
  * When another oop_test instance is created it must reuse the statically
@@ -94,7 +94,7 @@ function wow_static() {
 $oop_global = 0;
 class oop_class {
 	var $oop_name;
-	
+
 	function __construct() {
 		global $oop_global;
 		echo "oop_class()\n";
@@ -104,11 +104,11 @@ class oop_class {
 
 class oop_test {
 	static $oop_value;
-	
+
 	function __construct() {
 		echo "oop_test()\n";
 	}
-	
+
 	function oop_static() {
 		echo "oop_static()\n";
 		if (!isset(self::$oop_value)) {

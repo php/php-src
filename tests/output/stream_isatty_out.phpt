@@ -23,7 +23,7 @@ STDOUT (php://fd/1): bool(false)
 STDERR (constant): bool(true)
 STDERR (fopen): bool(true)
 STDERR (php://fd/2): bool(true)
-Not a stream: 
+Not a stream:
 Warning: stream_isatty() expects parameter 1 to be resource, string given in %s on line %d
 bool(false)
 Invalid stream (php://temp): bool(false)

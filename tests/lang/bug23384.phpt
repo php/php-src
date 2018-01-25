@@ -15,7 +15,7 @@ class Foo {
     }
 }
 
-Foo::test();   
+Foo::test();
 echo Foo::HUN."\n";
 ?>
 --EXPECTF--

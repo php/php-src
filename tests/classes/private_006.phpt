@@ -14,7 +14,7 @@ class first {
 
 first::do_show();
 
-class second extends first { 
+class second extends first {
 }
 
 second::do_show();

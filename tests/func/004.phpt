@@ -1,7 +1,7 @@
 --TEST--
 General function test
 --FILE--
-<?php 
+<?php
 
 echo "Before function declaration...\n";
 

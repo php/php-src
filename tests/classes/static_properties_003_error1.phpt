@@ -1,5 +1,5 @@
 --TEST--
-Attempting to access static properties using instance property syntax 
+Attempting to access static properties using instance property syntax
 --FILE--
 <?php
 class C {

@@ -1,7 +1,7 @@
 --TEST--
 Timeout within foreach loop
 --SKIPIF--
-<?php 
+<?php
 	if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 ?>
 --FILE--
@@ -11,7 +11,7 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "timeout_config.inc";
 
 set_time_limit($t);
 
-foreach (range(0, 42) as $i) { 
+foreach (range(0, 42) as $i) {
 	busy_wait(1);
 }
 

@@ -6,7 +6,7 @@ Testing recursive function
 function Test()
 {
 	static $a=1;
-	echo "$a ";	
+	echo "$a ";
 	$a++;
 	if($a<10): Test(); endif;
 }
@@ -15,4 +15,4 @@ Test();
 
 ?>
 --EXPECT--
-1 2 3 4 5 6 7 8 9 
+1 2 3 4 5 6 7 8 9
