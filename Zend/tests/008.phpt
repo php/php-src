@@ -22,7 +22,7 @@ var_dump(constant("test const"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: define() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 

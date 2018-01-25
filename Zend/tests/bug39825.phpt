@@ -1,7 +1,7 @@
 --TEST--
 Bug #39825 (foreach produces memory error)
 --FILE--
-<?php 
+<?php
 $array = array(1 => 2, "foo" => "bar");
 $obj = (object)$array;
 foreach ($obj as $name => $value)  {

@@ -10,7 +10,7 @@ class Stat {
         }
         return self::$requests[1];
     }
-    
+
     public function __destruct() {
         unset(self::$requests[1]);
     }

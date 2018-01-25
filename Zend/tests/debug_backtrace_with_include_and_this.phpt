@@ -1,5 +1,5 @@
 --TEST--
-debug_backtrace segmentation fault with include and error handler 
+debug_backtrace segmentation fault with include and error handler
 --FILE--
 <?php
 class CLWrapper {

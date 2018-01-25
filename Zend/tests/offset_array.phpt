@@ -24,7 +24,7 @@ var_dump($arr[$arr1]);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(2)
 int(1)
 

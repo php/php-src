@@ -9,7 +9,7 @@ class test {
 var_dump(test::TEST);
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {
   [0]=>
   int(1)

@@ -3,7 +3,7 @@ Testing __construct and __destruct with Trait
 --FILE--
 <?php
 
-trait foo {	
+trait foo {
 	public function __construct() {
 		var_dump(__FUNCTION__);
 	}

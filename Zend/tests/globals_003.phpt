@@ -28,7 +28,7 @@ test::bar();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(false)
 string(5) "array"

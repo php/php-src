@@ -1,11 +1,11 @@
 --TEST--
 Testing dynamic call to constructor (old-style)
 --FILE--
-<?php 
+<?php
 
-class foo { 
+class foo {
 	public function foo() {
-	}	
+	}
 }
 
 $a = 'foo';

@@ -6,7 +6,7 @@ Bug #29674 (inherited method doesn't have access to private variables of the der
 class BaseClass
 {
 	private $private_base = "Base";
-	
+
 	function printVars ()
 	{
 		var_dump($this->private_base);

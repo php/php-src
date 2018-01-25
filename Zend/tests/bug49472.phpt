@@ -14,7 +14,7 @@ class Foo implements ia {
 class FooBar extends Foo implements ia {
 	const x = 1;
 	const c = 'Ocean';
-	
+
 	public function show() {
 		return ia::c;
 	}

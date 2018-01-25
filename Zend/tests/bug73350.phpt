@@ -20,7 +20,7 @@ Stack trace:
    'code' => 0,
    'file' => '%sbug73350.php',
    'line' => %d,
-   'trace' => 
+   'trace' =>
   array (
   ),
    'previous' => NULL,

@@ -26,7 +26,7 @@ var_dump(property_exists('TraitsTest', 'world'));
 $t = new TraitsTest;
 $t->test();
 ?>
---EXPECTF--	
+--EXPECTF--
 bool(true)
 bool(true)
 hello World!

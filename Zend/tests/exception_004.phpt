@@ -1,7 +1,7 @@
 --TEST--
 Throwing exception using a class that isn't derived from the Exception base class
 --FILE--
-<?php 
+<?php
 
 error_reporting(E_ALL|E_STRICT);
 

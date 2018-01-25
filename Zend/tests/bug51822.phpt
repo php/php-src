@@ -7,14 +7,14 @@ class DestructableObject
 	public function __destruct()
 	{
 		echo "2\n";
-	}	
+	}
 }
 
 class DestructorCreator
 {
 	public function __destruct()
 	{
-		$this->test = new DestructableObject;	
+		$this->test = new DestructableObject;
 		echo "1\n";
 	}
 }

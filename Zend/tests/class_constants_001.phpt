@@ -15,7 +15,7 @@ var_dump(test::val3);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(6) "string"
 int(1)
 

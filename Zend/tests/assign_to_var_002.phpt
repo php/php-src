@@ -12,7 +12,7 @@ var_dump($var1);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 string(1) "g"
 string(1) "g"
 Done

@@ -5,7 +5,7 @@ Bug #30346 (arrayAccess and using $this)
 
 class Test implements ArrayAccess
 {
-        public function __construct() { }       
+        public function __construct() { }
         public function offsetExists( $offset ) { return false; }
         public function offsetGet( $offset ) { return $offset; }
         public function offsetSet( $offset, $data ) { }

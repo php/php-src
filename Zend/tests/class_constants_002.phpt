@@ -23,7 +23,7 @@ bar();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 int(1)
 int(5)
 int(10)

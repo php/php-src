@@ -7,5 +7,5 @@ function __autoload($a, $b) {}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Fatal error: __autoload() must take exactly 1 argument in %s on line %d

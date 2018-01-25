@@ -19,7 +19,7 @@ foo(1,2);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: func_get_arg() expects exactly 1 parameter, 3 given in %s on line %d
 NULL
 

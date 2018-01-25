@@ -8,11 +8,11 @@ error_reporting(E_ALL);
 class foo {
 	public $x;
 	static public $y;
-		
+
 	public function a() {
 		return $this->x;
 	}
-	
+
 	static public function b() {
 		return self::$y;
 	}

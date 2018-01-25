@@ -21,7 +21,7 @@ class D extends B {
 	public function __construct() {
 		var_dump(get_class_vars('A'));
 		var_dump(get_class_vars('B'));
-		var_dump(get_class_vars('C'));		
+		var_dump(get_class_vars('C'));
 	}
 }
 

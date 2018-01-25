@@ -44,11 +44,11 @@ foreach($a as $var) {
 		my_dump($a[$i]);
 		echo "\n";
 	}
-}	
+}
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} == array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} != string(0) ""
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} != int(1)

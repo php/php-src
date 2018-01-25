@@ -1,7 +1,7 @@
 --TEST--
 Bug #36568 (memory_limit has no effect)
 --SKIPIF--
-<?php 
+<?php
 	if (!function_exists('memory_get_usage')) die('skip PHP is configured without memory_limit');
 ?>
 --INI--

@@ -1,7 +1,7 @@
 --TEST--
 Testing dynamic call with invalid value for method name
 --FILE--
-<?php 
+<?php
 
 $a = new stdClass;
 

@@ -18,7 +18,7 @@ $b = new B;
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Methods with the same name as their class will not be constructors in a future version of PHP; A has a deprecated constructor in %s on line %d
 I'm A
 I'm A

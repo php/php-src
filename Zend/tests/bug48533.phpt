@@ -5,7 +5,7 @@ Bug #48533 (__callStatic is not invoked for private/protected methods)
 
 class foo {
 	private function a() {
-		var_dump(1);	
+		var_dump(1);
 	}
 	public function b() {
 		var_dump(2);

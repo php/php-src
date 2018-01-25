@@ -1,7 +1,7 @@
 --TEST--
 Bug #36513 (comment will be outputed in last line)
 --FILE--
-<?php 
+<?php
 function test($s) {
   echo "'".trim(str_replace("&nbsp;", " ", htmlspecialchars_decode(strip_tags(highlight_string($s,1)))))."'\n";
 }

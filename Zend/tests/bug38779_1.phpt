@@ -47,6 +47,6 @@ if (file_exists($filename)) {
 	@unlink(dirname(__FILE__)."/bug38779.txt");
 }
 ?>
---EXPECTF--	
+--EXPECTF--
 Parse error: %s error%sin %s on line %d
 string(6) "close!"

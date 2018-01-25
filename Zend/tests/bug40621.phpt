@@ -14,7 +14,7 @@ Foo::get();
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Deprecated: Non-static method Foo::get() should not be called statically in %s on line %d
 
 Fatal error: Uncaught Error: Non-static method Foo::__construct() cannot be called statically in %s:%d
