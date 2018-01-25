@@ -29,6 +29,13 @@ try {
 } catch (PharException $ex) {
 }
 
+// should also not be able to pull out /, because paths are not "rooted" that way
+try {
+  $pharB->extractTo($outDir, '/', true);
+  echo 'failed to throw expected exception';
+} catch (PharException $ex) {
+}
+
 // should be able to do by array, too
 $pharB = new Phar($phar);
 $pharB->extractTo($outDir, [ 'dirA/', 'dirAB/' ], true);

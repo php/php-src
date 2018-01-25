@@ -4306,7 +4306,7 @@ static int extract_helper(phar_archive_data *archive, char *search, char *pathto
 
 	/* nothing to match, or matching "/" -- extract all files */
 	len = search ? strlen(search) : 0;
-	if (0 == len || 0 == strcmp((const char *)search, "/")) {
+	if (0 == len) {
 		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, error)) return -1;
 			extracted++;
