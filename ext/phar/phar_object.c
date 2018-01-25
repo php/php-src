@@ -4299,13 +4299,13 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 }
 /* }}} */
 
-static int extract_helper(phar_archive_data *archive, char *search, char *pathto, size_t pathto_len, zend_bool overwrite, char **error) { /* {{{ */
+static int extract_helper(phar_archive_data *archive, zend_string *search, char *pathto, size_t pathto_len, zend_bool overwrite, char **error) { /* {{{ */
 	int extracted = 0;
 	phar_entry_info *entry;
 	int len;
 
 	/* nothing to match, or matching "/" -- extract all files */
-	len = search ? strlen(search) : 0;
+	len = search ? ZSTR_LEN(search) : 0;
 	if (0 == len) {
 		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, error)) return -1;
@@ -4313,16 +4313,16 @@ static int extract_helper(phar_archive_data *archive, char *search, char *pathto
 		} ZEND_HASH_FOREACH_END();
 
 	/* ends in "/" -- extract all entries having that prefix */
-	} else if ('/' == search[len - 1]) {
+	} else if ('/' == ZSTR_VAL(search)[len - 1]) {
 		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
-			if (0 != strncmp(search, entry->filename, len)) continue;
+			if (0 != strncmp(ZSTR_VAL(search), entry->filename, len)) continue;
 			if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, error)) return -1;
 			extracted++;
 		} ZEND_HASH_FOREACH_END();
 
 	/* otherwise, looking for an exact match */
 	} else {
-		entry = zend_hash_str_find_ptr(&archive->manifest, search, len);
+		entry = zend_hash_find_ptr(&archive->manifest, search);
 		if (NULL == entry) return 0;
 		if (FAILURE == phar_extract_file(overwrite, entry, pathto, (int)pathto_len, error)) return -1;
 		return 1;
@@ -4339,7 +4339,8 @@ PHP_METHOD(Phar, extractTo)
 {
 	php_stream *fp;
 	php_stream_statbuf ssb;
-	char *pathto, *filename;
+	char *pathto;
+	zend_string *filename;
 	size_t pathto_len;
 	int ret, i;
 	int nelems;
@@ -4397,7 +4398,7 @@ PHP_METHOD(Phar, extractTo)
 			    filename = NULL;
 				break;
 			case IS_STRING:
-				filename = ZSTR_VAL(Z_STR_P(zval_files));
+				filename = Z_STR_P(zval_files);
 				break;
 			case IS_ARRAY:
 				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
@@ -4411,8 +4412,7 @@ PHP_METHOD(Phar, extractTo)
 								"Invalid argument, array of filenames to extract contains non-string value");
 							return;
 						}
-						filename = ZSTR_VAL(Z_STR_P(zval_file));
-						switch (extract_helper(phar_obj->archive, filename, pathto, pathto_len, overwrite, &error)) {
+						switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
 							case -1:
 								zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
 									phar_obj->archive->fname, error);
@@ -4421,7 +4421,7 @@ PHP_METHOD(Phar, extractTo)
 							case 0:
 								zend_throw_exception_ex(phar_ce_PharException, 0,
 									"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
-									filename, phar_obj->archive->fname);
+									ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
 								return;
 						}
 					}
@@ -4444,7 +4444,7 @@ PHP_METHOD(Phar, extractTo)
 	} else if (0 == ret && NULL != filename) {
 		zend_throw_exception_ex(phar_ce_PharException, 0,
 			"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
-			filename, phar_obj->archive->fname);
+			ZSTR_VAL(filename), phar_obj->archive->fname);
 	} else {
 		RETURN_TRUE;
 	}
