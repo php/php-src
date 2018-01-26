@@ -69,6 +69,12 @@ ZEND_API void zend_interned_strings_init(void)
 	int i;
 	zend_string *str;
 
+	interned_string_request_handler = zend_new_interned_string_request;
+	interned_string_copy_storage = NULL;
+
+	zend_empty_string = NULL;
+	zend_known_strings = NULL;
+
 	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
 
 	zend_new_interned_string = zend_new_interned_string_permanent;
