@@ -151,6 +151,8 @@ PHP                                                                        NEWS
     loop). (jhdxr)
   . Fixed bug #74372 (autoloading file with syntax error uses next autoloader,
     may hide parse error). (Nikita)
+  . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
+    (cmb)
 
 - SQLite3:
   . Updated bundled libsqlite to 3.22.0. (cmb)
