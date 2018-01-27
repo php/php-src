@@ -10,4 +10,4 @@ $proc = new XSLTProcessor();
 var_dump($proc->hasExsltSupport());
 ?>
 --EXPECTF--
-Fatal error: Class 'XSLTProcessor' not found in %s on line %i
+Fatal error: Class 'XSLTProcessor' not found in %s on line %d
