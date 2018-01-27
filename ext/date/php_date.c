@@ -2912,7 +2912,7 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateTime::__set_state(array $array)
+/* {{{ proto DateTime::__set_state(array array)
 */
 PHP_METHOD(DateTime, __set_state)
 {
@@ -2934,7 +2934,7 @@ PHP_METHOD(DateTime, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__set_state(array $array)
+/* {{{ proto DateTimeImmutable::__set_state(array array)
 */
 PHP_METHOD(DateTimeImmutable, __set_state)
 {
@@ -3838,7 +3838,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	return FAILURE;
 } /* }}} */
 
-/* {{{ proto DateTimeZone::__set_state(array $array)
+/* {{{ proto DateTimeZone::__set_state(array array)
  *  */
 PHP_METHOD(DateTimeZone, __set_state)
 {
@@ -4361,7 +4361,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateInterval::__set_state(array $array)
+/* {{{ proto DateInterval::__set_state(array array)
 */
 PHP_METHOD(DateInterval, __set_state)
 {
@@ -5214,7 +5214,7 @@ static int php_date_period_initialize_from_hash(php_period_obj *period_obj, Hash
 	return 1;
 } /* }}} */
 
-/* {{{ proto DatePeriod::__set_state(array $array)
+/* {{{ proto DatePeriod::__set_state(array array)
 */
 PHP_METHOD(DatePeriod, __set_state)
 {
