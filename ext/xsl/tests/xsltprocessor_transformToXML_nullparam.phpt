@@ -51,4 +51,4 @@ $proc->importStyleSheet($xsldoc);
 echo $proc->transformToXML(null);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToXml() expects parameter 1 to be object, null given in %s on line %i
+Warning: XSLTProcessor::transformToXml() expects parameter 1 to be object, null given in %s on line %d

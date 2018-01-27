@@ -74,7 +74,7 @@ if (file_exists($outputfile)) {
 --EXPECTF--
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %s
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
@@ -84,7 +84,7 @@ OK, file exists
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %s element output in %s on line %d
 
-Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %s
+Warning: XSLTProcessor::transformToXml(): File write for %s/bug54446test.txt refused in %s on line %d
 
 Warning: XSLTProcessor::transformToXml(): runtime error: file %s line %d element output in %s on line %d
 
