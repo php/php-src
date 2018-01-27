@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
+- SPL:
+  . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
+    (cmb)
+
 01 Feb 2018, PHP 7.2.2
 
 - Core:
