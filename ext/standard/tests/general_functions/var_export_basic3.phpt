@@ -11,7 +11,7 @@ serialize_precision=17
  */
 
 echo "*** Testing var_export() with valid float values ***\n";
-// different valid  float vlaues 
+// different valid  float values 
 $valid_floats = array(
 	  "-2147483649" => (float)-2147483649, // float value
 	  "2147483648" => (float)2147483648,  // float value

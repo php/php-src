@@ -52,7 +52,7 @@ $pad_lengths =  array (
 		  TRUE,
 		  FALSE,
 		
-		  // null vlaues
+		  // null values
 /*15*/	  NULL,
 		  null,
 		

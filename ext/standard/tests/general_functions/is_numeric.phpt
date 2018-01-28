@@ -7,7 +7,7 @@ Test is_numeric() function
  */
 
 echo "*** Testing is_numeric() with valid numeric values ***\n";
-// different valid numeric  vlaues 
+// different valid numeric  values 
 $numerics = array(
   0,
   1,

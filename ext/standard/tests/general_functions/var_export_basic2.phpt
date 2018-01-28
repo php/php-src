@@ -10,7 +10,7 @@ Test var_export() function with valid boolean values
  */
 
 echo "*** Testing var_export() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean values 
 $valid_bool = array(
 		    "1" => 1,
 		    "TRUE" => TRUE,

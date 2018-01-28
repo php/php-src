@@ -9,7 +9,7 @@ Test var_export() function with integer values
  */
 
 echo "*** Testing var_export() with integer values ***\n";
-// different integer vlaues 
+// different integer values 
 $valid_ints = array(
                 '0' => '0',
                 '1' => '1',
