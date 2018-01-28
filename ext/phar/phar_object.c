@@ -4385,8 +4385,7 @@ PHP_METHOD(Phar, extractTo)
 	char *pathto;
 	zend_string *filename;
 	size_t pathto_len;
-	int ret, i;
-	int nelems;
+	int ret;
 	zval *zval_file;
 	zval *zval_files = NULL;
 	zend_bool overwrite = 0;
@@ -4444,31 +4443,30 @@ PHP_METHOD(Phar, extractTo)
 				filename = Z_STR_P(zval_files);
 				break;
 			case IS_ARRAY:
-				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
-				if (nelems == 0 ) {
+				if (zend_hash_num_elements(Z_ARRVAL_P(zval_files)) == 0) {
 					RETURN_FALSE;
 				}
-				for (i = 0; i < nelems; i++) {
-					if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(zval_files), i)) != NULL) {
-						if (IS_STRING != Z_TYPE_P(zval_file)) {
-							zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-								"Invalid argument, array of filenames to extract contains non-string value");
-							return;
-						}
-						switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
-							case -1:
-								zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
-									phar_obj->archive->fname, error);
-								efree(error);
-								return;
-							case 0:
-								zend_throw_exception_ex(phar_ce_PharException, 0,
-									"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
-									ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
-								return;
-						}
+
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zval_files), zval_file) {
+					ZVAL_DEREF(zval_file);
+					if (IS_STRING != Z_TYPE_P(zval_file)) {
+						zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+							"Invalid argument, array of filenames to extract contains non-string value");
+						return;
 					}
-				}
+					switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
+						case -1:
+							zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
+								phar_obj->archive->fname, error);
+							efree(error);
+							return;
+						case 0:
+							zend_throw_exception_ex(phar_ce_PharException, 0,
+								"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+								ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
+							return;
+					}
+				} ZEND_HASH_FOREACH_END();
 				RETURN_TRUE;
 			default:
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
