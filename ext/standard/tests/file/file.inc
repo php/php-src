@@ -210,7 +210,7 @@ function change_file_perms($file_path,
    $permission = An octal number, This should be similar to $mode 
      specified in chmod() call. 
    $content_type = Specify type of the content to fill in the file. 
-     "numeric" = fill file with numeric vlaues
+     "numeric" = fill file with numeric values
      "text" = fill file with regular text
      "empty" = empty file
      "text_with_new_line" = similar to text fill type, but writes with new line char
@@ -330,7 +330,7 @@ function create_files( $file_path,
    $link_perms = An octal number, This should be similar to $mode
      specified in chmod() call.
    $link_file_content = Type of the content to fill in the file.
-     numeric = fill file with numeric vlaues
+     numeric = fill file with numeric values
      text = fill file with regular text
      text_with_new_line = same as text but new lines are written
      alphanumeric = fill with alphanumeric text

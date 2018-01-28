@@ -9,7 +9,7 @@ Test sprintf() function : usage variations - int formats with int values
 
 echo "*** Testing sprintf() : integer formats with integer values ***\n";
 
-// different valid  integer vlaues
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
