@@ -52,7 +52,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
