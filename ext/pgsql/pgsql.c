@@ -5832,7 +5832,7 @@ static int php_pgsql_add_quotes(zval *src, zend_bool should_free)
 	}
 
 /* {{{ php_pgsql_convert
- * check and convert array values (fieldname=>vlaue pair) for sql
+ * check and convert array values (fieldname=>value pair) for sql
  */
 PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, const zval *values, zval *result, zend_ulong opt)
 {
