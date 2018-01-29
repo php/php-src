@@ -952,7 +952,7 @@ cli_server.color = On
 [iconv]
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; If empty, default_charset or input_encoding or iconv.input_encoding is used.
-; The precedence is: default_charset < intput_encoding < iconv.input_encoding
+; The precedence is: default_charset < input_encoding < iconv.input_encoding
 ;iconv.input_encoding =
 
 ; Use of this INI entry is deprecated, use global internal_encoding instead.
@@ -1613,7 +1613,7 @@ zend.assertions = 1
 ; http input encoding.
 ; mbstring.encoding_traslation = On is needed to use this setting.
 ; If empty, default_charset or input_encoding or mbstring.input is used.
-; The precedence is: default_charset < intput_encoding < mbsting.http_input
+; The precedence is: default_charset < input_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
