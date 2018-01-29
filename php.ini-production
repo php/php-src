@@ -83,7 +83,7 @@
 ; development version only in development environments, as errors shown to
 ; application users can inadvertently leak otherwise secure information.
 
-; This is php.ini-production INI file.
+; This is the php.ini-production INI file.
 
 ;;;;;;;;;;;;;;;;;;;
 ; Quick Reference ;
@@ -169,7 +169,7 @@
 ; Name for user-defined php.ini (.htaccess) files. Default is ".user.ini"
 ;user_ini.filename = ".user.ini"
 
-; To disable this feature set this option to empty value
+; To disable this feature set this option to an empty value
 ;user_ini.filename =
 
 ; TTL for user-defined php.ini files (time-to-live) in seconds. Default is 300 seconds (5 minutes)
@@ -248,7 +248,7 @@ output_buffering = 4096
 ; Production Value: "form="
 ;url_rewriter.tags
 
-; URL rewriter will not rewrites absolute URL nor form by default. To enable
+; URL rewriter will not rewrite absolute URL nor form by default. To enable
 ; absolute URL rewrite, allowed hosts must be defined at RUNTIME.
 ; Refer to session.trans_sid_hosts for more details.
 ; Default Value: ""
@@ -959,7 +959,7 @@ cli_server.color = On
 [iconv]
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; If empty, default_charset or input_encoding or iconv.input_encoding is used.
-; The precedence is: default_charset < intput_encoding < iconv.input_encoding
+; The precedence is: default_charset < input_encoding < iconv.input_encoding
 ;iconv.input_encoding =
 
 ; Use of this INI entry is deprecated, use global internal_encoding instead.
@@ -1331,10 +1331,11 @@ session.save_handler = files
 ;session.save_path = "/tmp"
 
 ; Whether to use strict session mode.
-; Strict session mode does not accept uninitialized session ID and regenerate
-; session ID if browser sends uninitialized session ID. Strict mode protects
-; applications from session fixation via session adoption vulnerability. It is
-; disabled by default for maximum compatibility, but enabling it is encouraged.
+; Strict session mode does not accept an uninitialized session ID, and
+; regenerates the session ID if the browser sends an uninitialized session ID.
+; Strict mode protects applications from session fixation via a session adoption
+; vulnerability. It is disabled by default for maximum compatibility, but
+; enabling it is encouraged.
 ; https://wiki.php.net/rfc/strict_sessions
 session.use_strict_mode = 0
 
@@ -1372,11 +1373,12 @@ session.cookie_path = /
 ; http://php.net/session.cookie-domain
 session.cookie_domain =
 
-; Whether or not to add the httpOnly flag to the cookie, which makes it inaccessible to browser scripting languages such as JavaScript.
+; Whether or not to add the httpOnly flag to the cookie, which makes it
+; inaccessible to browser scripting languages such as JavaScript.
 ; http://php.net/session.cookie-httponly
 session.cookie_httponly =
 
-; Handler used to serialize data.  php is the standard serializer of PHP.
+; Handler used to serialize data. php is the standard serializer of PHP.
 ; http://php.net/session.serialize-handler
 session.serialize_handler = php
 
@@ -1385,7 +1387,7 @@ session.serialize_handler = php
 ; gc_probability/gc_divisor. Where session.gc_probability is the numerator
 ; and gc_divisor is the denominator in the equation. Setting this value to 1
 ; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any give request.
+; the gc will run on any given request.
 ; Default Value: 1
 ; Development Value: 1
 ; Production Value: 1
@@ -1395,10 +1397,10 @@ session.gc_probability = 1
 ; Defines the probability that the 'garbage collection' process is started on every
 ; session initialization. The probability is calculated by using the following equation:
 ; gc_probability/gc_divisor. Where session.gc_probability is the numerator and
-; session.gc_divisor is the denominator in the equation. Setting this value to 1
-; when the session.gc_divisor value is 100 will give you approximately a 1% chance
-; the gc will run on any give request. Increasing this value to 1000 will give you
-; a 0.1% chance the gc will run on any give request. For high volume production servers,
+; session.gc_divisor is the denominator in the equation. Setting this value to 100
+; when the session.gc_probability value is 1 will give you approximately a 1% chance
+; the gc will run on any given request. Increasing this value to 1000 will give you
+; a 0.1% chance the gc will run on any given request. For high volume production servers,
 ; this is a more efficient approach.
 ; Default Value: 100
 ; Development Value: 1000
@@ -1468,7 +1470,7 @@ session.sid_length = 26
 session.trans_sid_tags = "a=href,area=href,frame=src,form="
 
 ; URL rewriter does not rewrite absolute URLs by default.
-; To enable rewrites for absolute pathes, target hosts must be specified
+; To enable rewrites for absolute paths, target hosts must be specified
 ; at RUNTIME. i.e. use ini_set()
 ; <form> tags is special. PHP will check action attribute's URL regardless
 ; of session.trans_sid_tags setting.
@@ -1557,7 +1559,7 @@ zend.assertions = -1
 ; http://php.net/assert.active
 ;assert.active = On
 
-; Throw an AssertationException on failed assertions
+; Throw an AssertionError on failed assertions
 ; http://php.net/assert.exception
 ;assert.exception = On
 
@@ -1587,7 +1589,7 @@ zend.assertions = -1
 ; http://php.net/com.allow-dcom
 ;com.allow_dcom = true
 
-; autoregister constants of a components typlib on com_load()
+; autoregister constants of a component's typlib on com_load()
 ; http://php.net/com.autoregister-typelib
 ;com.autoregister_typelib = true
 
@@ -1618,9 +1620,9 @@ zend.assertions = -1
 
 ; Use of this INI entry is deprecated, use global input_encoding instead.
 ; http input encoding.
-; mbstring.encoding_traslation = On is needed to use this setting.
+; mbstring.encoding_translation = On is needed to use this setting.
 ; If empty, default_charset or input_encoding or mbstring.input is used.
-; The precedence is: default_charset < intput_encoding < mbsting.http_input
+; The precedence is: default_charset < input_encoding < mbsting.http_input
 ; http://php.net/mbstring.http-input
 ;mbstring.http_input =
 
