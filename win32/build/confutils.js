@@ -3219,6 +3219,53 @@ function toolset_setup_common_cflags()
 	}
 }
 
+function toolset_setup_intrinsic_cflags()
+{
+	var default_enabled = "sse2";
+	/* XXX AVX and above needs to be reflected in /arch, for now SSE4.2 is
+		the best possible optimization.*/
+	var avail = WScript.CreateObject("Scripting.Dictionary");
+	avail.Add("sse", "__SSE__");
+	avail.Add("sse2", "__SSE2__");
+	avail.Add("sse3", "__SSE3__");
+	avail.Add("ssse3", "__SSSE3__");
+	avail.Add("sse4.1", "__SSE4_1__");
+	avail.Add("sse4.2", "__SSE4_2__");
+	/* From oldest to newest. */
+	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2");
+
+	if (VS_TOOLSET) {
+		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
+			PHP_NATIVE_INTRINSICS = default_enabled;
+		}
+
+		if ("all" == PHP_NATIVE_INTRINSICS) {
+			var list = (new VBArray(avail.Keys())).toArray();
+
+			for (var i in list) {
+				AC_DEFINE(avail.Item(list[i]), 1);
+			}
+		} else {
+			var list = PHP_NATIVE_INTRINSICS.split(",");
+			var j = 0;
+			for (var k = 0; k < scale.length; k++) {
+				for (var i = 0; i < list.length; i++) {
+					var it = list[i].toLowerCase();
+					if (scale[k] == it) {
+						j = k > j ? k : j;
+					} else if (!avail.Exists(it)) {
+						WARNING("Unknown intrinsic name '" + it + "' ignored");
+					}
+				}
+			}
+			for (var i = 0; i <= j; i++) {
+				var it = scale[i];
+				AC_DEFINE(avail.Item(it), 1);
+			}
+		}
+	}
+}
+
 function toolset_setup_common_ldlags()
 {
 	// General DLL link flags
