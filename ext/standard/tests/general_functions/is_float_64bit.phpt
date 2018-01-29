@@ -13,7 +13,7 @@ precision=14
  */ 
 
 echo "*** Testing is_float(), is_double() and is_real() with float values***\n";
-// different valid  float vlaues 
+// different valid  float values 
 $floats = array(
   -2147483649, // float value
   2147483648,  // float value

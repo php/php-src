@@ -92,9 +92,6 @@ PHP_FUNCTION(intval)
 	zval *num;
 	zend_long base = 10;
 
-	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
-		WRONG_PARAM_COUNT;
-	}
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(num)
 		Z_PARAM_OPTIONAL

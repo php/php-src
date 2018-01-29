@@ -109,6 +109,9 @@ PHP_MSHUTDOWN_FUNCTION(localeconv);
 #if HAVE_NL_LANGINFO
 PHP_MINIT_FUNCTION(nl_langinfo);
 #endif
+#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+PHP_MINIT_FUNCTION(string_intrin);
+#endif
 
 #define strnatcmp(a, b) \
 	strnatcmp_ex(a, strlen(a), b, strlen(b), 0)
@@ -125,7 +128,11 @@ PHPAPI char *php_strtolower(char *s, size_t len);
 PHPAPI zend_string *php_string_toupper(zend_string *s);
 PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);
+#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+PHPAPI extern zend_string *(*php_addslashes)(zend_string *str, int should_free);
+#else
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free);
+#endif
 PHPAPI zend_string *php_addcslashes(zend_string *str, int freeit, char *what, size_t what_len);
 PHPAPI void php_stripslashes(zend_string *str);
 PHPAPI void php_stripcslashes(zend_string *str);

@@ -118,16 +118,8 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 int php_tag_find(char *tag, size_t len, const char *set);
 
-#ifdef PHP_WIN32
-# define SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
-#elif HAVE_ATTRIBUTE_ALIGNED
-# define SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
-#else
-# define SET_ALIGNED(alignment, decl) decl
-#endif
-
 /* this is read-only, so it's ok */
-SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
 
 /* localeconv mutex */
 #ifdef ZTS
@@ -3866,17 +3858,15 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 
 /* {{{ php_addslashes */
 
-#if defined(__GNUC__) && defined(__SSE4_2__)
+#if ZEND_INTRIN_SSE4_2_NATIVE
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
-# define PHP_ADDSLASHES_LEVEL 2
-#elif defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) && \
-      defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(HAVE_NMMINTRIN_H)
+#elif ZEND_INTRIN_SSE4_2_RESOLVER
 # include <nmmintrin.h>
 # include "Zend/zend_bitset.h"
 # include "Zend/zend_cpuinfo.h"
-# define PHP_ADDSLASHES_LEVEL 1
 
+# if ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
 zend_string *php_addslashes_sse42(zend_string *str, int should_free) __attribute__((target("sse4.2")));
 zend_string *php_addslashes_default(zend_string *str, int should_free);
@@ -3887,18 +3877,35 @@ static void *resolve_addslashes() {
 	}
 	return  php_addslashes_default;
 }
-#else
-# define PHP_ADDSLASHES_LEVEL 0
+# else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
+zend_string *php_addslashes_sse42(zend_string *str, int should_free);
+zend_string *php_addslashes_default(zend_string *str, int should_free);
+
+PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
+
+/* {{{ PHP_MINIT_FUNCTION
+ */
+PHP_MINIT_FUNCTION(string_intrin)
+{
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
+		php_addslashes = php_addslashes_sse42;
+	} else {
+		php_addslashes = php_addslashes_default;
+	}
+	return SUCCESS;
+}
+/* }}} */
+# endif
 #endif
 
-#if PHP_ADDSLASHES_LEVEL
-# if PHP_ADDSLASHES_LEVEL == 2
+#if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
+# if ZEND_INTRIN_SSE4_2_NATIVE
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
-# else
+# elif ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 # endif
 {
-	SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
+	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
 	__m128i w128, s128;
 	uint32_t res = 0;
 	/* maximum string length, worst case situation */
@@ -3915,7 +3922,7 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 	end = source + ZSTR_LEN(str);
 
 	if (ZSTR_LEN(str) > 15) {
-		char *aligned = (char*)(((zend_uintptr_t)source + 15) & ~15);
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
 
 		if (UNEXPECTED(source != aligned)) {
 			do {
@@ -3990,7 +3997,7 @@ do_escape:
 		}
 		source += 16;
 	} else if (end - source > 15) {
-		char *aligned = (char*)(((zend_uintptr_t)source + 15) & ~15);
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
 
 		if (source != aligned) {
 			do {
@@ -4078,8 +4085,8 @@ do_escape:
 /* }}} */
 #endif
 
-#if PHP_ADDSLASHES_LEVEL != 2
-# if PHP_ADDSLASHES_LEVEL == 1
+#if !ZEND_INTRIN_SSE4_2_NATIVE
+# if ZEND_INTRIN_SSE4_2_RESOLVER
 zend_string *php_addslashes_default(zend_string *str, int should_free) /* {{{ */
 # else
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)

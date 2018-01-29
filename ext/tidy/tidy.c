@@ -30,7 +30,11 @@
 #include "php_ini.h"
 #include "ext/standard/info.h"
 
+#if HAVE_TIDY_H
 #include "tidy.h"
+#elif HAVE_TIDYP_H
+#include "tidyp.h"
+#endif
 
 #if HAVE_TIDYBUFFIO_H
 #include "tidybuffio.h"
@@ -1073,8 +1077,12 @@ static PHP_MINFO_FUNCTION(tidy)
 	php_info_print_table_header(2, "Tidy support", "enabled");
 #if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
+#elif HAVE_TIDYP_H
+	php_info_print_table_row(2, "libtidyp Version", (char *)tidyVersion());
 #endif
+#if HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
+#endif
 	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
@@ -1342,7 +1350,11 @@ static PHP_FUNCTION(tidy_get_release)
 		return;
 	}
 
+#if HAVE_TIDYRELEASEDATE
 	RETURN_STRING((char *)tidyReleaseDate());
+#else
+	RETURN_STRING((char *)"unknown");
+#endif
 }
 /* }}} */
 

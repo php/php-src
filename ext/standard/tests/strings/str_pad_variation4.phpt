@@ -60,7 +60,7 @@ $pad_types =  array (
 		  TRUE,
 		  FALSE,
 		
-		  // null vlaues
+		  // null values
 /*22*/	  NULL,
 		  null,
 		

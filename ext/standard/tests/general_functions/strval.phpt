@@ -26,7 +26,7 @@ $heredoc_NULL_string = <<<EOD
 NULL
 EOD;
 
-// different valid  scalar vlaues 
+// different valid  scalar values 
 $scalars = array(
   /* integers */
   0,

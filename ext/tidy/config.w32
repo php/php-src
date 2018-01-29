@@ -17,6 +17,8 @@ if (PHP_TIDY != "no") {
 
 		EXTENSION("tidy", "tidy.c");
 		AC_DEFINE('HAVE_TIDY', 1, 'Have TIDY library');
+		AC_DEFINE('HAVE_TIDY_H', 1, "tidy include header")
+		AC_DEFINE('HAVE_TIDYRELEASEDATE', 1, "tidy release date function")
 		ADD_FLAG('CFLAGS_TIDY', '/DZEND_ENABLE_STATIC_TSRMLS_CACHE=1');
 		if (!PHP_TIDY_SHARED) {
 			ADD_DEF_FILE("ext\\tidy\\php_tidy.def");

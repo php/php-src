@@ -11,13 +11,13 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
  */
 
 echo "*** Testing intval() with valid integer values ***\n";
-// different valid  integer vlaues 
+// different valid  integer values
 $valid_ints = array(
                 '0',
                 '1',
                 '-1',
                 '-2147483648', // max negative integer value
-                '-2147483647', 
+                '-2147483647',
                 2147483647,  // max positive integer value
                 2147483640,
                 0x123B,      // integer as hexadecimal
@@ -33,7 +33,7 @@ $valid_ints = array(
                 017777777777,  // max positive integer as octal
                );
 
-/* loop to check that intval() recognizes different 
+/* loop to check that intval() recognizes different
    integer values, expected output:integer value in decimal notation for valid integer */
 
 echo "\n***Output with default base value ie 10 ***\n";
@@ -47,7 +47,7 @@ foreach ($valid_ints as $value ) {
    var_dump( intval($value, 10) );
 }
 
- 
+
 echo "\n***Output with base value  of 16 ***\n";
 foreach ($valid_ints as $value ) {
    var_dump( intval($value, 16) );
@@ -140,7 +140,7 @@ $not_int_types = array (
 );
 
 
-/* loop through the $not_int_types to see working of 
+/* loop through the $not_int_types to see working of
    intval() on non integer types, expected output: integer value in decimal notation for valid integers */
 foreach ($not_int_types as $type ) {
    var_dump( intval($type) );
@@ -150,9 +150,9 @@ echo "\n*** Testing error conditions ***\n";
 //Zero argument
 var_dump( intval() );
 
-//arguments more than expected 
+//arguments more than expected
 var_dump( intval(TRUE, FALSE, TRUE) );
- 
+
 echo "\n--- Done ---\n";
 
 
@@ -297,10 +297,10 @@ int(0)
 
 *** Testing error conditions ***
 
-Warning: Wrong parameter count for intval() in %s on line %d
+Warning: intval() expects at least 1 parameter, 0 given in %s on line %d
 NULL
 
-Warning: Wrong parameter count for intval() in %s on line %d
+Warning: intval() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
 --- Done ---

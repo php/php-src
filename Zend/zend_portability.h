@@ -514,6 +514,35 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # endif
 #endif
 
+#if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+# define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
+#endif
+
+#ifdef __SSE4_2__
+/* Instructions compiled directly. */
+# define ZEND_INTRIN_SSE4_2_NATIVE 1
+#elif (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_NMMINTRIN_H) || defined(ZEND_WIN32)
+/* Function resolved by ifunc or MINIT. */
+# define ZEND_INTRIN_SSE4_2_RESOLVER 1
+#endif
+
+#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER)
+# define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
+#elif ZEND_INTRIN_SSE4_2_RESOLVER
+# define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
+#endif
+
+#ifdef ZEND_WIN32
+# define ZEND_SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
+#elif HAVE_ATTRIBUTE_ALIGNED
+# define ZEND_SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
+#else
+# define ZEND_SET_ALIGNED(alignment, decl) decl
+#endif
+
+#define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((zend_uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))
+#define ZEND_SLIDE_TO_ALIGNED16(ptr) ZEND_SLIDE_TO_ALIGNED(Z_UL(16), ptr)
+
 #endif /* ZEND_PORTABILITY_H */
 
 /*
