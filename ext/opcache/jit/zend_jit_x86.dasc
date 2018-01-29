@@ -1318,7 +1318,7 @@ static void* dasm_labels[zend_lb_MAX];
 |.endmacro
 
 |.macro SEPARATE_ZVAL_NOREF, addr, op_info, cold, filename, lineno
-||	if ((op_info & (MAY_BE_STRING|MAY_BE_ARRAY)) && RC_MAY_BE_N(op_info)) {
+||	if ((op_info & MAY_BE_ARRAY) && RC_MAY_BE_N(op_info)) {
 ||		if (cold) {
 |			IF_ZVAL_TYPE addr, IS_ARRAY, >1
 |.cold_code
