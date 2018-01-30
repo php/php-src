@@ -1583,7 +1583,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-	int max_requests = 500;
+	int max_requests = 0;
 	int requests = 0;
 	int fcgi_fd = 0;
 	fcgi_request *request;
