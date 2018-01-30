@@ -12,7 +12,7 @@ $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 $bert = "file://" . dirname(__FILE__) . "/bug41033.pem";
 $sert = "file://" . dirname(__FILE__) . "/san-cert.pem";
 $cpca = dirname(__FILE__) . "/san-ca.pem";
-$utfl = dirname(__FILE__) . "/sni_server_domain1.pem";
+$utfl = dirname(__FILE__) . "/sni_server_uk.pem";
 $rcrt = openssl_x509_read($cert);
 
 /*  int openssl_x509_checkpurpose ( mixed $x509cert , int $purpose);   */
