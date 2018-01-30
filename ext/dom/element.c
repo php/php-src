@@ -412,6 +412,10 @@ PHP_FUNCTION(dom_element_set_attribute)
 		if (xmlNewNs(nodep, (xmlChar *)value, NULL)) {
 			RETURN_TRUE;
 		}
+	} else if (xmlStrncmp((xmlChar *)name, (xmlChar *)"xmlns:", 6) == 0) {
+		if (xmlNewNs(nodep, (xmlChar *)value, (xmlChar *)(name + 6))) {
+			RETURN_TRUE;
+		}
 	} else {
 		attr = (xmlNodePtr)xmlSetProp(nodep, (xmlChar *) name, (xmlChar *)value);
 	}
