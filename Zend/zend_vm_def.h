@@ -1450,7 +1450,7 @@ ZEND_VM_C_LABEL(fetch_this):
 		}
 	}
 
-	if ((opline->extended_value & ZEND_FETCH_TYPE_MASK) != ZEND_FETCH_GLOBAL_LOCK) {
+	if (!(opline->extended_value & ZEND_FETCH_GLOBAL_LOCK)) {
 		FREE_OP1();
 	}
 
@@ -6197,7 +6197,7 @@ ZEND_VM_HANDLER(197, ZEND_ISSET_ISEMPTY_CV, CV, UNUSED, ISSET)
 		result =
 			Z_TYPE_P(value) > IS_NULL &&
 		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
-	} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
+	} else {
 		SAVE_OPLINE();
 		result = !i_zend_is_true(value);
 		if (UNEXPECTED(EG(exception))) {
@@ -6240,7 +6240,7 @@ ZEND_VM_HANDLER(114, ZEND_ISSET_ISEMPTY_VAR, CONST|TMPVAR|CV, UNUSED, VAR_FETCH|
 	if (opline->extended_value & ZEND_ISSET) {
 		result = value && Z_TYPE_P(value) > IS_NULL &&
 		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
-	} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
+	} else {
 		result = !value || !i_zend_is_true(value);
 	}
 
@@ -6330,7 +6330,7 @@ ZEND_VM_C_LABEL(is_static_prop_return):
 	if (opline->extended_value & ZEND_ISSET) {
 		result = value && Z_TYPE_P(value) > IS_NULL &&
 		    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
-	} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
+	} else {
 		result = !value || !i_zend_is_true(value);
 	}
 
@@ -6404,7 +6404,7 @@ ZEND_VM_C_LABEL(num_index_prop):
 			/* > IS_NULL means not IS_UNDEF and not IS_NULL */
 			result = value != NULL && Z_TYPE_P(value) > IS_NULL &&
 			    (!Z_ISREF_P(value) || Z_TYPE_P(Z_REFVAL_P(value)) != IS_NULL);
-		} else /* if (opline->extended_value & ZEND_ISEMPTY) */ {
+		} else {
 			result = (value == NULL || !i_zend_is_true(value));
 		}
 		ZEND_VM_C_GOTO(isset_dim_obj_exit);

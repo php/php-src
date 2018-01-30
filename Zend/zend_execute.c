@@ -1519,11 +1519,10 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 {
 	HashTable *ht;
 
-	if (EXPECTED(fetch_type == ZEND_FETCH_GLOBAL_LOCK) ||
-	    EXPECTED(fetch_type == ZEND_FETCH_GLOBAL)) {
+	if (EXPECTED(fetch_type & (ZEND_FETCH_GLOBAL_LOCK | ZEND_FETCH_GLOBAL))) {
 		ht = &EG(symbol_table);
 	} else {
-		ZEND_ASSERT(fetch_type == ZEND_FETCH_LOCAL);
+		ZEND_ASSERT(fetch_type & ZEND_FETCH_LOCAL);
 		if (!(EX_CALL_INFO() & ZEND_CALL_HAS_SYMBOL_TABLE)) {
 			zend_rebuild_symbol_table();
 		}
