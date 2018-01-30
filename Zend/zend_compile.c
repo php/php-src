@@ -7571,7 +7571,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 	}
 
 	result->op_type = opline->result_type = IS_TMP_VAR;
-	opline->extended_value |= ast->kind == ZEND_AST_ISSET ? ZEND_ISSET : ZEND_ISEMPTY;
+	opline->extended_value |= ast->kind == ZEND_AST_ISSET ? ZEND_ISSET : 0;
 }
 /* }}} */
 

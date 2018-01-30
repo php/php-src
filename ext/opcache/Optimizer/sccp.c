@@ -430,7 +430,6 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
-			ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
@@ -588,7 +587,6 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
-			ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
@@ -655,7 +653,6 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 	if (extended_value & ZEND_ISSET) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
-		ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 		ZVAL_BOOL(result, !zend_is_true(op1));
 	}
 	return SUCCESS;
