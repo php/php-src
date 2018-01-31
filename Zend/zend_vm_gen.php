@@ -69,6 +69,7 @@ $vm_op_flags = array(
 	"ZEND_VM_OP_NEXT"         => 0x60,
 	"ZEND_VM_OP_CLASS_FETCH"  => 0x70,
 	"ZEND_VM_OP_CONSTRUCTOR"  => 0x80,
+	"ZEND_VM_OP_CONST_FETCH"  => 0x90,
 
 	"ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
 	"ZEND_VM_EXT_ISSET"       => 1<<17,
@@ -80,8 +81,8 @@ $vm_op_flags = array(
     // unused 0x2000000
 	"ZEND_VM_EXT_JMP_ADDR"    => 0x03000000,
 	"ZEND_VM_EXT_DIM_OBJ"     => 0x04000000,
-	"ZEND_VM_EXT_CLASS_FETCH" => 0x05000000,
-	"ZEND_VM_EXT_CONST_FETCH" => 0x06000000,
+    // unused 0x5000000
+    // unused 0x6000000
 	"ZEND_VM_EXT_TYPE"        => 0x07000000,
 	"ZEND_VM_EXT_EVAL"        => 0x08000000,
 	"ZEND_VM_EXT_TYPE_MASK"   => 0x09000000,
@@ -113,14 +114,13 @@ $vm_op_decode = array(
 	"NEXT"                 => ZEND_VM_OP_NEXT,
 	"CLASS_FETCH"          => ZEND_VM_OP_CLASS_FETCH,
 	"CONSTRUCTOR"          => ZEND_VM_OP_CONSTRUCTOR,
+	"CONST_FETCH"          => ZEND_VM_OP_CONST_FETCH,
 );
 
 $vm_ext_decode = array(
 	"NUM"                  => ZEND_VM_EXT_NUM,
 	"JMP_ADDR"             => ZEND_VM_EXT_JMP_ADDR,
 	"DIM_OBJ"              => ZEND_VM_EXT_DIM_OBJ,
-	"CLASS_FETCH"          => ZEND_VM_EXT_CLASS_FETCH,
-	"CONST_FETCH"          => ZEND_VM_EXT_CONST_FETCH,
 	"VAR_FETCH"            => ZEND_VM_EXT_VAR_FETCH,
 	"ARRAY_INIT"           => ZEND_VM_EXT_ARRAY_INIT,
 	"TYPE"                 => ZEND_VM_EXT_TYPE,

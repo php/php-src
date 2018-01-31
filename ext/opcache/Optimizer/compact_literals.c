@@ -181,7 +181,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					LITERAL_INFO(opline->op1.constant, LITERAL_CONST, 1, 1, 2);
 					break;
 				case ZEND_FETCH_CONSTANT:
-					if ((opline->extended_value & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
+					if ((opline->op1.num & (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) == (IS_CONSTANT_IN_NAMESPACE|IS_CONSTANT_UNQUALIFIED)) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 5);
 					} else {
 						LITERAL_INFO(opline->op2.constant, LITERAL_CONST, 1, 1, 3);

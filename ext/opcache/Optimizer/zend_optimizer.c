@@ -276,7 +276,6 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			return 0;
 		case ZEND_INIT_STATIC_METHOD_CALL:
 		case ZEND_CATCH:
-		case ZEND_FETCH_CONSTANT:
 		case ZEND_FETCH_CLASS_CONSTANT:
 		case ZEND_DEFINED:
 		case ZEND_NEW:

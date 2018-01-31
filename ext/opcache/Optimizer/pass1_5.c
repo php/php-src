@@ -287,8 +287,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else if (op_array->scope &&
 					opline->op1_type == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
-					((opline - 1)->op1_type == IS_UNUSED &&
-					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->op2_type == IS_UNUSED &&
+					((opline - 1)->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					(opline - 1)->result.var == opline->op1.var) {
 					/* for self::B */
 					ce = op_array->scope;
