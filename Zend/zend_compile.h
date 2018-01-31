@@ -877,6 +877,8 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_ARG_MASK         0x0fffffff
 
+#define ZEND_LAST_CATCH			    0x00000001
+
 #define ZEND_FREE_ON_RETURN     (1<<0)
 
 #define ZEND_SEND_BY_VAL     0

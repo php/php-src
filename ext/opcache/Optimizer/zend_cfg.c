@@ -385,8 +385,8 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				BB_START(i + 1);
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
-					BB_START(ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+				if (opline->extended_value != ZEND_LAST_CATCH) {
+					BB_START(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes);
 				}
 				BB_START(i + 1);
 				break;
@@ -546,9 +546,9 @@ int zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t b
 				block->successors[1] = j + 1;
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
+				if (opline->extended_value != ZEND_LAST_CATCH) {
 					block->successors_count = 2;
-					block->successors[0] = block_map[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)];
+					block->successors[0] = block_map[OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes];
 					block->successors[1] = j + 1;
 				} else {
 					block->successors_count = 1;

@@ -5201,15 +5201,17 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 				zend_error_noreturn(E_COMPILE_ERROR, "Cannot re-assign $this");
 			}
 
-			opline->op2_type = IS_CV;
-			opline->op2.var = lookup_cv(CG(active_op_array), var_name);
+			opline->result_type = IS_CV;
+			opline->result.var = lookup_cv(CG(active_op_array), var_name);
 
-			opline->result.num = is_last_catch && is_last_class;
+			if (is_last_catch && is_last_class) {
+				opline->extended_value = ZEND_LAST_CATCH;
+			}
 
 			if (!is_last_class) {
 				jmp_multicatch[j] = zend_emit_jump(0);
 				opline = &CG(active_op_array)->opcodes[opnum_catch];
-				opline->extended_value = get_next_op_number(CG(active_op_array));
+				opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 			}
 		}
 
@@ -5227,7 +5229,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 
 		opline = &CG(active_op_array)->opcodes[opnum_catch];
 		if (!is_last_catch) {
-			opline->extended_value = get_next_op_number(CG(active_op_array));
+			opline->op2.opline_num = get_next_op_number(CG(active_op_array));
 		}
 	}
 

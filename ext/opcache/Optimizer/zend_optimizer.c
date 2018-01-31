@@ -757,16 +757,16 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 		case ZEND_ASSERT_CHECK:
 			ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
 			break;
-		case ZEND_CATCH:
-			if (!opline->result.num) {
-				new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			}
-			break;
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
+			break;
+		case ZEND_CATCH:
+			if (opline->extended_value != ZEND_LAST_CATCH) {
+				ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
+			}
 			break;
 		case ZEND_SWITCH_LONG:
 		case ZEND_SWITCH_STRING:
@@ -803,11 +803,15 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 		case ZEND_ASSERT_CHECK:
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
+		case ZEND_CATCH:
+			if (opline->extended_value != ZEND_LAST_CATCH) {
+				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
+			}
+			break;
 		case ZEND_DECLARE_ANON_CLASS:
 		case ZEND_DECLARE_ANON_INHERITED_CLASS:
 		case ZEND_FE_FETCH_R:
 		case ZEND_FE_FETCH_RW:
-		case ZEND_CATCH:
 			opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) - shiftlist[ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value)]);
 			break;
 		case ZEND_SWITCH_LONG:
@@ -1167,6 +1171,11 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 				case ZEND_ASSERT_CHECK:
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 					break;
+				case ZEND_CATCH:
+					if (opline->extended_value != ZEND_LAST_CATCH) {
+						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+					}
+					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
@@ -1247,6 +1256,11 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+					break;
+				case ZEND_CATCH:
+					if (opline->extended_value != ZEND_LAST_CATCH) {
+						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
+					}
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:

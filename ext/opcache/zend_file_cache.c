@@ -446,6 +446,11 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 				case ZEND_ASSERT_CHECK:
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
+				case ZEND_CATCH:
+					if (opline->extended_value != ZEND_LAST_CATCH) {
+						SERIALIZE_PTR(opline->op2.jmp_addr);
+					}
+					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:
 				case ZEND_FE_FETCH_R:
@@ -1046,6 +1051,11 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				case ZEND_FE_RESET_RW:
 				case ZEND_ASSERT_CHECK:
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
+					break;
+				case ZEND_CATCH:
+					if (opline->extended_value != ZEND_LAST_CATCH) {
+						UNSERIALIZE_PTR(opline->op2.jmp_addr);
+					}
 					break;
 				case ZEND_DECLARE_ANON_CLASS:
 				case ZEND_DECLARE_ANON_INHERITED_CLASS:

@@ -452,6 +452,11 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 					case ZEND_ASSERT_CHECK:
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
+					case ZEND_CATCH:
+						if (opline->extended_value != ZEND_LAST_CATCH) {
+							opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
+						}
+						break;
 					case ZEND_DECLARE_ANON_CLASS:
 					case ZEND_DECLARE_ANON_INHERITED_CLASS:
 					case ZEND_FE_FETCH_R:

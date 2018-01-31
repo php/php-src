@@ -552,9 +552,9 @@ static void zend_ssa_replace_control_link(zend_op_array *op_array, zend_ssa *ssa
 				}
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.num) {
-					if (ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value) == old->start) {
-						opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, dst->start);
+				if (opline->extended_value != ZEND_LAST_CATCH) {
+					if (ZEND_OP2_JMP_ADDR(opline) == op_array->opcodes + old->start) {
+						ZEND_SET_OP_JMP_ADDR(opline, opline->op2, op_array->opcodes + dst->start);
 					}
 				}
 				break;

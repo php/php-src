@@ -965,8 +965,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.var) {
-					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
+				if (opline->extended_value != ZEND_LAST_CATCH) {
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
