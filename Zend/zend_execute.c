@@ -2368,14 +2368,12 @@ ZEND_API void zend_init_execute_data(zend_execute_data *execute_data, zend_op_ar
 }
 /* }}} */
 
-static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(const zend_op *opline, zend_execute_data *call) /* {{{ */
+static zend_always_inline zend_bool zend_is_by_ref_func_arg_fetch(uint32_t arg_num, zend_function *func) /* {{{ */
 {
-	uint32_t arg_num = opline->extended_value & ZEND_FETCH_ARG_MASK;
-
 	if (EXPECTED(arg_num <= MAX_ARG_FLAG_NUM)) {
-		return QUICK_ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);
+		return QUICK_ARG_SHOULD_BE_SENT_BY_REF(func, arg_num);
 	}
-	return ARG_SHOULD_BE_SENT_BY_REF(call->func, arg_num);
+	return ARG_SHOULD_BE_SENT_BY_REF(func, arg_num);
 }
 /* }}} */
 
