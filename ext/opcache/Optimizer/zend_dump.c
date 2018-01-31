@@ -681,10 +681,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else {
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+			if (opline->opcode != ZEND_CATCH || opline->extended_value != ZEND_LAST_CATCH) {
+				if (b) {
+					fprintf(stderr, " BB%d", b->successors[n++]);
+				} else {
+					fprintf(stderr, " L%u", (uint32_t)(OP_JMP_ADDR(opline, opline->op2) - op_array->opcodes));
+				}
 			}
 		} else {
 			zend_dump_unused_op(opline, opline->op2, op2_flags);
@@ -692,12 +694,10 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	}
 
 	if (ZEND_VM_EXT_JMP_ADDR == (flags & ZEND_VM_EXT_MASK)) {
-		if (opline->opcode != ZEND_CATCH || !opline->result.num) {
-			if (b) {
-				fprintf(stderr, " BB%d", b->successors[n++]);
-			} else {
-				fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
-			}
+		if (b) {
+			fprintf(stderr, " BB%d", b->successors[n++]);
+		} else {
+			fprintf(stderr, " L%u", (uint32_t)ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 		}
 	}
 	if (opline->result_type == IS_CONST) {

@@ -4082,7 +4082,7 @@ ZEND_VM_HANDLER(108, ZEND_THROW, CONST|TMP|VAR|CV, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
+ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH)
 {
 	USE_OPLINE
 	zend_class_entry *ce, *catch_ce;
@@ -4093,7 +4093,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 	/* Check whether an exception has been thrown, if not, jump over code */
 	zend_exception_restore();
 	if (EG(exception) == NULL) {
-		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
 		ZEND_VM_CONTINUE();
 	}
 	catch_ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)));
@@ -4112,17 +4112,17 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, CV, JMP_ADDR)
 
 	if (ce != catch_ce) {
 		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
-			if (opline->result.num) {
+			if (opline->extended_value == ZEND_LAST_CATCH) {
 				zend_rethrow_exception(execute_data);
 				HANDLE_EXCEPTION();
 			}
-			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
 			ZEND_VM_CONTINUE();
 		}
 	}
 
 	exception = EG(exception);
-	ex = EX_VAR(opline->op2.var);
+	ex = EX_VAR(opline->result.var);
 	if (UNEXPECTED(Z_ISREF_P(ex))) {
 		ex = Z_REFVAL_P(ex);
 	}

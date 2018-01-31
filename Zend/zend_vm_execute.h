@@ -2904,6 +2904,61 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_THROW_SPEC_CONST_HANDLER(ZEND_
 	HANDLE_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zend_class_entry *ce, *catch_ce;
+	zend_object *exception;
+	zval *ex;
+
+	SAVE_OPLINE();
+	/* Check whether an exception has been thrown, if not, jump over code */
+	zend_exception_restore();
+	if (EG(exception) == NULL) {
+		ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+		ZEND_VM_CONTINUE();
+	}
+	catch_ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)));
+	if (UNEXPECTED(catch_ce == NULL)) {
+		catch_ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), RT_CONSTANT(opline, opline->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
+
+		CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)), catch_ce);
+	}
+	ce = EG(exception)->ce;
+
+#ifdef HAVE_DTRACE
+	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
+		DTRACE_EXCEPTION_CAUGHT((char *)ce->name);
+	}
+#endif /* HAVE_DTRACE */
+
+	if (ce != catch_ce) {
+		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
+			if (opline->extended_value == ZEND_LAST_CATCH) {
+				zend_rethrow_exception(execute_data);
+				HANDLE_EXCEPTION();
+			}
+			ZEND_VM_SET_OPCODE(OP_JMP_ADDR(opline, opline->op2));
+			ZEND_VM_CONTINUE();
+		}
+	}
+
+	exception = EG(exception);
+	ex = EX_VAR(opline->result.var);
+	if (UNEXPECTED(Z_ISREF_P(ex))) {
+		ex = Z_REFVAL_P(ex);
+	}
+	zval_ptr_dtor(ex);
+	ZVAL_OBJ(ex, EG(exception));
+	if (UNEXPECTED(EG(exception) != exception)) {
+		GC_ADDREF(EG(exception));
+		HANDLE_EXCEPTION();
+	} else {
+		EG(exception) = NULL;
+		ZEND_VM_NEXT_OPCODE();
+	}
+}
+
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10766,61 +10821,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 	EX(call) = call;
 
 	ZEND_VM_NEXT_OPCODE();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zend_class_entry *ce, *catch_ce;
-	zend_object *exception;
-	zval *ex;
-
-	SAVE_OPLINE();
-	/* Check whether an exception has been thrown, if not, jump over code */
-	zend_exception_restore();
-	if (EG(exception) == NULL) {
-		ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
-		ZEND_VM_CONTINUE();
-	}
-	catch_ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)));
-	if (UNEXPECTED(catch_ce == NULL)) {
-		catch_ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), RT_CONSTANT(opline, opline->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-
-		CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op1)), catch_ce);
-	}
-	ce = EG(exception)->ce;
-
-#ifdef HAVE_DTRACE
-	if (DTRACE_EXCEPTION_CAUGHT_ENABLED()) {
-		DTRACE_EXCEPTION_CAUGHT((char *)ce->name);
-	}
-#endif /* HAVE_DTRACE */
-
-	if (ce != catch_ce) {
-		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
-			if (opline->result.num) {
-				zend_rethrow_exception(execute_data);
-				HANDLE_EXCEPTION();
-			}
-			ZEND_VM_SET_RELATIVE_OPCODE(opline, opline->extended_value);
-			ZEND_VM_CONTINUE();
-		}
-	}
-
-	exception = EG(exception);
-	ex = EX_VAR(opline->op2.var);
-	if (UNEXPECTED(Z_ISREF_P(ex))) {
-		ex = Z_REFVAL_P(ex);
-	}
-	zval_ptr_dtor(ex);
-	ZVAL_OBJ(ex, EG(exception));
-	if (UNEXPECTED(EG(exception) != exception)) {
-		GC_ADDREF(EG(exception));
-		HANDLE_EXCEPTION();
-	} else {
-		EG(exception) = NULL;
-		ZEND_VM_NEXT_OPCODE();
-	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -54885,7 +54885,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_EXT_NOP_SPEC_LABEL,
 			(void*)&&ZEND_TICKS_SPEC_LABEL,
 			(void*)&&ZEND_SEND_VAR_NO_REF_SPEC_VAR_LABEL,
-			(void*)&&ZEND_CATCH_SPEC_CONST_CV_LABEL,
+			(void*)&&ZEND_CATCH_SPEC_CONST_LABEL,
 			(void*)&&ZEND_THROW_SPEC_CONST_LABEL,
 			(void*)&&ZEND_THROW_SPEC_TMP_LABEL,
 			(void*)&&ZEND_THROW_SPEC_VAR_LABEL,
@@ -57012,6 +57012,9 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			HYBRID_CASE(ZEND_THROW_SPEC_CONST):
 				ZEND_THROW_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_CATCH_SPEC_CONST):
+				ZEND_CATCH_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAL_SPEC_CONST):
 				ZEND_SEND_VAL_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
@@ -57524,9 +57527,6 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_INIT_USER_CALL_SPEC_CONST_CV):
 				ZEND_INIT_USER_CALL_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_CATCH_SPEC_CONST_CV):
-				ZEND_CATCH_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV):
 				ZEND_ADD_ARRAY_ELEMENT_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -62770,7 +62770,7 @@ void zend_init_opcodes_handlers(void)
 		ZEND_EXT_NOP_SPEC_HANDLER,
 		ZEND_TICKS_SPEC_HANDLER,
 		ZEND_SEND_VAR_NO_REF_SPEC_VAR_HANDLER,
-		ZEND_CATCH_SPEC_CONST_CV_HANDLER,
+		ZEND_CATCH_SPEC_CONST_HANDLER,
 		ZEND_THROW_SPEC_CONST_HANDLER,
 		ZEND_THROW_SPEC_TMP_HANDLER,
 		ZEND_THROW_SPEC_VAR_HANDLER,

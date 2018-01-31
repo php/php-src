@@ -760,9 +760,9 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				return 1;
 			}
 
-			do {
+			cur = &op_array->opcodes[catch];
+			while (1) {
 				zend_class_entry *ce;
-				cur = &op_array->opcodes[catch];
 
 				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1))))) {
 					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
@@ -773,8 +773,12 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 					return 1;
 				}
 
-				catch += cur->extended_value / sizeof(zend_op);
-			} while (!cur->result.num);
+				if (cur->extended_value == ZEND_LAST_CATCH) {
+					return 0;
+				}
+
+				cur = OP_JMP_ADDR(cur, cur->op2);
+			}
 
 			return 0;
 		}

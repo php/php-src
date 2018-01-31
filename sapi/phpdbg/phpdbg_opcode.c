@@ -115,7 +115,13 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	/* RESULT */
 	switch (opline->opcode) {
 	case ZEND_CATCH:
-		spprintf(&decode[3], 0, "%" PRIu32, opline->result.num);
+		if (opline->extended_value == ZEND_LAST_CATCH) {
+			if (decode[2]) {
+				efree(decode[2]);
+				decode[2] = NULL;
+			}
+		}
+		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);
 		break;
 	default:
 		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);
