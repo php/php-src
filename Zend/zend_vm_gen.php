@@ -1136,7 +1136,7 @@ function gen_null_label($f, $kind, $prolog) {
 
 // Generates array of opcode handlers (specialized or unspecialized)
 function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()) {
-	global $opcodes, $op_types, $prefix;
+	global $opcodes, $op_types, $prefix, $op_types_ex;
 
 	$next = 0;
 	$label = 0;
@@ -1147,16 +1147,35 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 		foreach($opcodes as $num => $dsc) {
 			$specs[$num] = "$label";
 			$spec_op1 = $spec_op2 = $spec_extra = false;
+			$def_op1_type = $def_op2_type = "ANY";
 			$next = $num + 1;
-			$diff = array_diff_key(array_flip($op_types), isset($dsc["op1"]) ? $dsc["op1"] : array());
-			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op1"]["TMPVAR"]) || isset($dsc["op1"]["TMPVARCV"])) {
-				$spec_op1 = true;
-				$specs[$num] .= " | SPEC_RULE_OP1";
+			if (isset($dsc["op1"]) && !isset($dsc["op1"]["ANY"])) {
+				$count = 0;
+				foreach ($op_types_ex as $t) {
+					if (isset($dsc["op1"][$t])) {
+						$def_op1_type = $t;
+						$count++;
+					}
+				}
+				if ($count > 1) {
+					$spec_op1 = true;
+					$specs[$num] .= " | SPEC_RULE_OP1";
+					$def_op1_type = "ANY";
+				}
 			}
-			$diff = array_diff_key(array_flip($op_types), isset($dsc["op2"]) ? $dsc["op2"] : array());
-			if ((count($diff) == count($op_types) - 1 ? isset($diff["ANY"]) : count($diff) != count($op_types)) || isset($dsc["op2"]["TMPVAR"]) || isset($dsc["op2"]["TMPVARCV"])) {
-				$spec_op2 = true;
-				$specs[$num] .= " | SPEC_RULE_OP2";
+			if (isset($dsc["op2"]) && !isset($dsc["op2"]["ANY"])) {
+				$count = 0;
+				foreach ($op_types_ex as $t) {
+					if (isset($dsc["op2"][$t])) {
+						$def_op2_type = $t;
+						$count++;
+					}
+				}
+				if ($count > 1) {
+					$spec_op2 = true;
+					$specs[$num] .= " | SPEC_RULE_OP2";
+					$def_op2_type = "ANY";
+				}
 			}
 			$spec_extra = call_user_func_array("array_merge", extra_spec_handler($dsc) ?: array(array()));
 			$flags = extra_spec_flags($spec_extra);
@@ -1169,7 +1188,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			}
 
 			$foreach_op1 = function($do) use ($dsc, $op_types) {
-				return function() use ($do, $dsc, $op_types) {
+				return function($_, $op2) use ($do, $dsc, $op_types) {
 					// For each op1.op_type except ANY
 					foreach($op_types as $op1) {
 						if ($op1 != "ANY") {
@@ -1189,13 +1208,13 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 									$op1 = "ANY";
 								}
 							}
-							$do($op1, "ANY");
+							$do($op1, $op2);
 						}
 					}
 				};
 			};
 			$foreach_op2 = function($do) use ($dsc, $op_types) {
-				return function($op1) use ($do, $dsc, $op_types) {
+				return function($op1, $_) use ($do, $dsc, $op_types) {
 					// For each op2.op_type except ANY
 					foreach($op_types as $op2) {
 						if ($op2 != "ANY") {
@@ -1308,7 +1327,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				$do = $foreach_op1($do);
 			}
 
-			$do("ANY", "ANY");
+			$do($def_op1_type, $def_op2_type);
 		}
 	} else {
 	  // Emit labels for unspecialized executor
@@ -1637,7 +1656,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,"static zend_op hybrid_halt_op;\n");
 						out($f,"#endif\n");
 					}
-					out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID)\n");
+					out($f,"#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
 					out($f,"static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op);\n");
 					out($f,"#endif\n\n");
 					if ($kind == ZEND_VM_KIND_HYBRID) {
@@ -2496,7 +2515,7 @@ function gen_vm($def, $skel) {
 		out($f, "\treturn zend_opcode_handlers[(spec & SPEC_START_MASK) + offset];\n");
 	}
 	out($f, "}\n\n");
-	out($f, "#if ZEND_VM_KIND != ZEND_VM_KIND_HYBRID\n");
+	out($f, "#if (ZEND_VM_KIND != ZEND_VM_KIND_HYBRID) || !ZEND_VM_SPEC\n");
 	out($f, "static const void *zend_vm_get_opcode_handler(zend_uchar opcode, const zend_op* op)\n");
 	out($f, "{\n");
 	if (!ZEND_VM_SPEC) {
