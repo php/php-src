@@ -2451,7 +2451,7 @@ function gen_vm($def, $skel) {
 		out($f, "\treturn zend_opcode_handlers[spec];\n");
 	} else {
 		out($f, "\tstatic const int zend_vm_decode[] = {\n");
-		out($f, "\t\t_UNUSED_CODE, /* 0              */\n");
+		out($f, "\t\t_UNUSED_CODE, /* 0 = IS_UNUSED  */\n");
 		out($f, "\t\t_CONST_CODE,  /* 1 = IS_CONST   */\n");
 		out($f, "\t\t_TMP_CODE,    /* 2 = IS_TMP_VAR */\n");
 		out($f, "\t\t_UNUSED_CODE, /* 3              */\n");
@@ -2459,15 +2459,7 @@ function gen_vm($def, $skel) {
 		out($f, "\t\t_UNUSED_CODE, /* 5              */\n");
 		out($f, "\t\t_UNUSED_CODE, /* 6              */\n");
 		out($f, "\t\t_UNUSED_CODE, /* 7              */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 8 = IS_UNUSED  */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 9              */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 10             */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 11             */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 12             */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 13             */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 14             */\n");
-		out($f, "\t\t_UNUSED_CODE, /* 15             */\n");
-		out($f, "\t\t_CV_CODE      /* 16 = IS_CV     */\n");
+		out($f, "\t\t_CV_CODE      /* 8 = IS_CV      */\n");
 		out($f, "\t};\n");
 		out($f, "\tuint32_t offset = 0;\n");
 		out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");
@@ -2525,7 +2517,7 @@ function gen_vm($def, $skel) {
 			out($f, "\treturn zend_opcode_handler_funcs[spec];\n");
 		} else {
 			out($f, "\tstatic const int zend_vm_decode[] = {\n");
-			out($f, "\t\t_UNUSED_CODE, /* 0              */\n");
+			out($f, "\t\t_UNUSED_CODE, /* 0 = IS_UNUSED  */\n");
 			out($f, "\t\t_CONST_CODE,  /* 1 = IS_CONST   */\n");
 			out($f, "\t\t_TMP_CODE,    /* 2 = IS_TMP_VAR */\n");
 			out($f, "\t\t_UNUSED_CODE, /* 3              */\n");
@@ -2533,15 +2525,7 @@ function gen_vm($def, $skel) {
 			out($f, "\t\t_UNUSED_CODE, /* 5              */\n");
 			out($f, "\t\t_UNUSED_CODE, /* 6              */\n");
 			out($f, "\t\t_UNUSED_CODE, /* 7              */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 8 = IS_UNUSED  */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 9              */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 10             */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 11             */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 12             */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 13             */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 14             */\n");
-			out($f, "\t\t_UNUSED_CODE, /* 15             */\n");
-			out($f, "\t\t_CV_CODE      /* 16 = IS_CV     */\n");
+			out($f, "\t\t_CV_CODE      /* 8 = IS_CV      */\n");
 			out($f, "\t};\n");
 			out($f, "\tuint32_t offset = 0;\n");
 			out($f, "\tif (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];\n");

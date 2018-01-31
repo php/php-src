@@ -660,11 +660,11 @@ struct _zend_execute_data {
 
 #endif
 
+#define IS_UNUSED	0		/* Unused operand */
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
 #define IS_VAR		(1<<2)
-#define IS_UNUSED	(1<<3)	/* Unused variable */
-#define IS_CV		(1<<4)	/* Compiled variable */
+#define IS_CV		(1<<3)	/* Compiled variable */
 
 #include "zend_globals.h"
 
