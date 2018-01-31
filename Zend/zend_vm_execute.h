@@ -4844,7 +4844,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_CONST(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -4915,7 +4915,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -5138,7 +5138,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -7122,7 +7122,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -7347,7 +7347,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -8378,7 +8378,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_VAR(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -8830,7 +8830,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUS
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value & ZEND_FETCH_ARG_MASK, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -8897,7 +8897,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -8918,7 +8918,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -10261,7 +10261,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -10484,7 +10484,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -14011,7 +14011,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_CONST(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -16459,7 +16459,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_VAR(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -16820,7 +16820,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNU
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value & ZEND_FETCH_ARG_MASK, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -16889,7 +16889,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -19274,7 +19274,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CO
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -19301,7 +19301,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -19711,7 +19711,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TM
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -19738,7 +19738,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -20285,7 +20285,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UN
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -20714,7 +20714,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -20741,7 +20741,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -23576,7 +23576,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CO
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -23665,7 +23665,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -26008,7 +26008,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TM
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -26097,7 +26097,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -28258,7 +28258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UN
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -29851,7 +29851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -29940,7 +29940,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -32433,7 +32433,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -34258,7 +34258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -36613,7 +36613,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -40851,7 +40851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_CONST(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -40956,7 +40956,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CON
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -41241,7 +41241,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -44842,7 +44842,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -45129,7 +45129,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
@@ -47187,7 +47187,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_VAR(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -47968,7 +47968,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value & ZEND_FETCH_ARG_MASK, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CV_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CV_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -48035,7 +48035,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPE
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_UNUSED(BP_VAR_R ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
@@ -48090,7 +48090,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNU
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -50573,7 +50573,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
             zend_throw_error(NULL, "Cannot use temporary expression in write context");
@@ -50858,7 +50858,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 {
 	USE_OPLINE
 
-	if (zend_is_by_ref_func_arg_fetch(opline, EX(call))) {
+	if (zend_is_by_ref_func_arg_fetch(opline->extended_value, EX(call)->func)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
 			SAVE_OPLINE();
