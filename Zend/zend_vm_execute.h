@@ -8709,7 +8709,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	retval = zend_hash_find_ex(target_symbol_table, name, IS_CONST == IS_CONST);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS)))) {
@@ -9285,7 +9285,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CONST_UNUSED_HA
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	zend_hash_del_ind(target_symbol_table, name);
 
 	if (IS_CONST != IS_CONST) {
@@ -9373,7 +9373,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CONST_U
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	value = zend_hash_find_ex_ind(target_symbol_table, name, IS_CONST == IS_CONST);
 
 	if (IS_CONST != IS_CONST) {
@@ -16699,7 +16699,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	retval = zend_hash_find_ex(target_symbol_table, name, (IS_TMP_VAR|IS_VAR) == IS_CONST);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS)))) {
@@ -16930,7 +16930,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_TMPVAR_UNUSED_H
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	zend_hash_del_ind(target_symbol_table, name);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -17018,7 +17018,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_TMPVAR_
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	value = zend_hash_find_ex_ind(target_symbol_table, name, (IS_TMP_VAR|IS_VAR) == IS_CONST);
 
 	if ((IS_TMP_VAR|IS_VAR) != IS_CONST) {
@@ -47847,7 +47847,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_var_address_helper_SPEC_
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	retval = zend_hash_find_ex(target_symbol_table, name, IS_CV == IS_CONST);
 	if (retval == NULL) {
 		if (UNEXPECTED(zend_string_equals(name, ZSTR_KNOWN(ZEND_STR_THIS)))) {
@@ -48690,7 +48690,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_UNSET_VAR_SPEC_CV_UNUSED_HANDL
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	zend_hash_del_ind(target_symbol_table, name);
 
 	if (IS_CV != IS_CONST) {
@@ -48803,7 +48803,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_VAR_SPEC_CV_UNUS
 		name = zval_get_tmp_string(varname, &tmp_name);
 	}
 
-	target_symbol_table = zend_get_target_symbol_table(opline->extended_value & ZEND_FETCH_TYPE_MASK EXECUTE_DATA_CC);
+	target_symbol_table = zend_get_target_symbol_table(opline->extended_value EXECUTE_DATA_CC);
 	value = zend_hash_find_ex_ind(target_symbol_table, name, IS_CV == IS_CONST);
 
 	if (IS_CV != IS_CONST) {
