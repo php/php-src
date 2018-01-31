@@ -7724,9 +7724,9 @@ void zend_compile_const(znode *result, zend_ast *ast) /* {{{ */
 		opline->op2.constant = zend_add_const_name_literal(
 			CG(active_op_array), resolved_name, 0);
 	} else {
-		opline->extended_value = IS_CONSTANT_UNQUALIFIED;
+		opline->op1.num = IS_CONSTANT_UNQUALIFIED;
 		if (FC(current_namespace)) {
-			opline->extended_value |= IS_CONSTANT_IN_NAMESPACE;
+			opline->op1.num |= IS_CONSTANT_IN_NAMESPACE;
 			opline->op2.constant = zend_add_const_name_literal(
 				CG(active_op_array), resolved_name, 1);
 		} else {

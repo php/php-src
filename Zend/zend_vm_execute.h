@@ -33271,10 +33271,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_CONSTANT_SPEC_UNUSED_CON
 
 	if (EXPECTED(CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2))))) {
 		c = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(opline, opline->op2)));
-	} else if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->extended_value)) == NULL) {
+	} else if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num)) == NULL) {
 		SAVE_OPLINE();
 
-		if ((opline->extended_value & IS_CONSTANT_UNQUALIFIED) != 0) {
+		if ((opline->op1.num & IS_CONSTANT_UNQUALIFIED) != 0) {
 			char *actual = (char *)zend_memrchr(Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)), '\\', Z_STRLEN_P(RT_CONSTANT(opline, opline->op2)));
 			if (!actual) {
 				ZVAL_STR_COPY(EX_VAR(opline->result.var), Z_STR_P(RT_CONSTANT(opline, opline->op2)));
