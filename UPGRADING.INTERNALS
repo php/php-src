@@ -15,6 +15,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   l. php_hrtime_current()
   m. zend_cpu_supports()
   n. IS_TYPE_COPYABLE
+  o. IS_UNUSED
 
 2. Build system changes
   a. Unix build system changes
@@ -109,6 +110,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
      IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
      macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
+
+  o. IS_UNUSED became zero and can't be used as a bitmask (there were no such
+     usages in PHP sources).
 
 ========================
 2. Build system changes

@@ -534,19 +534,10 @@ static void zend_init_exception_op(void) /* {{{ */
 {
 	memset(EG(exception_op), 0, sizeof(EG(exception_op)));
 	EG(exception_op)[0].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[0].op1_type = IS_UNUSED;
-	EG(exception_op)[0].op2_type = IS_UNUSED;
-	EG(exception_op)[0].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op));
 	EG(exception_op)[1].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[1].op1_type = IS_UNUSED;
-	EG(exception_op)[1].op2_type = IS_UNUSED;
-	EG(exception_op)[1].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+1);
 	EG(exception_op)[2].opcode = ZEND_HANDLE_EXCEPTION;
-	EG(exception_op)[2].op1_type = IS_UNUSED;
-	EG(exception_op)[2].op2_type = IS_UNUSED;
-	EG(exception_op)[2].result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(EG(exception_op)+2);
 }
 /* }}} */
@@ -555,9 +546,6 @@ static void zend_init_call_trampoline_op(void) /* {{{ */
 {
 	memset(&EG(call_trampoline_op), 0, sizeof(EG(call_trampoline_op)));
 	EG(call_trampoline_op).opcode = ZEND_CALL_TRAMPOLINE;
-	EG(call_trampoline_op).op1_type = IS_UNUSED;
-	EG(call_trampoline_op).op2_type = IS_UNUSED;
-	EG(call_trampoline_op).result_type = IS_UNUSED;
 	ZEND_VM_SET_OPCODE_HANDLER(&EG(call_trampoline_op));
 }
 /* }}} */

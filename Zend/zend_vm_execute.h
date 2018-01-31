@@ -66995,7 +66995,7 @@ ZEND_API int zend_vm_kind(void)
 static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)
 {
 	static const int zend_vm_decode[] = {
-		_UNUSED_CODE, /* 0              */
+		_UNUSED_CODE, /* 0 = IS_UNUSED  */
 		_CONST_CODE,  /* 1 = IS_CONST   */
 		_TMP_CODE,    /* 2 = IS_TMP_VAR */
 		_UNUSED_CODE, /* 3              */
@@ -67003,15 +67003,7 @@ static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* o
 		_UNUSED_CODE, /* 5              */
 		_UNUSED_CODE, /* 6              */
 		_UNUSED_CODE, /* 7              */
-		_UNUSED_CODE, /* 8 = IS_UNUSED  */
-		_UNUSED_CODE, /* 9              */
-		_UNUSED_CODE, /* 10             */
-		_UNUSED_CODE, /* 11             */
-		_UNUSED_CODE, /* 12             */
-		_UNUSED_CODE, /* 13             */
-		_UNUSED_CODE, /* 14             */
-		_UNUSED_CODE, /* 15             */
-		_CV_CODE      /* 16 = IS_CV     */
+		_CV_CODE      /* 8 = IS_CV      */
 	};
 	uint32_t offset = 0;
 	if (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];
@@ -67050,7 +67042,7 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 {
 	uint32_t spec = zend_spec_handlers[opcode];
 	static const int zend_vm_decode[] = {
-		_UNUSED_CODE, /* 0              */
+		_UNUSED_CODE, /* 0 = IS_UNUSED  */
 		_CONST_CODE,  /* 1 = IS_CONST   */
 		_TMP_CODE,    /* 2 = IS_TMP_VAR */
 		_UNUSED_CODE, /* 3              */
@@ -67058,15 +67050,7 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 		_UNUSED_CODE, /* 5              */
 		_UNUSED_CODE, /* 6              */
 		_UNUSED_CODE, /* 7              */
-		_UNUSED_CODE, /* 8 = IS_UNUSED  */
-		_UNUSED_CODE, /* 9              */
-		_UNUSED_CODE, /* 10             */
-		_UNUSED_CODE, /* 11             */
-		_UNUSED_CODE, /* 12             */
-		_UNUSED_CODE, /* 13             */
-		_UNUSED_CODE, /* 14             */
-		_UNUSED_CODE, /* 15             */
-		_CV_CODE      /* 16 = IS_CV     */
+		_CV_CODE      /* 8 = IS_CV      */
 	};
 	uint32_t offset = 0;
 	if (spec & SPEC_RULE_OP1) offset = offset * 5 + zend_vm_decode[op->op1_type];
