@@ -2501,7 +2501,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast, int th
 		fetch_type = zend_get_class_fetch_type(name);
 
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, NULL);
-		opline->extended_value = fetch_type | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
+		opline->op1.num = fetch_type | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
 
 		if (fetch_type == ZEND_FETCH_CLASS_DEFAULT) {
 			uint32_t type = name_ast->kind == ZEND_AST_ZVAL ? name_ast->attr : ZEND_NAME_FQ;
@@ -2515,7 +2515,7 @@ static zend_op *zend_compile_class_ref(znode *result, zend_ast *name_ast, int th
 		zend_string_release(name);
 	} else {
 		opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, &name_node);
-		opline->extended_value = ZEND_FETCH_CLASS_DEFAULT | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
+		opline->op1.num = ZEND_FETCH_CLASS_DEFAULT | (throw_exception ? ZEND_FETCH_CLASS_EXCEPTION : 0);
 	}
 
 	return opline;
@@ -2553,7 +2553,7 @@ static void zend_compile_class_ref_ex(znode *result, zend_ast *name_ast, uint32_
 			zend_string_release(name);
 		} else {
 			zend_op *opline = zend_emit_op(result, ZEND_FETCH_CLASS, NULL, &name_node);
-			opline->extended_value = ZEND_FETCH_CLASS_DEFAULT | fetch_flags;
+			opline->op1.num = ZEND_FETCH_CLASS_DEFAULT | fetch_flags;
 		}
 		return;
 	}
@@ -7749,7 +7749,7 @@ void zend_compile_class_const(znode *result, zend_ast *ast) /* {{{ */
 	if (zend_try_compile_const_expr_resolve_class_name(&result->u.constant, class_ast, const_ast, 0)) {
 		if (Z_TYPE(result->u.constant) == IS_NULL) {
 			zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-			opline->extended_value = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
+			opline->op1.num = zend_get_class_fetch_type(zend_ast_get_str(class_ast));
 		} else {
 			result->op_type = IS_CONST;
 		}
@@ -7807,14 +7807,14 @@ void zend_compile_resolve_class_name(znode *result, zend_ast *ast) /* {{{ */
 				ZVAL_STR_COPY(&result->u.constant, CG(active_class_entry)->name);
 			} else {
 				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-				opline->extended_value = fetch_type;
+				opline->op1.num = fetch_type;
 			}
 			break;
 		case ZEND_FETCH_CLASS_STATIC:
 		case ZEND_FETCH_CLASS_PARENT:
 			{
 				zend_op *opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-				opline->extended_value = fetch_type;
+				opline->op1.num = fetch_type;
 			}
 			break;
 		case ZEND_FETCH_CLASS_DEFAULT:
@@ -7972,7 +7972,7 @@ void zend_compile_magic_const(znode *result, zend_ast *ast) /* {{{ */
 	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	opline = zend_emit_op_tmp(result, ZEND_FETCH_CLASS_NAME, NULL, NULL);
-	opline->extended_value = ZEND_FETCH_CLASS_SELF;
+	opline->op1.num = ZEND_FETCH_CLASS_SELF;
 }
 /* }}} */
 

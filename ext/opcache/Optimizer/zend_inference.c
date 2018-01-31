@@ -2821,7 +2821,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_FETCH_CLASS:
 			UPDATE_SSA_TYPE(MAY_BE_CLASS, ssa_ops[i].result_def);
 			if (opline->op2_type == IS_UNUSED) {
-				switch (opline->extended_value & ZEND_FETCH_CLASS_MASK) {
+				switch (opline->op1.num & ZEND_FETCH_CLASS_MASK) {
 					case ZEND_FETCH_CLASS_SELF:
 						if (op_array->scope) {
 							UPDATE_SSA_OBJ_TYPE(op_array->scope, 0, ssa_ops[i].result_def);
