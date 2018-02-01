@@ -212,7 +212,7 @@ PHP_FUNCTION(password_get_info)
 }
 /** }}} */
 
-/* {{{ proto boolean password_needs_rehash(string $hash, integer $algo[, array $options])
+/* {{{ proto boolean password_needs_rehash(string $hash, int $algo[, array $options])
 Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {

@@ -248,8 +248,8 @@ ZEND_BEGIN_ARG_INFO_EX( arginfo_resourcebundle_get, 0, 0, 1 )
 ZEND_END_ARG_INFO()
 /* }}} */
 
-/* {{{ proto mixed ResourceBundle::get( integer|string $resindex [, bool $fallback = true ] )
- * proto mixed resourcebundle_get( ResourceBundle $rb, integer|string $resindex [, bool $fallback = true ] )
+/* {{{ proto mixed ResourceBundle::get( int|string $resindex [, bool $fallback = true ] )
+ * proto mixed resourcebundle_get( ResourceBundle $rb, int|string $resindex [, bool $fallback = true ] )
  * Get resource identified by numerical index or key name.
  */
 PHP_FUNCTION( resourcebundle_get )
