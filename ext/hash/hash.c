@@ -434,7 +434,7 @@ PHP_FUNCTION(hash_update)
 }
 /* }}} */
 
-/* {{{ proto int hash_update_stream(HashContext context, resource handle[, integer length])
+/* {{{ proto int hash_update_stream(HashContext context, resource handle[, int length])
 Pump data into the hashing algorithm from an open stream */
 PHP_FUNCTION(hash_update_stream)
 {
