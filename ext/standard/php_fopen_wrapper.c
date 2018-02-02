@@ -217,7 +217,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		return php_stream_alloc(&php_stream_output_ops, NULL, 0, "wb");
 	}
 
-	if (!strcasecmp(path, "input")) {
+	if (!strcasecmp(path, "input", 5)) {
 		path += 5;
 		max_memory = SAPI_POST_BLOCK_SIZE;
 		if (!strncasecmp(path, "/maxmemory:", 11)) {
