@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
+- Phar:
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
+
 - SPL:
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
