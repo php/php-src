@@ -2999,6 +2999,7 @@ function toolset_setup_project_tools()
 	}
 	PATH_PROG('zip');
 	PATH_PROG('lemon');
+	PATH_PROG('7za');
 
 	// avoid picking up midnight commander from cygwin
 	PATH_PROG('mc', WshShell.Environment("Process").Item("PATH"));
