@@ -218,6 +218,16 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	}
 
 	if (!strcasecmp(path, "input")) {
+		path += 5;
+		max_memory = SAPI_POST_BLOCK_SIZE;
+		if (!strncasecmp(path, "/maxmemory:", 11)) {
+			path += 11;
+			max_memory = ZEND_STRTOL(path, NULL, 10);
+			if (max_memory < 0) {
+				zend_throw_error(NULL, "Max memory must be >= 0");
+				return NULL;
+			}
+		}
 		php_stream_input_t *input;
 
 		if ((options & STREAM_OPEN_FOR_INCLUDE) && !PG(allow_url_include) ) {
@@ -231,7 +241,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		if ((input->body = SG(request_info).request_body)) {
 			php_stream_rewind(input->body);
 		} else {
-			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, SAPI_POST_BLOCK_SIZE, PG(upload_tmp_dir));
+			input->body = php_stream_temp_create_ex(TEMP_STREAM_DEFAULT, max_memory, PG(upload_tmp_dir));
 			SG(request_info).request_body = input->body;
 		}
 
