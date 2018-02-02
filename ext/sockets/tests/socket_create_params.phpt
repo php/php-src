@@ -17,8 +17,8 @@ fa@php.net
 ?>
 --EXPECTF--
 
-Warning: socket_create() expects exactly 3 parameters, 0 given in %s on line %i
+Warning: socket_create() expects exactly 3 parameters, 0 given in %s on line %d
 
-Warning: socket_create() expects exactly 3 parameters, 1 given in %s on line %i
+Warning: socket_create() expects exactly 3 parameters, 1 given in %s on line %d
 
-Warning: socket_create() expects exactly 3 parameters, 2 given in %s on line %i
+Warning: socket_create() expects exactly 3 parameters, 2 given in %s on line %d
