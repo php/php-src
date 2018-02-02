@@ -16,6 +16,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   m. zend_cpu_supports()
   n. IS_TYPE_COPYABLE
   o. IS_UNUSED
+  p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
 
 2. Build system changes
   a. Unix build system changes
@@ -113,6 +114,11 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
   o. IS_UNUSED became zero and can't be used as a bitmask (there were no such
      usages in PHP sources).
+
+  p. Operands of few VM instructions were changed
+    - FETCH_CLASS     op1<fetch-flags>, op2<name>, result<var>
+    - FETCH_CONSTANT  op1<fetch-flags>, op2<name>, result<tmp>
+    - CATCH           ext<last-flag>, op1<name>, op2<jump_addr>, result<cv>
 
 ========================
 2. Build system changes

@@ -527,7 +527,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			case (1<<IS_RESOURCE):
 				fprintf(stderr, " (resource)");
 				break;
-			case ((1<<IS_FALSE)||(1<<IS_TRUE)):
+			case ((1<<IS_FALSE)|(1<<IS_TRUE)):
 				fprintf(stderr, " (bool)");
 				break;
 			default:

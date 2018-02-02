@@ -480,7 +480,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 
 /* zval.u1.v.type_flags */
-#define IS_TYPE_REFCOUNTED			(1<<2) /* equal to ZEND_CALL_FREE_EXTRA_ARGS */
+#define IS_TYPE_REFCOUNTED			(1<<0)
 
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
