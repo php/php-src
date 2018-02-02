@@ -1,7 +1,7 @@
 --TEST--
 json_last_error() failures
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

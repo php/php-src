@@ -1,9 +1,7 @@
 --TEST--
 json_encode() invalid UTF8
 --SKIPIF--
-<?php
-if (!extension_loaded("json")) print "skip";
-?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function json_encode_invalid_utf8($str) {

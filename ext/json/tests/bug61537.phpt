@@ -1,7 +1,7 @@
 --TEST--
 Bug #61537 (json_encode() incorrectly truncates/discards information)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $invalid_utf8 = "\x9f";

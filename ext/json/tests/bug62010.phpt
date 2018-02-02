@@ -1,7 +1,7 @@
 --TEST--
 Bug #62010 (json_decode produces invalid byte-sequences)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

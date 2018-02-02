@@ -1,7 +1,7 @@
 --TEST--
 FR #62369 (Segfault on json_encode(deeply_nested_array)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -29,6 +29,7 @@ switch (json_last_error()) {
 		echo 'ERROR' . PHP_EOL;
 	break;
 }
+?>
 --EXPECTF--
 OK
 ERROR

@@ -1,7 +1,7 @@
 --TEST--
 Bug #41504 (json_decode() converts empty array keys to "_empty_")
 --SKIPIF--
-<?php if (!extension_loaded('json')) print 'skip'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 
@@ -11,7 +11,7 @@ var_dump(json_decode('{"key":"value", "":"value"}', true));
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 array(1) {
   [""]=>
   string(5) "value"

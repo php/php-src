@@ -1,7 +1,7 @@
 --TEST--
 Bug #46944 (json_encode() doesn't handle 3 byte utf8 correctly)
 --SKIPIF--
-<?php if (!extension_loaded('json')) print 'skip'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

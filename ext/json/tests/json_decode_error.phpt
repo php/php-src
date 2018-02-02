@@ -1,7 +1,7 @@
 --TEST--
 Test json_decode() function : error conditions
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo "*** Testing json_decode() : error conditions ***\n";

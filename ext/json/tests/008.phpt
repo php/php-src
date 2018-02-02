@@ -1,7 +1,7 @@
 --TEST--
 json_decode() with large integers
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $json = '{"largenum":123456789012345678901234567890}';

@@ -1,7 +1,7 @@
 --TEST--
 Bug #69187 json_last_error return BC in PHP7
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 var_dump(json_decode(NULL)); 

@@ -1,5 +1,7 @@
 --TEST--
 Test json_decode() function : JSON_THROW_ON_ERROR flag
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 
