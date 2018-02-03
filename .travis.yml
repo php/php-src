@@ -1,6 +1,7 @@
 dist: trusty
 language: c
 sudo: false
+
 addons:
   apt:
     packages:
@@ -20,7 +21,7 @@ addons:
       - libzip-dev
 
 notifications:
-    email: 
+    email:
        on_failure: change
     irc:
       template:
@@ -47,6 +48,24 @@ env:
       - ENABLE_MAINTAINER_ZTS=0 ENABLE_DEBUG=0
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
+jobs:
+    include:
+        stage: Fast test
+        before_script:
+            - ccache --version
+            - ccache --zero-stats
+            - export USE_CCACHE=1
+            # Compile PHP fast
+            - ./travis/compile-fast.sh
+
+        # Run PHPs run-tests.php
+        script:
+            - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --set-timeout 120
+
+stages:
+    - Fast test
+    - Test
+
 before_script:
     - ccache --version
     - ccache --zero-stats
@@ -60,7 +79,7 @@ before_script:
     - . ./travis/ext/pgsql/setup.sh
     - . ./travis/ext/pdo_pgsql/setup.sh
 
-# Run PHPs run-tests.php 
+# Run PHPs run-tests.php
 script:
     - ./sapi/cli/php run-tests.php -p `pwd`/sapi/cli/php $(if [ $ENABLE_DEBUG == 0 ]; then echo "-d opcache.enable_cli=1 -d zend_extension=`pwd`/modules/opcache.so"; fi) -g "FAIL,XFAIL,BORK,WARN,LEAK,SKIP" --offline --show-diff --show-slow 1000 --set-timeout 120
 
