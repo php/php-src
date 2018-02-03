@@ -2,12 +2,6 @@
 string stream_socket_recvfrom ( resource $socket , int $length [, int $flags = 0 [, string &$address ]] );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
---SKIPIF--
-<?php
-if (phpversion() < "5.3.0") {
-  die('SKIP php version so lower.');
-}
-?>
 --FILE--
 <?php
 $serverUri = "tcp://127.0.0.1:31854";
