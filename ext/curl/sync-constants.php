@@ -11,7 +11,7 @@ const CURL_DOC_FILE = 'https://curl.haxx.se/libcurl/c/symbols-in-versions.html';
 
 const SOURCE_FILE = __DIR__ . '/interface.c';
 
-const MIN_SUPPORTED_CURL_VERSION = '7.12.1';
+const MIN_SUPPORTED_CURL_VERSION = '7.15.5';
 
 const IGNORED_CONSTANTS = [
     'CURLOPT_PROGRESSDATA'
@@ -28,7 +28,7 @@ foreach ($curlConstants as $name => [$introduced, $deprecated, $removed]) {
     $inPHP = in_array($name, $sourceConstants);
 
     if ($removed !== null) {
-        if (version_compare($removed, MIN_SUPPORTED_CURL_VERSION) < 0) {
+        if (version_compare($removed, MIN_SUPPORTED_CURL_VERSION) <= 0) {
             // constant removed before the minimum supported version
             continue;
         }
@@ -51,7 +51,7 @@ foreach ($sourceConstants as $name) {
         continue;
     }
 
-    if (version_compare($removed, MIN_SUPPORTED_CURL_VERSION) < 0) {
+    if (version_compare($removed, MIN_SUPPORTED_CURL_VERSION) <= 0) {
         // constant removed before the minimum supported version
         $outdated[$name] = $removed;
     }

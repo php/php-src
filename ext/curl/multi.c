@@ -531,7 +531,6 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 #endif
 
-#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
@@ -615,7 +614,6 @@ PHP_FUNCTION(curl_multi_setopt)
 	}
 }
 /* }}} */
-#endif
 
 #endif
 
