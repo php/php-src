@@ -37,5 +37,5 @@ B::test('foo');
 ?>
 --EXPECT--
 B
-B more,args
+B more,args 
 C other,args
