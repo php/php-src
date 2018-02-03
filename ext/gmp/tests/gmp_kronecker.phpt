@@ -1,5 +1,7 @@
 --TEST--
 gmp_kronecker(): Kronecker symbol
+--SKIPIF--
+<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
 --FILE--
 <?php
 
