@@ -2,8 +2,6 @@
 mysqli_real_escape_string() - euckr
 --SKIPIF--
 <?php
-if (ini_get('unicode.semantics'))
-	die("skip Test cannot be run in unicode mode");
 
 require_once('skipif.inc');
 require_once('skipifemb.inc');
