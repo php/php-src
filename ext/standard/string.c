@@ -3878,7 +3878,7 @@ static void *resolve_addslashes() {
 	return  php_addslashes_default;
 }
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
-zend_string *php_addslashes_sse42(zend_string *str, int should_free);
+zend_string *php_addslashes_sse42(zend_string *str, int should_free) __attribute__ ((target ("sse4.2")));
 zend_string *php_addslashes_default(zend_string *str, int should_free);
 
 PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
