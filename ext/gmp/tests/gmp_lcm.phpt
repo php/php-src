@@ -1,5 +1,7 @@
 --TEST--
 gmp_lcm(): Least common multiple
+--SKIPIF--
+<?php if (!extension_loaded('gmp')) die('skip gmp extension not loaded'); ?>
 --FILE--
 <?php
 

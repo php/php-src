@@ -1,5 +1,7 @@
 --TEST--
 hash_equals() function
+--SKIPIF--
+<?php if(!extension_loaded('hash')) die('skip hash extension not loaded'); ?>
 --FILE--
 <?php
 var_dump(hash_equals("same", "same"));
@@ -15,6 +17,7 @@ var_dump(hash_equals(123, 123));
 var_dump(hash_equals(null, ""));
 var_dump(hash_equals(null, 123));
 var_dump(hash_equals(null, null));
+?>
 --EXPECTF--
 bool(true)
 bool(false)
