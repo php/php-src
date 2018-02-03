@@ -19,12 +19,7 @@ if (!$socket) {
 	die("could not start/bind the ftp server\n");
 }
 
-
-
-
 $pid = pcntl_fork();
-
-
 
 function pasv_listen($action){
 	global $pasv_port, $tmp_file;
@@ -55,8 +50,6 @@ function pasv_listen($action){
 		exit;
 	}
 }
-
-
 
 if ($pid) {
 
@@ -524,8 +517,9 @@ if ($pid) {
 
 			fputs($s, "226 Closing data Connection.\r\n");
 			fclose($fs);
-		}else {
+		}elseif (preg_match("/^SITE/", $buf)) {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
+		}else {
 			dump_and_exit($buf);
 		}
 	}
