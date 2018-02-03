@@ -1,7 +1,7 @@
 --TEST--
 Bug #37565 (Using reflection::export with simplexml causing a crash)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml") || !extension_loaded('reflection')) print "skip"; ?>
+<?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
 
