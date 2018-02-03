@@ -1940,7 +1940,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_CALL_TRAMPOLINE_SPEC_HANDLER(Z
 	uint32_t call_info = EX_CALL_INFO() & (ZEND_CALL_NESTED | ZEND_CALL_TOP | ZEND_CALL_RELEASE_THIS);
 	uint32_t num_args = EX_NUM_ARGS();
 	zend_execute_data *call;
-	USE_OPLINE
 
 	SAVE_OPLINE();
 
@@ -2043,8 +2042,6 @@ call_trampoline_end:
 		ZEND_VM_RETURN();
 	}
 
-	opline = EX(opline);
-
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 		zend_object *object = Z_OBJ(call->This);
 		OBJ_RELEASE(object);
@@ -2056,6 +2053,7 @@ call_trampoline_end:
 		HANDLE_EXCEPTION_LEAVE();
 	}
 
+	LOAD_OPLINE();
 	ZEND_VM_INC_OPCODE();
 	ZEND_VM_LEAVE();
 }
@@ -22946,6 +22944,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -22968,6 +22967,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -22990,6 +22990,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -25382,6 +25383,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -25404,6 +25406,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -25426,6 +25429,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -27945,6 +27949,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -29235,6 +29240,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -29257,6 +29263,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -29279,6 +29286,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_VAR != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -31821,6 +31829,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_UNUSED != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -33686,6 +33695,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_UNUSED != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -36132,6 +36142,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_UNUSED != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -40449,6 +40460,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -40471,6 +40483,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -40493,6 +40506,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -44406,6 +44420,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -44428,6 +44443,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -44450,6 +44466,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -47788,6 +47805,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -50147,6 +50165,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -50169,6 +50188,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 
@@ -50191,6 +50211,7 @@ static zend_always_inline ZEND_OPCODE_HANDLER_RET zend_binary_assign_op_helper_S
 #else
 # if 0 || IS_CV != IS_UNUSED
 #  if 0
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
 #  endif
 

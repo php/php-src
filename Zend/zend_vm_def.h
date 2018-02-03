@@ -7782,7 +7782,6 @@ ZEND_VM_HANDLER(158, ZEND_CALL_TRAMPOLINE, ANY, ANY)
 	uint32_t call_info = EX_CALL_INFO() & (ZEND_CALL_NESTED | ZEND_CALL_TOP | ZEND_CALL_RELEASE_THIS);
 	uint32_t num_args = EX_NUM_ARGS();
 	zend_execute_data *call;
-	USE_OPLINE
 
 	SAVE_OPLINE();
 
@@ -7885,8 +7884,6 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 		ZEND_VM_RETURN();
 	}
 
-	opline = EX(opline);
-
 	if (UNEXPECTED(call_info & ZEND_CALL_RELEASE_THIS)) {
 		zend_object *object = Z_OBJ(call->This);
 		OBJ_RELEASE(object);
@@ -7898,6 +7895,7 @@ ZEND_VM_C_LABEL(call_trampoline_end):
 		HANDLE_EXCEPTION_LEAVE();
 	}
 
+	LOAD_OPLINE();
 	ZEND_VM_INC_OPCODE();
 	ZEND_VM_LEAVE();
 }
