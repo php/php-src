@@ -18,8 +18,6 @@ var_dump(ftp_site($ftp, 'foo bar baz'));
 ?>
 --EXPECTF--
 bool(true)
-string(18) "SITE foo bar baz
-"
 
 Warning: ftp_site(): Syntax error, command unrecognized. in %s on line %d
 bool(false)
