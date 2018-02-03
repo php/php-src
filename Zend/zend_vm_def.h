@@ -948,7 +948,10 @@ ZEND_VM_INLINE_HELPER(zend_binary_assign_op_helper, VAR|UNUSED|THIS|CV, CONST|TM
 	ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_dim_helper, binary_op, binary_op);
 #else
 # if !defined(ZEND_VM_SPEC) || OP1_TYPE != IS_UNUSED
+#  if !defined(ZEND_VM_SPEC)
+	/* opline->extended_value checks are specialized, don't need opline */
 	USE_OPLINE
+#  endif
 
 	if (EXPECTED(opline->extended_value == 0)) {
 		ZEND_VM_DISPATCH_TO_HELPER(zend_binary_assign_op_simple_helper, binary_op, binary_op);
