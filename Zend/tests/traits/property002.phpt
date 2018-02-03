@@ -2,7 +2,6 @@
 Non-conflicting properties should work just fine.
 --FILE--
 <?php
-error_reporting(E_ALL);
 
 trait THello1 {
   public $hello = "hello";

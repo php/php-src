@@ -8,8 +8,6 @@ Test timezone_name_from_abbr() function : error conditions
  * Alias to functions: 
  */
 
-error_reporting(E_ALL | E_STRICT);
-
 //Set the default time zone 
 date_default_timezone_set("Europe/London");
 

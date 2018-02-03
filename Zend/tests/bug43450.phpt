@@ -6,7 +6,6 @@ Bug #43450 (Memory leak on some functions with implicit object __toString() call
 opcache.enable_cli=0
 --FILE--
 <?php
-error_reporting(E_ALL|E_STRICT);
 
 class Foo 
 {

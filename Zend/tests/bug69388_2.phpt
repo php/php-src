@@ -2,7 +2,6 @@
 Bug #69388 - Variation
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 function handle_error($code, $message, $file, $line, $context) {
     eval('namespace Foo;');
     echo "$message\n";

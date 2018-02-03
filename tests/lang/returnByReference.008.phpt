@@ -1,7 +1,5 @@
 --TEST--
 Returning a reference from a non-static method via another non-static method
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 class C {

@@ -2,7 +2,6 @@
 Conflicting properties with different visibility modifiers should result in a fatal error, since this indicates that the code is incompatible.
 --FILE--
 <?php
-error_reporting(E_ALL);
 
 trait THello1 {
   public $hello;
