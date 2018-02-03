@@ -2,7 +2,6 @@
 Phar: copy() tar-based
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --INI--
 phar.readonly=0

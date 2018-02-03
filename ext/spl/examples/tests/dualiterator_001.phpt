@@ -1,7 +1,5 @@
 --TEST--
 SPL: DualIterator
---SKIPIF--
-<?php if (!extension_loaded("spl") || !extension_loaded("reflection")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -15,8 +13,8 @@ spl_autoload_register('spl_examples_autoload');
 function test($a, $b, $identical = false)
 {
 	var_dump(DualIterator::compareIterators(
-					new RecursiveArrayIterator($a), 
-					new RecursiveArrayIterator($b), 
+					new RecursiveArrayIterator($a),
+					new RecursiveArrayIterator($b),
 					$identical));
 }
 

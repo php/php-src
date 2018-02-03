@@ -2,7 +2,6 @@
 Phar: encrypted zip
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --FILE--
 <?php
 try {

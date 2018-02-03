@@ -1,7 +1,5 @@
 --TEST--
 Bug #40191 (use of array_unique() with objects triggers segfault)
---SKIPIF--
-<?php if (!extension_loaded('spl')) die("skip SPL is not available"); ?>
 --FILE--
 <?php
 
@@ -15,7 +13,7 @@ var_dump($arr);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: array_unique() expects parameter 1 to be array, object given in %s on line %d
 NULL
 Done
