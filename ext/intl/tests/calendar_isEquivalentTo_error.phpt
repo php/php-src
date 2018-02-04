@@ -50,16 +50,16 @@ try {
 }
 
 --EXPECT--
-error: 0, Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, int given
 
 error: 2, IntlCalendar::isEquivalentTo() expects exactly 1 parameter, 2 given
 error: 2, IntlCalendar::isEquivalentTo(): intlcal_is_equivalent_to: bad arguments
 bool(false)
-error: 0, Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to IntlCalendar::isEquivalentTo() must be an instance of IntlCalendar, int given
 
 error: 2, intlcal_is_equivalent_to() expects exactly 2 parameters, 1 given
 error: 2, intlcal_is_equivalent_to(): intlcal_is_equivalent_to: bad arguments
 bool(false)
-error: 0, Argument 2 passed to intlcal_is_equivalent_to() must be an instance of IntlCalendar, integer given
+error: 0, Argument 2 passed to intlcal_is_equivalent_to() must be an instance of IntlCalendar, int given
 
-error: 0, Argument 1 passed to intlcal_is_equivalent_to() must be an instance of IntlCalendar, integer given
+error: 0, Argument 1 passed to intlcal_is_equivalent_to() must be an instance of IntlCalendar, int given

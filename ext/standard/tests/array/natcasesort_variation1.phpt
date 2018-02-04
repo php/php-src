@@ -99,22 +99,22 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: natcasesort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: natcasesort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 5 --

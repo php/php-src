@@ -40,13 +40,13 @@ NULL
 Warning: preg_replace_callback_array() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: preg_replace_callback_array() expects parameter 1 to be array, integer given in %s on line %d
+Warning: preg_replace_callback_array() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
-Warning: preg_replace_callback_array() expects parameter 1 to be array, integer given in %s on line %d
+Warning: preg_replace_callback_array() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
-Warning: preg_replace_callback_array() expects parameter 1 to be array, integer given in %s on line %d
+Warning: preg_replace_callback_array() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: preg_replace_callback_array() expects parameter 3 to be integer, string given in %s on line %d

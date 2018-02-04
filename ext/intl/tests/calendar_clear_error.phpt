@@ -29,7 +29,7 @@ bool(false)
 Warning: intlcal_clear(): intlcal_clear: invalid field in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_clear() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_clear() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_clear(1, 2)
 #1 {main}

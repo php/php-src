@@ -134,19 +134,19 @@ fclose($fileRes);
 *** Testing readfile() : usage variation ***
 
 --int 0--
-Error: 2 - readfile() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, int given, %s(%d)
 file not read
 
 --int 1--
-Error: 2 - readfile() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, int given, %s(%d)
 file not read
 
 --int 12345--
-Error: 2 - readfile() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, int given, %s(%d)
 file not read
 
 --int -12345--
-Error: 2 - readfile() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, int given, %s(%d)
 file not read
 
 --float 10.5--

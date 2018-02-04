@@ -82,22 +82,22 @@ Notice: Undefined variable: unset_var in %sget_class_variation_001.php on line 6
 
 Arg value: 0 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 1 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 12345 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: -2345 (type: integer)
 
-Warning: get_class() expects parameter 1 to be object, integer given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, int given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 10.5 (type: double)

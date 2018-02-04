@@ -99,22 +99,22 @@ foreach($inputs as $input) {
 
 -- Iteration 1 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, int given in %s on line 85
 NULL
 
 -- Iteration 2 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, int given in %s on line 85
 NULL
 
 -- Iteration 3 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, int given in %s on line 85
 NULL
 
 -- Iteration 4 --
 
-Warning: imap_fetchbody() expects parameter 1 to be resource, integer given in %s on line 85
+Warning: imap_fetchbody() expects parameter 1 to be resource, int given in %s on line 85
 NULL
 
 -- Iteration 5 --

@@ -32,7 +32,7 @@ NULL
 Warning: SplObjectStorage::contains() expects parameter 1 to be object, string given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::contains() expects parameter 1 to be object, integer given in %s on line %d
+Warning: SplObjectStorage::contains() expects parameter 1 to be object, int given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::contains() expects parameter 1 to be object, float given in %s on line %d

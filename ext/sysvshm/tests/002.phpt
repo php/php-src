@@ -62,7 +62,7 @@ bool(false)
 Warning: shm_remove() expects parameter 1 to be resource, boolean given in %s on line %d
 resource(%d) of type (sysvshm)
 
-Warning: shm_remove() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: shm_remove() expects parameter 1 to be resource, int given in %s on line %d
 resource(%d) of type (sysvshm)
 resource(%d) of type (sysvshm)
 resource(%d) of type (sysvshm)

@@ -100,22 +100,22 @@ echo "Done";
 
 Arg value 0 
 
-Warning: xml_parse_into_struct() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: xml_parse_into_struct() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 Arg value 1 
 
-Warning: xml_parse_into_struct() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: xml_parse_into_struct() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 Arg value 12345 
 
-Warning: xml_parse_into_struct() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: xml_parse_into_struct() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 Arg value -2345 
 
-Warning: xml_parse_into_struct() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: xml_parse_into_struct() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 Arg value 10.5 

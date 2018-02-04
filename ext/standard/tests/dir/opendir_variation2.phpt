@@ -114,22 +114,22 @@ rmdir($path);
 
 -- Iteration 1 --
 
-Warning: opendir() expects parameter 2 to be resource, integer given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: opendir() expects parameter 2 to be resource, integer given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: opendir() expects parameter 2 to be resource, integer given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: opendir() expects parameter 2 to be resource, integer given in %s on line %d
+Warning: opendir() expects parameter 2 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 5 --

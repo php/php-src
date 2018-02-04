@@ -128,16 +128,16 @@ fclose($fileRes);
 *** Testing mkdir() : usage variation ***
 
 --int 0--
-Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, int given, %s(%d)
 
 --int 1--
-Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, int given, %s(%d)
 
 --int 12345--
-Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, int given, %s(%d)
 
 --int -12345--
-Error: 2 - mkdir() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, int given, %s(%d)
 
 --float 10.5--
 Error: 2 - mkdir() expects parameter 4 to be resource, float given, %s(%d)

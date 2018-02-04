@@ -80,7 +80,7 @@ Warning: fgets() expects parameter 1 to be resource, string given in %s on line 
 bool(false)
 -- Iteration 2 --
 
-Warning: fgets() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fgets() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 -- Iteration 3 --
 

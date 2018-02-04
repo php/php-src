@@ -98,22 +98,22 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 
-Warning: array_product() expects parameter 1 to be array, integer given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, int given in %sarray_product_variation5.php on line %d
 NULL
 
 --int 1--
 
-Warning: array_product() expects parameter 1 to be array, integer given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, int given in %sarray_product_variation5.php on line %d
 NULL
 
 --int 12345--
 
-Warning: array_product() expects parameter 1 to be array, integer given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, int given in %sarray_product_variation5.php on line %d
 NULL
 
 --int -12345--
 
-Warning: array_product() expects parameter 1 to be array, integer given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, int given in %sarray_product_variation5.php on line %d
 NULL
 
 --float 10.5--

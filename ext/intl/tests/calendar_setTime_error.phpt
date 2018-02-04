@@ -34,7 +34,7 @@ Warning: intlcal_set_time() expects exactly 2 parameters, 3 given in %s on line 
 Warning: intlcal_set_time(): intlcal_set_time: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_time() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_time() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_set_time(1)
 #1 {main}

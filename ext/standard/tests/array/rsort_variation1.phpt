@@ -106,70 +106,70 @@ echo "Done";
 -- Iteration 1 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 -- Iteration 2 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 -- Iteration 3 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 -- Iteration 4 --
 Flag = default:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_REGULAR:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_NUMERIC:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 Flag = SORT_STRING:
 
-Warning: rsort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: rsort() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 -- Iteration 5 --
 Flag = default:

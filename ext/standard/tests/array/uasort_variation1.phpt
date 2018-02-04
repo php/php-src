@@ -99,19 +99,19 @@ echo "Done"
 *** Testing uasort() : unexpected values for 'array_arg' ***
 -- Iteration 1 --
 
-Warning: uasort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 2 --
 
-Warning: uasort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 3 --
 
-Warning: uasort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 4 --
 
-Warning: uasort() expects parameter 1 to be array, integer given in %s on line %d
+Warning: uasort() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 5 --
 

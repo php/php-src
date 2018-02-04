@@ -18,5 +18,5 @@ try {
 }
 ?>
 --EXPECTF--
-Argument 1 passed to gen() must be of the type array, integer given, called in %sgenerator_with_type_check_2.php on line 4
-Argument 1 passed to gen() must be of the type array, integer given, called in %sgenerator_with_type_check_2.php on line 10
+Argument 1 passed to gen() must be of the type array, int given, called in %sgenerator_with_type_check_2.php on line 4
+Argument 1 passed to gen() must be of the type array, int given, called in %sgenerator_with_type_check_2.php on line 10
