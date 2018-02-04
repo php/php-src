@@ -410,14 +410,8 @@ static ZEND_COLD void zend_append_type_hint(smart_str *str, const zend_function 
 			smart_str_appendc(str, ' ');
 		}
 	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
-		if (ZEND_TYPE_CODE(arg_info->type) == IS_LONG) {
-			smart_str_appendl(str, "int", 3);
-		} else if (ZEND_TYPE_CODE(arg_info->type) == _IS_BOOL) {
-			smart_str_appendl(str, "bool", 4);
-		} else {
-			const char *type_name = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
-			smart_str_appends(str, type_name);
-		}
+		const char *type_name = zend_get_type_by_const(ZEND_TYPE_CODE(arg_info->type));
+		smart_str_appends(str, type_name);
 		if (!return_hint) {
 			smart_str_appendc(str, ' ');
 		}
