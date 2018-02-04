@@ -3,7 +3,7 @@ Set and get of connection attributes with all types of connections.
 --SKIPIF--
 <?php if (!extension_loaded('oci8')) die("skip no oci8 extension"); 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys"))
     die("skip needs to be run as a DBA user");

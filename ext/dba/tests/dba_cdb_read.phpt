@@ -3,7 +3,7 @@ DBA CDB handler test (read only)
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once 'skipif.inc';
 ?>
 --FILE--
 <?php

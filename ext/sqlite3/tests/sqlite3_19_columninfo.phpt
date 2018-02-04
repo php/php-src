@@ -1,7 +1,7 @@
 --TEST--
 SQLite3 columnType and columnName
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

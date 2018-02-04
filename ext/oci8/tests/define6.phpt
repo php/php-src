@@ -3,7 +3,7 @@ oci_define_by_name tests with REF CURSORs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 ?> 
 --FILE--
 <?php

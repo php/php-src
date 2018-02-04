@@ -4,7 +4,7 @@ imap_rfc822_parse_headers() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once('skipif.inc');
 ?>
 --FILE--
 <?php

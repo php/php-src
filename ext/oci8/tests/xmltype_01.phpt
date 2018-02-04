@@ -4,7 +4,7 @@ Basic XMLType test
 <?php 
 if (!extension_loaded("simplexml")) die("skip no simplexml extension");
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 ?>
 --FILE--
 <?php

@@ -3,7 +3,7 @@ Bug #51291 (oci_error() doesn't report last error when called two times)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error messages from TimesTen
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 ?> 
 --FILE--
 <?php

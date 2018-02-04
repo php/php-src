@@ -2,7 +2,7 @@
 PDO MySQL specific class constants
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require_once('skipif.inc');
 if (!extension_loaded('mysqli') && !extension_loaded('mysqlnd')) {
 	/* Need connection to detect library version */
 	require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');

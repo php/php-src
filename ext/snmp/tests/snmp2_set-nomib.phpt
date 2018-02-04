@@ -4,7 +4,7 @@ Function snmp2_set (without MIBs loading)
 Boris Lytockin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once('skipif.inc');
 ?>
 --ENV--
 return <<<END

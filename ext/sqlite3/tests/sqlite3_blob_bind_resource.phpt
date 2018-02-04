@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::execute() with a resource bound for blob param
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

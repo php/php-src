@@ -2,7 +2,7 @@
 Test imap_close() function : usage variations - different ints as $options arg
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once('skipif.inc');
 ?>
 --FILE--
 <?php

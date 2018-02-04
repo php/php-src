@@ -2,7 +2,7 @@
 DBA Multiple File Creation Test
 --SKIPIF--
 <?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require_once('skipif.inc');
 	if (!function_exists('dba_list')) die('skip dba_list() not available');
 	die("info $HND handler used");
 ?>

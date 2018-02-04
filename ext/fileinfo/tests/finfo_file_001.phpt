@@ -1,7 +1,7 @@
 --TEST--
 finfo_file(): Testing file names
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once('skipif.inc'); ?>
 --FILE--
 <?php
 

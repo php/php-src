@@ -3,7 +3,7 @@ Bug #49125 (Error in dba_exists C code)
 --SKIPIF--
 <?php 
 	$handler = 'db4';
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require_once('skipif.inc');
 ?>
 --FILE--
 <?php

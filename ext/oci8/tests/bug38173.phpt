@@ -3,7 +3,7 @@ Bug #38173 (Freeing nested cursors causes OCI8 to segfault)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 ?> 
 --FILE--
 <?php

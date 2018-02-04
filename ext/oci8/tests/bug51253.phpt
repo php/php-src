@@ -3,7 +3,7 @@ Bug #51253 (oci_bind_array_by_name() array references)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require('skipif.inc');
 ?> 
 --FILE--
 <?php

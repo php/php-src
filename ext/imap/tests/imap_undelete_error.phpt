@@ -4,7 +4,7 @@ imap_undelete() incorrect parameter count
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once('skipif.inc');
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 DBA Insert/Replace/Fetch Test
 --SKIPIF--
 <?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require_once('skipif.inc');
 	die("info $HND handler used");
 ?>
 --FILE--

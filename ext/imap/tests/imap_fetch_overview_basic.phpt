@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : basic functionality 
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require_once('skipif.inc');
 ?>
 --FILE--
 <?php

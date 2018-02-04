@@ -3,7 +3,7 @@ DBA GDBM handler test
 --SKIPIF--
 <?php 
 	$handler = 'gdbm';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require_once 'skipif.inc';
 ?>
 --FILE--
 <?php
