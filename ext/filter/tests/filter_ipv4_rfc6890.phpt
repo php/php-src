@@ -1,6 +1,6 @@
 --TEST--
 Bug #71745 FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8 range
-SKIPIF--
+--SKIPIF--
 <?php if (!extension_loaded('filter')) die('skip filter extension not loaded'); ?>
 --FILE--
 <?php
