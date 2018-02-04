@@ -4,7 +4,7 @@ ldap_err2str() - Incorrect usage of number to string conversion
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // Too few args

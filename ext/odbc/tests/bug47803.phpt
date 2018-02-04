@@ -1,7 +1,7 @@
 --TEST--
 Bug #47803 Executing prepared statements is successful only for the first two statements
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -5,7 +5,7 @@ Vincent Tsao <notes4vincent@gmail.com>
 (and Dan Convissor)
 # TestFest 2009 NYPHP
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

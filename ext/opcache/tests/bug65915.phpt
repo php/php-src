@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.file_cache_only=0
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $tmp = __DIR__ . "/bug65915.inc.php";

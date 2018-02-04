@@ -2,7 +2,7 @@
 mysqli bind_result (OO-Style)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

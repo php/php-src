@@ -2,7 +2,7 @@
 PostgreSQL non-blocking async prepared queries
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 if (!function_exists('pg_send_prepare')) die('skip function pg_send_prepare() does not exist');
 ?>
 --FILE--

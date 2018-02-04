@@ -2,7 +2,7 @@
 Test imap_alerts() function : error conditions
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

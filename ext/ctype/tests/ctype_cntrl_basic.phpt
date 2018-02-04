@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_cntrl() function : basic functionality 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_cntrl(mixed $c)

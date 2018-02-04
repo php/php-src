@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : usage variation - diff data types as $section arg
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

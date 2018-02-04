@@ -2,7 +2,7 @@
 DBA with array key with array containing too many elements
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

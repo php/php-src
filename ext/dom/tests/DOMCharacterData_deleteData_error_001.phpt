@@ -4,7 +4,7 @@ DOMCharacterData::deleteData() with no arguments.
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-24
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $document = new DOMDocument;

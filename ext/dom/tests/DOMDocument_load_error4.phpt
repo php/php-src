@@ -11,7 +11,7 @@ Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
 assert.bail=true
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required"); ?>
 --ENV--
 XML_FILE=/not_well_formed4.xml

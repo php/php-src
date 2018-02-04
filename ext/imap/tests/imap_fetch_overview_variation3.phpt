@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : usage variations - FT_UID option
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

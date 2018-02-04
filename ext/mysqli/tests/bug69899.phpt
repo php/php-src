@@ -8,7 +8,7 @@ unconditionally sets the connection of the statement to ready, despite the fact
 that it might already be closed.
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
+require 'skipif.inc';
 require_once __DIR__ . '/skipifconnectfailure.inc';
 require_once __DIR__ . '/connect.inc';
 if (!$IS_MYSQLND) {

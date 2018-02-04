@@ -1,7 +1,7 @@
 --TEST--
 Bug #50308 (session id not appended properly for empty anchor tags)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.name=PHPSESSID
 session.save_handler=files

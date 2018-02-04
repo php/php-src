@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::query Skip all cleanup
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

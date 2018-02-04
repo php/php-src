@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 groupB 004 (php/wsdl): echoNestedStruct
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 precision=14
 soap.wsdl_cache_enabled=0

@@ -2,7 +2,7 @@
 show information about extension
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 if (!extension_loaded("session")) {
 	die("skip session extension required");
 }

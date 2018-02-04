@@ -2,7 +2,7 @@
 Bug #72479: Use After Free Vulnerability in SNMP with GC and unserialize()
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

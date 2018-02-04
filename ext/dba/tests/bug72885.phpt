@@ -3,7 +3,7 @@ Bug #72885 flatfile: dba_fetch() fails to read replaced entry
 --SKIPIF--
 <?php 
 $handler = "flatfile";
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

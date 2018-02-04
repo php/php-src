@@ -18,7 +18,7 @@ session.upload_progress.freq=1%
 session.upload_progress.min_freq=0.000000001
 session.save_handler=files
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --COOKIE--
 PHPSESSID=rfc1867-tests
 --GET--

@@ -1,7 +1,7 @@
 --TEST--
 SOAP 1.2: T28 echoOk
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $HTTP_RAW_POST_DATA = <<<EOF

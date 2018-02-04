@@ -1,7 +1,7 @@
 --TEST--
 Bug #61605 (header_remove() does not remove all headers)
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --GET--
 foo=bar
 --INI--

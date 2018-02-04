@@ -2,7 +2,7 @@
 Test imap_clearflag_full() function : basic functionality 
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

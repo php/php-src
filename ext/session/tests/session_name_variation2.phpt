@@ -1,7 +1,7 @@
 --TEST--
 Test session_name() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.name=blah 
 --FILE--

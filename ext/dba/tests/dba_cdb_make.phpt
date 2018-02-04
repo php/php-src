@@ -3,7 +3,7 @@ DBA CDB_MAKE handler test
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	die('info CDB_MAKE does not support reading');
 ?>
 --FILE--

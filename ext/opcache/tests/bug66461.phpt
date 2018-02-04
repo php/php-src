@@ -7,7 +7,7 @@ opcache.optimization_level=-1
 opcache.file_update_protection=0
 opcache.interned_strings_buffer=0
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo "ok\n";

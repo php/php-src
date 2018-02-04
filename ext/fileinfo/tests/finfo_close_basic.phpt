@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_close() function : basic functionality 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : resource finfo_close(resource finfo)

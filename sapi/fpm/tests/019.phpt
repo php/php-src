@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test global prefix
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

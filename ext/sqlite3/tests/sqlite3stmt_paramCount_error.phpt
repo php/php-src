@@ -1,7 +1,7 @@
 --TEST--
 SQLite3Stmt::paramCount error test
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

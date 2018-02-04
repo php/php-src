@@ -2,7 +2,7 @@
 Bug #61679 (Error on non-standard HTTP methods)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

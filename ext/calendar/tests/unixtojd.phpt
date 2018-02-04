@@ -1,7 +1,7 @@
 --TEST--
 unixtojd()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --ENV--
 TZ=UTC
 --FILE--

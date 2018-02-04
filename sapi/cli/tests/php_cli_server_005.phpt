@@ -2,7 +2,7 @@
 Post a file
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

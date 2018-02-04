@@ -11,7 +11,7 @@ opcache.file_cache_only=0
 opcache.log_verbosity_level=4
 opcache.huge_code_pages=0
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo "Foo Bar\n";

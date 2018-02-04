@@ -3,7 +3,7 @@ Bug #72021 (ldap_escape() with DN flag is not RFC compliant)
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $subject = " Joe,= \rSmith ";

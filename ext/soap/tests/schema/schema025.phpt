@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 25: SOAP 1.2 Array
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

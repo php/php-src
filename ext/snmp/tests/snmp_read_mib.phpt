@@ -4,7 +4,7 @@ Function snmp_read_mib
 Olivier Doucet Olivier Doucet Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once(dirname(__FILE__).'/snmp_include.inc');
 
 if (!file_exists($mibdir . '/SNMPv2-MIB.txt')) die('skip MIB file not in the system');

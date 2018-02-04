@@ -4,7 +4,7 @@ Test imap_mail_move() function : basic functionality
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_fetch_object()
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 error_reporting(E_ALL);

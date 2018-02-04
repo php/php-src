@@ -2,7 +2,7 @@
 mysqli multi_query, next_result, more_results
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

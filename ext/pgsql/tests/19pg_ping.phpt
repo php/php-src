@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_ping() functions
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // optional functions

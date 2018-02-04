@@ -4,7 +4,7 @@ SQLite3::lastErrorMsg test with parameters
 Thijs Feryn <thijs@feryn.eu>
 #TestFest PHPBelgium 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

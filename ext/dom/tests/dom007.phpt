@@ -2,7 +2,7 @@
 Test 7: DTD tests
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

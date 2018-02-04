@@ -3,7 +3,7 @@ reading/writing BFILE LOBs
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 ob_start();
 phpinfo(INFO_MODULES);
 $phpinfo = ob_get_clean();

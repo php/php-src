@@ -4,7 +4,7 @@ IPv6 support
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {

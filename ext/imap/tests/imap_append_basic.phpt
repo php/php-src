@@ -2,7 +2,7 @@
 Test imap_append() function : basic functionality 
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

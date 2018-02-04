@@ -2,7 +2,7 @@
 mysqli_float_handling - ensure 4 byte float is handled correctly
 --SKIPIF--
 <?php
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	require_once('skipifemb.inc');
 	require_once('skipifconnectfailure.inc');
 ?>

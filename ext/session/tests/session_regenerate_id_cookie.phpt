@@ -3,7 +3,7 @@ Test session_regenerate_id() function : basic functionality
 --SKIPIF--
 <?php
 
-include('skipif.inc');
+require 'skipif.inc';
 
 require __DIR__.'/../../../sapi/cgi/tests/include.inc';
 

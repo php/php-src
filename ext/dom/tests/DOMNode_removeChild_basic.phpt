@@ -2,7 +2,7 @@
 DOM removeChild : Basic Functionality
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --CREDITS--
 Simon Hughes <odbc3@hotmail.com>

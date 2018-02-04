@@ -1,7 +1,7 @@
 --TEST--
 odbc_exec(): Getting accurate date data from query
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

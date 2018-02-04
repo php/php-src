@@ -2,7 +2,7 @@
 Playing with datatype change between prepare and execute
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>

@@ -9,7 +9,7 @@ Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
 assert.bail=true
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $dom = new DOMDocument();

@@ -5,7 +5,7 @@ session.upload_progress.freq=-1
 error_log=
 --SKIPIF--
 <?php 
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

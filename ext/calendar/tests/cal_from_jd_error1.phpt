@@ -3,7 +3,7 @@ Test cal_from_jd() function : error conditions
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 var_dump(cal_from_jd(1748326, -1));

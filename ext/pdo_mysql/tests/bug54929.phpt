@@ -2,7 +2,7 @@
 Bug #54929 (Parse error with single quote in sql comment (pdo-mysql))
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 

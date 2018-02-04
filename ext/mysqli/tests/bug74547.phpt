@@ -2,7 +2,7 @@
 Bug #74547 mysqli::change_user() doesn't accept null as $database argument w/strict_types
 --SKIPIF--
 <?php
-  require_once('skipif.inc');
+  require 'skipif.inc';
   require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

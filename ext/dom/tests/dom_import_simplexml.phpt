@@ -1,7 +1,7 @@
 --TEST--
 Interop Test: Import from SimpleXML
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php	if (!extension_loaded('simplexml')) die('skip simplexml extension not available');?>
 --FILE--
 <?php

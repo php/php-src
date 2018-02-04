@@ -11,7 +11,7 @@ Antonio Diaz Ruiz <dejalatele@gmail.com>
 --INI--
 assert.bail=true
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --ENV--
 XML_FILE=/not_well_formed5.xml
 LOAD_OPTIONS=0

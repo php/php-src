@@ -1,7 +1,7 @@
 --TEST--
 frenchtojd()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo frenchtojd(-1,-1,-1), "\n";

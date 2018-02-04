@@ -2,7 +2,7 @@
 mysqli_embedded_connect()
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifnotemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>

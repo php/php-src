@@ -2,7 +2,7 @@
 defining INI options with -d
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

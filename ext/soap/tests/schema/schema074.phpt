@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 74: Structure with attributes and qualified elements
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

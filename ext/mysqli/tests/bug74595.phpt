@@ -2,7 +2,7 @@
 Bug #74595 (ReflectionMethod::getParameters returns incorrect number of parameters)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

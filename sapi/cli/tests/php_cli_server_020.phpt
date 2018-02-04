@@ -2,7 +2,7 @@
 Use SEARCH as a HTTP verb
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

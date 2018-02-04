@@ -3,7 +3,7 @@ DBA QDBM handler test
 --SKIPIF--
 <?php
 	$handler = 'qdbm';
-	require_once 'skipif.inc';
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

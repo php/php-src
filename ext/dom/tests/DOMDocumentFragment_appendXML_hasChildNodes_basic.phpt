@@ -1,7 +1,7 @@
 --TEST--
 Testing DOMDocumentFragment::appendXML and DOMDocumentFragment::hasChildNodes
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $doc = new DOMDocument();

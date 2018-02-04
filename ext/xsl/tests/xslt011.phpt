@@ -1,7 +1,7 @@
 --TEST--
 Test 11: php:function Support
 --SKIPIF--
-<?php require_once 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 print "Test 11: php:function Support\n";

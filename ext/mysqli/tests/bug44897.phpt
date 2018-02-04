@@ -2,7 +2,7 @@
 Bug #44879 (failed to prepare statement)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 
 if (!stristr(mysqli_get_client_info(), 'mysqlnd'))
 	die("skip: only available in mysqlnd");

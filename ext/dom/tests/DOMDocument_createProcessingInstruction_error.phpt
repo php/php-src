@@ -4,7 +4,7 @@ DomDocument::createProcessingInstruction() - error test for DomDocument::createP
 Muhammad Khalid Adnan
 # TestFest 2008
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

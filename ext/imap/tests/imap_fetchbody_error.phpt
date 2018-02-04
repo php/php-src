@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

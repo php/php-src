@@ -1,7 +1,7 @@
 --TEST--
 Bug #72197 pg_lo_create arbitrary read 
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* This shouldn't crash. */

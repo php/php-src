@@ -2,7 +2,7 @@
 Bug #64609 (pg_convert enum type support)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_server_version('8.3', '<');
 ?>
 --FILE--

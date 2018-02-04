@@ -4,7 +4,7 @@ Test curl_copy_handle() after exec()
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

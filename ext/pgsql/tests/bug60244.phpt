@@ -2,7 +2,7 @@
 Bug #60244 (pg_fetch_* functions do not validate that row param is >0)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 Test session_start() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

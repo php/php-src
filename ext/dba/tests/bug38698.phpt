@@ -3,7 +3,7 @@ Bug #38698 (Bug #38698 for some keys cdbmake creates corrupted db and cdb can't 
 --SKIPIF--
 <?php 
 	$handler = 'cdb_make';
-	require_once('skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

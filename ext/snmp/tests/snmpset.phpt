@@ -4,7 +4,7 @@ Function snmpset
 Olivier Doucet Olivier Doucet Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

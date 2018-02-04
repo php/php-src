@@ -2,7 +2,7 @@
 PostgreSQL non-blocking async connect
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

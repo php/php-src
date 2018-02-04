@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_escape_bytea() functions (before connection)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // optional functions

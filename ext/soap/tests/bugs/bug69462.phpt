@@ -1,7 +1,7 @@
 --TEST--
 Bug #69462 (__soapCall with a SoapVar that has a namespace but no name crashes)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $namespace = "http://example.com/ns";

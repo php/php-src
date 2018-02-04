@@ -4,7 +4,7 @@ DOMDocumentType: basic access to all properties.
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-25
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // Access publicId, systemId, name, internalSubset all with values.

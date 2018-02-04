@@ -4,7 +4,7 @@ Test session_set_save_handler() function: interface
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

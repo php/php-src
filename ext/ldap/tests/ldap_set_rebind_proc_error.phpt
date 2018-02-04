@@ -4,7 +4,7 @@ ldap_set_rebind_proc() - Testing ldap_set_rebind_proc() that should fail
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php
 	if (!function_exists("ldap_set_rebind_proc")) {
 		die("skip ldap_set_rebind_proc() does not exist");

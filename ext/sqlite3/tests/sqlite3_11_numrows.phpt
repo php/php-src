@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::prepare number of rows
 --SKIPIF--
-<?php require_once('skipif.inc');
+<?php require 'skipif.inc';
 // Create an instance of the ReflectionMethod class
 try {
 	$method = new ReflectionMethod('sqlite3result', 'numRows');

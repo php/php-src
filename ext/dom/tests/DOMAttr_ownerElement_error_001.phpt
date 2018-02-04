@@ -4,7 +4,7 @@ Read $ownerElement with null parent.
 Travis Pew
 # TestFest Atlanta 2009-05-14
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

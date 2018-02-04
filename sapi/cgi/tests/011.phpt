@@ -1,7 +1,7 @@
 --TEST--
 header_remove()
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

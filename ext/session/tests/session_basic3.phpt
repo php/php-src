@@ -14,7 +14,7 @@ session.save_path=
 session.name=PHPSESSID
 url_rewriter.hosts=
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

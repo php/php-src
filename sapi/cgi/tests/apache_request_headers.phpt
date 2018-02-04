@@ -4,7 +4,7 @@ apache_request_headers() stack overflow.
 default_charset="UTF-8"
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

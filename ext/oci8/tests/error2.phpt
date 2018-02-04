@@ -3,7 +3,7 @@ Exercise error code for SUCCESS_WITH_INFO
 --SKIPIF--
 <?php 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 if (getenv('SKIP_SLOW_TESTS')) die('skip slow tests excluded by request');
 ?>
 --FILE--

@@ -3,7 +3,7 @@ DRCP: oci_connect()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs (Calling PL/SQL from SQL is not supported in TimesTen)
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --INI--
 oci8.connection_class=test

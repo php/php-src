@@ -4,7 +4,7 @@ Generic timeout (wrong community)
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

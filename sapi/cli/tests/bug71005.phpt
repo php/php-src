@@ -2,7 +2,7 @@
 Bug #71005 (Segfault in php_cli_server_dispatch_router())
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

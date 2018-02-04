@@ -2,7 +2,7 @@
 Bug #74416 Wrong reflection on DOMNode::cloneNode
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

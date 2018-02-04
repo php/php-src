@@ -2,7 +2,7 @@
 Bug #66830 (Empty header causes PHP built-in web server to hang)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 jdtofrench()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo jdtofrench(0). "\n";

@@ -2,7 +2,7 @@
 Bug #70470 (Built-in server truncates headers spanning over TCP packets)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

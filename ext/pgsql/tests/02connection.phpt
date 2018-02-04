@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL connection
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // connection function tests

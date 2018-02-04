@@ -3,7 +3,7 @@ collections and numbers (2)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 Implement Req #61679 (Support HTTP PATCH method)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

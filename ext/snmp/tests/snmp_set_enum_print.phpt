@@ -4,7 +4,7 @@ Function snmp_set_enum_print
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 if (!function_exists('snmp_set_enum_print')) die('This function is only available if using NET_SNMP');
 ?>
 --FILE--

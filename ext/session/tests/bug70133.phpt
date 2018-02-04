@@ -1,7 +1,7 @@
 --TEST--
 Bug #70133 (Extended SessionHandler::read is ignoring $session_id when calling parent)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.save_handler=files
 session.save_path=

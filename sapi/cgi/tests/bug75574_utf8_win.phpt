@@ -6,7 +6,7 @@ Bug #75574 putenv does not work properly if parameter contains non-ASCII unicode
 if (substr(PHP_OS, 0, 3) != 'WIN') {
   die("skip Valid only on Windows");
 }
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

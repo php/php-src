@@ -4,7 +4,7 @@ Test session_create_id() function : basic functionality
 session.save_handler=files
 session.sid_length=32
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

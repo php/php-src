@@ -4,7 +4,7 @@ SQLite3Result::reset test, testing an exception is raised when calling reset wit
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

@@ -4,7 +4,7 @@ DOMComment::__construct() with constructor called twice.
 Eric Lee Stewart <ericleestewart@gmail.com>
 # TestFest Atlanta 2009-05-25
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $dom = new DOMDocument('1.0', 'UTF-8');

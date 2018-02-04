@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 3: all functions
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $server = new soapserver(null,array('uri'=>"http://testuri.org"));

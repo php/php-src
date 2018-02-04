@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : basic function
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

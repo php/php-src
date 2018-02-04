@@ -4,7 +4,7 @@ Bug #55747 (request headers missed in $_SERVER)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

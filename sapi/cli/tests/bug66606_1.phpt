@@ -4,7 +4,7 @@ Bug #66606 (Sets HTTP_CONTENT_TYPE but not CONTENT_TYPE) - GET request
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

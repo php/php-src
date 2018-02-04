@@ -4,7 +4,7 @@ ldap_connect() - Connection using default host from openldap's ldap.conf
 David Caldwell <david@galvanix.com>
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ob_start();
 phpinfo();
 if (!preg_match("/vendor name => openldap/i", ob_get_clean()))

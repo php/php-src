@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round3 GroupD Compound1 003 (php/wsdl): echoDocument
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

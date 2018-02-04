@@ -2,7 +2,7 @@
 Bug #33090 (mysql_prepare doesn't return an error)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

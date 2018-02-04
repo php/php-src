@@ -1,7 +1,7 @@
 --TEST--
 InterBase: array handling
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #24592 (crash when multiple NULL values are being stored)
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 html_errors=0
 session.save_handler=files

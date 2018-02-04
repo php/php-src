@@ -3,7 +3,7 @@ PostgreSQL notice function
 --SKIPIF--
 <?php
 
-include("skipif.inc");
+require 'skipif.inc';
 
 _skip_lc_messages();
 

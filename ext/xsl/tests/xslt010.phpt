@@ -2,7 +2,7 @@
 Test 10: EXSLT Support
 --SKIPIF--
 <?php 
-require_once 'skipif.inc';
+require 'skipif.inc';
 $proc = new xsltprocessor;
 if (!$proc->hasExsltSupport()) die('skip EXSLT support not available');
 if (LIBXSLT_VERSION < 10117) die('skip too old libxsl');

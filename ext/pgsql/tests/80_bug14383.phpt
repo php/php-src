@@ -3,7 +3,7 @@ Bug #14383 (8.0+) (using postgres with DBA causes DBA not to be able to find any
 --SKIPIF--
 <?php 
 require_once(dirname(__FILE__).'/../../dba/tests/skipif.inc');
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

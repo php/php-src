@@ -4,7 +4,7 @@ Bug #64124 IPv6 malformed
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 
 $packed = str_repeat(chr(0), 15) . chr(1);
 if (@inet_ntop($packed) === false) {

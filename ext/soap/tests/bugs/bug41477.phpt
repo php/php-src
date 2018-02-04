@@ -1,7 +1,7 @@
 --TEST--
 Bug #41477 (no arginfo about SoapClient::__soapCall())
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $objRfClass = new ReflectionClass('SoapClient');

@@ -5,7 +5,7 @@ Frank Cassedanne franck@ouarz.net
 #London TestFest 2008
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

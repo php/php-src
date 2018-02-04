@@ -1,7 +1,7 @@
 --TEST--
 InterBase: binding (may take a while)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

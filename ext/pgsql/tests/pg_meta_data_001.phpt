@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL pg_meta_data() - basic test using schema
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

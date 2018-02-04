@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 16: user fault
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function test() {

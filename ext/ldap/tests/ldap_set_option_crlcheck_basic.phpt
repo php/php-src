@@ -3,7 +3,7 @@ ldap_set_option() - Basic test for TLS CRL check ldap option
 --CREDITS--
 Chad Sikorra <Chad.Sikorra@gmail.com>
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php
 	require "connect.inc";
 	$link = ldap_connect($host, $port);

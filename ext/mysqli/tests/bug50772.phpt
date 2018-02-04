@@ -2,7 +2,7 @@
 Bug #50772 (mysqli constructor without parameters does not return a working mysqli object)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

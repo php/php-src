@@ -1,7 +1,7 @@
 --TEST--
 Test session_save_path() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.save_handler=files
 session.gc_probability=0

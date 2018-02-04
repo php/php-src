@@ -1,7 +1,7 @@
 --TEST--
 Bug #69354 Incorrect use of SQLColAttributes with ODBC 3.0
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Bug #37100 (data is returned truncated with BINARY CURSOR)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_bytea_not_escape();
 ?>
 --FILE--

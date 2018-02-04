@@ -2,7 +2,7 @@
 References to result sets - mysqlnd (no copies but references)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 

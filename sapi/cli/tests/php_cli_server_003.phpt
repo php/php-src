@@ -4,7 +4,7 @@ Bug #55726 (Changing the working directory makes router script inaccessible)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

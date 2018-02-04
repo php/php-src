@@ -4,7 +4,7 @@ DOMDocument::relaxNGValidate() should fail if document doesn't validate
 Knut Urdalen <knut@php.net>
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

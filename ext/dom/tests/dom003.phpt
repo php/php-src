@@ -1,7 +1,7 @@
 --TEST--
 Test 3: Exception Test
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

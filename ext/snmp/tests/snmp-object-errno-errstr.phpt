@@ -4,7 +4,7 @@ OO API: getErrno & getError methods
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

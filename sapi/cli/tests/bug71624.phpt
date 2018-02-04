@@ -2,7 +2,7 @@
 Bug #61977 Test that -R properly sets argi and argn
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

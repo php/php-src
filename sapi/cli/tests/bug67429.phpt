@@ -2,7 +2,7 @@
 FR #67429 (CLI server is missing some new HTTP response codes)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

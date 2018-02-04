@@ -2,7 +2,7 @@
 DBA FirstKey/NextKey with 2 deletes
 --SKIPIF--
 <?php 
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	die("info $HND handler used");
 ?>
 --FILE--

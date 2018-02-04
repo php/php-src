@@ -2,7 +2,7 @@
 Implement Req #65917 (getallheaders() is not supported by the built-in web server)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

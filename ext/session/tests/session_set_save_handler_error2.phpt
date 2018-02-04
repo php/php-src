@@ -1,7 +1,7 @@
 --TEST--
 Test session_set_save_handler() function : error functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 error_reporting=0
 --FILE--

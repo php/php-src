@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : usage variations - $msg_no argument
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

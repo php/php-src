@@ -3,7 +3,7 @@ Unsupported type: oci_bind_array_by_name() and SQLT_UIN
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --FILE--
 <?php

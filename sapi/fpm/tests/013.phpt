@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test for log_level in fpm_unix_init_main #68381
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

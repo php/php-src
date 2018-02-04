@@ -3,7 +3,7 @@ Bind with various bind types not supported by TimesTen
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => false, 'timesten' => true);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --FILE--
 <?php

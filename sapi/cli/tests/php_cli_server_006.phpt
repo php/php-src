@@ -2,7 +2,7 @@
 Bug #55755 (SegFault when outputting header WWW-Authenticate)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

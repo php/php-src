@@ -3,7 +3,7 @@ DBA DB4 Truncate Existing File popen("n")
 --SKIPIF--
 <?php 
 $handler = "db4";
-require_once('skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

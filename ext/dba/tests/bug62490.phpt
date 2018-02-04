@@ -3,7 +3,7 @@ Bug #62490 (dba_delete returns true on missing item (inifile))
 --SKIPIF--
 <?php
 $handler = "inifile";
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

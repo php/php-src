@@ -2,7 +2,7 @@
 mysqli_thread_safe()
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 ?>
 --FILE--

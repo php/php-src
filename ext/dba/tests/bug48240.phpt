@@ -3,7 +3,7 @@ Bug #48240 (DBA Segmentation fault dba_nextkey)
 --SKIPIF--
 <?php 
 	$handler = 'db4';
-	require_once('skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

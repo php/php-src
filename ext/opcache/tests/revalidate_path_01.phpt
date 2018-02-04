@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.revalidate_path=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
 --FILE--
 <?php

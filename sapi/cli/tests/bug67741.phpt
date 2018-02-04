@@ -5,7 +5,7 @@ include_path={PWD}
 auto_prepend_file=bug67741_stub.inc
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 #!/bin/env php

@@ -3,7 +3,7 @@ Bug #36436 (DBA problem with Berkeley DB4)
 --SKIPIF--
 <?php
 	$handler = 'db4';
-	require_once('skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

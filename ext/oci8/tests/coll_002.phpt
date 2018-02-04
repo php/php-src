@@ -3,7 +3,7 @@ oci_new_collection() + free()
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --FILE--
 <?php

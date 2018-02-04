@@ -2,7 +2,7 @@
 Bug #36625 (8.0+) (pg_trace() does not work)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

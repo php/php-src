@@ -2,7 +2,7 @@
 executing a code with -R
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
+require 'skipif.inc'; 
 if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }

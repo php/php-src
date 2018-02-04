@@ -3,7 +3,7 @@ DBA Handler Test
 --SKIPIF--
 <?php 
 $handler="flatfile";
-require('skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

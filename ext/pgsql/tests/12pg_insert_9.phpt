@@ -2,7 +2,7 @@
 PostgreSQL pg_insert() (9.0+)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_bytea_not_hex();
 ?>
 --FILE--

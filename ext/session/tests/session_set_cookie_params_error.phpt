@@ -1,7 +1,7 @@
 --TEST--
 Test session_set_cookie_params() function : error functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

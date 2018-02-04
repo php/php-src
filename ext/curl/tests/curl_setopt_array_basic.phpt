@@ -4,7 +4,7 @@ curl_setopt_array() function - tests setting multiple cURL options with curl_set
 Mattijs Hoitink mattijshoitink@gmail.com
 #Testfest Utrecht 2009
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /*

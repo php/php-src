@@ -2,7 +2,7 @@
 DOMDocument::saveHTML() vs DOMDocumet::saveXML() 
 --SKIPIF--
 <?php
-require_once 'skipif.inc';
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

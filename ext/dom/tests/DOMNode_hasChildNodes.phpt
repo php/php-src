@@ -4,7 +4,7 @@ Tests DOMNode::hasChildNodes()
 Michael Stillwell <mjs@beebo.org>
 # TestFest 2008
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

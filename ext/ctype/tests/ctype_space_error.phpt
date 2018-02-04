@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_space() function : error conditions - Incorrect number of args
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_space(mixed $c)

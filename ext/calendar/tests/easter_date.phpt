@@ -3,7 +3,7 @@ easter_date()
 --INI--
 date.timezone=UTC
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 putenv('TZ=UTC');

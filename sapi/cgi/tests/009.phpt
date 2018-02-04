@@ -1,7 +1,7 @@
 --TEST--
 path info request without exported PATH_INFO
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

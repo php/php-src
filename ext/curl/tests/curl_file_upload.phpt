@@ -1,7 +1,7 @@
 --TEST--
 CURL file uploading
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

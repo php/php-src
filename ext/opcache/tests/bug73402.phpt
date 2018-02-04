@@ -4,7 +4,7 @@ Bug #73402 (Opcache segfault when using class constant to call a method)
 opcache.enable=1
 opcache.enable_cli=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 class Logger {

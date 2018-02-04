@@ -3,7 +3,7 @@ Bug #47189 (Multiple oci_fetch_all calls)
 --SKIPIF--
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs: different error handling for this undefined behavior
-require('skipif.inc');
+require 'skipif.inc';
 ?> 
 --FILE--
 <?php

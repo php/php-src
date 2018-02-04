@@ -2,7 +2,7 @@
 Test: Xinclude and Streams
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 in_array('compress.zlib', stream_get_wrappers()) or die('skip compress.zlib wrapper is not available');
 ?>
 --FILE--

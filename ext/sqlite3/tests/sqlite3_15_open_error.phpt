@@ -5,7 +5,7 @@ SQLite3::open error test
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
 	die('skip non windows test');
 }
-require_once('skipif.inc');
+require 'skipif.inc';
 if (posix_geteuid() == 0) {
     die('SKIP Cannot run test as root.');
 }

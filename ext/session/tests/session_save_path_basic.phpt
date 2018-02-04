@@ -5,7 +5,7 @@ session.gc_probability=0
 session.save_path=
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

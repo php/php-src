@@ -4,7 +4,7 @@ Bug #64159: Truncated snmpget
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --ENV--
 MIBS=noneXistent

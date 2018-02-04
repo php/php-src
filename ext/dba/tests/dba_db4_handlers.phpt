@@ -3,7 +3,7 @@ DBA DB4 Handler Test
 --SKIPIF--
 <?php 
 $handler="db4";
-require('skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

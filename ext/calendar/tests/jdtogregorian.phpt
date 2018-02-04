@@ -1,7 +1,7 @@
 --TEST--
 jdtogregorian()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo jdtogregorian(0). "\n";

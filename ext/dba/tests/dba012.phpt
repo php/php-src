@@ -3,7 +3,7 @@ DBA dba.default_handler tests
 --SKIPIF--
 <?php 
 $handler = "flatfile";
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --INI--
 dba.default_handler=flatfile

@@ -4,7 +4,7 @@ __construct() with no arguments.
 Nic Rosental nicrosental@gmail.com
 # TestFest Atlanta 2009-5-14 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 	try {

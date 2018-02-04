@@ -4,7 +4,7 @@ Test adding data to a DOMComment
 Andrew Larssen <al@larssen.org>
 London TestFest 2008
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

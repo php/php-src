@@ -4,7 +4,7 @@ Function snmpset (without MIBs loading)
 Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --ENV--
 return <<<END

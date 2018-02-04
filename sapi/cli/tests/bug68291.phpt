@@ -4,7 +4,7 @@ Bug #68291 (404 on urls with '+')
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

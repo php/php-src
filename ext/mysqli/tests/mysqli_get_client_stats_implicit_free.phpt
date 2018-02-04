@@ -2,7 +2,7 @@
 mysqli_get_client_stats() - implicit_free_result
 --SKIPIF--
 <?PHP
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 if (!function_exists('mysqli_get_client_stats')) {

@@ -4,7 +4,7 @@ SQLite3::blobOpen test, testing stream with wrong parameter count
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 class SQLite3_Test_Stream

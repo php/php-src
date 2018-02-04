@@ -2,7 +2,7 @@
 DBA File Creation Test
 --SKIPIF--
 <?php 
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	die("info $HND handler used");
 ?>
 --FILE--

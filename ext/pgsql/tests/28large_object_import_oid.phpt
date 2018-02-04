@@ -2,7 +2,7 @@
 PostgreSQL import large object with given oid
 --SKIPIF--
 <?php 
-include("skipif.inc"); 
+require 'skipif.inc'; 
 $v = pg_version($conn);
 if (version_compare("8.4devel", $v["client"]) > 0) die("skip - requires pg client >= 8.4\n");
 if (version_compare("8.4devel", $v["server"]) > 0) die("skip - requires pg server >= 8.4\n");

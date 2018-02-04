@@ -3,7 +3,7 @@ DBA TCADB handler test
 --SKIPIF--
 <?php
 	$handler = 'tcadb';
-	require_once 'skipif.inc';
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

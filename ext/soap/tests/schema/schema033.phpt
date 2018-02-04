@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 33: Nested complex types
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

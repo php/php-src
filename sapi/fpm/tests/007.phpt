@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test IPv6 all addresses and access_log (bug #68421)
 --SKIPIF--
-<?php include "skipif.inc";
+<?php require 'skipif.inc';
       @stream_socket_client('tcp://[::1]:0', $errno);
       if ($errno != 111) die('skip IPv6 not supported.');
 ?>

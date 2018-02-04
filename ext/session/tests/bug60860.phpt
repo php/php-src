@@ -2,7 +2,7 @@
 Bug #60860 (session.save_handler=user without defined function core dumps)
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --INI--
 session.save_handler=user

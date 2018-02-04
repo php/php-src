@@ -3,7 +3,7 @@ DBA FlatFile handler test
 --SKIPIF--
 <?php 
 	$handler = 'flatfile';
-	require_once('skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

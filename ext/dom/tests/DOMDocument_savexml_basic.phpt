@@ -5,7 +5,7 @@ Sami Greenbury (sami@patabugen.co.uk)
 # TestFest 2008
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

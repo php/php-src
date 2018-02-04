@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL create db
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // create test table

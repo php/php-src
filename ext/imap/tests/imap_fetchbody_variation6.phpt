@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : usage variations - $msg_no arg
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

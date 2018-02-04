@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_set_flags() function : basic functionality 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool finfo_set_flags(resource finfo, int options)

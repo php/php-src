@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : usage variations - diff data types as $msg_no arg
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

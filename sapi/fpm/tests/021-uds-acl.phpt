@@ -2,7 +2,7 @@
 FPM: Test Unix Domain Socket with Posix ACL
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 if (!(file_exists('/usr/bin/getfacl') && file_exists('/etc/passwd') && file_exists('/etc/group'))) die ("skip missing getfacl command");
 $cfg = <<<EOT
 [global]

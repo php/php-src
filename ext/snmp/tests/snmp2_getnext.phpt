@@ -4,7 +4,7 @@ Function snmp2_getnext
 Olivier Doucet & Boris Lytochkin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

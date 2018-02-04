@@ -4,7 +4,7 @@ Bug #63379: Warning when using session_regenerate_id(TRUE) with a SessionHandler
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

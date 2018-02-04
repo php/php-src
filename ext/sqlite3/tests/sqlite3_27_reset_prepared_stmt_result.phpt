@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::reset prepared statement results
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

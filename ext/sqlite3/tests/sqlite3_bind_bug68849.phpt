@@ -1,7 +1,7 @@
 --TEST--
 Bug #68849 bindValue is not using the right data type
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

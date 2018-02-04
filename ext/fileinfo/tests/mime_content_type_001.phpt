@@ -1,7 +1,7 @@
 --TEST--
 mime_content_type(): Testing wrong parameters
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

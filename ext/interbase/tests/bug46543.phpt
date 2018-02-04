@@ -1,7 +1,7 @@
 --TEST--
 Bug #46543 (ibase_trans() memory leaks when using wrong parameters)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

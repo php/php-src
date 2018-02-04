@@ -2,7 +2,7 @@
 Bug #72157 (use-after-free caused by dba_open)
 --SKIPIF--
 <?php 
-	require_once('skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

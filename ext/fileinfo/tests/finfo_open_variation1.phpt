@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_open() function : variations in opening
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : resource finfo_open([int options [, string arg]])

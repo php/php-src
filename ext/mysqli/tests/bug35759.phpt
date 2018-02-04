@@ -2,7 +2,7 @@
 Bug #35759 (mysqli_stmt_bind_result() makes huge allocation when column empty)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

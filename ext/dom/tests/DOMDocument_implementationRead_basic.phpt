@@ -4,7 +4,7 @@ DOMDocument::DOMImplementation - basic test for DomDocument::DOMImplementation
 Lev Radin <prokurator@gmail.com>
 # TestFest 2009 NYPHP
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -4,7 +4,7 @@ Function snmp_get_quick_print / snmp_set_quick_print
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

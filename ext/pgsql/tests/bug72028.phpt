@@ -1,7 +1,7 @@
 --TEST--
 Bug #72028 pg_query_params(): NULL converts to empty string
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // create test table

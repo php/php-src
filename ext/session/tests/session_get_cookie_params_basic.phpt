@@ -1,7 +1,7 @@
 --TEST--
 Test session_get_cookie_params() function : basic functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.cookie_lifetime=0
 session.cookie_path="/"

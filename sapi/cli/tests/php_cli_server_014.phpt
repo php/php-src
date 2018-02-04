@@ -2,7 +2,7 @@
 Bug #60477: Segfault after two multipart/form-data POST requestes
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

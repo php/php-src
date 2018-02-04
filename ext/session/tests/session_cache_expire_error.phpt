@@ -1,7 +1,7 @@
 --TEST--
 Test session_cache_expire() function : error functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #38438 (DOMNodeList->item(0) segfault on empty NodeList)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $list = new DOMNodeList();

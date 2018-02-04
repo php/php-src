@@ -2,7 +2,7 @@
 PostgreSQL sync prepared queries
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 if (!function_exists('pg_prepare')) die('skip function pg_prepare() does not exist');
 ?>
 --FILE--

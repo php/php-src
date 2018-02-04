@@ -3,7 +3,7 @@ DomDocument::schemaValidateSource() - Don't add missing attribute default values
 --CREDITS--
 Chris Wright <info@daverandom.com>
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

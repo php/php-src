@@ -1,7 +1,7 @@
 --TEST--
 Test finfo_buffer() function : basic functionality 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : string finfo_buffer(resource finfo, char *string [, int options [, resource context]])

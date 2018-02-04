@@ -1,7 +1,7 @@
 --TEST--
 SQLite3 open_basedir checks
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 open_basedir=.
 --FILE--

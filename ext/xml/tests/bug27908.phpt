@@ -2,7 +2,7 @@
 Bug #27908 (default handler not being called)
 --SKIPIF--
 <?php
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

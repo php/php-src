@@ -1,7 +1,7 @@
 --TEST--
 Attributes: DOMAttribute functionality
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 require_once("dom_test.inc");

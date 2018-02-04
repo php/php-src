@@ -2,7 +2,7 @@
 Bug #68089 (NULL byte injection - cURL lib)
 --SKIPIF--
 <?php 
-include 'skipif.inc';
+require 'skipif.inc';
 
 ?>
 --FILE--

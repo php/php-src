@@ -2,7 +2,7 @@
 Bug #73037 SoapServer reports Bad Request when gzipped, var 0
 --SKIPIF--
 <?php 
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	if (!extension_loaded("zlib")) {
 		echo "skip zlib is required for this test";
 	}

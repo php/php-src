@@ -3,7 +3,7 @@ DBA DB4 file creation dba_open("cd")
 --SKIPIF--
 <?php 
 $handler = "db4";
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

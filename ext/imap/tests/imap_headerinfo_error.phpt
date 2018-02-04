@@ -4,7 +4,7 @@ imap_headerinfo() incorrect parameter count
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

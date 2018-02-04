@@ -3,7 +3,7 @@ DBA with persistent connections
 --SKIPIF--
 <?php 
 $handler = "flatfile";
-require_once('skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

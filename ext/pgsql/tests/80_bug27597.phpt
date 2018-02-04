@@ -2,7 +2,7 @@
 Bug #27597 (pg_fetch_array not returning false)
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 Bug #30266 (Invalid opcode 137/1/8)
 --SKIPIF--
 <?php
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

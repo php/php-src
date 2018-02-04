@@ -1,7 +1,7 @@
 --TEST--
 Bug #72681: PHP Session Data Injection Vulnerability
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 ini_set('session.serialize_handler', 'php');

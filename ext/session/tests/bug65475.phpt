@@ -4,7 +4,7 @@ Bug #65475: Session ID is not initialized when session.usr_strict_mode=1
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 ob_start();

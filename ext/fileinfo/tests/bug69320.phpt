@@ -1,7 +1,7 @@
 --TEST--
 Bug #69320 libmagic crash when running laravel tests
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 73: SOAP 1.1 Array (document style, element with type ref)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

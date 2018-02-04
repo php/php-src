@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL version
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // Get postgresql version for easier debugging.

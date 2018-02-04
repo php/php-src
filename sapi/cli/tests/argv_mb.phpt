@@ -2,7 +2,7 @@
 Test basic argv multibyte API integration
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
+require 'skipif.inc'; 
 if (substr(PHP_OS, 0, 3) != 'WIN') {
 	die ("skip only for Windows");
 }

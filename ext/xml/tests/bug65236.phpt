@@ -2,7 +2,7 @@
 Bug #65236 (heap corruption in xml parser)
 --SKIPIF--
 <?php
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

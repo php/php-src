@@ -2,7 +2,7 @@
 PostgreSQL pg_convert()
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_bytea_not_escape();
 ?>
 --FILE--

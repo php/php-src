@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 groupB 005 (soap/direct): echoNestedArray
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 precision=14
 --FILE--

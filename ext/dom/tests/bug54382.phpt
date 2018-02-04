@@ -2,7 +2,7 @@
 Bug #54382 DOMNode::getAttributeNodeNS doesn't get xmlns* attributes
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

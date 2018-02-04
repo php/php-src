@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.fast_shutdown=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* run this test script with valgrind */

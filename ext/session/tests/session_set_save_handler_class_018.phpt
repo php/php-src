@@ -4,7 +4,7 @@ Test session_set_save_handler() function: class with validate_sid
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

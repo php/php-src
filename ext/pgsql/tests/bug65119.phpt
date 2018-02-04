@@ -2,7 +2,7 @@
 Bug #65119 (pg_copy_from() modifies input array variable)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php
