@@ -102,19 +102,19 @@ echo "Done"
 *** Testing array_filter() : usage variations - unexpected values for 'input'***
 -- Iteration 1 --
 
-Warning: array_filter() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_filter() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 2 --
 
-Warning: array_filter() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_filter() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 3 --
 
-Warning: array_filter() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_filter() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 4 --
 
-Warning: array_filter() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_filter() expects parameter 1 to be array, int given in %s on line %d
 NULL
 -- Iteration 5 --
 

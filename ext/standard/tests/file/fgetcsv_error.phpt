@@ -60,10 +60,10 @@ Warning: fgetcsv() expects parameter 1 to be resource, string given in %s on lin
 NULL
 -- Iteration 2 --
 
-Warning: fgetcsv() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fgetcsv() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
-Warning: fgetcsv() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fgetcsv() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 -- Iteration 3 --
 

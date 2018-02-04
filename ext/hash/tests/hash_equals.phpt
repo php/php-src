@@ -27,13 +27,13 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: hash_equals(): Expected known_string to be a string, integer given in %s on line %d
+Warning: hash_equals(): Expected known_string to be a string, int given in %s on line %d
 bool(false)
 
-Warning: hash_equals(): Expected user_string to be a string, integer given in %s on line %d
+Warning: hash_equals(): Expected user_string to be a string, int given in %s on line %d
 bool(false)
 
-Warning: hash_equals(): Expected known_string to be a string, integer given in %s on line %d
+Warning: hash_equals(): Expected known_string to be a string, int given in %s on line %d
 bool(false)
 
 Warning: hash_equals(): Expected known_string to be a string, null given in %s on line %d

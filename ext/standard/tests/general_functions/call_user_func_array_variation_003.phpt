@@ -109,19 +109,19 @@ foreach($inputs as $key =>$value) {
 *** Testing call_user_func_array() : usage variation ***
 
 --int 0--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, int given, %s(%d)
 NULL
 
 --int 1--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, int given, %s(%d)
 NULL
 
 --int 12345--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, int given, %s(%d)
 NULL
 
 --int -12345--
-Error: 2 - call_user_func_array() expects parameter 2 to be array, integer given, %s(%d)
+Error: 2 - call_user_func_array() expects parameter 2 to be array, int given, %s(%d)
 NULL
 
 --float 10.5--

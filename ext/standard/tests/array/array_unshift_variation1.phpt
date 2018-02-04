@@ -119,38 +119,38 @@ echo "Done";
 *** Testing array_unshift() : unexpected values for $array argument ***
 
 -- Iteration 1 --
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(0)
 
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(0)
 
 -- Iteration 2 --
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(1)
 
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(1)
 
 -- Iteration 3 --
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(12345)
 
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(12345)
 
 -- Iteration 4 --
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(-2345)
 
-Warning: array_unshift() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, int given in %s on line %d
 NULL
 int(-2345)
 

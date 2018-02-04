@@ -123,16 +123,16 @@ fclose( $file_handle );
 *** Testing timezone_offset_get() : usage variation -  unexpected values to second argument $datetime***
 
 -- int 0 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int 1 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int 12345 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int -12345 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- float 10.5 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given

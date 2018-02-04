@@ -37,7 +37,7 @@ echo PHP_EOL . "Done";
 ?>
 --EXPECTF--
 Testing int:
-*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
 Testing float:
 *** Caught Argument 1 passed to {closure}() must be of the type float, null given, called in %s on line %d
 Testing string:

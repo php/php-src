@@ -129,19 +129,19 @@ unlink($filename);
 *** Testing file() : usage variation ***
 
 --int 0--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int 1--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int 12345--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int -12345--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --float 10.5--

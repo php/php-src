@@ -211,7 +211,7 @@ array(3) {
 }
 -- Iteration 13 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -223,7 +223,7 @@ array(3) {
 }
 -- Iteration 14 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -235,7 +235,7 @@ array(3) {
 }
 -- Iteration 15 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -247,7 +247,7 @@ array(3) {
 }
 -- Iteration 16 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -259,7 +259,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: asort() expects parameter 2 to be integer, object given in %s on line %d
+Warning: asort() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -271,7 +271,7 @@ array(3) {
 }
 -- Iteration 18 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -283,7 +283,7 @@ array(3) {
 }
 -- Iteration 19 --
 
-Warning: asort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: asort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [1]=>
@@ -295,7 +295,7 @@ array(3) {
 }
 -- Iteration 20 --
 
-Warning: asort() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: asort() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 array(3) {
   [1]=>

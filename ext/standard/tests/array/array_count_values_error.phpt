@@ -45,6 +45,6 @@ NULL
 
 -- Testing array_count_values() function integer arguments --
 
-Warning: array_count_values() expects parameter 1 to be array, integer given in %sarray_count_values_error.php on line 26
+Warning: array_count_values() expects parameter 1 to be array, int given in %sarray_count_values_error.php on line 26
 NULL
 Done

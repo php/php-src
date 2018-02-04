@@ -73,7 +73,7 @@ NULL
 bool(true)
 int(3)
 
-Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, integer given in %s on line %d
+Warning: oci_lob_seek() expects parameter 1 to be OCI-Lob, int given in %s on line %d
 NULL
 bool(true)
 array(2) {

@@ -30,7 +30,7 @@ object(ReflectionObject)#%d (1) {
   string(0) ""
 }
 
-Warning: ReflectionObject::__construct() expects parameter 1 to be object, integer given in %s on line 7
+Warning: ReflectionObject::__construct() expects parameter 1 to be object, int given in %s on line 7
 object(ReflectionObject)#%d (1) {
   ["name"]=>
   string(0) ""

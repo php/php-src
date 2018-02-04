@@ -98,22 +98,22 @@ fclose($fp);
 
 -- Iteration 1 --
 
-Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
+Warning: reset() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
+Warning: reset() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
+Warning: reset() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: reset() expects parameter 1 to be array, integer given in %s on line %d
+Warning: reset() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Iteration 5 --

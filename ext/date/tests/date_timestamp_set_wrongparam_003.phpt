@@ -16,4 +16,4 @@ $wrong_parameter = array();
 date_timestamp_set($dtms021, $wrong_parameter);
 ?>
 --EXPECTF--
-Warning: date_timestamp_set() expects parameter 2 to be integer, array given in %s on line %d
+Warning: date_timestamp_set() expects parameter 2 to be int, array given in %s on line %d

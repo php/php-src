@@ -123,16 +123,16 @@ fclose( $file_handle );
 *** Testing timezone_offset_get() : usage variation -  unexpected values to first argument $object***
 
 -- int 0 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given
 
 -- int 1 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given
 
 -- int 12345 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given
 
 -- int -12345 --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given
 
 -- float 10.5 --
 Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, float given

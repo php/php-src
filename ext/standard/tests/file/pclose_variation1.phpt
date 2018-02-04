@@ -114,19 +114,19 @@ foreach($inputs as $key =>$value) {
 *** Testing pclose() : usage variation ***
 
 --int 0--
-Error: 2 - pclose() expects parameter 1 to be resource, integer given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, int given, %s(%d)
 bool(false)
 
 --int 1--
-Error: 2 - pclose() expects parameter 1 to be resource, integer given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, int given, %s(%d)
 bool(false)
 
 --int 12345--
-Error: 2 - pclose() expects parameter 1 to be resource, integer given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, int given, %s(%d)
 bool(false)
 
 --int -12345--
-Error: 2 - pclose() expects parameter 1 to be resource, integer given, %s(%d)
+Error: 2 - pclose() expects parameter 1 to be resource, int given, %s(%d)
 bool(false)
 
 --float 10.5--

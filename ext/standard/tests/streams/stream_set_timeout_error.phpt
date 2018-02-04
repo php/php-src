@@ -72,7 +72,7 @@ bool(false)
 
 -- Testing stream_set_timeout() function with an invalid stream --
 
-Warning: stream_set_timeout() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: stream_set_timeout() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- Testing stream_set_timeout() function with a stream that does not support timeouts --

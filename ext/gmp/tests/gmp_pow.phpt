@@ -57,10 +57,10 @@ NULL
 Warning: gmp_pow() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmp_pow() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
-Warning: gmp_pow() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmp_pow() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
 Warning: gmp_pow(): Unable to convert variable to GMP - wrong type in %s on line %d

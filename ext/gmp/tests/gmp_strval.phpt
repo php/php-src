@@ -40,13 +40,13 @@ NULL
 Warning: gmp_strval(): Unable to convert variable to GMP - string is not an integer in %s on line %d
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 Warning: gmp_strval(): Bad base for conversion: -1 (should be between 2 and %d or -2 and -%d) in %s on line %d
 bool(false)
 
-Warning: gmp_strval() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d
@@ -68,10 +68,10 @@ Warning: gmp_strval(): Bad base for conversion: 100000 (should be between 2 and 
 bool(false)
 string(8) "-3373333"
 
-Warning: gmp_strval() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
-Warning: gmp_strval() expects parameter 2 to be integer, object given in %s on line %d
+Warning: gmp_strval() expects parameter 2 to be int, object given in %s on line %d
 NULL
 
 Warning: gmp_strval(): Unable to convert variable to GMP - wrong type in %s on line %d

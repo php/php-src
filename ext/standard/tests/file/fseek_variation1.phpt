@@ -105,31 +105,31 @@ int(0)
 
 Arg value Array 
 
-Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 int(0)
 
 Arg value Array 
 
-Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 int(0)
 
 Arg value Array 
 
-Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 int(0)
 
 Arg value Array 
 
-Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 int(0)
 
 Arg value Array 
 
-Warning: fseek() expects parameter 2 to be integer, array given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 int(0)
 
@@ -159,31 +159,31 @@ int(0)
 
 Arg value  
 
-Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value  
 
-Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value string 
 
-Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value string 
 
-Warning: fseek() expects parameter 2 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 int(0)
 
 Arg value testClass 
 
-Warning: fseek() expects parameter 2 to be integer, object given in %s on line %d
+Warning: fseek() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 int(0)
 

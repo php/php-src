@@ -87,13 +87,13 @@ string(21) "/** My Doc comment */"
 Reflecting on class constant TestClass::PROT
 
 __toString():
-string(42) "Constant [ protected integer PROT ] { 4 }
+string(38) "Constant [ protected int PROT ] { 4 }
 "
 export():
-string(42) "Constant [ protected integer PROT ] { 4 }
+string(38) "Constant [ protected int PROT ] { 4 }
 "
 export():
-Constant [ protected integer PROT ] { 4 }
+Constant [ protected int PROT ] { 4 }
 
 NULL
 getName():

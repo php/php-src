@@ -68,28 +68,28 @@ Testing 'int' type:
 int(1)
 
 *** Trying float value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, float given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, float given, called in %s on line %d
 
 *** Trying string value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, string given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, string given, called in %s on line %d
 
 *** Trying true value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, boolean given, called in %s on line %d
 
 *** Trying false value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, boolean given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, boolean given, called in %s on line %d
 
 *** Trying null value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, null given, called in %s on line %d
 
 *** Trying array value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, array given, called in %s on line %d
 
 *** Trying object value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, object given, called in %s on line %d
 
 *** Trying resource value
-*** Caught Argument 1 passed to {closure}() must be of the type integer, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type int, resource given, called in %s on line %d
 
 Testing 'float' type:
 
@@ -123,7 +123,7 @@ float(1)
 Testing 'string' type:
 
 *** Trying integer value
-*** Caught Argument 1 passed to {closure}() must be of the type string, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type string, int given, called in %s on line %d
 
 *** Trying float value
 *** Caught Argument 1 passed to {closure}() must be of the type string, float given, called in %s on line %d
@@ -152,7 +152,7 @@ string(1) "1"
 Testing 'bool' type:
 
 *** Trying integer value
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, integer given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type boolean, int given, called in %s on line %d
 
 *** Trying float value
 *** Caught Argument 1 passed to {closure}() must be of the type boolean, float given, called in %s on line %d

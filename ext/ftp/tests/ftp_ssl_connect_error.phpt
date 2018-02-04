@@ -37,9 +37,9 @@ bool(false)
 
 Warning: ftp_ssl_connect() expects parameter 1 to be string, array given in %s on line %d
 
-Warning: ftp_ssl_connect() expects parameter 2 to be integer, array given in %s on line %d
+Warning: ftp_ssl_connect() expects parameter 2 to be int, array given in %s on line %d
 
-Warning: ftp_ssl_connect() expects parameter 3 to be integer, array given in %s on line %d
+Warning: ftp_ssl_connect() expects parameter 3 to be int, array given in %s on line %d
 
 -- Testing ftp_ssl_connect() function with more than expected no. of arguments --
 

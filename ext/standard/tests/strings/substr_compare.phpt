@@ -41,6 +41,6 @@ Warning: substr_compare(): The length must be greater than or equal to zero in %
 bool(false)
 bool(true)
 
-Warning: substr_compare() expects parameter 4 to be integer, string given in %s on line %d
+Warning: substr_compare() expects parameter 4 to be int, string given in %s on line %d
 bool(false)
 Done

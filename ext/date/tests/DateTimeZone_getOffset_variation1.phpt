@@ -112,22 +112,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 -- float 10.5 --

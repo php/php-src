@@ -24,7 +24,7 @@ var_dump(srand("500ABC"));
 Warning: srand() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: srand() expects parameter 1 to be integer, string given in %s on line %d
+Warning: srand() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Notice: A non well formed numeric value encountered in %s on line %d
