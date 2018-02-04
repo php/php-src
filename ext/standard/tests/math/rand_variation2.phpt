@@ -113,7 +113,7 @@ int(%i)
 
 -- Iteration 8 --
 
-Warning: rand() expects parameter 2 to be integer, float given in %s on line %d
+Warning: rand() expects parameter 2 to be int, float given in %s on line %d
 NULL
 
 -- Iteration 9 --
@@ -142,37 +142,37 @@ int(%i)
 
 -- Iteration 17 --
 
-Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
+Warning: rand() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
+Warning: rand() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: rand() expects parameter 2 to be integer, array given in %s on line %d
+Warning: rand() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
+Warning: rand() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
+Warning: rand() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: rand() expects parameter 2 to be integer, string given in %s on line %d
+Warning: rand() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 23 --
 
-Warning: rand() expects parameter 2 to be integer, object given in %s on line %d
+Warning: rand() expects parameter 2 to be int, object given in %s on line %d
 NULL
 
 -- Iteration 24 --
@@ -183,6 +183,6 @@ int(%i)
 
 -- Iteration 26 --
 
-Warning: rand() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: rand() expects parameter 2 to be int, resource given in %s on line %d
 NULL
 ===Done===

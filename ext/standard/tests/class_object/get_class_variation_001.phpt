@@ -3,9 +3,9 @@ Test get_class() function : usage variations  - passing unexpected types.
 --FILE--
 <?php
 /* Prototype  : proto string get_class([object object])
- * Description: Retrieves the class name 
+ * Description: Retrieves the class name
  * Source code: Zend/zend_builtin_functions.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing get_class() : usage variations ***\n";

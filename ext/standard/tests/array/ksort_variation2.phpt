@@ -210,7 +210,7 @@ array(3) {
 }
 -- Iteration 13 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -222,7 +222,7 @@ array(3) {
 }
 -- Iteration 14 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -234,7 +234,7 @@ array(3) {
 }
 -- Iteration 15 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -246,7 +246,7 @@ array(3) {
 }
 -- Iteration 16 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -258,7 +258,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: ksort() expects parameter 2 to be integer, object given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -270,7 +270,7 @@ array(3) {
 }
 -- Iteration 18 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -282,7 +282,7 @@ array(3) {
 }
 -- Iteration 19 --
 
-Warning: ksort() expects parameter 2 to be integer, string given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 array(3) {
   [10]=>
@@ -294,7 +294,7 @@ array(3) {
 }
 -- Iteration 20 --
 
-Warning: ksort() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: ksort() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 array(3) {
   [10]=>

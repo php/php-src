@@ -11,4 +11,4 @@ try {
 
 ?>
 --EXPECT--
-Call to a member function foo() on integer
+Call to a member function foo() on int

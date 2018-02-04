@@ -239,13 +239,13 @@ NULL
 
 Warning: Use of undefined constant ABCD - assumed 'ABCD' (this will throw an Error in a future version of PHP) in %s on line %d
 
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, %s given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, %s given in %s on line %d
 NULL
 
-Warning: count() expects parameter 2 to be integer, %s given in %s on line %d
+Warning: count() expects parameter 2 to be int, %s given in %s on line %d
 NULL
 
 Done

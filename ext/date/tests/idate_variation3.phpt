@@ -31,11 +31,11 @@ var_dump( idate($format, $timestamp) );
 
 -- Testing idate() function with float 12.3456789000e10 to timestamp --
 
-Warning: idate() expects parameter 2 to be integer, float given in %s on line %d
+Warning: idate() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 -- Testing idate() function with float -12.3456789000e10 to timestamp --
 
-Warning: idate() expects parameter 2 to be integer, float given in %s on line %d
+Warning: idate() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 ===DONE===

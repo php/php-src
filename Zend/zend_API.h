@@ -690,7 +690,7 @@ END_EXTERN_C()
 #define FAST_ZPP 1
 
 #define Z_EXPECTED_TYPES(_) \
-	_(Z_EXPECTED_LONG,		"integer") \
+	_(Z_EXPECTED_LONG,		"int") \
 	_(Z_EXPECTED_BOOL,		"boolean") \
 	_(Z_EXPECTED_STRING,	"string") \
 	_(Z_EXPECTED_ARRAY,		"array") \

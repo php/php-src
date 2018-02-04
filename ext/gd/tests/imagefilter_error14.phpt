@@ -14,5 +14,5 @@ $image = imagecreatetruecolor(180, 30);
 var_dump(imagefilter($image, IMG_FILTER_COLORIZE, 'wrong parameter', 255, 255));
 ?>
 --EXPECTF--
-Warning: imagefilter() expects parameter 3 to be integer, string given in %s on line %d
+Warning: imagefilter() expects parameter 3 to be int, string given in %s on line %d
 bool(false)

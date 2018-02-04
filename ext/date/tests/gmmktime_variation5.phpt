@@ -3,9 +3,9 @@ Test gmmktime() function : usage variation - Passing unexpected values to fifth 
 --FILE--
 <?php
 /* Prototype  : int gmmktime([int hour [, int min [, int sec [, int mon [, int day [, int year]]]]]])
- * Description: Get UNIX timestamp for a GMT date 
+ * Description: Get UNIX timestamp for a GMT date
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmmktime() : usage variation ***\n";
@@ -110,22 +110,22 @@ int(1217491688)
 
 --empty array--
 
-Warning: gmmktime() expects parameter 5 to be integer, array given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: gmmktime() expects parameter 5 to be integer, array given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: gmmktime() expects parameter 5 to be integer, array given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: gmmktime() expects parameter 5 to be integer, array given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -148,42 +148,42 @@ int(1217491688)
 
 --empty string DQ--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmmktime() expects parameter 5 to be integer, string given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: gmmktime() expects parameter 5 to be integer, object given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: gmmktime() expects parameter 5 to be integer, object given in %s on line %d
+Warning: gmmktime() expects parameter 5 to be int, object given in %s on line %d
 bool(false)
 
 --undefined var--

@@ -427,7 +427,7 @@ bool(true)
 NULL
 string(4) "NULL"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 NULL
 string(4) "NULL"
@@ -442,7 +442,7 @@ bool(true)
 NULL
 string(4) "NULL"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 NULL
 string(4) "NULL"
@@ -452,17 +452,17 @@ bool(true)
 NULL
 string(4) "NULL"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 NULL
 string(4) "NULL"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 NULL
 string(4) "NULL"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 NULL
 string(4) "NULL"

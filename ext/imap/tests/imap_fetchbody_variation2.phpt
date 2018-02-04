@@ -176,37 +176,37 @@ bool(false)
 
 -- Iteration 16 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, array given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, string given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 22 --
 
-Warning: imap_fetchbody() expects parameter 2 to be integer, object given in %s on line %d
+Warning: imap_fetchbody() expects parameter 2 to be int, object given in %s on line %d
 NULL
 
 -- Iteration 23 --

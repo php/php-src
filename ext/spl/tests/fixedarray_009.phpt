@@ -10,4 +10,4 @@ try {
 }
 ?>
 --EXPECTF--
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
+Ok - SplFixedArray::__construct() expects parameter 1 to be int, string given

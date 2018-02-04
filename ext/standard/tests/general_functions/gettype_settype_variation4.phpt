@@ -462,7 +462,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 50 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(false)
 string(7) "boolean"
@@ -472,7 +472,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
@@ -487,7 +487,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
@@ -497,17 +497,17 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 57 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 58 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 59 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
@@ -954,7 +954,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 50 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(false)
 string(7) "boolean"
@@ -964,7 +964,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
@@ -979,7 +979,7 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
@@ -989,17 +989,17 @@ bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 57 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 58 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
 -- Iteration 59 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 bool(true)
 string(7) "boolean"
