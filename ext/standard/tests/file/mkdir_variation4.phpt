@@ -173,16 +173,16 @@ Directory created
 Directory created
 
 --lowercase true--
-Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, bool given, %s(%d)
 
 --lowercase false--
-Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, bool given, %s(%d)
 
 --uppercase TRUE--
-Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, bool given, %s(%d)
 
 --uppercase FALSE--
-Error: 2 - mkdir() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - mkdir() expects parameter 4 to be resource, bool given, %s(%d)
 
 --empty string DQ--
 Error: 2 - mkdir() expects parameter 4 to be resource, string given, %s(%d)

@@ -38,7 +38,7 @@ Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
 
 Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
 
-Warning: curl_setopt() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: curl_setopt() expects parameter 1 to be resource, bool given in %s on line %d
 
 Warning: curl_setopt() expects parameter 2 to be int, string given in %s on line %d
 

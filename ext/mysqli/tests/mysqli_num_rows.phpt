@@ -78,9 +78,9 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 
-Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 
 Warning: mysqli_num_rows(): Couldn't fetch mysqli_result in %s on line %d
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!

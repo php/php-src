@@ -27,7 +27,7 @@ foreach($data_provider as $input) {
 Warning: SplObjectStorage::removeAllExcept() expects parameter 1 to be SplObjectStorage, array given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::removeAllExcept() expects parameter 1 to be SplObjectStorage, boolean given in %s on line %d
+Warning: SplObjectStorage::removeAllExcept() expects parameter 1 to be SplObjectStorage, bool given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::removeAllExcept() expects parameter 1 to be SplObjectStorage, string given in %s on line %d

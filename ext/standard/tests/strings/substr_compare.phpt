@@ -33,7 +33,7 @@ bool(false)
 bool(true)
 int(0)
 
-Warning: substr_compare() expects parameter 5 to be boolean, object given in %s on line %d
+Warning: substr_compare() expects parameter 5 to be bool, object given in %s on line %d
 bool(false)
 Test
 

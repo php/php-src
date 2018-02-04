@@ -267,7 +267,7 @@ array(3) {
 
 -- Iteration 18 --
 
-Warning: array_slice() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: array_slice() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
@@ -302,7 +302,7 @@ array(3) {
 
 -- Iteration 22 --
 
-Warning: array_slice() expects parameter 4 to be boolean, object given in %s on line %d
+Warning: array_slice() expects parameter 4 to be bool, object given in %s on line %d
 NULL
 
 -- Iteration 23 --

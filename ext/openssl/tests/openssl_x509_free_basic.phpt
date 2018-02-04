@@ -13,4 +13,4 @@ openssl_x509_free(false);
 resource(%d) of type (OpenSSL X.509)
 resource(%d) of type (Unknown)
 
-Warning: openssl_x509_free() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: openssl_x509_free() expects parameter 1 to be resource, bool given in %s on line %d

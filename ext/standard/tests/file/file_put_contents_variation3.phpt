@@ -188,19 +188,19 @@ int(13)
 int(13)
 
 --lowercase true--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, bool given, %s(%d)
 NULL
 
 --lowercase false--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase TRUE--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase FALSE--
-Error: 2 - file_put_contents() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - file_put_contents() expects parameter 4 to be resource, bool given, %s(%d)
 NULL
 
 --empty string DQ--

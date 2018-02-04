@@ -242,55 +242,55 @@ Warning: asort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 15 --
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: asort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: asort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 16 --
 

@@ -132,22 +132,22 @@ bool(false)
 
 --empty array--
 
-Warning: interface_exists() expects parameter 2 to be boolean, array given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, array given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --int indexed array--
 
-Warning: interface_exists() expects parameter 2 to be boolean, array given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, array given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --associative array--
 
-Warning: interface_exists() expects parameter 2 to be boolean, array given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, array given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --nested arrays--
 
-Warning: interface_exists() expects parameter 2 to be boolean, array given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, array given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --uppercase NULL--
@@ -188,12 +188,12 @@ bool(false)
 
 --instance of classWithToString--
 
-Warning: interface_exists() expects parameter 2 to be boolean, object given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, object given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --instance of classWithoutToString--
 
-Warning: interface_exists() expects parameter 2 to be boolean, object given in %sinterface_exists_variation2.php on line %d
+Warning: interface_exists() expects parameter 2 to be bool, object given in %sinterface_exists_variation2.php on line %d
 NULL
 
 --undefined var--

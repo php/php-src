@@ -162,16 +162,16 @@ Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, 
 Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given
 
 -- lowercase true --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, bool given
 
 -- lowercase false --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, bool given
 
 -- uppercase TRUE --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, bool given
 
 -- uppercase FALSE --
-Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, boolean given
+Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, bool given
 
 -- empty string DQ --
 Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, string given

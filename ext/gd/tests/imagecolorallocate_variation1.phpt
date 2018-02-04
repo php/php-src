@@ -192,22 +192,22 @@ NULL
 
 -- lowercase true --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- lowercase false --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- uppercase TRUE --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- uppercase FALSE --
 
-Warning: imagecolorallocate() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imagecolorallocate() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- empty string DQ --

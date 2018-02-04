@@ -154,22 +154,22 @@ NULL
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: %string|unicode%(0) ""

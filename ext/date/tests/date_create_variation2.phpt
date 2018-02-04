@@ -187,22 +187,22 @@ object(DateTime)#%d (3) {
 
 -- lowercase true --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, boolean given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, boolean given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, boolean given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_create() expects parameter 2 to be DateTimeZone, boolean given in %s on line %d
+Warning: date_create() expects parameter 2 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

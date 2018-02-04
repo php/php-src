@@ -257,21 +257,21 @@ bool(true)
 bool(false)
 
 *** Trying NULL
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
 
 *** Trying array(0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, array given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, array given, called in %s on line %d
 
 *** Trying object(stdClass)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
 *** Trying object(Stringable)#%s (0) {
 }
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, object given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, object given, called in %s on line %d
 
 *** Trying resource(%d) of type (stream)
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, resource given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, resource given, called in %s on line %d
 
 Done

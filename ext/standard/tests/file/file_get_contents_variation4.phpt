@@ -189,19 +189,19 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 --lowercase true--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --lowercase false--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase TRUE--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase FALSE--
-Error: 2 - file_get_contents() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --empty string DQ--

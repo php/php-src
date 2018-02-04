@@ -209,43 +209,43 @@ Warning: array_reverse() expects parameter 1 to be array, null given in %s on li
 NULL
 
 -- Iteration 12 --
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_reverse() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_reverse() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --

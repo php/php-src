@@ -200,17 +200,17 @@ bool(true)
 *** Trying bool(false)
 bool(false)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of the type boolean, null returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, array returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of the type boolean, resource returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, resource returned in %s on line %d
 
 Done

@@ -192,19 +192,19 @@ testing readfile
 testing readfile
 
 --lowercase true--
-Error: 2 - readfile() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, bool given, %s(%d)
 file not read
 
 --lowercase false--
-Error: 2 - readfile() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, bool given, %s(%d)
 file not read
 
 --uppercase TRUE--
-Error: 2 - readfile() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, bool given, %s(%d)
 file not read
 
 --uppercase FALSE--
-Error: 2 - readfile() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - readfile() expects parameter 3 to be resource, bool given, %s(%d)
 file not read
 
 --empty string DQ--

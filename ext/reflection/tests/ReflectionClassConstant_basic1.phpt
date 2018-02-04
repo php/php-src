@@ -53,13 +53,13 @@ reflectClassConstant($instance, "BAD_CONST");
 Reflecting on class constant TestClass::PUB
 
 __toString():
-string(38) "Constant [ public boolean PUB ] { 1 }
+string(35) "Constant [ public bool PUB ] { 1 }
 "
 export():
-string(38) "Constant [ public boolean PUB ] { 1 }
+string(35) "Constant [ public bool PUB ] { 1 }
 "
 export():
-Constant [ public boolean PUB ] { 1 }
+Constant [ public bool PUB ] { 1 }
 
 NULL
 getName():

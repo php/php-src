@@ -175,22 +175,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

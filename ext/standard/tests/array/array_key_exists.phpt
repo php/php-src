@@ -264,10 +264,10 @@ NULL
 Warning: array_key_exists() expects parameter 2 to be array, null given in %s on line %d
 NULL
 
-Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, bool given in %s on line %d
 NULL
 
-Warning: array_key_exists() expects parameter 2 to be array, boolean given in %s on line %d
+Warning: array_key_exists() expects parameter 2 to be array, bool given in %s on line %d
 NULL
 
 Warning: array_key_exists() expects parameter 2 to be array, float given in %s on line %d

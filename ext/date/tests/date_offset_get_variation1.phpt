@@ -175,22 +175,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, boolean given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

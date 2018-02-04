@@ -180,19 +180,19 @@ Warning: dir() expects parameter 2 to be resource, null given in %s on line %d
 NULL
 
 -- Iteration 17 --
-Warning: dir() expects parameter 2 to be resource, boolean given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 18 --
-Warning: dir() expects parameter 2 to be resource, boolean given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 19 --
-Warning: dir() expects parameter 2 to be resource, boolean given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 20 --
-Warning: dir() expects parameter 2 to be resource, boolean given in %s on line %d
+Warning: dir() expects parameter 2 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 21 --

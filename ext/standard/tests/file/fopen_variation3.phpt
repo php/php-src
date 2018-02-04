@@ -151,19 +151,19 @@ ok
 ok
 
 --empty array--
-Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, array given, %s(%d)
 bool(false)
 
 --int indexed array--
-Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, array given, %s(%d)
 bool(false)
 
 --associative array--
-Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, array given, %s(%d)
 bool(false)
 
 --nested arrays--
-Error: 2 - fopen() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
@@ -203,11 +203,11 @@ ok
 ok
 
 --instance of classWithToString--
-Error: 2 - fopen() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, object given, %s(%d)
 bool(false)
 
 --instance of classWithoutToString--
-Error: 2 - fopen() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - fopen() expects parameter 3 to be bool, object given, %s(%d)
 bool(false)
 
 --undefined var--
