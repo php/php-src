@@ -128,27 +128,27 @@ bool(false)
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 
 Arg value  
@@ -187,7 +187,7 @@ bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(80)
 
 Arg value  
-Error: 2 - trait_exists() expects parameter 2 to be boolean, object given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, object given, %s(81)
 NULL
 
 Arg value  

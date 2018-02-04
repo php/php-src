@@ -153,22 +153,22 @@ NULL
 
 --lowercase true--
 
-Warning: array_product() expects parameter 1 to be array, boolean given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, bool given in %sarray_product_variation5.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: array_product() expects parameter 1 to be array, boolean given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, bool given in %sarray_product_variation5.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: array_product() expects parameter 1 to be array, boolean given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, bool given in %sarray_product_variation5.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: array_product() expects parameter 1 to be array, boolean given in %sarray_product_variation5.php on line %d
+Warning: array_product() expects parameter 1 to be array, bool given in %sarray_product_variation5.php on line %d
 NULL
 
 --empty string DQ--

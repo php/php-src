@@ -75,7 +75,7 @@ Warning: fflush() expects parameter 1 to be resource, float given in %s on line 
 bool(false)
 -- Iteration 4 --
 
-Warning: fflush() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fflush() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 -- Iteration 5 --
 

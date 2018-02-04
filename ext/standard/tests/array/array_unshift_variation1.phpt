@@ -218,38 +218,38 @@ NULL
 NULL
 
 -- Iteration 12 --
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(true)
 
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(true)
 
 -- Iteration 13 --
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(false)
 
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(false)
 
 -- Iteration 14 --
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(true)
 
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(true)
 
 -- Iteration 15 --
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(false)
 
-Warning: array_unshift() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_unshift() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 bool(false)
 

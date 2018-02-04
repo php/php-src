@@ -190,19 +190,19 @@ bool(true)
 bool(true)
 
 --lowercase true--
-Error: 2 - rename() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - rename() expects parameter 3 to be resource, bool given, %s(%d)
 bool(false)
 
 --lowercase false--
-Error: 2 - rename() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - rename() expects parameter 3 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase TRUE--
-Error: 2 - rename() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - rename() expects parameter 3 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - rename() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - rename() expects parameter 3 to be resource, bool given, %s(%d)
 bool(false)
 
 --empty string DQ--

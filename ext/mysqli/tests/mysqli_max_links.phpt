@@ -54,23 +54,23 @@ Warning: mysqli_%sonnect(): Too many open links (1) in %s on line %d
 
 Warning: mysqli_%sonnect(): Too many open links (1) in %s on line %d
 
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_query() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_close() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_query() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_close() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_query() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_close() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_query() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_close() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_query() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_query() expects parameter 1 to be mysqli, bool given in %s on line %d
 
-Warning: mysqli_close() expects parameter 1 to be mysqli, boolean given in %s on line %d
+Warning: mysqli_close() expects parameter 1 to be mysqli, bool given in %s on line %d
 done!

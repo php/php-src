@@ -165,22 +165,22 @@ NULL
 
 -- Iteration 12 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: imap_fetchheader() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetchheader() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --

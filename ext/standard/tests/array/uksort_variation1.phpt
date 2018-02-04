@@ -154,22 +154,22 @@ NULL
 
 --lowercase true--
 
-Warning: uksort() expects parameter 1 to be array, boolean given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, bool given in %suksort_variation1.php on line %d
 NULL
 
 --lowercase false--
 
-Warning: uksort() expects parameter 1 to be array, boolean given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, bool given in %suksort_variation1.php on line %d
 NULL
 
 --uppercase TRUE--
 
-Warning: uksort() expects parameter 1 to be array, boolean given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, bool given in %suksort_variation1.php on line %d
 NULL
 
 --uppercase FALSE--
 
-Warning: uksort() expects parameter 1 to be array, boolean given in %suksort_variation1.php on line %d
+Warning: uksort() expects parameter 1 to be array, bool given in %suksort_variation1.php on line %d
 NULL
 
 --empty string DQ--

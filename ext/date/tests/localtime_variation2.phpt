@@ -305,22 +305,22 @@ array(9) {
 
 --empty array--
 
-Warning: localtime() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: localtime() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: localtime() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: localtime() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -589,12 +589,12 @@ array(9) {
 
 --instance of classWithToString--
 
-Warning: localtime() expects parameter 2 to be boolean, object given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: localtime() expects parameter 2 to be boolean, object given in %s on line %d
+Warning: localtime() expects parameter 2 to be bool, object given in %s on line %d
 bool(false)
 
 --undefined var--

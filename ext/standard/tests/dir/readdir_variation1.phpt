@@ -145,22 +145,22 @@ NULL
 
 -- Iteration 12 --
 
-Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: readdir() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: readdir() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --

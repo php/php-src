@@ -162,22 +162,22 @@ bool(false)
 
 Arg value: 1 (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value:  (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value: 1 (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value:  (type: boolean)
 
-Warning: get_class() expects parameter 1 to be object, boolean given in %sget_class_variation_001.php on line %d
+Warning: get_class() expects parameter 1 to be object, bool given in %sget_class_variation_001.php on line %d
 bool(false)
 
 Arg value:  (type: string)

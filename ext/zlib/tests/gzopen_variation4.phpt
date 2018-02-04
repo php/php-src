@@ -118,37 +118,37 @@ This is a file in script dir
 
 Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 
 Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
-
-
-Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
-
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
-
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 
 Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
 
-Warning: gzpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 
-Warning: gzclose() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: gzclose() expects parameter 1 to be resource, bool given in %s on line %d
+
+
+Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+
+Warning: gzpassthru() expects parameter 1 to be resource, bool given in %s on line %d
+
+Warning: gzclose() expects parameter 1 to be resource, bool given in %s on line %d
+
+
+Warning: gzopen(): cannot open a zlib stream for reading and writing at the same time! in %s on line %d
+
+Warning: gzpassthru() expects parameter 1 to be resource, bool given in %s on line %d
+
+Warning: gzclose() expects parameter 1 to be resource, bool given in %s on line %d
 
 
 ** testing with mode=rt **

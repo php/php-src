@@ -171,16 +171,16 @@ object(DateTime)#%d (3) {
 }
 
 -- lowercase true --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- lowercase false --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- uppercase TRUE --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- uppercase FALSE --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- empty string DQ --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given

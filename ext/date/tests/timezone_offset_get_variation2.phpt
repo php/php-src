@@ -162,16 +162,16 @@ Argument 2 passed to timezone_offset_get() must implement interface DateTimeInte
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
 
 -- lowercase true --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- lowercase false --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- uppercase TRUE --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- uppercase FALSE --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- empty string DQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given

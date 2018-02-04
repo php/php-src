@@ -154,22 +154,22 @@ NULL
 
 -- Iteration 12 --
 
-Warning: end() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: end() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: end() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: end() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: end() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: end() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: end() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: end() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --

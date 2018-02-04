@@ -43,7 +43,7 @@ Testing float:
 Testing string:
 *** Caught Argument 1 passed to {closure}() must be of the type string, null given, called in %s on line %d
 Testing bool:
-*** Caught Argument 1 passed to {closure}() must be of the type boolean, null given, called in %s on line %d
+*** Caught Argument 1 passed to {closure}() must be of the type bool, null given, called in %s on line %d
 Testing int nullable:
 NULL
 Testing float nullable:

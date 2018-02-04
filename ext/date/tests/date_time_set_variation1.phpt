@@ -179,22 +179,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: date_time_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_time_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_time_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_time_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_time_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_time_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_time_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_time_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

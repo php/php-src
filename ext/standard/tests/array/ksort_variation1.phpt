@@ -240,55 +240,55 @@ Warning: ksort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 15 --
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: ksort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: ksort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 16 --
 

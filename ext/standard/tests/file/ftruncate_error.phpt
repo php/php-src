@@ -102,7 +102,7 @@ Warning: ftruncate() expects parameter 1 to be resource, float given in %s on li
 bool(false)
 -- Iteration 4 --
 
-Warning: ftruncate() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: ftruncate() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 -- Iteration 5 --
 

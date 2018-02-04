@@ -174,22 +174,22 @@ NULL
 
 Arg value 1 
 
-Warning: xml_set_object() expects parameter 2 to be object, boolean given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_set_object() expects parameter 2 to be object, boolean given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, bool given in %s on line %d
 NULL
 
 Arg value 1 
 
-Warning: xml_set_object() expects parameter 2 to be object, boolean given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_set_object() expects parameter 2 to be object, boolean given in %s on line %d
+Warning: xml_set_object() expects parameter 2 to be object, bool given in %s on line %d
 NULL
 
 Arg value  

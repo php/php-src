@@ -60,7 +60,7 @@ try {
 --EXPECTF--
 invoke() on a non-object:
 
-Warning: ReflectionMethod::invoke() expects parameter 1 to be object, boolean given in %s%eReflectionMethod_invoke_error1.php on line %d
+Warning: ReflectionMethod::invoke() expects parameter 1 to be object, bool given in %s%eReflectionMethod_invoke_error1.php on line %d
 NULL
 
 invoke() on a non-instance:

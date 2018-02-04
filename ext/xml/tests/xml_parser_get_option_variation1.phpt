@@ -180,22 +180,22 @@ NULL
 
 Arg value 1 
 
-Warning: xml_parser_get_option() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: xml_parser_get_option() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: xml_parser_get_option() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 Arg value 1 
 
-Warning: xml_parser_get_option() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: xml_parser_get_option() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: xml_parser_get_option() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: xml_parser_get_option() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 Arg value  

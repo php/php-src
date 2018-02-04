@@ -48,7 +48,7 @@ bool(false)
 
 -- Testing is_subclass_of() function with more than invalid 3rd argument --
 
-Warning: is_subclass_of() expects parameter 3 to be boolean, object given in %s on line 26
+Warning: is_subclass_of() expects parameter 3 to be bool, object given in %s on line 26
 NULL
 
 -- Testing is_subclass_of() function with less than expected no. of arguments --

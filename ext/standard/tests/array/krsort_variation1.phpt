@@ -240,55 +240,55 @@ Warning: krsort() expects parameter 1 to be array, null given in %s on line %d
 bool(false)
 -- Iteration 12 --
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 15 --
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
-Warning: krsort() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: krsort() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 -- Iteration 16 --
 

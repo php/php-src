@@ -52,4 +52,4 @@ $wrong_parameter = true;
 echo $proc->transformToXML($wrong_parameter);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToXml() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: XSLTProcessor::transformToXml() expects parameter 1 to be object, bool given in %s on line %d

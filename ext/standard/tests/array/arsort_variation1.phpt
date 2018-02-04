@@ -242,55 +242,55 @@ Warning: arsort() expects parameter 1 to be array, null given in %sarsort_variat
 bool(false)
 -- Iteration 12 --
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 13 --
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 14 --
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 15 --
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 
-Warning: arsort() expects parameter 1 to be array, boolean given in %sarsort_variation1.php on line %d
+Warning: arsort() expects parameter 1 to be array, bool given in %sarsort_variation1.php on line %d
 bool(false)
 -- Iteration 16 --
 
