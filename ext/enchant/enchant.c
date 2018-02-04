@@ -372,7 +372,7 @@ PHP_FUNCTION(enchant_broker_init)
 }
 /* }}} */
 
-/* {{{ proto boolean enchant_broker_free(resource broker)
+/* {{{ proto bool enchant_broker_free(resource broker)
    Destroys the broker object and its dictionnaries */
 PHP_FUNCTION(enchant_broker_free)
 {

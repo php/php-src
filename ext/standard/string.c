@@ -930,7 +930,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string wordwrap(string str [, int width [, string break [, boolean cut]]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {

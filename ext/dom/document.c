@@ -967,7 +967,7 @@ PHP_FUNCTION(dom_document_get_elements_by_tag_name)
 }
 /* }}} end dom_document_get_elements_by_tag_name */
 
-/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, boolean deep)
+/* {{{ proto DOMNode dom_document_import_node(DOMNode importedNode, bool deep)
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Core-Document-importNode
 Since: DOM Level 2
 */
@@ -1758,7 +1758,7 @@ PHP_FUNCTION(dom_document_xinclude)
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_validate()
+/* {{{ proto bool dom_document_validate()
 Since: DOM extended
 */
 PHP_FUNCTION(dom_document_validate)
@@ -1880,14 +1880,14 @@ static void _dom_document_schema_validate(INTERNAL_FUNCTION_PARAMETERS, int type
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_schema_validate_file(string filename, int flags); */
+/* {{{ proto bool dom_document_schema_validate_file(string filename, int flags); */
 PHP_FUNCTION(dom_document_schema_validate_file)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_schema_validate_file */
 
-/* {{{ proto boolean dom_document_schema_validate(string source, int flags); */
+/* {{{ proto bool dom_document_schema_validate(string source, int flags); */
 PHP_FUNCTION(dom_document_schema_validate_xml)
 {
 	_dom_document_schema_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -1973,14 +1973,14 @@ static void _dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAMETERS, int typ
 }
 /* }}} */
 
-/* {{{ proto boolean dom_document_relaxNG_validate_file(string filename); */
+/* {{{ proto bool dom_document_relaxNG_validate_file(string filename); */
 PHP_FUNCTION(dom_document_relaxNG_validate_file)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_FILE);
 }
 /* }}} end dom_document_relaxNG_validate_file */
 
-/* {{{ proto boolean dom_document_relaxNG_validate_xml(string source); */
+/* {{{ proto bool dom_document_relaxNG_validate_xml(string source); */
 PHP_FUNCTION(dom_document_relaxNG_validate_xml)
 {
 	_dom_document_relaxNG_validate(INTERNAL_FUNCTION_PARAM_PASSTHRU, DOM_LOAD_STRING);
@@ -2229,7 +2229,7 @@ PHP_FUNCTION(dom_document_save_html)
 
 #endif  /* defined(LIBXML_HTML_ENABLED) */
 
-/* {{{ proto boolean DOMDocument::registerNodeClass(string baseclass, string extendedclass)
+/* {{{ proto bool DOMDocument::registerNodeClass(string baseclass, string extendedclass)
    Register extended class used to create base node type */
 PHP_METHOD(domdocument, registerNodeClass)
 {
