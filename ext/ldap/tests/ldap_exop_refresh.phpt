@@ -1,7 +1,5 @@
 --TEST--
 ldap_exop_refresh() - Test LDAP refresh extended operation
---SKIPIF--
-<?php require 'skipif.inc'; ?>
 --CREDITS--
 Emmanuel Dreyfus <manu@netbsd.org>
 --SKIPIF--
