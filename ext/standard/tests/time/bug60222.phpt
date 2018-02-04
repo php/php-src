@@ -1,5 +1,7 @@
 --TEST--
 Bug #60222 (time_nanosleep() does validate input params)
+--SKIPIF--
+<?php if (!function_exists('time_nanosleep')) die('skip time_nanosleep function not available'); ?>
 --FILE--
 <?php
 	var_dump(time_nanosleep(-1, 0));

@@ -1,5 +1,7 @@
 --TEST--
 getprotobynumber function errors test
+--SKIPIF--
+<?php if (!function_exists('getprotobynumber')) die('skip getprotobynumber function not available'); ?>
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
 --FILE--

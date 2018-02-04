@@ -1,5 +1,7 @@
 --TEST--
 Test function getservbyport() by calling it more than or less than its expected arguments
+--SKIPIF--
+<?php if (!function_exists('getservbyport')) die('skip getservbyport function not available'); ?>
 --DESCRIPTION--
 Test function passing invalid port number and invalid protocol name
 --CREDITS--
@@ -18,7 +20,7 @@ Simone Gentili (sensorario@gmail.com)
 	var_dump(getservbyport( 2, 2));
 	var_dump(getservbyport( "80", "tcp"));
 	var_dump(getservbyport( new stdClass(), new stdClass()));
-	
+
 ?>
 --EXPECTF--
 bool(false)

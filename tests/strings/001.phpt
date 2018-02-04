@@ -1,7 +1,9 @@
 --TEST--
 String functions
+--SKIPIF--
+<?php if (!function_exists('uniqid')) die('skip uniqid function not available'); ?>
 --FILE--
-<?php 
+<?php
 
 error_reporting(0);
 

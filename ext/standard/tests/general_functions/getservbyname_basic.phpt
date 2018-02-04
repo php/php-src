@@ -1,5 +1,7 @@
 --TEST--
 Test function getservbyname()
+--SKIPIF--
+<?php if (!function_exists('getservbyname')) die('skip getservbyname function not available') ?>
 --CREDITS--
 Italian PHP TestFest 2009 Cesena 19-20-21 june
 Fabio Fabbrucci (fabbrucci@grupporetina.com)

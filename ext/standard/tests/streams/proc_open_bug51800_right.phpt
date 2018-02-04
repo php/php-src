@@ -1,5 +1,7 @@
 --TEST--
 Bug #51800 proc_open on Windows hangs forever, the right way to do it
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 $callee = dirname(__FILE__) . "/process_proc_open_bug51800_right.php";
@@ -75,4 +77,3 @@ array(3) {
 int(10000)
 int(10000)
 ===DONE===
-

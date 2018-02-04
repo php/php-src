@@ -1,5 +1,7 @@
 --TEST--
 Bug #60602 proc_open() modifies environment if it contains arrays
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 
@@ -17,7 +19,7 @@ $p = proc_open($cmd, $descs, $pipes, '.', $environment);
 if (is_resource($p)) {
 	$data = '';
 
-	while (1) {	
+	while (1) {
 		$w = $e = NULL;
 		$n = stream_select($pipes, $w, $e, 300);
 

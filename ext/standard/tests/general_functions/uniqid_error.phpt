@@ -1,9 +1,11 @@
 --TEST--
 Test uniqid() function : error conditions
+--SKIPIF--
+<?php if (!function_exists('uniqid')) die('skip uniqid function not available'); ?>
 --FILE--
 <?php
 /* Prototype  : string uniqid  ([ string $prefix= ""  [, bool $more_entropy= false  ]] )
- * Description: Gets a prefixed unique identifier based on the current time in microseconds. 
+ * Description: Gets a prefixed unique identifier based on the current time in microseconds.
  * Source code: ext/standard/uniqid.c
 */
 echo "*** Testing uniqid() : error conditions ***\n";
@@ -17,7 +19,7 @@ var_dump(uniqid($prefix, $more_entropy, $extra_arg));
 echo "\n-- Testing uniqid() function with invalid values for \$prefix --\n";
 class class1{}
 $obj = new class1();
-$res = fopen(__FILE__, "r"); 
+$res = fopen(__FILE__, "r");
 $array = array(1,2,3);
 
 uniqid($array, false);
@@ -28,7 +30,7 @@ fclose($res);
 
 ?>
 ===DONE===
---EXPECTF-- 
+--EXPECTF--
 *** Testing uniqid() : error conditions ***
 
 -- Testing uniqid() function with more than expected no. of arguments --

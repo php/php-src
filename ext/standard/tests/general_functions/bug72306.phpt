@@ -1,5 +1,7 @@
 --TEST--
 Bug #72306 (Heap overflow through proc_open and $env parameter)
+--SKIPIF--
+<?php if (!function_exists('proc_open')) die ('skip proc_open function not available'); ?>
 --FILE--
 <?php
 class moo {

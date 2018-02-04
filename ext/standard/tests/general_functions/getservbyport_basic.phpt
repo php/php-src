@@ -1,5 +1,7 @@
 --TEST--
 Test function getservbyport() by calling it more than or less than its expected arguments
+--SKIPIF--
+<?php if (!function_exists('getservbyport')) die('skip getservbyport function not available'); ?>
 --CREDITS--
 Italian PHP TestFest 2009 Cesena 19-20-21 june
 Fabio Fabbrucci (fabbrucci@grupporetina.com)

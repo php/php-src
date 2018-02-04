@@ -3,6 +3,7 @@ Bug #34794 (proc_close() hangs when used with two processes)
 --SKIPIF--
 <?php
 if (!is_executable('/bin/cat')) echo 'skip cat not found';
+if (!function_exists('proc_open')) die ('skip proc_open function not available');
 ?>
 --FILE--
 <?php

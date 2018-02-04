@@ -1,12 +1,14 @@
 --TEST--
 Test function getservbyname() by substituting argument 2 with string values.
+--SKIPIF--
+<?php if (!function_exists('getservbyname')) die('skip getservbyname function not available') ?>
 --FILE--
 <?php
 
 
 echo "*** Test substituting argument 2 with string values ***\n";
 
-$service = "www"; 
+$service = "www";
 
 
 $heredoc = <<<EOT

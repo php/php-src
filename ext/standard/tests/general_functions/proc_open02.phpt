@@ -2,6 +2,7 @@
 proc_open
 --SKIPIF--
 <?php
+if (!function_exists('proc_open')) die ('skip proc_open function not available');
 if (!is_executable('/bin/sleep')) echo 'skip no sleep';
 if (getenv('SKIP_SLOW_TESTS')) echo 'skip slow test';
 ?>
