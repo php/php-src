@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -40,7 +40,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMNameList
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList
 * Since: DOM Level 3
 */
 
@@ -52,7 +52,7 @@ const zend_function_entry php_dom_namelist_class_functions[] = {
 
 /* {{{ length	int
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-length
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-length
 Since:
 */
 int dom_namelist_length_read(dom_object *obj, zval *retval)
@@ -64,7 +64,7 @@ int dom_namelist_length_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ proto string dom_namelist_get_name(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getName
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getName
 Since:
 */
 PHP_FUNCTION(dom_namelist_get_name)
@@ -74,7 +74,7 @@ PHP_FUNCTION(dom_namelist_get_name)
 /* }}} end dom_namelist_get_name */
 
 /* {{{ proto string dom_namelist_get_namespace_uri(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getNamespaceURI
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#NameList-getNamespaceURI
 Since:
 */
 PHP_FUNCTION(dom_namelist_get_namespace_uri)

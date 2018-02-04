@@ -11,7 +11,7 @@ Mattijs Hoitink mattijshoitink@gmail.com
  * Prototype:     bool curl_setopt_array(resource $ch, array $options)
  * Description:   Sets multiple options for a cURL session.
  * Source:        ext/curl/interface.c
- * Documentation: http://wiki.php.net/qa/temp/ext/curl
+ * Documentation: https://wiki.php.net/qa/temp/ext/curl
  */
 
 // Figure out what handler to use

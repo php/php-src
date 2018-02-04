@@ -10,7 +10,7 @@ Mark van der Velden
 /*
  * Description       : Adds a file which stores the received data from curl_exec();
  * Source code       : ext/curl/multi.c
- * Test documentation: http://wiki.php.net/qa/temp/ext/curl
+ * Test documentation: https://wiki.php.net/qa/temp/ext/curl
  */
 
 // Figure out what handler to use

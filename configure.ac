@@ -159,7 +159,7 @@ if test -n "$with_apxs2filter" && test -n "$with_apxs2"; then
   AC_MSG_ERROR([--with-apxs2filter and --with-apxs2 cannot be used together])
 fi
 
-  
+
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 
@@ -705,7 +705,7 @@ dnl Check for getaddrinfo, should be a better way, but...
 dnl Also check for working getaddrinfo
 AC_CACHE_CHECK([for getaddrinfo], ac_cv_func_getaddrinfo,
 [AC_TRY_LINK([#include <netdb.h>],
-                [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);], 
+                [struct addrinfo *g,h;g=&h;getaddrinfo("","",g,&g);],
   AC_TRY_RUN([
 #include <netdb.h>
 #include <sys/types.h>
@@ -727,7 +727,7 @@ int main(void) {
   }
 
   pai = ai;
-  
+
   while (pai) {
     if (pai->ai_family != AF_INET) {
       /* 127.0.0.1/NUMERICHOST should only resolve ONE way */
@@ -828,7 +828,7 @@ if test "$PHP_GCOV" = "yes"; then
   if test "$GCC" != "yes"; then
     AC_MSG_ERROR([GCC is required for --enable-gcov])
   fi
-  
+
   dnl Check if ccache is being used
   case `$php_shtool path $CC` in
     *ccache*[)] gcc_ccache=yes;;
@@ -838,7 +838,7 @@ if test "$PHP_GCOV" = "yes"; then
   if test "$gcc_ccache" = "yes" && (test -z "$CCACHE_DISABLE" || test "$CCACHE_DISABLE" != "1"); then
     AC_MSG_ERROR([ccache must be disabled when --enable-gcov option is used. You can disable ccache by setting environment variable CCACHE_DISABLE=1.])
   fi
-  
+
   dnl min: 1.5 (i.e. 105, major * 100 + minor for easier comparison)
   ltp_version_min="105"
   dnl non-working versions, e.g. "1.8 1.18";
@@ -871,7 +871,7 @@ if test "$PHP_GCOV" = "yes"; then
       fi
     ])
   else
-    ltp_msg="To enable code coverage reporting you must have LTP installed"      
+    ltp_msg="To enable code coverage reporting you must have LTP installed"
     AC_MSG_ERROR([$ltp_msg])
   fi
 
@@ -961,7 +961,7 @@ fi
 AC_MSG_CHECKING([where to scan for configuration files])
 PHP_ARG_WITH(config-file-scan-dir,,
 [  --with-config-file-scan-dir=PATH
-                          Set the path where to scan for configuration files], DEFAULT, no) 
+                          Set the path where to scan for configuration files], DEFAULT, no)
 if test "$PHP_CONFIG_FILE_SCAN_DIR" = "DEFAULT"; then
   PHP_CONFIG_FILE_SCAN_DIR=
 fi
@@ -1059,7 +1059,7 @@ dnl -------------------------------------------------------------------------
 PHP_HELP_SEPARATOR([Extensions:
 
   --with-EXTENSION=[shared[,PATH]]
-  
+
     NOTE: Not all extensions can be build as 'shared'.
 
     Example: --with-foobar=shared,/usr/local/foobar/
@@ -1146,13 +1146,13 @@ if test "$PHP_PEAR" != "no"; then
   dnl PEAR dependancies
   dnl
   if test "$PHP_XML" = "no"; then
-    pear_error_msg="$pear_error_msg 
+    pear_error_msg="$pear_error_msg
                     PEAR requires XML to be enabled.     Add --enable-xml to the configure line. (or --without-pear)"
   fi
 
 dnl
 dnl  if test "$PHP_XMLRPC" = "no"; then
-dnl    pear_error_msg="$pear_error_msg 
+dnl    pear_error_msg="$pear_error_msg
 dnl                    PEAR requires XML-RPC to be enabled. Add --with-xmlrpc to the configure line. (or --without-pear)"
 dnl  fi
 dnl
@@ -1265,7 +1265,7 @@ if test -z "$EXTENSION_DIR"; then
     if test "$enable_maintainer_zts" = "yes"; then
       extbasedir=$extbasedir-zts
     fi
-    
+
     if test "$PHP_DEBUG" = "1"; then
       extbasedir=$extbasedir-debug
     fi
@@ -1606,7 +1606,7 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
     echo "|                                                                    |"
-    echo "| Please go read http://www.php.net/faq.build#faq.build.apxs         |"
+    echo "| Please go read https://php.net/faq.build#faq.build.apxs            |"
     echo "| and make the changes described there and try again.                |"
   fi
 
@@ -1652,7 +1652,7 @@ cat <<X
 |                                                                    |
 | Please check that your Apache (httpd) is linked with libpthread.   |
 | If not, you have to recompile Apache with pthread. For more        |
-| details, see this page: http://www.php.net/manual/ref.oci8.php     |
+| details, see this page: https://php.net/manual/ref.oci8.php        |
 X
       fi
     fi

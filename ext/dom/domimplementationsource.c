@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -41,7 +41,7 @@ ZEND_END_ARG_INFO();
 /*
 * class domimplementationsource
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationSource
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationSource
 * Since: DOM Level 3
 */
 
@@ -54,7 +54,7 @@ const zend_function_entry php_dom_domimplementationsource_class_functions[] = {
 /* {{{ attribute protos, not implemented yet */
 
 /* {{{ proto domdomimplementation dom_domimplementationsource_get_domimplementation(string features);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpl
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpl
 Since:
 */
 PHP_FUNCTION(dom_domimplementationsource_get_domimplementation)
@@ -64,7 +64,7 @@ PHP_FUNCTION(dom_domimplementationsource_get_domimplementation)
 /* }}} end dom_domimplementationsource_get_domimplementation */
 
 /* {{{ proto domimplementationlist dom_domimplementationsource_get_domimplementations(string features);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpls
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-getDOMImpls
 Since:
 */
 PHP_FUNCTION(dom_domimplementationsource_get_domimplementations)

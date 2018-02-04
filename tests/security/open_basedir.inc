@@ -14,7 +14,7 @@
 // recommended for production use as . bypasses all semblence of security..!
 //
 // Although safe mode has been removed in php 6.0, open_basedir is still valid.
-//      See http://www.php.net/features.safe-mode for more information
+//      See https://php.net/features.safe-mode for more information
 
 function recursive_delete_directory($directory) {
 
@@ -136,4 +136,3 @@ function test_open_basedir($function) {
 }
 
 ?>
-

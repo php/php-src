@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -753,7 +753,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_TIMEZONEDB      php_date_global_timezone_db ? php_date_global_timezone_db : timelib_builtin_db()
 
 /*
- * RFC822, Section 5.1: http://www.ietf.org/rfc/rfc822.txt
+ * RFC822, Section 5.1: https://www.ietf.org/rfc/rfc822.txt
  *  date-time   =  [ day "," ] date time        ; dd mm yy hh:mm:ss zzz
  *  day         =  "Mon"  / "Tue" /  "Wed"  / "Thu"  /  "Fri"  / "Sat" /  "Sun"
  *  date        =  1*2DIGIT month 2DIGIT        ; day month year e.g. 20 Jun 82
@@ -765,7 +765,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC822   "D, d M y H:i:s O"
 
 /*
- * RFC850, Section 2.1.4: http://www.ietf.org/rfc/rfc850.txt
+ * RFC850, Section 2.1.4: https://www.ietf.org/rfc/rfc850.txt
  *  Format must be acceptable both to the ARPANET and to the getdate routine.
  *  One format that is acceptable to both is Weekday, DD-Mon-YY HH:MM:SS TIMEZONE
  *  TIMEZONE can be any timezone name (3 or more letters)
@@ -773,7 +773,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC850   "l, d-M-y H:i:s T"
 
 /*
- * RFC1036, Section 2.1.2: http://www.ietf.org/rfc/rfc1036.txt
+ * RFC1036, Section 2.1.2: https://www.ietf.org/rfc/rfc1036.txt
  *  Its format must be acceptable both in RFC-822 and to the getdate(3)
  *  Wdy, DD Mon YY HH:MM:SS TIMEZONE
  *  There is no hope of having a complete list of timezones.  Universal
@@ -783,7 +783,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC1036  "D, d M y H:i:s O"
 
 /*
- * RFC1123, Section 5.2.14: http://www.ietf.org/rfc/rfc1123.txt
+ * RFC1123, Section 5.2.14: https://www.ietf.org/rfc/rfc1123.txt
  *  RFC-822 Date and Time Specification: RFC-822 Section 5
  *  The syntax for the date is hereby changed to: date = 1*2DIGIT month 2*4DIGIT
  */
@@ -795,7 +795,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_RFC7231  "D, d M Y H:i:s \\G\\M\\T"
 
 /*
- * RFC2822, Section 3.3: http://www.ietf.org/rfc/rfc2822.txt
+ * RFC2822, Section 3.3: https://www.ietf.org/rfc/rfc2822.txt
  *  FWS             =       ([*WSP CRLF] 1*WSP) /   ; Folding white space
  *  CFWS            =       *([FWS] comment) (([FWS] comment) / FWS)
  *
@@ -816,7 +816,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
  */
 #define DATE_FORMAT_RFC2822  "D, d M Y H:i:s O"
 /*
- * RFC3339, Section 5.6: http://www.ietf.org/rfc/rfc3339.txt
+ * RFC3339, Section 5.6: https://www.ietf.org/rfc/rfc3339.txt
  *  date-fullyear   = 4DIGIT
  *  date-month      = 2DIGIT  ; 01-12
  *  date-mday       = 2DIGIT  ; 01-28, 01-29, 01-30, 01-31 based on month/year
@@ -840,7 +840,7 @@ PHP_RSHUTDOWN_FUNCTION(date)
 #define DATE_FORMAT_ISO8601  "Y-m-d\\TH:i:sO"
 
 /*
- * RFC3339, Appendix A: http://www.ietf.org/rfc/rfc3339.txt
+ * RFC3339, Appendix A: https://www.ietf.org/rfc/rfc3339.txt
  *  ISO 8601 also requires (in section 5.3.1.3) that a decimal fraction
  *  be proceeded by a "0" if less than unity.  Annex B.2 of ISO 8601
  *  gives examples where the decimal fractions are not preceded by a "0".
@@ -867,7 +867,7 @@ PHP_MINIT_FUNCTION(date)
 	REGISTER_INI_ENTRIES();
 	date_register_classes();
 /*
- * RFC4287, Section 3.3: http://www.ietf.org/rfc/rfc4287.txt
+ * RFC4287, Section 3.3: https://www.ietf.org/rfc/rfc4287.txt
  *   A Date construct is an element whose content MUST conform to the
  *   "date-time" production in [RFC3339].  In addition, an uppercase "T"
  *   character MUST be used to separate date and time, and an uppercase

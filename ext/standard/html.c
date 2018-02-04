@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -27,12 +27,12 @@
  * http://www.unicode.org/Public/MAPPINGS/OBSOLETE/UNI2SGML.TXT
  *
  * XHTML 1.0 DTD
- * http://www.w3.org/TR/2002/REC-xhtml1-20020801/dtds.html#h-A2
+ * https://www.w3.org/TR/2002/REC-xhtml1-20020801/dtds.html#h-A2
  *
  * From HTML 4.01 strict DTD:
- * http://www.w3.org/TR/html4/HTMLlat1.ent
- * http://www.w3.org/TR/html4/HTMLsymbol.ent
- * http://www.w3.org/TR/html4/HTMLspecial.ent
+ * https://www.w3.org/TR/html4/HTMLlat1.ent
+ * https://www.w3.org/TR/html4/HTMLsymbol.ent
+ * https://www.w3.org/TR/html4/HTMLspecial.ent
  *
  * HTML 5:
  * http://dev.w3.org/html5/spec/Overview.html#named-character-references
@@ -666,7 +666,7 @@ table_over_7F:
 	case cs_sjis:
 	case cs_eucjp:
 		/* we interpret 0x5C as the Yen symbol. This is not universal.
-		 * See <http://www.w3.org/Submission/japanese-xml/#ambiguity_of_yen> */
+		 * See <https://www.w3.org/Submission/japanese-xml/#ambiguity_of_yen> */
 		if (code >= 0x20 && code <= 0x7D) {
 			if (code == 0x5C)
 				return FAILURE;
@@ -716,8 +716,8 @@ static inline int unicode_cp_is_allowed(unsigned uni_cp, int document_type)
 	 * (*) exclude code points where ((code & 0xFFFF) >= 0xFFFE)
 	 *
 	 * References:
-	 * XML 1.0:   <http://www.w3.org/TR/REC-xml/#charsets>
-	 * HTML 4.01: <http://www.w3.org/TR/1999/PR-html40-19990824/sgml/sgmldecl.html>
+	 * XML 1.0:   <https://www.w3.org/TR/REC-xml/#charsets>
+	 * HTML 4.01: <https://www.w3.org/TR/1999/PR-html40-19990824/sgml/sgmldecl.html>
 	 * HTML 5:    <http://dev.w3.org/html5/spec/Overview.html#preprocessing-the-input-stream>
 	 *
 	 * Not sure this is the relevant part for HTML 5, though. I opted to
@@ -776,7 +776,7 @@ static inline int numeric_entity_is_allowed(unsigned uni_cp, int document_type)
 	case ENT_HTML_DOC_XHTML:
 	case ENT_HTML_DOC_XML1:
 		/* OTOH, XML 1.0 requires "character references to match the production for Char
-		 * See <http://www.w3.org/TR/REC-xml/#NT-CharRef> */
+		 * See <https://www.w3.org/TR/REC-xml/#NT-CharRef> */
 		return unicode_cp_is_allowed(uni_cp, document_type);
 	default:
 		return 1;

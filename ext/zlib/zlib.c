@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -213,7 +213,7 @@ static int php_zlib_output_handler(void **handler_context, php_output_context *o
 	if (!php_zlib_output_encoding()) {
 		/* "Vary: Accept-Encoding" header sent along uncompressed content breaks caching in MSIE,
 			so let's just send it with successfully compressed content or unless the complete
-			buffer gets discarded, see http://bugs.php.net/40325;
+			buffer gets discarded, see https://bugs.php.net/40325;
 
 			Test as follows:
 			+Vary: $ HTTP_ACCEPT_ENCODING=gzip ./sapi/cgi/php <<<'<?php ob_start("ob_gzhandler"); echo "foo\n";'

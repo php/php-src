@@ -5,7 +5,7 @@ AC_CONFIG_SRCDIR(mbfl/mbfilter.c)
 AM_CONFIG_HEADER(config.h)
 
 # SHLIB isn't a version number but the API reference
-# Read http://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
+# Read https://www.gnu.org/software/libtool/manual/libtool.html#Updating-version-info
 SHLIB_VERSION="1:1:0"
 AC_SUBST(SHLIB_VERSION)
 

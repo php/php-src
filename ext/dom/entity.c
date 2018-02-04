@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -31,7 +31,7 @@
 /*
 * class DOMEntity extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-527DCFF2
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-527DCFF2
 * Since:
 */
 
@@ -41,7 +41,7 @@ const zend_function_entry php_dom_entity_class_functions[] = {
 
 /* {{{ publicId	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7303025
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7303025
 Since:
 */
 int dom_entity_public_id_read(dom_object *obj, zval *retval)
@@ -66,7 +66,7 @@ int dom_entity_public_id_read(dom_object *obj, zval *retval)
 
 /* {{{ systemId	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7C29F3E
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-D7C29F3E
 Since:
 */
 int dom_entity_system_id_read(dom_object *obj, zval *retval)
@@ -91,7 +91,7 @@ int dom_entity_system_id_read(dom_object *obj, zval *retval)
 
 /* {{{ notationName	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-6ABAEB38
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-6ABAEB38
 Since:
 */
 int dom_entity_notation_name_read(dom_object *obj, zval *retval)
@@ -119,7 +119,7 @@ int dom_entity_notation_name_read(dom_object *obj, zval *retval)
 
 /* {{{ actualEncoding	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-actualEncoding
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-actualEncoding
 Since: DOM Level 3
 */
 int dom_entity_actual_encoding_read(dom_object *obj, zval *retval)
@@ -137,7 +137,7 @@ int dom_entity_actual_encoding_write(dom_object *obj, zval *newval)
 
 /* {{{ encoding	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-encoding
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-encoding
 Since: DOM Level 3
 */
 int dom_entity_encoding_read(dom_object *obj, zval *retval)
@@ -155,7 +155,7 @@ int dom_entity_encoding_write(dom_object *obj, zval *newval)
 
 /* {{{ version	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-version
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Entity3-version
 Since: DOM Level 3
 */
 int dom_entity_version_read(dom_object *obj, zval *retval)

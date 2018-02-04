@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -46,7 +46,7 @@ ZEND_END_ARG_INFO();
 /*
 * class domdomconfiguration
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration
 * Since: DOM Level 3
 */
 
@@ -60,7 +60,7 @@ const zend_function_entry php_dom_domconfiguration_class_functions[] = {
 /* {{{ attribute protos, not implemented yet */
 
 /* {{{ proto dom_void dom_domconfiguration_set_parameter(string name, domuserdata value);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-property
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-property
 Since:
 */
 PHP_FUNCTION(dom_domconfiguration_set_parameter)
@@ -70,7 +70,7 @@ PHP_FUNCTION(dom_domconfiguration_set_parameter)
 /* }}} end dom_domconfiguration_set_parameter */
 
 /* {{{ proto domdomuserdata dom_domconfiguration_get_parameter(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-getParameter
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-getParameter
 Since:
 */
 PHP_FUNCTION(dom_domconfiguration_get_parameter)
@@ -80,7 +80,7 @@ PHP_FUNCTION(dom_domconfiguration_get_parameter)
 /* }}} end dom_domconfiguration_get_parameter */
 
 /* {{{ proto bool dom_domconfiguration_can_set_parameter(string name, domuserdata value);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-canSetParameter
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMConfiguration-canSetParameter
 Since:
 */
 PHP_FUNCTION(dom_domconfiguration_can_set_parameter)

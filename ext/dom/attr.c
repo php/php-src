@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -42,7 +42,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMAttr extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-637646024
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-637646024
 * Since:
 */
 
@@ -92,7 +92,7 @@ PHP_METHOD(domattr, __construct)
 
 /* {{{ name	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1112119403
 Since:
 */
 int dom_attr_name_read(dom_object *obj, zval *retval)
@@ -115,7 +115,7 @@ int dom_attr_name_read(dom_object *obj, zval *retval)
 
 /* {{{ specified	boolean
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-862529273
 Since:
 */
 int dom_attr_specified_read(dom_object *obj, zval *retval)
@@ -129,7 +129,7 @@ int dom_attr_specified_read(dom_object *obj, zval *retval)
 
 /* {{{ value	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-221662474
 Since:
 */
 int dom_attr_value_read(dom_object *obj, zval *retval)
@@ -179,7 +179,7 @@ int dom_attr_value_write(dom_object *obj, zval *newval)
 
 /* {{{ ownerElement	DOMElement
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-ownerElement
 Since: DOM Level 2
 */
 int dom_attr_owner_element_read(dom_object *obj, zval *retval)
@@ -208,7 +208,7 @@ int dom_attr_owner_element_read(dom_object *obj, zval *retval)
 
 /* {{{ schemaTypeInfo	DOMTypeInfo
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-schemaTypeInfo
 Since: DOM Level 3
 */
 int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
@@ -221,7 +221,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ proto bool dom_attr_is_id()
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_attr_is_id)

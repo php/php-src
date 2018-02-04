@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://php.net/license/3_01.txt                                     |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -139,10 +139,10 @@ PHP_MINIT_FUNCTION(xsl)
 #endif
 
 	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
-				   (const xmlChar *) "http://php.net/xsl",
+				   (const xmlChar *) "https://php.net/xsl",
 				   xsl_ext_function_string_php);
 	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
-				   (const xmlChar *) "http://php.net/xsl",
+				   (const xmlChar *) "https://php.net/xsl",
 				   xsl_ext_function_object_php);
 	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
 
@@ -237,9 +237,9 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 PHP_MSHUTDOWN_FUNCTION(xsl)
 {
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "functionString",
-				   (const xmlChar *) "http://php.net/xsl");
+				   (const xmlChar *) "https://php.net/xsl");
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
-				   (const xmlChar *) "http://php.net/xsl");
+				   (const xmlChar *) "https://php.net/xsl");
 	xsltSetGenericErrorFunc(NULL, NULL);
 	xsltCleanupGlobals();
 

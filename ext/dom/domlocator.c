@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -31,7 +31,7 @@
 /*
 * class domlocator
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Interfaces-DOMLocator
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Interfaces-DOMLocator
 * Since: DOM Level 3
 */
 
@@ -43,7 +43,7 @@ const zend_function_entry php_dom_domlocator_class_functions[] = {
 
 /* {{{ line_number	long
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-line-number
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-line-number
 Since:
 */
 int dom_domlocator_line_number_read(dom_object *obj, zval *retval)
@@ -56,7 +56,7 @@ int dom_domlocator_line_number_read(dom_object *obj, zval *retval)
 
 /* {{{ column_number	long
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-column-number
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-column-number
 Since:
 */
 int dom_domlocator_column_number_read(dom_object *obj, zval *retval)
@@ -69,7 +69,7 @@ int dom_domlocator_column_number_read(dom_object *obj, zval *retval)
 
 /* {{{ offset	long
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-offset
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-offset
 Since:
 */
 int dom_domlocator_offset_read(dom_object *obj, zval *retval)
@@ -82,7 +82,7 @@ int dom_domlocator_offset_read(dom_object *obj, zval *retval)
 
 /* {{{ related_node	node
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-node
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-node
 Since:
 */
 int dom_domlocator_related_node_read(dom_object *obj, zval *retval)
@@ -95,7 +95,7 @@ int dom_domlocator_related_node_read(dom_object *obj, zval *retval)
 
 /* {{{ uri	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-uri
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMLocator-uri
 Since:
 */
 int dom_domlocator_uri_read(dom_object *obj, zval *retval)

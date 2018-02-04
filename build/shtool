@@ -3,7 +3,7 @@
 ##  GNU shtool -- The GNU Portable Shell Tool
 ##  Copyright (c) 1994-2008 Ralf S. Engelschall <rse@engelschall.com>
 ##
-##  See http://www.gnu.org/software/shtool/ for more information.
+##  See https://www.gnu.org/software/shtool/ for more information.
 ##  See ftp://ftp.gnu.org/gnu/shtool/ for latest version.
 ##
 ##  Version:  2.0.8 (18-Jul-2008)
@@ -1583,9 +1583,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];\1;g' \
                                -e 's;<\([^>]*\)>;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;ï¿½ï¿½;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;ï¿½ï¿½;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_V=\"\${val_V}\""
                     ;;
@@ -1596,9 +1596,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];;g' \
                                -e 's;<\([^>]*\)>;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;ï¿½ï¿½;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;ï¿½ï¿½;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_N=\"\${val_N}\""
                     ;;
@@ -1609,9 +1609,9 @@ platform )
                            sed -e 's/^://' \
                                -e 's;\[\([^]]*\)\];;g' \
                                -e 's;[^<]*<\([^>]*\)>[^<]*;\1;g' \
-                               -e "s; ;§§;g" \
+                               -e "s; ;ï¿½ï¿½;g" \
                                -e "s;/;%%;g" \
-                               -e "s;§§;${opt_S};g" \
+                               -e "s;ï¿½ï¿½;${opt_S};g" \
                                -e "s;%%;${opt_C};g"`
                     eval "${var_uc}_C=\"\${val_C}\""
                     ;;
@@ -1811,4 +1811,3 @@ path )
 esac
 
 shtool_exit 0
-

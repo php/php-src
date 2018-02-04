@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -40,7 +40,7 @@ ZEND_END_ARG_INFO();
 /*
 * class domstringextend
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend
 * Since:
 */
 
@@ -53,7 +53,7 @@ const zend_function_entry php_dom_string_extend_class_functions[] = {
 /* {{{ attribute protos, not implemented yet */
 
 /* {{{ proto int dom_string_extend_find_offset16(int offset32);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset16
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset16
 Since:
 */
 PHP_FUNCTION(dom_string_extend_find_offset16)
@@ -63,7 +63,7 @@ PHP_FUNCTION(dom_string_extend_find_offset16)
 /* }}} end dom_string_extend_find_offset16 */
 
 /* {{{ proto int dom_string_extend_find_offset32(int offset16);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset32
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#i18n-methods-StringExtend-findOffset32
 Since:
 */
 PHP_FUNCTION(dom_string_extend_find_offset32)
