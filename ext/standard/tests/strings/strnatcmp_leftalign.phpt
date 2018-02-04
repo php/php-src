@@ -1,6 +1,6 @@
 --TEST--
 Test strnatcmp() function : left align, whitespace, digits
---CREDIT--
+--CREDITS--
 Sol Richardson <sr5732358@hotmail.com>
 --FILE--
 <?php

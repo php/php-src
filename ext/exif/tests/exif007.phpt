@@ -35,5 +35,5 @@ array(7) {
     int(1)
   }
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

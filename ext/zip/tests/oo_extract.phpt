@@ -80,16 +80,3 @@ bar
 bar
 
 foo
---UEXPECTF--
-blabla laber rababer sÃ¼lz
-
-bar
-
-foo
-
-
-bar
-
-bar
-
-foo
