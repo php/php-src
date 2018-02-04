@@ -214,7 +214,7 @@ string(7) "boolean"
 string(6) "string"
 2: settype(): Cannot convert to resource type
 bool(false)
-string(1) "ÿ"
+string(1) "ï¿½"
 string(6) "string"
 -- Iteration 6 --
 string(6) "string"
@@ -505,11 +505,11 @@ bool(false)
 float(-2147483648)
 string(6) "double"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 50 --
 string(6) "double"
 2: settype(): Cannot convert to resource type
@@ -523,11 +523,11 @@ bool(false)
 float(1232147483649)
 string(6) "double"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(85)
-string(7) "integer"
+string(3) "int"
 -- Iteration 53 --
 string(6) "double"
 2: settype(): Cannot convert to resource type
@@ -535,23 +535,23 @@ bool(false)
 float(1058513956921)
 string(6) "double"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(-21903)
-string(7) "integer"
+string(3) "int"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 2: settype(): Cannot convert to resource type
 bool(false)
 int(-365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 57 --
 string(6) "double"
 2: settype(): Cannot convert to resource type

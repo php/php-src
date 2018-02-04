@@ -198,808 +198,808 @@ echo "Done\n";
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 2 --
 string(7) "boolean"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 3 --
 string(7) "boolean"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 4 --
 string(7) "boolean"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 5 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 6 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 7 --
 string(6) "string"
 bool(true)
 int(3)
-string(7) "integer"
+string(3) "int"
 -- Iteration 8 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 9 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 10 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 11 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 12 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 13 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 14 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 15 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 16 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 17 --
 string(6) "string"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 18 --
 string(6) "string"
 bool(true)
 int(100)
-string(7) "integer"
+string(3) "int"
 -- Iteration 19 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 21 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 22 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 23 --
 string(6) "string"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 24 --
 string(6) "string"
 bool(true)
 int(100)
-string(7) "integer"
+string(3) "int"
 -- Iteration 25 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 27 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 28 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 29 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 30 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 31 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 32 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 33 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 34 --
 string(6) "string"
 bool(true)
 int(-123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 35 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 36 --
 string(6) "string"
 bool(true)
 int(-123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 37 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 38 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 39 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 40 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 41 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 42 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 43 --
 string(5) "array"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 44 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 45 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 46 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 47 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 48 --
 string(6) "double"
 bool(true)
 int(-2147483648)
-string(7) "integer"
+string(3) "int"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 50 --
 string(6) "double"
 bool(true)
 int(-2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 51 --
 string(6) "double"
 bool(true)
 int(-508130303)
-string(7) "integer"
+string(3) "int"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(85)
-string(7) "integer"
+string(3) "int"
 -- Iteration 53 --
 string(6) "double"
 bool(true)
 int(1952002105)
-string(7) "integer"
+string(3) "int"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(-21903)
-string(7) "integer"
+string(3) "int"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(-365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 57 --
 string(6) "double"
 bool(true)
 int(343000682)
-string(7) "integer"
+string(3) "int"
 -- Iteration 58 --
 string(6) "double"
 bool(true)
 int(100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 59 --
 string(6) "double"
 bool(true)
 int(-100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 60 --
 string(6) "double"
 bool(true)
 int(100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 61 --
 string(6) "double"
 bool(true)
 int(-100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 62 --
 string(6) "double"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 63 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 64 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 65 --
 string(6) "double"
 bool(true)
 int(500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 66 --
 string(6) "double"
 bool(true)
 int(-500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 67 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 68 --
 string(6) "double"
 bool(true)
 int(500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 69 --
 string(6) "double"
 bool(true)
 int(-500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 70 --
 string(6) "double"
 bool(true)
 int(512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 71 --
 string(6) "double"
 bool(true)
 int(-512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 72 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 73 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 74 --
 string(6) "double"
 bool(true)
 int(512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 75 --
 string(6) "double"
 bool(true)
 int(-512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 76 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 77 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 78 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 79 --
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 80 --
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 
 -- Setting type of data to int --
 -- Iteration 1 --
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 2 --
 string(7) "boolean"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 3 --
 string(7) "boolean"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 4 --
 string(7) "boolean"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 5 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 6 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 7 --
 string(6) "string"
 bool(true)
 int(3)
-string(7) "integer"
+string(3) "int"
 -- Iteration 8 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 9 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 10 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 11 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 12 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 13 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 14 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 15 --
 string(6) "string"
 bool(true)
 int(10)
-string(7) "integer"
+string(3) "int"
 -- Iteration 16 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 17 --
 string(6) "string"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 18 --
 string(6) "string"
 bool(true)
 int(100)
-string(7) "integer"
+string(3) "int"
 -- Iteration 19 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 20 --
 string(6) "string"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 21 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 22 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 23 --
 string(6) "string"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 24 --
 string(6) "string"
 bool(true)
 int(100)
-string(7) "integer"
+string(3) "int"
 -- Iteration 25 --
 string(6) "string"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 26 --
 string(6) "string"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 27 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 28 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 29 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 30 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 31 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 32 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 33 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 34 --
 string(6) "string"
 bool(true)
 int(-123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 35 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 36 --
 string(6) "string"
 bool(true)
 int(-123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 37 --
 string(6) "string"
 bool(true)
 int(123)
-string(7) "integer"
+string(3) "int"
 -- Iteration 38 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 39 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 40 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 41 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 42 --
 string(6) "string"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 43 --
 string(5) "array"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 44 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 45 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 46 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 47 --
 string(5) "array"
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 48 --
 string(6) "double"
 bool(true)
 int(-2147483648)
-string(7) "integer"
+string(3) "int"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 50 --
 string(6) "double"
 bool(true)
 int(-2147483647)
-string(7) "integer"
+string(3) "int"
 -- Iteration 51 --
 string(6) "double"
 bool(true)
 int(-508130303)
-string(7) "integer"
+string(3) "int"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(85)
-string(7) "integer"
+string(3) "int"
 -- Iteration 53 --
 string(6) "double"
 bool(true)
 int(1952002105)
-string(7) "integer"
+string(3) "int"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(-21903)
-string(7) "integer"
+string(3) "int"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 int(-365)
-string(7) "integer"
+string(3) "int"
 -- Iteration 57 --
 string(6) "double"
 bool(true)
 int(343000682)
-string(7) "integer"
+string(3) "int"
 -- Iteration 58 --
 string(6) "double"
 bool(true)
 int(100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 59 --
 string(6) "double"
 bool(true)
 int(-100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 60 --
 string(6) "double"
 bool(true)
 int(100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 61 --
 string(6) "double"
 bool(true)
 int(-100000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 62 --
 string(6) "double"
 bool(true)
 int(-1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 63 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 64 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 65 --
 string(6) "double"
 bool(true)
 int(500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 66 --
 string(6) "double"
 bool(true)
 int(-500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 67 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 68 --
 string(6) "double"
 bool(true)
 int(500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 69 --
 string(6) "double"
 bool(true)
 int(-500000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 70 --
 string(6) "double"
 bool(true)
 int(512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 71 --
 string(6) "double"
 bool(true)
 int(-512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 72 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 73 --
 string(6) "double"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 74 --
 string(6) "double"
 bool(true)
 int(512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 75 --
 string(6) "double"
 bool(true)
 int(-512000)
-string(7) "integer"
+string(3) "int"
 -- Iteration 76 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 77 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 78 --
 string(6) "object"
 8: Object of class point could not be converted to int
 bool(true)
 int(1)
-string(7) "integer"
+string(3) "int"
 -- Iteration 79 --
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 -- Iteration 80 --
 string(4) "NULL"
 bool(true)
 int(0)
-string(7) "integer"
+string(3) "int"
 Done

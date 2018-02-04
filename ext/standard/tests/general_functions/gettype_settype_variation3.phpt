@@ -432,7 +432,7 @@ bool(true)
 float(-2147483648)
 string(6) "double"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(2147483647)
 string(6) "double"
@@ -447,7 +447,7 @@ bool(true)
 float(1232147483649)
 string(6) "double"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(85)
 string(6) "double"
@@ -457,17 +457,17 @@ bool(true)
 float(1058513956921)
 string(6) "double"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(-21903)
 string(6) "double"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(365)
 string(6) "double"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(-365)
 string(6) "double"
@@ -837,7 +837,7 @@ bool(true)
 float(-2147483648)
 string(6) "double"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(2147483647)
 string(6) "double"
@@ -852,7 +852,7 @@ bool(true)
 float(1232147483649)
 string(6) "double"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(85)
 string(6) "double"
@@ -862,17 +862,17 @@ bool(true)
 float(1058513956921)
 string(6) "double"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(-21903)
 string(6) "double"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(365)
 string(6) "double"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 float(-365)
 string(6) "double"

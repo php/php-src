@@ -209,7 +209,7 @@ string(6) "string"
 -- Iteration 5 --
 string(6) "string"
 bool(true)
-string(1) "ÿ"
+string(1) "ï¿½"
 string(6) "string"
 -- Iteration 6 --
 string(6) "string"
@@ -433,7 +433,7 @@ bool(true)
 string(11) "-2147483648"
 string(6) "string"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 string(10) "2147483647"
 string(6) "string"
@@ -448,7 +448,7 @@ bool(true)
 string(13) "1232147483649"
 string(6) "string"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 string(2) "85"
 string(6) "string"
@@ -458,17 +458,17 @@ bool(true)
 string(13) "1058513956921"
 string(6) "string"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 string(6) "-21903"
 string(6) "string"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 string(3) "365"
 string(6) "string"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 string(4) "-365"
 string(6) "string"

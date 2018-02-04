@@ -221,7 +221,7 @@ string(6) "string"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>
-  string(1) "ÿ"
+  string(1) "ï¿½"
 }
 string(6) "object"
 -- Iteration 6 --
@@ -584,7 +584,7 @@ object(stdClass)#4 (1) {
 }
 string(6) "object"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>
@@ -608,7 +608,7 @@ object(stdClass)#4 (1) {
 }
 string(6) "object"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>
@@ -624,7 +624,7 @@ object(stdClass)#4 (1) {
 }
 string(6) "object"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>
@@ -632,7 +632,7 @@ object(stdClass)#4 (1) {
 }
 string(6) "object"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>
@@ -640,7 +640,7 @@ object(stdClass)#4 (1) {
 }
 string(6) "object"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 object(stdClass)#4 (1) {
   ["scalar"]=>

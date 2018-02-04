@@ -223,7 +223,7 @@ string(6) "string"
 bool(true)
 array(1) {
   [0]=>
-  string(1) "ÿ"
+  string(1) "ï¿½"
 }
 string(5) "array"
 -- Iteration 6 --
@@ -586,7 +586,7 @@ array(1) {
 }
 string(5) "array"
 -- Iteration 49 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 array(1) {
   [0]=>
@@ -610,7 +610,7 @@ array(1) {
 }
 string(5) "array"
 -- Iteration 52 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 array(1) {
   [0]=>
@@ -626,7 +626,7 @@ array(1) {
 }
 string(5) "array"
 -- Iteration 54 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 array(1) {
   [0]=>
@@ -634,7 +634,7 @@ array(1) {
 }
 string(5) "array"
 -- Iteration 55 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 array(1) {
   [0]=>
@@ -642,7 +642,7 @@ array(1) {
 }
 string(5) "array"
 -- Iteration 56 --
-string(7) "integer"
+string(3) "int"
 bool(true)
 array(1) {
   [0]=>
