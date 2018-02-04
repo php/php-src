@@ -26,7 +26,7 @@
 #include "php_cli_process_title.h"
 #include "ps_title.h"
 
-/* {{{ proto boolean cli_set_process_title(string arg)
+/* {{{ proto bool cli_set_process_title(string arg)
    Return a boolean to confirm if the process title was successfully changed or not */
 PHP_FUNCTION(cli_set_process_title)
 {
