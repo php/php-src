@@ -438,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -592,7 +592,7 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }

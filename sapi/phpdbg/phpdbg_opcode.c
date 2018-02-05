@@ -115,7 +115,7 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	/* RESULT */
 	switch (opline->opcode) {
 	case ZEND_CATCH:
-		if (opline->extended_value == ZEND_LAST_CATCH) {
+		if (opline->extended_value & ZEND_LAST_CATCH) {
 			if (decode[2]) {
 				efree(decode[2]);
 				decode[2] = NULL;

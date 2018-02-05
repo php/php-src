@@ -453,7 +453,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 						opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						break;
 					case ZEND_CATCH:
-						if (opline->extended_value != ZEND_LAST_CATCH) {
+						if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 							opline->op2.jmp_addr = &new_opcodes[opline->op2.jmp_addr - op_array->opcodes];
 						}
 						break;
