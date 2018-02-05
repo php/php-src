@@ -2811,7 +2811,7 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 		opline->op2.constant = zend_add_class_name_literal(
 			CG(active_op_array), Z_STR(class_node.u.constant));
 		if (opline->op1_type != IS_CONST) {
-			opline->extended_value = zend_alloc_polymorphic_cache_slot();
+			opline->extended_value = zend_alloc_cache_slot();
 		}
 	} else {
 		SET_NODE(opline->op2, &class_node);
