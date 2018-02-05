@@ -190,7 +190,7 @@ static int _display_module_info_def(zval *el) /* {{{ */
  */
 static void php_print_gpcse_array(char *name, uint32_t name_length)
 {
-	zval *data, *tmp, tmp2;
+	zval *data, *tmp;
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_string *key;
