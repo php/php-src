@@ -546,7 +546,10 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
-			add_assoc_string(subarray, "value", (char*)cp);
+			n = dlen - n - 2;
+			CHECKCP(n);
+			add_assoc_stringl(subarray, "value", (char*)cp, n);
+			cp += n;
 			break;
 		case DNS_T_TXT:
 			{
