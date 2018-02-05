@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
+- Standard:
+  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
+    Philip Sharp)
+
 01 Feb 2018, PHP 7.1.14
 
 - Core:
