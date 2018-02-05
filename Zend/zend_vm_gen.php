@@ -73,7 +73,6 @@ $vm_op_flags = array(
 
 	"ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
 	"ZEND_VM_EXT_ISSET"       => 1<<17,
-	"ZEND_VM_EXT_ARG_NUM"     => 1<<18,
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
 	"ZEND_VM_EXT_MASK"        => 0x0f000000,
@@ -128,7 +127,6 @@ $vm_ext_decode = array(
 	"EVAL"                 => ZEND_VM_EXT_EVAL,
 	"TYPE_MASK"            => ZEND_VM_EXT_TYPE_MASK,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
-	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
 	"REF"                  => ZEND_VM_EXT_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
 );

@@ -1957,7 +1957,7 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 {
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
 
-	switch (type & BP_VAR_MASK) {
+	switch (type) {
 		case BP_VAR_R:
 			return;
 		case BP_VAR_W:
@@ -1971,7 +1971,6 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 			return;
 		case BP_VAR_FUNC_ARG:
 			opline->opcode += 4 * factor;
-			opline->extended_value |= type >> BP_VAR_SHIFT;
 			return;
 		case BP_VAR_UNSET:
 			opline->opcode += 5 * factor;
@@ -3249,9 +3248,23 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_VAR;
 				}
 			} else {
-				zend_compile_var(&arg_node, arg,
-					BP_VAR_FUNC_ARG | (arg_num << BP_VAR_SHIFT));
-				opcode = ZEND_SEND_VAR_EX;
+				do {
+					if (arg->kind == ZEND_AST_VAR) {
+						CG(zend_lineno) = zend_ast_get_lineno(ast);
+						if (is_this_fetch(arg)) {
+							zend_emit_op(&arg_node, ZEND_FETCH_THIS, NULL, NULL);
+							opcode = ZEND_SEND_VAR_EX;
+							break;
+						} else if (zend_try_compile_cv(&arg_node, arg) == SUCCESS) {
+							opcode = ZEND_SEND_VAR_EX;
+							break;
+						}
+					}
+					opline = zend_emit_op(NULL, ZEND_CHECK_FUNC_ARG, NULL, NULL);
+					opline->op2.num = arg_num;
+					zend_compile_var(&arg_node, arg, BP_VAR_FUNC_ARG);
+					opcode = ZEND_SEND_FUNC_ARG;
+				} while (0);
 			}
 		} else {
 			zend_compile_expr(&arg_node, arg);

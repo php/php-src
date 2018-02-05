@@ -1228,6 +1228,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 							break;
 						case ZEND_SEND_REF:
 						case ZEND_SEND_VAR_EX:
+						case ZEND_SEND_FUNC_ARG:
 							msg = "Only variables can be passed by reference";
 							break;
 						case ZEND_FE_RESET_RW:
@@ -2491,6 +2492,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 					case ZEND_SEND_VAL_EX:
 					case ZEND_SEND_VAR:
 					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:

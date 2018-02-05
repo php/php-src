@@ -228,6 +228,7 @@ static zend_bool can_replace_op1(
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_SEND_UNPACK:
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:

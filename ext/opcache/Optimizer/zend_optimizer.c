@@ -265,6 +265,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			zval_ptr_dtor_nogc(val);
 			return 1;
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_FETCH_DIM_W:
 		case ZEND_FETCH_DIM_RW:
 		case ZEND_FETCH_DIM_FUNC_ARG:
@@ -593,6 +594,7 @@ int zend_optimizer_replace_by_const(zend_op_array *op_array,
 					opline->opcode = ZEND_SEND_VAL;
 					break;
 				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_FUNC_ARG:
 					opline->extended_value = 0;
 					opline->opcode = ZEND_SEND_VAL_EX;
 					break;

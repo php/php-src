@@ -481,6 +481,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_GENERATOR          (1 << 8)
 #define ZEND_CALL_DYNAMIC            (1 << 9)
 #define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
+#define ZEND_CALL_SEND_ARG_BY_REF    (1 << 11)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
@@ -501,8 +502,16 @@ struct _zend_execute_data {
 		call_info |= ((flag) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
+#define ZEND_DEL_CALL_FLAG_EX(call_info, flag) do { \
+		call_info &= ~((flag) << ZEND_CALL_INFO_SHIFT); \
+	} while (0)
+
 #define ZEND_ADD_CALL_FLAG(call, flag) do { \
 		ZEND_ADD_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
+	} while (0)
+
+#define ZEND_DEL_CALL_FLAG(call, flag) do { \
+		ZEND_DEL_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
 	} while (0)
 
 #define ZEND_CALL_NUM_ARGS(call) \
@@ -840,11 +849,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-/* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
-#define BP_VAR_SHIFT 3
-#define BP_VAR_MASK  7
-
-
 #define ZEND_INTERNAL_FUNCTION				1
 #define ZEND_USER_FUNCTION					2
 #define ZEND_OVERLOADED_FUNCTION			3
@@ -874,8 +878,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_FETCH_TYPE_MASK		0x70000000
 
 #define ZEND_ISSET				    0x00000001
-
-#define ZEND_FETCH_ARG_MASK         0x0fffffff
 
 #define ZEND_LAST_CATCH			    0x00000001
 
