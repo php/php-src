@@ -2799,7 +2799,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
 			}
 #if 0
-			/* We won't recieve unused arguments */
+			/* We won't receive unused arguments */
 			if (ssa_vars[ssa_ops[i].result_def].use_chain < 0 &&
 			    ssa_vars[ssa_ops[i].result_def].phi_use_chain == NULL &&
 			    op_array->arg_info &&

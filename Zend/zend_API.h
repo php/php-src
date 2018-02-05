@@ -419,7 +419,7 @@ ZEND_API int add_assoc_zval_ex(zval *arg, const char *key, size_t key_len, zval 
 #define add_assoc_stringl(__arg, __key, __str, __length) add_assoc_stringl_ex(__arg, __key, strlen(__key), __str, __length)
 #define add_assoc_zval(__arg, __key, __value) add_assoc_zval_ex(__arg, __key, strlen(__key), __value)
 
-/* unset() functions are only suported for legacy modules and null() functions should be used */
+/* unset() functions are only supported for legacy modules and null() functions should be used */
 #define add_assoc_unset(__arg, __key) add_assoc_null_ex(__arg, __key, strlen(__key))
 #define add_index_unset(__arg, __key) add_index_null(__arg, __key)
 #define add_next_index_unset(__arg) add_next_index_null(__arg)

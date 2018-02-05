@@ -69,7 +69,7 @@ get_phpt_files($extension_test_path, $count, $phpt_files);
 $extension_method_info = mark_methods_as_tested($extension_method_info, $phpt_files);
 
 /**
- * The loop to ouput the test coverage info
+ * The loop to output the test coverage info
  * Should output: Extension, Class Name, Method/Function Name, Test Status, Test Files
  */ 
 foreach($extension_method_info as $record) {
