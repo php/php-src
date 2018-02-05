@@ -871,15 +871,15 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_RT (1<<1)
 
 /* global/local fetches */
-#define ZEND_FETCH_GLOBAL			0x10000000
-#define ZEND_FETCH_LOCAL			0x20000000
-#define ZEND_FETCH_GLOBAL_LOCK		0x40000000
+#define ZEND_FETCH_GLOBAL		(1<<1)
+#define ZEND_FETCH_LOCAL		(1<<2)
+#define ZEND_FETCH_GLOBAL_LOCK	(1<<3)
 
-#define ZEND_FETCH_TYPE_MASK		0x70000000
+#define ZEND_FETCH_TYPE_MASK	0xe
 
-#define ZEND_ISSET				    0x00000001
+#define ZEND_ISSET				(1<<0)
 
-#define ZEND_LAST_CATCH			    0x00000001
+#define ZEND_LAST_CATCH			(1<<0)
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 
