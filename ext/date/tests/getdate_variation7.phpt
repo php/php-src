@@ -27,11 +27,11 @@ var_dump( getdate($timestamp) );
 
 -- Testing getdate() function by passing float 12.3456789000e10 value to timestamp --
 
-Warning: getdate() expects parameter 1 to be integer, float given in %s on line %d
+Warning: getdate() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
 -- Testing getdate() function by passing float -12.3456789000e10 value to timestamp --
 
-Warning: getdate() expects parameter 1 to be integer, float given in %s on line %d
+Warning: getdate() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 ===DONE===

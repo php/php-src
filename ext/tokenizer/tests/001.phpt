@@ -252,9 +252,9 @@ T_HALT_COMPILER
 UNKNOWN
 UNKNOWN
 
-Warning: token_name() expects parameter 1 to be integer, string given in %s on line %d
+Warning: token_name() expects parameter 1 to be int, string given in %s on line %d
 
 
-Warning: token_name() expects parameter 1 to be integer, array given in %s on line %d
+Warning: token_name() expects parameter 1 to be int, array given in %s on line %d
 
 Done

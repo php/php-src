@@ -36,7 +36,7 @@ echo "Done";
 
 -- Testing array_fill_keys() function with both wrong arguments --
 
-Warning: array_fill_keys() expects parameter 1 to be array, boolean given in %sarray_fill_keys_variation3.php on line %d
+Warning: array_fill_keys() expects parameter 1 to be array, bool given in %sarray_fill_keys_variation3.php on line %d
 NULL
 
 -- Testing array_fill_keys() function with unusual second arguments --

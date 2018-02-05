@@ -9,4 +9,4 @@ try {
 }
 ?>
 --EXPECTF--
-SplTempFileObject::__construct() expects parameter 1 to be integer, string given
+SplTempFileObject::__construct() expects parameter 1 to be int, string given

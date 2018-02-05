@@ -2,7 +2,6 @@
 Phar: corrupted zip (extra field way too long)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --FILE--
 <?php
 try {

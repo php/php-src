@@ -56,7 +56,7 @@ bool(false)
 Warning: date_timezone_set() expects parameter 1 to be DateTime, object given in %s on line %d
 bool(false)
 
-Warning: date_timezone_set() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_timezone_set() expects parameter 1 to be DateTime, int given in %s on line %d
 bool(false)
 
 Warning: date_timezone_set() expects parameter 1 to be DateTime, null given in %s on line %d

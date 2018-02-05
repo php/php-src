@@ -162,6 +162,8 @@ PHP                                                                        NEWS
     used). (Anton Artamonov)
 
 - Standard:
+  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
+    Philip Sharp)
   . Fixed unserialize(), to disable creation of unsupported data structures
     through manually crafted strings. (Dmitry)
   . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 

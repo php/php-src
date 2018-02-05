@@ -27,7 +27,7 @@ fa@php.net
 --EXPECTF--
 bool(true)
 
-Warning: socket_getpeername(): unable to retrieve peer name [%i]: %a in %s on line %i
+Warning: socket_getpeername(): unable to retrieve peer name [%i]: %a in %s on line %d
 bool(false)
 NULL
 NULL

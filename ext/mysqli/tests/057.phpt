@@ -103,7 +103,7 @@ bool(true)
 bool(false)
 string(0) ""
 
-Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, boolean given in %s on line %d
+Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, bool given in %s on line %d
 NULL
 Rows: 3
 array(1) {

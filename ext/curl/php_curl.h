@@ -150,9 +150,6 @@ typedef struct {
 	php_curl_write    *write;
 	php_curl_write    *write_header;
 	php_curl_read     *read;
-#if CURLOPT_PASSWDFUNCTION != 0
-	zval               passwd;
-#endif
 	zval               std_err;
 	php_curl_progress *progress;
 #if LIBCURL_VERSION_NUM >= 0x071500 /* Available since 7.21.0 */

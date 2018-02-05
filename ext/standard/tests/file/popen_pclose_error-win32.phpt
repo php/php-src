@@ -51,7 +51,7 @@ bool(false)
 Warning: pclose() expects exactly 1 parameter, 2 given in %s on line %d
 bool(false)
 
-Warning: pclose() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: pclose() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
 

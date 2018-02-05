@@ -240,32 +240,32 @@ array(3) {
 
 -- Iteration 16 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_change_key_case() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_change_key_case() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

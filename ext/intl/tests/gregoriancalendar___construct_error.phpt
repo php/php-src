@@ -38,4 +38,4 @@ NULL
 
 Exception: IntlGregorianCalendar::__construct(): intlgregcal_create_instance: no variant with 4 arguments (excluding trailing NULLs) in %s on line %d
 
-Exception: IntlGregorianCalendar::__construct() expects parameter 6 to be integer, array given in %s on line %d
+Exception: IntlGregorianCalendar::__construct() expects parameter 6 to be int, array given in %s on line %d

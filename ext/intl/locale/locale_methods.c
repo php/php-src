@@ -1242,7 +1242,7 @@ static int strToMatch(const char* str ,char *retstr)
 * Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
 */
 /* }}} */
-/* {{{ proto boolean locale_filter_matches(string $langtag, string $locale[, bool $canonicalize])
+/* {{{ proto bool locale_filter_matches(string $langtag, string $locale[, bool $canonicalize])
 * Checks if a $langtag filter matches with $locale according to RFC 4647's basic filtering algorithm
 */
 PHP_FUNCTION(locale_filter_matches)

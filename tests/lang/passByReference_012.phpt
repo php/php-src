@@ -2,8 +2,6 @@
 Test pass by reference semantics
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT | E_NOTICE);
-
 // Simplified array_shift_variation5.phpt
 // Showing warning:
 // "Only variables should be passed by reference in %s on line %d"

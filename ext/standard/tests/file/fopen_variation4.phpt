@@ -130,19 +130,19 @@ fclose($fileresource);
 *** Testing fopen() : usage variation ***
 
 --int 0--
-Error: 2 - fopen() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, int given, %s(%d)
 bool(false)
 
 --int 1--
-Error: 2 - fopen() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, int given, %s(%d)
 bool(false)
 
 --int 12345--
-Error: 2 - fopen() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, int given, %s(%d)
 bool(false)
 
 --int -12345--
-Error: 2 - fopen() expects parameter 4 to be resource, integer given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, int given, %s(%d)
 bool(false)
 
 --float 10.5--
@@ -188,19 +188,19 @@ ok
 ok
 
 --lowercase true--
-Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, bool given, %s(%d)
 bool(false)
 
 --lowercase false--
-Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase TRUE--
-Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - fopen() expects parameter 4 to be resource, boolean given, %s(%d)
+Error: 2 - fopen() expects parameter 4 to be resource, bool given, %s(%d)
 bool(false)
 
 --empty string DQ--

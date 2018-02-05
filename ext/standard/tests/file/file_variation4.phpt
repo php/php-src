@@ -129,19 +129,19 @@ unlink($filename);
 *** Testing file() : usage variation ***
 
 --int 0--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int 1--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int 12345--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --int -12345--
-Error: 2 - file() expects parameter 3 to be resource, integer given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, int given, %s(%d)
 NULL
 
 --float 10.5--
@@ -205,19 +205,19 @@ array(3) {
 }
 
 --lowercase true--
-Error: 2 - file() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --lowercase false--
-Error: 2 - file() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase TRUE--
-Error: 2 - file() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --uppercase FALSE--
-Error: 2 - file() expects parameter 3 to be resource, boolean given, %s(%d)
+Error: 2 - file() expects parameter 3 to be resource, bool given, %s(%d)
 NULL
 
 --empty string DQ--

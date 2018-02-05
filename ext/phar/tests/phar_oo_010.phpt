@@ -2,7 +2,6 @@
 Phar object: ArrayAccess and isset
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--
@@ -35,7 +34,7 @@ var_dump(isset($phar['b']));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_010.phar.php');
 __halt_compiler();
 ?>

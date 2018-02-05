@@ -2914,17 +2914,9 @@ ZEND_METHOD(reflection_type, isBuiltin)
 static zend_string *reflection_type_name(type_reference *param) {
 	if (ZEND_TYPE_IS_CLASS(param->arg_info->type)) {
 		return zend_string_copy(ZEND_TYPE_NAME(param->arg_info->type));
-	}
-	switch (ZEND_TYPE_CODE(param->arg_info->type)) {
-		/* keep this for BC, bool vs boolean, int vs integer */
-		case _IS_BOOL:    return zend_string_init("bool", sizeof("bool") - 1, 0);
-		case IS_LONG:     return zend_string_init("int", sizeof("int") - 1, 0);
-		/* use zend API for other types */
-		default:
-			{
-			char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->arg_info->type));
-			return zend_string_init(name, strlen(name), 0);
-			}
+	} else {
+		char *name = zend_get_type_by_const(ZEND_TYPE_CODE(param->arg_info->type));
+		return zend_string_init(name, strlen(name), 0);
 	}
 }
 /* }}} */

@@ -1,6 +1,6 @@
 --TEST--
 Test rand funtion when min and max are in proper or inverted order
---CREDIT--
+--CREDITS--
 PHP TestFEst 2017 - PHPDublin, PHPSP - Joao P V Martins <jp.joao@gmail.com>
 --FILE--
 <?php

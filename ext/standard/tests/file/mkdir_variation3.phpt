@@ -147,16 +147,16 @@ Directory created
 Directory created
 
 --empty array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, array given, %s(%d)
 
 --int indexed array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, array given, %s(%d)
 
 --associative array--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, array given, %s(%d)
 
 --nested arrays--
-Error: 2 - mkdir() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, array given, %s(%d)
 
 --uppercase NULL--
 Directory created
@@ -195,10 +195,10 @@ Directory created
 Directory created
 
 --instance of classWithToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, object given, %s(%d)
 
 --instance of classWithoutToString--
-Error: 2 - mkdir() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 3 to be bool, object given, %s(%d)
 
 --undefined var--
 Directory created

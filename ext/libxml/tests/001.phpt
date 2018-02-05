@@ -22,7 +22,7 @@ bool(false)
 bool(false)
 bool(true)
 
-Warning: libxml_use_internal_errors() expects parameter 1 to be boolean, object given in %s001.php on line 6
+Warning: libxml_use_internal_errors() expects parameter 1 to be bool, object given in %s001.php on line 6
 NULL
 array(0) {
 }

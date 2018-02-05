@@ -1628,5 +1628,5 @@ array(31) {
   ["RelatedImageHeight"]=>
   int(1)
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

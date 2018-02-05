@@ -1,7 +1,5 @@
 --TEST--
 Ensure ReflectionClass::getProperty() triggers autoload
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 spl_autoload_register(function ($name) {

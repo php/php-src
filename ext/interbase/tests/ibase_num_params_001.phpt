@@ -28,5 +28,5 @@ NULL
 
 Warning: ibase_prepare(): Dynamic SQL Error SQL error code = -206 %s in %s on line %d
 
-Warning: ibase_num_params() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: ibase_num_params() expects parameter 1 to be resource, bool given in %s on line %d
 NULL

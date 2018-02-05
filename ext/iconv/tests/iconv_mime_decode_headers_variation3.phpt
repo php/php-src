@@ -239,7 +239,7 @@ array(5) {
 
 -- Iteration 7 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, float given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 -- Iteration 8 --
@@ -396,32 +396,32 @@ array(5) {
 
 -- Iteration 16 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, string given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, object given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -464,6 +464,6 @@ array(5) {
 
 -- Iteration 24 --
 
-Warning: iconv_mime_decode_headers() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: iconv_mime_decode_headers() expects parameter 2 to be int, resource given in %s on line %d
 bool(false)
 Done

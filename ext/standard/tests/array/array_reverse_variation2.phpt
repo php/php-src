@@ -235,23 +235,23 @@ array(6) {
 }
 -- Iteration 10 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, array given in %s on line %d
 NULL
 -- Iteration 15 --
 array(6) {
@@ -375,7 +375,7 @@ array(6) {
 }
 -- Iteration 23 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, object given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, object given in %s on line %d
 NULL
 -- Iteration 24 --
 array(6) {
@@ -409,6 +409,6 @@ array(6) {
 }
 -- Iteration 26 --
 
-Warning: array_reverse() expects parameter 2 to be boolean, resource given in %s on line %d
+Warning: array_reverse() expects parameter 2 to be bool, resource given in %s on line %d
 NULL
 Done

@@ -1,7 +1,5 @@
 --TEST--
 Bug #44144 (spl_autoload_functions() should return object instance when appropriate)
---SKIPIF--
-<?php if (!extension_loaded("spl")) print "skip"; ?>
 --FILE--
 <?php
 class Foo {
@@ -23,5 +21,3 @@ array(1) {
     string(15) "nonstaticMethod"
   }
 }
-
-

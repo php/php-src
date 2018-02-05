@@ -514,6 +514,8 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # endif
 #endif
 
+/* Intrinsics macros start. */
+
 #if defined(HAVE_FUNC_ATTRIBUTE_IFUNC) && defined(HAVE_FUNC_ATTRIBUTE_TARGET)
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
@@ -531,6 +533,18 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #elif ZEND_INTRIN_SSE4_2_RESOLVER
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
 #endif
+
+#if ZEND_INTRIN_SSE4_2_RESOLVER
+# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) ZEND_API func __attribute__((target("sse4.2")))
+# else
+#  define ZEND_INTRIN_SSE4_2_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_SSE4_2_FUNC_DECL(func)
+#endif
+
+/* Intrinsics macros end. */
 
 #ifdef ZEND_WIN32
 # define ZEND_SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl

@@ -88,22 +88,22 @@ echo "Done";
 
 Arg value 0 
 
-Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
 Arg value 1 
 
-Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
 Arg value 12345 
 
-Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
 Arg value -2345 
 
-Warning: fpassthru() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, int given in %s on line %d
 bool(false)
 
 Arg value 10.5 
@@ -168,22 +168,22 @@ bool(false)
 
 Arg value 1 
 
-Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 
 Arg value  
 
-Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 
 Arg value 1 
 
-Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 
 Arg value  
 
-Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 
 Arg value  

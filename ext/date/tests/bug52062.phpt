@@ -25,7 +25,7 @@ string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(12) "100000000000"
 
-Warning: DateTime::setTimestamp() expects parameter 1 to be integer, float given in %s on line %d
+Warning: DateTime::setTimestamp() expects parameter 1 to be int, float given in %s on line %d
 string(32) "5138-11-16 09:46:40 100000000000"
 bool(false)
 string(10) "1215752192"

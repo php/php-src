@@ -39,12 +39,12 @@ foreach($vars as $variation =>$object) {
 
 -- bool --
 
-Warning: get_resource_type() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: get_resource_type() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- int 10 --
 
-Warning: get_resource_type() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: get_resource_type() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- float 10.5 --

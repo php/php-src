@@ -1,7 +1,5 @@
 --TEST--
 Test is_a() function : error conditions - wrong number of args
---INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name, bool allow_string)
@@ -44,7 +42,7 @@ NULL
 
 -- Testing is_a() function with non-boolean in last position --
 
-Warning: is_a() expects parameter 3 to be boolean, object given in %s on line 21
+Warning: is_a() expects parameter 3 to be bool, object given in %s on line 21
 NULL
 
 -- Testing is_a() function with less than expected no. of arguments --

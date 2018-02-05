@@ -3,7 +3,6 @@ Phar object: basics
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 ?>
 --INI--
 phar.require_hash=0
@@ -44,7 +43,7 @@ try {
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_001.phar.php');
 __halt_compiler();
 ?>

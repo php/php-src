@@ -64,7 +64,7 @@ const zend_function_entry php_dom_domimplementation_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto boolean dom_domimplementation_has_feature(string feature, string version);
+/* {{{ proto bool dom_domimplementation_has_feature(string feature, string version);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-5CED94D7
 Since:
 */

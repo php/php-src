@@ -38,7 +38,7 @@ bool(false)
 Warning: intlcal_set(): intlcal_set: invalid field in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_set(1, 2, 3)
 #1 {main}

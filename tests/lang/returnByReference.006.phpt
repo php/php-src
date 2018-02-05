@@ -1,7 +1,5 @@
 --TEST--
 Returning a reference from a function via another function
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 function returnConstantByValue() {

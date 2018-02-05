@@ -26,10 +26,10 @@ var_dump(openssl_csr_new(["countryName" => "DE"], $x, $conf + ["x509_extensions"
 echo "Done\n";
 ?>
 --EXPECTF--	
-Warning: openssl_csr_new() expects parameter 1 to be array, integer given in %s on line %d
+Warning: openssl_csr_new() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
-Warning: openssl_csr_new() expects parameter 1 to be array, integer given in %s on line %d
+Warning: openssl_csr_new() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: openssl_csr_new(): key array must be of the form array(0 => key, 1 => phrase) in %s on line %d

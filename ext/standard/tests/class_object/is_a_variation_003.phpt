@@ -1,7 +1,5 @@
 --TEST--
 Test is_a() function : usage variations  - case sensitivity
---INI--
-error_reporting=E_ALL | E_STRICT | E_DEPRECATED
 --FILE--
 <?php
 /* Prototype  : proto bool is_a(object object, string class_name)

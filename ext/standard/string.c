@@ -930,7 +930,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string wordwrap(string str [, int width [, string break [, boolean cut]]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
@@ -3866,10 +3866,11 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 # include "Zend/zend_bitset.h"
 # include "Zend/zend_cpuinfo.h"
 
+ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str, int should_free));
+zend_string *php_addslashes_default(zend_string *str, int should_free);
+
 # if ZEND_INTRIN_SSE4_2_FUNC_PROTO
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
-zend_string *php_addslashes_sse42(zend_string *str, int should_free) __attribute__((target("sse4.2")));
-zend_string *php_addslashes_default(zend_string *str, int should_free);
 
 static void *resolve_addslashes() {
 	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
@@ -3878,8 +3879,6 @@ static void *resolve_addslashes() {
 	return  php_addslashes_default;
 }
 # else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
-zend_string *php_addslashes_sse42(zend_string *str, int should_free);
-zend_string *php_addslashes_default(zend_string *str, int should_free);
 
 PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
 

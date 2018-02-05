@@ -2,7 +2,6 @@
 Handling of public fields with traits needs to have same semantics as with normal inheritance, however, we do add strict warnings since it is easier to run into something unexpeted with changing traits.
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class BaseWithPropA {
   public $hello = 0;

@@ -1255,7 +1255,7 @@ static PHP_FUNCTION(tidy_get_output)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_parse_file(string file [, mixed config_options [, string encoding [, bool use_include_path]]])
+/* {{{ proto bool tidy_parse_file(string file [, mixed config_options [, string encoding [, bool use_include_path]]])
    Parse markup in file or URI */
 static PHP_FUNCTION(tidy_parse_file)
 {
@@ -1296,7 +1296,7 @@ static PHP_FUNCTION(tidy_parse_file)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_clean_repair()
+/* {{{ proto bool tidy_clean_repair()
    Execute configured cleanup and repair operations on parsed markup */
 static PHP_FUNCTION(tidy_clean_repair)
 {
@@ -1311,7 +1311,7 @@ static PHP_FUNCTION(tidy_clean_repair)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_repair_string(string data [, mixed config_file [, string encoding]])
+/* {{{ proto bool tidy_repair_string(string data [, mixed config_file [, string encoding]])
    Repair a string using an optionally provided configuration file */
 static PHP_FUNCTION(tidy_repair_string)
 {
@@ -1319,7 +1319,7 @@ static PHP_FUNCTION(tidy_repair_string)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_repair_file(string filename [, mixed config_file [, string encoding [, bool use_include_path]]])
+/* {{{ proto bool tidy_repair_file(string filename [, mixed config_file [, string encoding [, bool use_include_path]]])
    Repair a file using an optionally provided configuration file */
 static PHP_FUNCTION(tidy_repair_file)
 {
@@ -1327,7 +1327,7 @@ static PHP_FUNCTION(tidy_repair_file)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_diagnose()
+/* {{{ proto bool tidy_diagnose()
    Run configured diagnostics on parsed and repaired markup. */
 static PHP_FUNCTION(tidy_diagnose)
 {
@@ -1459,7 +1459,7 @@ static PHP_FUNCTION(tidy_get_html_ver)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_is_xhtml()
+/* {{{ proto bool tidy_is_xhtml()
    Indicates if the document is a XHTML document. */
 static PHP_FUNCTION(tidy_is_xhtml)
 {
@@ -1469,7 +1469,7 @@ static PHP_FUNCTION(tidy_is_xhtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidy_is_xml()
+/* {{{ proto bool tidy_is_xml()
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 static PHP_FUNCTION(tidy_is_xml)
 {
@@ -1717,7 +1717,7 @@ static PHP_FUNCTION(tidy_get_body)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::hasChildren()
+/* {{{ proto bool tidyNode::hasChildren()
    Returns true if this node has children */
 static TIDY_NODE_METHOD(hasChildren)
 {
@@ -1731,7 +1731,7 @@ static TIDY_NODE_METHOD(hasChildren)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::hasSiblings()
+/* {{{ proto bool tidyNode::hasSiblings()
    Returns true if this node has siblings */
 static TIDY_NODE_METHOD(hasSiblings)
 {
@@ -1745,7 +1745,7 @@ static TIDY_NODE_METHOD(hasSiblings)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isComment()
+/* {{{ proto bool tidyNode::isComment()
    Returns true if this node represents a comment */
 static TIDY_NODE_METHOD(isComment)
 {
@@ -1759,7 +1759,7 @@ static TIDY_NODE_METHOD(isComment)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isHtml()
+/* {{{ proto bool tidyNode::isHtml()
    Returns true if this node is part of a HTML document */
 static TIDY_NODE_METHOD(isHtml)
 {
@@ -1773,7 +1773,7 @@ static TIDY_NODE_METHOD(isHtml)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isText()
+/* {{{ proto bool tidyNode::isText()
    Returns true if this node represents text (no markup) */
 static TIDY_NODE_METHOD(isText)
 {
@@ -1787,7 +1787,7 @@ static TIDY_NODE_METHOD(isText)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isJste()
+/* {{{ proto bool tidyNode::isJste()
    Returns true if this node is JSTE */
 static TIDY_NODE_METHOD(isJste)
 {
@@ -1801,7 +1801,7 @@ static TIDY_NODE_METHOD(isJste)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isAsp()
+/* {{{ proto bool tidyNode::isAsp()
    Returns true if this node is ASP */
 static TIDY_NODE_METHOD(isAsp)
 {
@@ -1815,7 +1815,7 @@ static TIDY_NODE_METHOD(isAsp)
 }
 /* }}} */
 
-/* {{{ proto boolean tidyNode::isPhp()
+/* {{{ proto bool tidyNode::isPhp()
    Returns true if this node is PHP */
 static TIDY_NODE_METHOD(isPhp)
 {

@@ -108,22 +108,22 @@ rmdir($dir);
 
 -- Iteration 1 --
 
-Warning: scandir() expects parameter 3 to be resource, integer given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 2 --
 
-Warning: scandir() expects parameter 3 to be resource, integer given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 3 --
 
-Warning: scandir() expects parameter 3 to be resource, integer given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 4 --
 
-Warning: scandir() expects parameter 3 to be resource, integer given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, int given in %s on line %d
 NULL
 
 -- Iteration 5 --
@@ -163,22 +163,22 @@ NULL
 
 -- Iteration 12 --
 
-Warning: scandir() expects parameter 3 to be resource, boolean given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 13 --
 
-Warning: scandir() expects parameter 3 to be resource, boolean given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 14 --
 
-Warning: scandir() expects parameter 3 to be resource, boolean given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 15 --
 
-Warning: scandir() expects parameter 3 to be resource, boolean given in %s on line %d
+Warning: scandir() expects parameter 3 to be resource, bool given in %s on line %d
 NULL
 
 -- Iteration 16 --
