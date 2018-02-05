@@ -6696,6 +6696,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_FUNC_ARG:
 				case ZEND_SEND_REF:
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
@@ -6762,6 +6763,7 @@ static int zend_jit_needs_call_chain(zend_call_info *call_info, uint32_t b, zend
 					case ZEND_SEND_VAR:
 					case ZEND_SEND_VAL_EX:
 					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
@@ -6814,9 +6816,9 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 	} else {
 		zval *zv = RT_CONSTANT(opline, opline->op2);
 
-		|	// if (CACHED_PTR(Z_CACHE_SLOT_P(fname)))
+		|	// if (CACHED_PTR(opline->result.num))
 		|	mov r0,	EX->run_time_cache
-		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
+		|	mov r0, aword [r0 + opline->result.num]
 		|	test r0, r0
 		|	jz >1
 		|.cold_code
@@ -6838,9 +6840,9 @@ static int zend_jit_init_fcall(dasm_State **Dst, const zend_op *opline, uint32_t
 			|	test r0, r0
 			|	jz ->exception_handler
 		}
-		|	// CACHE_PTR(Z_CACHE_SLOT_P(fname), fbc);
+		|	// CACHE_PTR(opline->result.num, fbc);
 		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
+		|	mov aword [r1 + opline->result.num], r0
 		|	jmp >3
 		|.code
 		|3:
@@ -7815,9 +7817,9 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 		}
 	}
 
-	|	// if (CACHED_PTR(Z_CACHE_SLOT_P(EX_CONSTANT(opline->op1)))) {
+	|	// if (CACHED_PTR(opline->extended_value)) {
 	|	mov r0,	EX->run_time_cache
-	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(zv)]
+	|	mov r0, aword [r0 + opline->extended_value]
 	|	test r0, r0
 	|	jz >1
 	|.cold_code
@@ -7833,7 +7835,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 			|	jz >3
 		}
 		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
+		|	mov aword [r1 + opline->extended_value], r0
 		if (defined_label != (uint32_t)-1) {
 			|	jmp =>defined_label
 		} else {
@@ -7843,7 +7845,7 @@ static int zend_jit_defined(dasm_State **Dst, const zend_op *opline, int b, int 
 		res_addr = zend_jit_decode_op(op_array, opline->result_type, opline->result, opline, NULL, -1);
 		|	jz >2
 		|	mov r1,	EX->run_time_cache
-		|	mov aword [r1 + Z_CACHE_SLOT_P(zv)], r0
+		|	mov aword [r1 + opline->extended_value], r0
 		|	SET_ZVAL_TYPE_INFO res_addr, IS_TRUE
 		|	jmp >3
 		|2:
@@ -8709,9 +8711,9 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 		op1_info = OP1_INFO();
 	}
 
-	//idx = (uint32_t)(uintptr_t)CACHED_PTR(Z_CACHE_SLOT_P(varname)) - 1;
+	//idx = (uint32_t)(uintptr_t)CACHED_PTR(opline->extended_value) - 1;
 	|	mov	r0, EX->run_time_cache
-	|	mov r0, aword [r0 + Z_CACHE_SLOT_P(varname)]
+	|	mov r0, aword [r0 + opline->extended_value]
 	|	sub r0, 1
 	//if (EXPECTED(idx < EG(symbol_table).nNumUsed))
 	|	MEM_OP2_2 cmp, eax, dword, &EG(symbol_table).nNumUsed, r1
@@ -8835,6 +8837,11 @@ static int zend_jit_bind_global(dasm_State **Dst, const zend_op *opline, zend_op
 	|9:
 	|	mov FCARG1a, FP
 	|	LOAD_ADDR FCARG2a, (ptrdiff_t)varname
+	|.if X64
+		|	mov CARG3, opline->extended_value
+	|.else
+		|	push opline->extended_value
+	|.endif
 	|	EXT_CALL zend_jit_fetch_global_helper, r0
 	|	jmp <1
 	|.code
@@ -9019,7 +9026,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 			|	jne >8
 			|	mov FCARG1a, r0
 			|	mov r0,	EX->run_time_cache
-			|	lea r0, [r0 + Z_CACHE_SLOT_P(zv)]
+			|	lea r0, [r0 + opline->extended_value]
 			|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
 			|.if X64
 				|	mov CARG3, arg_num
@@ -9062,7 +9069,7 @@ static int zend_jit_recv_init(dasm_State **Dst, const zend_op *opline, zend_op_a
 	|8:
 	|	mov FCARG1a, r0
 	|	mov r0,	EX->run_time_cache
-	|	lea r0, [r0 + Z_CACHE_SLOT_P(zv)]
+	|	lea r0, [r0 + opline->extended_value]
 	|	LOAD_ADDR FCARG2a, (ptrdiff_t)op_array
 	|.if X64
 		|	mov CARG3, arg_num
@@ -9232,10 +9239,10 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 
 	if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
 		|	mov r0,	EX->run_time_cache
-		|	mov r2, aword [r0 + Z_CACHE_SLOT_P(member)]
+		|	mov r2, aword [r0 + opline->extended_value]
 		|	cmp r2, aword [FCARG1a + offsetof(zend_object, ce)]
 		|	jne >5
-		|	mov r0, aword [r0 + Z_CACHE_SLOT_P(member) + sizeof(void*)]
+		|	mov r0, aword [r0 + opline->extended_value + sizeof(void*)]
 		may_be_dynamic = zend_may_be_dynamic_property(ce, Z_STR_P(member), opline->op1_type == IS_UNUSED, op_array->filename);
 		if (may_be_dynamic) {
 			|	test r0, r0
@@ -9272,7 +9279,9 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	|	LOAD_ADDR FCARG2a, member
 	|.if X64
 		|	LOAD_ZVAL_ADDR CARG3, res_addr
+		|	mov CARG4, opline->extended_value
 	|.else
+		|	push opline->extended_value
 		|	PUSH_ZVAL_ADDR res_addr, r0
 	|.endif
 	|	SAVE_VALID_OPLINE opline
@@ -9335,7 +9344,9 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 		|.if X64
 			|	LOAD_ADDR CARG3, member
 			|	LOAD_ZVAL_ADDR CARG4, res_addr
+			|	mov CARG5, opline->extended_value
 		|.else
+			|	push opline->extended_value
 			|	PUSH_ZVAL_ADDR res_addr, r0
 			|	PUSH_ADDR member, r0
 		|.endif

@@ -841,6 +841,7 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(void)
 							break;
 						case ZEND_SEND_REF:
 						case ZEND_SEND_VAR_EX:
+						case ZEND_SEND_FUNC_ARG:
 							msg = "Only variables can be passed by reference";
 							break;
 						EMPTY_SWITCH_DEFAULT_CASE();
@@ -1672,7 +1673,7 @@ static zval* ZEND_FASTCALL zend_jit_new_ref_helper(zval *value)
 	return value;
 }
 
-static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname)
+static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execute_data, zval *varname, uint32_t cache_slot)
 {
 	uint32_t idx;
 	zval *value = zend_hash_find(&EG(symbol_table), Z_STR_P(varname));
@@ -1681,11 +1682,11 @@ static zval* ZEND_FASTCALL zend_jit_fetch_global_helper(zend_execute_data *execu
 		value = zend_hash_add_new(&EG(symbol_table), Z_STR_P(varname), &EG(uninitialized_zval));
 		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 	} else {
 		idx = ((char*)value - (char*)EG(symbol_table).arData) / sizeof(Bucket);
 		/* Store "hash slot index" + 1 (NULL is a mark of uninitialized cache slot) */
-		CACHE_PTR(Z_CACHE_SLOT_P(varname), (void*)(uintptr_t)(idx + 1));
+		CACHE_PTR(cache_slot, (void*)(uintptr_t)(idx + 1));
 		/* GLOBAL variable may be an INDIRECT pointer to CV */
 		if (UNEXPECTED(Z_TYPE_P(value) == IS_INDIRECT)) {
 			value = Z_INDIRECT_P(value);
@@ -1949,7 +1950,7 @@ static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
 	ZVAL_COPY(dst, src);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *offset, zval *result, uint32_t cache_slot)
 {
 	zval *retval;
 	zend_execute_data *execute_data = EG(current_execute_data);
@@ -1962,14 +1963,14 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 		ZVAL_NULL(result);
 	} else {
 		ZVAL_OBJ(&tmp, zobj);
-		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_R, CACHE_ADDR(Z_CACHE_SLOT_P(offset)), result);
+		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_R, CACHE_ADDR(cache_slot), result);
 		if (retval != result) {
 			ZVAL_COPY_UNREF(result, retval);
 		}
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result, uint32_t cache_slot)
 {
 	if (zobj->properties) {
 		zval *retval;
@@ -1990,22 +1991,22 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr
 					return;
 				}
 			}
-			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + cache_slot) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
 
 		retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
-			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + cache_slot) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 			ZVAL_COPY_UNREF(result, retval);
 			return;
 		}
 	}
-	zend_jit_fetch_obj_r_slow(zobj, offset, result);
+	zend_jit_fetch_obj_r_slow(zobj, offset, result, cache_slot);
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *offset, zval *result, uint32_t cache_slot)
 {
 	zval *retval;
 	zend_execute_data *execute_data = EG(current_execute_data);
@@ -2015,14 +2016,14 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *of
 		ZVAL_NULL(result);
 	} else {
 		ZVAL_OBJ(&tmp, zobj);
-		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_IS, CACHE_ADDR(Z_CACHE_SLOT_P(offset)), result);
+		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_IS, CACHE_ADDR(cache_slot), result);
 		if (retval != result) {
 			ZVAL_COPY(result, retval);
 		}
 	}
 }
 
-static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result)
+static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intptr_t prop_offset, zval *offset, zval *result, uint32_t cache_slot)
 {
 	if (zobj->properties) {
 		zval *retval;
@@ -2043,19 +2044,19 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 					return;
 				}
 			}
-			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + cache_slot) + 1, (void*)ZEND_DYNAMIC_PROPERTY_OFFSET);
 		}
 
 		retval = zend_hash_find(zobj->properties, Z_STR_P(offset));
 
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
-			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + Z_CACHE_SLOT_P(offset)) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
+			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + cache_slot) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
 			ZVAL_COPY(result, retval);
 			return;
 		}
 	}
-	zend_jit_fetch_obj_is_slow(zobj, offset, result);
+	zend_jit_fetch_obj_is_slow(zobj, offset, result, cache_slot);
 }
 
 static void ZEND_FASTCALL zend_jit_vm_stack_free_args_helper(zend_execute_data *call)

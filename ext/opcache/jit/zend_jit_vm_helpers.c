@@ -116,13 +116,18 @@ void ZEND_FASTCALL zend_jit_copy_extra_args_helper(void)
 				src--;
 				dst--;
 			} while (src != end);
+			if (type_flags & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) {
+				ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_FREE_EXTRA_ARGS);
+			}
 		} else {
 			do {
-				type_flags |= Z_TYPE_INFO_P(src);
+				if (Z_REFCOUNTED_P(src)) {
+					ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_FREE_EXTRA_ARGS);
+					break;
+				}
 				src--;
 			} while (src != end);
 		}
-		ZEND_ADD_CALL_FLAG(execute_data, ((type_flags >> Z_TYPE_FLAGS_SHIFT) & IS_TYPE_REFCOUNTED));
 	}
 }
 
