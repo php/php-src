@@ -21,6 +21,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #75729 (opcache segfault when installing Bitrix). (Nikita)
+  . Fixed bug #75893 (file_get_contents $http_response_header variable bugged
+    with opcache). (Nikita)
 
 - Standard:
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
