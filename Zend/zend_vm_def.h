@@ -1521,12 +1521,7 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 		if (OP2_TYPE == IS_CONST) {
 			if (OP1_TYPE == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					FREE_UNFETCHED_OP1();
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -1556,12 +1551,7 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 			if (OP1_TYPE == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					FREE_UNFETCHED_OP1();
-					break;
-				}
+				break;
 			}
 		}
 
@@ -6383,12 +6373,6 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CLA
 	if (OP2_TYPE == IS_CONST) {
 		if (OP1_TYPE == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			ZEND_VM_C_GOTO(is_static_prop_return);
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -6417,12 +6401,6 @@ ZEND_VM_HANDLER(180, ZEND_ISSET_ISEMPTY_STATIC_PROP, CONST|TMPVAR|CV, UNUSED|CLA
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			ZEND_VM_C_GOTO(is_static_prop_return);
 		}
 	}
