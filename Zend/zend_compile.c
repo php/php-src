@@ -5378,7 +5378,7 @@ static int zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
 	uint32_t i = 0;
 	zend_ast_list *file_ast = zend_ast_get_list(CG(ast));
 
-	/* Check to see if this declare is preceeded only by declare statements */
+	/* Check to see if this declare is preceded only by declare statements */
 	while (i < file_ast->children) {
 		if (file_ast->child[i] == ast) {
 			return SUCCESS;
@@ -5386,7 +5386,7 @@ static int zend_declare_is_first_statement(zend_ast *ast) /* {{{ */
 			/* Empty statements are not allowed prior to a declare */
 			return FAILURE;
 		} else if (file_ast->child[i]->kind != ZEND_AST_DECLARE) {
-			/* declares can only be preceeded by other declares */
+			/* declares can only be preceded by other declares */
 			return FAILURE;
 		}
 		i++;
@@ -5719,7 +5719,7 @@ void zend_compile_params(zend_ast *ast, zend_ast *return_type_ast) /* {{{ */
 		}
 	}
 
-	/* These are assigned at the end to avoid unitialized memory in case of an error */
+	/* These are assigned at the end to avoid uninitialized memory in case of an error */
 	op_array->num_args = list->children;
 	op_array->arg_info = arg_infos;
 

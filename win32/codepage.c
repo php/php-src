@@ -156,7 +156,7 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 
 	/* Check and conversion could be merged. This however would
 		be more expencive, if a non ASCII string was passed.
-		TODO check wether the impact is acceptable. */
+		TODO check whether the impact is acceptable. */
 	if (in_len > 15) {
 		const char *aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
 

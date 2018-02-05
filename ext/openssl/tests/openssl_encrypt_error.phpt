@@ -12,7 +12,7 @@ $wrong = "wrong";
 $object = new stdclass;
 $arr = array(1);
 
-// wrong paramters tests
+// wrong parameters tests
 var_dump(openssl_encrypt($data, $wrong, $password));
 var_dump(openssl_encrypt($object, $method, $password));
 var_dump(openssl_encrypt($data, $object, $password));
