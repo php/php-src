@@ -563,16 +563,12 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 		}
 	} else {
 		if (ZEND_VM_EXT_VAR_FETCH & flags) {
-			switch (opline->extended_value & ZEND_FETCH_TYPE_MASK) {
-				case ZEND_FETCH_GLOBAL:
-					fprintf(stderr, " (global)");
-					break;
-				case ZEND_FETCH_LOCAL:
-					fprintf(stderr, " (local)");
-					break;
-				case ZEND_FETCH_GLOBAL_LOCK:
-					fprintf(stderr, " (global+lock)");
-					break;
+			if (opline->extended_value & ZEND_FETCH_GLOBAL) {
+				fprintf(stderr, " (global)");
+			} else if (opline->extended_value & ZEND_FETCH_LOCAL) {
+				fprintf(stderr, " (local)");
+			} else if (opline->extended_value & ZEND_FETCH_GLOBAL_LOCK) {
+				fprintf(stderr, " (global+lock)");
 			}
 		}
 		if (ZEND_VM_EXT_ISSET & flags) {
@@ -581,9 +577,6 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 			} else {
 				fprintf(stderr, " (empty)");
 			}
-		}
-		if (ZEND_VM_EXT_ARG_NUM & flags) {
-			fprintf(stderr, " %u", opline->extended_value & ZEND_FETCH_ARG_MASK);
 		}
 		if (ZEND_VM_EXT_ARRAY_INIT & flags) {
 			fprintf(stderr, " %u", opline->extended_value >> ZEND_ARRAY_SIZE_SHIFT);
@@ -681,7 +674,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else {
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
-			if (opline->opcode != ZEND_CATCH || opline->extended_value != ZEND_LAST_CATCH) {
+			if (opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH)) {
 				if (b) {
 					fprintf(stderr, " BB%d", b->successors[n++]);
 				} else {

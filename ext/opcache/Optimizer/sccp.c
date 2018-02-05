@@ -228,6 +228,7 @@ static zend_bool can_replace_op1(
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_SEND_UNPACK:
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:
@@ -437,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -591,7 +592,7 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }

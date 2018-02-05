@@ -3179,11 +3179,11 @@ function toolset_setup_common_cflags()
 			ADD_FLAG('CFLAGS', ' /RTC1 ');
 		} else {
 			if (PHP_DEBUG == "no" && PHP_SECURITY_FLAGS == "yes") {
-				/* Mitigations for Spectre variant 1, see
-					https://blogs.msdn.microsoft.com/vcblog/2018/01/15/spectre-mitigations-in-msvc/ 
-					TODO backport for all supported VS versions when they release it. */
+				/* Mitigations for CVE-2017-5753.
+			  	   TODO backport for all supported VS versions when they release it. */
 				if (VCVERS >= 1912) {
-					if (VCVERS >= 1913) {
+					var subver1912 = probe_binary(PHP_CL).substr(6);
+					if (VCVERS >= 1913 || 1912 == VCVERS && subver1912 >= 25835) {
 						ADD_FLAG('CFLAGS', "/Qspectre");
 					} else {
 						/* Undocumented. */
