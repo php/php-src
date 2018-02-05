@@ -102,7 +102,7 @@ PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, si
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
 	wchar_t *ret, *ret_idx;
-	const char *idx = in, *end, *aidx;
+	const char *idx = in, *end;
 
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
@@ -115,9 +115,10 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	}
 
 	end = in + in_len;
-	aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
 
 	if (in_len > 15) {
+		const char *aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
+
 		/* Process unaligned chunk. */
 		while (idx < aidx) {
 			if (!__isascii(*idx) && '\0' != *idx) {
@@ -157,6 +158,8 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 		be more expencive, if a non ASCII string was passed.
 		TODO check wether the impact is acceptable. */
 	if (in_len > 15) {
+		const char *aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
+
 		/* Process unaligned chunk. */
 		while (idx < aidx) {
 			*ret_idx++ = (wchar_t)*idx++;
