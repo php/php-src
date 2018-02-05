@@ -4246,7 +4246,6 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 
 	znode class_node, ctor_result;
 	zend_op *opline;
-	uint32_t opnum;
 
 	if (class_ast->kind == ZEND_AST_CLASS) {
 		uint32_t dcl_opnum = get_next_op_number(CG(active_op_array));
@@ -4263,7 +4262,6 @@ void zend_compile_new(znode *result, zend_ast *ast) /* {{{ */
 		zend_compile_class_ref_ex(&class_node, class_ast, ZEND_FETCH_CLASS_EXCEPTION);
 	}
 
-	opnum = get_next_op_number(CG(active_op_array));
 	opline = zend_emit_op(result, ZEND_NEW, NULL, NULL);
 
 	if (class_node.op_type == IS_CONST) {
