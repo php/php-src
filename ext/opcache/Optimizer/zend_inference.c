@@ -1734,6 +1734,16 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 }
 /* }}} */
 
+static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
+	if (alias == PHP_ERRORMSG_ALIAS) {
+		return MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
+	} else if (alias == HTTP_RESPONSE_HEADER_ALIAS) {
+		return MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_RC1 | MAY_BE_RCN;
+	} else {
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+	}
+}
+
 #define UPDATE_SSA_TYPE(_type, _var)									\
 	do {																\
 		uint32_t __type = (_type);										\
@@ -1742,7 +1752,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			__type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF; \
 		}																\
 		if (__var >= 0) {												\
-			if (ssa_vars[__var].var < op_array->last_var) {				\
+			zend_ssa_var *__ssa_var = &ssa_vars[__var];					\
+			if (__ssa_var->var < op_array->last_var) {					\
 				if (__type & (MAY_BE_REF|MAY_BE_RCN)) {					\
 					__type |= MAY_BE_RC1 | MAY_BE_RCN;					\
 				}														\
@@ -1750,6 +1761,9 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 					/* TODO: support for array keys and ($str . "")*/   \
 					__type |= MAY_BE_RCN;                               \
 				}                                                       \
+				if (__ssa_var->alias) {									\
+					__type |= get_ssa_alias_types(__ssa_var->alias);	\
+				}														\
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
 				if (ssa_var_info[__var].type & ~__type) {				\
@@ -3915,18 +3929,6 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	/* Narrowing integer initialization to doubles */
 	zend_type_narrowing(op_array, script, ssa);
 
-	for (j = 0; j < ssa_vars_count; j++) {
-		if (ssa->vars[j].alias) {
-			if (ssa->vars[j].alias == PHP_ERRORMSG_ALIAS) {
-				ssa_var_info[j].type |= MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
-			} else if (ssa->vars[j].alias == HTTP_RESPONSE_HEADER_ALIAS) {
-				ssa_var_info[j].type |= MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_RC1 | MAY_BE_RCN;
-			} else {
-				ssa_var_info[j].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-			}
-		}
-	}
-
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
@@ -3954,6 +3956,9 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF;
 			ssa_var_info[i].has_range = 0;
+			if (ssa->vars[i].alias) {
+				ssa_var_info[i].type |= get_ssa_alias_types(ssa->vars[i].alias);
+			}
 		}
 	}
 	for (i = op_array->last_var; i < ssa->vars_count; i++) {
