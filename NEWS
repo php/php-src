@@ -15,6 +15,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
+- libxml2:
+  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
+
 - Phar:
   . Fixed bug #65414 (deal with leading slash when adding files correctly).
     (bishopb)
