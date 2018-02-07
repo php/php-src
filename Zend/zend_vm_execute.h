@@ -4577,12 +4577,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_CONST == IS_CONST) {
 			if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -4612,12 +4607,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -4681,8 +4671,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CONS
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -5736,12 +5724,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_CONST == IS_CONST) {
 		if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -5770,12 +5752,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -8184,12 +8160,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_VAR == IS_CONST) {
 			if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -8219,12 +8190,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -8288,8 +8254,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CONS
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CONST_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -8375,12 +8339,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_VAR == IS_CONST) {
 		if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -8409,12 +8367,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -8733,8 +8685,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_RW_SPEC_CONST_UNUSED_HAN
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CONST_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -8767,12 +8717,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_UNUSED == IS_CONST) {
 			if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -8802,12 +8747,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CONST == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -8871,8 +8811,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CONS
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CONST_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CONST_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -9446,12 +9384,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_UNUSED == IS_CONST) {
 		if (IS_CONST == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -9480,12 +9412,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -13965,12 +13891,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_CONST == IS_CONST) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -14000,12 +13921,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			}
 		}
 
@@ -14070,8 +13986,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_TMPV
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -14707,12 +14621,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_CONST == IS_CONST) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -14741,12 +14649,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -16494,12 +16396,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_VAR == IS_CONST) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -16529,12 +16426,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			}
 		}
 
@@ -16599,8 +16491,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_TMPV
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_TMPVAR_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -16686,12 +16576,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_VAR == IS_CONST) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -16720,12 +16604,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -16953,8 +16831,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_RW_SPEC_TMPVAR_UNUSED_HA
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_TMPVAR_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -16987,12 +16863,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_UNUSED == IS_CONST) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -17022,12 +16893,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-					zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-					break;
-				}
+				break;
 			}
 		}
 
@@ -17092,8 +16958,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_TMPV
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_TMPVAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_TMPVAR_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -17251,12 +17115,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_UNUSED == IS_CONST) {
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -17285,12 +17143,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -41358,12 +41210,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_CONST == IS_CONST) {
 			if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -41393,12 +41240,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -41462,8 +41304,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CV_C
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_CONST(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -43497,12 +43337,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_CONST == IS_CONST) {
 		if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -43531,12 +43365,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -47785,12 +47613,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_VAR == IS_CONST) {
 			if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -47820,12 +47643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -47889,8 +47707,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CV_V
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CV_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_VAR(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -48089,12 +47905,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_VAR == IS_CONST) {
 		if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -48123,12 +47933,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}
@@ -48666,8 +48470,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_RW_SPEC_CV_UNUSED_HANDLE
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_var_address_helper_SPEC_CV_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -48700,12 +48502,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 		if (IS_UNUSED == IS_CONST) {
 			if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value)) != NULL)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			} else {
 				zval *class_name = RT_CONSTANT(opline, opline->op2);
 
@@ -48735,12 +48532,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_fetch_static_prop_helper_SPEC_
 			if (IS_CV == IS_CONST &&
 			    EXPECTED(CACHED_PTR(opline->extended_value) == ce)) {
 				retval = CACHED_PTR(opline->extended_value + sizeof(void*));
-
-				/* check if static properties were destoyed */
-				if (EXPECTED(CE_STATIC_MEMBERS(ce) != NULL)) {
-
-					break;
-				}
+				break;
 			}
 		}
 
@@ -48804,8 +48596,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_RW_SPEC_CV_U
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_STATIC_PROP_FUNC_ARG_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
-	USE_OPLINE
-
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		ZEND_VM_TAIL_CALL(zend_fetch_static_prop_helper_SPEC_CV_UNUSED(BP_VAR_W ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 	} else {
@@ -49601,12 +49391,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 	if (IS_UNUSED == IS_CONST) {
 		if (IS_CV == IS_CONST && EXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) != NULL)) {
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		} else if (UNEXPECTED((ce = CACHED_PTR(opline->extended_value & ~ZEND_ISSET)) == NULL)) {
 			ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op2)), RT_CONSTANT(opline, opline->op2) + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
@@ -49635,12 +49419,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ISSET_ISEMPTY_STATIC_PROP_SPEC
 		    EXPECTED(CACHED_PTR(opline->extended_value & ~ZEND_ISSET) == ce)) {
 
 			value = CACHED_PTR((opline->extended_value & ~ZEND_ISSET) + sizeof(void*));
-
-			/* check if static properties were destoyed */
-			if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
-				value = NULL;
-			}
-
 			goto is_static_prop_return;
 		}
 	}

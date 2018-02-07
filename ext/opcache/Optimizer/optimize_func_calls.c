@@ -120,7 +120,7 @@ static void zend_try_inline_call(zend_op_array *op_array, zend_op *fcall, zend_o
 			}
 
 			if (fcall->extended_value < func->op_array.num_args) {
-				/* don't inline funcions with named constants in default arguments */
+				/* don't inline functions with named constants in default arguments */
 				i = fcall->extended_value;
 
 				do {

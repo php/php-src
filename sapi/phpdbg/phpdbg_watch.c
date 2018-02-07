@@ -29,7 +29,7 @@
  * WATCH_ON_HASHDATA: special watchpoint to watch for HT_GET_DATA_ADDR(ht) being efree()'d to be able to properly relocate Bucket watches
  *
  * Watch elements are either simple, recursive or implicit (PHPDBG_WATCH_* flags)
- * Simple means that a particular watchpoint was explicitely defined
+ * Simple means that a particular watchpoint was explicitly defined
  * Recursive watch elements are created recursively (recursive root flag is to distinguish the root element easily from its children recursive elements)
  * Implicit  watch elements are implicitely created on all ancestors of simple or recursive watch elements
  * Recursive and (simple or implicit) watch elements are mutually exclusive

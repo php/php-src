@@ -708,7 +708,7 @@ static int bmp_read_direct(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, b
 		return 1;
 	}
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -805,7 +805,7 @@ static int bmp_read_1bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -875,7 +875,7 @@ static int bmp_read_4bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
@@ -962,7 +962,7 @@ static int bmp_read_8bit(gdImagePtr im, gdIOCtxPtr infile, bmp_info_t *info, bmp
 
 	im->colorsTotal = info->numcolors;
 
-	/* There is a chance the data isn't until later, would be wierd but it is possible */
+	/* There is a chance the data isn't until later, would be weird but it is possible */
 	if (gdTell(infile) != header->off) {
 		/* Should make sure we don't seek past the file size */
 		if (!gdSeek(infile, header->off)) {
