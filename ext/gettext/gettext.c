@@ -299,7 +299,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 #endif
 
 #if HAVE_DNGETTEXT
-/* {{{ proto string dngettext (string domain, string msgid1, string msgid2, int count)
+/* {{{ proto string dngettext(string domain, string msgid1, string msgid2, int count)
    Plural version of dgettext() */
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
@@ -325,7 +325,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 #endif
 
 #if HAVE_DCNGETTEXT
-/* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, int n, int category)
+/* {{{ proto string dcngettext(string domain, string msgid1, string msgid2, int n, int category)
    Plural version of dcgettext() */
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {
