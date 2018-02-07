@@ -181,6 +181,10 @@ PHP                                                                        NEWS
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
     (cmb)
 
+- Tidy:
+  . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
+    functions taking tidy). (Gabriel Caruso)
+
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)
 
