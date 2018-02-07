@@ -141,7 +141,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunrise, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, latitude)
 	ZEND_ARG_INFO(0, longitude)
-	ZEND_ARG_INFO(0, zenith)
+	ZEND_ARG_INFO(0, azimuth)
 	ZEND_ARG_INFO(0, gmt_offset)
 ZEND_END_ARG_INFO()
 
@@ -150,7 +150,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sunset, 0, 0, 1)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, latitude)
 	ZEND_ARG_INFO(0, longitude)
-	ZEND_ARG_INFO(0, zenith)
+	ZEND_ARG_INFO(0, azimuth)
 	ZEND_ARG_INFO(0, gmt_offset)
 ZEND_END_ARG_INFO()
 
@@ -571,10 +571,10 @@ int php_date_global_timezone_db_enabled;
 #define DATE_DEFAULT_LONGITUDE "35.2333"
 
 /* on 90'35; common sunset declaration (start of sun body appear) */
-#define DATE_SUNSET_ZENITH "90.583333"
+#define DATE_SUNSET_AZIMUTH "90.583333"
 
 /* on 90'35; common sunrise declaration (sun body disappeared) */
-#define DATE_SUNRISE_ZENITH "90.583333"
+#define DATE_SUNRISE_AZIMUTH "90.583333"
 
 static PHP_INI_MH(OnUpdate_date_timezone);
 
@@ -583,8 +583,8 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("date.timezone", "", PHP_INI_ALL, OnUpdate_date_timezone, default_timezone, zend_date_globals, date_globals)
 	PHP_INI_ENTRY("date.default_latitude",           DATE_DEFAULT_LATITUDE,        PHP_INI_ALL, NULL)
 	PHP_INI_ENTRY("date.default_longitude",          DATE_DEFAULT_LONGITUDE,       PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("date.sunset_zenith",              DATE_SUNSET_ZENITH,           PHP_INI_ALL, NULL)
-	PHP_INI_ENTRY("date.sunrise_zenith",             DATE_SUNRISE_ZENITH,          PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("date.sunset_azimuth",              DATE_SUNSET_AZIMUTH,           PHP_INI_ALL, NULL)
+	PHP_INI_ENTRY("date.sunrise_azimuth",             DATE_SUNRISE_AZIMUTH,          PHP_INI_ALL, NULL)
 PHP_INI_END()
 /* }}} */
 
@@ -4850,7 +4850,7 @@ PHP_FUNCTION(date_default_timezone_get)
  */
 static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_sunset)
 {
-	double latitude = 0.0, longitude = 0.0, zenith = 0.0, gmt_offset = 0, altitude;
+	double latitude = 0.0, longitude = 0.0, azimuth = 0.0, gmt_offset = 0, altitude;
 	double h_rise, h_set, N;
 	timelib_sll rise, set, transit;
 	zend_long time, retformat = 0;
@@ -4865,7 +4865,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		Z_PARAM_LONG(retformat)
 		Z_PARAM_DOUBLE(latitude)
 		Z_PARAM_DOUBLE(longitude)
-		Z_PARAM_DOUBLE(zenith)
+		Z_PARAM_DOUBLE(azimuth)
 		Z_PARAM_DOUBLE(gmt_offset)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
@@ -4878,9 +4878,9 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 			longitude = INI_FLT("date.default_longitude");
 		case 4:
 			if (calc_sunset) {
-				zenith = INI_FLT("date.sunset_zenith");
+				azimuth = INI_FLT("date.sunset_azimuth");
 			} else {
-				zenith = INI_FLT("date.sunrise_zenith");
+				azimuth = INI_FLT("date.sunrise_azimuth");
 			}
 		case 5:
 		case 6:
@@ -4897,7 +4897,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 		php_error_docref(NULL, E_WARNING, "Wrong return format given, pick one of SUNFUNCS_RET_TIMESTAMP, SUNFUNCS_RET_STRING or SUNFUNCS_RET_DOUBLE");
 		RETURN_FALSE;
 	}
-	altitude = 90 - zenith;
+	altitude = 90 - azimuth;
 
 	/* Initialize time struct */
 	t = timelib_time_ctor();
@@ -4938,7 +4938,7 @@ static void php_do_date_sunrise_sunset(INTERNAL_FUNCTION_PARAMETERS, int calc_su
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* {{{ proto mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
    Returns time of sunrise for a given day and location */
 PHP_FUNCTION(date_sunrise)
 {
@@ -4946,7 +4946,7 @@ PHP_FUNCTION(date_sunrise)
 }
 /* }}} */
 
-/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* {{{ proto mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
    Returns time of sunset for a given day and location */
 PHP_FUNCTION(date_sunset)
 {

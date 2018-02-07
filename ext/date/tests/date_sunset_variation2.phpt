@@ -4,7 +4,7 @@ Test date_sunset() function : usage variation - Passing unexpected values to sec
 <?php if (PHP_INT_SIZE != 4) echo "skip this test is for 32-bit only"; ?>
 --FILE--
 <?php
-/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
  * Description: Returns time of sunset for a given day and location 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
@@ -17,7 +17,7 @@ date_default_timezone_set("Asia/Calcutta");
 $time = mktime(8, 8, 8, 8, 8, 2008);
 $latitude = 22.34;
 $longitude = 88.21;
-$zenith = 90;
+$azimuth = 90;
 $gmt_offset = 5.5;
 
 //get an unset variable
@@ -96,7 +96,7 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunset($time, $value, $latitude, $longitude, $zenith, $gmt_offset) );
+      var_dump( date_sunset($time, $value, $latitude, $longitude, $azimuth, $gmt_offset) );
 };
 
 ?>

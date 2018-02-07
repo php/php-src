@@ -2,7 +2,7 @@
 Test date_sunset() function : usage variation - Passing unexpected values to sixth argument gmt_offset.
 --FILE--
 <?php
-/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
  * Description: Returns time of sunset for a given day and location 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
@@ -15,7 +15,7 @@ date_default_timezone_set("Asia/Calcutta");
 $time = mktime(8, 8, 8, 8, 8, 2008);
 $longitude = 88.21;
 $latitude = 22.34;
-$zenith = 90;
+$azimuth = 90;
 
 //get an unset variable
 $unset_var = 10;
@@ -92,9 +92,9 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $zenith, $value) );
-      var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $zenith, $value) );
-      var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $zenith, $value) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_STRING, $latitude, $longitude, $azimuth, $value) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $azimuth, $value) );
+      var_dump( date_sunset($time, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $azimuth, $value) );
 };
 
 ?>
