@@ -295,10 +295,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_string, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_error_buffer, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_error_buffer, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_output, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_output, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
@@ -308,7 +310,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_parse_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, use_include_path)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_clean_repair, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_clean_repair, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_string, 0, 0, 1)
@@ -324,7 +327,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_repair_file, 0, 0, 1)
 	ZEND_ARG_INFO(0, use_include_path)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_diagnose, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_diagnose, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_release, 0)
@@ -337,31 +341,40 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_config, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_config, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_status, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_status, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_get_html_ver, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_html_ver, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xhtml, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_is_xhtml, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_is_xml, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_is_xml, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_error_count, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_error_count, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_warning_count, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_warning_count, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_access_count, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_access_count, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_tidy_config_count, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_config_count, 0, 0, 1)
+    ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_getopt, 0, 0, 1)
@@ -1240,7 +1253,7 @@ static PHP_FUNCTION(tidy_get_error_buffer)
 }
 /* }}} */
 
-/* {{{ proto string tidy_get_output()
+/* {{{ proto string tidy_get_output(tidy tidy)
    Return a string representing the parsed tidy markup */
 static PHP_FUNCTION(tidy_get_output)
 {
@@ -1296,7 +1309,7 @@ static PHP_FUNCTION(tidy_parse_file)
 }
 /* }}} */
 
-/* {{{ proto bool tidy_clean_repair()
+/* {{{ proto bool tidy_clean_repair(tidy tidy)
    Execute configured cleanup and repair operations on parsed markup */
 static PHP_FUNCTION(tidy_clean_repair)
 {
@@ -1400,7 +1413,7 @@ static PHP_FUNCTION(tidy_get_opt_doc)
 #endif
 
 
-/* {{{ proto array tidy_get_config()
+/* {{{ proto array tidy_get_config(tidy tidy)
    Get current Tidy configuration */
 static PHP_FUNCTION(tidy_get_config)
 {
@@ -1439,7 +1452,7 @@ static PHP_FUNCTION(tidy_get_config)
 }
 /* }}} */
 
-/* {{{ proto int tidy_get_status()
+/* {{{ proto int tidy_get_status(tidy tidy)
    Get status of specified document. */
 static PHP_FUNCTION(tidy_get_status)
 {
@@ -1449,7 +1462,7 @@ static PHP_FUNCTION(tidy_get_status)
 }
 /* }}} */
 
-/* {{{ proto int tidy_get_html_ver()
+/* {{{ proto int tidy_get_html_ver(tidy tidy)
    Get the Detected HTML version for the specified document. */
 static PHP_FUNCTION(tidy_get_html_ver)
 {
@@ -1459,7 +1472,7 @@ static PHP_FUNCTION(tidy_get_html_ver)
 }
 /* }}} */
 
-/* {{{ proto bool tidy_is_xhtml()
+/* {{{ proto bool tidy_is_xhtml(tidy tidy)
    Indicates if the document is a XHTML document. */
 static PHP_FUNCTION(tidy_is_xhtml)
 {
@@ -1469,7 +1482,7 @@ static PHP_FUNCTION(tidy_is_xhtml)
 }
 /* }}} */
 
-/* {{{ proto bool tidy_is_xml()
+/* {{{ proto bool tidy_is_xml(tidy tidy)
    Indicates if the document is a generic (non HTML/XHTML) XML document. */
 static PHP_FUNCTION(tidy_is_xml)
 {
@@ -1479,7 +1492,7 @@ static PHP_FUNCTION(tidy_is_xml)
 }
 /* }}} */
 
-/* {{{ proto int tidy_error_count()
+/* {{{ proto int tidy_error_count(tidy tidy)
    Returns the Number of Tidy errors encountered for specified document. */
 static PHP_FUNCTION(tidy_error_count)
 {
@@ -1489,7 +1502,7 @@ static PHP_FUNCTION(tidy_error_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_warning_count()
+/* {{{ proto int tidy_warning_count(tidy tidy)
    Returns the Number of Tidy warnings encountered for specified document. */
 static PHP_FUNCTION(tidy_warning_count)
 {
@@ -1499,7 +1512,7 @@ static PHP_FUNCTION(tidy_warning_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_access_count()
+/* {{{ proto int tidy_access_count(tidy tidy)
    Returns the Number of Tidy accessibility warnings encountered for specified document. */
 static PHP_FUNCTION(tidy_access_count)
 {
@@ -1509,7 +1522,7 @@ static PHP_FUNCTION(tidy_access_count)
 }
 /* }}} */
 
-/* {{{ proto int tidy_config_count()
+/* {{{ proto int tidy_config_count(tidy tidy)
    Returns the Number of Tidy configuration errors encountered for specified document. */
 static PHP_FUNCTION(tidy_config_count)
 {
@@ -1709,7 +1722,7 @@ static PHP_FUNCTION(tidy_get_head)
 }
 /* }}} */
 
-/* {{{ proto TidyNode tidy_get_body(resource tidy)
+/* {{{ proto TidyNode tidy_get_body(tidy tidy)
    Returns a TidyNode Object starting from the <BODY> tag of the tidy parse tree */
 static PHP_FUNCTION(tidy_get_body)
 {
