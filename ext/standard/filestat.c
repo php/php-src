@@ -546,7 +546,7 @@ static void php_do_chown(INTERNAL_FUNCTION_PARAMETERS, int do_lchown) /* {{{ */
 /* }}} */
 
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 PHP_FUNCTION(chown)
 {
@@ -554,7 +554,7 @@ PHP_FUNCTION(chown)
 }
 /* }}} */
 
-/* {{{ proto bool chown (string filename, mixed user)
+/* {{{ proto bool chown(string filename, mixed user)
    Change file owner */
 #if HAVE_LCHOWN
 PHP_FUNCTION(lchown)
