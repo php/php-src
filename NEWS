@@ -7,6 +7,7 @@ PHP                                                                        NEWS
     configuration). (Anatol)
 
 - Date:
+  . Fixed bug #75857 (Timezone gets truncated when formatted). (carusogabriel)
   . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
     accept `null`). (Pedro Lacerda)
 
