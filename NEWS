@@ -9,6 +9,9 @@ PHP                                                                        NEWS
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
     configuration). (Anatol)
 
+- LDAP:
+  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
+
 - PGSQL:
   . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
 
