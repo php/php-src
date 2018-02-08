@@ -42,7 +42,7 @@ if test "$PHP_XMLRPC" != "no"; then
         PHP_ADD_BUILD_DIR(ext/xml)
       fi
     ], [
-      AC_MSG_ERROR([xml2-config not found. Use --with-libxml-dir=<DIR>])
+      AC_MSG_ERROR([libxml2 not found. Use --with-libxml-dir=<DIR>])
     ])
   else
     testval=no
