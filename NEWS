@@ -77,6 +77,8 @@ PHP                                                                        NEWS
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
   . Added full support for sending and parsing ldap controls (Come)
+  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
+
 
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
