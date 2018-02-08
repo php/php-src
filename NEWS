@@ -122,6 +122,8 @@ PHP                                                                        NEWS
 - phar:
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
 
 - pgsql:
   . Added new error constants for pg_result_error(): (Kalle)
