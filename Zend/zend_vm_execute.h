@@ -1800,7 +1800,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 	int ret;
 
 	SAVE_OPLINE();
-	ret = zend_user_opcode_handlers[opline->opcode](execute_data);
+	/* Check that a user handler has been set */
+	if (EXPECTED(zend_user_opcode_handlers[opline->opcode] != NULL)) {
+		ret = zend_user_opcode_handlers[opline->opcode](execute_data);
+	} else {
+		ret = ZEND_USER_OPCODE_DISPATCH;
+	}
 	opline = EX(opline);
 
 	switch (ret) {
