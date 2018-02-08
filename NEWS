@@ -153,6 +153,7 @@ PHP                                                                        NEWS
     may hide parse error). (Nikita)
   . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
     (cmb)
+  . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
 - SQLite3:
   . Updated bundled libsqlite to 3.22.0. (cmb)
