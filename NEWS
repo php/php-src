@@ -17,6 +17,8 @@ PHP                                                                        NEWS
     be extracted). (bishop)
   . Fixed bug #65414 (deal with leading slash while adding files correctly). 
     (bishopb)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
 
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
