@@ -1,8 +1,8 @@
 --TEST--
-Test date_sunset() function : usage variation - Passing unexpected values to fifth argument zenith.
+Test date_sunset() function : usage variation - Passing unexpected values to fifth argument azimuth.
 --FILE--
 <?php
-/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* Prototype  : mixed date_sunset(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
  * Description: Returns time of sunset for a given day and location 
  * Source code: ext/date/php_date.c
  * Alias to functions: 
@@ -88,7 +88,7 @@ $inputs = array(
       'unset var' => @$unset_var,
 );
 
-// loop through each element of the array for zenith
+// loop through each element of the array for azimuth
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";

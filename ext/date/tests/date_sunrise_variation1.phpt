@@ -2,7 +2,7 @@
 Test date_sunrise() function : usage variation - Passing unexpected values to first argument time.
 --FILE--
 <?php
-/* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float zenith [, float gmt_offset]]]]])
+/* Prototype  : mixed date_sunrise(mixed time [, int format [, float latitude [, float longitude [, float azimuth [, float gmt_offset]]]]])
  * Description: Returns time of sunrise for a given day and location 
  * Source code: ext/date/php_date.c
  */
@@ -12,7 +12,7 @@ echo "*** Testing date_sunrise() : usage variation ***\n";
 //Initialise the variables
 $latitude = 38.4;
 $longitude = -9;
-$zenith = 90;
+$azimuth = 90;
 $gmt_offset = 1;
 $format = SUNFUNCS_RET_STRING;
 date_default_timezone_set("Asia/Calcutta");
@@ -97,9 +97,9 @@ $inputs = array(
 
 foreach($inputs as $key =>$value) {
       echo "\n--$key--\n";
-      var_dump( date_sunrise($value, SUNFUNCS_RET_STRING, $latitude, $longitude, $zenith, $gmt_offset) );
-      var_dump( date_sunrise($value, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $zenith, $gmt_offset) );
-      var_dump( date_sunrise($value, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $zenith, $gmt_offset) );
+      var_dump( date_sunrise($value, SUNFUNCS_RET_STRING, $latitude, $longitude, $azimuth, $gmt_offset) );
+      var_dump( date_sunrise($value, SUNFUNCS_RET_DOUBLE, $latitude, $longitude, $azimuth, $gmt_offset) );
+      var_dump( date_sunrise($value, SUNFUNCS_RET_TIMESTAMP, $latitude, $longitude, $azimuth, $gmt_offset) );
 };
 
 ?>
