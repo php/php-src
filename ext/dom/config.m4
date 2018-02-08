@@ -33,6 +33,6 @@ if test "$PHP_DOM" != "no"; then
     PHP_INSTALL_HEADERS([ext/dom/xml_common.h])
     PHP_ADD_EXTENSION_DEP(dom, libxml)
   ], [
-    AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
+    AC_MSG_ERROR([libxml2 not found. Please check your libxml2 installation.])
   ])
 fi
