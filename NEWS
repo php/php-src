@@ -12,6 +12,9 @@ PHP                                                                        NEWS
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
+- libxml2:
+  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
+
 - PGSQL:
   . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
 
