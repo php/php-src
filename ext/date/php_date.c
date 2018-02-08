@@ -666,6 +666,7 @@ static HashTable *date_object_get_gc_period(zval *object, zval **table, int *n);
 static HashTable *date_object_get_properties_period(zval *object);
 static HashTable *date_object_get_properties_timezone(zval *object);
 static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n);
+static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
 void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
@@ -2133,6 +2134,7 @@ static void date_register_classes(void) /* {{{ */
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
 	date_object_handlers_timezone.get_properties = date_object_get_properties_timezone;
 	date_object_handlers_timezone.get_gc = date_object_get_gc_timezone;
+	date_object_handlers_timezone.get_debug_info = date_object_get_debug_info_timezone;
 
 #define REGISTER_TIMEZONE_CLASS_CONST_STRING(const_name, value) \
 	zend_declare_class_constant_long(date_ce_timezone, const_name, sizeof(const_name)-1, value);
@@ -2390,6 +2392,45 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
 
 	return props;
+} /* }}} */
+
+static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp) /* {{{ */
+{
+	HashTable *ht, *props;
+	zval zv;
+	php_timezone_obj *tzobj;
+
+	tzobj = Z_PHPTIMEZONE_P(object);
+	props = zend_std_get_properties(object);
+
+	*is_temp = 1;
+	ht = zend_array_dup(props);
+	
+	ZVAL_LONG(&zv, tzobj->type);
+	zend_hash_str_update(ht, "timezone_type", sizeof("timezone_type")-1, &zv);
+
+	switch (tzobj->type) {
+		case TIMELIB_ZONETYPE_ID:
+			ZVAL_STRING(&zv, tzobj->tzi.tz->name);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET: {
+			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+
+			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
+			tzobj->tzi.utc_offset > 0 ? '-' : '+',
+			abs(tzobj->tzi.utc_offset / 60),
+			abs((tzobj->tzi.utc_offset % 60)));
+
+			ZVAL_NEW_STR(&zv, tmpstr);
+			}
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			ZVAL_STRING(&zv, tzobj->tzi.z.abbr);
+			break;
+	}
+	zend_hash_str_update(ht, "timezone", sizeof("timezone")-1, &zv);
+
+	return ht;
 } /* }}} */
 
 static zend_object *date_object_new_interval(zend_class_entry *class_type) /* {{{ */
