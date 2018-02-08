@@ -39,34 +39,30 @@ object(DateTimeZone)#%d (2) {
 
 -- Add some properties --
 object(DateTimeZone)#%d (4) {
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
   string(5) "Hello"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- clone it --
 object(DateTimeZone)#%d (4) {
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
   string(5) "Hello"
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- Add some more properties --
 object(DateTimeZone)#%d (6) {
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -75,14 +71,14 @@ object(DateTimeZone)#%d (6) {
   bool(true)
   ["property4"]=>
   float(10.5)
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 
 -- clone it --
 object(DateTimeZone)#%d (6) {
-  ["timezone_type"]=>
-  int(3)
-  ["timezone"]=>
-  string(13) "Europe/London"
   ["property1"]=>
   int(99)
   ["property2"]=>
@@ -91,5 +87,9 @@ object(DateTimeZone)#%d (6) {
   bool(true)
   ["property4"]=>
   float(10.5)
+  ["timezone_type"]=>
+  int(3)
+  ["timezone"]=>
+  string(13) "Europe/London"
 }
 ===DONE===
