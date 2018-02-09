@@ -33,6 +33,7 @@ PHP                                                                        NEWS
   . Fixed bug #75729 (opcache segfault when installing Bitrix). (Nikita)
   . Fixed bug #75893 (file_get_contents $http_response_header variable bugged
     with opcache). (Nikita)
+  . Fixed bug #75938 (Modulus value not stored in variable). (Nikita)
 
 - SPL:
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
