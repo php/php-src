@@ -38,12 +38,12 @@ Array
     [height] => 10
 )
 
-Warning: imagecrop(): gd warning: one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
+Warning: imagecrop(): one parameter to a memory allocation multiplication is negative or zero, failing operation gracefully
  in %sbug66356.php on line %d
 bool(false)
 resource(%d) of type (gd)
 resource(%d) of type (gd)
 
-Warning: imagecrop(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecrop(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %sbug66356.php on line %d
 bool(false)
