@@ -529,10 +529,11 @@ PHP_FUNCTION(hash_final)
 	digest = zend_string_alloc(digest_len, 0);
 	hash->ops->hash_final((unsigned char *) ZSTR_VAL(digest), hash->context);
 	if (hash->options & PHP_HASH_HMAC) {
-		int i;
+		int i, block_size;
 
 		/* Convert K to opad -- 0x6A = 0x36 ^ 0x5C */
-		for(i=0; i < hash->ops->block_size; i++) {
+		block_size = hash->ops->block_size;
+		for(i=0; i < block_size; i++) {
 			hash->key[i] ^= 0x6A;
 		}
 
