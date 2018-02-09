@@ -472,9 +472,12 @@ end
 
 define print_pi
 	set $pi = (zend_property_info *)$arg0
+	set $initial_offset = ((uint32_t)(zend_uintptr_t)(&((zend_object*)0)->properties_table[(0)]))
+	set $ptr_to_val = (zval*)((char*)$pi->ce->default_properties_table + $pi->offset - $initial_offset)
 	printf "[%p] {\n", $pi
+	printf "    offset = %p\n", $pi->offset
 	printf "    ce = [%p] %s\n", $pi->ce, $pi->ce->name->val
-	printf "    flags = %d (", $pi->flags
+	printf "    flags = 0x%x (", $pi->flags
 	if $pi->flags & 0x100
 		printf "ZEND_ACC_PUBLIC"
 	else
@@ -485,7 +488,11 @@ define print_pi
 				printf "ZEND_ACC_PRIVATE"
 			else
 				if $pi->flags & 0x800
-					printf "ZEND_ACC_CHANGED"
+					printf "ZEND_ACC_EARLY_BINDING"
+				else
+					if $pi->flags & 0x20000
+						printf "ZEND_ACC_SHADOW"
+					end
 				end
 			end
 		end
@@ -493,6 +500,8 @@ define print_pi
 	printf ")\n"
 	printf "    name  = "
 	print_zstr $pi->name
+	printf "    default value: "
+	printzv $ptr_to_val
 	printf "}\n"
 end
 
