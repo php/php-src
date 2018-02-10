@@ -5,7 +5,7 @@ date.timezone=UTC
 --FILE--
 PHP Regression Test
 
-<?php 
+<?php
 
 include("023-1.inc");
 
@@ -246,7 +246,7 @@ $i=2<br>
 
 *** Nested file include test ***<br>
 <html>
-This is Finish.phtml.  This file is supposed to be included 
+This is Finish.phtml.  This file is supposed to be included
 from regression_test.phtml.  This is normal HTML.
 and this is PHP code, 2+2=4
 </html>

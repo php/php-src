@@ -15,8 +15,8 @@
  * @version 1.2
  * @since PHP 5.0
  *
- * The objects of this class are created by instances of RecursiveIterator. 
- * Elements of those iterators may be traversable themselves. If so these 
+ * The objects of this class are created by instances of RecursiveIterator.
+ * Elements of those iterators may be traversable themselves. If so these
  * sub elements are recursed into.
  */
 class RecursiveIteratorIterator implements OuterIterator
@@ -47,7 +47,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	 * @param flags  Control flags, zero or any combination of the following
 	 *               (since PHP 5.1).
 	 *               - CATCH_GET_CHILD which catches exceptions during
-	 *                 getChildren() calls and simply jumps to the next 
+	 *                 getChildren() calls and simply jumps to the next
 	 *                 element.
 	 */
 	function __construct(RecursiveIterator $it, $mode = self::LEAVES_ONLY, $flags = 0)
@@ -69,7 +69,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		$this->ait[0]->recursed = false;
 		callNextElement(true);
 	}
-	
+
 	/** @return whether iterator is valid
 	 */
 	function valid()
@@ -85,7 +85,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		}
 		return false;
 	}
-	
+
 	/** @return current key
 	 */
 	function key()
@@ -93,7 +93,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		$it = $this->ait[$this->count];
 		return $it->key();
 	}
-	
+
 	/** @return current element
 	 */
 	function current()
@@ -101,7 +101,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		$it = $this->ait[$this->count];
 		return $it->current();
 	}
-	
+
 	/** Forward to next element
 	 */
 	function next()
@@ -153,7 +153,7 @@ class RecursiveIteratorIterator implements OuterIterator
 		callNextElement(true);
 	}
 
-	/** @return Sub Iterator at given level or if unspecified the current sub 
+	/** @return Sub Iterator at given level or if unspecified the current sub
 	 *          Iterator
 	 */
 	function getSubIterator($level = NULL)
@@ -166,7 +166,7 @@ class RecursiveIteratorIterator implements OuterIterator
 
 	/**
 	 * @return The inner iterator
-	 */	
+	 */
 	function getInnerIterator()
 	{
 		return $this->it;
@@ -201,7 +201,7 @@ class RecursiveIteratorIterator implements OuterIterator
 	function beginChildren()
 	{
 	}
-	
+
 	/** Called after current child iterator is invalid and right before it
 	 * gets destructed.
 	 * @since PHP 5.1
@@ -226,7 +226,7 @@ class RecursiveIteratorIterator implements OuterIterator
 			}
 		}
 	}
-	
+
 	/** Called when the next element is available
 	 */
 	function nextElement()

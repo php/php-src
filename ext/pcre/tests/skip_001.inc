@@ -1,4 +1,4 @@
-<?php 
+<?php
 
 if (!function_exists('setlocale')) {
 	die('skip: setlocale() not available');

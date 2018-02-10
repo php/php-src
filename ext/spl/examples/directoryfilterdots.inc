@@ -28,7 +28,7 @@ class DirectoryFilterDots extends RecursiveFilterIterator
 	}
 
 	/** @return whether the current entry is neither '.' nor '..'
-	 */	
+	 */
 	function accept()
 	{
 		return !$this->getInnerIterator()->isDot();

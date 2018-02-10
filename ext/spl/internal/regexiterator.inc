@@ -15,11 +15,11 @@
  * @version 1.0
  * @since PHP 5.1
  *
- * This filter iterator assumes that the inner iterator 
+ * This filter iterator assumes that the inner iterator
  */
 class RegexIterator extends FilterIterator
 {
-	const USE_KEY     = 0x00000001; /**< If present in $flags the key is 
+	const USE_KEY     = 0x00000001; /**< If present in $flags the key is
 	                                     used rather then the current value. */
 
 	const MATCH       = 0; /**< Mode: Executed a plain match only      */
@@ -27,26 +27,26 @@ class RegexIterator extends FilterIterator
 	const ALL_MATCHES = 2; /**< Mode: Return all matches (if any)      */
 	const SPLIT       = 3; /**< Mode: Return the split values (if any) */
 	const REPLACE     = 4; /**< Mode: Replace the input key or current */
-	
+
 	private $regex;     /**< the regular expression to match against */
-	private $mode;      /**< operation mode (one of self::MATCH, 
+	private $mode;      /**< operation mode (one of self::MATCH,
 	                         self::GET_MATCH, self::ALL_MATCHES, self::SPLIT) */
 	private $flags;     /**< special flags (self::USE_KEY) */
-	private $preg_flags;/**< PREG_* flags, see preg_match(), preg_match_all(), 
-	                         preg_split() */ 
+	private $preg_flags;/**< PREG_* flags, see preg_match(), preg_match_all(),
+	                         preg_split() */
 	private $key;       /**< the value used for key() */
 	private $current;   /**< the value used for current() */
 
 	/**
-	 * Constructs a regular expression filter around an iterator whose 
+	 * Constructs a regular expression filter around an iterator whose
 	 * elemnts or keys are strings.
 	 *
 	 * @param it          inner iterator
 	 * @param regex       the regular expression to match
-	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH, 
+	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH,
 	 *                    self::ALL_MATCHES, self::SPLIT)
 	 * @param flags       special flags (self::USE_KEY)
-	 * @param preg_flags  global PREG_* flags, see preg_match(), 
+	 * @param preg_flags  global PREG_* flags, see preg_match(),
 	 *                    preg_match_all(), preg_split()
 	 */
 	function __construct(Iterator $it, $regex, $mode = 0, $flags = 0, $preg_flags = 0) {
