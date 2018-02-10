@@ -10,7 +10,7 @@ if( substr(PHP_OS, 0, 3) == 'WIN' && extension_loaded('sockets')) {
 	// imap uses tcp port 143
 	socket_connect($socket, "localhost", 143) or die ("skip can't socket to mail server");
 }
- 
+
 // Change these to make tests run successfully
 $mailbox  = '{localhost}';
 $username = 'webmaster@example.com';

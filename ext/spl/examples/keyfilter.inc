@@ -16,7 +16,7 @@
  *
  * Instances of this class act as a filter around iterators whose elements
  * are strings. In other words you can put an iterator into the constructor
- * and the instance will only return elements which match the given regular 
+ * and the instance will only return elements which match the given regular
  * expression.
  */
 class KeyFilter extends FilterIterator
@@ -38,13 +38,13 @@ class KeyFilter extends FilterIterator
 		$this->regex = $regex;
 	}
 
-	/** \return whether the current key mathes the regular expression 
+	/** \return whether the current key mathes the regular expression
 	 */
 	function accept()
 	{
 		return ereg($this->regex, $this->getInnerIterator()->key());
 	}
-	
+
 	/** @return regular expression used as filter
 	 */
 	function getRegex()
@@ -57,7 +57,7 @@ class KeyFilter extends FilterIterator
 	 */
 	protected function __clone()
 	{
-		// disallow clone 
+		// disallow clone
 	}
 }
 

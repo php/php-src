@@ -47,7 +47,7 @@ class IndexableRetrievable
 {
     private $label;
     private $indexable;
-    
+
     public function __construct(string $label, Indexable $indexable) {
         $this->label = $label;
         $this->indexable = $indexable;

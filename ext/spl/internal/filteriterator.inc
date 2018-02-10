@@ -15,12 +15,12 @@
  * @version 1.1
  * @since PHP 5.0
  *
- * Instances of this class act as a filter around iterators. In other words 
- * you can put an iterator into the constructor and the instance will only 
+ * Instances of this class act as a filter around iterators. In other words
+ * you can put an iterator into the constructor and the instance will only
  * return selected (accepted) elements.
  *
- * The only thing that needs to be done to make this work is implementing 
- * method accept(). Typically this invloves reading the current element or 
+ * The only thing that needs to be done to make this work is implementing
+ * method accept(). Typically this invloves reading the current element or
  * key of the inner Iterator and checking whether it is acceptable.
  */
 abstract class FilterIterator implements OuterIterator
@@ -39,7 +39,7 @@ abstract class FilterIterator implements OuterIterator
 	/**
 	 * Rewind the inner iterator.
 	 */
-	function rewind() {	
+	function rewind() {
 		$this->it->rewind();
 		$this->fetch();
 	}
@@ -76,38 +76,38 @@ abstract class FilterIterator implements OuterIterator
 		$this->it->next();
 		$this->fetch();
 	}
-	
+
 	/**
 	 * @return Whether more elements are available
 	 */
 	function valid() {
 		return $this->it->valid();
 	}
-	
+
 	/**
 	 * @return The current key
 	 */
 	function key() {
 		return $this->it->key();
 	}
-	
+
 	/**
 	 * @return The current value
 	 */
 	function current() {
 		return $this->it->current();
 	}
-	
+
 	/**
 	 * hidden __clone
 	 */
 	protected function __clone() {
-		// disallow clone 
+		// disallow clone
 	}
 
 	/**
 	 * @return The inner iterator
-	 */	
+	 */
 	function getInnerIterator()
 	{
 		return $this->it;

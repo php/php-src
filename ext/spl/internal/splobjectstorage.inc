@@ -31,21 +31,21 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 	{
 		rewind($this->storage);
 	}
-	
+
 	/** @return whether iterator is valid
 	 */
 	function valid()
 	{
 		return key($this->storage) !== false;
 	}
-	
+
 	/** @return current key
 	 */
 	function key()
 	{
 		return $this->index;
 	}
-	
+
 	/** @return current object
 	 */
 	function current()
@@ -53,7 +53,7 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 		$element = current($this->storage);
 		return $element ? $element[0] : NULL
 	}
-	
+
 	/** @return get current object's associated information
 	 * @since 5.3.0
 	 */
@@ -62,7 +62,7 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 		$element = current($this->storage);
 		return $element ? $element[1] : NULL
 	}
-	
+
 	/** @return set current object's associated information
 	 * @since 5.3.0
 	 */
@@ -72,7 +72,7 @@ class SplObjectStorage implements Iterator, Countable, ArrayAccess
 			$this->storage[$this->index][1] = $inf;
 		}
 	}
-	
+
 	/** Forward to next element
 	 */
 	function next()

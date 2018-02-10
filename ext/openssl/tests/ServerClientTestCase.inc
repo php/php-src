@@ -96,7 +96,7 @@ class ServerClientTestCase
         eval($this->stripPhpTagsFromCode($proc1Code));
         $this->cleanupWorkerProcess();
     }
-    
+
     public function wait()
     {
         fgets($this->isWorker ? STDIN : $this->workerStdOut);
