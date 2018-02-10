@@ -3331,7 +3331,7 @@ PHP_FUNCTION(ldap_parse_result)
 	LDAPControl **lserverctrls = NULL, **ctrlp = NULL;
 	char **lreferrals, **refp;
 	char *lmatcheddn, *lerrmsg;
-	int rc, lerrcode, myargcount = ZEND_NUM_ARGS(), ber_decode_error_count = -1;
+	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz/|z/z/z/z/", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		return;
@@ -4320,7 +4320,7 @@ PHP_FUNCTION(ldap_exop_whoami)
 	zval *link;
 	struct berval *lauthzid;
 	ldap_linkdata *ld;
-	int rc, myargcount = ZEND_NUM_ARGS();
+	int rc;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &link) == FAILURE) {
 		WRONG_PARAM_COUNT;

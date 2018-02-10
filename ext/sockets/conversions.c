@@ -1077,7 +1077,6 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
 	struct msghdr	*msg = args[0];
-	size_t			len;
 	zend_string     *str, *tmp_str;
 
 	str = zval_get_tmp_string(elem, &tmp_str);
