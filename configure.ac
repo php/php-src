@@ -1379,12 +1379,7 @@ old_CC=$CC
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
+  CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
 dnl This will go away, if we have a facility to run per-extension code

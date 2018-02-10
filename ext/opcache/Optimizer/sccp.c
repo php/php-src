@@ -228,6 +228,7 @@ static zend_bool can_replace_op1(
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_SEND_UNPACK:
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:
@@ -437,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -591,7 +592,7 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -814,7 +815,8 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "strpos")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| !Z_STRLEN_P(args[1])) {
+					|| !Z_STRLEN_P(args[1])
+					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
 				return FAILURE;
 			}
 			/* pass */
@@ -893,7 +895,8 @@ static inline int ct_eval_func_call(
 			/* pass */
 		} else if (zend_string_equals_literal(name, "substr")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG) {
+					|| Z_TYPE_P(args[1]) != IS_LONG
+					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
 				return FAILURE;
 			}
 			/* pass */

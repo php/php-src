@@ -447,7 +447,7 @@ static void zend_file_cache_serialize_op_array(zend_op_array            *op_arra
 					SERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
-					if (opline->extended_value != ZEND_LAST_CATCH) {
+					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 						SERIALIZE_PTR(opline->op2.jmp_addr);
 					}
 					break;
@@ -1053,7 +1053,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 					UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					break;
 				case ZEND_CATCH:
-					if (opline->extended_value != ZEND_LAST_CATCH) {
+					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
 						UNSERIALIZE_PTR(opline->op2.jmp_addr);
 					}
 					break;

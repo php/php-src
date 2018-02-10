@@ -2801,7 +2801,7 @@ static int accel_post_startup(void)
 
 		/* from this point further, shared memory is supposed to be OK */
 
-		/* remeber the last restart time in the process memory */
+		/* remember the last restart time in the process memory */
 		ZCG(last_restart_time) = ZCSG(last_restart_time);
 
 		/* Init auto-global strings */

@@ -1653,7 +1653,7 @@ PHP_FUNCTION(dirname)
 	ret = zend_string_init(str, str_len, 0);
 
 	if (levels == 1) {
-		/* Defaut case */
+		/* Default case */
 #ifdef PHP_WIN32
 		ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len);
 #else

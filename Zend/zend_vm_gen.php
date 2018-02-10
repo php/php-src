@@ -70,10 +70,11 @@ $vm_op_flags = array(
 	"ZEND_VM_OP_CLASS_FETCH"  => 0x70,
 	"ZEND_VM_OP_CONSTRUCTOR"  => 0x80,
 	"ZEND_VM_OP_CONST_FETCH"  => 0x90,
+	"ZEND_VM_OP_CACHE_SLOT"   => 0xa0,
 
 	"ZEND_VM_EXT_VAR_FETCH"   => 1<<16,
 	"ZEND_VM_EXT_ISSET"       => 1<<17,
-	"ZEND_VM_EXT_ARG_NUM"     => 1<<18,
+	"ZEND_VM_EXT_CACHE_SLOT"  => 1<<18,
 	"ZEND_VM_EXT_ARRAY_INIT"  => 1<<19,
 	"ZEND_VM_EXT_REF"         => 1<<20,
 	"ZEND_VM_EXT_MASK"        => 0x0f000000,
@@ -115,6 +116,7 @@ $vm_op_decode = array(
 	"CLASS_FETCH"          => ZEND_VM_OP_CLASS_FETCH,
 	"CONSTRUCTOR"          => ZEND_VM_OP_CONSTRUCTOR,
 	"CONST_FETCH"          => ZEND_VM_OP_CONST_FETCH,
+	"CACHE_SLOT"           => ZEND_VM_OP_CACHE_SLOT,
 );
 
 $vm_ext_decode = array(
@@ -128,9 +130,9 @@ $vm_ext_decode = array(
 	"EVAL"                 => ZEND_VM_EXT_EVAL,
 	"TYPE_MASK"            => ZEND_VM_EXT_TYPE_MASK,
 	"ISSET"                => ZEND_VM_EXT_ISSET,
-	"ARG_NUM"              => ZEND_VM_EXT_ARG_NUM,
 	"REF"                  => ZEND_VM_EXT_REF,
 	"SRC"                  => ZEND_VM_EXT_SRC,
+	"CACHE_SLOT"           => ZEND_VM_EXT_CACHE_SLOT,
 );
 
 $vm_kind_name = array(

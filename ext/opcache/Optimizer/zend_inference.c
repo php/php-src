@@ -501,6 +501,28 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	}
 }
 
+static inline zend_bool zend_abs_range(
+		zend_long min, zend_long max, zend_long *abs_min, zend_long *abs_max) {
+	if (min == ZEND_LONG_MIN) {
+		/* Cannot take absolute value of LONG_MIN  */
+		return 0;
+	}
+
+	if (min >= 0) {
+		*abs_min = min;
+		*abs_max = max;
+	} else if (max <= 0) {
+		*abs_min = -max;
+		*abs_max = -min;
+	} else {
+		/* Range crossing zero */
+		*abs_min = 0;
+		*abs_max = MAX(max, -min);
+	}
+
+	return 1;
+}
+
 /* Get the normal op corresponding to a compound assignment op */
 static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
 	switch (opcode) {
@@ -648,20 +670,35 @@ static int zend_inference_calc_binary_op_range(
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
+					zend_long op2_abs_min, op2_abs_max;
+
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
 					op2_max = OP2_MAX_RANGE();
-					if (op2_min == 0 || op2_max == 0) {
-						/* avoid division by zero */
+					if (!zend_abs_range(op2_min, op2_max, &op2_abs_min, &op2_abs_max)) {
 						break;
 					}
-					t1 = (op2_min == -1) ? 0 : (op1_min % op2_min);
-					t2 = (op2_max == -1) ? 0 : (op1_min % op2_max);
-					t3 = (op2_min == -1) ? 0 : (op1_max % op2_min);
-					t4 = (op2_max == -1) ? 0 : (op1_max % op2_max);
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+
+					if (op2_abs_max == 0) {
+						/* Always modulus by zero, nothing we can do */
+						break;
+					}
+					if (op2_abs_min == 0) {
+						/* Ignore the modulus by zero case, which will throw */
+						op2_abs_min++;
+					}
+
+					if (op1_min >= 0) {
+						tmp->min = op1_max < op2_abs_min ? op1_min : 0;
+						tmp->max = MIN(op1_max, op2_abs_max - 1);
+					} else if (op1_max <= 0) {
+						tmp->min = MAX(op1_min, -op2_abs_max + 1);
+						tmp->max = op1_min > -op2_abs_min ? op1_max : 0;
+					} else {
+						tmp->min = MAX(op1_min, -op2_abs_max + 1);
+						tmp->max = MIN(op1_max, op2_abs_max - 1);
+					}
 				}
 				return 1;
 			}
@@ -1734,6 +1771,16 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 }
 /* }}} */
 
+static uint32_t get_ssa_alias_types(zend_ssa_alias_kind alias) {
+	if (alias == PHP_ERRORMSG_ALIAS) {
+		return MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
+	} else if (alias == HTTP_RESPONSE_HEADER_ALIAS) {
+		return MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_RC1 | MAY_BE_RCN;
+	} else {
+		return MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
+	}
+}
+
 #define UPDATE_SSA_TYPE(_type, _var)									\
 	do {																\
 		uint32_t __type = (_type);										\
@@ -1742,7 +1789,8 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 			__type |= MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF; \
 		}																\
 		if (__var >= 0) {												\
-			if (ssa_vars[__var].var < op_array->last_var) {				\
+			zend_ssa_var *__ssa_var = &ssa_vars[__var];					\
+			if (__ssa_var->var < op_array->last_var) {					\
 				if (__type & (MAY_BE_REF|MAY_BE_RCN)) {					\
 					__type |= MAY_BE_RC1 | MAY_BE_RCN;					\
 				}														\
@@ -1750,6 +1798,9 @@ static int zend_infer_ranges(const zend_op_array *op_array, zend_ssa *ssa) /* {{
 					/* TODO: support for array keys and ($str . "")*/   \
 					__type |= MAY_BE_RCN;                               \
 				}                                                       \
+				if (__ssa_var->alias) {									\
+					__type |= get_ssa_alias_types(__ssa_var->alias);	\
+				}														\
 			}															\
 			if (ssa_var_info[__var].type != __type) { 					\
 				if (ssa_var_info[__var].type & ~__type) {				\
@@ -2721,6 +2772,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			break;
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 			if (ssa_ops[i].op1_def >= 0) {
 				tmp = (t1 & MAY_BE_UNDEF)|MAY_BE_REF|MAY_BE_RC1|MAY_BE_RCN|MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
@@ -2784,7 +2836,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 					(tmp & func_info->arg_info[opline->op1.num-1].info.type);
 			}
 #if 0
-			/* We won't recieve unused arguments */
+			/* We won't receive unused arguments */
 			if (ssa_vars[ssa_ops[i].result_def].use_chain < 0 &&
 			    ssa_vars[ssa_ops[i].result_def].phi_use_chain == NULL &&
 			    op_array->arg_info &&
@@ -3093,6 +3145,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 							tmp |= MAY_BE_ARRAY_OF_OBJECT;
 							break;
 						case ZEND_SEND_VAR_EX:
+						case ZEND_SEND_FUNC_ARG:
 						case ZEND_SEND_VAR_NO_REF:
 						case ZEND_SEND_VAR_NO_REF_EX:
 						case ZEND_SEND_REF:
@@ -3913,18 +3966,6 @@ static int zend_infer_types(const zend_op_array *op_array, const zend_script *sc
 	/* Narrowing integer initialization to doubles */
 	zend_type_narrowing(op_array, script, ssa);
 
-	for (j = 0; j < ssa_vars_count; j++) {
-		if (ssa->vars[j].alias) {
-			if (ssa->vars[j].alias == PHP_ERRORMSG_ALIAS) {
-				ssa_var_info[j].type |= MAY_BE_STRING | MAY_BE_RC1 | MAY_BE_RCN;
-			} else if (ssa->vars[j].alias == HTTP_RESPONSE_HEADER_ALIAS) {
-				ssa_var_info[j].type |= MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_LONG | MAY_BE_ARRAY_OF_STRING | MAY_BE_RC1 | MAY_BE_RCN;
-			} else {
-				ssa_var_info[j].type = MAY_BE_UNDEF | MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_REF | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-			}
-		}
-	}
-
 	if (ZEND_FUNC_INFO(op_array)) {
 		zend_func_return_info(op_array, script, 1, 0, &ZEND_FUNC_INFO(op_array)->return_info);
 	}
@@ -3952,6 +3993,9 @@ int zend_ssa_inference(zend_arena **arena, const zend_op_array *op_array, const 
 		for (i = 0; i < op_array->last_var; i++) {
 			ssa_var_info[i].type = MAY_BE_UNDEF;
 			ssa_var_info[i].has_range = 0;
+			if (ssa->vars[i].alias) {
+				ssa_var_info[i].type |= get_ssa_alias_types(ssa->vars[i].alias);
+			}
 		}
 	}
 	for (i = op_array->last_var; i < ssa->vars_count; i++) {
@@ -4042,6 +4086,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 				case ZEND_SEND_VAL_EX:
 				case ZEND_SEND_VAR:
 				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_FUNC_ARG:
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_REF:
@@ -4091,6 +4136,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 		case ZEND_SEND_VAL:
 		case ZEND_SEND_REF:
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_FREE:
 		case ZEND_SEPARATE:
 		case ZEND_TYPE_CHECK:
