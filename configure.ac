@@ -566,6 +566,8 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_supports
+PHP_CHECK_BUILTIN_CPU_SUPPORTS
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE

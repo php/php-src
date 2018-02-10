@@ -19,6 +19,8 @@
 #ifndef ZEND_CPU_INFO_H
 #define ZEND_CPU_INFO_H
 
+#include "zend.h"
+
 #define ZEND_CPU_EDX_MASK     (1<<31)
 
 typedef enum _zend_cpu_feature {
@@ -91,9 +93,72 @@ typedef enum _zend_cpu_feature {
 	/*intentionally don't support   = (1<<31 | ZEND_CPU_EDX_MASK)*/
 } zend_cpu_feature;
 
+void zend_cpu_startup();
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
-void zend_cpu_startup(void);
+#ifdef PHP_HAVE_BUILTIN_CPU_SUPPORTS
+/* NOTE: you should use following inline function in
+ * resolver functions (ifunc), as it could be called
+ * before all PLT symbols are resloved. in other words,
+ * resolver functions should not depends any external
+ * functions */
+static zend_always_inline int zend_cpu_support_sse2() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("sse2");
+}
+
+static zend_always_inline int zend_cpu_support_sse3() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("sse3");
+}
+
+static zend_always_inline int zend_cpu_support_sse41() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("sse4.1");
+}
+
+static zend_always_inline int zend_cpu_support_sse42() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("sse4.2");
+}
+
+static zend_always_inline int zend_cpu_support_avx() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("avx");
+}
+
+static zend_always_inline int zend_cpu_support_avx2() {
+	__builtin_cpu_init();
+	return __builtin_cpu_supports("avx2");
+}
+#else
+
+static zend_always_inline int zend_cpu_support_sse2() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE2);
+}
+
+static zend_always_inline int zend_cpu_support_sse3() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE3);
+}
+
+static zend_always_inline int zend_cpu_support_sse41() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE41);
+}
+
+static zend_always_inline int zend_cpu_support_sse42() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE42);
+}
+
+static zend_always_inline int zend_cpu_support_avx() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX);
+}
+
+static zend_always_inline int zend_cpu_support_avx2() {
+	/* TODO */
+	return 0;
+}
+
+#endif
 
 #endif
 

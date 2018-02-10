@@ -3241,6 +3241,25 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_INIT], [
 
 ])
 
+dnl PHP_CHECK_BUILTIN_CPU_SUPPORTS
+AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
+  AC_MSG_CHECKING([for __builtin_cpu_supports])
+
+  AC_TRY_LINK(, [
+    return __builtin_cpu_supports("sse2")? 1 : 0;
+  ], [
+    have_builtin_cpu_supports=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_cpu_supports=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
+   [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
+
+])
+
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
 

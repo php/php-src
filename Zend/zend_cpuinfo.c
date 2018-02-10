@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_cpuinfo.h"
 
 typedef struct _zend_cpu_info {
@@ -68,10 +67,6 @@ void zend_cpu_startup(void)
 }
 
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
-#ifdef HAVE_FUNC_ATTRIBUTE_IFUNC
-	/* The resolver is invoked before zend_startup(). */
-	zend_cpu_startup();
-#endif
 	if (feature & ZEND_CPU_EDX_MASK) {
 		return (cpuinfo.edx & (feature & ~ZEND_CPU_EDX_MASK));
 	} else {
