@@ -2151,7 +2151,6 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 /* {{{ */
 static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *newval)
 {
-	zval ztmp;
 	int ret = SUCCESS;
 	zend_long lval = zval_get_long(newval);
 
