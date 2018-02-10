@@ -743,6 +743,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 #endif
 
 	zend_cpu_startup();
+	zend_cpu_supports(ZEND_CPU_FEATURE_AVX2);
 
 #ifdef ZEND_WIN32
 	php_win32_cp_set_by_id(65001);
