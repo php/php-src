@@ -63,7 +63,7 @@ PHP License
 bool(true)
 --
 
-Warning: phpinfo() expects parameter 1 to be integer, array given in %sphpinfo.php on line 5
+Warning: phpinfo() expects parameter 1 to be int, array given in %sphpinfo.php on line 5
 NULL
 --
 phpinfo()

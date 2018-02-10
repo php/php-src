@@ -30,7 +30,7 @@
 # define accel_xlat_set(old, new)	zend_hash_index_add_new_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old), (new))
 # define accel_xlat_get(old)		zend_hash_index_find_ptr(&ZCG(bind_hash), (zend_ulong)(zend_uintptr_t)(old))
 #else
-# define accel_xlat_set(old, new)	zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (old))
+# define accel_xlat_set(old, new)	zend_hash_str_add_new_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*), (new))
 # define accel_xlat_get(old)	    zend_hash_str_find_ptr(&ZCG(bind_hash), (char*)&(old), sizeof(void*))
 #endif
 
@@ -180,15 +180,15 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZVAL_PTR_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT((source->u.flags & HASH_FLAG_PACKED) == 0);
+	ZEND_ASSERT((HT_FLAGS(source) & HASH_FLAG_PACKED) == 0);
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -231,15 +231,15 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -289,15 +289,15 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
 		return;
 	}
 
-	ZEND_ASSERT(!(source->u.flags & HASH_FLAG_PACKED));
+	ZEND_ASSERT(!(HT_FLAGS(source) & HASH_FLAG_PACKED));
 	HT_SET_DATA_ADDR(ht, emalloc(HT_SIZE(ht)));
 	HT_HASH_RESET(ht);
 
@@ -657,7 +657,11 @@ static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t s
 	const __m128i *end  = (const __m128i*)((const char*)src + size);
 
 	do {
+#ifdef PHP_WIN32
+		_mm_prefetch((const char *)(dqsrc + 4), _MM_HINT_NTA);
+#else
 		_mm_prefetch(dqsrc + 4, _MM_HINT_NTA);
+#endif
 
 		__m128i xmm0 = _mm_load_si128(dqsrc + 0);
 		__m128i xmm1 = _mm_load_si128(dqsrc + 1);

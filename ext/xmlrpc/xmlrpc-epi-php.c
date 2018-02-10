@@ -516,11 +516,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_SetValueID(xReturn, key, 0);
 					} else {
 						if (Z_TYPE(val) != IS_STRING) {
-							zval newvalue;
-							ZVAL_DUP(&newvalue, &val);
-							convert_to_string(&newvalue);
-							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(newvalue), Z_STRLEN(newvalue));
-							zval_dtor(&newvalue);
+							zend_string *str = zval_get_string_func(&val);
+							xReturn = XMLRPC_CreateValueBase64(key, ZSTR_VAL(str), ZSTR_LEN(str));
+							zend_string_release(str);
 						} else {
 							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(val), Z_STRLEN(val));
 						}

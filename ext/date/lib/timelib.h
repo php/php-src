@@ -310,9 +310,9 @@ typedef struct _timelib_tzdb {
 # define timelib_free    free
 #endif
 
-#define TIMELIB_VERSION 201705
-#define TIMELIB_EXTENDED_VERSION 20170509
-#define TIMELIB_ASCII_VERSION "2017.05beta9"
+#define TIMELIB_VERSION 201706
+#define TIMELIB_EXTENDED_VERSION 20170600
+#define TIMELIB_ASCII_VERSION "2017.06"
 
 #define TIMELIB_NONE             0x00
 #define TIMELIB_OVERRIDE_TIME    0x01
@@ -661,7 +661,7 @@ const timelib_tzdb *timelib_builtin_db(void);
  * Each entry contains the time zone ID ('id' field), and the position within the time zone
  * information ('pos' field). The pos field should not be used.
  */
-const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(timelib_tzdb *tzdb, int *count);
+const timelib_tzdb_index_entry *timelib_timezone_identifiers_list(const timelib_tzdb *tzdb, int *count);
 
 /* From parse_zoneinfo.c */
 

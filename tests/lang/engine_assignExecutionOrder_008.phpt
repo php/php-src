@@ -2,7 +2,6 @@
 Ensure by value assignments leave temporaries on the stack, for all sorts of assignees.
 --FILE--
 <?php
-error_reporting(E_ALL & ~E_STRICT);
 
 function f() { return 0; }
 $a[0][1] = 'good';

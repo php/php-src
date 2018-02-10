@@ -2,7 +2,6 @@
 Ensure foreach splits the iterated entity from its cow reference set, for all sorts of iterated entities.
 --FILE--
 <?php
-  error_reporting(E_ALL & ~E_STRICT);
 
   echo "\n" . '$a' . "\n";
   $b = $a = array('original');

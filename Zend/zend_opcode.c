@@ -458,7 +458,6 @@ void init_op(zend_op *op)
 {
 	memset(op, 0, sizeof(zend_op));
 	op->lineno = CG(zend_lineno);
-	SET_UNUSED(op->result);
 }
 
 zend_op *get_next_op(zend_op_array *op_array)
@@ -476,11 +475,6 @@ zend_op *get_next_op(zend_op_array *op_array)
 	init_op(next_op);
 
 	return next_op;
-}
-
-uint32_t get_next_op_number(zend_op_array *op_array)
-{
-	return op_array->last;
 }
 
 zend_brk_cont_element *get_next_brk_cont_element(void)
@@ -663,11 +657,15 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			}
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-			case ZEND_CATCH:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
+			case ZEND_CATCH:
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:

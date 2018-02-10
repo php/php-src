@@ -3,7 +3,6 @@ Bug #74737: Incorrect ReflectionFunction information for mysqli_get_client_info
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-if (!extension_loaded('reflection')) { die("skip"); }
 ?>
 --FILE--
 <?php

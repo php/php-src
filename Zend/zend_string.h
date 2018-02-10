@@ -136,14 +136,7 @@ static zend_always_inline zend_string *zend_string_alloc(size_t len, int persist
 	zend_string *ret = (zend_string *)pemalloc(ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(len)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
-#if 1
-	/* optimized single assignment */
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-#else
-	GC_TYPE(ret) = IS_STRING;
-	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
-	GC_INFO(ret) = 0;
-#endif
 	zend_string_forget_hash_val(ret);
 	ZSTR_LEN(ret) = len;
 	return ret;
@@ -154,14 +147,7 @@ static zend_always_inline zend_string *zend_string_safe_alloc(size_t n, size_t m
 	zend_string *ret = (zend_string *)safe_pemalloc(n, m, ZEND_MM_ALIGNED_SIZE(_ZSTR_STRUCT_SIZE(l)), persistent);
 
 	GC_SET_REFCOUNT(ret, 1);
-#if 1
-	/* optimized single assignment */
 	GC_TYPE_INFO(ret) = IS_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
-#else
-	GC_TYPE(ret) = IS_STRING;
-	GC_FLAGS(ret) = (persistent ? IS_STR_PERSISTENT : 0);
-	GC_INFO(ret) = 0;
-#endif
 	zend_string_forget_hash_val(ret);
 	ZSTR_LEN(ret) = (n * m) + l;
 	return ret;

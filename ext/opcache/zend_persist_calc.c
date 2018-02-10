@@ -56,11 +56,11 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 	uint32_t idx;
 	Bucket *p;
 
-	if (!(ht->u.flags & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED) || ht->nNumUsed == 0) {
 		return;
 	}
 
-	if (!(ht->u.flags & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
 		/* compact table */
 		uint32_t hash_size;
 
@@ -124,7 +124,7 @@ static void zend_persist_zval_calc(zval *z)
 		case IS_STRING:
 			ADD_INTERNED_STRING(Z_STR_P(z), 0);
 			if (ZSTR_IS_INTERNED(Z_STR_P(z))) {
-				Z_TYPE_FLAGS_P(z) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+				Z_TYPE_FLAGS_P(z) = 0;
 			}
 			break;
 		case IS_ARRAY:

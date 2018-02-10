@@ -586,12 +586,20 @@ static char *sapi_fcgi_getenv(char *name, size_t name_len)
 	fcgi_request *request = (fcgi_request*) SG(server_context);
 	char *ret = fcgi_getenv(request, name, (int)name_len);
 
+#ifndef PHP_WIN32
 	if (ret) return ret;
 	/*  if cgi, or fastcgi and not found in fcgi env
 		check the regular environment */
-#ifndef PHP_WIN32
 	return getenv(name);
 #else
+	if (ret) {
+		/* The functions outside here don't know, where does it come
+			from. They'll need to free the returned memory as it's
+			not necessary from the fcgi env. */
+		return strdup(ret);
+	}
+	/*  if cgi, or fastcgi and not found in fcgi env
+		check the regular environment */
 	return cgi_getenv_win32(name, name_len);
 #endif
 }
@@ -1188,7 +1196,7 @@ static void init_request_info(fcgi_request *request)
 	/* script_path_translated being set is a good indication that
 	 * we are running in a cgi environment, since it is always
 	 * null otherwise.  otherwise, the filename
-	 * of the script will be retreived later via argc/argv */
+	 * of the script will be retrieved later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
 		char *content_length = CGI_GETENV("CONTENT_LENGTH");

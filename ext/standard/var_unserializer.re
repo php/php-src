@@ -221,13 +221,13 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					BG(serialize_lock)++;
 					if (call_user_function_ex(CG(function_table), zv, &wakeup_name, &retval, 0, 0, 1, NULL) == FAILURE || Z_ISUNDEF(retval)) {
 						wakeup_failed = 1;
-						GC_FLAGS(Z_OBJ_P(zv)) |= IS_OBJ_DESTRUCTOR_CALLED;
+						OBJ_FLAGS(Z_OBJ_P(zv)) |= IS_OBJ_DESTRUCTOR_CALLED;
 					}
 					BG(serialize_lock)--;
 
 					zval_ptr_dtor(&retval);
 				} else {
-					GC_FLAGS(Z_OBJ_P(zv)) |= IS_OBJ_DESTRUCTOR_CALLED;
+					OBJ_FLAGS(Z_OBJ_P(zv)) |= IS_OBJ_DESTRUCTOR_CALLED;
 				}
 			}
 
@@ -444,7 +444,7 @@ string_key:
 						&& zend_hash_num_elements(&Z_OBJCE_P(rval)->properties_info) > 0) {
 					zend_property_info *existing_propinfo;
 					zend_string *new_key;
-					const char *unmangled_class = NULL; 
+					const char *unmangled_class = NULL;
 					const char *unmangled_prop;
 					size_t unmangled_prop_len;
 					zend_string *unmangled;
@@ -457,7 +457,7 @@ string_key:
 					unmangled = zend_string_init(unmangled_prop, unmangled_prop_len, 0);
 
 					existing_propinfo = zend_hash_find_ptr(&Z_OBJCE_P(rval)->properties_info, unmangled);
-					if ((existing_propinfo != NULL) 
+					if ((existing_propinfo != NULL)
 							&& (existing_propinfo->flags & ZEND_ACC_PPP_MASK)) {
 						if (existing_propinfo->flags & ZEND_ACC_PROTECTED) {
 							new_key = zend_mangle_property_name(
@@ -603,11 +603,11 @@ static inline int object_common2(UNSERIALIZE_PARAMETER, zend_long elements)
 		return 0;
 	}
 
-	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, (ht->u.flags & HASH_FLAG_PACKED));
+	zend_hash_extend(ht, zend_hash_num_elements(ht) + elements, HT_FLAGS(ht) & HASH_FLAG_PACKED);
 	if (!process_nested_data(UNSERIALIZE_PASSTHRU, ht, elements, 1)) {
 		if (has_wakeup) {
 			ZVAL_DEREF(rval);
-			GC_FLAGS(Z_OBJ_P(rval)) |= IS_OBJ_DESTRUCTOR_CALLED;
+			OBJ_FLAGS(Z_OBJ_P(rval)) |= IS_OBJ_DESTRUCTOR_CALLED;
 		}
 		return 0;
 	}

@@ -400,11 +400,6 @@ static void change_node_zval(xmlNodePtr node, zval *value)
 		case IS_TRUE:
 		case IS_DOUBLE:
 		case IS_NULL:
-			if (Z_REFCOUNT_P(value) > 1) {
-				value_copy = *value;
-				zval_copy_ctor(&value_copy);
-				value = &value_copy;
-			}
 			convert_to_string(value);
 			/* break missing intentionally */
 		case IS_STRING:

@@ -39,7 +39,7 @@ Warning: intlcal_is_set() expects exactly 2 parameters, 1 given in %s on line %d
 Warning: intlcal_is_set(): intlcal_is_set: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_set() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_set() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_is_set(1, 2)
 #1 {main}

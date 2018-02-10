@@ -904,7 +904,7 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 		php_url_scanner_reset_vars_impl(type);
 		goto finish;
 	}
-	/* Check preceeding separator */
+	/* Check preceding separator */
 	if (!sep_removed
 		&& (size_t)(start - PG(arg_separator).output) >= separator_len
 		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {

@@ -993,8 +993,7 @@ int php_oci_bind_post_exec(zval *data)
 		 * binds, php_oci_bind_out_callback() should have allocated a
 		 * new string that we can modify here.
 		 */
-		SEPARATE_STRING(zv);
-		Z_STR_P(zv) = zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0);
+		ZVAL_NEW_STR(zv, zend_string_extend(Z_STR_P(zv), Z_STRLEN_P(zv)+1, 0));
 		Z_STRVAL_P(zv)[ Z_STRLEN_P(zv) ] = '\0';
 	} else if (Z_TYPE_P(zv) == IS_ARRAY) {
 		int i;
@@ -1528,18 +1527,15 @@ php_oci_out_column *php_oci_statement_get_column_helper(INTERNAL_FUNCTION_PARAME
 			return NULL;
 		}
 	} else {
-		zval tmp;
+		zend_long tmp;
 		/* NB: for PHP4 compat only, it should be using 'Z' instead */
-		tmp = *column_index;
-		zval_copy_ctor(&tmp);
-		convert_to_long(&tmp);
-		column = php_oci_statement_get_column(statement, Z_LVAL(tmp), NULL, 0);
+
+		tmp = zval_get_long(column_index);
+		column = php_oci_statement_get_column(statement, tmp, NULL, 0);
 		if (!column) {
-			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", Z_LVAL(tmp));
-			zval_ptr_dtor(&tmp);
+			php_error_docref(NULL, E_WARNING, "Invalid column index \"" ZEND_LONG_FMT "\"", tmp);
 			return NULL;
 		}
-		zval_ptr_dtor(&tmp);
 	}
 	return column;
 }
@@ -1602,8 +1598,8 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	ZEND_ASSERT(Z_ISREF_P(var));
 	val = Z_REFVAL_P(var);
-	SEPARATE_ZVAL_NOREF(val);
 	convert_to_array(val);
+	SEPARATE_ARRAY(val);
 
 	if (maxlength < -1) {
 		php_error_docref(NULL, E_WARNING, "Invalid max length value (" ZEND_LONG_FMT ")", maxlength);

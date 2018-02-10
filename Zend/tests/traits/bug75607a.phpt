@@ -1,5 +1,5 @@
 --TEST--
-Bug #75607 (Comparision of initial static properties failing)
+Bug #75607 (Comparison of initial static properties failing)
 --FILE--
 <?php
 

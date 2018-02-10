@@ -44,8 +44,8 @@ foreach ( $variation as $var ) {
 ?>
 ===DONE===
 --EXPECTF--
-Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
+Error: 2 - gzfile() expects parameter 2 to be int, object given, %s(%d)
 NULL
-Error: 2 - gzfile() expects parameter 2 to be integer, object given, %s(%d)
+Error: 2 - gzfile() expects parameter 2 to be int, object given, %s(%d)
 NULL
 ===DONE===

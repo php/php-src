@@ -3,7 +3,6 @@ Bug #69388: Use after free on recursive calls to PHP compiler
 --FILE--
 <?php
 
-error_reporting(E_ALL | E_STRICT);
 function handle_error($code, $message, $file, $line, $context) {
 	if (!function_exists("bla")) {
 		eval('function bla($s) {echo "$s\n";}');

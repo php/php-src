@@ -148,7 +148,7 @@ JSON:
 ========================================
 
  Curl:
-  . libcurl >= 7.12.1 is now required
+  . libcurl >= 7.15.5 is now required.
 
  FTP:
   . Set default transfer mode to binary
@@ -164,6 +164,9 @@ JSON:
 ========================================
 10. New Global Constants
 ========================================
+
+Curl:
+  . CURLOPT_REQUEST_TARGET
 
 JSON:
   . JSON_THROW_ON_ERROR

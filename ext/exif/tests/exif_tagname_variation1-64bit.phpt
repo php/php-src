@@ -126,23 +126,23 @@ bool(false)
 bool(false)
 -- Iteration 10 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, array given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, array given in %s on line %d
 NULL
 -- Iteration 15 --
 bool(false)
@@ -154,11 +154,11 @@ bool(false)
 bool(false)
 -- Iteration 19 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, string given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, string given in %s on line %d
 NULL
 -- Iteration 21 --
 bool(false)
@@ -166,11 +166,11 @@ bool(false)
 bool(false)
 -- Iteration 23 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, object given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, object given in %s on line %d
 NULL
 -- Iteration 24 --
 
-Warning: exif_tagname() expects parameter 1 to be integer, resource given in %s on line %d
+Warning: exif_tagname() expects parameter 1 to be int, resource given in %s on line %d
 NULL
 -- Iteration 25 --
 bool(false)

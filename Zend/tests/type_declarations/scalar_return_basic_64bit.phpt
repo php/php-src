@@ -76,30 +76,30 @@ int(1)
 E_NOTICE: A non well formed numeric value encountered on line %d
 int(1)
 *** Trying string(1) "a"
-*** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, string returned in %s on line %d
 *** Trying string(0) ""
-*** Caught Return value of {closure}() must be of the type integer, string returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, string returned in %s on line %d
 *** Trying int(9223372036854775807)
 int(9223372036854775807)
 *** Trying float(NAN)
-*** Caught Return value of {closure}() must be of the type integer, float returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, float returned in %s on line %d
 *** Trying bool(true)
 int(1)
 *** Trying bool(false)
 int(0)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of the type integer, null returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of the type integer, array returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of the type integer, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of the type integer, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, object returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of the type integer, resource returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type int, resource returned in %s on line %d
 
 Testing 'float' type:
 *** Trying int(1)
@@ -200,17 +200,17 @@ bool(true)
 *** Trying bool(false)
 bool(false)
 *** Trying NULL
-*** Caught Return value of {closure}() must be of the type boolean, null returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, null returned in %s on line %d
 *** Trying array(0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, array returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, array returned in %s on line %d
 *** Trying object(stdClass)#6 (0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying object(Stringable)#7 (0) {
 }
-*** Caught Return value of {closure}() must be of the type boolean, object returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, object returned in %s on line %d
 *** Trying resource(5) of type (stream)
-*** Caught Return value of {closure}() must be of the type boolean, resource returned in %s on line %d
+*** Caught Return value of {closure}() must be of the type bool, resource returned in %s on line %d
 
 Done

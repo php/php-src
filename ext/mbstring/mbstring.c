@@ -2819,7 +2819,7 @@ PHP_FUNCTION(mb_substr)
 	}
 
 	if (((MBSTRG(func_overload) & MB_OVERLOAD_STRING) == MB_OVERLOAD_STRING)
-		&& (real_from >= mbfl_strlen(&string))) {
+		&& (real_from > mbfl_strlen(&string))) {
 		RETURN_FALSE;
 	}
 

@@ -61,7 +61,7 @@ $offsets =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -94,7 +94,7 @@ int(6)
 int(6)
 -- Iteration 3 --
 
-Warning: strrpos() expects parameter 3 to be integer, float given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, float given in %s on line %d
 bool(false)
 -- Iteration 4 --
 int(6)
@@ -102,23 +102,23 @@ int(6)
 int(6)
 -- Iteration 6 --
 
-Warning: strrpos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 7 --
 
-Warning: strrpos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 8 --
 
-Warning: strrpos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 9 --
 
-Warning: strrpos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 10 --
 
-Warning: strrpos() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 -- Iteration 11 --
 int(6)
@@ -130,15 +130,15 @@ int(6)
 int(6)
 -- Iteration 15 --
 
-Warning: strrpos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 -- Iteration 16 --
 
-Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 17 --
 
-Warning: strrpos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 -- Iteration 18 --
 int(6)
@@ -146,7 +146,7 @@ int(6)
 int(6)
 -- Iteration 20 --
 
-Warning: strrpos() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: strrpos() expects parameter 3 to be int, resource given in %s on line %d
 bool(false)
 -- Iteration 21 --
 int(6)

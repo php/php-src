@@ -7,7 +7,7 @@ Francesco Fullone ff@ideato.it
 <?php 
 	if (!extension_loaded("curl")) exit("skip curl extension not loaded");
 ?>
---COMMENT--
+--DESCRIPTION--
 the only way to test if a option is setten on a curl handle is using the curl_getinfo() function.
 but this can only check on a limited amount of options...
 --FILE--

@@ -114,22 +114,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, int given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, int given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, int given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, integer given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, int given in %s on line %d
 bool(false)
 
 -- float 10.5 --
@@ -179,22 +179,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: date_date_set() expects parameter 1 to be DateTime, boolean given in %s on line %d
+Warning: date_date_set() expects parameter 1 to be DateTime, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

@@ -9,7 +9,7 @@ includedir="`eval echo @includedir@`/php"
 builddir="`pwd`"
 SED="@SED@"
 
-FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4 ax_check_compile_flag.m4"
+FILES_BUILD="mkdep.awk scan_makefile_in.awk shtool libtool.m4 ax_check_compile_flag.m4 ax_gcc_func_attribute.m4"
 FILES="acinclude.m4 Makefile.global config.sub config.guess ltmain.sh run-tests*.php"
 CLEAN_FILES="$FILES *.o *.lo *.la .deps .libs/ build/ modules/ install-sh \
 	mkinstalldirs missing config.nice config.sub config.guess configure configure.ac \

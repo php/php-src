@@ -9,7 +9,7 @@ Test in_array() function : usage variations - haystack as resource/multi dimensi
  * Source Code: ext/standard/array.c
 */
 
-/* Test in_array() with haystack as resouce and multidimentional arrays */
+/* Test in_array() with haystack as resouce and multidimensional arrays */
 
 /* checking for Resources */
 echo "*** Testing resource type with in_array() ***\n";

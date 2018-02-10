@@ -48,7 +48,7 @@ $inputs =  array (
 		  TRUE,
 		  FALSE,
 		
-		  // null vlaues
+		  // null values
 /*15*/	  NULL,
 		  null,
 		

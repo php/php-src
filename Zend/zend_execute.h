@@ -250,8 +250,8 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 		do {
 			p--;
 			if (Z_REFCOUNTED_P(p)) {
-				if (!Z_DELREF_P(p)) {
-					zend_refcounted *r = Z_COUNTED_P(p);
+				zend_refcounted *r = Z_COUNTED_P(p);
+				if (!GC_DELREF(r)) {
 					ZVAL_NULL(p);
 					zval_dtor_func(r);
 				}

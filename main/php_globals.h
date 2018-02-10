@@ -106,7 +106,7 @@ struct _php_core_globals {
 	HashTable rfc1867_protected_variables;
 
 	short connection_status;
-	short ignore_user_abort;
+	zend_bool ignore_user_abort;
 
 	unsigned char header_is_being_sent;
 

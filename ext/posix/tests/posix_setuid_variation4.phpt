@@ -38,9 +38,9 @@ foreach ( $variation_array as $var ) {
 bool(false)
 bool(false)
 
-Warning: posix_setuid() expects parameter 1 to be integer, float given in %s on line %d
+Warning: posix_setuid() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: posix_setuid() expects parameter 1 to be integer, float given in %s on line %d
+Warning: posix_setuid() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 bool(false)

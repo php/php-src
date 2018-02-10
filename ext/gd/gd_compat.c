@@ -17,11 +17,6 @@
 #include "php.h"
 
 #ifdef HAVE_GD_JPG
-int gdJpegGetVersionInt()
-{
-	return JPEG_LIB_VERSION;
-}
-
 const char * gdJpegGetVersionString()
 {
 	switch(JPEG_LIB_VERSION) {

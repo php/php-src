@@ -113,12 +113,12 @@ string(20) "Dec 31 1969 23:59:50"
 
 --float 12.3456789000e10--
 
-Warning: gmstrftime() expects parameter 2 to be integer, float given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: gmstrftime() expects parameter 2 to be integer, float given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 --float .5--
@@ -126,22 +126,22 @@ string(20) "Jan 01 1970 00:00:00"
 
 --empty array--
 
-Warning: gmstrftime() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: gmstrftime() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: gmstrftime() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: gmstrftime() expects parameter 2 to be integer, array given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
@@ -164,42 +164,42 @@ string(20) "Jan 01 1970 00:00:00"
 
 --empty string DQ--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: gmstrftime() expects parameter 2 to be integer, string given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: gmstrftime() expects parameter 2 to be integer, object given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: gmstrftime() expects parameter 2 to be integer, object given in %s on line %d
+Warning: gmstrftime() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 --undefined var--

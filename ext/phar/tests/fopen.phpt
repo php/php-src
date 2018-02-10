@@ -2,7 +2,6 @@
 Phar: test fopen() interception
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (substr(phpversion(), 0, 3) == '5.2') die("skip PHP >= 5.3 required for this test");?>
 --INI--
 phar.require_hash=1
 phar.readonly=0

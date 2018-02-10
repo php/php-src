@@ -1,5 +1,7 @@
 --TEST--
 zend multibyte (11)
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --INI--
 zend.multibyte=1
 --FILE--

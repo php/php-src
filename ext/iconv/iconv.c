@@ -559,6 +559,8 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	size_t result;
 	zend_string *ret, *out_buffer;
 
+	*out = NULL;
+
 	/*
 	  This is not the right way to get output size...
 	  This is not space efficient for large text.

@@ -1,5 +1,7 @@
 --TEST--
 Bug #67949: DOMNodeList elements should be accessible through array notation
+--SKIPIF--
+<?php require 'skipif.inc' ?>
 --FILE--
 <?php
 
@@ -47,7 +49,7 @@ $anchor = $doc->getElementsByTagName('a')[0];
 var_dump($anchor->attributes[0]->name);
 
 echo "==DONE==\n";
-
+?>
 --EXPECTF--
 testing has_dimension
 bool(true)
@@ -84,4 +86,3 @@ NULL
 testing attribute access
 string(4) "href"
 ==DONE==
-

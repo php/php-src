@@ -101,12 +101,8 @@ PW32CP wchar_t *php_win32_cp_conv_to_w(DWORD cp, DWORD flags, const char* in, si
 	return NULL;
 PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size_t *out_len)
 {/*{{{*/
-	wchar_t *ret = NULL;
+	wchar_t *ret, *ret_idx;
 	const char *idx = in, *end;
-	size_t i = 0;
-	int k = 0;
-	wchar_t *ret_idx;
-
 
 	assert(in && in_len ? in[in_len] == '\0' : 1);
 
@@ -116,43 +112,33 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	} else if (0 == in_len) {
 		/* Not binary safe. */
 		in_len = strlen(in);
-		if (in_len > (size_t)INT_MAX) {
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-			return NULL;
-		}
 	}
 
 	end = in + in_len;
 
-	/* The ASCII check part can be moved into a separate function. */
-	while (end - idx > 16) {
-		__m128i block = _mm_loadu_si128((__m128i *)idx);
-		if (_mm_movemask_epi8(block)) {
-			ASCII_FAIL_RETURN()
-		}
-		idx += 16;
-	}
+	if (in_len > 15) {
+		const char *aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
 
-	while (end - idx > 8) {
-		char ch0 = *idx;
-		char ch1 = *(idx + 1);
-		char ch2 = *(idx + 2);
-		char ch3 = *(idx + 3);
-		char ch4 = *(idx + 4);
-		char ch5 = *(idx + 5);
-		char ch6 = *(idx + 6);
-		char ch7 = *(idx + 7);
-
-		if (!__isascii(ch0) || !__isascii(ch1) || !__isascii(ch2) || !__isascii(ch3) ||
-			!__isascii(ch4) || !__isascii(ch5) || !__isascii(ch6) || !__isascii(ch7)) {
-			ASCII_FAIL_RETURN()
+		/* Process unaligned chunk. */
+		while (idx < aidx) {
+			if (!__isascii(*idx) && '\0' != *idx) {
+				ASCII_FAIL_RETURN()
+			}
+			idx++;
 		}
 
-		idx += 8;
+		/* Process aligned chunk. */
+		while (end - idx > 15) {
+			const __m128i block = _mm_load_si128((__m128i *)idx);
+			if (_mm_movemask_epi8(block)) {
+				ASCII_FAIL_RETURN()
+			}
+			idx += 16;
+		}
 	}
 
-	/* Finish the job on remaining chars. */
-	while (idx != end) {
+	/* Process the trailing part, or otherwise process string < 16 bytes. */
+	while (idx < end) {
 		if (!__isascii(*idx) && '\0' != *idx) {
 			ASCII_FAIL_RETURN()
 		}
@@ -166,25 +152,47 @@ PW32CP wchar_t *php_win32_cp_conv_ascii_to_w(const char* in, size_t in_len, size
 	}
 
 	ret_idx = ret;
-	do {
-		k = _snwprintf(ret_idx, in_len - i, L"%.*hs", (int)(in_len - i), in);
+	idx = in;
 
-		if (-1 == k) {
-			free(ret);
-			SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
-			return NULL;
+	/* Check and conversion could be merged. This however would
+		be more expencive, if a non ASCII string was passed.
+		TODO check whether the impact is acceptable. */
+	if (in_len > 15) {
+		const char *aidx = (const char *)ZEND_SLIDE_TO_ALIGNED16(in);
+
+		/* Process unaligned chunk. */
+		while (idx < aidx) {
+			*ret_idx++ = (wchar_t)*idx++;
 		}
 
-		i += k + 1;
+		/* Process aligned chunk. */
+		if (end - idx > 15) {
+			const __m128i mask = _mm_set1_epi32(0);
+			while (end - idx > 15) {
+				const __m128i block = _mm_load_si128((__m128i *)idx);
 
-		if (i < in_len) {
-			/* Advance as this seems to be a string with \0 in it. */
-			in += k + 1;
-			ret_idx += k + 1;
+				{
+					const __m128i lo = _mm_unpacklo_epi8(block, mask);
+					_mm_storeu_si128((__m128i *)ret_idx, lo);
+				}
+
+				ret_idx += 8;
+				{ 
+					const __m128i hi = _mm_unpackhi_epi8(block, mask);
+					_mm_storeu_si128((__m128i *)ret_idx, hi);
+				}
+
+				idx += 16;
+				ret_idx += 8;
+			}
 		}
+	}
 
+	/* Process the trailing part, or otherwise process string < 16 bytes. */
+	while (idx < end) {
+		*ret_idx++ = (wchar_t)*idx++;
+	}
 
-	} while (i < in_len);
 	ret[in_len] = L'\0';
 
 	assert(ret ? wcslen(ret) == in_len : 1);

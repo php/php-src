@@ -13,7 +13,7 @@ precision=14
  */
 
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
-// different valid  integer vlaues 
+// different valid  integer values 
 $valid_ints = array(
   0,
   1,

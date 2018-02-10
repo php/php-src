@@ -472,7 +472,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_CODE               (1 << 0)
 #define ZEND_CALL_NESTED             (0 << 1)
 #define ZEND_CALL_TOP                (1 << 1)
-#define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2) /* equal to IS_TYPE_REFCOUNTED */
+#define ZEND_CALL_FREE_EXTRA_ARGS    (1 << 2)
 #define ZEND_CALL_CTOR               (1 << 3)
 #define ZEND_CALL_HAS_SYMBOL_TABLE   (1 << 4)
 #define ZEND_CALL_CLOSURE            (1 << 5)
@@ -481,6 +481,7 @@ struct _zend_execute_data {
 #define ZEND_CALL_GENERATOR          (1 << 8)
 #define ZEND_CALL_DYNAMIC            (1 << 9)
 #define ZEND_CALL_FAKE_CLOSURE       (1 << 10)
+#define ZEND_CALL_SEND_ARG_BY_REF    (1 << 11)
 
 #define ZEND_CALL_INFO_SHIFT         16
 
@@ -501,8 +502,16 @@ struct _zend_execute_data {
 		call_info |= ((flag) << ZEND_CALL_INFO_SHIFT); \
 	} while (0)
 
+#define ZEND_DEL_CALL_FLAG_EX(call_info, flag) do { \
+		call_info &= ~((flag) << ZEND_CALL_INFO_SHIFT); \
+	} while (0)
+
 #define ZEND_ADD_CALL_FLAG(call, flag) do { \
 		ZEND_ADD_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
+	} while (0)
+
+#define ZEND_DEL_CALL_FLAG(call, flag) do { \
+		ZEND_DEL_CALL_FLAG_EX(Z_TYPE_INFO((call)->This), flag); \
 	} while (0)
 
 #define ZEND_CALL_NUM_ARGS(call) \
@@ -660,11 +669,11 @@ struct _zend_execute_data {
 
 #endif
 
+#define IS_UNUSED	0		/* Unused operand */
 #define IS_CONST	(1<<0)
 #define IS_TMP_VAR	(1<<1)
 #define IS_VAR		(1<<2)
-#define IS_UNUSED	(1<<3)	/* Unused variable */
-#define IS_CV		(1<<4)	/* Compiled variable */
+#define IS_CV		(1<<3)	/* Compiled variable */
 
 #include "zend_globals.h"
 
@@ -765,7 +774,6 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 
 zend_op *get_next_op(zend_op_array *op_array);
 void init_op(zend_op *op);
-uint32_t get_next_op_number(zend_op_array *op_array);
 ZEND_API int pass_two(zend_op_array *op_array);
 zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
@@ -774,6 +782,11 @@ ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify
 uint32_t zend_get_class_fetch_type(zend_string *name);
 ZEND_API zend_uchar zend_get_call_op(const zend_op *init_op, zend_function *fbc);
 ZEND_API int zend_is_smart_branch(zend_op *opline);
+
+static zend_always_inline uint32_t get_next_op_number(zend_op_array *op_array)
+{
+	return op_array->last;
+}
 
 typedef zend_bool (*zend_auto_global_callback)(zend_string *name);
 typedef struct _zend_auto_global {
@@ -836,11 +849,6 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define BP_VAR_FUNC_ARG		4
 #define BP_VAR_UNSET		5
 
-/* Bottom 3 bits are the type, top bits are arg num for BP_VAR_FUNC_ARG */
-#define BP_VAR_SHIFT 3
-#define BP_VAR_MASK  7
-
-
 #define ZEND_INTERNAL_FUNCTION				1
 #define ZEND_USER_FUNCTION					2
 #define ZEND_OVERLOADED_FUNCTION			3
@@ -863,19 +871,15 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 #define ZEND_RT (1<<1)
 
 /* global/local fetches */
-#define ZEND_FETCH_GLOBAL			0x00000000
-#define ZEND_FETCH_LOCAL			0x10000000
-#define ZEND_FETCH_GLOBAL_LOCK		0x40000000
+#define ZEND_FETCH_GLOBAL		(1<<1)
+#define ZEND_FETCH_LOCAL		(1<<2)
+#define ZEND_FETCH_GLOBAL_LOCK	(1<<3)
 
-#define ZEND_FETCH_TYPE_MASK		0x70000000
+#define ZEND_FETCH_TYPE_MASK	0xe
 
-#define ZEND_FETCH_STANDARD		    0x00000000
+#define ZEND_ISSET				(1<<0)
 
-#define ZEND_ISSET				    0x02000000
-#define ZEND_ISEMPTY			    0x01000000
-#define ZEND_ISSET_ISEMPTY_MASK	    (ZEND_ISSET | ZEND_ISEMPTY)
-
-#define ZEND_FETCH_ARG_MASK         0x000fffff
+#define ZEND_LAST_CATCH			(1<<0)
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 

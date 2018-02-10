@@ -118,16 +118,16 @@ fclose( $file_handle);
 *** Testing new DateTime() : usage variation -  unexpected values to second argument $timezone***
 
 -- int 0 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, int given
 
 -- int 1 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, int given
 
 -- int 12345 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, int given
 
 -- int -12345 --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, integer given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, int given
 
 -- float 10.5 --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, float given
@@ -171,16 +171,16 @@ object(DateTime)#%d (3) {
 }
 
 -- lowercase true --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- lowercase false --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- uppercase TRUE --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- uppercase FALSE --
-FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, boolean given
+FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, bool given
 
 -- empty string DQ --
 FAILED: DateTime::__construct() expects parameter 2 to be DateTimeZone, string given

@@ -34,17 +34,17 @@ var_dump( localtime($timestamp, $is_associative) );
 
 -- Testing localtime() function with 'float 12.3456789000e10' to timestamp --
 
-Warning: localtime() expects parameter 1 to be integer, float given in %s on line %d
+Warning: localtime() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer, float given in %s on line %d
+Warning: localtime() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
 -- Testing localtime() function with 'float -12.3456789000e10' to timestamp --
 
-Warning: localtime() expects parameter 1 to be integer, float given in %s on line %d
+Warning: localtime() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
-Warning: localtime() expects parameter 1 to be integer, float given in %s on line %d
+Warning: localtime() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 ===DONE===

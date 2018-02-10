@@ -1,7 +1,5 @@
 --TEST--
 ReflectionObject::__toString (filtering privates/protected dynamic properties)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class C1 {
@@ -17,7 +15,7 @@ $x->p3 = 5;
 $obj = new ReflectionObject($x);
 echo $obj;
 ?>
---EXPECTF--	
+--EXPECTF--
 Object of class [ <user> class C1 ] {
   @@ %s024.php 2-6
 

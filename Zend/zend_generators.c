@@ -222,7 +222,7 @@ static void zend_generator_dtor_storage(zend_object *object) /* {{{ */
 		fast_call = ZEND_CALL_VAR(ex, ex->func->op_array.opcodes[finally_op_end].op1.var);
 		Z_OBJ_P(fast_call) = EG(exception);
 		EG(exception) = NULL;
-		fast_call->u2.lineno = (uint32_t)-1;
+		Z_OPLINE_NUM_P(fast_call) = (uint32_t)-1;
 
 		ex->opline = &ex->func->op_array.opcodes[finally_op_num];
 		generator->flags |= ZEND_GENERATOR_FORCED_CLOSE;
@@ -278,9 +278,9 @@ static uint32_t calc_gc_buffer_size(zend_generator *generator) /* {{{ */
 
 		/* Yield from root references */
 		if (generator->node.children == 0) {
-			zend_generator *child = generator, *root = generator->node.ptr.root;
-			while (root != child) {
-				child = child->node.parent;
+			zend_generator *root = generator->node.ptr.root;
+			while (root != generator) {
+				root = zend_generator_get_child(&root->node, generator);
 				size++;
 			}
 		}
@@ -343,10 +343,10 @@ static HashTable *zend_generator_get_gc(zval *object, zval **table, int *n) /* {
 	}
 
 	if (generator->node.children == 0) {
-		zend_generator *child = generator, *root = generator->node.ptr.root;
-		while (root != child) {
-			child = child->node.parent;
-			ZVAL_OBJ(gc_buffer++, &child->std);
+		zend_generator *root = generator->node.ptr.root;
+		while (root != generator) {
+			ZVAL_OBJ(gc_buffer++, &root->std);
+			root = zend_generator_get_child(&root->node, generator);
 		}
 	}
 
@@ -1061,7 +1061,6 @@ static void zend_generator_iterator_dtor(zend_object_iterator *iterator) /* {{{ 
 	zend_generator *generator = (zend_generator*)Z_OBJ(iterator->data);
 	generator->iterator = NULL;
 	zval_ptr_dtor(&iterator->data);
-	zend_iterator_dtor(iterator);
 }
 /* }}} */
 

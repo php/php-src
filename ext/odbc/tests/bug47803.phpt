@@ -1,5 +1,5 @@
 --TEST--
-Bug #47803 Executing prepared statements is succesfull only for the first two statements
+Bug #47803 Executing prepared statements is successful only for the first two statements
 --SKIPIF--
 <?php include 'skipif.inc'; ?>
 --FILE--

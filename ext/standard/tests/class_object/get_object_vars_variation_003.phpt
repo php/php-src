@@ -80,22 +80,22 @@ Notice: Undefined variable: unset_var in %s on line 59
 
 Arg value 0 
 
-Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, int given in %s on line %d
 NULL
 
 Arg value 1 
 
-Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, int given in %s on line %d
 NULL
 
 Arg value 12345 
 
-Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, int given in %s on line %d
 NULL
 
 Arg value -2345 
 
-Warning: get_object_vars() expects parameter 1 to be object, integer given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, int given in %s on line %d
 NULL
 
 Arg value 10.5 
@@ -160,22 +160,22 @@ NULL
 
 Arg value 1 
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Arg value 1 
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Arg value  
 
-Warning: get_object_vars() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: get_object_vars() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Arg value  

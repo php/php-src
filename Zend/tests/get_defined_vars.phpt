@@ -3,7 +3,7 @@ Testing get_defined_vars() Function
 --FILE--
 <?php
 /* Prototype: array get_defined_vars(void);
- * Description: Returns a  multidimentional array of all defined variables.
+ * Description: Returns a  multidimensional array of all defined variables.
  */
 
 /* Various variables definitions used for testing of the function */

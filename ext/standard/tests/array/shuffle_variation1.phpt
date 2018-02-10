@@ -98,22 +98,22 @@ echo "Done";
 
 -- Iteration 1 --
 
-Warning: shuffle() expects parameter 1 to be array, integer given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 
 -- Iteration 2 --
 
-Warning: shuffle() expects parameter 1 to be array, integer given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 
 -- Iteration 3 --
 
-Warning: shuffle() expects parameter 1 to be array, integer given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 
 -- Iteration 4 --
 
-Warning: shuffle() expects parameter 1 to be array, integer given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, int given in %s on line %d
 bool(false)
 
 -- Iteration 5 --
@@ -153,22 +153,22 @@ bool(false)
 
 -- Iteration 12 --
 
-Warning: shuffle() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
 -- Iteration 13 --
 
-Warning: shuffle() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
 -- Iteration 14 --
 
-Warning: shuffle() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
 -- Iteration 15 --
 
-Warning: shuffle() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: shuffle() expects parameter 1 to be array, bool given in %s on line %d
 bool(false)
 
 -- Iteration 16 --

@@ -490,7 +490,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 }
 
 
-/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, integer flags])
+/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, int flags])
    Registers a custom URL protocol handler class */
 PHP_FUNCTION(stream_wrapper_register)
 {

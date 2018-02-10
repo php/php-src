@@ -1,7 +1,5 @@
 --TEST--
 Bug #45805 (Crash on throwing exception from error handler)
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 class PHPUnit_Util_ErrorHandler
@@ -31,9 +29,9 @@ class B {
 }
 
 set_error_handler(
-  array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL | E_STRICT
+  array('PHPUnit_Util_ErrorHandler', 'handleError'), E_ALL
 );
-            
+
 $o = new B;
 $o->bar();
 ?>

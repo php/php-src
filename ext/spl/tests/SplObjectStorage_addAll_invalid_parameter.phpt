@@ -26,13 +26,13 @@ foreach($data_provider as $input) {
 Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, array given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, boolean given in %s on line %d
+Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, bool given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, string given in %s on line %d
 NULL
 
-Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, integer given in %s on line %d
+Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, int given in %s on line %d
 NULL
 
 Warning: SplObjectStorage::addAll() expects parameter 1 to be SplObjectStorage, float given in %s on line %d

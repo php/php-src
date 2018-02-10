@@ -529,7 +529,7 @@ static void php_xmlreader_set_relaxng_schema(INTERNAL_FUNCTION_PARAMETERS, int t
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::close()
+/* {{{ proto bool XMLReader::close()
 Closes xmlreader - current frees resources until xmlTextReaderClose is fixed in libxml */
 PHP_METHOD(xmlreader, close)
 {
@@ -612,7 +612,7 @@ PHP_METHOD(xmlreader, getAttributeNs)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::getParserProperty(int property)
+/* {{{ proto bool XMLReader::getParserProperty(int property)
 Indicates whether given property (one of the parser option constants) is set or not on parser */
 PHP_METHOD(xmlreader, getParserProperty)
 {
@@ -640,7 +640,7 @@ PHP_METHOD(xmlreader, getParserProperty)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::isValid()
+/* {{{ proto bool XMLReader::isValid()
 Returns boolean indicating if parsed document is valid or not.
 Must set XMLREADER_LOADDTD or XMLREADER_VALIDATE parser option prior to the first call to read
 or this method will always return FALSE */
@@ -658,7 +658,7 @@ PHP_METHOD(xmlreader, lookupNamespace)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToAttribute(string name)
+/* {{{ proto bool XMLReader::moveToAttribute(string name)
 Positions reader at specified attribute - Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttribute)
 {
@@ -691,7 +691,7 @@ PHP_METHOD(xmlreader, moveToAttribute)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToAttributeNo(int index)
+/* {{{ proto bool XMLReader::moveToAttributeNo(int index)
 Positions reader at attribute at specified index.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNo)
@@ -719,7 +719,7 @@ PHP_METHOD(xmlreader, moveToAttributeNo)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToAttributeNs(string name, string namespaceURI)
+/* {{{ proto bool XMLReader::moveToAttributeNs(string name, string namespaceURI)
 Positions reader at attribute spcified by name and namespaceURI.
 Returns TRUE on success and FALSE on failure */
 PHP_METHOD(xmlreader, moveToAttributeNs)
@@ -753,7 +753,7 @@ PHP_METHOD(xmlreader, moveToAttributeNs)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToElement()
+/* {{{ proto bool XMLReader::moveToElement()
 Moves the position of the current instance to the node that contains the current Attribute node. */
 PHP_METHOD(xmlreader, moveToElement)
 {
@@ -761,7 +761,7 @@ PHP_METHOD(xmlreader, moveToElement)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToFirstAttribute()
+/* {{{ proto bool XMLReader::moveToFirstAttribute()
 Moves the position of the current instance to the first attribute associated with the current node. */
 PHP_METHOD(xmlreader, moveToFirstAttribute)
 {
@@ -769,7 +769,7 @@ PHP_METHOD(xmlreader, moveToFirstAttribute)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::moveToNextAttribute()
+/* {{{ proto bool XMLReader::moveToNextAttribute()
 Moves the position of the current instance to the next attribute associated with the current node. */
 PHP_METHOD(xmlreader, moveToNextAttribute)
 {
@@ -777,7 +777,7 @@ PHP_METHOD(xmlreader, moveToNextAttribute)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::read()
+/* {{{ proto bool XMLReader::read()
 Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, read)
 {
@@ -801,7 +801,7 @@ PHP_METHOD(xmlreader, read)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::next([string localname])
+/* {{{ proto bool XMLReader::next([string localname])
 Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, next)
 {
@@ -843,7 +843,7 @@ PHP_METHOD(xmlreader, next)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::open(string URI [, string encoding [, int options]])
+/* {{{ proto bool XMLReader::open(string URI [, string encoding [, int options]])
 Sets the URI that the XMLReader will parse. */
 PHP_METHOD(xmlreader, open)
 {
@@ -916,7 +916,7 @@ PHP_METHOD(xmlreader, readInnerXml)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::readOuterXml()
+/* {{{ proto bool XMLReader::readOuterXml()
 Reads the contents of the current node, including child nodes and markup. */
 PHP_METHOD(xmlreader, readOuterXml)
 {
@@ -924,7 +924,7 @@ PHP_METHOD(xmlreader, readOuterXml)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::readString()
+/* {{{ proto bool XMLReader::readString()
 Reads the contents of an element or a text node as a string. */
 PHP_METHOD(xmlreader, readString)
 {
@@ -932,7 +932,7 @@ PHP_METHOD(xmlreader, readString)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::setSchema(string filename)
+/* {{{ proto bool XMLReader::setSchema(string filename)
 Use W3C XSD schema to validate the document as it is processed. Activation is only possible before the first Read(). */
 PHP_METHOD(xmlreader, setSchema)
 {
@@ -975,7 +975,7 @@ PHP_METHOD(xmlreader, setSchema)
 /* }}} */
 #endif
 
-/* {{{ proto boolean XMLReader::setParserProperty(int property, boolean value)
+/* {{{ proto bool XMLReader::setParserProperty(int property, bool value)
 Sets parser property (one of the parser option constants).
 Properties must be set after open() or XML() and before the first read() is called */
 PHP_METHOD(xmlreader, setParserProperty)
@@ -1005,7 +1005,7 @@ PHP_METHOD(xmlreader, setParserProperty)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::setRelaxNGSchema(string filename)
+/* {{{ proto bool XMLReader::setRelaxNGSchema(string filename)
 Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, setRelaxNGSchema)
 {
@@ -1013,7 +1013,7 @@ PHP_METHOD(xmlreader, setRelaxNGSchema)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::setRelaxNGSchemaSource(string source)
+/* {{{ proto bool XMLReader::setRelaxNGSchemaSource(string source)
 Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, setRelaxNGSchemaSource)
 {
@@ -1027,7 +1027,7 @@ XMLPUBFUN int XMLCALL
 		    				 xmlSchemaPtr schema);
 */
 
-/* {{{ proto boolean XMLReader::XML(string source [, string encoding [, int options]])
+/* {{{ proto bool XMLReader::XML(string source [, string encoding [, int options]])
 Sets the string that the XMLReader will parse. */
 PHP_METHOD(xmlreader, XML)
 {
@@ -1113,7 +1113,7 @@ PHP_METHOD(xmlreader, XML)
 }
 /* }}} */
 
-/* {{{ proto boolean XMLReader::expand()
+/* {{{ proto bool XMLReader::expand()
 Moves the position of the current instance to the next node in the stream. */
 PHP_METHOD(xmlreader, expand)
 {

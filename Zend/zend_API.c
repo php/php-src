@@ -105,9 +105,9 @@ ZEND_API char *zend_get_type_by_const(int type) /* {{{ */
 		case IS_FALSE:
 		case IS_TRUE:
 		case _IS_BOOL:
-			return "boolean";
+			return "bool";
 		case IS_LONG:
-			return "integer";
+			return "int";
 		case IS_DOUBLE:
 			return "float";
 		case IS_STRING:
@@ -497,7 +497,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_long(arg, p, is_null, check_null, c == 'L')) {
-					return "integer";
+					return "int";
 				}
 			}
 			break;
@@ -565,7 +565,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				}
 
 				if (!zend_parse_arg_bool(arg, p, is_null, check_null)) {
-					return "boolean";
+					return "bool";
 				}
 			}
 			break;
@@ -3624,7 +3624,7 @@ static inline zend_string *zval_make_interned_string(zval *zv) /* {{{ */
 	ZEND_ASSERT(Z_TYPE_P(zv) == IS_STRING);
 	Z_STR_P(zv) = zend_new_interned_string(Z_STR_P(zv));
 	if (ZSTR_IS_INTERNED(Z_STR_P(zv))) {
-		Z_TYPE_FLAGS_P(zv) &= ~ (IS_TYPE_REFCOUNTED | IS_TYPE_COPYABLE);
+		Z_TYPE_FLAGS_P(zv) = 0;
 	}
 	return Z_STR_P(zv);
 }

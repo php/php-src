@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #74383: Wrong reflection on Phar::running
 --SKIPIF--
-<?php if (!extension_loaded("phar") || !extension_loaded('reflection')) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip"); ?>
 --FILE--
 <?php
 $rc = new ReflectionClass(Phar::class);

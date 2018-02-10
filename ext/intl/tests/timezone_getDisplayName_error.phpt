@@ -19,12 +19,12 @@ var_dump(intltz_get_display_name(null, IntlTimeZone::DISPLAY_SHORT, false, 'pt_P
 
 --EXPECTF--
 
-Warning: IntlTimeZone::getDisplayName() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: IntlTimeZone::getDisplayName() expects parameter 1 to be bool, array given in %s on line %d
 
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be integer, array given in %s on line %d
+Warning: IntlTimeZone::getDisplayName() expects parameter 2 to be int, array given in %s on line %d
 
 Warning: IntlTimeZone::getDisplayName(): intltz_get_display_name: bad arguments in %s on line %d
 bool(false)

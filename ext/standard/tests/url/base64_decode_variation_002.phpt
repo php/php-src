@@ -116,23 +116,23 @@ bool(false)
 bool(false)
 
 -- Arg value array() --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 -- Arg value array(0) --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 -- Arg value array(1) --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 -- Arg value array(1, 2) --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 -- Arg value array('color' => 'red', 'item' => 'pen' --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 -- Arg value NULL --
@@ -160,7 +160,7 @@ string(12) "hello world!"
 string(12) "hello world!"
 
 -- Arg value stdClass object --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, object given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, object given, %s(%d)
 NULL
 
 -- Arg value undefined variable --
@@ -170,6 +170,6 @@ string(12) "hello world!"
 string(12) "hello world!"
 
 -- Arg value resource --
-Error: 2 - base64_decode() expects parameter 2 to be boolean, resource given, %s(%d)
+Error: 2 - base64_decode() expects parameter 2 to be bool, resource given, %s(%d)
 NULL
 ===Done===

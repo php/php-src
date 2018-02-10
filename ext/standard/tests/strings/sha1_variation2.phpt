@@ -111,23 +111,23 @@ string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 string(40) "0a4d55a8d778e5022fab701977c5d840bbc486d0"
 -- Iteration 10 --
 
-Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, array given in %s on line %d
 string(0) ""
 -- Iteration 11 --
 
-Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, array given in %s on line %d
 string(0) ""
 -- Iteration 12 --
 
-Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, array given in %s on line %d
 string(0) ""
 -- Iteration 13 --
 
-Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, array given in %s on line %d
 string(0) ""
 -- Iteration 14 --
 
-Warning: sha1() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, array given in %s on line %d
 string(0) ""
 -- Iteration 15 --
 string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
@@ -147,7 +147,7 @@ string(80) "30613464353561386437373865353032326661623730313937376335643834306262
 string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 23 --
 
-Warning: sha1() expects parameter 2 to be boolean, object given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, object given in %s on line %d
 string(0) ""
 -- Iteration 24 --
 string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
@@ -155,6 +155,6 @@ string(80) "30613464353561386437373865353032326661623730313937376335643834306262
 string(80) "30613464353561386437373865353032326661623730313937376335643834306262633438366430"
 -- Iteration 26 --
 
-Warning: sha1() expects parameter 2 to be boolean, resource given in %s on line %d
+Warning: sha1() expects parameter 2 to be bool, resource given in %s on line %d
 string(0) ""
 ===DONE===

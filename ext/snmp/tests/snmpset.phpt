@@ -188,25 +188,25 @@ bool(true)
 More error handing
 Single OID, single type in array, single value
 
-Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %s
+Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Single OID, single type, single value in array
 
-Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %s
+Warning: snmpset(): Single objid and multiple type or values are not supported in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Multiple OID, 1st wrong type
 
-Warning: snmpset(): '%s': bogus type 'sw', should be single char, got 2 in %s on line %s
+Warning: snmpset(): '%s': bogus type 'sw', should be single char, got 2 in %s on line %d
 bool(false)
 bool(true)
 bool(true)
 Multiple OID, 2nd wrong type
 
-Warning: snmpset(): '%s': bogus type 'sb', should be single char, got 2 in %s on line %s
+Warning: snmpset(): '%s': bogus type 'sb', should be single char, got 2 in %s on line %d
 bool(false)
 bool(true)
 bool(true)

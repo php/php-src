@@ -3688,6 +3688,10 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
+#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(string_intrin)
+#endif
+
 	BASIC_MINIT_SUBMODULE(crypt)
 	BASIC_MINIT_SUBMODULE(lcg)
 
@@ -4915,7 +4919,7 @@ PHP_FUNCTION(call_user_func_array)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY_EX(params, 0, 1)
+		Z_PARAM_ARRAY(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fcall_info_args(&fci, params);
@@ -4979,7 +4983,7 @@ PHP_FUNCTION(forward_static_call_array)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY_EX(params, 0, 1)
+		Z_PARAM_ARRAY(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fcall_info_args(&fci, params);

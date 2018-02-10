@@ -9,10 +9,7 @@ class gtIsValidClass extends gtPreCondition {
   public function check( $clo) {
     if($clo->hasOption('c') ) {
       $className = $clo->getOption('c');
-      if( in_array( $className, get_declared_classes() ) ) {
-        return true;
-      }
-      return false;
+      return in_array( $className, get_declared_classes() );
     }
     return true;
   }

@@ -72,7 +72,7 @@ NULL
 
 Wrong type of arg:
 
-Warning: ReflectionProperty::setValue() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: ReflectionProperty::setValue() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Static property / too many args:

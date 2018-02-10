@@ -1803,7 +1803,7 @@ data_accepted:
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
 		ctx = SSL_get_SSL_CTX(ftp->ssl_handle);
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL context");
 			return 0;
 		}
 
@@ -1822,7 +1822,7 @@ data_accepted:
 		/* get the session from the control connection so we can re-use it */
 		session = SSL_get_session(ftp->ssl_handle);
 		if (session == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL session");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
 			SSL_free(data->ssl_handle);
 			return 0;
 		}

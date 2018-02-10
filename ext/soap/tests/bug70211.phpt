@@ -1,5 +1,7 @@
 --TEST--
 Bug #70211 (php 7 ZEND_HASH_IF_FULL_DO_RESIZE use after free)
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

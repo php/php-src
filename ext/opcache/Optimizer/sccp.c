@@ -228,6 +228,7 @@ static zend_bool can_replace_op1(
 		case ZEND_UNSET_OBJ:
 		case ZEND_SEND_REF:
 		case ZEND_SEND_VAR_EX:
+		case ZEND_SEND_FUNC_ARG:
 		case ZEND_SEND_UNPACK:
 		case ZEND_SEND_ARRAY:
 		case ZEND_SEND_USER:
@@ -430,7 +431,6 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
-			ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
@@ -438,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -474,6 +474,7 @@ static inline int ct_eval_del_array_elem(zval *result, zval *key) {
 
 static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 	if (!key) {
+		SEPARATE_ARRAY(result);
 		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
 			Z_TRY_ADDREF_P(value);
 			return SUCCESS;
@@ -483,22 +484,28 @@ static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 
 	switch (Z_TYPE_P(key)) {
 		case IS_NULL:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_update(Z_ARR_P(result), ZSTR_EMPTY_ALLOC(), value);
 			break;
 		case IS_FALSE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), 0, value);
 			break;
 		case IS_TRUE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), 1, value);
 			break;
 		case IS_LONG:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(Z_ARR_P(result), Z_LVAL_P(key), value);
 			break;
 		case IS_DOUBLE:
+			SEPARATE_ARRAY(result);
 			value = zend_hash_index_update(
 				Z_ARR_P(result), zend_dval_to_lval(Z_DVAL_P(key)), value);
 			break;
 		case IS_STRING:
+			SEPARATE_ARRAY(result);
 			value = zend_symtable_update(Z_ARR_P(result), Z_STR_P(key), value);
 			break;
 		default:
@@ -581,12 +588,11 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (extended_value & ZEND_ISSET) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
-			ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, extended_value != ZEND_ISSET);
+		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
 		return SUCCESS;
 	}
 }
@@ -648,7 +654,6 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 	if (extended_value & ZEND_ISSET) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
-		ZEND_ASSERT(extended_value & ZEND_ISEMPTY);
 		ZVAL_BOOL(result, !zend_is_true(op1));
 	}
 	return SUCCESS;
@@ -810,7 +815,8 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "strpos")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_STRING
-					|| !Z_STRLEN_P(args[1])) {
+					|| !Z_STRLEN_P(args[1])
+					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
 				return FAILURE;
 			}
 			/* pass */
@@ -889,7 +895,8 @@ static inline int ct_eval_func_call(
 			/* pass */
 		} else if (zend_string_equals_literal(name, "substr")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
-					|| Z_TYPE_P(args[1]) != IS_LONG) {
+					|| Z_TYPE_P(args[1]) != IS_LONG
+					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
 				return FAILURE;
 			}
 			/* pass */
@@ -1081,7 +1088,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 				if (IS_PARTIAL_ARRAY(op1)) {
 					dup_partial_array(&zv, op1);
 				} else {
-					ZVAL_DUP(&zv, op1);
+					ZVAL_COPY(&zv, op1);
 				}
 
 				if (!op2 && IS_PARTIAL_ARRAY(&zv)) {
@@ -1398,7 +1405,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 							if (IS_PARTIAL_ARRAY(op1)) {
 								dup_partial_array(&zv, op1);
 							} else {
-								ZVAL_DUP(&zv, op1);
+								ZVAL_COPY(&zv, op1);
 							}
 						}
 
@@ -1618,6 +1625,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 		case ZEND_COALESCE:
 			SET_RESULT(result, op1);
 			break;
+#if 0
 		case ZEND_FETCH_CLASS:
 			if (!op1) {
 				SET_RESULT_BOT(result);
@@ -1625,6 +1633,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			}
 			SET_RESULT(result, op1);
 			break;
+#endif
 		case ZEND_ISSET_ISEMPTY_CV:
 			SKIP_IF_TOP(op1);
 			if (ct_eval_isset_isempty(&zv, opline->extended_value, op1) == SUCCESS) {

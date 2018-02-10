@@ -10,10 +10,7 @@ class gtIsValidFunction extends gtPreCondition {
     if($clo->hasOption('f') ) {
       $function = $clo->getOption('f');
       $functions = get_defined_functions();
-      if( in_array( $function, $functions['internal'] ) ) {
-        return true;
-      }
-      return false;
+      return in_array( $function, $functions['internal'] );
     }
     return true;
   }

@@ -34,6 +34,7 @@
 #ifdef HAVE_MONETARY_H
 # include <monetary.h>
 #endif
+
 /*
  * This define is here because some versions of libintl redefine setlocale
  * to point to libintl_setlocale.  That's a ridiculous thing to do as far
@@ -117,16 +118,8 @@ void register_string_constants(INIT_FUNC_ARGS)
 
 int php_tag_find(char *tag, size_t len, const char *set);
 
-#ifdef PHP_WIN32
-# define SET_ALIGNED(alignment, decl) __declspec(align(alignment)) decl
-#elif HAVE_ATTRIBUTE_ALIGNED
-# define SET_ALIGNED(alignment, decl) decl __attribute__ ((__aligned__ (alignment)))
-#else
-# define SET_ALIGNED(alignment, decl) decl
-#endif
-
 /* this is read-only, so it's ok */
-SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
+ZEND_SET_ALIGNED(16, static char hexconvtab[]) = "0123456789abcdef";
 
 /* localeconv mutex */
 #ifdef ZTS
@@ -937,7 +930,7 @@ PHP_FUNCTION(ltrim)
 }
 /* }}} */
 
-/* {{{ proto string wordwrap(string str [, int width [, string break [, boolean cut]]])
+/* {{{ proto string wordwrap(string str [, int width [, string break [, bool cut]]])
    Wraps buffer to selected number of characters using string break char */
 PHP_FUNCTION(wordwrap)
 {
@@ -1660,7 +1653,7 @@ PHP_FUNCTION(dirname)
 	ret = zend_string_init(str, str_len, 0);
 
 	if (levels == 1) {
-		/* Defaut case */
+		/* Default case */
 #ifdef PHP_WIN32
 		ZSTR_LEN(ret) = php_win32_ioutil_dirname(ZSTR_VAL(ret), str_len);
 #else
@@ -3865,9 +3858,240 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 }
 /* }}} */
 
-/* {{{ php_addslashes
+/* {{{ php_addslashes */
+
+#if ZEND_INTRIN_SSE4_2_NATIVE
+# include <nmmintrin.h>
+# include "Zend/zend_bitset.h"
+#elif ZEND_INTRIN_SSE4_2_RESOLVER
+# include <nmmintrin.h>
+# include "Zend/zend_bitset.h"
+# include "Zend/zend_cpuinfo.h"
+
+ZEND_INTRIN_SSE4_2_FUNC_DECL(zend_string *php_addslashes_sse42(zend_string *str, int should_free));
+zend_string *php_addslashes_default(zend_string *str, int should_free);
+
+# if ZEND_INTRIN_SSE4_2_FUNC_PROTO
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) __attribute__((ifunc("resolve_addslashes")));
+
+static void *resolve_addslashes() {
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
+		return php_addslashes_sse42;
+	}
+	return  php_addslashes_default;
+}
+# else /* ZEND_INTRIN_SSE4_2_FUNC_PTR */
+
+PHPAPI zend_string *(*php_addslashes)(zend_string *str, int should_free) = NULL;
+
+/* {{{ PHP_MINIT_FUNCTION
  */
+PHP_MINIT_FUNCTION(string_intrin)
+{
+	if (zend_cpu_supports(ZEND_CPU_FEATURE_SSE42)) {
+		php_addslashes = php_addslashes_sse42;
+	} else {
+		php_addslashes = php_addslashes_default;
+	}
+	return SUCCESS;
+}
+/* }}} */
+# endif
+#endif
+
+#if ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER
+# if ZEND_INTRIN_SSE4_2_NATIVE
+PHPAPI zend_string *php_addslashes(zend_string *str, int should_free) /* {{{ */
+# elif ZEND_INTRIN_SSE4_2_RESOLVER
+zend_string *php_addslashes_sse42(zend_string *str, int should_free)
+# endif
+{
+	ZEND_SET_ALIGNED(16, static const char slashchars[16]) = "\'\"\\\0";
+	__m128i w128, s128;
+	uint32_t res = 0;
+	/* maximum string length, worst case situation */
+	char *source, *target;
+	char *end;
+	size_t offset;
+	zend_string *new_str;
+
+	if (!str) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	source = ZSTR_VAL(str);
+	end = source + ZSTR_LEN(str);
+
+	if (ZSTR_LEN(str) > 15) {
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
+
+		if (UNEXPECTED(source != aligned)) {
+			do {
+				switch (*source) {
+					case '\0':
+					case '\'':
+					case '\"':
+					case '\\':
+						goto do_escape;
+					default:
+						source++;
+						break;
+				}
+			} while (source < aligned);
+		}
+
+		w128 = _mm_load_si128((__m128i *)slashchars);
+		for (;end - source > 15; source += 16) {
+			s128 = _mm_load_si128((__m128i *)source);
+			res = _mm_cvtsi128_si32(_mm_cmpestrm(w128, 4, s128, 16, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK));
+			if (res) {
+				goto do_escape;
+			}
+		}
+	}
+
+	while (source < end) {
+		switch (*source) {
+			case '\0':
+			case '\'':
+			case '\"':
+			case '\\':
+				goto do_escape;
+			default:
+				source++;
+				break;
+		}
+	}
+
+	if (!should_free) {
+		return zend_string_copy(str);
+	}
+
+	return str;
+
+do_escape:
+	offset = source - (char *)ZSTR_VAL(str);
+	new_str = zend_string_safe_alloc(2, ZSTR_LEN(str) - offset, offset, 0);
+	memcpy(ZSTR_VAL(new_str), ZSTR_VAL(str), offset);
+	target = ZSTR_VAL(new_str) + offset;
+
+	if (res) {
+		int pos = 0;
+		do {
+			int i, n = zend_ulong_ntz(res);
+			for (i = 0; i < n; i++) {
+				*target++ = source[pos + i];
+			}
+			pos += n;
+			*target++ = '\\';
+			if (source[pos] == '\0') {
+				*target++ = '0';
+			} else {
+				*target++ = source[pos];
+			}
+			pos++;
+			res = res >> (n + 1);
+		} while (res);
+
+		for (; pos < 16; pos++) {
+			*target++ = source[pos];
+		}
+		source += 16;
+	} else if (end - source > 15) {
+		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
+
+		if (source != aligned) {
+			do {
+				switch (*source) {
+					case '\0':
+						*target++ = '\\';
+						*target++ = '0';
+						break;
+					case '\'':
+					case '\"':
+					case '\\':
+						*target++ = '\\';
+						/* break is missing *intentionally* */
+					default:
+						*target++ = *source;
+						break;
+				}
+				source++;
+			} while (source < aligned);
+		}
+
+		w128 = _mm_load_si128((__m128i *)slashchars);
+	}
+
+	for (; end - source > 15; source += 16) {
+		int pos = 0;
+		s128 = _mm_load_si128((__m128i *)source);
+		res = _mm_cvtsi128_si32(_mm_cmpestrm(w128, 4, s128, 16, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK));
+		if (res) {
+			do {
+				int i, n = zend_ulong_ntz(res);
+				for (i = 0; i < n; i++) {
+					*target++ = source[pos + i];
+				}
+				pos += n;
+				*target++ = '\\';
+				if (source[pos] == '\0') {
+					*target++ = '0';
+				} else {
+					*target++ = source[pos];
+				}
+				pos++;
+				res = res >> (n + 1);
+			} while (res);
+			for (; pos < 16; pos++) {
+				*target++ = source[pos];
+			}
+		} else {
+			_mm_storeu_si128((__m128i*)target, s128);
+			target += 16;
+		}
+	}
+
+	while (source < end) {
+		switch (*source) {
+			case '\0':
+				*target++ = '\\';
+				*target++ = '0';
+				break;
+			case '\'':
+			case '\"':
+			case '\\':
+				*target++ = '\\';
+				/* break is missing *intentionally* */
+			default:
+				*target++ = *source;
+				break;
+		}
+		source++;
+	}
+
+	*target = '\0';
+	if (should_free) {
+		zend_string_release(str);
+	}
+
+	if (ZSTR_LEN(new_str) - (target - ZSTR_VAL(new_str)) > 16) {
+		new_str = zend_string_truncate(new_str, target - ZSTR_VAL(new_str), 0);
+	} else {
+		ZSTR_LEN(new_str) = target - ZSTR_VAL(new_str);
+	}
+
+	return new_str;
+}
+/* }}} */
+#endif
+
+#if !ZEND_INTRIN_SSE4_2_NATIVE
+# if ZEND_INTRIN_SSE4_2_RESOLVER
+zend_string *php_addslashes_default(zend_string *str, int should_free) /* {{{ */
+# else
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
+# endif
 {
 	/* maximum string length, worst case situation */
 	char *source, *target;
@@ -3922,11 +4146,10 @@ do_escape:
 				*target++ = *source;
 				break;
 		}
-
 		source++;
 	}
 
-	*target = 0;
+	*target = '\0';
 	if (should_free) {
 		zend_string_release(str);
 	}
@@ -3939,6 +4162,8 @@ do_escape:
 
 	return new_str;
 }
+#endif
+/* }}} */
 /* }}} */
 
 #define _HEB_BLOCK_TYPE_ENG 1

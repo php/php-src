@@ -45,10 +45,10 @@ as it turns around
 and I know that it descends down on me
 int(176)
 
-Warning: readgzfile() expects parameter 2 to be integer, string given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
-Warning: readgzfile() expects parameter 2 to be integer, string given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, string given in %s on line %d
 NULL
 When you're taught through feelings
 Destiny flying high above

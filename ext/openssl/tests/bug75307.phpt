@@ -3,7 +3,6 @@ Bug #75307 Wrong reflection for openssl_open function
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not available");
-if (!extension_loaded("reflection")) die("skip reflection not available");
 ?>
 --FILE--
 <?php

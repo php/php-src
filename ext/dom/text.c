@@ -194,7 +194,7 @@ PHP_FUNCTION(dom_text_split_text)
 }
 /* }}} end dom_text_split_text */
 
-/* {{{ proto boolean dom_text_is_whitespace_in_element_content()
+/* {{{ proto bool dom_text_is_whitespace_in_element_content()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-isWhitespaceInElementContent
 Since: DOM Level 3
 */

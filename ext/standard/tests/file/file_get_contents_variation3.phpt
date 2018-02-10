@@ -151,19 +151,19 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 --empty array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -203,11 +203,11 @@ string(%d) "contents read"
 string(%d) "contents read"
 
 --instance of classWithToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, object given, %s(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - file_get_contents() expects parameter 2 to be boolean, object given, %s(%d)
+Error: 2 - file_get_contents() expects parameter 2 to be bool, object given, %s(%d)
 NULL
 
 --undefined var--

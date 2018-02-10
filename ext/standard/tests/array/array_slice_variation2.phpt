@@ -153,7 +153,7 @@ array(4) {
 
 -- Iteration 7 --
 
-Warning: array_slice() expects parameter 2 to be integer, float given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, float given in %s on line %d
 NULL
 
 -- Iteration 8 --
@@ -250,32 +250,32 @@ array(4) {
 
 -- Iteration 16 --
 
-Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: array_slice() expects parameter 2 to be integer, array given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: array_slice() expects parameter 2 to be integer, string given in %s on line %d
+Warning: array_slice() expects parameter 2 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 22 --

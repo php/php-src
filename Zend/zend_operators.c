@@ -2535,7 +2535,7 @@ ZEND_API int ZEND_FASTCALL zend_object_is_true(zval *op) /* {{{ */
 		if (Z_OBJ_HT_P(op)->cast_object(op, &tmp, _IS_BOOL) == SUCCESS) {
 			return Z_TYPE(tmp) == IS_TRUE;
 		}
-		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to boolean", ZSTR_VAL(Z_OBJ_P(op)->ce->name));
+		zend_error(E_RECOVERABLE_ERROR, "Object of class %s could not be converted to bool", ZSTR_VAL(Z_OBJ_P(op)->ce->name));
 	} else if (Z_OBJ_HT_P(op)->get) {
 		int result;
 		zval rv;
@@ -2788,6 +2788,54 @@ ZEND_API int ZEND_FASTCALL zend_binary_zval_strcasecmp(zval *s1, zval *s2) /* {{
 ZEND_API int ZEND_FASTCALL zend_binary_zval_strncasecmp(zval *s1, zval *s2, zval *s3) /* {{{ */
 {
 	return zend_binary_strncasecmp_l(Z_STRVAL_P(s1), Z_STRLEN_P(s1), Z_STRVAL_P(s2), Z_STRLEN_P(s2), Z_LVAL_P(s3));
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL zendi_smart_streq(zend_string *s1, zend_string *s2) /* {{{ */
+{
+	int ret1, ret2;
+	int oflow1, oflow2;
+	zend_long lval1 = 0, lval2 = 0;
+	double dval1 = 0.0, dval2 = 0.0;
+
+	if ((ret1 = is_numeric_string_ex(s1->val, s1->len, &lval1, &dval1, 0, &oflow1)) &&
+		(ret2 = is_numeric_string_ex(s2->val, s2->len, &lval2, &dval2, 0, &oflow2))) {
+#if ZEND_ULONG_MAX == 0xFFFFFFFF
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0. &&
+			((oflow1 == 1 && dval1 > 9007199254740991. /*0x1FFFFFFFFFFFFF*/)
+			|| (oflow1 == -1 && dval1 < -9007199254740991.))) {
+#else
+		if (oflow1 != 0 && oflow1 == oflow2 && dval1 - dval2 == 0.) {
+#endif
+			/* both values are integers overflown to the same side, and the
+			 * double comparison may have resulted in crucial accuracy lost */
+			goto string_cmp;
+		}
+		if ((ret1 == IS_DOUBLE) || (ret2 == IS_DOUBLE)) {
+			if (ret1 != IS_DOUBLE) {
+				if (oflow2) {
+					/* 2nd operand is integer > LONG_MAX (oflow2==1) or < LONG_MIN (-1) */
+					return 0;
+				}
+				dval1 = (double) lval1;
+			} else if (ret2 != IS_DOUBLE) {
+				if (oflow1) {
+					return 0;
+				}
+				dval2 = (double) lval2;
+			} else if (dval1 == dval2 && !zend_finite(dval1)) {
+				/* Both values overflowed and have the same sign,
+				 * so a numeric comparison would be inaccurate */
+				goto string_cmp;
+			}
+			return dval1 == dval2;
+		} else { /* they both have to be long's */
+			return lval1 == lval2;
+		}
+	} else {
+string_cmp:
+		return zend_string_equal_content(s1, s2);
+	}
 }
 /* }}} */
 
