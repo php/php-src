@@ -4727,14 +4727,14 @@ PHP_FUNCTION(timezone_identifiers_list)
 	const timelib_tzdb             *tzdb;
 	const timelib_tzdb_index_entry *table;
 	int                             i, item_count;
-	zend_long                            what = PHP_DATE_TIMEZONE_GROUP_ALL;
+	zend_long                       what = PHP_DATE_TIMEZONE_GROUP_ALL;
 	char                           *option = NULL;
-	size_t                             option_len = 0;
+	size_t                          option_len = 0;
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(what)
-		Z_PARAM_STRING(option, option_len)
+		Z_PARAM_STRING_EX(option, option_len, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	/* Extra validation */
