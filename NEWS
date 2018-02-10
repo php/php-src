@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
     configuration). (Anatol)
 
+- Date:
+  . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
+    accept `null`). (Pedro Lacerda)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
