@@ -339,6 +339,10 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc, 0, 0, 2)
 	ZEND_ARG_INFO(0, resource)
 	ZEND_ARG_INFO(0, optname)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_opt_doc_method, 0, 0, 1)
+	ZEND_ARG_INFO(0, optname)
+ZEND_END_ARG_INFO()
 #endif
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_config, 0, 0, 1)
@@ -393,6 +397,13 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_tidy_get_body, 0, 0, 1)
 	ZEND_ARG_INFO(0, tidy)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_tidy_construct, 0)
+    ZEND_ARG_INFO(0, filename)
+    ZEND_ARG_INFO(0, config_file)
+    ZEND_ARG_INFO(0, encoding)
+    ZEND_ARG_INFO(0, use_include_path)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 static const zend_function_entry tidy_functions[] = {
@@ -426,19 +437,19 @@ static const zend_function_entry tidy_functions[] = {
 };
 
 static const zend_function_entry tidy_funcs_doc[] = {
-	TIDY_METHOD_MAP(getOpt, tidy_getopt, NULL)
+	TIDY_METHOD_MAP(getOpt, tidy_getopt, arginfo_tidy_getopt)
 	TIDY_METHOD_MAP(cleanRepair, tidy_clean_repair, NULL)
-	TIDY_DOC_ME(parseFile, NULL)
-	TIDY_DOC_ME(parseString, NULL)
-	TIDY_METHOD_MAP(repairString, tidy_repair_string, NULL)
-	TIDY_METHOD_MAP(repairFile, tidy_repair_file, NULL)
+	TIDY_DOC_ME(parseFile, arginfo_tidy_parse_file)
+	TIDY_DOC_ME(parseString, arginfo_tidy_parse_string)
+	TIDY_METHOD_MAP(repairString, tidy_repair_string, arginfo_tidy_repair_string)
+	TIDY_METHOD_MAP(repairFile, tidy_repair_file, arginfo_tidy_repair_file)
 	TIDY_METHOD_MAP(diagnose, tidy_diagnose, NULL)
 	TIDY_METHOD_MAP(getRelease, tidy_get_release, NULL)
 	TIDY_METHOD_MAP(getConfig, tidy_get_config, NULL)
 	TIDY_METHOD_MAP(getStatus, tidy_get_status, NULL)
 	TIDY_METHOD_MAP(getHtmlVer, tidy_get_html_ver, NULL)
 #if HAVE_TIDYOPTGETDOC
-	TIDY_METHOD_MAP(getOptDoc, tidy_get_opt_doc, NULL)
+	TIDY_METHOD_MAP(getOptDoc, tidy_get_opt_doc, arginfo_tidy_get_opt_doc_method)
 #endif
 	TIDY_METHOD_MAP(isXhtml, tidy_is_xhtml, NULL)
 	TIDY_METHOD_MAP(isXml, tidy_is_xml, NULL)
@@ -446,7 +457,7 @@ static const zend_function_entry tidy_funcs_doc[] = {
 	TIDY_METHOD_MAP(head, tidy_get_head, NULL)
 	TIDY_METHOD_MAP(html, tidy_get_html, NULL)
 	TIDY_METHOD_MAP(body, tidy_get_body, NULL)
-	TIDY_DOC_ME(__construct, NULL)
+	TIDY_DOC_ME(__construct, arginfo_tidy_construct)
 	PHP_FE_END
 };
 
