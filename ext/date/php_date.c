@@ -1140,38 +1140,38 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 		rfc_colon = 0;
 		switch (format[i]) {
 			/* day */
-			case 'd': length = slprintf(buffer, 32, "%02d", (int) t->d); break;
-			case 'D': length = slprintf(buffer, 32, "%s", php_date_short_day_name(t->y, t->m, t->d)); break;
-			case 'j': length = slprintf(buffer, 32, "%d", (int) t->d); break;
-			case 'l': length = slprintf(buffer, 32, "%s", php_date_full_day_name(t->y, t->m, t->d)); break;
-			case 'S': length = slprintf(buffer, 32, "%s", english_suffix(t->d)); break;
-			case 'w': length = slprintf(buffer, 32, "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
-			case 'N': length = slprintf(buffer, 32, "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
-			case 'z': length = slprintf(buffer, 32, "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
+			case 'd': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->d); break;
+			case 'D': length = slprintf(buffer, sizeof(buffer), "%s", php_date_short_day_name(t->y, t->m, t->d)); break;
+			case 'j': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->d); break;
+			case 'l': length = slprintf(buffer, sizeof(buffer), "%s", php_date_full_day_name(t->y, t->m, t->d)); break;
+			case 'S': length = slprintf(buffer, sizeof(buffer), "%s", english_suffix(t->d)); break;
+			case 'w': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_day_of_week(t->y, t->m, t->d)); break;
+			case 'N': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_iso_day_of_week(t->y, t->m, t->d)); break;
+			case 'z': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_day_of_year(t->y, t->m, t->d)); break;
 
 			/* week */
 			case 'W':
 				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
-				length = slprintf(buffer, 32, "%02d", (int) isoweek); break; /* iso weeknr */
+				length = slprintf(buffer, sizeof(buffer), "%02d", (int) isoweek); break; /* iso weeknr */
 			case 'o':
 				if(!weekYearSet) { timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear); weekYearSet = 1; }
-				length = slprintf(buffer, 32, "%d", (int) isoyear); break; /* iso year */
+				length = slprintf(buffer, sizeof(buffer), "%d", (int) isoyear); break; /* iso year */
 
 			/* month */
-			case 'F': length = slprintf(buffer, 32, "%s", mon_full_names[t->m - 1]); break;
-			case 'm': length = slprintf(buffer, 32, "%02d", (int) t->m); break;
-			case 'M': length = slprintf(buffer, 32, "%s", mon_short_names[t->m - 1]); break;
-			case 'n': length = slprintf(buffer, 32, "%d", (int) t->m); break;
-			case 't': length = slprintf(buffer, 32, "%d", (int) timelib_days_in_month(t->y, t->m)); break;
+			case 'F': length = slprintf(buffer, sizeof(buffer), "%s", mon_full_names[t->m - 1]); break;
+			case 'm': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->m); break;
+			case 'M': length = slprintf(buffer, sizeof(buffer), "%s", mon_short_names[t->m - 1]); break;
+			case 'n': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->m); break;
+			case 't': length = slprintf(buffer, sizeof(buffer), "%d", (int) timelib_days_in_month(t->y, t->m)); break;
 
 			/* year */
-			case 'L': length = slprintf(buffer, 32, "%d", timelib_is_leap((int) t->y)); break;
-			case 'y': length = slprintf(buffer, 32, "%02d", (int) t->y % 100); break;
-			case 'Y': length = slprintf(buffer, 32, "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
+			case 'L': length = slprintf(buffer, sizeof(buffer), "%d", timelib_is_leap((int) t->y)); break;
+			case 'y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->y % 100); break;
+			case 'Y': length = slprintf(buffer, sizeof(buffer), "%s%04lld", t->y < 0 ? "-" : "", php_date_llabs((timelib_sll) t->y)); break;
 
 			/* time */
-			case 'a': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "pm" : "am"); break;
-			case 'A': length = slprintf(buffer, 32, "%s", t->h >= 12 ? "PM" : "AM"); break;
+			case 'a': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "pm" : "am"); break;
+			case 'A': length = slprintf(buffer, sizeof(buffer), "%s", t->h >= 12 ? "PM" : "AM"); break;
 			case 'B': {
 				int retval = ((((long)t->sse)-(((long)t->sse) - ((((long)t->sse) % 86400) + 3600))) * 10);
 				if (retval < 0) {
@@ -1179,41 +1179,41 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 				}
 				/* Make sure to do this on a positive int to avoid rounding errors */
 				retval = (retval / 864)  % 1000;
-				length = slprintf(buffer, 32, "%03d", retval);
+				length = slprintf(buffer, sizeof(buffer), "%03d", retval);
 				break;
 			}
-			case 'g': length = slprintf(buffer, 32, "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'G': length = slprintf(buffer, 32, "%d", (int) t->h); break;
-			case 'h': length = slprintf(buffer, 32, "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
-			case 'H': length = slprintf(buffer, 32, "%02d", (int) t->h); break;
-			case 'i': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
-			case 's': length = slprintf(buffer, 32, "%02d", (int) t->s); break;
-			case 'u': length = slprintf(buffer, 32, "%06d", (int) floor(t->us)); break;
-			case 'v': length = slprintf(buffer, 32, "%03d", (int) floor(t->us / 1000)); break;
+			case 'g': length = slprintf(buffer, sizeof(buffer), "%d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'G': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->h); break;
+			case 'h': length = slprintf(buffer, sizeof(buffer), "%02d", (t->h % 12) ? (int) t->h % 12 : 12); break;
+			case 'H': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->h); break;
+			case 'i': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->i); break;
+			case 's': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->s); break;
+			case 'u': length = slprintf(buffer, sizeof(buffer), "%06d", (int) floor(t->us)); break;
+			case 'v': length = slprintf(buffer, sizeof(buffer), "%03d", (int) floor(t->us / 1000)); break;
 
 			/* timezone */
-			case 'I': length = slprintf(buffer, 32, "%d", localtime ? offset->is_dst : 0); break;
+			case 'I': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->is_dst : 0); break;
 			case 'P': rfc_colon = 1; /* break intentionally missing */
-			case 'O': length = slprintf(buffer, 32, "%c%02d%s%02d",
+			case 'O': length = slprintf(buffer, sizeof(buffer), "%c%02d%s%02d",
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
 											localtime ? abs(offset->offset / 3600) : 0,
 											rfc_colon ? ":" : "",
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'T': length = slprintf(buffer, 32, "%s", localtime ? offset->abbr : "GMT"); break;
+			case 'T': length = slprintf(buffer, sizeof(buffer), "%s", localtime ? offset->abbr : "GMT"); break;
 			case 'e': if (!localtime) {
-					      length = slprintf(buffer, 32, "%s", "UTC");
+					      length = slprintf(buffer, sizeof(buffer), "%s", "UTC");
 					  } else {
 						  switch (t->zone_type) {
 							  case TIMELIB_ZONETYPE_ID:
-								  length = slprintf(buffer, 32, "%s", t->tz_info->name);
+								  length = slprintf(buffer, sizeof(buffer), "%s", t->tz_info->name);
 								  break;
 							  case TIMELIB_ZONETYPE_ABBR:
-								  length = slprintf(buffer, 32, "%s", offset->abbr);
+								  length = slprintf(buffer, sizeof(buffer), "%s", offset->abbr);
 								  break;
 							  case TIMELIB_ZONETYPE_OFFSET:
-								  length = slprintf(buffer, 32, "%c%02d:%02d",
+								  length = slprintf(buffer, sizeof(buffer), "%c%02d:%02d",
 												((offset->offset < 0) ? '-' : '+'),
 												abs(offset->offset / 3600),
 												abs((offset->offset % 3600) / 60)
@@ -1222,10 +1222,10 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 						  }
 					  }
 					  break;
-			case 'Z': length = slprintf(buffer, 32, "%d", localtime ? offset->offset : 0); break;
+			case 'Z': length = slprintf(buffer, sizeof(buffer), "%d", localtime ? offset->offset : 0); break;
 
 			/* full date/time */
-			case 'c': length = slprintf(buffer, 96, "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
+			case 'c': length = slprintf(buffer, sizeof(buffer), "%04d-%02d-%02dT%02d:%02d:%02d%c%02d:%02d",
 							                (int) t->y, (int) t->m, (int) t->d,
 											(int) t->h, (int) t->i, (int) t->s,
 											localtime ? ((offset->offset < 0) ? '-' : '+') : '+',
@@ -1233,7 +1233,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'r': length = slprintf(buffer, 96, "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
+			case 'r': length = slprintf(buffer, sizeof(buffer), "%3s, %02d %3s %04d %02d:%02d:%02d %c%02d%02d",
 							                php_date_short_day_name(t->y, t->m, t->d),
 											(int) t->d, mon_short_names[t->m - 1],
 											(int) t->y, (int) t->h, (int) t->i, (int) t->s,
@@ -1242,7 +1242,7 @@ static zend_string *date_format(char *format, size_t format_len, timelib_time *t
 											localtime ? abs((offset->offset % 3600) / 60) : 0
 							  );
 					  break;
-			case 'U': length = slprintf(buffer, 32, "%lld", (timelib_sll) t->sse); break;
+			case 'U': length = slprintf(buffer, sizeof(buffer), "%lld", (timelib_sll) t->sse); break;
 
 			case '\\': if (i < format_len) i++; /* break intentionally missing */
 
@@ -4437,38 +4437,38 @@ static zend_string *date_interval_format(char *format, size_t format_len, timeli
 	for (i = 0; i < format_len; i++) {
 		if (have_format_spec) {
 			switch (format[i]) {
-				case 'Y': length = slprintf(buffer, 32, "%02d", (int) t->y); break;
-				case 'y': length = slprintf(buffer, 32, "%d", (int) t->y); break;
+				case 'Y': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->y); break;
+				case 'y': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->y); break;
 
-				case 'M': length = slprintf(buffer, 32, "%02d", (int) t->m); break;
-				case 'm': length = slprintf(buffer, 32, "%d", (int) t->m); break;
+				case 'M': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->m); break;
+				case 'm': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->m); break;
 
-				case 'D': length = slprintf(buffer, 32, "%02d", (int) t->d); break;
-				case 'd': length = slprintf(buffer, 32, "%d", (int) t->d); break;
+				case 'D': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->d); break;
+				case 'd': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->d); break;
 
-				case 'H': length = slprintf(buffer, 32, "%02d", (int) t->h); break;
-				case 'h': length = slprintf(buffer, 32, "%d", (int) t->h); break;
+				case 'H': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->h); break;
+				case 'h': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->h); break;
 
-				case 'I': length = slprintf(buffer, 32, "%02d", (int) t->i); break;
-				case 'i': length = slprintf(buffer, 32, "%d", (int) t->i); break;
+				case 'I': length = slprintf(buffer, sizeof(buffer), "%02d", (int) t->i); break;
+				case 'i': length = slprintf(buffer, sizeof(buffer), "%d", (int) t->i); break;
 
-				case 'S': length = slprintf(buffer, 32, "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
-				case 's': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) t->s); break;
+				case 'S': length = slprintf(buffer, sizeof(buffer), "%02" ZEND_LONG_FMT_SPEC, (zend_long) t->s); break;
+				case 's': length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) t->s); break;
 
-				case 'F': length = slprintf(buffer, 32, "%06" ZEND_LONG_FMT_SPEC, (zend_long) t->us); break;
-				case 'f': length = slprintf(buffer, 32, ZEND_LONG_FMT, (zend_long) t->us); break;
+				case 'F': length = slprintf(buffer, sizeof(buffer), "%06" ZEND_LONG_FMT_SPEC, (zend_long) t->us); break;
+				case 'f': length = slprintf(buffer, sizeof(buffer), ZEND_LONG_FMT, (zend_long) t->us); break;
 
 				case 'a': {
 					if ((int) t->days != -99999) {
-						length = slprintf(buffer, 32, "%d", (int) t->days);
+						length = slprintf(buffer, sizeof(buffer), "%d", (int) t->days);
 					} else {
-						length = slprintf(buffer, 32, "(unknown)");
+						length = slprintf(buffer, sizeof(buffer), "(unknown)");
 					}
 				} break;
-				case 'r': length = slprintf(buffer, 32, "%s", t->invert ? "-" : ""); break;
-				case 'R': length = slprintf(buffer, 32, "%c", t->invert ? '-' : '+'); break;
+				case 'r': length = slprintf(buffer, sizeof(buffer), "%s", t->invert ? "-" : ""); break;
+				case 'R': length = slprintf(buffer, sizeof(buffer), "%c", t->invert ? '-' : '+'); break;
 
-				case '%': length = slprintf(buffer, 32, "%%"); break;
+				case '%': length = slprintf(buffer, sizeof(buffer), "%%"); break;
 				default: buffer[0] = '%'; buffer[1] = format[i]; buffer[2] = '\0'; length = 2; break;
 			}
 			smart_str_appendl(&string, buffer, length);
