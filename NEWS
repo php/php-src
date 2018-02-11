@@ -273,6 +273,8 @@ PHP                                                                        NEWS
     DateTimeInterface interface). (Majkl578)
   . Fixed bug #75149 (redefinition of typedefs ttinfo and t1info). (Remi)
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
 
 - Dba:
   . Fixed bug #72885 (flatfile: dba_fetch() fails to read replaced entry).
