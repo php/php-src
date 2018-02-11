@@ -2417,9 +2417,9 @@ static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp
 			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-			tzobj->tzi.utc_offset > 0 ? '-' : '+',
-			abs(tzobj->tzi.utc_offset / 60),
-			abs((tzobj->tzi.utc_offset % 60)));
+				tzobj->tzi.utc_offset < 0 ? '-' : '+',
+				abs((int)(tzobj->tzi.utc_offset / 3600)),
+				abs(((int)(tzobj->tzi.utc_offset % 3600) / 60)));
 
 			ZVAL_NEW_STR(&zv, tmpstr);
 			}
