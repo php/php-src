@@ -2157,7 +2157,7 @@ static int php_snmp_write_valueretrieval(php_snmp_object *snmp_object, zval *new
 	if (lval >= 0 && lval <= (SNMP_VALUE_LIBRARY|SNMP_VALUE_PLAIN|SNMP_VALUE_OBJECT)) {
 		snmp_object->valueretrieval = lval;
 	} else {
-		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '" ZEND_LONG_FMT "'", Z_LVAL_P(newval));
+		php_error_docref(NULL, E_WARNING, "Unknown SNMP value retrieval method '" ZEND_LONG_FMT "'", lval);
 		ret = FAILURE;
 	}
 
