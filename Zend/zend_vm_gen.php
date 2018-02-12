@@ -2396,7 +2396,8 @@ function gen_vm($def, $skel) {
 	// Insert header
 	out($f, HEADER_TEXT);
 	fputs($f,"#include <stdio.h>\n");
-	fputs($f,"#include <zend.h>\n\n");
+	fputs($f,"#include <zend.h>\n");
+	fputs($f,"#include <zend_vm_opcodes.h>\n\n");
 	
 	fputs($f,"static const char *zend_vm_opcodes_names[".($max_opcode + 1)."] = {\n");
 	for ($i = 0; $i <= $max_opcode; $i++) {
@@ -2411,10 +2412,16 @@ function gen_vm($def, $skel) {
 	fputs($f, "};\n\n");
 
 	fputs($f, "ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {\n");
+	fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+	fputs($f, "\t\treturn NULL;\n");
+	fputs($f, "\t}\n");
 	fputs($f, "\treturn zend_vm_opcodes_names[opcode];\n");
 	fputs($f, "}\n");
 
 	fputs($f, "ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {\n");
+	fputs($f, "\tif (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {\n");
+	fputs($f, "\t\topcode = ZEND_NOP;\n");
+	fputs($f, "\t}\n");
 	fputs($f, "\treturn zend_vm_opcodes_flags[opcode];\n");
 	fputs($f, "}\n");
     
