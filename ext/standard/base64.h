@@ -13,6 +13,7 @@
    | license@php.net so we can mail you a copy immediately.               |
    +----------------------------------------------------------------------+
    | Author: Jim Winstead <jimw@php.net>                                  |
+   |         Xinchen Hui <laruence@php.net>                               |
    +----------------------------------------------------------------------+
 */
 
