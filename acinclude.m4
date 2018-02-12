@@ -3271,7 +3271,7 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
   AC_MSG_CHECKING([for __builtin_cpu_supports])
 
   AC_TRY_LINK(, [
-    return __builtin_cpu_supports("sse2")? 1 : 0;
+    return __builtin_cpu_supports("sse")? 1 : 0;
   ], [
     have_builtin_cpu_supports=1
     AC_MSG_RESULT([yes])
@@ -3282,7 +3282,28 @@ AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
 
   AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
    [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
+])
 
+dnl PHP_CHECK_CPU_SUPPORTS
+AC_DEFUN([PHP_CHECK_CPU_SUPPORTS], [
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_INIT])
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_SUPPORTS])
+  have_ext_instructions=0
+  if test $have_builtin_cpu_supports = 1; then
+    AC_MSG_CHECKING([for $1 instructions supports])
+    AC_TRY_RUN([
+int main() {
+	return __builtin_cpu_supports("$1")? 0 : 1;
+}
+    ], [
+      have_ext_instructions=1
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+  fi
+  AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
+   [$have_ext_instructions], [Whether the compiler supports $1 instructions])
 ])
 
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.

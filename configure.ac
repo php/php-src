@@ -496,7 +496,9 @@ sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
 assert.h \
-nmmintrin.h
+tmmintrin.h \
+nmmintrin.h \
+immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -571,6 +573,12 @@ PHP_CHECK_BUILTIN_CPU_INIT
 dnl Check __builtin_cpu_supports
 PHP_CHECK_BUILTIN_CPU_SUPPORTS
 
+dnl Check instructions
+PHP_CHECK_CPU_SUPPORTS([ssse3])
+PHP_CHECK_CPU_SUPPORTS([sse4.2])
+PHP_CHECK_CPU_SUPPORTS([avx])
+PHP_CHECK_CPU_SUPPORTS([avx2])
+
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
 dnl AC_STRUCT_ST_BLOCKS will screw QNX because fileblocks.o does not exists
@@ -590,7 +598,6 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
-AC_MSG_CHECKING([checking building environment])
 AX_GCC_FUNC_ATTRIBUTE([ifunc])
 AX_GCC_FUNC_ATTRIBUTE([target])
 
