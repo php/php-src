@@ -4992,7 +4992,7 @@ ZEND_METHOD(reflection_class, getTraitNames)
 }
 /* }}} */
 
-/* {{{ proto public arra ReflectionClass::getTraitaliases()
+/* {{{ proto public array ReflectionClass::getTraitAliases()
    Returns an array of trait aliases */
 ZEND_METHOD(reflection_class, getTraitAliases)
 {
