@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Fixed bug #75857 (Timezone gets truncated when formatted). (carusogabriel)
   . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
     accept `null`). (Pedro Lacerda)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
 
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
