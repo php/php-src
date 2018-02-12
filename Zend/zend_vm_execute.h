@@ -66630,7 +66630,8 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 
 ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)
 {
-	uint32_t spec = zend_spec_handlers[op->opcode];
+	zend_uchar opcode = zend_user_opcodes[op->opcode];
+	uint32_t spec = zend_spec_handlers[opcode];
 
 	if (spec & SPEC_RULE_COMMUTATIVE) {
 		if (op->op1_type < op->op2_type) {

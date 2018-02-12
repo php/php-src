@@ -2646,10 +2646,11 @@ function gen_vm($def, $skel) {
 	// Generate zend_vm_get_opcode_handler() function
 	out($f, "ZEND_API void ZEND_FASTCALL zend_vm_set_opcode_handler(zend_op* op)\n");
 	out($f, "{\n");
+	out($f, "\tzend_uchar opcode = zend_user_opcodes[op->opcode];\n");
 	if (!ZEND_VM_SPEC) {
-		out($f, "\top->handler = zend_vm_get_opcode_handler(op->opcode, op);\n");
+		out($f, "\top->handler = zend_vm_get_opcode_handler(opcode, op);\n");
 	} else {
-		out($f, "\tuint32_t spec = zend_spec_handlers[op->opcode];\n\n");
+		out($f, "\tuint32_t spec = zend_spec_handlers[opcode];\n\n");
 		out($f, "\tif (spec & SPEC_RULE_COMMUTATIVE) {\n");
 		out($f, "\t\tif (op->op1_type < op->op2_type) {\n");
 		out($f, "\t\t\tzend_swap_operands(op);\n");
