@@ -116,8 +116,8 @@ if ((($res = mysqli_query($link, 'SHOW CHARACTER SET LIKE "latin1"', MYSQLI_STOR
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_set_charset($link, $new_charset)))
-		printf("[016] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_set_charset($link, $new_charset)))
+		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

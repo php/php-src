@@ -501,6 +501,28 @@ static void zend_ssa_range_and(zend_long a, zend_long b, zend_long c, zend_long 
 	}
 }
 
+static inline zend_bool zend_abs_range(
+		zend_long min, zend_long max, zend_long *abs_min, zend_long *abs_max) {
+	if (min == ZEND_LONG_MIN) {
+		/* Cannot take absolute value of LONG_MIN  */
+		return 0;
+	}
+
+	if (min >= 0) {
+		*abs_min = min;
+		*abs_max = max;
+	} else if (max <= 0) {
+		*abs_min = -max;
+		*abs_max = -min;
+	} else {
+		/* Range crossing zero */
+		*abs_min = 0;
+		*abs_max = MAX(max, -min);
+	}
+
+	return 1;
+}
+
 /* Get the normal op corresponding to a compound assignment op */
 static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
 	switch (opcode) {
@@ -648,20 +670,35 @@ static int zend_inference_calc_binary_op_range(
 					tmp->min = ZEND_LONG_MIN;
 					tmp->max = ZEND_LONG_MAX;
 				} else {
+					zend_long op2_abs_min, op2_abs_max;
+
 					op1_min = OP1_MIN_RANGE();
 					op2_min = OP2_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
 					op2_max = OP2_MAX_RANGE();
-					if (op2_min == 0 || op2_max == 0) {
-						/* avoid division by zero */
+					if (!zend_abs_range(op2_min, op2_max, &op2_abs_min, &op2_abs_max)) {
 						break;
 					}
-					t1 = (op2_min == -1) ? 0 : (op1_min % op2_min);
-					t2 = (op2_max == -1) ? 0 : (op1_min % op2_max);
-					t3 = (op2_min == -1) ? 0 : (op1_max % op2_min);
-					t4 = (op2_max == -1) ? 0 : (op1_max % op2_max);
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+
+					if (op2_abs_max == 0) {
+						/* Always modulus by zero, nothing we can do */
+						break;
+					}
+					if (op2_abs_min == 0) {
+						/* Ignore the modulus by zero case, which will throw */
+						op2_abs_min++;
+					}
+
+					if (op1_min >= 0) {
+						tmp->min = op1_max < op2_abs_min ? op1_min : 0;
+						tmp->max = MIN(op1_max, op2_abs_max - 1);
+					} else if (op1_max <= 0) {
+						tmp->min = MAX(op1_min, -op2_abs_max + 1);
+						tmp->max = op1_min > -op2_abs_min ? op1_max : 0;
+					} else {
+						tmp->min = MAX(op1_min, -op2_abs_max + 1);
+						tmp->max = MIN(op1_max, op2_abs_max - 1);
+					}
 				}
 				return 1;
 			}

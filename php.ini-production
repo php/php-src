@@ -1791,7 +1791,7 @@ ldap.max_links = -1
 
 ; A bitmask, where each bit enables or disables the appropriate OPcache
 ; passes
-;opcache.optimization_level=0xffffffff
+;opcache.optimization_level=0x7FFFBFFF
 
 ;opcache.dups_fix=0
 

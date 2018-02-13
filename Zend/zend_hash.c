@@ -542,7 +542,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	zend_ulong h;
 	uint32_t nIndex;
 	uint32_t idx;
-	Bucket *p;
+	Bucket *p, *arData;
 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
@@ -614,13 +614,14 @@ add_to_hash:
 		ht->nInternalPointer = idx;
 	}
 	zend_hash_iterators_update(ht, HT_INVALID_IDX, idx);
-	p = ht->arData + idx;
+	arData = ht->arData;
+	p = arData + idx;
 	p->key = key;
 	p->h = h = ZSTR_H(key);
-	ZVAL_COPY_VALUE(&p->val, pData);
 	nIndex = h | ht->nTableMask;
-	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
-	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
+	Z_NEXT(p->val) = HT_HASH_EX(arData, nIndex);
+	HT_HASH_EX(arData, nIndex) = HT_IDX_TO_HASH(idx);
+	ZVAL_COPY_VALUE(&p->val, pData);
 
 	return &p->val;
 }

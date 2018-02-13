@@ -19,6 +19,9 @@
 #ifndef ZEND_CPU_INFO_H
 #define ZEND_CPU_INFO_H
 
+#include "zend.h"
+
+#define ZEND_CPU_EBX_MASK     (1<<30)
 #define ZEND_CPU_EDX_MASK     (1<<31)
 
 typedef enum _zend_cpu_feature {
@@ -53,8 +56,11 @@ typedef enum _zend_cpu_feature {
 	ZEND_CPU_FEATURE_OSXSAVE		= (1<<27) ,
 	ZEND_CPU_FEATURE_AVX			= (1<<28),
 	ZEND_CPU_FEATURE_F16C			= (1<<29),
-	ZEND_CPU_FEATURE_RDRAND			= (1<<30),
+	/* intentionally don't support	= (1<<30) */
 	/* intentionally don't support	= (1<<31) */
+
+	/* EBX */
+	ZEND_CPU_FEATURE_AVX2			= (1<<5 | ZEND_CPU_EBX_MASK),
 
 	/* EDX */
 	ZEND_CPU_FEATURE_FPU			= (1<<0 | ZEND_CPU_EDX_MASK),
@@ -86,14 +92,88 @@ typedef enum _zend_cpu_feature {
 	ZEND_CPU_FEATURE_SSE2			= (1<<26 | ZEND_CPU_EDX_MASK),
 	ZEND_CPU_FEATURE_SS				= (1<<27 | ZEND_CPU_EDX_MASK),
 	ZEND_CPU_FEATURE_HT				= (1<<28 | ZEND_CPU_EDX_MASK),
-	ZEND_CPU_FEATURE_TM				= (1<<29 | ZEND_CPU_EDX_MASK),
-	ZEND_CPU_FEATURE_IA64			= (1<<30 | ZEND_CPU_EDX_MASK)
+	ZEND_CPU_FEATURE_TM				= (1<<29 | ZEND_CPU_EDX_MASK)
+	/*intentionally don't support   = (1<<30 | ZEND_CPU_EDX_MASK)*/
 	/*intentionally don't support   = (1<<31 | ZEND_CPU_EDX_MASK)*/
 } zend_cpu_feature;
 
+void zend_cpu_startup();
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature);
 
-void zend_cpu_startup(void);
+#if PHP_HAVE_BUILTIN_CPU_SUPPORTS
+/* NOTE: you should use following inline function in
+ * resolver functions (ifunc), as it could be called
+ * before all PLT symbols are resloved. in other words,
+ * resolver functions should not depends any external
+ * functions */
+static zend_always_inline int zend_cpu_supports_sse2() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("sse2");
+}
+
+static zend_always_inline int zend_cpu_supports_ssse3() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("ssse3");
+}
+
+static zend_always_inline int zend_cpu_supports_sse41() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("sse4.1");
+}
+
+static zend_always_inline int zend_cpu_supports_sse42() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("sse4.2");
+}
+
+static zend_always_inline int zend_cpu_supports_avx() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("avx");
+}
+
+static zend_always_inline int zend_cpu_supports_avx2() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("avx2");
+}
+#else
+
+static zend_always_inline int zend_cpu_supports_sse2() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE2);
+}
+
+static zend_always_inline int zend_cpu_supports_ssse3() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSSE3);
+}
+
+static zend_always_inline int zend_cpu_supports_sse41() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE41);
+}
+
+static zend_always_inline int zend_cpu_supports_sse42() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE42);
+}
+
+static zend_always_inline int zend_cpu_supports_avx() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX);
+}
+
+static zend_always_inline int zend_cpu_supports_avx2() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_AVX2);
+}
+
+#endif
 
 #endif
 

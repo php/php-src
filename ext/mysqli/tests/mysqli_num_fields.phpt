@@ -35,8 +35,8 @@ require_once('skipifconnectfailure.inc');
 
 		mysqli_free_result($res);
 
-		if ($test_free && (NULL !== ($tmp = mysqli_num_fields($res))))
-			printf("[%03d] Expecting NULL, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
+		if ($test_free && (false !== ($tmp = mysqli_num_fields($res))))
+			printf("[%03d] Expecting false, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
 	}
 
 	func_test_mysqli_num_fields($link, "SELECT 1 AS a", 1, 5);

@@ -13,8 +13,8 @@
  * @brief Basic Iterator wrapper
  * @since PHP 5.1
  *
- * This iterator wrapper allows to convert anything that is traversable into 
- * an Iterator. It is very important to understand that most classes that do 
+ * This iterator wrapper allows to convert anything that is traversable into
+ * an Iterator. It is very important to understand that most classes that do
  * not implement Iterator have their reasone to. Most likely they do not allow
  * the full Iterator feature set. If so you need to provide techniques to
  * prevent missuse. If you do not you must expect exceptions or fatal errors.
@@ -32,7 +32,7 @@
  }
  \endcode
  *
- * As you can see in the example this approach requires that the class to 
+ * As you can see in the example this approach requires that the class to
  * downcast to is actually a base class of the specified iterator to wrap.
  * Omitting the downcast in the above example would result in an endless loop
  * since IteratorIterator::__construct() would call SomeClass::getIterator().

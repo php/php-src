@@ -23,9 +23,9 @@ class DirectoryGraphIterator extends DirectoryTreeIterator
 				new ParentIterator(
 					new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::KEY_AS_FILENAME
 					)
-				), 
+				),
 				CachingIterator::CALL_TOSTRING|CachingIterator::CATCH_GET_CHILD
-			), 
+			),
 			parent::SELF_FIRST
 		);
 	}

@@ -32,7 +32,7 @@ unlink($fname);
 
 ?>
 --EXPECTF--	
-Warning: imagecreatefromgd2(): gd warning: product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
+Warning: imagecreatefromgd2(): product of memory allocation multiplication would exceed INT_MAX, failing operation gracefully
  in %sbug72339.php on line %d
 
 Warning: imagecreatefromgd2(): '%sbug72339.gd' is not a valid GD2 file in %sbug72339.php on line %d

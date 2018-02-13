@@ -32,7 +32,7 @@
 #define CHECK_STATUS(value) \
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
 		php_error_docref(NULL, E_WARNING, "Property access is not allowed yet"); \
-		ZVAL_NULL(retval); \
+		ZVAL_FALSE(retval); \
 		return retval; \
 	} \
 
@@ -40,7 +40,7 @@
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
-	ZVAL_NULL(retval);\
+	ZVAL_FALSE(retval);\
 	return retval; \
 } else { \
 	CHECK_STATUS(statusval);\

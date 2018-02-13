@@ -251,5 +251,5 @@ object(stdClass)#%d (13) {
 }
 
 Warning: mysqli_field_seek(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

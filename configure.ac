@@ -496,7 +496,9 @@ sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
 assert.h \
-nmmintrin.h
+tmmintrin.h \
+nmmintrin.h \
+immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -566,6 +568,16 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_init
+PHP_CHECK_BUILTIN_CPU_INIT
+dnl Check __builtin_cpu_supports
+PHP_CHECK_BUILTIN_CPU_SUPPORTS
+
+dnl Check instructions
+PHP_CHECK_CPU_SUPPORTS([ssse3])
+PHP_CHECK_CPU_SUPPORTS([sse4.2])
+PHP_CHECK_CPU_SUPPORTS([avx])
+PHP_CHECK_CPU_SUPPORTS([avx2])
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -586,7 +598,6 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
-AC_MSG_CHECKING([checking building environment])
 AX_GCC_FUNC_ATTRIBUTE([ifunc])
 AX_GCC_FUNC_ATTRIBUTE([target])
 
@@ -1377,12 +1388,7 @@ old_CC=$CC
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
+  CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
 dnl This will go away, if we have a facility to run per-extension code

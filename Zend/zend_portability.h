@@ -520,10 +520,48 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_HAVE_IFUNC_TARGET 1
 #endif
 
+#if (defined(__i386__) || defined(__x86_64__))
+# if PHP_HAVE_SSSE3_INSTRUCTIONS && defined(HAVE_TMMINTRIN_H)
+# define PHP_HAVE_SSSE3
+# endif
+
+# if PHP_HAVE_SSE4_2_INSTRUCTIONS && defined(HAVE_NMMINTRIN_H)
+# define PHP_HAVE_SSE4_2
+# endif
+
+# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H)
+# define PHP_HAVE_AVX2
+# endif
+#endif
+
+#ifdef __SSSE3__
+/* Instructions compiled directly. */
+# define ZEND_INTRIN_SSSE3_NATIVE 1
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSSE3)) || defined(ZEND_WIN32)
+/* Function resolved by ifunc or MINIT. */
+# define ZEND_INTRIN_SSSE3_RESOLVER 1
+#endif
+
+#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER)
+# define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
+#elif ZEND_INTRIN_SSSE3_RESOLVER
+# define ZEND_INTRIN_SSSE3_FUNC_PTR 1
+#endif
+
+#if ZEND_INTRIN_SSSE3_RESOLVER
+# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) ZEND_API func __attribute__((target("ssse3")))
+# else
+#  define ZEND_INTRIN_SSSE3_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_SSSE3_FUNC_DECL(func)
+#endif
+
 #ifdef __SSE4_2__
 /* Instructions compiled directly. */
 # define ZEND_INTRIN_SSE4_2_NATIVE 1
-#elif (defined(__i386__) || defined(__x86_64__)) && defined(HAVE_NMMINTRIN_H) || defined(ZEND_WIN32)
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_SSE4_2)) || defined(ZEND_WIN32)
 /* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
@@ -542,6 +580,30 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # endif
 #else
 # define ZEND_INTRIN_SSE4_2_FUNC_DECL(func)
+#endif
+
+#ifdef __AVX2__
+/* Instructions compiled directly. */
+# define ZEND_INTRIN_AVX2_NATIVE 1
+#elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || defined(ZEND_WIN32)
+/* Function resolved by ifunc or MINIT. */
+# define ZEND_INTRIN_AVX2_RESOLVER 1
+#endif
+
+#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER)
+# define ZEND_INTRIN_AVX2_FUNC_PROTO 1
+#elif ZEND_INTRIN_AVX2_RESOLVER
+# define ZEND_INTRIN_AVX2_FUNC_PTR 1
+#endif
+
+#if ZEND_INTRIN_AVX2_RESOLVER
+# if defined(HAVE_FUNC_ATTRIBUTE_TARGET)
+#  define ZEND_INTRIN_AVX2_FUNC_DECL(func) ZEND_API func __attribute__((target("avx2")))
+# else
+#  define ZEND_INTRIN_AVX2_FUNC_DECL(func) func
+# endif
+#else
+# define ZEND_INTRIN_AVX2_FUNC_DECL(func)
 #endif
 
 /* Intrinsics macros end. */

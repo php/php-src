@@ -23,7 +23,7 @@ function __load_class($classname, $dir)
 	return false;
 }
 
-/** 
+/**
  * @brief   Class loader for SPL example classes
  * @author  Marcus Boerger
  * @version 1.0

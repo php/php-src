@@ -45,6 +45,8 @@ PHP                                                                        NEWS
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
 
 - DBA:
   . Fixed bug #75264 (compiler warnings emitted). (petk)
@@ -77,6 +79,10 @@ PHP                                                                        NEWS
   . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
     (Come)
   . Added full support for sending and parsing ldap controls (Come)
+  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
+
+- libxml2:
+  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
 
 - litespeed:
   . Fixed bug #75248 (Binary directory doesn't get created when building 
@@ -122,6 +128,8 @@ PHP                                                                        NEWS
 - phar:
   . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
     (bwbroersma)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
 
 - pgsql:
   . Added new error constants for pg_result_error(): (Kalle)
@@ -153,6 +161,7 @@ PHP                                                                        NEWS
     may hide parse error). (Nikita)
   . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
     (cmb)
+  . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
 - SQLite3:
   . Updated bundled libsqlite to 3.22.0. (cmb)
@@ -173,6 +182,10 @@ PHP                                                                        NEWS
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
     (cmb)
+
+- Tidy:
+  . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
+    functions taking tidy). (Gabriel Caruso)
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

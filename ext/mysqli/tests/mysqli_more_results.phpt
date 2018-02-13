@@ -82,5 +82,5 @@ Strict Standards: mysqli_next_result(): There is no next result set. Please, cal
 Strict Standards: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 
 Warning: mysqli_more_results(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

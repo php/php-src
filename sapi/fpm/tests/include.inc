@@ -64,7 +64,7 @@ function run_fpm($config, &$out = false, $extra_args = '') /* {{{ */
 function test_fpm_conf($config, &$msg = NULL) { /* {{{ */
 	$cfg = dirname(__FILE__).'/test-fpm-config.tmp';
 	file_put_contents($cfg, $config);
-	exec(get_fpm_path() . ' -t -y ' . $cfg . ' 2>&1', $output, $code);	
+	exec(get_fpm_path() . ' -t -y ' . $cfg . ' 2>&1', $output, $code);
 	if ($code) {
 		$msg = preg_replace("/\[.+?\]/", "", $output[0]);
 		return false;

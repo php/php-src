@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 #include <zend.h>
+#include <zend_vm_opcodes.h>
 
 static const char *zend_vm_opcodes_names[199] = {
 	"ZEND_NOP",
@@ -426,8 +427,14 @@ static uint32_t zend_vm_opcodes_flags[199] = {
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {
+	if (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {
+		return NULL;
+	}
 	return zend_vm_opcodes_names[opcode];
 }
 ZEND_API uint32_t ZEND_FASTCALL zend_get_opcode_flags(zend_uchar opcode) {
+	if (UNEXPECTED(opcode > ZEND_VM_LAST_OPCODE)) {
+		opcode = ZEND_NOP;
+	}
 	return zend_vm_opcodes_flags[opcode];
 }

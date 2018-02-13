@@ -3233,7 +3233,7 @@ function toolset_setup_intrinsic_cflags()
 	avail.Add("sse4.1", "__SSE4_1__");
 	avail.Add("sse4.2", "__SSE4_2__");
 	/* From oldest to newest. */
-	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2");
+	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2");
 
 	if (VS_TOOLSET) {
 		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
@@ -3246,6 +3246,9 @@ function toolset_setup_intrinsic_cflags()
 			for (var i in list) {
 				AC_DEFINE(avail.Item(list[i]), 1);
 			}
+
+			/* All means all. __AVX__ and __AVX2__ are defined by compiler. */
+			ADD_FLAG("CFLAGS","/arch:AVX2");
 		} else {
 			var list = PHP_NATIVE_INTRINSICS.split(",");
 			var j = 0;
@@ -3254,10 +3257,17 @@ function toolset_setup_intrinsic_cflags()
 					var it = list[i].toLowerCase();
 					if (scale[k] == it) {
 						j = k > j ? k : j;
-					} else if (!avail.Exists(it)) {
+					} else if (!avail.Exists(it) && "avx2" != it && "avx" != it) {
 						WARNING("Unknown intrinsic name '" + it + "' ignored");
 					}
 				}
+			}
+			if ("avx2" == scale[j]) {
+				ADD_FLAG("CFLAGS","/arch:AVX2");
+				j -= 2;
+			} else if ("avx" == scale[j]) {
+				ADD_FLAG("CFLAGS","/arch:AVX");
+				j -= 1;
 			}
 			for (var i = 0; i <= j; i++) {
 				var it = scale[i];

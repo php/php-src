@@ -742,9 +742,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	extern zend_php_scanner_globals language_scanner_globals;
 #endif
 
-#ifndef HAVE_FUNC_ATTRIBUTE_IFUNC
 	zend_cpu_startup();
-#endif
 
 #ifdef ZEND_WIN32
 	php_win32_cp_set_by_id(65001);

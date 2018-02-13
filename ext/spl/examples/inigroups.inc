@@ -18,11 +18,11 @@ if (!class_exists("DbaReader", false)) require_once("dbareader.inc");
  * @version 1.1
  *
  * Using this class you can iterator over all groups of a ini file.
- * 
+ *
  * This class uses a 'is-a' relation to KeyFilter in contrast to a 'has-a'
- * relation. Doing so both current() and key() methods must be overwritten. 
+ * relation. Doing so both current() and key() methods must be overwritten.
  * If it would use a 'has-a' relation there would be much more to type...
- * but for puritists that would allow correctness in so far as then no 
+ * but for puritists that would allow correctness in so far as then no
  * key() would be needed.
  */
 class IniGroups extends KeyFilter

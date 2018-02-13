@@ -16,7 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-#include "zend.h"
 #include "zend_cpuinfo.h"
 
 typedef struct _zend_cpu_info {
@@ -30,50 +29,53 @@ typedef struct _zend_cpu_info {
 static zend_cpu_info cpuinfo = {0};
 
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
-static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	__asm__ __volatile__ (
 		"cpuid"
-		: "=a"(cpuinfo.eax), "=b"(cpuinfo.ebx), "=c"(cpuinfo.ecx), "=d"(cpuinfo.edx)
+		: "=a"(cpuinfo->eax), "=b"(cpuinfo->ebx), "=c"(cpuinfo->ecx), "=d"(cpuinfo->edx)
 		: "a"(func), "c"(subfunc)
 	);
 }
 #elif defined(ZEND_WIN32)
 # include <intrin.h>
-static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
 	int regs[4];
 
 	__cpuidex(regs, func, subfunc);
 
-	cpuinfo.eax = regs[0];
-	cpuinfo.ebx = regs[1];
-	cpuinfo.ecx = regs[2];
-	cpuinfo.edx = regs[3];
+	cpuinfo->eax = regs[0];
+	cpuinfo->ebx = regs[1];
+	cpuinfo->ecx = regs[2];
+	cpuinfo->edx = regs[3];
 }
 #else
-static void __zend_cpuid(uint32_t func, uint32_t subfunc) {
-	cpuinfo.eax = 0;
+static void __zend_cpuid(uint32_t func, uint32_t subfunc, zend_cpu_info *cpuinfo) {
+	cpuinfo->eax = 0;
 }
 #endif
 
 void zend_cpu_startup(void)
 {
 	if (!cpuinfo.initialized) {
+		zend_cpu_info ebx;
+
 		cpuinfo.initialized = 1;
-		__zend_cpuid(0, 0);
+		__zend_cpuid(0, 0, &cpuinfo);
 		if (cpuinfo.eax == 0) {
 			return;
 		}
-		__zend_cpuid(1, 0);
+		__zend_cpuid(1, 0, &cpuinfo);
+		/* for avx2 */
+		__zend_cpuid(7, 0, &ebx);
+		cpuinfo.ebx = ebx.ebx;
 	}
 }
 
 ZEND_API int zend_cpu_supports(zend_cpu_feature feature) {
-#ifdef HAVE_FUNC_ATTRIBUTE_IFUNC
-	/* The resolver is invoked before zend_startup(). */
-	zend_cpu_startup();
-#endif
 	if (feature & ZEND_CPU_EDX_MASK) {
 		return (cpuinfo.edx & (feature & ~ZEND_CPU_EDX_MASK));
+	} else if (feature & ZEND_CPU_EBX_MASK) {
+		return (cpuinfo.ebx & (feature & ~ZEND_CPU_EBX_MASK));
 	} else {
 		return (cpuinfo.ecx & feature);
 	}

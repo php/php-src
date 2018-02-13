@@ -24,8 +24,8 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[003] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (NULL !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[004] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
+		printf("[004] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	function func_test_mysqli_stmt_param_count($stmt, $query, $expected, $offset) {
 
@@ -48,8 +48,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (NULL !== ($tmp = mysqli_stmt_param_count($stmt)))
-		printf("[40] Expecting NULL, got %s/%s\n");
+	if (false !== ($tmp = mysqli_stmt_param_count($stmt)))
+		printf("[40] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 

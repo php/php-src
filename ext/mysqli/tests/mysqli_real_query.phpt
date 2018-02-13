@@ -84,8 +84,8 @@ ver_param;')) {
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_real_query($link, "SELECT id FROM test")))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_real_query($link, "SELECT id FROM test")))
+		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

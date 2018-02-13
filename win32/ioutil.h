@@ -376,7 +376,7 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 {/*{{{*/
 	FILE *ret;
 	wchar_t modew[16] = {0};
-	int err = 0, i;
+	int err = 0, i = 0;
 
 	PHP_WIN32_IOUTIL_INIT_W(patha)
 	if (!pathw) {
@@ -386,8 +386,9 @@ __forceinline static FILE *php_win32_ioutil_fopen(const char *patha, const char 
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, NULL, 1)
 
-	for (i = 0; i < (sizeof(modew)-1)/sizeof(wchar_t); i++) {
+	while (i < (sizeof(modew)-1)/sizeof(wchar_t) && modea[i]) {
 		modew[i] = (wchar_t)modea[i];
+		i++;
 	}
 
 	ret = php_win32_ioutil_fopen_w(pathw, modew);

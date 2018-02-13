@@ -104,6 +104,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
      point in the past.
 
   m. zend_cpu_supports() determines if a feature is supported by current cpu.
+     Also serial inline zend_cpu_supports_xxx() are added, which is designed for
+     ifunc resolver function, as resolver function should not depend on any
+     external function.
 
   n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
      duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.

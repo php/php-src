@@ -34,7 +34,6 @@
 /* {{{ */
 static void msgfmt_do_format(MessageFormatter_object *mfo, zval *args, zval *return_value)
 {
-	int count;
 	UChar* formatted = NULL;
 	int32_t formatted_len = 0;
 
