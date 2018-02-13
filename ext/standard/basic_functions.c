@@ -307,8 +307,8 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_max, 0, 0, 1)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_walk, 0, 0, 2)
-	ZEND_ARG_INFO(1, input) /* ARRAY_INFO(1, arg, 0) */
-	ZEND_ARG_INFO(0, funcname)
+	ZEND_ARG_ARRAY_INFO(1, input, 0)
+	ZEND_ARG_CALLABLE_INFO(0, funcname, 0)
 	ZEND_ARG_INFO(0, userdata)
 ZEND_END_ARG_INFO()
 
@@ -589,7 +589,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_array_key_exists, 0)
 	ZEND_ARG_INFO(0, key)
-	ZEND_ARG_INFO(0, search)
+	ZEND_ARG_ARRAY_INFO(0, search, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array_chunk, 0, 0, 2)
