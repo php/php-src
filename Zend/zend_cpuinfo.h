@@ -113,6 +113,13 @@ static zend_always_inline int zend_cpu_supports_sse2() {
 	return __builtin_cpu_supports("sse2");
 }
 
+static zend_always_inline int zend_cpu_supports_sse3() {
+#if PHP_HAVE_BUILTIN_CPU_INIT
+	__builtin_cpu_init();
+#endif
+	return __builtin_cpu_supports("sse3");
+}
+
 static zend_always_inline int zend_cpu_supports_ssse3() {
 #if PHP_HAVE_BUILTIN_CPU_INIT
 	__builtin_cpu_init();
@@ -151,6 +158,10 @@ static zend_always_inline int zend_cpu_supports_avx2() {
 
 static zend_always_inline int zend_cpu_supports_sse2() {
 	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE2);
+}
+
+static zend_always_inline int zend_cpu_supports_sse3() {
+	return zend_cpu_supports(ZEND_CPU_FEATURE_SSE3);
 }
 
 static zend_always_inline int zend_cpu_supports_ssse3() {
