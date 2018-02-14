@@ -657,6 +657,7 @@ static HashTable *date_object_get_properties_period(zval *object);
 static HashTable *date_object_get_properties_timezone(zval *object);
 static HashTable *date_object_get_gc_timezone(zval *object, zval **table, int *n);
 static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp);
+static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv);
 
 zval *date_interval_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
 void date_interval_write_property(zval *object, zval *member, zval *value, void **cache_slot);
@@ -2399,6 +2400,30 @@ static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
 	return props;
 } /* }}} */
 
+static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
+{
+	switch (tzobj->type) {
+		case TIMELIB_ZONETYPE_ID:
+			ZVAL_STRING(zv, tzobj->tzi.tz->name);
+			break;
+		case TIMELIB_ZONETYPE_OFFSET: {
+			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
+			timelib_sll utc_offset = tzobj->tzi.utc_offset;
+
+			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
+				utc_offset < 0 ? '-' : '+',
+				abs(utc_offset / 3600),
+				abs(((utc_offset % 3600) / 60)));
+
+			ZVAL_NEW_STR(zv, tmpstr);
+			}
+			break;
+		case TIMELIB_ZONETYPE_ABBR:
+			ZVAL_STRING(zv, tzobj->tzi.z.abbr);
+			break;
+	}
+}
+
 static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp) /* {{{ */
 {
 	HashTable *ht, *props;
@@ -2414,25 +2439,7 @@ static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp
 	ZVAL_LONG(&zv, tzobj->type);
 	zend_hash_str_update(ht, "timezone_type", sizeof("timezone_type")-1, &zv);
 
-	switch (tzobj->type) {
-		case TIMELIB_ZONETYPE_ID:
-			ZVAL_STRING(&zv, tzobj->tzi.tz->name);
-			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				abs((int)(tzobj->tzi.utc_offset / 3600)),
-				abs(((int)(tzobj->tzi.utc_offset % 3600) / 60)));
-
-			ZVAL_NEW_STR(&zv, tmpstr);
-			}
-			break;
-		case TIMELIB_ZONETYPE_ABBR:
-			ZVAL_STRING(&zv, tzobj->tzi.z.abbr);
-			break;
-	}
+	php_timezone_to_string(tzobj, &zv);
 	zend_hash_str_update(ht, "timezone", sizeof("timezone")-1, &zv);
 
 	return ht;
@@ -3942,27 +3949,7 @@ PHP_FUNCTION(timezone_name_get)
 	}
 	tzobj = Z_PHPTIMEZONE_P(object);
 	DATE_CHECK_INITIALIZED(tzobj->initialized, DateTimeZone);
-
-	switch (tzobj->type) {
-		case TIMELIB_ZONETYPE_ID:
-			RETURN_STRING(tzobj->tzi.tz->name);
-			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-			timelib_sll utc_offset = tzobj->tzi.utc_offset;
-
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
-
-			RETURN_NEW_STR(tmpstr);
-			}
-			break;
-		case TIMELIB_ZONETYPE_ABBR:
-			RETURN_STRING(tzobj->tzi.z.abbr);
-			break;
-	}
+	php_timezone_to_string(tzobj, return_value);
 }
 /* }}} */
 
