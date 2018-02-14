@@ -3,7 +3,6 @@ mb_split()
 --SKIPIF--
 <?php
 extension_loaded('mbstring') or die('skip mbstring not available');
-extension_loaded('pcre') or die('skip pcre not available');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
 --INI--
@@ -21,7 +20,7 @@ mbstring.func_overload=0
 			print "ok\n";
 		} else {
 			print count($result1).'-'.count($result2)."\n";
-		}	
+		}
 	}
 
 	var_dump( mb_split( " ", "a b c d e f g" )
@@ -46,4 +45,3 @@ ok
 2-2
 3-3
 4-4
-
