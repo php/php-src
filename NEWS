@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.3
 
-
-15 Feb 2018, PHP 7.2.3RC1
-
 - Core:
   . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
 
