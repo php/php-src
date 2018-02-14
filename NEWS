@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.5
 
+- Core:
+  . Fixed bug #75722 (Convert valgrind detection to configure option).
+    (Michael Heimpold)
+
 - Mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
