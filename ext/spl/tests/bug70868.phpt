@@ -2,8 +2,6 @@
 Bug #70868, with PCRE JIT
 --INI--
 pcre.jit=1
---SKIPIF--
-<?php if (!extension_loaded("pcre")) die("skip"); ?>
 --FILE--
 <?php
 
