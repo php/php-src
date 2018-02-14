@@ -76,6 +76,7 @@ if (where == NULL)   /* Requests field length */
     case PCRE2_INFO_BSR:
     case PCRE2_INFO_CAPTURECOUNT:
     case PCRE2_INFO_DEPTHLIMIT:
+    case PCRE2_INFO_EXTRAOPTIONS:
     case PCRE2_INFO_FIRSTCODETYPE:
     case PCRE2_INFO_FIRSTCODEUNIT:
     case PCRE2_INFO_HASBACKSLASHC:
@@ -142,6 +143,10 @@ switch(what)
   case PCRE2_INFO_DEPTHLIMIT:
   *((uint32_t *)where) = re->limit_depth;
   if (re->limit_depth == UINT32_MAX) return PCRE2_ERROR_UNSET;
+  break;
+
+  case PCRE2_INFO_EXTRAOPTIONS:
+  *((uint32_t *)where) = re->extra_options;
   break;
 
   case PCRE2_INFO_FIRSTCODETYPE:

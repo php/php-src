@@ -214,10 +214,10 @@ for (i = 0; i < number_of_codes; i++)
   if (dst_re->magic_number != MAGIC_NUMBER ||
       dst_re->name_entry_size > MAX_NAME_SIZE + IMM2_SIZE + 1 ||
       dst_re->name_count > MAX_NAME_COUNT)
-    {
-    memctl->free(dst_re, memctl->memory_data);
+    {   
+    memctl->free(dst_re, memctl->memory_data); 
     return PCRE2_ERROR_BADSERIALIZEDDATA;
-    }
+    } 
 
   /* At the moment only one table is supported. */
 

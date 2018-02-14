@@ -558,46 +558,72 @@ for(;;)
     continue;
     }
 
+  /* At the end of a branch, skip to the end of the group. */
+
   if (c == OP_ALT)
     {
     do code += GET(code, 1); while (*code == OP_ALT);
     c = *code;
     }
 
+  /* Inspect the next opcode. */
+
   switch(c)
     {
-    case OP_END:
-    case OP_KETRPOS:
-    /* TRUE only in greedy case. The non-greedy case could be replaced by
-    an OP_EXACT, but it is probably not worth it. (And note that OP_EXACT
-    uses more memory, which we cannot get at this stage.) */
+    /* We can always possessify a greedy iterator at the end of the pattern,
+    which is reached after skipping over the final OP_KET. A non-greedy
+    iterator must never be possessified. */
 
+    case OP_END:
     return base_list[1] != 0;
 
+    /* When an iterator is at the end of certain kinds of group we can inspect
+    what follows the group by skipping over the closing ket. Note that this
+    does not apply to OP_KETRMAX or OP_KETRMIN because what follows any given
+    iteration is variable (could be another iteration or could be the next
+    item). As these two opcodes are not listed in the next switch, they will
+    end up as the next code to inspect, and return FALSE by virtue of being
+    unsupported. */
+
     case OP_KET:
-    /* If the bracket is capturing, and referenced by an OP_RECURSE, or
-    it is an atomic sub-pattern (assert, once, etc.) the non-greedy case
-    cannot be converted to a possessive form. */
+    case OP_KETRPOS:
+    /* The non-greedy case cannot be converted to a possessive form. */
 
     if (base_list[1] == 0) return FALSE;
 
+    /* If the bracket is capturing it might be referenced by an OP_RECURSE
+    so its last iterator can never be possessified if the pattern contains
+    recursions. (This could be improved by keeping a list of group numbers that
+    are called by recursion.) */
+
     switch(*(code - GET(code, 1)))
       {
+      case OP_CBRA:
+      case OP_SCBRA:
+      case OP_CBRAPOS:
+      case OP_SCBRAPOS:
+      if (cb->had_recurse) return FALSE;
+      break;
+
+      /* Atomic sub-patterns and assertions can always auto-possessify their
+      last iterator. However, if the group was entered as a result of checking
+      a previous iterator, this is not possible. */
+
       case OP_ASSERT:
       case OP_ASSERT_NOT:
       case OP_ASSERTBACK:
       case OP_ASSERTBACK_NOT:
       case OP_ONCE:
 
-      /* Atomic sub-patterns and assertions can always auto-possessify their
-      last iterator. However, if the group was entered as a result of checking
-      a previous iterator, this is not possible. */
-
       return !entered_a_group;
       }
 
+    /* Skip over the bracket and inspect what comes next. */
+
     code += PRIV(OP_lengths)[c];
     continue;
+
+    /* Handle cases where the next item is a group. */
 
     case OP_ONCE:
     case OP_BRA:
@@ -637,11 +663,15 @@ for(;;)
     code += PRIV(OP_lengths)[c];
     continue;
 
+    /* The next opcode does not need special handling; fall through and use it
+    to see if the base can be possessified. */
+
     default:
     break;
     }
 
-  /* Check for a supported opcode, and load its properties. */
+  /* We now have the next appropriate opcode to compare with the base. Check
+  for a supported opcode, and load its properties. */
 
   code = get_chr_property_list(code, utf, cb->fcc, list);
   if (code == NULL) return FALSE;    /* Unsupported */
