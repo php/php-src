@@ -883,7 +883,7 @@ static zend_always_inline zend_bool zend_check_type(
 static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t arg_num, zval *arg, zval *default_value, void **cache_slot)
 {
 	zend_arg_info *cur_arg_info;
-	zend_class_entry *ce;
+	zend_class_entry *ce = NULL;
 
 	if (EXPECTED(arg_num <= zf->common.num_args)) {
 		cur_arg_info = &zf->common.arg_info[arg_num-1];
