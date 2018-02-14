@@ -1,6 +1,5 @@
 --TEST--
 Test intval() function with "0b" string prefix
---SKIPIF--
 --FILE--
 <?php
 

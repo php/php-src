@@ -1,6 +1,5 @@
 --TEST--
 Bug #55397 (comparison of incomplete DateTime causes SIGSEGV)
---INI--
 --FILE--
 <?php
 date_default_timezone_set('Europe/Prague');
