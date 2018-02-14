@@ -102,7 +102,7 @@ dnl
 
 PHP_ARG_WITH(odbcver,,
 [  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0350.
-                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
+                          Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
@@ -246,8 +246,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress-bcs,,
-[  --with-empress-bcs[=DIR]
-                          Include Empress Local Access support [\$EMPRESSPATH]
+[  --with-empress-bcs[=DIR]  Include Empress Local Access support [\$EMPRESSPATH]
                           (Empress Version >= 8.60 required)])
 
   AC_MSG_CHECKING(for Empress local access support)
