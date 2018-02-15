@@ -1380,6 +1380,8 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 
 	/* Iterate through hash */
 	do {
+		zval *orig;
+
 		/* Retrieve value */
 		zv = zend_hash_get_current_data_ex(target_hash, &pos);
 		if (zv == NULL) {
@@ -1396,7 +1398,10 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 		}
 
 		/* Ensure the value is a reference. Otherwise the location of the value may be freed. */
-		ZVAL_MAKE_REF(zv);
+		if (!Z_ISREF_P(zv)) {
+			orig = zv;
+			ZVAL_NEW_REF(zv, zv);
+		}
 
 		/* Retrieve key */
 		zend_hash_get_current_key_zval_ex(target_hash, &args[1], &pos);
@@ -1451,6 +1456,10 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			}
 
 			zval_ptr_dtor(&args[0]);
+		}
+
+		if (orig && zv == orig && Z_ISREF_P(zv)) {
+			ZVAL_UNREF(zv);
 		}
 
 		if (Z_TYPE(args[1]) != IS_UNDEF) {
