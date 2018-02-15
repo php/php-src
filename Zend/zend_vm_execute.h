@@ -366,7 +366,7 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 # endif
 # if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 #  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; return
-#  define ZEND_VM_HOT             zend_always_inline
+#  define ZEND_VM_HOT             zend_always_inline ZEND_OPT_SIZE
 # else
 #  define ZEND_VM_RETURN()        opline = NULL; return
 #  define ZEND_VM_HOT

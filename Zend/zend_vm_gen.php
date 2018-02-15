@@ -1745,7 +1745,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							if ($kind == ZEND_VM_KIND_HYBRID) {
 								out($f,"# if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
 								out($f,"#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; return\n");
-								out($f,"#  define ZEND_VM_HOT             zend_always_inline\n");
+								out($f,"#  define ZEND_VM_HOT             zend_always_inline ZEND_OPT_SIZE\n");
 								out($f,"# else\n");
 								out($f,"#  define ZEND_VM_RETURN()        opline = NULL; return\n");
 								out($f,"#  define ZEND_VM_HOT\n");
