@@ -1027,7 +1027,7 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
 
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
-	global $definition_file, $prefix, $opnames;
+	global $definition_file, $prefix, $opnames, $gen_order;
 
 	if ($spec && skip_extra_spec_function($op1, $op2, $extra_spec)) {
 		return;
@@ -1046,7 +1046,11 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 				. "\t\t\t\tVM_TRACE($spec_name)\n"
 				. "\t\t\t\t{$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
 				. "\t\t\t\tHYBRID_BREAK();\n";
-			out($f, $code);
+			if (is_array($gen_order)) {
+				$gen_order[$spec_name] = $code;
+			} else {
+				out($f, $code);
+			}
 			return;
 		case ZEND_VM_KIND_CALL:
 			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
@@ -1532,9 +1536,31 @@ function extra_spec_handler($dsc) {
 	return $f($specs);
 }
 
+function read_order_file($fn) {
+	$f = fopen($fn, "r");
+	if (!is_resource($f)) {
+		return false;
+	}
+	$order = [];
+	while (!feof($f)) {
+		$op = trim(fgets($f));
+		if ($op !== "") {
+			$order[$op] = null;
+		}
+	}
+	fclose($f);
+	return $order;
+}
+
 // Generates all opcode handlers and helpers (specialized or unspecilaized)
 function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array()) {
-	global $list, $opcodes, $helpers, $op_types_ex;
+	global $list, $opcodes, $helpers, $op_types_ex, $gen_order;
+
+	if ($kind == ZEND_VM_KIND_HYBRID && file_exists(__DIR__ . "/zend_vm_order.txt")) {
+		$gen_order = read_order_file(__DIR__ . "/zend_vm_order.txt");
+	} else {
+		$gen_order = null;
+	}
 
 	if ($spec) {
 		// Produce specialized executor
@@ -1591,6 +1617,14 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			} else {
 				var_dump($dsc);
 				die("??? $kind:$num\n");
+			}
+		}
+	}
+
+	if (is_array($gen_order)) {
+		foreach ($gen_order as $txt) {
+			if ($txt !== null) {
+				out($f, $txt);
 			}
 		}
 	}
