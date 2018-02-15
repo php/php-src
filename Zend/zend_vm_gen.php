@@ -1041,9 +1041,12 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 	$spec_name = $name.($spec?"_SPEC":"").$prefix[$op1].$prefix[$op2].($spec?extra_spec_name($extra_spec):"");
 	switch($kind) {
 		case ZEND_VM_KIND_HYBRID:
-			out($f,"\t\t\tHYBRID_CASE({$spec_name}):\n");
-			out($f,"\t\t\t\t{$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
-			out($f,"\t\t\t\tHYBRID_BREAK();\n");
+			$code =
+				  "\t\t\tHYBRID_CASE({$spec_name}):\n"
+				. "\t\t\t\tVM_TRACE($spec_name)\n"
+				. "\t\t\t\t{$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n"
+				. "\t\t\t\tHYBRID_BREAK();\n";
+			out($f, $code);
 			return;
 		case ZEND_VM_KIND_CALL:
 			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
@@ -1671,6 +1674,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 						out($f,"# define zend_vm_get_opcode_handler_func zend_vm_get_opcode_handler\n");
 						out($f,"#endif\n\n");
 					}
+					out($f,"#ifndef VM_TRACE\n");
+					out($f,"# define VM_TRACE(op)\n");
+					out($f,"#endif\n");
 					switch ($kind) {
 						case ZEND_VM_KIND_HYBRID:
 							out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
