@@ -6111,7 +6111,7 @@ ZEND_VM_C_LABEL(fe_fetch_r_exit):
 		zend_refcounted *gc = Z_COUNTED_P(value);
 
 		ZVAL_COPY_VALUE_EX(res, value, gc, value_type);
-		if (EXPECTED((value_type & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)) {
+		if (EXPECTED(Z_TYPE_INFO_REFCOUNTED(value_type))) {
 			GC_ADDREF(gc);
 		}
 	}

@@ -2142,7 +2142,7 @@ static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 			ZVAL_UNDEF(src);
 			src--;
 		} while (--count);
-		if (type_flags & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) {
+		if (Z_TYPE_INFO_REFCOUNTED(type_flags)) {
 			ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_FREE_EXTRA_ARGS);
 		}
 	} else {

@@ -478,6 +478,8 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 /* zval.u1.v.type_flags */
 #define IS_TYPE_REFCOUNTED			(1<<0)
 
+#define Z_TYPE_INFO_REFCOUNTED(t)	(((t) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)
+
 /* extended types */
 #define IS_INTERNED_STRING_EX		IS_STRING
 
@@ -549,7 +551,7 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_OPT_CONSTANT(zval)		(Z_OPT_TYPE(zval) == IS_CONSTANT_AST)
 #define Z_OPT_CONSTANT_P(zval_p)	Z_OPT_CONSTANT(*(zval_p))
 
-#define Z_OPT_REFCOUNTED(zval)		((Z_TYPE_INFO(zval) & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0)
+#define Z_OPT_REFCOUNTED(zval)		Z_TYPE_INFO_REFCOUNTED(Z_TYPE_INFO(zval))
 #define Z_OPT_REFCOUNTED_P(zval_p)	Z_OPT_REFCOUNTED(*(zval_p))
 
 /* deprecated: (COPYABLE is the same as IS_ARRAY) */
@@ -999,7 +1001,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);		\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);				\
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);			\
-		if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+		if (Z_TYPE_INFO_REFCOUNTED(_t)) {				\
 			GC_ADDREF(_gc);								\
 		}												\
 	} while (0)
@@ -1013,7 +1015,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		if ((_t & Z_TYPE_MASK) == IS_ARRAY) {			\
 			ZVAL_ARR(_z1, zend_array_dup((zend_array*)_gc));\
 		} else {										\
-			if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) { \
+			if (Z_TYPE_INFO_REFCOUNTED(_t)) {			\
 				GC_ADDREF(_gc);							\
 			}											\
 			ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);		\
@@ -1031,7 +1033,7 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		zend_refcounted *_gc = Z_COUNTED_P(_z2);						\
 		uint32_t _t = Z_TYPE_INFO_P(_z2);								\
 		ZVAL_COPY_VALUE_EX(_z1, _z2, _gc, _t);							\
-		if ((_t & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) != 0) {	\
+		if (Z_TYPE_INFO_REFCOUNTED(_t)) {								\
 			if (EXPECTED(!(GC_FLAGS(_gc) & GC_PERSISTENT))) {			\
 				GC_ADDREF(_gc);											\
 			} else {													\
