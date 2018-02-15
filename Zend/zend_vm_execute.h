@@ -425,6 +425,16 @@ typedef ZEND_OPCODE_HANDLER_RET (ZEND_FASTCALL *opcode_handler_t) (ZEND_OPCODE_H
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_interrupt_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS);
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS);
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -436,6 +446,25 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_this_not_in_object_context_hel
 	}
 	FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
 	UNDEF_RESULT();
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_abstract_method_helper_SPEC(zend_function *fbc ZEND_OPCODE_HANDLER_ARGS_DC)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	UNDEF_RESULT();
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC(zval *function_name ZEND_OPCODE_HANDLER_ARGS_DC)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 	HANDLE_EXCEPTION();
 }
 
@@ -730,10 +759,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-				fbc->common.scope ? "::" : "",
-				ZSTR_VAL(fbc->common.function_name));
+			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 			    UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -810,10 +836,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_BY_NAME_S
 		ZEND_ASSERT(fbc->type == ZEND_INTERNAL_FUNCTION);
 
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-				fbc->common.scope ? "::" : "",
-				ZSTR_VAL(fbc->common.function_name));
+			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 			    UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -874,15 +897,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_abstract_method_helper_SPEC(fbc ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-				fbc->common.scope ? "::" : "",
-				ZSTR_VAL(fbc->common.function_name));
+			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -1001,15 +1019,10 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DO_FCALL_SPEC_RETV
 	EX(call) = call->prev_execute_data;
 	if (UNEXPECTED((fbc->common.fn_flags & (ZEND_ACC_ABSTRACT|ZEND_ACC_DEPRECATED)) != 0)) {
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_ABSTRACT) != 0)) {
-			zend_throw_error(NULL, "Cannot call abstract method %s::%s()", ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-			UNDEF_RESULT();
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_abstract_method_helper_SPEC(fbc ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 		}
 		if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_DEPRECATED) != 0)) {
-			zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
-				fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
-				fbc->common.scope ? "::" : "",
-				ZSTR_VAL(fbc->common.function_name));
+			zend_deprecated_function(fbc);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				UNDEF_RESULT();
 				HANDLE_EXCEPTION();
@@ -1190,6 +1203,20 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_GENERATOR_CREATE_SPEC_HANDLER(
 	} else {
 		ZEND_VM_TAIL_CALL(zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *arg;
+	uint32_t arg_num = opline->op2.num;
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
+	FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var);
+	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
+	ZVAL_UNDEF(arg);
+	HANDLE_EXCEPTION();
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_UNPACK_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -1409,13 +1436,7 @@ send_array:
 							if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 								/* By-value send is not allowed -- emit a warning,
 								 * but still perform the call. */
-								zend_error(E_WARNING,
-									"Parameter %d to %s%s%s() expected to be a reference, value given",
-									arg_num,
-									EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-									EX(call)->func->common.scope ? "::" : "",
-									ZSTR_VAL(EX(call)->func->common.function_name));
-
+								zend_param_must_be_ref(EX(call)->func, arg_num);
 							}
 						}
 					} else {
@@ -1442,13 +1463,7 @@ send_array:
 						if (!ARG_MAY_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 							/* By-value send is not allowed -- emit a warning,
 							 * but still perform the call. */
-							zend_error(E_WARNING,
-								"Parameter %d to %s%s%s() expected to be a reference, value given",
-								arg_num,
-								EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-								EX(call)->func->common.scope ? "::" : "",
-								ZSTR_VAL(EX(call)->func->common.function_name));
-
+							zend_param_must_be_ref(EX(call)->func, arg_num);
 						}
 					}
 				} else {
@@ -2032,9 +2047,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_BY_NAME
 		function_name = (zval*)RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(function_name+1), 1);
 		if (UNEXPECTED(func == NULL)) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(function_name ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
@@ -2122,9 +2135,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_NS_FCALL_BY_NAME_SPEC_CON
 			func_name++;
 			func = zend_hash_find_ex(EG(function_table), Z_STR_P(func_name), 1);
 			if (UNEXPECTED(func == NULL)) {
-				SAVE_OPLINE();
-				zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(RT_CONSTANT(opline, opline->op2)));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(func_name ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 			}
 		}
 		fbc = Z_FUNC_P(func);
@@ -2156,9 +2167,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_FCALL_SPEC_CO
 		fname = RT_CONSTANT(opline, opline->op2);
 		func = zend_hash_find_ex(EG(function_table), Z_STR_P(fname), 1);
 		if (UNEXPECTED(func == NULL)) {
-		    SAVE_OPLINE();
-			zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(fname));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_undefined_function_helper_SPEC(fname ZEND_OPCODE_HANDLER_ARGS_PASSTHRU_CC));
 		}
 		fbc = Z_FUNC_P(func);
 		CACHE_PTR(opline->result.num, fbc);
@@ -2991,12 +3000,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_CONST_HANDLER
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
-
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_UNDEF(arg);
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
@@ -3022,12 +3026,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_C
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
-
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_UNDEF(arg);
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	value = RT_CONSTANT(opline, opline->op1);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
@@ -3051,11 +3050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CONST_HANDLER(Z
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-			opline->op2.num,
-			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-			EX(call)->func->common.scope ? "::" : "",
-			ZSTR_VAL(EX(call)->func->common.function_name));
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
 	ZVAL_COPY(param, arg);
@@ -4104,10 +4099,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CONST_HANDLER(Z
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -5174,7 +5166,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 				if (IS_CONST == IS_CONST) {
 					function_name = RT_CONSTANT(opline, opline->op2);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -5206,7 +5198,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -5320,7 +5312,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -5357,22 +5349,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -5420,9 +5398,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CONS
 		if (error) {
 			efree(error);
 			/* This is the only soft error is_callable() can generate */
-			zend_error(E_DEPRECATED,
-				"Non-static method %s::%s() should not be called statically",
-				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			zend_non_static_method_call(func);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 
 				HANDLE_EXCEPTION();
@@ -5625,13 +5601,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -6284,7 +6260,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -6606,10 +6582,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_TMPVAR_HANDLER(
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -7366,7 +7339,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 				zval_ptr_dtor_nogc(free_op2);
 
 				HANDLE_EXCEPTION();
@@ -7398,7 +7371,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 
@@ -7513,7 +7486,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 			HANDLE_EXCEPTION();
@@ -7550,22 +7523,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -7613,9 +7572,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_TMPV
 		if (error) {
 			efree(error);
 			/* This is the only soft error is_callable() can generate */
-			zend_error(E_DEPRECATED,
-				"Non-static method %s::%s() should not be called statically",
-				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			zend_non_static_method_call(func);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 				zval_ptr_dtor_nogc(free_op2);
 				HANDLE_EXCEPTION();
@@ -7748,13 +7705,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -8002,7 +7959,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -8933,7 +8890,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -8970,22 +8927,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -9214,13 +9157,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -9900,10 +9843,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CONST_CV_HANDLER(ZEND
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -10658,7 +10598,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 				if (IS_CV == IS_CONST) {
 					function_name = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -10690,7 +10630,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -10804,7 +10744,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -10841,22 +10781,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_C
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -10904,9 +10830,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_USER_CALL_SPEC_CONST_CV_H
 		if (error) {
 			efree(error);
 			/* This is the only soft error is_callable() can generate */
-			zend_error(E_DEPRECATED,
-				"Non-static method %s::%s() should not be called statically",
-				ZSTR_VAL(func->common.scope->name), ZSTR_VAL(func->common.function_name));
+			zend_non_static_method_call(func);
 			if (UNEXPECTED(EG(exception) != NULL)) {
 
 				HANDLE_EXCEPTION();
@@ -11038,13 +10962,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -11432,7 +11356,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -13392,10 +13316,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CONST_HANDLER(
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -14428,7 +14349,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 				if (IS_CONST == IS_CONST) {
 					function_name = RT_CONSTANT(opline, opline->op2);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
@@ -14460,7 +14381,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 			zval_ptr_dtor_nogc(free_op1);
@@ -14955,7 +14876,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 	zval_ptr_dtor_nogc(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -15119,10 +15040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_TMPVAR_HANDLER
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -16030,7 +15948,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 				zval_ptr_dtor_nogc(free_op2);
 				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
@@ -16062,7 +15980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 			zval_ptr_dtor_nogc(free_op1);
@@ -16379,7 +16297,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 	zval_ptr_dtor_nogc(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -17343,10 +17261,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_TMPVAR_CV_HANDLER(ZEN
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -18040,7 +17955,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 				if (IS_CV == IS_CONST) {
 					function_name = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 				zval_ptr_dtor_nogc(free_op1);
 				HANDLE_EXCEPTION();
@@ -18072,7 +17987,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 			zval_ptr_dtor_nogc(free_op1);
@@ -18387,7 +18302,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 	zval_ptr_dtor_nogc(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -18615,12 +18530,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_TMP_HANDLER(Z
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_UNDEF(arg);
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	value = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
@@ -18646,12 +18556,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAL_EX_SPEC_T
 		}
 	} else if (ARG_MUST_BE_SENT_BY_REF(EX(call)->func, arg_num)) {
 send_val_by_ref:
-		SAVE_OPLINE();
-		zend_throw_error(NULL, "Cannot pass parameter %d by reference", arg_num);
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		arg = ZEND_CALL_VAR(EX(call), opline->result.var);
-		ZVAL_UNDEF(arg);
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_cannot_pass_by_ref_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 	value = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 	arg = ZEND_CALL_VAR(EX(call), opline->result.var);
@@ -18675,11 +18580,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_TMP_HANDLER(ZEN
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-			opline->op2.num,
-			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-			EX(call)->func->common.scope ? "::" : "",
-			ZSTR_VAL(EX(call)->func->common.function_name));
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
 	ZVAL_COPY(param, arg);
@@ -19554,13 +19455,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -19991,13 +19892,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -20501,13 +20402,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -20994,13 +20895,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -21938,11 +21839,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_VAR_HANDLER(ZEN
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-			opline->op2.num,
-			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-			EX(call)->func->common.scope ? "::" : "",
-			ZSTR_VAL(EX(call)->func->common.function_name));
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
 	ZVAL_COPY(param, arg);
@@ -23042,7 +22939,7 @@ assign_dim_op_new_array:
 		if (IS_CONST == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -23085,7 +22982,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -23095,7 +22992,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -24344,7 +24241,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -24382,7 +24279,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -24398,7 +24295,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -24435,7 +24332,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -24474,7 +24371,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -24490,7 +24387,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -24527,7 +24424,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -24566,7 +24463,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -24582,7 +24479,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -24619,7 +24516,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -24657,7 +24554,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -24673,7 +24570,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -24822,7 +24719,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -24859,22 +24756,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -25052,13 +24935,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -25164,7 +25047,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -25472,7 +25355,7 @@ assign_dim_op_new_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -25515,7 +25398,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -25525,7 +25408,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -26779,7 +26662,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -26817,7 +26700,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -26833,7 +26716,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -26870,7 +26753,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -26909,7 +26792,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -26925,7 +26808,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -26962,7 +26845,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -27001,7 +26884,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -27017,7 +26900,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -27054,7 +26937,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -27092,7 +26975,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -27108,7 +26991,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -27201,7 +27084,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 			HANDLE_EXCEPTION();
@@ -27238,22 +27121,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -27360,13 +27229,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -27472,7 +27341,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -28067,7 +27936,7 @@ assign_dim_op_new_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -28110,7 +27979,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -28120,7 +27989,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -28299,7 +28168,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -28337,7 +28206,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -28353,7 +28222,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -28390,7 +28259,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -28429,7 +28298,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -28445,7 +28314,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -28482,7 +28351,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -28521,7 +28390,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -28537,7 +28406,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -28574,7 +28443,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -28612,7 +28481,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -28628,7 +28497,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -28721,7 +28590,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -28758,22 +28627,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -29002,13 +28857,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -29399,7 +29254,7 @@ assign_dim_op_new_array:
 		if (IS_CV == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -29442,7 +29297,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -29452,7 +29307,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -30701,7 +30556,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -30739,7 +30594,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -30755,7 +30610,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -30792,7 +30647,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -30831,7 +30686,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -30847,7 +30702,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -30884,7 +30739,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -30923,7 +30778,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -30939,7 +30794,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -30976,7 +30831,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -31014,7 +30869,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 				UNDEF_RESULT();
@@ -31030,7 +30885,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_VAR != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -31236,7 +31091,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -31273,22 +31128,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_V
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -31395,13 +31236,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -31507,7 +31348,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -33307,7 +33148,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 				if (IS_CONST == IS_CONST) {
 					function_name = RT_CONSTANT(opline, opline->op2);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -33339,7 +33180,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -33453,7 +33294,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -33490,22 +33331,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -35181,7 +35008,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 				zval_ptr_dtor_nogc(free_op2);
 
 				HANDLE_EXCEPTION();
@@ -35213,7 +35040,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 
@@ -35328,7 +35155,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 			HANDLE_EXCEPTION();
@@ -35365,22 +35192,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -35888,7 +35701,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -35925,22 +35738,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -37702,7 +37501,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 				if (IS_CV == IS_CONST) {
 					function_name = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -37734,7 +37533,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -37848,7 +37647,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(ce, Z_STR_P(function_name));
 			}
 
 			HANDLE_EXCEPTION();
@@ -37885,22 +37684,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_STATIC_METHOD_CALL_SPEC_U
 			object = Z_OBJ(EX(This));
 			ce = object->ce;
 		} else {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				/* Allowed for PHP 4 compatibility. */
-				zend_error(
-					E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					HANDLE_EXCEPTION();
-				}
-			} else {
-				/* An internal function assumes $this is present and won't check that.
-				 * So PHP would crash by allowing the call. */
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				HANDLE_EXCEPTION();
 			}
 		}
@@ -38987,11 +38772,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_USER_SPEC_CV_HANDLER(ZEND
 	param = ZEND_CALL_VAR(EX(call), opline->result.var);
 
 	if (UNEXPECTED(ARG_MUST_BE_SENT_BY_REF(EX(call)->func, opline->op2.num))) {
-		zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
-			opline->op2.num,
-			EX(call)->func->common.scope ? ZSTR_VAL(EX(call)->func->common.scope->name) : "",
-			EX(call)->func->common.scope ? "::" : "",
-			ZSTR_VAL(EX(call)->func->common.function_name));
+		zend_param_must_be_ref(EX(call)->func, opline->op2.num);
 	}
 
 	ZVAL_COPY(param, arg);
@@ -40040,10 +39821,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CONST_HANDLER(ZEND
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -40640,7 +40418,7 @@ assign_dim_op_new_array:
 		if (IS_CONST == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -40683,7 +40461,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CONST == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -40693,7 +40471,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -42314,7 +42092,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -42352,7 +42130,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -42368,7 +42146,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -42405,7 +42183,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -42444,7 +42222,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -42460,7 +42238,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -42497,7 +42275,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -42536,7 +42314,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -42552,7 +42330,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -42589,7 +42367,7 @@ try_assign_dim_array:
 		if (IS_CONST == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -42627,7 +42405,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CONST == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -42643,7 +42421,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = RT_CONSTANT(opline, opline->op2);
 assign_dim_error:
@@ -42893,7 +42671,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 				if (IS_CONST == IS_CONST) {
 					function_name = RT_CONSTANT(opline, opline->op2);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -42925,7 +42703,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CONST == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -43045,13 +42823,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -43211,7 +42989,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -43919,7 +43697,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -44083,10 +43861,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_TMPVAR_HANDLER(ZEN
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -44647,7 +44422,7 @@ assign_dim_op_new_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -44690,7 +44465,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -44700,7 +44475,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -46202,7 +45977,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -46240,7 +46015,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -46256,7 +46031,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -46293,7 +46068,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -46332,7 +46107,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -46348,7 +46123,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -46385,7 +46160,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -46424,7 +46199,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -46440,7 +46215,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -46477,7 +46252,7 @@ try_assign_dim_array:
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -46515,7 +46290,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -46531,7 +46306,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 assign_dim_error:
@@ -46725,7 +46500,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 				if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 					function_name = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 				zval_ptr_dtor_nogc(free_op2);
 
 				HANDLE_EXCEPTION();
@@ -46757,7 +46532,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 			zval_ptr_dtor_nogc(free_op2);
 
@@ -46878,13 +46653,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 		zval_ptr_dtor_nogc(free_op2);
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -46990,7 +46765,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -47261,7 +47036,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -48112,7 +47887,7 @@ assign_dim_op_new_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -48155,7 +47930,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_UNUSED == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -48165,7 +47940,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -48630,7 +48405,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -48668,7 +48443,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -48684,7 +48459,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -48721,7 +48496,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -48760,7 +48535,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -48776,7 +48551,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -48813,7 +48588,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -48852,7 +48627,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -48868,7 +48643,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -48905,7 +48680,7 @@ try_assign_dim_array:
 		if (IS_UNUSED == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -48943,7 +48718,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_UNUSED == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -48959,7 +48734,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = NULL;
 assign_dim_error:
@@ -49108,13 +48883,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -49881,10 +49656,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_MOD_SPEC_CV_CV_HANDLER(ZEND_OP
 		if (EXPECTED(Z_TYPE_INFO_P(op2) == IS_LONG)) {
 			result = EX_VAR(opline->result.var);
 			if (UNEXPECTED(Z_LVAL_P(op2) == 0)) {
-				SAVE_OPLINE();
-				zend_throw_exception_ex(zend_ce_division_by_zero_error, 0, "Modulo by zero");
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
+				ZEND_VM_TAIL_CALL(zend_mod_by_zero_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 			} else if (UNEXPECTED(Z_LVAL_P(op2) == -1)) {
 				/* Prevent overflow error/crash if op1==ZEND_LONG_MIN */
 				ZVAL_LONG(result, 0);
@@ -50481,7 +50253,7 @@ assign_dim_op_new_array:
 		if (IS_CV == IS_UNUSED) {
 			var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(!var_ptr)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_op_ret_null;
 			}
 		} else {
@@ -50524,7 +50296,7 @@ assign_dim_op_convert_to_array:
 		} else {
 			if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 				if (IS_CV == IS_UNUSED) {
-					zend_throw_error(NULL, "[] operator not supported for strings");
+					zend_use_new_element_for_string();
 				} else {
 					zend_check_string_offset(dim, BP_VAR_RW EXECUTE_DATA_CC);
 					zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -50534,7 +50306,7 @@ assign_dim_op_convert_to_array:
 				goto assign_dim_op_convert_to_array;
 			} else {
 				if (UNEXPECTED(IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(container)))) {
-					zend_error(E_WARNING, "Cannot use a scalar value as an array");
+					zend_use_scalar_as_array();
 				}
 assign_dim_op_ret_null:
 				if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -52029,7 +51801,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -52067,7 +51839,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -52083,7 +51855,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -52120,7 +51892,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -52159,7 +51931,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -52175,7 +51947,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -52212,7 +51984,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -52251,7 +52023,7 @@ try_assign_dim_array:
 			zval_ptr_dtor_nogc(free_op_data);
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 				zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
 
 				UNDEF_RESULT();
@@ -52267,7 +52039,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -52304,7 +52076,7 @@ try_assign_dim_array:
 		if (IS_CV == IS_UNUSED) {
 			variable_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(object_ptr), &EG(uninitialized_zval));
 			if (UNEXPECTED(variable_ptr == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				goto assign_dim_error;
 			}
 		} else {
@@ -52342,7 +52114,7 @@ try_assign_dim_array:
 
 		} else if (EXPECTED(Z_TYPE_P(object_ptr) == IS_STRING)) {
 			if (IS_CV == IS_UNUSED) {
-				zend_throw_error(NULL, "[] operator not supported for strings");
+				zend_use_new_element_for_string();
 
 
 				UNDEF_RESULT();
@@ -52358,7 +52130,7 @@ try_assign_dim_array:
 			goto try_assign_dim_array;
 		} else {
 			if (IS_CV != IS_VAR || EXPECTED(!Z_ISERROR_P(object_ptr))) {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 			}
 			dim = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 assign_dim_error:
@@ -52664,7 +52436,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 				if (IS_CV == IS_CONST) {
 					function_name = _get_zval_ptr_cv_undef(opline->op2.var EXECUTE_DATA_CC);
 				}
-				zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+				zend_invalid_method_call(object, function_name);
 
 
 				HANDLE_EXCEPTION();
@@ -52696,7 +52468,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 		fbc = obj->handlers->get_method(&obj, Z_STR_P(function_name), ((IS_CV == IS_CONST) ? (RT_CONSTANT(opline, opline->op2) + 1) : NULL));
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(obj->ce->name), Z_STRVAL_P(function_name));
+				zend_undefined_method(obj->ce, Z_STR_P(function_name));
 			}
 
 
@@ -52816,13 +52588,13 @@ num_index:
 			str = ZSTR_EMPTY_ALLOC();
 			goto str_index;
 		} else {
-			zend_error(E_WARNING, "Illegal offset type");
+			zend_illegal_offset();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 
 	} else {
 		if (!zend_hash_next_index_insert(Z_ARRVAL_P(EX_VAR(opline->result.var)), expr_ptr)) {
-			zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+			zend_cannot_add_element();
 			zval_ptr_dtor_nogc(expr_ptr);
 		}
 	}
@@ -52928,7 +52700,7 @@ num_index_dim:
 		}
 		if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
 			if (UNEXPECTED(Z_OBJ_HT_P(container)->unset_dimension == NULL)) {
-				zend_throw_error(NULL, "Cannot use object as array");
+				zend_use_object_as_array();
 			} else {
 				Z_OBJ_HT_P(container)->unset_dimension(container, offset);
 			}
@@ -53337,7 +53109,7 @@ fetch_dim_r_index_slow:
 fetch_dim_r_index_undef:
 	ZVAL_NULL(EX_VAR(opline->result.var));
 	SAVE_OPLINE();
-	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, offset);
+	zend_undefined_offset(offset);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }

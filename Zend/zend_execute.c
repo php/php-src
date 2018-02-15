@@ -1024,7 +1024,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	}
 }
 
-static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **cache_slot)
+static ZEND_COLD int zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 
@@ -1046,10 +1046,20 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 	return 1;
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)
+{
+	zend_throw_error(NULL, "Cannot use object as array");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
+{
+	zend_error(E_WARNING, "Illegal offset type");
+}
+
 static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value)
 {
 	if (UNEXPECTED(!Z_OBJ_HT_P(object)->write_dimension)) {
-		zend_throw_error(NULL, "Cannot use object as array");
+		zend_use_object_as_array();
 		return;
 	}
 
@@ -1117,7 +1127,7 @@ try_again:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_illegal_offset();
 				break;
 		}
 
@@ -1289,6 +1299,14 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_NOTICE, "Trying to check property '%s' of non-object", ZSTR_VAL(property_name));
 	zend_tmp_string_release(property_name);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
+{
+	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+		fbc->common.scope ? "::" : "",
+		ZSTR_VAL(fbc->common.function_name));
 }
 
 static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result EXECUTE_DATA_DC)
@@ -1532,6 +1550,87 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 	return ht;
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_offset(zend_long lval)
+{
+	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, lval);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset)
+{
+	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
+{
+	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(zval *object, zval *function_name)
+{
+	zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
+{
+	if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+		zend_error(E_DEPRECATED,
+			"Non-static method %s::%s() should not be called statically",
+			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	} else {
+		zend_throw_error(
+			zend_ce_error,
+			"Non-static method %s::%s() cannot be called statically",
+			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	}
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)
+{
+	zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+		arg_num,
+		func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
+		func->common.scope ? "::" : "",
+		ZSTR_VAL(func->common.function_name));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_scalar_as_array(void)
+{
+	zend_error(E_WARNING, "Cannot use a scalar value as an array");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
+{
+	zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim)
+{
+	zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_string(void)
+{
+	zend_throw_error(NULL, "[] operator not supported for strings");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_modify_property_of_non_object(zval *property)
+{
+	zend_string *tmp;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp);
+	zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(tmp);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_access_undefined_propery_in_overloaded_object(void)
+{
+	zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_unsupported_property_reference(void)
+{
+	zend_error(E_WARNING, "This object doesn't support property references");
+}
+
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
 	zval *retval;
@@ -1547,14 +1646,14 @@ num_index:
 num_undef:
 		switch (type) {
 			case BP_VAR_R:
-				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				zend_undefined_offset(hval);
 				/* break missing intentionally */
 			case BP_VAR_UNSET:
 			case BP_VAR_IS:
 				retval = &EG(uninitialized_zval);
 				break;
 			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				zend_undefined_offset(hval);
 				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
 				break;
 			case BP_VAR_W:
@@ -1577,14 +1676,14 @@ str_index:
 				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_undefined_index(offset_key);
 							/* break missing intentionally */
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_undefined_index(offset_key);
 							/* break missing intentionally */
 						case BP_VAR_W:
 							ZVAL_NULL(retval);
@@ -1595,14 +1694,14 @@ str_index:
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_undefined_index(offset_key);
 					/* break missing intentionally */
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_undefined_index(offset_key);
 					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
 					break;
 				case BP_VAR_W:
@@ -1622,7 +1721,7 @@ str_index:
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));
 				goto num_index;
 			case IS_RESOURCE:
-				zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+				zend_use_resource_as_offset(dim);
 				hval = Z_RES_HANDLE_P(dim);
 				goto num_index;
 			case IS_FALSE:
@@ -1635,7 +1734,7 @@ str_index:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_illegal_offset();
 				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
 					NULL : &EG(uninitialized_zval);
 		}
@@ -1674,7 +1773,7 @@ fetch_from_array:
 		if (dim == NULL) {
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(retval == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				ZVAL_ERROR(result);
 				return;
 			}
@@ -1695,7 +1794,7 @@ fetch_from_array:
 	}
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (dim == NULL) {
-			zend_throw_error(NULL, "[] operator not supported for strings");
+			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
 			zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -1707,7 +1806,7 @@ fetch_from_array:
 			dim = &EG(uninitialized_zval);
 		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(NULL, "Cannot use object as array");
+			zend_use_object_as_array();
 			ZVAL_ERROR(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1759,7 +1858,7 @@ fetch_from_array:
 				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
 				ZVAL_NULL(result);
 			} else {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 				ZVAL_ERROR(result);
 			}
 		}
@@ -1829,7 +1928,7 @@ try_string_offset:
 					dim = Z_REFVAL_P(dim);
 					goto try_string_offset;
 				default:
-					zend_error(E_WARNING, "Illegal offset type");
+					zend_illegal_offset();
 					break;
 			}
 
@@ -1861,7 +1960,7 @@ try_string_offset:
 			dim = &EG(uninitialized_zval);
 		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(NULL, "Cannot use object as array");
+			zend_use_object_as_array();
 			ZVAL_NULL(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1939,9 +2038,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				object_init(container);
 			} else {
 				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
-					zend_string *property_name = zval_get_string(prop_ptr);
-					zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-					zend_string_release(property_name);
+					zend_modify_property_of_non_object(prop_ptr);
 				}
 				ZVAL_ERROR(result);
 				return;
@@ -1986,7 +2083,7 @@ use_read_property:
 					ZVAL_UNREF(ptr);
 				}
 			} else {
-				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
+				zend_access_undefined_propery_in_overloaded_object();
 				ZVAL_ERROR(result);
 			}
 		} else {
@@ -1995,7 +2092,7 @@ use_read_property:
 	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
 		goto use_read_property;
 	} else {
-		zend_error(E_WARNING, "This object doesn't support property references");
+		zend_unsupported_property_reference();
 		ZVAL_ERROR(result);
 	}
 }
@@ -2581,7 +2678,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
+				zend_undefined_method(called_scope, mname);
 			}
 			zend_string_release(lcname);
 			zend_string_release(mname);
@@ -2592,18 +2689,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		zend_string_release(mname);
 
 		if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					return NULL;
-				}
-			} else {
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				return NULL;
 			}
 		}
@@ -2713,23 +2800,13 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
+					zend_undefined_method(called_scope, Z_STR_P(method));
 				}
 				return NULL;
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						return NULL;
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				zend_non_static_method_call(fbc);
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					return NULL;
 				}
 			}
@@ -2740,7 +2817,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
+					zend_undefined_method(object->ce, Z_STR_P(method));
 				}
 				return NULL;
 			}
