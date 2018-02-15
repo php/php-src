@@ -2214,6 +2214,11 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			/* this should modify object only if it's empty */
 			if (type == BP_VAR_UNSET ||
 				UNEXPECTED(!make_real_object_rw(container, prop_ptr OPLINE_CC))) {
+				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
+					zend_string *property_name = zval_get_string(prop_ptr);
+					zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+					zend_string_release(property_name);
+				}
 				ZVAL_ERROR(result);
 				return;
 			}
