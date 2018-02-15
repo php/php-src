@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     specially compiled functions). (Majkl578)
   . Fixed bug #76430 (__METHOD__ inconsistent outside of method).
     (Ryan McCullagh, Nikita)
+  . Fixed bug #75921 (Inconsistent: No warning in some cases when stdObj is
+    created on the fly). (David Walker)
 
 - CURL:
   . Fixed bug #76480 (Use curl_multi_wait() so that timeouts are respected).

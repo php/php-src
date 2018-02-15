@@ -709,6 +709,10 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *ob
 			 || opline->opcode == ZEND_POST_INC_OBJ
 			 || opline->opcode == ZEND_POST_DEC_OBJ) {
 				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
+			} else if (opline->opcode == ZEND_FETCH_OBJ_W
+					|| opline->opcode == ZEND_FETCH_OBJ_RW
+					|| opline->opcode == ZEND_ASSIGN_OBJ_REF) {
+				zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
 			} else {
 				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 			}
@@ -745,38 +749,6 @@ static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object(zval *ob
 		return NULL;
 	}
 	Z_DELREF_P(object);
-	return object;
-}
-
-static zend_never_inline ZEND_COLD zval* ZEND_FASTCALL make_real_object_rw(zval *object, zval *property OPLINE_DC)
-{
-	zval *ref = NULL;
-	if (Z_ISREF_P(object)) {
-		ref = object;
-		object = Z_REFVAL_P(object);
-	}
-
-	if (UNEXPECTED(Z_TYPE_P(object) > IS_FALSE &&
-			(Z_TYPE_P(object) != IS_STRING || Z_STRLEN_P(object) != 0))) {
-		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
-			zend_string *tmp_property_name;
-			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-			zend_tmp_string_release(tmp_property_name);
-		}
-		return NULL;
-	}
-
-	if (ref) {
-		zend_property_info *error_prop = i_zend_check_ref_stdClass_assignable(Z_REF_P(ref));
-		if (error_prop) {
-			zend_throw_auto_init_in_ref_error(error_prop, "stdClass");
-			return NULL;
-		}
-	}
-
-	zval_ptr_dtor_nogc(object);
-	object_init(object);
 	return object;
 }
 
@@ -2736,7 +2708,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 				return;
 			}
 
-			container = make_real_object_rw(container, prop_ptr OPLINE_CC);
+			container = make_real_object(container, prop_ptr OPLINE_CC);
 			if (UNEXPECTED(!container)) {
 				ZVAL_ERROR(result);
 				return;

@@ -14,17 +14,19 @@ $xml_str = <<<EOD
 </c_fpobel>
 EOD;
 
-$xml = simplexml_load_string ($xml_str) ;
+$xml = simplexml_load_string($xml_str);
 
 $val = 1;
 
 var_dump($val);
 $zml->pos["act_idx"] = $val;
-var_dump($val) ;
+var_dump($val);
 
 ?>
 ===DONE===
---EXPECT--
+--EXPECTF--
 int(1)
+
+Warning: Creating default object from empty value in %sbug36611.php on line 17
 int(1)
 ===DONE===
