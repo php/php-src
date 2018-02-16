@@ -461,8 +461,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_abstract_method_helper_SPEC(ze
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC(zval *function_name ZEND_OPCODE_HANDLER_ARGS_DC)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 	HANDLE_EXCEPTION();

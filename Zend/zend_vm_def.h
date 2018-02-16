@@ -784,8 +784,6 @@ ZEND_VM_HELPER(zend_abstract_method_helper, ANY, ANY, zend_function *fbc)
 
 ZEND_VM_HELPER(zend_undefined_function_helper, ANY, ANY, zval *function_name)
 {
-	USE_OPLINE
-
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
 	HANDLE_EXCEPTION();
