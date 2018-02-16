@@ -96,7 +96,7 @@ int __riscosify_control = __RISCOSIFY_STRICT_UNIX_SPECS;
 # include "openssl/applink.c"
 #endif
 
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 # include "valgrind/callgrind.h"
 #endif
 
@@ -2296,7 +2296,7 @@ consult the installation file that came with this distribution, or visit \n\
 						if (comma) {
 							warmup_repeats = atoi(php_optarg);
 							repeats = atoi(comma + 1);
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 							if (warmup_repeats > 0) {
 								CALLGRIND_STOP_INSTRUMENTATION;
 							}
@@ -2723,7 +2723,7 @@ fastcgi_request_done:
 #else
 							time(&start);
 #endif
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 							CALLGRIND_START_INSTRUMENTATION;
 #endif
 						}

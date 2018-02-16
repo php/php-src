@@ -21,7 +21,7 @@
 #include "zend.h"
 #include "zend_globals.h"
 
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 # include "valgrind/callgrind.h"
 #endif
 
@@ -359,7 +359,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_str
 	return ret;
 }
 
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
 {
 	size_t len = ZSTR_LEN(s1);
@@ -427,7 +427,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_str
 	return ret;
 }
 
-#ifdef HAVE_VALGRIND
+#ifdef HAVE_VALGRIND_VALGRIND_H
 ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
 {
 	size_t len = ZSTR_LEN(s1);
