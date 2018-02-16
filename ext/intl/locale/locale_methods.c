@@ -1000,10 +1000,9 @@ static zend_string* get_private_subtags(const char* loc_name)
 	size_t       len = 0;
 	const char*  mod_loc_name =NULL;
 
-	if( loc_name && (len = strlen(loc_name)>0 ) ){
+	if( loc_name && (len = strlen(loc_name)) > 0 ){
 		zend_off_t singletonPos = 0;
 		mod_loc_name = loc_name ;
-		len   = strlen(mod_loc_name);
 		while( (singletonPos = getSingletonPos(mod_loc_name)) > -1){
 			if( (*(mod_loc_name+singletonPos)=='x') || (*(mod_loc_name+singletonPos)=='X') ){
 				/* private subtag start found */
