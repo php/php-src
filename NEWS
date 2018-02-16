@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
+- Opcache:
+  . Fixed bug #75969 (Assertion failure in live range DCE due to block pass
+    misoptimization). (Nikita)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 

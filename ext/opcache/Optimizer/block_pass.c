@@ -792,8 +792,6 @@ optimize_const_unary_op:
 		}
 		opline++;
 	}
-
-	strip_nops(op_array, block);
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
@@ -1836,6 +1834,13 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				memset(Tsource, 0, (op_array->last_var + op_array->T) * sizeof(zend_op *));
 			}
 			zend_optimize_block(b, op_array, usage, &cfg, Tsource);
+		}
+
+		/* Eliminate NOPs */
+		for (b = blocks; b < end; b++) {
+			if (b->flags & ZEND_BB_REACHABLE) {
+				strip_nops(op_array, b);
+			}
 		}
 
 		/* Jump optimization for each block */
