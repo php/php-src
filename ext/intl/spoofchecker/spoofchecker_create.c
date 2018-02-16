@@ -28,7 +28,9 @@
  */
 PHP_METHOD(Spoofchecker, __construct)
 {
+#if U_ICU_VERSION_MAJOR_NUM < 58
 	int checks;
+#endif
 	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
