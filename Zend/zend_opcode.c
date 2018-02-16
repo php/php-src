@@ -27,6 +27,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 #include "zend_API.h"
+#include "zend_sort.h"
 
 #include "zend_vm.h"
 
@@ -553,6 +554,20 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
+/* Live ranges must be sorted by increasing start opline */
+static int cmp_live_range(const zend_live_range *a, const zend_live_range *b) {
+	return a->start - b->start;
+}
+static void swap_live_range(zend_live_range *a, zend_live_range *b) {
+	zend_live_range tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+static void zend_sort_live_ranges(zend_op_array *op_array) {
+	zend_sort(op_array->live_range, op_array->last_live_range, sizeof(zend_live_range),
+			(compare_func_t) cmp_live_range, (swap_func_t) swap_live_range);
+}
+
 ZEND_API int pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
@@ -707,6 +722,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	if (op_array->live_range) {
 		int i;
 
+		zend_sort_live_ranges(op_array);
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =
 				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |
