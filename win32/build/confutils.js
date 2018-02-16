@@ -3122,16 +3122,20 @@ function toolset_setup_arch()
 
 function toolset_setup_codegen_arch()
 {
-	if("no" == PHP_CODEGEN_ARCH) {
+	if("no" == PHP_CODEGEN_ARCH || "yes" == PHP_CODEGEN_ARCH) {
 		return;
 	}
 
 	if (VS_TOOLSET) {
 		var arc = PHP_CODEGEN_ARCH.toUpperCase();
 
-		if ("AVX2" == arc || "AVX" == arc || "SSE2" == arc || "SSE" == arc || "IA32" == arc) {
-			ADD_FLAG("CFLAGS", "/arch:" + arc);
+		if ("IA32" != arc) {
+			ERROR("Only IA32 arch is supported by --with-codegen-arch, got '" + arc + "'");
+		} else if (X64) {
+			ERROR("IA32 arch is only supported with 32-bit build");
 		}
+		ADD_FLAG("CFLAGS", "/arch:" + arc);
+		PHP_NATIVE_INTRINSICS = "disabled";
 	}
 }
 
@@ -3236,6 +3240,10 @@ function toolset_setup_intrinsic_cflags()
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2");
 
 	if (VS_TOOLSET) {
+		if ("disabled" == PHP_NATIVE_INTRINSICS) {
+			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
+		}
+
 		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
 			PHP_NATIVE_INTRINSICS = default_enabled;
 		}
