@@ -2074,7 +2074,6 @@ static zend_always_inline zend_string *php_replace_in_subject(zval *regex, zval 
  */
 static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fci, zend_fcall_info_cache *fcc, zval *subject, size_t limit, size_t *replace_count)
 {
-	zval		*regex_entry;
 	zend_string *result;
 	zend_string	*subject_str = zval_get_string(subject);
 
@@ -2087,6 +2086,8 @@ static zend_string *php_replace_in_subject_func(zval *regex, zend_fcall_info *fc
 		zend_string_release(subject_str);
 		return result;
 	} else {
+		zval		*regex_entry;
+
 		/* If regex is an array */
 
 		/* For each entry in the regex array, get the entry */
