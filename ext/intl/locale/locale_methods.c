@@ -1330,12 +1330,8 @@ PHP_FUNCTION(locale_filter_matches)
 			/* check if the char. after match is SEPARATOR */
 			chrcheck = token + (strlen(cur_loc_range));
 			if( isIDSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
-				if( cur_lang_tag){
-					efree( cur_lang_tag );
-				}
-				if( cur_loc_range){
-					efree( cur_loc_range );
-				}
+				efree( cur_lang_tag );
+				efree( cur_loc_range );
 				if( can_lang_tag){
 					zend_string_release( can_lang_tag );
 				}
@@ -1386,12 +1382,8 @@ PHP_FUNCTION(locale_filter_matches)
 			/* check if the char. after match is SEPARATOR */
 			chrcheck = token + (strlen(cur_loc_range));
 			if( isIDSeparator(*chrcheck) || isEndOfTag(*chrcheck) ){
-				if( cur_lang_tag){
-					efree( cur_lang_tag );
-				}
-				if( cur_loc_range){
-					efree( cur_loc_range );
-				}
+				efree( cur_lang_tag );
+				efree( cur_loc_range );
 				RETURN_TRUE;
 			}
 		}
@@ -1433,7 +1425,6 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	zend_string* lang_tag = NULL;
 	zval* ele_value = NULL;
-	char** cur_arr = NULL;
 
 	char* cur_loc_range	= NULL;
 	zend_string* can_loc_range	= NULL;
@@ -1441,7 +1432,7 @@ static zend_string* lookup_loc_range(const char* loc_range, HashTable* hash_arr,
 
 	zend_string* return_value = NULL;
 
-	cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
+	char **cur_arr = ecalloc(zend_hash_num_elements(hash_arr)*2, sizeof(char *));
 	ZEND_HASH_FOREACH_VAL(hash_arr, ele_value) {
 	/* convert the array to lowercase , also replace hyphens with the underscore and store it in cur_arr */
 		if(Z_TYPE_P(ele_value)!= IS_STRING) {
