@@ -22325,7 +22325,7 @@ fe_fetch_r_exit:
 		zend_refcounted *gc = Z_COUNTED_P(value);
 
 		ZVAL_COPY_VALUE_EX(res, value, gc, value_type);
-		if (EXPECTED(Z_TYPE_INFO_REFCOUNTED(value_type))) {
+		if (Z_TYPE_INFO_REFCOUNTED(value_type)) {
 			GC_ADDREF(gc);
 		}
 	}
