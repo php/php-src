@@ -3270,6 +3270,17 @@ function toolset_setup_intrinsic_cflags()
 					}
 				}
 			}
+			if (!X64) {
+				/* SSE2 is currently the default on 32-bit. It could change later,
+					for now no need to pass it. But, if SSE only was chosen,
+					/arch:SSE is required. */
+				if ("sse" == scale[j]) {
+					ADD_FLAG("CFLAGS","/arch:SSE");
+				}
+			}
+			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
+				The declared macros therefore won't affect the code generation,
+				but will enable the guarded code parts. */
 			if ("avx2" == scale[j]) {
 				ADD_FLAG("CFLAGS","/arch:AVX2");
 				j -= 2;
