@@ -770,6 +770,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 #define ZEND_PARSE_PARAMETERS_NONE() do { \
 		if (UNEXPECTED(ZEND_NUM_ARGS() != 0)) { \
 			zend_wrong_parameters_none_error(); \
+			return; \
 		} \
 	} while (0)
 
