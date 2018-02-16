@@ -77,10 +77,6 @@ char *phpdbg_decode_input_op(
 		if (op.num != (uint32_t)-1) {
 			spprintf(&result, 0, "try-catch(%" PRIu32 ")", op.num);
 		}
-	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			spprintf(&result, 0, "live-range(%" PRIu32 ")", op.num);
-		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		result = estrdup("THIS");
 	} else if (ZEND_VM_OP_NEXT == (flags & ZEND_VM_OP_MASK)) {

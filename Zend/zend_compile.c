@@ -629,7 +629,6 @@ static uint32_t zend_start_live_range_ex(zend_op_array *op_array, uint32_t start
 		if (!zend_stack_is_empty(&CG(loop_var_stack))) {
 			zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
 			zend_loop_var *base = zend_stack_base(&CG(loop_var_stack));
-			int check_opcodes = 0;
 
 			for (; loop_var >= base; loop_var--) {
 				if (loop_var->opcode == ZEND_RETURN) {
@@ -639,26 +638,9 @@ static uint32_t zend_start_live_range_ex(zend_op_array *op_array, uint32_t start
 			           loop_var->opcode == ZEND_FE_FREE) {
 					if (loop_var->u.live_range_offset >= n) {
 						loop_var->u.live_range_offset++;
-						check_opcodes = 1;
 					} else {
 						break;
 					}
-				}
-			}
-
-			/* update previously generated FREE/FE_FREE opcodes */
-			if (check_opcodes) {
-				zend_op *opline = op_array->opcodes + op_array->live_range[n+1].start;
-				zend_op *end = op_array->opcodes + op_array->last;
-
-				while (opline < end) {
-					if ((opline->opcode == ZEND_FREE ||
-					     opline->opcode == ZEND_FE_FREE) &&
-					    (opline->extended_value & ZEND_FREE_ON_RETURN) &&
-					    opline->op2.num >= n) {
-						opline->op2.num++;
-					}
-					opline++;
 				}
 			}
 		}
@@ -4463,7 +4445,6 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
 			SET_UNUSED(opline->op2);
-			opline->op2.num = loop_var->u.live_range_offset;
 			opline->extended_value = ZEND_FREE_ON_RETURN;
 			depth--;
 	    }

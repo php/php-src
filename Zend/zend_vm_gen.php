@@ -64,7 +64,7 @@ $vm_op_flags = array(
 	"ZEND_VM_OP_NUM"          => 0x10,
 	"ZEND_VM_OP_JMP_ADDR"     => 0x20,
 	"ZEND_VM_OP_TRY_CATCH"    => 0x30,
-	"ZEND_VM_OP_LIVE_RANGE"   => 0x40,
+	// unused 0x40
 	"ZEND_VM_OP_THIS"         => 0x50,
 	"ZEND_VM_OP_NEXT"         => 0x60,
 	"ZEND_VM_OP_CLASS_FETCH"  => 0x70,
@@ -110,7 +110,6 @@ $vm_op_decode = array(
 	"NUM"                  => ZEND_VM_OP_NUM,
 	"JMP_ADDR"             => ZEND_VM_OP_JMP_ADDR,
 	"TRY_CATCH"            => ZEND_VM_OP_TRY_CATCH,
-	"LIVE_RANGE"           => ZEND_VM_OP_LIVE_RANGE,
 	"THIS"                 => ZEND_VM_OP_THIS,
 	"NEXT"                 => ZEND_VM_OP_NEXT,
 	"CLASS_FETCH"          => ZEND_VM_OP_CLASS_FETCH,

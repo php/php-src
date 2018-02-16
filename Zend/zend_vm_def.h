@@ -2730,7 +2730,7 @@ ZEND_VM_HANDLER(47, ZEND_JMPNZ_EX, CONST|TMPVAR|CV, JMP_ADDR)
 	ZEND_VM_JMP(opline);
 }
 
-ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, LIVE_RANGE)
+ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, ANY)
 {
 	USE_OPLINE
 
@@ -2739,7 +2739,7 @@ ZEND_VM_HANDLER(70, ZEND_FREE, TMPVAR, LIVE_RANGE)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, LIVE_RANGE)
+ZEND_VM_HANDLER(127, ZEND_FE_FREE, TMPVAR, ANY)
 {
 	zval *var;
 	USE_OPLINE
@@ -7129,16 +7129,15 @@ ZEND_VM_HANDLER(149, ZEND_HANDLE_EXCEPTION, ANY, ANY)
 	uint32_t throw_op_num = throw_op - EX(func)->op_array.opcodes;
 	int i, current_try_catch_offset = -1;
 
-	{
-		const zend_op *exc_opline = EG(opline_before_exception);
-		if ((exc_opline->opcode == ZEND_FREE || exc_opline->opcode == ZEND_FE_FREE)
-			&& exc_opline->extended_value & ZEND_FREE_ON_RETURN) {
-			/* exceptions thrown because of loop var destruction on return/break/...
-			 * are logically thrown at the end of the foreach loop, so adjust the
-			 * throw_op_num.
-			 */
-			throw_op_num = EX(func)->op_array.live_range[exc_opline->op2.num].end;
-		}
+	if ((throw_op->opcode == ZEND_FREE || throw_op->opcode == ZEND_FE_FREE)
+		&& throw_op->extended_value & ZEND_FREE_ON_RETURN) {
+		/* exceptions thrown because of loop var destruction on return/break/...
+		 * are logically thrown at the end of the foreach loop, so adjust the
+		 * throw_op_num.
+		 */
+		const zend_live_range *range = find_live_range(
+			&EX(func)->op_array, throw_op_num, throw_op->op1.var);
+		throw_op_num = range->end;
 	}
 
 	/* Find the innermost try/catch/finally the exception was thrown in */

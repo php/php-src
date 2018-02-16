@@ -2576,6 +2576,20 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 }
 /* }}} */
 
+static const zend_live_range *find_live_range(const zend_op_array *op_array, uint32_t op_num, uint32_t var_num) /* {{{ */
+{
+	int i;
+	for (i = 0; i < op_array->last_live_range; i++) {
+		const zend_live_range *range = &op_array->live_range[i];
+		if (op_num >= range->start && op_num < range->end
+				&& var_num == (range->var & ~ZEND_LIVE_MASK)) {
+			return range;
+		}
+	}
+	return NULL;
+}
+/* }}} */
+
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
 	int i;
