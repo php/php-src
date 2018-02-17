@@ -1392,9 +1392,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				return 1;
 			}
 			break;
-		case ZEND_COUNT:
 		case ZEND_FUNC_NUM_ARGS:
 			tmp->min = 0;
+			tmp->max = ZEND_LONG_MAX;
+			return 1;
+		case ZEND_COUNT:
+			/* count() on Countable objects may return negative numbers */
+			tmp->min = ZEND_LONG_MIN;
 			tmp->max = ZEND_LONG_MAX;
 			return 1;
 		case ZEND_DO_FCALL:
@@ -3734,6 +3738,8 @@ void zend_init_func_return_info(const zend_op_array   *op_array,
 		ret->type = zend_fetch_arg_info(script, ret_info, &ret->ce);
 		if (op_array->fn_flags & ZEND_ACC_RETURN_REFERENCE) {
 			ret->type |= MAY_BE_REF;
+		} else if (ret->type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
+			ret->type |= MAY_BE_RC1|MAY_BE_RCN;
 		}
 		ret->is_instanceof = (ret->ce) ? 1 : 0;
 		ret->range = tmp_range;
