@@ -3511,10 +3511,13 @@ PHP_FUNCTION(strtr)
 
 /* {{{ proto string strrev(string str)
    Reverse a string */
+#if ZEND_INTRIN_SSSE3_NATIVE
+#include <tmmintrin.h>
+#endif
 PHP_FUNCTION(strrev)
 {
 	zend_string *str;
-	char *e, *p;
+	char *s, *e, *p;
 	zend_string *n;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3524,10 +3527,24 @@ PHP_FUNCTION(strrev)
 	n = zend_string_alloc(ZSTR_LEN(str), 0);
 	p = ZSTR_VAL(n);
 
-	e = ZSTR_VAL(str) + ZSTR_LEN(str);
-
-	while (--e >= ZSTR_VAL(str)) {
-		*p++ = *e;
+	s = ZSTR_VAL(str);
+	e = s + ZSTR_LEN(str);
+	--e;
+#if ZEND_INTRIN_SSSE3_NATIVE
+	while (e - s > 15) {
+		const __m128i map = _mm_set_epi8(
+				0, 1, 2, 3,
+				4, 5, 6, 7,
+				8, 9, 10, 11,
+				12, 13, 14, 15);
+		const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
+		_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
+		p += 16;
+		e -= 16;
+	}
+#endif
+	while (e >= s) {
+		*p++ = *e--;
 	}
 
 	*p = '\0';
