@@ -2912,17 +2912,14 @@ PHP_METHOD(DateTimeImmutable, createFromMutable)
 static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht)
 {
 	zval             *z_date;
-	zval             *z_timezone;
-	zval             *z_timezone_type;
 	zval              tmp_obj;
 	timelib_tzinfo   *tzi;
-	php_timezone_obj *tzobj;
 
 	z_date = zend_hash_str_find(myht, "date", sizeof("data")-1);
 	if (z_date && Z_TYPE_P(z_date) == IS_STRING) {
-		z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
+		zval *z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type")-1);
 		if (z_timezone_type && Z_TYPE_P(z_timezone_type) == IS_LONG) {
-			z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
+			zval *z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone")-1);
 			if (z_timezone && Z_TYPE_P(z_timezone) == IS_STRING) {
 				switch (Z_LVAL_P(z_timezone_type)) {
 					case TIMELIB_ZONETYPE_OFFSET:
@@ -2937,6 +2934,7 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 
 					case TIMELIB_ZONETYPE_ID: {
 						int ret;
+						php_timezone_obj *tzobj;
 
 						tzi = php_date_parse_tzfile(Z_STRVAL_P(z_timezone), DATE_TIMEZONEDB);
 
@@ -3432,7 +3430,6 @@ PHP_FUNCTION(date_timezone_get)
 {
 	zval             *object;
 	php_date_obj     *dateobj;
-	php_timezone_obj *tzobj;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O", &object, date_ce_interface) == FAILURE) {
 		RETURN_FALSE;
@@ -3440,6 +3437,7 @@ PHP_FUNCTION(date_timezone_get)
 	dateobj = Z_PHPDATE_P(object);
 	DATE_CHECK_INITIALIZED(dateobj->time, DateTime);
 	if (dateobj->time->is_localtime) {
+		php_timezone_obj *tzobj;
 		php_date_instantiate(date_ce_timezone, return_value);
 		tzobj = Z_PHPTIMEZONE_P(return_value);
 		set_timezone_from_timelib_time(tzobj, dateobj->time);
@@ -3867,10 +3865,11 @@ PHP_METHOD(DateTimeZone, __construct)
 
 static int php_date_timezone_initialize_from_hash(zval **return_value, php_timezone_obj **tzobj, HashTable *myht) /* {{{ */
 {
-	zval            *z_timezone;
 	zval            *z_timezone_type;
 
 	if ((z_timezone_type = zend_hash_str_find(myht, "timezone_type", sizeof("timezone_type") - 1)) != NULL) {
+		zval *z_timezone;
+
 		if ((z_timezone = zend_hash_str_find(myht, "timezone", sizeof("timezone") - 1)) != NULL) {
 			if (Z_TYPE_P(z_timezone_type) != IS_LONG) {
 				return FAILURE;
@@ -4012,7 +4011,7 @@ PHP_FUNCTION(timezone_transitions_get)
 {
 	zval                *object, element;
 	php_timezone_obj    *tzobj;
-	unsigned int         i, begin = 0, found;
+	unsigned int         begin = 0, found;
 	zend_long            timestamp_begin = ZEND_LONG_MIN, timestamp_end = ZEND_LONG_MAX;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "O|ll", &object, date_ce_timezone, &timestamp_begin, &timestamp_end) == FAILURE) {
@@ -4076,6 +4075,7 @@ PHP_FUNCTION(timezone_transitions_get)
 			add_nominal();
 		}
 	} else {
+		unsigned int i;
 		for (i = begin; i < tzobj->tzi.tz->bit32.timecnt; ++i) {
 			if (tzobj->tzi.tz->trans[i] < timestamp_end) {
 				add(i, tzobj->tzi.tz->trans[i]);
@@ -4305,7 +4305,6 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 PHP_METHOD(DateInterval, __construct)
 {
 	zend_string *interval_string = NULL;
-	php_interval_obj *diobj;
 	timelib_rel_time *reltime;
 	zend_error_handling error_handling;
 
@@ -4315,7 +4314,7 @@ PHP_METHOD(DateInterval, __construct)
 
 	zend_replace_error_handling(EH_THROW, NULL, &error_handling);
 	if (date_interval_initialize(&reltime, ZSTR_VAL(interval_string), ZSTR_LEN(interval_string)) == SUCCESS) {
-		diobj = Z_PHPINTERVAL_P(getThis());
+		php_interval_obj *diobj = Z_PHPINTERVAL_P(getThis());
 		diobj->diff = reltime;
 		diobj->initialized = 1;
 	}
@@ -4571,7 +4570,6 @@ PHP_METHOD(DatePeriod, __construct)
 {
 	php_period_obj   *dpobj;
 	php_date_obj     *dateobj;
-	php_interval_obj *intobj;
 	zval *start, *end = NULL, *interval;
 	zend_long  recurrences = 0, options = 0;
 	char *isostr = NULL;
@@ -4614,7 +4612,7 @@ PHP_METHOD(DatePeriod, __construct)
 		dpobj->start_ce = date_ce_date;
 	} else {
 		/* init */
-		intobj  = Z_PHPINTERVAL_P(interval);
+		php_interval_obj *intobj = Z_PHPINTERVAL_P(interval);
 
 		/* start date */
 		dateobj = Z_PHPDATE_P(start);
