@@ -110,12 +110,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_filter_list, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_has_var, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_filter_has_var, 0)
 	ZEND_ARG_INFO(0, type)
 	ZEND_ARG_INFO(0, variable_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_filter_id, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_filter_id, 0)
 	ZEND_ARG_INFO(0, filtername)
 ZEND_END_ARG_INFO()
 /* }}} */

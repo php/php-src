@@ -48,7 +48,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_get_status, 0, 0, 0)
 	ZEND_ARG_INFO(0, fetch_scripts)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_compile_file, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_opcache_compile_file, 0)
 	ZEND_ARG_INFO(0, file)
 ZEND_END_ARG_INFO()
 
@@ -57,7 +57,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_invalidate, 0, 0, 1)
 	ZEND_ARG_INFO(0, force)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_opcache_is_script_cached, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_opcache_is_script_cached, 0)
 	ZEND_ARG_INFO(0, script)
 ZEND_END_ARG_INFO()
 

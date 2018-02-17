@@ -386,11 +386,11 @@ static zend_object *TimeZone_object_create(zend_class_entry *ce)
 
 /* {{{ TimeZone methods arguments info */
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_idarg, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_idarg, 0)
 	ZEND_ARG_INFO(0, zoneId)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_fromDateTimeZone, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_fromDateTimeZone, 0)
 	ZEND_ARG_OBJ_INFO(0, otherTimeZone, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 
@@ -398,7 +398,7 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_createEnumeration, 0, 0, 0)
 	ZEND_ARG_INFO(0, countryOrRawOffset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_countEquivalentIDs, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_countEquivalentIDs, 0)
 	ZEND_ARG_INFO(0, zoneId)
 ZEND_END_ARG_INFO()
 
@@ -413,19 +413,19 @@ ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getCanonicalID, 0, 0, 1)
 	ZEND_ARG_INFO(1, isSystemID)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getEquivalentID, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_getEquivalentID, 0)
 	ZEND_ARG_INFO(0, zoneId)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_getOffset, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_getOffset, 0)
 	ZEND_ARG_INFO(0, date)
 	ZEND_ARG_INFO(0, local)
 	ZEND_ARG_INFO(1, rawOffset)
 	ZEND_ARG_INFO(1, dstOffset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(ainfo_tz_hasSameRules, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(ainfo_tz_hasSameRules, 0)
 	ZEND_ARG_OBJ_INFO(0, otherTimeZone, IntlTimeZone, 0)
 ZEND_END_ARG_INFO()
 

@@ -108,7 +108,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_value, 0, 0, 1)
 	ZEND_ARG_INFO(0, comment)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_vars, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_wddx_serialize_vars, 0)
 	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
@@ -116,16 +116,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_serialize_start, 0, 0, 0)
 	ZEND_ARG_INFO(0, comment)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_packet_end, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_wddx_packet_end, 0)
 	ZEND_ARG_INFO(0, packet_id)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_add_vars, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_wddx_add_vars, 0)
 	ZEND_ARG_INFO(0, packet_id)
 	ZEND_ARG_VARIADIC_INFO(0, var_names)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_wddx_deserialize, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_wddx_deserialize, 0)
 	ZEND_ARG_INFO(0, packet)
 ZEND_END_ARG_INFO()
 /* }}} */

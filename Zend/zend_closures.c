@@ -587,7 +587,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_call, 0, 0, 1)
 	ZEND_ARG_VARIADIC_INFO(0, parameters)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_closure_fromcallable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_closure_fromcallable, 0)
 	ZEND_ARG_INFO(0, callable)
 ZEND_END_ARG_INFO()
 

@@ -28,11 +28,11 @@
 #include "php_dom.h"
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namelist_get_name, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_namelist_get_name, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_namelist_get_namespace_uri, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_namelist_get_namespace_uri, 0)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO();
 /* }}} */

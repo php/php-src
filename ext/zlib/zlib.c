@@ -1253,7 +1253,7 @@ ZEND_GET_MODULE(php_zlib)
 #endif
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ob_gzhandler, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_ob_gzhandler, 0)
 	ZEND_ARG_INFO(0, data)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
@@ -1375,11 +1375,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
 	ZEND_ARG_INFO(0, flush_mode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_inflate_get_status, 0)
 	ZEND_ARG_INFO(0, resource)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_read_len, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_inflate_get_read_len, 0)
 	ZEND_ARG_INFO(0, resource)
 ZEND_END_ARG_INFO()
 

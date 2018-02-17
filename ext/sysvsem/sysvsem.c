@@ -69,11 +69,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_acquire, 0, 0, 1)
 	ZEND_ARG_INFO(0, nowait)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_release, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_sem_release, 0)
 	ZEND_ARG_INFO(0, sem_identifier)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_sem_remove, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_sem_remove, 0)
 	ZEND_ARG_INFO(0, sem_identifier)
 ZEND_END_ARG_INFO()
 /* }}} */

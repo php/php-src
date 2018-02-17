@@ -494,15 +494,15 @@ static const zend_function_entry zend_funcs_iterator[] = {
 
 static const zend_function_entry *zend_funcs_traversable = NULL;
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset, 0)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_get, 0, 0, 1) /* actually this should be return by ref but atm cannot be */
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset_get, 0) /* actually this should be return by ref but atm cannot be */
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_arrayaccess_offset_value, 0)
 	ZEND_ARG_INFO(0, offset)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()

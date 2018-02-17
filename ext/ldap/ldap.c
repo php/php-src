@@ -4498,13 +4498,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_attributes, 0, 0, 2)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_values, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_get_values, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 	ZEND_ARG_INFO(0, attribute)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_values_len, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_get_values_len, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, result_entry_identifier)
 	ZEND_ARG_INFO(0, attribute)
@@ -4618,7 +4618,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_compare, 0, 0, 4)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_sort, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_sort, 0)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(0, sortfilter)
@@ -4659,13 +4659,13 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_rename_ext, 0, 0, 5)
 	ZEND_ARG_INFO(0, servercontrols)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_get_option, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_get_option, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(1, retval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_set_option, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_set_option, 0)
 	ZEND_ARG_INFO(0, link_identifier)
 	ZEND_ARG_INFO(0, option)
 	ZEND_ARG_INFO(0, newval)
@@ -4682,7 +4682,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_next_reference, 0, 0, 2)
 ZEND_END_ARG_INFO()
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_reference, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_parse_reference, 0)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(1, referrals)
@@ -4754,7 +4754,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_LDAP_REFRESH_S
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_exop_refresh, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_exop_refresh, 0)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, dn)
 	ZEND_ARG_INFO(0, ttl)
@@ -4762,7 +4762,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ldap_parse_exop, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO(arginfo_ldap_parse_exop, 0)
 	ZEND_ARG_INFO(0, link)
 	ZEND_ARG_INFO(0, result)
 	ZEND_ARG_INFO(1, retdata)

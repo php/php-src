@@ -311,7 +311,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_decrypt, 0, 0, 3)
 	ZEND_ARG_INFO(0, recipkey)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs7_read, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs7_read, 0)
 	ZEND_ARG_INFO(0, infilename)
 	ZEND_ARG_INFO(1, certs)
 ZEND_END_ARG_INFO()

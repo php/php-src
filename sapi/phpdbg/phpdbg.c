@@ -742,17 +742,17 @@ static PHP_FUNCTION(phpdbg_end_oplog)
 ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_next_arginfo, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_file_arginfo, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(phpdbg_break_file_arginfo, 0)
 	ZEND_ARG_INFO(0, file)
 	ZEND_ARG_INFO(0, line)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_method_arginfo, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(phpdbg_break_method_arginfo, 0)
 	ZEND_ARG_INFO(0, class)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_function_arginfo, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(phpdbg_break_function_arginfo, 0)
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 

@@ -2599,7 +2599,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_session_regenerate_id, 0, 0, 0)
 	ZEND_ARG_INFO(0, delete_old_session)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_session_decode, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_session_decode, 0)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 

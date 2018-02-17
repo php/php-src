@@ -118,7 +118,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_disable_entity_loader, 0, 0, 0)
 	ZEND_ARG_INFO(0, disable)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_libxml_set_external_entity_loader, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_libxml_set_external_entity_loader, 0)
 	ZEND_ARG_INFO(0, resolver_function)
 ZEND_END_ARG_INFO()
 /* }}} */

@@ -65,20 +65,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_receive, 0, 0, 5)
 	ZEND_ARG_INFO(1, errorcode)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_remove_queue, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_msg_remove_queue, 0)
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_stat_queue, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_msg_stat_queue, 0)
 	ZEND_ARG_INFO(0, queue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_set_queue, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_msg_set_queue, 0)
 	ZEND_ARG_INFO(0, queue)
 	ZEND_ARG_INFO(0, data)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_msg_queue_exists, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_msg_queue_exists, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 /* }}} */

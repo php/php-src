@@ -171,11 +171,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_parse, 0)
 	ZEND_ARG_INFO(0, date)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_parse_from_format, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_parse_from_format, 0)
 	ZEND_ARG_INFO(0, format)
 	ZEND_ARG_INFO(0, date)
 ZEND_END_ARG_INFO()
@@ -183,59 +183,59 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_date_get_last_errors, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_format, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_format, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_format, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_format, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_modify, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_modify, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, modify)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_modify, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_modify, 0)
 	ZEND_ARG_INFO(0, modify)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_add, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_add, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, interval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_add, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_add, 0)
 	ZEND_ARG_INFO(0, interval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_sub, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_sub, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, interval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_sub, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_sub, 0)
 	ZEND_ARG_INFO(0, interval)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_timezone_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO(arginfo_date_method_timezone_get, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timezone_set, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_timezone_set, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_timezone_set, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_timezone_set, 0)
 	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_offset_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_offset_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -268,14 +268,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_time_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, microseconds)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_date_set, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO(arginfo_date_date_set, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, year)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_date_set, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_date_set, 0)
 	ZEND_ARG_INFO(0, year)
 	ZEND_ARG_INFO(0, month)
 	ZEND_ARG_INFO(0, day)
@@ -294,16 +294,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_isodate_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, day)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timestamp_set, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_timestamp_set, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, unixtimestamp)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_timestamp_set, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_timestamp_set, 0)
 	ZEND_ARG_INFO(0, unixtimestamp)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_timestamp_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_timestamp_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -311,19 +311,19 @@ ZEND_BEGIN_ARG_INFO(arginfo_date_method_timestamp_get, 0)
 ZEND_END_ARG_INFO()
 
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_create_from_immutable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_create_from_immutable, 0)
 	ZEND_ARG_INFO(0, DateTimeImmutable)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_method_create_from_mutable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_method_create_from_mutable, 0)
 	ZEND_ARG_INFO(0, DateTime)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_open, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_open, 0)
 	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_name_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -336,12 +336,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_name_from_abbr, 0, 0, 1)
 	ZEND_ARG_INFO(0, isdst)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_offset_get, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_offset_get, 0)
 	ZEND_ARG_OBJ_INFO(0, object, DateTimeZone, 0)
 	ZEND_ARG_OBJ_INFO(0, datetime, DateTimeInterface, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_offset_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_method_offset_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -356,7 +356,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_method_transitions_get, 0, 0, 0)
 	ZEND_ARG_INFO(0, timestamp_end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_timezone_location_get, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_timezone_location_get, 0)
 	ZEND_ARG_INFO(0, object)
 ZEND_END_ARG_INFO()
 
@@ -374,11 +374,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_timezone_version_get, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_create_from_date_string, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_interval_create_from_date_string, 0)
 	ZEND_ARG_INFO(0, time)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_format, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_date_interval_format, 0)
 	ZEND_ARG_INFO(0, object)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
@@ -387,17 +387,17 @@ ZEND_BEGIN_ARG_INFO(arginfo_date_method_interval_format, 0)
 	ZEND_ARG_INFO(0, format)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_period_construct, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_date_period_construct, 0)
 	ZEND_ARG_INFO(0, start)
 	ZEND_ARG_INFO(0, interval)
 	ZEND_ARG_INFO(0, end)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_set_state, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_set_state, 0)
 	ZEND_ARG_INFO(0, array)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_date_interval_construct, 0)
 	ZEND_ARG_INFO(0, interval_spec)
 ZEND_END_ARG_INFO()
 /* }}} */
@@ -2430,7 +2430,7 @@ static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp
 
 	*is_temp = 1;
 	ht = zend_array_dup(props);
-	
+
 	ZVAL_LONG(&zv, tzobj->type);
 	zend_hash_str_update(ht, "timezone_type", sizeof("timezone_type")-1, &zv);
 

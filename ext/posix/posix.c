@@ -200,7 +200,7 @@ ZEND_END_ARG_INFO()
 #endif
 
 #ifdef HAVE_SETRLIMIT
-ZEND_BEGIN_ARG_INFO_EX(arginfo_posix_setrlimit, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_posix_setrlimit, 0)
 	ZEND_ARG_INFO(0, resource)
 	ZEND_ARG_INFO(0, softlimit)
 	ZEND_ARG_INFO(0, hardlimit)

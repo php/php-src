@@ -83,7 +83,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_info, 0, 0, 0)
 	ZEND_ARG_INFO(0, newvalue)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_add_history, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_readline_add_history, 0)
 	ZEND_ARG_INFO(0, prompt)
 ZEND_END_ARG_INFO()
 
@@ -103,12 +103,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_write_history, 0, 0, 0)
 	ZEND_ARG_INFO(0, filename)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_completion_function, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_readline_completion_function, 0)
 	ZEND_ARG_INFO(0, funcname)
 ZEND_END_ARG_INFO()
 
 #if HAVE_RL_CALLBACK_READ_CHAR
-ZEND_BEGIN_ARG_INFO_EX(arginfo_readline_callback_handler_install, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_readline_callback_handler_install, 0)
 	ZEND_ARG_INFO(0, prompt)
 	ZEND_ARG_INFO(0, callback)
 ZEND_END_ARG_INFO()
