@@ -1013,7 +1013,7 @@ static const func_info_t func_infos[] = {
 	F1("mysql_table_name",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
 
 	/* ext/mysqli */
-	F1("mysqli_connect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	F1("mysqli_connect",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_OBJECT),
 	F0("mysqli_close",							MAY_BE_NULL | MAY_BE_TRUE),
 	I1("mysqli_connect_error",					MAY_BE_NULL | MAY_BE_STRING),
 	I0("mysqli_connect_errno",					MAY_BE_LONG),
