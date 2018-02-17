@@ -1392,9 +1392,13 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 				return 1;
 			}
 			break;
-		case ZEND_COUNT:
 		case ZEND_FUNC_NUM_ARGS:
 			tmp->min = 0;
+			tmp->max = ZEND_LONG_MAX;
+			return 1;
+		case ZEND_COUNT:
+			/* count() on Countable objects may return negative numbers */
+			tmp->min = ZEND_LONG_MIN;
 			tmp->max = ZEND_LONG_MAX;
 			return 1;
 		case ZEND_DO_FCALL:
