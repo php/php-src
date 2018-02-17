@@ -817,9 +817,7 @@ PHP_FUNCTION(xmlrpc_decode)
    Creates an xmlrpc server */
 PHP_FUNCTION(xmlrpc_server_create)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (USED_RET()) {
 		xmlrpc_server_data *server = emalloc(sizeof(xmlrpc_server_data));
@@ -1448,4 +1446,3 @@ PHP_FUNCTION(xmlrpc_is_fault)
  * c-basic-offset: 4
  * End:
  */
-

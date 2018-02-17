@@ -58,9 +58,7 @@
 	PHPTidyObj *obj;	\
 	TIDY_SET_CONTEXT; \
 	if (object) {	\
-		if (zend_parse_parameters_none() == FAILURE) {	\
-			return;	\
-		}	\
+		ZEND_PARSE_PARAMETERS_NONE(); \
 	} else {	\
 		if (zend_parse_method_parameters(ZEND_NUM_ARGS(), NULL, "O", &object, tidy_ce_doc) == FAILURE) {	\
 			RETURN_FALSE;	\
@@ -71,9 +69,7 @@
 #define TIDY_FETCH_ONLY_OBJECT	\
 	PHPTidyObj *obj;	\
 	TIDY_SET_CONTEXT; \
-	if (zend_parse_parameters_none() == FAILURE) {	\
-		return;	\
-	}	\
+	ZEND_PARSE_PARAMETERS_NONE(); \
 	obj = Z_TIDY_P(object);	\
 
 #define TIDY_APPLY_CONFIG_ZVAL(_doc, _val) \
@@ -1370,9 +1366,7 @@ static PHP_FUNCTION(tidy_diagnose)
    Get release date (version) for Tidy library */
 static PHP_FUNCTION(tidy_get_release)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #if HAVE_TIDYRELEASEDATE
 	RETURN_STRING((char *)tidyReleaseDate());

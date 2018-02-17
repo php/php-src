@@ -999,9 +999,8 @@ PHP_FUNCTION(mhash_get_hash_name)
    Gets the number of available hashes */
 PHP_FUNCTION(mhash_count)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	RETURN_LONG(MHASH_NUM_ALGOS - 1);
 }
 /* }}} */
@@ -1503,4 +1502,3 @@ ZEND_GET_MODULE(hash)
  * vim600: noet sw=4 ts=4 fdm=marker
  * vim<600: noet sw=4 ts=4
  */
-

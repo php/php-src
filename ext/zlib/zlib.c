@@ -544,9 +544,8 @@ static PHP_FUNCTION(ob_gzhandler)
    Returns the coding type used for output compression */
 static PHP_FUNCTION(zlib_get_coding_type)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+	
 	switch (ZLIBG(compression_coding)) {
 		case PHP_ZLIB_ENCODING_GZIP:
 			RETURN_STRINGL("gzip", sizeof("gzip") - 1);

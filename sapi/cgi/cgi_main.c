@@ -1581,9 +1581,8 @@ static PHP_MINFO_FUNCTION(cgi)
 
 PHP_FUNCTION(apache_child_terminate) /* {{{ */
 {
-	if (zend_parse_parameters_none()) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	if (fcgi_is_fastcgi()) {
 		fcgi_terminate();
 	}
@@ -1642,9 +1641,8 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 
 PHP_FUNCTION(apache_request_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none()) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	array_init(return_value);
 	if (fcgi_is_fastcgi()) {
 		fcgi_request *request = (fcgi_request*) SG(server_context);
@@ -1755,9 +1753,7 @@ static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{
 
 PHP_FUNCTION(apache_response_headers) /* {{{ */
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_llist_apply_with_argument(&SG(sapi_headers).headers, (llist_apply_with_arg_func_t)add_response_header, return_value);

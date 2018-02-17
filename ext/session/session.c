@@ -1737,9 +1737,7 @@ static PHP_FUNCTION(session_set_cookie_params)
    Return the session cookie parameters */
 static PHP_FUNCTION(session_get_cookie_params)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -2295,9 +2293,7 @@ static PHP_FUNCTION(session_encode)
 {
 	zend_string *enc;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	enc = php_session_encode();
 	if (enc == NULL) {
@@ -2424,9 +2420,7 @@ static PHP_FUNCTION(session_start)
    Destroy the current session and all data associated with it */
 static PHP_FUNCTION(session_destroy)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(php_session_destroy() == SUCCESS);
 }
@@ -2436,9 +2430,7 @@ static PHP_FUNCTION(session_destroy)
    Unset all registered variables */
 static PHP_FUNCTION(session_unset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		RETURN_FALSE;
@@ -2461,9 +2453,7 @@ static PHP_FUNCTION(session_gc)
 {
 	zend_long num;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		php_error_docref(NULL, E_WARNING, "Session is not active");
@@ -2484,9 +2474,7 @@ static PHP_FUNCTION(session_gc)
    Write session data and end session */
 static PHP_FUNCTION(session_write_close)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		RETURN_FALSE;
@@ -2500,9 +2488,7 @@ static PHP_FUNCTION(session_write_close)
    Abort session and end session. Session data will not be written */
 static PHP_FUNCTION(session_abort)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		RETURN_FALSE;
@@ -2516,9 +2502,7 @@ static PHP_FUNCTION(session_abort)
    Reset session data from saved session data */
 static PHP_FUNCTION(session_reset)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (PS(session_status) != php_session_active) {
 		RETURN_FALSE;
@@ -2532,9 +2516,7 @@ static PHP_FUNCTION(session_reset)
    Returns the current session status */
 static PHP_FUNCTION(session_status)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(PS(session_status));
 }

@@ -4166,9 +4166,7 @@ PHP_FUNCTION(imap_alerts)
 {
 	STRINGLIST *cur=NIL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (IMAPG(imap_alertstack) == NIL) {
 		RETURN_FALSE;
@@ -4193,9 +4191,7 @@ PHP_FUNCTION(imap_errors)
 {
 	ERRORLIST *cur=NIL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (IMAPG(imap_errorstack) == NIL) {
 		RETURN_FALSE;
@@ -4220,9 +4216,7 @@ PHP_FUNCTION(imap_last_error)
 {
 	ERRORLIST *cur=NIL;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (IMAPG(imap_errorstack) == NIL) {
 		RETURN_FALSE;

@@ -380,10 +380,9 @@ PHP_FUNCTION(mysqli_fetch_all)
    Returns statistics about the zval cache */
 PHP_FUNCTION(mysqli_get_client_stats)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
-	mysqlnd_get_client_stats(return_value);
+    ZEND_PARSE_PARAMETERS_NONE();
+    
+    mysqlnd_get_client_stats(return_value);
 }
 /* }}} */
 

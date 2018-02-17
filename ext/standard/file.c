@@ -853,9 +853,7 @@ PHP_NAMED_FUNCTION(php_if_tmpfile)
 {
 	php_stream *stream;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	stream = php_stream_fopen_tmpfile();
 
@@ -2519,9 +2517,8 @@ PHP_FUNCTION(fnmatch)
    Returns directory path used for temporary files */
 PHP_FUNCTION(sys_get_temp_dir)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_STRING((char *)php_get_temporary_directory());
 }
 /* }}} */

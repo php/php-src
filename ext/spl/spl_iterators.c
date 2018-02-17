@@ -616,9 +616,7 @@ SPL_METHOD(RecursiveIteratorIterator, rewind)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_recursive_it_rewind_ex(object, getThis());
 } /* }}} */
@@ -629,9 +627,7 @@ SPL_METHOD(RecursiveIteratorIterator, valid)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(spl_recursive_it_valid_ex(object, getThis()) == SUCCESS);
 } /* }}} */
@@ -643,9 +639,7 @@ SPL_METHOD(RecursiveIteratorIterator, key)
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	zend_object_iterator      *iterator;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -664,9 +658,7 @@ SPL_METHOD(RecursiveIteratorIterator, current)
 	zend_object_iterator      *iterator;
 	zval                      *data;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -683,9 +675,7 @@ SPL_METHOD(RecursiveIteratorIterator, next)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	spl_recursive_it_move_forward_ex(object, getThis());
 } /* }}} */
@@ -696,9 +686,7 @@ SPL_METHOD(RecursiveIteratorIterator, getDepth)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(object->level);
 } /* }}} */
@@ -736,9 +724,7 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 	zval      *zobject;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_SUB_ELEMENT_ADDR(zobject, object, zobject);
 
@@ -750,9 +736,8 @@ SPL_METHOD(RecursiveIteratorIterator, getInnerIterator)
    Called when iteration begins (after first rewind() call) */
 SPL_METHOD(RecursiveIteratorIterator, beginIteration)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -760,9 +745,8 @@ SPL_METHOD(RecursiveIteratorIterator, beginIteration)
    Called when iteration ends (when valid() first returns false */
 SPL_METHOD(RecursiveIteratorIterator, endIteration)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -774,9 +758,7 @@ SPL_METHOD(RecursiveIteratorIterator, callHasChildren)
 	zend_class_entry *ce;
 	zval *zobject;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!object->iterators) {
 		RETURN_NULL();
@@ -803,9 +785,7 @@ SPL_METHOD(RecursiveIteratorIterator, callGetChildren)
 	zend_class_entry *ce;
 	zval *zobject;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_SUB_ELEMENT(ce, object, ce);
 
@@ -824,9 +804,8 @@ SPL_METHOD(RecursiveIteratorIterator, callGetChildren)
    Called when recursing one level down */
 SPL_METHOD(RecursiveIteratorIterator, beginChildren)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -834,9 +813,8 @@ SPL_METHOD(RecursiveIteratorIterator, beginChildren)
    Called when end recursing one level */
 SPL_METHOD(RecursiveIteratorIterator, endChildren)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -844,9 +822,8 @@ SPL_METHOD(RecursiveIteratorIterator, endChildren)
    Called when the next element is available */
 SPL_METHOD(RecursiveIteratorIterator, nextElement)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -876,9 +853,7 @@ SPL_METHOD(RecursiveIteratorIterator, getMaxDepth)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (object->max_depth == -1) {
 		RETURN_FALSE;
@@ -1132,9 +1107,7 @@ SPL_METHOD(RecursiveTreeIterator, getPrefix)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
@@ -1167,9 +1140,7 @@ SPL_METHOD(RecursiveTreeIterator, getEntry)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
@@ -1186,9 +1157,7 @@ SPL_METHOD(RecursiveTreeIterator, getPostfix)
 {
 	spl_recursive_it_object   *object = Z_SPLRECURSIVE_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
@@ -1208,9 +1177,7 @@ SPL_METHOD(RecursiveTreeIterator, current)
 	char                      *ptr;
 	zend_string               *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if(!object->iterators) {
 		zend_throw_exception_ex(spl_ce_LogicException, 0,
@@ -1272,9 +1239,7 @@ SPL_METHOD(RecursiveTreeIterator, key)
 	char                      *ptr;
 	zend_string               *str;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_SUB_ITERATOR(iterator, object);
 
@@ -1633,9 +1598,7 @@ SPL_METHOD(dual_it, getInnerIterator)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1737,9 +1700,7 @@ SPL_METHOD(dual_it, rewind)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1756,9 +1717,7 @@ SPL_METHOD(dual_it, valid)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1777,9 +1736,7 @@ SPL_METHOD(dual_it, key)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1804,9 +1761,7 @@ SPL_METHOD(dual_it, current)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1828,9 +1783,7 @@ SPL_METHOD(dual_it, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1877,9 +1830,7 @@ SPL_METHOD(FilterIterator, rewind)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	spl_filter_it_rewind(getThis(), intern);
@@ -1891,9 +1842,7 @@ SPL_METHOD(FilterIterator, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	spl_filter_it_next(getThis(), intern);
@@ -1921,9 +1870,7 @@ SPL_METHOD(RecursiveFilterIterator, hasChildren)
 	spl_dual_it_object   *intern;
 	zval                  retval;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1942,9 +1889,7 @@ SPL_METHOD(RecursiveFilterIterator, getChildren)
 	spl_dual_it_object   *intern;
 	zval                  retval;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1962,9 +1907,7 @@ SPL_METHOD(RecursiveCallbackFilterIterator, getChildren)
 	spl_dual_it_object   *intern;
 	zval                  retval;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -1998,9 +1941,7 @@ SPL_METHOD(CallbackFilterIterator, accept)
 	zend_fcall_info_cache  *fcc = &intern->u.cbfilter->fcc;
 	zval                    params[3];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(intern->current.data) == IS_UNDEF || Z_TYPE(intern->current.key) == IS_UNDEF) {
 		RETURN_FALSE;
@@ -2041,9 +1982,7 @@ SPL_METHOD(RegexIterator, accept)
 	pcre2_code *re;
 	int rc;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2126,9 +2065,7 @@ SPL_METHOD(RegexIterator, getRegex)
 {
 	spl_dual_it_object *intern = Z_SPLDUAL_IT_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_STR_COPY(intern->u.regex.regex);
 } /* }}} */
@@ -2139,9 +2076,7 @@ SPL_METHOD(RegexIterator, getMode)
 {
 	spl_dual_it_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2175,9 +2110,7 @@ SPL_METHOD(RegexIterator, getFlags)
 {
 	spl_dual_it_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2206,9 +2139,7 @@ SPL_METHOD(RegexIterator, getPregFlags)
 {
 	spl_dual_it_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2250,9 +2181,7 @@ SPL_METHOD(RecursiveRegexIterator, getChildren)
 	spl_dual_it_object   *intern;
 	zval                 retval;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2278,9 +2207,7 @@ SPL_METHOD(RecursiveRegexIterator, accept)
 {
 	spl_dual_it_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2735,9 +2662,7 @@ SPL_METHOD(CachingIterator, rewind)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2750,9 +2675,7 @@ SPL_METHOD(CachingIterator, valid)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2765,9 +2688,7 @@ SPL_METHOD(CachingIterator, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2780,9 +2701,7 @@ SPL_METHOD(CachingIterator, hasNext)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2920,9 +2839,7 @@ SPL_METHOD(CachingIterator, getCache)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2941,9 +2858,7 @@ SPL_METHOD(CachingIterator, getFlags)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -2990,9 +2905,7 @@ SPL_METHOD(CachingIterator, count)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3057,9 +2970,7 @@ SPL_METHOD(RecursiveCachingIterator, hasChildren)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3072,9 +2983,7 @@ SPL_METHOD(RecursiveCachingIterator, getChildren)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3133,9 +3042,8 @@ SPL_METHOD(NoRewindIterator, __construct)
    Prevent a call to inner iterators rewind() */
 SPL_METHOD(NoRewindIterator, rewind)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* nothing to do */
 } /* }}} */
 
@@ -3145,9 +3053,7 @@ SPL_METHOD(NoRewindIterator, valid)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	RETURN_BOOL(intern->inner.iterator->funcs->valid(intern->inner.iterator) == SUCCESS);
@@ -3159,9 +3065,7 @@ SPL_METHOD(NoRewindIterator, key)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3179,9 +3083,7 @@ SPL_METHOD(NoRewindIterator, current)
 	spl_dual_it_object   *intern;
 	zval *data;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	data = intern->inner.iterator->funcs->get_current_data(intern->inner.iterator);
@@ -3197,9 +3099,7 @@ SPL_METHOD(NoRewindIterator, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 	intern->inner.iterator->funcs->move_forward(intern->inner.iterator);
@@ -3233,9 +3133,7 @@ SPL_METHOD(InfiniteIterator, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3260,18 +3158,15 @@ static const zend_function_entry spl_funcs_InfiniteIterator[] = {
    Does nothing  */
 SPL_METHOD(EmptyIterator, rewind)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 } /* }}} */
 
 /* {{{ proto false EmptyIterator::valid()
    Return false */
 SPL_METHOD(EmptyIterator, valid)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	RETURN_FALSE;
 } /* }}} */
 
@@ -3279,9 +3174,8 @@ SPL_METHOD(EmptyIterator, valid)
    Throws exception BadMethodCallException */
 SPL_METHOD(EmptyIterator, key)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the key of an EmptyIterator", 0);
 } /* }}} */
 
@@ -3289,9 +3183,8 @@ SPL_METHOD(EmptyIterator, key)
    Throws exception BadMethodCallException */
 SPL_METHOD(EmptyIterator, current)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	zend_throw_exception(spl_ce_BadMethodCallException, "Accessing the value of an EmptyIterator", 0);
 } /* }}} */
 
@@ -3299,9 +3192,7 @@ SPL_METHOD(EmptyIterator, current)
    Does nothing */
 SPL_METHOD(EmptyIterator, next)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 } /* }}} */
 
 static const zend_function_entry spl_funcs_EmptyIterator[] = {
@@ -3402,9 +3293,7 @@ SPL_METHOD(AppendIterator, current)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3425,9 +3314,7 @@ SPL_METHOD(AppendIterator, rewind)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3443,9 +3330,7 @@ SPL_METHOD(AppendIterator, valid)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3458,9 +3343,7 @@ SPL_METHOD(AppendIterator, next)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3473,9 +3356,7 @@ SPL_METHOD(AppendIterator, getIteratorIndex)
 {
 	spl_dual_it_object   *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 
@@ -3490,9 +3371,7 @@ SPL_METHOD(AppendIterator, getArrayIterator)
 	spl_dual_it_object   *intern;
 	zval *value;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	SPL_FETCH_AND_CHECK_DUAL_IT(intern, getThis());
 

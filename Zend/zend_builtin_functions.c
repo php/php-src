@@ -912,9 +912,7 @@ ZEND_FUNCTION(get_called_class)
 {
 	zend_class_entry *called_scope;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	called_scope = zend_get_called_scope(execute_data);
 	if (called_scope) {
@@ -1544,9 +1542,7 @@ ZEND_FUNCTION(get_included_files)
 {
 	zend_string *entry;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	ZEND_HASH_FOREACH_STR_KEY(&EG(included_files), entry) {
@@ -1628,9 +1624,7 @@ ZEND_FUNCTION(set_error_handler)
    Restores the previously defined error handler function */
 ZEND_FUNCTION(restore_error_handler)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(EG(user_error_handler)) != IS_UNDEF) {
 		zval zeh;
@@ -1693,9 +1687,7 @@ ZEND_FUNCTION(set_exception_handler)
    Restores the previously defined exception handler function */
 ZEND_FUNCTION(restore_exception_handler)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (Z_TYPE(EG(user_exception_handler)) != IS_UNDEF) {
 		zval_ptr_dtor(&EG(user_exception_handler));
@@ -1739,9 +1731,7 @@ ZEND_FUNCTION(get_declared_traits)
 	uint32_t mask = ZEND_ACC_TRAIT;
 	uint32_t comply = 1;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
@@ -1755,9 +1745,7 @@ ZEND_FUNCTION(get_declared_classes)
 	uint32_t mask = ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
 	uint32_t comply = 0;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);
@@ -1771,9 +1759,7 @@ ZEND_FUNCTION(get_declared_interfaces)
 	uint32_t mask = ZEND_ACC_INTERFACE;
 	uint32_t comply = 1;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 	zend_hash_apply_with_arguments(EG(class_table), copy_class_or_interface_name, 3, return_value, mask, comply);

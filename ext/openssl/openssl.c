@@ -5897,9 +5897,7 @@ PHP_FUNCTION(openssl_error_string)
 	char buf[256];
 	unsigned long val;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_openssl_store_errors();
 

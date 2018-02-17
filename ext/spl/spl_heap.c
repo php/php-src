@@ -547,9 +547,7 @@ SPL_METHOD(SplHeap, count)
 	zend_long count;
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	count = spl_ptr_heap_count(intern->heap);
 	RETURN_LONG(count);
@@ -562,9 +560,7 @@ SPL_METHOD(SplHeap, isEmpty)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(spl_ptr_heap_count(intern->heap) == 0);
 }
@@ -601,9 +597,7 @@ SPL_METHOD(SplHeap, extract)
 {
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -659,9 +653,7 @@ SPL_METHOD(SplPriorityQueue, extract)
 	zval value, *value_out;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -698,9 +690,7 @@ SPL_METHOD(SplPriorityQueue, top)
 	zval *value, *value_out;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -754,9 +744,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 {
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -770,9 +758,7 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 {
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -788,9 +774,7 @@ SPL_METHOD(SplHeap, isCorrupted)
 {
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -819,9 +803,7 @@ SPL_METHOD(SplHeap, top)
 	zval *value;
 	spl_heap_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLHEAP_P(getThis());
 
@@ -963,9 +945,7 @@ SPL_METHOD(SplHeap, key)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->heap->count - 1);
 }
@@ -979,9 +959,7 @@ SPL_METHOD(SplHeap, next)
 	zval elem;
 	spl_ptr_heap_delete_top(intern->heap, &elem, getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	zval_ptr_dtor(&elem);
 }
@@ -993,9 +971,7 @@ SPL_METHOD(SplHeap, valid)
 {
 	spl_heap_object *intern = Z_SPLHEAP_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(intern->heap->count != 0);
 }
@@ -1005,9 +981,8 @@ SPL_METHOD(SplHeap, valid)
    Rewind the datastructure back to the start */
 SPL_METHOD(SplHeap, rewind)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
+
 	/* do nothing, the iterator always points to the top element */
 }
 /* }}} */
@@ -1019,9 +994,7 @@ SPL_METHOD(SplHeap, current)
 	spl_heap_object *intern  = Z_SPLHEAP_P(getThis());
 	zval *element = &intern->heap->elements[0];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
@@ -1039,9 +1012,7 @@ SPL_METHOD(SplPriorityQueue, current)
 	spl_heap_object  *intern  = Z_SPLHEAP_P(getThis());
 	zval *element = &intern->heap->elements[0];
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!intern->heap->count || Z_ISUNDEF_P(element)) {
 		RETURN_NULL();
@@ -1252,4 +1223,3 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-

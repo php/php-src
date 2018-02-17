@@ -741,9 +741,8 @@ static void php_xmlwriter_end(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_read_int_t
 
 	if (self) {
 		XMLWRITER_FROM_OBJECT(intern, self);
-		if (zend_parse_parameters_none() == FAILURE) {
-			return;
-		}
+		
+		ZEND_PARSE_PARAMETERS_NONE();
 	} else {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &pind) == FAILURE) {
 			return;

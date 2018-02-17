@@ -674,9 +674,7 @@ PHP_FUNCTION(com_create_guid)
 	GUID retval;
 	OLECHAR *guid_string;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	php_com_initialize();
 	if (CoCreateGuid(&retval) == S_OK && StringFromCLSID(&retval, &guid_string) == S_OK) {

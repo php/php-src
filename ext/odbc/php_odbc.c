@@ -1140,9 +1140,7 @@ PHP_FUNCTION(odbc_close_all)
 {
 	zend_resource *p;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	/* Loop through list and close all statements */
 	ZEND_HASH_FOREACH_PTR(&EG(regular_list), p) {

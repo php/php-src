@@ -381,9 +381,7 @@ PHP_FUNCTION(readline_add_history)
    Clears the history */
 PHP_FUNCTION(readline_clear_history)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 #if HAVE_LIBEDIT
 	/* clear_history is the only function where rl_initialize
@@ -403,9 +401,7 @@ PHP_FUNCTION(readline_list_history)
 {
 	HIST_ENTRY **history;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	history = history_list();
 

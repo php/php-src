@@ -1893,9 +1893,7 @@ PHP_METHOD(domnode, getLineNo)
 	xmlNode *nodep;
 	dom_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	DOM_GET_THIS_OBJ(nodep, id, xmlNodePtr, intern);
 

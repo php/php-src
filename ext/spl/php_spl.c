@@ -739,9 +739,7 @@ PHP_FUNCTION(spl_autoload_functions)
 	zend_function *fptr;
 	autoload_func_info *alfi;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!EG(autoload_func)) {
 		if ((fptr = zend_hash_str_find_ptr(EG(function_table), ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1))) {

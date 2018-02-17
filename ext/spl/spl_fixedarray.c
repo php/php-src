@@ -582,9 +582,7 @@ SPL_METHOD(SplFixedArray, __wakeup)
 	HashTable *intern_ht = zend_std_get_properties(getThis());
 	zval *data;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (intern->array.size == 0) {
 		int index = 0;
@@ -611,9 +609,7 @@ SPL_METHOD(SplFixedArray, count)
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	RETURN_LONG(intern->array.size);
@@ -626,9 +622,7 @@ SPL_METHOD(SplFixedArray, toArray)
 {
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(getThis());
 
@@ -724,9 +718,7 @@ SPL_METHOD(SplFixedArray, getSize)
 	zval *object = getThis();
 	spl_fixedarray_object *intern;
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern = Z_SPLFIXEDARRAY_P(object);
 	RETURN_LONG(intern->array.size);
@@ -918,9 +910,7 @@ SPL_METHOD(SplFixedArray, key)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(intern->current);
 }
@@ -932,9 +922,7 @@ SPL_METHOD(SplFixedArray, next)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern->current++;
 }
@@ -946,9 +934,7 @@ SPL_METHOD(SplFixedArray, valid)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_BOOL(intern->current >= 0 && intern->current < intern->array.size);
 }
@@ -960,9 +946,7 @@ SPL_METHOD(SplFixedArray, rewind)
 {
 	spl_fixedarray_object *intern = Z_SPLFIXEDARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	intern->current = 0;
 }
@@ -975,9 +959,7 @@ SPL_METHOD(SplFixedArray, current)
 	zval zindex, *value;
 	spl_fixedarray_object *intern  = Z_SPLFIXEDARRAY_P(getThis());
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	ZVAL_LONG(&zindex, intern->current);
 

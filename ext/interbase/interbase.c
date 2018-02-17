@@ -477,9 +477,7 @@ int le_link, le_plink, le_trans;
    Return error message */
 PHP_FUNCTION(ibase_errmsg)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (IBG(sql_code) != 0) {
 		RETURN_STRING(IBG(errmsg));
@@ -493,9 +491,7 @@ PHP_FUNCTION(ibase_errmsg)
    Return error code */
 PHP_FUNCTION(ibase_errcode)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (IBG(sql_code) != 0) {
 		RETURN_LONG(IBG(sql_code));

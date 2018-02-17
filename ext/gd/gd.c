@@ -1323,9 +1323,7 @@ PHP_MINFO_FUNCTION(gd)
  */
 PHP_FUNCTION(gd_info)
 {
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	array_init(return_value);
 
@@ -2023,9 +2021,7 @@ PHP_FUNCTION(imagegrabscreen)
 	gdImagePtr im;
 	hdc		= GetDC(0);
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	if (!hdc) {
 		RETURN_FALSE;
@@ -2194,9 +2190,7 @@ PHP_FUNCTION(imagetypes)
 	ret |= PHP_IMG_BMP;
 #endif
 
-	if (zend_parse_parameters_none() == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_NONE();
 
 	RETURN_LONG(ret);
 }
