@@ -23,6 +23,9 @@ PHP                                                                        NEWS
   . Fixed bug #75969 (Assertion failure in live range DCE due to block pass
     misoptimization). (Nikita)
 
+- OpenSSL:
+  . Fixed openssl_* arginfos. (carusogabriel)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
