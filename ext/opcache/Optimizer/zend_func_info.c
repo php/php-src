@@ -1032,7 +1032,7 @@ static const func_info_t func_infos[] = {
 	F0("curl_multi_exec",                       MAY_BE_NULL | MAY_BE_LONG),
 	FN("curl_multi_getcontent",                 MAY_BE_NULL | MAY_BE_STRING),
 	F1("curl_multi_info_read",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG | MAY_BE_ARRAY | MAY_BE_ARRAY_KEY_STRING | MAY_BE_ARRAY_OF_LONG | MAY_BE_ARRAY_OF_RESOURCE),
-	F0("curl_multi_close",                      MAY_BE_NULL),
+	F0("curl_multi_close",                      MAY_BE_NULL | MAY_BE_FALSE),
 	F0("curl_multi_setopt",                     MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("curl_share_init",                       MAY_BE_NULL | MAY_BE_RESOURCE),
 	F0("curl_share_close",                      MAY_BE_NULL),
