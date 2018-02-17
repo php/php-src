@@ -797,12 +797,11 @@ void _xml_startElementHandler(void *userData, const XML_Char *name, const XML_Ch
 void _xml_endElementHandler(void *userData, const XML_Char *name)
 {
 	xml_parser *parser = (xml_parser *)userData;
-	zend_string *tag_name;
 
 	if (parser) {
 		zval retval, args[2];
 
-		tag_name = _xml_decode_tag(parser, (const char *)name);
+		zend_string *tag_name = _xml_decode_tag(parser, (const char *)name);
 
 		if (!Z_ISUNDEF(parser->endElementHandler)) {
 			ZVAL_COPY(&args[0], &parser->index);
