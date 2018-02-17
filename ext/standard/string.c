@@ -2757,14 +2757,13 @@ PHP_FUNCTION(quotemeta)
    Warning: This function is special-cased by zend_compile.c and so is bypassed for constant string argument */
 PHP_FUNCTION(ord)
 {
-	char   *str;
-	size_t str_len;
+	zend_string *str;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(str, str_len)
+		Z_PARAM_STR(str)
 	ZEND_PARSE_PARAMETERS_END();
 
-	RETURN_LONG((unsigned char) str[0]);
+	RETURN_LONG((unsigned char) ZSTR_VAL(str)[0]);
 }
 /* }}} */
 
