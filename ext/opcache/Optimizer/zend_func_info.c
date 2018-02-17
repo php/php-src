@@ -1508,7 +1508,7 @@ static const func_info_t func_infos[] = {
 	F1("bcpow",									MAY_BE_NULL | MAY_BE_STRING),
 	F1("bcsqrt",								MAY_BE_NULL | MAY_BE_STRING),
 	F0("bccomp",								MAY_BE_NULL | MAY_BE_LONG),
-	F0("bcscale",								MAY_BE_NULL | MAY_BE_TRUE),
+	F0("bcscale",								MAY_BE_NULL | MAY_BE_LONG),
 
 	/* ext/exif */
 	F1("exif_tagname",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
