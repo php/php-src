@@ -724,7 +724,7 @@ php_mb_parse_encoding_list(const char *value, size_t value_length, const mbfl_en
 	const mbfl_encoding **entry, **list;
 
 	list = NULL;
-	if (value == NULL || value_length <= 0) {
+	if (value == NULL || value_length == 0) {
 		if (return_list) {
 			*return_list = NULL;
 		}
@@ -3401,7 +3401,7 @@ PHP_FUNCTION(mb_detect_encoding)
 			}
 			break;
 		}
-		if (size <= 0) {
+		if (size == 0) {
 			php_error_docref(NULL, E_WARNING, "Illegal argument");
 		}
 	}
@@ -3810,7 +3810,7 @@ PHP_FUNCTION(mb_convert_variables)
 			break;
 	}
 
-	if (elistsz <= 0) {
+	if (elistsz == 0) {
 		from_encoding = &mbfl_encoding_pass;
 	} else if (elistsz == 1) {
 		from_encoding = *elist;
