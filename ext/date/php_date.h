@@ -208,7 +208,7 @@ ZEND_END_MODULE_GLOBALS(date)
 /* Backwards compatibility wrapper */
 PHPAPI zend_long php_parse_date(char *string, zend_long *now);
 PHPAPI void php_mktime(INTERNAL_FUNCTION_PARAMETERS, int gmt);
-PHPAPI int php_idate(char format, time_t ts, int localtime);
+PHPAPI int php_idate(char format, time_t ts);
 #if HAVE_STRFTIME
 #define _php_strftime php_strftime
 PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gm);

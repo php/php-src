@@ -1308,7 +1308,7 @@ PHPAPI zend_string *php_format_date(char *format, size_t format_len, time_t ts, 
 
 /* {{{ php_idate
  */
-PHPAPI int php_idate(char format, time_t ts, int localtime)
+PHPAPI int php_idate(char format, time_t ts)
 {
 	timelib_time   *t;
 	timelib_tzinfo *tzi;
@@ -1318,36 +1318,29 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 
 	t = timelib_time_ctor();
 
-	if (!localtime) {
-		tzi = get_timezone_info();
-		t->tz_info = tzi;
-		t->zone_type = TIMELIB_ZONETYPE_ID;
-		timelib_unixtime2local(t, ts);
-	} else {
-		tzi = NULL;
-		timelib_unixtime2gmt(t, ts);
-	}
+	tzi = get_timezone_info();
+	t->tz_info = tzi;
+	t->zone_type = TIMELIB_ZONETYPE_ID;
+	timelib_unixtime2local(t, ts);
 
-	if (!localtime) {
-		if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
-			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
-			offset->leap_secs = 0;
-			offset->is_dst = t->dst;
-			offset->abbr = timelib_strdup(t->tz_abbr);
-		} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
-			offset = timelib_time_offset_ctor();
-			offset->offset = (t->z + (t->dst * 3600));
-			offset->leap_secs = 0;
-			offset->is_dst = t->dst;
-			offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
-			snprintf(offset->abbr, 9, "GMT%c%02d%02d",
-			                          (offset->offset < 0) ? '-' : '+',
-			                          abs(offset->offset / 3600),
-			                          abs((offset->offset % 3600) / 60));
-		} else {
-			offset = timelib_get_time_zone_info(t->sse, t->tz_info);
-		}
+	if (t->zone_type == TIMELIB_ZONETYPE_ABBR) {
+		offset = timelib_time_offset_ctor();
+		offset->offset = (t->z + (t->dst * 3600));
+		offset->leap_secs = 0;
+		offset->is_dst = t->dst;
+		offset->abbr = timelib_strdup(t->tz_abbr);
+	} else if (t->zone_type == TIMELIB_ZONETYPE_OFFSET) {
+		offset = timelib_time_offset_ctor();
+		offset->offset = (t->z + (t->dst * 3600));
+		offset->leap_secs = 0;
+		offset->is_dst = t->dst;
+		offset->abbr = timelib_malloc(9); /* GMT±xxxx\0 */
+		snprintf(offset->abbr, 9, "GMT%c%02d%02d",
+		                          (offset->offset < 0) ? '-' : '+',
+		                          abs(offset->offset / 3600),
+		                          abs((offset->offset % 3600) / 60));
+	} else {
+		offset = timelib_get_time_zone_info(t->sse, t->tz_info);
 	}
 
 	timelib_isoweek_from_date(t->y, t->m, t->d, &isoweek, &isoyear);
@@ -1388,15 +1381,13 @@ PHPAPI int php_idate(char format, time_t ts, int localtime)
 		case 's': retval = (int) t->s; break;
 
 		/* timezone */
-		case 'I': retval = (int) (!localtime ? offset->is_dst : 0); break;
-		case 'Z': retval = (int) (!localtime ? offset->offset : 0); break;
+		case 'I': retval = (int) offset->is_dst; break;
+		case 'Z': retval = (int) offset->offset; break;
 
 		case 'U': retval = (int) t->sse; break;
 	}
 
-	if (!localtime) {
-		timelib_time_offset_dtor(offset);
-	}
+	timelib_time_offset_dtor(offset);
 	timelib_time_dtor(t);
 
 	return retval;
@@ -1442,7 +1433,7 @@ PHP_FUNCTION(idate)
 		ts = time(NULL);
 	}
 
-	ret = php_idate(ZSTR_VAL(format)[0], ts, 0);
+	ret = php_idate(ZSTR_VAL(format)[0], ts);
 	if (ret == -1) {
 		php_error_docref(NULL, E_WARNING, "Unrecognized date format token.");
 		RETURN_FALSE;
