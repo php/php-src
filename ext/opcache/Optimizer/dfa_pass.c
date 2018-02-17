@@ -31,12 +31,18 @@
 #include "zend_inference.h"
 #include "zend_dump.h"
 
+#define ZEND_VERIFY_INFERENCE 1
+
 #ifndef ZEND_DEBUG_DFA
 # define ZEND_DEBUG_DFA ZEND_DEBUG
 #endif
 
 #if ZEND_DEBUG_DFA
 # include "ssa_integrity.c"
+#endif
+
+#if ZEND_VERIFY_INFERENCE
+# include "verify_inference.c"
 #endif
 
 int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, zend_ssa *ssa)
@@ -1183,6 +1189,10 @@ void zend_dfa_optimize_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx
 			ssa_verify_integrity(op_array, ssa, "after nop");
 #endif
 		}
+
+#if ZEND_VERIFY_INFERENCE 
+		zend_ssa_verify_inference(ctx, op_array, ssa);
+#endif
 	}
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_DFA_PASS) {

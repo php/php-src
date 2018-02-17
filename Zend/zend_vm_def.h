@@ -8432,6 +8432,104 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HANDLER(199, ZEND_CHECK_INFERENCE, TMPVARCV, ANY)
+{
+	USE_OPLINE
+	zval *op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	uint32_t type = opline->extended_value;
+	const zend_op *prev_opline;
+	const char *errmsg = "-";
+
+	if (Z_TYPE_P(op1) == IS_INDIRECT) {
+		op1 = Z_INDIRECT_P(op1);
+	}
+
+	if (Z_REFCOUNTED_P(op1)) {
+		if (Z_REFCOUNT_P(op1) == 1 && !(type & (1 << 27))) { /* MAY_BE_RC1 */
+			errmsg = "RC1";
+			ZEND_VM_C_GOTO(wrong_type);
+		}
+		if (Z_REFCOUNT_P(op1) > 1 && !(type & (1 << 28))) { /* MAY_BE_RCN */
+			errmsg = "RCN";
+			ZEND_VM_C_GOTO(wrong_type);
+		}
+	}
+
+	if (type & (1 << Z_TYPE_P(op1))) {
+		if (Z_TYPE_P(op1) == IS_LONG) {
+			if (opline->op2.num != (uint32_t) INT32_MIN
+					&& Z_LVAL_P(op1) < (int32_t) opline->op2.num) {
+				ZEND_VM_C_GOTO(wrong_range);
+			}
+			if (opline->result.num != (uint32_t) INT32_MAX
+					&& Z_LVAL_P(op1) > (int32_t) opline->result.num) {
+				ZEND_VM_C_GOTO(wrong_range);
+			}
+		}
+
+		if (Z_TYPE_P(op1) != IS_ARRAY) {
+			ZEND_VM_NEXT_OPCODE();
+		}
+
+		if (type & MAY_BE_ARRAY_KEY_ANY) {
+			zend_string *str;
+			zval *val;
+			int i = 0;
+			ZEND_HASH_FOREACH_STR_KEY_VAL_IND(Z_ARRVAL_P(op1), str, val) {
+				if (str) {
+					if (!(type & MAY_BE_ARRAY_KEY_STRING)) {
+						errmsg = "array key string";
+						ZEND_VM_C_GOTO(wrong_type);
+					}
+				} else {
+					if (!(type & MAY_BE_ARRAY_KEY_LONG)) {
+						errmsg = "array key long";
+						ZEND_VM_C_GOTO(wrong_type);
+					}
+				}
+				if (!(type & (1 << (Z_TYPE_P(val) + MAY_BE_ARRAY_SHIFT)))) {
+					errmsg = "array value";
+					ZEND_VM_C_GOTO(wrong_type);
+				}
+				if (++i >= 10) {
+					break; /* Only sample some elements */
+				}
+			} ZEND_HASH_FOREACH_END();
+			ZEND_VM_NEXT_OPCODE();
+		} else {
+			if (zend_hash_num_elements(Z_ARRVAL_P(op1)) == 0) {
+				ZEND_VM_NEXT_OPCODE();
+			}
+		}
+	} else if (Z_TYPE_P(op1) == _IS_ERROR && (type & MAY_BE_ERROR)) {
+		ZEND_VM_NEXT_OPCODE();
+	}
+
+ZEND_VM_C_LABEL(wrong_type):
+	prev_opline = opline;
+	while (prev_opline->opcode == ZEND_CHECK_INFERENCE) {
+		prev_opline--;
+	}
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Type mismatch (%s) in %s",
+		errmsg, zend_get_opcode_name(prev_opline->opcode));
+	HANDLE_EXCEPTION();
+
+ZEND_VM_C_LABEL(wrong_range):
+	prev_opline = opline;
+	while (prev_opline->opcode == ZEND_CHECK_INFERENCE) {
+		prev_opline--;
+	}
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL,
+		"Range mismatch (" ZEND_LONG_FMT " not in %" PRIi32 "..%" PRIi32 ") in %s",
+		Z_LVAL_P(op1), (int32_t) opline->op2.num, (int32_t) opline->result.num,
+		zend_get_opcode_name(prev_opline->opcode));
+	HANDLE_EXCEPTION();
+}
+
 ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_JMP, (OP_JMP_ADDR(op, op->op1) > op), ZEND_JMP_FORWARD, JMP_ADDR, ANY)
 {
 	USE_OPLINE
