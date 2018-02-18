@@ -89,7 +89,8 @@ static zend_always_inline unsigned char *php_base64_encode_impl(const unsigned c
 
 static zend_always_inline int php_base64_decode_impl(const unsigned char *in, size_t inl, unsigned char *out, size_t *outl, zend_bool strict) /* {{{ */
 {
-	int ch, i = 0, padding = 0, j = *outl;
+	int ch;
+	size_t i = 0, padding = 0, j = *outl;
 
 	/* run through the whole string, converting as we go */
 	while (inl-- > 0) {
