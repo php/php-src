@@ -3531,17 +3531,19 @@ PHP_FUNCTION(strrev)
 	e = s + ZSTR_LEN(str);
 	--e;
 #if ZEND_INTRIN_SSSE3_NATIVE
-	while (e - s > 15) {
+	do {
 		const __m128i map = _mm_set_epi8(
 				0, 1, 2, 3,
 				4, 5, 6, 7,
 				8, 9, 10, 11,
 				12, 13, 14, 15);
-		const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
-		_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
-		p += 16;
-		e -= 16;
-	}
+		while (e - s > 15) {
+			const __m128i str = _mm_loadu_si128((__m128i *)(e - 15));
+			_mm_storeu_si128((__m128i *)p, _mm_shuffle_epi8(str, map));
+			p += 16;
+			e -= 16;
+		}
+	} while(0);
 #endif
 	while (e >= s) {
 		*p++ = *e--;
