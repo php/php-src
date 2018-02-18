@@ -571,7 +571,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	mpz_ptr gmpnum = GET_GMP_FROM_ZVAL(object);
 	smart_str buf = {0};
 	zval zv;
-	php_serialize_data_t serialize_data = (php_serialize_data_t) data;
+	php_serialize_data_t serialize_data;
 
 	PHP_VAR_SERIALIZE_INIT(serialize_data);
 
@@ -597,7 +597,7 @@ static int gmp_unserialize(zval *object, zend_class_entry *ce, const unsigned ch
 	const unsigned char *p, *max;
 	zval *zv;
 	int retval = FAILURE;
-	php_unserialize_data_t unserialize_data = (php_unserialize_data_t) data;
+	php_unserialize_data_t unserialize_data;
 	zval object_copy;
 
 	PHP_VAR_UNSERIALIZE_INIT(unserialize_data);
