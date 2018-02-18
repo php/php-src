@@ -295,6 +295,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ANON_CLASS                 0x100
 #define ZEND_ACC_ANON_BOUND                 0x200
 #define ZEND_ACC_INHERITED                  0x400
+#define ZEND_ACC_IMMUTABLE 					0x09
 
 /* class implement interface(s) flag */
 #define ZEND_ACC_IMPLEMENT_INTERFACES 0x80000
