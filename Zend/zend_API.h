@@ -216,8 +216,6 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__debugInfo = NULL;					\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
-		class_container.serialize = NULL;						\
-		class_container.unserialize = NULL;						\
 		class_container.parent = NULL;							\
 		class_container.num_interfaces = 0;						\
 		class_container.traits = NULL;							\
