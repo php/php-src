@@ -83,7 +83,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_pow, 0, 0, 2)
 	ZEND_ARG_INFO(0, exp)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_gmp_powm, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_gmp_powm, 0)
 	ZEND_ARG_INFO(0, base)
 	ZEND_ARG_INFO(0, exp)
 	ZEND_ARG_INFO(0, mod)

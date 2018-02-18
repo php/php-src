@@ -128,19 +128,19 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_getdatetype, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_settimezoneid, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_settimezoneid, 0)
 	ZEND_ARG_INFO(0, zone)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_setpattern, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_setpattern, 0)
 	ZEND_ARG_INFO(0, pattern)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_setlenient, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_setlenient, 0)
 	ZEND_ARG_INFO(0, lenient)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_intldateformatter_setcalendar, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_intldateformatter_setcalendar, 0)
 	ZEND_ARG_INFO(0, which)
 ZEND_END_ARG_INFO()
 

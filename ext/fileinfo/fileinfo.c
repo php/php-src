@@ -116,16 +116,16 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_open, 0, 0, 0)
 	ZEND_ARG_INFO(0, arg)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_close, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_finfo_close, 0)
 	ZEND_ARG_INFO(0, finfo)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_set_flags, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_finfo_set_flags, 0)
 	ZEND_ARG_INFO(0, finfo)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_set_flags, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_finfo_method_set_flags, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
@@ -155,7 +155,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_finfo_method_buffer, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_mime_content_type, 0)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 /* }}} */

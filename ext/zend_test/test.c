@@ -36,11 +36,11 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO(arginfo_zend_test_nullable_array_return, IS_ARRAY, 1)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_terminate_string, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_zend_terminate_string, 0)
 	ZEND_ARG_INFO(1, str)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_zend_leak_variable, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_zend_leak_variable, 0)
 	ZEND_ARG_INFO(0, variable)
 ZEND_END_ARG_INFO()
 
@@ -257,4 +257,3 @@ ZEND_TSRMLS_CACHE_DEFINE()
 #endif
 ZEND_GET_MODULE(zend_test)
 #endif
-

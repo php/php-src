@@ -5188,12 +5188,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mapPhar, 0, 0, 0)
 	ZEND_ARG_INFO(0, offset)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mount, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_mount, 0)
 	ZEND_ARG_INFO(0, inphar)
 	ZEND_ARG_INFO(0, externalfile)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_mungServer, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_mungServer, 0)
 	ZEND_ARG_INFO(0, munglist)
 ZEND_END_ARG_INFO()
 
@@ -5209,7 +5209,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_running, 0, 0, 0)
 	ZEND_ARG_INFO(0, retphar)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_ua, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_ua, 0)
 	ZEND_ARG_INFO(0, archive)
 ZEND_END_ARG_INFO()
 
@@ -5233,7 +5233,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_decomp, 0, 0, 0)
 	ZEND_ARG_INFO(0, file_ext)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_comp, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_comp, 0)
 	ZEND_ARG_INFO(0, compression_type)
 ZEND_END_ARG_INFO()
 
@@ -5241,12 +5241,12 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_compo, 0, 0, 0)
 	ZEND_ARG_INFO(0, compression_type)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_copy, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_copy, 0)
 	ZEND_ARG_INFO(0, newfile)
 	ZEND_ARG_INFO(0, oldfile)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_delete, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_delete, 0)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
 
@@ -5255,20 +5255,20 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromdir, 0, 0, 1)
 	ZEND_ARG_INFO(0, regex)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetExists, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_offsetExists, 0)
 	ZEND_ARG_INFO(0, entry)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_offsetSet, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_offsetSet, 0)
 	ZEND_ARG_INFO(0, entry)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setAlias, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_setAlias, 0)
 	ZEND_ARG_INFO(0, alias)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_setMetadata, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_setMetadata, 0)
 	ZEND_ARG_INFO(0, metadata)
 ZEND_END_ARG_INFO()
 
@@ -5302,7 +5302,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_fromstring, 0, 0, 1)
 	ZEND_ARG_INFO(0, contents)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_phar_isff, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_phar_isff, 0)
 	ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
 

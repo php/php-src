@@ -2602,11 +2602,11 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexml_import_dom, 0, 0, 1)
 	ZEND_ARG_INFO(0, class_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_xpath, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_simplexmlelement_xpath, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_simplexmlelement_registerxpathnamespace, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_simplexmlelement_registerxpathnamespace, 0)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, ns)
 ZEND_END_ARG_INFO()

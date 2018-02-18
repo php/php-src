@@ -111,7 +111,7 @@ ZEND_END_ARG_INFO();
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_normalize_document, 0, 0, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_document_rename_node, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_document_rename_node, 0)
 	ZEND_ARG_OBJ_INFO(0, node, DOMNode, 0)
 	ZEND_ARG_INFO(0, namespaceURI)
 	ZEND_ARG_INFO(0, qualifiedName)

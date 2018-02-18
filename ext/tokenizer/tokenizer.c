@@ -50,7 +50,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_token_get_all, 0, 0, 1)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_token_name, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_token_name, 0)
 	ZEND_ARG_INFO(0, token)
 ZEND_END_ARG_INFO()
 /* }}} */

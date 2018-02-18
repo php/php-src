@@ -2439,15 +2439,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it___construct, 0, 0, 2)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_mode, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_regex_it_set_mode, 0)
 	ZEND_ARG_INFO(0, mode)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_flags, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_regex_it_set_flags, 0)
 	ZEND_ARG_INFO(0, flags)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_regex_it_set_preg_flags, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_regex_it_set_preg_flags, 0)
 	ZEND_ARG_INFO(0, preg_flags)
 ZEND_END_ARG_INFO();
 

@@ -254,7 +254,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_delete_user, 0, 0, 3)
 	ZEND_ARG_INFO(0, last_name)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ibase_service_attach, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_ibase_service_attach, 0)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, dba_username)
 	ZEND_ARG_INFO(0, dba_password)

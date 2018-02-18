@@ -37,11 +37,11 @@
 #if defined(LIBXML_XPATH_ENABLED)
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_construct, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_xpath_construct, 0)
 	ZEND_ARG_OBJ_INFO(0, doc, DOMDocument, 0)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_xpath_register_ns, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_xpath_register_ns, 0)
 	ZEND_ARG_INFO(0, prefix)
 	ZEND_ARG_INFO(0, uri)
 ZEND_END_ARG_INFO();

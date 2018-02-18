@@ -3034,15 +3034,15 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fwrite, 0, 0, 1)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_fread, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_file_object_fread, 0)
 	ZEND_ARG_INFO(0, length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_ftruncate, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_file_object_ftruncate, 0)
 	ZEND_ARG_INFO(0, size)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_file_object_seek, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_file_object_seek, 0)
 	ZEND_ARG_INFO(0, line_pos)
 ZEND_END_ARG_INFO()
 

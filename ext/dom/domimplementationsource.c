@@ -29,11 +29,11 @@
 
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementationsource_getdomimplementation, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_implementationsource_getdomimplementation, 0)
 	ZEND_ARG_INFO(0, features)
 ZEND_END_ARG_INFO();
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_implementationsource_getdomimplementations, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_implementationsource_getdomimplementations, 0)
 	ZEND_ARG_INFO(0, features)
 ZEND_END_ARG_INFO();
 /* }}} */

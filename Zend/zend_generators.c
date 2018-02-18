@@ -1164,11 +1164,11 @@ zend_object_iterator *zend_generator_get_iterator(zend_class_entry *ce, zval *ob
 ZEND_BEGIN_ARG_INFO(arginfo_generator_void, 0)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_send, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_generator_send, 0)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_generator_throw, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_generator_throw, 0)
 	ZEND_ARG_INFO(0, exception)
 ZEND_END_ARG_INFO()
 

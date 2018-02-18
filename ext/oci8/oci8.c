@@ -430,7 +430,7 @@ ZEND_ARG_INFO(0, action)
 ZEND_END_ARG_INFO()
 #endif
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_password_change, 0, 0, 4)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_password_change, 0)
 	ZEND_ARG_INFO(0, connection_resource_or_connection_string)
 	ZEND_ARG_INFO(0, username)
 	ZEND_ARG_INFO(0, old_password)
@@ -461,32 +461,32 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_num_rows, 0, 0, 1)
 	ZEND_ARG_INFO(0, statement_resource)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_free_collection, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_free_collection, 0)
 	ZEND_ARG_INFO(0, collection)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_append, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_append, 0)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_get, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_element_get, 0)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, index)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_assign, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_assign, 0)
 	ZEND_ARG_INFO(0, collection_to)
 	ZEND_ARG_INFO(0, collection_from)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_element_assign, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_element_assign, 0)
 	ZEND_ARG_INFO(0, collection)
 	ZEND_ARG_INFO(0, index)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_oci_collection_size, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_oci_collection_size, 0)
 	ZEND_ARG_INFO(0, collection)
 ZEND_END_ARG_INFO()
 

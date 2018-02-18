@@ -550,7 +550,7 @@ static void dom_dtor_prop_handler(zval *zv) /* {{{ */
 }
 
 /* {{{ arginfo */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_dom_import_simplexml, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO(arginfo_dom_import_simplexml, 0)
 	ZEND_ARG_INFO(0, node)
 ZEND_END_ARG_INFO()
 /* }}} */
