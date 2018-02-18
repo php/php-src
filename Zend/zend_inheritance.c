@@ -807,6 +807,13 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 		}
 	}
 
+	if (EXPECTED(Z_CE_IS_IMMUTABLE(parent_ce) && !Z_CE_IS_IMMUTABLE(ce))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Immutable class %s may not be extended by non immutable class %s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(ce->name));
+	}
+	if (EXPECTED(!Z_CE_IS_IMMUTABLE(parent_ce) && Z_CE_IS_IMMUTABLE(ce))) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Class %s may not be extended by immutable class %s", ZSTR_VAL(parent_ce->name), ZSTR_VAL(ce->name));
+	}
+
 	ce->parent = parent_ce;
 
 	/* Inherit interfaces */
