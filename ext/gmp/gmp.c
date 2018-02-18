@@ -1429,7 +1429,7 @@ ZEND_FUNCTION(gmp_binomial)
 ZEND_FUNCTION(gmp_pow)
 {
 	zval *base_arg;
-	mpz_ptr gmpnum_result, gmpnum_base;
+	mpz_ptr gmpnum_result;
 	gmp_temp_t temp_base;
 	zend_long exp;
 
@@ -1446,6 +1446,7 @@ ZEND_FUNCTION(gmp_pow)
 		INIT_GMP_RETVAL(gmpnum_result);
 		mpz_ui_pow_ui(gmpnum_result, Z_LVAL_P(base_arg), exp);
 	} else {
+		mpz_ptr gmpnum_base;
 		FETCH_GMP_ZVAL(gmpnum_base, base_arg, temp_base);
 		INIT_GMP_RETVAL(gmpnum_result);
 		mpz_pow_ui(gmpnum_result, gmpnum_base, exp);
@@ -1908,7 +1909,6 @@ ZEND_FUNCTION(gmp_random)
 ZEND_FUNCTION(gmp_random_seed)
 {
 	zval *seed;
-	mpz_ptr gmpnum_seed;
 	gmp_temp_t temp_a;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &seed) == FAILURE) {
@@ -1921,6 +1921,8 @@ ZEND_FUNCTION(gmp_random_seed)
 		gmp_randseed_ui(GMPG(rand_state), Z_LVAL_P(seed));
 	}
 	else {
+		mpz_ptr gmpnum_seed;
+
 		FETCH_GMP_ZVAL(gmpnum_seed, seed, temp_a);
 
 		gmp_randseed(GMPG(rand_state), gmpnum_seed);
@@ -1958,7 +1960,7 @@ ZEND_FUNCTION(gmp_random_bits)
 ZEND_FUNCTION(gmp_random_range)
 {
 	zval *min_arg, *max_arg;
-	mpz_ptr gmpnum_min, gmpnum_max, gmpnum_result;
+	mpz_ptr gmpnum_max, gmpnum_result;
 	mpz_t gmpnum_range;
 	gmp_temp_t temp_a, temp_b;
 
@@ -1995,6 +1997,8 @@ ZEND_FUNCTION(gmp_random_range)
 		mpz_clear(gmpnum_range);
 		FREE_GMP_TEMP(temp_a);
 	} else {
+		mpz_ptr gmpnum_min;
+
 		FETCH_GMP_ZVAL_DEP(gmpnum_min, min_arg, temp_b, temp_a);
 
 		if (mpz_cmp(gmpnum_max, gmpnum_min) <= 0) {
