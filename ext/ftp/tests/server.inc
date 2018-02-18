@@ -454,11 +454,13 @@ if ($pid) {
 		} elseif (preg_match('/^SITE CHMOD/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 
+		} elseif (preg_match('/^DELE/', $buf, $matches)) {
+			fputs($s, "250 OK\r\n");
+
 		} elseif (preg_match('/^ALLO (\d+)/', $buf, $matches)) {
 			fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 
 		}elseif (preg_match('/^LIST www\//', $buf, $matches)) {
-			fputs($s, "150 Opening ASCII mode data connection for file list\r\n");
 			fputs($s, "226 Transfer complete\r\n");
 
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
