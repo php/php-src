@@ -43,8 +43,7 @@ install-modules: build-modules
 	@test -d modules && \
 	$(mkinstalldirs) $(INSTALL_ROOT)$(EXTENSION_DIR)
 	@echo "Installing shared extensions:     $(INSTALL_ROOT)$(EXTENSION_DIR)/"
-	@rm -f modules/*.la >/dev/null 2>&1
-	@$(INSTALL) modules/* $(INSTALL_ROOT)$(EXTENSION_DIR)
+	@find ./modules -type f ! -name '*.la' | xargs -0 -I {} $(INSTALL) {} $(INSTALL_ROOT)$(EXTENSION_DIR)
 
 install-headers:
 	-@if test "$(INSTALL_HEADERS)"; then \
