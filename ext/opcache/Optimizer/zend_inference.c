@@ -39,7 +39,8 @@
 #define SYM_RANGE
 
 /* Whether to handle negative range constraints */
-#define NEG_RANGE
+/* Negative range inference is buggy, so disabled for now */
+#undef NEG_RANGE
 
 /* Number of warmup passes to use prior to widening */
 #define RANGE_WARMUP_PASSES 16
