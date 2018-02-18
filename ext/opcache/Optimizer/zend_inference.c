@@ -524,6 +524,15 @@ static inline zend_bool zend_abs_range(
 	return 1;
 }
 
+static inline zend_bool shift_left_overflows(zend_long n, zend_long s) {
+	/* This considers shifts that shift in the sign bit to be overflowing as well */
+	if (n >= 0) {
+		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) < n;
+	} else {
+		return s >= SIZEOF_ZEND_LONG * 8 - 1 || (n << s) > n;
+	}
+}
+
 /* Get the normal op corresponding to a compound assignment op */
 static inline zend_uchar get_compound_assign_op(zend_uchar opcode) {
 	switch (opcode) {
@@ -717,12 +726,27 @@ static int zend_inference_calc_binary_op_range(
 					op2_min = OP2_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
 					op2_max = OP2_MAX_RANGE();
-					t1 = op1_min << op2_min;
-					t2 = op1_min << op2_max;
-					t3 = op1_max << op2_min;
-					t4 = op1_max << op2_max;
-					tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
-					tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+
+					/* Shifts by negative numbers will throw, ignore them */
+					if (op2_min < 0) {
+						op2_min = 0;
+					}
+					if (op2_max < 0) {
+						op2_max = 0;
+					}
+
+					if (shift_left_overflows(op1_min, op2_max)
+							|| shift_left_overflows(op1_max, op2_max)) {
+						tmp->min = ZEND_LONG_MIN;
+						tmp->max = ZEND_LONG_MAX;
+					} else {
+						t1 = op1_min << op2_min;
+						t2 = op1_min << op2_max;
+						t3 = op1_max << op2_min;
+						t4 = op1_max << op2_max;
+						tmp->min = MIN(MIN(t1, t2), MIN(t3, t4));
+						tmp->max = MAX(MAX(t1, t2), MAX(t3, t4));
+					}
 				}
 				return 1;
 			}
