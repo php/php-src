@@ -740,6 +740,23 @@ static int zend_inference_calc_binary_op_range(
 					op2_min = OP2_MIN_RANGE();
 					op1_max = OP1_MAX_RANGE();
 					op2_max = OP2_MAX_RANGE();
+
+					/* Shifts by negative numbers will throw, ignore them */
+					if (op2_min < 0) {
+						op2_min = 0;
+					}
+					if (op2_max < 0) {
+						op2_max = 0;
+					}
+
+					/* Shifts by more than the integer size will be 0 or -1 */
+					if (op2_min >= SIZEOF_ZEND_LONG * 8) {
+						op2_min = SIZEOF_ZEND_LONG * 8 - 1;
+					}
+					if (op2_max >= SIZEOF_ZEND_LONG * 8) {
+						op2_max = SIZEOF_ZEND_LONG * 8 - 1;
+					}
+
 					t1 = op1_min >> op2_min;
 					t2 = op1_min >> op2_max;
 					t3 = op1_max >> op2_min;
