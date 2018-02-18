@@ -6058,6 +6058,10 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		flags |= ZEND_ACC_IMMUTABLE;
 	}
 
+	if (flags & ZEND_ACC_IMMUTABLE && flags & ZEND_ACC_STATIC) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Immutable properties cannot be declared static");
+	}
+
 	for (i = 0; i < children; ++i) {
 		zend_ast *prop_ast = list->child[i];
 		zend_ast *name_ast = prop_ast->child[0];
