@@ -155,7 +155,8 @@ typedef enum {
 	(len) > 1 && !PHP_WIN32_IOUTIL_IS_SLASHW(pathw[(len)-2]) && L'.' != pathw[(len)-2] && L'.' == pathw[(len)-1]))
 
 #define PHP_WIN32_IOUTIL_CHECK_PATH_W(pathw, ret, dealloc) do { \
-		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, wcslen(pathw))) { \
+		size_t _len = wcslen(pathw); \
+		if (!PHP_WIN32_IOUTIL_PATH_IS_OK_W(pathw, _len)) { \
 			if (dealloc) { \
 				free((void *)pathw); \
 			} \
