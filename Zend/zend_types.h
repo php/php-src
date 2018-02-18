@@ -667,6 +667,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_PTR(zval)					(zval).value.ptr
 #define Z_PTR_P(zval_p)				Z_PTR(*(zval_p))
 
+
+#define Z_CE_IS_IMMUTABLE(zend_class_entry)     (((zend_class_entry)->ce_flags & ZEND_ACC_IMMUTABLE) != 0)
+#define Z_OBJ_IS_IMMUTABLE(zend_object)         (((zend_object)->ce->ce_flags & ZEND_ACC_IMMUTABLE) != 0)
+#define Z_OBJ_IS_LOCKED(zend_object)            (((zend_object)->zobj_flags & ZEND_OBJ_LOCKED) != 0)
+
 #define ZVAL_UNDEF(z) do {				\
 		Z_TYPE_INFO_P(z) = IS_UNDEF;	\
 	} while (0)
