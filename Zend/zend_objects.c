@@ -32,6 +32,7 @@ ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
 	object->ce = ce;
+	object->zobj_flags = 0;
 	object->properties = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
