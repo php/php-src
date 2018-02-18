@@ -2468,6 +2468,10 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 #endif
 				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
+			} else {
+				if (EXPECTED(Z_OBJ_IS_IMMUTABLE(object))) {
+					object->zobj_flags |= ZEND_OBJ_LOCKED;
+				}
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -2499,6 +2503,10 @@ ZEND_VM_HELPER(zend_leave_helper, ANY, ANY)
 #endif
 				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
+			} else {
+				if (EXPECTED(Z_OBJ_IS_IMMUTABLE(object))) {
+					object->zobj_flags |= ZEND_OBJ_LOCKED;
+				}
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
