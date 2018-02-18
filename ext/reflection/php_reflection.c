@@ -6565,6 +6565,7 @@ static const zend_function_entry reflection_property_functions[] = {
 	ZEND_ME(reflection_property, isPrivate, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isProtected, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isStatic, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_property, isImmutable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, isDefault, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_property, getDeclaringClass, arginfo_reflection__void, 0)
