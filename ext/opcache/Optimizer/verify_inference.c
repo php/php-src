@@ -18,7 +18,8 @@ static inline uint32_t num_def_operands(zend_ssa_op *ssa_op) {
 }
 
 static void emit_type_check(
-		zend_ssa *ssa, zend_op *opline, int var, int op_type, int ssa_var, uint32_t lineno) {
+		zend_op_array *op_array, zend_ssa *ssa,
+		zend_op *opline, int var, int op_type, int ssa_var, uint32_t lineno) {
 	zend_ssa_var_info *info = &ssa->var_info[ssa_var];
 	uint32_t type = info->type;
 
@@ -32,36 +33,35 @@ static void emit_type_check(
 	opline->op1_type = op_type;
 	opline->op1.var = var;
 	opline->op2_type = IS_UNUSED;
-	opline->op2.num = (uint32_t) INT32_MIN;
 	opline->result_type = IS_UNUSED;
-	opline->result.num = (uint32_t) INT32_MAX;
 	opline->extended_value = type;
 	opline->lineno = lineno;
 
 	if (info->has_range) {
-		if (!info->range.underflow && info->range.min > INT32_MIN && info->range.min < INT32_MAX) {
-			opline->op2.num = (uint32_t) info->range.min;
-		}
-		if (!info->range.overflow && info->range.max > INT32_MIN && info->range.max < INT32_MAX) {
-			opline->result.num = (uint32_t) info->range.max;
-		}
+		zval zv;
+		opline->op2_type = IS_CONST;
+		ZVAL_LONG(&zv, info->range.min);
+		opline->op2.constant = zend_optimizer_add_literal(op_array, &zv);
+		ZVAL_LONG(&zv, info->range.max);
+		zend_optimizer_add_literal(op_array, &zv);
 	}
 }
 
 static zend_op *emit_type_checks(
-		zend_ssa *ssa, zend_op *new_opline, zend_op *opline, zend_ssa_op *ssa_op) {
+		zend_op_array *op_array, zend_ssa *ssa,
+		zend_op *new_opline, zend_op *opline, zend_ssa_op *ssa_op) {
 	if (ssa_op->result_def >= 0) {
-		emit_type_check(ssa, new_opline,
+		emit_type_check(op_array, ssa, new_opline,
 			opline->result.var, opline->result_type, ssa_op->result_def, opline->lineno);
 		new_opline++;
 	}
 	if (ssa_op->op1_def >= 0) {
-		emit_type_check(ssa, new_opline,
+		emit_type_check(op_array, ssa, new_opline,
 			opline->op1.var, opline->op1_type, ssa_op->op1_def, opline->lineno);
 		new_opline++;
 	}
 	if (ssa_op->op2_def >= 0) {
-		emit_type_check(ssa, new_opline,
+		emit_type_check(op_array, ssa, new_opline,
 			opline->op2.var, opline->op2_type, ssa_op->op2_def, opline->lineno);
 		new_opline++;
 	}
@@ -239,7 +239,7 @@ static void insert_type_checks(context *ctx) {
 			}
 			if (!should_skip(&ctx->op_array->opcodes[j], end)) {
 				zend_op *orig_new_opline = new_opline;
-				new_opline = emit_type_checks(ssa, new_opline, opline, ssa_op);
+				new_opline = emit_type_checks(op_array, ssa, new_opline, opline, ssa_op);
 				new_ssa_op += new_opline - orig_new_opline;
 			}
 		}

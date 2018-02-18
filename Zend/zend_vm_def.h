@@ -8432,10 +8432,11 @@ ZEND_VM_HANDLER(195, ZEND_FUNC_GET_ARGS, UNUSED|CONST, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HANDLER(199, ZEND_CHECK_INFERENCE, TMPVARCV, ANY)
+ZEND_VM_HANDLER(199, ZEND_CHECK_INFERENCE, TMPVARCV, UNUSED|CONST)
 {
 	USE_OPLINE
 	zval *op1 = GET_OP1_ZVAL_PTR_UNDEF(BP_VAR_R);
+	zval *op2 = GET_OP2_ZVAL_PTR(BP_VAR_R);
 	uint32_t type = opline->extended_value;
 	const zend_op *prev_opline;
 	const char *errmsg = "-";
@@ -8456,13 +8457,11 @@ ZEND_VM_HANDLER(199, ZEND_CHECK_INFERENCE, TMPVARCV, ANY)
 	}
 
 	if (type & (1 << Z_TYPE_P(op1))) {
-		if (Z_TYPE_P(op1) == IS_LONG) {
-			if (opline->op2.num != (uint32_t) INT32_MIN
-					&& Z_LVAL_P(op1) < (int32_t) opline->op2.num) {
+		if (Z_TYPE_P(op1) == IS_LONG && OP2_TYPE != IS_UNUSED) {
+			if (Z_LVAL_P(op1) < Z_LVAL_P(op2)) {
 				ZEND_VM_C_GOTO(wrong_range);
 			}
-			if (opline->result.num != (uint32_t) INT32_MAX
-					&& Z_LVAL_P(op1) > (int32_t) opline->result.num) {
+			if (Z_LVAL_P(op1) > Z_LVAL_P(op2+1)) {
 				ZEND_VM_C_GOTO(wrong_range);
 			}
 		}
@@ -8524,8 +8523,8 @@ ZEND_VM_C_LABEL(wrong_range):
 
 	SAVE_OPLINE();
 	zend_throw_error(NULL,
-		"Range mismatch (" ZEND_LONG_FMT " not in %" PRIi32 "..%" PRIi32 ") in %s",
-		Z_LVAL_P(op1), (int32_t) opline->op2.num, (int32_t) opline->result.num,
+		"Range mismatch (" ZEND_LONG_FMT " not in " ZEND_LONG_FMT ".." ZEND_LONG_FMT ") in %s",
+		Z_LVAL_P(op1), Z_LVAL_P(op2), Z_LVAL_P(op2+1),
 		zend_get_opcode_name(prev_opline->opcode));
 	HANDLE_EXCEPTION();
 }
