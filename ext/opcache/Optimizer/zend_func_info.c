@@ -1411,7 +1411,7 @@ static const func_info_t func_infos[] = {
 
 	/* ext/pgsql */
 	F1("pg_connect",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
-	F1("pg_pconnect",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
+	FN("pg_pconnect",							MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("pg_connect_poll",						MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_LONG),
 	F0("pg_close",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F1("pg_dbname",								MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_STRING),
