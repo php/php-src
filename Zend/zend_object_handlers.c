@@ -690,6 +690,10 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 
 	zobj = Z_OBJ_P(object);
 
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(zobj) && Z_OBJ_IS_LOCKED(zobj))) {
+		zend_throw_error(NULL, "Can not modify state of immutable object after constructor");
+	}
+
 	ZVAL_UNDEF(&tmp_member);
  	if (UNEXPECTED(Z_TYPE_P(member) != IS_STRING)) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
