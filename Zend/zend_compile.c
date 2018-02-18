@@ -749,6 +749,9 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_IMMUTABLE)) {
 		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the immutable modifier on an abstract class");
 	}
+	if ((flags & ZEND_ACC_IMMUTABLE) && (new_flags & ZEND_ACC_IMMUTABLE)) {
+		zend_error_noreturn(E_COMPILE_ERROR, "Multiple immutable modifiers are not allowed");
+	}
 	return new_flags;
 }
 /* }}} */
