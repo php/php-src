@@ -259,6 +259,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_DECLARE_INHERITED_CLASS_DELAYED:
 					LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 2);
 					break;
+				case ZEND_CHECK_INFERENCE:
+					if (opline->op2_type == IS_CONST) {
+						LITERAL_INFO(opline->op2.constant, LITERAL_VALUE, 2);
+					}
+					break;
 				default:
 					if (opline->op1_type == IS_CONST) {
 						LITERAL_INFO(opline->op1.constant, LITERAL_VALUE, 1);
@@ -337,7 +342,8 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					map[i] = l_true;
 					break;
 				case IS_LONG:
-					if ((pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
+					if (LITERAL_NUM_RELATED(info[i].flags) == 1 &&
+							(pos = zend_hash_index_find(&hash, Z_LVAL(op_array->literals[i]))) != NULL) {
 						map[i] = Z_LVAL_P(pos);
 					} else {
 						map[i] = j;
@@ -348,6 +354,13 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 							info[j] = info[i];
 						}
 						j++;
+						n = LITERAL_NUM_RELATED(info[i].flags);
+						while (n > 1) {
+							i++;
+							if (i != j) op_array->literals[j] = op_array->literals[i];
+							j++;
+							n--;
+						}
 					}
 					break;
 				case IS_DOUBLE:
