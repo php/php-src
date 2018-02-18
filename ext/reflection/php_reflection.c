@@ -5475,6 +5475,14 @@ ZEND_METHOD(reflection_property, isStatic)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::isImmutable()
+   Returns whether this property is immutable */
+ZEND_METHOD(reflection_property, isImmutable)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMMUTABLE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionProperty::isDefault()
    Returns whether this property is default (declared at compilation time). */
 ZEND_METHOD(reflection_property, isDefault)
