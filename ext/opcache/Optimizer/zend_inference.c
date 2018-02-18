@@ -2055,6 +2055,14 @@ static uint32_t binary_op_result_type(
 	uint32_t tmp = 0;
 	uint32_t t1_type = (t1 & MAY_BE_ANY) | (t1 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
 	uint32_t t2_type = (t2 & MAY_BE_ANY) | (t2 & MAY_BE_UNDEF ? MAY_BE_NULL : 0);
+
+	/* Handle potentially overloaded operators.
+	 * This could be made more precise by checking the class type, if known. */
+	if ((t1_type & MAY_BE_OBJECT) || (t2_type & MAY_BE_OBJECT)) {
+		/* This is somewhat GMP specific. */
+		tmp |= MAY_BE_OBJECT | MAY_BE_FALSE | MAY_BE_RC1;
+	}
+
 	switch (opcode) {
 		case ZEND_ADD:
 			if (t1_type == MAY_BE_LONG && t2_type == MAY_BE_LONG) {
@@ -2109,7 +2117,7 @@ static uint32_t binary_op_result_type(
 			 * handling */
 			break;
 		case ZEND_MOD:
-			tmp = MAY_BE_LONG;
+			tmp |= MAY_BE_LONG;
 			/* Division by zero results in an exception, so it doesn't need any special handling */
 			break;
 		case ZEND_BW_OR:
@@ -2124,7 +2132,7 @@ static uint32_t binary_op_result_type(
 			break;
 		case ZEND_SL:
 		case ZEND_SR:
-			tmp = MAY_BE_LONG;
+			tmp |= MAY_BE_LONG;
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
@@ -2251,6 +2259,10 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (t1 & (MAY_BE_ANY-MAY_BE_STRING)) {
 				tmp |= MAY_BE_LONG;
+			}
+			if (t1 & MAY_BE_OBJECT) {
+				/* Potentially overloaded operator. */
+				tmp |= MAY_BE_OBJECT | MAY_BE_RC1;
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
