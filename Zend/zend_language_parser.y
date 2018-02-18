@@ -809,6 +809,7 @@ member_modifier:
 	|	T_STATIC				{ $$ = ZEND_ACC_STATIC; }
 	|	T_ABSTRACT				{ $$ = ZEND_ACC_ABSTRACT; }
 	|	T_FINAL					{ $$ = ZEND_ACC_FINAL; }
+  |	T_IMMUTABLE				{ $$ = ZEND_ACC_IMMUTABLE; }
 ;
 
 property_list:
