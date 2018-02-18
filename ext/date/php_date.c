@@ -2412,8 +2412,8 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
+				abs((int)(utc_offset / 3600)),
+				abs((int)(utc_offset % 3600) / 60));
 
 			ZVAL_NEW_STR(zv, tmpstr);
 			}
