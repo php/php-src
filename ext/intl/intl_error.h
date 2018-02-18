@@ -27,8 +27,8 @@
 
 typedef struct _intl_error {
 	UErrorCode      code;
-	char*           custom_error_message;
 	int             free_custom_error_message;
+	char*           custom_error_message;
 } intl_error;
 
 intl_error* intl_error_create( void );
