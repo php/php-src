@@ -2161,11 +2161,7 @@ static uint32_t binary_op_result_type(
 			 * handling */
 			break;
 		case ZEND_MOD:
-			if (ZEND_OPTIMIZER_IGNORE_OVERLOADING & optimization_level) {
-				tmp = MAY_BE_LONG;
-			} else {
-				tmp |= MAY_BE_LONG;
-			}
+			tmp |= MAY_BE_LONG;
 			/* Division by zero results in an exception, so it doesn't need any special handling */
 			break;
 		case ZEND_BW_OR:
@@ -2180,11 +2176,7 @@ static uint32_t binary_op_result_type(
 			break;
 		case ZEND_SL:
 		case ZEND_SR:
-			if (ZEND_OPTIMIZER_IGNORE_OVERLOADING & optimization_level) {
-				tmp = MAY_BE_LONG;
-			} else {
-				tmp |= MAY_BE_LONG;
-			}
+			tmp |= MAY_BE_LONG;
 			break;
 		case ZEND_CONCAT:
 		case ZEND_FAST_CONCAT:
