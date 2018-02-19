@@ -1965,8 +1965,8 @@ ZEND_FUNCTION(gmp_setbit)
 		php_error_docref(NULL, E_WARNING, "Index must be greater than or equal to zero");
 		RETURN_FALSE;
 	}
-    if (index / GMP_NUMB_BITS >= INT_MAX ) {
-        php_error_docref(NULL, E_WARNING, "Index must be less than %ld * %ld", INT_MAX, GMP_NUMB_BITS);
+    if (index / GMP_NUMB_BITS >= INT_MAX) {
+        php_error_docref(NULL, E_WARNING, "Index must be less than %d * %d", INT_MAX, GMP_NUMB_BITS);
         RETURN_FALSE;
     }
 
