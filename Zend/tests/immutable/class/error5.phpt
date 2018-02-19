@@ -1,15 +1,18 @@
 --TEST--
-Immutable classes are not cloneable.
+Can not assign array to immutable property.
+--DESCRIPTION--
+
 --FILE--
 <?php
-namespace X\Y\Z;
-immutable class A {}
-$a = new A;
-clone $a;
-?>
---EXPECTF--
+immutable class A {
+	public $x;
+	public function __construct($x) {
+		$this->x = $x;
+	}
+}
 
-Fatal error: Uncaught Error: Cloning of immutable class X\Y\Z\A is not permitted in %simmutable_modifier%sclass%serror5.php:7
-Stack trace:
-#0 {main}
-  thrown in %simmutable%sclass%serror5.php on line 7
+new A([0, 1, 2]);
+?>
+--EXPECT--
+
+Fatal error: Can not assign array to immutable property x in %simmutable%sclass%serror5.php on line 3
