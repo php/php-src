@@ -42,7 +42,7 @@ bug_pecl_1295($db);
 $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Emulated...
 array(1) {
   [0]=>

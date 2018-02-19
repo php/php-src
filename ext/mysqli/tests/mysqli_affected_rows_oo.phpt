@@ -110,5 +110,5 @@ mysqli->affected_rows
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

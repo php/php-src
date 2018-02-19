@@ -50,7 +50,7 @@ var_dump( array_walk_recursive($input, 'callback_two_parameter', 10));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : callback function variation ***
 -- callback function with both parameters --
 int(0)

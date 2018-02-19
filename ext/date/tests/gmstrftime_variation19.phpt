@@ -37,7 +37,7 @@ foreach($inputs as $key =>$value) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gmstrftime() : usage variation ***
 
 --Newline character--

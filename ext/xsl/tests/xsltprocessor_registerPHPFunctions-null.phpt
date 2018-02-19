@@ -23,7 +23,7 @@ $proc->importStylesheet($phpfuncxsl);
 var_dump($proc->registerPHPFunctions('ucwords'));
 var_dump($proc->registerPHPFunctions(null));
 var_dump($proc->transformToXml($dom));
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 string(18) "This Is An Example"

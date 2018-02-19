@@ -39,7 +39,7 @@ function test($phpEx)
 }
 var_dump(test("xxx"));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

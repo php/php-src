@@ -52,7 +52,7 @@ foreach($integer_values as $int_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : float formats with integer values ***
 
 -- Iteration 1 --

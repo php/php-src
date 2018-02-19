@@ -67,7 +67,7 @@ echo "-- array with mixed values --\n";
 var_dump( array_sum($input) );
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : array with unexpected entries ***
 -- empty array --
 int(0)

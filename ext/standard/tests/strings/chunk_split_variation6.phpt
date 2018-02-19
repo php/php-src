@@ -45,7 +45,7 @@ for($count = 0;$count < count($values);$count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : with different single quoted 'str' ***
 -- Iteration 0 --
 string(3) "):("

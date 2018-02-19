@@ -130,6 +130,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test2"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 done!

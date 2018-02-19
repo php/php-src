@@ -32,6 +32,6 @@ try {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 C::serialize() must return a string or NULL
 Done

@@ -38,7 +38,7 @@ try{
 $n = "-1";
 $n %= $n;
 var_dump($n);
---EXPECTF--
+--EXPECT--
 int(0)
 
 Exception: Bit shift by negative number

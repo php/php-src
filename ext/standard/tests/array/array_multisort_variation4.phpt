@@ -22,7 +22,7 @@ var_dump($arr3);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : Testing  with multiple array arguments ***
 bool(true)
 array(4) {

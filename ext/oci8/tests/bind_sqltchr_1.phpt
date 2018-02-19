@@ -135,7 +135,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 TEST241 bind SQLT_CHR
 array(1) {
   ["VARCHAR2_T10"]=>

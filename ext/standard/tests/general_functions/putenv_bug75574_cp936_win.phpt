@@ -35,7 +35,7 @@ var_dump(putenv('FOO=가a가가가가'), getenv("FOO"));
 
 ?>
 ===DONE===
---EXPECTF--	
+--EXPECT--	
 bool(true)
 string(2) "가"
 bool(true)

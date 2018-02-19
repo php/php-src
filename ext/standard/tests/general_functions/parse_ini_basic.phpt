@@ -14,7 +14,7 @@ var_dump(parse_ini_file($ini_file, 1));
 
 echo "Done.\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(26) {
   ["basic"]=>
   array(15) {

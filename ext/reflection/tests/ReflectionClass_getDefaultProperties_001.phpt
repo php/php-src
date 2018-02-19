@@ -73,7 +73,7 @@ foreach ($classes as $class) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 ---- Static properties in A ----
 Array
 (

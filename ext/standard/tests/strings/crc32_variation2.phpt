@@ -72,7 +72,7 @@ foreach($string_array as $str) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing crc32() : with different strings in single quotes ***
 
 -- Iteration 1 --

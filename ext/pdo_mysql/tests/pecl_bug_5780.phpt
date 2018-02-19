@@ -33,7 +33,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 $db->exec('DROP TABLE IF EXISTS test2');
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(7) "testing"

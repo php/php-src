@@ -23,5 +23,5 @@ $stmt = $db->query("select (select 1 union select 2)");
 
 print "ok";
 ?>
---EXPECTF--
+--EXPECT--
 ok

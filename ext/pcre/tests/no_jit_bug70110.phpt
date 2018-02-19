@@ -10,7 +10,7 @@ var_dump(preg_match('~(*NO_JIT)(a)*~', str_repeat('a', 5431), $match))
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 int(1)
 int(1)
 ==DONE==

@@ -13,6 +13,6 @@ declare(encoding="UTF-8") {
 	echo "ok\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 ok
 ok

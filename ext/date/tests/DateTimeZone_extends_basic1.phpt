@@ -24,7 +24,7 @@ echo $d . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing basic DateTimeZone inheritance() ***
 
 -- Create an instance of DateTimeZoneExt --

@@ -74,7 +74,7 @@ $link->close();
 
 unlink('bug53503.data');
 ?>
---EXPECTF--
+--EXPECT--
 done
 [006] [2000] open_basedir restriction in effect. Unable to open file
 done

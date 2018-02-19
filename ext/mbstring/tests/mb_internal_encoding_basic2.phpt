@@ -38,7 +38,7 @@ var_dump(mb_internal_encoding());    //check internal encoding is now set to UTF
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_internal_encoding() : basic functionality ***
 string(0) ""
 string(10) "ISO-8859-1"

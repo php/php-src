@@ -55,7 +55,7 @@ var_dump( array_search('123abc', array(123), TRUE) ); // false in strict mode
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing resource type with array_search() ***
 int(0)
 bool(false)

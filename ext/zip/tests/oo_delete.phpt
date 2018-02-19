@@ -71,7 +71,7 @@ if (file_exists($file)) {
 	unlink($file);
 }
 ?>
---EXPECTF--
+--EXPECT--
 ok
 ok
 ok

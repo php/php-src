@@ -40,7 +40,7 @@ foreach($test as $key => $val)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 test Object
 (
     [pub] => public

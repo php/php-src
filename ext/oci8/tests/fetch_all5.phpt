@@ -58,7 +58,7 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 int(3)
 array(2) {

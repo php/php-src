@@ -21,7 +21,7 @@ $myFixedArr->setSize(2);
 
 print_r($myFixedArr->toArray());
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [0] => foo

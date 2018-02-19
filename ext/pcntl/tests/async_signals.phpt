@@ -19,7 +19,7 @@ $i = 0; // dummy
 echo "Done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Start!
 Signal handler called!
 Done!

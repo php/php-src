@@ -85,5 +85,5 @@ mysqli_query($link, "DROP PROCEDURE IF EXISTS p");
 mysqli_close($link);
 ?>
 
---EXPECTF--
+--EXPECT--
 done!

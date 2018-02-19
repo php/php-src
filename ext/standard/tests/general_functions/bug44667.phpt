@@ -28,6 +28,6 @@ echo "Result is: ", $result, "\n";
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Result is: Hello
 Done

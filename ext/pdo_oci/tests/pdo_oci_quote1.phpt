@@ -39,7 +39,7 @@ echo "Done\n";
 @$db->exec("drop table poq_tab");
 
 ?>
---EXPECTF--
+--EXPECT--
 Unquoted : NULL
 Quoted   : string(2) "''"
 array(1) {

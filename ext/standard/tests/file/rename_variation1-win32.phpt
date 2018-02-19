@@ -63,7 +63,7 @@ unlink($file_path."/rename_variation_link.tmp");
 unlink($file_path."/rename_variation.tmp");
 rmdir($file_path."/rename_variation_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() : renaming directory across directories ***
 -- Iteration 1 --
 bool(true)

@@ -15,7 +15,7 @@ $xml = new SimpleXMLElement('<foo><bar/><baz/></foo>');
 print_r($xml);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 SimpleXMLElement Object
 (
     [bar] => SimpleXMLElement Object

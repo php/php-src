@@ -43,7 +43,7 @@ if (is_resource($fpm)) {
 
 ?>
 Done
---EXPECTF--
+--EXPECT--
 Started
 Done
 --CLEAN--

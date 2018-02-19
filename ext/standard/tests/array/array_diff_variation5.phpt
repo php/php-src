@@ -48,7 +48,7 @@ var_dump(array_diff($arr_float_str, $arr_int_str));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 -- Compare integers and floats: --
 array(0) {

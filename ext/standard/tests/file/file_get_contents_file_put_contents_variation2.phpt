@@ -46,7 +46,7 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/file_get_contents_variation2/file_get_contents_variation2.tmp");
 rmdir($file_path."/file_get_contents_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing with variation in use_include_path argument ***
 string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"
 string(240) "text text text text text text text text text text text text text text text text text text text text 22222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222222221  Data1 in an array2  Data2 in an array"

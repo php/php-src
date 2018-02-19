@@ -60,7 +60,7 @@ foreach($arrays as $array) {
 		
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_search() with different needle values ***
 -- Iteration 1 --
 bool(false)

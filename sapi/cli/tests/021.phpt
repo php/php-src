@@ -35,7 +35,7 @@ echo "\nDone\n";
 <?php
 unlink(__DIR__.'/021.tmp.php');
 ?>
---EXPECTF--
+--EXPECT--
 ola
 2
 adeus

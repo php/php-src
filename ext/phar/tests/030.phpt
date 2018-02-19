@@ -37,7 +37,7 @@ echo $e->getMessage(),"\n";
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
---EXPECTF--
+--EXPECT--
 This is a
 This is b
 This is b/c

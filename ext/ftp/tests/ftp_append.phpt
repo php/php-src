@@ -35,7 +35,7 @@ unlink($barPath);
 $fooBarPath = __DIR__ . '/ftp_append_foobar';
 unlink($fooBarPath);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

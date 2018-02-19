@@ -80,7 +80,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_executable_variation2/");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_executable(): usage variations ***
 
 *** Testing is_executable() on directory without execute permission ***

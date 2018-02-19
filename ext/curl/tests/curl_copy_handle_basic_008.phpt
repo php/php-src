@@ -19,7 +19,7 @@ Test curl_copy_handle() with CURLOPT_PROGRESSFUNCTION
   echo curl_exec($ch2);
 
 ?>
---EXPECTF--
+--EXPECT--
 Hello World!
 Hello World!
 Hello World!

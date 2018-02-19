@@ -55,7 +55,7 @@ var_dump(key_exists(0, $h));
 $i = array('foo' => 'baz', $st);  
 var_dump(key_exists(0, $i));
 
---EXPECTF--
+--EXPECT--
 *** test key_exists() by using mixed type of arrays ***
 bool(false)
 integer

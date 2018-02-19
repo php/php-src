@@ -50,7 +50,7 @@ foreach($valid_ints as $int_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with integer values ***
 
 -- Iteration 1 --

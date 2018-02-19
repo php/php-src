@@ -35,7 +35,7 @@ unlink($filename);
 unlink($symlink);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing lchown() : basic functionality ***
 bool(true)
 bool(true)

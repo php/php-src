@@ -9,5 +9,5 @@ extract($a, EXTR_REFS);
 $a['foo'] = 'changed.foo';
 var_dump($nonref);
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "original.foo"

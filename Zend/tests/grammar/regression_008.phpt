@@ -14,7 +14,7 @@ echo "$friday->require ($friday->require) {$friday->require}", PHP_EOL;
 echo "\nDone\n";
 
 
---EXPECTF--
+--EXPECT--
 
 fun (fun) fun
 

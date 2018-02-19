@@ -84,7 +84,7 @@ foreach ($stmtarray as $stmt) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1
 Read b$
 Read cd$

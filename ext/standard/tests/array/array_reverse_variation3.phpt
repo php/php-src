@@ -81,7 +81,7 @@ fclose($fp);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : usage variations ***
 -- Iteration 1 --
 - with default argument -

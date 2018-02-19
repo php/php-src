@@ -16,5 +16,5 @@ try {
 	echo "Done!\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Done!

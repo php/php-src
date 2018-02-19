@@ -55,7 +55,7 @@ foreach ($array as $html) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(4) {
   ["author"]=>
   string(4) "name"

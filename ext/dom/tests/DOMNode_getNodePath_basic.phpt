@@ -14,6 +14,6 @@ foreach($nodes as $node) {
 	var_dump($node->getNodePath());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(20) "/books/book[1]/title"
 string(20) "/books/book[2]/title"

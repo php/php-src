@@ -14,4 +14,4 @@ class Sub extends Base {
 	}	
 }
 ?>
---EXPECTF--
+--EXPECT--

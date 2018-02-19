@@ -25,5 +25,5 @@ var_dump($expected == $actual);
 $dirname = 'DirectoryIterator_getGroup_basic';
 rmdir($dirname);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

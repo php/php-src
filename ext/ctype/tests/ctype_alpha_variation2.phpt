@@ -27,7 +27,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alpha() : usage variations ***
 character code 65 is alphabetic
 character code 66 is alphabetic

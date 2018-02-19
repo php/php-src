@@ -26,7 +26,7 @@ var_dump( array_map('square_recur_single_array', $array1));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : recursive callback function ***
 array(3) {
   [0]=>

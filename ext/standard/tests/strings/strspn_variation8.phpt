@@ -111,7 +111,7 @@ foreach($heredoc_strings as $str)  {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strspn() : with different start and len values ***
 
 -- Iteration 1 --

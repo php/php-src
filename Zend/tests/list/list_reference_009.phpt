@@ -18,7 +18,7 @@ $ary = [[0, 1]];
 ] = $ary[0];
 var_dump($ary, $a, $b);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(2) {

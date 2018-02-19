@@ -39,7 +39,7 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents.tmp");
 unlink($file_path."/file_put_contents1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing the basic functionality of file_put_contents() and file_get_contents() functions ***
 -- Testing with simple valid data file --
 string(100) "text text text text text text text text text text text text text text text text text text text text "

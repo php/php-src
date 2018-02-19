@@ -24,7 +24,7 @@ var_dump($ar);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : Testing  all array sort specifiers ***
 array(3) {
   [0]=>

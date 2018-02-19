@@ -28,7 +28,7 @@ var_dump(session_cache_expire());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_cache_expire() : variation ***
 int(360)
 int(360)

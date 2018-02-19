@@ -86,7 +86,7 @@ if (!MySQLPDOTest::isPDOMySQLnd())
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 Native PS...
 
 Testing with PDO::MYSQL_ATTR_MULTI_STATEMENTS set to false

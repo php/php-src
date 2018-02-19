@@ -33,7 +33,7 @@ var_dump( $tt );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_html_translation_table() : basic functionality ***
 -- with table = HTML_SPECIALCHARS & quote_style = ENT_COMPAT --
 array(4) {

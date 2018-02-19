@@ -52,7 +52,7 @@ for($index1 = 0; $index1 < count($strings); $index1++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncmp() function: with different input strings ***
 int(0)
 int(0)

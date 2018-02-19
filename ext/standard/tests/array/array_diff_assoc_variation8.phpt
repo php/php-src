@@ -30,7 +30,7 @@ var_dump(array_diff_assoc($array_assoc, $array_index));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : variation ***
 array(2) {
   [0]=>

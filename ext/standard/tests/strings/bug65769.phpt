@@ -31,7 +31,7 @@ foreach ($locales as $locale) {
 
 ?>
 +++DONE+++
---EXPECTF--
+--EXPECT--
 string(19) "Swedish_Sweden.1252"
 string(1) ","
 string(1) " "

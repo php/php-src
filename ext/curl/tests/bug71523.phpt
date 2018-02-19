@@ -27,5 +27,5 @@ do {
 } while ($active);
 ?>
 okey
---EXPECTF--
+--EXPECT--
 okey

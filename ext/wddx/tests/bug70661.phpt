@@ -53,7 +53,7 @@ function ptr2str($ptr)
 }
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

@@ -37,5 +37,5 @@ function gc ($maxlifetime) {
 
 session_set_save_handler ("open", "close", "read", "write", "destroy", "gc");
 session_start();
---EXPECTF--
+--EXPECT--
 8

@@ -20,7 +20,7 @@ $proc->importStyleSheet($xsl);
 
 echo $proc->transformToXML($xml);
 ?>
---EXPECTF--
+--EXPECT--
 Hey! Welcome to Nicolas Eliaszewicz's sweet CD collection! 
   
  <h1>Fight for your mind</h1><h2>by Ben Harper - 1995</h2><hr>

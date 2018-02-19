@@ -26,7 +26,7 @@ class B extends A {
 $b = new B();
 $b->test();
 ?>
---EXPECTF--
+--EXPECT--
 In B::__call(test1, array(1,a))
 object(B)#1 (0) {
 }

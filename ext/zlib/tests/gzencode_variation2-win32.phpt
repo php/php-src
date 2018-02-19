@@ -35,7 +35,7 @@ var_dump(bin2hex(gzencode($data, -1, FORCE_DEFLATE)));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gzencode() : variation ***
 
 -- Testing with each encoding_mode  --

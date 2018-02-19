@@ -29,7 +29,7 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing addslashes() : basic functionality ***
 string(16) "How\'s everybody"
 string(17) "Are you \"JOHN\"?"

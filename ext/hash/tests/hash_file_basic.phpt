@@ -34,7 +34,7 @@ $filename = 'hash_file_basic_example.txt';
 unlink( $filename );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing hash_file() : basic functionality ***
 string(32) "5c6ffbdd40d9556b73a21e63c3e0e904"
 string(40) "c0854fb9fb03c41cce3802cb0d220529e6eef94e"

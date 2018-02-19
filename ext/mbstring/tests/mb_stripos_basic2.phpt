@@ -71,7 +71,7 @@ foreach ($greek_needles as $needle) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_stripos() : basic functionality***
 
  -- ASCII Strings --

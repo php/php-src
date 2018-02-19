@@ -21,6 +21,6 @@ var_dump($host);
 unlink($conf);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(16) "example.com:3141"
 ===DONE===
