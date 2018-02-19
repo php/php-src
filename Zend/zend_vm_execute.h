@@ -336,6 +336,12 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 #ifndef VM_TRACE
 # define VM_TRACE(op)
 #endif
+#ifndef VM_TRACE_START()
+# define VM_TRACE_START()
+#endif
+#ifndef VM_TRACE_END()
+# define VM_TRACE_END()
+#endif
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
 #define HYBRID_NEXT()     goto *(void**)(OPLINE->handler)
 #define HYBRID_SWITCH()   HYBRID_NEXT();
@@ -62308,7 +62314,7 @@ ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value)
 }
 
 
-void zend_init_opcodes_handlers(void)
+void zend_vm_init(void)
 {
 	static const void * const labels[] = {
 		ZEND_NOP_SPEC_HANDLER,
@@ -66461,6 +66467,12 @@ void zend_init_opcodes_handlers(void)
 	zend_handlers_count = sizeof(labels) / sizeof(void*);
 	zend_spec_handlers = specs;
 #endif
+	VM_TRACE_START();
+}
+
+void zend_vm_dtor(void)
+{
+	VM_TRACE_END();
 }
 
 static HashTable *zend_handlers_table = NULL;

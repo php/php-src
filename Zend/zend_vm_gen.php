@@ -1710,6 +1710,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#ifndef VM_TRACE\n");
 					out($f,"# define VM_TRACE(op)\n");
 					out($f,"#endif\n");
+					out($f,"#ifndef VM_TRACE_START()\n");
+					out($f,"# define VM_TRACE_START()\n");
+					out($f,"#endif\n");
+					out($f,"#ifndef VM_TRACE_END()\n");
+					out($f,"# define VM_TRACE_END()\n");
+					out($f,"#endif\n");
 					switch ($kind) {
 						case ZEND_VM_KIND_HYBRID:
 							out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
@@ -2514,7 +2520,7 @@ function gen_vm($def, $skel) {
 	out($f, "255\n};\n\n");
 
 	// Generate specialized executor
-	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_init_opcodes_handlers");
+	gen_executor($f, $skl, ZEND_VM_SPEC, ZEND_VM_KIND, "execute", "zend_vm_init");
 
 	// Generate zend_vm_get_opcode_handler() function
 	out($f, "static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)\n");

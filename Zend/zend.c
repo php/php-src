@@ -705,8 +705,6 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 }
 /* }}} */
 
-void zend_init_opcodes_handlers(void);
-
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
@@ -807,7 +805,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	/* Set up the default garbage collection implementation. */
 	gc_collect_cycles = zend_gc_collect_cycles;
 
-	zend_init_opcodes_handlers();
+	zend_vm_init();
 
 	/* set up version */
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
@@ -939,6 +937,8 @@ int zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+	zend_vm_dtor();
+
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	zend_destroy_modules();
 
