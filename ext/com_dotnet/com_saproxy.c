@@ -542,7 +542,8 @@ zend_object_iterator *php_com_saproxy_iter_get(zend_class_entry *ce, zval *objec
 	int i;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	I = ecalloc(1, sizeof(*I));

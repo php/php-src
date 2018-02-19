@@ -2469,7 +2469,8 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	struct php_pdo_iterator *I;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	I = ecalloc(1, sizeof(struct php_pdo_iterator));

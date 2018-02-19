@@ -146,7 +146,8 @@ zend_object_iterator *php_com_iter_get(zend_class_entry *ce, zval *object, int b
 	zval ptr;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	obj = CDNO_FETCH(object);

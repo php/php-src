@@ -2007,7 +2007,8 @@ zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval
 	date_period_it *iterator = emalloc(sizeof(date_period_it));
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	zend_iterator_init((zend_object_iterator*)iterator);
