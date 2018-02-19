@@ -45,7 +45,7 @@ f("bad4");
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 30: Objects returned by bad1::getIterator() must be traversable or implement interface Iterator
 30: Objects returned by bad2::getIterator() must be traversable or implement interface Iterator
 30: Objects returned by bad3::getIterator() must be traversable or implement interface Iterator

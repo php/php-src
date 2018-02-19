@@ -20,7 +20,7 @@ class myZip extends ZipArchive {
 
 $z = new myZip;
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   int(1)

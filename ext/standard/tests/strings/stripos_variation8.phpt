@@ -35,7 +35,7 @@ for($index = 0; $index < count($needles); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: strings repetitive chars ***
 
 -- Iteration 1 --

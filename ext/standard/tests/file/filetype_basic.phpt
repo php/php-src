@@ -15,7 +15,7 @@ print( filetype(".") )."\n";
 
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filetype() with files and dirs ***
 file
 dir

@@ -24,7 +24,7 @@ var_dump($proc->registerPHPFunctions(array('strpos', 'ucwords')));
 var_dump($proc->registerPHPFunctions(array('strrev', 'array_key_exists')));
 var_dump($proc->registerPHPFunctions(array()));
 var_dump($proc->transformToXml($dom));
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

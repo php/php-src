@@ -24,7 +24,7 @@ MySQLPDOTest::skip();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

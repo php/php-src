@@ -55,7 +55,7 @@ var_dump($string_key_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : basic functionality ***
 -- Numeric array with default keys --
 bool(true)

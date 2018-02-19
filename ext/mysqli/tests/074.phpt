@@ -21,7 +21,7 @@ require_once('skipifconnectfailure.inc');
 	var_dump($result->fetch_row());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(1) {
   [0]=>

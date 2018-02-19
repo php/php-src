@@ -35,7 +35,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   echo "Data: $alldata";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl_setopt($ch, CURLOPT_WRITEFUNCTION, <closure>); ***
 Data: Hello World!
 Hello World!===DONE===

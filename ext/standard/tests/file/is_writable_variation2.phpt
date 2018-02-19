@@ -85,7 +85,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_writable_variation2/");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_writable(): usage variations ***
 
 *** Testing is_writable() on directory without write permission ***

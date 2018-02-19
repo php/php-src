@@ -107,7 +107,7 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECTF--
+--EXPECT--
 id = 1 (integer) / label = 'a' (string)
 id = 2 (integer) / label = 'b' (string)
 id = 3 (integer) / label = 'c' (string)

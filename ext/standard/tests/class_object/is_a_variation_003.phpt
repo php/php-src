@@ -17,7 +17,7 @@ var_dump(is_a(new caseSensitivityTestChild, 'caseSensitivityTEST'));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_a() : usage variations ***
 bool(true)
 Done

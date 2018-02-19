@@ -44,7 +44,7 @@ D::testFromC();
 echo "\n\n--> Reflect inherited private from subclass:\n";
 D::testFromD();
 ?>
---EXPECTF--
+--EXPECT--
 --> Reflect inherited private from global scope:
 Property D::$p does not exist
 

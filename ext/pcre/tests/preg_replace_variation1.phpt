@@ -13,5 +13,5 @@ $string = 'This is a string. It contains numbers (0-9) as well as parentheses an
 $new_string = preg_replace(array('/\b\w{1}s/', '/(\d{1})-(\d{1})/', '/[\(!\)]/'), array('test', '$1 to $2', '*'), $string);
 print $new_string;
 ?>
---EXPECTF--
+--EXPECT--
 This test a string. It contains numbers *0 to 9* test well test parentheses and some other things*

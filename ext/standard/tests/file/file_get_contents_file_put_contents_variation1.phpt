@@ -41,7 +41,7 @@ echo "--- Done ---";
 $file_path = dirname(__FILE__);
 unlink($file_path."/file_put_contents_variation1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing with variations in the arguments values ***
 string(100) "text text text text text text text text text text text text text text text text text text text text "
 string(100) "text text text text text text text text text text text text text text text text text text text text "

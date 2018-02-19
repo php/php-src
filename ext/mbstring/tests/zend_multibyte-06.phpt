@@ -11,5 +11,5 @@ mbstring.internal_encoding=CP932
 declare(encoding="UTF-8");
 var_dump(bin2hex("テスト"));
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "836583588367"

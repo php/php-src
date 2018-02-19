@@ -119,7 +119,7 @@ fclose( $file_handle );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_offset_get() : usage variation -  unexpected values to first argument $object***
 
 -- int 0 --

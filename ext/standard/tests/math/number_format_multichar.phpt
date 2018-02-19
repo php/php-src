@@ -33,7 +33,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
  number_format tests.....multiple character decimal point
 string(13) "1 234&#183;57"
 string(14) "-1 234&#183;57"

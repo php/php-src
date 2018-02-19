@@ -20,7 +20,7 @@ In $a->$b[Y]() and $a->X[Y]() both $a->$b[Y] and $a->X[Y] represent a global fun
   $c->functions[0](5, 6);
   $c->functions[1][2][3][4](7, 8);
 ?>
---EXPECTF--
+--EXPECT--
 Called global foo(1, 2)
 Called global foo(3, 4)
 Called global foo(5, 6)

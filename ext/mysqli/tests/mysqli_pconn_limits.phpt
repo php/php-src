@@ -89,7 +89,7 @@ mysqli.max_links=-1
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 Regular connection 1 - 'works..'
 Regular connection 2 - 'works...'
 Persistent connection 1 - 'works...'

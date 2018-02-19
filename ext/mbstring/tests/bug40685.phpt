@@ -14,7 +14,7 @@ var_dump(mb_decode_numericentity('&#x3d', $map, 'UTF-8'));
 var_dump(mb_decode_numericentity('&#61;', $map, 'UTF-8'));
 var_dump(mb_decode_numericentity('&#x3d;', $map, 'UTF-8'));
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "&"
 string(3) "&&&"
 string(2) "&#"

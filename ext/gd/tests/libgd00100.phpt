@@ -111,5 +111,5 @@ test_image_equals_file(__DIR__ . '/libgd00100.png', $im);
 
 imagedestroy($im);
 ?>
---EXPECTF--
+--EXPECT--
 The images are equal.

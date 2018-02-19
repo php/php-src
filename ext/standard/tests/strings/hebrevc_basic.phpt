@@ -17,7 +17,7 @@ var_dump(hebrevc($hebrew_text, 15));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing hebrevc() : basic functionality ***
 string(239) ".The hebrevc function converts logical Hebrew text to visual text<br />
 ) This function is similar to hebrev() with the difference that it converts newlines<br />

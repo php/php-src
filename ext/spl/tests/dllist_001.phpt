@@ -48,7 +48,7 @@ echo count($dll)."\n";
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Exception: Can't pop from an empty datastructure
 Exception: Can't shift from an empty datastructure
 2

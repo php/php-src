@@ -24,7 +24,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using char format ***
 string(1) "A"
 string(3) "A B"

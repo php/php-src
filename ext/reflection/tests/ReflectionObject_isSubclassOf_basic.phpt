@@ -37,7 +37,7 @@ foreach ($ros as $childName => $child) {
 	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 Is A a subclass of A? 
    - Using ReflectionClass object argument: bool(false)
    - Using ReflectionObject object argument: bool(false)

@@ -7,5 +7,5 @@ Testing getDocNamespaces() with invalid XML
 $xml = @new SimpleXMLElement("X",1);
 var_dump($xml->getDocNamespaces());
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

@@ -13,5 +13,5 @@ class DateTime extends \DateTime {
 
 echo "DONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 DONE

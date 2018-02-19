@@ -23,7 +23,7 @@ for($ASCII = 97; $ASCII <= 122; $ASCII++) {
 }
 echo "*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncasecmp() function: with alphabets ***
 -- Passing upper-case letters for 'str1' --
 int(0)

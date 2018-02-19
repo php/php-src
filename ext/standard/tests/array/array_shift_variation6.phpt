@@ -37,7 +37,7 @@ var_dump($copied_array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Variable is referenced array --

@@ -96,7 +96,7 @@ echo 'end  of stream4 is ', $ending4, PHP_EOL;
 
 --XFAIL--
 Fails due to Bug 60994
---EXPECTF--
+--EXPECT--
 
 Test 1:  j
 size of string1 is 1000006 bytes, 1000006 chars.

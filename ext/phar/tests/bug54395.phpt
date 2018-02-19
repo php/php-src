@@ -12,5 +12,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(25) "Mounting of 1 to 1 failed"

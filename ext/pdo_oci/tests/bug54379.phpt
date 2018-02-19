@@ -26,7 +26,7 @@ $stmt->execute();
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 $db->exec("DROP TABLE test");
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(1) {

@@ -25,7 +25,7 @@ var_dump( strrpos($quote_char_str, 'things', 0) );
 var_dump( strrpos($quote_char_str, "things", 20) );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with heredoc strings ***
 -- With heredoc string containing quote & slash chars --
 int(88)

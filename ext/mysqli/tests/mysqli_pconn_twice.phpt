@@ -65,7 +65,7 @@ mysqli.max_links=-1
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["it_works"]=>
   string(2) "ok"

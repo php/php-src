@@ -16,6 +16,6 @@ date.timezone=
           from the multiple names like Europe/Berlin or Europe/Paris . For this reason the test is
           parametrized so there is no hardcoded timezone data.*/
 ?>
---EXPECTF--
+--EXPECT--
 UTC
 UTC

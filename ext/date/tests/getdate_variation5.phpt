@@ -36,7 +36,7 @@ foreach($inputs as $timezone) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing getdate() : usage variation ***
 
 --Pacific/Samoa--

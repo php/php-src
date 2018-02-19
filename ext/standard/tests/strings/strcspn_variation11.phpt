@@ -77,7 +77,7 @@ foreach($strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different start and default len values ***
 
 -- Iteration 1 --

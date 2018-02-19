@@ -12,7 +12,7 @@ var_dump($db);
 var_dump($db->changes());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 object(SQLite3)#1 (0) {
 }
 int(0)

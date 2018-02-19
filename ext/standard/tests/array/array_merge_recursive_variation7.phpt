@@ -40,7 +40,7 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : array with reference variables for $arr1 argument ***
 -- With default argument --
 array(6) {

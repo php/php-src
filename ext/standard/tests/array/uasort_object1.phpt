@@ -92,7 +92,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : object functionality ***
 bool(true)
 array(4) {

@@ -9,7 +9,7 @@ foreach ($coords as [&$x, $y]) {
 }
 var_dump($coords);
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(2) {

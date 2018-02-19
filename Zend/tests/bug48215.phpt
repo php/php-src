@@ -28,7 +28,7 @@ $b = new B();
 $b->A();
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 B::__construct
 A::__construct
 B::A

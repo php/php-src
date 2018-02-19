@@ -54,7 +54,7 @@ echo "-- Array after call to usort() --\n";
 var_dump($array_args[5]);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Pass usort() a two-dimensional array --

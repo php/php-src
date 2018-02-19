@@ -39,7 +39,7 @@ foreach($values as $value) {
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing floor() : basic functionality ***
 
 -- floor 0 --

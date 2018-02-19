@@ -24,6 +24,6 @@ var_dump($bytes);
 echo file_get_contents($filename);
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 int(126)
 <html><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8"><title>This is the title</title></head></html>

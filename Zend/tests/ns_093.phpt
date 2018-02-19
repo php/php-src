@@ -22,6 +22,6 @@ use Foo\Bar\
 echo "\nDone\n";
 
 
---EXPECTF--
+--EXPECT--
 
 Done

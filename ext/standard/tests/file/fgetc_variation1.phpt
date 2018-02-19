@@ -46,7 +46,7 @@ echo "Done\n";
 <?php
 unlink( dirname(__FILE__)."/fgetc_variation1.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with file whose file pointer is pointing to EOF --
 -- File opened in mode : r --

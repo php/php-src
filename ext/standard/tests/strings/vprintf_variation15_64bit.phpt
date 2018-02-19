@@ -50,7 +50,7 @@ foreach($formats as $format) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --

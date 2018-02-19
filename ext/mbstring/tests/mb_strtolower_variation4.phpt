@@ -39,7 +39,7 @@ foreach ($uppers as $lang => $sourcestring) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_strtolower() :  usage variations ***
 
 -- Basic Latin --

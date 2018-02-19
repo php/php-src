@@ -61,7 +61,7 @@ closedir();
 $dir_path = dirname(__FILE__) . "/readdir_variation6";
 rmdir($dir_path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 
 -- Reading Directory Contents with Previous Handle --

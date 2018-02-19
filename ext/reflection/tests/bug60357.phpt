@@ -6,5 +6,5 @@ function foo( array $x = array( 'a', 'b' ) ) {}
 $r = new ReflectionParameter( 'foo', 0 );
 echo $r->__toString();
 ?>
---EXPECTF--
+--EXPECT--
 Parameter #0 [ <optional> array $x = Array ]

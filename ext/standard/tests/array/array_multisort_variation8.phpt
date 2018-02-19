@@ -43,7 +43,7 @@ var_dump($inputs);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : usage variation  - test sort order of all types***
 bool(true)
 array(10) {

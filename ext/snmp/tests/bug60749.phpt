@@ -24,5 +24,5 @@ if (strcmp($info["hostname"], "$ip:$port") !== 0) {
 }
 var_dump($session->close());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

@@ -43,7 +43,7 @@ include $pname . '/b.php';
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 brand new!
 bool(true)

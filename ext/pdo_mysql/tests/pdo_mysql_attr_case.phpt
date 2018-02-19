@@ -89,7 +89,7 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 string(15) "PDO::CASE_LOWER"
 array(2) {
   [0]=>

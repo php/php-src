@@ -188,7 +188,7 @@ $s = oci_parse($c, 'drop table lob_null_tab');
 echo "Done\n";
 
 ?>
---EXPECTF-- 
+--EXPECT-- 
 Temporary CLOB: NULL
 Temporary CLOB: ''
 Temporary CLOB: text

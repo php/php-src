@@ -73,7 +73,7 @@ bug_44707($db);
 
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Native Prepared Statements
 bool(false)
 bool(false)

@@ -33,7 +33,7 @@ var_dump($headers2['Author']);
 
 ?>
 Done
---EXPECTF--
+--EXPECT--
 Test
 bool(true)
 bool(true)

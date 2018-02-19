@@ -22,7 +22,7 @@ var_dump(get_object_vars($oldFoo));
 
 $newFoo->bing($oldFoo);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(4) "bing"

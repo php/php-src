@@ -21,7 +21,7 @@ function a ($field_type, $allowed_values) {
 
 var_dump(a("list_string", ["xxx"]));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["allowed_values"]=>
   array(1) {

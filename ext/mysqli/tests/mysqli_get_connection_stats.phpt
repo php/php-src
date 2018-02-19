@@ -83,5 +83,5 @@ if (!function_exists('mysqli_get_connection_stats')) {
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

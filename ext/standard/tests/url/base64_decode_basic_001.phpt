@@ -16,7 +16,7 @@ var_dump(bin2hex(base64_decode($allbase64, true)));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Decode an input string containing the whole base64 alphabet:
 string(98) "00108310518720928b30d38f41149351559761969b71d79f8218a39259a7a29aabb2dbafc31cb3d35db7e39ebbf3dfbf55"
 string(98) "00108310518720928b30d38f41149351559761969b71d79f8218a39259a7a29aabb2dbafc31cb3d35db7e39ebbf3dfbf55"

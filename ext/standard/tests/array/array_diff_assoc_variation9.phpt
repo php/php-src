@@ -37,7 +37,7 @@ var_dump(array_diff_assoc($array1, $array2['sub_arraya']));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : usage variations ***
 -- Compare two 2-D arrays --
 array(2) {

@@ -26,7 +26,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_encode() : variation ***
 bool(true)
 string(24) "A2Zvb2k6MTIzNDU2Nzg5MDs="

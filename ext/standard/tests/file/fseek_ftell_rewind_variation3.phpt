@@ -60,7 +60,7 @@ foreach($file_content_types as $file_content_type){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : whence = SEEK_SET & all r and a modes ***
 *** Testing fseek() with whence = SEEK_SET ***
 

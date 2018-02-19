@@ -66,5 +66,5 @@ mysqli_chararcter_set_name(), mysql_client_encoding() [alias]
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

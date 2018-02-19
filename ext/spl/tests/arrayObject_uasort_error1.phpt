@@ -24,7 +24,7 @@ try {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Function expects exactly one argument
 Function expects exactly one argument
 ===DONE===

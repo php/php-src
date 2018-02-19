@@ -13,7 +13,7 @@ var_dump(json_encode($a));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(0) {

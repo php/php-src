@@ -61,7 +61,7 @@ foreach($arrays as $array) {
 		
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing in_array() with different needle values ***
 -- Iteration 1 --
 bool(false)

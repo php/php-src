@@ -28,5 +28,5 @@ $inflated .= inflate_add($resource, "", ZLIB_FINISH);
 assert($inflated === $uncompressed);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

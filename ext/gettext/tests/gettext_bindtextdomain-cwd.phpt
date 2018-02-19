@@ -19,7 +19,7 @@ bindtextdomain('messages', './locale');
 var_dump(gettext('Basic test'));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "Basic test"
 string(12) "A basic test"
 --CREDITS--

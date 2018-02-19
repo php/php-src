@@ -23,7 +23,7 @@ var_dump($ao1->asort());
 var_dump($ao1, $c);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::asort() : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {

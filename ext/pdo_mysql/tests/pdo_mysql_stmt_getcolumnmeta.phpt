@@ -309,6 +309,6 @@ try {
 $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Testing native PS...
 done!

@@ -59,7 +59,7 @@ foreach ($codes as $key => $code) {
 
 echo "\nDone\n";
 ?>
---EXPECTF--
+--EXPECT--
 --------------
 Snippet no. 1:
 --------------

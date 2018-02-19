@@ -44,7 +44,7 @@ echo "Running bug48182\n";
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
---EXPECTF--
+--EXPECT--
 Running bug48182
 Sending bug48182
 Sending data over to SSL server in async mode with contents like Hello World

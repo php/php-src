@@ -54,7 +54,7 @@ var_dump(session_id());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_id() : error functionality ***
 string(0) ""
 string(0) ""

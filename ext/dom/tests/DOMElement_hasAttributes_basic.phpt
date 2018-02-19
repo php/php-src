@@ -35,7 +35,7 @@ var_dump($element->hasAttributes());
 
 
 ?>
---EXPECTF--
+--EXPECT--
 Verify that we have a DOMElement object:
 DOMElement
 

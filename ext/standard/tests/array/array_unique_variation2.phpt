@@ -80,7 +80,7 @@ foreach($inputs as $input) {
   
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : Passing different arrays to $input argument ***
 -- Iteration 1 --
 array(2) {

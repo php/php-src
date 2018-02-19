@@ -28,7 +28,7 @@ var_dump($rd->hasConstant("myConst"));
 echo "Check absent constant: ";
 var_dump($rd->hasConstant("doesntExist"));
 ?>
---EXPECTF--
+--EXPECT--
 Check existing constant: bool(true)
 Check existing constant, different case: bool(false)
 Check absent constant: bool(false)

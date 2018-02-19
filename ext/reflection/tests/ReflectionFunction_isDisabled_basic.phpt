@@ -10,5 +10,5 @@ disable_functions=is_file
 $rc = new ReflectionFunction('is_file');
 var_dump($rc->isDisabled());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

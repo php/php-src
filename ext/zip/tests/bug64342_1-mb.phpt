@@ -29,7 +29,7 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 }
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 failed
 0 bar
 1 foobar/

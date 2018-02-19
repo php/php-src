@@ -16,7 +16,7 @@ preg_match_all($pattern, $message, $match, PREG_OFFSET_CAPTURE);
 var_dump($match);
 
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(2) {
