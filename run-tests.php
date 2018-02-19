@@ -1305,6 +1305,20 @@ TEST $file
 				$borked    = true;
 			}
 
+			// check for unknown sections
+			if (!in_array($section, array(
+				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
+				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'GET', 'COOKIE', 'ARGS', 'REQUEST', 'HEADERS',
+				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
+				'INI', 'ENV', 'EXTENSIONS',
+				'SKIPIF', 'XFAIL', 'CLEAN',
+				'CREDITS', 'DESCRIPTION',
+			))) {
+				$bork_info = 'Unknown section "' . $section . '"';
+				$borked = true;
+			}
+
 			$section_text[$section] = '';
 			$secfile = $section == 'FILE' || $section == 'FILEEOF' || $section == 'FILE_EXTERNAL';
 			$secdone = false;
