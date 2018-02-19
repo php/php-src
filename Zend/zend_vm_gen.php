@@ -1654,7 +1654,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			out($f,"\t\t\t\topline = orig_opline;\n");
 			out($f,"\t\t\t\treturn;\n");
 			out($f,"\t\t\tHYBRID_DEFAULT:\n");
-			out($f,"\t\t\t\tzend_error_noreturn(E_ERROR, \"Invalid opcode %d/%d/%d.\", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);\n");
+			out($f,"\t\t\t\tZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
 			out($f,"\t\t\t\tHYBRID_BREAK(); /* Never reached */\n");
 			break;
 	}

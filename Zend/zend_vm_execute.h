@@ -62259,7 +62259,7 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 				opline = orig_opline;
 				return;
 			HYBRID_DEFAULT:
-				zend_error_noreturn(E_ERROR, "Invalid opcode %d/%d/%d.", OPLINE->opcode, OPLINE->op1_type, OPLINE->op2_type);
+				ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK(); /* Never reached */
 #else
 #ifdef ZEND_VM_FP_GLOBAL_REG
