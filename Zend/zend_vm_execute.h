@@ -336,10 +336,10 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 #ifndef VM_TRACE
 # define VM_TRACE(op)
 #endif
-#ifndef VM_TRACE_START()
+#ifndef VM_TRACE_START
 # define VM_TRACE_START()
 #endif
-#ifndef VM_TRACE_END()
+#ifndef VM_TRACE_END
 # define VM_TRACE_END()
 #endif
 #if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)

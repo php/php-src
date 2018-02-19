@@ -1710,10 +1710,10 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#ifndef VM_TRACE\n");
 					out($f,"# define VM_TRACE(op)\n");
 					out($f,"#endif\n");
-					out($f,"#ifndef VM_TRACE_START()\n");
+					out($f,"#ifndef VM_TRACE_START\n");
 					out($f,"# define VM_TRACE_START()\n");
 					out($f,"#endif\n");
-					out($f,"#ifndef VM_TRACE_END()\n");
+					out($f,"#ifndef VM_TRACE_END\n");
 					out($f,"# define VM_TRACE_END()\n");
 					out($f,"#endif\n");
 					switch ($kind) {
