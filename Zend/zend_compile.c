@@ -6094,12 +6094,12 @@ void zend_compile_prop_decl(zend_ast *ast) /* {{{ */
 		}
 
 		if (flags & ZEND_ACC_IMMUTABLE) {
-			if (Z_TYPE_P(value_zv)) {
+			if (Z_TYPE(value_zv)) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Can not assign array to immutable property %s",
 					ZSTR_VAL(name));
 			}
 
-			if (Z_TYPE_P(value_zv) == IS_RESOURCE) {
+			if (Z_TYPE(value_zv) == IS_RESOURCE) {
 				zend_error_noreturn(E_COMPILE_ERROR, "Can not assign resource to immutable property %s",
 					ZSTR_VAL(name));
 			}
