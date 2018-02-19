@@ -692,7 +692,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 	zobj = Z_OBJ_P(object);
 
 	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(zobj) && Z_OBJ_IS_LOCKED(zobj))) {
-		zend_throw_error(NULL, "Can not modify state of immutable object after constructor");
+		zend_throw_error(NULL, "Cannot modify state of immutable object after constructor");
 	}
 
 	ZVAL_UNDEF(&tmp_member);
@@ -731,8 +731,8 @@ found:
 							goto exit;
 						}
 				    if (Z_TYPE_P(value) == IS_ARRAY) {
-				      zend_throw_error(NULL, "Arrays are not supported in immutable structures", NULL);
-				      goto exit;
+							zend_throw_error(NULL, "Cannot assign array to immutable property: %s", ZSTR_VAL(Z_STR_P(member)));
+							goto exit;
 				    }
 					}
 				}
@@ -754,7 +754,7 @@ found:
 			goto exit;
 		}
 		if (Z_TYPE_P(value) == IS_ARRAY) {
-			zend_throw_error(NULL, "Arrays are not supported in immutable structures", NULL);
+			zend_throw_error(NULL, "Cannot assign array to immutable property: %s", ZSTR_VAL(Z_STR_P(member)));
 			goto exit;
 		}
 	}
