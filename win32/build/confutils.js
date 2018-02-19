@@ -1649,7 +1649,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
-						"--quiet --inconclusive --template=vs ";
+						"--quiet --inconclusive --template=vs -j 4 ";
 
 			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
 			if (!!cppcheck_build_dir) {
