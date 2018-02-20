@@ -36,7 +36,7 @@ extern zend_module_entry xml_module_entry;
 
 #ifdef HAVE_XML 
 
-#include "ext/xml/expat_compat.h"
+#include "expat_compat.h"
 
 #ifdef XML_UNICODE
 #error "UTF-16 Unicode support not implemented!"
