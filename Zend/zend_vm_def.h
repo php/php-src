@@ -1746,28 +1746,42 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
+ZEND_VM_HELPER(zend_use_tmp_in_write_context_helper, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot use temporary expression in write context");
+	FREE_UNFETCHED_OP2();
+	FREE_UNFETCHED_OP1();
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
+ZEND_VM_HELPER(zend_use_undef_in_read_context_helper, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot use [] for reading");
+	FREE_UNFETCHED_OP2();
+	FREE_UNFETCHED_OP1();
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(93, ZEND_FETCH_DIM_FUNC_ARG, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSED|NEXT|CV)
 {
 	USE_OPLINE
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			FREE_UNFETCHED_OP2();
-			FREE_UNFETCHED_OP1();
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_DISPATCH_TO_HELPER(zend_use_tmp_in_write_context_helper);
         }
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_DIM_W);
 	} else {
 		if (OP2_TYPE == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-			FREE_UNFETCHED_OP2();
-			FREE_UNFETCHED_OP1();
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_DISPATCH_TO_HELPER(zend_use_undef_in_read_context_helper);
 		}
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_DIM_R);
 	}
@@ -2040,12 +2054,7 @@ ZEND_VM_HANDLER(94, ZEND_FETCH_OBJ_FUNC_ARG, CONST|TMP|VAR|UNUSED|THIS|CV, CONST
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((OP1_TYPE & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			FREE_UNFETCHED_OP2();
-			FREE_UNFETCHED_OP1();
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_DISPATCH_TO_HELPER(zend_use_tmp_in_write_context_helper);
 		}
 
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_FETCH_OBJ_W);
