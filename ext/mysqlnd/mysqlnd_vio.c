@@ -517,6 +517,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 		zval cafile_zval;
 		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
+		zval_ptr_dtor(&cafile_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_capath) {

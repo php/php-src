@@ -19,6 +19,10 @@ PHP                                                                        NEWS
 - libxml2:
   . Fixed bug #75871 (use pkg-config where available). (pmmaga)
 
+- mysqlnd
+  . Fixed negotiation of MySQL authenticaton plugin. (Johannes)
+  . Fixed a memleak with SSL connections. (Johannes)
+
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
