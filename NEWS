@@ -44,6 +44,9 @@ PHP                                                                        NEWS
   . Fixed bug #75969 (Assertion failure in live range DCE due to block pass
     misoptimization). (Nikita)
 
+- OpenSSL:
+  . Fixed openssl_* arginfos. (carusogabriel)
+
 - SPL:
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
