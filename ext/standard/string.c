@@ -3939,31 +3939,15 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 	end = source + ZSTR_LEN(str);
 
 	if (ZSTR_LEN(str) > 15) {
-		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
-
-		if (UNEXPECTED(source != aligned)) {
-			do {
-				switch (*source) {
-					case '\0':
-					case '\'':
-					case '\"':
-					case '\\':
-						goto do_escape;
-					default:
-						source++;
-						break;
-				}
-			} while (source < aligned);
-		}
-
-		w128 = _mm_load_si128((__m128i *)slashchars);
-		for (;end - source > 15; source += 16) {
-			s128 = _mm_load_si128((__m128i *)source);
+		w128 = _mm_loadu_si128((__m128i *)slashchars);
+		do {
+			s128 = _mm_loadu_si128((__m128i *)source);
 			res = _mm_cvtsi128_si32(_mm_cmpestrm(w128, 4, s128, 16, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK));
 			if (res) {
 				goto do_escape;
 			}
-		}
+			source += 16;
+		} while ((end - source) > 15);
 	}
 
 	while (source < end) {
@@ -4014,34 +3998,12 @@ do_escape:
 		}
 		source += 16;
 	} else if (end - source > 15) {
-		char *aligned = (char*) ZEND_SLIDE_TO_ALIGNED16(source);
-
-		if (source != aligned) {
-			do {
-				switch (*source) {
-					case '\0':
-						*target++ = '\\';
-						*target++ = '0';
-						break;
-					case '\'':
-					case '\"':
-					case '\\':
-						*target++ = '\\';
-						/* break is missing *intentionally* */
-					default:
-						*target++ = *source;
-						break;
-				}
-				source++;
-			} while (source < aligned);
-		}
-
-		w128 = _mm_load_si128((__m128i *)slashchars);
+		w128 = _mm_loadu_si128((__m128i *)slashchars);
 	}
 
 	for (; end - source > 15; source += 16) {
 		int pos = 0;
-		s128 = _mm_load_si128((__m128i *)source);
+		s128 = _mm_loadu_si128((__m128i *)source);
 		res = _mm_cvtsi128_si32(_mm_cmpestrm(w128, 4, s128, 16, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK));
 		if (res) {
 			do {
