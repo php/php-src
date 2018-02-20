@@ -2004,12 +2004,14 @@ static const zend_object_iterator_funcs date_period_it_funcs = {
 
 zend_object_iterator *date_object_period_get_iterator(zend_class_entry *ce, zval *object, int by_ref) /* {{{ */
 {
-	date_period_it *iterator = emalloc(sizeof(date_period_it));
+	date_period_it *iterator;
 
 	if (by_ref) {
 		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
 		return NULL;
 	}
+
+	iterator = emalloc(sizeof(date_period_it));
 
 	zend_iterator_init((zend_object_iterator*)iterator);
 
