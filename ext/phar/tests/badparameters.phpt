@@ -145,13 +145,13 @@ echo $e->getMessage() . "\n";
 ?>
 ===DONE===
 --EXPECTF--
-Warning: Phar::mungServer() expects parameter 1 to be array, %string given in %sbadparameters.php on line %d
+Warning: Phar::mungServer() expects parameter 1 to be array, string given in %sbadparameters.php on line %d
 
 Warning: Phar::createDefaultStub() expects parameter 1 to be a valid path, array given in %sbadparameters.php on line %d
 
 Warning: Phar::loadPhar() expects parameter 1 to be a valid path, array given in %sbadparameters.php on line %d
 
-Warning: Phar::canCompress() expects parameter 1 to be int, %string given in %sbadparameters.php on line %d
+Warning: Phar::canCompress() expects parameter 1 to be int, string given in %sbadparameters.php on line %d
 
 Exception: Phar::__construct() expects parameter 1 to be a valid path, array given in %sbadparameters.php on line %d
 

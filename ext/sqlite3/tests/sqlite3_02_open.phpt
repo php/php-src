@@ -16,4 +16,4 @@ try {
 
 ?>
 --EXPECTF--
-%string|unicode%(60) "SQLite3::__construct() expects at least 1 parameter, 0 given"
+string(60) "SQLite3::__construct() expects at least 1 parameter, 0 given"

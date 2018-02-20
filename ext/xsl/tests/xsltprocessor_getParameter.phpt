@@ -13,7 +13,7 @@ $proc->importStylesheet($xsl);
 $proc->setParameter('', 'key', 'value');
 var_dump($proc->getParameter('', 'key'));
 --EXPECTF--
-%string|unicode%(5) "value"
+string(5) "value"
 --CREDITS--
 Christian Weiske, cweiske@php.net
 PHP Testfest Berlin 2009-05-09
