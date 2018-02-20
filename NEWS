@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018 PHP 7.0.28
+- mysqlnd
+  . Fixed negotiation of MySQL authenticaton plugin. (Johannes)
 
 04 Jan 2018 PHP 7.0.27
 
@@ -23,9 +25,6 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
-
-- myslqnd
-  . Fixed negotiaton of MySQL authenticaton plugin. (Johannes)
 
 - PCRE:
   . Fixed bug #74183 (preg_last_error not returning error code after error).
