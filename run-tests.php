@@ -2123,7 +2123,11 @@ COMMAND $cmd
 				@unlink($test_file);
 			}
 
-			if (!$leaked && !$failed_headers) {
+			// check if EXPECT isn't better
+			if (isset($section_test['EXPECTF']) && preg_match('/%a|%e|%i|%u|%b|%c|%d|%e|%f|%r|%s|%w|%x/i', $wanted) === 0) {
+				$warn = true;
+				$info = ' (warn: this test has an EXPECTF section which can be replaced with an EXPECT)';
+			} elseif (!$leaked && !$failed_headers) {
 				if (isset($section_text['XFAIL'] )) {
 					$warn = true;
 					$info = " (warn: XFAIL section but test passes)";
