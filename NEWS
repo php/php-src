@@ -24,6 +24,9 @@ PHP                                                                        NEWS
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
     (Dmitry)
 
+- myslqnd
+  . Fixed negotiaton of MySQL authenticaton plugin. (Johannes)
+
 - PCRE:
   . Fixed bug #74183 (preg_last_error not returning error code after error).
     (Andrew Nester)
