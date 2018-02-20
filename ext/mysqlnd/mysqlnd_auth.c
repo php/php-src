@@ -761,7 +761,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 
 
-	if (conn->protocol_frame_codec->data->ssl) {
+	if (conn->vio->data->ssl) {
 		DBG_INF("simple clear text under SSL");
 		/* clear text under SSL */
 		*auth_data_len = passwd_len;
