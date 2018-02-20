@@ -2019,6 +2019,125 @@ ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *di
 	}
 }
 
+static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable *ht, zval *offset EXECUTE_DATA_DC)
+{
+	zend_ulong hval;
+
+	if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		hval = zend_dval_to_lval(Z_DVAL_P(offset));
+num_idx:
+		return zend_hash_index_find(ht, hval);
+	} else if (Z_TYPE_P(offset) == IS_NULL) {
+str_idx:
+		return zend_hash_find_ex_ind(ht, ZSTR_EMPTY_ALLOC(), 1);
+	} else if (Z_TYPE_P(offset) == IS_FALSE) {
+		hval = 0;
+		goto num_idx;
+	} else if (Z_TYPE_P(offset) == IS_TRUE) {
+		hval = 1;
+		goto num_idx;
+	} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+		hval = Z_RES_HANDLE_P(offset);
+		goto num_idx;
+	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		goto str_idx;
+	} else {
+		zend_error(E_WARNING, "Illegal offset type in isset or empty");
+		return NULL;
+	}
+}
+
+static zend_never_inline int ZEND_FASTCALL zend_isset_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
+{
+	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		offset = &EG(uninitialized_zval);
+	}
+
+	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
+			return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
+		} else {
+			zend_error(E_NOTICE, "Trying to check element of non-array");
+			return 0;
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
+		zend_long lval;
+
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+str_offset:
+			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
+				lval += (zend_long)Z_STRLEN_P(container);
+			}
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
+				ZVAL_DEREF(offset);
+			/*}*/
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+				lval = zval_get_long(offset);
+				goto str_offset;
+			}
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+static zend_never_inline int ZEND_FASTCALL zend_isempty_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
+{
+	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		offset = &EG(uninitialized_zval);
+	}
+
+	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
+			return !Z_OBJ_HT_P(container)->has_dimension(container, offset, 1);
+		} else {
+			zend_error(E_NOTICE, "Trying to check element of non-array");
+			return 1;
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
+		zend_long lval;
+
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+str_offset:
+			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
+				lval += (zend_long)Z_STRLEN_P(container);
+			}
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				return (Z_STRVAL_P(container)[lval] == '0');
+			} else {
+				return 1;
+			}
+		} else {
+			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
+				ZVAL_DEREF(offset);
+			/*}*/
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+				lval = zval_get_long(offset);
+				goto str_offset;
+			}
+			return 1;
+		}
+	} else {
+		return 1;
+	}
+}
+
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type)
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
