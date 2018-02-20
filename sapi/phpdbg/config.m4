@@ -3,7 +3,7 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg         Build phpdbg], yes, yes)
+[  --enable-phpdbg         Build phpdbg], no, no)
 
 PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
 [  --enable-phpdbg-webhelper
