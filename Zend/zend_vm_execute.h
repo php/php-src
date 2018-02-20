@@ -22515,7 +22515,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -22938,7 +22938,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -23015,7 +23015,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -23277,7 +23277,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -23401,7 +23401,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -23525,7 +23525,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -23649,7 +23649,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -24834,7 +24834,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -25259,7 +25259,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -25337,7 +25337,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -25601,7 +25601,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -25725,7 +25725,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -25849,7 +25849,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -25973,7 +25973,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -28636,7 +28636,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -29059,7 +29059,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -29136,7 +29136,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -29398,7 +29398,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -29522,7 +29522,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -29646,7 +29646,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -29770,7 +29770,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -31194,7 +31194,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -31335,7 +31335,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -31412,7 +31412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -31768,7 +31768,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -31892,7 +31892,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -32016,7 +32016,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -32140,7 +32140,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_O
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -32952,7 +32952,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -33093,7 +33093,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -33171,7 +33171,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -33530,7 +33530,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -33654,7 +33654,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -33778,7 +33778,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -33902,7 +33902,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -35353,7 +35353,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -35494,7 +35494,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -35571,7 +35571,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -35927,7 +35927,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -36051,7 +36051,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -36175,7 +36175,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -36299,7 +36299,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -39412,7 +39412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -39835,7 +39835,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -39912,7 +39912,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -40546,7 +40546,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -40670,7 +40670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -40794,7 +40794,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -40918,7 +40918,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DA
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -43256,7 +43256,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -43681,7 +43681,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -43759,7 +43759,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -44271,7 +44271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -44395,7 +44395,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -44519,7 +44519,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -44643,7 +44643,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_D
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -48927,7 +48927,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_binary_assign_op_obj_helper_SP
 					goto assign_op_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -49350,7 +49350,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_pre_incdec_property_helper_SPE
 					goto pre_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -49427,7 +49427,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_post_incdec_property_helper_SP
 					goto post_incdec_object;
 				}
 			}
-			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+			if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 				break;
 			}
 		}
@@ -49935,7 +49935,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}
@@ -50059,7 +50059,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -50183,7 +50183,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 			zval_ptr_dtor_nogc(free_op_data);
 			goto exit_assign_obj;
 		}
@@ -50307,7 +50307,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_
 				goto assign_object;
 			}
 		}
-		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC))) {
+		if (UNEXPECTED(!make_real_object(object, property OPLINE_CC EXECUTE_DATA_CC))) {
 
 			goto exit_assign_obj;
 		}

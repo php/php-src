@@ -642,7 +642,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assign
 }
 
 /* this should modify object only if it's empty */
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC)
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_object *obj;
 
