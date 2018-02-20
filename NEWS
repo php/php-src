@@ -22,17 +22,6 @@ PHP                                                                        NEWS
 - libxml2:
   . Fixed bug #75871 (use pkg-config where available). (pmmaga)
 
-- PGSQL:
-  . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
-
-- Phar:
-  . Fixed bug #54289 (Phar::extractTo() does not accept specific directories to
-    be extracted). (bishop)
-  . Fixed bug #65414 (deal with leading slash while adding files correctly). 
-    (bishopb)
-  . Fixed bug #65414 (deal with leading slash when adding files correctly).
-    (bishopb)
-
 - ODBC:
   . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
 
@@ -46,6 +35,17 @@ PHP                                                                        NEWS
 
 - OpenSSL:
   . Fixed openssl_* arginfos. (carusogabriel)
+
+- PGSQL:
+  . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
+
+- Phar:
+  . Fixed bug #54289 (Phar::extractTo() does not accept specific directories to
+    be extracted). (bishop)
+  . Fixed bug #65414 (deal with leading slash while adding files correctly). 
+    (bishopb)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
 
 - SPL:
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
