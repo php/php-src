@@ -472,6 +472,30 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_undefined_function_helper_SPEC
 	HANDLE_EXCEPTION();
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot use temporary expression in write context");
+	FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+	FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var);
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot use [] for reading");
+	FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+	FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var);
+	ZVAL_UNDEF(EX_VAR(opline->result.var));
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zend_execute_data *old_execute_data;
@@ -4742,22 +4766,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CONST == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -4966,12 +4980,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -6850,22 +6859,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -7076,12 +7075,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -8671,22 +8665,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_UNUSED == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -10048,22 +10032,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CONST_
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CV == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -10272,12 +10246,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CONST & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -18864,22 +18833,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CO
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CONST == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -18892,12 +18851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CO
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -19301,22 +19255,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_TM
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -19329,12 +19273,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_TM
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -19875,22 +19814,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_UN
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_UNUSED == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -20304,22 +20233,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_TMP_CV
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CV == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -20332,12 +20251,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_TMP_CV
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_TMP_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -23103,22 +23017,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CO
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CONST == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -23193,12 +23097,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CO
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -25410,22 +25309,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_TM
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -25500,12 +25389,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_TM
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -27527,22 +27411,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_UN
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_VAR_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_UNUSED == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -29176,22 +29050,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_VAR_CV
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CV == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -29266,12 +29130,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_VAR_CV
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_VAR & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -31644,12 +31503,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -33406,12 +33260,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -35803,12 +35652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_UNUSED & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -40112,22 +39956,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CON
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CONST == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -40398,12 +40232,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CON
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -43818,22 +43647,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_TMP
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if ((IS_TMP_VAR|IS_VAR) == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -44106,12 +43925,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMP
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
@@ -46992,22 +46806,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_UNU
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_CV_UNUSED_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_UNUSED == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -49453,22 +49257,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_DIM_FUNC_ARG_SPEC_CV_CV_
 
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
         if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-            zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
         }
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	} else {
 		if (IS_CV == IS_UNUSED) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use [] for reading");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_undef_in_read_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_DIM_R_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
@@ -49739,12 +49533,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
 		/* Behave like FETCH_OBJ_W */
 		if ((IS_CV & (IS_CONST|IS_TMP_VAR))) {
-			SAVE_OPLINE();
-			zend_throw_error(NULL, "Cannot use temporary expression in write context");
-
-
-			ZVAL_UNDEF(EX_VAR(opline->result.var));
-			HANDLE_EXCEPTION();
+			ZEND_VM_TAIL_CALL(zend_use_tmp_in_write_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 		}
 
 		ZEND_VM_TAIL_CALL(ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
