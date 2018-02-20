@@ -79,11 +79,15 @@ mysqlnd_run_authentication(
 		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
 		if (!auth_plugin) {
-			php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
-			goto end;
+			if (first_call) {
+				mnd_pefree(requested_protocol, FALSE);
+				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+			} else {
+				php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
+				goto end;
+			}
 		}
-		DBG_INF("plugin found");
 
 		{
 			zend_uchar * switch_to_auth_protocol_data = NULL;
@@ -108,10 +112,13 @@ mysqlnd_run_authentication(
 
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
-			scrambled_data =
-				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, session_options,
-												   conn->protocol_frame_codec->data, mysql_flags);
+			if (auth_plugin) {
+				scrambled_data =
+					auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
+													   plugin_data, plugin_data_len, session_options,
+													   conn->protocol_frame_codec->data, mysql_flags);
+			}
+
 			if (conn->error_info->error_no) {
 				goto end;
 			}
