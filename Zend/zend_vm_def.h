@@ -5084,7 +5084,7 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED|CONST_FETCH, CONST, CACHE_SLOT)
 
 	if (EXPECTED(CACHED_PTR(opline->extended_value))) {
 		c = CACHED_PTR(opline->extended_value);
-	} else if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num)) == NULL) {
+	} else if (UNEXPECTED((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num)) == NULL)) {
 		SAVE_OPLINE();
 
 		if ((opline->op1.num & IS_CONSTANT_UNQUALIFIED) != 0) {
