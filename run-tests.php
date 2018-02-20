@@ -783,7 +783,7 @@ HELP;
 				} else if (preg_match("/\*$/", $argv[$i])) {
 					$pattern_match = glob($argv[$i] . '.phpt');
 				} else {
-					die('Cannot found test file "' . $argv[$i] . '".' . PHP_EOL);
+					die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
 				}
 
 				if (is_array($pattern_match)) {
@@ -795,7 +795,7 @@ HELP;
 			} else if (preg_match("/\.phpt$/", $testfile)) {
 				$test_files[] = $testfile;
 			} else {
-				die('Cannot found test file "' . $argv[$i] . '".' . PHP_EOL);
+				die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
 			}
 		}
 	}
