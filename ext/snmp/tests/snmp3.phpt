@@ -76,50 +76,50 @@ var_dump((snmp3_get($hostname, $rwuser, 'authPriv', 'MD5', $auth_pass, 'AES', $p
 --EXPECTF--
 Working version
 GET single: noAuthNoPriv
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET single: MD5
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET single: SHA
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET single: MD5/AES
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET single: MD5/DES
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET single: MD5/AES128
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 GET multiple
 array(2) {
   ["%s"]=>
-  %string|unicode%(%d) "%s"
+  string(%d) "%s"
   ["%s"]=>
-  %string|unicode%(%d) "%s"
+  string(%d) "%s"
 }
 GETNEXT single
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 WALK single on single OID
-%string|unicode%(5) "array"
+string(5) "array"
 int(1)
 array(1) {
   [0]=>
-  %string|unicode%(%d) "%s"
+  string(%d) "%s"
 }
 REALWALK single on single OID
-%string|unicode%(5) "array"
+string(5) "array"
 int(1)
 array(1) {
   ["%s"]=>
-  %string|unicode%(%d) "%s"
+  string(%d) "%s"
 }
 WALK multiple on single OID
-%string|unicode%(5) "array"
+string(5) "array"
 int(%d)
 int(0)
-%string|unicode%(%d) "%s"
+string(%d) "%s"
 REALWALK multiple on single OID
-%string|unicode%(5) "array"
+string(5) "array"
 int(%d)
-%string|unicode%(%d) "%s"
-%string|unicode%(%d) "%s"
+string(%d) "%s"
+string(%d) "%s"
 SET single OID
 bool(true)
 bool(true)

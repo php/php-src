@@ -18,8 +18,8 @@ object(SplDoublyLinkedList)#1 (2) {
   ["dllist":"SplDoublyLinkedList":private]=>
   array(2) {
     [0]=>
-    %string|unicode%(2) "oh"
+    string(2) "oh"
     [1]=>
-    %string|unicode%(3) "hai"
+    string(3) "hai"
   }
 }

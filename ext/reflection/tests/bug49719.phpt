@@ -40,5 +40,5 @@ var_dump($prop->getValue(new b2));
 bool(false)
 bool(false)
 bool(false)
-%string|unicode%(25) "Property a does not exist"
+string(25) "Property a does not exist"
 int(2)
