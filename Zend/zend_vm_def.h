@@ -2389,18 +2389,12 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	} else if (OP2_TYPE == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr, OP2_TYPE OPLINE_CC EXECUTE_DATA_CC))) {
 			FREE_OP2_VAR_PTR();
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-
-		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, OP2_TYPE);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
-		}
-		/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	} else {
 
@@ -7215,6 +7209,18 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
+ZEND_VM_HELPER(zend_yield_in_closed_generator_helper, ANY, ANY)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
+	FREE_UNFETCHED_OP2();
+	FREE_UNFETCHED_OP1();
+	UNDEF_RESULT();
+	HANDLE_EXCEPTION();
+}
+
 ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSED, SRC)
 {
 	USE_OPLINE
@@ -7223,11 +7229,7 @@ ZEND_VM_HANDLER(160, ZEND_YIELD, CONST|TMP|VAR|CV|UNUSED, CONST|TMP|VAR|CV|UNUSE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		FREE_UNFETCHED_OP2();
-		FREE_UNFETCHED_OP1();
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_DISPATCH_TO_HELPER(zend_yield_in_closed_generator_helper);
 	}
 
 	/* Destroy the previously yielded value */

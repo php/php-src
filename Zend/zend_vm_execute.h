@@ -1843,6 +1843,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_USER_OPCODE_SPEC_HANDLER(ZEND_
 	}
 }
 
+static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+
+	SAVE_OPLINE();
+	zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
+	FREE_UNFETCHED_OP(opline->op2_type, opline->op2.var);
+	FREE_UNFETCHED_OP(opline->op1_type, opline->op1.var);
+	UNDEF_RESULT();
+	HANDLE_EXCEPTION();
+}
+
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_DISCARD_EXCEPTION_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -5930,11 +5942,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CONST_HANDLER
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -7843,11 +7851,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_TMP_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -8240,11 +8244,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_VAR_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -9289,11 +9289,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_UNUSED_HANDLE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -10963,11 +10959,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CONST_CV_HANDLER(ZE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -19076,11 +19068,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CONST_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -19534,11 +19522,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_TMP_HANDLER(ZEN
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -19675,11 +19659,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_VAR_HANDLER(ZEN
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -19998,11 +19978,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_UNUSED_HANDLER(
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -20476,11 +20452,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_TMP_CV_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -24515,11 +24487,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CONST_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -26775,11 +26743,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_TMP_HANDLER(ZEN
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -27026,18 +26990,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr, IS_VAR OPLINE_CC EXECUTE_DATA_CC))) {
 			if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-
-		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_VAR);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
-		}
-		/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	} else {
 
@@ -27067,11 +27025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_VAR_HANDLER(ZEN
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -28171,11 +28125,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_UNUSED_HANDLER(
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -30113,18 +30063,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
 
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-
-		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_CV);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
-		}
-		/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	} else {
 
@@ -30534,11 +30478,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_VAR_CV_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-		zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -32581,11 +32521,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CONST_HANDLE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -34234,11 +34170,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_TMP_HANDLER(
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -34375,11 +34307,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_VAR_HANDLER(
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -34820,11 +34748,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_UNUSED_HANDL
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -36622,11 +36546,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_UNUSED_CV_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -41979,11 +41899,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CONST_HANDLER(ZE
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -45582,11 +45498,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_TMP_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -45958,18 +45870,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr, IS_VAR OPLINE_CC EXECUTE_DATA_CC))) {
 			if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-
-		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_VAR);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
-		}
-		/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	} else {
 
@@ -46177,11 +46083,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_VAR_HANDLER(ZEND
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-		zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -47637,11 +47539,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_UNUSED_HANDLER(Z
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */
@@ -50516,18 +50414,12 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(variable_ptr, value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
 
 			UNDEF_RESULT();
 			HANDLE_EXCEPTION();
 		}
-
-		value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, IS_CV);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
-		}
-		/* zend_assign_to_variable() always takes care of op2, never free it! */
 
 	} else {
 
@@ -51157,11 +51049,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_SPEC_CV_CV_HANDLER(ZEND_
 
 	SAVE_OPLINE();
 	if (UNEXPECTED(generator->flags & ZEND_GENERATOR_FORCED_CLOSE)) {
-		zend_throw_error(NULL, "Cannot yield from finally in a force-closed generator");
-
-
-		UNDEF_RESULT();
-		HANDLE_EXCEPTION();
+		ZEND_VM_TAIL_CALL(zend_yield_in_closed_generator_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	/* Destroy the previously yielded value */

@@ -633,6 +633,21 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	ZVAL_REF(variable_ptr, ref);
 }
 
+static zend_never_inline int zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_uchar value_type OPLINE_DC EXECUTE_DATA_DC)
+{
+	zend_error(E_NOTICE, "Only variables should be assigned by reference");
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return 0;
+	}
+
+	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, value_type);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
+	}
+	return 1;
+}
+
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property)
 {
 	zend_string *tmp_property_name;
