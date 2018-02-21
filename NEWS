@@ -13,6 +13,9 @@ PHP                                                                        NEWS
   . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
     (jhdxr)
 
+- FTP:
+  . Fixed ftp_pasv arginfo. (carusogabriel)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
@@ -47,6 +50,7 @@ PHP                                                                        NEWS
   . Fixed bug #75961 (Strange references behavior). (Laruence)
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
+  . Fixed some arginfos. (carusogabriel)
 
 01 Feb 2018, PHP 7.1.14
 
