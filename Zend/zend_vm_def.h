@@ -172,7 +172,7 @@ ZEND_VM_HANDLER(4, ZEND_DIV, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_mod_by_zero_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_mod_by_zero_helper, ANY, ANY)
 {
 	USE_OPLINE
 
@@ -758,7 +758,7 @@ ZEND_VM_HANDLER(13, ZEND_BOOL_NOT, CONST|TMPVAR|CV, ANY)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_this_not_in_object_context_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_this_not_in_object_context_helper, ANY, ANY)
 {
 	USE_OPLINE
 
@@ -772,7 +772,7 @@ ZEND_VM_HELPER(zend_this_not_in_object_context_helper, ANY, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_abstract_method_helper, ANY, ANY, zend_function *fbc)
+ZEND_VM_COLD_HELPER(zend_abstract_method_helper, ANY, ANY, zend_function *fbc)
 {
 	USE_OPLINE
 
@@ -782,7 +782,7 @@ ZEND_VM_HELPER(zend_abstract_method_helper, ANY, ANY, zend_function *fbc)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_undefined_function_helper, ANY, ANY, zval *function_name)
+ZEND_VM_COLD_HELPER(zend_undefined_function_helper, ANY, ANY, zval *function_name)
 {
 	SAVE_OPLINE();
 	zend_throw_error(NULL, "Call to undefined function %s()", Z_STRVAL_P(function_name));
@@ -1746,7 +1746,7 @@ ZEND_VM_HANDLER(90, ZEND_FETCH_DIM_IS, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_use_tmp_in_write_context_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_use_tmp_in_write_context_helper, ANY, ANY)
 {
 	USE_OPLINE
 
@@ -1758,7 +1758,7 @@ ZEND_VM_HELPER(zend_use_tmp_in_write_context_helper, ANY, ANY)
 	HANDLE_EXCEPTION();
 }
 
-ZEND_VM_HELPER(zend_use_undef_in_read_context_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_use_undef_in_read_context_helper, ANY, ANY)
 {
 	USE_OPLINE
 
@@ -4196,7 +4196,7 @@ ZEND_VM_HOT_HANDLER(65, ZEND_SEND_VAL, CONST|TMPVAR, NUM)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_cannot_pass_by_ref_helper, ANY, ANY)
 {
 	USE_OPLINE
 	zval *arg;
@@ -7209,7 +7209,7 @@ ZEND_VM_HANDLER(156, ZEND_SEPARATE, VAR, UNUSED)
 	ZEND_VM_NEXT_OPCODE();
 }
 
-ZEND_VM_HELPER(zend_yield_in_closed_generator_helper, ANY, ANY)
+ZEND_VM_COLD_HELPER(zend_yield_in_closed_generator_helper, ANY, ANY)
 {
 	USE_OPLINE
 

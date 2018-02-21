@@ -1083,7 +1083,7 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 }
 
 // Generates helper
-function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $extra_spec = null) {
+function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno, $inline, $cold, $extra_spec = null) {
 	global $definition_file, $prefix;
 
 	if ($kind == ZEND_VM_KIND_HYBRID) {
@@ -1104,18 +1104,22 @@ function gen_helper($f, $spec, $kind, $name, $op1, $op2, $param, $code, $lineno,
 	switch($kind) {
 		case ZEND_VM_KIND_CALL:
 			if ($inline) {
-				$zend_always_inline = " zend_always_inline";
+				$zend_attributes = " zend_always_inline";
 				$zend_fastcall = "";
 			} else {
-				$zend_always_inline = "";
+				if ($cold) {
+					$zend_attributes = " zend_never_inline ZEND_COLD";
+				} else {
+					$zend_attributes = "";
+				}
 				$zend_fastcall = " ZEND_FASTCALL";
 			}
 			if ($param == null) {
 			  // Helper without parameters
-				out($f, "static$zend_always_inline ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name(ZEND_OPCODE_HANDLER_ARGS)\n");
+				out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name(ZEND_OPCODE_HANDLER_ARGS)\n");
 			} else {
 			  // Helper with parameter
-				out($f, "static$zend_always_inline ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name($param ZEND_OPCODE_HANDLER_ARGS_DC)\n");
+				out($f, "static$zend_attributes ZEND_OPCODE_HANDLER_RET$zend_fastcall $spec_name($param ZEND_OPCODE_HANDLER_ARGS_DC)\n");
 			}
 			break;
 		case ZEND_VM_KIND_SWITCH:
@@ -1588,7 +1592,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 							if (isset($helpers[$num]["op1"][$op1]) &&
 							    isset($helpers[$num]["op2"][$op2])) {
 							  // Generate helper code
-								gen_helper($f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $extra_spec);
+								gen_helper($f, 1, $kind, $num, $op1, $op2, $helpers[$num]["param"], $helpers[$num]["code"], $lineno, $helpers[$num]["inline"], $helpers[$num]["cold"], $extra_spec);
 							}
 						}
 					} else {
@@ -2285,15 +2289,18 @@ function gen_vm($def, $skel) {
 			$handler = $code;
 			$helper = null;
 			$list[$lineno] = array("handler"=>$handler);
-		} else if (strpos($line,"ZEND_VM_HELPER(") === 0 || strpos($line,"ZEND_VM_INLINE_HELPER(") === 0) {
+		} else if (strpos($line,"ZEND_VM_HELPER(") === 0 ||
+		           strpos($line,"ZEND_VM_INLINE_HELPER(") === 0 ||
+		           strpos($line,"ZEND_VM_COLD_HELPER(") === 0) {
 		  // Parsing helper's definition
 			if (preg_match(
-					"/^ZEND_VM(_INLINE)?_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?(?:,\s*([^)]*)\s*)?\)/",
+					"/^ZEND_VM(_INLINE|_COLD)?_HELPER\(\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(?:,\s*SPEC\(([A-Z_|=,]+)\)\s*)?(?:,\s*([^)]*)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HELPER definition.\n");
 			}
-			$inline = !empty($m[1]);
+			$inline = !empty($m[1]) && $m[1] === "_INLINE";
+			$cold   = !empty($m[1]) && $m[1] === "_COLD";
 			$helper = $m[2];
 			$op1    = parse_operand_spec($def, $lineno, $m[3], $flags1);
 			$op2    = parse_operand_spec($def, $lineno, $m[4], $flags2);
@@ -2310,7 +2317,7 @@ function gen_vm($def, $skel) {
 				}
 			}
 
-			$helpers[$helper] = array("op1"=>$op1,"op2"=>$op2,"param"=>$param,"code"=>"","inline"=>$inline);
+			$helpers[$helper] = array("op1"=>$op1,"op2"=>$op2,"param"=>$param,"code"=>"","inline"=>$inline,"cold"=>$cold);
 
 			if (!empty($m[5])) {
 				$helpers[$helper]["spec"] = parse_spec_rules($def, $lineno, $m[5]);
