@@ -23143,10 +23143,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -23267,10 +23264,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -23391,10 +23385,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -23515,10 +23506,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -25431,10 +25419,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -25555,10 +25540,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -25679,10 +25661,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -25803,10 +25782,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -29152,10 +29128,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -29276,10 +29249,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -29400,10 +29370,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -29524,10 +29491,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -31491,10 +31455,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -31615,10 +31576,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -31739,10 +31697,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -31863,10 +31818,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -33244,10 +33196,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -33368,10 +33317,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -33492,10 +33438,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -33616,10 +33559,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -35624,10 +35564,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -35748,10 +35685,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -35872,10 +35806,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -35996,10 +35927,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -40221,10 +40149,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -40345,10 +40270,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -40469,10 +40391,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -40593,10 +40512,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -43910,10 +43826,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -44034,10 +43947,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -44158,10 +44068,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -44282,10 +44189,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -49458,10 +49362,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}
@@ -49582,10 +49483,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -49706,10 +49604,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 		zval_ptr_dtor_nogc(free_op_data);
 		goto exit_assign_obj;
 	}
@@ -49830,10 +49725,7 @@ fast_assign_obj:
 	}
 
 	if (!Z_OBJ_HT_P(object)->write_property) {
-		zend_wrong_property_assignment(property);
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_NULL(EX_VAR(opline->result.var));
-		}
+		zend_wrong_property_assignment(property OPLINE_CC EXECUTE_DATA_CC);
 
 		goto exit_assign_obj;
 	}

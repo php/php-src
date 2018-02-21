@@ -648,12 +648,15 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 	return 1;
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_string *tmp_property_name;
 	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 	zend_tmp_string_release(property_name);
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
 }
 
 /* this should modify object only if it's empty */
@@ -667,17 +670,18 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 		zval_ptr_dtor_nogc(object);
 	} else {
 		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
+			zend_string *tmp_property_name;
+			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+
 			if (opline->opcode == ZEND_PRE_INC_OBJ
 			 || opline->opcode == ZEND_PRE_DEC_OBJ
 			 || opline->opcode == ZEND_POST_INC_OBJ
 			 || opline->opcode == ZEND_POST_DEC_OBJ) {
-				zend_string *tmp_property_name;
-				zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
 				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
-				zend_tmp_string_release(property_name);
 			} else {
-				zend_wrong_property_assignment(property);
+				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
 			}
+			zend_tmp_string_release(property_name);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 			ZVAL_NULL(EX_VAR(opline->result.var));
@@ -697,6 +701,25 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 		return 0;
 	}
 	Z_DELREF_P(object);
+	return 1;
+}
+
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *object, zval *property)
+{
+	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
+		/* nothing to destroy */
+	} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
+		zval_ptr_dtor_nogc(object);
+	} else {
+		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
+			zend_string *tmp_property_name;
+			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+			zend_tmp_string_release(property_name);
+		}
+		return 0;
+	}
+	object_init(object);
 	return 1;
 }
 
@@ -1654,14 +1677,6 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_s
 	zend_throw_error(NULL, "[] operator not supported for strings");
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_modify_property_of_non_object(zval *property)
-{
-	zend_string *tmp;
-	zend_string *property_name = zval_get_tmp_string(property, &tmp);
-	zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(tmp);
-}
-
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_access_undefined_propery_in_overloaded_object(void)
 {
 	zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
@@ -2195,15 +2210,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 
 			/* this should modify object only if it's empty */
-			if (type != BP_VAR_UNSET &&
-			    EXPECTED(Z_TYPE_P(container) <= IS_FALSE ||
-			      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0))) {
-				zval_ptr_dtor_nogc(container);
-				object_init(container);
-			} else {
-				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
-					zend_modify_property_of_non_object(prop_ptr);
-				}
+			if (type == BP_VAR_UNSET ||
+				UNEXPECTED(!make_real_object_rw(container, prop_ptr))) {
 				ZVAL_ERROR(result);
 				return;
 			}
