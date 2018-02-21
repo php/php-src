@@ -46,7 +46,7 @@ var_dump($string_values);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : 'cmp_function' with reference arguments ***
 -- Passing integer values to 'cmp_function' --
 bool(true)

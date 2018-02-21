@@ -27,7 +27,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_commit() : variation ***
 bool(true)
 bool(true)

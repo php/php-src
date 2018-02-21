@@ -40,7 +40,7 @@ if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

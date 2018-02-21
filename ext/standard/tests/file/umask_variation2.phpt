@@ -57,7 +57,7 @@ for($mask = 0351; $mask <= 0777; $mask++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing umask() on file and directory ***
 -- Setting umask to 351 --
 File permission : 426

@@ -17,7 +17,7 @@ foreach($strings as $string) {
 	var_dump(bin2hex($ent_encoded));
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "266c743b"
 string(8) "266c743b"
 string(0) ""

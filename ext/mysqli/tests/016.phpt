@@ -28,6 +28,6 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "foobar"
 done!

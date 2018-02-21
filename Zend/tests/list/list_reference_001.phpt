@@ -26,7 +26,7 @@ $arr = array("one" => 1, "two" => array(2));
 var_dump($a, $b, $c);
 var_dump($arr);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 array(2) {

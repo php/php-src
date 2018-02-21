@@ -32,7 +32,7 @@ traverse_xml($people);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 <people>
   <person>Jane
   </person>

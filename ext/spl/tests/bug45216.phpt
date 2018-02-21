@@ -17,6 +17,6 @@ var_dump(fgetss($handle));
 <?php
 unlink(dirname(__FILE__) . '/foo.html');
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "text 0text 1"
 string(12) "text 0text 1"

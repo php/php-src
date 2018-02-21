@@ -25,7 +25,7 @@ var_dump( array_diff_ukey($input_array, $float_indx_array, 'key_compare_func') )
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
 -- Testing array_diff_ukey() function with float indexed array --

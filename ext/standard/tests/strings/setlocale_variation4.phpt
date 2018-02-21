@@ -51,7 +51,7 @@ if($locale_info_before != $locale_info_after){
 
 echo "\nDone\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing setlocale() : usage variations - Setting system locale = null ***
 Locale info, before setting the locale
 array(18) {

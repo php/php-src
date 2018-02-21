@@ -78,7 +78,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --

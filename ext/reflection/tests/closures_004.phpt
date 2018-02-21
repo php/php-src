@@ -31,7 +31,7 @@ $closure2->__invoke ();
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Invoked!
 Invoked!
 Invoked!

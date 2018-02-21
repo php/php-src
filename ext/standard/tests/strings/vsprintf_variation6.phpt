@@ -67,7 +67,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : float formats and non-float values ***
 
 -- Iteration 1 --

@@ -19,7 +19,7 @@ var_dump(bin2hex(quoted_printable_decode($str)));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing quoted_printable_decode() : basic functionality ***
 string(76) "fa776f772d666163746f72c1d0d5ddc5ceced9c50a20d4cfd2c7cfd7d9c520d0d2cfc5cbd4d9"
 ===DONE===

@@ -19,7 +19,7 @@ var_dump(ini_get('phar.require_hash'));
 var_dump(ini_get('phar.readonly'));
 __HALT_COMPILER();
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "1"
 string(1) "1"
 string(1) "1"

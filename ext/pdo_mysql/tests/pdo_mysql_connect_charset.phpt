@@ -29,5 +29,5 @@ MySQLPDOTest::skip();
 		echo "failed!\n";
 	}
 ?>
---EXPECTF--
+--EXPECT--
 done!

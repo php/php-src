@@ -8,5 +8,5 @@ Test function posix_setegid() by calling it with its expected arguments
 <?php
 var_dump(posix_setegid(posix_getegid()));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

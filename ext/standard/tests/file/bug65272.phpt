@@ -23,7 +23,7 @@ echo "Done\n";
 $file = dirname(__FILE__)."/flock_bug65272.dat";
 unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 int(1)

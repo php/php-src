@@ -47,7 +47,7 @@ catch(Exception $e)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Exception: Passed array specifies a non static method but no object (non-static method MyAutoLoader::autoLoad() should not be called statically)
 MyAutoLoader::autoLoad(TestClass)
 MyAutoLoader::autoThrow(TestClass)

@@ -23,7 +23,7 @@ $errno = curl_share_errno($sh);
 echo $errno . PHP_EOL;
 echo curl_share_strerror($errno) . PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 0
 No error
 1

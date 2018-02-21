@@ -43,7 +43,7 @@ for ($i = 0; $i < count($values); $i++) {
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing ceil() : basic functionality ***
 float(0)
 float(0)

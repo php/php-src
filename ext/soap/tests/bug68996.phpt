@@ -38,7 +38,7 @@ $HTTP_RAW_POST_DATA = <<<EOF
 EOF;
 $s->handle($HTTP_RAW_POST_DATA);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <SOAP-ENV:Envelope xmlns:SOAP-ENV="http://schemas.xmlsoap.org/soap/envelope/"><SOAP-ENV:Body><SOAP-ENV:Fault><faultcode></faultcode><faultstring>some msg</faultstring></SOAP-ENV:Fault></SOAP-ENV:Body></SOAP-ENV:Envelope>
 <?xml version="1.0" encoding="UTF-8"?>

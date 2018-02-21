@@ -34,7 +34,7 @@ var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using float format ***
 string(9) "11.110000"
 string(9) "11.110000"

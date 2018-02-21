@@ -102,7 +102,7 @@ if ($p1 && $p2 && $p3) {
 	echo "P/TC: ok\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 TC/TC: ok
 TC/P: ok
 P/P: ok

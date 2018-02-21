@@ -22,7 +22,7 @@ foreach ( $variation_array as $var ) {
   var_dump(getservbyname( $var ,  $protocol ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with float values ***
 bool(false)
 bool(false)

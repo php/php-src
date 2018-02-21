@@ -64,7 +64,7 @@ foreach( $file_types as $type ) {
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fflush(): with various types of files ***
 -- Iteration 1 with file containing empty Data--
 -- File opened in w mode --

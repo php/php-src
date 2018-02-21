@@ -17,7 +17,7 @@ var_dump($ao->getFlags());
 $cao = clone $ao;
 var_dump($cao->getFlags());
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(1)
 int(2)

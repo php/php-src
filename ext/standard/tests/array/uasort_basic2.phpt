@@ -49,7 +49,7 @@ var_dump($int_values3);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : basic functionality with duplicate values ***
 -- Numeric array with increasing values --
 bool(true)

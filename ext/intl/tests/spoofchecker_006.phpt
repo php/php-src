@@ -17,7 +17,7 @@ $x->setAllowedLocales("gr_GR");
 var_dump($x->isSuspicious("NAPKIN PEZ"));
 var_dump($x->isSuspicious("napkin pez"));
 ?>
---EXPECTF--
+--EXPECT--
 paypal with Cyrillic spoof characters
 bool(true)
 bool(true)

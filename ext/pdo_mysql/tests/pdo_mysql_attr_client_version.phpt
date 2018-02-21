@@ -33,5 +33,5 @@ $db = MySQLPDOTest::factory();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

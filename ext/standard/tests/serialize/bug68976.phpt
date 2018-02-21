@@ -26,7 +26,7 @@ for($i = 0; $i < 5; $i++) {
 var_dump($data);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   object(evilClass)#1 (0) {

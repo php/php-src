@@ -104,7 +104,7 @@ foreach($encoding as $enc) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr() : usage variations ***
 
 -- Iteration 1: UCS-4 --

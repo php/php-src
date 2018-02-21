@@ -12,5 +12,5 @@ var_dump(
 $ci->__toString() // if conversion to string is done by echo, for example, an exeption is thrown. Invoking __toString explicitly covers different code.
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(0) ""

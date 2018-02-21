@@ -14,6 +14,6 @@ catch (ReflectionException $e) {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "UndefC"
 Class UndefC does not exist

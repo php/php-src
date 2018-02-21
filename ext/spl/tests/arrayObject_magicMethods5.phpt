@@ -70,7 +70,7 @@ var_dump($obj);
 echo "  Wrapping ArrayObject:\n";
 var_dump($ao);
 ?>
---EXPECTF--
+--EXPECT--
 --> Write existent, non-existent and dynamic:
 In UsesMagic::__set(a,changed)
 In UsesMagic::__set(dynamic,new)

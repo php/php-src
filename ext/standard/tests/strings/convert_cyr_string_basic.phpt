@@ -26,7 +26,7 @@ for ($i = 128; $i < 256; $i++) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing convert_cyr_string() : basic functionality ***
 
 -- First try some simple English text --

@@ -19,7 +19,7 @@ PHP Testfest Berlin 2009-05-10
     var_dump(posix_ttyname(STDOUT));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

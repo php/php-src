@@ -11,5 +11,5 @@ test:
 }
 echo "okey";
 ?>
---EXPECTF--
+--EXPECT--
 okey

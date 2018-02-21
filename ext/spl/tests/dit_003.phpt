@@ -10,6 +10,6 @@ foreach(new FilesystemIterator(__DIR__) as $ent)
 var_dump($count > 0);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 ===DONE===

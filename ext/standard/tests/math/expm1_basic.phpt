@@ -34,7 +34,7 @@ foreach($values as $value) {
 };
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing expm1() : basic functionality ***
 
 -- Iteration 1 --

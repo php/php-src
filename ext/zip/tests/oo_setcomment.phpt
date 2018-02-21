@@ -55,7 +55,7 @@ $zip->close();
 @unlink($file);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

@@ -10,6 +10,6 @@ $line = $splFileObject->getCurrentLine();
 var_dump($line === '<?p');
 var_dump(strlen($line) === 3);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)

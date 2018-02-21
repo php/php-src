@@ -54,7 +54,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying various arrays containing sub arrays --

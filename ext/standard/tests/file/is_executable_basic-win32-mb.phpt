@@ -35,7 +35,7 @@ delete_file($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_executable(): basic functionality ***
 -- Changing mode of file to 0 --
 bool(false)

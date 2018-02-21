@@ -63,7 +63,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
 string(18) "Testing    Ucwords"

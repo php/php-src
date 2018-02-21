@@ -91,7 +91,7 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
  1. 3
  2. 6
  3. 9

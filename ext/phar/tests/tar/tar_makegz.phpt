@@ -33,7 +33,7 @@ var_dump($phar2->isCompressed() == Phar::GZ);
 @unlink(dirname(__FILE__) . '/tar_makegz.phar.tar.gz');
 @unlink(dirname(__FILE__) . '/tar_makegz_b.phar.tar.gz');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

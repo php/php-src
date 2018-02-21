@@ -26,7 +26,7 @@ var_dump( date_format($date, "H:i:s") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_format() : basic functionality ***
 string(23) "July 14, 2005, 10:30 pm"
 string(8) "07.14.05"

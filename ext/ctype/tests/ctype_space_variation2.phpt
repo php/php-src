@@ -26,7 +26,7 @@ for ($c = 1; $c < 256; $c++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_space() : usage variations ***
 character code 9 is a space character
 character code 10 is a space character

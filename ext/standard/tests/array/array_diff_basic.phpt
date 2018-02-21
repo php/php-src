@@ -52,7 +52,7 @@ var_dump(array_diff($array_int1, $array_int2, $array_string1, $array_string2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : basic functionality ***
 -- Test indexed array with integers as elements --
 array(2) {

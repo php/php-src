@@ -16,7 +16,7 @@ var_dump(ob_implicit_flush(false));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ob_implicit_flush() : check return value ***
 NULL
 NULL

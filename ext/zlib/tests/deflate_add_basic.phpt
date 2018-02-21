@@ -66,5 +66,5 @@ foreach ($modes as $modeKey => $mode) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

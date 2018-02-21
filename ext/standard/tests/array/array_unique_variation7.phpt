@@ -20,7 +20,7 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : array with binary data for $input argument ***
 array(3) {
   [0]=>

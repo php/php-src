@@ -28,7 +28,7 @@ for($index = 0; $index < count($haystacks); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strrpos() function: binary safe ***
 int(5)
 int(5)

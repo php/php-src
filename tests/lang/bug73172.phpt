@@ -9,5 +9,5 @@ include dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug73172.inc";
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 ==DONE==

@@ -38,7 +38,7 @@ $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation1.tmp";
 unlink($filename); 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fscanf(): for its return type without third argument ***
 bool(true)
 array(1) {

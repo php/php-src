@@ -154,7 +154,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_check_private_key, 0)
 	ZEND_ARG_INFO(0, key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_x509_parse, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(0, shortname)
 ZEND_END_ARG_INFO()
@@ -182,7 +182,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export_to_file, 0, 0, 4)
 	ZEND_ARG_INFO(0, args) /* array */
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkcs12_export, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkcs12_export, 0, 0, 4)
 	ZEND_ARG_INFO(0, x509)
 	ZEND_ARG_INFO(1, out)
 	ZEND_ARG_INFO(0, priv_key)

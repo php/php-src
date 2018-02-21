@@ -99,7 +99,7 @@ $file_content_types = array("numeric","text","text_with_new_line","alphanumeric"
 } // end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fread() basic operations ***
 
 -- Testing fread) with file having data of type numeric --

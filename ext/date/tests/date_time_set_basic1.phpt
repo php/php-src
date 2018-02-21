@@ -35,7 +35,7 @@ echo "After modification5 " . date_format($datetime, DATE_RFC2822) . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_time_set() : basic functionality ***
 Initial date: Sat, 31 Jan 2009 15:14:10 +0000
 After modification1 Sat, 31 Jan 2009 17:20:00 +0000
