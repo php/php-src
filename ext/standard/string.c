@@ -4152,7 +4152,7 @@ static zend_always_inline char *php_stripslashes_impl(const char *str, char *out
 # if ZEND_INTRIN_SSE4_2_NATIVE
 PHPAPI void php_stripslashes(zend_string *str)
 # elif ZEND_INTRIN_SSE4_2_RESOLVER
-PHPAPI void php_stripslashes_sse42(zend_string *str)
+void php_stripslashes_sse42(zend_string *str)
 # endif
 {
 	const char *s = ZSTR_VAL(str);
