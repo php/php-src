@@ -249,9 +249,7 @@ function copy_config_scripts() {
 		$files[] = 'config.w32';
 	}
 
-	if (!$files) {
-		return;
-	}
+	$files[] = '.gitignore';
 
 	foreach($files as $config_script) {
 		$new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
