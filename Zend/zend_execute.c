@@ -2261,6 +2261,42 @@ use_read_property:
 	}
 }
 
+static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DATA_DC)
+{
+	zval *result = EX_VAR(opline->result.var);
+
+	switch (type) {
+		case BP_VAR_R:
+			if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+				ZVAL_OBJ(result, Z_OBJ(EX(This)));
+				Z_ADDREF_P(result);
+			} else {
+				ZVAL_NULL(result);
+				zend_error(E_NOTICE,"Undefined variable: this");
+			}
+			break;
+		case BP_VAR_IS:
+			if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+				ZVAL_OBJ(result, Z_OBJ(EX(This)));
+				Z_ADDREF_P(result);
+			} else {
+				ZVAL_NULL(result);
+			}
+			break;
+		case BP_VAR_RW:
+		case BP_VAR_W:
+			ZVAL_UNDEF(result);
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			break;
+		case BP_VAR_UNSET:
+			ZVAL_UNDEF(result);
+			zend_throw_error(NULL, "Cannot unset $this");
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
+
 #if ZEND_INTENSIVE_DEBUGGING
 
 #define CHECK_SYMBOL_TABLES()													\
