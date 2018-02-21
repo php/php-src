@@ -1906,18 +1906,21 @@ fetch_from_array:
 	}
 }
 
-static zend_never_inline void zend_fetch_dimension_address_W(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_W(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_RW(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_RW(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_RW EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
@@ -2026,38 +2029,39 @@ try_string_offset:
 	}
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_R(zval *result, zval *container, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_R(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *container, zval *dim OPLINE_DC OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result, zval *container, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_IS(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_LIST_w(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_w(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container, dim, IS_TMP_VAR, BP_VAR_W EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_LIST_r(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
 }
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type)
 {
-	if (type == BP_VAR_IS) {
-		zend_fetch_dimension_address_read_IS(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
-	} else {
-		zend_fetch_dimension_address_read_R(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
-	}
+	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, type, 1, 0 NO_EXECUTE_DATA_CC);
 }
 
 static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable *ht, zval *offset EXECUTE_DATA_DC)
