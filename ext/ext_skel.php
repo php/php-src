@@ -140,7 +140,7 @@ function process_args($argv, $argc) {
 					continue;
 				}
 
-				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) : $argv[$i + 1]);
+				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
 			}
 			break;
 			default: {
