@@ -10,5 +10,5 @@ phar.readonly=0
 files/write17.phar
 --EXPECTF--
 NULL
-%string|unicode%(2) "hi"
+string(2) "hi"
 ok

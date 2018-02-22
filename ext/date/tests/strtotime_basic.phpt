@@ -38,9 +38,9 @@ var_dump(date('Y-m-d', strtotime('second Monday December 2008')));
 var_dump(date('Y-m-d', strtotime('third Monday December 2008')));
 ?>
 --EXPECTF--
-%string|unicode%(10) "2008-12-01"
-%string|unicode%(10) "2008-12-08"
-%string|unicode%(10) "2008-12-15"
-%string|unicode%(10) "2008-12-08"
-%string|unicode%(10) "2008-12-15"
-%string|unicode%(10) "2008-12-22"
+string(10) "2008-12-01"
+string(10) "2008-12-08"
+string(10) "2008-12-15"
+string(10) "2008-12-08"
+string(10) "2008-12-15"
+string(10) "2008-12-22"

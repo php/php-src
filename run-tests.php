@@ -2077,27 +2077,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-
-			$wanted_re = str_replace(
-				array('%binary_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode\|string%', '%string\|unicode%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%u\|b%', '%b\|u%'),
-				'',
-				$wanted_re
-			);
+			
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
