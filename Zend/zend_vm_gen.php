@@ -1153,6 +1153,7 @@ function gen_null_label($f, $kind, $prolog) {
 function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()) {
 	global $opcodes, $op_types, $prefix, $op_types_ex;
 
+	$list = [];
 	$next = 0;
 	$label = 0;
 	if ($spec) {
@@ -1288,7 +1289,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					}
 				};
 			};
-			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label) {
+			$generate = function ($op1, $op2, $extra_spec = array()) use ($f, $kind, $dsc, $prefix, $prolog, $num, $switch_labels, &$label, &$list) {
 				global $commutative_order;
 
 				// Check if specialized handler is defined
@@ -1298,6 +1299,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 				    (!isset($extra_spec["OP_DATA"]) || isset($dsc["spec"]["OP_DATA"][$extra_spec["OP_DATA"]]))) {
 					if (skip_extra_spec_function($op1, $op2, $extra_spec)) {
 						gen_null_label($f, $kind, $prolog);
+						$list[$label] = null;
 						$label++;
 						return;
 					}
@@ -1307,20 +1309,20 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					switch ($kind) {
 						case ZEND_VM_KIND_CALL:
 							out($f,"$prolog{$spec_name}_HANDLER,\n");
-							$label++;
 							break;
 						case ZEND_VM_KIND_SWITCH:
 							out($f,$prolog."(void*)(uintptr_t)$switch_labels[$spec_name],\n");
-							$label++;
 							break;
 						case ZEND_VM_KIND_GOTO:
 							out($f,$prolog."(void*)&&{$spec_name}_LABEL,\n");
-							$label++;
 							break;
 					}
+					$list[$label] = $spec_name;
+					$label++;
 				} else {
 					// Emit pointer to handler of undefined opcode
 					gen_null_label($f, $kind, $prolog);
+					$list[$label] = null;
 					$label++;
 				}
 			};
@@ -1384,6 +1386,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 					out($f,$prolog."(void*)&&".$dsc["op"]."_LABEL,\n");
 					break;
 				}
+				$list[] = $dsc["op"];
 			} else {
 				switch ($kind) {
 					case ZEND_VM_KIND_CALL:
@@ -1396,6 +1399,7 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 						out($f,$prolog."(void*)&&ZEND_NULL_LABEL,\n");
 						break;
 				}
+				$list[] = null;
 			}
 		}
 	}
@@ -1413,6 +1417,16 @@ function gen_labels($f, $spec, $kind, $prolog, &$specs, $switch_labels = array()
 			break;
 	}
 	$specs[$num + 1] = "$label";
+
+	$l = fopen(__DIR__ . "/zend_vm_handlers.h", "w+") or die("ERROR: Cannot create zend_vm_handlers.h\n");
+	out($l, "#define VM_HANDLERS(_) \\\n");
+	foreach ($list as $n => $name) {
+		if (!is_null($name)) {
+			out($l, "\t_($n, $name) \\\n");
+		}
+	}
+	out($l, "\t_($n+1, ZEND_NULL)\n");
+	fclose($l);
 }
 
 // Generates specialized offsets
@@ -1658,6 +1672,7 @@ function gen_executor_code($f, $spec, $kind, $prolog, &$switch_labels = array())
 			out($f,"\t\t\t\topline = orig_opline;\n");
 			out($f,"\t\t\t\treturn;\n");
 			out($f,"\t\t\tHYBRID_DEFAULT:\n");
+			out($f,"\t\t\t\tVM_TRACE(ZEND_NULL)\n");
 			out($f,"\t\t\t\tZEND_NULL_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
 			out($f,"\t\t\t\tHYBRID_BREAK(); /* Never reached */\n");
 			break;

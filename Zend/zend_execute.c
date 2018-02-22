@@ -3189,6 +3189,8 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
+#elif defined(ZEND_VM_TRACE_MAP)
+# include "zend_vm_trace_map.h"
 #endif
 
 #define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \
