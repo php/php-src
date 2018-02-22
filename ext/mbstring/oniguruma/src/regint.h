@@ -528,7 +528,11 @@ typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
 typedef int MemNumType;
+#if defined(__s390x__)
+typedef int StateCheckNumType;
+#else
 typedef short int StateCheckNumType;
+#endif
 typedef void* PointerType;
 
 #define SIZE_OPCODE           1
