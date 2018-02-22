@@ -966,6 +966,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 		return 1;
 	}
 
+	ce = NULL;
 	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
@@ -1689,7 +1690,7 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_unsupported_property_
 
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
-	zval *retval;
+	zval *retval = NULL;
 	zend_string *offset_key;
 	zend_ulong hval;
 
