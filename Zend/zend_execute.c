@@ -704,7 +704,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *obje
 	return 1;
 }
 
-static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *object, zval *property)
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *object, zval *property OPLINE_DC)
 {
 	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
 		/* nothing to destroy */
@@ -2050,7 +2050,7 @@ static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_R(
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *container, zval *dim OPLINE_DC OPLINE_DC EXECUTE_DATA_DC)
+static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1 EXECUTE_DATA_CC);
@@ -2198,7 +2198,7 @@ str_offset:
 	}
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type)
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type OPLINE_DC)
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
@@ -2211,7 +2211,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 
 			/* this should modify object only if it's empty */
 			if (type == BP_VAR_UNSET ||
-				UNEXPECTED(!make_real_object_rw(container, prop_ptr))) {
+				UNEXPECTED(!make_real_object_rw(container, prop_ptr OPLINE_CC))) {
 				ZVAL_ERROR(result);
 				return;
 			}
