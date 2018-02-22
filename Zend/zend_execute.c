@@ -896,7 +896,7 @@ static zend_bool zend_verify_scalar_type_hint(zend_uchar type_hint, zval *arg, z
 		if (type_hint != IS_DOUBLE || Z_TYPE_P(arg) != IS_LONG) {
 			return 0;
 		}
-	} else if (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	} else if (UNEXPECTED(ZVAL_IS_NULL(arg))) {
 		/* NULL may be accepted only by nullable hints (this is already checked) */
 		return 0;
 	}
@@ -920,19 +920,19 @@ static zend_always_inline zend_bool zend_check_type(
 		} else {
 			*ce = zend_fetch_class(ZEND_TYPE_NAME(type), (ZEND_FETCH_CLASS_AUTO | ZEND_FETCH_CLASS_NO_AUTOLOAD));
 			if (UNEXPECTED(!*ce)) {
-				return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
+				return ZVAL_IS_NULL(arg) && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
 			}
 			*cache_slot = (void *) *ce;
 		}
 		if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT)) {
 			return instanceof_function(Z_OBJCE_P(arg), *ce);
 		}
-		return Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
+		return ZVAL_IS_NULL(arg) && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)));
 	} else if (EXPECTED(ZEND_TYPE_CODE(type) == Z_TYPE_P(arg))) {
 		return 1;
 	}
 
-	if (Z_TYPE_P(arg) == IS_NULL && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)))) {
+	if (ZVAL_IS_NULL(arg) && (ZEND_TYPE_ALLOW_NULL(type) || (default_value && is_null_constant(scope, default_value)))) {
 		/* Null passed to nullable type */
 		return 1;
 	}
@@ -2088,7 +2088,7 @@ static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable 
 		hval = zend_dval_to_lval(Z_DVAL_P(offset));
 num_idx:
 		return zend_hash_index_find(ht, hval);
-	} else if (Z_TYPE_P(offset) == IS_NULL) {
+	} else if (ZVAL_IS_NULL(offset)) {
 str_idx:
 		return zend_hash_find_ex_ind(ht, ZSTR_EMPTY_ALLOC(), 1);
 	} else if (Z_TYPE_P(offset) == IS_FALSE) {
@@ -2340,9 +2340,9 @@ static int zend_check_symbol(zval *pz)
 #define CHECK_SYMBOL_TABLES()
 #endif
 
-ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value)
+ZEND_API void execute_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
-	execute_data->func->internal_function.handler(execute_data, return_value);
+	execute_data->func->internal_function.handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 
 ZEND_API void zend_clean_and_cache_symbol_table(zend_array *symbol_table) /* {{{ */

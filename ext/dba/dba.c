@@ -1114,7 +1114,7 @@ PHP_FUNCTION(dba_key_split)
 		WRONG_PARAM_COUNT;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &zkey) == SUCCESS) {
-		if (Z_TYPE_P(zkey) == IS_NULL || (Z_TYPE_P(zkey) == IS_FALSE)) {
+		if (ZVAL_IS_NULL(zkey) || (Z_TYPE_P(zkey) == IS_FALSE)) {
 			RETURN_BOOL(0);
 		}
 	}

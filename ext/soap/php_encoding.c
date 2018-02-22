@@ -132,7 +132,7 @@ static void set_ns_and_type(xmlNodePtr node, encodeTypePtr type);
 
 #define FIND_ZVAL_NULL(zval, xml, style) \
 { \
-	if (!zval || Z_TYPE_P(zval) == IS_NULL) { \
+	if (!zval || ZVAL_IS_NULL(zval)) { \
 	  if (style == SOAP_ENCODED) {\
 			set_xsi_nil(xml); \
 		} \
@@ -1625,7 +1625,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 
 			data = get_zval_property(object, model->u.element->name, &rv);
 			if (data &&
-			    Z_TYPE_P(data) == IS_NULL &&
+			    ZVAL_IS_NULL(data) &&
 			    !model->u.element->nillable &&
 			    model->min_occurs > 0 &&
 			    !strict) {
@@ -1641,7 +1641,7 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 
 					ZEND_HASH_FOREACH_VAL(ht, val) {
 						ZVAL_DEREF(val);
-						if (Z_TYPE_P(val) == IS_NULL && model->u.element->nillable) {
+						if (ZVAL_IS_NULL(val) && model->u.element->nillable) {
 							property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 							xmlAddChild(node, property);
 							set_xsi_nil(property);
@@ -1661,11 +1661,11 @@ static int model_to_xml_object(xmlNodePtr node, sdlContentModelPtr model, zval *
 						}
 					} ZEND_HASH_FOREACH_END();
 				} else {
-					if (Z_TYPE_P(data) == IS_NULL && model->u.element->nillable) {
+					if (ZVAL_IS_NULL(data) && model->u.element->nillable) {
 						property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 						xmlAddChild(node, property);
 						set_xsi_nil(property);
-					} else if (Z_TYPE_P(data) == IS_NULL && model->min_occurs == 0) {
+					} else if (ZVAL_IS_NULL(data) && model->min_occurs == 0) {
 						return 1;
 					} else {
 						property = master_to_xml(enc, data, style, node);
@@ -1809,7 +1809,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 	HashTable *prop = NULL;
 	sdlTypePtr sdlType = type->sdl_type;
 
-	if (!data || Z_TYPE_P(data) == IS_NULL) {
+	if (!data || ZVAL_IS_NULL(data)) {
 		xmlParam = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 		xmlAddChild(parent, xmlParam);
 		if (style == SOAP_ENCODED) {
@@ -1896,7 +1896,7 @@ static xmlNodePtr to_xml_object(encodeTypePtr type, zval *data, int style, xmlNo
 				ZEND_HASH_FOREACH_VAL(prop, val) {
 					xmlNodePtr property;
 					ZVAL_DEREF(val);
-					if (Z_TYPE_P(val) == IS_NULL && array_el->nillable) {
+					if (ZVAL_IS_NULL(val) && array_el->nillable) {
 						property = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 						xmlAddChild(xmlParam, property);
 						set_xsi_nil(property);
@@ -2217,7 +2217,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 	xmlParam = xmlNewNode(NULL, BAD_CAST("BOGUS"));
 	xmlAddChild(parent, xmlParam);
 
-	if (!data || Z_TYPE_P(data) == IS_NULL) {
+	if (!data || ZVAL_IS_NULL(data)) {
 		if (style == SOAP_ENCODED) {
 			set_xsi_nil(xmlParam);
 			if (SOAP_GLOBAL(features) & SOAP_USE_XSI_ARRAY_TYPE) {

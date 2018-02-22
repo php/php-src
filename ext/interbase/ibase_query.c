@@ -474,7 +474,7 @@ static int _php_ibase_bind_array(zval *val, char *buf, zend_ulong buf_size, /* {
 
 	} else {
 		/* expect a single value */
-		if (Z_TYPE_P(val) == IS_NULL) {
+		if (ZVAL_IS_NULL(val)) {
 			memset(buf, 0, buf_size);
 		} else if (array->ar_desc.array_desc_scale < 0) {
 

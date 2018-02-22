@@ -883,7 +883,7 @@ PHP_METHOD(SoapFault, SoapFault)
 		return;
 	}
 
-	if (Z_TYPE_P(code) == IS_NULL) {
+	if (ZVAL_IS_NULL(code)) {
 	} else if (Z_TYPE_P(code) == IS_STRING) {
 		fault_code = Z_STRVAL_P(code);
 		fault_code_len = Z_STRLEN_P(code);
@@ -984,7 +984,7 @@ PHP_METHOD(SoapVar, SoapVar)
 	}
 
 	this_ptr = getThis();
-	if (Z_TYPE_P(type) == IS_NULL) {
+	if (ZVAL_IS_NULL(type)) {
 		add_property_long(this_ptr, "enc_type", UNKNOWN_TYPE);
 	} else {
 		if (zend_hash_index_exists(&SOAP_GLOBAL(defEncIndex), Z_LVAL_P(type))) {
@@ -1161,7 +1161,7 @@ PHP_METHOD(SoapServer, SoapServer)
 		if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL &&
 		    Z_TYPE_P(tmp) == IS_STRING) {
 			service->uri = estrndup(Z_STRVAL_P(tmp), Z_STRLEN_P(tmp));
-		} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+		} else if (ZVAL_IS_NULL(wsdl)) {
 			php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
 		}
 
@@ -1213,7 +1213,7 @@ PHP_METHOD(SoapServer, SoapServer)
 			}
 		}
 
-	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+	} else if (ZVAL_IS_NULL(wsdl)) {
 		php_error_docref(NULL, E_ERROR, "'uri' option is required in nonWSDL mode");
 	}
 
@@ -2295,7 +2295,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		HashTable *ht = Z_ARRVAL_P(options);
 		zval *tmp, tmp2;
 
-		if (Z_TYPE_P(wsdl) == IS_NULL) {
+		if (ZVAL_IS_NULL(wsdl)) {
 			/* Fetching non-WSDL mode options */
 			if ((tmp = zend_hash_str_find(ht, "uri", sizeof("uri")-1)) != NULL &&
 			    Z_TYPE_P(tmp) == IS_STRING) {
@@ -2328,7 +2328,7 @@ PHP_METHOD(SoapClient, SoapClient)
 		if ((tmp = zend_hash_str_find(ht, "location", sizeof("location")-1)) != NULL &&
 		    Z_TYPE_P(tmp) == IS_STRING) {
 			add_property_str(this_ptr, "location", zend_string_copy(Z_STR_P(tmp)));
-		} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+		} else if (ZVAL_IS_NULL(wsdl)) {
 			php_error_docref(NULL, E_ERROR, "'location' option is required in nonWSDL mode");
 		}
 
@@ -2464,7 +2464,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			Z_TYPE_P(tmp) == IS_LONG) {
 			add_property_long(this_ptr, "_ssl_method", Z_LVAL_P(tmp));
 		}
-	} else if (Z_TYPE_P(wsdl) == IS_NULL) {
+	} else if (ZVAL_IS_NULL(wsdl)) {
 		php_error_docref(NULL, E_ERROR, "'location' and 'uri' options are required in nonWSDL mode");
 	}
 
@@ -2852,7 +2852,7 @@ PHP_METHOD(SoapClient, __call)
 		}
 	}
 
-	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
+	if (headers == NULL || ZVAL_IS_NULL(headers)) {
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		soap_headers = Z_ARRVAL_P(headers);
 		verify_soap_headers_array(soap_headers);
@@ -3154,7 +3154,7 @@ PHP_METHOD(SoapClient, __setSoapHeaders)
 		return;
 	}
 
-	if (headers == NULL || Z_TYPE_P(headers) == IS_NULL) {
+	if (headers == NULL || ZVAL_IS_NULL(headers)) {
 		zend_hash_str_del(Z_OBJPROP_P(this_ptr), "__default_headers", sizeof("__default_headers")-1);
 	} else if (Z_TYPE_P(headers) == IS_ARRAY) {
 		verify_soap_headers_array(Z_ARRVAL_P(headers));

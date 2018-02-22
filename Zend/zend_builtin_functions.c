@@ -1614,7 +1614,7 @@ ZEND_FUNCTION(set_error_handler)
 		zend_stack_push(&EG(user_error_handlers), &EG(user_error_handler));
 	}
 
-	if (Z_TYPE_P(error_handler) == IS_NULL) { /* unset user-defined handler */
+	if (ZVAL_IS_NULL(error_handler)) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_error_handler));
 		return;
 	}
@@ -1680,7 +1680,7 @@ ZEND_FUNCTION(set_exception_handler)
 		zend_stack_push(&EG(user_exception_handlers), &EG(user_exception_handler));
 	}
 
-	if (Z_TYPE_P(exception_handler) == IS_NULL) { /* unset user-defined handler */
+	if (ZVAL_IS_NULL(exception_handler)) { /* unset user-defined handler */
 		ZVAL_UNDEF(&EG(user_exception_handler));
 		return;
 	}

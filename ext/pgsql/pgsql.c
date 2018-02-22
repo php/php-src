@@ -1968,7 +1968,7 @@ PHP_FUNCTION(pg_query_params)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 			ZVAL_DEREF(tmp);
-			if (Z_TYPE_P(tmp) == IS_NULL) {
+			if (ZVAL_IS_NULL(tmp)) {
 				params[i] = NULL;
 			} else {
 				zval tmp_val;
@@ -2171,7 +2171,7 @@ PHP_FUNCTION(pg_execute)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
-			if (Z_TYPE_P(tmp) == IS_NULL) {
+			if (ZVAL_IS_NULL(tmp)) {
 				params[i] = NULL;
 			} else {
 				zend_string *tmp_str;
@@ -4983,7 +4983,7 @@ PHP_FUNCTION(pg_send_query_params)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
-			if (Z_TYPE_P(tmp) == IS_NULL) {
+			if (ZVAL_IS_NULL(tmp)) {
 				params[i] = NULL;
 			} else {
 				zend_string *tmp_str;
@@ -5154,7 +5154,7 @@ PHP_FUNCTION(pg_send_execute)
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(pv_param_arr), tmp) {
 
-			if (Z_TYPE_P(tmp) == IS_NULL) {
+			if (ZVAL_IS_NULL(tmp)) {
 				params[i] = NULL;
 			} else {
 				zval tmp_val;

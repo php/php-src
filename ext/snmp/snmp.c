@@ -2131,7 +2131,7 @@ static int php_snmp_write_max_oids(php_snmp_object *snmp_object, zval *newval)
 	int ret = SUCCESS;
 	zend_long lval;
 
-	if (Z_TYPE_P(newval) == IS_NULL) {
+	if (ZVAL_IS_NULL(newval)) {
 		snmp_object->max_oids = 0;
 		return ret;
 	}

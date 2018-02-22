@@ -3153,7 +3153,7 @@ PHP_FUNCTION(ldap_set_option)
 		return;
 	}
 
-	if (Z_TYPE_P(link) == IS_NULL) {
+	if (ZVAL_IS_NULL(link)) {
 		ldap = NULL;
 	} else {
 		if ((ld = (ldap_linkdata *)zend_fetch_resource_ex(link, "ldap link", le_link)) == NULL) {
@@ -3927,7 +3927,7 @@ PHP_FUNCTION(ldap_control_paged_result)
 		return;
 	}
 
-	if (Z_TYPE_P(link) == IS_NULL) {
+	if (ZVAL_IS_NULL(link)) {
 		ldap = NULL;
 	} else {
 		if ((ld = (ldap_linkdata *)zend_fetch_resource_ex(link, "ldap link", le_link)) == NULL) {

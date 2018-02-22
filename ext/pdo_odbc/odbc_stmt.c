@@ -453,7 +453,7 @@ static int odbc_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *p
 							P->len = SQL_LEN_DATA_AT_EXEC(Z_STRLEN_P(parameter));
 						}
 					}
-				} else if (Z_TYPE_P(parameter) == IS_NULL || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
+				} else if (ZVAL_IS_NULL(parameter) || PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL) {
 					P->len = SQL_NULL_DATA;
 				} else {
 					convert_to_string(parameter);

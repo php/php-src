@@ -194,7 +194,7 @@ ZEND_METHOD(Closure, bind)
 	if (scope_arg != NULL) { /* scope argument was given */
 		if (Z_TYPE_P(scope_arg) == IS_OBJECT) {
 			ce = Z_OBJCE_P(scope_arg);
-		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
+		} else if (ZVAL_IS_NULL(scope_arg)) {
 			ce = NULL;
 		} else {
 			zend_string *tmp_class_name;

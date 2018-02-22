@@ -3892,7 +3892,7 @@ void zend_func_return_info(const zend_op_array   *op_array,
 				if (opline->op1_type == IS_CONST) {
 					zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->op1, info->ssa.rt_constants);
 
-					if (Z_TYPE_P(zv) == IS_NULL) {
+					if (ZVAL_IS_NULL(zv)) {
 						if (tmp_has_range < 0) {
 							tmp_has_range = 1;
 							tmp_range.underflow = 0;

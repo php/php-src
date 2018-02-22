@@ -334,7 +334,7 @@ ZEND_API int ZEND_FASTCALL zend_parse_arg_class(zval *arg, zend_class_entry **pc
 {
 	zend_class_entry *ce_base = *pce;
 
-	if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+	if (check_null && ZVAL_IS_NULL(arg)) {
 		*pce = NULL;
 		return 1;
 	}
@@ -730,7 +730,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zend_class_entry *lookup, **pce = va_arg(*va, zend_class_entry **);
 				zend_class_entry *ce_base = *pce;
 
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+				if (check_null && ZVAL_IS_NULL(arg)) {
 					*pce = NULL;
 					break;
 				}
@@ -764,7 +764,7 @@ static const char *zend_parse_arg_impl(int arg_num, zval *arg, va_list *va, cons
 				zend_fcall_info_cache *fcc = va_arg(*va, zend_fcall_info_cache *);
 				char *is_callable_error = NULL;
 
-				if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+				if (check_null && ZVAL_IS_NULL(arg)) {
 					fci->size = 0;
 					fcc->function_handler = 0;
 					break;

@@ -41,7 +41,7 @@
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->opN, ssa->rt_constants); \
-			return (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || Z_TYPE_P(zv) == IS_NULL); \
+			return (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || ZVAL_IS_NULL(zv)); \
 		} else { \
 			return (opline->opN##_type != IS_UNUSED && \
 		        ssa->ops && \
@@ -63,7 +63,7 @@
 				return 1; \
 			} else if (Z_TYPE_P(zv) == IS_FALSE) { \
 				return 0; \
-			} else if (Z_TYPE_P(zv) == IS_NULL) { \
+			} else if (ZVAL_IS_NULL(zv)) { \
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
@@ -87,7 +87,7 @@
 				return 1; \
 			} else if (Z_TYPE_P(zv) == IS_FALSE) { \
 				return 0; \
-			} else if (Z_TYPE_P(zv) == IS_NULL) { \
+			} else if (ZVAL_IS_NULL(zv)) { \
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
@@ -105,7 +105,7 @@
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->opN, ssa->rt_constants); \
-			if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || Z_TYPE_P(zv) == IS_NULL) { \
+			if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || ZVAL_IS_NULL(zv)) { \
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \
@@ -123,7 +123,7 @@
 	{ \
 		if (opline->opN##_type == IS_CONST) { \
 			zval *zv = CRT_CONSTANT_EX(op_array, opline, opline->opN, ssa->rt_constants); \
-			if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || Z_TYPE_P(zv) == IS_NULL) { \
+			if (Z_TYPE_P(zv) == IS_LONG || Z_TYPE_P(zv) == IS_TRUE || Z_TYPE_P(zv) == IS_FALSE || ZVAL_IS_NULL(zv)) { \
 				return 0; \
 			} \
 		} else if (opline->opN##_type != IS_UNUSED && \

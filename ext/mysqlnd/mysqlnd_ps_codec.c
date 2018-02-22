@@ -680,7 +680,7 @@ mysqlnd_stmt_execute_calculate_param_values_size(MYSQLND_STMT_DATA * stmt, zval 
 
 		bind_var = the_var;
 		ZVAL_DEREF(the_var);
-		if ((stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB && Z_TYPE_P(the_var) == IS_NULL)) {
+		if ((stmt->param_bind[i].type != MYSQL_TYPE_LONG_BLOB && ZVAL_IS_NULL(the_var))) {
 			continue;
 		}
 
@@ -769,7 +769,7 @@ mysqlnd_stmt_execute_store_param_values(MYSQLND_STMT_DATA * stmt, zval * copies,
 		ZVAL_DEREF(parameter);
 		data = (copies && !Z_ISUNDEF(copies[i]))? &copies[i]: parameter;
 		/* Handle long data */
-		if (!Z_ISUNDEF_P(parameter) && Z_TYPE_P(data) == IS_NULL) {
+		if (!Z_ISUNDEF_P(parameter) && ZVAL_IS_NULL(data)) {
 			(buf + null_byte_offset)[i/8] |= (zend_uchar) (1 << (i & 7));
 		} else {
 			switch (stmt->param_bind[i].type) {

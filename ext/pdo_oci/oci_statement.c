@@ -389,7 +389,7 @@ static int oci_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *pa
 				} else if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_LOB && P->thing) {
 					php_stream *stm;
 
-					if (Z_TYPE_P(parameter) == IS_NULL) {
+					if (ZVAL_IS_NULL(parameter)) {
 						/* if the param is NULL, then we assume that they
 						 * wanted to bind a lob locator into it from the query
 						 * */

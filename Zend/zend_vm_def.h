@@ -5193,7 +5193,7 @@ ZEND_VM_C_LABEL(num_index):
 		} else if ((OP2_TYPE & (IS_VAR|IS_CV)) && EXPECTED(Z_TYPE_P(offset) == IS_REFERENCE)) {
 			offset = Z_REFVAL_P(offset);
 			ZEND_VM_C_GOTO(add_again);
-		} else if (Z_TYPE_P(offset) == IS_NULL) {
+		} else if (ZVAL_IS_NULL(offset)) {
 			str = ZSTR_EMPTY_ALLOC();
 			ZEND_VM_C_GOTO(str_index);
 		} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
@@ -5549,7 +5549,7 @@ ZEND_VM_C_LABEL(num_index_dim):
 			} else if (Z_TYPE_P(offset) == IS_DOUBLE) {
 				hval = zend_dval_to_lval(Z_DVAL_P(offset));
 				ZEND_VM_C_GOTO(num_index_dim);
-			} else if (Z_TYPE_P(offset) == IS_NULL) {
+			} else if (ZVAL_IS_NULL(offset)) {
 				key = ZSTR_EMPTY_ALLOC();
 				ZEND_VM_C_GOTO(str_index_dim);
 			} else if (Z_TYPE_P(offset) == IS_FALSE) {

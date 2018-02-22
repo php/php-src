@@ -192,7 +192,7 @@ void phpdbg_webdata_decompress(char *msg, int len) {
 		}
 	}
 
-	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("sapi_name"))) && (Z_TYPE_P(zvp) == IS_STRING || Z_TYPE_P(zvp) == IS_NULL)) {
+	if ((zvp = zend_hash_str_find(ht, ZEND_STRL("sapi_name"))) && (Z_TYPE_P(zvp) == IS_STRING || ZVAL_IS_NULL(zvp))) {
 		if (PHPDBG_G(sapi_name_ptr)) {
 			free(PHPDBG_G(sapi_name_ptr));
 		}
