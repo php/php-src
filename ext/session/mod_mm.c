@@ -219,7 +219,7 @@ static int ps_mm_key_exists(ps_mm *data, const char *key)
 	return FAILURE;
 }
 
-ps_module ps_mod_mm = {
+const ps_module ps_mod_mm = {
 	PS_MOD_SID(mm)
 };
 

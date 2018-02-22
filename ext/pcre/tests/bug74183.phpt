@@ -10,6 +10,6 @@ var_dump(preg_match($sRegex, $sTest));
 var_dump(preg_last_error() === \PREG_INTERNAL_ERROR);
 ?>
 --EXPECTF--
-Warning: preg_match(): Compilation failed: regular expression is too large at offset %s in %s on line %s
+Warning: preg_match(): Compilation failed: regular expression is too large at offset %s in %s on line %d
 bool(false)
 bool(true)

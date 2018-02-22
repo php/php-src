@@ -31,7 +31,7 @@
 #include "zend_execute.h"
 #include "zend_vm.h"
 
-void zend_optimizer_nop_removal(zend_op_array *op_array)
+void zend_optimizer_nop_removal(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_op *end, *opline;
 	uint32_t new_count, i, shift;
@@ -98,9 +98,10 @@ void zend_optimizer_nop_removal(zend_op_array *op_array)
 		}
 
 		/* update early binding list */
-		if (op_array->early_binding != (uint32_t)-1) {
-			uint32_t *opline_num = &op_array->early_binding;
+		if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+			uint32_t *opline_num = &ctx->script->first_early_binding_opline;
 
+			ZEND_ASSERT(op_array == &ctx->script->main_op_array);
 			do {
 				*opline_num -= shiftlist[*opline_num];
 				opline_num = &op_array->opcodes[*opline_num].result.opline_num;

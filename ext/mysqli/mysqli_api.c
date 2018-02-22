@@ -880,9 +880,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			}
 			for (j = i + 1; j < stmt->param.var_cnt; j++) {
 				/* Oops, someone binding the same variable - clone */
-				if (Z_TYPE(stmt->param.vars[j]) == Z_TYPE(stmt->param.vars[i]) &&
+				if (Z_ISREF(stmt->param.vars[j]) &&
 					   	Z_REFVAL(stmt->param.vars[j]) == Z_REFVAL(stmt->param.vars[i])) {
-					SEPARATE_ZVAL(&stmt->param.vars[j]);
+					/*SEPARATE_ZVAL(&stmt->param.vars[j]);*/
+					Z_DELREF_P(&stmt->param.vars[j]);
+					ZVAL_COPY(&stmt->param.vars[j], Z_REFVAL(stmt->param.vars[j]));
 					break;
 				}
 			}
@@ -1714,14 +1716,12 @@ static int mysqli_options_get_option_zval_type(int option)
 #ifdef MYSQL_OPT_PROTOCOL
                 case MYSQL_OPT_PROTOCOL:
 #endif /* MySQL 4.1.0 */
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 		case MYSQL_OPT_READ_TIMEOUT:
 		case MYSQL_OPT_WRITE_TIMEOUT:
 		case MYSQL_OPT_GUESS_CONNECTION:
 		case MYSQL_OPT_USE_EMBEDDED_CONNECTION:
 		case MYSQL_OPT_USE_REMOTE_CONNECTION:
 		case MYSQL_SECURE_AUTH:
-#endif
 #ifdef MYSQL_OPT_RECONNECT
 		case MYSQL_OPT_RECONNECT:
 #endif /* MySQL 5.0.13 */
@@ -1872,6 +1872,9 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
 			MYSQLND_ERROR_INFO error_info = *mysql->mysql->data->error_info;
+			mysql->mysql->data->error_info->error_list.head = NULL;
+			mysql->mysql->data->error_info->error_list.tail = NULL;
+			mysql->mysql->data->error_info->error_list.count = 0;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;
@@ -1882,6 +1885,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
 #else
+			zend_llist_clean(&mysql->mysql->data->error_info->error_list);
 			*mysql->mysql->data->error_info = error_info;
 #endif
 		}

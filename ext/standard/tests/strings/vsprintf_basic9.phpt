@@ -34,7 +34,7 @@ var_dump( vsprintf($format33,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using hexadecimal format ***
 string(1) "b"
 string(1) "B"

@@ -295,7 +295,7 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 		return NULL;
 	/*
 	 * The main work is done here!
-	 * We have the file name and/or the data buffer to be identified. 
+	 * We have the file name and/or the data buffer to be identified.
 	 */
 	if (file_buffer(ms, NULL, NULL, buf, nb) == -1) {
 		return NULL;

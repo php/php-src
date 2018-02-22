@@ -22,7 +22,7 @@ Foo::priv();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Bar::priv()
 Foo::priv()
 Done

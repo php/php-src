@@ -413,32 +413,32 @@ array(9) {
 
 -- Iteration 16 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 17 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 18 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 -- Iteration 19 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 20 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 21 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 -- Iteration 22 --
@@ -487,6 +487,6 @@ array(9) {
 
 -- Iteration 24 --
 
-Warning: date_sun_info() expects parameter 1 to be integer, resource given in %s on line %d
+Warning: date_sun_info() expects parameter 1 to be int, resource given in %s on line %d
 bool(false)
 ===Done===

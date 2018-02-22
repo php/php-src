@@ -3,13 +3,14 @@ dnl $Id$
 dnl
 
 PHP_ARG_ENABLE(phpdbg, for phpdbg support,
-[  --enable-phpdbg            Build phpdbg], yes, yes)
+[  --enable-phpdbg         Build phpdbg], yes, yes)
 
 PHP_ARG_ENABLE(phpdbg-webhelper, for phpdbg web SAPI support,
-[  --enable-phpdbg-webhelper  Build phpdbg web SAPI support], no)
+[  --enable-phpdbg-webhelper
+                          Build phpdbg web SAPI support], no)
 
 PHP_ARG_ENABLE(phpdbg-debug, for phpdbg debug build,
-[  --enable-phpdbg-debug      Build phpdbg in debug mode], no, no)
+[  --enable-phpdbg-debug   Build phpdbg in debug mode], no, no)
 
 if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
   AC_HEADER_TIOCGWINSZ
@@ -46,6 +47,7 @@ if test "$BUILD_PHPDBG" = "" && test "$PHP_PHPDBG" != "no"; then
                 \$(EXTRA_LIBS) \
                 \$(PHPDBG_EXTRA_LIBS) \
                 \$(ZEND_EXTRA_LIBS) \
+                \$(PHP_FRAMEWORKS) \
          -o \$(BUILD_BINARY)"
 
   BUILD_PHPDBG_SHARED="\$(LIBTOOL) --mode=link \

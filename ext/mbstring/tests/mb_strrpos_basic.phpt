@@ -40,7 +40,7 @@ var_dump(mb_strrpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : basic ***
 
 -- ASCII string 1 --

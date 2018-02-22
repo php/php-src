@@ -27,7 +27,7 @@ var_dump($_SESSION);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_write_close() : basic functionality ***
 bool(true)
 array(0) {

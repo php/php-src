@@ -24,7 +24,7 @@ var_dump(isset($x->o->text));
 var_dump(isset($x->o->xx));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

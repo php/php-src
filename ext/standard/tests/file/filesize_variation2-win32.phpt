@@ -64,7 +64,7 @@ unlink($file_path."/filesize_variation2/filesize_variation2_sub/filesize_variati
 rmdir($file_path."/filesize_variation2/filesize_variation2_sub");
 rmdir($file_path."/filesize_variation2");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 
 *** Testing size of a dir, sub-dir and file with filesize() ***

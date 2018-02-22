@@ -401,7 +401,7 @@ _get_entity(void *user, const xmlChar *name)
 	return ret;
 }
 
-static xmlSAXHandler
+static const xmlSAXHandler
 php_xml_compat_handlers = {
 	NULL, /* internalSubset */
 	NULL, /* isStandalone */

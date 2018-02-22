@@ -30,8 +30,8 @@
 #include "zend_smart_str.h"
 
 /* {{{ rot13 stream filter implementation */
-static char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
 
 static php_stream_filter_status_t strfilter_rot13_filter(
 	php_stream *stream,
@@ -61,7 +61,7 @@ static php_stream_filter_status_t strfilter_rot13_filter(
 	return PSFS_PASS_ON;
 }
 
-static php_stream_filter_ops strfilter_rot13_ops = {
+static const php_stream_filter_ops strfilter_rot13_ops = {
 	strfilter_rot13_filter,
 	NULL,
 	"string.rot13"
@@ -72,14 +72,14 @@ static php_stream_filter *strfilter_rot13_create(const char *filtername, zval *f
 	return php_stream_filter_alloc(&strfilter_rot13_ops, NULL, persistent);
 }
 
-static php_stream_filter_factory strfilter_rot13_factory = {
+static const php_stream_filter_factory strfilter_rot13_factory = {
 	strfilter_rot13_create
 };
 /* }}} */
 
 /* {{{ string.toupper / string.tolower stream filter implementation */
-static char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
-static char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+static const char lowercase[] = "abcdefghijklmnopqrstuvwxyz";
+static const char uppercase[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 static php_stream_filter_status_t strfilter_toupper_filter(
 	php_stream *stream,
@@ -137,13 +137,13 @@ static php_stream_filter_status_t strfilter_tolower_filter(
 	return PSFS_PASS_ON;
 }
 
-static php_stream_filter_ops strfilter_toupper_ops = {
+static const php_stream_filter_ops strfilter_toupper_ops = {
 	strfilter_toupper_filter,
 	NULL,
 	"string.toupper"
 };
 
-static php_stream_filter_ops strfilter_tolower_ops = {
+static const php_stream_filter_ops strfilter_tolower_ops = {
 	strfilter_tolower_filter,
 	NULL,
 	"string.tolower"
@@ -159,11 +159,11 @@ static php_stream_filter *strfilter_tolower_create(const char *filtername, zval 
 	return php_stream_filter_alloc(&strfilter_tolower_ops, NULL, persistent);
 }
 
-static php_stream_filter_factory strfilter_toupper_factory = {
+static const php_stream_filter_factory strfilter_toupper_factory = {
 	strfilter_toupper_create
 };
 
-static php_stream_filter_factory strfilter_tolower_factory = {
+static const php_stream_filter_factory strfilter_tolower_factory = {
 	strfilter_tolower_create
 };
 /* }}} */
@@ -236,7 +236,7 @@ static void strfilter_strip_tags_dtor(php_stream_filter *thisfilter)
 	pefree(Z_PTR(thisfilter->abstract), ((php_strip_tags_filter *)Z_PTR(thisfilter->abstract))->persistent);
 }
 
-static php_stream_filter_ops strfilter_strip_tags_ops = {
+static const php_stream_filter_ops strfilter_strip_tags_ops = {
 	strfilter_strip_tags_filter,
 	strfilter_strip_tags_dtor,
 	"string.strip_tags"
@@ -278,7 +278,7 @@ static php_stream_filter *strfilter_strip_tags_create(const char *filtername, zv
 	return php_stream_filter_alloc(&strfilter_strip_tags_ops, inst, persistent);
 }
 
-static php_stream_filter_factory strfilter_strip_tags_factory = {
+static const php_stream_filter_factory strfilter_strip_tags_factory = {
 	strfilter_strip_tags_create
 };
 
@@ -822,7 +822,7 @@ static php_conv_err_t php_conv_qprint_encode_convert(php_conv_qprint_encode *ins
 			}
 		}
 
-		if (lb_ptr >= lb_cnt && icnt <= 0) {
+		if (lb_ptr >= lb_cnt && icnt == 0) {
 			break;
 		}
 
@@ -1028,7 +1028,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 	for (;;) {
 		switch (scan_stat) {
 			case 0: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == '=') {
@@ -1045,7 +1045,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 1: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (*ps == ' ' || *ps == '\t') {
@@ -1074,7 +1074,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} /* break is missing intentionally */
 
 			case 2: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 
@@ -1101,7 +1101,7 @@ static php_conv_err_t php_conv_qprint_decode_convert(php_conv_qprint_decode *ins
 			} break;
 
 			case 4: {
-				if (icnt <= 0) {
+				if (icnt == 0) {
 					goto out;
 				}
 				if (lb_cnt < inst->lbchars_len &&
@@ -1210,12 +1210,13 @@ static php_conv_err_t php_conv_get_string_prop_ex(const HashTable *ht, char **pr
 	*pretval_len = 0;
 
 	if ((tmpval = zend_hash_str_find((HashTable *)ht, field_name, field_name_len-1)) != NULL) {
-		zend_string *str = zval_get_string(tmpval);
+		zend_string *tmp;
+		zend_string *str = zval_get_tmp_string(tmpval, &tmp);
 
 		*pretval = pemalloc(ZSTR_LEN(str) + 1, persistent);
 		*pretval_len = ZSTR_LEN(str);
 		memcpy(*pretval, ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-		zend_string_release(str);
+		zend_tmp_string_release(tmp);
 	} else {
 		return PHP_CONV_ERR_NOT_FOUND;
 	}
@@ -1687,7 +1688,7 @@ static void strfilter_convert_dtor(php_stream_filter *thisfilter)
 	pefree(Z_PTR(thisfilter->abstract), ((php_convert_filter *)Z_PTR(thisfilter->abstract))->persistent);
 }
 
-static php_stream_filter_ops strfilter_convert_ops = {
+static const php_stream_filter_ops strfilter_convert_ops = {
 	strfilter_convert_filter,
 	strfilter_convert_dtor,
 	"convert.*"
@@ -1738,7 +1739,7 @@ out:
 	return retval;
 }
 
-static php_stream_filter_factory strfilter_convert_factory = {
+static const php_stream_filter_factory strfilter_convert_factory = {
 	strfilter_convert_create
 };
 /* }}} */
@@ -1790,7 +1791,7 @@ static void consumed_filter_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops consumed_filter_ops = {
+static const php_stream_filter_ops consumed_filter_ops = {
 	consumed_filter_filter,
 	consumed_filter_dtor,
 	"consumed"
@@ -1798,7 +1799,7 @@ static php_stream_filter_ops consumed_filter_ops = {
 
 static php_stream_filter *consumed_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_consumed_filter_data *data;
 
 	if (strcasecmp(filtername, "consumed")) {
@@ -1815,7 +1816,7 @@ static php_stream_filter *consumed_filter_create(const char *filtername, zval *f
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory consumed_filter_factory = {
+static const php_stream_filter_factory consumed_filter_factory = {
 	consumed_filter_create
 };
 
@@ -1994,7 +1995,7 @@ static void php_chunked_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops chunked_filter_ops = {
+static const php_stream_filter_ops chunked_filter_ops = {
 	php_chunked_filter,
 	php_chunked_dtor,
 	"dechunk"
@@ -2002,7 +2003,7 @@ static php_stream_filter_ops chunked_filter_ops = {
 
 static php_stream_filter *chunked_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_chunked_filter_data *data;
 
 	if (strcasecmp(filtername, "dechunk")) {
@@ -2019,14 +2020,14 @@ static php_stream_filter *chunked_filter_create(const char *filtername, zval *fi
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-static php_stream_filter_factory chunked_filter_factory = {
+static const php_stream_filter_factory chunked_filter_factory = {
 	chunked_filter_create
 };
 /* }}} */
 
 static const struct {
-	php_stream_filter_ops *ops;
-	php_stream_filter_factory *factory;
+	const php_stream_filter_ops *ops;
+	const php_stream_filter_factory *factory;
 } standard_filters[] = {
 	{ &strfilter_rot13_ops, &strfilter_rot13_factory },
 	{ &strfilter_toupper_ops, &strfilter_toupper_factory },

@@ -2,7 +2,7 @@ dnl $Id$
 dnl config.m4 for extension sodium
 
 PHP_ARG_WITH(sodium, for sodium support,
-[  --with-sodium[=DIR]     Include sodium support])
+[  --with-sodium[=DIR]       Include sodium support])
 
 if test "$PHP_SODIUM" != "no"; then
   SEARCH_PATH="/usr/local /usr"     # you might want to change this
@@ -43,7 +43,7 @@ if test "$PHP_SODIUM" != "no"; then
   fi
 
   LIBNAME=sodium
-  LIBSYMBOL=sodium_add
+  LIBSYMBOL=sodium_bin2hex
 
   if test -n "$LIBSODIUM_DIR"; then
     PHP_ADD_INCLUDE($LIBSODIUM_DIR/include)

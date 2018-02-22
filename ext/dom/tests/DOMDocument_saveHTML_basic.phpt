@@ -20,5 +20,5 @@ $text = $doc->createTextNode('This is the title');
 $text = $title->appendChild($text);
 echo $doc->saveHTML();
 ?>
---EXPECTF--
+--EXPECT--
 <html><head><title>This is the title</title></head></html>

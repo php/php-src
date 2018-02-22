@@ -25,22 +25,6 @@ array(2) {
   [1]=>
   string(4) "test"
 }
-array(2) {
-  [0]=>
-  object(Exception)#%d (6) {
-    ["message":protected]=>
-    string(0) ""
-    ["string":"Exception":private]=>
-    string(0) ""
-    ["code":protected]=>
-    int(0)
-    ["file":protected]=>
-    string(%d) "%s"
-    ["line":protected]=>
-    int(3)
-    ["previous":"Exception":private]=>
-    NULL
-  }
-  [1]=>
-  string(4) "test"
-}
+
+Notice: unserialize(): Error at offset %d of %d bytes in %sbug70963.php on line 3
+bool(false)

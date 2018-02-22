@@ -187,7 +187,11 @@ credits files in ext/standard.
 
 9. run: ``PHPROOT=. ./makedist php 5.4.1``, this will export the tag, create configure
 and build three tarballs (gz, bz2 and xz).
-Check if the pear files are updated (phar).
+   Check if the pear files are updated (phar).
+   On some systems the behavior of GNU tar can default to produce POSIX complaint archives
+with PAX headers. As not every application is compatible with that format, creation of
+archives with PAX headers should be avoided. When packaging on such a system, the GNU tar
+can be influenced by defining the environment variable TAR_OPTIONS='--format=gnu'.
 
 10. Generate the GPG signature files for the archives.
   ``gpg -u YOUREMAIL --armor --detach-sign php-X.Y.Z.tar.xxx``
@@ -197,7 +201,8 @@ Check if the pear files are updated (phar).
     ``git submodule init;
     git submodule update;
     cd distributions;
-    git pull origin master;
+    git fetch;
+    git pull --rebase origin master;
     cd ..;
     git commit distributions;
     git push;``
@@ -326,6 +331,28 @@ the news entry.
 Please make sure that the mail to php-announce@ is its own completely separate email.
 This is to make sure that replies to the announcement on php-general@ or internals@
 will not accidentally hit the php-announce@ mailinglist.
+
+Forking a new release branch
+----------------------------
+
+1. One week prior to cutting X.Y.0beta1, warn internals@ that your version's branch
+   is about to be cut, and that PHP-X.Y will be moving into feature freeze.
+   Try to be specific about when the branch will be cut.
+      Example: http://news.php.net/php.internals/99864
+
+2. Just prior to cutting X.Y.0beta1, create the new branch locally.
+   Add a commit on master after the branch point clearing the NEWS file, and updating
+     main/php_versions.h and Zend/zend.h to update versions.
+     Example: https://github.com/php/php-src/commit/5230541ef59e0637d5522293a7d099bf18ce6af3
+   Push the new branch and the commit just added to master.
+
+3. Immediately notify internals@ of the branch cut and advise the new merging order:
+     Example: http://news.php.net/php.internals/99903
+
+4. Update php-web:git.php and wiki.php.net/vcs/gitworkflow to reflect the new branch:
+     Example: https://github.com/php/web-php/commit/74bcad4c770d95f21b7fbeeedbd76d943bb83f23
+
+5. Notify nlopess@ to add PHP_X_Y tag to gcov.php.net
 
 New Release Manager Checklist
 -----------------------------

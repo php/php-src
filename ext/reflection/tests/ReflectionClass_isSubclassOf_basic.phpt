@@ -25,7 +25,7 @@ foreach ($rcs as $childName => $child) {
 	}
 }
 ?>
---EXPECTF--
+--EXPECT--
 Is A a subclass of A? 
    - Using object argument: bool(false)
    - Using string argument: bool(false)

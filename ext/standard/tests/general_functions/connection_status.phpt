@@ -6,5 +6,5 @@ marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao p
 <?php
 var_dump(connection_status() == CONNECTION_NORMAL);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

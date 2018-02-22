@@ -29,7 +29,7 @@ NULL
 Warning: socket_import_stream() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
-Warning: socket_import_stream() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: socket_import_stream() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 Warning: socket_import_stream() expects parameter 1 to be resource, object given in %s on line %d

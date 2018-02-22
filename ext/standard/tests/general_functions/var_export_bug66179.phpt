@@ -19,7 +19,7 @@ var_export(10000000000000000.0);
 echo PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 1.0
 123.0
 -1.0

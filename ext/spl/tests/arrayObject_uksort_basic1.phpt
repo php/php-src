@@ -27,7 +27,7 @@ $ao->uksort('cmp');
 var_dump($ao);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::uksort() : basic functionality ***
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>

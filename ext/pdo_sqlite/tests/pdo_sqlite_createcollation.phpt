@@ -29,7 +29,7 @@ foreach ($result as $row) {
 $db->query('DROP TABLE foobar');
 
 ?>
---EXPECTF--
+--EXPECT--
 1
 2
 10

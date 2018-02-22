@@ -1574,10 +1574,13 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* strip off the colon */
 	zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
-	char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-	zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, client->current_header_value);
+	zend_string *lc_header_name = zend_string_alloc(client->current_header_name_len, 1);
+	zend_str_tolower_copy(ZSTR_VAL(lc_header_name), client->current_header_name, client->current_header_name_len);
+	GC_MAKE_PERSISTENT_LOCAL(orig_header_name);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
+	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
 	zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, client->current_header_value);
-	efree(lc_header_name);
+	zend_string_release(lc_header_name);
 	zend_string_release(orig_header_name);
 
 	if (client->current_header_name_allocated) {

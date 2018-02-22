@@ -66,5 +66,5 @@ echo "Fetch operation done!\n";
 $db->exec("drop table pdo_oci_stream_2");
 
 ?>
---EXPECTF--
+--EXPECT--
 Fetch operation done!

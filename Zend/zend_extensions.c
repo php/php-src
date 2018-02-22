@@ -125,14 +125,6 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 #endif
 		DL_UNLOAD(handle);
 		return FAILURE;
-	} else if (zend_get_extension(new_extension->name)) {
-		fprintf(stderr, "Cannot load %s - extension already loaded\n", new_extension->name);
-/* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
-		fflush(stderr);
-#endif
-		DL_UNLOAD(handle);
-		return FAILURE;
 	}
 
 	return zend_register_extension(new_extension, handle);

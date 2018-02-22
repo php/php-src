@@ -10,6 +10,6 @@ print "\n";
 print strtotime('2008-05-23 00:00:00');
 
 ?>
---EXPECTF--
+--EXPECT--
 1211472000
 1211472000

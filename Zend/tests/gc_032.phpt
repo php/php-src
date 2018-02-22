@@ -7,35 +7,25 @@ zend.enable_gc=1
 $a = array();
 $b =& $a;
 $a[0] = $a;
-debug_zval_dump($a);
+var_dump($a);
 $a = array(array());
 $b =& $a;
 $a[0][0] = $a;
-debug_zval_dump($a);
+var_dump($a);
 ?>
---EXPECTF--
-array(1) refcount(%d){
+--EXPECT--
+array(1) {
   [0]=>
-  array(1) refcount(%d){
-    [0]=>
-    array(1) refcount(%d){
-      [0]=>
-      *RECURSION*
-    }
+  array(0) {
   }
 }
-array(1) refcount(%d){
+array(1) {
   [0]=>
-  array(1) refcount(%d){
+  array(1) {
     [0]=>
-    array(1) refcount(%d){
+    array(1) {
       [0]=>
-      array(1) refcount(%d){
-        [0]=>
-        array(1) refcount(%d){
-          [0]=>
-          *RECURSION*
-        }
+      array(0) {
       }
     }
   }

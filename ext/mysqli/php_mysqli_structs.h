@@ -211,7 +211,7 @@ extern void php_mysqli_dtor_p_elements(void *data);
 
 extern void php_mysqli_close(MY_MYSQL * mysql, int close_type, int resource_status);
 
-extern zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
+extern const zend_object_iterator_funcs php_mysqli_result_iterator_funcs;
 extern zend_object_iterator *php_mysqli_result_get_iterator(zend_class_entry *ce, zval *object, int by_ref);
 
 extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend_long fetchtype);
@@ -256,12 +256,12 @@ extern void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * resul
 	mysqli_object *intern = Z_MYSQLI_P(__id); \
 	if (!(my_res = (MYSQLI_RESOURCE *)intern->ptr)) {\
   		php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(intern->zo.ce->name));\
-  		RETURN_NULL();\
+		RETURN_FALSE;\
   	}\
 	__ptr = (__type)my_res->ptr; \
 	if (__check && my_res->status < __check) { \
 		php_error_docref(NULL, E_WARNING, "invalid object or resource %s\n", ZSTR_VAL(intern->zo.ce->name)); \
-		RETURN_NULL();\
+		RETURN_FALSE;\
 	}\
 }
 

@@ -46,7 +46,7 @@ var_dump(array_fill_keys($refArray, $simpleStr));
 fclose($fp);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_fill_keys() : parameter variations ***
 
 -- Testing array_fill_keys() function with reference value --

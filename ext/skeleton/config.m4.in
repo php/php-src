@@ -1,0 +1,7 @@
+PHP_ARG_ENABLE(%EXTNAME%, whether to enable %EXTNAME% support,
+[  --enable-%EXTNAME%          Enable %EXTNAME% support], no)
+
+if test "$PHP_%EXTNAMECAPS%" != "no"; then
+  AC_DEFINE(HAVE_%EXTNAMECAPS%, 1, [ Have %EXTNAME% support ])
+  PHP_NEW_EXTENSION(%EXTNAME%, %EXTNAME%.c, $ext_shared)
+fi

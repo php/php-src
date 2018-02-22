@@ -43,7 +43,7 @@ HEADER;
 
 test_mimetypes($mimetypes);
 ?>
---EXPECTF--
+--EXPECT--
 foo.html => Content-Type: text/html; charset=UTF-8
 foo.htm => Content-Type: text/html; charset=UTF-8
 foo.svg => Content-Type: image/svg+xml

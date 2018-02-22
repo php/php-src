@@ -34,7 +34,7 @@ echo "\nTry 2:\n";
 printf($obj . "\n");
 
 ?>
---EXPECTF--
+--EXPECT--
 Object with no __toString():
 Try 1:
 Error: 4096 - Object of class stdClass could not be converted to string

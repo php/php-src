@@ -27,8 +27,8 @@ require_once('skipifconnectfailure.inc');
 	if (!$stmt = mysqli_stmt_init($link))
 		printf("[004] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if (NULL !== ($tmp = mysqli_stmt_sqlstate($stmt)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_sqlstate($stmt)))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id FROM test"))
 		printf("[006] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));
@@ -45,8 +45,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_stmt_close($stmt);
 
-	if (NULL !== ($tmp = mysqli_stmt_sqlstate($stmt)))
-		printf("[010] Expecting NULL, got %s/%s\n");
+	if (false !== ($tmp = mysqli_stmt_sqlstate($stmt)))
+		printf("[010] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 	print "done!";

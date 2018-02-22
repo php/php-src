@@ -219,7 +219,7 @@ PHP_FUNCTION(socket_recvmsg)
 	struct err_s	err = {0};
 
 	//ssize_t recvmsg(int sockfd, struct msghdr *msg, int flags);
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra/|l",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ra|l",
 			&zsocket, &zmsg, &flags) == FAILURE) {
 		return;
 	}
@@ -256,7 +256,7 @@ PHP_FUNCTION(socket_recvmsg)
 		msghdr = NULL;
 		allocations_dispose(&allocations);
 
-		zval_dtor(zmsg);
+		zval_ptr_dtor(zmsg);
 		if (!err.has_error) {
 			ZVAL_COPY_VALUE(zmsg, zres);
 		} else {

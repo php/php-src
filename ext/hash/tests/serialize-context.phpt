@@ -11,5 +11,5 @@ try {
 } catch (Exception $e) {
   echo "Exception: {$e->getMessage()}\n";
 }
---EXPECTF--
+--EXPECT--
 Exception: Serialization of 'HashContext' is not allowed

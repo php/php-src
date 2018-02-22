@@ -91,7 +91,6 @@ if (PHP_INTL != "no") {
 					spoofchecker_create.c \
 					spoofchecker_main.c",
 					"intl");
-					AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 		}
 
 		ADD_SOURCES(configure_module_dirname + "/transliterator", "\

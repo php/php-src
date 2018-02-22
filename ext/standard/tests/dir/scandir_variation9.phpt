@@ -37,7 +37,7 @@ delete_files($dir, 2);
 $dir = dirname(__FILE__) . '/scandir_variation9';
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 array(4) {
   [0]=>

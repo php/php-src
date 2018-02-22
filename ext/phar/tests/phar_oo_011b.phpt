@@ -2,7 +2,6 @@
 Phar object: add file
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=0
@@ -12,11 +11,11 @@ phar.require_hash=0
 try
 {
 	$pharconfig = 0;
-	
+
 	require_once 'files/phar_oo_test.inc';
-	
+
 	$phar = new Phar($fname);
-	
+
 	$phar['f.php'] = 'hi';
 	var_dump(isset($phar['f.php']));
 	echo $phar['f.php'];
@@ -30,10 +29,10 @@ catch (BadMethodCallException $e)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_011b.phar.php');
 __halt_compiler();
 ?>
---EXPECTF--
+--EXPECT--
 Exception: Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

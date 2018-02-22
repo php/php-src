@@ -39,7 +39,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : anonymous function as 'cmp_function' ***
 -- Anonymous 'cmp_function' with parameters passed by value --
 bool(true)

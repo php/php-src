@@ -33,7 +33,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   var_dump( $curl_content );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl with user agent ***
 string(9) "cURL phpt"
 ===DONE===

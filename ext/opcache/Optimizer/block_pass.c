@@ -57,7 +57,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 		if (c->flags & CONST_PERSISTENT) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
-				zval_copy_ctor(result);
+				Z_TRY_ADDREF_P(result);
 			}
 		} else {
 			retval = 0;
@@ -188,8 +188,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					VAR_SOURCE(op1) = NULL;
 					MAKE_NOP(src);
 				} else {
-					zval c = ZEND_OP1_LITERAL(src);
-					zval_copy_ctor(&c);
+					zval c;
+					ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 					if (zend_optimizer_update_op1_const(op_array, opline, &c)) {
 						zend_optimizer_remove_live_range(op_array, op1.var);
 						VAR_SOURCE(op1) = NULL;
@@ -256,9 +256,9 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 			    src->op1_type == IS_CONST) {
 
 				znode_op op2 = opline->op2;
-				zval c = ZEND_OP1_LITERAL(src);
+				zval c;
 
-				zval_copy_ctor(&c);
+				ZVAL_COPY(&c, &ZEND_OP1_LITERAL(src));
 				if (zend_optimizer_update_op2_const(op_array, opline, &c)) {
 					zend_optimizer_remove_live_range(op_array, op2.var);
 					VAR_SOURCE(op2) = NULL;
@@ -347,10 +347,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R &&
 					    src->opcode != ZEND_NEW) {
-						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-							/* mark as removed (empty live range) */
-							op_array->live_range[opline->op2.num].var = (uint32_t)-1;
-						}
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
 					}
@@ -410,7 +406,8 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 		}
 #endif
 
-			case ZEND_FETCH_LIST:
+			case ZEND_FETCH_LIST_R:
+			case ZEND_FETCH_LIST_W:
 				if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 					/* LIST variable will be deleted later by FREE */
 					Tsource[VAR_NUM(opline->op1.var)] = NULL;
@@ -873,7 +870,7 @@ optimize_const_unary_op:
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
-static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
+static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_optimizer_ctx *ctx)
 {
 	zend_basic_block *blocks = cfg->blocks;
 	zend_basic_block *end = blocks + cfg->blocks_count;
@@ -962,8 +959,8 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				break;
 			case ZEND_CATCH:
-				if (!opline->result.var) {
-					opline->extended_value = ZEND_OPLINE_TO_OFFSET(opline, new_opcodes + blocks[b->successors[0]].start);
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					ZEND_SET_OP_JMP_ADDR(opline, opline->op2, new_opcodes + blocks[b->successors[0]].start);
 				}
 				break;
 			case ZEND_DECLARE_ANON_CLASS:
@@ -1039,10 +1036,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 	/* adjust loop jump targets & remove unused live range entries */
 	if (op_array->last_live_range) {
 		int i, j;
-		uint32_t *map;
-		ALLOCA_FLAG(use_heap);
-
-		map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
 
 		for (i = 0, j = 0; i < op_array->last_live_range; i++) {
 			if (op_array->live_range[i].var == (uint32_t)-1) {
@@ -1061,7 +1054,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 				}
 				op_array->live_range[i].start = start_op;
 				op_array->live_range[i].end = end_op;
-				map[i] = j;
 				if (i != j) {
 					op_array->live_range[j]  = op_array->live_range[i];
 				}
@@ -1070,40 +1062,19 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 
 		if (i != j) {
-			if ((op_array->last_live_range = j)) {
-				zend_op *opline = new_opcodes;
-				zend_op *end = opline + len;
-				while (opline != end) {
-					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-							opline->extended_value == ZEND_FREE_ON_RETURN) {
-						ZEND_ASSERT(opline->op2.num < (uint32_t) i);
-						opline->op2.num = map[opline->op2.num];
-					}
-					opline++;
-				}
-			} else {
+			op_array->last_live_range = j;
+			if (j == 0) {
 				efree(op_array->live_range);
 				op_array->live_range = NULL;
 			}
 		}
-		free_alloca(map, use_heap);
 	}
 
 	/* adjust early binding list */
-	if (op_array->early_binding != (uint32_t)-1) {
-		uint32_t *opline_num = &op_array->early_binding;
-		zend_op *end;
-
-		opline = op_array->opcodes;
-		end = opline + op_array->last;
-		while (opline < end) {
-			if (opline->opcode == ZEND_DECLARE_INHERITED_CLASS_DELAYED) {
-				*opline_num = opline - op_array->opcodes;
-				opline_num = &opline->result.opline_num;
-			}
-			++opline;
-		}
-		*opline_num = -1;
+	if (op_array->fn_flags & ZEND_ACC_EARLY_BINDING) {
+		ZEND_ASSERT(op_array == &ctx->script->main_op_array);
+		ctx->script->first_early_binding_opline =
+			zend_build_delayed_early_binding_list(op_array);
 	}
 
 	/* rebuild map (just for printing) */
@@ -1158,8 +1129,8 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/* JMP L, L: JMPZNZ L1,L2 -> JMPZNZ L1,L2 */
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
-						zval zv = ZEND_OP1_LITERAL(last_op);
-						zval_copy_ctor(&zv);
+						zval zv;
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
@@ -1175,8 +1146,8 @@ static void zend_jmp_optimization(zend_basic_block *block, zend_op_array *op_arr
 					/* JMP L, L: RETURN to immediate RETURN */
 					*last_op = *target;
 					if (last_op->op1_type == IS_CONST) {
-						zval zv = ZEND_OP1_LITERAL(last_op);
-						zval_copy_ctor(&zv);
+						zval zv;
+						ZVAL_COPY(&zv, &ZEND_OP1_LITERAL(last_op));
 						last_op->op1.constant = zend_optimizer_add_literal(op_array, &zv);
 					}
 					DEL_SOURCE(block, block->successors[0]);
@@ -1748,6 +1719,8 @@ static void zend_t_usage(zend_cfg *cfg, zend_op_array *op_array, zend_bitset use
 					switch (opline->opcode) {
 						case ZEND_POST_INC:
 						case ZEND_POST_DEC:
+						case ZEND_POST_INC_OBJ:
+						case ZEND_POST_DEC_OBJ:
 							opline->opcode -= 2;
 							opline->result_type = IS_UNUSED;
 							break;
@@ -1886,7 +1859,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
     /* Build CFG */
 	checkpoint = zend_arena_checkpoint(ctx->arena);
-	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg, NULL) != SUCCESS) {
+	if (zend_build_cfg(&ctx->arena, op_array, ZEND_CFG_SPLIT_AT_LIVE_RANGES, &cfg) != SUCCESS) {
 		zend_arena_release(&ctx->arena, checkpoint);
 		return;
 	}
@@ -1955,7 +1928,7 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 
 	zend_bitset_clear(usage, bitset_len);
 	zend_t_usage(&cfg, op_array, usage, ctx);
-	assemble_code_blocks(&cfg, op_array);
+	assemble_code_blocks(&cfg, op_array, ctx);
 
 	if (ctx->debug_level & ZEND_DUMP_AFTER_BLOCK_PASS) {
 		zend_dump_op_array(op_array, ZEND_DUMP_CFG | ZEND_DUMP_HIDE_UNREACHABLE, "after block pass", &cfg);

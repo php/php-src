@@ -24,7 +24,7 @@ echo "-- with string keys --\n";
 var_dump( array_sum($input) );
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : with associative array ***
 -- with numeric keys --
 float(32.56)

@@ -28,5 +28,5 @@ for ($j=0; $j<30; $j++) {
 }
 echo "OK\n";
 ?>
---EXPECTF--
+--EXPECT--
 OK

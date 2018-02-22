@@ -34,7 +34,7 @@ foreach($strings as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
 string(89) "Roy&#039s height > Sam&#039;s $height... 1111 &ap; 0000 = 0000... " double quote string ""

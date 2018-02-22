@@ -216,7 +216,7 @@ PHP_FUNCTION(assert)
 	}
 
 	if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
-		zval *args = safe_emalloc(!description ? 3 : 4, sizeof(zval), 0);
+		zval args[4];
 		zval retval;
 		int i;
 		uint32_t lineno = zend_get_executed_lineno();
@@ -242,7 +242,6 @@ PHP_FUNCTION(assert)
 			}
 		}
 
-		efree(args);
 		zval_ptr_dtor(&retval);
 	}
 
@@ -279,7 +278,7 @@ PHP_FUNCTION(assert)
 	if (ASSERTG(bail)) {
 		zend_bailout();
 	}
-	
+
 	RETURN_FALSE;
 }
 /* }}} */

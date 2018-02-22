@@ -32,7 +32,7 @@ foreach ($contents as $content) {
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing file() : variation ***
 array(2) {
   [0]=>

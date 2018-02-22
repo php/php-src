@@ -16,7 +16,7 @@ $obj[]=2;
 $obj[]=2;
 
 ?>
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

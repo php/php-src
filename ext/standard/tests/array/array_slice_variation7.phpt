@@ -111,7 +111,7 @@ foreach($inputs as $type => $input) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Iteration 1 : key type is int --

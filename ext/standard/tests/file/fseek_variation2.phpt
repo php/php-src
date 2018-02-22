@@ -128,25 +128,25 @@ int(3)
 
 Arg value  
 
-Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value  
 
-Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value string 
 
-Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 int(3)
 
 Arg value string 
 
-Warning: fseek() expects parameter 3 to be integer, string given in %s on line %d
+Warning: fseek() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 int(3)
 

@@ -45,7 +45,7 @@ var_dump(ClassC::$prop);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===INIT===
 string(1) "A"
 string(1) "C"

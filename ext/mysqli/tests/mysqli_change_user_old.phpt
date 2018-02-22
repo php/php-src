@@ -123,5 +123,5 @@ if (mysqli_get_server_version($link) >= 50600)
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

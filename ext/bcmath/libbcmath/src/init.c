@@ -51,14 +51,6 @@ _bc_new_num_ex (length, scale, persistent)
   }
   /* PHP Change:  malloc() -> pemalloc(), removed free_list code */
   temp = (bc_num) safe_pemalloc (1, sizeof(bc_struct)+length, scale, persistent);
-#if 0
-  if (_bc_Free_list != NULL) {
-    temp = _bc_Free_list;
-    _bc_Free_list = temp->n_next;
-  } else {
-    temp = (bc_num) pemalloc (sizeof(bc_struct), persistent);
-  }
-#endif
   temp->n_sign = PLUS;
   temp->n_len = length;
   temp->n_scale = scale;
@@ -86,10 +78,6 @@ _bc_free_num_ex (num, persistent)
 		/* PHP Change:  free() -> pefree(), removed free_list code */
       pefree ((*num)->n_ptr, persistent);
 	pefree(*num, persistent);
-#if 0
-    (*num)->n_next = _bc_Free_list;
-    _bc_Free_list = *num;
-#endif
   }
   *num = NULL;
 }

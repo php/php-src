@@ -29,7 +29,7 @@ echo "\n-- Multibyte String --\n";
 var_dump(iconv_strlen($string_mb, 'UTF-8'));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing iconv_strlen() : basic functionality***
 
 -- ASCII String --

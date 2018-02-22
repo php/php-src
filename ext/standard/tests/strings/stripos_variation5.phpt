@@ -24,7 +24,7 @@ var_dump( stripos($control_char_str, "\t", 15) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: with heredoc strings ***
 -- With heredoc string containing escape characters --
 int(12)

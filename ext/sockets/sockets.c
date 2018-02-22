@@ -339,7 +339,7 @@ PHP_FUNCTION(socket_addrinfo_explain);
 
 /* {{{ sockets_functions[]
  */
-const zend_function_entry sockets_functions[] = {
+static const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			arginfo_socket_select)
 	PHP_FE(socket_create,			arginfo_socket_create)
 	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)
@@ -919,7 +919,7 @@ PHP_FUNCTION(socket_select)
 	int				retval, sets = 0;
 	zend_long			usec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!a/!a/!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
 		return;
 	}
 
@@ -940,29 +940,18 @@ PHP_FUNCTION(socket_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		zval tmp;
-
-		if (Z_TYPE_P(sec) != IS_LONG) {
-			tmp = *sec;
-			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
-			sec = &tmp;
-		}
+		zend_long s = zval_get_long(sec);
 
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
-			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
+			tv.tv_sec = s + (usec / 1000000);
 			tv.tv_usec = usec % 1000000;
 		} else {
-			tv.tv_sec = Z_LVAL_P(sec);
+			tv.tv_sec = s;
 			tv.tv_usec = usec;
 		}
 
 		tv_p = &tv;
-
-		if (sec == &tmp) {
-			zval_dtor(&tmp);
-		}
 	}
 
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);

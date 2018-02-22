@@ -51,7 +51,7 @@ check($a);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --- 1 refs container:
 array(3) {
   [0]=>

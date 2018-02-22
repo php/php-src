@@ -107,7 +107,7 @@ struct dirent *readdir(DIR *dp)
 	memmove(dp->dent.d_name, _tmp, reclen + 1);
 	free(_tmp);
 	dp->dent.d_reclen = (unsigned short)reclen;
-	
+
 	dp->offset++;
 
 	dp->dent.d_ino = 1;

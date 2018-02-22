@@ -2,7 +2,6 @@
 Phar object: entry & openFile()
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.require_hash=0
 --FILE--
@@ -26,7 +25,7 @@ foreach($phar as $name => $ent)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_003.phar.php');
 __halt_compiler();
 ?>

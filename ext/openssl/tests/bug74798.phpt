@@ -85,7 +85,7 @@ unlink($tmpFileOut2);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 int(40)

@@ -92,7 +92,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ php_gettext_functions[]
  */
-const zend_function_entry php_gettext_functions[] = {
+static const zend_function_entry php_gettext_functions[] = {
 	PHP_NAMED_FE(textdomain,		zif_textdomain,		arginfo_textdomain)
 	PHP_NAMED_FE(gettext,			zif_gettext,		arginfo_gettext)
 	/* Alias for gettext() */
@@ -299,7 +299,7 @@ PHP_NAMED_FUNCTION(zif_ngettext)
 #endif
 
 #if HAVE_DNGETTEXT
-/* {{{ proto string dngettext (string domain, string msgid1, string msgid2, int count)
+/* {{{ proto string dngettext(string domain, string msgid1, string msgid2, int count)
    Plural version of dgettext() */
 PHP_NAMED_FUNCTION(zif_dngettext)
 {
@@ -325,7 +325,7 @@ PHP_NAMED_FUNCTION(zif_dngettext)
 #endif
 
 #if HAVE_DCNGETTEXT
-/* {{{ proto string dcngettext (string domain, string msgid1, string msgid2, int n, int category)
+/* {{{ proto string dcngettext(string domain, string msgid1, string msgid2, int n, int category)
    Plural version of dcgettext() */
 PHP_NAMED_FUNCTION(zif_dcngettext)
 {

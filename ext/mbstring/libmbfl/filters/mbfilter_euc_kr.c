@@ -64,7 +64,9 @@ const mbfl_encoding mbfl_encoding_euc_kr = {
 	"EUC-KR",
 	(const char *(*)[])&mbfl_encoding_euc_kr_aliases,
 	mblen_table_euckr,
-	MBFL_ENCTYPE_MBCS
+	MBFL_ENCTYPE_MBCS,
+	&vtbl_euckr_wchar,
+	&vtbl_wchar_euckr
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_euckr = {

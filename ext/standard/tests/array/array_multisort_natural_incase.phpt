@@ -36,7 +36,7 @@ var_dump($a, $b);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : natural sorting case-insensitive
 array(7) {
   [0]=>

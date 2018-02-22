@@ -18,6 +18,6 @@ posix_setuid(0);
 var_dump(posix_errno());
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Test by calling function with permission error ***
 int(1)

@@ -79,7 +79,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : hexa formats and non-hexa values ***
 
 -- Iteration 1 --

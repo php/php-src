@@ -37,7 +37,7 @@ array(16) {
     ["bits"]=>
     int(24)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
   }
   ["test12pix.webp"]=>
   array(6) {
@@ -67,7 +67,7 @@ array(16) {
     ["bits"]=>
     int(32)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
   }
   ["test1pix.bmp"]=>
   array(6) {
@@ -82,7 +82,7 @@ array(16) {
     ["bits"]=>
     int(24)
     ["mime"]=>
-    string(14) "image/x-ms-bmp"
+    string(9) "image/bmp"
   }
   ["test1pix.jp2"]=>
   array(7) {

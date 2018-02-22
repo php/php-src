@@ -14,5 +14,5 @@ $my_var=array(1,2,3);
 $data = call_user_func_array("implode",array(&$my_var, new StdClass()));
 echo "Done.\n";
 ?>
---EXPECTF--
+--EXPECT--
 Done.

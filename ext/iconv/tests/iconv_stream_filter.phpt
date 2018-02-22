@@ -27,7 +27,7 @@ var_dump(bin2hex(fread($fp, 5)) != "69636f6e76");
 var_dump(bin2hex(fread($fp, 1)) != "0a");
 fclose($fp);
 ?>
---EXPECTF--
+--EXPECT--
 string(20) "1b244224332473244b24"
 string(10) "41244f1b28"
 string(2) "42"

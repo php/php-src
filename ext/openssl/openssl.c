@@ -457,7 +457,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ openssl_functions[]
  */
-const zend_function_entry openssl_functions[] = {
+static const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
 
 /* spki functions */
@@ -6009,7 +6009,7 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|sz/", &data, &data_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a|sz/", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}
@@ -6739,7 +6739,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 /* }}} */
 
 
-/* {{{ proto string openssl_random_pseudo_bytes(integer length [, &bool returned_strong_result])
+/* {{{ proto string openssl_random_pseudo_bytes(int length [, &bool returned_strong_result])
    Returns a string of the length specified filled with random pseudo bytes */
 PHP_FUNCTION(openssl_random_pseudo_bytes)
 {

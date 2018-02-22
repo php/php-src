@@ -161,19 +161,19 @@ string(12) "737472696e67"
 string(12) "737472696e67"
 
 --empty array--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, array given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -213,11 +213,11 @@ string(12) "737472696e67"
 string(12) "737472696e67"
 
 --instance of classWithToString--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, object given, %s(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, object given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, object given, %s(%d)
 NULL
 
 --undefined var--
@@ -227,6 +227,6 @@ string(8) "5f76616c"
 string(8) "5f76616c"
 
 --resource--
-Error: 2 - mb_strrichr() expects parameter 3 to be boolean, resource given, %s(%d)
+Error: 2 - mb_strrichr() expects parameter 3 to be bool, resource given, %s(%d)
 NULL
 ===DONE===

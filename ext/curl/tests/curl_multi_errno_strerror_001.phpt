@@ -23,7 +23,7 @@ $errno = curl_multi_errno($mh);
 echo $errno . PHP_EOL;
 echo curl_multi_strerror($errno) . PHP_EOL;
 ?>
---EXPECTF--
+--EXPECT--
 0
 No error
 6

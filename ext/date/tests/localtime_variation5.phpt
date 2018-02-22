@@ -31,7 +31,7 @@ foreach($inputs as $key =>$value) {
 	  
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing localtime() : usage variation ***
 
 --Hexa-decimal 0--

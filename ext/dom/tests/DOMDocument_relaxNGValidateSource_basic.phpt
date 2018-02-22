@@ -35,5 +35,5 @@ $result = $doc->relaxNGValidateSource($rng);
 var_dump($result);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

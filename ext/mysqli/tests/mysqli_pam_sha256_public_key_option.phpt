@@ -128,5 +128,5 @@ $link->close();
 	$file = sprintf("%s%s%s_%s", sys_get_temp_dir(), DIRECTORY_SEPARATOR, "test_sha256_" , @date("Ymd"));
 	@unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 done!

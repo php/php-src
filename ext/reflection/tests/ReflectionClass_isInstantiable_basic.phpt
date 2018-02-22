@@ -32,7 +32,7 @@ foreach($classes  as $class ) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Is C instantiable?  bool(true)
 Is iface instantiable?  bool(false)
 Is ifaceImpl instantiable?  bool(true)

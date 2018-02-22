@@ -23,7 +23,7 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing DateTimeZone() : error conditions ***
 
 -- Testing new DateTimeZone() with more than expected no. of arguments --

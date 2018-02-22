@@ -40,7 +40,7 @@ var_dump( array_intersect_assoc($arr_associative, $arr_default_keys, $arr3, $arr
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : basic functionality ***
 array(4) {
   [0]=>

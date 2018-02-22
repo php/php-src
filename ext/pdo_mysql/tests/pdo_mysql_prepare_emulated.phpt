@@ -327,7 +327,7 @@ $db->exec('DROP TABLE IF EXISTS test');
 --XFAIL--
 PDO's PS parser has some problems with invalid SQL and crashes from time to time
 (check with valgrind...)
---EXPECTF--
+--EXPECT--
 array(1) {
   ["one"]=>
   string(1) "1"

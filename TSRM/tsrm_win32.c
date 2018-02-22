@@ -207,192 +207,169 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL fAccess = FALSE;
 
 	realpath_cache_bucket * bucket = NULL;
-	char * real_path = NULL;
+	char real_path[MAXPATHLEN] = {0};
+
+	if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
+		if(tsrm_realpath(pathname, real_path) == NULL) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_FILE_NOT_FOUND);
+			return -1;
+		}
+		pathname = real_path;
+	}
 
 	PHP_WIN32_IOUTIL_INIT_W(pathname)
 	if (!pathw) {
 		return -1;
 	}
 
-	if (mode == 1 /*X_OK*/) {
-		DWORD type;
-		int ret;
-
-		ret = GetBinaryTypeW(pathw, &type) ? 0 : -1;
-
+	/* Either access call failed, or the mode was asking for a specific check.*/
+	int ret = php_win32_ioutil_access_w(pathw, mode);
+	if (0 > ret || X_OK == mode || F_OK == mode) {
 		PHP_WIN32_IOUTIL_CLEANUP_W()
-
 		return ret;
-	} else {
-		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
-			real_path = (char *)malloc(MAXPATHLEN);
-			if(tsrm_realpath(pathname, real_path) == NULL) {
-				goto Finished;
-			}
-			pathname = real_path;
-			PHP_WIN32_IOUTIL_REINIT_W(pathname);
- 		}
-
-		if(php_win32_ioutil_access(pathname, mode)) {
-			PHP_WIN32_IOUTIL_CLEANUP_W()
-			free(real_path);
-			return errno;
-		}
-
- 		/* If only existence check is made, return now */
- 		if (mode == 0) {
-			PHP_WIN32_IOUTIL_CLEANUP_W()
-			free(real_path);
-			return 0;
-		}
+	}
 
 /* Only in NTS when impersonate==1 (aka FastCGI) */
 
-		/*
-		 AccessCheck() requires an impersonation token.  We first get a primary
-		 token and then create a duplicate impersonation token.  The
-		 impersonation token is not actually assigned to the thread, but is
-		 used in the call to AccessCheck.  Thus, this function itself never
-		 impersonates, but does use the identity of the thread.  If the thread
-		 was impersonating already, this function uses that impersonation context.
-		*/
-		if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
-			if (GetLastError() == ERROR_NO_TOKEN) {
-				if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
-					 TWG(impersonation_token) = NULL;
-					 goto Finished;
-				 }
-			}
+	/*
+	 AccessCheck() requires an impersonation token.  We first get a primary
+	 token and then create a duplicate impersonation token.  The
+	 impersonation token is not actually assigned to the thread, but is
+	 used in the call to AccessCheck.  Thus, this function itself never
+	 impersonates, but does use the identity of the thread.  If the thread
+	 was impersonating already, this function uses that impersonation context.
+	*/
+	if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
+		if (GetLastError() == ERROR_NO_TOKEN) {
+			if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
+				 TWG(impersonation_token) = NULL;
+				 goto Finished;
+			 }
 		}
+	}
 
-		/* token_sid will be freed in tsrmwin32_dtor */
-		token_sid = tsrm_win32_get_token_sid(thread_token);
-		if (!token_sid) {
-			if (TWG(impersonation_token_sid)) {
-				free(TWG(impersonation_token_sid));
-			}
-			TWG(impersonation_token_sid) = NULL;
+	/* token_sid will be freed in tsrmwin32_dtor */
+	token_sid = tsrm_win32_get_token_sid(thread_token);
+	if (!token_sid) {
+		if (TWG(impersonation_token_sid)) {
+			free(TWG(impersonation_token_sid));
+		}
+		TWG(impersonation_token_sid) = NULL;
+		goto Finished;
+	}
+
+	/* Different identity, we need a new impersontated token as well */
+	if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
+		if (TWG(impersonation_token_sid)) {
+			free(TWG(impersonation_token_sid));
+		}
+		TWG(impersonation_token_sid) = token_sid;
+
+		/* Duplicate the token as impersonated token */
+		if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
 			goto Finished;
 		}
+	} else {
+		/* we already have it, free it then */
+		free(token_sid);
+	}
 
-		/* Different identity, we need a new impersontated token as well */
-		if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
-			if (TWG(impersonation_token_sid)) {
-				free(TWG(impersonation_token_sid));
+	if (CWDG(realpath_cache_size_limit)) {
+		t = time(0);
+		bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
+		if(bucket == NULL && !real_path[0]) {
+			/* We used the pathname directly. Call tsrm_realpath */
+			/* so that entry is created in realpath cache */
+			if(tsrm_realpath(pathname, real_path) != NULL) {
+				pathname = real_path;
+				bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
+				PHP_WIN32_IOUTIL_REINIT_W(pathname);
 			}
-			TWG(impersonation_token_sid) = token_sid;
-
-			/* Duplicate the token as impersonated token */
-			if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
-				goto Finished;
-			}
-		} else {
-			/* we already have it, free it then */
-			free(token_sid);
 		}
+	}
 
-		if (CWDG(realpath_cache_size_limit)) {
-			t = time(0);
-			bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
-			if(bucket == NULL && real_path == NULL) {
-				/* We used the pathname directly. Call tsrm_realpath */
-				/* so that entry is created in realpath cache */
-				real_path = (char *)malloc(MAXPATHLEN);
-				if(tsrm_realpath(pathname, real_path) != NULL) {
-					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
-					PHP_WIN32_IOUTIL_REINIT_W(pathname);
-				}
-			}
- 		}
-
- 		/* Do a full access check because access() will only check read-only attribute */
- 		if(mode == 0 || mode > 6) {
-			if(bucket != NULL && bucket->is_rvalid) {
-				fAccess = bucket->is_readable;
-				goto Finished;
-			}
- 			desired_access = FILE_GENERIC_READ;
- 		} else if(mode <= 2) {
-			if(bucket != NULL && bucket->is_wvalid) {
-				fAccess = bucket->is_writable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_WRITE;
- 		} else if(mode <= 4) {
-			if(bucket != NULL && bucket->is_rvalid) {
-				fAccess = bucket->is_readable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS;
- 		} else { // if(mode <= 6)
-			if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
-				fAccess = bucket->is_readable & bucket->is_writable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
- 		}
-
-		if(TWG(impersonation_token) == NULL) {
+	/* Do a full access check because access() will only check read-only attribute */
+	if(mode == 0 || mode > 6) {
+		if(bucket != NULL && bucket->is_rvalid) {
+			fAccess = bucket->is_readable;
 			goto Finished;
 		}
-
-		/* Get size of security buffer. Call is expected to fail */
-		if(GetFileSecurityW(pathw, sec_info, NULL, 0, &sec_desc_length)) {
+		desired_access = FILE_GENERIC_READ;
+	} else if(mode <= 2) {
+		if(bucket != NULL && bucket->is_wvalid) {
+			fAccess = bucket->is_writable;
 			goto Finished;
 		}
-
-		psec_desc = (BYTE *)malloc(sec_desc_length);
-		if(psec_desc == NULL ||
-			 !GetFileSecurityW(pathw, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+		desired_access = FILE_GENERIC_WRITE;
+	} else if(mode <= 4) {
+		if(bucket != NULL && bucket->is_rvalid) {
+			fAccess = bucket->is_readable;
 			goto Finished;
 		}
-
-		MapGenericMask(&desired_access, &gen_map);
-
-		if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
-			goto Finished_Impersonate;
+		desired_access = FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS;
+	} else { // if(mode <= 6)
+		if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
+			fAccess = bucket->is_readable & bucket->is_writable;
+			goto Finished;
 		}
+		desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
+	}
 
-		/* Keep the result in realpath_cache */
-		if(bucket != NULL) {
-			if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
-				bucket->is_rvalid = 1;
-				bucket->is_readable = fAccess;
-			}
-			else if(desired_access == FILE_GENERIC_WRITE) {
-				bucket->is_wvalid = 1;
-				bucket->is_writable = fAccess;
-			} else if (desired_access == (FILE_GENERIC_READ | FILE_GENERIC_WRITE)) {
-				bucket->is_rvalid = 1;
-				bucket->is_readable = fAccess;
-				bucket->is_wvalid = 1;
-				bucket->is_writable = fAccess;
-			}
+	if(TWG(impersonation_token) == NULL) {
+		goto Finished;
+	}
+
+	/* Get size of security buffer. Call is expected to fail */
+	if(GetFileSecurityW(pathw, sec_info, NULL, 0, &sec_desc_length)) {
+		goto Finished;
+	}
+
+	psec_desc = (BYTE *)malloc(sec_desc_length);
+	if(psec_desc == NULL ||
+		 !GetFileSecurityW(pathw, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+		goto Finished;
+	}
+
+	MapGenericMask(&desired_access, &gen_map);
+
+	if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
+		goto Finished_Impersonate;
+	}
+
+	/* Keep the result in realpath_cache */
+	if(bucket != NULL) {
+		if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
+			bucket->is_rvalid = 1;
+			bucket->is_readable = fAccess;
 		}
+		else if(desired_access == FILE_GENERIC_WRITE) {
+			bucket->is_wvalid = 1;
+			bucket->is_writable = fAccess;
+		} else if (desired_access == (FILE_GENERIC_READ | FILE_GENERIC_WRITE)) {
+			bucket->is_rvalid = 1;
+			bucket->is_readable = fAccess;
+			bucket->is_wvalid = 1;
+			bucket->is_writable = fAccess;
+		}
+	}
 
 Finished_Impersonate:
-		if(psec_desc != NULL) {
-			free(psec_desc);
-			psec_desc = NULL;
-		}
+	if(psec_desc != NULL) {
+		free(psec_desc);
+		psec_desc = NULL;
+	}
 
 Finished:
-		if(thread_token != NULL) {
-			CloseHandle(thread_token);
-		}
-		if(real_path != NULL) {
-			free(real_path);
-			real_path = NULL;
-		}
+	if(thread_token != NULL) {
+		CloseHandle(thread_token);
+	}
 
-		PHP_WIN32_IOUTIL_CLEANUP_W()
-		if(fAccess == FALSE) {
-			errno = EACCES;
-			return errno;
-		} else {
-			return 0;
-		}
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+	if(fAccess == FALSE) {
+		errno = EACCES;
+		return errno;
+	} else {
+		return 0;
 	}
 }/*}}}*/
 
@@ -787,15 +764,6 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
 		default:
 			return -1;
 	}
-}/*}}}*/
-
-TSRM_API char *realpath(char *orig_path, char *buffer)
-{/*{{{*/
-	int ret = GetFullPathName(orig_path, _MAX_PATH, buffer, NULL);
-	if(!ret || ret > _MAX_PATH) {
-		return NULL;
-	}
-	return buffer;
 }/*}}}*/
 
 #if HAVE_UTIME

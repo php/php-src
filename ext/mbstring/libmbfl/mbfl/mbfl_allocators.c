@@ -54,9 +54,9 @@
 
 #include "mbfl_allocators.h"
 
-static void *__mbfl__malloc(unsigned int);
-static void *__mbfl__realloc(void *, unsigned int);
-static void *__mbfl__calloc(unsigned int, unsigned int);
+static void *__mbfl__malloc(size_t);
+static void *__mbfl__realloc(void *, size_t);
+static void *__mbfl__calloc(size_t, size_t);
 static void __mbfl__free(void *);
 
 static mbfl_allocators default_allocators = {
@@ -71,17 +71,17 @@ static mbfl_allocators default_allocators = {
 
 mbfl_allocators *__mbfl_allocators = &default_allocators;
 
-static void *__mbfl__malloc(unsigned int sz)
+static void *__mbfl__malloc(size_t sz)
 {
 	return malloc(sz);
 }
 
-static void *__mbfl__realloc(void *ptr, unsigned int sz)
+static void *__mbfl__realloc(void *ptr, size_t sz)
 {
 	return realloc(ptr, sz);
 }
 
-static void *__mbfl__calloc(unsigned int nelems, unsigned int szelem)
+static void *__mbfl__calloc(size_t nelems, size_t szelem)
 {
 	return calloc(nelems, szelem);
 }

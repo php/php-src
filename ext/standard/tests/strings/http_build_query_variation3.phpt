@@ -18,6 +18,6 @@ $oDimensional = array(
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC1738) . PHP_EOL;
 echo http_build_query($oDimensional, '', ini_get('arg_separator.output'), PHP_QUERY_RFC3986);
 ?>
---EXPECTF--
+--EXPECT--
 name=main+page&sort=desc%2Cadmin&equation=10+%2B+10+-+5
 name=main%20page&sort=desc%2Cadmin&equation=10%20%2B%2010%20-%205

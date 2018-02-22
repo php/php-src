@@ -307,8 +307,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	obj = Z_MYSQLI_P(object);
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -342,8 +341,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	mysqli_prop_handler *hnd = NULL;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -370,7 +368,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
-	p.name = zend_string_init(pname, pname_len, 1);
+	p.name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = (w_func) ? w_func : mysqli_write_na;
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
@@ -424,8 +422,7 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
-	ALLOC_HASHTABLE(retval);
-	ZEND_INIT_SYMTABLE_EX(retval, zend_hash_num_elements(props) + 1, 0);
+	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
 		zval rv, member;
@@ -449,7 +446,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
-	intern = ecalloc(1, sizeof(mysqli_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(mysqli_object), class_type);
 
 	mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&
@@ -501,7 +498,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API mysqli_reverse_api = {
+static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };
@@ -568,11 +565,9 @@ PHP_MINIT_FUNCTION(mysqli)
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
-#endif
 #endif
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -691,9 +686,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-#endif
 #if defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
@@ -885,7 +878,6 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	zend_ulong client_ver = mysql_get_client_version();
 	/*
@@ -897,7 +889,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	}
 #else
 	mysql_server_end();
-#endif
 #endif
 #endif
 
@@ -917,7 +908,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -954,7 +945,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
@@ -1312,7 +1303,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				}
 			}
 
-			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);

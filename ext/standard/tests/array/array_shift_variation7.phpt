@@ -23,7 +23,7 @@ echo key($stack) . " => " . current ($stack) . "\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : usage variations ***
 
 -- Call array_shift() --

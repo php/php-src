@@ -31,7 +31,7 @@ var_dump( class_exists('stdclass') );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing class_exists() : basic functionality ***
 Calling class_exists() on non-existent class with autoload explicitly enabled:
 In autoload(C)

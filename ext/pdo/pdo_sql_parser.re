@@ -69,10 +69,10 @@ static int scan(Scanner *s)
 struct placeholder {
 	char *pos;
 	size_t len;
-	int bindno;
 	size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
+	int bindno;
 	struct placeholder *next;
 };
 

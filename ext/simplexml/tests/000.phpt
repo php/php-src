@@ -22,7 +22,7 @@ test('sxe->elem1');
 test('sxe->elem1[0]');
 test('sxe->elem1[0]->elem2');
 test('sxe->elem1[0]->elem2->bla');
-if (!ini_get("unicode_semantics")) test('sxe->elem1[0]["attr1"]');
+test('sxe->elem1[0]["attr1"]');
 test('sxe->elem1[0]->attr1');
 test('sxe->elem1[1]');
 test('sxe->elem1[2]');

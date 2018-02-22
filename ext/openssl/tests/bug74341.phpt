@@ -47,6 +47,6 @@ $parsed_cert = openssl_x509_parse($pem_cert);
 var_dump($parsed_cert['validFrom_time_t']);
 var_dump($parsed_cert['validTo_time_t']);
 ?>
---EXPECTF--
+--EXPECT--
 int(1389052800)
 int(1459494000)

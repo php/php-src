@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -136,17 +136,17 @@ file_fsmagic(struct magic_set *ms, const char *fn, zend_stat_t *sb, php_stream *
 				return -1;
 #endif
 #ifdef S_ISGID
-		if (sb->st_mode & S_ISGID) 
+		if (sb->st_mode & S_ISGID)
 			if (file_printf(ms, "%ssetgid", COMMA) == -1)
 				return -1;
 #endif
 #ifdef S_ISVTX
-		if (sb->st_mode & S_ISVTX) 
+		if (sb->st_mode & S_ISVTX)
 			if (file_printf(ms, "%ssticky", COMMA) == -1)
 				return -1;
 #endif
 	}
-	
+
 	switch (sb->st_mode & S_IFMT) {
 #ifndef PHP_WIN32
 # ifdef S_IFCHR

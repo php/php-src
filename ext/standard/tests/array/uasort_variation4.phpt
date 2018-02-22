@@ -67,7 +67,7 @@ var_dump($empty_array);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : different numeric arrays as 'array_arg' ***
 -- Sorting Integer array --
 bool(true)

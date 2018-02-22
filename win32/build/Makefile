@@ -200,14 +200,14 @@ build-dist: $(BUILD_DIR)\deplister.exe
 	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_PECL)
 	$(PHP_SDK_PHP_CMD) -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(PHP_VERSION_STRING)" "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\$(DIST_ZIP_SNAP) .
+	-$(7ZA) a ..\$(DIST_ZIP_SNAP) .
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\$(DIST_ZIP_PECL) .
+	-$(7ZA) a ..\$(DIST_ZIP_PECL) .
 	cd $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\$(DIST_ZIP_TEST_PACK) .
+	-$(7ZA) a ..\$(DIST_ZIP_TEST_PACK) .
 	cd $(BUILD_DIR)
-	-$(ZIP) -9 -q $(DIST_ZIP_DEBUG_PACK) *.pdb
-	-$(ZIP) -9 -q -r $(DIST_ZIP_DEV_PACK) $(BUILD_DIR_DEV_NAME)
+	-$(7ZA) a $(DIST_ZIP_DEBUG_PACK) *.pdb
+	-$(7ZA) a $(DIST_ZIP_DEV_PACK) $(BUILD_DIR_DEV_NAME)
 	cd $(BUILD_DIR)
 
 dist: all build-dist

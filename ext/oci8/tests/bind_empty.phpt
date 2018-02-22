@@ -91,7 +91,7 @@ $statement = oci_parse($c, $drop);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 bool(true)
 Test 2

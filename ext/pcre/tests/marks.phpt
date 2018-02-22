@@ -33,7 +33,7 @@ var_dump(preg_replace_callback($regex, function($matches) {
 }, '_a__b__c__d_'));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(5) {
   [0]=>

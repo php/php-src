@@ -100,7 +100,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		previous = zend_read_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &pv);
-			GC_REFCOUNT(add_previous)--;
+			GC_DELREF(add_previous);
 			return;
 		}
 		ex = previous;
@@ -547,14 +547,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
-	file = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_FILE));
+	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "Function name is no string");
 			smart_str_appends(str, "[unknown function]");
 		} else{
 			zend_long line;
-			tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_LINE));
+			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
@@ -577,7 +577,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
 	smart_str_appendc(str, '(');
-	tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);
@@ -711,9 +711,9 @@ ZEND_METHOD(exception, __toString)
 		zend_string_release(file);
 		zval_ptr_dtor(&trace);
 
-		Z_OBJPROP_P(exception)->u.v.nApplyCount++;
+		Z_PROTECT_RECURSION_P(exception);
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
-		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_OBJPROP_P(exception)->u.v.nApplyCount > 0) {
+		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_IS_RECURSIVE_P(exception)) {
 			break;
 		}
 	}
@@ -722,8 +722,8 @@ ZEND_METHOD(exception, __toString)
 	exception = getThis();
 	/* Reset apply counts */
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
-		if (Z_OBJPROP_P(exception)->u.v.nApplyCount) {
-			Z_OBJPROP_P(exception)->u.v.nApplyCount--;
+		if (Z_IS_RECURSIVE_P(exception)) {
+			Z_UNPROTECT_RECURSION_P(exception);
 		} else {
 			break;
 		}
@@ -743,7 +743,7 @@ ZEND_METHOD(exception, __toString)
 /* }}} */
 
 /** {{{ Throwable method definition */
-const zend_function_entry zend_funcs_throwable[] = {
+static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
 	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
 	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)

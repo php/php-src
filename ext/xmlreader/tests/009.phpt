@@ -23,6 +23,6 @@ echo $reader->getAttribute('num');
 echo "\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 book 2
 ===DONE===

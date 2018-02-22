@@ -22,7 +22,7 @@
 
 /* operations for a plain file; use the php_stream_fopen_XXX funcs below */
 PHPAPI extern php_stream_ops php_stream_stdio_ops;
-PHPAPI extern php_stream_wrapper php_plain_files_wrapper;
+PHPAPI extern const php_stream_wrapper php_plain_files_wrapper;
 
 BEGIN_EXTERN_C()
 
@@ -53,6 +53,9 @@ PHPAPI php_stream *_php_stream_fopen_temporary_file(const char *dir, const char 
  * will most likely fail on systems with fopencookie. */
 PHPAPI FILE * _php_stream_open_wrapper_as_file(char * path, char * mode, int options, zend_string **opened_path STREAMS_DC);
 #define php_stream_open_wrapper_as_file(path, mode, options, opened_path) _php_stream_open_wrapper_as_file((path), (mode), (options), (opened_path) STREAMS_CC)
+
+/* parse standard "fopen" modes into open() flags */
+PHPAPI int php_stream_parse_fopen_modes(const char *mode, int *open_flags);
 
 END_EXTERN_C()
 

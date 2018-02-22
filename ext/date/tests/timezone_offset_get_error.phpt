@@ -110,7 +110,7 @@ bool(false)
 -- Testing timezone_offset_get() function with an invalid values for $object argument --
 string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, instance of stdClass given"
 
-string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, integer given"
+string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, int given"
 
 string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of DateTimeZone, null given"
 
@@ -118,7 +118,7 @@ string(%d) "Argument 1 passed to timezone_offset_get() must be an instance of Da
 -- Testing timezone_offset_get() function with an invalid values for $datetime argument --
 string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, instance of stdClass given"
 
-string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given"
+string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given"
 
 string(%d) "Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given"
 

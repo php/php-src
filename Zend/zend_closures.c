@@ -114,12 +114,13 @@ ZEND_METHOD(Closure, call)
 	zend_closure *closure;
 	zend_fcall_info fci;
 	zend_fcall_info_cache fci_cache;
-	zval *my_params;
-	int my_param_count = 0;
 	zend_function my_function;
 	zend_object *newobj;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &my_params, &my_param_count) == FAILURE) {
+	fci.param_count = 0;
+	fci.params = NULL;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o*", &newthis, &fci.params, &fci.param_count) == FAILURE) {
 		return;
 	}
 
@@ -132,25 +133,14 @@ ZEND_METHOD(Closure, call)
 		return;
 	}
 
-	/* This should never happen as closures will always be callable */
-	if (zend_fcall_info_init(zclosure, 0, &fci, &fci_cache, NULL, NULL) != SUCCESS) {
-		ZEND_ASSERT(0);
-	}
-
-	fci.retval = &closure_result;
-	fci.params = my_params;
-	fci.param_count = my_param_count;
-	fci.object = fci_cache.object = newobj;
-	fci_cache.initialized = 1;
-	fci_cache.called_scope = Z_OBJCE_P(newthis);
-
-	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
+	if (closure->func.common.fn_flags & ZEND_ACC_GENERATOR) {
 		zval new_closure;
-		zend_create_closure(&new_closure, fci_cache.function_handler, Z_OBJCE_P(newthis), closure->called_scope, newthis);
+		zend_create_closure(&new_closure, &closure->func, Z_OBJCE_P(newthis), closure->called_scope, newthis);
 		closure = (zend_closure *) Z_OBJ(new_closure);
 		fci_cache.function_handler = &closure->func;
 	} else {
-		memcpy(&my_function, fci_cache.function_handler, fci_cache.function_handler->type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		memcpy(&my_function, &closure->func, closure->func.type == ZEND_USER_FUNCTION ? sizeof(zend_op_array) : sizeof(zend_internal_function));
+		my_function.common.fn_flags &= ~ZEND_ACC_CLOSURE;
 		/* use scope of passed object */
 		my_function.common.scope = Z_OBJCE_P(newthis);
 		fci_cache.function_handler = &my_function;
@@ -162,6 +152,15 @@ ZEND_METHOD(Closure, call)
 		}
 	}
 
+	fci_cache.calling_scope = closure->called_scope;
+	fci_cache.called_scope = newobj->ce;
+	fci_cache.object = fci.object = newobj;
+
+	fci.size = sizeof(fci);
+	ZVAL_COPY_VALUE(&fci.function_name, zclosure);
+	fci.retval = &closure_result;
+	fci.no_separation = 1;
+
 	if (zend_call_function(&fci, &fci_cache) == SUCCESS && Z_TYPE(closure_result) != IS_UNDEF) {
 		if (Z_ISREF(closure_result)) {
 			zend_unwrap_reference(&closure_result);
@@ -171,7 +170,7 @@ ZEND_METHOD(Closure, call)
 
 	if (fci_cache.function_handler->common.fn_flags & ZEND_ACC_GENERATOR) {
 		/* copied upon generator creation */
-		--GC_REFCOUNT(&closure->std);
+		GC_DELREF(&closure->std);
 	} else if (ZEND_USER_CODE(my_function.type) && closure->func.common.scope != Z_OBJCE_P(newthis)) {
 		efree(my_function.op_array.run_time_cache);
 	}
@@ -198,7 +197,8 @@ ZEND_METHOD(Closure, bind)
 		} else if (Z_TYPE_P(scope_arg) == IS_NULL) {
 			ce = NULL;
 		} else {
-			zend_string *class_name = zval_get_string(scope_arg);
+			zend_string *tmp_class_name;
+			zend_string *class_name = zval_get_tmp_string(scope_arg, &tmp_class_name);
 			if (zend_string_equals_literal(class_name, "static")) {
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
@@ -206,7 +206,7 @@ ZEND_METHOD(Closure, bind)
 				zend_string_release(class_name);
 				RETURN_NULL();
 			}
-			zend_string_release(class_name);
+			zend_tmp_string_release(tmp_class_name);
 		}
 	} else { /* scope argument not given; do not change the scope by default */
 		ce = closure->func.common.scope;
@@ -237,13 +237,16 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fci.size = sizeof(zend_fcall_info);
 	fci.retval = return_value;
 
-	fcc.initialized = 1;
 	fcc.function_handler = (zend_function *) EX(func)->common.arg_info;
 	fci.params = params;
 	fci.param_count = 2;
 	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);
-	array_init(&fci.params[1]);
-	zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+	if (ZEND_NUM_ARGS()) {
+		array_init_size(&fci.params[1], ZEND_NUM_ARGS());
+		zend_copy_parameters_array(ZEND_NUM_ARGS(), &fci.params[1]);
+	} else {
+		ZVAL_EMPTY_ARRAY(&fci.params[1]);
+	}
 
 	fci.object = Z_OBJ(EX(This));
 	fcc.object = Z_OBJ(EX(This));
@@ -495,8 +498,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	if (closure->func.type == ZEND_USER_FUNCTION && closure->func.op_array.static_variables) {
 		HashTable *static_variables = closure->func.op_array.static_variables;
@@ -628,7 +630,7 @@ void zend_register_closure_ce(void) /* {{{ */
 
 static ZEND_NAMED_FUNCTION(zend_closure_internal_handler) /* {{{ */
 {
-	zend_closure *closure = (zend_closure*)EX(func)->common.prototype;
+	zend_closure *closure = (zend_closure*)ZEND_CLOSURE_OBJECT(EX(func));
 	closure->orig_internal_handler(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 	OBJ_RELEASE((zend_object*)closure);
 	EX(func) = NULL;
@@ -651,7 +653,6 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 
 	if (func->type == ZEND_USER_FUNCTION) {
 		memcpy(&closure->func, func, sizeof(zend_op_array));
-		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		if (closure->func.op_array.static_variables) {
 			closure->func.op_array.static_variables =
@@ -681,7 +682,6 @@ ZEND_API void zend_create_closure(zval *res, zend_function *func, zend_class_ent
 		}
 	} else {
 		memcpy(&closure->func, func, sizeof(zend_internal_function));
-		closure->func.common.prototype = (zend_function*)closure;
 		closure->func.common.fn_flags |= ZEND_ACC_CLOSURE;
 		/* wrap internal function handler to avoid memory leak */
 		if (UNEXPECTED(closure->func.internal_function.handler == zend_closure_internal_handler)) {

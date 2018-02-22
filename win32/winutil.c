@@ -123,7 +123,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
         int             eerrno;
     };
 
-    static const struct code_to_errno_map errmap[] = 
+    static const struct code_to_errno_map errmap[] =
     {
         /*   1 */       {   ERROR_INVALID_FUNCTION          ,   EINVAL          }
         /*   2 */   ,   {   ERROR_FILE_NOT_FOUND            ,   ENOENT          }
@@ -371,6 +371,7 @@ PHP_WINUTIL_API int php_win32_code_to_errno(unsigned long w32Err)
 		/* 258 */   ,   { WAIT_TIMEOUT, ETIME}
 
         /* 267 */   ,   {   ERROR_DIRECTORY                 ,   ENOTDIR         }
+		/* 336 */   ,   {   ERROR_DIRECTORY_NOT_SUPPORTED   ,   EISDIR          }
 
         /* 996 */   ,   {   ERROR_IO_INCOMPLETE             ,   EAGAIN          }
         /* 997 */   ,   {   ERROR_IO_PENDING                ,   EAGAIN          }

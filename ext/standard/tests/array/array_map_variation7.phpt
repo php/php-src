@@ -32,7 +32,7 @@ var_dump( array_map('callback', array(), array(1, 2, 3), array('a', 'b')) );  //
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : arrays with diff. size ***
 array(3) {
   [0]=>

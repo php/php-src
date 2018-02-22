@@ -34,7 +34,7 @@ echo $d . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing basic DateTime inheritance() ***
 
 -- Create an instance of DateTimeExt --

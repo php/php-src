@@ -78,7 +78,7 @@ $a[1] = &$c;
 check($c);
 
 ?>
---EXPECTF--
+--EXPECT--
 --- Nested array references 1 element in containing array:
 array(3) {
   [0]=>

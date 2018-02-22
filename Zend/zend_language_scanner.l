@@ -648,9 +648,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zend_string *opened_path = NULL;
 
 	if (Z_TYPE_P(filename) != IS_STRING) {
-		tmp = *filename;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(filename));
 		filename = &tmp;
 	}
 	file_handle.filename = Z_STRVAL_P(filename);
@@ -673,8 +671,8 @@ zend_op_array *compile_filename(int type, zval *filename)
 	}
 	zend_destroy_file_handle(&file_handle);
 
-	if (filename==&tmp) {
-		zval_dtor(&tmp);
+	if (UNEXPECTED(filename == &tmp)) {
+		zval_ptr_dtor(&tmp);
 	}
 	return retval;
 }
@@ -753,22 +751,25 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	zend_op_array *op_array = NULL;
 	zval tmp;
 
-	if (Z_STRLEN_P(source_string)==0) {
+	if (UNEXPECTED(Z_TYPE_P(source_string) != IS_STRING)) {
+		ZVAL_STR(&tmp, zval_get_string_func(source_string));
+	} else {
+		ZVAL_COPY(&tmp, source_string);
+	}
+
+	if (Z_STRLEN(tmp)==0) {
+		zval_ptr_dtor(&tmp);
 		return NULL;
 	}
 
-	ZVAL_DUP(&tmp, source_string);
-	convert_to_string(&tmp);
-	source_string = &tmp;
-
 	zend_save_lexical_state(&original_lex_state);
-	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {
+	if (zend_prepare_string_for_scanning(&tmp, filename) == SUCCESS) {
 		BEGIN(ST_IN_SCRIPTING);
 		op_array = zend_compile(ZEND_EVAL_CODE);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(&tmp);
+	zval_ptr_dtor(&tmp);
 
 	return op_array;
 }
@@ -803,13 +804,18 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, char *str_name)
 {
 	zend_lex_state original_lex_state;
-	zval tmp = *str;
+	zval tmp;
 
-	str = &tmp;
-	zval_copy_ctor(str);
+	if (UNEXPECTED(Z_TYPE_P(str) != IS_STRING)) {
+		ZVAL_STR(&tmp, zval_get_string_func(str));
+		str = &tmp;
+	}
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(str, str_name)==FAILURE) {
 		zend_restore_lexical_state(&original_lex_state);
+		if (UNEXPECTED(str == &tmp)) {
+			zval_ptr_dtor(&tmp);
+		}
 		return FAILURE;
 	}
 	BEGIN(INITIAL);
@@ -819,7 +825,9 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 		SCNG(script_filtered) = NULL;
 	}
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(str);
+	if (UNEXPECTED(str == &tmp)) {
+		zval_ptr_dtor(&tmp);
+	}
 	return SUCCESS;
 }
 

@@ -1,5 +1,7 @@
 --TEST--
 Bug #73944: Dictionary option of intflate_init() does not work
+--SKIPIF--
+<?php if(!extension_loaded('zlib')) die('skip zlib extension not loaded'); ?>
 --FILE--
 <?php
 
@@ -12,6 +14,6 @@ $b = inflate_add($in, file_get_contents(__DIR__.'/bug73944_fixture2'));
 echo '2 block: '.($b === false ? 'failed' : strlen($b)).PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 1 block: 32768
 2 block: 32768

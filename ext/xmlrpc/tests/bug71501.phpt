@@ -9,7 +9,7 @@ if (!extension_loaded("xmlrpc")) print "skip";
 $params = 'Lê Trung Hiếu';
 echo xmlrpc_encode_request('foo', $params, ['encoding' => 'UTF-8', 'escaping' => 'markup']);
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0" encoding="UTF-8"?>
 <methodCall>
 <methodName>foo</methodName>

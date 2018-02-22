@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -68,17 +68,17 @@ _zip_name_locate(zip_t *za, const char *fname, zip_flags_t flags, zip_error_t *e
 
 	for (i=0; i<za->nentry; i++) {
 	    fn = _zip_get_name(za, i, flags, error);
-	    
+
 	    /* newly added (partially filled) entry or error */
 	    if (fn == NULL)
 		continue;
-	    
+
 	    if (flags & ZIP_FL_NODIR) {
 		p = strrchr(fn, '/');
 		if (p)
 		    fn = p+1;
 	    }
-	    
+
 	    if (cmp(fname, fn) == 0) {
 		_zip_error_clear(error);
 		return (zip_int64_t)i;

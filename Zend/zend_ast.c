@@ -25,6 +25,7 @@
 #include "zend_language_parser.h"
 #include "zend_smart_str.h"
 #include "zend_exceptions.h"
+#include "zend_constants.h"
 
 ZEND_API zend_ast_process_t zend_ast_process = NULL;
 
@@ -64,12 +65,23 @@ ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr
 	ast->kind = ZEND_AST_ZVAL;
 	ast->attr = attr;
 	ZVAL_COPY_VALUE(&ast->val, zv);
-	ast->val.u2.lineno = lineno;
+	Z_LINENO(ast->val) = lineno;
 	return (zend_ast *) ast;
 }
 
 ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
 	return zend_ast_create_zval_with_lineno(zv, attr, CG(zend_lineno));
+}
+
+ZEND_API zend_ast *zend_ast_create_constant(zend_string *name, zend_ast_attr attr) {
+	zend_ast_zval *ast;
+
+	ast = zend_ast_alloc(sizeof(zend_ast_zval));
+	ast->kind = ZEND_AST_CONSTANT;
+	ast->attr = attr;
+	ZVAL_STR(&ast->val, name);
+	Z_LINENO(ast->val) = CG(zend_lineno);
+	return (zend_ast *) ast;
 }
 
 ZEND_API zend_ast *zend_ast_create_decl(
@@ -276,25 +288,30 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 		{
 			zval *zv = zend_ast_get_zval(ast);
 
-			if (Z_OPT_CONSTANT_P(zv)) {
-				if (Z_TYPE_FLAGS_P(zv) & IS_TYPE_REFCOUNTED) {
-					if (UNEXPECTED(zval_update_constant_ex(zv, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
-					ZVAL_COPY(result, zv);
-				} else {
-					ZVAL_COPY_VALUE(result, zv);
-					if (UNEXPECTED(zval_update_constant_ex(result, scope) != SUCCESS)) {
-						ret = FAILURE;
-						break;
-					}
-				}
-			} else {
-				ZVAL_COPY(result, zv);
-			}
+			ZVAL_COPY(result, zv);
 			break;
 		}
+		case ZEND_AST_CONSTANT:
+		{
+			zend_string *name = zend_ast_get_constant_name(ast);
+			zval *zv = zend_get_constant_ex(name, scope, ast->attr);
+
+			if (UNEXPECTED(zv == NULL)) {
+				ZVAL_UNDEF(result);
+				ret = zend_use_undefined_constant(name, ast->attr, result);
+				break;
+			}
+			ZVAL_COPY_OR_DUP(result, zv);
+			break;
+		}
+		case ZEND_AST_CONSTANT_CLASS:
+			ZEND_ASSERT(EG(current_execute_data));
+			if (scope && scope->name) {
+				ZVAL_STR_COPY(result, scope->name);
+			} else {
+				ZVAL_EMPTY_STRING(result);
+			}
+			break;
 		case ZEND_AST_AND:
 			if (UNEXPECTED(zend_ast_evaluate(&op1, ast->child[0], scope) != SUCCESS)) {
 				ret = FAILURE;
@@ -391,10 +408,15 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 			}
 			break;
 		case ZEND_AST_ARRAY:
-			array_init(result);
 			{
 				uint32_t i;
 				zend_ast_list *list = zend_ast_get_list(ast);
+
+				if (!list->children) {
+					ZVAL_EMPTY_ARRAY(result);
+					break;
+				}
+				array_init(result);
 				for (i = 0; i < list->children; i++) {
 					zend_ast *elem = list->child[i];
 					if (elem->child[1]) {
@@ -430,16 +452,8 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 				zval_dtor(&op1);
 				ret = FAILURE;
 			} else {
-				zval tmp;
+				zend_fetch_dimension_const(result, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
 
-				zend_fetch_dimension_const(&tmp, &op1, &op2, (ast->attr == ZEND_DIM_IS) ? BP_VAR_IS : BP_VAR_R);
-
-				if (UNEXPECTED(Z_ISREF(tmp))) {
-					ZVAL_DUP(result, Z_REFVAL(tmp));
-				} else {
-					ZVAL_DUP(result, &tmp);
-				}
-				zval_ptr_dtor(&tmp);
 				zval_dtor(&op1);
 				zval_dtor(&op2);
 			}
@@ -451,50 +465,108 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 	return ret;
 }
 
-ZEND_API zend_ast *zend_ast_copy(zend_ast *ast)
+static size_t zend_ast_tree_size(zend_ast *ast)
 {
-	if (ast == NULL) {
-		return NULL;
-	} else if (ast->kind == ZEND_AST_ZVAL) {
-		zend_ast_zval *new = emalloc(sizeof(zend_ast_zval));
+	size_t size;
+
+	if (ast->kind == ZEND_AST_ZVAL || ast->kind == ZEND_AST_CONSTANT) {
+		size = sizeof(zend_ast_zval);
+	} else if (zend_ast_is_list(ast)) {
+		uint32_t i;
+		zend_ast_list *list = zend_ast_get_list(ast);
+
+		size = zend_ast_list_size(list->children);
+		for (i = 0; i < list->children; i++) {
+			if (list->child[i]) {
+				size += zend_ast_tree_size(list->child[i]);
+			}
+		}
+	} else {
+		uint32_t i, children = zend_ast_get_num_children(ast);
+
+		size = zend_ast_size(children);
+		for (i = 0; i < children; i++) {
+			if (ast->child[i]) {
+				size += zend_ast_tree_size(ast->child[i]);
+			}
+		}
+	}
+	return size;
+}
+
+static void* zend_ast_tree_copy(zend_ast *ast, void *buf)
+{
+	if (ast->kind == ZEND_AST_ZVAL) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
 		new->kind = ZEND_AST_ZVAL;
 		new->attr = ast->attr;
 		ZVAL_COPY(&new->val, zend_ast_get_zval(ast));
-		return (zend_ast *) new;
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
+	} else if (ast->kind == ZEND_AST_CONSTANT) {
+		zend_ast_zval *new = (zend_ast_zval*)buf;
+		new->kind = ZEND_AST_CONSTANT;
+		new->attr = ast->attr;
+		ZVAL_STR_COPY(&new->val, zend_ast_get_constant_name(ast));
+		buf = (void*)((char*)buf + sizeof(zend_ast_zval));
 	} else if (zend_ast_is_list(ast)) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		zend_ast_list *new = emalloc(zend_ast_list_size(list->children));
+		zend_ast_list *new = (zend_ast_list*)buf;
 		uint32_t i;
 		new->kind = list->kind;
 		new->attr = list->attr;
 		new->children = list->children;
+		buf = (void*)((char*)buf + zend_ast_list_size(list->children));
 		for (i = 0; i < list->children; i++) {
-			new->child[i] = zend_ast_copy(list->child[i]);
+			if (list->child[i]) {
+				new->child[i] = (zend_ast*)buf;
+				buf = zend_ast_tree_copy(list->child[i], buf);
+			} else {
+				new->child[i] = NULL;
+			}
 		}
-		return (zend_ast *) new;
 	} else {
 		uint32_t i, children = zend_ast_get_num_children(ast);
-		zend_ast *new = emalloc(zend_ast_size(children));
+		zend_ast *new = (zend_ast*)buf;
 		new->kind = ast->kind;
 		new->attr = ast->attr;
+		buf = (void*)((char*)buf + zend_ast_size(children));
 		for (i = 0; i < children; i++) {
-			new->child[i] = zend_ast_copy(ast->child[i]);
+			if (ast->child[i]) {
+				new->child[i] = (zend_ast*)buf;
+				buf = zend_ast_tree_copy(ast->child[i], buf);
+			} else {
+				new->child[i] = NULL;
+			}
 		}
-		return new;
 	}
+	return buf;
 }
 
-static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
+ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
+{
+	size_t tree_size;
+	zend_ast_ref *ref;
+
+	ZEND_ASSERT(ast != NULL);
+	tree_size = zend_ast_tree_size(ast) + sizeof(zend_ast_ref);
+	ref = emalloc(tree_size);
+	zend_ast_tree_copy(ast, GC_AST(ref));
+	GC_SET_REFCOUNT(ref, 1);
+	GC_TYPE_INFO(ref) = IS_CONSTANT_AST;
+	return ref;
+}
+
+ZEND_API void zend_ast_destroy(zend_ast *ast) {
 	if (!ast) {
 		return;
 	}
 
 	switch (ast->kind) {
 		case ZEND_AST_ZVAL:
-			/* Destroy value without using GC: When opcache moves arrays into SHM it will
-			 * free the zend_array structure, so references to it from outside the op array
-			 * become invalid. GC would cause such a reference in the root buffer. */
 			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
+			break;
+		case ZEND_AST_CONSTANT:
+			zend_string_release(zend_ast_get_constant_name(ast));
 			break;
 		case ZEND_AST_FUNC_DECL:
 		case ZEND_AST_CLOSURE:
@@ -508,10 +580,10 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 			if (decl->doc_comment) {
 				zend_string_release(decl->doc_comment);
 			}
-			zend_ast_destroy_ex(decl->child[0], free);
-			zend_ast_destroy_ex(decl->child[1], free);
-			zend_ast_destroy_ex(decl->child[2], free);
-			zend_ast_destroy_ex(decl->child[3], free);
+			zend_ast_destroy(decl->child[0]);
+			zend_ast_destroy(decl->child[1]);
+			zend_ast_destroy(decl->child[2]);
+			zend_ast_destroy(decl->child[3]);
 			break;
 		}
 		default:
@@ -519,26 +591,21 @@ static void zend_ast_destroy_ex(zend_ast *ast, zend_bool free) {
 				zend_ast_list *list = zend_ast_get_list(ast);
 				uint32_t i;
 				for (i = 0; i < list->children; i++) {
-					zend_ast_destroy_ex(list->child[i], free);
+					zend_ast_destroy(list->child[i]);
 				}
 			} else {
 				uint32_t i, children = zend_ast_get_num_children(ast);
 				for (i = 0; i < children; i++) {
-					zend_ast_destroy_ex(ast->child[i], free);
+					zend_ast_destroy(ast->child[i]);
 				}
 			}
 	}
-
-	if (free) {
-		efree(ast);
-	}
 }
 
-ZEND_API void zend_ast_destroy(zend_ast *ast) {
-	zend_ast_destroy_ex(ast, 0);
-}
-ZEND_API void zend_ast_destroy_and_free(zend_ast *ast) {
-	zend_ast_destroy_ex(ast, 1);
+ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast)
+{
+	zend_ast_destroy(GC_AST(ast));
+	efree(ast);
 }
 
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
@@ -955,9 +1022,6 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 			} ZEND_HASH_FOREACH_END();
 			smart_str_appendc(str, ']');
 			break;
-		case IS_CONSTANT:
-			smart_str_appendl(str, Z_STRVAL_P(zv), Z_STRLEN_P(zv));
-			break;
 		case IS_CONSTANT_AST:
 			zend_ast_export_ex(str, Z_ASTVAL_P(zv), priority, indent);
 			break;
@@ -1036,6 +1100,14 @@ tail_call:
 		/* special nodes */
 		case ZEND_AST_ZVAL:
 			zend_ast_export_zval(str, zend_ast_get_zval(ast), priority, indent);
+			break;
+		case ZEND_AST_CONSTANT: {
+			zend_string *name = zend_ast_get_constant_name(ast);
+			smart_str_appendl(str, ZSTR_VAL(name), ZSTR_LEN(name));
+			break;
+		}
+		case ZEND_AST_CONSTANT_CLASS:
+			smart_str_appendl(str, "__CLASS__", sizeof("__CLASS__")-1);
 			break;
 		case ZEND_AST_ZNODE:
 			/* This AST kind is only used for temporary nodes during compilation */

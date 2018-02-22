@@ -159,8 +159,7 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 static void filter_map_apply(zval *value, filter_map *map)
 {
 	unsigned char *str;
-	size_t i;
-	int c;
+	size_t i, c;
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);

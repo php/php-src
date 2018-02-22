@@ -13,6 +13,10 @@ DBA QDBM handler test
 	require_once dirname(__FILE__) .'/dba_handler.inc';
 ?>
 ===DONE===
+--CLEAN--
+<?php 
+	require(dirname(__FILE__) .'/clean.inc'); 
+?>
 --EXPECTF--
 database handler: qdbm
 3NYNYY

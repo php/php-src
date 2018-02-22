@@ -185,7 +185,7 @@ static void proc_open_rsrc_dtor(zend_resource *rsrc)
 	/* Close all handles to avoid a deadlock */
 	for (i = 0; i < proc->npipes; i++) {
 		if (proc->pipes[i] != 0) {
-			GC_REFCOUNT(proc->pipes[i])--;
+			GC_DELREF(proc->pipes[i]);
 			zend_list_close(proc->pipes[i]);
 			proc->pipes[i] = 0;
 		}

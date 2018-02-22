@@ -1,5 +1,5 @@
 --TEST--
-Bug #73793 (WDDX uses wrong decimal seperator)
+Bug #73793 (WDDX uses wrong decimal separator)
 --SKIPIF--
 <?php
 if (!extension_loaded('wddx')) print 'skip wddx extension not available';

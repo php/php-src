@@ -27,7 +27,7 @@ var_dump(`cat "$filename_txt" | "$php" -n -R "var_dump(1);"`);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(21) "int(1)
 int(1)
 int(1)

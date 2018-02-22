@@ -16,7 +16,7 @@ echo "certain all-uppercase Latin sequences can be spoof of Greek\n";
 var_dump($x->isSuspicious("NAPKIN PEZ"));
 var_dump($x->isSuspicious("napkin pez"));
 ?>
---EXPECTF--
+--EXPECT--
 paypal with Cyrillic spoof characters
 bool(true)
 certain all-uppercase Latin sequences can be spoof of Greek

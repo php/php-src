@@ -19,7 +19,7 @@ if ((isset($matches[1]) && $matches[1] >= 11)) {
         "grant use on edition myedition1 to $testuser",
     );
 } else {
-    // Server is Pre 11.2 
+    // Server is Pre 11.2
     $stmtarray = array(
         "drop user $testuser cascade",
         "create user $testuser identified by $testpassword",
@@ -34,7 +34,7 @@ foreach ($stmtarray as $stmt) {
 		$m = oci_error($s);
 		if (!in_array($m['code'], array(   // ignore expected errors
                         942 // table or view does not exist
-                     , 1918 // user does not exist 
+                     , 1918 // user does not exist
                      , 2289 // sequence does not exist
                      , 4080 // trigger does not exist
                     , 38802 // edition does not exist
@@ -50,8 +50,8 @@ foreach ($stmtarray as $stmt) {
 
 function get_attr($conn,$attr)
 {
-    $sel_stmt="select " .$attr. " from v\$session where sid = 
-	(select sid from v\$session where audsid = 
+    $sel_stmt="select " .$attr. " from v\$session where sid =
+	(select sid from v\$session where audsid =
 	sys_context('userenv','sessionid')) order by 1";
     $s2 = oci_parse($conn,$sel_stmt);
     oci_execute($s2,OCI_DEFAULT);
@@ -60,8 +60,8 @@ function get_attr($conn,$attr)
     }
 }
 
-/* Pass $conn_type=1 for a connection with oci_connect() 
-   Pass $conn_type=2 for ooci_pconnect 
+/* Pass $conn_type=1 for a connection with oci_connect()
+   Pass $conn_type=2 for ooci_pconnect
    Default will give a oci_new_connect */
 
 function get_conn($conn_type)
@@ -87,23 +87,23 @@ function get_conn($conn_type)
 
 function set_attr($conn,$attr,$sufix)
 {
-	if (!strcmp($attr,'MODULE')) 
+	if (!strcmp($attr,'MODULE'))
 		$r = oci_set_module_name($conn,'PHP TEST'.$sufix);
-	else if (!strcmp($attr,'ACTION')) 
+	else if (!strcmp($attr,'ACTION'))
         $r = oci_set_action($conn,'TASK'.$sufix);
-	else if (!strcmp($attr,'CLIENT_INFO')) 
+	else if (!strcmp($attr,'CLIENT_INFO'))
         $r = oci_set_client_info($conn,'INFO1'.$sufix);
-	else if (!strcmp($attr,'CLIENT_IDENTIFIER')) 
+	else if (!strcmp($attr,'CLIENT_IDENTIFIER'))
         $r = oci_set_client_identifier($conn,'ID00'.$sufix);
 	else
 		echo "Pass one of the above four attributes!!!\n";
 	if ($r) {
 		echo "Value of $attr has been set successfully\n";
     }
-    
+
 	//Do a round-trip here
 	oci_server_version($conn);
-	return $r;    
+	return $r;
 }
 
 function set_edit_attr($value)
@@ -126,7 +126,7 @@ function get_edit_attr ($conn) {
 
 function get_sys_attr($conn,$attr)
 {
-	$sel_stmt="select " .$attr. " from v\$session where sid = 
+	$sel_stmt="select " .$attr. " from v\$session where sid =
 	(select sid from v\$session where audsid = sys_context('userenv','sessionid')) order by 1";
     $s2 = oci_parse($conn,$sel_stmt);
     oci_execute($s2,OCI_DEFAULT);
@@ -141,7 +141,7 @@ function clean_up($c) {
         "drop edition myedition cascade",
         "drop user " . $GLOBALS['testuser'] . " cascade",
 	);
-    
+
 	foreach ($stmtarray as $stmt) {
         $s = oci_parse($c, $stmt);
         @oci_execute($s);

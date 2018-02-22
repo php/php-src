@@ -58,6 +58,7 @@
 
 #include "php_win32_globals.h"
 #include "wsyslog.h"
+#include "codepage.h"
 
 void closelog(void)
 {
@@ -80,10 +81,19 @@ void closelog(void)
 void syslog(int priority, const char *message, ...)
 {
 	va_list args;
+
+	va_start(args, message);	/* initialize vararg mechanism */
+	vsyslog(priority, message, args);
+	va_end(args);
+}
+
+void vsyslog(int priority, const char *message, va_list args)
+{
 	LPTSTR strs[2];
 	unsigned short etype;
 	char *tmp = NULL;
 	DWORD evid;
+	wchar_t *strsw[2];
 
 	/* default event source */
 	if (INVALID_HANDLE_VALUE == PW32G(log_source))
@@ -102,13 +112,28 @@ void syslog(int priority, const char *message, ...)
 			etype = EVENTLOG_WARNING_TYPE;
 			evid = PHP_SYSLOG_WARNING_TYPE;
 	}
-	va_start(args, message);	/* initialize vararg mechanism */
+
 	vspprintf(&tmp, 0, message, args);	/* build message */
+
+	strsw[0] = php_win32_cp_any_to_w(PW32G(log_header));
+	strsw[1] = php_win32_cp_any_to_w(tmp);
+
+	/* report the event */
+	if (strsw[0] && strsw[1]) {
+		ReportEventW(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strsw, NULL);
+		free(strsw[0]);
+		free(strsw[1]);
+		efree(tmp);
+		return;
+	}
+
+	free(strsw[0]);
+	free(strsw[1]);
+
 	strs[0] = PW32G(log_header);	/* write header */
 	strs[1] = tmp;				/* then the message */
-	/* report the event */
-	ReportEvent(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strs, NULL);
-	va_end(args);
+
+	ReportEventA(PW32G(log_source), etype, (unsigned short) priority, evid, NULL, 2, 0, strs, NULL);
 	efree(tmp);
 }
 
@@ -127,7 +152,6 @@ void openlog(const char *ident, int logopt, int facility)
 	PW32G(log_source) = RegisterEventSource(NULL, "PHP-" PHP_VERSION);
 	spprintf(&PW32G(log_header), 0, (logopt & LOG_PID) ? "%s[%d]" : "%s", ident, getpid());
 }
-
 /*
  * Local variables:
  * tab-width: 4

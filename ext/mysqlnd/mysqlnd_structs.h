@@ -49,29 +49,25 @@ typedef struct st_mysqlnd_const_string
 
 
 typedef struct st_mysqlnd_memory_pool MYSQLND_MEMORY_POOL;
-typedef struct st_mysqlnd_memory_pool_chunk MYSQLND_MEMORY_POOL_CHUNK;
-typedef struct st_mysqlnd_memory_pool_chunk_llist MYSQLND_MEMORY_POOL_CHUNK_LLIST;
-
-
-#define MYSQLND_MEMORY_POOL_CHUNK_LIST_SIZE 100
 
 struct st_mysqlnd_memory_pool
 {
-	zend_uchar *arena;
-	unsigned int arena_size;
-	unsigned int free_size;
+	zend_arena		*arena;
+	void			*last;
+	void            *checkpoint;
 
-	MYSQLND_MEMORY_POOL_CHUNK*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, unsigned int size);
-	enum_func_status	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk, unsigned int size);
-	void				(*free_chunk)(MYSQLND_MEMORY_POOL * pool, MYSQLND_MEMORY_POOL_CHUNK * chunk);
+	void*	(*get_chunk)(MYSQLND_MEMORY_POOL * pool, size_t size);
+	void*	(*resize_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr, size_t old_size, size_t size);
+	void	(*free_chunk)(MYSQLND_MEMORY_POOL * pool, void * ptr);
 };
 
-struct st_mysqlnd_memory_pool_chunk
+
+typedef struct st_mysqlnd_row_buffer MYSQLND_ROW_BUFFER;
+
+struct st_mysqlnd_row_buffer
 {
-	size_t				app;
-	zend_uchar			*ptr;
-	unsigned int		size;
-	zend_bool			from_pool;
+	void			*ptr;
+	size_t			size;
 };
 
 
@@ -85,6 +81,8 @@ typedef struct st_mysqlnd_cmd_buffer
 typedef struct st_mysqlnd_field
 {
 	zend_string *sname;			/* Name of column */
+	zend_bool    is_numeric;
+	zend_ulong	 num_key;
 	const char  *name;          /* Name of column in C string */
 	const char  *org_name;		/* Original column name, if an alias */
 	const char  *table;			/* Table of column if column was a field */
@@ -152,7 +150,7 @@ struct st_mysqlnd_error_info
 	char error[MYSQLND_ERRMSG_SIZE+1];
 	char sqlstate[MYSQLND_SQLSTATE_LENGTH + 1];
 	unsigned int error_no;
-	zend_llist * error_list;
+	zend_llist error_list;
 
 	zend_bool persistent;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_error_info) *m;
@@ -370,7 +368,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory);
 
 typedef MYSQLND * (*func_mysqlnd_object_factory__get_connection)(MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) * factory, const zend_bool persistent);
 typedef MYSQLND * (*func_mysqlnd_object_factory__clone_connection_object)(MYSQLND * conn);
-typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
+typedef MYSQLND_STMT * (*func_mysqlnd_object_factory__get_prepared_statement)(MYSQLND_CONN_DATA * conn);
 typedef MYSQLND_PFC * (*func_mysqlnd_object_factory__get_pfc)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_VIO * (*func_mysqlnd_object_factory__get_vio)(const zend_bool persistent, MYSQLND_STATS * stats, MYSQLND_ERROR_INFO * error_info);
 typedef MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * (*func_mysqlnd_object_factory__get_protocol_payload_decoder_factory)(MYSQLND_CONN_DATA * conn, const zend_bool persistent);
@@ -451,7 +449,7 @@ typedef enum_func_status	(*func_mysqlnd_conn_data__send_close)(MYSQLND_CONN_DATA
 
 typedef enum_func_status    (*func_mysqlnd_conn_data__ssl_set)(MYSQLND_CONN_DATA * const conn, const char * key, const char * const cert, const char * const ca, const char * const capath, const char * const cipher);
 
-typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int field_count, zend_bool persistent);
+typedef MYSQLND_RES * 		(*func_mysqlnd_conn_data__result_init)(unsigned int field_count);
 
 typedef enum_func_status	(*func_mysqlnd_conn_data__set_autocommit)(MYSQLND_CONN_DATA * conn, unsigned int mode);
 typedef enum_func_status	(*func_mysqlnd_conn_data__tx_commit)(MYSQLND_CONN_DATA * conn);
@@ -585,7 +583,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn)
 
 
 	/* for decoding - binary or text protocol */
-typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_MEMORY_POOL_CHUNK * row_buffer, zval * fields,
+typedef enum_func_status	(*func_mysqlnd_res__row_decoder)(MYSQLND_ROW_BUFFER * row_buffer, zval * fields,
 									unsigned int field_count, const MYSQLND_FIELD * fields_metadata,
 									zend_bool as_int_or_float, MYSQLND_STATS * stats);
 
@@ -608,7 +606,7 @@ typedef const MYSQLND_FIELD *(*func_mysqlnd_res__fetch_fields)(MYSQLND_RES * con
 
 typedef enum_func_status	(*func_mysqlnd_res__read_result_metadata)(MYSQLND_RES * result, MYSQLND_CONN_DATA * conn);
 typedef const size_t *		(*func_mysqlnd_res__fetch_lengths)(MYSQLND_RES * const result);
-typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_MEMORY_POOL_CHUNK *** row_buffers, zend_bool binary_protocol);
+typedef enum_func_status	(*func_mysqlnd_res__store_result_fetch_data)(MYSQLND_CONN_DATA * const conn, MYSQLND_RES * result, MYSQLND_RES_METADATA * meta, MYSQLND_ROW_BUFFER ** row_buffers, zend_bool binary_protocol);
 
 typedef void				(*func_mysqlnd_res__free_result_buffers)(MYSQLND_RES * result);	/* private */
 typedef enum_func_status	(*func_mysqlnd_res__free_result)(MYSQLND_RES * result, const zend_bool implicit);
@@ -618,7 +616,7 @@ typedef void				(*func_mysqlnd_res__free_buffered_data)(MYSQLND_RES *result);
 typedef void				(*func_mysqlnd_res__unbuffered_free_last_data)(MYSQLND_RES *result);
 
 
-typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(unsigned int field_count, zend_bool persistent);
+typedef MYSQLND_RES_METADATA * (*func_mysqlnd_res__result_meta_init)(MYSQLND_RES *result, unsigned int field_count);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res)
 {
@@ -696,8 +694,8 @@ typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_field_direct)(const
 typedef const MYSQLND_FIELD *	(*func_mysqlnd_res_meta__fetch_fields)(MYSQLND_RES_METADATA * const meta);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_tell)(const MYSQLND_RES_METADATA * const meta);
 typedef MYSQLND_FIELD_OFFSET	(*func_mysqlnd_res_meta__field_seek)(MYSQLND_RES_METADATA * const meta, const MYSQLND_FIELD_OFFSET field_offset);
-typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn);
-typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(const MYSQLND_RES_METADATA * const meta, const zend_bool persistent);
+typedef enum_func_status		(*func_mysqlnd_res_meta__read_metadata)(MYSQLND_RES_METADATA * const meta, MYSQLND_CONN_DATA * conn, MYSQLND_RES * result);
+typedef MYSQLND_RES_METADATA *	(*func_mysqlnd_res_meta__clone_metadata)(MYSQLND_RES *result, const MYSQLND_RES_METADATA * const meta);
 typedef void					(*func_mysqlnd_res_meta__free_metadata)(MYSQLND_RES_METADATA * meta);
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta)
@@ -843,13 +841,7 @@ struct st_mysqlnd_vio
 
 
 
-struct st_mysqlnd_protocol_command
-{
-	enum_func_status (*run)(void *cmd);
-	void (*free_command)(void * cmd);
-};
-
-typedef struct st_mysqlnd_protocol_command * (*func_mysqlnd__command_factory)(enum php_mysqlnd_server_command command, ...);
+typedef enum_func_status (*func_mysqlnd__run_command)(enum php_mysqlnd_server_command command, ...);
 
 
 
@@ -937,7 +929,7 @@ struct st_mysqlnd_connection_data
 	zend_bool		in_async_err_cb;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_object_factory) object_factory;
-	func_mysqlnd__command_factory command_factory;
+	func_mysqlnd__run_command run_command;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_conn_data) * m;
 
@@ -956,8 +948,9 @@ struct st_mysqlnd_connection
 
 
 struct st_mysqlnd_packet_greet;
-struct st_mysqlnd_packet_greet;
 struct st_mysqlnd_packet_auth;
+struct st_mysqlnd_packet_auth_response;
+struct st_mysqlnd_packet_change_auth_response;
 struct st_mysqlnd_packet_ok;
 struct st_mysqlnd_packet_command;
 struct st_mysqlnd_packet_eof;
@@ -971,21 +964,21 @@ struct st_mysqlnd_packet_auth_pam;
 struct st_mysqlnd_packet_sha256_pk_request;
 struct st_mysqlnd_packet_sha256_pk_request_response;
 
-typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_auth_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_change_auth_response *	(*func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_ok *			(*func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_command *		(*func_mysqlnd_protocol_payload_decoder_factory__get_command_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_eof *			(*func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_rset_header *	(*func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_res_field *	(*func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_row *			(*func_mysqlnd_protocol_payload_decoder_factory__get_row_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_stats *		(*func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
-typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_greet_packet)(struct st_mysqlnd_packet_greet *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_auth_packet)(struct st_mysqlnd_packet_auth *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_auth_response_packet)(struct st_mysqlnd_packet_auth_response *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_change_auth_response_packet)(struct st_mysqlnd_packet_change_auth_response *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_ok_packet)(struct st_mysqlnd_packet_ok *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_command_packet)(struct st_mysqlnd_packet_command *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_eof_packet)(struct st_mysqlnd_packet_eof *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_rset_header_packet)(struct st_mysqlnd_packet_rset_header *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_result_field_packet)(struct st_mysqlnd_packet_res_field *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_row_packet)(struct st_mysqlnd_packet_row *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_stats_packet)(struct st_mysqlnd_packet_stats *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_prepare_response_packet)(struct st_mysqlnd_packet_prepare_response *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_change_user_response_packet)(struct st_mysqlnd_packet_chg_user_resp *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_packet)(struct st_mysqlnd_packet_sha256_pk_request *packet);
+typedef void (*func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_response_packet)(struct st_mysqlnd_packet_sha256_pk_request_response *packet);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
@@ -1005,8 +998,7 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 			MYSQLND_ERROR_INFO * const error_info,
 			MYSQLND_UPSERT_STATUS * const upsert_status,
 			const zend_bool ignore_upsert_status,  /* actually used only by LOAD DATA. COM_QUERY and COM_EXECUTE handle the responses themselves */
-			MYSQLND_STRING * const last_message,
-			const zend_bool last_message_persistent);
+			MYSQLND_STRING * const last_message);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_EOF)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const payload_decoder_factory,
@@ -1022,27 +1014,26 @@ typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_c
 
 			MYSQLND_ERROR_INFO	* error_info,
 			MYSQLND_UPSERT_STATUS * upsert_status,
-			MYSQLND_STRING * last_message,
-			zend_bool last_message_persistent);
+			MYSQLND_STRING * last_message);
 
 
 MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
 {
-	func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet get_greet_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet get_auth_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_auth_response_packet get_auth_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_change_auth_response_packet get_change_auth_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_ok_packet get_ok_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_command_packet get_command_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_eof_packet get_eof_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_rset_header_packet get_rset_header_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_result_field_packet get_result_field_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_row_packet get_row_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_stats_packet get_stats_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_prepare_response_packet get_prepare_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet get_change_user_response_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet get_sha256_pk_request_packet;
-	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_greet_packet init_greet_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_auth_packet init_auth_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_auth_response_packet init_auth_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_change_auth_response_packet init_change_auth_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_ok_packet init_ok_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_command_packet init_command_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_eof_packet init_eof_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_rset_header_packet init_rset_header_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_result_field_packet init_result_field_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_row_packet init_row_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_stats_packet init_stats_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_prepare_response_packet init_prepare_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_change_user_response_packet init_change_user_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_packet init_sha256_pk_request_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__init_sha256_pk_request_response_packet init_sha256_pk_request_response_packet;
 
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response;
@@ -1135,30 +1126,19 @@ struct st_mysqlnd_protocol_frame_codec
 };
 
 
-
-struct mysqlnd_field_hash_key
-{
-	zend_bool		is_numeric;
-	zend_ulong	key;
-};
-
-
 struct st_mysqlnd_result_metadata
 {
 	MYSQLND_FIELD					*fields;
-	struct mysqlnd_field_hash_key	*zend_hash_keys;
 
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res_meta) * m;
 
 	unsigned int					current_field;
 	unsigned int					field_count;
-
-	zend_bool						persistent;
 };
 
 
 #define def_mysqlnd_buffered_result_parent 			\
-	MYSQLND_MEMORY_POOL_CHUNK **row_buffers;		\
+	MYSQLND_ROW_BUFFER	*row_buffers;				\
 	uint64_t			row_count;					\
 	uint64_t			initialized_rows;			\
 													\
@@ -1173,7 +1153,6 @@ struct st_mysqlnd_result_metadata
 													\
 	unsigned int		field_count;				\
 	zend_bool			ps;							\
-	zend_bool			persistent;					\
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_result_buffered) m;	\
 	enum mysqlnd_buffered_type type;				\
 	void				* unused1;					\
@@ -1212,7 +1191,7 @@ struct st_mysqlnd_unbuffered_result
 
 	/* For unbuffered (both normal and PS) */
 	zval				*last_row_data;
-	MYSQLND_MEMORY_POOL_CHUNK *last_row_buffer;
+	MYSQLND_ROW_BUFFER	 last_row_buffer;
 
 	/*
 	  Column lengths of current row - both buffered and unbuffered.
@@ -1222,15 +1201,13 @@ struct st_mysqlnd_unbuffered_result
 
 	MYSQLND_MEMORY_POOL	*result_set_memory_pool;
 
-	struct st_mysqlnd_packet_row * row_packet;
+	struct st_mysqlnd_packet_row *row_packet;
 
 	unsigned int		field_count;
 
 	zend_bool			eof_reached;
 
 	zend_bool			ps;
-	zend_bool			persistent;
-
 };
 
 
@@ -1247,7 +1224,8 @@ struct st_mysqlnd_res
 	MYSQLND_RES_BUFFERED	*stored_data;
 	MYSQLND_RES_UNBUFFERED	*unbuf;
 
-	zend_bool				persistent;
+	MYSQLND_MEMORY_POOL		*memory_pool;
+
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_res) m;
 };
 
@@ -1279,7 +1257,6 @@ struct st_mysqlnd_stmt_data
 	MYSQLND_PARAM_BIND			*param_bind;
 	MYSQLND_RESULT_BIND			*result_bind;
 	zend_bool					result_zvals_separated_once;
-	zend_bool					persistent;
 
 	MYSQLND_UPSERT_STATUS * 	upsert_status;
 	MYSQLND_UPSERT_STATUS 		upsert_status_impl;
@@ -1307,7 +1284,6 @@ struct st_mysqlnd_stmt
 {
 	MYSQLND_STMT_DATA * data;
 	MYSQLND_CLASS_METHODS_TYPE(mysqlnd_stmt) * m;
-	zend_bool persistent;
 };
 
 

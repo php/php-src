@@ -22,7 +22,7 @@ echo "New timezone: " . date_timezone_get($datetime)->getName() . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing DateTime::setTimezone() : basic functionality ***
 Default timezone: Europe/London
 New timezone: America/Los_Angeles

@@ -179,7 +179,7 @@ static int fpm_sockets_new_listening_socket(struct fpm_worker_pool_s *wp, struct
 
 	if (wp->listen_address_domain == FPM_AF_UNIX) {
 		if (fpm_socket_unix_test_connect((struct sockaddr_un *)sa, socklen) == 0) {
-			zlog(ZLOG_ERROR, "An another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
+			zlog(ZLOG_ERROR, "Another FPM instance seems to already listen on %s", ((struct sockaddr_un *) sa)->sun_path);
 			close(sock);
 			return -1;
 		}

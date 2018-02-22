@@ -244,15 +244,15 @@ static void litespeed_php_import_environment_variables(zval *array_ptr)
         Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
-        zval_dtor(array_ptr);
-        ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
 		return;
     } else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
         Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
         zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
-        zval_dtor(array_ptr);
-        ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]));
 		return;
 	}
 
@@ -501,7 +501,7 @@ static int lsapi_module_main(int show_source)
     if (php_request_startup() == FAILURE ) {
         return -1;
     }
-    
+
     if (show_source) {
         zend_syntax_highlighter_ini syntax_highlighter_ini;
 
@@ -782,7 +782,7 @@ static int lsapi_activate_user_ini_walk_down_the_path(_lsapi_activate_user_ini_c
                 strncmp(ctx->path, ctx->doc_root, docroot_len) != 0;
 
         if (is_outside_of_docroot) {
-            php_parse_user_ini_file(ctx->path, PG(user_ini_filename), 
+            php_parse_user_ini_file(ctx->path, PG(user_ini_filename),
                                     &ctx->entry->user_config);
         } else {
             walk_down_the_path(ctx->doc_root, ctx->path,
@@ -806,7 +806,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     fn_activate_user_ini_chain_t *fn_next = next;
 
     DEBUG_MESSAGE("calling php_ini_activate_config()");
-    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR, 
+    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR,
                             PHP_INI_STAGE_HTACCESS);
 
     if (*fn_next) {
@@ -837,7 +837,7 @@ static int lsapi_activate_user_ini( void )
         &lsapi_activate_user_ini_finally,
         NULL
     };
-    
+
     return fn_chain[0](&ctx, (fn_activate_user_ini_chain_t*)(fn_chain + 1));
 }
 
@@ -995,7 +995,7 @@ static int cli_main( int argc, char * argv[] )
         zend_uv.html_errors = 0; /* tell the engine we're in non-html mode */
         CG(in_compilation) = 0; /* not initialized but needed for several options */
         SG(options) |= SAPI_OPTION_NO_CHDIR;
-        
+
 #if PHP_MAJOR_VERSION < 7
         EG(uninitialized_zval_ptr) = NULL;
 #endif
@@ -1264,7 +1264,7 @@ int main( int argc, char * argv[] )
      * options: the latter override the former.
      */
     init_sapi_from_env(&lsapi_sapi_module);
-    
+
     if ( ignore_php_ini )
         lsapi_sapi_module.php_ini_ignore = 1;
 
@@ -1358,7 +1358,7 @@ PHP_FUNCTION(apache_get_modules);
 
 PHP_MINFO_FUNCTION(litespeed);
 
-zend_function_entry litespeed_functions[] = {
+static const zend_function_entry litespeed_functions[] = {
     PHP_FE(litespeed_request_headers,   arginfo_litespeed__void)
     PHP_FE(litespeed_response_headers,  arginfo_litespeed__void)
     PHP_FE(apache_get_modules,          arginfo_litespeed__void)

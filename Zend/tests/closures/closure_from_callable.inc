@@ -26,7 +26,7 @@ class Foo
 	{
 		return $param1;
 	}
-	
+
 	private static function privateStaticFunction($param1)
 	{
 		return $param1;
@@ -41,18 +41,18 @@ class Foo
 	{
 		return $param1;
 	}
-	
+
 	protected function protectedInstanceFunc($param1)
 	{
 		return $param1;
 	}
-	
-	
+
+
 	public function publicInstanceFunc($param1)
 	{
 		return $param1;
 	}
-	
+
 	public function closePrivateValid()
 	{
 		return Closure::fromCallable([$this, 'privateInstanceFunc']);
@@ -87,23 +87,23 @@ class Foo
 
 
 class SubFoo extends Foo {
-	
+
 	public function closePrivateStaticInvalid()
 	{
 		return Closure::fromCallable([__CLASS__, 'privateStaticFunction']);
 	}
-	
-	
+
+
 	public function closePrivateInvalid()
 	{
 		return Closure::fromCallable([$this, 'privateInstanceFunc']);
 	}
-	
+
 	public function closeProtectedStaticMethod()
 	{
 		return Closure::fromCallable([__CLASS__, 'protectedStaticFunction']);
 	}
-	
+
 	public function closeProtectedValid()
 	{
 		return Closure::fromCallable([$this, 'protectedInstanceFunc']);
@@ -113,13 +113,13 @@ class SubFoo extends Foo {
 	{
 		return Closure::fromCallable('parent::publicInstanceFunc');
 	}
-	
+
 	public function getSelfColonParentPublicInstanceMethod()
 	{
 		return Closure::fromCallable('self::publicInstanceFunc');
 	}
-	
-	
+
+
 	public function getSelfColonParentProtectedInstanceMethod()
 	{
 		return Closure::fromCallable('self::protectedInstanceFunc');

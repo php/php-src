@@ -568,15 +568,15 @@ void cgi_php_import_environment_variables(zval *array_ptr) /* {{{ */
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_ENV])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_ENV]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
 		return;
 	} else if (Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY &&
 		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]) &&
 		zend_hash_num_elements(Z_ARRVAL(PG(http_globals)[TRACK_VARS_SERVER])) > 0
 	) {
-		zval_dtor(array_ptr);
-		ZVAL_DUP(array_ptr, &PG(http_globals)[TRACK_VARS_SERVER]);
+		zend_array_destroy(Z_ARR_P(array_ptr));
+		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_SERVER]));
 		return;
 	}
 
@@ -1047,7 +1047,7 @@ static void init_request_info(void)
 	/* script_path_translated being set is a good indication that
 	 * we are running in a cgi environment, since it is always
 	 * null otherwise.  otherwise, the filename
-	 * of the script will be retreived later via argc/argv */
+	 * of the script will be retrieved later via argc/argv */
 	if (script_path_translated) {
 		const char *auth;
 		char *content_length = FCGI_GETENV(request, "CONTENT_LENGTH");
@@ -1583,7 +1583,7 @@ int main(int argc, char *argv[])
 	void ***tsrm_ls;
 #endif
 
-	int max_requests = 500;
+	int max_requests = 0;
 	int requests = 0;
 	int fcgi_fd = 0;
 	fcgi_request *request;
@@ -1595,6 +1595,10 @@ int main(int argc, char *argv[])
 	int force_stderr = 0;
 	int php_information = 0;
 	int php_allow_to_run_as_root = 0;
+	int ret;
+#if ZEND_RC_DEBUG
+	zend_bool old_rc_debug;
+#endif
 
 #ifdef HAVE_SIGNAL_H
 #if defined(SIGPIPE) && defined(SIG_IGN)
@@ -1858,7 +1862,18 @@ consult the installation file that came with this distribution, or visit \n\
 		}
 	}
 
-	if (0 > fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr)) {
+#if ZEND_RC_DEBUG
+	old_rc_debug = zend_rc_debug;
+	zend_rc_debug = 0;
+#endif
+
+	ret = fpm_init(argc, argv, fpm_config ? fpm_config : CGIG(fpm_config), fpm_prefix, fpm_pid, test_conf, php_allow_to_run_as_root, force_daemon, force_stderr);
+
+#if ZEND_RC_DEBUG
+	zend_rc_debug = old_rc_debug;
+#endif
+
+	if (ret < 0) {
 
 		if (fpm_globals.send_config_pipe[1]) {
 			int writeval = 0;

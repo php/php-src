@@ -57,7 +57,7 @@ PHP_METHOD(domdocumentfragment, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 

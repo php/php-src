@@ -107,7 +107,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 
 -- Iteration 1: int data --

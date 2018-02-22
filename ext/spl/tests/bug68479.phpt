@@ -9,7 +9,7 @@ var_dump($params);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   object(ReflectionParameter)#2 (1) {

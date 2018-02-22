@@ -30,7 +30,7 @@ foreach($classes  as $class ) {
 	var_dump($ro->IsInstantiable()); 
 }
 ?>
---EXPECTF--
+--EXPECT--
 Is C instantiable?  bool(true)
 Is ifaceImpl instantiable?  bool(true)
 Is D instantiable?  bool(true)

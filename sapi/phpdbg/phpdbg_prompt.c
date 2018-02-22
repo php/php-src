@@ -618,7 +618,7 @@ int phpdbg_compile(void) /* {{{ */
 			data->len += start_line_len;
 			for (i = 1; i <= data->lines; i++) {
 				data->line[i] += start_line_len;
-			}		
+			}
 			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
 		}
 
@@ -1692,7 +1692,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
 		before_ex = EG(opline_before_exception); \
-		++GC_REFCOUNT(exception); \
+		GC_ADDREF(exception); \
 		zend_clear_exception(); \
 	} \
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \

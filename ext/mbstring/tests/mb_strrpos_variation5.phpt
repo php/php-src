@@ -38,7 +38,7 @@ foreach ($inputs as $type => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strrpos() : usage variations ***
 
 -- Double Quoted String --

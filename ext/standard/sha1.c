@@ -111,7 +111,7 @@ static void SHA1Transform(uint32_t[5], const unsigned char[64]);
 static void SHA1Encode(unsigned char *, uint32_t *, unsigned int);
 static void SHA1Decode(uint32_t *, const unsigned char *, unsigned int);
 
-static unsigned char PADDING[64] =
+static const unsigned char PADDING[64] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

@@ -27,5 +27,5 @@ $o = new MyHelloWorld();
 $o->saySomething();
 $o->sayWorld();
 ?>
---EXPECTF--	
+--EXPECT--	
 Hello World

@@ -41,7 +41,7 @@ foreach($classes as $class) {
 	var_dump($rc->hasMethod("doesntExist"));
 }
 ?>
---EXPECTF--
+--EXPECT--
 Reflecting on class pubf: 
   --> Check for f(): bool(true)
   --> Check for s(): bool(true)

@@ -75,7 +75,7 @@ echo"\nDone";
 Warning: array_push() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_push() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_push() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: array_push() expects parameter 1 to be array, string given in %s on line %d

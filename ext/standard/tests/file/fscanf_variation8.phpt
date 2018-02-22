@@ -20,7 +20,7 @@ $file_handle = fopen($filename, "w");
 if($file_handle == false)
   exit("Error:failed to open file $filename");
 
-// different valid float vlaues
+// different valid float values
 $valid_floats = array(
 -2147483649, // float value
   2147483648,  // float value

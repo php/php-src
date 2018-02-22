@@ -40,6 +40,7 @@
 #ifdef PHP_WIN32
 #include "win32/php_win32_globals.h"
 #include "win32/time.h"
+#include "win32/ioutil.h"
 #endif
 
 typedef struct yy_buffer_state *YY_BUFFER_STATE;
@@ -962,7 +963,10 @@ ZEND_BEGIN_ARG_INFO(arginfo_gethostname, 0)
 ZEND_END_ARG_INFO()
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+ZEND_BEGIN_ARG_INFO(arginfo_net_get_interfaces, 0)
+ZEND_END_ARG_INFO()
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_check_record, 0, 0, 1)
 	ZEND_ARG_INFO(0, host)
 	ZEND_ARG_INFO(0, type)
@@ -984,7 +988,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_dns_get_mx, 0, 0, 2)
 ZEND_END_ARG_INFO()
 # endif
 
-#endif /* defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#endif /* defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC */
 /* }}} */
 
 /* {{{ exec.c */
@@ -1204,7 +1208,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fgetcsv, 0, 0, 1)
 	ZEND_ARG_INFO(0, escape)
 ZEND_END_ARG_INFO()
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 ZEND_BEGIN_ARG_INFO(arginfo_realpath, 0)
 	ZEND_ARG_INFO(0, path)
 ZEND_END_ARG_INFO()
@@ -1447,6 +1451,11 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_http_response_code, 0, 0, 0)
 	ZEND_ARG_INFO(0, response_code)
+ZEND_END_ARG_INFO()
+/* }}} */
+/* {{{ hrtime.c */
+ZEND_BEGIN_ARG_INFO(arginfo_hrtime, 0)
+	ZEND_ARG_INFO(0, get_as_number)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ html.c */
@@ -2710,7 +2719,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 /* }}} */
 
-const zend_function_entry basic_functions[] = { /* {{{ */
+static const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(constant,														arginfo_constant)
 	PHP_FE(bin2hex,															arginfo_bin2hex)
 	PHP_FE(hex2bin,															arginfo_hex2bin)
@@ -2955,7 +2964,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(fmod,															arginfo_fmod)
 	PHP_FE(intdiv,															arginfo_intdiv)
 #ifdef HAVE_INET_NTOP
-	PHP_RAW_NAMED_FE(inet_ntop,		php_inet_ntop,								arginfo_inet_ntop)
+	PHP_RAW_NAMED_FE(inet_ntop,		zif_inet_ntop,								arginfo_inet_ntop)
 #endif
 #ifdef HAVE_INET_PTON
 	PHP_RAW_NAMED_FE(inet_pton,		php_inet_pton,								arginfo_inet_pton)
@@ -2981,6 +2990,8 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 #ifdef HAVE_GETRUSAGE
 	PHP_FE(getrusage,														arginfo_getrusage)
 #endif
+
+	PHP_FE(hrtime,															arginfo_hrtime)
 
 #ifdef HAVE_GETTIMEOFDAY
 	PHP_FE(uniqid,															arginfo_uniqid)
@@ -3060,7 +3071,11 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 	PHP_FE(gethostname,													arginfo_gethostname)
 #endif
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if defined(PHP_WIN32) || HAVE_GETIFADDRS
+	PHP_FE(net_get_interfaces,												arginfo_net_get_interfaces)
+#endif
+
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 
 	PHP_FE(dns_check_record,												arginfo_dns_check_record)
 	PHP_FALIAS(checkdnsrr,			dns_check_record,						arginfo_dns_check_record)
@@ -3189,7 +3204,7 @@ const zend_function_entry basic_functions[] = { /* {{{ */
 
 	PHP_FALIAS(socket_get_status, stream_get_meta_data,						arginfo_stream_get_meta_data)
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 	PHP_FE(realpath,														arginfo_realpath)
 #endif
 
@@ -3673,6 +3688,14 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	BASIC_MINIT_SUBMODULE(nl_langinfo)
 #endif
 
+#if ZEND_INTRIN_SSE4_2_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(string_intrin)
+#endif
+
+#if ZEND_INTRIN_AVX2_FUNC_PTR || ZEND_INTRIN_SSSE3_FUNC_PTR
+	BASIC_MINIT_SUBMODULE(base64_intrin)
+#endif
+
 	BASIC_MINIT_SUBMODULE(crypt)
 	BASIC_MINIT_SUBMODULE(lcg)
 
@@ -3700,13 +3723,15 @@ PHP_MINIT_FUNCTION(basic) /* {{{ */
 	php_register_url_stream_wrapper("http", &php_stream_http_wrapper);
 	php_register_url_stream_wrapper("ftp", &php_stream_ftp_wrapper);
 
-#if defined(PHP_WIN32) || (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if defined(PHP_WIN32) || HAVE_DNS_SEARCH_FUNC
 # if defined(PHP_WIN32) || HAVE_FULL_DNS_FUNCS
 	BASIC_MINIT_SUBMODULE(dns)
 # endif
 #endif
 
 	BASIC_MINIT_SUBMODULE(random)
+
+	BASIC_MINIT_SUBMODULE(hrtime)
 
 	return SUCCESS;
 }
@@ -3879,8 +3904,8 @@ PHP_FUNCTION(constant)
 	scope = zend_get_executed_scope();
 	c = zend_get_constant_ex(const_name, scope, ZEND_FETCH_CLASS_SILENT);
 	if (c) {
-		ZVAL_DUP(return_value, c);
-		if (Z_CONSTANT_P(return_value)) {
+		ZVAL_COPY_OR_DUP(return_value, c);
+		if (Z_TYPE_P(return_value) == IS_CONSTANT_AST) {
 			if (UNEXPECTED(zval_update_constant_ex(return_value, scope) != SUCCESS)) {
 				return;
 			}
@@ -3897,7 +3922,7 @@ PHP_FUNCTION(constant)
 #ifdef HAVE_INET_NTOP
 /* {{{ proto string inet_ntop(string in_addr)
    Converts a packed inet address to a human readable IP address string */
-PHP_NAMED_FUNCTION(php_inet_ntop)
+PHP_NAMED_FUNCTION(zif_inet_ntop)
 {
 	char *address;
 	size_t address_len;
@@ -4040,7 +4065,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
@@ -4161,7 +4186,7 @@ PHP_FUNCTION(putenv)
 	pe.key_len = (int)strlen(pe.key);
 #ifdef PHP_WIN32
 	if (equals) {
-		if (pe.key_len < setting_len - 1) {
+		if ((size_t)pe.key_len < setting_len - 1) {
 			value = p + 1;
 		} else {
 			/* empty string*/
@@ -4354,8 +4379,8 @@ PHP_FUNCTION(getopt)
 	 * in order to be on the safe side, even though it is also available
 	 * from the symbol table. */
 	if ((Z_TYPE(PG(http_globals)[TRACK_VARS_SERVER]) == IS_ARRAY || zend_is_auto_global_str(ZEND_STRL("_SERVER"))) &&
-		((args = zend_hash_str_find_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), "argv", sizeof("argv")-1)) != NULL ||
-		(args = zend_hash_str_find_ind(&EG(symbol_table), "argv", sizeof("argv")-1)) != NULL)
+		((args = zend_hash_find_ex_ind(Z_ARRVAL_P(&PG(http_globals)[TRACK_VARS_SERVER]), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL ||
+		(args = zend_hash_find_ex_ind(&EG(symbol_table), ZSTR_KNOWN(ZEND_STR_ARGV), 1)) != NULL)
 	) {
 		int pos = 0;
 		zval *entry;
@@ -4371,11 +4396,12 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(args), entry) {
-			zend_string *arg_str = zval_get_string(entry);
+			zend_string *tmp_arg_str;
+			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
 			argv[pos++] = estrdup(ZSTR_VAL(arg_str));
 
-			zend_string_release(arg_str);
+			zend_tmp_string_release(tmp_arg_str);
 		} ZEND_HASH_FOREACH_END();
 
 		/* The C Standard requires argv[argc] to be NULL - this might
@@ -4404,7 +4430,8 @@ PHP_FUNCTION(getopt)
 
 		/* Iterate over the hash to construct the argv array. */
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(p_longopts), entry) {
-			zend_string *arg_str = zval_get_string(entry);
+			zend_string *tmp_arg_str;
+			zend_string *arg_str = zval_get_tmp_string(entry, &tmp_arg_str);
 
 			opts->need_param = 0;
 			opts->opt_name = estrdup(ZSTR_VAL(arg_str));
@@ -4420,7 +4447,7 @@ PHP_FUNCTION(getopt)
 			opts->opt_char = 0;
 			opts++;
 
-			zend_string_release(arg_str);
+			zend_tmp_string_release(tmp_arg_str);
 		} ZEND_HASH_FOREACH_END();
 	} else {
 		opts = (opt_struct*) erealloc(opts, sizeof(opt_struct) * (len + 1));
@@ -4896,7 +4923,7 @@ PHP_FUNCTION(call_user_func_array)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY_EX(params, 0, 1)
+		Z_PARAM_ARRAY(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fcall_info_args(&fci, params);
@@ -4960,7 +4987,7 @@ PHP_FUNCTION(forward_static_call_array)
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_FUNC(fci, fci_cache)
-		Z_PARAM_ARRAY_EX(params, 0, 1)
+		Z_PARAM_ARRAY(params)
 	ZEND_PARSE_PARAMETERS_END();
 
 	zend_fcall_info_args(&fci, params);
@@ -5161,7 +5188,7 @@ PHP_FUNCTION(register_shutdown_function)
 		}
 
 		for (i = 0; i < shutdown_function_entry.arg_count; i++) {
-			if (Z_REFCOUNTED(shutdown_function_entry.arguments[i])) Z_ADDREF(shutdown_function_entry.arguments[i]);
+			Z_TRY_ADDREF(shutdown_function_entry.arguments[i]);
 		}
 		zend_hash_next_index_insert_mem(BG(user_shutdown_function_names), &shutdown_function_entry, sizeof(php_shutdown_function_entry));
 	}
@@ -5343,26 +5370,29 @@ PHP_FUNCTION(highlight_string)
    Get a configuration option */
 PHP_FUNCTION(ini_get)
 {
-	char *varname, *str;
-	size_t varname_len, len;
+	zend_string *varname, *val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_STRING(varname, varname_len)
+		Z_PARAM_STR(varname)
 	ZEND_PARSE_PARAMETERS_END();
 
-	str = zend_ini_string(varname, (uint32_t)varname_len, 0);
+	val = zend_ini_get_value(varname);
 
-	if (!str) {
+	if (!val) {
 		RETURN_FALSE;
 	}
 
-	len = strlen(str);
-	if (len == 0) {
-		RETURN_EMPTY_STRING();
-	} else if (len == 1) {
-		RETURN_INTERNED_STR(ZSTR_CHAR((zend_uchar)str[0]));
+	if (ZSTR_IS_INTERNED(val)) {
+		RETVAL_INTERNED_STR(val);
+	} else if (ZSTR_LEN(val) == 0) {
+		RETVAL_EMPTY_STRING();
+	} else if (ZSTR_LEN(val) == 1) {
+		RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+	} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+		ZVAL_NEW_STR(return_value, zend_string_copy(val));
+	} else {
+		ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 	}
-	RETURN_STRINGL(str, len);
 }
 /* }}} */
 
@@ -5446,9 +5476,9 @@ PHP_FUNCTION(ini_get_all)
 }
 /* }}} */
 
-static int php_ini_check_path(char *option_name, int option_len, char *new_option_name, int new_option_len) /* {{{ */
+static int php_ini_check_path(char *option_name, size_t option_len, char *new_option_name, size_t new_option_len) /* {{{ */
 {
-	if (option_len != (new_option_len - 1)) {
+	if (option_len + 1 != new_option_len) {
 		return 0;
 	}
 
@@ -5462,31 +5492,33 @@ PHP_FUNCTION(ini_set)
 {
 	zend_string *varname;
 	zend_string *new_value;
-	char *old_value;
+	zend_string *val;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(varname)
 		Z_PARAM_STR(new_value)
 	ZEND_PARSE_PARAMETERS_END();
 
-	old_value = zend_ini_string(ZSTR_VAL(varname), (int)ZSTR_LEN(varname), 0);
+	val = zend_ini_get_value(varname);
 
 	/* copy to return here, because alter might free it! */
-	if (old_value) {
-		size_t len = strlen(old_value);
-
-		if (len == 0) {
+	if (val) {
+		if (ZSTR_IS_INTERNED(val)) {
+			RETVAL_INTERNED_STR(val);
+		} else if (ZSTR_LEN(val) == 0) {
 			RETVAL_EMPTY_STRING();
-		} else if (len == 1) {
-			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)old_value[0]));
+		} else if (ZSTR_LEN(val) == 1) {
+			RETVAL_INTERNED_STR(ZSTR_CHAR((zend_uchar)ZSTR_VAL(val)[0]));
+		} else if (!(GC_FLAGS(val) & GC_PERSISTENT)) {
+			ZVAL_NEW_STR(return_value, zend_string_copy(val));
 		} else {
-			RETVAL_STRINGL(old_value, len);
+			ZVAL_NEW_STR(return_value, zend_string_init(ZSTR_VAL(val), ZSTR_LEN(val), 0));
 		}
 	} else {
 		RETVAL_FALSE;
 	}
 
-#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, (int)var_len, ini, sizeof(ini))
+#define _CHECK_PATH(var, var_len, ini) php_ini_check_path(var, var_len, ini, sizeof(ini))
 	/* open basedir check */
 	if (PG(open_basedir)) {
 		if (_CHECK_PATH(ZSTR_VAL(varname), ZSTR_LEN(varname), "error_log") ||
@@ -5501,6 +5533,7 @@ PHP_FUNCTION(ini_set)
 			}
 		}
 	}
+#undef _CHECK_PATH
 
 	if (zend_alter_ini_entry_ex(varname, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
 		zval_dtor(return_value);
@@ -5810,9 +5843,7 @@ PHP_FUNCTION(register_tick_function)
 	}
 
 	for (i = 0; i < tick_fe.arg_count; i++) {
-		if (Z_REFCOUNTED(tick_fe.arguments[i])) {
-			Z_ADDREF(tick_fe.arguments[i]);
-		}
+		Z_TRY_ADDREF(tick_fe.arguments[i]);
 	}
 
 	zend_llist_add_element(BG(user_tick_functions), &tick_fe);
@@ -5952,15 +5983,15 @@ static void php_simple_ini_parser_cb(zval *arg1, zval *arg2, zval *arg3, int cal
 			}
 
 			if (!(Z_STRLEN_P(arg1) > 1 && Z_STRVAL_P(arg1)[0] == '0') && is_numeric_string(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1), NULL, NULL, 0) == IS_LONG) {
-				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), (int)Z_STRLEN_P(arg1));
+				zend_ulong key = (zend_ulong) zend_atol(Z_STRVAL_P(arg1), Z_STRLEN_P(arg1));
 				if ((find_hash = zend_hash_index_find(Z_ARRVAL_P(arr), key)) == NULL) {
 					array_init(&hash);
-					find_hash = zend_hash_index_update(Z_ARRVAL_P(arr), key, &hash);
+					find_hash = zend_hash_index_add_new(Z_ARRVAL_P(arr), key, &hash);
 				}
 			} else {
 				if ((find_hash = zend_hash_find(Z_ARRVAL_P(arr), Z_STR_P(arg1))) == NULL) {
 					array_init(&hash);
-					find_hash = zend_hash_update(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
+					find_hash = zend_hash_add_new(Z_ARRVAL_P(arr), Z_STR_P(arg1), &hash);
 				}
 			}
 

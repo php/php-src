@@ -58,13 +58,13 @@ float(%s)
   }
 }
 
-Warning: microtime() expects parameter 1 to be boolean, array given in %s on line 25
+Warning: microtime() expects parameter 1 to be bool, array given in %s on line 25
 NULL
 
 --> bad arg: object(stdClass)#%d (0) {
 }
 
-Warning: microtime() expects parameter 1 to be boolean, object given in %s on line 25
+Warning: microtime() expects parameter 1 to be bool, object given in %s on line 25
 NULL
 
 --> bad arg: int(1)

@@ -1186,7 +1186,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_PSD:
 			return "image/psd";
 		case IMAGE_FILETYPE_BMP:
-			return "image/x-ms-bmp";
+			return "image/bmp";
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			return "image/tiff";
@@ -1346,7 +1346,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 
     /* WBMP may be smaller than 12 bytes, so delay error */
 	twelve_bytes_read = (php_stream_read(stream, filetype+4, 8) == 8);
-    
+
 /* BYTES READ: 12 */
    	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;

@@ -50,7 +50,7 @@ echo "um, hi\n";
  */
 
 ?>
---EXPECTF--
+--EXPECT--
 write: goodbye cruel world
 
 Warning: Unknown: Cannot call session save handler in a recursive manner in Unknown on line 0

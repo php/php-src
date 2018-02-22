@@ -17,7 +17,7 @@ var_dump(parse_ini_string($contents, false, INI_SCANNER_TYPED));
 
 ?>
 Done
---EXPECTF--
+--EXPECT--
 array(4) {
   ["foo"]=>
   int(1)
