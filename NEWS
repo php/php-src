@@ -14,6 +14,9 @@ PHP                                                                        NEWS
   . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
     (carusogabriel)
 
+- standard:
+  . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
+
 29 Mar 2018, PHP 7.1.16
 
 - Core:
