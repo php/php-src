@@ -81,14 +81,26 @@ PHPAPI int php_header(void)
 }
 
 
-PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, zend_string *path, zend_string *domain, int secure, int url_encode, int httponly)
+static void php_setcookie(INTERNAL_FUNCTION_PARAMETERS, int url_encode)
 {
 	char *cookie;
 	size_t len = sizeof("Set-Cookie: ");
-	zend_string *dt;
 	sapi_header_line ctr = {0};
 	int result;
-	zend_string *encoded_value = NULL;
+	zend_string *dt, *encoded_value = NULL, *name, *value = NULL, *path = NULL, *domain = NULL;
+	zend_long expires = 0;
+	zend_bool secure = 0, httponly = 0;
+
+	ZEND_PARSE_PARAMETERS_START(1, 7)
+		Z_PARAM_STR(name)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STR(value)
+		Z_PARAM_LONG(expires)
+		Z_PARAM_STR(path)
+		Z_PARAM_STR(domain)
+		Z_PARAM_BOOL(secure)
+		Z_PARAM_BOOL(httponly)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ZSTR_LEN(name)) {
 		zend_error( E_WARNING, "Cookie names must not be empty" );
@@ -188,7 +200,12 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 
 	result = sapi_header_op(SAPI_HEADER_ADD, &ctr);
 	efree(cookie);
-	return result;
+
+	if (result == SUCCESS) {
+		RETVAL_TRUE;
+	} else {
+		RETVAL_FALSE;
+	}
 }
 
 
@@ -197,26 +214,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
    Send a cookie */
 PHP_FUNCTION(setcookie)
 {
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
-	zend_long expires = 0;
-	zend_bool secure = 0, httponly = 0;
-
-	ZEND_PARSE_PARAMETERS_START(1, 7)
-		Z_PARAM_STR(name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(value)
-		Z_PARAM_LONG(expires)
-		Z_PARAM_STR(path)
-		Z_PARAM_STR(domain)
-		Z_PARAM_BOOL(secure)
-		Z_PARAM_BOOL(httponly)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (php_setcookie(name, value, expires, path, domain, secure, 1, httponly) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	php_setcookie(INTERNAL_FUNCTION_PARAM_PASSTHRU, 1);
 }
 /* }}} */
 
@@ -224,26 +222,7 @@ PHP_FUNCTION(setcookie)
    Send a cookie with no url encoding of the value */
 PHP_FUNCTION(setrawcookie)
 {
-	zend_string *name, *value = NULL, *path = NULL, *domain = NULL;
-	zend_long expires = 0;
-	zend_bool secure = 0, httponly = 0;
-
-	ZEND_PARSE_PARAMETERS_START(1, 7)
-		Z_PARAM_STR(name)
-		Z_PARAM_OPTIONAL
-		Z_PARAM_STR(value)
-		Z_PARAM_LONG(expires)
-		Z_PARAM_STR(path)
-		Z_PARAM_STR(domain)
-		Z_PARAM_BOOL(secure)
-		Z_PARAM_BOOL(httponly)
-	ZEND_PARSE_PARAMETERS_END();
-
-	if (php_setcookie(name, value, expires, path, domain, secure, 0, httponly) == SUCCESS) {
-		RETVAL_TRUE;
-	} else {
-		RETVAL_FALSE;
-	}
+	php_setcookie(INTERNAL_FUNCTION_PARAM_PASSTHRU, 0);
 }
 /* }}} */
 
