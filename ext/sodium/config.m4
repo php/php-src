@@ -43,7 +43,7 @@ if test "$PHP_SODIUM" != "no"; then
   fi
 
   LIBNAME=sodium
-  LIBSYMBOL=sodium_add
+  LIBSYMBOL=sodium_bin2hex
 
   if test -n "$LIBSODIUM_DIR"; then
     PHP_ADD_INCLUDE($LIBSODIUM_DIR/include)
