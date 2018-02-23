@@ -313,7 +313,7 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto long http_response_code([int response_code])
+/* {{{ proto int http_response_code([int response_code])
    Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {

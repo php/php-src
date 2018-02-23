@@ -2298,7 +2298,7 @@ PHP_FUNCTION(pg_affected_rows)
 /* }}} */
 #endif
 
-/* {{{ proto mixed pg_last_notice(resource connection [, long option])
+/* {{{ proto mixed pg_last_notice(resource connection [, int option])
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice)
 {
@@ -5246,7 +5246,7 @@ PHP_FUNCTION(pg_get_result)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result_status(resource result[, long result_type])
+/* {{{ proto mixed pg_result_status(resource result[, int result_type])
    Get status of query result */
 PHP_FUNCTION(pg_result_status)
 {

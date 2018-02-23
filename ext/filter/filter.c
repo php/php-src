@@ -706,7 +706,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
+/* {{{ proto mixed filter_input(constant type, string variable_name [, int filter [, mixed options]])
  * Returns the filtered variable 'name'* from source `type`.
  */
 PHP_FUNCTION(filter_input)
@@ -762,7 +762,7 @@ PHP_FUNCTION(filter_input)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var(mixed variable [, long filter [, mixed options]])
+/* {{{ proto mixed filter_var(mixed variable [, int filter [, mixed options]])
  * Returns the filtered version of the variable.
  */
 PHP_FUNCTION(filter_var)
