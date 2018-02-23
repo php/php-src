@@ -9,7 +9,9 @@ immutable class A {
 		$this->x = $x;
 	}
 }
-(new A(1))->x = 2;
+
+$a = new A(1);
+$a->x = 2;
 ?>
 --EXPECTF--
 
