@@ -1,5 +1,5 @@
 --TEST--
-Reference assignment of immutable class properties are not permitted.
+Referencing immutable property is not permitted.
 --FILE--
 <?php
 namespace X\Y\Z;
@@ -14,7 +14,8 @@ $x = &$a->x;
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught Error: Reference assignment of immutable property X\Y\Z\A::$x is not permitted in %simmutable_modifier%sclass%serror6.php:15
+
+Fatal error: Uncaught Error: Can not reference property of immutable object in %simmutable%sclass%serror6.php on line 10
 Stack trace:
 #0 {main}
-  thrown in %simmutable%sclass%serror6.php on line 15
+  thrown in %simmutable%sclass%serror6.php on line 10
