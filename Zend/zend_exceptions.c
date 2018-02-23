@@ -303,7 +303,7 @@ ZEND_METHOD(exception, __construct)
 }
 /* }}} */
 
-/* {{{ proto Exception::__wakeup()
+/* {{{ proto void Exception::__wakeup()
    Exception unserialize checks */
 #define CHECK_EXC_TYPE(id, type) \
 	pvalue = zend_read_property_ex(i_get_exception_base(object), (object), ZSTR_KNOWN(id), 1, &value); \
@@ -330,7 +330,7 @@ ZEND_METHOD(exception, __wakeup)
 }
 /* }}} */
 
-/* {{{ proto ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Throwable previous]]])
+/* {{{ proto void ErrorException::__construct(string message, int code, int severity [, string filename [, int lineno [, Throwable previous]]])
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {

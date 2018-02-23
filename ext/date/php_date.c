@@ -2826,7 +2826,7 @@ PHP_FUNCTION(date_create_immutable_from_format)
 }
 /* }}} */
 
-/* {{{ proto DateTime::__construct([string time[, DateTimeZone object]])
+/* {{{ proto void DateTime::__construct([string time[, DateTimeZone object]])
    Creates new DateTime object
 */
 PHP_METHOD(DateTime, __construct)
@@ -2848,7 +2848,7 @@ PHP_METHOD(DateTime, __construct)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__construct([string time[, DateTimeZone object]])
+/* {{{ proto void DateTimeImmutable::__construct([string time[, DateTimeZone object]])
    Creates new DateTimeImmutable object
 */
 PHP_METHOD(DateTimeImmutable, __construct)
@@ -2870,7 +2870,7 @@ PHP_METHOD(DateTimeImmutable, __construct)
 }
 /* }}} */
 
-/* {{{ proto DateTime::createFromImmutable(DateTimeImmutable object)
+/* {{{ proto DateTime DateTime::createFromImmutable(DateTimeImmutable object)
    Creates new DateTime object from an existing immutable DateTimeImmutable object.
 */
 PHP_METHOD(DateTime, createFromImmutable)
@@ -2891,7 +2891,7 @@ PHP_METHOD(DateTime, createFromImmutable)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::createFromMutable(DateTime object)
+/* {{{ proto DateTimeImmutable DateTimeImmutable::createFromMutable(DateTime object)
    Creates new DateTimeImmutable object from an existing mutable DateTime object.
 */
 PHP_METHOD(DateTimeImmutable, createFromMutable)
@@ -2961,7 +2961,7 @@ static int php_date_initialize_from_hash(php_date_obj **dateobj, HashTable *myht
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateTime::__set_state(array array)
+/* {{{ proto DateTime DateTime::__set_state(array array)
 */
 PHP_METHOD(DateTime, __set_state)
 {
@@ -2983,7 +2983,7 @@ PHP_METHOD(DateTime, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::__set_state(array array)
+/* {{{ proto DateTimeImmutable DateTimeImmutable::__set_state(array array)
 */
 PHP_METHOD(DateTimeImmutable, __set_state)
 {
@@ -3005,7 +3005,7 @@ PHP_METHOD(DateTimeImmutable, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTime::__wakeup()
+/* {{{ proto void DateTime::__wakeup()
 */
 PHP_METHOD(DateTime, __wakeup)
 {
@@ -3278,7 +3278,7 @@ PHP_FUNCTION(date_modify)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::modify()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::modify()
 */
 PHP_METHOD(DateTimeImmutable, modify)
 {
@@ -3333,7 +3333,7 @@ PHP_FUNCTION(date_add)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::add()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::add()
 */
 PHP_METHOD(DateTimeImmutable, add)
 {
@@ -3389,7 +3389,7 @@ PHP_FUNCTION(date_sub)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::sub()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::sub()
 */
 PHP_METHOD(DateTimeImmutable, sub)
 {
@@ -3492,7 +3492,7 @@ PHP_FUNCTION(date_timezone_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTimezone()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::setTimezone()
 */
 PHP_METHOD(DateTimeImmutable, setTimezone)
 {
@@ -3577,7 +3577,7 @@ PHP_FUNCTION(date_time_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTime()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::setTime()
 */
 PHP_METHOD(DateTimeImmutable, setTime)
 {
@@ -3626,7 +3626,7 @@ PHP_FUNCTION(date_date_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setDate()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::setDate()
 */
 PHP_METHOD(DateTimeImmutable, setDate)
 {
@@ -3679,7 +3679,7 @@ PHP_FUNCTION(date_isodate_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setISODate()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::setISODate()
 */
 PHP_METHOD(DateTimeImmutable, setISODate)
 {
@@ -3727,7 +3727,7 @@ PHP_FUNCTION(date_timestamp_set)
 }
 /* }}} */
 
-/* {{{ proto DateTimeImmutable::setTimestamp()
+/* {{{ proto DateTimeImmutable DateTimeImmutable::setTimestamp()
 */
 PHP_METHOD(DateTimeImmutable, setTimestamp)
 {
@@ -3846,7 +3846,7 @@ PHP_FUNCTION(timezone_open)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone::__construct(string timezone)
+/* {{{ proto void DateTimeZone::__construct(string timezone)
    Creates new DateTimeZone object.
 */
 PHP_METHOD(DateTimeZone, __construct)
@@ -3888,7 +3888,7 @@ static int php_date_timezone_initialize_from_hash(zval **return_value, php_timez
 	return FAILURE;
 } /* }}} */
 
-/* {{{ proto DateTimeZone::__set_state(array array)
+/* {{{ proto DateTimeZone DateTimeZone::__set_state(array array)
  *  */
 PHP_METHOD(DateTimeZone, __set_state)
 {
@@ -3911,7 +3911,7 @@ PHP_METHOD(DateTimeZone, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateTimeZone::__wakeup()
+/* {{{ proto void DateTimeZone::__wakeup()
  *  */
 PHP_METHOD(DateTimeZone, __wakeup)
 {
@@ -4302,7 +4302,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 }
 /* }}} */
 
-/* {{{ proto DateInterval::__construct([string interval_spec])
+/* {{{ proto void DateInterval::__construct([string interval_spec])
    Creates new DateInterval object.
 */
 PHP_METHOD(DateInterval, __construct)
@@ -4391,7 +4391,7 @@ static int php_date_interval_initialize_from_hash(zval **return_value, php_inter
 	return 0;
 } /* }}} */
 
-/* {{{ proto DateInterval::__set_state(array array)
+/* {{{ proto DateInterval DateInterval::__set_state(array array)
 */
 PHP_METHOD(DateInterval, __set_state)
 {
@@ -4411,7 +4411,7 @@ PHP_METHOD(DateInterval, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DateInterval::__wakeup()
+/* {{{ proto void DateInterval::__wakeup()
 */
 PHP_METHOD(DateInterval, __wakeup)
 {
@@ -4566,7 +4566,7 @@ static int date_period_initialize(timelib_time **st, timelib_time **et, timelib_
 	return retval;
 } /* }}} */
 
-/* {{{ proto DatePeriod::__construct(DateTime $start, DateInterval $interval, int recurrences|DateTime $end)
+/* {{{ proto void DatePeriod::__construct(DateTime $start, DateInterval $interval, int recurrences|DateTime $end)
    Creates new DatePeriod object.
 */
 PHP_METHOD(DatePeriod, __construct)
@@ -4653,7 +4653,7 @@ PHP_METHOD(DatePeriod, __construct)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getStartDate()
+/* {{{ proto DateTimeInterface DatePeriod::getStartDate()
    Get start date.
 */
 PHP_METHOD(DatePeriod, getStartDate)
@@ -4680,7 +4680,7 @@ PHP_METHOD(DatePeriod, getStartDate)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getEndDate()
+/* {{{ proto DateTimeInterface DatePeriod::getEndDate()
    Get end date.
 */
 PHP_METHOD(DatePeriod, getEndDate)
@@ -4711,7 +4711,7 @@ PHP_METHOD(DatePeriod, getEndDate)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::getDateInterval()
+/* {{{ proto DateInterval DatePeriod::getDateInterval()
    Get date interval.
 */
 PHP_METHOD(DatePeriod, getDateInterval)
@@ -5243,7 +5243,7 @@ static int php_date_period_initialize_from_hash(php_period_obj *period_obj, Hash
 	return 1;
 } /* }}} */
 
-/* {{{ proto DatePeriod::__set_state(array array)
+/* {{{ proto DatePeriod DatePeriod::__set_state(array array)
 */
 PHP_METHOD(DatePeriod, __set_state)
 {
@@ -5265,7 +5265,7 @@ PHP_METHOD(DatePeriod, __set_state)
 }
 /* }}} */
 
-/* {{{ proto DatePeriod::__wakeup()
+/* {{{ proto void DatePeriod::__wakeup()
 */
 PHP_METHOD(DatePeriod, __wakeup)
 {

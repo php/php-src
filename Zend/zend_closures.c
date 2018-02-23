@@ -563,7 +563,7 @@ static HashTable *zend_closure_get_gc(zval *obj, zval **table, int *n) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto Closure::__construct()
+/* {{{ proto void Closure::__construct()
    Private constructor preventing instantiation */
 ZEND_COLD ZEND_METHOD(Closure, __construct)
 {
