@@ -850,7 +850,7 @@ PHP_FUNCTION(filter_var_array)
 }
 /* }}} */
 
-/* {{{ proto filter_list()
+/* {{{ proto array filter_list()
  * Returns a list of all supported filters */
 PHP_FUNCTION(filter_list)
 {
@@ -867,7 +867,7 @@ PHP_FUNCTION(filter_list)
 }
 /* }}} */
 
-/* {{{ proto filter_id(string filtername)
+/* {{{ proto int filter_id(string filtername)
  * Returns the filter ID belonging to a named filter */
 PHP_FUNCTION(filter_id)
 {
