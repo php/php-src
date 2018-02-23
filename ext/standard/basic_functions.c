@@ -633,7 +633,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
 	ZEND_ARG_INFO(0, varname)
 	ZEND_ARG_INFO(0, local_only)
 ZEND_END_ARG_INFO()
@@ -1386,7 +1386,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_vfprintf, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ fsock.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, port)
 	ZEND_ARG_INFO(1, errno)
@@ -1394,7 +1394,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, port)
 	ZEND_ARG_INFO(1, errno)
@@ -2206,7 +2206,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_implode, 0)
 	ZEND_ARG_INFO(0, pieces)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strtok, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strtok, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, token)
 ZEND_END_ARG_INFO()
@@ -2472,7 +2472,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_str_split, 0, 0, 1)
 	ZEND_ARG_INFO(0, split_length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strpbrk, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strpbrk, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, char_list)
 ZEND_END_ARG_INFO()
@@ -4585,7 +4585,7 @@ PHP_FUNCTION(usleep)
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds)
+/* {{{ proto mixed time_nanosleep(int seconds, int nanoseconds)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {

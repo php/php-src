@@ -31,6 +31,6 @@ var_dump($f);
 
 ?>
 +++DONE+++
---EXPECTF--
+--EXPECT--
 string(0) ""
 +++DONE+++

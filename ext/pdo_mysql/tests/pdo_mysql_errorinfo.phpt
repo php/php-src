@@ -101,7 +101,7 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 Emulated Prepared Statements...
 [015] Driver-specific error code not set
 [015] Driver-specific error message.not set

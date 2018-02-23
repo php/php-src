@@ -16,5 +16,5 @@ $dom->substituteEntities = true;
 $dom->load(dirname(__FILE__).'/dom.xml');
 var_dump($dom->validate());
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

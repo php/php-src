@@ -47,7 +47,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : sorting different associative arrays ***
 -- Array with duplicate keys --
 bool(true)

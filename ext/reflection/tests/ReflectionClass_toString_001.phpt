@@ -8,7 +8,7 @@ Steve Seear <stevseea@php.net>
 $rc = new ReflectionClass("ReflectionClass");
 echo $rc;
 ?>
---EXPECTF--
+--EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Constants [3] {

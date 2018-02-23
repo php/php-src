@@ -18,7 +18,7 @@ $email_address = "test?mail@example.com";
 var_dump(filter_var($email_address, FILTER_VALIDATE_EMAIL));   
 
 ?>
---EXPECTF--
+--EXPECT--
 string(21) "test=mail@example.com"
 string(21) "test-mail@example.com"
 string(21) "test+mail@example.com"

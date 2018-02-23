@@ -29,7 +29,7 @@ foreach ($data AS $value) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing escapeshellcmd() basic operations ***
 -- Test 1 --
 string(5) "^"abc"

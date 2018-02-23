@@ -47,7 +47,7 @@ var_dump(array_diff_assoc($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 
 *** Testing array_diff_assoc() : usage variations ***
 -- Results when $a = a: --

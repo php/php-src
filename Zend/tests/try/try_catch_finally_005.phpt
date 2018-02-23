@@ -39,7 +39,7 @@ for ($i = 0;  $i < 3; $i ++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "break"
 string(9) "continue1"
 string(9) "continue1"

@@ -28,7 +28,7 @@ foreach($string_array as $string)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : obscure functionality ***
 -- Iteration 1 --
 string(12) "hello  world"

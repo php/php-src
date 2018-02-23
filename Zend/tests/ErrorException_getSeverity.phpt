@@ -862,7 +862,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 This exception severity is: 1bool(true)
 bool(true)
 bool(true)

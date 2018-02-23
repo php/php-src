@@ -35,7 +35,7 @@ var_dump( sizeof($obj, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : object functionality ***
 -- Testing sizeof() with an object which implements Countable interface --
 -- Testing sizeof() in default mode --

@@ -30,7 +30,7 @@ $o= myHelloWorld::getInstance(array(1=>2));
 $o= myHelloWorld::getInstance(array(1=>2));
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 array(1) {

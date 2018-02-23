@@ -30,6 +30,22 @@
 #define BLOB_CLOSE		1
 #define BLOB_CANCEL		2
 
+#define PARSE_PARAMETERS \
+	switch (ZEND_NUM_ARGS()) { \
+		default: \
+			WRONG_PARAM_COUNT; \
+		case 1: \
+			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) { \
+				RETURN_FALSE; \
+			} \
+			break; \
+		case 2: \
+			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) { \
+				RETURN_FALSE; \
+			} \
+			break; \
+	} \
+
 static int le_blob;
 
 static void _php_ibase_free_blob(zend_resource *rsrc) /* {{{ */
@@ -242,21 +258,7 @@ PHP_FUNCTION(ibase_blob_open)
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
@@ -405,21 +407,7 @@ PHP_FUNCTION(ibase_blob_info)
 	IBASE_BLOBINFO bl_info;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
@@ -482,21 +470,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	unsigned short seg_len;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 

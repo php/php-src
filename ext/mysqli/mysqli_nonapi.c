@@ -757,7 +757,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 }
 /* }}} */
 
-/* {{{ proto int mysqli_poll(array read, array write, array error, long sec [, long usec]) U
+/* {{{ proto int mysqli_poll(array read, array write, array error, int sec [, int usec]) U
    Poll connections */
 PHP_FUNCTION(mysqli_poll)
 {

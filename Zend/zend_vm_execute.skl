@@ -47,6 +47,12 @@ ZEND_API void zend_{%EXECUTOR_NAME%}(zend_op_array *op_array, zval *return_value
 void {%INITIALIZER_NAME%}(void)
 {
 	{%EXTERNAL_LABELS%}
+	VM_TRACE_START();
+}
+
+void zend_vm_dtor(void)
+{
+	VM_TRACE_END();
 }
 
 static HashTable *zend_handlers_table = NULL;

@@ -13,7 +13,7 @@ test if bind_textdomain_codeset() returns correct value
 
 	echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 bool(false)
 string(5) "UTF-8"
 Done

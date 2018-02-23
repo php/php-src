@@ -13,5 +13,5 @@ class C implements I {
 $c = new C;
 $c->f();
 ?>
---EXPECTF--
+--EXPECT--
 int(2)

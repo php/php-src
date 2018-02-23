@@ -24,7 +24,7 @@ var_dump(class_exists("C", true));
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 var:2
 bool(false)
 ===DONE===

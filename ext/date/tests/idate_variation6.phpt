@@ -23,7 +23,7 @@ $timestamp = mktime(8, 8, 8, 8, 8, 2001);
 var_dump( idate($format, $timestamp) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing idate() : usage variation ***
 
 -- Testing idate() function for 2 digit year having no zero as starting number --

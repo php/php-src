@@ -49,5 +49,5 @@ if (!function_exists('mysqli_get_connection_stats')) {
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

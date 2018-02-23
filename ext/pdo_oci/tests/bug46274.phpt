@@ -56,7 +56,7 @@ var_dump($res->fetch());
 $db->exec("DROP TABLE test_one_blob");
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["blob1"]=>
   string(3) "foo"

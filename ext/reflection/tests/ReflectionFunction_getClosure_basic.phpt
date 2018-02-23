@@ -30,7 +30,7 @@ $closure( 'succeeded' );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ReflectionFunction::getClosure() : basic functionality ***
 string(19) "Inside foo function"
 string(16) "Arg is succeeded"

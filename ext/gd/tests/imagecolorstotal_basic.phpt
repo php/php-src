@@ -30,7 +30,7 @@ imagedestroy($im);
 ?>
 
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***
 Total colors in image: 128
 ===DONE===

@@ -25,33 +25,33 @@ echo "Done";
 -- Before sorting: --
 array(6) {
   [0]=>
-  %string|unicode%(6) "Süden"
+  string(6) "Süden"
   [1]=>
-  %string|unicode%(7) "spielen"
+  string(7) "spielen"
   [2]=>
-  %string|unicode%(5) "Sonne"
+  string(5) "Sonne"
   [3]=>
-  %string|unicode%(4) "Wind"
+  string(4) "Wind"
   [4]=>
-  %string|unicode%(5) "Regen"
+  string(5) "Regen"
   [5]=>
-  %string|unicode%(4) "Meer"
+  string(4) "Meer"
 }
 
 -- After Sorting: --
 bool(true)
 array(6) {
   [5]=>
-  %string|unicode%(4) "Meer"
+  string(4) "Meer"
   [4]=>
-  %string|unicode%(5) "Regen"
+  string(5) "Regen"
   [2]=>
-  %string|unicode%(5) "Sonne"
+  string(5) "Sonne"
   [1]=>
-  %string|unicode%(7) "spielen"
+  string(7) "spielen"
   [0]=>
-  %string|unicode%(6) "Süden"
+  string(6) "Süden"
   [3]=>
-  %string|unicode%(4) "Wind"
+  string(4) "Wind"
 }
 Done

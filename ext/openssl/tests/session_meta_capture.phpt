@@ -53,7 +53,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
---EXPECTF--
+--EXPECT--
 string(5) "TLSv1"
 string(7) "TLSv1.1"
 string(7) "TLSv1.2"

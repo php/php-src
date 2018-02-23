@@ -69,7 +69,7 @@ for($index =0; $index < count($heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ucwords() : usage variations ***
 -- Iteration 1 --
 string(0) ""

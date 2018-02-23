@@ -894,7 +894,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 }
 /* }}} end xsl_xsltprocessor_set_profiling */
 
-/* {{{ proto long xsl_xsltprocessor_set_security_prefs(long securityPrefs) */
+/* {{{ proto int xsl_xsltprocessor_set_security_prefs(int securityPrefs) */
 PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
@@ -914,7 +914,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
 
-/* {{{ proto long xsl_xsltprocessor_get_security_prefs() */
+/* {{{ proto int xsl_xsltprocessor_get_security_prefs() */
 PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 {
 	zval *id;

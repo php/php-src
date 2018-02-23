@@ -73,7 +73,7 @@ foreach (new A3 as $k=>$v) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -----( A1: )-----
 --> EnglishMealIterator::rewind (0)
 --> EnglishMealIterator::valid (0)

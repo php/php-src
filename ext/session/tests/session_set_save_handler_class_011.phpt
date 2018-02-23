@@ -57,7 +57,7 @@ $_SESSION['foo'] = 'bar';
 echo "done\n";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_set_save_handler() : shutdown failure ***
 (#1) constructor called
 done

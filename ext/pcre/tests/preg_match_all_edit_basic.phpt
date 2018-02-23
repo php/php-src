@@ -25,7 +25,7 @@ var_dump($match4);
 var_dump(preg_match_all('/(This is a ){2}(.*)\stest/', $string, $match5));							//tries to find "This is aThis is a [...] test" (0 matches)	
 var_dump($match5);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 array(1) {
   [0]=>

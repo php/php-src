@@ -26,7 +26,7 @@ require_once('skipifconnectfailure.inc');
 	$mysql->close();
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [1]=>
   string(1) "1"

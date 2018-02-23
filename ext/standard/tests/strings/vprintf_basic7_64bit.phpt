@@ -35,7 +35,7 @@ echo "\n";
 var_dump($result);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : basic functionality - using unsigned format ***
 18446744073709550505
 int(20)

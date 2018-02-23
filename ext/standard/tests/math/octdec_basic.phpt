@@ -29,7 +29,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(14489)
 int(253)
 int(36947879)

@@ -11,6 +11,6 @@ declare(encoding="ISO-8859-15") {
 }
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok
 ok

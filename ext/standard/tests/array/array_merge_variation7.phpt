@@ -24,7 +24,7 @@ var_dump(array_merge($arr2, $arr1));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_merge() : usage variations ***
 array(8) {
   [0]=>

@@ -25,7 +25,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_shift() : basic functionality ***
 
 -- Before shift: --

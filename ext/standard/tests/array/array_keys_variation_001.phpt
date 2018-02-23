@@ -29,7 +29,7 @@ foreach ($arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() on various arrays ***
 -- Iteration 0 --
 array(0) {

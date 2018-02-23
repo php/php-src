@@ -256,10 +256,7 @@ PHP_METHOD(mysqli_warning, __construct)
 	MYSQLI_WARNING  *w;
 	MYSQLI_RESOURCE *mysqli_resource;
 
-	if (ZEND_NUM_ARGS() != 1) {
-		WRONG_PARAM_COUNT;
-	}
-	if (zend_parse_parameters(1, "o", &z)==FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "o", &z) == FAILURE) {
 		return;
 	}
 	obj = Z_MYSQLI_P(z);

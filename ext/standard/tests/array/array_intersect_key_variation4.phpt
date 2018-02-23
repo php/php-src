@@ -25,7 +25,7 @@ foreach($input_arrays as $key =>$value) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_key() : usage variation ***
 
 --decimal indexed--

@@ -22,5 +22,5 @@ eval('
 
 echo "DONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 DONE

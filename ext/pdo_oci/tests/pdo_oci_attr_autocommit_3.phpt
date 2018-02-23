@@ -44,7 +44,7 @@ $dbh2->exec("drop table pdo_ac_tab");
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 PDO::ATTR_AUTOCOMMIT: bool(false)
 Insert data
 Second connection should be able to see committed data

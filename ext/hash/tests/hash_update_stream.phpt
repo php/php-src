@@ -4,7 +4,7 @@ int hash_update_stream ( resource $context , resource $handle [, int $length = -
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . '/skip_mhash.inc'); ?>
+if (!extension_loaded('hash')) die('skip hash extension not available');
 ?>
 --FILE--
 <?php

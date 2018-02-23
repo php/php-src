@@ -783,7 +783,7 @@ HELP;
 				} else if (preg_match("/\*$/", $argv[$i])) {
 					$pattern_match = glob($argv[$i] . '.phpt');
 				} else {
-					die('Cannot found test file "' . $argv[$i] . '".' . PHP_EOL);
+					die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
 				}
 
 				if (is_array($pattern_match)) {
@@ -795,7 +795,7 @@ HELP;
 			} else if (preg_match("/\.phpt$/", $testfile)) {
 				$test_files[] = $testfile;
 			} else {
-				die('Cannot found test file "' . $argv[$i] . '".' . PHP_EOL);
+				die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
 			}
 		}
 	}
@@ -1303,6 +1303,20 @@ TEST $file
 			if (isset($section_text[$section]) && $section_text[$section]) {
 				$bork_info = "duplicated $section section";
 				$borked    = true;
+			}
+
+			// check for unknown sections
+			if (!in_array($section, array(
+				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL', 'EXPECTHEADERS',
+				'POST', 'POST_RAW', 'GZIP_POST', 'DEFLATE_POST', 'PUT', 'GET', 'COOKIE', 'ARGS', 'REQUEST', 'HEADERS',
+				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+				'CAPTURE_STDIO', 'STDIN', 'CGI', 'PHPDBG',
+				'INI', 'ENV', 'EXTENSIONS',
+				'SKIPIF', 'XFAIL', 'CLEAN',
+				'CREDITS', 'DESCRIPTION',
+			))) {
+				$bork_info = 'Unknown section "' . $section . '"';
+				$borked = true;
 			}
 
 			$section_text[$section] = '';
@@ -2063,27 +2077,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-
-			$wanted_re = str_replace(
-				array('%binary_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode_string_optional%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%unicode\|string%', '%string\|unicode%'),
-				'string',
-				$wanted_re
-			);
-			$wanted_re = str_replace(
-				array('%u\|b%', '%b\|u%'),
-				'',
-				$wanted_re
-			);
+			
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);

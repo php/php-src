@@ -1690,6 +1690,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 			var vc_incs = WshShell.Environment("Process").Item("INCLUDE").split(";")
 			for (i in vc_incs) {
+				if (!vc_incs[i].length) {
+					continue;
+				}
 				analyzer_base_flags += " -I " + "\"" + vc_incs[i] + "\"";
 			}
 
@@ -1702,7 +1705,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
-						"--quiet --inconclusive --template=vs ";
+						"--quiet --inconclusive --template=vs -j 4 " +
+						"--suppress=unmatchedSuppression " +
+						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
 
 			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
 			if (!!cppcheck_build_dir) {

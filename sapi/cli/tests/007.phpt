@@ -40,7 +40,7 @@ var_dump(`echo "<?php /* comment */ class test {\n // comment \n function foo() 
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(81) "
 <?php
  class test { public $var = "test"; private $pri; function foo() { } } ?>

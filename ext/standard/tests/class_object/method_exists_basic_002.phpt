@@ -22,7 +22,7 @@ var_dump(method_exists(new stdclass, "nonexistent"));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
  ---(Internal classes, using string class name)---
 Does exception::getmessage exist? bool(true)
 Does stdclass::nonexistent exist? bool(false)

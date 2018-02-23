@@ -43,7 +43,7 @@ unlink($file_path."/is_file_variation1.tmp");
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 -- Testing is_file() with file containing data --
 bool(true)
 

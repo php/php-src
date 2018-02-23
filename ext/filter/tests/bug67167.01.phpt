@@ -12,5 +12,5 @@ var_dump(filter_var(
     FILTER_NULL_ON_FAILURE
 ));
 
---EXPECTF--
+--EXPECT--
 NULL

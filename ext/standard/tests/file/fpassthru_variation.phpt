@@ -71,7 +71,7 @@ unlink($file_name);
 echo "\n*** Done ***\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fpassthru() function with files ***
 
 --- Testing with different offsets ---

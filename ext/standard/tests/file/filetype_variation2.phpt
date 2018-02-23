@@ -23,7 +23,7 @@ echo "-- Checking for char --\n";
 print( filetype("/dev/null") )."\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 -- Checking for char --
 char
 ===DONE===

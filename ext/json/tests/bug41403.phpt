@@ -20,7 +20,7 @@ var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(1) {
   [0]=>
   float(2,1)

@@ -125,7 +125,7 @@ foreach($objects as $object) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing is_callable() on objects ***
 
 ** Testing behavior of is_callable() on static methods **

@@ -38,6 +38,6 @@ unset($stringSocketLength);
 unset($socket);
 unset($socketConn);
 ?>
---EXPECTF--
+--EXPECT--
 okey
 okey

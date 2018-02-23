@@ -22,7 +22,7 @@ print $doc->saveXML();
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 DOMDocumentType
 <?xml version="1.0" encoding="utf-8"?>
 <set><foo>footext</foo><bar>bartext</bar></set>

@@ -18,7 +18,7 @@ print_r(iterator_to_array($it2));
 $it2 = new \RegexIterator($it, "/^ba/", \RegexIterator::MATCH, \RegexIterator::USE_KEY | \RegexIterator::INVERT_MATCH);
 print_r(iterator_to_array($it2));
 
---EXPECTF--
+--EXPECT--
 Array
 (
     [1] => bar

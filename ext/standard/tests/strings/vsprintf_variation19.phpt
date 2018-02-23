@@ -53,7 +53,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : with  white spaces in format strings ***
 
 -- Iteration 1 --

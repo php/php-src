@@ -39,7 +39,7 @@ foreach ($input_arrays as $input_array){
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : basic functionality ***
 
 -- Iteration 1 --

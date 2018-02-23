@@ -22,7 +22,7 @@ foreach($obj as $ak=>$av) {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ==Normal==
 0=>0 - 0=>0
 0=>0 - 1=>1

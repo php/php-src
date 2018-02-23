@@ -17,7 +17,7 @@ $node[0] = 'New Value';
 print $sx1->asXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root><node>node1</node><node>node2</node></root>
 

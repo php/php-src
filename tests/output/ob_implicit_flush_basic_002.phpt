@@ -24,6 +24,6 @@ ob_end_clean();
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ob_implicit_flush() : ensure implicit flushing does not apply to user buffers. ***
 Done

@@ -25,7 +25,7 @@ $test = new Test();
 ?>
 
 ===DONE===
---EXPECTF--
+--EXPECT--
 array (
   1 => 'first',
   2 => 'second',

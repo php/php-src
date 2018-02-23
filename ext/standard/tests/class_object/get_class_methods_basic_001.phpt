@@ -35,7 +35,7 @@ var_dump( get_class_methods("NonExistent") );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_class_methods() : basic functionality ***
 Argument is class name:
 array(3) {

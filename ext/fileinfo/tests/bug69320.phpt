@@ -15,6 +15,6 @@ var_dump(finfo_file(finfo_open(FILEINFO_MIME_TYPE), $fname));
 	$fname = dirname(__FILE__) . DIRECTORY_SEPARATOR . "bug69320.txt";
 	unlink($fname);
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "text/plain"
 

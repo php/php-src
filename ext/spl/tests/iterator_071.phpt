@@ -21,7 +21,7 @@ $recItIt = new MyRecursiveIteratorIterator($recArrIt, RecursiveIteratorIterator:
 foreach ($recItIt as $key => $val) echo "$key\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 MyRecursiveIteratorIterator::nextelement
 0
 MyRecursiveIteratorIterator::nextelement

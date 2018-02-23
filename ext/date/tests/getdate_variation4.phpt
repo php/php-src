@@ -32,7 +32,7 @@ foreach($inputs as $key =>$value) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing getdate() : usage variation ***
 
 --01 Jan 1970--

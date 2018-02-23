@@ -30,7 +30,7 @@ for($index = 0; $index < count($needles); $index++ ) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strrpos() function: binary safe ***
 int(1)
 int(1)

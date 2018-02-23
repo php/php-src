@@ -158,7 +158,7 @@ echo Obj::__NAMESPACE__, PHP_EOL;
 
 echo "\nDone\n";
 
---EXPECTF--
+--EXPECT--
 empty
 callable
 trait

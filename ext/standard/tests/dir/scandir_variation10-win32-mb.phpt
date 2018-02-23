@@ -52,7 +52,7 @@ delete_files($dir, 2, "私はガラスを食べられますfile");
 $dir = dirname(__FILE__) . '/私はガラスを食べられますscandir_variation10';
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 SCANDIR_SORT_ASCENDING: 0
 SCANDIR_SORT_DESCENDING: 1
 SCANDIR_SORT_NONE: 2

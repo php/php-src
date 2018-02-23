@@ -22,6 +22,6 @@ $array = ['x' => 'property'];
 $array = $closure($array, ['x'], 'a');
 var_dump(str_replace(array_keys($array), $array, "x property"));
 
---EXPECTF--
+--EXPECT--
 string(10) "a property"
 string(10) "a property"

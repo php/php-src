@@ -20,7 +20,7 @@ var_dump($ar1, $ar2);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : basic functionality - renumbering of numeric keys ***
 
 -- Testing array_multisort() function with all normal arguments --

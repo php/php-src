@@ -55,7 +55,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation4.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() for file after using touch() on the file ***
 bool(true)
 bool(true)

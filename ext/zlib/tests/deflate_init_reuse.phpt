@@ -24,5 +24,5 @@ $compressed .= deflate_add($resource, "", ZLIB_FINISH);
 assert($uncompressed === zlib_decode($compressed));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ===DONE===

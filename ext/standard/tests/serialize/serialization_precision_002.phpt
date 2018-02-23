@@ -17,5 +17,5 @@ serialize_precision=75
 
 var_dump(serialize(0.1));
 ?>
---EXPECTF--
+--EXPECT--
 string(60) "d:0.1000000000000000055511151231257827021181583404541015625;"

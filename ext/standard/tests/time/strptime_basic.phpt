@@ -35,7 +35,7 @@ var_dump(strptime($str, '%A %B %e %R'));
 setlocale(LC_ALL, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strptime() : basic functionality ***
 array(9) {
   ["tm_sec"]=>

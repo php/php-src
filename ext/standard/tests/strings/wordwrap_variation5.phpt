@@ -40,7 +40,7 @@ var_dump( wordwrap($str, $width, $break1, $cut) );
   
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing wordwrap() : usage variations ***
 
 -- Testing wordwrap() with default break value and single space as value --

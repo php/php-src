@@ -156,7 +156,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["testing"]=>
   string(19) "mysqli.default_port"

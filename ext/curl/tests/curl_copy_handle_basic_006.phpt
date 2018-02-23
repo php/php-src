@@ -31,7 +31,7 @@ Rick Buitenman <rick@meritos.nl>
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl copy handle with User Agent ***
 string(9) "cURL phpt"
 string(9) "cURL phpt"

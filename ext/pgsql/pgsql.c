@@ -811,7 +811,6 @@ static int le_link, le_plink, le_result, le_lofp, le_string;
 static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t len, int escape_literal, int safe) /* {{{ */
 {
 	char *result, *rp, *s;
-	size_t tmp_len;
 
 	if (!conn) {
 		return NULL;
@@ -821,9 +820,8 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 	rp = result = (char *)safe_emalloc(len, 2, 5); /* leading " E" needs extra 2 bytes + quote_chars on both end for 2 bytes + NULL */
 
 	if (escape_literal) {
-		size_t new_len;
-
 		if (safe) {
+			size_t new_len;
 			char *tmp = (char *)safe_emalloc(len, 2, 1);
 			*rp++ = '\'';
 			/* PQescapeString does not escape \, but it handles multibyte chars safely.
@@ -834,6 +832,7 @@ static char *php_pgsql_PQescapeInternal(PGconn *conn, const char *str, size_t le
 			rp += new_len;
 		} else {
 			char *encoding;
+			size_t tmp_len;
 			/* This is compatible with PQescapeLiteral, but it cannot handle multbyte chars
 			   such as SJIS, BIG5. Raise warning and return NULL by checking
 			   client_encoding. */
@@ -996,7 +995,6 @@ static int _rollback_transactions(zval *el)
 {
 	PGconn *link;
 	PGresult *res;
-	int orig;
 	zend_resource *rsrc = Z_RES_P(el);
 
 	if (rsrc->type != le_plink)
@@ -1016,7 +1014,7 @@ static int _rollback_transactions(zval *el)
 	if ((PQprotocolVersion(link) >= 3 && PQtransactionStatus(link) != PQTRANS_IDLE) || PQprotocolVersion(link) < 3)
 #endif
 	{
-		orig = PGG(ignore_notices);
+		int orig = PGG(ignore_notices);
 		PGG(ignore_notices) = 1;
 #if HAVE_PGTRANSACTIONSTATUS && HAVE_PQPROTOCOLVERSION
 		res = PQexec(link,"ROLLBACK;");
@@ -1055,14 +1053,14 @@ static void _free_result(zend_resource *rsrc)
 
 static int _php_pgsql_detect_identifier_escape(const char *identifier, size_t len) /* {{{ */
 {
-	size_t i;
-
 	/* Handle edge case. Cannot be a escaped string */
 	if (len <= 2) {
 		return FAILURE;
 	}
 	/* Detect double qoutes */
 	if (identifier[0] == '"' && identifier[len-1] == '"') {
+		size_t i;
+
 		/* Detect wrong format of " inside of escaped string */
 		for (i = 1; i < len-1; i++) {
 			if (identifier[i] == '"' && (identifier[++i] != '"' || i == len-1)) {
@@ -1830,7 +1828,6 @@ PHP_FUNCTION(pg_query)
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
-	pgsql_result_handle *pg_result;
 
 	if (argc == 1) {
 		if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &query, &query_len) == FAILURE) {
@@ -1885,7 +1882,7 @@ PHP_FUNCTION(pg_query)
 		case PGRES_COMMAND_OK: /* successful command that did not return rows */
 		default:
 			if (pgsql_result) {
-				pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+				pgsql_result_handle *pg_result = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 				pg_result->conn = pgsql;
 				pg_result->result = pgsql_result;
 				pg_result->row = 0;
@@ -2301,7 +2298,7 @@ PHP_FUNCTION(pg_affected_rows)
 /* }}} */
 #endif
 
-/* {{{ proto mixed pg_last_notice(resource connection [, long option])
+/* {{{ proto mixed pg_last_notice(resource connection [, int option])
    Returns the last notice set by the backend */
 PHP_FUNCTION(pg_last_notice)
 {
@@ -2358,7 +2355,6 @@ PHP_FUNCTION(pg_last_notice)
  */
 static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 {
-	PGresult *result;
 	smart_str str = {0};
 	zend_resource *field_type;
 	char *ret=NULL;
@@ -2375,6 +2371,7 @@ static char *get_field_name(PGconn *pgsql, Oid oid, HashTable *list)
 		int oid_offset,name_offset;
 		char *tmp_oid, *end_ptr, *tmp_name;
 		zend_resource new_oid_entry;
+		PGresult *result;
 
 		if ((result = PQexec(pgsql, "select oid,typname from pg_type")) == NULL || PQresultStatus(result) != PGRES_TUPLES_OK) {
 			if (result) {
@@ -4090,12 +4087,7 @@ PHP_FUNCTION(pg_copy_to)
 	PGconn *pgsql;
 	PGresult *pgsql_result;
 	ExecStatusType status;
-	int copydone = 0;
-#if !HAVE_PQGETCOPYDATA
-	char copybuf[COPYBUFSIZ];
-#endif
 	char *csv = (char *)NULL;
-	int ret;
 	int argc = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(argc, "rs|ss",
@@ -4136,12 +4128,17 @@ PHP_FUNCTION(pg_copy_to)
 	switch (status) {
 		case PGRES_COPY_OUT:
 			if (pgsql_result) {
+				int copydone = 0;
+#if !HAVE_PQGETCOPYDATA
+				char copybuf[COPYBUFSIZ];
+#endif
+
 				PQclear(pgsql_result);
 				array_init(return_value);
 #if HAVE_PQGETCOPYDATA
 				while (!copydone)
 				{
-					ret = PQgetCopyData(pgsql, &csv, 0);
+					int ret = PQgetCopyData(pgsql, &csv, 0);
 					switch (ret) {
 						case -1:
 							copydone = 1;
@@ -5249,7 +5246,7 @@ PHP_FUNCTION(pg_get_result)
 }
 /* }}} */
 
-/* {{{ proto mixed pg_result_status(resource result[, long result_type])
+/* {{{ proto mixed pg_result_status(resource result[, int result_type])
    Get status of query result */
 PHP_FUNCTION(pg_result_status)
 {
@@ -5402,14 +5399,13 @@ static int php_pgsql_fd_set_option(php_stream *stream, int option, int value, vo
 static int php_pgsql_fd_cast(php_stream *stream, int cast_as, void **ret) /* {{{ */
 {
 	PGconn *pgsql = (PGconn *) stream->abstract;
-	int fd_number;
 
 	switch (cast_as)	{
 		case PHP_STREAM_AS_FD_FOR_SELECT:
 		case PHP_STREAM_AS_FD:
 		case PHP_STREAM_AS_SOCKETD:
 			if (ret) {
-				fd_number = PQsocket(pgsql);
+				int fd_number = PQsocket(pgsql);
 				if (fd_number == -1) {
 					return FAILURE;
 				}
@@ -5744,7 +5740,6 @@ static php_pgsql_data_type php_pgsql_get_data_type(const char *type_name, size_t
 static int php_pgsql_convert_match(const char *str, size_t str_len, const char *regex , int icase)
 {
 	pcre2_code *re;
-	PCRE2_UCHAR	         err_msg[256];
 	PCRE2_SIZE           err_offset;
 	int res, errnumber;
 	uint32_t options = PCRE2_NO_AUTO_CAPTURE;
@@ -5766,6 +5761,7 @@ static int php_pgsql_convert_match(const char *str, size_t str_len, const char *
 
 	re = pcre2_compile((PCRE2_SPTR)regex, PCRE2_ZERO_TERMINATED, options, &errnumber, &err_offset, php_pcre_cctx());
 	if (NULL == re) {
+		PCRE2_UCHAR err_msg[256];
 		pcre2_get_error_message(errnumber, err_msg, sizeof(err_msg));
 		php_error_docref(NULL, E_WARNING, "Cannot compile regex: '%s'", err_msg);
 		return FAILURE;
@@ -6456,12 +6452,10 @@ PHP_PGSQL_API int php_pgsql_convert(PGconn *pg_link, const char *table_name, con
 		}
 		/* If field is NULL and HAS DEFAULT, should be skipped */
 		if (!skip_field) {
-			char *escaped;
-
 			if (_php_pgsql_detect_identifier_escape(ZSTR_VAL(field), ZSTR_LEN(field)) == SUCCESS) {
 				zend_hash_update(Z_ARRVAL_P(result), field, &new_val);
 			} else {
-				escaped = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
+				char *escaped = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(field), ZSTR_LEN(field));
 				add_assoc_zval(result, escaped, &new_val);
 				PGSQLfree(escaped);
 			}
@@ -6704,7 +6698,6 @@ PHP_FUNCTION(pg_insert)
 	PGconn *pg_link;
 	PGresult *pg_result;
 	ExecStatusType status;
-	pgsql_result_handle *pgsql_handle;
 	zend_string *sql = NULL;
 	int argc = ZEND_NUM_ARGS();
 
@@ -6757,7 +6750,7 @@ PHP_FUNCTION(pg_insert)
 			case PGRES_COMMAND_OK: /* successful command that did not return rows */
 			default:
 				if (pg_result) {
-					pgsql_handle = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
+					pgsql_result_handle *pgsql_handle = (pgsql_result_handle *) emalloc(sizeof(pgsql_result_handle));
 					pgsql_handle->conn = pg_link;
 					pgsql_handle->result = pg_result;
 					pgsql_handle->row = 0;
@@ -6781,8 +6774,6 @@ PHP_FUNCTION(pg_insert)
 
 static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, HashTable *ht, int where_cond, const char *pad, int pad_len, zend_ulong opt) /* {{{ */
 {
-	char *tmp;
-	char buf[256];
 	zend_string *fld;
 	zval *val;
 
@@ -6792,7 +6783,7 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			return -1;
 		}
 		if (opt & PGSQL_DML_ESCAPE) {
-			tmp = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
+			char *tmp = PGSQLescapeIdentifier(pg_link, ZSTR_VAL(fld), ZSTR_LEN(fld) + 1);
 			smart_str_appends(querystr, tmp);
 			PGSQLfree(tmp);
 		} else {
@@ -6807,9 +6798,8 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 		switch (Z_TYPE_P(val)) {
 			case IS_STRING:
 				if (opt & PGSQL_DML_ESCAPE) {
-					size_t new_len;
-					tmp = (char *)safe_emalloc(Z_STRLEN_P(val), 2, 1);
-					new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
+					char *tmp = (char *)safe_emalloc(Z_STRLEN_P(val), 2, 1);
+					size_t new_len = PQescapeStringConn(pg_link, tmp, Z_STRVAL_P(val), Z_STRLEN_P(val), NULL);
 					smart_str_appendc(querystr, '\'');
 					smart_str_appendl(querystr, tmp, new_len);
 					smart_str_appendc(querystr, '\'');
@@ -6821,8 +6811,10 @@ static inline int build_assignment_string(PGconn *pg_link, smart_str *querystr, 
 			case IS_LONG:
 				smart_str_append_long(querystr, Z_LVAL_P(val));
 				break;
-			case IS_DOUBLE:
-				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)), sizeof(buf)-1));
+			case IS_DOUBLE: {
+				char buf[256];
+				smart_str_appendl(querystr, buf, MIN(snprintf(buf, sizeof(buf), "%F", Z_DVAL_P(val)), sizeof(buf) - 1));
+				}
 				break;
 			case IS_NULL:
 				smart_str_appendl(querystr, "NULL", sizeof("NULL")-1);

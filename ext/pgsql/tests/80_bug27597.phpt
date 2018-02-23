@@ -40,7 +40,7 @@ pg_close($dbh);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Array
 (
     [id] => 0

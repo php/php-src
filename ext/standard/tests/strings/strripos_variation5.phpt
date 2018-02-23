@@ -24,7 +24,7 @@ var_dump( strripos($control_char_str, "\t", 15) );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with heredoc strings ***
 -- With heredoc string containing escape characters --
 int(13)

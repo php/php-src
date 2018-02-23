@@ -15,7 +15,7 @@ var_dump($r1->isInternal(), $r2->isInternal(), $r3->isInternal(),
 		 $r4->isInternal(), $r5->isInternal());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

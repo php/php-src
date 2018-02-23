@@ -30,7 +30,7 @@ delete_files($file_path, 1);
 
 echo "\n*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing the basic functionality of the file_get_contents() function ***
 -- Testing with simple valid data file --
 string(100) "text text text text text text text text text text text text text text text text text text text text "

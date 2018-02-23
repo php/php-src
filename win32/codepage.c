@@ -407,11 +407,10 @@ PW32CP wchar_t *php_win32_cp_env_any_to_w(const char* env)
 
 	do {
 		wchar_t *tmp;
-		size_t tmp_len;
 
 		tmp = php_win32_cp_any_to_w(cur);
 		if (tmp) {
-			tmp_len = wcslen(tmp) + 1;
+			size_t tmp_len = wcslen(tmp) + 1;
 			memmove(ew + bin_len, tmp, tmp_len * sizeof(wchar_t));
 			free(tmp);
 

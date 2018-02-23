@@ -71,7 +71,7 @@ var_dump( $temp_array);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing rsort() : basic functionality ***
 
 -- Testing rsort() by supplying string array, 'flag' value is defualt --

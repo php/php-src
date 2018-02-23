@@ -72,7 +72,7 @@ imagedestroy($im);
 
 
 ?>
---EXPECTF--
+--EXPECT--
 Horizontal: ok
 Vertical: ok
 Diagonal: ok

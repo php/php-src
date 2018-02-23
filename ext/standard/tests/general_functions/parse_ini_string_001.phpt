@@ -207,7 +207,7 @@ print_r($ini_array);
 
 echo "*** Done **\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test parse_ini_string() function:  with various keys and values given in string ***
 -- ini string without process_sections optional arg --
 Array

@@ -37,7 +37,7 @@ foreach( $options as $option ) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing finfo_buffer() : variation functionality with oo interface ***
 string(36) "ASCII text, with no line terminators"
 string(3) "ELF"

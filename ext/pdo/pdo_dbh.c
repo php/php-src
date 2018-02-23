@@ -814,7 +814,7 @@ fail:
 }
 /* }}} */
 
-/* {{{ proto bool PDO::setAttribute(long attribute, mixed value)
+/* {{{ proto bool PDO::setAttribute(int attribute, mixed value)
    Set an attribute */
 static PHP_METHOD(PDO, setAttribute)
 {
@@ -837,7 +837,7 @@ static PHP_METHOD(PDO, setAttribute)
 }
 /* }}} */
 
-/* {{{ proto mixed PDO::getAttribute(long attribute)
+/* {{{ proto mixed PDO::getAttribute(int attribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
 {
@@ -902,7 +902,7 @@ static PHP_METHOD(PDO, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto long PDO::exec(string query)
+/* {{{ proto int PDO::exec(string query)
    Execute a query that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {

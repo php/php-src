@@ -57,5 +57,5 @@ if (!function_exists('mysqli_ssl_set'))
 	*/
 	print "done!\n";
 ?>
---EXPECTF--
+--EXPECT--
 done!

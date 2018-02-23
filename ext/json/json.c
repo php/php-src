@@ -307,7 +307,7 @@ static PHP_FUNCTION(json_encode)
 }
 /* }}} */
 
-/* {{{ proto mixed json_decode(string json [, bool assoc [, long depth]])
+/* {{{ proto mixed json_decode(string json [, bool assoc [, int depth]])
    Decodes the JSON representation into a PHP value */
 static PHP_FUNCTION(json_decode)
 {
