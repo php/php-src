@@ -355,7 +355,7 @@ PHP_NAMED_FUNCTION(zif_dcngettext)
 
 #if HAVE_BIND_TEXTDOMAIN_CODESET
 
-/* {{{ proto string bind_textdomain_codeset (string domain, string codeset)
+/* {{{ proto string bind_textdomain_codeset(string domain, string codeset)
    Specify the character encoding in which the messages from the DOMAIN message catalog will be returned. */
 PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
 {
