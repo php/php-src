@@ -159,7 +159,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_parse, 0, 0, 1)
 	ZEND_ARG_INFO(0, shortname)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 3)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_x509_checkpurpose, 0, 0, 2)
 	ZEND_ARG_INFO(0, x509cert)
 	ZEND_ARG_INFO(0, purpose)
 	ZEND_ARG_INFO(0, cainfo) /* array */
@@ -224,12 +224,14 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_new, 0, 0, 2)
 	ZEND_ARG_INFO(0, extraattribs)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_csr_get_subject, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_subject, 0, 0, 1)
 	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_INFO(0, use_shortnames)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_csr_get_public_key, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_csr_get_public_key, 0, 0, 1)
 	ZEND_ARG_INFO(0, csr)
+	ZEND_ARG_INFO(0, use_shortnames)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_new, 0, 0, 0)
