@@ -1745,7 +1745,7 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ proto SNMP SNMP::__construct(int version, string hostname, string community|securityName [, long timeout [, long retries]])
+/* {{{ proto SNMP SNMP::__construct(int version, string hostname, string community|securityName [, int timeout [, int retries]])
 	Creates a new SNMP session to specified host. */
 PHP_METHOD(snmp, __construct)
 {
@@ -1868,7 +1868,7 @@ PHP_METHOD(snmp, setSecurity)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getErrno()
+/* {{{ proto int SNMP::getErrno()
 	Get last error code number */
 PHP_METHOD(snmp, getErrno)
 {
@@ -1882,7 +1882,7 @@ PHP_METHOD(snmp, getErrno)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getError()
+/* {{{ proto int SNMP::getError()
 	Get last error message */
 PHP_METHOD(snmp, getError)
 {

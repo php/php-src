@@ -517,7 +517,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {

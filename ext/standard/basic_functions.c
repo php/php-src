@@ -4585,7 +4585,7 @@ PHP_FUNCTION(usleep)
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds)
+/* {{{ proto mixed time_nanosleep(int seconds, int nanoseconds)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {

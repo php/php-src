@@ -220,7 +220,7 @@ PHP_NAMED_FUNCTION(zif_dgettext)
 }
 /* }}} */
 
-/* {{{ proto string dcgettext(string domain_name, string msgid, long category)
+/* {{{ proto string dcgettext(string domain_name, string msgid, int category)
    Return the translation of msgid for domain_name and category, or msgid unaltered if a translation does not exist */
 PHP_NAMED_FUNCTION(zif_dcgettext)
 {
@@ -389,4 +389,3 @@ PHP_NAMED_FUNCTION(zif_bind_textdomain_codeset)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-

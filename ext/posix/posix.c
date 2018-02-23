@@ -520,7 +520,7 @@ PHP_FUNCTION(posix_getegid)
 }
 /* }}} */
 
-/* {{{ proto bool posix_setuid(long uid)
+/* {{{ proto bool posix_setuid(int uid)
    Set user id (POSIX.1, 4.2.2) */
 PHP_FUNCTION(posix_setuid)
 {
@@ -536,7 +536,7 @@ PHP_FUNCTION(posix_setgid)
 }
 /* }}} */
 
-/* {{{ proto bool posix_seteuid(long uid)
+/* {{{ proto bool posix_seteuid(int uid)
    Set effective user id */
 #ifdef HAVE_SETEUID
 PHP_FUNCTION(posix_seteuid)
@@ -546,7 +546,7 @@ PHP_FUNCTION(posix_seteuid)
 #endif
 /* }}} */
 
-/* {{{ proto bool posix_setegid(long uid)
+/* {{{ proto bool posix_setegid(int uid)
    Set effective group id */
 #ifdef HAVE_SETEGID
 PHP_FUNCTION(posix_setegid)
@@ -1106,7 +1106,7 @@ PHP_FUNCTION(posix_getgrnam)
 }
 /* }}} */
 
-/* {{{ proto array posix_getgrgid(long gid)
+/* {{{ proto array posix_getgrgid(int gid)
    Group database access (POSIX.1, 9.2.1) */
 PHP_FUNCTION(posix_getgrgid)
 {
@@ -1226,7 +1226,7 @@ PHP_FUNCTION(posix_getpwnam)
 }
 /* }}} */
 
-/* {{{ proto array posix_getpwuid(long uid)
+/* {{{ proto array posix_getpwuid(int uid)
    User database access (POSIX.1, 9.2.2) */
 PHP_FUNCTION(posix_getpwuid)
 {
