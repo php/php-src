@@ -761,9 +761,10 @@ PHP_FUNCTION(pcntl_wifexited)
 	       return;
 	}
 
-	if (WIFEXITED(status_word))
+	if (WIFEXITED((int)status_word))
 		RETURN_TRUE;
 #endif
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -779,7 +780,7 @@ PHP_FUNCTION(pcntl_wifstopped)
 	       return;
 	}
 
-	if (WIFSTOPPED(status_word))
+	if (WIFSTOPPED((int)status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -797,7 +798,7 @@ PHP_FUNCTION(pcntl_wifsignaled)
 	       return;
 	}
 
-	if (WIFSIGNALED(status_word))
+	if (WIFSIGNALED((int)status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -814,7 +815,7 @@ PHP_FUNCTION(pcntl_wifcontinued)
 	       return;
 	}
 
-	if (WIFCONTINUED(status_word))
+	if (WIFCONTINUED((int)status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -833,7 +834,7 @@ PHP_FUNCTION(pcntl_wexitstatus)
 	       return;
 	}
 
-	RETURN_LONG(WEXITSTATUS(status_word));
+	RETURN_LONG(WEXITSTATUS((int)status_word));
 #else
 	RETURN_FALSE;
 #endif
@@ -851,7 +852,7 @@ PHP_FUNCTION(pcntl_wtermsig)
 	       return;
 	}
 
-	RETURN_LONG(WTERMSIG(status_word));
+	RETURN_LONG(WTERMSIG((int)status_word));
 #else
 	RETURN_FALSE;
 #endif
@@ -869,7 +870,7 @@ PHP_FUNCTION(pcntl_wstopsig)
 	       return;
 	}
 
-	RETURN_LONG(WSTOPSIG(status_word));
+	RETURN_LONG(WSTOPSIG((int)status_word));
 #else
 	RETURN_FALSE;
 #endif
