@@ -5053,14 +5053,6 @@ static const int uni2jis_tbl_range[][2] = {
 	{0xfa0f, 0xfa6a},
 };
 
-static const unsigned short *uni2jis_tbl[] = {
-	ucs_a1_jisx0213_table,
-	ucs_hk_jisx0213_table,
-	ucs_i_jisx0213_table,
-	ucs_r_jisx0213_table,
-	ucs_r2_jisx0213_table,
-};
-
 static const int uni2jis_tbl_len = sizeof(uni2jis_tbl_range)/(sizeof(int)*2);
 
 #endif /* UNICODE_TABLE_JIS2004_H */
