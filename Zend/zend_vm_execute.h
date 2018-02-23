@@ -514,6 +514,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 #endif
 				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
+			} else {
+				if (EXPECTED(Z_OBJ_IS_IMMUTABLE(object))) {
+					object->zobj_flags |= ZEND_OBJ_LOCKED;
+				}
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -545,6 +549,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL zend_leave_helper_SPEC(ZEND_OPCODE_
 #endif
 				GC_DELREF(object);
 				zend_object_store_ctor_failed(object);
+			} else {
+				if (EXPECTED(Z_OBJ_IS_IMMUTABLE(object))) {
+					object->zobj_flags |= ZEND_OBJ_LOCKED;
+				}
 			}
 			OBJ_RELEASE(object);
 		} else if (UNEXPECTED(call_info & ZEND_CALL_CLOSURE)) {
@@ -22924,6 +22932,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 	result = EX_VAR(opline->result.var);
 	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
@@ -25193,6 +25216,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
 	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR) {
@@ -28899,6 +28937,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 	result = EX_VAR(opline->result.var);
 	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
@@ -31153,6 +31206,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 	result = EX_VAR(opline->result.var);
 	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
@@ -32889,6 +32957,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
 	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR) {
@@ -35256,6 +35339,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
 	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
 	if (IS_UNUSED == IS_VAR) {
@@ -39816,6 +39914,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 	result = EX_VAR(opline->result.var);
 	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
 	}
@@ -43485,6 +43598,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
 	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR) {
@@ -49017,6 +49145,21 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
+
+	if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(container)))) {
+			switch ((opline + 1)->opcode) {
+				case ZEND_RETURN_BY_REF:
+				case ZEND_SEND_REF:
+				case ZEND_ASSIGN_REF: {
+					zend_throw_error(NULL, "Can not reference property of immutable object");
+					HANDLE_EXCEPTION();
+				} break;
+			}
+		}
+	}
+
 	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W OPLINE_CC);
 
 	if (IS_CV == IS_VAR) {
