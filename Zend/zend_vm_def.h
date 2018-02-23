@@ -3104,16 +3104,6 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		}
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(Z_STR_P(function_name), ZEND_CONSTRUCTOR_FUNC_NAME))) {
-			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
-		}
-
-		FREE_OP2();
-		FREE_OP1();
-		HANDLE_EXCEPTION();
-	}
-
 	call_info = ZEND_CALL_NESTED_FUNCTION;
 	if (UNEXPECTED((fbc->common.fn_flags & ZEND_ACC_STATIC) != 0)) {
 		obj = NULL;
@@ -3128,6 +3118,15 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 
 	if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(EG(exception))) {
 		HANDLE_EXCEPTION();
+	}
+
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
+			FREE_OP2();
+			FREE_OP1();
+			HANDLE_EXCEPTION();
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
