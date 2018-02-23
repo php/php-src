@@ -39,6 +39,10 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed openssl_* arginfos. (carusogabriel)
 
+- PCNTL:
+  . Fixed bug #75873 (pcntl_wexitstatus returns incorrect on Big_Endian platform
+    (s390x)). (Sam Ding)
+
 - PGSQL:
   . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
 
