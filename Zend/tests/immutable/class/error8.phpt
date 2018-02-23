@@ -13,8 +13,8 @@ $x = new A(fopen(__DIR__.'/error5.out', 'r'));
 ?>
 --EXPECT--
 
-Fatal error: Uncaught Error: Cannot assign resource to immutable property: x in %simmutable%sclass%serror5.php:5
+Fatal error: Uncaught Error: Cannot assign resource to immutable property: x in %simmutable%sclass%serror8.php:5
 Stack trace:
-#0 %simmutable%sclass%serror5.php(9): A->__construct(Resource id #5)
+#0 %simmutable%sclass%serror8.php(9): A->__construct(Resource id #5)
 #1 {main}
-  thrown in %simmutable%sclass%serror5.php on line 5
+  thrown in %simmutable%sclass%serror8.php on line 5

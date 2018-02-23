@@ -14,4 +14,4 @@ immutable class A {
 new A([0, 1, 2]);
 ?>
 --EXPECT--
-Fatal error: Cannot assign array to immutable property x in %simmutable%sclass%serror5.php on line 3
+Fatal error: Cannot assign array to immutable property x in %simmutable%sclass%serror9.php on line 3

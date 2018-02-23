@@ -9,4 +9,4 @@ class A {
 ?>
 --EXPECTF--
 
-Fatal error: Multiple immutable modifiers are not allowed in %simmutable_modifier%sclass%serror1.php on line 3
+Fatal error: Multiple immutable modifiers are not allowed in %simmutable%sproperty%serror1.php on line 3
