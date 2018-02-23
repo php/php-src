@@ -142,7 +142,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fget, 0, 0, 4)
 	ZEND_ARG_INFO(0, resumepos)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_ftp_pasv, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_pasv, 0, 0, 2)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, pasv)
 ZEND_END_ARG_INFO()
