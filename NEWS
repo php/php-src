@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 -GD:
   . Fixed imagesetinterpolation arginfo. (Gabriel Caruso)
 
+- iconv:
+  . Fixed bug #75867 (Freeing uninitialized pointer). (Philip Prindeville)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
