@@ -100,6 +100,9 @@ PHP                                                                        NEWS
 - IMAP:
   . Fixed bug #75774 (imap_append HeapCorruction). (Anatol)
 
+- Mbstring:
+  . Fixed bug #62545 (wrong unicode mapping in some charsets). (cmb)
+
 - Opcache:
   . Fixed bug #75720 (File cache not populated after SHM runs full). (Dmitry)
   . Fixed bug #75579 (Interned strings buffer overflow may cause crash).
