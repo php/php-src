@@ -1355,6 +1355,14 @@ TEST $file
 				$borked = true;
 			}
 
+			// check for duplicate FILE* sections
+			if (count(array_intersect_key($section_text, array_flip([
+				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+			]))) > 1) {
+			    $bork_info = "either of --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --REDIRECTTEST-- section is required";
+				$borked = true;
+			}
+
 			if (isset($section_text['FILEEOF'])) {
 				$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 				unset($section_text['FILEEOF']);
@@ -1379,6 +1387,14 @@ TEST $file
 
 			if (!isset($section_text['EXPECT']) && !isset($section_text['EXPECTF']) && !isset($section_text['EXPECTREGEX'])) {
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
+				$borked = true;
+			}
+
+			// check for duplicate EXPECT* sections
+			if (count(array_intersect_key($section_text, array_flip([
+				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL',
+			]))) !== 1) {
+			    $bork_info = "either of --EXPECT--, --EXPECTF--, --EXPECTREGEX--, --EXPECTREGEX_EXTERNAL--, --EXPECT_EXTERNAL--, or --EXPECTF_EXTERNAL-- section is required";
 				$borked = true;
 			}
 		}
@@ -2077,7 +2093,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-			
+
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
