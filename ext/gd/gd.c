@@ -848,7 +848,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixconcat, 0)
 	ZEND_ARG_INFO(0, m2)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagesetinterpolation, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()

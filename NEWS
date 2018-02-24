@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - FTP:
   . Fixed ftp_pasv arginfo. (carusogabriel)
 
+-GD:
+  . Fixed imagesetinterpolation arginfo. (Gabriel Caruso)
+
 - LDAP:
   . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
 
