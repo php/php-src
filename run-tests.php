@@ -1351,7 +1351,7 @@ TEST $file
 		} else {
 
 			if (!isset($section_text['PHPDBG']) && !isset($section_text['FILE']) && !isset($section_text['FILEEOF']) && !isset($section_text['FILE_EXTERNAL'])) {
-				$bork_info = "missing section --FILE--, --FILEEOF-- or --FILE_EXTERNAL--";
+				$bork_info = "Missing --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --PHPDBG-- section";
 				$borked = true;
 			}
 
@@ -1359,7 +1359,7 @@ TEST $file
 			if (count(array_intersect_key($section_text, array_flip([
 				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
 			]))) > 1) {
-			    $bork_info = "either of --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --REDIRECTTEST-- section is required";
+			    $bork_info = "Either of --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --REDIRECTTEST-- section is required";
 				$borked = true;
 			}
 
@@ -1379,14 +1379,14 @@ TEST $file
 						$section_text[$prefix] = file_get_contents($section_text[$key], FILE_BINARY);
 						unset($section_text[$key]);
 					} else {
-						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
+						$bork_info = "Could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
 						$borked = true;
 					}
 				}
 			}
 
 			if (!isset($section_text['EXPECT']) && !isset($section_text['EXPECTF']) && !isset($section_text['EXPECTREGEX'])) {
-				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
+				$bork_info = "Missing --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- section";
 				$borked = true;
 			}
 
@@ -1394,7 +1394,7 @@ TEST $file
 			if (count(array_intersect_key($section_text, array_flip([
 				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL',
 			]))) !== 1) {
-			    $bork_info = "either of --EXPECT--, --EXPECTF--, --EXPECTREGEX--, --EXPECTREGEX_EXTERNAL--, --EXPECT_EXTERNAL--, or --EXPECTF_EXTERNAL-- section is required";
+			    $bork_info = "Either of --EXPECT--, --EXPECTF--, --EXPECTREGEX--, --EXPECTREGEX_EXTERNAL--, --EXPECT_EXTERNAL--, or --EXPECTF_EXTERNAL-- section is required";
 				$borked = true;
 			}
 		}
