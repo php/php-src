@@ -6,9 +6,8 @@ class A {
 	public $a;
 	protected $b;
 	private $c;
-	var $d;
 }
-for ($name = 'a'; $name <= 'd'; ++$name) {
+for ($name = 'a'; $name <= 'c'; ++$name) {
 	$reflector = new ReflectionProperty(A::class, $name);
 	$modifiers = $reflector->getModifiers();
 	$names     = Reflection::getModifierNames($modifiers);
@@ -17,7 +16,6 @@ for ($name = 'a'; $name <= 'd'; ++$name) {
 ?>
 --EXPECT--
 
-bool(false)
 bool(false)
 bool(false)
 bool(false)

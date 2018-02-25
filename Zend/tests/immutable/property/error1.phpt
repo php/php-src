@@ -1,5 +1,5 @@
 --TEST--
-Ensure that multiple immutable property modifiers result in a fatal error.
+Multiple immutable modifiers not allowed on properties.
 --FILE--
 <?php
 namespace X\Y\Z;
@@ -9,4 +9,4 @@ class A {
 ?>
 --EXPECTF--
 
-Fatal error: Multiple immutable modifiers are not allowed in %simmutable%sproperty%serror1.php on line 3
+Fatal error: Multiple immutable modifiers are not allowed in %simmutable%sproperty%serror1.php on line 4
