@@ -15,7 +15,7 @@ $a->x = 2;
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught Error: Cannot mutate immutable object X\Y\Z\A after construction in %simmutable%sclass%serror3.php:14
+Fatal error: Uncaught Error: Cannot mutate immutable object X\Y\Z\A after construction in %serror3.php:14
 Stack trace:
 #0 {main}
-  thrown in %simmutable%sclass%serror3.php on line 14
+  thrown in %serror3.php on line 14

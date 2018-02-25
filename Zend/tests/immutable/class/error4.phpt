@@ -8,4 +8,4 @@ class B extends A {}
 ?>
 --EXPECTF--
 
-Fatal error: Immutable class X\Y\Z\B cannot extend immutable class X\Y\Z\A in %simmutable%sclass%serror4.php on line 6
+Fatal error: Immutable class X\Y\Z\B cannot extend immutable class X\Y\Z\A in %serror4.php on line 6
