@@ -52,7 +52,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto void CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
@@ -133,7 +133,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::__wakeup()
+/* {{{ proto CURLFile::__wakeup()
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {

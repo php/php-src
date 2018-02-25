@@ -49,7 +49,7 @@ const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMDocumentFragment::__construct() */
+/* {{{ proto DOMDocumentFragment::__construct() */
 PHP_METHOD(domdocumentfragment, __construct)
 {
 

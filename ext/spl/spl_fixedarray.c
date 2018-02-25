@@ -546,7 +546,7 @@ static int spl_fixedarray_object_count_elements(zval *object, zend_long *count) 
 }
 /* }}} */
 
-/* {{{ proto void SplFixedArray::__construct([int size])
+/* {{{ proto SplFixedArray::__construct([int size])
 */
 SPL_METHOD(SplFixedArray, __construct)
 {
@@ -574,7 +574,7 @@ SPL_METHOD(SplFixedArray, __construct)
 }
 /* }}} */
 
-/* {{{ proto void SplFixedArray::__wakeup()
+/* {{{ proto SplFixedArray::__wakeup()
 */
 SPL_METHOD(SplFixedArray, __wakeup)
 {

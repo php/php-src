@@ -1877,7 +1877,7 @@ static TIDY_NODE_METHOD(getParent)
 /* }}} */
 
 
-/* {{{ proto void tidyNode::__construct()
+/* {{{ proto tidyNode::__construct()
          __constructor for tidyNode. */
 static TIDY_NODE_METHOD(__construct)
 {
