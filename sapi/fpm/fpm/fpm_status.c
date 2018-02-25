@@ -3,6 +3,7 @@
 	/* (c) 2009 Jerome Loyet */
 
 #include "php.h"
+#include "zend_long.h"
 #include "SAPI.h"
 #include <stdio.h>
 
@@ -42,6 +43,97 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	}
 
 	return 0;
+}
+/* }}} */
+
+/* {{{ proto array fastcgi_get_status
+ * Returns the status of the fastcgi process manager */
+PHP_FUNCTION(fastcgi_get_status)
+{
+	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
+	struct fpm_scoreboard_proc_s proc;
+	zval fpm_proc_stats, fpm_proc_stat;
+	time_t now_epoch;
+	struct timeval duration, now;
+	double cpu;
+	int i;
+
+
+	scoreboard_p = fpm_scoreboard_get();
+	if (!scoreboard_p) {
+		zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
+		return;
+	}
+
+	if (!fpm_spinlock(&scoreboard_p->lock, 1)) {
+		zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
+		return;
+	}
+	/* copy the scoreboard not to bother other processes */
+	scoreboard = *scoreboard_p;
+	fpm_unlock(scoreboard_p->lock);
+
+	now_epoch = time(NULL);
+	fpm_clock_get(&now);
+
+	array_init(return_value);
+	add_assoc_string(return_value, "pool", scoreboard.pool);
+	add_assoc_string(return_value, "process-manager", PM2STR(scoreboard.pm));
+	add_assoc_long(return_value, "start-time", scoreboard.start_epoch);
+	add_assoc_long(return_value, "start-since", now_epoch - scoreboard.start_epoch);
+	add_assoc_long(return_value, "accepted-conn", scoreboard.requests);
+#ifdef HAVE_FPM_LQ
+	add_assoc_long(return_value, "listen-queue", scoreboard.lq);
+	add_assoc_long(return_value, "max-listen-queue", scoreboard.lq_max);
+	add_assoc_long(return_value, "listen-queue-len", scoreboard.lq_len);
+#endif
+	add_assoc_long(return_value, "idle-processes", scoreboard.idle);
+	add_assoc_long(return_value, "active-processes", scoreboard.active);
+	add_assoc_long(return_value, "total-processes", scoreboard.idle + scoreboard.active);
+	add_assoc_long(return_value, "max-active-processes", scoreboard.active_max);
+	add_assoc_long(return_value, "max-children-reached", scoreboard.max_children_reached);
+	add_assoc_long(return_value, "slow-requests", scoreboard.slow_rq);
+
+	array_init(&fpm_proc_stats);
+	for(i=0; i<scoreboard.nprocs; i++) {
+		if (!scoreboard_p->procs[i] || !scoreboard_p->procs[i]->used) {
+			continue;
+		}
+		proc = *scoreboard_p->procs[i];
+#ifdef HAVE_FPM_LQ
+		/* prevent NaN */
+		if (proc.cpu_duration.tv_sec == 0 && proc.cpu_duration.tv_usec == 0) {
+			cpu = 0.;
+		} else {
+			cpu = (proc.last_request_cpu.tms_utime + proc.last_request_cpu.tms_stime + proc.last_request_cpu.tms_cutime + proc.last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.;
+		}
+#endif
+
+		array_init(&fpm_proc_stat);
+		add_assoc_long(&fpm_proc_stat, "pid", proc.pid);
+		add_assoc_string(&fpm_proc_stat, "state", fpm_request_get_stage_name(proc.request_stage));
+		add_assoc_long(&fpm_proc_stat, "start-time", proc.start_epoch);
+		add_assoc_long(&fpm_proc_stat, "start-since", now_epoch - proc.start_epoch);
+		add_assoc_long(&fpm_proc_stat, "requests", proc.requests);
+		if (proc.request_stage == FPM_REQUEST_ACCEPTING) {
+			duration = proc.duration;
+		} else {
+			timersub(&now, &proc.accepted, &duration);
+		}
+		add_assoc_long(&fpm_proc_stat, "request-duration", duration.tv_sec * 1000000UL + duration.tv_usec);
+		add_assoc_string(&fpm_proc_stat, "request-method", proc.request_method[0] != '\0' ? proc.request_method : "-");
+		add_assoc_string(&fpm_proc_stat, "request-uri", proc.request_uri);
+		add_assoc_string(&fpm_proc_stat, "query-string", proc.query_string);
+		add_assoc_long(&fpm_proc_stat, "request-length", proc.content_length);
+		add_assoc_string(&fpm_proc_stat, "user", proc.auth_user[0] != '\0' ? proc.auth_user : "-");
+		add_assoc_string(&fpm_proc_stat, "script", proc.script_filename[0] != '\0' ? proc.script_filename : "-");
+#ifdef HAVE_FPM_LQ
+		add_assoc_double(&fpm_proc_stat, "last-request-cpu", proc.request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.);
+#endif
+		add_assoc_long(&fpm_proc_stat, "last-request-memory", proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
+		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
+	}
+	add_assoc_zval(return_value, "procs", &fpm_proc_stats);
 }
 /* }}} */
 
@@ -478,4 +570,3 @@ int fpm_status_handle_request(void) /* {{{ */
 	return 0;
 }
 /* }}} */
-
