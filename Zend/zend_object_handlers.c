@@ -723,7 +723,13 @@ found:
 				if (property_info != NULL) {
 					if (EXPECTED((property_info->flags & ZEND_ACC_IMMUTABLE) != 0)) {
 						if ((Z_TYPE_P(value) == IS_OBJECT) && !(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(value)))) {
-							zend_throw_error(NULL, "Cannot assign instance of non immutable class %s to immutable property $%s", ZSTR_VAL(zobj->ce->name), ZSTR_VAL(Z_STR_P(member)));
+							zend_throw_exception_ex(
+								NULL,
+								0,
+								"Cannot assign instance of non immutable class %s to immutable property $%s",
+									ZSTR_VAL(zobj->ce->name),
+									ZSTR_VAL(Z_STR_P(member))
+							);
 							goto exit;
 						}
 						if (Z_TYPE_P(value) == IS_RESOURCE) {
@@ -743,6 +749,8 @@ found:
 	} else if (UNEXPECTED(EG(exception))) {
 		goto exit;
 	}
+
+	property_info = zend_hash_find_ptr(&zobj->ce->properties_info, Z_STR_P(member));
 
 	if (EXPECTED((property_info->flags & ZEND_ACC_IMMUTABLE) != 0)) {
 		if ((Z_TYPE_P(value) == IS_OBJECT) && !(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(value)))) {
