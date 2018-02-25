@@ -192,7 +192,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
+/* {{{ proto PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -1156,7 +1156,7 @@ static PHP_METHOD(PDO, quote)
 }
 /* }}} */
 
-/* {{{ proto int PDO::__wakeup()
+/* {{{ proto PDO::__wakeup()
    Prevents use of a PDO instance that has been unserialized */
 static PHP_METHOD(PDO, __wakeup)
 {

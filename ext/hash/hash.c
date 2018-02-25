@@ -882,7 +882,7 @@ PHP_FUNCTION(hash_equals)
 }
 /* }}} */
 
-/* {{{ proto void HashContext::__construct() */
+/* {{{ proto HashContext::__construct() */
 static PHP_METHOD(HashContext, __construct) {
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);

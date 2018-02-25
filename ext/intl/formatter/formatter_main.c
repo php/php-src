@@ -86,7 +86,7 @@ PHP_FUNCTION( numfmt_create )
 }
 /* }}} */
 
-/* {{{ proto void NumberFormatter::__construct( string $locale, int style[, string $pattern ] )
+/* {{{ proto NumberFormatter::__construct( string $locale, int style[, string $pattern ] )
  * NumberFormatter object constructor.
  */
 PHP_METHOD( NumberFormatter, __construct )

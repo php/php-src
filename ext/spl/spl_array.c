@@ -1192,7 +1192,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
+/* {{{ proto ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
    Constructs a new array object from an array or object. */
 SPL_METHOD(Array, __construct)
 {
@@ -1222,7 +1222,7 @@ SPL_METHOD(Array, __construct)
 }
  /* }}} */
 
-/* {{{ proto void ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
+/* {{{ proto ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
    Constructs a new array iterator from an array or object. */
 SPL_METHOD(ArrayIterator, __construct)
 {
