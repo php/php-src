@@ -4664,6 +4664,14 @@ ZEND_METHOD(reflection_class, isFinal)
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionClass::isImmutable()
+   Returns whether this class is immutable */
+ZEND_METHOD(reflection_class, isImmutable)
+{
+	_class_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMMUTABLE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionClass::isAbstract()
    Returns whether this class is abstract */
 ZEND_METHOD(reflection_class, isAbstract)
@@ -5443,6 +5451,14 @@ static void _property_check_flag(INTERNAL_FUNCTION_PARAMETERS, int mask) /* {{{ 
 }
 /* }}} */
 
+/* {{{ proto public bool ReflectionProperty::isImmutable()
+   Returns whether this property is immutable */
+ZEND_METHOD(reflection_property, isImmutable)
+{
+	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMMUTABLE);
+}
+/* }}} */
+
 /* {{{ proto public bool ReflectionProperty::isPublic()
    Returns whether this property is public */
 ZEND_METHOD(reflection_property, isPublic)
@@ -5472,14 +5488,6 @@ ZEND_METHOD(reflection_property, isProtected)
 ZEND_METHOD(reflection_property, isStatic)
 {
 	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_STATIC);
-}
-/* }}} */
-
-/* {{{ proto public bool ReflectionProperty::isImmutable()
-   Returns whether this property is immutable */
-ZEND_METHOD(reflection_property, isImmutable)
-{
-	_property_check_flag(INTERNAL_FUNCTION_PARAM_PASSTHRU, ZEND_ACC_IMMUTABLE);
 }
 /* }}} */
 
@@ -6490,6 +6498,7 @@ static const zend_function_entry reflection_class_functions[] = {
 	ZEND_ME(reflection_class, isTrait, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isAbstract, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isFinal, arginfo_reflection__void, 0)
+	ZEND_ME(reflection_class, isImmutable, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, getModifiers, arginfo_reflection__void, 0)
 	ZEND_ME(reflection_class, isInstance, arginfo_reflection_class_isInstance, 0)
 	ZEND_ME(reflection_class, newInstance, arginfo_reflection_class_newInstance, 0)
@@ -6798,6 +6807,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMPLICIT_ABSTRACT", ZEND_ACC_IMPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_EXPLICIT_ABSTRACT", ZEND_ACC_EXPLICIT_ABSTRACT_CLASS);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_FINAL", ZEND_ACC_FINAL);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(class, "IS_IMMUTABLE", ZEND_ACC_IMMUTABLE);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionObject", reflection_object_functions);
 	_reflection_entry.create_object = reflection_objects_new;
@@ -6821,6 +6831,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PUBLIC", ZEND_ACC_PUBLIC);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PROTECTED", ZEND_ACC_PROTECTED);
 	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_PRIVATE", ZEND_ACC_PRIVATE);
+	REGISTER_REFLECTION_CLASS_CONST_LONG(property, "IS_IMMUTABLE", ZEND_ACC_IMMUTABLE);
 
 	INIT_CLASS_ENTRY(_reflection_entry, "ReflectionExtension", reflection_extension_functions);
 	_reflection_entry.create_object = reflection_objects_new;
