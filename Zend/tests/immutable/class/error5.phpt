@@ -13,10 +13,10 @@ immutable class A {
 
 new A([0, 1, 2]);
 ?>
---EXPECT--
+--EXPECTF--
 
-Fatal error: Uncaught Error: Cannot assign array to immutable property: x in %serror5.php:5
+Fatal error: Uncaught Error: Cannot assign array to immutable property: x in %s:%d
 Stack trace:
-#0 %serror5.php(9): A->__construct(Array)
+#0 %s(%d): A->__construct(Array)
 #1 {main}
-  thrown in %serror5.php on line 5
+  thrown in %s on line %d

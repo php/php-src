@@ -8,7 +8,7 @@ final class C {}
 for ($name = 'A'; $name < 'D'; ++$name) {
 	$reflector = new ReflectionClass($name);
 	$modifiers = $reflector->getModifiers();
-	var_dump(($modifiers & T_IMMUTABLE) === T_IMMUTABLE);
+	var_dump(($modifiers & ReflectionClass::IS_IMMUTABLE) === ReflectionClass::IS_IMMUTABLE);
 }
 ?>
 --EXPECT--

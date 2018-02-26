@@ -16,7 +16,8 @@ immutable class A {
 ?>
 --EXPECTF--
 
-Fatal error: Uncaught Error: Cannot mutate immutable object X\Y\Z\A after construction in %s:%d
+Fatal error: Uncaught Error: Cannot modify state of immutable object after constructor in %s:%d
 Stack trace:
-#0 {main}
+#0 %s(%d): X\Y\Z\A->setX(2)
+#1 {main}
   thrown in %s on line %d

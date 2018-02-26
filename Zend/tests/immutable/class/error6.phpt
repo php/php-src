@@ -15,7 +15,7 @@ $x = &$a->x;
 --EXPECTF--
 
 
-Fatal error: Uncaught Error: Can not reference property of immutable object in %serror6.php on line 10
+Fatal error: Uncaught Error: Can not reference property of immutable object in %s:%d
 Stack trace:
 #0 {main}
-  thrown in %serror6.php on line 10
+  thrown in %s on line %d

@@ -3,27 +3,17 @@ ReflectionProperty::isImmutable reports properties of immutable class as immutab
 --FILE--
 <?php
 immutable class A {
-	public static $a;
-	public $b;
-	protected static $c;
-	protected $d;
-	private static $e;
-	private $f;
-	var $g;
-	static $h;
+	public $a;
+	protected $b;
+	private $c;
 }
-for ($name = 'a'; $name < 'i'; ++$name) {
+for ($name = 'a'; $name < 'd'; ++$name) {
 	$reflector = new ReflectionProperty(A::class, $name);
 	var_dump($reflector->isImmutable());
 }
 ?>
 --EXPECT--
 
-bool(true)
-bool(true)
-bool(true)
-bool(true)
-bool(true)
 bool(true)
 bool(true)
 bool(true)

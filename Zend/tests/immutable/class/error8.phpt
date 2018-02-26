@@ -9,12 +9,12 @@ immutable class A {
 	}
 }
 
-$x = new A(fopen(__DIR__.'/error5.out', 'r'));
+$x = new A(fopen(__DIR__.'/error8.phpt', 'r'));
 ?>
---EXPECT--
+--EXPECTF--
 
-Fatal error: Uncaught Error: Cannot assign resource to immutable property: x in %serror8.php:5
+Fatal error: Uncaught Error: Cannot assign resource to immutable property: x in %s:%d
 Stack trace:
-#0 %serror8.php(9): A->__construct(Resource id #5)
+#0 %s(%d): A->__construct(Resource id #5)
 #1 {main}
-  thrown in %serror8.php on line 5
+  thrown in %s on line %d
