@@ -3121,8 +3121,8 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 	}
 
 	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
-		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) &&
-		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME)) {
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 			FREE_OP2();
 			FREE_OP1();

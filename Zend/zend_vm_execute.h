@@ -5255,13 +5255,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CO
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -7352,13 +7352,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_TM
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 			zval_ptr_dtor_nogc(free_op2);
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -10473,13 +10473,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CONST_CV
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -14167,13 +14167,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -15713,13 +15713,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_T
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 			zval_ptr_dtor_nogc(free_op2);
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -17625,13 +17625,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_TMPVAR_C
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 			zval_ptr_dtor_nogc(free_op1);
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -22993,6 +22993,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+					zval_ptr_dtor_nogc(free_op1);
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -25279,6 +25281,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+					zval_ptr_dtor_nogc(free_op1);
+					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -28998,6 +29002,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+					zval_ptr_dtor_nogc(free_op1);
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -31267,6 +31273,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -32125,13 +32133,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -33029,6 +33037,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -33890,13 +33900,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_T
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 			zval_ptr_dtor_nogc(free_op2);
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -35420,6 +35430,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -36278,13 +36290,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_UNUSED_C
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -40002,6 +40014,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -41321,13 +41335,13 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_S
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -43697,6 +43711,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+					zval_ptr_dtor_nogc(free_op2);
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -44963,13 +44979,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_TMPVA
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 			zval_ptr_dtor_nogc(free_op2);
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,
@@ -49253,6 +49269,8 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 				case ZEND_SEND_REF:
 				case ZEND_ASSIGN_REF: {
 					zend_throw_error(NULL, "Can not reference property of immutable object");
+
+
 					HANDLE_EXCEPTION();
 				} break;
 			}
@@ -50622,13 +50640,13 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_INIT_METHOD_CALL_SPEC_CV_CV_HA
 		HANDLE_EXCEPTION();
 	}
 
-	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) && EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object)))) {
-		if (EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
+	if (EXPECTED(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(object))) &&
+		EXPECTED(Z_OBJ_IS_LOCKED(Z_OBJ_P(object))) &&
+		EXPECTED(zend_string_equals_literal_ci(fbc->common.function_name, ZEND_CONSTRUCTOR_FUNC_NAME))) {
 			zend_throw_error(NULL, "Cannot call constructor on initialized immutable object");
 
 
 			HANDLE_EXCEPTION();
-		}
 	}
 
 	call = zend_vm_stack_push_call_frame(call_info,

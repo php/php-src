@@ -693,7 +693,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 	zval tmp_member;
 	zval *variable_ptr;
 	uintptr_t property_offset;
-	zend_property_info *property_info;
+	zend_property_info *property_info = NULL;
 
 	zobj = Z_OBJ_P(object);
 
@@ -726,7 +726,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 			}
 			if ((variable_ptr = zend_hash_find(zobj->properties, Z_STR_P(member))) != NULL) {
 found:
-				property_info = zend_hash_find_ptr(&zobj->ce->properties_info, Z_STR_P(member));
+				property_info = zend_get_property_info(zobj->ce, Z_STR_P(member), 0);
 				if (property_info != NULL && EXPECTED((property_info->flags & ZEND_ACC_IMMUTABLE) != 0)) {
 					if ((Z_TYPE_P(value) == IS_OBJECT) && !(Z_OBJ_IS_IMMUTABLE(Z_OBJ_P(value)))) {
 						zend_throw_exception_ex(
