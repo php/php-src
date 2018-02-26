@@ -210,7 +210,7 @@ typedef struct _zend_refcounted_h {
 			ZEND_ENDIAN_LOHI_3(
 				zend_uchar    type,
 				zend_uchar    flags,    /* used for strings & objects */
-				uint16_t      gc_info)  /* keeps GC root number (or 0) and color */
+				uint16_t      gc_info)  /* keeps GC information, must be initialized by 0 */
 		} v;
 		uint32_t type_info;
 	} u;

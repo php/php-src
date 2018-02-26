@@ -302,7 +302,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
 #if ZEND_DEBUG
-		if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		if (gc_enabled() && !CG(unclean_shutdown)) {
 			gc_collect_cycles();
 		}
 #endif
