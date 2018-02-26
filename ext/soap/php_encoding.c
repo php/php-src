@@ -2229,7 +2229,7 @@ static xmlNodePtr to_xml_array(encodeTypePtr type, zval *data, int style, xmlNod
 		return xmlParam;
 	}
 
-	if (Z_TYPE_P(data) == IS_OBJECT && instanceof_function(Z_OBJCE_P(data), zend_ce_traversable)) {
+	if (Z_TYPE_P(data) == IS_OBJECT && zend_is_iterable(data)) {
 		zend_object_iterator   *iter;
 		zend_class_entry       *ce = Z_OBJCE_P(data);
 		zval                   *val;
