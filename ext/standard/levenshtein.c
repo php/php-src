@@ -114,11 +114,11 @@ PHP_FUNCTION(levenshtein)
 			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_rep, cost_del);
 			break;
 
-		case 3: /* most general version: calc cost by user-supplied function */
-			if (zend_parse_parameters(3, "sss", &str1, &str1_len, &str2, &str2_len, &callback_name, &callback_len) == FAILURE) {
+		case 3: /* most general version: calc cost by using same weight for ins/rep/del*/
+			if (zend_parse_parameters(3, "ssl", &str1, &str1_len, &str2, &str2_len, &cost_ins) == FAILURE) {
 				return;
 			}
-			distance = custom_levdist(str1, str2, callback_name);
+			distance = reference_levdist(str1, str1_len, str2, str2_len, cost_ins, cost_ins, cost_ins);
 			break;
 
 		default:
