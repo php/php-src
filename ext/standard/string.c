@@ -3657,7 +3657,7 @@ PHP_FUNCTION(addcslashes)
 	}
 
 	if (ZSTR_LEN(what) == 0) {
-		RETURN_STRINGL(ZSTR_VAL(str), ZSTR_LEN(str));
+		RETURN_STR_COPY(str);
 	}
 
 	RETURN_STR(php_addcslashes(str, 0, ZSTR_VAL(what), ZSTR_LEN(what)));
