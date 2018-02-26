@@ -5654,7 +5654,7 @@ PHP_FUNCTION(str_pad)
 	/* If resulting string turns out to be shorter than input string,
 	   we simply copy the input and return. */
 	if (pad_length < 0  || (size_t)pad_length <= ZSTR_LEN(input)) {
-		RETURN_STRINGL(ZSTR_VAL(input), ZSTR_LEN(input));
+		RETURN_STR_COPY(input);
 	}
 
 	if (pad_str_len == 0) {
