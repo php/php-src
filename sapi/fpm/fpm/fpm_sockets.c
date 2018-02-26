@@ -47,7 +47,7 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 	unsigned socket_set_count = 0;
 	unsigned socket_set[FPM_ENV_SOCKET_SET_MAX];
 	unsigned socket_set_buf = 0;
-	char envname[16];
+	char envname[32];
 	char *env_value = 0;
 	int p = 0;
 	struct listening_socket_s *ls = sockets_list.data;
@@ -83,8 +83,12 @@ static void fpm_sockets_cleanup(int which, void *arg) /* {{{ */
 	}
 
 	if (env_value) {
-		for(i = 0; i < socket_set_count; i++) {
-			sprintf(envname, "FPM_SOCKETS_%d", i);
+		for (i = 0; i < socket_set_count; i++) {
+			if (!i) {
+				strcpy(envname, "FPM_SOCKETS");
+			} else {
+				sprintf(envname, "FPM_SOCKETS_%d", i);
+			}
 			setenv(envname, env_value + socket_set[i], 1);
 		}
 		free(env_value);
@@ -343,7 +347,7 @@ int fpm_sockets_init_main() /* {{{ */
 {
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
-	char sockname[16];
+	char sockname[32];
 	char *inherited;
 	struct listening_socket_s *ls;
 
@@ -353,7 +357,11 @@ int fpm_sockets_init_main() /* {{{ */
 
 	/* import inherited sockets */
 	for (i = 0; i < FPM_ENV_SOCKET_SET_MAX; i++) {
-		sprintf(sockname, "FPM_SOCKETS_%d", i);
+		if (!i) {
+			strcpy(sockname, "FPM_SOCKETS");
+		} else {
+			sprintf(sockname, "FPM_SOCKETS_%d", i);
+		}
 		inherited = getenv(sockname);
 		if (!inherited) break;
 
