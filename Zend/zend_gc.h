@@ -40,57 +40,25 @@
 # define GC_BENCH_PEAK(peak, counter)
 #endif
 
-#define GC_COLOR  0xc000
-
-#define GC_BLACK  0x0000
-#define GC_WHITE  0x8000
-#define GC_GREY   0x4000
-#define GC_PURPLE 0xc000
-
-#define GC_ADDRESS(v) \
-	((v) & ~GC_COLOR)
-#define GC_INFO_GET_COLOR(v) \
-	(((zend_uintptr_t)(v)) & GC_COLOR)
-#define GC_INFO_SET_ADDRESS(v, a) \
-	do {(v) = ((v) & GC_COLOR) | (a);} while (0)
-#define GC_INFO_SET_COLOR(v, c) \
-	do {(v) = ((v) & ~GC_COLOR) | (c);} while (0)
-#define GC_INFO_SET_BLACK(v) \
-	do {(v) = (v) & ~GC_COLOR;} while (0)
-#define GC_INFO_SET_PURPLE(v) \
-	do {(v) = (v) | GC_COLOR;} while (0)
-
 typedef struct _gc_root_buffer {
-	zend_refcounted          *ref;
-	struct _gc_root_buffer   *next;     /* double-linked list               */
-	struct _gc_root_buffer   *prev;
-	uint32_t                 refcount;
+	zend_refcounted *ref;
+	uint32_t         next;
+	uint32_t         prev;
+	uint32_t         refcount;
 } gc_root_buffer;
-
-#define GC_NUM_ADDITIONAL_ENTRIES \
-	((4096 - ZEND_MM_OVERHEAD - sizeof(void*) * 2) / sizeof(gc_root_buffer))
-
-typedef struct _gc_additional_bufer gc_additional_buffer;
-
-struct _gc_additional_bufer {
-	uint32_t              used;
-	gc_additional_buffer *next;
-	gc_root_buffer        buf[GC_NUM_ADDITIONAL_ENTRIES];
-};
 
 typedef struct _zend_gc_globals {
 	zend_bool         gc_enabled;
-	zend_bool         gc_active;
-	zend_bool         gc_full;
+	zend_bool         gc_active;        /* GC currently running, forbid nested GC */
+	zend_bool         gc_protected;     /* GC protected, forbid root additions */
 
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
-	gc_root_buffer    roots;			/* list of possible roots of cycles */
-	gc_root_buffer   *unused;			/* list of unused buffers           */
-	gc_root_buffer   *first_unused;		/* pointer to first unused buffer   */
-	gc_root_buffer   *last_unused;		/* pointer to last unused buffer    */
-
-	gc_root_buffer    to_free;			/* list to free                     */
-	gc_root_buffer   *next_to_free;
+	uint32_t          buf_size;			/* size of the GC buffer            */
+	uint32_t          num_roots;        /* number of roots in GC buffer     */
+	uint32_t          unused;			/* linked list of unused buffers    */
+	uint32_t          first_unused;		/* first unused buffer              */
+	uint32_t          next_to_free;     /* next to free in to_free list     */
+	uint32_t          gc_threshold;     /* GC collection threshold          */
 
 	uint32_t gc_runs;
 	uint32_t collected;
@@ -103,9 +71,6 @@ typedef struct _zend_gc_globals {
 	uint32_t zval_remove_from_buffer;
 	uint32_t zval_marked_grey;
 #endif
-
-	gc_additional_buffer *additional_buffer;
-
 } zend_gc_globals;
 
 #ifdef ZTS
@@ -133,16 +98,14 @@ ZEND_API int  zend_gc_collect_cycles(void);
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
-		zend_refcounted *_p = (zend_refcounted*)(p); \
-		if (GC_ADDRESS(GC_INFO(_p))) { \
+		zend_refcounted *_p = (zend_refcounted *)(p); \
+		if (GC_ADDRESS(_p)) { \
 			gc_remove_from_buffer(_p); \
 		} \
 	} while (0)
 
 #define GC_MAY_LEAK(ref) \
-	((GC_TYPE_INFO(ref) & \
-		(GC_INFO_MASK | (GC_COLLECTABLE << GC_FLAGS_SHIFT))) == \
-	(GC_COLLECTABLE << GC_FLAGS_SHIFT))
+	((GC_FLAGS(ref) & GC_COLLECTABLE) && GC_ADDRESS(ref) == 0)
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {

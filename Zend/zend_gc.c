@@ -72,9 +72,6 @@
 #include "zend.h"
 #include "zend_API.h"
 
-/* one (0) is reserved */
-#define GC_ROOT_BUFFER_MAX_ENTRIES 10001
-
 #define GC_HAS_DESTRUCTORS  (1<<0)
 
 #ifndef ZEND_GC_DEBUG
@@ -104,16 +101,40 @@ ZEND_API int (*gc_collect_cycles)(void);
 # define GC_TRACE(str)
 #endif
 
-#define GC_REF_SET_ADDRESS(ref, a) \
-	GC_INFO_SET_ADDRESS(GC_INFO(ref), a)
+#define GC_INVALID          ((uint32_t) -1)
+#define GC_ROOTS_SENTINEL   ((uint32_t) 0)
+#define GC_TO_FREE_SENTINEL ((uint32_t) 1)
+#define GC_FIRST_REAL_ROOT  ((uint32_t) 2)
+#define GC_DUMMY_BUF_SIZE   GC_FIRST_REAL_ROOT
+
+#define GC_DEFAULT_COLLECTION_THRESHOLD 10000
+#define GC_ROOT_BUFFER_DEFAULT_SIZE \
+	(GC_DEFAULT_COLLECTION_THRESHOLD + GC_FIRST_REAL_ROOT)
+
+#define GC_TO_BUF(addr) (GC_G(buf) + (addr))
+#define GC_TO_ADDR(buffer) ((buffer) - GC_G(buf))
+
+#define GC_ROOTS() GC_TO_BUF(GC_ROOTS_SENTINEL)
+#define GC_TO_FREE() GC_TO_BUF(GC_TO_FREE_SENTINEL)
+
+#define GC_NEXT_BUF(buf) GC_TO_BUF((buf)->next)
+#define GC_PREV_BUF(buf) GC_TO_BUF((buf)->prev)
+
 #define GC_REF_GET_COLOR(ref) \
-	GC_INFO_GET_COLOR(GC_INFO(ref))
+	(GC_FLAGS(ref) & GC_COLOR)
+#define GC_REF_SET_COLOR_EX(ref, c) \
+	do { GC_FLAGS(ref) = (GC_FLAGS(ref) & ~GC_COLOR) | (c); } while (0);
+#define GC_REF_SET_BLACK_EX(ref) \
+	do { GC_FLAGS(ref) = GC_FLAGS(ref) & ~GC_COLOR; } while (0);
+#define GC_REF_SET_PURPLE_EX(ref) \
+	do { GC_FLAGS(ref) |= GC_COLOR; } while (0);
+
 #define GC_REF_SET_COLOR(ref, c) \
-	do { GC_TRACE_SET_COLOR(ref, c); GC_INFO_SET_COLOR(GC_INFO(ref), c); } while (0)
+	do { GC_TRACE_SET_COLOR(ref, c); GC_REF_SET_COLOR_EX(ref, c); } while (0)
 #define GC_REF_SET_BLACK(ref) \
-	do { GC_TRACE_SET_COLOR(ref, GC_BLACK); GC_INFO_SET_BLACK(GC_INFO(ref)); } while (0)
+	do { GC_TRACE_SET_COLOR(ref, GC_BLACK); GC_REF_SET_BLACK_EX(ref); } while (0)
 #define GC_REF_SET_PURPLE(ref) \
-	do { GC_TRACE_SET_COLOR(ref, GC_PURPLE); GC_INFO_SET_PURPLE(GC_INFO(ref)); } while (0)
+	do { GC_TRACE_SET_COLOR(ref, GC_PURPLE); GC_REF_SET_PURPLE_EX(ref); } while (0)
 
 #if ZEND_GC_DEBUG > 1
 static const char *gc_color_name(uint32_t color) {
@@ -129,44 +150,46 @@ static void gc_trace_ref(zend_refcounted *ref) {
 	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object *obj = (zend_object *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s object(%s)#%d ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
+			ref, GC_REFCOUNT(ref), GC_ADDRESS(ref),
 			gc_color_name(GC_REF_GET_COLOR(ref)),
 			obj->ce->name->val, obj->handle);
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		zend_array *arr = (zend_array *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s array(%d) ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
+			ref, GC_REFCOUNT(ref), GC_ADDRESS(ref),
 			gc_color_name(GC_REF_GET_COLOR(ref)),
 			zend_hash_num_elements(arr));
 	} else {
-		fprintf(stderr, "[%p] rc=%d addr=%d %s %s ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
+		fprintf(stderr, "[%p] rc=%d %s %s ",
+			ref, GC_REFCOUNT(ref),
 			gc_color_name(GC_REF_GET_COLOR(ref)),
 			zend_get_type_by_const(GC_TYPE(ref)));
 	}
 }
 #endif
 
+static const gc_root_buffer gc_dummy_buffer[GC_DUMMY_BUF_SIZE] = {
+	{ NULL, GC_ROOTS_SENTINEL, GC_ROOTS_SENTINEL, 0 },
+	{ NULL, GC_TO_FREE_SENTINEL, GC_TO_FREE_SENTINEL, 0 },
+};
+#define GC_DUMMY_BUF() ((gc_root_buffer *) &gc_dummy_buffer)
+
 static zend_always_inline void gc_remove_from_roots(gc_root_buffer *root)
 {
-	root->next->prev = root->prev;
-	root->prev->next = root->next;
+	GC_NEXT_BUF(root)->prev = root->prev;
+	GC_PREV_BUF(root)->next = root->next;
 	root->prev = GC_G(unused);
-	GC_G(unused) = root;
-	GC_BENCH_DEC(root_buf_length);
-}
+	GC_G(unused) = GC_TO_ADDR(root);
 
-static zend_always_inline void gc_remove_from_additional_roots(gc_root_buffer *root)
-{
-	root->next->prev = root->prev;
-	root->prev->next = root->next;
+	GC_G(num_roots)--;
+	GC_BENCH_DEC(root_buf_length);
 }
 
 static void root_buffer_dtor(zend_gc_globals *gc_globals)
 {
-	if (gc_globals->buf) {
+	if (gc_globals->buf != GC_DUMMY_BUF()) {
 		free(gc_globals->buf);
-		gc_globals->buf = NULL;
+		gc_globals->buf = GC_DUMMY_BUF();
 	}
 }
 
@@ -174,21 +197,19 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 {
 	gc_globals->gc_enabled = 0;
 	gc_globals->gc_active = 0;
+	gc_globals->gc_protected = 0;
 
-	gc_globals->buf = NULL;
+	gc_globals->buf = GC_DUMMY_BUF();
+	gc_globals->buf_size = GC_DUMMY_BUF_SIZE;
+	gc_globals->gc_threshold = GC_DEFAULT_COLLECTION_THRESHOLD;
 
-	gc_globals->roots.next = &gc_globals->roots;
-	gc_globals->roots.prev = &gc_globals->roots;
-	gc_globals->unused = NULL;
-	gc_globals->next_to_free = NULL;
-
-	gc_globals->to_free.next = &gc_globals->to_free;
-	gc_globals->to_free.prev = &gc_globals->to_free;
+	gc_globals->num_roots = 0;
+	gc_globals->unused = GC_INVALID;
+	gc_globals->first_unused = GC_FIRST_REAL_ROOT;
+	gc_globals->next_to_free = GC_INVALID;
 
 	gc_globals->gc_runs = 0;
 	gc_globals->collected = 0;
-
-	gc_globals->additional_buffer = NULL;
 
 #if GC_BENCH
 	gc_globals->root_buf_length = 0;
@@ -220,7 +241,6 @@ ZEND_API void gc_reset(void)
 {
 	GC_G(gc_runs) = 0;
 	GC_G(collected) = 0;
-	GC_G(gc_full) = 0;
 
 #if GC_BENCH
 	GC_G(root_buf_length) = 0;
@@ -231,57 +251,57 @@ ZEND_API void gc_reset(void)
 	GC_G(zval_marked_grey) = 0;
 #endif
 
-	GC_G(roots).next = &GC_G(roots);
-	GC_G(roots).prev = &GC_G(roots);
-
-	GC_G(to_free).next = &GC_G(to_free);
-	GC_G(to_free).prev = &GC_G(to_free);
-
-	if (GC_G(buf)) {
-		GC_G(unused) = NULL;
-		GC_G(first_unused) = GC_G(buf) + 1;
-	} else {
-		GC_G(unused) = NULL;
-		GC_G(first_unused) = NULL;
-		GC_G(last_unused) = NULL;
+	if (GC_G(buf) != GC_DUMMY_BUF()) {
+		GC_ROOTS()->next = GC_ROOTS_SENTINEL;
+		GC_ROOTS()->prev = GC_ROOTS_SENTINEL;
+		GC_TO_FREE()->next = GC_TO_FREE_SENTINEL;
+		GC_TO_FREE()->prev = GC_TO_FREE_SENTINEL;
 	}
 
-	GC_G(additional_buffer) = NULL;
+	GC_G(unused) = GC_INVALID;
+	GC_G(first_unused) = GC_FIRST_REAL_ROOT;
 }
 
 ZEND_API void gc_init(void)
 {
-	if (GC_G(buf) == NULL && GC_G(gc_enabled)) {
-		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_ROOT_BUFFER_MAX_ENTRIES);
-		GC_G(last_unused) = &GC_G(buf)[GC_ROOT_BUFFER_MAX_ENTRIES];
+	if (GC_G(buf) == GC_DUMMY_BUF() && GC_G(gc_enabled)) {
+		GC_G(buf) = malloc(sizeof(gc_root_buffer) * GC_ROOT_BUFFER_DEFAULT_SIZE);
+		if (GC_G(buf)) {
+			GC_G(buf_size) = GC_ROOT_BUFFER_DEFAULT_SIZE;
+		} else {
+			GC_G(buf) = GC_DUMMY_BUF();
+			GC_G(buf_size) = GC_DUMMY_BUF_SIZE;
+		}
 		gc_reset();
 	}
 }
 
+static void gc_grow_root_buffer() {
+	/* Double the buffer size, taking into account the reserved roots */
+	size_t new_size = (GC_G(buf_size) - GC_FIRST_REAL_ROOT) * 2 + GC_FIRST_REAL_ROOT;
+	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
+	GC_G(buf_size) = new_size;
+}
+
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
+	uint32_t newRootAddr;
 	gc_root_buffer *newRoot;
 
-	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {
+	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_protected))) {
 		return;
 	}
 
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	ZEND_ASSERT(EXPECTED(GC_REF_GET_COLOR(ref) == GC_BLACK));
-	ZEND_ASSERT(!GC_ADDRESS(GC_INFO(ref)));
+	ZEND_ASSERT(!GC_ADDRESS(ref));
 
 	GC_BENCH_INC(zval_possible_root);
 
-	newRoot = GC_G(unused);
-	if (newRoot) {
-		GC_G(unused) = newRoot->prev;
-	} else if (GC_G(first_unused) != GC_G(last_unused)) {
-		newRoot = GC_G(first_unused);
-		GC_G(first_unused)++;
-	} else {
-		if (!GC_G(gc_enabled)) {
-			return;
-		}
+	/* TODO It would be more elegant to move this to the end and avoid all the
+	 * special cases here. I'm keeping it for now to preserve exact collection point. */
+	if (UNEXPECTED(GC_G(num_roots) >= GC_G(gc_threshold)
+			&& GC_G(gc_enabled) && !GC_G(gc_active))) {
 		GC_ADDREF(ref);
 		gc_collect_cycles();
 		GC_DELREF(ref);
@@ -289,78 +309,71 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 			zval_dtor_func(ref);
 			return;
 		}
-		if (UNEXPECTED(GC_INFO(ref))) {
+		if (UNEXPECTED(GC_ADDRESS(ref))) {
 			return;
 		}
-		newRoot = GC_G(unused);
-		if (!newRoot) {
-#if ZEND_GC_DEBUG
-			if (!GC_G(gc_full)) {
-				fprintf(stderr, "GC: no space to record new root candidate\n");
-				GC_G(gc_full) = 1;
-			}
-#endif
-			return;
-		}
+	}
+
+	newRootAddr = GC_G(unused);
+	if (newRootAddr != GC_INVALID) {
+		newRoot = GC_TO_BUF(newRootAddr);
 		GC_G(unused) = newRoot->prev;
+	} else if (GC_G(first_unused) != GC_G(buf_size)) {
+		newRootAddr = GC_G(first_unused);
+		newRoot = GC_TO_BUF(newRootAddr);
+		GC_G(first_unused)++;
+	} else {
+		if (GC_G(buf) == GC_DUMMY_BUF()) {
+			/* This means that the GC is completely disabled, rather than just disabled
+			 * temporarily at run-time. In this case we just let things leak. */
+			return;
+		}
+
+		gc_grow_root_buffer();
+		newRootAddr = GC_G(first_unused);
+		newRoot = GC_TO_BUF(newRootAddr);
+		GC_G(first_unused)++;
 	}
 
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
-	GC_INFO(ref) = (newRoot - GC_G(buf)) | GC_PURPLE;
+	GC_SET_ADDRESS(ref, newRootAddr);
+	GC_REF_SET_PURPLE(ref);
 	newRoot->ref = ref;
 
-	newRoot->next = GC_G(roots).next;
-	newRoot->prev = &GC_G(roots);
-	GC_G(roots).next->prev = newRoot;
-	GC_G(roots).next = newRoot;
+	{
+		gc_root_buffer *roots = GC_ROOTS();
+		newRoot->next = roots->next;
+		newRoot->prev = GC_ROOTS_SENTINEL;
+		GC_NEXT_BUF(roots)->prev = newRootAddr;
+		roots->next = newRootAddr;
+	}
 
+	GC_G(num_roots)++;
 	GC_BENCH_INC(zval_buffered);
 	GC_BENCH_INC(root_buf_length);
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
-static zend_always_inline gc_root_buffer* gc_find_additional_buffer(zend_refcounted *ref)
-{
-	gc_additional_buffer *additional_buffer = GC_G(additional_buffer);
-
-	/* We have to check each additional_buffer to find which one holds the ref */
-	while (additional_buffer) {
-		uint32_t idx = GC_ADDRESS(GC_INFO(ref)) - GC_ROOT_BUFFER_MAX_ENTRIES;
-		if (idx < additional_buffer->used) {
-			gc_root_buffer *root = additional_buffer->buf + idx;
-			if (root->ref == ref) {
-				return root;
-			}
-		}
-		additional_buffer = additional_buffer->next;
-	}
-
-	ZEND_ASSERT(0);
-	return NULL;
-}
-
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
+	uint32_t addr;
 	gc_root_buffer *root;
 
-	ZEND_ASSERT(GC_ADDRESS(GC_INFO(ref)));
+	ZEND_ASSERT(GC_ADDRESS(ref));
 
 	GC_BENCH_INC(zval_remove_from_buffer);
 
-	if (EXPECTED(GC_ADDRESS(GC_INFO(ref)) < GC_ROOT_BUFFER_MAX_ENTRIES)) {
-		root = GC_G(buf) + GC_ADDRESS(GC_INFO(ref));
-		gc_remove_from_roots(root);
-	} else {
-		root = gc_find_additional_buffer(ref);
-		gc_remove_from_additional_roots(root);
-	}
+	addr = GC_ADDRESS(ref);
+	root = GC_TO_BUF(addr);
+	gc_remove_from_roots(root);
+
 	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 		GC_TRACE_SET_COLOR(ref, GC_PURPLE);
 	}
-	GC_INFO(ref) = 0;
+	GC_SET_ADDRESS(ref, 0);
 
 	/* updete next root that is going to be freed */
-	if (GC_G(next_to_free) == root) {
+	if (GC_G(next_to_free) == addr) {
 		GC_G(next_to_free) = root->next;
 	}
 }
@@ -576,13 +589,14 @@ tail_call:
 
 static void gc_mark_roots(void)
 {
-	gc_root_buffer *current = GC_G(roots).next;
+	gc_root_buffer *roots = GC_ROOTS();
+	gc_root_buffer *current = GC_NEXT_BUF(roots);
 
-	while (current != &GC_G(roots)) {
+	while (current != roots) {
 		if (GC_REF_GET_COLOR(current->ref) == GC_PURPLE) {
 			gc_mark_grey(current->ref);
 		}
-		current = current->next;
+		current = GC_NEXT_BUF(current);
 	}
 }
 
@@ -685,62 +699,47 @@ tail_call:
 
 static void gc_scan_roots(void)
 {
-	gc_root_buffer *current = GC_G(roots).next;
+	gc_root_buffer *roots = GC_ROOTS();
+	gc_root_buffer *current = GC_NEXT_BUF(roots);
 
-	while (current != &GC_G(roots)) {
+	while (current != roots) {
 		gc_scan(current->ref);
-		current = current->next;
+		current = GC_NEXT_BUF(current);
 	}
 }
 
 static void gc_add_garbage(zend_refcounted *ref)
 {
-	gc_root_buffer *buf = GC_G(unused);
+	gc_root_buffer *roots;
+	uint32_t addr;
+	gc_root_buffer *buf;
 
-	if (buf) {
+	if (GC_G(unused) != GC_INVALID) {
+		addr = GC_G(unused);
+		buf = GC_TO_BUF(addr);
 		GC_G(unused) = buf->prev;
-#if 1
-		/* optimization: color is already GC_BLACK (0) */
-		GC_INFO(ref) = buf - GC_G(buf);
-#else
-		GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-#endif
-	} else if (GC_G(first_unused) != GC_G(last_unused)) {
-		buf = GC_G(first_unused);
+	} else if (GC_G(first_unused) != GC_G(buf_size)) {
+		addr = GC_G(first_unused);
+		buf = GC_TO_BUF(addr);
 		GC_G(first_unused)++;
-#if 1
-		/* optimization: color is already GC_BLACK (0) */
-		GC_INFO(ref) = buf - GC_G(buf);
-#else
-		GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-#endif
 	} else {
-		/* If we don't have free slots in the buffer, allocate a new one and
-		 * set it's address above GC_ROOT_BUFFER_MAX_ENTRIES that have special
-		 * meaning.
-		 */
-		if (!GC_G(additional_buffer) || GC_G(additional_buffer)->used == GC_NUM_ADDITIONAL_ENTRIES) {
-			gc_additional_buffer *new_buffer = emalloc(sizeof(gc_additional_buffer));
-			new_buffer->used = 0;
-			new_buffer->next = GC_G(additional_buffer);
-			GC_G(additional_buffer) = new_buffer;
-		}
-		buf = GC_G(additional_buffer)->buf + GC_G(additional_buffer)->used;
-#if 1
-		/* optimization: color is already GC_BLACK (0) */
-		GC_INFO(ref) = GC_ROOT_BUFFER_MAX_ENTRIES + GC_G(additional_buffer)->used;
-#else
-		GC_REF_SET_ADDRESS(ref, GC_ROOT_BUFFER_MAX_ENTRIES) + GC_G(additional_buffer)->used;
-#endif
-		GC_G(additional_buffer)->used++;
+		gc_grow_root_buffer();
+		addr = GC_G(first_unused);
+		buf = GC_TO_BUF(addr);
+		GC_G(first_unused)++;
 	}
-	if (buf) {
-		buf->ref = ref;
-		buf->next = GC_G(roots).next;
-		buf->prev = &GC_G(roots);
-		GC_G(roots).next->prev = buf;
-		GC_G(roots).next = buf;
-	}
+
+	/* optimization: color is already GC_BLACK (0) */
+	GC_SET_ADDRESS(ref, addr);
+
+	roots = GC_ROOTS();
+	buf->ref = ref;
+	buf->next = roots->next;
+	buf->prev = GC_ROOTS_SENTINEL;
+	GC_NEXT_BUF(roots)->prev = addr;
+	roots->next = addr;
+
+	GC_G(num_roots)++;
 }
 
 static int gc_collect_white(zend_refcounted *ref, uint32_t *flags)
@@ -770,12 +769,7 @@ tail_call:
 				zval *zv, *end;
 				zval tmp;
 
-#if 1
-				/* optimization: color is GC_BLACK (0) */
-				if (!GC_INFO(ref)) {
-#else
-				if (!GC_ADDRESS(GC_INFO(ref))) {
-#endif
+				if (!GC_ADDRESS(ref)) {
 					gc_add_garbage(ref);
 				}
 				if (obj->handlers->dtor_obj &&
@@ -816,12 +810,7 @@ tail_call:
 				return count;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-#if 1
-				/* optimization: color is GC_BLACK (0) */
-				if (!GC_INFO(ref)) {
-#else
-				if (!GC_ADDRESS(GC_INFO(ref))) {
-#endif
+			if (!GC_ADDRESS(ref)) {
 				gc_add_garbage(ref);
 			}
 			ht = (zend_array*)ref;
@@ -883,48 +872,50 @@ tail_call:
 static int gc_collect_roots(uint32_t *flags)
 {
 	int count = 0;
-	gc_root_buffer *current = GC_G(roots).next;
+	gc_root_buffer *roots = GC_ROOTS();
+	gc_root_buffer *current = GC_NEXT_BUF(roots);
 
 	/* remove non-garbage from the list */
-	while (current != &GC_G(roots)) {
-		gc_root_buffer *next = current->next;
+	while (current != roots) {
+		gc_root_buffer *next = GC_NEXT_BUF(current);
 		if (GC_REF_GET_COLOR(current->ref) == GC_BLACK) {
-			if (EXPECTED(GC_ADDRESS(GC_INFO(current->ref)) < GC_ROOT_BUFFER_MAX_ENTRIES)) {
-				gc_remove_from_roots(current);
-			} else {
-				gc_remove_from_additional_roots(current);
-			}
-			GC_INFO(current->ref) = 0; /* reset GC_ADDRESS() and keep GC_BLACK */
+			gc_remove_from_roots(current);
+			GC_SET_ADDRESS(current->ref, 0); /* reset GC_ADDRESS() and keep GC_BLACK */
 		}
 		current = next;
 	}
 
-	current = GC_G(roots).next;
-	while (current != &GC_G(roots)) {
+	/* Root buffer might be reallocated during gc_collect_white,
+	 * make sure to reload pointers. */
+	current = GC_NEXT_BUF(roots);
+	while (current != GC_ROOTS()) {
+		uint32_t next = current->next;
 		if (GC_REF_GET_COLOR(current->ref) == GC_WHITE) {
 			count += gc_collect_white(current->ref, flags);
 		}
-		current = current->next;
+		current = GC_TO_BUF(next);
 	}
 
 	/* relink remaining roots into list to free */
-	if (GC_G(roots).next != &GC_G(roots)) {
-		if (GC_G(to_free).next == &GC_G(to_free)) {
+	roots = GC_ROOTS();
+	if (roots->next != GC_ROOTS_SENTINEL) {
+		gc_root_buffer *to_free = GC_TO_FREE();
+		if (to_free->next == GC_TO_FREE_SENTINEL) {
 			/* move roots into list to free */
-			GC_G(to_free).next = GC_G(roots).next;
-			GC_G(to_free).prev = GC_G(roots).prev;
-			GC_G(to_free).next->prev = &GC_G(to_free);
-			GC_G(to_free).prev->next = &GC_G(to_free);
+			to_free->next = roots->next;
+			to_free->prev = roots->prev;
+			GC_NEXT_BUF(to_free)->prev = GC_TO_FREE_SENTINEL;
+			GC_PREV_BUF(to_free)->next = GC_TO_FREE_SENTINEL;
 		} else {
 			/* add roots into list to free */
-			GC_G(to_free).prev->next = GC_G(roots).next;
-			GC_G(roots).next->prev = GC_G(to_free).prev;
-			GC_G(roots).prev->next = &GC_G(to_free);
-			GC_G(to_free).prev = GC_G(roots).prev;
+			GC_PREV_BUF(to_free)->next = roots->next;
+			GC_NEXT_BUF(roots)->prev = to_free->prev;
+			GC_PREV_BUF(roots)->next = GC_TO_FREE_SENTINEL;
+			to_free->prev = roots->prev;
 		}
 
-		GC_G(roots).next = &GC_G(roots);
-		GC_G(roots).prev = &GC_G(roots);
+		roots->next = GC_ROOTS_SENTINEL;
+		roots->prev = GC_ROOTS_SENTINEL;
 	}
 	return count;
 }
@@ -937,16 +928,13 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buff
 
 tail_call:
 	if (root ||
-	    (GC_ADDRESS(GC_INFO(ref)) != 0 &&
+	    ((GC_FLAGS(ref) & GC_COLLECTABLE) &&
+		 GC_ADDRESS(ref) != 0 &&
 	     GC_REF_GET_COLOR(ref) == GC_BLACK)) {
 		GC_TRACE_REF(ref, "removing from buffer");
 		if (root) {
-			if (EXPECTED(GC_ADDRESS(GC_INFO(root->ref)) < GC_ROOT_BUFFER_MAX_ENTRIES)) {
-				gc_remove_from_roots(root);
-			} else {
-				gc_remove_from_additional_roots(root);
-			}
-			GC_INFO(ref) = 0;
+			gc_remove_from_roots(root);
+			GC_SET_ADDRESS(ref, 0);
 			root = NULL;
 		} else {
 			GC_REMOVE_FROM_BUFFER(ref);
@@ -1031,19 +1019,27 @@ tail_call:
 	}
 }
 
+static void gc_adjust_threshold(int count) {
+	/* TODO Very simple heuristic for dynamic GC buffer resizing:
+	 * If there are "too few" collections, increase the collection threshold
+	 * by a factor of two. */
+	if (count < 100) {
+		GC_G(gc_threshold) *= 2;
+	} else if (GC_G(gc_threshold) > GC_DEFAULT_COLLECTION_THRESHOLD) {
+		GC_G(gc_threshold) /= 2;
+	}
+}
+
 ZEND_API int zend_gc_collect_cycles(void)
 {
 	int count = 0;
+	gc_root_buffer *roots = GC_ROOTS();
 
-	if (GC_G(roots).next != &GC_G(roots)) {
-		gc_root_buffer *current, *next, *orig_next_to_free;
+	if (roots->next != GC_ROOTS_SENTINEL) {
+		gc_root_buffer *current, *next;
 		zend_refcounted *p;
-		gc_root_buffer to_free;
+		gc_root_buffer *to_free;
 		uint32_t gc_flags = 0;
-		gc_additional_buffer *additional_buffer_snapshot;
-#if ZEND_GC_DEBUG
-		zend_bool orig_gc_full;
-#endif
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1052,61 +1048,43 @@ ZEND_API int zend_gc_collect_cycles(void)
 		GC_TRACE("Collecting cycles");
 		GC_G(gc_runs)++;
 		GC_G(gc_active) = 1;
+		GC_G(gc_protected) = 1;
 
 		GC_TRACE("Marking roots");
 		gc_mark_roots();
 		GC_TRACE("Scanning roots");
 		gc_scan_roots();
 
-#if ZEND_GC_DEBUG
-		orig_gc_full = GC_G(gc_full);
-		GC_G(gc_full) = 0;
-#endif
-
 		GC_TRACE("Collecting roots");
-		additional_buffer_snapshot = GC_G(additional_buffer);
 		count = gc_collect_roots(&gc_flags);
-#if ZEND_GC_DEBUG
-		GC_G(gc_full) = orig_gc_full;
-#endif
-		GC_G(gc_active) = 0;
 
-		if (GC_G(to_free).next == &GC_G(to_free)) {
+		GC_G(gc_protected) = 0;
+
+		to_free = GC_TO_FREE();
+		if (to_free->next == GC_TO_FREE_SENTINEL) {
 			/* nothing to free */
 			GC_TRACE("Nothing to free");
+			GC_G(gc_active) = 0;
+			gc_adjust_threshold(count);
 			return 0;
 		}
-
-		/* Copy global to_free list into local list */
-		to_free.next = GC_G(to_free).next;
-		to_free.prev = GC_G(to_free).prev;
-		to_free.next->prev = &to_free;
-		to_free.prev->next = &to_free;
-
-		/* Free global list */
-		GC_G(to_free).next = &GC_G(to_free);
-		GC_G(to_free).prev = &GC_G(to_free);
-
-		orig_next_to_free = GC_G(next_to_free);
-
-#if ZEND_GC_DEBUG
-		orig_gc_full = GC_G(gc_full);
-		GC_G(gc_full) = 0;
-#endif
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
 			GC_TRACE("Calling destructors");
 
+			/* The root buffer might be reallocated during destructors calls,
+			 * make sure to reload pointers as necessary. */
+
 			/* Remember reference counters before calling destructors */
-			current = to_free.next;
-			while (current != &to_free) {
+			current = GC_NEXT_BUF(to_free);
+			while (current != to_free) {
 				current->refcount = GC_REFCOUNT(current->ref);
-				current = current->next;
+				current = GC_NEXT_BUF(current);
 			}
 
 			/* Call destructors */
-			current = to_free.next;
-			while (current != &to_free) {
+			current = GC_NEXT_BUF(to_free);
+			while (current != GC_TO_FREE()) {
 				p = current->ref;
 				GC_G(next_to_free) = current->next;
 				if (GC_TYPE(p) == IS_OBJECT) {
@@ -1124,25 +1102,26 @@ ZEND_API int zend_gc_collect_cycles(void)
 						}
 					}
 				}
-				current = GC_G(next_to_free);
+				current = GC_TO_BUF(GC_G(next_to_free));
 			}
 
 			/* Remove values captured in destructors */
-			current = to_free.next;
-			while (current != &to_free) {
+			current = GC_NEXT_BUF(to_free);
+			while (current != GC_TO_FREE()) {
 				GC_G(next_to_free) = current->next;
 				if (GC_REFCOUNT(current->ref) > current->refcount) {
 					gc_remove_nested_data_from_buffer(current->ref, current);
 				}
-				current = GC_G(next_to_free);
+				current = GC_TO_BUF(GC_G(next_to_free));
 			}
 		}
 
 		/* Destroy zvals */
 		GC_TRACE("Destroying zvals");
-		GC_G(gc_active) = 1;
-		current = to_free.next;
-		while (current != &to_free) {
+		GC_G(gc_protected) = 1;
+		to_free = GC_TO_FREE();
+		current = GC_NEXT_BUF(to_free);
+		while (current != to_free) {
 			p = current->ref;
 			GC_G(next_to_free) = current->next;
 			GC_TRACE_REF(p, "destroying");
@@ -1172,35 +1151,32 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 				zend_hash_destroy(arr);
 			}
-			current = GC_G(next_to_free);
+			current = GC_TO_BUF(GC_G(next_to_free));
 		}
 
 		/* Free objects */
-		current = to_free.next;
-		while (current != &to_free) {
-			next = current->next;
+		current = GC_NEXT_BUF(to_free);
+		while (current != to_free) {
+			next = GC_NEXT_BUF(current);
 			p = current->ref;
-			if (EXPECTED(current >= GC_G(buf) && current < GC_G(buf) + GC_ROOT_BUFFER_MAX_ENTRIES)) {
-				current->prev = GC_G(unused);
-				GC_G(unused) = current;
-			}
+			current->prev = GC_G(unused);
+			GC_G(unused) = GC_TO_ADDR(current);
+			GC_G(num_roots)--;
+
 			efree(p);
 			current = next;
 		}
 
-		while (GC_G(additional_buffer) != additional_buffer_snapshot) {
-			gc_additional_buffer *next = GC_G(additional_buffer)->next;
-			efree(GC_G(additional_buffer));
-			GC_G(additional_buffer) = next;
-		}
+		to_free->next = GC_TO_FREE_SENTINEL;
+		to_free->prev = GC_TO_FREE_SENTINEL;
 
 		GC_TRACE("Collection finished");
 		GC_G(collected) += count;
-		GC_G(next_to_free) = orig_next_to_free;
-#if ZEND_GC_DEBUG
-		GC_G(gc_full) = orig_gc_full;
-#endif
+		GC_G(next_to_free) = GC_INVALID;
+		GC_G(gc_protected) = 0;
 		GC_G(gc_active) = 0;
+
+		gc_adjust_threshold(count);
 	}
 
 	return count;

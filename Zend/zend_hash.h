@@ -42,7 +42,7 @@
 #define HASH_FLAG_HAS_EMPTY_IND    (1<<5)
 #define HASH_FLAG_ALLOW_COW_VIOLATION (1<<6)
 
-#define HT_FLAGS(ht) (ht)->u.flags
+#define HT_FLAGS(ht) GC_EXTRA_FLAGS(ht)
 
 #define HT_IS_PACKED(ht) \
 	((HT_FLAGS(ht) & HASH_FLAG_PACKED) != 0)
@@ -59,12 +59,12 @@
 # define HT_ALLOW_COW_VIOLATION(ht)
 #endif
 
-#define HT_ITERATORS_COUNT(ht) (ht)->u.v.nIteratorsCount
+#define HT_ITERATORS_COUNT(ht) (HT_FLAGS(ht) >> 8)
 #define HT_ITERATORS_OVERFLOW(ht) (HT_ITERATORS_COUNT(ht) == 0xff)
 #define HT_HAS_ITERATORS(ht) (HT_ITERATORS_COUNT(ht) != 0)
 
 #define HT_SET_ITERATORS_COUNT(ht, iters) \
-	do { HT_ITERATORS_COUNT(ht) = (iters); } while (0)
+	do { GC_EXTRA_FLAGS(ht) = ((iters) << 8) | (GC_EXTRA_FLAGS(ht) & 0xff); } while (0)
 #define HT_INC_ITERATORS_COUNT(ht) \
 	HT_SET_ITERATORS_COUNT(ht, HT_ITERATORS_COUNT(ht) + 1)
 #define HT_DEC_ITERATORS_COUNT(ht) \
