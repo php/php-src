@@ -718,9 +718,9 @@ finish:
 								tmp_line, response_code);
 				}
 			}
-			if (tmp_line[tmp_line_len - 1] == '\n') {
+			if (tmp_line_len >= 1 && tmp_line[tmp_line_len - 1] == '\n') {
 				--tmp_line_len;
-				if (tmp_line[tmp_line_len - 1] == '\r') {
+				if (tmp_line_len >= 1 &&tmp_line[tmp_line_len - 1] == '\r') {
 					--tmp_line_len;
 				}
 			}
