@@ -881,7 +881,7 @@ $test_dirs = array();
 $optionals = array('tests', 'ext', 'Zend', 'sapi');
 
 foreach($optionals as $dir) {
-	if (@filetype($dir) == 'dir') {
+	if (is_dir($dir)) {
 		$test_dirs[] = $dir;
 	}
 }
@@ -1339,7 +1339,7 @@ TEST $file
 	// the redirect section allows a set of tests to be reused outside of
 	// a given test dir
 	if (!$borked) {
-		if (@count($section_text['REDIRECTTEST']) == 1) {
+		if (isset($section_text['REDIRECTTEST'])) {
 
 			if ($IN_REDIRECT) {
 				$borked = true;
@@ -1350,12 +1350,20 @@ TEST $file
 
 		} else {
 
-			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
-				$bork_info = "missing section --FILE--";
+			if (!isset($section_text['PHPDBG']) && !isset($section_text['FILE']) && !isset($section_text['FILEEOF']) && !isset($section_text['FILE_EXTERNAL'])) {
+				$bork_info = "Missing --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --PHPDBG-- section";
 				$borked = true;
 			}
 
-			if (@count($section_text['FILEEOF']) == 1) {
+			// check for duplicate FILE* sections
+			if (count(array_intersect_key($section_text, array_flip([
+				'FILE', 'FILEEOF', 'FILE_EXTERNAL', 'REDIRECTTEST',
+			]))) > 1) {
+			    $bork_info = "Either of --FILE--, --FILEEOF--, --FILE_EXTERNAL-- or --REDIRECTTEST-- section is required";
+				$borked = true;
+			}
+
+			if (isset($section_text['FILEEOF'])) {
 				$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 				unset($section_text['FILEEOF']);
 			}
@@ -1363,7 +1371,7 @@ TEST $file
 			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {
 				$key = $prefix . '_EXTERNAL';
 
-				if (@count($section_text[$key]) == 1) {
+				if (isset($section_text[$key])) {
 					// don't allow tests to retrieve files from anywhere but this subdirectory
 					$section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
 
@@ -1371,14 +1379,22 @@ TEST $file
 						$section_text[$prefix] = file_get_contents($section_text[$key], FILE_BINARY);
 						unset($section_text[$key]);
 					} else {
-						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
+						$bork_info = "Could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
 						$borked = true;
 					}
 				}
 			}
 
-			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
-				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
+			if (!isset($section_text['EXPECT']) && !isset($section_text['EXPECTF']) && !isset($section_text['EXPECTREGEX'])) {
+				$bork_info = "Missing --EXPECT--, --EXPECTF-- or --EXPECTREGEX-- section";
+				$borked = true;
+			}
+
+			// check for duplicate EXPECT* sections
+			if (count(array_intersect_key($section_text, array_flip([
+				'EXPECT', 'EXPECTF', 'EXPECTREGEX', 'EXPECTREGEX_EXTERNAL', 'EXPECT_EXTERNAL', 'EXPECTF_EXTERNAL',
+			]))) !== 1) {
+			    $bork_info = "Either of --EXPECT--, --EXPECTF--, --EXPECTREGEX--, --EXPECTREGEX_EXTERNAL--, --EXPECT_EXTERNAL--, or --EXPECTF_EXTERNAL-- section is required";
 				$borked = true;
 			}
 		}
@@ -1680,7 +1696,7 @@ TEST $file
 		return 'SKIPPED';
 	}
 
-	if (@count($section_text['REDIRECTTEST']) == 1) {
+	if (isset($section_text['REDIRECTTEST'])) {
 		$test_files = array();
 
 		$IN_REDIRECT = eval($section_text['REDIRECTTEST']);
@@ -1734,7 +1750,7 @@ TEST $file
 		}
 	}
 
-	if (is_array($org_file) || @count($section_text['REDIRECTTEST']) == 1) {
+	if (is_array($org_file) || isset($section_text['REDIRECTTEST'])) {
 
 		if (is_array($org_file)) {
 			$file = $org_file[0];
@@ -2077,7 +2093,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-			
+
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);
