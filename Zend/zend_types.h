@@ -509,8 +509,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 /* object flags (zval.value->gc.u.flags) */
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<4)
 #define IS_OBJ_FREE_CALLED			(1<<5)
-#define IS_OBJ_USE_GUARDS           (1<<6)
-#define IS_OBJ_HAS_GUARDS           (1<<7)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
