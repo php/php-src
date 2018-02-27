@@ -2286,7 +2286,7 @@ PHP_FUNCTION(simplexml_load_string)
 }
 /* }}} */
 
-/* {{{ proto void SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]])
+/* {{{ proto SimpleXMLElement::__construct(string data [, int options [, bool data_is_url [, string ns [, bool is_prefix]]]])
    SimpleXMLElement constructor */
 SXE_METHOD(__construct)
 {
