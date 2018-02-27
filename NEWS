@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018 PHP 7.0.28
+01 Mar 2018 PHP 7.0.28
 
 - Standard:
   . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
