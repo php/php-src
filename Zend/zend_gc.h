@@ -51,7 +51,7 @@ END_EXTERN_C()
 
 static zend_always_inline void gc_check_possible_root(zend_refcounted *ref)
 {
-	if (GC_TYPE(ref) == IS_REFERENCE) {
+	if (GC_TYPE_INFO(ref) == IS_REFERENCE) {
 		zval *zv = &((zend_reference*)ref)->val;
 
 		if (!Z_REFCOUNTED_P(zv)) {

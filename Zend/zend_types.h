@@ -446,10 +446,35 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
 
-#define GC_TYPE(p)					(p)->gc.u.v.type
-#define GC_FLAGS(p)					(p)->gc.u.v.flags
-#define GC_INFO(p)					(p)->gc.u.v.gc_info
+#define GC_TYPE_MASK				0x000000ff
+#define GC_FLAGS_MASK				0x0000ff00
+#define GC_INFO_MASK				0xffff0000
+#define GC_FLAGS_SHIFT				8
+#define GC_INFO_SHIFT				16
+
+static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
+	return (gc_type_info & GC_TYPE_MASK);
+}
+
+static zend_always_inline zend_uchar zval_gc_flags(uint32_t gc_type_info) {
+	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
+}
+
+static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
+	return (gc_type_info >> GC_INFO_SHIFT);
+}
+
 #define GC_TYPE_INFO(p)				(p)->gc.u.type_info
+#define GC_TYPE(p)					zval_gc_type(GC_TYPE_INFO(p))
+#define GC_FLAGS(p)					zval_gc_flags(GC_TYPE_INFO(p))
+#define GC_INFO(p)					zval_gc_info(GC_TYPE_INFO(p))
+
+#define GC_ADD_FLAGS(p, flags) do { \
+		GC_TYPE_INFO(p) |= (flags) << GC_FLAGS_SHIFT; \
+	} while (0)
+#define GC_DEL_FLAGS(p, flags) do { \
+		GC_TYPE_INFO(p) &= ~((flags) << GC_FLAGS_SHIFT); \
+	} while (0)
 
 #define Z_GC_TYPE(zval)				GC_TYPE(Z_COUNTED(zval))
 #define Z_GC_TYPE_P(zval_p)			Z_GC_TYPE(*(zval_p))
@@ -461,10 +486,6 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define Z_GC_INFO_P(zval_p)			Z_GC_INFO(*(zval_p))
 #define Z_GC_TYPE_INFO(zval)		GC_TYPE_INFO(Z_COUNTED(zval))
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
-
-#define GC_FLAGS_SHIFT				8
-#define GC_INFO_SHIFT				16
-#define GC_INFO_MASK				0xffff0000
 
 /* zval.value->gc.u.v.flags (common flags) */
 #define GC_COLLECTABLE				(1<<0)
@@ -517,11 +538,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 	(GC_FLAGS(p) & GC_PROTECTED)
 
 #define GC_PROTECT_RECURSION(p) do { \
-		GC_FLAGS(p) |= GC_PROTECTED; \
+		GC_ADD_FLAGS(p, GC_PROTECTED); \
 	} while (0)
 
 #define GC_UNPROTECT_RECURSION(p) do { \
-		GC_FLAGS(p) &= ~GC_PROTECTED; \
+		GC_DEL_FLAGS(p, GC_PROTECTED); \
 	} while (0)
 
 #define Z_IS_RECURSIVE(zval)        GC_IS_RECURSIVE(Z_COUNTED(zval))
@@ -914,7 +935,7 @@ extern ZEND_API zend_bool zend_rc_debug;
 		} \
 	} while (0)
 # define GC_MAKE_PERSISTENT_LOCAL(p) do { \
-		GC_FLAGS(p) |= GC_PERSISTENT_LOCAL; \
+		GC_ADD_FLAGS(p, GC_PERSISTENT_LOCAL); \
 	} while (0)
 #else
 # define ZEND_RC_MOD_CHECK(p) \
