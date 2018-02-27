@@ -286,7 +286,7 @@ PW32IO int php_win32_ioutil_close(int fd)
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
 	size_t path_len;
-	wchar_t *my_path;
+	const wchar_t *my_path;
 
 	if (!path) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
