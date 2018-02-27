@@ -39,7 +39,7 @@ END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
 		zend_refcounted *_p = (zend_refcounted*)(p); \
-		if (GC_INFO(_p)) { \
+		if (GC_TYPE_INFO(_p) & GC_INFO_MASK) { \
 			gc_remove_from_buffer(_p); \
 		} \
 	} while (0)

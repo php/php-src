@@ -443,14 +443,14 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_TYPE_MASK				0x0000000f
 #define GC_FLAGS_MASK				0x000003f0
 #define GC_INFO_MASK				0xfffffc00
-#define GC_FLAGS_SHIFT				4
+#define GC_FLAGS_SHIFT				0
 #define GC_INFO_SHIFT				10
 
 static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
 }
 
-static zend_always_inline zend_uchar zval_gc_flags(uint32_t gc_type_info) {
+static zend_always_inline uint32_t zval_gc_flags(uint32_t gc_type_info) {
 	return (gc_type_info >> GC_FLAGS_SHIFT) & (GC_FLAGS_MASK >> GC_FLAGS_SHIFT);
 }
 
@@ -482,11 +482,11 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_GC_TYPE_INFO_P(zval_p)	Z_GC_TYPE_INFO(*(zval_p))
 
 /* zval.value->gc.u.v.flags (common flags) */
-#define GC_COLLECTABLE				(1<<0)
-#define GC_PROTECTED                (1<<1) /* used for recursion detection */
-#define GC_IMMUTABLE                (1<<2) /* can't be canged in place */
-#define GC_PERSISTENT               (1<<3) /* allocated using malloc */
-#define GC_PERSISTENT_LOCAL         (1<<4) /* persistent, but thread-local */
+#define GC_COLLECTABLE				(1<<4)
+#define GC_PROTECTED                (1<<5) /* used for recursion detection */
+#define GC_IMMUTABLE                (1<<6) /* can't be canged in place */
+#define GC_PERSISTENT               (1<<7) /* allocated using malloc */
+#define GC_PERSISTENT_LOCAL         (1<<8) /* persistent, but thread-local */
 
 #define GC_ARRAY					(IS_ARRAY          | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
 #define GC_OBJECT					(IS_OBJECT         | (GC_COLLECTABLE << GC_FLAGS_SHIFT))
@@ -515,15 +515,15 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 /* string flags (zval.value->gc.u.flags) */
 #define IS_STR_INTERNED				GC_IMMUTABLE  /* interned string */
 #define IS_STR_PERSISTENT			GC_PERSISTENT /* allocated using malloc */
-#define IS_STR_PERMANENT        	(1<<5)        /* relives request boundary */
+#define IS_STR_PERMANENT        	(1<<8)        /* relives request boundary */
 
 /* array flags */
 #define IS_ARRAY_IMMUTABLE			GC_IMMUTABLE
 #define IS_ARRAY_PERSISTENT			GC_PERSISTENT
 
 /* object flags (zval.value->gc.u.flags) */
-#define IS_OBJ_DESTRUCTOR_CALLED	(1<<4)
-#define IS_OBJ_FREE_CALLED			(1<<5)
+#define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
+#define IS_OBJ_FREE_CALLED			(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
