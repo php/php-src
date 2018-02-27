@@ -1,6 +1,8 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 5.6.34
+?? ??? 2018, PHP 5.6.35
+
+01 Mar 2018, PHP 5.6.34
 
 - Standard:
   . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
