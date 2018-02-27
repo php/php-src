@@ -2,9 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.3
 
-
-15 Feb 2018, PHP 7.2.3RC1
-
 - Core:
   . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
 
@@ -51,6 +48,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
     Philip Sharp)
+  . Fixed bug #75981 (Prevent reading beyond buffer start in http wrapper).
+    (Stas)
 
 01 Feb 2018, PHP 7.2.2
 
