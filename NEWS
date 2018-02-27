@@ -68,6 +68,7 @@ PHP                                                                        NEWS
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
     Philip Sharp)
   . Fixed some arginfos. (carusogabriel)
+  . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
 
 01 Feb 2018, PHP 7.2.2
 
