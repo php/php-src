@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-15 Feb 2018, PHP 7.1.15RC1
+1 Mar 2018, PHP 7.1.15
 
 - Apache2Handler:
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
@@ -35,6 +35,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
+  . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
 
 01 Feb 2018, PHP 7.1.14
 
