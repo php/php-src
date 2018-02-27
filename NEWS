@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018 PHP 7.0.28
 
+- Standard:
+  . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
+
 04 Jan 2018 PHP 7.0.27
 
 - CLI Server:
