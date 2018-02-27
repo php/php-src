@@ -793,7 +793,8 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	if (UNEXPECTED(flag & HASH_ADD_NEXT
 		&& ht->nNextFreeElement > ZEND_LONG_MIN 
 		&& ht->nNextFreeElement < 0)) {
-		zend_error(E_DEPRECATED, "In the next major version of PHP the implicit keys of this array will start from %d instead of 0", ht->nNextFreeElement);
+		zend_error(E_DEPRECATED, "In the next major version of PHP the implicit keys of this array will start from " ZEND_LONG_FMT " instead of 0",
+			ht->nNextFreeElement);
 		h = 0;
 	}
 
@@ -884,10 +885,6 @@ convert_to_hash:
 	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 
 add_to_hash:
-	/* Initialize nNextFreeElement with the value of the first numeric index */
-	if (ht->nNextFreeElement == ZEND_LONG_MIN) {
-		ht->nNextFreeElement = h;
-	}
 	idx = ht->nNumUsed++;
 	ht->nNumOfElements++;
 	if (ht->nInternalPointer == HT_INVALID_IDX) {
