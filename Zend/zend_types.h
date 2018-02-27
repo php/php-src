@@ -206,12 +206,6 @@ struct _zval_struct {
 typedef struct _zend_refcounted_h {
 	uint32_t         refcount;			/* reference counter 32-bit */
 	union {
-		struct {
-			ZEND_ENDIAN_LOHI_3(
-				zend_uchar    type,
-				zend_uchar    flags,    /* used for strings & objects */
-				uint16_t      gc_info)  /* keeps GC information, must be initialized by 0 */
-		} v;
 		uint32_t type_info;
 	} u;
 } zend_refcounted_h;
@@ -446,11 +440,11 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 #define GC_ADDREF_EX(p, rc)			zend_gc_addref_ex(&(p)->gc, rc)
 #define GC_DELREF_EX(p, rc)			zend_gc_delref_ex(&(p)->gc, rc)
 
-#define GC_TYPE_MASK				0x000000ff
-#define GC_FLAGS_MASK				0x0000ff00
-#define GC_INFO_MASK				0xffff0000
-#define GC_FLAGS_SHIFT				8
-#define GC_INFO_SHIFT				16
+#define GC_TYPE_MASK				0x0000000f
+#define GC_FLAGS_MASK				0x000003f0
+#define GC_INFO_MASK				0xfffffc00
+#define GC_FLAGS_SHIFT				4
+#define GC_INFO_SHIFT				10
 
 static zend_always_inline zend_uchar zval_gc_type(uint32_t gc_type_info) {
 	return (gc_type_info & GC_TYPE_MASK);
