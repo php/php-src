@@ -573,7 +573,7 @@ SPL_METHOD(SplHeap, isEmpty)
 }
 /* }}} */
 
-/* {{{ proto bool SplHeap::insert(mixed value)
+/* {{{ proto void SplHeap::insert(mixed value)
 	   Push $value on the heap */
 SPL_METHOD(SplHeap, insert)
 {
@@ -593,8 +593,6 @@ SPL_METHOD(SplHeap, insert)
 
 	if (Z_REFCOUNTED_P(value)) Z_ADDREF_P(value);
 	spl_ptr_heap_insert(intern->heap, value, getThis());
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -624,7 +622,7 @@ SPL_METHOD(SplHeap, extract)
 }
 /* }}} */
 
-/* {{{ proto bool SplPriorityQueue::insert(mixed value, mixed priority)
+/* {{{ proto void SplPriorityQueue::insert(mixed value, mixed priority)
 	   Push $value with the priority $priodiry on the priorityqueue */
 SPL_METHOD(SplPriorityQueue, insert)
 {
@@ -650,8 +648,6 @@ SPL_METHOD(SplPriorityQueue, insert)
 	add_assoc_zval_ex(&elem, "priority", sizeof("priority") - 1, priority);
 
 	spl_ptr_heap_insert(intern->heap, &elem, getThis());
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -767,7 +763,7 @@ SPL_METHOD(SplPriorityQueue, getExtractFlags)
 }
 /* }}} */
 
-/* {{{ proto int SplHeap::recoverFromCorruption()
+/* {{{ proto void SplHeap::recoverFromCorruption()
  Recover from a corrupted state*/
 SPL_METHOD(SplHeap, recoverFromCorruption)
 {
@@ -780,8 +776,6 @@ SPL_METHOD(SplHeap, recoverFromCorruption)
 	intern = Z_SPLHEAP_P(getThis());
 
 	intern->heap->flags = intern->heap->flags & ~SPL_HEAP_CORRUPTED;
-
-	RETURN_TRUE;
 }
 /* }}} */
 
@@ -1255,4 +1249,3 @@ PHP_MINIT_FUNCTION(spl_heap) /* {{{ */
  * vim600: fdm=marker
  * vim: noet sw=4 ts=4
  */
-
