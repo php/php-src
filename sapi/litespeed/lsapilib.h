@@ -17,7 +17,7 @@
 */
 
 /*
-Copyright (c) 2002-2015, Lite Speed Technologies Inc.
+Copyright (c) 2002-2018, Lite Speed Technologies Inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
@@ -56,9 +56,9 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 extern "C" {
 #endif
 
-#include <stddef.h>
-#include <lsapidef.h>
+#include "lsapidef.h"
 
+#include <stddef.h>
 #include <sys/time.h>
 #include <sys/types.h>
 
@@ -168,7 +168,6 @@ int LSAPI_ForeachSpecialEnv_r( LSAPI_Request * pReq,
             LSAPI_CB_EnvHandler fn, void * arg );
 
 char * LSAPI_GetEnv_r( LSAPI_Request * pReq, const char * name );
-
 
 ssize_t LSAPI_ReadReqBody_r( LSAPI_Request * pReq, char * pBuf, size_t len );
 
@@ -294,28 +293,28 @@ static inline int LSAPI_ForeachSpecialEnv( LSAPI_CB_EnvHandler fn, void * arg )
 static inline char * LSAPI_GetEnv( const char * name )
 {   return LSAPI_GetEnv_r( &g_req, name );                  }
 
-static inline char * LSAPI_GetQueryString()
+static inline char * LSAPI_GetQueryString(void)
 {   return LSAPI_GetQueryString_r( &g_req );                }
 
-static inline char * LSAPI_GetScriptFileName()
+static inline char * LSAPI_GetScriptFileName(void)
 {   return LSAPI_GetScriptFileName_r( &g_req );             }
 
-static inline char * LSAPI_GetScriptName()
+static inline char * LSAPI_GetScriptName(void)
 {    return LSAPI_GetScriptName_r( &g_req );                }
 
-static inline char * LSAPI_GetRequestMethod()
+static inline char * LSAPI_GetRequestMethod(void)
 {   return LSAPI_GetRequestMethod_r( &g_req );              }
 
-static inline off_t LSAPI_GetReqBodyLen()
+static inline off_t LSAPI_GetReqBodyLen(void)
 {   return LSAPI_GetReqBodyLen_r( &g_req );                 }
 
-static inline off_t LSAPI_GetReqBodyRemain()
+static inline off_t LSAPI_GetReqBodyRemain(void)
 {   return LSAPI_GetReqBodyRemain_r( &g_req );                 }
 
 static inline ssize_t LSAPI_ReadReqBody( char * pBuf, size_t len )
 {   return LSAPI_ReadReqBody_r( &g_req, pBuf, len );        }
 
-static inline int LSAPI_ReqBodyGetChar()
+static inline int LSAPI_ReqBodyGetChar(void)
 {   return LSAPI_ReqBodyGetChar_r( &g_req );        }
 
 static inline int LSAPI_ReqBodyGetLine( char * pBuf, int len, int *getLF )
@@ -337,7 +336,7 @@ static inline ssize_t LSAPI_sendfile( int fdIn, off_t* off, size_t size )
 static inline ssize_t LSAPI_Write_Stderr( const char * pBuf, ssize_t len )
 {   return LSAPI_Write_Stderr_r( &g_req, pBuf, len );       }
 
-static inline int LSAPI_Flush()
+static inline int LSAPI_Flush(void)
 {   return LSAPI_Flush_r( &g_req );                         }
 
 static inline int LSAPI_AppendRespHeader( char * pBuf, int len )
@@ -379,9 +378,39 @@ int LSAPI_Init_Env_Parameters( fn_select_t fp );
 
 void LSAPI_Set_Slow_Req_Msecs( int msecs );
 
-int  LSAPI_Get_Slow_Req_Msecs( );
+int  LSAPI_Get_Slow_Req_Msecs(void);
 
-int LSAPI_is_suEXEC_Daemon();
+int LSAPI_is_suEXEC_Daemon(void);
+
+int LSAPI_Set_Restored_Parent_Pid(int pid);
+
+typedef void (*LSAPI_On_Timer_pf)(void);
+void LSAPI_Register_Pgrp_Timer_Callback(LSAPI_On_Timer_pf);
+
+int LSAPI_Inc_Req_Processed(int cnt);
+
+#define LSAPI_LOG_LEVEL_BITS    0xff
+#define LSAPI_LOG_FLAG_NONE     0
+#define LSAPI_LOG_FLAG_DEBUG    1
+#define LSAPI_LOG_FLAG_INFO     2
+#define LSAPI_LOG_FLAG_NOTICE   3
+#define LSAPI_LOG_FLAG_WARN     4
+#define LSAPI_LOG_FLAG_ERROR    5
+#define LSAPI_LOG_FLAG_CRIT     6
+#define LSAPI_LOG_FLAG_FATAL    7
+
+#define LSAPI_LOG_TIMESTAMP_BITS (0xff00)
+#define LSAPI_LOG_TIMESTAMP_FULL (0x100)
+#define LSAPI_LOG_TIMESTAMP_HMS  (0x200)
+
+#define LSAPI_LOG_PID            (0x10000)
+
+void LSAPI_Log(int flag, const char * fmt, ...)
+#if __GNUC__
+        __attribute__((format(printf, 2, 3)))
+#endif
+;
+
 
 #if defined (c_plusplus) || defined (__cplusplus)
 }
