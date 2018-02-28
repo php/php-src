@@ -789,10 +789,9 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	/* [negative_array_index] Removing this block will end the deprecation phase and allow the new behavior */
+	/* Removing this block will end the deprecation phase and allow the new behavior */
 	if (UNEXPECTED(flag & HASH_ADD_NEXT
-		&& ht->nNextFreeElement > ZEND_LONG_MIN 
-		&& ht->nNextFreeElement < 0)) {
+		&& HASH_ADD_NEXT_EMITS_DEPRECATED(ht))) {
 		zend_error(E_DEPRECATED, "In the next major version of PHP the implicit keys of this array will start from " ZEND_LONG_FMT " instead of 0",
 			ht->nNextFreeElement);
 		h = 0;

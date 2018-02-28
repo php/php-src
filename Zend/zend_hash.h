@@ -35,6 +35,9 @@
 #define HASH_ADD_NEW			(1<<3)
 #define HASH_ADD_NEXT			(1<<4)
 
+#define HASH_ADD_NEXT_EMITS_DEPRECATED(ht) \
+	((ht)->nNextFreeElement > ZEND_LONG_MIN && (ht)->nNextFreeElement < 0)
+
 #define HASH_FLAG_CONSISTENCY      ((1<<0) | (1<<1))
 #define HASH_FLAG_PACKED           (1<<2)
 #define HASH_FLAG_INITIALIZED      (1<<3)

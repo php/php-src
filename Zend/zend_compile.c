@@ -7048,8 +7048,8 @@ static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast) /* {{{ */
 					break;
 			}
 		} else {
-				/* [negative_array_index] Bail out of CT eval in case the deprecation notice would be emitted so it may be handled in RT */
-			if ((Z_ARRVAL_P(result)->nNextFreeElement > ZEND_LONG_MIN && Z_ARRVAL_P(result)->nNextFreeElement < 0) ||
+			/* Bail out of CT eval in case the deprecation notice would be emitted so it may be handled in RT */
+			if (HASH_ADD_NEXT_EMITS_DEPRECATED(Z_ARRVAL_P(result)) ||
 				!zend_hash_next_index_insert(Z_ARRVAL_P(result), value)) {
 				zval_ptr_dtor_nogc(value);
 				zval_ptr_dtor(result);
