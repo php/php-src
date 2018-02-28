@@ -245,9 +245,10 @@ static zend_always_inline zval *_get_zval_ptr_var_deref(uint32_t var, zend_free_
 
 static zend_never_inline ZEND_COLD void zval_undefined_cv(uint32_t var EXECUTE_DATA_DC)
 {
-	zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
-
-	zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(cv));
+	if (EXPECTED(EG(exception) == NULL)) {
+		zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
+		zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(cv));
+	}
 }
 
 static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int type EXECUTE_DATA_DC)
