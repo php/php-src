@@ -251,7 +251,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> ctor_arguments alt_if_stmt_without_else trait_adaptation_list lexical_vars
 %type <ast> lexical_var_list encaps_list array_pair_list non_empty_array_pair_list
 %type <ast> assignment_list isset_variable type return_type
-%type <ast> identifier
+%type <ast> identifier databag
 
 %type <num> returns_ref function is_reference is_variadic variable_modifiers
 %type <num> method_modifiers non_empty_member_modifiers member_modifier
@@ -428,6 +428,7 @@ statement:
 	|	T_BREAK optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_BREAK, $2); }
 	|	T_CONTINUE optional_expr ';'	{ $$ = zend_ast_create(ZEND_AST_CONTINUE, $2); }
 	|	T_RETURN optional_expr ';'		{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
+	|	T_RETURN databag ';'			{ $$ = zend_ast_create(ZEND_AST_RETURN, $2); }
 	|	T_GLOBAL global_var_list ';'	{ $$ = $2; }
 	|	T_STATIC static_var_list ';'	{ $$ = $2; }
 	|	T_ECHO echo_expr_list ';'		{ $$ = $2; }
@@ -665,6 +666,7 @@ non_empty_argument_list:
 
 argument:
 		expr			{ $$ = $1; }
+ 	|	databag			{ $$ = $1; }
 	|	T_ELLIPSIS expr	{ $$ = zend_ast_create(ZEND_AST_UNPACK, $2); }
 ;
 
@@ -857,6 +859,8 @@ expr_without_variable:
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	variable '=' expr
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
+	|	variable '=' databag
+			{ $$ = zend_ast_create(ZEND_AST_ASSIGN, $1, $3); }
 	|	variable '=' '&' variable
 			{ $$ = zend_ast_create(ZEND_AST_ASSIGN_REF, $1, $4); }
 	|	T_CLONE expr { $$ = zend_ast_create(ZEND_AST_CLONE, $2); }
@@ -1043,8 +1047,13 @@ ctor_arguments:
 
 dereferencable_scalar:
 		T_ARRAY '(' array_pair_list ')'	{ $$ = $3; }
+    |   T_ARRAY_CAST '{' array_pair_list '}'  { $$ = zend_ast_create_cast(IS_OBJECT, $3), NULL; }
 	|	'[' array_pair_list ']'			{ $$ = $2; }
 	|	T_CONSTANT_ENCAPSED_STRING		{ $$ = $1; }
+;
+
+databag:
+      '{' array_pair_list '}'         { $$ = zend_ast_create_cast(IS_OBJECT, $2), NULL; }
 ;
 
 scalar:
@@ -1203,6 +1212,11 @@ array_pair:
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $4, $1); }
 	|	'&' variable
 			{ $$ = zend_ast_create_ex(ZEND_AST_ARRAY_ELEM, 1, $2, NULL); }
+    |   expr ':' expr
+            { $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+    |   expr ':' databag
+            { $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $3, $1); }
+	|	databag { $$ = zend_ast_create(ZEND_AST_ARRAY_ELEM, $1, NULL); }
 ;
 
 encaps_list:
