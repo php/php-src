@@ -559,7 +559,7 @@ static HashTable *spl_dllist_object_get_gc(zval *obj, zval **gc_data, int *gc_da
 }
 /* }}} */
 
-/* {{{ proto bool SplDoublyLinkedList::push(mixed value)
+/* {{{ proto void SplDoublyLinkedList::push(mixed value)
 	   Push $value on the SplDoublyLinkedList */
 SPL_METHOD(SplDoublyLinkedList, push)
 {
@@ -572,12 +572,10 @@ SPL_METHOD(SplDoublyLinkedList, push)
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_push(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 
-/* {{{ proto bool SplDoublyLinkedList::unshift(mixed value)
+/* {{{ proto void SplDoublyLinkedList::unshift(mixed value)
 	   Unshift $value on the SplDoublyLinkedList */
 SPL_METHOD(SplDoublyLinkedList, unshift)
 {
@@ -590,8 +588,6 @@ SPL_METHOD(SplDoublyLinkedList, unshift)
 
 	intern = Z_SPLDLLIST_P(getThis());
 	spl_ptr_llist_unshift(intern->llist, value);
-
-	RETURN_TRUE;
 }
 /* }}} */
 

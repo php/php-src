@@ -24,7 +24,7 @@ NULL
 
 Warning: SplPriorityQueue::insert() expects exactly 2 parameters, 1 given in %s on line 8
 NULL
-bool(true)
+NULL
 
 Warning: SplPriorityQueue::insert() expects exactly 2 parameters, 3 given in %s on line 10
 NULL
