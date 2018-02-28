@@ -1,5 +1,11 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? ????, PHP 7.1.16
+
+- Core:
+  . Fixed bug #76025 (Segfault while throwing exception in error_handler).
+    (Dmitry, Laruence)
+
 01 Feb 2018, PHP 7.1.15
 
 - Apache2Handler:
