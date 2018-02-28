@@ -453,7 +453,7 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 		gc_remove_from_additional_roots(root);
 	}
 	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
-		GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+		GC_TRACE_SET_COLOR(ref, GC_BLACK);
 	}
 	GC_REF_SET_INFO(ref, 0);
 
