@@ -130,7 +130,7 @@ PHPAPI zend_string *php_string_tolower(zend_string *s);
 PHPAPI char *php_strtr(char *str, size_t len, const char *str_from, const char *str_to, size_t trlen);
 #if ZEND_INTRIN_SSE4_2_FUNC_PTR
 PHPAPI extern zend_string *(*php_addslashes)(zend_string *str, int should_free);
-PHPAPI void (*php_stripslashes)(zend_string *str);
+PHPAPI extern void (*php_stripslashes)(zend_string *str);
 #else
 PHPAPI zend_string *php_addslashes(zend_string *str, int should_free);
 PHPAPI void php_stripslashes(zend_string *str);
