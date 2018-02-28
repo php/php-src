@@ -6,7 +6,7 @@ PHP                                                                        NEWS
   . Fixed bug #76025 (Segfault while throwing exception in error_handler).
     (Dmitry, Laruence)
 
-01 Feb 2018, PHP 7.1.15
+01 Mar 2018, PHP 7.1.15
 
 - Apache2Handler:
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
