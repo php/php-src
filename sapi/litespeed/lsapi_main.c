@@ -427,7 +427,7 @@ static int sapi_lsapi_activate()
                 server_name_len = strlen(server_name);
                 server_name = estrndup(server_name, server_name_len);
                 zend_str_tolower(server_name, server_name_len);
-                php_ini_activate_per_host_config(server_name, server_name_len + 1);
+                php_ini_activate_per_host_config(server_name, server_name_len);
                 efree(server_name);
         }
     }
