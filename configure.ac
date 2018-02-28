@@ -984,6 +984,15 @@ if test "$PHP_DMALLOC" = "yes"; then
   ])
 fi
 
+PHP_ARG_ENABLE(mm-custom, whether to enable Zend custom memory allocator,
+[  --disable-mm-custom     Disable Zend custom memory allocator], yes, no)
+
+if test "$PHP_MM_CUSTOM" = "yes"; then
+  AC_DEFINE(ZEND_MM_CUSTOM, 1, [ ])
+else
+  AC_DEFINE(ZEND_MM_CUSTOM, 0, [ ])
+fi
+
 PHP_ARG_ENABLE(ipv6, whether to enable IPv6 support,
 [  --disable-ipv6          Disable IPv6 support], yes, no)
 
