@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-1 Mar 2018, PHP 7.1.15
+01 Mar 2018, PHP 7.1.15
 
 - Apache2Handler:
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
