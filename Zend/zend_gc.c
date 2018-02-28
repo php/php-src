@@ -184,16 +184,37 @@ static zend_gc_globals gc_globals;
 # define GC_TRACE(str)
 #endif
 
-#define GC_REF_SET_INFO(ref, info) do { \
-		GC_TYPE_INFO(ref) = ((info) << GC_INFO_SHIFT) | \
-			(GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK)); \
-	} while (0)
-#define GC_REF_SET_ADDRESS(ref, a) do {\
-		GC_TYPE_INFO(ref) = ((info) << GC_INFO_SHIFT) | \
-			(GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK | (GC_COLOR << GC_INFO_SHIFT))); \
-	} while (0)
+static zend_always_inline void gc_ref_set_info(zend_refcounted *ref, uint32_t info)
+{
+	GC_TYPE_INFO(ref) = (info << GC_INFO_SHIFT)
+		| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
+}
+
+static zend_always_inline void gc_ref_set_info_ex(zend_refcounted *ref, gc_root_buffer *buffer, uint32_t color)
+{
+	if (sizeof(gc_root_buffer) == 16) {
+		GC_TYPE_INFO(ref) =
+			(((char*)buffer + ((color) << 4) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 4))
+			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
+	} else if (sizeof(gc_root_buffer) == 32) {
+		GC_TYPE_INFO(ref) =
+			(((char*)buffer + ((color) << 5) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 5))
+			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
+	} else {
+		GC_TYPE_INFO(ref) = ((buffer - GC_G(buf)) << GC_INFO_SHIFT)
+			| (color << GC_INFO_SHIFT)
+			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
+	}
+}
+
+#define GC_REF_SET_INFO(ref, info) \
+	gc_ref_set_info(ref, info)
+#define GC_REF_SET_INFO_EX(ref, buffer, color) \
+	gc_ref_set_info_ex(ref, buffer, color)
+
 #define GC_REF_GET_COLOR(ref) \
 	GC_INFO_GET_COLOR(GC_INFO(ref))
+
 #define GC_REF_SET_COLOR(ref, c) do { \
 		GC_TYPE_INFO(ref) = ((c) << GC_INFO_SHIFT) | \
 			(GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK | ~(GC_COLOR << GC_INFO_SHIFT))); \
@@ -356,55 +377,40 @@ ZEND_API zend_bool gc_enabled(void)
 	return GC_G(gc_enabled);
 }
 
-ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
+static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
 	gc_root_buffer *newRoot;
 
-	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
+	ZEND_ASSERT(GC_INFO(ref) == 0);
+
+	if (!GC_G(gc_enabled)) {
 		return;
 	}
-
-	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
-	ZEND_ASSERT(EXPECTED(GC_REF_GET_COLOR(ref) == GC_BLACK));
-	ZEND_ASSERT(!GC_ADDRESS(GC_INFO(ref)));
-
-	GC_BENCH_INC(zval_possible_root);
-
-	newRoot = GC_G(unused);
-	if (newRoot) {
-		GC_G(unused) = newRoot->prev;
-	} else if (GC_G(first_unused) != GC_G(last_unused)) {
-		newRoot = GC_G(first_unused);
-		GC_G(first_unused)++;
-	} else {
-		if (!GC_G(gc_enabled)) {
-			return;
-		}
-		GC_ADDREF(ref);
-		gc_collect_cycles();
-		GC_DELREF(ref);
-		if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
-			zval_dtor_func(ref);
-			return;
-		}
-		if (UNEXPECTED(GC_INFO(ref))) {
-			return;
-		}
-		newRoot = GC_G(unused);
-		if (!newRoot) {
-#if ZEND_GC_DEBUG
-			if (!GC_G(gc_full)) {
-				fprintf(stderr, "GC: no space to record new root candidate\n");
-				GC_G(gc_full) = 1;
-			}
-#endif
-			return;
-		}
-		GC_G(unused) = newRoot->prev;
+	GC_ADDREF(ref);
+	gc_collect_cycles();
+	GC_DELREF(ref);
+	if (UNEXPECTED(GC_REFCOUNT(ref)) == 0) {
+		zval_dtor_func(ref);
+		return;
 	}
+	if (UNEXPECTED(GC_INFO(ref))) {
+		return;
+	}
+	newRoot = GC_G(unused);
+	if (!newRoot) {
+#if ZEND_GC_DEBUG
+		if (!GC_G(gc_full)) {
+			fprintf(stderr, "GC: no space to record new root candidate\n");
+			GC_G(gc_full) = 1;
+		}
+#endif
+		return;
+	}
+	GC_G(unused) = newRoot->prev;
 
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
-	GC_REF_SET_INFO(ref, (newRoot - GC_G(buf)) | GC_PURPLE);
+	GC_REF_SET_INFO_EX(ref, newRoot, GC_PURPLE);
 	newRoot->ref = ref;
 
 	newRoot->next = GC_G(roots).next;
@@ -417,15 +423,53 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
-static zend_always_inline gc_root_buffer* gc_find_additional_buffer(zend_refcounted *ref)
+ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
+{
+	gc_root_buffer *newRoot;
+
+	if (UNEXPECTED(CG(unclean_shutdown)) || UNEXPECTED(GC_G(gc_active))) {
+		return;
+	}
+
+	GC_BENCH_INC(zval_possible_root);
+
+	newRoot = GC_G(unused);
+	if (newRoot) {
+		GC_G(unused) = newRoot->prev;
+	} else if (EXPECTED(GC_G(first_unused) != GC_G(last_unused))) {
+		newRoot = GC_G(first_unused);
+		GC_G(first_unused)++;
+	} else {
+		gc_possible_root_when_full(ref);
+		return;
+	}
+
+	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
+	ZEND_ASSERT(GC_INFO(ref) == 0);
+
+	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+	GC_REF_SET_INFO_EX(ref, newRoot, GC_PURPLE);
+	newRoot->ref = ref;
+
+	newRoot->next = GC_G(roots).next;
+	newRoot->prev = &GC_G(roots);
+	GC_G(roots).next->prev = newRoot;
+	GC_G(roots).next = newRoot;
+
+	GC_BENCH_INC(zval_buffered);
+	GC_BENCH_INC(root_buf_length);
+	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
+static zend_always_inline gc_root_buffer* gc_find_additional_buffer(zend_refcounted *ref, uint32_t addr)
 {
 	gc_additional_buffer *additional_buffer = GC_G(additional_buffer);
 
 	/* We have to check each additional_buffer to find which one holds the ref */
+	addr -= GC_ROOT_BUFFER_MAX_ENTRIES;
 	while (additional_buffer) {
-		uint32_t idx = GC_ADDRESS(GC_INFO(ref)) - GC_ROOT_BUFFER_MAX_ENTRIES;
-		if (idx < additional_buffer->used) {
-			gc_root_buffer *root = additional_buffer->buf + idx;
+		if (addr < additional_buffer->used) {
+			gc_root_buffer *root = additional_buffer->buf + addr;
 			if (root->ref == ref) {
 				return root;
 			}
@@ -440,22 +484,24 @@ static zend_always_inline gc_root_buffer* gc_find_additional_buffer(zend_refcoun
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
+	uint32_t addr = GC_ADDRESS(GC_INFO(ref));
 
-	ZEND_ASSERT(GC_ADDRESS(GC_INFO(ref)));
+	ZEND_ASSERT(addr);
 
 	GC_BENCH_INC(zval_remove_from_buffer);
 
-	if (EXPECTED(GC_ADDRESS(GC_INFO(ref)) < GC_ROOT_BUFFER_MAX_ENTRIES)) {
-		root = GC_G(buf) + GC_ADDRESS(GC_INFO(ref));
-		gc_remove_from_roots(root);
-	} else {
-		root = gc_find_additional_buffer(ref);
-		gc_remove_from_additional_roots(root);
-	}
 	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
 		GC_TRACE_SET_COLOR(ref, GC_BLACK);
 	}
 	GC_REF_SET_INFO(ref, 0);
+
+	if (EXPECTED(addr < GC_ROOT_BUFFER_MAX_ENTRIES)) {
+		root = GC_G(buf) + addr;
+		gc_remove_from_roots(root);
+	} else {
+		root = gc_find_additional_buffer(ref, addr);
+		gc_remove_from_additional_roots(root);
+	}
 
 	/* updete next root that is going to be freed */
 	if (GC_G(next_to_free) == root) {
@@ -797,21 +843,11 @@ static void gc_add_garbage(zend_refcounted *ref)
 
 	if (buf) {
 		GC_G(unused) = buf->prev;
-#if 1
-		/* optimization: color is already GC_BLACK (0) */
-		GC_REF_SET_INFO(ref, buf - GC_G(buf));
-#else
-		GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-#endif
+		GC_REF_SET_INFO_EX(ref, buf, GC_BLACK);
 	} else if (GC_G(first_unused) != GC_G(last_unused)) {
 		buf = GC_G(first_unused);
 		GC_G(first_unused)++;
-#if 1
-		/* optimization: color is already GC_BLACK (0) */
-		GC_REF_SET_INFO(ref, buf - GC_G(buf));
-#else
-		GC_REF_SET_ADDRESS(ref, buf - GC_G(buf));
-#endif
+		GC_REF_SET_INFO_EX(ref, buf, GC_BLACK);
 	} else {
 		/* If we don't have free slots in the buffer, allocate a new one and
 		 * set it's address above GC_ROOT_BUFFER_MAX_ENTRIES that have special
@@ -824,12 +860,8 @@ static void gc_add_garbage(zend_refcounted *ref)
 			GC_G(additional_buffer) = new_buffer;
 		}
 		buf = GC_G(additional_buffer)->buf + GC_G(additional_buffer)->used;
-#if 1
 		/* optimization: color is already GC_BLACK (0) */
 		GC_REF_SET_INFO(ref, GC_ROOT_BUFFER_MAX_ENTRIES + GC_G(additional_buffer)->used);
-#else
-		GC_REF_SET_ADDRESS(ref, GC_ROOT_BUFFER_MAX_ENTRIES) + GC_G(additional_buffer)->used;
-#endif
 		GC_G(additional_buffer)->used++;
 	}
 	if (buf) {
@@ -868,12 +900,8 @@ tail_call:
 				zval *zv, *end;
 				zval tmp;
 
-#if 1
 				/* optimization: color is GC_BLACK (0) */
 				if (!GC_INFO(ref)) {
-#else
-				if (!GC_ADDRESS(GC_INFO(ref))) {
-#endif
 					gc_add_garbage(ref);
 				}
 				if (obj->handlers->dtor_obj &&
@@ -914,12 +942,8 @@ tail_call:
 				return count;
 			}
 		} else if (GC_TYPE(ref) == IS_ARRAY) {
-#if 1
-				/* optimization: color is GC_BLACK (0) */
-				if (!GC_INFO(ref)) {
-#else
-				if (!GC_ADDRESS(GC_INFO(ref))) {
-#endif
+			/* optimization: color is GC_BLACK (0) */
+			if (!GC_INFO(ref)) {
 				gc_add_garbage(ref);
 			}
 			ht = (zend_array*)ref;
