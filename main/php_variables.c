@@ -245,6 +245,10 @@ PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars
 	} else {
 plain_var:
 		if (!index) {
+			/* [negative_array_index] Avoid the deprecation notice during globals registration */
+			if (symtable1->nNextFreeElement > ZEND_LONG_MIN && symtable1->nNextFreeElement < 0) {
+				symtable1->nNextFreeElement = 0;
+			}
 			if (zend_hash_next_index_insert(symtable1, val) == NULL) {
 				zval_ptr_dtor(val);
 			}
