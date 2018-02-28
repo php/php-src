@@ -3,6 +3,8 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.3
 
 - Core:
+  . Fixed bug #76025 (Segfault while throwing exception in error_handler).
+    (Dmitry, Laruence)
   . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
 
 - Apache2Handler:
