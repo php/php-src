@@ -144,7 +144,7 @@
 /* bit stealing tags for gc_root_buffer.ref */
 #define GC_BITS    0x3
 
-#define GC_ROOT    0x0 /* poissible root of circular garbage    */
+#define GC_ROOT    0x0 /* possible root of circular garbage     */
 #define GC_UNUSED  0x1 /* part of linked list of unused buffers */
 #define GC_GARBAGE 0x2 /* garbage to delete                     */
 
@@ -295,12 +295,6 @@ static zend_always_inline uint32_t gc_fetch_next_unused(void)
 	return addr;
 }
 
-static zend_always_inline void gc_ref_set_info(zend_refcounted *ref, uint32_t info)
-{
-	GC_TYPE_INFO(ref) = (info << GC_INFO_SHIFT)
-		| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-}
-
 #if ZEND_GC_DEBUG > 1
 static const char *gc_color_name(uint32_t color) {
 	switch (color) {
@@ -449,7 +443,7 @@ static void gc_grow_root_buffer(void)
 		}
 	}
 	if (GC_G(buf_size) < GC_BUF_GROW_STEP) {
-		new_size = GC_G(buf_size) *= 2;
+		new_size = GC_G(buf_size) * 2;
 	} else {
 		new_size = GC_G(buf_size) + GC_BUF_GROW_STEP;
 	}
@@ -462,7 +456,7 @@ static void gc_grow_root_buffer(void)
 
 static void gc_adjust_threshold(int count)
 {
-    uint32_t new_threshold;
+	uint32_t new_threshold;
 
 	/* TODO Very simple heuristic for dynamic GC buffer resizing:
 	 * If there are "too few" collections, increase the collection threshold
@@ -1373,7 +1367,6 @@ ZEND_API int zend_gc_collect_cycles(void)
 			/* Remove values captured in destructors */
 			n = GC_FIRST_REAL_ROOT;
 			current = GC_G(buf) + GC_FIRST_REAL_ROOT;
-			last = GC_G(buf) + GC_G(first_unused);
 			while (n != end) {
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
