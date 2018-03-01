@@ -551,7 +551,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER)
+#if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSSE3_RESOLVER
 # define ZEND_INTRIN_SSSE3_FUNC_PTR 1
@@ -575,7 +575,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER)
+#if ZEND_INTRIN_SSE4_2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSE4_2_RESOLVER
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
@@ -592,14 +592,12 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #endif
 
 #ifdef __AVX2__
-/* Instructions compiled directly. */
 # define ZEND_INTRIN_AVX2_NATIVE 1
 #elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || defined(ZEND_WIN32)
-/* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_AVX2_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER)
+#if ZEND_INTRIN_AVX2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_AVX2_FUNC_PROTO 1
 #elif ZEND_INTRIN_AVX2_RESOLVER
 # define ZEND_INTRIN_AVX2_FUNC_PTR 1
