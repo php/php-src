@@ -275,7 +275,8 @@ static zend_always_inline uint32_t gc_fetch_unused(void)
 	addr = GC_G(unused);
 	root = GC_G(buf) + addr;
 	ZEND_ASSERT(GC_IS_UNUSED(root->ref));
-	GC_G(unused) = (uint32_t)(uintptr_t)GC_GET_PTR(root->ref) / sizeof(void*);
+	/* optimization: GC_GET_PTR(root->ref) is not necessary because it shifted anyway */
+	GC_G(unused) = (uint32_t)(uintptr_t)root->ref / sizeof(void*);
 	return addr;
 }
 
