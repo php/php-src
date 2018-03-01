@@ -721,6 +721,7 @@ static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *o
 		return 0;
 	}
 	object_init(object);
+	zend_error(E_WARNING, "Creating default object from empty value");
 	return 1;
 }
 
