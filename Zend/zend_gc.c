@@ -105,9 +105,6 @@
 			((info) << GC_INFO_SHIFT); \
 	} while (0)
 
-#define GC_REF_SET_INFO_EX(ref, buffer, color) \
-	gc_ref_set_info_ex(ref, buffer, color)
-
 #define GC_REF_SET_COLOR(ref, c) do { \
 		GC_TYPE_INFO(ref) = \
 			(GC_TYPE_INFO(ref) & ~(GC_COLOR << GC_INFO_SHIFT)) | \
@@ -254,77 +251,54 @@ static zend_always_inline uint32_t gc_compress(uint32_t idx)
 	return GC_MAX_UNCOMPRESSED + ((idx - GC_MAX_UNCOMPRESSED) % GC_COMPRESS_FACTOR);
 }
 
-static zend_always_inline uint32_t gc_decompress(zend_refcounted *ref, uint32_t idx)
+static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t idx)
 {
 	ZEND_ASSERT(GC_NEED_COMPRESSION(idx));
 	while (idx < GC_G(first_unused)) {
 		gc_root_buffer *root = GC_G(buf) + idx;
 
 		if (root->ref == ref) {
-			return idx;
+			return root;
 		}
 		idx += GC_COMPRESS_FACTOR;
 	}
 	ZEND_ASSERT(0);
+	return NULL;
 }
 
-static zend_always_inline gc_root_buffer* gc_fetch_unused(void)
+static zend_always_inline uint32_t gc_fetch_unused(void)
 {
+	uint32_t addr;
 	gc_root_buffer *root;
 
 	ZEND_ASSERT(GC_HAS_UNUSED());
-	root = (gc_root_buffer*)((char*)GC_G(buf) + GC_G(unused));
+	addr = GC_G(unused);
+	root = GC_G(buf) + addr;
 	ZEND_ASSERT(GC_IS_UNUSED(root->ref));
-	GC_G(unused) = (uint32_t)(uintptr_t)GC_GET_PTR(root->ref);
-	return root;
+	GC_G(unused) = (uint32_t)(uintptr_t)GC_GET_PTR(root->ref) / sizeof(void*);
+	return addr;
 }
 
 static zend_always_inline void gc_link_unused(gc_root_buffer *root)
 {
-	root->ref = (void*)(uintptr_t)(GC_G(unused) | GC_UNUSED);
-	GC_G(unused) = (char*)root - (char*)GC_G(buf);
+	root->ref = (void*)(uintptr_t)((GC_G(unused) * sizeof(void*)) | GC_UNUSED);
+	GC_G(unused) = root - GC_G(buf);
 }
 
-static zend_always_inline gc_root_buffer* gc_fetch_next_unused(void)
+static zend_always_inline uint32_t gc_fetch_next_unused(void)
 {
-	gc_root_buffer *root;
+	uint32_t addr;
 
 	ZEND_ASSERT(GC_HAS_NEXT_UNUSED());
-	root = GC_G(buf) + GC_G(first_unused);
+	addr = GC_G(first_unused);
 	GC_G(first_unused)++;
-	return root;
+	return addr;
 }
 
 static zend_always_inline void gc_ref_set_info(zend_refcounted *ref, uint32_t info)
 {
 	GC_TYPE_INFO(ref) = (info << GC_INFO_SHIFT)
 		| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-}
-
-static zend_always_inline void gc_ref_set_info_ex(zend_refcounted *ref, gc_root_buffer *buffer, uint32_t color)
-{
-	if (GC_COMPRESS_FACTOR) {
-		uint32_t addr = buffer - GC_G(buf);
-
-		if (GC_NEED_COMPRESSION(addr)) {
-			addr = gc_compress(addr);
-		}
-		GC_TYPE_INFO(ref) = (addr << GC_INFO_SHIFT)
-			| (color << GC_INFO_SHIFT)
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	} else if (sizeof(gc_root_buffer) == 4) {
-		GC_TYPE_INFO(ref) =
-			(((char*)buffer + ((color) << 2) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 2))
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	} else if (sizeof(gc_root_buffer) == 8) {
-		GC_TYPE_INFO(ref) =
-			(((char*)buffer + ((color) << 3) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 3))
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	} else {
-		GC_TYPE_INFO(ref) = ((buffer - GC_G(buf)) << GC_INFO_SHIFT)
-			| (color << GC_INFO_SHIFT)
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	}
 }
 
 #if ZEND_GC_DEBUG > 1
@@ -516,8 +490,21 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
+static zend_never_inline void ZEND_FASTCALL gc_add_compressed(zend_refcounted *ref, uint32_t addr)
+{
+	addr = gc_compress(addr);
+
+	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
+	GC_G(num_roots)++;
+
+	GC_BENCH_INC(zval_buffered);
+	GC_BENCH_INC(root_buf_length);
+	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
+	uint32_t addr;
 	gc_root_buffer *newRoot;
 
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
@@ -535,18 +522,25 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	}
 
 	if (GC_HAS_UNUSED()) {
-		newRoot = GC_FETCH_UNUSED();
+		addr = GC_FETCH_UNUSED();
 	} else if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
-		newRoot = GC_FETCH_NEXT_UNUSED();
+		addr = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
 		ZEND_ASSERT(GC_HAS_NEXT_UNUSED());
-		newRoot = GC_FETCH_NEXT_UNUSED();
+		addr = GC_FETCH_NEXT_UNUSED();
 	}
 
-	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
-	GC_REF_SET_INFO_EX(ref, newRoot, GC_PURPLE);
+	newRoot = GC_G(buf) + addr;
 	newRoot->ref = ref; /* GC_ROOT tag is 0 */
+	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
+
+	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
+		gc_add_compressed(ref, addr);
+		return;
+	}
+
+	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
 	GC_G(num_roots)++;
 
 	GC_BENCH_INC(zval_buffered);
@@ -556,6 +550,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
+	uint32_t addr;
 	gc_root_buffer *newRoot;
 
 	if (UNEXPECTED(GC_G(gc_protected)) || UNEXPECTED(CG(unclean_shutdown))) {
@@ -564,10 +559,10 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 	GC_BENCH_INC(zval_possible_root);
 
-	if (GC_HAS_UNUSED()) {
-		newRoot = GC_FETCH_UNUSED();
+	if (EXPECTED(GC_HAS_UNUSED())) {
+		addr = GC_FETCH_UNUSED();
 	} else if (EXPECTED(GC_HAS_NEXT_UNUSED_UNDER_THRESHOLD())) {
-		newRoot = GC_FETCH_NEXT_UNUSED();
+		addr = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_possible_root_when_full(ref);
 		return;
@@ -576,14 +571,27 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	ZEND_ASSERT(GC_INFO(ref) == 0);
 
+	newRoot = GC_G(buf) + addr;
+	newRoot->ref = ref; /* GC_ROOT tag is 0 */
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
-	GC_REF_SET_INFO_EX(ref, newRoot, GC_PURPLE);
-	newRoot->ref = ref;
+
+	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
+		gc_add_compressed(ref, addr);
+		return;
+	}
+
+	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
 	GC_G(num_roots)++;
 
 	GC_BENCH_INC(zval_buffered);
 	GC_BENCH_INC(root_buf_length);
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
+}
+
+static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t addr)
+{
+	gc_root_buffer *root = gc_decompress(ref, addr);
+	gc_remove_from_roots(root);
 }
 
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
@@ -601,7 +609,8 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	GC_REF_SET_INFO(ref, 0);
 
 	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
-		addr = gc_decompress(ref, addr);
+		gc_remove_compressed(ref, addr);
+		return;
 	}
 
 	root = GC_G(buf) + addr;
@@ -989,20 +998,26 @@ static void gc_scan_roots(void)
 
 static void gc_add_garbage(zend_refcounted *ref)
 {
+	uint32_t addr;
 	gc_root_buffer *buf;
 
 	if (GC_HAS_UNUSED()) {
-		buf = GC_FETCH_UNUSED();
+		addr = GC_FETCH_UNUSED();
 	} else if (GC_HAS_NEXT_UNUSED()) {
-		buf = GC_FETCH_NEXT_UNUSED();
+		addr = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
 		ZEND_ASSERT(GC_HAS_NEXT_UNUSED());
-		buf = GC_FETCH_NEXT_UNUSED();
+		addr = GC_FETCH_NEXT_UNUSED();
 	}
 
-	GC_REF_SET_INFO_EX(ref, buf, GC_BLACK);
+	buf = GC_G(buf) + addr;
 	buf->ref = GC_MAKE_GARBAGE(ref);
+
+	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
+		addr = gc_compress(addr);
+	}
+	GC_REF_SET_INFO(ref, addr | GC_BLACK);
 	GC_G(num_roots)++;
 }
 
