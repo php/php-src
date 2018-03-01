@@ -80,44 +80,47 @@
 # define ZEND_GC_DEBUG 0
 #endif
 
-/* GC_TYPE */
-#define GC_COLOR  0x300000
+/* GC_INFO layout */
+#define GC_ADDRESS  0x0fffff
+#define GC_COLOR    0x300000
 
-#define GC_BLACK  0x000000 /* must be zero */
-#define GC_WHITE  0x100000
-#define GC_GREY   0x200000
-#define GC_PURPLE 0x300000
+#define GC_BLACK    0x000000 /* must be zero */
+#define GC_WHITE    0x100000
+#define GC_GREY     0x200000
+#define GC_PURPLE   0x300000
 
-#define GC_ADDRESS(v) \
-	((v) & ~GC_COLOR)
+/* GC_INFO access */
+#define GC_REF_ADDRESS(ref) \
+	(((GC_TYPE_INFO(ref)) & (GC_ADDRESS << GC_INFO_SHIFT)) >> GC_INFO_SHIFT)
 
-#define GC_INFO_GET_COLOR(v) \
-	(((zend_uintptr_t)(v)) & GC_COLOR)
-
-/* GC_TYPE_INFO */
-#define GC_REF_SET_INFO(ref, info) \
-	gc_ref_set_info(ref, info)
-#define GC_REF_SET_INFO_EX(ref, buffer, color) \
-	gc_ref_set_info_ex(ref, buffer, color)
-
-#define GC_REF_GET_COLOR(ref) \
-	GC_INFO_GET_COLOR(GC_INFO(ref))
+#define GC_REF_COLOR(ref) \
+	(((GC_TYPE_INFO(ref)) & (GC_COLOR << GC_INFO_SHIFT)) >> GC_INFO_SHIFT)
 
 #define GC_REF_CHECK_COLOR(ref, color) \
 	((GC_TYPE_INFO(ref) & (GC_COLOR << GC_INFO_SHIFT)) == ((color) << GC_INFO_SHIFT))
+
+#define GC_REF_SET_INFO(ref, info) do { \
+		GC_TYPE_INFO(ref) = \
+			(GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK)) | \
+			((info) << GC_INFO_SHIFT); \
+	} while (0)
+
+#define GC_REF_SET_INFO_EX(ref, buffer, color) \
+	gc_ref_set_info_ex(ref, buffer, color)
 
 #define GC_REF_SET_COLOR(ref, c) do { \
 		GC_TYPE_INFO(ref) = \
 			(GC_TYPE_INFO(ref) & ~(GC_COLOR << GC_INFO_SHIFT)) | \
 			((c) << GC_INFO_SHIFT); \
 	} while (0)
+
 #define GC_REF_SET_BLACK(ref) do { \
 		GC_TYPE_INFO(ref) &= ~(GC_COLOR << GC_INFO_SHIFT); \
 	} while (0)
+
 #define GC_REF_SET_PURPLE(ref) do { \
 		GC_TYPE_INFO(ref) |= (GC_COLOR << GC_INFO_SHIFT); \
 	} while (0)
-
 
 /* GC buffer size */
 #define GC_INVALID           0
@@ -317,14 +320,6 @@ static zend_always_inline void gc_ref_set_info_ex(zend_refcounted *ref, gc_root_
 		GC_TYPE_INFO(ref) =
 			(((char*)buffer + ((color) << 3) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 3))
 			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	} else if (sizeof(gc_root_buffer) == 16) {
-		GC_TYPE_INFO(ref) =
-			(((char*)buffer + ((color) << 4) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 4))
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
-	} else if (sizeof(gc_root_buffer) == 32) {
-		GC_TYPE_INFO(ref) =
-			(((char*)buffer + ((color) << 5) - (char*)GC_G(buf)) << (GC_INFO_SHIFT - 5))
-			| (GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK));
 	} else {
 		GC_TYPE_INFO(ref) = ((buffer - GC_G(buf)) << GC_INFO_SHIFT)
 			| (color << GC_INFO_SHIFT)
@@ -346,19 +341,19 @@ static void gc_trace_ref(zend_refcounted *ref) {
 	if (GC_TYPE(ref) == IS_OBJECT) {
 		zend_object *obj = (zend_object *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s object(%s)#%d ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
-			gc_color_name(GC_REF_GET_COLOR(ref)),
+			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
+			gc_color_name(GC_REF_COLOR(ref)),
 			obj->ce->name->val, obj->handle);
 	} else if (GC_TYPE(ref) == IS_ARRAY) {
 		zend_array *arr = (zend_array *) ref;
 		fprintf(stderr, "[%p] rc=%d addr=%d %s array(%d) ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
-			gc_color_name(GC_REF_GET_COLOR(ref)),
+			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
+			gc_color_name(GC_REF_COLOR(ref)),
 			zend_hash_num_elements(arr));
 	} else {
 		fprintf(stderr, "[%p] rc=%d addr=%d %s %s ",
-			ref, GC_REFCOUNT(ref), GC_ADDRESS(GC_INFO(ref)),
-			gc_color_name(GC_REF_GET_COLOR(ref)),
+			ref, GC_REFCOUNT(ref), GC_REF_ADDRESS(ref),
+			gc_color_name(GC_REF_COLOR(ref)),
 			zend_get_type_by_const(GC_TYPE(ref)));
 	}
 }
@@ -594,7 +589,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
-	uint32_t addr = GC_ADDRESS(GC_INFO(ref));
+	uint32_t addr = GC_REF_ADDRESS(ref);
 
 	ZEND_ASSERT(addr);
 
@@ -848,7 +843,7 @@ static void gc_compact(void)
 					if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
 						addr = gc_compress(addr);
 					}
-					GC_REF_SET_INFO(p, addr | GC_REF_GET_COLOR(p));
+					GC_REF_SET_INFO(p, addr | GC_REF_COLOR(p));
 					free++;
 					scan--;
 					if (scan <= GC_G(num_roots)) {
@@ -1188,7 +1183,7 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buff
 
 tail_call:
 	if (root ||
-	    (GC_ADDRESS(GC_INFO(ref)) != 0 &&
+	    (GC_REF_ADDRESS(ref) != 0 &&
 	     GC_REF_CHECK_COLOR(ref, GC_BLACK))) {
 		GC_TRACE_REF(ref, "removing from buffer");
 		if (root) {
