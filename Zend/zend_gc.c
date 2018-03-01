@@ -119,7 +119,6 @@
 #define GC_INVALID           0
 #define GC_FIRST_REAL_ROOT   1
 
-#define GC_DEFAULT_THRESHOLD 10000
 #define GC_DEFAULT_BUF_SIZE  (16 * 1024)
 #define GC_BUF_GROW_STEP     (128 * 1024)
 
@@ -129,6 +128,11 @@
 
 #define GC_NEED_COMPRESSION(addr) \
 	((GC_COMPRESS_FACTOR > 0) && (addr >= GC_MAX_UNCOMPRESSED))
+
+#define GC_DEFAULT_THRESHOLD 10000
+#define GC_THRESHOLD_STEP    10000
+#define GC_THRESHOLD_MAX     (GC_COMPRESS_FACTOR ? 1000000000 : 1000000)
+#define GC_THRESHOLD_TRIGGER 100
 
 /* GC flags */
 #define GC_HAS_DESTRUCTORS  (1<<0)
@@ -485,16 +489,32 @@ static void gc_grow_root_buffer(void)
 
 static void gc_adjust_threshold(int count)
 {
-#if 0
+    uint32_t new_threshold;
+
 	/* TODO Very simple heuristic for dynamic GC buffer resizing:
 	 * If there are "too few" collections, increase the collection threshold
-	 * by a factor of two ??? */
-	if (count < 100) {
-		GC_G(gc_threshold) *= 2;
+	 * by a fixed step */
+	if (count < GC_THRESHOLD_TRIGGER) {
+		/* increase */
+		if (GC_G(gc_threshold) < GC_THRESHOLD_MAX) {
+			new_threshold = GC_G(gc_threshold) + GC_THRESHOLD_STEP;
+			if (new_threshold > GC_THRESHOLD_MAX) {
+				new_threshold = GC_THRESHOLD_MAX;
+			}
+			if (new_threshold > GC_G(buf_size)) {
+				gc_grow_root_buffer();
+			}
+			if (new_threshold <= GC_G(buf_size)) {
+				GC_G(gc_threshold) = new_threshold;
+			}
+		}
 	} else if (GC_G(gc_threshold) > GC_DEFAULT_THRESHOLD) {
-		GC_G(gc_threshold) /= 2;
+		new_threshold = GC_G(gc_threshold) - GC_THRESHOLD_STEP;
+		if (new_threshold < GC_DEFAULT_THRESHOLD) {
+			new_threshold = GC_DEFAULT_THRESHOLD;
+		}
+		GC_G(gc_threshold) = new_threshold;
 	}
-#endif
 }
 
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
