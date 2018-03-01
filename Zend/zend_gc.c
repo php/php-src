@@ -103,9 +103,13 @@
 #define GC_REF_GET_COLOR(ref) \
 	GC_INFO_GET_COLOR(GC_INFO(ref))
 
+#define GC_REF_CHECK_COLOR(ref, color) \
+	((GC_TYPE_INFO(ref) & (GC_COLOR << GC_INFO_SHIFT)) == ((color) << GC_INFO_SHIFT))
+
 #define GC_REF_SET_COLOR(ref, c) do { \
-		GC_TYPE_INFO(ref) = ((c) << GC_INFO_SHIFT) | \
-			(GC_TYPE_INFO(ref) & (GC_TYPE_MASK | GC_FLAGS_MASK | ~(GC_COLOR << GC_INFO_SHIFT))); \
+		GC_TYPE_INFO(ref) = \
+			(GC_TYPE_INFO(ref) & ~(GC_COLOR << GC_INFO_SHIFT)) | \
+			((c) << GC_INFO_SHIFT); \
 	} while (0)
 #define GC_REF_SET_BLACK(ref) do { \
 		GC_TYPE_INFO(ref) &= ~(GC_COLOR << GC_INFO_SHIFT); \
@@ -129,7 +133,7 @@
 #define GC_NEED_COMPRESSION(addr) \
 	((GC_COMPRESS_FACTOR > 0) && (addr >= GC_MAX_UNCOMPRESSED))
 
-#define GC_DEFAULT_THRESHOLD 10000
+#define GC_THRESHOLD_DEFAULT 10000
 #define GC_THRESHOLD_STEP    10000
 #define GC_THRESHOLD_MAX     (GC_COMPRESS_FACTOR ? 1000000000 : 1000000)
 #define GC_THRESHOLD_TRIGGER 100
@@ -449,7 +453,7 @@ ZEND_API zend_bool gc_set_enabled(zend_bool enable)
 	if (enable && !old_enabled && GC_G(buf) == NULL) {
 		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE);
 		GC_G(buf_size) = GC_DEFAULT_BUF_SIZE;
-		GC_G(gc_threshold) = GC_DEFAULT_THRESHOLD + GC_FIRST_REAL_ROOT;
+		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT + GC_FIRST_REAL_ROOT;
 		gc_reset();
 	}
 	return old_enabled;
@@ -508,10 +512,10 @@ static void gc_adjust_threshold(int count)
 				GC_G(gc_threshold) = new_threshold;
 			}
 		}
-	} else if (GC_G(gc_threshold) > GC_DEFAULT_THRESHOLD) {
+	} else if (GC_G(gc_threshold) > GC_THRESHOLD_DEFAULT) {
 		new_threshold = GC_G(gc_threshold) - GC_THRESHOLD_STEP;
-		if (new_threshold < GC_DEFAULT_THRESHOLD) {
-			new_threshold = GC_DEFAULT_THRESHOLD;
+		if (new_threshold < GC_THRESHOLD_DEFAULT) {
+			new_threshold = GC_THRESHOLD_DEFAULT;
 		}
 		GC_G(gc_threshold) = new_threshold;
 	}
@@ -596,7 +600,7 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 
 	GC_BENCH_INC(zval_remove_from_buffer);
 
-	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+	if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 		GC_TRACE_SET_COLOR(ref, GC_BLACK);
 	}
 	GC_REF_SET_INFO(ref, 0);
@@ -642,7 +646,7 @@ tail_call:
 				if (Z_REFCOUNTED_P(zv)) {
 					ref = Z_COUNTED_P(zv);
 					GC_ADDREF(ref);
-					if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+					if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 						gc_scan_black(ref);
 					}
 				}
@@ -651,7 +655,7 @@ tail_call:
 			if (EXPECTED(!ht)) {
 				ref = Z_COUNTED_P(zv);
 				GC_ADDREF(ref);
-				if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+				if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 					goto tail_call;
 				}
 				return;
@@ -669,7 +673,7 @@ tail_call:
 		if (Z_REFCOUNTED(((zend_reference*)ref)->val)) {
 			ref = Z_COUNTED(((zend_reference*)ref)->val);
 			GC_ADDREF(ref);
-			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 				goto tail_call;
 			}
 		}
@@ -700,7 +704,7 @@ tail_call:
 		if (Z_REFCOUNTED_P(zv)) {
 			ref = Z_COUNTED_P(zv);
 			GC_ADDREF(ref);
-			if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+			if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 				gc_scan_black(ref);
 			}
 		}
@@ -712,7 +716,7 @@ tail_call:
 	}
 	ref = Z_COUNTED_P(zv);
 	GC_ADDREF(ref);
-	if (GC_REF_GET_COLOR(ref) != GC_BLACK) {
+	if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
 		goto tail_call;
 	}
 }
@@ -724,7 +728,7 @@ static void gc_mark_grey(zend_refcounted *ref)
 	zval *zv;
 
 tail_call:
-	if (GC_REF_GET_COLOR(ref) != GC_GREY) {
+	if (!GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 		ht = NULL;
 		GC_BENCH_INC(zval_marked_grey);
 		GC_REF_SET_COLOR(ref, GC_GREY);
@@ -870,7 +874,7 @@ static void gc_mark_roots(void)
 	last = GC_G(buf) + GC_G(first_unused);
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
-			if (GC_REF_GET_COLOR(current->ref) == GC_PURPLE) {
+			if (GC_REF_CHECK_COLOR(current->ref, GC_PURPLE)) {
 				gc_mark_grey(current->ref);
 			}
 		}
@@ -885,7 +889,7 @@ static void gc_scan(zend_refcounted *ref)
 	zval *zv;
 
 tail_call:
-	if (GC_REF_GET_COLOR(ref) == GC_GREY) {
+	if (GC_REF_CHECK_COLOR(ref, GC_GREY)) {
 		if (GC_REFCOUNT(ref) > 0) {
 			gc_scan_black(ref);
 		} else {
@@ -1015,7 +1019,7 @@ static int gc_collect_white(zend_refcounted *ref, uint32_t *flags)
 	zval *zv;
 
 tail_call:
-	if (GC_REF_GET_COLOR(ref) == GC_WHITE) {
+	if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 		ht = NULL;
 		GC_REF_SET_BLACK(ref);
 
@@ -1147,7 +1151,7 @@ static int gc_collect_roots(uint32_t *flags)
 	/* remove non-garbage from the list */
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
-			if (GC_REF_GET_COLOR(current->ref) == GC_BLACK) {
+			if (GC_REF_CHECK_COLOR(current->ref, GC_BLACK)) {
 				GC_REF_SET_INFO(current->ref, 0); /* reset GC_ADDRESS() and keep GC_BLACK */
 				gc_remove_from_roots(current);
 			}
@@ -1165,7 +1169,7 @@ static int gc_collect_roots(uint32_t *flags)
 		current = GC_G(buf) + n;
 		ref = current->ref;
 		if (GC_IS_ROOT(ref)) {
-			if (GC_REF_GET_COLOR(ref) == GC_WHITE) {
+			if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
 				current->ref = GC_MAKE_GARBAGE(ref);
 				count += gc_collect_white(ref, flags);
 			}
@@ -1185,7 +1189,7 @@ static void gc_remove_nested_data_from_buffer(zend_refcounted *ref, gc_root_buff
 tail_call:
 	if (root ||
 	    (GC_ADDRESS(GC_INFO(ref)) != 0 &&
-	     GC_REF_GET_COLOR(ref) == GC_BLACK)) {
+	     GC_REF_CHECK_COLOR(ref, GC_BLACK))) {
 		GC_TRACE_REF(ref, "removing from buffer");
 		if (root) {
 			gc_remove_from_roots(root);
