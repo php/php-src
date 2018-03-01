@@ -538,7 +538,12 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define PHP_HAVE_SSE4_2
 # endif
 
-# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H)
+/*
+ * AVX2 support was added in gcc 4.7, but AVX2 intrinsics don't work in
+ * __attribute__((target("avx2"))) functions until gcc 4.9.
+ */
+# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H) && \
+  (defined(__llvm__) || defined(__clang__) || (defined(__GNUC__) && ZEND_GCC_VERSION >= 4009))
 # define PHP_HAVE_AVX2
 # endif
 #endif
