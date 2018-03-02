@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0alpha1
 
 - Core:
+  . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
