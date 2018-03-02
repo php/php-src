@@ -1935,6 +1935,7 @@ function write_extensions_summary()
 function write_summary()
 {
 	var ar = new Array();
+	var k = 0;
 
 	STDOUT.WriteBlankLines(2);
 	write_extensions_summary();
@@ -1944,27 +1945,31 @@ function write_summary()
 		output_as_table(["Sapi Name"], sapi_enabled);
 		STDOUT.WriteBlankLines(2);
 	}
-	ar[0] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
-	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
-	ar[2] = ['Compiler', COMPILER_NAME];
-	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	ar[k++] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
+	ar[k++] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
+	ar[k++] = ['Compiler', COMPILER_NAME];
+	ar[k++] = ['Architecture', X64 ? 'x64' : 'x86'];
 	if (PHP_PGO == "yes") {
-		ar[4] = ['Optimization', "PGO"];
+		ar[k++] = ['Optimization', "PGO"];
 	} else if (PHP_PGI == "yes") {
-		ar[4] = ['Optimization', "PGI"];
+		ar[k++] = ['Optimization', "PGI"];
 	} else {
-		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+		ar[k++] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	var simd = configure_subst.Item("PHP_SIMD_SCALE");
+	if (!!simd) {
+		ar[k++] = ["Native SIMD", simd.toUpperCase()];
 	}
 	if (PHP_ANALYZER == "vs") {
-		ar[5] = ['Static analyzer', 'Visual Studio'];
+		ar[k++] = ['Static analyzer', 'Visual Studio'];
 	} else if (PHP_ANALYZER == "clang") {
-		ar[5] = ['Static analyzer', 'clang'];
+		ar[k++] = ['Static analyzer', 'clang'];
 	} else if (PHP_ANALYZER == "cppcheck") {
-		ar[5] = ['Static analyzer', 'Cppcheck'];
+		ar[k++] = ['Static analyzer', 'Cppcheck'];
 	} else if (PHP_ANALYZER == "pvs") {
-		ar[5] = ['Static analyzer', 'PVS-Studio'];
+		ar[k++] = ['Static analyzer', 'PVS-Studio'];
 	} else {
-		ar[5] = ['Static analyzer', 'disabled'];
+		ar[k++] = ['Static analyzer', 'disabled'];
 	}
 
 	output_as_table(["",""], ar);
@@ -3262,6 +3267,7 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__ and __AVX2__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX2");
+			configure_subst.Add("PHP_SIMD_SCALE", "avx2");
 		} else {
 			var list = PHP_NATIVE_INTRINSICS.split(",");
 			var j = 0;
@@ -3283,6 +3289,7 @@ function toolset_setup_intrinsic_cflags()
 					ADD_FLAG("CFLAGS","/arch:SSE");
 				}
 			}
+			configure_subst.Add("PHP_SIMD_SCALE", scale[j]);
 			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
 				The declared macros therefore won't affect the code generation,
 				but will enable the guarded code parts. */
