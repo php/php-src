@@ -1958,7 +1958,7 @@ function write_summary()
 	}
 	var simd = configure_subst.Item("PHP_SIMD_SCALE");
 	if (!!simd) {
-		ar[k++] = ["Native SIMD", simd.toUpperCase()];
+		ar[k++] = ["Native intrinsics", simd];
 	}
 	if (PHP_ANALYZER == "vs") {
 		ar[k++] = ['Static analyzer', 'Visual Studio'];
@@ -3267,7 +3267,7 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__ and __AVX2__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX2");
-			configure_subst.Add("PHP_SIMD_SCALE", "avx2");
+			configure_subst.Add("PHP_SIMD_SCALE", "AVX2");
 		} else {
 			var list = PHP_NATIVE_INTRINSICS.split(",");
 			var j = 0;
@@ -3289,7 +3289,7 @@ function toolset_setup_intrinsic_cflags()
 					ADD_FLAG("CFLAGS","/arch:SSE");
 				}
 			}
-			configure_subst.Add("PHP_SIMD_SCALE", scale[j]);
+			configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
 			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
 				The declared macros therefore won't affect the code generation,
 				but will enable the guarded code parts. */
