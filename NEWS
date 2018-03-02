@@ -22,6 +22,7 @@ PHP                                                                        NEWS
   . Fixed ftp_pasv arginfo. (carusogabriel)
 
 -GD:
+  . Fixed bug #76041 (null pointer access crashed php). (cmb)
   . Fixed imagesetinterpolation arginfo. (Gabriel Caruso)
 
 - iconv:
