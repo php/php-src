@@ -126,16 +126,12 @@
 #define GC_DEFAULT_BUF_SIZE  (16 * 1024)
 #define GC_BUF_GROW_STEP     (128 * 1024)
 
-#define GC_COMPRESS_FACTOR   4096 /* shold be 0 to disable compression */
-#define GC_MAX_UNCOMPRESSED  ((1024 * 1024) - GC_COMPRESS_FACTOR)
-#define GC_MAX_BUF_SIZE      (GC_COMPRESS_FACTOR ? (0x40000000) : GC_MAX_UNCOMPRESSED)
-
-#define GC_NEED_COMPRESSION(addr) \
-	((GC_COMPRESS_FACTOR > 0) && (addr >= GC_MAX_UNCOMPRESSED))
+#define GC_MAX_UNCOMPRESSED  (1024 * 1024)
+#define GC_MAX_BUF_SIZE      0x40000000
 
 #define GC_THRESHOLD_DEFAULT 10000
 #define GC_THRESHOLD_STEP    10000
-#define GC_THRESHOLD_MAX     (GC_COMPRESS_FACTOR ? 1000000000 : 1000000)
+#define GC_THRESHOLD_MAX     1000000000
 #define GC_THRESHOLD_TRIGGER 100
 
 /* GC flags */
@@ -245,25 +241,27 @@ static zend_gc_globals gc_globals;
 # define GC_TRACE(str)
 #endif
 
-static zend_always_inline uint32_t gc_compress(uint32_t idx)
+static zend_always_inline uint32_t gc_compress(uint32_t addr)
 {
-	ZEND_ASSERT(GC_NEED_COMPRESSION(idx));
-	return GC_MAX_UNCOMPRESSED + ((idx - GC_MAX_UNCOMPRESSED) % GC_COMPRESS_FACTOR);
+	return addr % GC_MAX_UNCOMPRESSED;
 }
 
-static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t idx)
+static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t addr)
 {
-	ZEND_ASSERT(GC_NEED_COMPRESSION(idx));
-	while (idx < GC_G(first_unused)) {
-		gc_root_buffer *root = GC_G(buf) + idx;
+	gc_root_buffer *root = GC_G(buf) + addr;
 
-		if (root->ref == ref) {
+	if (EXPECTED(GC_GET_PTR(root->ref) == ref)) {
+		return root;
+	}
+
+	while (1) {
+		addr += GC_MAX_UNCOMPRESSED;
+		ZEND_ASSERT(addr < GC_G(first_unused));
+		root = GC_G(buf) + addr;
+		if (GC_GET_PTR(root->ref) == ref) {
 			return root;
 		}
-		idx += GC_COMPRESS_FACTOR;
 	}
-	ZEND_ASSERT(0);
-	return NULL;
 }
 
 static zend_always_inline uint32_t gc_fetch_unused(void)
@@ -485,18 +483,6 @@ static void gc_adjust_threshold(int count)
 	}
 }
 
-static zend_never_inline void ZEND_FASTCALL gc_add_compressed(zend_refcounted *ref, uint32_t addr)
-{
-	addr = gc_compress(addr);
-
-	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
-	GC_G(num_roots)++;
-
-	GC_BENCH_INC(zval_buffered);
-	GC_BENCH_INC(root_buf_length);
-	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
-}
-
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
 	uint32_t addr;
@@ -530,11 +516,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	newRoot->ref = ref; /* GC_ROOT tag is 0 */
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
 
-	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
-		gc_add_compressed(ref, addr);
-		return;
-	}
-
+	addr = gc_compress(addr);
 	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
 	GC_G(num_roots)++;
 
@@ -570,11 +552,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	newRoot->ref = ref; /* GC_ROOT tag is 0 */
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
 
-	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
-		gc_add_compressed(ref, addr);
-		return;
-	}
-
+	addr = gc_compress(addr);
 	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
 	GC_G(num_roots)++;
 
@@ -585,8 +563,8 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t addr)
 {
-	gc_root_buffer *root = gc_decompress(ref, addr);
-	gc_remove_from_roots(root);
+       gc_root_buffer *root = gc_decompress(ref, addr);
+       gc_remove_from_roots(root);
 }
 
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
@@ -603,7 +581,8 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	}
 	GC_REF_SET_INFO(ref, 0);
 
-	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
+	/* Perform decopression only in case of large buffers */
+	if (UNEXPECTED(GC_G(first_unused) >= GC_MAX_UNCOMPRESSED)) {
 		gc_remove_compressed(ref, addr);
 		return;
 	}
@@ -843,10 +822,7 @@ static void gc_compact(void)
 					p = buf[scan].ref;
 					buf[free].ref = p;
 					p = GC_GET_PTR(p);
-					addr = free;
-					if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
-						addr = gc_compress(addr);
-					}
+					addr = gc_compress(free);
 					GC_REF_SET_INFO(p, addr | GC_REF_COLOR(p));
 					free++;
 					scan--;
@@ -1009,9 +985,7 @@ static void gc_add_garbage(zend_refcounted *ref)
 	buf = GC_G(buf) + addr;
 	buf->ref = GC_MAKE_GARBAGE(ref);
 
-	if (UNEXPECTED(GC_NEED_COMPRESSION(addr))) {
-		addr = gc_compress(addr);
-	}
+	addr = gc_compress(addr);
 	GC_REF_SET_INFO(ref, addr | GC_BLACK);
 	GC_G(num_roots)++;
 }
