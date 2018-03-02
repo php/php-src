@@ -368,7 +368,7 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 #endif
 }
 
-ZEND_API void gc_globals_ctor(void)
+void gc_globals_ctor(void)
 {
 #ifdef ZTS
 	ts_allocate_id(&gc_globals_id, sizeof(zend_gc_globals), (ts_allocate_ctor) gc_globals_ctor_ex, (ts_allocate_dtor) root_buffer_dtor);
@@ -377,14 +377,14 @@ ZEND_API void gc_globals_ctor(void)
 #endif
 }
 
-ZEND_API void gc_globals_dtor(void)
+void gc_globals_dtor(void)
 {
 #ifndef ZTS
 	root_buffer_dtor(&gc_globals);
 #endif
 }
 
-ZEND_API void gc_reset(void)
+void gc_reset(void)
 {
 	if (GC_G(buf)) {
 		GC_G(gc_active) = 0;
@@ -408,7 +408,7 @@ ZEND_API void gc_reset(void)
 	}
 }
 
-ZEND_API zend_bool gc_set_enabled(zend_bool enable)
+ZEND_API zend_bool gc_enable(zend_bool enable)
 {
 	zend_bool old_enabled = GC_G(gc_enabled);
 	GC_G(gc_enabled) = enable;
@@ -426,6 +426,18 @@ ZEND_API zend_bool gc_enabled(void)
 	return GC_G(gc_enabled);
 }
 
+ZEND_API zend_bool gc_protect(zend_bool protect)
+{
+	zend_bool old_protected = GC_G(gc_protected);
+	GC_G(gc_protected) = protect;
+	return old_protected;
+}
+
+ZEND_API zend_bool gc_protected(void)
+{
+	return GC_G(gc_protected);
+}
+
 static void gc_grow_root_buffer(void)
 {
 	size_t new_size;
@@ -433,11 +445,9 @@ static void gc_grow_root_buffer(void)
 	if (GC_G(buf_size) >= GC_MAX_BUF_SIZE) {
 		if (!GC_G(gc_full)) {
 			zend_error(E_WARNING, "GC buffer overflow (GC disabled)\n");
-			//???GC_G(gc_enabled) = 0;
 			GC_G(gc_active) = 1;
 			GC_G(gc_protected) = 1;
 			GC_G(gc_full) = 1;
-			CG(unclean_shutdown) = 1;
 			return;
 		}
 	}
@@ -530,7 +540,7 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	uint32_t addr;
 	gc_root_buffer *newRoot;
 
-	if (UNEXPECTED(GC_G(gc_protected)) || UNEXPECTED(CG(unclean_shutdown))) {
+	if (UNEXPECTED(GC_G(gc_protected))) {
 		return;
 	}
 
@@ -1354,6 +1364,11 @@ ZEND_API int zend_gc_collect_cycles(void)
 			}
 
 			pefree(refcounts, 1);
+
+			if (GC_G(gc_protected)) {
+				/* something went wrong */
+				return 0;
+			}
 		}
 
 		/* Destroy zvals */

@@ -27,14 +27,22 @@ ZEND_API extern int (*gc_collect_cycles)(void);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref);
-ZEND_API void gc_globals_ctor(void);
-ZEND_API void gc_globals_dtor(void);
-ZEND_API void gc_reset(void);
-ZEND_API zend_bool gc_set_enabled(zend_bool enable);
+
+/* enable/disable automatic start of GC collection */
+ZEND_API zend_bool gc_enable(zend_bool enable);
 ZEND_API zend_bool gc_enabled(void);
+
+/* enable/disable possible root additions */
+ZEND_API zend_bool gc_protect(zend_bool protect);
+ZEND_API zend_bool gc_protected(void);
 
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
+
+void gc_globals_ctor(void);
+void gc_globals_dtor(void);
+void gc_reset(void);
+
 END_EXTERN_C()
 
 #define GC_REMOVE_FROM_BUFFER(p) do { \
