@@ -140,17 +140,17 @@
 	((void*)(((uintptr_t)(ptr)) | GC_GARBAGE))
 
 /* GC address conversion */
-#define GC_ADDR2NUM(addr)    (addr)
-#define GC_NUM2ADDR(num)     (num)
+#define GC_ADDR2NUM(addr)    ((addr) / sizeof(void*))
+#define GC_NUM2ADDR(num)     ((num) * sizeof(void*))
 
-#define GC_NEXT_ADDR(addr)   ((addr) + 1)
-#define GC_PREV_ADDR(addr)   ((addr) - 1)
+#define GC_NEXT_ADDR(addr)   ((addr) + sizeof(void*))
+#define GC_PREV_ADDR(addr)   ((addr) - sizeof(void*))
 
-#define GC_ADDR2PTR(addr)    (GC_G(buf) + (addr))
-#define GC_PTR2ADDR(ptr)     ((ptr) - GC_G(buf))
+#define GC_ADDR2PTR(addr)    ((gc_root_buffer*)(((char*)GC_G(buf)) + (addr)))
+#define GC_PTR2ADDR(ptr)     ((uint32_t)(((char*)(ptr)) - (char*)GC_G(buf)))
 
-#define GC_ADDR2LIST(addr)   ((void*)(uintptr_t)(((addr) * sizeof(void*)) | GC_UNUSED))
-#define GC_LIST2ADDR(list)   (((uint32_t)(uintptr_t)(list)) / sizeof(void*))
+#define GC_ADDR2LIST(addr)   ((void*)(uintptr_t)((addr) | GC_UNUSED))
+#define GC_LIST2ADDR(list)   (((uint32_t)(uintptr_t)(list)) - GC_UNUSED)
 
 /* GC buffers */
 #define GC_INVALID_NUM       0
