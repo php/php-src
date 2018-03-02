@@ -7270,7 +7270,7 @@ static int zend_jit_do_fcall(dasm_State **Dst, const zend_op *opline, zend_op_ar
 				|	GC_DELREF r0
 				|	// zend_object_store_ctor_failed(object);
 				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				|	or byte [r0 + offsetof(zend_object, gc.u.v.flags)], IS_OBJ_DESTRUCTOR_CALLED
+				|	or byte [r0 + offsetof(zend_object, gc.u.type_info)], IS_OBJ_DESTRUCTOR_CALLED
 				|1:
 			}
 			|	// OBJ_RELEASE(object);
@@ -8201,7 +8201,7 @@ static int zend_jit_leave_func(dasm_State **Dst, const zend_op *opline, zend_op_
 				|	GC_DELREF r0
 				|	// zend_object_store_ctor_failed(object);
 				|	// GC_FLAGS(obj) |= IS_OBJ_DESTRUCTOR_CALLED;
-				|	or byte [r0 + offsetof(zend_object, gc.u.v.flags)], IS_OBJ_DESTRUCTOR_CALLED
+				|	or byte [r0 + offsetof(zend_object, gc.u.type_info)], IS_OBJ_DESTRUCTOR_CALLED
 				|	jmp >5
 				|.code
 				|5:
