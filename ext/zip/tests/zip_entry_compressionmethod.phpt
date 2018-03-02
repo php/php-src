@@ -3,7 +3,7 @@ zip_entry_compressionmethod() function
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
 ?>
 --FILE--
 <?php

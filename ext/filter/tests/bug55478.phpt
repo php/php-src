@@ -1,7 +1,7 @@
 --TEST--
 Bug #55478 (FILTER_VALIDATE_EMAIL fails with internationalized domain name addresses containing >1 -)
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 $email_address = "test@xn--example--7za.de"; // "example-ä.de"

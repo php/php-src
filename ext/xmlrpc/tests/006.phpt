@@ -6,7 +6,7 @@ Michel Araujo <araujo_michel@yahoo.com.br>
 #PHPSP 2013-08-22
 
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 
 --FILE--
 <?php

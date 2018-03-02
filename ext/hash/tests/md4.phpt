@@ -1,7 +1,7 @@
 --TEST--
 md4 algorithm
 --SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+<?php if(!extension_loaded("hash")) die("skip hash extension not loaded"); ?>
 --FILE--
 <?php
 /* RFC 1320 vectors */

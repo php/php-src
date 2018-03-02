@@ -1,7 +1,7 @@
 --TEST--
 openssl_random_pseudo_bytes() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 for ($i = 0; $i < 10; $i++) {

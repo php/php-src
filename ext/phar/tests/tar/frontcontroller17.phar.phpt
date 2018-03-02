@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller mime type unknown tar-based
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller17.phar.php
 REQUEST_URI=/frontcontroller17.phar.php/fronk.gronk

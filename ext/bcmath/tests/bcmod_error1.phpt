@@ -4,7 +4,7 @@ bcmod — Get modulus of an arbitrary precision number
 Antoni Torrents
 antoni@solucionsinternet.com
 --SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+<?php if(!extension_loaded("bcmath")) die("skip bcmath extension not loaded"); ?>
 --FILE--
 <?php
 echo bcmod('1', '2', '3', '4');

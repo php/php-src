@@ -1,7 +1,7 @@
 --TEST--
 GET/REQUEST Test with fifa example data
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --INI--
 filter.default=stripped
 --GET--

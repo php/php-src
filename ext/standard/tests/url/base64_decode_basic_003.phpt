@@ -1,7 +1,7 @@
 --TEST--
 Test base64_decode() function : basic functionality - padding and whitespace
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 /* Prototype  : proto string base64_decode(string str[, bool strict])

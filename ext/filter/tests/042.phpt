@@ -1,7 +1,7 @@
 --TEST--
 Combination of strip & sanitize filters
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php 
 $var = 'XYZ< script>alert(/ext/filter+bypass/);< /script>ABC';

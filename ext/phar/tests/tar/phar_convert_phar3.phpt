@@ -1,8 +1,8 @@
 --TEST--
 Phar::convertToPhar() bzipped
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
+<?php if (!extension_loaded("bz2")) die("skip bz2 extension not loaded"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -39,7 +39,7 @@ var_dump(strlen($phar->getStub()));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.bz2');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '2.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');

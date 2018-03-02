@@ -2,7 +2,7 @@
 Bug #36732 (add support for req_extensions in openss_csr_new and sign)
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip");
 ?>
 --FILE--

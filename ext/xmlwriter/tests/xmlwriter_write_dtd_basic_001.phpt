@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_write_dtd basic function tests
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if(!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); ?>
 --FILE--
 <?php
 

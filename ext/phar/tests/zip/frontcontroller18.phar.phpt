@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller $_SERVER munging failure zip-based
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller18.phar.php

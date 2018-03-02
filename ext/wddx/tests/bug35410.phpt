@@ -2,7 +2,7 @@
 #35410 (wddx_deserialize() doesn't handle large ints as keys properly)
 --SKIPIF--
 <?php 
-	if (!extension_loaded("wddx")) print "skip"; 
+	if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); 
     if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--

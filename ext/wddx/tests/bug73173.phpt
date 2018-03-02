@@ -1,7 +1,7 @@
 --TEST--
 Bug #73173: huge memleak when wddx_unserialize
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 

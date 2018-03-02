@@ -2,7 +2,7 @@
 Test iconv_strpos() function : usage variations - pass different data types as $offset arg
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_strpos') or die("skip iconv_strpos() is not available in this build");
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>

@@ -3,7 +3,7 @@ Phar: test edge cases of intercepted functions when the underlying phar archive 
 --SKIPIF--
 <?php
 if (defined('PHP_WINDOWS_VERSION_MAJOR')) die("skip");
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --INI--
 phar.readonly=0

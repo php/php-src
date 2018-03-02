@@ -2,7 +2,7 @@
 Test INI mbstring.internal_encoding basic - encoding when valid specified
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_stripos') or die("skip mb_stripos() is not available in this build");
 ?>
 --INI--

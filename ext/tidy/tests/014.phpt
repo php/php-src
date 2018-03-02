@@ -1,7 +1,7 @@
 --TEST--
 Passing configuration options through tidy_parse_string().
 --SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+<?php if(!extension_loaded("tidy")) die("skip tidy extension not loaded"); ?>
 --FILE--
 <?php
         $text = "<B>testing</I>";

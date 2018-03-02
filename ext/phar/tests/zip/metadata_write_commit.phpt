@@ -2,7 +2,7 @@
 Phar with meta-data (write) zip-based
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --INI--
 phar.require_hash=0

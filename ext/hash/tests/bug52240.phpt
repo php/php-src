@@ -1,7 +1,7 @@
 --TEST--
 Bug #52240 (hash_copy() does not copy the HMAC key, causes wrong results and PHP crashes)
 --SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+<?php extension_loaded('hash') or die('skip hash extension not loaded'); ?>
 --FILE--
 <?php
 

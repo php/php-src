@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: Expand Error
 --SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip";
+<?php if(!extension_loaded("xmlreader")) die("skip xmlreader extension not loaded");
 if (!extension_loaded("dom")) print "skip DOM extension required";
 $reader = new XMLReader();
 if (!method_exists($reader, 'expand')) print "skip";

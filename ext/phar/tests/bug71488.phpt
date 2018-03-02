@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #71488: Stack overflow when decompressing tar archives
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 $p = new PharData(__DIR__."/bug71488.tar");

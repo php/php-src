@@ -3,7 +3,7 @@ Phar front controller rewrite array tar-based
 --INI--
 default_charset=UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller9.phar.php
 REQUEST_URI=/frontcontroller9.phar.php/hi

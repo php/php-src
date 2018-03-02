@@ -2,7 +2,7 @@
 Bug #74145 (wddx parsing empty boolean tag leads to SIGSEGV)
 --SKIPIF--
 <?php
-if (!extension_loaded("wddx")) print "skip";
+if(!extension_loaded("wddx")) die("skip wddx extension not loaded");
 ?>
 --FILE--
 <?php

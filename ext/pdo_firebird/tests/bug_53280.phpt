@@ -1,8 +1,8 @@
 --TEST--
 PDO_Firebird: bug 53280 segfaults if query column count is less than param count
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php extension_loaded("pdo_firebird") or die("skip pdo_firebird extension not loaded"); ?>
+<?php function_exists("ibase_query") or die("skip ibase_query function not available"); ?>
 --FILE--
 <?php
 

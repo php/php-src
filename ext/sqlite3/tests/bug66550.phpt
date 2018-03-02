@@ -2,7 +2,7 @@
 Bug #66550 (SQLite prepared statement use-after-free)
 --SKIPIF--
 <?php
-if (!extension_loaded('sqlite3')) die('skip');
+if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not loaded');
 ?>
 --FILE--
 <?php

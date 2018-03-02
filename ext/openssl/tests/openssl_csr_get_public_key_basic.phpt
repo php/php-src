@@ -2,7 +2,7 @@
 openssl_csr_get_public_key() tests
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

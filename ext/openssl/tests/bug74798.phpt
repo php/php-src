@@ -2,7 +2,7 @@
 Bug #74798 pkcs7_en/decrypt does not work if \x0a is used in content
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

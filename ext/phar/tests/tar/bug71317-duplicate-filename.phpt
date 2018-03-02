@@ -1,7 +1,7 @@
 --TEST--
 Bug #71317: regression in opening tar based phar files
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!extension_loaded('phar')) die('skip phar extension not loaded'); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --FILE--
 <?php

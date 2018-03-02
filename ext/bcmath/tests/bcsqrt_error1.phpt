@@ -4,7 +4,7 @@ bcsqrt — Get the square root of an arbitrary precision number
 Antoni Torrents
 antoni@solucionsinternet.com
 --SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+<?php if(!extension_loaded("bcmath")) die("skip bcmath extension not loaded"); ?>
 --FILE--
 <?php
 echo bcsqrt('-9');

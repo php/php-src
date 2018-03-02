@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar archive, require_hash=1, OpenSSL hash
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!extension_loaded('phar')) die('skip phar extension not loaded'); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 <?php if (!extension_loaded("openssl")) die("skip openssl not available"); ?>
 --INI--

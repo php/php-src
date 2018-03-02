@@ -4,7 +4,7 @@ Phar front controller with valid callback that does not return any value [cache_
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller33.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller33.php
 REQUEST_URI=/frontcontroller33.php

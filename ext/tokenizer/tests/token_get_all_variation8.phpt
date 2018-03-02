@@ -1,7 +1,7 @@
 --TEST--
 Test token_get_all() function : usage variations - with type casting operators
 --SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+<?php if(!extension_loaded("tokenizer")) die("skip tokenizer extension not loaded"); ?>
 --FILE--
 <?php
 /* Prototype  : array token_get_all(string $source)

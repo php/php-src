@@ -1,7 +1,7 @@
 --TEST--
 bzopen() and invalid parameters
 --SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+<?php if (!extension_loaded("bz2")) die("skip bz2 extension not loaded"); ?>
 --FILE--
 <?php
 
@@ -18,7 +18,7 @@ var_dump(bzopen($fp, "r"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: bzopen() expects exactly 2 parameters, 0 given in %s on line %d
 NULL
 

@@ -3,7 +3,7 @@ mb_split() empty match
 --
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_split') or die("skip mb_split() is not available in this build");
 ?>
 --FILE--

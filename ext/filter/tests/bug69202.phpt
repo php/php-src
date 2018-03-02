@@ -1,7 +1,7 @@
 --TEST--
 Bug #69202 (FILTER_FLAG_STRIP_BACKTICK ignored unless other flags are used)
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(filter_var("``a`b`c``", FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_BACKTICK));

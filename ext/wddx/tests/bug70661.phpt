@@ -2,7 +2,7 @@
 Bug #70661 (Use After Free Vulnerability in WDDX Packet Deserialization)
 --SKIPIF--
 <?php
-if (!extension_loaded("wddx")) print "skip";
+if(!extension_loaded("wddx")) die("skip wddx extension not loaded");
 ?>
 --FILE--
 <?php

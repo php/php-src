@@ -1,7 +1,7 @@
 --TEST--
 libxml_set_external_entity_loader() error: bad arguments
 --SKIPIF--
-<?php if (!extension_loaded('dom')) die('skip'); ?>
+<?php if (!extension_loaded('dom')) die('skip dom extension not loaded'); ?>
 --FILE--
 <?php
 $xml = <<<XML

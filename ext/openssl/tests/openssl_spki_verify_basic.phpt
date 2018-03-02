@@ -4,7 +4,7 @@ openssl_spki_verify() tests for valid signature
 error_reporting=0
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

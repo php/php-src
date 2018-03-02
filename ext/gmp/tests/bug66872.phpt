@@ -1,7 +1,7 @@
 --TEST--
 Bug #66872: Crash when passing string to gmp_testbit
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+<?php if (!extension_loaded("gmp")) die("skip gmp extension not loaded"); ?>
 --FILE--
 <?php
 

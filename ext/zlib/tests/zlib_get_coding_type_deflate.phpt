@@ -3,7 +3,7 @@ zlib_get_coding_type() with deflate encoding
 --CREDITS--
 PHP TestFest 2017 - Bergfreunde, Florian Engelhardt <florian.engelhardt@bergfreunde.de>
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --ENV--
 HTTP_ACCEPT_ENCODING=deflate
 --FILE--

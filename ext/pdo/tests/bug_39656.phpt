@@ -2,7 +2,7 @@
 PDO Common: Bug #39656 (Crash when calling fetch() on a PDO statement object after closeCursor())
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';

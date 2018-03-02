@@ -3,7 +3,7 @@ Phar front controller mime type extension is not a string zip-based
 --INI--
 default_charset=
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 <?php die("skip"); ?>
 --ENV--

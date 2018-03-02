@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium version
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+<?php if(!extension_loaded("sodium")) die("skip sodium extension not loaded"); ?>
 --FILE--
 <?php
 echo strlen(SODIUM_LIBRARY_VERSION) >= 5;

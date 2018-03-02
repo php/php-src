@@ -4,7 +4,7 @@ Test that PDO::getAvailableDrivers / pdo_drivers does not accept any parameters
 Amo Chohan <amo.chohan@gmail.com>
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 --FILE--
 <?php
 PDO::getAvailableDrivers('fail');

@@ -7,7 +7,7 @@ http://bugs.php.net/bug.php?id=52013
 Frederic Hardy frederic.hardy@mageekbox.net
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 if (!extension_loaded("zlib")) die("skip test needs zlib extension enabled to compress archives with gzip");
 ?>
 --INI--

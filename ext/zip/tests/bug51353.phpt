@@ -2,7 +2,7 @@
 Bug #51353 ZIP64 problem, archive with 100000 items
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
 die('skip the test might get very long, activate it manually');
 --FILE--
 <?php

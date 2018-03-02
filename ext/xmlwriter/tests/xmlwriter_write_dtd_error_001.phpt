@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_write_dtd with missing param(s)
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if(!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); ?>
 --FILE--
 <?php
 $xmlwriter = xmlwriter_open_memory();

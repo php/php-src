@@ -2,7 +2,7 @@
 gzfile(), gzreadfile()
 --SKIPIF--
 <?php /* $Id$ */
-if (!extension_loaded("zlib")) print "skip"; ?>
+if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 $original = <<<EOD

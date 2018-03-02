@@ -2,7 +2,7 @@
 Bug #69324: Buffer Over-read in unserialize when parsing Phar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --FILE--
 <?php

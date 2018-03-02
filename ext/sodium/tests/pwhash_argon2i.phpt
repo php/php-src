@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium argon2i
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip";
+<?php if(!extension_loaded("sodium")) die("skip sodium extension not loaded");
 if (!defined('SODIUM_CRYPTO_PWHASH_SALTBYTES')) print "skip libsodium without argon2i"; ?>
 --FILE--
 <?php

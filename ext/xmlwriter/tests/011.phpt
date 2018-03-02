@@ -5,7 +5,7 @@ Mauricio Vieira <mauricio [at] @mauriciovieira [dot] net>
 #testfest PHPSP on 2014-07-05
 --SKIPIF--
 <?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+if (!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); 
 if (LIBXML_VERSION < 20701) die("skip: libxml2 2.7.1+ required");
 ?>
 --FILE--

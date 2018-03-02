@@ -2,7 +2,7 @@
 Test mb_strtolower() function : Two error messages returned for incorrect encoding for mb_strto[upper|lower]
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strtolower') or die("skip mb_strtolower() is not available in this build");
 ?>
 --FILE--

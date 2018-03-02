@@ -5,7 +5,7 @@ marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
 --SKIPIF--
 <?php
 if (getenv("SKIP_ONLINE_TESTS")) { die('skip: online test'); }
-if (!extension_loaded('curl')) { print("skip"); }
+if (!extension_loaded('curl')) die('skip curl extension not loaded')
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 Bug #72564: wddx deserialization of boolean
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 	foreach([true, false, NULL] as $v) {

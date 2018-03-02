@@ -4,7 +4,7 @@ Phar front controller rewrite access denied [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller10.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller10.php
 REQUEST_URI=/frontcontroller10.php/hi

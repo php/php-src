@@ -2,7 +2,7 @@
 Test iconv_substr() function : error conditions - Pass an unknown encoding
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_substr') or die("skip iconv_substr() is not available in this build");
 ?>
 --FILE--

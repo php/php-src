@@ -1,9 +1,9 @@
 --TEST--
 XMLWriter: libxml2 XML Writer, membuffer, flush, text, attribute
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if(!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); ?>
 --FILE--
-<?php 
+<?php
 /* $Id$ */
 
 $xw = new XMLWriter();

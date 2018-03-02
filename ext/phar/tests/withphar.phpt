@@ -1,7 +1,7 @@
 --TEST--
 Phar: phar run with pecl/phar with default stub
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/nophar.phar';

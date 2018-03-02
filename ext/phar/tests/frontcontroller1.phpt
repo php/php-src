@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller other
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller1.php
 REQUEST_URI=/frontcontroller1.php/a.jpg

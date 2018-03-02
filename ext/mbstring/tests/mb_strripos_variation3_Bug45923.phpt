@@ -2,16 +2,16 @@
 Test mb_strripos() function : usage variations - pass different data types as $offset arg
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strripos') or die("skip mb_strripos() is not available in this build");
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--
 <?php
 /* Prototype  : int mb_strripos(string haystack, string needle [, int offset [, string encoding]])
- * Description: Finds position of last occurrence of a string within another, case insensitive 
+ * Description: Finds position of last occurrence of a string within another, case insensitive
  * Source code: ext/mbstring/mbstring.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 /*
@@ -70,7 +70,7 @@ $inputs = array(
        false,
        TRUE,
        FALSE,
-       
+
        // empty data
 /*16*/ "",
        '',
@@ -79,7 +79,7 @@ $inputs = array(
 /*18*/ "string",
        'string',
        $heredoc,
-       
+
        // object data
 /*21*/ new classA(),
 
@@ -204,4 +204,3 @@ int(8)
 Warning: mb_strripos() expects parameter 3 to be int, resource given in %s on line %d
 NULL
 Done
-

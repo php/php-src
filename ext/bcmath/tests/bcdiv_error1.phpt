@@ -5,7 +5,7 @@ TestFest2009
 Antoni Torrents
 antoni@solucionsinternet.com
 --SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+<?php if(!extension_loaded("bcmath")) die("skip bcmath extension not loaded"); ?>
 --FILE--
 <?php
 echo bcdiv('10.99', '0');

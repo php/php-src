@@ -2,7 +2,7 @@
 Phar::buildFromDirectory() - non-directory passed as first parameter
 --SKIPIF--
 <?php
-	if (!extension_loaded("phar")) die("skip");
+	if (!extension_loaded("phar")) die("skip phar extension not loaded");
 	if (substr(PHP_OS, 0, 3) == "WIN") die("skip not for Windows");
 ?>
 --INI--

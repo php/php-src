@@ -1,7 +1,7 @@
 --TEST--
 Bug #46047 (SimpleXML converts empty nodes into object with nested array)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if(!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE--
 <?php
 $xml = new SimpleXMLElement('<foo><bar><![CDATA[]]></bar><baz/></foo>', 

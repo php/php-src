@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller index.php relocate
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller5.php
 REQUEST_URI=/frontcontroller5.php/

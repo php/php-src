@@ -1,7 +1,7 @@
 --TEST--
 Phar: a non-executable zip with no stub named .phar.zip
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 phar.readonly=1
 detect_unicode=0

@@ -1,7 +1,7 @@
 --TEST--
 Bug #73631 (Memory leak due to invalid wddx stack processing)
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 $xml = <<<EOF

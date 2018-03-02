@@ -1,9 +1,9 @@
 --TEST--
 tidy_diagnose()
 --SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+<?php if(!extension_loaded("tidy")) die("skip tidy extension not loaded"); ?>
 --FILE--
-<?php 
+<?php
 $a = tidy_parse_string('<HTML></HTML>');
 var_dump(tidy_diagnose($a));
 echo str_replace("\r", "", tidy_get_error_buffer($a));

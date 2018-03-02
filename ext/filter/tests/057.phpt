@@ -1,7 +1,7 @@
 --TEST--
 filter_input_array() and filter_var_array() with invalid $definition arguments
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 foreach (array(null, true, false, 1, "", new stdClass) as $invalid) {

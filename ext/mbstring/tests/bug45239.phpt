@@ -6,7 +6,7 @@ mbstring.http_input=UTF-8
 mbstring.internal_encoding=UTF-8
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 ?>
 --FILE--
 <?php

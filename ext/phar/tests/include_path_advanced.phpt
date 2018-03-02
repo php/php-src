@@ -3,7 +3,7 @@ Phar: include_path advanced code coverage test
 --INI--
 default_charset=UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE_EXTERNAL--
 files/include_path.phar
 --EXPECT--

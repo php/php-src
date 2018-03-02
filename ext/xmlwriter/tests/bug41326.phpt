@@ -2,7 +2,7 @@
 Bug #41287 (Writing empty tags with Xmlwriter::WriteElement[ns])
 --SKIPIF--
 <?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+if (!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); 
 ?>
 --FILE--
 <?php

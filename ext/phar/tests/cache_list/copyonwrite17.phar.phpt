@@ -5,7 +5,7 @@ default_charset=UTF-8
 phar.cache_list={PWD}/copyonwrite17.phar.php
 phar.readonly=0
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE_EXTERNAL--
 files/write17.phar
 --EXPECTF--

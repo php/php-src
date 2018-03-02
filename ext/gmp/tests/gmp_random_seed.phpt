@@ -1,7 +1,7 @@
 --TEST--
 gmp_random_seed() basic tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+<?php if (!extension_loaded("gmp")) die("skip gmp extension not loaded"); ?>
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only"); ?>
 --INI--
 error_reporting=E_ALL&~E_DEPRECATED

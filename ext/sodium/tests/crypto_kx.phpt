@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium-based key exchange
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+<?php if(!extension_loaded("sodium")) die("skip sodium extension not loaded"); ?>
 --FILE--
 <?php
 $client_seed = sodium_hex2bin('0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef');

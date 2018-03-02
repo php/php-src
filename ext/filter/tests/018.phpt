@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and FILTER_VALIDATE_IP
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(filter_var("192.168.0.1", FILTER_VALIDATE_IP));

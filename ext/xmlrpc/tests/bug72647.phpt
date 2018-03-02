@@ -2,7 +2,7 @@
 Bug #72647 (xmlrpc_encode() unexpected output after referencing array elements)
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 ?>
 --FILE--
 <?php

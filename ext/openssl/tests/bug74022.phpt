@@ -2,7 +2,7 @@
 Bug #74022 PHP Fast CGI crashes when reading from a pfx file with valid password
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

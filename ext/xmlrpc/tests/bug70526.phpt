@@ -2,7 +2,7 @@
 Bug #70526 (xmlrpc_set_type returns false on success)
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 ?>
 --FILE--
 <?php

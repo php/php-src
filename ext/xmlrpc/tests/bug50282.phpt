@@ -1,7 +1,7 @@
 --TEST--
 Bug #50282 (xmlrpc_encode_request() changes object into array in calling function)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 

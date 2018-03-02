@@ -1,7 +1,7 @@
 --TEST--
 Phar: ignore filenames starting with / on offsetSet
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1

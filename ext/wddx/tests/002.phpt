@@ -1,7 +1,7 @@
 --TEST--
 wddx packet construction using wddx ressource
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --INI--
 precision=14
 --FILE--

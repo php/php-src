@@ -1,7 +1,7 @@
 --TEST--
 Bug #43941 (json_encode() invalid UTF-8)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 

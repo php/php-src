@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs12_read() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 $p12_file = dirname(__FILE__) . "/p12_with_extra_certs.p12";

@@ -1,7 +1,7 @@
 --TEST--
 Bug #61264: xmlrpc_parse_method_descriptions leaks temporary variable
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 $xml = <<<XML

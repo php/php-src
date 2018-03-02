@@ -3,7 +3,7 @@ Phar front controller mime type not string/int
 --INI--
 default_charset=UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller13.php
 REQUEST_URI=/frontcontroller13.php/a.php

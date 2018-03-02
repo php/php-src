@@ -2,7 +2,7 @@
 PDO Common: Bug #38394 (Prepared statement error stops subsequent statements)
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 if (!strncasecmp(getenv('PDOTEST_DSN'), 'sqlite2', strlen('sqlite2'))) die('skip not relevant for pdo_sqlite2 driver');

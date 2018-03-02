@@ -1,7 +1,7 @@
 --TEST--
 Bug #53150 (FILTER_FLAG_NO_RES_RANGE is missing some IP ranges)
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(filter_var('127.0.0.1', FILTER_VALIDATE_IP));

@@ -1,7 +1,7 @@
 --TEST--
 Bug #41527 (WDDX deserialize numeric string array keys)
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 $data = array('01' => 'Zero', '+1' => 'Plus sign', ' 1' => 'Space');

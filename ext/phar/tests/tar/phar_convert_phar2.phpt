@@ -1,8 +1,8 @@
 --TEST--
 Phar::convertToPhar() gzipped
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
@@ -39,7 +39,7 @@ var_dump(strlen($phar->getStub()));
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar');

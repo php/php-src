@@ -2,7 +2,7 @@
 JSON (http://www.crockford.com/JSON/JSON_checker/test/fail*.json)
 --SKIPIF--
 <?php
-  if (!extension_loaded('json')) die('skip');
+  if (!extension_loaded('json')) die('skip json extension not loaded');
 ?>
 --FILE--
 <?php

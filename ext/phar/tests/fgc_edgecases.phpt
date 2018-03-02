@@ -2,7 +2,7 @@
 Phar: test edge cases of file_get_contents() function interception
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --INI--
 phar.readonly=0

@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML [profile]: Accessing by namespace prefix
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if(!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE--
 <?php
 

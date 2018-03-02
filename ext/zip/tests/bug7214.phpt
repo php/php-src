@@ -3,7 +3,7 @@ Bug #7214 (zip_entry_read() binary safe)
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
  ?>
 --FILE--
 <?php

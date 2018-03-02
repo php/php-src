@@ -4,7 +4,7 @@ Test curl_multi_select()
 Ivo Jansch <ivo@ibuildings.com>
 #testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+<?php if (!extension_loaded("curl")) die("skip curl extension not loaded"); ?>
 --FILE--
 <?php
 /* Prototype         : resource curl_multi_select($mh, $timeout=1.0])

@@ -1,7 +1,7 @@
 --TEST--
 SimpleXMLElement->addAttribute()
 --SKIPIF-- 
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
+<?php if (!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE-- 
 <?php
 	$simple = simplexml_load_file(dirname(__FILE__)."/book.xml");

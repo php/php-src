@@ -1,7 +1,7 @@
 --TEST--
 gzencode() and invalid params
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 

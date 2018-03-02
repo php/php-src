@@ -1,7 +1,7 @@
 --TEST--
 zlib.deflate (with convert.base64-encode)
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php /* $Id$ */
 $text = 'I am the very model of a modern major general, I\'ve information vegetable, animal, and mineral.';

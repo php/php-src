@@ -2,7 +2,7 @@
 Bug #72155 (use-after-free caused by get_zval_xmlrpc_type)
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 ?>
 --FILE--
 <?php

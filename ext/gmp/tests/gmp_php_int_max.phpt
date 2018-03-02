@@ -2,7 +2,7 @@
 PHP_INT_MAX tests
 --SKIPIF--
 <?php
-if (!extension_loaded("gmp")) print "skip";
+if (!extension_loaded("gmp")) die("skip gmp extension not loaded");
 if (PHP_INT_SIZE != 8) print "skip";
 ?>
 --FILE--

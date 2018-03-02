@@ -1,7 +1,7 @@
 --TEST--
 Bug #50558 - Broken object model when extending tidy
 --SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+<?php if(!extension_loaded("tidy")) die("skip tidy extension not loaded"); ?>
 --FILE--
 <?php
 class MyTidy extends tidy

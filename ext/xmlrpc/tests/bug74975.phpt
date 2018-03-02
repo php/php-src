@@ -2,7 +2,7 @@
 Bug #74975	Different serialization for classes
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 ?>
 --FILE--
 <?php

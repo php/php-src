@@ -1,7 +1,7 @@
 --TEST--
 grapheme() str[i]pos limits
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) die('skip'); 
+<?php if(!extension_loaded('intl')) die('skip intl extension not loaded'); 
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--

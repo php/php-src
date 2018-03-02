@@ -2,7 +2,7 @@
 Crash when calling a method of a class that inherits PDOStatement
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 ?>
 --FILE--
 <?php

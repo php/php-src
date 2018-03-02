@@ -2,7 +2,7 @@
 Bug #72340: Double Free Courruption in wddx_deserialize
 --SKIPIF--
 <?php
-if (!extension_loaded("wddx")) print "skip";
+if(!extension_loaded("wddx")) die("skip wddx extension not loaded");
 ?>
 --FILE--
 <?php

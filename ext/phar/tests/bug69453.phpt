@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #69453: Memory Corruption in phar_parse_tarfile when entry filename starts with null
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/bug69453.tar.phar';

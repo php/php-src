@@ -2,7 +2,7 @@
 PDO Common: Bug #44861 (scrollable cursor don't work with pgsql)
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 $allowed = array('oci', 'pgsql');

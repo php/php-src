@@ -2,7 +2,7 @@
 Bug #72668 (Spurious warning when exception is thrown in user defined function)
 --SKIPIF--
 <?php
-if (!extension_loaded('sqlite3')) die('skip'); ?>
+if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not loaded'); ?>
 --FILE--
 <?php
 function my_udf_md5($string) {

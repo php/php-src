@@ -3,7 +3,7 @@ bug 7715, floats value with integer or incomplete input
 --INI--
 precision=14
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 $data = array(

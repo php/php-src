@@ -2,7 +2,7 @@
 Phar: fopen a .phar for writing (new file)
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --INI--
 phar.readonly=1

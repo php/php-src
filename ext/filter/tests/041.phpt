@@ -1,7 +1,7 @@
 --TEST--
 COOKIE multiple cookie test
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --INI--
 filter.default=stripped
 filter.default_flags=0

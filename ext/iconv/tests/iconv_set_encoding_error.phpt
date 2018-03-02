@@ -2,7 +2,7 @@
 Test iconv_set_encoding() function : basic functionality
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_set_encoding') or die("skip iconv_set_encoding() is not available in this build");
 ?>
 --FILE--

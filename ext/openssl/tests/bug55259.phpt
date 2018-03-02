@@ -1,7 +1,7 @@
 --TEST--
 Bug #55259 (openssl extension does not get the DH parameters from DH key resource)
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip"); ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Bug #53854 (Missing constants for compression type)
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
 ?>
 --FILE--
 <?php

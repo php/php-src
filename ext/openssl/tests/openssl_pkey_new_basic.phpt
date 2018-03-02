@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkey_new() basic usage tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 function openssl_pkey_test_cmp($expected, $bin_key) {

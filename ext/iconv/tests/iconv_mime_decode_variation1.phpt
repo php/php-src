@@ -2,7 +2,7 @@
 Test iconv_mime_decode() function : usage variations - Pass different data types to header arg
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_mime_decode') or die("skip iconv_mime_decode() is not available in this build");
 ?>
 --FILE--

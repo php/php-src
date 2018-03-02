@@ -4,7 +4,7 @@ Phar front controller with huge file [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller28.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller28.php
 REQUEST_URI=/frontcontroller28.php/bigfile.txt

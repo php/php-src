@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #46032: PharData::__construct wrong memory read
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
 --FILE--
 <?php

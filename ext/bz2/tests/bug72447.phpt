@@ -1,7 +1,7 @@
 --TEST--
 Bug #72447: Type Confusion in php_bz2_filter_create()
 --SKIPIF--
-<?php if (!extension_loaded("bz2")) print "skip"; ?>
+<?php if (!extension_loaded("bz2")) die("skip bz2 extension not loaded"); ?>
 --FILE--
 <?php
 $input = "AAAAAAAA";

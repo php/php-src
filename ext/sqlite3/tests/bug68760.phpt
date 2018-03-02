@@ -2,7 +2,7 @@
 Bug #68760 (Callback throws exception behaviour. Segfault in 5.6)
 --SKIPIF--
 <?php
-if (!extension_loaded('sqlite3')) die('skip');
+if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not loaded');
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 Bug #68912 (Segmentation fault at openssl_spki_new)
 --SKIPIF--
 <?php 
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 if (!extension_loaded("xml")) die("skip xml extension not loaded");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>

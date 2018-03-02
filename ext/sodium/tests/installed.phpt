@@ -1,7 +1,7 @@
 --TEST--
 Check for sodium presence
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+<?php if(!extension_loaded("sodium")) die("skip sodium extension not loaded"); ?>
 --FILE--
 <?php
 echo "sodium extension is available";

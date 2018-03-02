@@ -1,7 +1,7 @@
 --TEST--
 inflate_get_status()
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 

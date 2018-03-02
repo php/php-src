@@ -2,7 +2,7 @@
 Test mb_strripos() function : usage variations - pass different data types to $haystack arg
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strripos') or die("skip mb_strripos() is not available in this build");
 ?>
 --FILE--

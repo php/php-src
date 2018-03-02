@@ -1,7 +1,7 @@
 --TEST--
 pcntl_wait() and rusage
 --SKIPIF--
-<?php if (!extension_loaded("pcntl")) print "skip"; ?>
+<?php if if(!extension_loaded("pcntl")) die("skip pcntl extension not loaded"); ?>
 <?php if (!extension_loaded("posix")) die("skip posix extension not available"); ?>
 --FILE--
 <?php

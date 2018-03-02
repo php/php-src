@@ -1,7 +1,7 @@
 --TEST--
 Bug #38431 (xmlrpc_get_type() crashes PHP on objects)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 

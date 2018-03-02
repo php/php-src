@@ -3,7 +3,7 @@ Bug #12414 ( extracting files from damaged archives)
 --SKIPIF--
 <?php
 /*$ */
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
  ?>
 --FILE--
 <?php

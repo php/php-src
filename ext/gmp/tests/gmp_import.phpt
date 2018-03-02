@@ -1,7 +1,7 @@
 --TEST--
 gmp_import() basic tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) echo "skip"; ?>
+<?php if(!extension_loaded("gmp")) die("skip gmp extension not loaded"); ?>
 --FILE--
 <?php
 

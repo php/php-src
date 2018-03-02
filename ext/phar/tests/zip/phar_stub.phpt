@@ -1,7 +1,7 @@
 --TEST--
 Phar::setStub() (zip-based)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0
