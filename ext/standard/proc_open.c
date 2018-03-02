@@ -239,7 +239,7 @@ PHP_MINIT_FUNCTION(proc_open)
 }
 /* }}} */
 
-/* {{{ proto bool proc_terminate(resource process [, long signal])
+/* {{{ proto bool proc_terminate(resource process [, int signal])
    kill a process opened by proc_open */
 PHP_FUNCTION(proc_terminate)
 {

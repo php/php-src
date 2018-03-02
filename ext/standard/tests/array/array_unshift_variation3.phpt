@@ -72,7 +72,7 @@ foreach($arrays as $array) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : different arrays for $array argument ***
 -- Iteration 1 --
 int(3)

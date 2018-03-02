@@ -15,6 +15,6 @@ $rc->getProperty("UndefC::p");
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "undefc"
 Class undefc does not exist

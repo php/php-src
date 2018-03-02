@@ -95,5 +95,5 @@ MySQLPDOTest::skip();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

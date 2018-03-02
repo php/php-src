@@ -59,7 +59,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_graph() : usage variations ***
 
 -- Iteration 1 --

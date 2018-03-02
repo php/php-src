@@ -50,7 +50,7 @@ foreach ($file_modes as $file_mode ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
  *** Testing fgetc() : usage variations ***
 -- Testing fgetc() with files opened with different read modes --
 -- File opened in mode : a+ --

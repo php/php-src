@@ -31,7 +31,7 @@ foreach ($sqls as $sql) {
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "SELECT"
 string(6) "DELETE"
 string(6) "INSERT"

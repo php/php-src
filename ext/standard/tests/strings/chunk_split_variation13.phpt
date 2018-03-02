@@ -28,7 +28,7 @@ for($count = 0; $count < count($values); $count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : default 'chunklen' with long string 'str' ***
 -- Iteration 0 --
 string(85) "1234567890123456789012345678901234567890123456789012345678901234567890123456

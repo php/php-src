@@ -22,7 +22,7 @@ echo "createFromFormat method: " . $fromFormat->format("D., M. j, Y g:iA") . "\n
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing clone on DateTime objects ***
 Format method: Thu., Nov. 29, 2012 5:00PM
 createFromFormat method: Thu., Nov. 29, 2012 5:00PM

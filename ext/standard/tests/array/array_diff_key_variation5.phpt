@@ -19,7 +19,7 @@ var_dump( array_diff_key($input_array, $float_indx_array) );
 var_dump( array_diff_key($float_indx_array, $input_array) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_key() : usage variation ***
 
 -- Testing array_diff_key() function with float indexed array --

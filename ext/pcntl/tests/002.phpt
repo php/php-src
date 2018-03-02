@@ -73,7 +73,7 @@ if ($pid == -1) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 signo == SIGTERM

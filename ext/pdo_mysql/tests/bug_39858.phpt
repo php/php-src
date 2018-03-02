@@ -70,7 +70,7 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec("DROP PROCEDURE IF EXISTS p");
 ?>
---EXPECTF--
+--EXPECT--
 Emulated Prepared Statements...
 array(1) {
   [0]=>

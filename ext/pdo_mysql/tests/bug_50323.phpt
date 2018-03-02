@@ -56,5 +56,5 @@ $db = PDOTest::test_factory(dirname(__FILE__) . '/common.phpt');
 
 @$db->exec('DROP DATABASE IF EXISTS `crazy;dbname`');
 ?>
---EXPECTF--
+--EXPECT--
 done!

@@ -79,7 +79,7 @@ echo "Done\n";
 <?php
 rmdir(dirname(__FILE__)."/is_readable_variation2/");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable(): usage variations ***
 
 *** Testing is_readable() on directory without read permission ***

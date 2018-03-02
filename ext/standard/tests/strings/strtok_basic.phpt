@@ -31,7 +31,7 @@ for( $i = 2; $i <=7; $i++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : basic functionality ***
 
 The Input string is:

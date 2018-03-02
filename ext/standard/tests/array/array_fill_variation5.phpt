@@ -52,7 +52,7 @@ for($i = 0; $i < count($values); $i++)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_fill() : usage variations ***
 --- Testing array_fill() with different types of array values for 'val' argument ---
 -- Iteration 1 --

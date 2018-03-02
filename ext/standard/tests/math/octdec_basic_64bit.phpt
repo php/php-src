@@ -33,7 +33,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing octdec() : basic functionality ***
 int(14489)
 int(253)

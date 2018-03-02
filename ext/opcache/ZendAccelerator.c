@@ -484,13 +484,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	STRTAB_COLLISION(s) = *hash_slot;
 	*hash_slot = STRTAB_STR_TO_POS(&ZCSG(interned_strings), s);
 	GC_SET_REFCOUNT(s, 1);
-#if 1
-	/* optimized single assignment */
 	GC_TYPE_INFO(s) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT);
-#else
-	GC_TYPE(s) = IS_STRING;
-	GC_FLAGS(s) = IS_STR_INTERNED | IS_STR_PERMANENT;
-#endif
 	ZSTR_H(s) = h;
 	ZSTR_LEN(s) = ZSTR_LEN(str);
 	memcpy(ZSTR_VAL(s), ZSTR_VAL(str), ZSTR_LEN(s) + 1);
@@ -1362,7 +1356,7 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, NULL, 0, 0);
 
 	/* Allocate memory block */
-#ifdef __SSE2__
+#if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_arena_alloc(&CG(arena), memory_used + 64);
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
@@ -1469,7 +1463,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	memory_used = zend_accel_script_persist_calc(new_persistent_script, key, key_length, 1);
 
 	/* Allocate shared memory */
-#ifdef __SSE2__
+#if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_shared_alloc(memory_used + 64);
 	if (ZCG(mem)) {

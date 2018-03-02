@@ -22,7 +22,7 @@ foreach ($urls as $url) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 --> 64.246.30.37: array(1) {
   ["path"]=>

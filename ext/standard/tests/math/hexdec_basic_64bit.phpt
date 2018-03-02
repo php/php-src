@@ -34,7 +34,7 @@ foreach($values as $value) {
 				
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hexdec() : basic functionality ***
 
 -- hexdec 1194684 --

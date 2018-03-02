@@ -29,7 +29,7 @@ var_dump(error_reporting());
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 int(32767)
 int(32759)
 Done

@@ -14,7 +14,7 @@ var_dump(openssl_pkcs12_read($p12, $certs, ""));
 var_dump(openssl_pkcs12_read($p12, $certs, $pass));
 var_dump($certs);
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)

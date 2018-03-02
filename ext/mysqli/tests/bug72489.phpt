@@ -60,6 +60,6 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS bug72489"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 Finished 1
 Finished 2

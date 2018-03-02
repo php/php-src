@@ -32,7 +32,7 @@ var_dump( strrev('Hello, World\n') );
 var_dump( strrev($heredoc) );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrev() : basic functionality ***
 string(12) "dlroW ,olleH"
 string(12) "dlroW ,olleH"

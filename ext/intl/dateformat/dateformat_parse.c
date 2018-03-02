@@ -130,7 +130,6 @@ PHP_FUNCTION(datefmt_parse)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	zend_long   long_parse_pos;
 	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -146,6 +145,7 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		zend_long long_parse_pos;
 		ZVAL_DEREF(z_parse_pos);
 		long_parse_pos = zval_get_long(z_parse_pos);
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
@@ -175,7 +175,6 @@ PHP_FUNCTION(datefmt_localtime)
 	char*           text_to_parse = NULL;
 	size_t          text_len =0;
 	zval*         	z_parse_pos = NULL;
-	zend_long   long_parse_pos;
 	int32_t		parse_pos = -1;
 
 	DATE_FORMAT_METHOD_INIT_VARS;
@@ -191,6 +190,7 @@ PHP_FUNCTION(datefmt_localtime)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		zend_long long_parse_pos;
 		ZVAL_DEREF(z_parse_pos);
 		long_parse_pos = zval_get_long(z_parse_pos);
 		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {

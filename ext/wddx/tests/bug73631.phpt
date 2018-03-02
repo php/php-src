@@ -14,5 +14,5 @@ EOF;
 $wddx = wddx_deserialize($xml);
 var_dump($wddx);
 ?>
---EXPECTF--
+--EXPECT--
 int(1234)

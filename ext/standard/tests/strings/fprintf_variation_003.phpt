@@ -33,7 +33,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fprintf() with binary ***
 
 0

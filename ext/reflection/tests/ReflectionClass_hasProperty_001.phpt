@@ -41,7 +41,7 @@ foreach($classes as $class) {
 	var_dump($rc->hasProperty("doesntExist"));
 }
 ?>
---EXPECTF--
+--EXPECT--
 Reflecting on class pubf: 
   --> Check for s: bool(true)
   --> Check for a: bool(true)

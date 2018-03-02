@@ -347,10 +347,6 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 					    src->opcode != ZEND_FETCH_DIM_R &&
 					    src->opcode != ZEND_FETCH_OBJ_R &&
 					    src->opcode != ZEND_NEW) {
-						if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-							/* mark as removed (empty live range) */
-							op_array->live_range[opline->op2.num].var = (uint32_t)-1;
-						}
 						src->result_type = IS_UNUSED;
 						MAKE_NOP(opline);
 					}
@@ -871,8 +867,6 @@ optimize_const_unary_op:
 		}
 		opline++;
 	}
-
-	strip_nops(op_array, block);
 }
 
 /* Rebuild plain (optimized) op_array from CFG */
@@ -1042,10 +1036,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 	/* adjust loop jump targets & remove unused live range entries */
 	if (op_array->last_live_range) {
 		int i, j;
-		uint32_t *map;
-		ALLOCA_FLAG(use_heap);
-
-		map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
 
 		for (i = 0, j = 0; i < op_array->last_live_range; i++) {
 			if (op_array->live_range[i].var == (uint32_t)-1) {
@@ -1064,7 +1054,6 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 				}
 				op_array->live_range[i].start = start_op;
 				op_array->live_range[i].end = end_op;
-				map[i] = j;
 				if (i != j) {
 					op_array->live_range[j]  = op_array->live_range[i];
 				}
@@ -1073,23 +1062,12 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 		}
 
 		if (i != j) {
-			if ((op_array->last_live_range = j)) {
-				zend_op *opline = new_opcodes;
-				zend_op *end = opline + len;
-				while (opline != end) {
-					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-							opline->extended_value == ZEND_FREE_ON_RETURN) {
-						ZEND_ASSERT(opline->op2.num < (uint32_t) i);
-						opline->op2.num = map[opline->op2.num];
-					}
-					opline++;
-				}
-			} else {
+			op_array->last_live_range = j;
+			if (j == 0) {
 				efree(op_array->live_range);
 				op_array->live_range = NULL;
 			}
 		}
-		free_alloca(map, use_heap);
 	}
 
 	/* adjust early binding list */
@@ -1925,6 +1903,13 @@ void zend_optimize_cfg(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				memset(Tsource, 0, (op_array->last_var + op_array->T) * sizeof(zend_op *));
 			}
 			zend_optimize_block(b, op_array, usage, &cfg, Tsource);
+		}
+
+		/* Eliminate NOPs */
+		for (b = blocks; b < end; b++) {
+			if (b->flags & ZEND_BB_REACHABLE) {
+				strip_nops(op_array, b);
+			}
 		}
 
 		/* Jump optimization for each block */

@@ -61,7 +61,7 @@ for($count = 0; $count < count($input_values); $count++) {
 }  
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : 'input' array with different values***
 
 -- Iteration 1 --

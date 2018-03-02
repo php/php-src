@@ -48,7 +48,7 @@ var_dump( array_merge_recursive($arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : arrays with common key and value ***
 -- Integer values --
 array(3) {

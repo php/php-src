@@ -48,7 +48,7 @@ var_dump($r->bar);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ReflectionMethodEx::__construct
 string(26) "ReflectionFunctionAbstract"
 string(7) "getName"

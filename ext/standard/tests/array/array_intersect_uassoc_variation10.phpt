@@ -34,7 +34,7 @@ $obj = new MyClass();
 var_dump( array_intersect_uassoc($array1, $array2, array($obj,'class_compare_func')) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_uassoc() : usage variation ***
 
 -- Testing array_intersect_uassoc() function using class with static method as callback --

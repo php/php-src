@@ -10,5 +10,5 @@ try {
 } catch (Error $e) {
   echo "Exception: {$e->getMessage()}\n";
 }
---EXPECTF--
+--EXPECT--
 Exception: Call to private HashContext::__construct() from invalid context

@@ -22,7 +22,7 @@ var_dump( range( 1, 5, array(1, 2) ) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing range() with various low and high values ***
 -- creating an array with low = 'ABCD' and high = 'ABCD' --
 array(1) {

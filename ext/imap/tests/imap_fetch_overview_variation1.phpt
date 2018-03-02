@@ -172,12 +172,12 @@ NULL
 Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(0) ""
+-- Testing with first argument value: string(0) ""
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(0) ""
+-- Testing with first argument value: string(0) ""
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
@@ -188,17 +188,17 @@ NULL
 Warning: imap_fetch_overview() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(6) "string"
+-- Testing with first argument value: string(6) "string"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(6) "string"
+-- Testing with first argument value: string(6) "string"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(11) "hello world"
+-- Testing with first argument value: string(11) "hello world"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL

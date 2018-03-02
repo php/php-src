@@ -250,7 +250,7 @@ typedef struct {
 	char *putenv_string;
 	char *previous_value;
 	char *key;
-	int key_len;
+	size_t key_len;
 } putenv_entry;
 #endif
 

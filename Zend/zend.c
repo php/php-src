@@ -101,15 +101,34 @@ static ZEND_INI_MH(OnUpdateErrorReporting) /* {{{ */
 
 static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
-	OnUpdateBool(entry, new_value, mh_arg1, mh_arg2, mh_arg3, stage);
+	zend_bool val;
 
-	if (GC_G(gc_enabled)) {
-		gc_init();
+	if (ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) {
+		val = 1;
+	} else if (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) {
+		val = 1;
+	}else if (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) {
+		val = 1;
+	} else {
+		val = (zend_bool) atoi(ZSTR_VAL(new_value));
 	}
+
+	gc_enable(val);
 
 	return SUCCESS;
 }
 /* }}} */
+
+static ZEND_INI_DISP(zend_gc_enabled_displayer_cb) /* {{{ */
+{
+	if (gc_enabled()) {
+		ZEND_PUTS("On");
+	} else {
+		ZEND_PUTS("Off");
+	}
+}
+/* }}} */
+
 
 static ZEND_INI_MH(OnUpdateScriptEncoding) /* {{{ */
 {
@@ -154,7 +173,7 @@ static ZEND_INI_MH(OnUpdateAssertions) /* {{{ */
 ZEND_INI_BEGIN()
 	ZEND_INI_ENTRY("error_reporting",				NULL,		ZEND_INI_ALL,		OnUpdateErrorReporting)
 	STD_ZEND_INI_ENTRY("zend.assertions",				"1",    ZEND_INI_ALL,       OnUpdateAssertions,           assertions,   zend_executor_globals,  executor_globals)
-	STD_ZEND_INI_BOOLEAN("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled,      gc_enabled,     zend_gc_globals,        gc_globals)
+	ZEND_INI_ENTRY3_EX("zend.enable_gc",				"1",	ZEND_INI_ALL,		OnUpdateGCEnabled, NULL, NULL, NULL, zend_gc_enabled_displayer_cb)
  	STD_ZEND_INI_BOOLEAN("zend.multibyte", "0", ZEND_INI_PERDIR, OnUpdateBool, multibyte,      zend_compiler_globals, compiler_globals)
  	ZEND_INI_ENTRY("zend.script_encoding",			NULL,		ZEND_INI_ALL,		OnUpdateScriptEncoding)
  	STD_ZEND_INI_BOOLEAN("zend.detect_unicode",			"1",	ZEND_INI_ALL,		OnUpdateBool, detect_unicode, zend_compiler_globals, compiler_globals)
@@ -705,8 +724,6 @@ static void php_scanner_globals_ctor(zend_php_scanner_globals *scanner_globals_p
 }
 /* }}} */
 
-void zend_init_opcodes_handlers(void);
-
 static void module_destructor_zval(zval *zv) /* {{{ */
 {
 	zend_module_entry *module = (zend_module_entry*)Z_PTR_P(zv);
@@ -807,7 +824,7 @@ int zend_startup(zend_utility_functions *utility_functions, char **extensions) /
 	/* Set up the default garbage collection implementation. */
 	gc_collect_cycles = zend_gc_collect_cycles;
 
-	zend_init_opcodes_handlers();
+	zend_vm_init();
 
 	/* set up version */
 	zend_version_info = strdup(ZEND_CORE_VERSION_INFO);
@@ -939,6 +956,8 @@ int zend_post_startup(void) /* {{{ */
 
 void zend_shutdown(void) /* {{{ */
 {
+	zend_vm_dtor();
+
 	zend_destroy_rsrc_list(&EG(persistent_list));
 	zend_destroy_modules();
 
@@ -1000,6 +1019,7 @@ ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno) /* 
 		zend_output_debug_string(1, "%s(%d) : Bailed out without a bailout address!", filename, lineno);
 		exit(-1);
 	}
+	gc_protect(1);
 	CG(unclean_shutdown) = 1;
 	CG(active_class_entry) = NULL;
 	CG(in_compilation) = 0;

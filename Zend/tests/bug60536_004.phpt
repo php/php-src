@@ -28,7 +28,7 @@ class Notice extends Base {
 }
 echo "POST-CLASS-GUARD2\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 PRE-CLASS-GUARD
 POST-CLASS-GUARD
 POST-CLASS-GUARD2

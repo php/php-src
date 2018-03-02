@@ -49,7 +49,7 @@ error_reporting=E_ALL
 	$db->exec(sprintf('DROP TABLE IF EXISTS %s', $table));
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "00000"
 array(2) {
   [0]=>

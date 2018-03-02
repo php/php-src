@@ -105,9 +105,9 @@ static void php_converter_default_callback(zval *return_value, zval *zobj, zend_
 }
 /* }}} */
 
-/* {{{ proto void UConverter::toUCallback(long $reason,
+/* {{{ proto void UConverter::toUCallback(int $reason,
                                           string $source, string $codeUnits,
-                                          long &$error) */
+                                          int &$error) */
 ZEND_BEGIN_ARG_INFO_EX(php_converter_toUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
@@ -127,9 +127,9 @@ static PHP_METHOD(UConverter, toUCallback) {
 }
 /* }}} */
 
-/* {{{ proto void UConverter::fromUCallback(long $reason,
-                                            Array $source, long $codePoint,
-                                            long &$error) */
+/* {{{ proto void UConverter::fromUCallback(int $reason,
+                                            Array $source, int $codePoint,
+                                            int &$error) */
 ZEND_BEGIN_ARG_INFO_EX(php_converter_fromUCallback_arginfo, 0, ZEND_RETURN_VALUE, 4)
 	ZEND_ARG_INFO(0, reason)
 	ZEND_ARG_INFO(0, source)
@@ -508,14 +508,14 @@ static void php_converter_do_get_type(php_converter_object *objval, UConverter *
 }
 /* }}} */
 
-/* {{{ proto long UConverter::getSourceType() */
+/* {{{ proto int UConverter::getSourceType() */
 static PHP_METHOD(UConverter, getSourceType) {
 	php_converter_object *objval = CONV_GET(getThis());
 	php_converter_do_get_type(objval, objval->src, INTERNAL_FUNCTION_PARAM_PASSTHRU);
 }
 /* }}} */
 
-/* {{{ proto long UConverter::getDestinationType() */
+/* {{{ proto int UConverter::getDestinationType() */
 static PHP_METHOD(UConverter, getDestinationType) {
 	php_converter_object *objval = CONV_GET(getThis());
 	php_converter_do_get_type(objval, objval->dest, INTERNAL_FUNCTION_PARAM_PASSTHRU);
@@ -709,7 +709,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 }
 /* }}} */
 
-/* {{{ proto string UConverter::reasonText(long reason) */
+/* {{{ proto string UConverter::reasonText(int reason) */
 #define UCNV_REASON_CASE(v) case (UCNV_ ## v) : RETURN_STRINGL( "REASON_" #v , sizeof( "REASON_" #v ) - 1);
 ZEND_BEGIN_ARG_INFO_EX(php_converter_reasontext_arginfo, 0, ZEND_RETURN_VALUE, 0)
 	ZEND_ARG_INFO(0, reason)

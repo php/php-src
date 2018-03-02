@@ -633,7 +633,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_long2ip, 0)
 	ZEND_ARG_INFO(0, proper_address)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_getenv, 0, 0, 0)
 	ZEND_ARG_INFO(0, varname)
 	ZEND_ARG_INFO(0, local_only)
 ZEND_END_ARG_INFO()
@@ -1386,7 +1386,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_vfprintf, 0)
 ZEND_END_ARG_INFO()
 /* }}} */
 /* {{{ fsock.c */
-ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, port)
 	ZEND_ARG_INFO(1, errno)
@@ -1394,7 +1394,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_fsockopen, 0, 0, 2)
 	ZEND_ARG_INFO(0, timeout)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_pfsockopen, 0, 0, 1)
 	ZEND_ARG_INFO(0, hostname)
 	ZEND_ARG_INFO(0, port)
 	ZEND_ARG_INFO(1, errno)
@@ -2206,7 +2206,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_implode, 0)
 	ZEND_ARG_INFO(0, pieces)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_strtok, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strtok, 0, 0, 1)
 	ZEND_ARG_INFO(0, str)
 	ZEND_ARG_INFO(0, token)
 ZEND_END_ARG_INFO()
@@ -2472,7 +2472,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_str_split, 0, 0, 1)
 	ZEND_ARG_INFO(0, split_length)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_strpbrk, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_strpbrk, 0, 0, 2)
 	ZEND_ARG_INFO(0, haystack)
 	ZEND_ARG_INFO(0, char_list)
 ZEND_END_ARG_INFO()
@@ -4183,10 +4183,10 @@ PHP_FUNCTION(putenv)
 #endif
 	}
 
-	pe.key_len = (int)strlen(pe.key);
+	pe.key_len = strlen(pe.key);
 #ifdef PHP_WIN32
 	if (equals) {
-		if ((size_t)pe.key_len < setting_len - 1) {
+		if (pe.key_len < setting_len - 1) {
 			value = p + 1;
 		} else {
 			/* empty string*/
@@ -4353,13 +4353,13 @@ PHP_FUNCTION(getopt)
 	char *options = NULL, **argv = NULL;
 	char opt[2] = { '\0' };
 	char *optname;
-	int argc = 0, len, o;
-	size_t options_len = 0;
+	int argc = 0, o;
+	size_t options_len = 0, len;
 	char *php_optarg = NULL;
 	int php_optind = 1;
 	zval val, *args = NULL, *p_longopts = NULL;
 	zval *zoptind = NULL;
-	int optname_len = 0;
+	size_t optname_len = 0;
 	opt_struct *opts, *orig_opts;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
@@ -4435,7 +4435,7 @@ PHP_FUNCTION(getopt)
 
 			opts->need_param = 0;
 			opts->opt_name = estrdup(ZSTR_VAL(arg_str));
-			len = (int)strlen(opts->opt_name);
+			len = strlen(opts->opt_name);
 			if ((len > 0) && (opts->opt_name[len - 1] == ':')) {
 				opts->need_param++;
 				opts->opt_name[len - 1] = '\0';
@@ -4491,7 +4491,7 @@ PHP_FUNCTION(getopt)
 		}
 
 		/* Add this option / argument pair to the result hash. */
-		optname_len = (int)strlen(optname);
+		optname_len = strlen(optname);
 		if (!(optname_len > 1 && optname[0] == '0') && is_numeric_string(optname, optname_len, NULL, NULL, 0) == IS_LONG) {
 			/* numeric string */
 			int optname_int = atoi(optname);
@@ -4585,7 +4585,7 @@ PHP_FUNCTION(usleep)
 /* }}} */
 
 #if HAVE_NANOSLEEP
-/* {{{ proto mixed time_nanosleep(long seconds, long nanoseconds)
+/* {{{ proto mixed time_nanosleep(int seconds, int nanoseconds)
    Delay for a number of seconds and nano seconds */
 PHP_FUNCTION(time_nanosleep)
 {

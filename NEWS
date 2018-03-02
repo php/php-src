@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0alpha1
 
 - Core:
+  . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
@@ -41,6 +42,10 @@ PHP                                                                        NEWS
   . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
   . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
+
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)
@@ -50,10 +55,6 @@ PHP                                                                        NEWS
 
 - DBA:
   . Fixed bug #75264 (compiler warnings emitted). (petk)
-
-- cURL:
-  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
-    (cebe)
 
 - GD:
   . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
@@ -65,12 +66,12 @@ PHP                                                                        NEWS
   . Added gmp_perfect_power(a). (Nikita)
   . Added gmp_kronecker(a, b). (Nikita)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
-
-- interbase:
-  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
 
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
@@ -125,12 +126,6 @@ PHP                                                                        NEWS
 - PDO SQLite
   . Add support for additional open flags
 
-- phar:
-  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
-    (bwbroersma)
-  . Fixed bug #65414 (deal with leading slash when adding files correctly).
-    (bishopb)
-
 - pgsql:
   . Added new error constants for pg_result_error(): (Kalle)
     - Requires Postgres 9.3
@@ -142,6 +137,12 @@ PHP                                                                        NEWS
 	- Requires Postgres 9.6
 	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
 
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
@@ -151,6 +152,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
 
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
@@ -165,10 +168,6 @@ PHP                                                                        NEWS
 
 - SQLite3:
   . Updated bundled libsqlite to 3.22.0. (cmb)
-
-- Soap:
-  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
-    used). (Anton Artamonov)
 
 - Standard:
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 

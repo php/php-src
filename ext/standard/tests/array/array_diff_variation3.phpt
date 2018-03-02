@@ -103,7 +103,7 @@ foreach($values as $value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff() : usage variations ***
 
  Iteration: 1 

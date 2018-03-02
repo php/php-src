@@ -14,7 +14,7 @@ $data = array(
 $out = filter_var($data, FILTER_VALIDATE_FLOAT, FILTER_REQUIRE_ARRAY);
 var_dump($out);
 ?>
---EXPECTF--
+--EXPECT--
 array(5) {
   [0]=>
   bool(false)

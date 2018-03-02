@@ -74,7 +74,7 @@ foreach ($permission_values as $perm) {
 $dir_path = dirname(__FILE__) . "/scandir_variation7";
 rmdir($dir_path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 
 -- Iteration 1 --

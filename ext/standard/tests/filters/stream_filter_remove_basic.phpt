@@ -39,7 +39,7 @@ $file = dirname( __FILE__ ) . DIRECTORY_SEPARATOR . 'streamfilterTest.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stream_filter_remove() : basic functionality ***
 bool(true)
 Grfgvat gur ebg13 svygre juvpu fuvsgf fbzr guvatf nebhaq.

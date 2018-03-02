@@ -14,6 +14,6 @@ $b = inflate_add($in, file_get_contents(__DIR__.'/bug73944_fixture2'));
 echo '2 block: '.($b === false ? 'failed' : strlen($b)).PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 1 block: 32768
 2 block: 32768

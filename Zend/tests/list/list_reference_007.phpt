@@ -29,7 +29,7 @@ $a = new StorageRef(['one' => 1, 'two' => 2]);
 var_dump($a);
 
 ?>
---EXPECTF--
+--EXPECT--
 object(StorageRef)#1 (1) {
   ["s":"StorageRef":private]=>
   array(2) {

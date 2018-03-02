@@ -19,7 +19,7 @@ D::$p =& $ref;
 var_dump(C::$p, D::$p, E::$p);
 ?>
 ==Done==
---EXPECTF--
+--EXPECT--
 Inherited static properties refer to the same value across classes:
 string(8) "original"
 string(8) "original"

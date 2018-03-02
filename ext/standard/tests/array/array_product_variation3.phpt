@@ -28,7 +28,7 @@ var_dump( array_product(array(-99999999.9, 99999999.1)));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_product() : variations - negative numbers***
 
 -- Testing array_product() function with one negative number --

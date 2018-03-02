@@ -256,9 +256,10 @@ static zend_always_inline zval *_get_zval_ptr_var_deref(uint32_t var, zend_free_
 
 static zend_never_inline ZEND_COLD void zval_undefined_cv(uint32_t var EXECUTE_DATA_DC)
 {
-	zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
-
-	zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(cv));
+	if (EXPECTED(EG(exception) == NULL)) {
+		zend_string *cv = CV_DEF_OF(EX_VAR_TO_NUM(var));
+		zend_error(E_NOTICE, "Undefined variable: %s", ZSTR_VAL(cv));
+	}
 }
 
 static zend_never_inline zval *_get_zval_cv_lookup(zval *ptr, uint32_t var, int type EXECUTE_DATA_DC)
@@ -633,20 +634,93 @@ static inline void zend_assign_to_variable_reference(zval *variable_ptr, zval *v
 	ZVAL_REF(variable_ptr, ref);
 }
 
-/* this should modify object only if it's empty */
-static inline int make_real_object(zval *object)
+static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(zval *variable_ptr, zval *value_ptr, zend_uchar value_type OPLINE_DC EXECUTE_DATA_DC)
 {
-	if (UNEXPECTED(Z_TYPE_P(object) != IS_OBJECT)) {
-		if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
-			/* nothing to destroy */
-		} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
-			zval_ptr_dtor_nogc(object);
-		} else {
-			return 0;
-		}
-		object_init(object);
-		zend_error(E_WARNING, "Creating default object from empty value");
+	zend_error(E_NOTICE, "Only variables should be assigned by reference");
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return 0;
 	}
+
+	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, value_type);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
+	}
+	return 1;
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property OPLINE_DC EXECUTE_DATA_DC)
+{
+	zend_string *tmp_property_name;
+	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
+	zend_tmp_string_release(property_name);
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_NULL(EX_VAR(opline->result.var));
+	}
+}
+
+/* this should modify object only if it's empty */
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object(zval *object, zval *property OPLINE_DC EXECUTE_DATA_DC)
+{
+	zend_object *obj;
+
+	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
+		/* nothing to destroy */
+	} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
+		zval_ptr_dtor_nogc(object);
+	} else {
+		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
+			zend_string *tmp_property_name;
+			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+
+			if (opline->opcode == ZEND_PRE_INC_OBJ
+			 || opline->opcode == ZEND_PRE_DEC_OBJ
+			 || opline->opcode == ZEND_POST_INC_OBJ
+			 || opline->opcode == ZEND_POST_DEC_OBJ) {
+				zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
+			} else {
+				zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
+			}
+			zend_tmp_string_release(property_name);
+		}
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		return 0;
+	}
+	object_init(object);
+	Z_ADDREF_P(object);
+	obj = Z_OBJ_P(object);
+	zend_error(E_WARNING, "Creating default object from empty value");
+	if (GC_REFCOUNT(obj) == 1) {
+		/* the enclosing container was deleted, obj is unreferenced */
+		OBJ_RELEASE(obj);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
+		}
+		return 0;
+	}
+	Z_DELREF_P(object);
+	return 1;
+}
+
+static zend_never_inline ZEND_COLD int ZEND_FASTCALL make_real_object_rw(zval *object, zval *property OPLINE_DC)
+{
+	if (EXPECTED(Z_TYPE_P(object) <= IS_FALSE)) {
+		/* nothing to destroy */
+	} else if (EXPECTED((Z_TYPE_P(object) == IS_STRING && Z_STRLEN_P(object) == 0))) {
+		zval_ptr_dtor_nogc(object);
+	} else {
+		if (opline->op1_type != IS_VAR || EXPECTED(!Z_ISERROR_P(object))) {
+			zend_string *tmp_property_name;
+			zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
+			zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
+			zend_tmp_string_release(property_name);
+		}
+		return 0;
+	}
+	object_init(object);
 	return 1;
 }
 
@@ -893,6 +967,7 @@ static zend_always_inline int zend_verify_arg_type(zend_function *zf, uint32_t a
 		return 1;
 	}
 
+	ce = NULL;
 	if (UNEXPECTED(!zend_check_type(cur_arg_info->type, arg, &ce, cache_slot, default_value, zf->common.scope, 0))) {
 		zend_verify_arg_error(zf, cur_arg_info, arg_num, ce, arg);
 		return 0;
@@ -1024,7 +1099,7 @@ static zend_always_inline void zend_verify_return_type(zend_function *zf, zval *
 	}
 }
 
-static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **cache_slot)
+static ZEND_COLD int zend_verify_missing_return_type(const zend_function *zf, void **cache_slot)
 {
 	zend_arg_info *ret_info = zf->common.arg_info - 1;
 
@@ -1046,14 +1121,31 @@ static ZEND_COLD int zend_verify_missing_return_type(zend_function *zf, void **c
 	return 1;
 }
 
-static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_object_as_array(void)
+{
+	zend_throw_error(NULL, "Cannot use object as array");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_illegal_offset(void)
+{
+	zend_error(E_WARNING, "Illegal offset type");
+}
+
+static zend_never_inline void zend_assign_to_object_dim(zval *object, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (UNEXPECTED(!Z_OBJ_HT_P(object)->write_dimension)) {
-		zend_throw_error(NULL, "Cannot use object as array");
+		zend_use_object_as_array();
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+		}
 		return;
 	}
 
 	Z_OBJ_HT_P(object)->write_dimension(object, dim, value);
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), value);
+	}
 }
 
 static zend_never_inline void zend_binary_assign_op_obj_dim(zval *object, zval *property, zval *value, zval *retval, binary_op_type binary_op EXECUTE_DATA_DC)
@@ -1117,7 +1209,7 @@ try_again:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_illegal_offset();
 				break;
 		}
 
@@ -1251,22 +1343,6 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 	zend_throw_error(NULL, "%s", msg);
 }
 
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_assignment(zval *property)
-{
-	zend_string *tmp_property_name;
-	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Attempt to assign property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
-}
-
-static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_inc_dec(zval *property)
-{
-	zend_string *tmp_property_name;
-	zend_string *property_name = zval_get_tmp_string(property, &tmp_property_name);
-	zend_error(E_WARNING, "Attempt to increment/decrement property '%s' of non-object", ZSTR_VAL(property_name));
-	zend_tmp_string_release(property_name);
-}
-
 static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_read(zval *property)
 {
 	zend_string *tmp_property_name;
@@ -1291,7 +1367,15 @@ static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_wrong_property_check(
 	zend_tmp_string_release(property_name);
 }
 
-static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value, zval *result EXECUTE_DATA_DC)
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_deprecated_function(const zend_function *fbc)
+{
+	zend_error(E_DEPRECATED, "Function %s%s%s() is deprecated",
+		fbc->common.scope ? ZSTR_VAL(fbc->common.scope->name) : "",
+		fbc->common.scope ? "::" : "",
+		ZSTR_VAL(fbc->common.function_name));
+}
+
+static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim, zval *value OPLINE_DC EXECUTE_DATA_DC)
 {
 	zend_uchar c;
 	size_t string_len;
@@ -1301,8 +1385,8 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if (offset < -(zend_long)Z_STRLEN_P(str)) {
 		/* Error on negative offset */
 		zend_error(E_WARNING, "Illegal string offset:  " ZEND_LONG_FMT, offset);
-		if (result) {
-			ZVAL_NULL(result);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 		return;
 	}
@@ -1322,8 +1406,8 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	if (string_len == 0) {
 		/* Error on empty input string */
 		zend_error(E_WARNING, "Cannot assign an empty string to a string offset");
-		if (result) {
-			ZVAL_NULL(result);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 		return;
 	}
@@ -1349,13 +1433,13 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 	Z_STRVAL_P(str)[offset] = c;
 
-	if (result) {
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		/* Return the new character */
-		ZVAL_INTERNED_STR(result, ZSTR_CHAR(c));
+		ZVAL_INTERNED_STR(EX_VAR(opline->result.var), ZSTR_CHAR(c));
 	}
 }
 
-static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
+static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval rv, obj;
@@ -1367,7 +1451,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
-			ZVAL_UNDEF(result);
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
 			return;
 		}
 
@@ -1381,11 +1465,11 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		}
 
 		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
-			ZVAL_COPY(result, Z_REFVAL_P(z));
+			ZVAL_COPY(EX_VAR(opline->result.var), Z_REFVAL_P(z));
 		} else {
-			ZVAL_COPY(result, z);
+			ZVAL_COPY(EX_VAR(opline->result.var), z);
 		}
-		ZVAL_COPY(&z_copy, result);
+		ZVAL_COPY(&z_copy, EX_VAR(opline->result.var));
 		if (inc) {
 			increment_function(&z_copy);
 		} else {
@@ -1397,11 +1481,11 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		zval_ptr_dtor(z);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		ZVAL_NULL(result);
+		ZVAL_NULL(EX_VAR(opline->result.var));
 	}
 }
 
-static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc, zval *result)
+static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval rv;
 
@@ -1413,8 +1497,8 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
-			if (result) {
-				ZVAL_UNDEF(result);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_NULL(EX_VAR(opline->result.var));
 			}
 			return;
 		}
@@ -1434,21 +1518,21 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 		} else {
 			decrement_function(z);
 		}
-		if (UNEXPECTED(result)) {
-			ZVAL_COPY(result, z);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), z);
 		}
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
 		zval_ptr_dtor(zptr);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
-		if (UNEXPECTED(result)) {
-			ZVAL_NULL(result);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	}
 }
 
-static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op, zval *result)
+static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *z;
 	zval rv, obj;
@@ -1460,8 +1544,8 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
-			if (result) {
-				ZVAL_UNDEF(result);
+			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+				ZVAL_UNDEF(EX_VAR(opline->result.var));
 			}
 			return;
 		}
@@ -1478,14 +1562,14 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 		ZVAL_DEREF(z);
 		binary_op(z, z, value);
 		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
-		if (UNEXPECTED(result)) {
-			ZVAL_COPY(result, z);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_COPY(EX_VAR(opline->result.var), z);
 		}
 		zval_ptr_dtor(zptr);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
-		if (UNEXPECTED(result)) {
-			ZVAL_NULL(result);
+		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+			ZVAL_NULL(EX_VAR(opline->result.var));
 		}
 	}
 	OBJ_RELEASE(Z_OBJ(obj));
@@ -1532,9 +1616,82 @@ static zend_always_inline HashTable *zend_get_target_symbol_table(int fetch_type
 	return ht;
 }
 
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_offset(zend_long lval)
+{
+	zend_error(E_NOTICE, "Undefined offset: " ZEND_LONG_FMT, lval);
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_index(const zend_string *offset)
+{
+	zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_undefined_method(const zend_class_entry *ce, const zend_string *method)
+{
+	zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(ce->name), ZSTR_VAL(method));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_invalid_method_call(zval *object, zval *function_name)
+{
+	zend_throw_error(NULL, "Call to a member function %s() on %s", Z_STRVAL_P(function_name), zend_get_type_by_const(Z_TYPE_P(object)));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_non_static_method_call(const zend_function *fbc)
+{
+	if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
+		zend_error(E_DEPRECATED,
+			"Non-static method %s::%s() should not be called statically",
+			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	} else {
+		zend_throw_error(
+			zend_ce_error,
+			"Non-static method %s::%s() cannot be called statically",
+			ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+	}
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_param_must_be_ref(const zend_function *func, uint32_t arg_num)
+{
+	zend_error(E_WARNING, "Parameter %d to %s%s%s() expected to be a reference, value given",
+		arg_num,
+		func->common.scope ? ZSTR_VAL(func->common.scope->name) : "",
+		func->common.scope ? "::" : "",
+		ZSTR_VAL(func->common.function_name));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_scalar_as_array(void)
+{
+	zend_error(E_WARNING, "Cannot use a scalar value as an array");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_cannot_add_element(void)
+{
+	zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_resource_as_offset(const zval *dim)
+{
+	zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_use_new_element_for_string(void)
+{
+	zend_throw_error(NULL, "[] operator not supported for strings");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_access_undefined_propery_in_overloaded_object(void)
+{
+	zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
+}
+
+static zend_never_inline ZEND_COLD void ZEND_FASTCALL zend_unsupported_property_reference(void)
+{
+	zend_error(E_WARNING, "This object doesn't support property references");
+}
+
 static zend_always_inline zval *zend_fetch_dimension_address_inner(HashTable *ht, const zval *dim, int dim_type, int type EXECUTE_DATA_DC)
 {
-	zval *retval;
+	zval *retval = NULL;
 	zend_string *offset_key;
 	zend_ulong hval;
 
@@ -1547,14 +1704,14 @@ num_index:
 num_undef:
 		switch (type) {
 			case BP_VAR_R:
-				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				zend_undefined_offset(hval);
 				/* break missing intentionally */
 			case BP_VAR_UNSET:
 			case BP_VAR_IS:
 				retval = &EG(uninitialized_zval);
 				break;
 			case BP_VAR_RW:
-				zend_error(E_NOTICE,"Undefined offset: " ZEND_LONG_FMT, hval);
+				zend_undefined_offset(hval);
 				retval = zend_hash_index_update(ht, hval, &EG(uninitialized_zval));
 				break;
 			case BP_VAR_W:
@@ -1577,14 +1734,14 @@ str_index:
 				if (UNEXPECTED(Z_TYPE_P(retval) == IS_UNDEF)) {
 					switch (type) {
 						case BP_VAR_R:
-							zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_undefined_index(offset_key);
 							/* break missing intentionally */
 						case BP_VAR_UNSET:
 						case BP_VAR_IS:
 							retval = &EG(uninitialized_zval);
 							break;
 						case BP_VAR_RW:
-							zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+							zend_undefined_index(offset_key);
 							/* break missing intentionally */
 						case BP_VAR_W:
 							ZVAL_NULL(retval);
@@ -1595,14 +1752,14 @@ str_index:
 		} else {
 			switch (type) {
 				case BP_VAR_R:
-					zend_error(E_NOTICE, "Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_undefined_index(offset_key);
 					/* break missing intentionally */
 				case BP_VAR_UNSET:
 				case BP_VAR_IS:
 					retval = &EG(uninitialized_zval);
 					break;
 				case BP_VAR_RW:
-					zend_error(E_NOTICE,"Undefined index: %s", ZSTR_VAL(offset_key));
+					zend_undefined_index(offset_key);
 					retval = zend_hash_update(ht, offset_key, &EG(uninitialized_zval));
 					break;
 				case BP_VAR_W:
@@ -1622,7 +1779,7 @@ str_index:
 				hval = zend_dval_to_lval(Z_DVAL_P(dim));
 				goto num_index;
 			case IS_RESOURCE:
-				zend_error(E_NOTICE, "Resource ID#%d used as offset, casting to integer (%d)", Z_RES_HANDLE_P(dim), Z_RES_HANDLE_P(dim));
+				zend_use_resource_as_offset(dim);
 				hval = Z_RES_HANDLE_P(dim);
 				goto num_index;
 			case IS_FALSE:
@@ -1635,7 +1792,7 @@ str_index:
 				dim = Z_REFVAL_P(dim);
 				goto try_again;
 			default:
-				zend_error(E_WARNING, "Illegal offset type");
+				zend_illegal_offset();
 				retval = (type == BP_VAR_W || type == BP_VAR_RW) ?
 					NULL : &EG(uninitialized_zval);
 		}
@@ -1674,7 +1831,7 @@ fetch_from_array:
 		if (dim == NULL) {
 			retval = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
 			if (UNEXPECTED(retval == NULL)) {
-				zend_error(E_WARNING, "Cannot add element to the array as the next element is already occupied");
+				zend_cannot_add_element();
 				ZVAL_ERROR(result);
 				return;
 			}
@@ -1695,7 +1852,7 @@ fetch_from_array:
 	}
 	if (UNEXPECTED(Z_TYPE_P(container) == IS_STRING)) {
 		if (dim == NULL) {
-			zend_throw_error(NULL, "[] operator not supported for strings");
+			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
 			zend_wrong_string_offset(EXECUTE_DATA_C);
@@ -1707,7 +1864,7 @@ fetch_from_array:
 			dim = &EG(uninitialized_zval);
 		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(NULL, "Cannot use object as array");
+			zend_use_object_as_array();
 			ZVAL_ERROR(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1759,25 +1916,28 @@ fetch_from_array:
 				zend_error(E_WARNING, "Cannot unset offset in a non-array variable");
 				ZVAL_NULL(result);
 			} else {
-				zend_error(E_WARNING, "Cannot use a scalar value as an array");
+				zend_use_scalar_as_array();
 				ZVAL_ERROR(result);
 			}
 		}
 	}
 }
 
-static zend_never_inline void zend_fetch_dimension_address_W(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_W(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_W EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_RW(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_RW(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_RW EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_UNSET(zval *result, zval *container_ptr, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_UNSET(zval *container_ptr, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container_ptr, dim, dim_type, BP_VAR_UNSET EXECUTE_DATA_CC);
 }
 
@@ -1829,7 +1989,7 @@ try_string_offset:
 					dim = Z_REFVAL_P(dim);
 					goto try_string_offset;
 				default:
-					zend_error(E_WARNING, "Illegal offset type");
+					zend_illegal_offset();
 					break;
 			}
 
@@ -1861,7 +2021,7 @@ try_string_offset:
 			dim = &EG(uninitialized_zval);
 		}
 		if (!Z_OBJ_HT_P(container)->read_dimension) {
-			zend_throw_error(NULL, "Cannot use object as array");
+			zend_use_object_as_array();
 			ZVAL_NULL(result);
 		} else {
 			retval = Z_OBJ_HT_P(container)->read_dimension(container, dim, type, result);
@@ -1886,41 +2046,161 @@ try_string_offset:
 	}
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_R(zval *result, zval *container, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_R(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_R, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void zend_fetch_dimension_address_read_R_slow(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, IS_CV, BP_VAR_R, 1, 1 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_read_IS(zval *result, zval *container, zval *dim, int dim_type EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_read_IS(zval *container, zval *dim, int dim_type OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, dim_type, BP_VAR_IS, 1, 0 EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_LIST_w(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_w(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address(result, container, dim, IS_TMP_VAR, BP_VAR_W EXECUTE_DATA_CC);
 }
 
-static zend_never_inline void zend_fetch_dimension_address_LIST_r(zval *result, zval *container, zval *dim EXECUTE_DATA_DC)
+static zend_never_inline void ZEND_FASTCALL zend_fetch_dimension_address_LIST_r(zval *container, zval *dim OPLINE_DC EXECUTE_DATA_DC)
 {
+	zval *result = EX_VAR(opline->result.var);
 	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, BP_VAR_R, 0, 0 EXECUTE_DATA_CC);
 }
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type)
 {
-	if (type == BP_VAR_IS) {
-		zend_fetch_dimension_address_read_IS(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
+	zend_fetch_dimension_address_read(result, container, dim, IS_TMP_VAR, type, 1, 0 NO_EXECUTE_DATA_CC);
+}
+
+static zend_never_inline zval* ZEND_FASTCALL zend_find_array_dim_slow(HashTable *ht, zval *offset EXECUTE_DATA_DC)
+{
+	zend_ulong hval;
+
+	if (Z_TYPE_P(offset) == IS_DOUBLE) {
+		hval = zend_dval_to_lval(Z_DVAL_P(offset));
+num_idx:
+		return zend_hash_index_find(ht, hval);
+	} else if (Z_TYPE_P(offset) == IS_NULL) {
+str_idx:
+		return zend_hash_find_ex_ind(ht, ZSTR_EMPTY_ALLOC(), 1);
+	} else if (Z_TYPE_P(offset) == IS_FALSE) {
+		hval = 0;
+		goto num_idx;
+	} else if (Z_TYPE_P(offset) == IS_TRUE) {
+		hval = 1;
+		goto num_idx;
+	} else if (Z_TYPE_P(offset) == IS_RESOURCE) {
+		hval = Z_RES_HANDLE_P(offset);
+		goto num_idx;
+	} else if (/*OP2_TYPE == IS_CV &&*/ Z_TYPE_P(offset) == IS_UNDEF) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		goto str_idx;
 	} else {
-		zend_fetch_dimension_address_read_R(result, container, dim, IS_TMP_VAR NO_EXECUTE_DATA_CC);
+		zend_error(E_WARNING, "Illegal offset type in isset or empty");
+		return NULL;
 	}
 }
 
-static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type)
+static zend_never_inline int ZEND_FASTCALL zend_isset_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
+{
+	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		offset = &EG(uninitialized_zval);
+	}
+
+	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
+			return Z_OBJ_HT_P(container)->has_dimension(container, offset, 0);
+		} else {
+			zend_error(E_NOTICE, "Trying to check element of non-array");
+			return 0;
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
+		zend_long lval;
+
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+str_offset:
+			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
+				lval += (zend_long)Z_STRLEN_P(container);
+			}
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				return 1;
+			} else {
+				return 0;
+			}
+		} else {
+			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
+				ZVAL_DEREF(offset);
+			/*}*/
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+				lval = zval_get_long(offset);
+				goto str_offset;
+			}
+			return 0;
+		}
+	} else {
+		return 0;
+	}
+}
+
+static zend_never_inline int ZEND_FASTCALL zend_isempty_dim_slow(zval *container, zval *offset EXECUTE_DATA_DC)
+{
+	if (/*OP2_TYPE == IS_CV &&*/ UNEXPECTED(Z_TYPE_P(offset) == IS_UNDEF)) {
+		zval_undefined_cv(EX(opline)->op2.var EXECUTE_DATA_CC);
+		offset = &EG(uninitialized_zval);
+	}
+
+	if (/*OP1_TYPE != IS_CONST &&*/ EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
+		if (EXPECTED(Z_OBJ_HT_P(container)->has_dimension)) {
+			return !Z_OBJ_HT_P(container)->has_dimension(container, offset, 1);
+		} else {
+			zend_error(E_NOTICE, "Trying to check element of non-array");
+			return 1;
+		}
+	} else if (EXPECTED(Z_TYPE_P(container) == IS_STRING)) { /* string offsets */
+		zend_long lval;
+
+		if (EXPECTED(Z_TYPE_P(offset) == IS_LONG)) {
+			lval = Z_LVAL_P(offset);
+str_offset:
+			if (UNEXPECTED(lval < 0)) { /* Handle negative offset */
+				lval += (zend_long)Z_STRLEN_P(container);
+			}
+			if (EXPECTED(lval >= 0) && (size_t)lval < Z_STRLEN_P(container)) {
+				return (Z_STRVAL_P(container)[lval] == '0');
+			} else {
+				return 1;
+			}
+		} else {
+			/*if (OP2_TYPE & (IS_CV|IS_VAR)) {*/
+				ZVAL_DEREF(offset);
+			/*}*/
+			if (Z_TYPE_P(offset) < IS_STRING /* simple scalar types */
+					|| (Z_TYPE_P(offset) == IS_STRING /* or numeric string */
+						&& IS_LONG == is_numeric_string(Z_STRVAL_P(offset), Z_STRLEN_P(offset), NULL, NULL, 0))) {
+				lval = zval_get_long(offset);
+				goto str_offset;
+			}
+			return 1;
+		}
+	} else {
+		return 1;
+	}
+}
+
+static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type OPLINE_DC)
 {
     if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
@@ -1932,17 +2212,8 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			}
 
 			/* this should modify object only if it's empty */
-			if (type != BP_VAR_UNSET &&
-			    EXPECTED(Z_TYPE_P(container) <= IS_FALSE ||
-			      (Z_TYPE_P(container) == IS_STRING && Z_STRLEN_P(container)==0))) {
-				zval_ptr_dtor_nogc(container);
-				object_init(container);
-			} else {
-				if (container_op_type != IS_VAR || EXPECTED(!Z_ISERROR_P(container))) {
-					zend_string *property_name = zval_get_string(prop_ptr);
-					zend_error(E_WARNING, "Attempt to modify property '%s' of non-object", ZSTR_VAL(property_name));
-					zend_string_release(property_name);
-				}
+			if (type == BP_VAR_UNSET ||
+				UNEXPECTED(!make_real_object_rw(container, prop_ptr OPLINE_CC))) {
 				ZVAL_ERROR(result);
 				return;
 			}
@@ -1986,7 +2257,7 @@ use_read_property:
 					ZVAL_UNREF(ptr);
 				}
 			} else {
-				zend_throw_error(NULL, "Cannot access undefined property for object with overloaded property access");
+				zend_access_undefined_propery_in_overloaded_object();
 				ZVAL_ERROR(result);
 			}
 		} else {
@@ -1995,10 +2266,46 @@ use_read_property:
 	} else if (EXPECTED(Z_OBJ_HT_P(container)->read_property)) {
 		goto use_read_property;
 	} else {
-		zend_error(E_WARNING, "This object doesn't support property references");
+		zend_unsupported_property_reference();
 		ZVAL_ERROR(result);
 	}
 }
+
+static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DATA_DC)
+{
+	zval *result = EX_VAR(opline->result.var);
+
+	switch (type) {
+		case BP_VAR_R:
+			if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+				ZVAL_OBJ(result, Z_OBJ(EX(This)));
+				Z_ADDREF_P(result);
+			} else {
+				ZVAL_NULL(result);
+				zend_error(E_NOTICE,"Undefined variable: this");
+			}
+			break;
+		case BP_VAR_IS:
+			if (EXPECTED(Z_TYPE(EX(This)) == IS_OBJECT)) {
+				ZVAL_OBJ(result, Z_OBJ(EX(This)));
+				Z_ADDREF_P(result);
+			} else {
+				ZVAL_NULL(result);
+			}
+			break;
+		case BP_VAR_RW:
+		case BP_VAR_W:
+			ZVAL_UNDEF(result);
+			zend_throw_error(NULL, "Cannot re-assign $this");
+			break;
+		case BP_VAR_UNSET:
+			ZVAL_UNDEF(result);
+			zend_throw_error(NULL, "Cannot unset $this");
+			break;
+		EMPTY_SWITCH_DEFAULT_CASE()
+	}
+}
+
 
 #if ZEND_INTENSIVE_DEBUGGING
 
@@ -2142,7 +2449,7 @@ static zend_never_inline void zend_copy_extra_args(EXECUTE_DATA_D)
 			ZVAL_UNDEF(src);
 			src--;
 		} while (--count);
-		if (type_flags & (IS_TYPE_REFCOUNTED << Z_TYPE_FLAGS_SHIFT)) {
+		if (Z_TYPE_INFO_REFCOUNTED(type_flags)) {
 			ZEND_ADD_CALL_FLAG(execute_data, ZEND_CALL_FREE_EXTRA_ARGS);
 		}
 	} else {
@@ -2479,6 +2786,20 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 }
 /* }}} */
 
+static const zend_live_range *find_live_range(const zend_op_array *op_array, uint32_t op_num, uint32_t var_num) /* {{{ */
+{
+	int i;
+	for (i = 0; i < op_array->last_live_range; i++) {
+		const zend_live_range *range = &op_array->live_range[i];
+		if (op_num >= range->start && op_num < range->end
+				&& var_num == (range->var & ~ZEND_LIVE_MASK)) {
+			return range;
+		}
+	}
+	return NULL;
+}
+/* }}} */
+
 static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, uint32_t catch_op_num) /* {{{ */
 {
 	int i;
@@ -2581,7 +2902,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		}
 		if (UNEXPECTED(fbc == NULL)) {
 			if (EXPECTED(!EG(exception))) {
-				zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), ZSTR_VAL(mname));
+				zend_undefined_method(called_scope, mname);
 			}
 			zend_string_release(lcname);
 			zend_string_release(mname);
@@ -2592,18 +2913,8 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		zend_string_release(mname);
 
 		if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
-			if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-				zend_error(E_DEPRECATED,
-					"Non-static method %s::%s() should not be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					return NULL;
-				}
-			} else {
-				zend_throw_error(
-					zend_ce_error,
-					"Non-static method %s::%s() cannot be called statically",
-					ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+			zend_non_static_method_call(fbc);
+			if (UNEXPECTED(EG(exception) != NULL)) {
 				return NULL;
 			}
 		}
@@ -2713,23 +3024,13 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			}
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(called_scope->name), Z_STRVAL_P(method));
+					zend_undefined_method(called_scope, Z_STR_P(method));
 				}
 				return NULL;
 			}
 			if (!(fbc->common.fn_flags & ZEND_ACC_STATIC)) {
-				if (fbc->common.fn_flags & ZEND_ACC_ALLOW_STATIC) {
-					zend_error(E_DEPRECATED,
-						"Non-static method %s::%s() should not be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
-					if (UNEXPECTED(EG(exception) != NULL)) {
-						return NULL;
-					}
-				} else {
-					zend_throw_error(
-						zend_ce_error,
-						"Non-static method %s::%s() cannot be called statically",
-						ZSTR_VAL(fbc->common.scope->name), ZSTR_VAL(fbc->common.function_name));
+				zend_non_static_method_call(fbc);
+				if (UNEXPECTED(EG(exception) != NULL)) {
 					return NULL;
 				}
 			}
@@ -2740,7 +3041,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_array(zend_ar
 			fbc = Z_OBJ_HT_P(obj)->get_method(&object, Z_STR_P(method), NULL);
 			if (UNEXPECTED(fbc == NULL)) {
 				if (EXPECTED(!EG(exception))) {
-					zend_throw_error(NULL, "Call to undefined method %s::%s()", ZSTR_VAL(object->ce->name), Z_STRVAL_P(method));
+					zend_undefined_method(object->ce, Z_STR_P(method));
 				}
 				return NULL;
 			}
@@ -2886,6 +3187,12 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 	return 1;
 }
 /* }}} */
+
+#ifdef ZEND_VM_TRACE_HANDLERS
+# include "zend_vm_trace_handlers.h"
+#elif defined(ZEND_VM_TRACE_MAP)
+# include "zend_vm_trace_map.h"
+#endif
 
 #define ZEND_VM_NEXT_OPCODE_EX(check_exception, skip) \
 	CHECK_SYMBOL_TABLES() \

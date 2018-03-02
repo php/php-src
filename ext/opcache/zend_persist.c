@@ -40,13 +40,15 @@
 #ifdef HAVE_OPCACHE_FILE_CACHE
 #define zend_set_str_gc_flags(str) do { \
 	if (ZCG(accel_directives).file_cache_only) { \
-		GC_FLAGS(str) = IS_STR_INTERNED; \
+		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
-		GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT; \
+		GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
 	} \
 } while (0)
 #else
-#define zend_set_str_gc_flags(str) GC_FLAGS(str) = IS_STR_INTERNED | IS_STR_PERMANENT
+#define zend_set_str_gc_flags(str) do {\
+	GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
+} while (0)
 #endif
 
 #define zend_accel_store_string(str) do { \
@@ -305,7 +307,7 @@ static void zend_persist_zval(zval *z)
 					/* make immutable array */
 					Z_TYPE_FLAGS_P(z) = 0;
 					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
-					GC_FLAGS(Z_COUNTED_P(z)) |= IS_ARRAY_IMMUTABLE;
+					GC_ADD_FLAGS(Z_COUNTED_P(z), IS_ARRAY_IMMUTABLE);
 					HT_FLAGS(Z_ARRVAL_P(z)) |= HASH_FLAG_STATIC_KEYS;
 				}
 			}
@@ -891,7 +893,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 	zend_accel_store_interned_string(script->script.filename);
 
-#ifdef __SSE2__
+#if defined(__AVX__) || defined(__SSE2__)
 	/* Align to 64-byte boundary */
 	ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
 #else

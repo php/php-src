@@ -39,12 +39,14 @@
 #define ZEND_OPTIMIZER_PASS_12		(1<<11)  /* Adjust used stack           */
 #define ZEND_OPTIMIZER_PASS_13		(1<<12)  /* Remove unused variables     */
 #define ZEND_OPTIMIZER_PASS_14		(1<<13)  /* DCE (dead code elimination) */
-#define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* Collect constants */
+#define ZEND_OPTIMIZER_PASS_15		(1<<14)  /* (unsafe) Collect constants */
 #define ZEND_OPTIMIZER_PASS_16		(1<<15)  /* Inline functions */
+
+#define ZEND_OPTIMIZER_IGNORE_OVERLOADING	(1<<16)  /* (unsafe) Ignore possibility of operator overloading */
 
 #define ZEND_OPTIMIZER_ALL_PASSES	0x7FFFFFFF
 
-#define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFFBFFF"
+#define DEFAULT_OPTIMIZATION_LEVEL  "0x7FFEBFFF"
 
 
 #define ZEND_DUMP_AFTER_PASS_1		ZEND_OPTIMIZER_PASS_1

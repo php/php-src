@@ -23,7 +23,7 @@ class B implements A {
 new B;
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(1) "a"

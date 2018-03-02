@@ -25,7 +25,7 @@ var_dump( array_reverse($array, false) );  // expects the keys not to be preserv
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : basic functionality ***
 array(6) {
   [0]=>

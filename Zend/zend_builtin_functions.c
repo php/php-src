@@ -361,7 +361,7 @@ ZEND_FUNCTION(gc_collect_cycles)
    Returns status of the circular reference collector */
 ZEND_FUNCTION(gc_enabled)
 {
-	RETURN_BOOL(GC_G(gc_enabled));
+	RETURN_BOOL(gc_enabled());
 }
 /* }}} */
 

@@ -64,7 +64,7 @@ func1();
 
 echo "\nDone";
 ?> 
---EXPECTF--
+--EXPECT--
 *** Displaying various variables through the array captured by the get_defined_vars function call ***
 int(1)
 float(22.33)

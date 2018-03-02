@@ -46,7 +46,7 @@ delete_files($dir, 2);
 $dir = dirname(__FILE__) . '/scandir_variation10';
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 SCANDIR_SORT_ASCENDING: 0
 SCANDIR_SORT_DESCENDING: 1
 SCANDIR_SORT_NONE: 2

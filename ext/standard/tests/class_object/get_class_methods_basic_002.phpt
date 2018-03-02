@@ -66,7 +66,7 @@ X::testFromX();
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 Accessing D from global scope:
 array(4) {
   [0]=>

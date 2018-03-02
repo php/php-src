@@ -85,7 +85,7 @@ foreach($v as $k => $d)
 unlink(dirname(__FILE__) . '/files/phar_oo_008.phar.php');
 __halt_compiler();
 ?>
---EXPECTF--
+--EXPECT--
 ===1===
 0=>1,2,3
 

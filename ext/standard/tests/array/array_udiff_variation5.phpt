@@ -38,7 +38,7 @@ var_dump(array_udiff($arr1, $arr2, 'too_few_parameters'));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_udiff() : usage variation ***
 
 -- comparison function with an incorrect return value --

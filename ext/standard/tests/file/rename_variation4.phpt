@@ -40,7 +40,7 @@ echo "Done\n";
 $file_path = dirname(__FILE__);
 rmdir($file_path."/12345");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() by renaming a file, link and directory to numeric name ***
 bool(true)
 bool(false)

@@ -36,6 +36,6 @@ catch (BadMethodCallException $e)
 unlink(dirname(__FILE__) . '/files/phar_oo_012b.phar.php');
 __halt_compiler();
 ?>
---EXPECTF--
+--EXPECT--
 Exception: Write operations disabled by the php.ini setting phar.readonly
 ===DONE===

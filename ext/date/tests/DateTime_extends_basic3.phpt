@@ -20,7 +20,7 @@ echo $d->format() . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing new DateTime() : with user format() method ***
 May 1, 1967, 10:30:41 pm
 ===DONE===

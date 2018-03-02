@@ -14,7 +14,7 @@ TestFest London May 2009
     var_dump($k);
   }
 ?>
---EXPECTF--
+--EXPECT--
 one=>1
 string(3) "one"
 two=>2

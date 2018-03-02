@@ -2194,8 +2194,8 @@ manage_callouts(PCRE2_SPTR ptr, uint32_t **pcalloutptr, BOOL auto_callout,
 {
 uint32_t *previous_callout = *pcalloutptr;
 
-if (previous_callout != NULL) previous_callout[2] = ptr - cb->start_pattern -
-  (PCRE2_SIZE)previous_callout[1];
+if (previous_callout != NULL) previous_callout[2] = (uint32_t)(ptr -
+  cb->start_pattern - (PCRE2_SIZE)previous_callout[1]);
 
 if (!auto_callout) previous_callout = NULL; else
   {
@@ -3806,7 +3806,7 @@ while (ptr < ptrend)
       /* Remember the offset to the next item in the pattern, and set a default
       length. This should get updated after the next item is read. */
 
-      previous_callout[1] = ptr - cb->start_pattern;
+      previous_callout[1] = (uint32_t)(ptr - cb->start_pattern);
       previous_callout[2] = 0;
       break;                  /* End callout */
 
@@ -5599,14 +5599,17 @@ for (;; pptr++)
     /* ===================================================================*/
     /* Deal with (*VERB)s. */
 
-    /* Check for open captures before ACCEPT and convert it to ASSERT_ACCEPT if
-    in an assertion. In the first pass, just accumulate the length required;
+    /* Check for open captures before ACCEPT and close those that are within
+    the same assertion level, also converting ACCEPT to ASSERT_ACCEPT in an
+    assertion. In the first pass, just accumulate the length required;
     otherwise hitting (*ACCEPT) inside many nested parentheses can cause
     workspace overflow. Do not set firstcu after *ACCEPT. */
 
     case META_ACCEPT:
     cb->had_accept = TRUE;
-    for (oc = cb->open_caps; oc != NULL; oc = oc->next)
+    for (oc = cb->open_caps;
+         oc != NULL && oc->assert_depth >= cb->assert_depth;
+         oc = oc->next)
       {
       if (lengthptr != NULL)
         {
@@ -7132,7 +7135,7 @@ for (;; pptr++)
     later. */
 
     HANDLE_SINGLE_REFERENCE:
-    if (firstcuflags == REQ_UNSET) firstcuflags = REQ_NONE;
+    if (firstcuflags == REQ_UNSET) zerofirstcuflags = firstcuflags = REQ_NONE;
     *code++ = ((options & PCRE2_CASELESS) != 0)? OP_REFI : OP_REF;
     PUT2INC(code, 0, meta_arg);
 
@@ -7483,6 +7486,7 @@ if (*code == OP_CBRA)
   capitem.number = capnumber;
   capitem.next = cb->open_caps;
   capitem.flag = FALSE;
+  capitem.assert_depth = cb->assert_depth;
   cb->open_caps = &capitem;
   }
 
@@ -8102,13 +8106,13 @@ REQ_NONE in the flags.
 Arguments:
   code       points to start of compiled pattern
   flags      points to the first code unit flags
-  inassert   TRUE if in an assertion
+  inassert   non-zero if in an assertion
 
 Returns:     the fixed first code unit, or 0 with REQ_NONE in flags
 */
 
 static uint32_t
-find_firstassertedcu(PCRE2_SPTR code, int32_t *flags, BOOL inassert)
+find_firstassertedcu(PCRE2_SPTR code, int32_t *flags, uint32_t inassert)
 {
 uint32_t c = 0;
 int cflags = REQ_NONE;
@@ -8135,7 +8139,7 @@ do {
      case OP_SCBRAPOS:
      case OP_ASSERT:
      case OP_ONCE:
-     d = find_firstassertedcu(scode, &dflags, op == OP_ASSERT);
+     d = find_firstassertedcu(scode, &dflags, inassert + ((op==OP_ASSERT)?1:0));
      if (dflags < 0)
        return 0;
      if (cflags < 0) { c = d; cflags = dflags; }
@@ -8150,7 +8154,7 @@ do {
      case OP_PLUS:
      case OP_MINPLUS:
      case OP_POSPLUS:
-     if (!inassert) return 0;
+     if (inassert == 0) return 0;
      if (cflags < 0) { c = scode[1]; cflags = 0; }
        else if (c != scode[1]) return 0;
      break;
@@ -8163,7 +8167,7 @@ do {
      case OP_PLUSI:
      case OP_MINPLUSI:
      case OP_POSPLUSI:
-     if (!inassert) return 0;
+     if (inassert == 0) return 0;
      if (cflags < 0) { c = scode[1]; cflags = REQ_CASELESS; }
        else if (c != scode[1]) return 0;
      break;
@@ -9481,6 +9485,7 @@ re->blocksize = re_blocksize;
 re->magic_number = MAGIC_NUMBER;
 re->compile_options = options;
 re->overall_options = cb.external_options;
+re->extra_options = ccontext->extra_options;
 re->flags = PCRE2_CODE_UNIT_WIDTH/8 | cb.external_flags | setflags;
 re->limit_heap = limit_heap;
 re->limit_match = limit_match;
@@ -9670,7 +9675,7 @@ if ((re->overall_options & PCRE2_NO_START_OPTIMIZE) == 0)
   actual literals that follow). */
 
   if (firstcuflags < 0)
-    firstcu = find_firstassertedcu(codestart, &firstcuflags, FALSE);
+    firstcu = find_firstassertedcu(codestart, &firstcuflags, 0);
 
   /* Save the data for a first code unit. */
 

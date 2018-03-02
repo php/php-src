@@ -113,7 +113,7 @@ var_dump(
     
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "pack e"
 string(16) "0000000000000000"
 string(16) "0000000000000000"

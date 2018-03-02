@@ -21,7 +21,7 @@ var_dump($res->fetchAll(PDO::FETCH_FUNC, function($a) { return strtoupper($a); }
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(3) "XYZ"

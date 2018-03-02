@@ -16,6 +16,6 @@ foreach ($fcts as $fct) {
 }
 ?>
 Done
---EXPECTF--
+--EXPECT--
 dl Ok
 Done

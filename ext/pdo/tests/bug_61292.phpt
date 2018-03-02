@@ -38,6 +38,6 @@ class Database_SQL extends PDO
 
 (new Database_SQL)->foo();
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

@@ -32,7 +32,7 @@ var_dump( strncmp($str1, $str2, 8) );  //comparing all the 8-bits; expected: int
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Test strncmp() function: with binary inputs ***
 
 -- Checking with all 256 characters given, in binary format --

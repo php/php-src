@@ -91,7 +91,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through hard link ***
 
 -- Access data of the file through the hard link --

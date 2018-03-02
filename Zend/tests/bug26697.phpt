@@ -13,7 +13,7 @@ var_dump(class_exists('NotExistingClass'));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 {closure}(NotExistingClass)
 bool(false)
 {closure}(NotExistingClass), done

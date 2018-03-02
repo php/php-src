@@ -64,5 +64,5 @@ precision=5
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 1: 9.9999: 9.9999

@@ -13,7 +13,7 @@ var_dump(filter_var("123456789000000", FILTER_SANITIZE_EMAIL));
 	
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(5) "a@b.c"
 string(30) "a[!@#$%^&*@a@#$%^&*.com@#$%^&*"
 string(21) "whitespaceheresommore"

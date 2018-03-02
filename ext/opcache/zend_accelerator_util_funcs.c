@@ -596,8 +596,74 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 	return;
 }
 
-#ifdef __SSE2__
-# include <mmintrin.h>
+#if defined(__AVX__)
+# include <nmmintrin.h>
+# if defined(__GNUC__) && defined(__i386__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"vmovaps (%1), %%ymm0\n\t"
+		"vmovaps 0x20(%1), %%ymm1\n\t"
+		"vmovaps %%ymm0, (%1,%2)\n\t"
+		"vmovaps %%ymm1, 0x20(%1,%2)\n\t"
+		"addl $0x40, %1\n\t"
+		"subl $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		"+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%ymm0", "%ymm1");
+}
+# elif defined(__GNUC__) && defined(__x86_64__)
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	size_t delta = (char*)dest - (char*)src;
+
+	__asm__ volatile (
+		".align 16\n\t"
+		".LL0%=:\n\t"
+		"prefetchnta 0x40(%1)\n\t"
+		"vmovaps (%1), %%ymm0\n\t"
+		"vmovaps 0x20(%1), %%ymm1\n\t"
+		"vmovaps %%ymm0, (%1,%2)\n\t"
+		"vmovaps %%ymm1, 0x20(%1,%2)\n\t"
+		"addq $0x40, %1\n\t"
+		"subq $0x40, %0\n\t"
+		"ja .LL0%="
+		: "+r"(size),
+		"+r"(src)
+		: "r"(delta)
+		: "cc", "memory", "%ymm0", "%ymm1");
+}
+# else
+static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
+{
+	__m256 *dqdest = (__m256*)dest;
+	const __m256 *dqsrc  = (const __m256*)src;
+	const __m256 *end  = (const __m256*)((const char*)src + size);
+
+	do {
+#ifdef PHP_WIN32
+		_mm_prefetch((const char *)(dqsrc + 2), _MM_HINT_NTA);
+#else
+		_mm_prefetch(dqsrc + 2, _MM_HINT_NTA);
+#endif
+
+		__m256 ymm0 = _mm256_load_ps((const float *)(dqsrc + 0));
+		__m256 ymm1 = _mm256_load_ps((const float *)(dqsrc + 1));
+		dqsrc  += 2;
+		_mm256_store_ps((float *)(dqdest + 0), ymm0);
+		_mm256_store_ps((float *)(dqdest + 1), ymm1);
+		dqdest += 2;
+	} while (dqsrc != end);
+}
+# endif
+#elif defined(__SSE2__)
 # include <emmintrin.h>
 # if defined(__GNUC__) && defined(__i386__)
 static zend_always_inline void fast_memcpy(void *dest, const void *src, size_t size)
@@ -691,7 +757,7 @@ zend_op_array* zend_accel_load_script(zend_persistent_script *persistent_script,
 		ZCG(current_persistent_script) = persistent_script;
 		ZCG(arena_mem) = NULL;
 		if (EXPECTED(persistent_script->arena_size)) {
-#ifdef __SSE2__
+#if defined(__AVX__) || defined(__SSE2__)
 			/* Target address must be aligned to 64-byte boundary */
 			_mm_prefetch(persistent_script->arena_mem, _MM_HINT_NTA);
 			ZCG(arena_mem) = zend_arena_alloc(&CG(arena), persistent_script->arena_size + 64);

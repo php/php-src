@@ -28,7 +28,7 @@ $ao->uasort('cmp');
 var_dump($ao);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::uasort() : basic functionality ***
 object(ArrayObject)#1 (1) {
   ["storage":"ArrayObject":private]=>

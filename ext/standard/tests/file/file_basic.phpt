@@ -28,7 +28,7 @@ foreach( $filetypes as $type ) {
 
 echo "\n--- Done ---";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing file() with basic types of files ***
 Array
 (

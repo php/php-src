@@ -42,7 +42,7 @@ foreach($string_array as $string)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : basic functionality ***
 -- Iteration 1 --
 string(5) "hello"

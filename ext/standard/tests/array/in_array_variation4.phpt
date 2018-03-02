@@ -58,7 +58,7 @@ var_dump( in_array('123abc', array(123), TRUE) ); // false in strict mode
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing resource type with in_array() ***
 bool(true)
 bool(false)

@@ -32,6 +32,9 @@ ZEND_API const zend_op *zend_get_halt_op(void);
 ZEND_API int ZEND_FASTCALL zend_vm_call_opcode_handler(zend_execute_data *ex);
 ZEND_API int zend_vm_kind(void);
 
+void zend_vm_init(void);
+void zend_vm_dtor(void);
+
 END_EXTERN_C()
 
 #define ZEND_VM_SET_OPCODE_HANDLER(opline) zend_vm_set_opcode_handler(opline)

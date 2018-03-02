@@ -6,5 +6,5 @@ Bug #73532 (Null pointer dereference in mb_eregi)
 <?php
 var_dump(mb_eregi("a", "\xf5"));
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)

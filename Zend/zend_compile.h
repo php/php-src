@@ -1010,7 +1010,7 @@ END_EXTERN_C()
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
 
-/* force IS_OBJ_USE_GUARDS for all classes */
+/* force ZEND_ACC_USE_GUARDS for all classes */
 #define ZEND_COMPILE_GUARDS						(1<<9)
 
 /* disable builtin special case function calls */

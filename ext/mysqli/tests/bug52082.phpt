@@ -22,7 +22,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(20) "character_set_client"

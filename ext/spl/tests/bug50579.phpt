@@ -31,7 +31,7 @@ foreach ($i as $name=>$value) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 test1=>[test888]
 test3=>[test999]
 test1=>888

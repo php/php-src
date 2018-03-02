@@ -22,7 +22,7 @@ var_dump($var); //should be still string(1) "1"
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["test1"]=>
   int(1)

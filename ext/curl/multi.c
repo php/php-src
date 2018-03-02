@@ -311,7 +311,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(resource mh [, long &msgs_in_queue])
+/* {{{ proto array curl_multi_info_read(resource mh [, int &msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {

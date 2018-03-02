@@ -11,6 +11,6 @@ session.use_only_cookies=0
 ob_start();
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok
 

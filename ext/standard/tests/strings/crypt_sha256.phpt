@@ -59,6 +59,6 @@ Expected: <$t[2]>
 Got       <$res>\n";
 }
 echo "Passes.";?>
---EXPECTF--
+--EXPECT--
 Passes.
 

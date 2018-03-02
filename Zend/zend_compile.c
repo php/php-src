@@ -605,68 +605,6 @@ static uint32_t zend_start_live_range(zend_op_array *op_array, uint32_t start) /
 }
 /* }}} */
 
-static uint32_t zend_start_live_range_ex(zend_op_array *op_array, uint32_t start) /* {{{ */
-{
-	if (op_array->last_live_range == 0 ||
-	    op_array->live_range[op_array->last_live_range - 1].start <= start) {
-		return zend_start_live_range(op_array, start);
-	} else {
-		/* Live ranges have to be sorted by "start" field */
-		uint32_t n = op_array->last_live_range;
-
-		/* move early ranges to make a room */
-		op_array->last_live_range = n + 1;
-		op_array->live_range = erealloc(op_array->live_range, sizeof(zend_live_range) * op_array->last_live_range);
-		do {
-			op_array->live_range[n] = op_array->live_range[n-1];
-			n--;
-		} while (n != 0 && op_array->live_range[n-1].start > start);
-
-	    /* initialize new range */
-		op_array->live_range[n].start = start;
-
-		/* update referens to live-ranges from stack */
-		if (!zend_stack_is_empty(&CG(loop_var_stack))) {
-			zend_loop_var *loop_var = zend_stack_top(&CG(loop_var_stack));
-			zend_loop_var *base = zend_stack_base(&CG(loop_var_stack));
-			int check_opcodes = 0;
-
-			for (; loop_var >= base; loop_var--) {
-				if (loop_var->opcode == ZEND_RETURN) {
-					/* Stack separator */
-					break;
-				} else if (loop_var->opcode == ZEND_FREE ||
-			           loop_var->opcode == ZEND_FE_FREE) {
-					if (loop_var->u.live_range_offset >= n) {
-						loop_var->u.live_range_offset++;
-						check_opcodes = 1;
-					} else {
-						break;
-					}
-				}
-			}
-
-			/* update previously generated FREE/FE_FREE opcodes */
-			if (check_opcodes) {
-				zend_op *opline = op_array->opcodes + op_array->live_range[n+1].start;
-				zend_op *end = op_array->opcodes + op_array->last;
-
-				while (opline < end) {
-					if ((opline->opcode == ZEND_FREE ||
-					     opline->opcode == ZEND_FE_FREE) &&
-					    (opline->extended_value & ZEND_FREE_ON_RETURN) &&
-					    opline->op2.num >= n) {
-						opline->op2.num++;
-					}
-					opline++;
-				}
-			}
-		}
-		return n;
-	}
-}
-/* }}} */
-
 static void zend_end_live_range(zend_op_array *op_array, uint32_t offset, uint32_t end, uint32_t kind, uint32_t var) /* {{{ */
 {
 	zend_live_range *range = op_array->live_range + offset;
@@ -2059,7 +1997,7 @@ static void zend_find_live_range(zend_op *opline, zend_uchar type, uint32_t var)
 			}
 
 	        zend_end_live_range(CG(active_op_array),
-				zend_start_live_range_ex(CG(active_op_array),
+				zend_start_live_range(CG(active_op_array),
 					def + 1 - CG(active_op_array)->opcodes),
 				opline - CG(active_op_array)->opcodes,
 				ZEND_LIVE_TMPVAR, var);
@@ -4463,7 +4401,6 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
 			SET_UNUSED(opline->op2);
-			opline->op2.num = loop_var->u.live_range_offset;
 			opline->extended_value = ZEND_FREE_ON_RETURN;
 			depth--;
 	    }
@@ -7963,7 +7900,7 @@ static void zend_compile_encaps_list(znode *result, zend_ast *ast) /* {{{ */
 		GET_NODE(result, opline->result);
 	} else {
 		uint32_t var;
-		uint32_t range = zend_start_live_range_ex(CG(active_op_array), rope_init_lineno);
+		uint32_t range = zend_start_live_range(CG(active_op_array), rope_init_lineno);
 
 		init_opline->extended_value = j;
 		opline->opcode = ZEND_ROPE_END;

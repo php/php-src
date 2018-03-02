@@ -27,5 +27,5 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 Heap is corrupted, heap properties are no longer ensured.

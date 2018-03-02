@@ -28,7 +28,7 @@ unlink($filename);
 unlink($symlink);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

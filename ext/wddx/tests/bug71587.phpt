@@ -29,7 +29,7 @@ foreach($wddx as $k=>$v)
 
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(8) "manhluat"

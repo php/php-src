@@ -13,7 +13,7 @@ var_dump($fo->fgetcsv());
 <?php
 unlink('SplFileObject__fgetcsv7.csv');
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   string(4) "aa\""

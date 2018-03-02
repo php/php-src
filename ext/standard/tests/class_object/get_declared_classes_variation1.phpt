@@ -25,7 +25,7 @@ var_dump(in_array('AutoLoaded', get_declared_classes()));
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_declared_classes() : testing autoloaded classes ***
 
 -- before instance is declared --

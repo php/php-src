@@ -221,10 +221,19 @@ char *alloca();
 # define ZEND_ATTRIBUTE_UNUSED __attribute__((unused))
 # define ZEND_COLD __attribute__((cold))
 # define ZEND_HOT __attribute__((hot))
+# ifdef __OPTIMIZE__
+#  define ZEND_OPT_SIZE  __attribute__((optimize("Os")))
+#  define ZEND_OPT_SPEED __attribute__((optimize("Ofast")))
+# else
+#  define ZEND_OPT_SIZE
+#  define ZEND_OPT_SPEED
+# endif
 #else
 # define ZEND_ATTRIBUTE_UNUSED
 # define ZEND_COLD
 # define ZEND_HOT
+# define ZEND_OPT_SIZE
+# define ZEND_OPT_SPEED
 #endif
 
 #if defined(__GNUC__) && ZEND_GCC_VERSION >= 5000
@@ -529,7 +538,12 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define PHP_HAVE_SSE4_2
 # endif
 
-# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H)
+/*
+ * AVX2 support was added in gcc 4.7, but AVX2 intrinsics don't work in
+ * __attribute__((target("avx2"))) functions until gcc 4.9.
+ */
+# if PHP_HAVE_AVX2_INSTRUCTIONS && defined(HAVE_IMMINTRIN_H) && \
+  (defined(__llvm__) || defined(__clang__) || (defined(__GNUC__) && ZEND_GCC_VERSION >= 4009))
 # define PHP_HAVE_AVX2
 # endif
 #endif
@@ -542,7 +556,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSSE3_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSSE3_NATIVE || ZEND_INTRIN_SSSE3_RESOLVER)
+#if ZEND_INTRIN_SSSE3_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSSE3_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSSE3_RESOLVER
 # define ZEND_INTRIN_SSSE3_FUNC_PTR 1
@@ -566,7 +580,7 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 # define ZEND_INTRIN_SSE4_2_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_SSE4_2_NATIVE || ZEND_INTRIN_SSE4_2_RESOLVER)
+#if ZEND_INTRIN_SSE4_2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_SSE4_2_FUNC_PROTO 1
 #elif ZEND_INTRIN_SSE4_2_RESOLVER
 # define ZEND_INTRIN_SSE4_2_FUNC_PTR 1
@@ -583,14 +597,12 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 #endif
 
 #ifdef __AVX2__
-/* Instructions compiled directly. */
 # define ZEND_INTRIN_AVX2_NATIVE 1
 #elif (defined(HAVE_FUNC_ATTRIBUTE_TARGET) && defined(PHP_HAVE_AVX2)) || defined(ZEND_WIN32)
-/* Function resolved by ifunc or MINIT. */
 # define ZEND_INTRIN_AVX2_RESOLVER 1
 #endif
 
-#if ZEND_INTRIN_HAVE_IFUNC_TARGET && (ZEND_INTRIN_AVX2_NATIVE || ZEND_INTRIN_AVX2_RESOLVER)
+#if ZEND_INTRIN_AVX2_RESOLVER && ZEND_INTRIN_HAVE_IFUNC_TARGET
 # define ZEND_INTRIN_AVX2_FUNC_PROTO 1
 #elif ZEND_INTRIN_AVX2_RESOLVER
 # define ZEND_INTRIN_AVX2_FUNC_PTR 1

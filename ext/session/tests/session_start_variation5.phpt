@@ -31,7 +31,7 @@ session_destroy();
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_start() : variation ***
 array(4) {
   ["colour"]=>
