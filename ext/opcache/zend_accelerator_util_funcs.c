@@ -180,7 +180,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumUsed = 0;
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
-	ht->pDestructor = ZVAL_PTR_DTOR;
+	ht->pDestructor = NULL;
 	ht->u.flags = (source->u.flags & HASH_FLAG_INITIALIZED) | HASH_FLAG_APPLY_PROTECTION;
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
