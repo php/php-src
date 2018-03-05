@@ -1765,7 +1765,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	GC_TYPE_INFO(target) = IS_ARRAY;
 
 	target->nTableSize = source->nTableSize;
-	target->pDestructor = source->pDestructor;
+	target->pDestructor = ZVAL_PTR_DTOR;
 
 	if (source->nNumUsed == 0) {
 		target->u.flags = (source->u.flags & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED|HASH_FLAG_PERSISTENT|ZEND_HASH_APPLY_COUNT_MASK)) | HASH_FLAG_APPLY_PROTECTION | HASH_FLAG_STATIC_KEYS;
