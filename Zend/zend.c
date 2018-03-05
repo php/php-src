@@ -103,16 +103,7 @@ static ZEND_INI_MH(OnUpdateGCEnabled) /* {{{ */
 {
 	zend_bool val;
 
-	if (ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) {
-		val = 1;
-	} else if (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) {
-		val = 1;
-	}else if (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) {
-		val = 1;
-	} else {
-		val = (zend_bool) atoi(ZSTR_VAL(new_value));
-	}
-
+	val = zend_ini_parse_bool(new_value);
 	gc_enable(val);
 
 	return SUCCESS;
