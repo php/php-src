@@ -330,7 +330,7 @@ static void zend_persist_zval(zval *z)
 				Z_ARR_P(z) = zend_accel_memdup(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) = 0;
-				GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
+				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
 				efree(old_ref);
 			}
 			break;
