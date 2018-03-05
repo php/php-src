@@ -599,7 +599,7 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	}
 	GC_REF_SET_INFO(ref, 0);
 
-	/* Perform decopression only in case of large buffers */
+	/* Perform decompression only in case of large buffers */
 	if (UNEXPECTED(GC_G(first_unused) >= GC_MAX_UNCOMPRESSED)) {
 		gc_remove_compressed(ref, idx);
 		return;
