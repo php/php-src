@@ -1300,7 +1300,10 @@ EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
 # SOURCE_DATE_EPOCH for reproducible builds https://reproducible-builds.org/specs/source-date-epoch/
-PHP_BUILD_DATE=`date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d`
+PHP_BUILD_DATE=`date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d 2>/dev/null`
+if test $? -ne 0 ; then
+PHP_BUILD_DATE=`date -u +%Y-%m-%d`
+fi
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
 PHP_UNAME=`uname -a | xargs`
