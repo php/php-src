@@ -152,6 +152,7 @@ void init_executor(void) /* {{{ */
 	zend_hash_init(&EG(included_files), 8, NULL, NULL, 0);
 
 	EG(ticks_count) = 0;
+	EG(vm_count) = 0;
 
 	ZVAL_UNDEF(&EG(user_error_handler));
 	ZVAL_UNDEF(&EG(user_exception_handler));
