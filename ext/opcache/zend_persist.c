@@ -35,7 +35,7 @@
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 #define zend_set_str_gc_flags(str) do { \
-	if (ZCG(accel_directives).file_cache_only) { \
+	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
 		GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \

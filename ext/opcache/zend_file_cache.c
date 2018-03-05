@@ -1423,7 +1423,7 @@ zend_persistent_script *zend_file_cache_script_load(zend_file_handle *file_handl
 		return NULL;
 	}
 
-	if (!ZCG(accel_directives).file_cache_only &&
+	if (!file_cache_only &&
 	    !ZCSG(restart_in_progress) &&
 		!ZSMMG(memory_exhausted) &&
 	    accelerator_shm_read_lock() == SUCCESS) {
