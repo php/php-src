@@ -1244,7 +1244,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_STR(ce->info.user.filename);
 	UNSERIALIZE_STR(ce->info.user.doc_comment);
 	zend_file_cache_unserialize_hash(&ce->properties_info,
-			script, buf, zend_file_cache_unserialize_prop_info, ZVAL_PTR_DTOR);
+			script, buf, zend_file_cache_unserialize_prop_info, NULL);
 
 	if (ce->trait_aliases) {
 		zend_trait_alias **p, *q;
