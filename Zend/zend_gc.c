@@ -140,24 +140,15 @@
 	((void*)(((uintptr_t)(ptr)) | GC_GARBAGE))
 
 /* GC address conversion */
-#define GC_ADDR2NUM(addr)    ((addr) / sizeof(void*))
-#define GC_NUM2ADDR(num)     ((num) * sizeof(void*))
+#define GC_IDX2PTR(idx)      (GC_G(buf) + (idx))
+#define GC_PTR2IDX(ptr)      ((ptr) - GC_G(buf))
 
-#define GC_NEXT_ADDR(addr)   ((addr) + sizeof(void*))
-#define GC_PREV_ADDR(addr)   ((addr) - sizeof(void*))
-
-#define GC_ADDR2PTR(addr)    ((gc_root_buffer*)(((char*)GC_G(buf)) + (addr)))
-#define GC_PTR2ADDR(ptr)     ((uint32_t)(((char*)(ptr)) - (char*)GC_G(buf)))
-
-#define GC_ADDR2LIST(addr)   ((void*)(uintptr_t)((addr) | GC_UNUSED))
-#define GC_LIST2ADDR(list)   (((uint32_t)(uintptr_t)(list)) - GC_UNUSED)
+#define GC_IDX2LIST(idx)     ((void*)(uintptr_t)(((idx) * sizeof(void*)) | GC_UNUSED))
+#define GC_LIST2IDX(list)    (((uint32_t)(uintptr_t)(list)) / sizeof(void*))
 
 /* GC buffers */
-#define GC_INVALID_NUM       0
-#define GC_FIRST_ROOT_NUM    1
-
-#define GC_INVALID_ADDR      GC_NUM2ADDR(GC_INVALID_NUM)
-#define GC_FIRST_ROOT_ADDR   GC_NUM2ADDR(GC_FIRST_ROOT_NUM)
+#define GC_INVALID           0
+#define GC_FIRST_ROOT        1
 
 #define GC_DEFAULT_BUF_SIZE  (16 * 1024)
 #define GC_BUF_GROW_STEP     (128 * 1024)
@@ -175,7 +166,7 @@
 
 /* unused buffers */
 #define GC_HAS_UNUSED() \
-	(GC_G(unused) != GC_INVALID_ADDR)
+	(GC_G(unused) != GC_INVALID)
 #define GC_FETCH_UNUSED() \
 	gc_fetch_unused()
 #define GC_LINK_UNUSED(root) \
@@ -203,8 +194,8 @@ typedef struct _zend_gc_globals {
 	gc_root_buffer   *buf;				/* preallocated arrays of buffers   */
 	uint32_t          unused;			/* linked list of unused buffers    */
 	uint32_t          first_unused;		/* first unused buffer              */
-	uint32_t          gc_threshold;     /* GC collection threshold [addr]   */
-	uint32_t          buf_size;			/* size of the GC buffer [addr]     */
+	uint32_t          gc_threshold;     /* GC collection threshold          */
+	uint32_t          buf_size;			/* size of the GC buffer            */
 	uint32_t          num_roots;		/* number of roots in GC buffer     */
 
 	uint32_t gc_runs;
@@ -257,23 +248,23 @@ static zend_gc_globals gc_globals;
 # define GC_TRACE(str)
 #endif
 
-static zend_always_inline uint32_t gc_compress(uint32_t addr)
+static zend_always_inline uint32_t gc_compress(uint32_t idx)
 {
-	return addr % GC_MAX_UNCOMPRESSED;
+	return idx % GC_MAX_UNCOMPRESSED;
 }
 
-static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t addr)
+static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, uint32_t idx)
 {
-	gc_root_buffer *root = GC_ADDR2PTR(addr);
+	gc_root_buffer *root = GC_IDX2PTR(idx);
 
 	if (EXPECTED(GC_GET_PTR(root->ref) == ref)) {
 		return root;
 	}
 
 	while (1) {
-		addr += GC_MAX_UNCOMPRESSED;
-		ZEND_ASSERT(addr < GC_G(first_unused));
-		root = GC_ADDR2PTR(addr);
+		idx += GC_MAX_UNCOMPRESSED;
+		ZEND_ASSERT(idx < GC_G(first_unused));
+		root = GC_IDX2PTR(idx);
 		if (GC_GET_PTR(root->ref) == ref) {
 			return root;
 		}
@@ -282,31 +273,31 @@ static zend_always_inline gc_root_buffer* gc_decompress(zend_refcounted *ref, ui
 
 static zend_always_inline uint32_t gc_fetch_unused(void)
 {
-	uint32_t addr;
+	uint32_t idx;
 	gc_root_buffer *root;
 
 	ZEND_ASSERT(GC_HAS_UNUSED());
-	addr = GC_G(unused);
-	root = GC_ADDR2PTR(addr);
+	idx = GC_G(unused);
+	root = GC_IDX2PTR(idx);
 	ZEND_ASSERT(GC_IS_UNUSED(root->ref));
-	GC_G(unused) = GC_LIST2ADDR(root->ref);
-	return addr;
+	GC_G(unused) = GC_LIST2IDX(root->ref);
+	return idx;
 }
 
 static zend_always_inline void gc_link_unused(gc_root_buffer *root)
 {
-	root->ref = GC_ADDR2LIST(GC_G(unused));
-	GC_G(unused) = GC_PTR2ADDR(root);
+	root->ref = GC_IDX2LIST(GC_G(unused));
+	GC_G(unused) = GC_PTR2IDX(root);
 }
 
 static zend_always_inline uint32_t gc_fetch_next_unused(void)
 {
-	uint32_t addr;
+	uint32_t idx;
 
 	ZEND_ASSERT(GC_HAS_NEXT_UNUSED());
-	addr = GC_G(first_unused);
-	GC_G(first_unused) = GC_NEXT_ADDR(GC_G(first_unused));
-	return addr;
+	idx = GC_G(first_unused);
+	GC_G(first_unused) = GC_G(first_unused) + 1;
+	return idx;
 }
 
 #if ZEND_GC_DEBUG > 1
@@ -364,10 +355,10 @@ static void gc_globals_ctor_ex(zend_gc_globals *gc_globals)
 	gc_globals->gc_full = 0;
 
 	gc_globals->buf = NULL;
-	gc_globals->unused = GC_INVALID_ADDR;
-	gc_globals->first_unused = GC_INVALID_ADDR;
-	gc_globals->gc_threshold = GC_INVALID_ADDR;
-	gc_globals->buf_size = GC_INVALID_ADDR;
+	gc_globals->unused = GC_INVALID;
+	gc_globals->first_unused = GC_INVALID;
+	gc_globals->gc_threshold = GC_INVALID;
+	gc_globals->buf_size = GC_INVALID;
 	gc_globals->num_roots = 0;
 
 	gc_globals->gc_runs = 0;
@@ -405,8 +396,8 @@ void gc_reset(void)
 		GC_G(gc_active) = 0;
 		GC_G(gc_protected) = 0;
 		GC_G(gc_full) = 0;
-		GC_G(unused) = GC_INVALID_ADDR;
-		GC_G(first_unused) = GC_FIRST_ROOT_ADDR;
+		GC_G(unused) = GC_INVALID;
+		GC_G(first_unused) = GC_FIRST_ROOT;
 		GC_G(num_roots) = 0;
 
 		GC_G(gc_runs) = 0;
@@ -429,8 +420,8 @@ ZEND_API zend_bool gc_enable(zend_bool enable)
 	GC_G(gc_enabled) = enable;
 	if (enable && !old_enabled && GC_G(buf) == NULL) {
 		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE);
-		GC_G(buf_size) = GC_NUM2ADDR(GC_DEFAULT_BUF_SIZE);
-		GC_G(gc_threshold) = GC_NUM2ADDR(GC_THRESHOLD_DEFAULT + GC_FIRST_ROOT_NUM);
+		GC_G(buf_size) = GC_DEFAULT_BUF_SIZE;
+		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT + GC_FIRST_ROOT;
 		gc_reset();
 	}
 	return old_enabled;
@@ -457,7 +448,7 @@ static void gc_grow_root_buffer(void)
 {
 	size_t new_size;
 
-	if (GC_ADDR2NUM(GC_G(buf_size)) >= GC_MAX_BUF_SIZE) {
+	if (GC_G(buf_size) >= GC_MAX_BUF_SIZE) {
 		if (!GC_G(gc_full)) {
 			zend_error(E_WARNING, "GC buffer overflow (GC disabled)\n");
 			GC_G(gc_active) = 1;
@@ -466,16 +457,16 @@ static void gc_grow_root_buffer(void)
 			return;
 		}
 	}
-	if (GC_G(buf_size) < GC_NUM2ADDR(GC_BUF_GROW_STEP)) {
-		new_size = GC_ADDR2NUM(GC_G(buf_size)) * 2;
+	if (GC_G(buf_size) < GC_BUF_GROW_STEP) {
+		new_size = GC_G(buf_size) * 2;
 	} else {
-		new_size = GC_ADDR2NUM(GC_G(buf_size)) + GC_BUF_GROW_STEP;
+		new_size = GC_G(buf_size) + GC_BUF_GROW_STEP;
 	}
 	if (new_size > GC_MAX_BUF_SIZE) {
 		new_size = GC_MAX_BUF_SIZE;
 	}
 	GC_G(buf) = perealloc(GC_G(buf), sizeof(gc_root_buffer) * new_size, 1);
-	GC_G(buf_size) = GC_NUM2ADDR(new_size);
+	GC_G(buf_size) = new_size;
 }
 
 static void gc_adjust_threshold(int count)
@@ -487,30 +478,30 @@ static void gc_adjust_threshold(int count)
 	 * by a fixed step */
 	if (count < GC_THRESHOLD_TRIGGER) {
 		/* increase */
-		if (GC_G(gc_threshold) < GC_NUM2ADDR(GC_THRESHOLD_MAX)) {
-			new_threshold = GC_ADDR2NUM(GC_G(gc_threshold)) + GC_THRESHOLD_STEP;
+		if (GC_G(gc_threshold) < GC_THRESHOLD_MAX) {
+			new_threshold = GC_G(gc_threshold) + GC_THRESHOLD_STEP;
 			if (new_threshold > GC_THRESHOLD_MAX) {
 				new_threshold = GC_THRESHOLD_MAX;
 			}
-			if (new_threshold > GC_ADDR2NUM(GC_G(buf_size))) {
+			if (new_threshold > GC_G(buf_size)) {
 				gc_grow_root_buffer();
 			}
-			if (new_threshold <= GC_ADDR2NUM(GC_G(buf_size))) {
-				GC_G(gc_threshold) = GC_NUM2ADDR(new_threshold);
+			if (new_threshold <= GC_G(buf_size)) {
+				GC_G(gc_threshold) = new_threshold;
 			}
 		}
-	} else if (GC_G(gc_threshold) > GC_NUM2ADDR(GC_THRESHOLD_DEFAULT)) {
-		new_threshold = GC_ADDR2NUM(GC_G(gc_threshold)) - GC_THRESHOLD_STEP;
+	} else if (GC_G(gc_threshold) > GC_THRESHOLD_DEFAULT) {
+		new_threshold = GC_G(gc_threshold) - GC_THRESHOLD_STEP;
 		if (new_threshold < GC_THRESHOLD_DEFAULT) {
 			new_threshold = GC_THRESHOLD_DEFAULT;
 		}
-		GC_G(gc_threshold) = GC_NUM2ADDR(new_threshold);
+		GC_G(gc_threshold) = new_threshold;
 	}
 }
 
 static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refcounted *ref)
 {
-	uint32_t addr;
+	uint32_t idx;
 	gc_root_buffer *newRoot;
 
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
@@ -528,23 +519,23 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 	}
 
 	if (GC_HAS_UNUSED()) {
-		addr = GC_FETCH_UNUSED();
+		idx = GC_FETCH_UNUSED();
 	} else if (EXPECTED(GC_HAS_NEXT_UNUSED())) {
-		addr = GC_FETCH_NEXT_UNUSED();
+		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
 		if (UNEXPECTED(!GC_HAS_NEXT_UNUSED())) {
 			return;
 		}
-		addr = GC_FETCH_NEXT_UNUSED();
+		idx = GC_FETCH_NEXT_UNUSED();
 	}
 
-	newRoot = GC_ADDR2PTR(addr);
+	newRoot = GC_IDX2PTR(idx);
 	newRoot->ref = ref; /* GC_ROOT tag is 0 */
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
 
-	addr = gc_compress(addr);
-	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
+	idx = gc_compress(idx);
+	GC_REF_SET_INFO(ref, idx | GC_PURPLE);
 	GC_G(num_roots)++;
 
 	GC_BENCH_INC(zval_buffered);
@@ -554,7 +545,7 @@ static zend_never_inline void ZEND_FASTCALL gc_possible_root_when_full(zend_refc
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 {
-	uint32_t addr;
+	uint32_t idx;
 	gc_root_buffer *newRoot;
 
 	if (UNEXPECTED(GC_G(gc_protected))) {
@@ -564,9 +555,9 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_INC(zval_possible_root);
 
 	if (EXPECTED(GC_HAS_UNUSED())) {
-		addr = GC_FETCH_UNUSED();
+		idx = GC_FETCH_UNUSED();
 	} else if (EXPECTED(GC_HAS_NEXT_UNUSED_UNDER_THRESHOLD())) {
-		addr = GC_FETCH_NEXT_UNUSED();
+		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_possible_root_when_full(ref);
 		return;
@@ -575,12 +566,12 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	ZEND_ASSERT(GC_TYPE(ref) == IS_ARRAY || GC_TYPE(ref) == IS_OBJECT);
 	ZEND_ASSERT(GC_INFO(ref) == 0);
 
-	newRoot = GC_ADDR2PTR(addr);
+	newRoot = GC_IDX2PTR(idx);
 	newRoot->ref = ref; /* GC_ROOT tag is 0 */
 	GC_TRACE_SET_COLOR(ref, GC_PURPLE);
 
-	addr = gc_compress(addr);
-	GC_REF_SET_INFO(ref, addr | GC_PURPLE);
+	idx = gc_compress(idx);
+	GC_REF_SET_INFO(ref, idx | GC_PURPLE);
 	GC_G(num_roots)++;
 
 	GC_BENCH_INC(zval_buffered);
@@ -588,18 +579,18 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 	GC_BENCH_PEAK(root_buf_peak, root_buf_length);
 }
 
-static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t addr)
+static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
-       gc_root_buffer *root = gc_decompress(ref, addr);
+       gc_root_buffer *root = gc_decompress(ref, idx);
        gc_remove_from_roots(root);
 }
 
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 {
 	gc_root_buffer *root;
-	uint32_t addr = GC_REF_ADDRESS(ref);
+	uint32_t idx = GC_REF_ADDRESS(ref);
 
-	ZEND_ASSERT(addr);
+	ZEND_ASSERT(idx);
 
 	GC_BENCH_INC(zval_remove_from_buffer);
 
@@ -610,11 +601,11 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 
 	/* Perform decopression only in case of large buffers */
 	if (UNEXPECTED(GC_G(first_unused) >= GC_MAX_UNCOMPRESSED)) {
-		gc_remove_compressed(ref, addr);
+		gc_remove_compressed(ref, idx);
 		return;
 	}
 
-	root = GC_ADDR2PTR(addr);
+	root = GC_IDX2PTR(idx);
 	gc_remove_from_roots(root);
 }
 
@@ -830,12 +821,12 @@ tail_call:
 /* Two-Finger compaction algorithm */
 static void gc_compact(void)
 {
-	if (GC_NUM2ADDR(GC_G(num_roots) + GC_FIRST_ROOT_NUM) != GC_G(first_unused)) {
+	if (GC_G(num_roots) + GC_FIRST_ROOT != GC_G(first_unused)) {
 		if (GC_G(num_roots)) {
-			gc_root_buffer *free = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-			gc_root_buffer *scan = GC_ADDR2PTR(GC_PREV_ADDR(GC_G(first_unused)));
-			gc_root_buffer *end  = GC_ADDR2PTR(GC_NUM2ADDR(GC_G(num_roots)));
-			uint32_t addr;
+			gc_root_buffer *free = GC_IDX2PTR(GC_FIRST_ROOT);
+			gc_root_buffer *scan = GC_IDX2PTR(GC_G(first_unused) - 1);
+			gc_root_buffer *end  = GC_IDX2PTR(GC_G(num_roots));
+			uint32_t idx;
 			zend_refcounted *p;
 
 			while (free < scan) {
@@ -849,8 +840,8 @@ static void gc_compact(void)
 					p = scan->ref;
 					free->ref = p;
 					p = GC_GET_PTR(p);
-					addr = gc_compress(GC_PTR2ADDR(free));
-					GC_REF_SET_INFO(p, addr | GC_REF_COLOR(p));
+					idx = gc_compress(GC_PTR2IDX(free));
+					GC_REF_SET_INFO(p, idx | GC_REF_COLOR(p));
 					free++;
 					scan--;
 					if (scan <= end) {
@@ -861,8 +852,8 @@ static void gc_compact(void)
 				}
 			}
 		}
-		GC_G(unused) = GC_INVALID_ADDR;
-		GC_G(first_unused) = GC_NUM2ADDR(GC_G(num_roots) + GC_FIRST_ROOT_NUM);
+		GC_G(unused) = GC_INVALID;
+		GC_G(first_unused) = GC_G(num_roots) + GC_FIRST_ROOT;
 	}
 }
 
@@ -872,8 +863,8 @@ static void gc_mark_roots(void)
 
 	gc_compact();
 
-	current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);;
-	last = GC_ADDR2PTR(GC_G(first_unused));
+	current = GC_IDX2PTR(GC_FIRST_ROOT);
+	last = GC_IDX2PTR(GC_G(first_unused));
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
 			if (GC_REF_CHECK_COLOR(current->ref, GC_PURPLE)) {
@@ -983,8 +974,8 @@ tail_call:
 
 static void gc_scan_roots(void)
 {
-	gc_root_buffer *current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-	gc_root_buffer *last = GC_ADDR2PTR(GC_G(first_unused));
+	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
+	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
 
 	while (current != last) {
 		if (GC_IS_ROOT(current->ref)) {
@@ -996,26 +987,26 @@ static void gc_scan_roots(void)
 
 static void gc_add_garbage(zend_refcounted *ref)
 {
-	uint32_t addr;
+	uint32_t idx;
 	gc_root_buffer *buf;
 
 	if (GC_HAS_UNUSED()) {
-		addr = GC_FETCH_UNUSED();
+		idx = GC_FETCH_UNUSED();
 	} else if (GC_HAS_NEXT_UNUSED()) {
-		addr = GC_FETCH_NEXT_UNUSED();
+		idx = GC_FETCH_NEXT_UNUSED();
 	} else {
 		gc_grow_root_buffer();
 		if (UNEXPECTED(!GC_HAS_NEXT_UNUSED())) {
 			return;
 		}
-		addr = GC_FETCH_NEXT_UNUSED();
+		idx = GC_FETCH_NEXT_UNUSED();
 	}
 
-	buf = GC_ADDR2PTR(addr);
+	buf = GC_IDX2PTR(idx);
 	buf->ref = GC_MAKE_GARBAGE(ref);
 
-	addr = gc_compress(addr);
-	GC_REF_SET_INFO(ref, addr | GC_BLACK);
+	idx = gc_compress(idx);
+	GC_REF_SET_INFO(ref, idx | GC_BLACK);
 	GC_G(num_roots)++;
 }
 
@@ -1150,11 +1141,11 @@ tail_call:
 
 static int gc_collect_roots(uint32_t *flags)
 {
-	uint32_t addr, end;
+	uint32_t idx, end;
 	zend_refcounted *ref;
 	int count = 0;
-	gc_root_buffer *current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-	gc_root_buffer *last = GC_ADDR2PTR(GC_G(first_unused));
+	gc_root_buffer *current = GC_IDX2PTR(GC_FIRST_ROOT);
+	gc_root_buffer *last = GC_IDX2PTR(GC_G(first_unused));
 
 	/* remove non-garbage from the list */
 	while (current != last) {
@@ -1171,10 +1162,10 @@ static int gc_collect_roots(uint32_t *flags)
 
 	/* Root buffer might be reallocated during gc_collect_white,
 	 * make sure to reload pointers. */
-	addr = GC_FIRST_ROOT_ADDR;
+	idx = GC_FIRST_ROOT;
 	end = GC_G(first_unused);
-	while (addr != end) {
-		current = GC_ADDR2PTR(addr);
+	while (idx != end) {
+		current = GC_IDX2PTR(idx);
 		ref = current->ref;
 		if (GC_IS_ROOT(ref)) {
 			if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
@@ -1182,7 +1173,7 @@ static int gc_collect_roots(uint32_t *flags)
 				count += gc_collect_white(ref, flags);
 			}
 		}
-		addr = GC_NEXT_ADDR(addr);
+		idx++;
 	}
 
 	return count;
@@ -1294,7 +1285,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		gc_root_buffer *current, *last;
 		zend_refcounted *p;
 		uint32_t gc_flags = 0;
-		uint32_t addr, end;
+		uint32_t idx, end;
 
 		if (GC_G(gc_active)) {
 			return 0;
@@ -1322,33 +1313,32 @@ ZEND_API int zend_gc_collect_cycles(void)
 		end = GC_G(first_unused);
 
 		if (gc_flags & GC_HAS_DESTRUCTORS) {
-			uint32_t *refcounts, count, n;
+			uint32_t *refcounts;
 
 			GC_TRACE("Calling destructors");
 
 			// TODO: may be use emalloc() ???
-			count = GC_ADDR2NUM(GC_G(first_unused));
-			refcounts = pemalloc(sizeof(uint32_t) * count, 1);
+			refcounts = pemalloc(sizeof(uint32_t) * end, 1);
 
 			/* Remember reference counters before calling destructors */
-			n = GC_FIRST_ROOT_NUM;
-			current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-			while (n != count) {
+			idx = GC_FIRST_ROOT;
+			current = GC_IDX2PTR(GC_FIRST_ROOT);
+			while (idx != end) {
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					refcounts[n] = GC_REFCOUNT(p);
+					refcounts[idx] = GC_REFCOUNT(p);
 				}
 				current++;
-				n++;
+				idx++;
 			}
 
 			/* Call destructors
 			 *
 			 * The root buffer might be reallocated during destructors calls,
 			 * make sure to reload pointers as necessary. */
-			addr = GC_FIRST_ROOT_ADDR;
-			while (addr != end) {
-				current = GC_ADDR2PTR(addr);
+			idx = GC_FIRST_ROOT;
+			while (idx != end) {
+				current = GC_IDX2PTR(idx);
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
 					if (GC_TYPE(p) == IS_OBJECT
@@ -1366,21 +1356,21 @@ ZEND_API int zend_gc_collect_cycles(void)
 						}
 					}
 				}
-				addr = GC_NEXT_ADDR(addr);
+				idx++;
 			}
 
 			/* Remove values captured in destructors */
-			n = GC_FIRST_ROOT_NUM;
-			current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-			while (n != count) {
+			idx = GC_FIRST_ROOT;
+			current = GC_IDX2PTR(GC_FIRST_ROOT);
+			while (idx != end) {
 				if (GC_IS_GARBAGE(current->ref)) {
 					p = GC_GET_PTR(current->ref);
-					if (GC_REFCOUNT(p) > refcounts[n]) {
+					if (GC_REFCOUNT(p) > refcounts[idx]) {
 						gc_remove_nested_data_from_buffer(p, current);
 					}
 				}
 				current++;
-				n++;
+				idx++;
 			}
 
 			pefree(refcounts, 1);
@@ -1394,8 +1384,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 		/* Destroy zvals */
 		GC_TRACE("Destroying zvals");
 		GC_G(gc_protected) = 1;
-		current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
-		last = GC_ADDR2PTR(GC_G(first_unused));
+		current = GC_IDX2PTR(GC_FIRST_ROOT);
+		last = GC_IDX2PTR(GC_G(first_unused));
 		while (current != last) {
 			if (GC_IS_GARBAGE(current->ref)) {
 				p = GC_GET_PTR(current->ref);
@@ -1433,7 +1423,7 @@ ZEND_API int zend_gc_collect_cycles(void)
 		}
 
 		/* Free objects */
-		current = GC_ADDR2PTR(GC_FIRST_ROOT_ADDR);
+		current = GC_IDX2PTR(GC_FIRST_ROOT);
 		while (current != last) {
 			if (GC_IS_GARBAGE(current->ref)) {
 				p = GC_GET_PTR(current->ref);
