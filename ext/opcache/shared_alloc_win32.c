@@ -182,9 +182,6 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 			}
 			accel_shared_globals = (zend_accel_shared_globals *)((char *)((zend_smm_shared_globals *)mapping_base)->app_shared_globals + ((char *)mapping_base - (char *)wanted_mb_save));
 
-			/* Make this process to use file-cache only */
-			ZCG(accel_directives).file_cache_only = 1;
-
 			return ALLOC_FALLBACK;
 		}
 #endif
