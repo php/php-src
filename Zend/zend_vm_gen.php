@@ -1707,6 +1707,9 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
 					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
 					out($f,"\n");
+					out($f,"#define ZEND_INCR_VM_COUNT() EG(vm_count)++\n");
+					out($f,"#define ZEND_DECR_VM_COUNT() EG(vm_count)--\n");
+					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void * const *zend_opcode_handlers;\n");
 					out($f,"static int zend_handlers_count;\n");
@@ -1768,20 +1771,20 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"# endif\n");
 							if ($kind == ZEND_VM_KIND_HYBRID) {
 								out($f,"# if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-								out($f,"#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; return\n");
+								out($f,"#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; ZEND_DECR_VM_COUNT(); return\n");
 								out($f,"#  define ZEND_VM_HOT             zend_always_inline ZEND_OPT_SIZE\n");
 								out($f,"# else\n");
-								out($f,"#  define ZEND_VM_RETURN()        opline = NULL; return\n");
+								out($f,"#  define ZEND_VM_RETURN()        opline = NULL; ZEND_DECR_VM_COUNT(); return\n");
 								out($f,"#  define ZEND_VM_HOT\n");
 								out($f,"# endif\n");
 							} else {
-								out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
+								out($f,"# define ZEND_VM_RETURN()        opline = NULL; ZEND_DECR_VM_COUNT(); return\n");
 							}
 							out($f,"#else\n");
 							out($f,"# define ZEND_OPCODE_HANDLER_RET int\n");
 							out($f,"# define ZEND_VM_TAIL_CALL(call) return call\n");
 							out($f,"# define ZEND_VM_CONTINUE()      return  0\n");
-							out($f,"# define ZEND_VM_RETURN()        return -1\n");
+							out($f,"# define ZEND_VM_RETURN()        ZEND_DECR_VM_COUNT(); return -1\n");
 							if ($kind == ZEND_VM_KIND_HYBRID) {
 								out($f,"# define ZEND_VM_HOT\n");
 							}
@@ -1861,7 +1864,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"#define HANDLE_EXCEPTION() LOAD_OPLINE(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define HANDLE_EXCEPTION_LEAVE() LOAD_OPLINE(); ZEND_VM_LEAVE()\n");
 							out($f,"#define ZEND_VM_CONTINUE() goto zend_vm_continue\n");
-							out($f,"#define ZEND_VM_RETURN()   return\n");
+							out($f,"#define ZEND_VM_RETURN()   ZEND_DECR_VM_COUNT(); return\n");
 							out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
@@ -1898,7 +1901,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 								out($f,"#define HANDLE_EXCEPTION_LEAVE() goto ZEND_HANDLE_EXCEPTION_LABEL\n");
 							}
 							out($f,"#define ZEND_VM_CONTINUE() goto *(void**)(OPLINE->handler)\n");
-							out($f,"#define ZEND_VM_RETURN()   return\n");
+							out($f,"#define ZEND_VM_RETURN()   ZEND_DECR_VM_COUNT(); return\n");
 							out($f,"#define ZEND_VM_ENTER_EX() ZEND_VM_INTERRUPT_CHECK(); ZEND_VM_CONTINUE()\n");
 							out($f,"#define ZEND_VM_ENTER()    execute_data = EG(current_execute_data); LOAD_OPLINE(); ZEND_VM_ENTER_EX()\n");
 							out($f,"#define ZEND_VM_LEAVE()    ZEND_VM_CONTINUE()\n");
@@ -2840,7 +2843,7 @@ function gen_vm($def, $skel) {
 		out($f,"#undef ZEND_VM_LEAVE\n");
 		out($f,"#undef ZEND_VM_DISPATCH\n");
 		out($f,"#define ZEND_VM_CONTINUE()   return  0\n");
-		out($f,"#define ZEND_VM_RETURN()     return -1\n");
+		out($f,"#define ZEND_VM_RETURN()     ZEND_DECR_VM_COUNT(); return -1\n");
 		out($f,"#define ZEND_VM_ENTER_EX()   return  1\n");
 		out($f,"#define ZEND_VM_ENTER()      return  1\n");
 		out($f,"#define ZEND_VM_LEAVE()      return  2\n");

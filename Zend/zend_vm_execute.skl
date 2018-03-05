@@ -2,6 +2,14 @@
 
 ZEND_API void {%EXECUTOR_NAME%}_ex(zend_execute_data *ex)
 {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	if (EXPECTED(execute_data != NULL)) {
+		ZEND_INCR_VM_COUNT();
+	}
+#else
+	ZEND_INCR_VM_COUNT();
+#endif
+
 	DCL_OPLINE
 
 	{%HELPER_VARS%}
