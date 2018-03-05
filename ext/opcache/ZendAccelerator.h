@@ -120,6 +120,8 @@ extern int lock_file;
 
 #if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
+#else
+# define ENABLE_FILE_CACHE_FALLBACK 0
 #endif
 
 #if ZEND_WIN32
@@ -283,6 +285,9 @@ typedef struct _zend_accel_shared_globals {
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+extern zend_bool file_cache_only;
+#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
