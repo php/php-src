@@ -180,7 +180,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -231,7 +231,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
@@ -289,7 +289,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNumOfElements = source->nNumOfElements;
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
-	HT_FLAGS(ht) = (HT_FLAGS(source) & HASH_FLAG_INITIALIZED);
+	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
 	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
