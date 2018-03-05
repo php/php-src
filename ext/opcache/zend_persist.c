@@ -89,13 +89,21 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	ht->pDestructor = NULL;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		return;
 	}
 	if (ht->nNumUsed == 0) {
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
@@ -175,13 +183,21 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	ht->pDestructor = NULL;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		return;
 	}
 	if (ht->nNumUsed == 0) {
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		ht->u.flags &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
@@ -833,9 +849,16 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce);
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length, int for_shm)
 {
 	script->mem = ZCG(mem);
+	script->corrupted = 0;
+	ZCG(current_persistent_script) = script;
+
+	if (!for_shm) {
+		/* script is not going to be saved in SHM */
+		script->corrupted = 1;
+	}
 
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 	zend_shared_alloc_clear_xlat_table();
@@ -859,6 +882,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
+
+	script->corrupted = 0;
+	ZCG(current_persistent_script) = NULL;
 
 	return script;
 }
