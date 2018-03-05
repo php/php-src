@@ -86,6 +86,8 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	uint32_t idx, nIndex;
 	Bucket *p;
 
+	ht->pDestructor = NULL;
+
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
 		return;
@@ -169,6 +171,8 @@ static void zend_hash_persist_immutable(HashTable *ht)
 {
 	uint32_t idx, nIndex;
 	Bucket *p;
+
+	ht->pDestructor = NULL;
 
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
 		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
