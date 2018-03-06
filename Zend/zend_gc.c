@@ -1167,11 +1167,10 @@ static int gc_collect_roots(uint32_t *flags)
 	while (idx != end) {
 		current = GC_IDX2PTR(idx);
 		ref = current->ref;
-		if (GC_IS_ROOT(ref)) {
-			if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
-				current->ref = GC_MAKE_GARBAGE(ref);
-				count += gc_collect_white(ref, flags);
-			}
+		ZEND_ASSERT(GC_IS_ROOT(ref));
+		current->ref = GC_MAKE_GARBAGE(ref);
+		if (GC_REF_CHECK_COLOR(ref, GC_WHITE)) {
+			count += gc_collect_white(ref, flags);
 		}
 		idx++;
 	}
