@@ -285,6 +285,9 @@ typedef struct _zend_accel_shared_globals {
 #endif
 	zend_bool       restart_in_progress;
 
+	/* uninitialized HashTable Support */
+	uint32_t uninitialized_bucket[-HT_MIN_MASK];
+
 	/* Interned Strings Support (must be the last element) */
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
