@@ -3,9 +3,27 @@ Oniguruma
 
 https://github.com/kkos/oniguruma
 
-Oniguruma is a regular expressions library.
-The characteristics of this library is that different character encoding
-for every regular expression object can be specified.
+FIXED Security Issues:
+--------------------------
+  **CVE-2017-9224, CVE-2017-9225, CVE-2017-9226**
+  **CVE-2017-9227, CVE-2017-9228, CVE-2017-9229**
+
+Oniguruma is a modern and flexible regular expressions library. It
+encompasses features from different regular expression implementations
+that traditionally exist in different languages. It comes close to
+being a complete superset of all regular expression features found
+in other regular expression implementations.
+
+Its features include:
+* Character encoding can be specified per regular expression object.
+* Several regular expression types are supported:
+  * POSIX
+  * Grep
+  * GNU Regex
+  * Perl
+  * Java
+  * Ruby
+  * Emacs
 
 Supported character encodings:
 
@@ -20,10 +38,61 @@ Supported character encodings:
 * CP1251:  contributed by Byte
 
 
+New feature of version 6.7.1
+--------------------------
+
+* NEW: Mechanism of try-in-match-limit (* disabled by default)
+
+
+New feature of version 6.7.0
+--------------------------
+
+* NEW: hexadecimal codepoint \uHHHH
+* NEW: add ONIG_SYNTAX_ONIGURUMA (== ONIG_SYNTAX_DEFAULT)
+* Disabled \N and \O on ONIG_SYNTAX_RUBY
+* Reduced object size
+
+
+New feature of version 6.6.1
+--------------------------
+
+* Fix definition of \X
+
+
+New feature of version 6.6.0
+--------------------------
+
+* NEW: ASCII only mode options for character type/property (?WDSP)
+* NEW: Extended Grapheme Cluster boundary \y, \Y (*original)
+* NEW: Extended Grapheme Cluster \X
+* Range-clear (Absent-clear) operator restores previous range in backtrack.
+
+
+New feature of version 6.5.0
+--------------------------
+
+* NEW: \K (keep)
+* NEW: \R (general newline) \N (no newline)
+* NEW: \O (true anychar)
+* NEW: if-then-else syntax   (?(...)...\|...)
+* NEW: Backreference validity checker (?(xxx)) (*original)
+* NEW: Absent repeater (?~absent)
+* NEW: Absent expression   (?~|absent|expr)  (*original)
+* NEW: Absent stopper (?~|absent)     (*original)
+
+
+New feature of version 6.4.0
+--------------------------
+
+* Fix fatal problem of endless repeat on Windows
+* NEW: call zero (call the total regexp) \g<0>
+* NEW: relative backref/call by positive number \k<+n>, \g<+n>
+
+
 New feature of version 6.3.0
 --------------------------
 
-* NEW SYNTAX: escape-o-brace for octal codepoint.
+* NEW: octal codepoint \o{.....}
 
 
 New feature of version 6.1.2

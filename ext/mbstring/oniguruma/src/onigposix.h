@@ -4,7 +4,7 @@
   onigposix.h - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2005  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ typedef struct {
 
 #ifndef ONIG_EXTERN
 #if defined(_WIN32) && !defined(__GNUC__)
-#if defined(EXPORT)
+#if defined(ONIGURUMA_EXPORT)
 #define ONIG_EXTERN   extern __declspec(dllexport)
 #else
 #define ONIG_EXTERN   extern __declspec(dllimport)
@@ -128,6 +128,7 @@ ONIG_EXTERN OnigSyntaxType OnigSyntaxGnuRegex;
 ONIG_EXTERN OnigSyntaxType OnigSyntaxJava;
 ONIG_EXTERN OnigSyntaxType OnigSyntaxPerl;
 ONIG_EXTERN OnigSyntaxType OnigSyntaxRuby;
+ONIG_EXTERN OnigSyntaxType OnigSyntaxOniguruma;
 
 /* predefined syntaxes (see regsyntax.c) */
 #define ONIG_SYNTAX_POSIX_BASIC        (&OnigSyntaxPosixBasic)
@@ -138,6 +139,7 @@ ONIG_EXTERN OnigSyntaxType OnigSyntaxRuby;
 #define ONIG_SYNTAX_JAVA               (&OnigSyntaxJava)
 #define ONIG_SYNTAX_PERL               (&OnigSyntaxPerl)
 #define ONIG_SYNTAX_RUBY               (&OnigSyntaxRuby)
+#define ONIG_SYNTAX_ONIGURUMA          (&OnigSyntaxOniguruma)
 /* default syntax */
 #define ONIG_SYNTAX_DEFAULT             OnigDefaultSyntax
 
@@ -147,6 +149,7 @@ ONIG_EXTERN int  onig_set_default_syntax P_((OnigSyntaxType* syntax));
 ONIG_EXTERN void onig_copy_syntax P_((OnigSyntaxType* to, OnigSyntaxType* from));
 ONIG_EXTERN const char* onig_version P_((void));
 ONIG_EXTERN const char* onig_copyright P_((void));
+ONIG_EXTERN int onig_end P_((void));
 
 #endif /* ONIGURUMA_H */
 

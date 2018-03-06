@@ -1,4 +1,4 @@
-README.ja  2016/05/06
+README.ja  2017/08/25
 
 鬼車  ----   (C) K.Kosako <kkosako0@gmail.com>
 
@@ -180,16 +180,4 @@ https://github.com/kkos/oniguruma
   win32/config.h     Win32用 config.h
 
 
-
-残件
-
-  ? case fold flag: Katakana <-> Hiragana
-  ? ONIG_OPTION_NOTBOS/NOTEOS追加 (\A, \z, \Z)
- ?? \X (== \PM\pM*)
- ?? 文法要素 ONIG_SYN_CONTEXT_INDEP_ANCHORSの実装
- ?? 検索位置移動停止演算子 (match_at()からONIG_STOPを返す)
-
 and I'm thankful to Akinori MUSHA.
-
-
-アドレス: K.Kosako <kkosako0@gmail.com>
