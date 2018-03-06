@@ -2,7 +2,7 @@
   regenc.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -137,7 +137,7 @@ onigenc_strlen(OnigEncoding enc, const UChar* p, const UChar* end)
 {
   int n = 0;
   UChar* q = (UChar* )p;
-
+  
   while (q < end) {
     q += ONIGENC_MBC_ENC_LEN(enc, q);
     n++;
@@ -150,7 +150,7 @@ onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 {
   int n = 0;
   UChar* p = (UChar* )s;
-
+  
   while (1) {
     if (*p == '\0') {
       UChar* q;
@@ -780,7 +780,7 @@ onigenc_mb2_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -803,7 +803,7 @@ onigenc_mb4_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -838,6 +838,16 @@ onigenc_minimum_property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
   }
 
   return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+}
+
+extern int
+onigenc_is_mbc_word_ascii(OnigEncoding enc, UChar* s, const UChar* end)
+{
+  OnigCodePoint code = ONIGENC_MBC_TO_CODE(enc, s, end);
+
+  if (code > 127) return 0;
+
+  return ONIGENC_IS_ASCII_CODE_WORD(code);
 }
 
 extern int
