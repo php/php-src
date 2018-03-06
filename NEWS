@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #76025 (Segfault while throwing exception in error_handler).
     (Dmitry, Laruence)
   . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
+  . Fixed bug #76044 ('date: illegal option -- -' in ./configure on FreeBSD).
+    (Anatol)
 
 - Apache2Handler:
   . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
