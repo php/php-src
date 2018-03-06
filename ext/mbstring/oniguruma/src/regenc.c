@@ -137,7 +137,7 @@ onigenc_strlen(OnigEncoding enc, const UChar* p, const UChar* end)
 {
   int n = 0;
   UChar* q = (UChar* )p;
-
+  
   while (q < end) {
     q += ONIGENC_MBC_ENC_LEN(enc, q);
     n++;
@@ -150,7 +150,7 @@ onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 {
   int n = 0;
   UChar* p = (UChar* )s;
-
+  
   while (1) {
     if (*p == '\0') {
       UChar* q;
