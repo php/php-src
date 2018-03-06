@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76025 (Segfault while throwing exception in error_handler).
     (Dmitry, Laruence)
+  . Fixed bug #76044 ('date: illegal option -- -' in ./configure on FreeBSD).
+    (Anatol)
 
 01 Mar 2018, PHP 7.1.15
 
