@@ -419,7 +419,8 @@ ZEND_API zend_bool gc_enable(zend_bool enable)
 	zend_bool old_enabled = GC_G(gc_enabled);
 	GC_G(gc_enabled) = enable;
 	if (enable && !old_enabled && GC_G(buf) == NULL) {
-		GC_G(buf) = (gc_root_buffer*) malloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE);
+		GC_G(buf) = (gc_root_buffer*) pemalloc(sizeof(gc_root_buffer) * GC_DEFAULT_BUF_SIZE, 1);
+		GC_G(buf)[0].ref = NULL;
 		GC_G(buf_size) = GC_DEFAULT_BUF_SIZE;
 		GC_G(gc_threshold) = GC_THRESHOLD_DEFAULT + GC_FIRST_ROOT;
 		gc_reset();
@@ -590,8 +591,6 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 	gc_root_buffer *root;
 	uint32_t idx = GC_REF_ADDRESS(ref);
 
-	ZEND_ASSERT(idx);
-
 	GC_BENCH_INC(zval_remove_from_buffer);
 
 	if (!GC_REF_CHECK_COLOR(ref, GC_BLACK)) {
@@ -605,6 +604,7 @@ ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
 		return;
 	}
 
+	ZEND_ASSERT(idx);
 	root = GC_IDX2PTR(idx);
 	gc_remove_from_roots(root);
 }
