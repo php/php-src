@@ -4328,7 +4328,6 @@ ZEND_METHOD(reflection_class, getProperty)
 		}
 	}
 	str_name = ZSTR_VAL(name);
-	str_name_len = ZSTR_LEN(name);
 	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
 		classname = zend_string_alloc(classname_len, 0);
