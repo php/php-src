@@ -4763,7 +4763,6 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 		/* INTERSECT_KEY is subset of INTERSECT_ASSOC. When having the former
 		 * no comparison of the data is done (part of INTERSECT_ASSOC) */
-		intersect_key_compare_func = php_array_key_compare_string;
 
 		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL && key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
 			/* array_intersect_assoc() or array_intersect_key() */
