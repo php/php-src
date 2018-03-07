@@ -97,13 +97,13 @@
 
 static int php_do_open_temporary_file(const char *path, const char *pfx, zend_string **opened_path_p)
 {
-	char *trailing_slash;
 #ifdef PHP_WIN32
 	char *opened_path = NULL;
 	size_t opened_path_len;
 	wchar_t *cwdw, *pfxw, pathw[MAXPATHLEN];
 #else
 	char opened_path[MAXPATHLEN];
+	char *trailing_slash;
 #endif
 	char cwd[MAXPATHLEN];
 	cwd_state new_state;
@@ -139,13 +139,13 @@ static int php_do_open_temporary_file(const char *path, const char *pfx, zend_st
 		return -1;
 	}
 
+#ifndef PHP_WIN32
 	if (IS_SLASH(new_state.cwd[new_state.cwd_length - 1])) {
 		trailing_slash = "";
 	} else {
 		trailing_slash = "/";
 	}
 
-#ifndef PHP_WIN32
 	if (snprintf(opened_path, MAXPATHLEN, "%s%s%sXXXXXX", new_state.cwd, trailing_slash, pfx) >= MAXPATHLEN) {
 		efree(new_state.cwd);
 		return -1;
