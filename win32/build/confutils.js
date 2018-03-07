@@ -2344,7 +2344,8 @@ function handle_analyzer_makefile_flags(fd, key, val)
 				.replace("/guard:cf ", "")
 				.replace(/\/MP \d+ /, "")
 				.replace(/\/MP /, "")
-				.replace("/LD ", "");
+				.replace("/LD ", "")
+				.replace("/Qspectre ", "");
 		} else if ("cppcheck" == PHP_ANALYZER) {
 			new_val = "";
 
