@@ -197,6 +197,12 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
+; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
+; or group is differrent than the master process user. It allows to create process
+; core dump and ptrace the process for the pool user.
+; Default Value: no
+; process.dumpable = yes
+
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
 ;   static  - a fixed number (pm.max_children) of child processes;
