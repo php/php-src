@@ -47,7 +47,7 @@ const zend_function_entry php_dom_processinginstruction_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMProcessingInstruction::__construct(string name, [string value]); */
+/* {{{ proto DOMProcessingInstruction::__construct(string name, [string value]); */
 PHP_METHOD(domprocessinginstruction, __construct)
 {
 	zval *id = getThis();

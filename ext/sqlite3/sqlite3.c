@@ -1669,7 +1669,7 @@ PHP_METHOD(sqlite3stmt, execute)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3Stmt::__construct(SQLite3 dbobject, String Statement)
+/* {{{ proto SQLite3Stmt::__construct(SQLite3 dbobject, String Statement)
    __constructor for SQLite3Stmt. */
 PHP_METHOD(sqlite3stmt, __construct)
 {
@@ -1891,7 +1891,7 @@ PHP_METHOD(sqlite3result, finalize)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3Result::__construct()
+/* {{{ proto SQLite3Result::__construct()
    __constructor for SQLite3Result. */
 PHP_METHOD(sqlite3result, __construct)
 {
