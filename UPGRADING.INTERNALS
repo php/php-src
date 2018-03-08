@@ -135,6 +135,12 @@ PHP 7.3 INTERNALS UPGRADE NOTES
       compiler.
     - ZEND_WIN32_KEEP_INLINE was removed, it was only needed for C++
       convenience and is now default behavior with C++.
+    - New configure option --enable-native-intrinsics accepts a list of the
+      intrinsic optimizations to enable. It affects both the code generation
+      and the explicit optimizations guarded by preprocessor macros.
+    - The configure option --with-codegen-arch accepts only ia32 as a value.
+      Use it, to produce builds suitable for older processors without SSE2 or
+      even SSE support.
 
 ========================
 3. Module changes
