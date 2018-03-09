@@ -4720,7 +4720,7 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_w <= 0) {
+	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
 		RETURN_FALSE;
 	}
 
