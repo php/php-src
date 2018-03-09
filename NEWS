@@ -11,6 +11,9 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #73957 (signed integer conversion in imagescale()). (cmb)
 
+- Opcache:
+  . Fixed bug #76074 (opcache corrupts variable in for-loop). (Bob)
+
 01 Mar 2018, PHP 7.1.15
 
 - Apache2Handler:
