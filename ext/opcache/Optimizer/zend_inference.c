@@ -825,7 +825,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 					tmp->min = MAX(constraint->range.min, tmp->min);
 #ifdef SYM_RANGE
 				} else if (narrowing && ssa->var_info[constraint->min_ssa_var].has_range) {
-					tmp->underflow = ssa->var_info[constraint->min_ssa_var].range.underflow && tmp->underflow;
+					tmp->underflow = ssa->var_info[constraint->min_ssa_var].range.underflow && tmp->underflow ||
+						add_will_overflow(ssa->var_info[constraint->min_ssa_var].range.min, constraint->range.min);
 					tmp->min = MAX(ssa->var_info[constraint->min_ssa_var].range.min + constraint->range.min, tmp->min);
 #endif
 				}
@@ -835,7 +836,8 @@ int zend_inference_calc_range(const zend_op_array *op_array, zend_ssa *ssa, int 
 #ifdef SYM_RANGE
 				} else if (narrowing && ssa->var_info[constraint->max_ssa_var].has_range) {
 					tmp->max = MIN(ssa->var_info[constraint->max_ssa_var].range.max + constraint->range.max, tmp->max);
-					tmp->overflow = ssa->var_info[constraint->max_ssa_var].range.overflow && tmp->overflow;
+					tmp->overflow = ssa->var_info[constraint->max_ssa_var].range.overflow && tmp->overflow ||
+						add_will_overflow(ssa->var_info[constraint->max_ssa_var].range.max, constraint->range.max);
 #endif
 				}
 			} else if (narrowing) {

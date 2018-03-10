@@ -214,14 +214,6 @@ static int find_adjusted_tmp_var(const zend_op_array *op_array, uint32_t build_f
 }
 /* }}} */
 
-static inline zend_bool add_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a > ZEND_LONG_MAX - b)
-		|| (b < 0 && a < ZEND_LONG_MIN - b);
-}
-static inline zend_bool sub_will_overflow(zend_long a, zend_long b) {
-	return (b > 0 && a < ZEND_LONG_MIN + b)
-		|| (b < 0 && a > ZEND_LONG_MAX + b);
-}
 
 /* e-SSA construction: Pi placement (Pi is actually a Phi with single
  * source and constraint).
