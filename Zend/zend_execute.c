@@ -3313,7 +3313,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 		} \
 	} while (0)
 
-#if ZEND_GCC_VERSION >= 4000
+#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
 # pragma GCC push_options
 # pragma GCC optimize("no-gcse")
 # pragma GCC optimize("no-ivopts")
@@ -3321,7 +3321,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 
 #include "zend_vm_execute.h"
 
-#if ZEND_GCC_VERSION >= 4000
+#if ZEND_GCC_VERSION >= 4000 && !defined(__clang__)
 # pragma GCC pop_options
 #endif
 
