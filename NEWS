@@ -33,6 +33,8 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #75961 (Strange references behavior). (Laruence)
   . Fixed some arginfos. (carusogabriel)
+  . Fixed bug #76068 (parse_ini_string fails to parse "[foo]\nbar=1|>baz" with
+    segfault). (Anatol)
 
 01 Mar 2018, PHP 7.2.3
 
