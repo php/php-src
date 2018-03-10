@@ -181,6 +181,7 @@ PHP                                                                        NEWS
   . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
+  . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
