@@ -1,24 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.3
+?? ??? 2018, PHP 7.2.4
 
 - Core:
   . Fixed bug #76025 (Segfault while throwing exception in error_handler).
     (Dmitry, Laruence)
-  . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
   . Fixed bug #76044 ('date: illegal option -- -' in ./configure on FreeBSD).
     (Anatol)
-
-- Apache2Handler:
-  . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
-    configuration). (Anatol)
-
-- Date:
-  . Fixed bug #75857 (Timezone gets truncated when formatted). (carusogabriel)
-  . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
-    accept `null`). (Pedro Lacerda)
-  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
-    (jhdxr)
 
 - FTP:
   . Fixed ftp_pasv arginfo. (carusogabriel)
@@ -31,20 +19,7 @@ PHP                                                                        NEWS
 - iconv:
   . Fixed bug #75867 (Freeing uninitialized pointer). (Philip Prindeville)
 
-- LDAP:
-  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
-
-- libxml2:
-  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
-
-- ODBC:
-  . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
-
 - Opcache:
-  . Fixed bug #75729 (opcache segfault when installing Bitrix). (Nikita)
-  . Fixed bug #75893 (file_get_contents $http_response_header variable bugged
-    with opcache). (Nikita)
-  . Fixed bug #75938 (Modulus value not stored in variable). (Nikita)
   . Fixed bug #75969 (Assertion failure in live range DCE due to block pass
     misoptimization). (Nikita)
 
@@ -54,6 +29,32 @@ PHP                                                                        NEWS
 - PCNTL:
   . Fixed bug #75873 (pcntl_wexitstatus returns incorrect on Big_Endian platform
     (s390x)). (Sam Ding)
+
+- Standard:
+  . Fixed bug #75961 (Strange references behavior). (Laruence)
+  . Fixed some arginfos. (carusogabriel)
+
+01 Mar 2018, PHP 7.2.3
+
+- Core:
+  . Fixed bug #75864 ("stream_isatty" returns wrong value on s390x). (Sam Ding)
+
+- Apache2Handler:
+  . Fixed bug #75882 (a simple way for segfaults in threadsafe php just with
+    configuration). (Anatol)
+
+- Date:
+  . Fixed bug #75857 (Timezone gets truncated when formatted). (carusogabriel)
+  . Fixed bug #75928 (Argument 2 for `DateTimeZone::listIdentifiers()` should
+    accept `null`). (Pedro Lacerda)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
+
+- LDAP:
+  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
+
+- libxml2:
+  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
 
 - PGSQL:
   . Fixed bug #75838 (Memory leak in pg_escape_bytea()). (ard_1 at mail dot ru)
@@ -66,15 +67,23 @@ PHP                                                                        NEWS
   . Fixed bug #65414 (deal with leading slash when adding files correctly).
     (bishopb)
 
+- ODBC:
+  . Fixed bug #73725 (Unable to retrieve value of varchar(max) type). (Anatol)
+
+- Opcache:
+  . Fixed bug #75729 (opcache segfault when installing Bitrix). (Nikita)
+  . Fixed bug #75893 (file_get_contents $http_response_header variable bugged
+    with opcache). (Nikita)
+  . Fixed bug #75938 (Modulus value not stored in variable). (Nikita)
+
 - SPL:
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
 - Standard:
-  . Fixed bug #75961 (Strange references behavior). (Laruence)
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike,
     Philip Sharp)
-  . Fixed some arginfos. (carusogabriel)
-  . Fixed bug #75981 (stack-buffer-overflow while parsing HTTP response). (Stas)
+  . Fixed bug #75981 (Prevent reading beyond buffer start in http wrapper).
+    (Stas)
 
 01 Feb 2018, PHP 7.2.2
 
