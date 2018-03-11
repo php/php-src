@@ -2518,9 +2518,7 @@ double_quotes_scan_done:
 
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					YYCTYPE *end = YYCURSOR + heredoc_label->length;
-
-					if (IS_LABEL_START(*end)) {
+					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
 						continue;
 					}
 
@@ -2625,9 +2623,7 @@ heredoc_scan_done:
 
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					YYCTYPE *end = YYCURSOR + heredoc_label->length;
-
-					if (IS_LABEL_START(*end)) {
+					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
 						continue;
 					}
 
