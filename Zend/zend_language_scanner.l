@@ -2273,6 +2273,7 @@ skip_escape_conversion:
 
 	if (YYCURSOR == YYLIMIT) {
 		YYCURSOR = saved_cursor;
+		ZVAL_NULL(zendlval);
 		RETURN_TOKEN(T_START_HEREDOC);
 	}
 
@@ -2514,6 +2515,7 @@ double_quotes_scan_done:
 				}
 
 				if (YYCURSOR == YYLIMIT) {
+					ZVAL_NULL(zendlval);
 					RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 				}
 
@@ -2625,6 +2627,7 @@ heredoc_scan_done:
 
 				if (YYCURSOR == YYLIMIT) {
 					CG(increment_lineno) = 1;
+					ZVAL_NULL(zendlval);
 					RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 				}
 
