@@ -2705,7 +2705,9 @@ static int accel_startup(zend_extension *extension)
 #endif
 
 #ifdef ZEND_WIN32
+# if !defined(__has_feature) || !__has_feature(address_sanitizer)
 	_setmaxstdio(2048); /* The default configuration is limited to 512 stdio files */
+# endif
 #endif
 
 	if (start_accel_module() == FAILURE) {
