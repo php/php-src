@@ -12,7 +12,6 @@ function output(array $tokens)
             echo "Line {$token[2]}: ", token_name($token[0]), " ('{$token[1]}')", PHP_EOL;
         }
     }
-
 }
 
 output(token_get_all(<<<'OUTER_END'
@@ -44,6 +43,27 @@ output(token_get_all(<<<'OUTER_END'
 echo <<<'INNER_END'
   INNER_END;
 OUTER_END));
+
+echo PHP_EOL;
+
+output(token_get_all(<<<'OUTER_END'
+  <?php
+  echo <<<INNER_END
+  a
+  OUTER_END
+));
+
+echo PHP_EOL;
+
+output(token_get_all(<<<'OUTER_END'
+<?php
+echo <<<INNER_END
+a
+OUTER_END
+));
+
+echo PHP_EOL;
+
 --EXPECT--
 Line 1: T_OPEN_TAG ('<?php
 ')
@@ -76,3 +96,19 @@ Line 2: T_WHITESPACE (' ')
 Line 2: T_START_HEREDOC ('<<<'INNER_END'
 ')
 Line 3: T_END_HEREDOC ('INNER_END')
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_ECHO ('echo')
+Line 2: T_WHITESPACE (' ')
+Line 2: T_START_HEREDOC ('<<<INNER_END
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_ECHO ('echo')
+Line 2: T_WHITESPACE (' ')
+Line 2: T_START_HEREDOC ('<<<INNER_END
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
