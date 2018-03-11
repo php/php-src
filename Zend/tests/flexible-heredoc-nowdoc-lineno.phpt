@@ -7,18 +7,22 @@ $heredoc = <<<EOT
 hello world
 EOT;
 
-$heredoc = <<<EOT
+$heredoc = <<<'EOT'
 hello world
 EOT;
 
 $heredoc = <<<EOT
-hello world
-EOT;
+ hello world
+ EOT;
+
+$heredoc = <<<'EOT'
+ hello world
+ EOT;
 
 try {
 	throw new exception();
 } catch (Exception $e) {
 	var_dump($e->getLine());
 }
---EXPECTF--
-int(16)
+--EXPECT--
+int(20)
