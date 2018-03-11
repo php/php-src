@@ -2319,8 +2319,9 @@ skip_escape_conversion:
 			zval_dtor(&zv);
 
 			if (EG(exception)) {
-				zend_restore_lexical_state(&current_state);
-				RETURN_TOKEN(retval);
+				OBJ_RELEASE(EG(exception));
+				EG(exception) = NULL;
+				break;
 			}
 
 			switch (retval) {
