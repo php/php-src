@@ -2292,7 +2292,7 @@ skip_escape_conversion:
 			}
 
 			BEGIN(ST_END_HEREDOC);
-			is_heredoc = 0;
+			RETURN_TOKEN(T_START_HEREDOC);
 		} else {
 			YYCURSOR = saved_cursor;
 		}
