@@ -64,6 +64,13 @@ OUTER_END
 
 echo PHP_EOL;
 
+output(token_get_all(<<<'OUTER_END'
+<?php
+echo <<<INNER_END
+a
+INNER_END;
+OUTER_END, TOKEN_PARSE));
+
 --EXPECT--
 Line 1: T_OPEN_TAG ('<?php
 ')
@@ -112,3 +119,13 @@ Line 2: T_WHITESPACE (' ')
 Line 2: T_START_HEREDOC ('<<<INNER_END
 ')
 Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_ECHO ('echo')
+Line 2: T_WHITESPACE (' ')
+Line 2: T_START_HEREDOC ('<<<INNER_END
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE ('a
+')
+Line 4: T_END_HEREDOC ('INNER_END')
