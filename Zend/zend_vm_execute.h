@@ -316,6 +316,9 @@ static zend_uchar zend_user_opcodes[256] = {0,
 #define SPEC_RULE_DIM_OBJ      0x00400000
 #define SPEC_RULE_COMMUTATIVE  0x00800000
 
+#define ZEND_INCR_VM_COUNT() EG(vm_count)++
+#define ZEND_DECR_VM_COUNT() EG(vm_count)--
+
 static const uint32_t *zend_spec_handlers;
 static const void * const *zend_opcode_handlers;
 static int zend_handlers_count;
@@ -371,17 +374,17 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 #  define ZEND_VM_CONTINUE()     return
 # endif
 # if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
-#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; return
+#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; ZEND_DECR_VM_COUNT(); return
 #  define ZEND_VM_HOT             zend_always_inline ZEND_OPT_SIZE
 # else
-#  define ZEND_VM_RETURN()        opline = NULL; return
+#  define ZEND_VM_RETURN()        opline = NULL; ZEND_DECR_VM_COUNT(); return
 #  define ZEND_VM_HOT
 # endif
 #else
 # define ZEND_OPCODE_HANDLER_RET int
 # define ZEND_VM_TAIL_CALL(call) return call
 # define ZEND_VM_CONTINUE()      return  0
-# define ZEND_VM_RETURN()        return -1
+# define ZEND_VM_RETURN()        ZEND_DECR_VM_COUNT(); return -1
 # define ZEND_VM_HOT
 #endif
 
@@ -50929,6 +50932,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NULL_HANDLER(ZEND_OPCODE_HANDL
 
 ZEND_API void execute_ex(zend_execute_data *ex)
 {
+#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)
+	if (EXPECTED(execute_data != NULL)) {
+		ZEND_INCR_VM_COUNT();
+	}
+#else
+	ZEND_INCR_VM_COUNT();
+#endif
+
 	DCL_OPLINE
 
 #ifdef ZEND_VM_IP_GLOBAL_REG

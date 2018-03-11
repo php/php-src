@@ -163,6 +163,7 @@ struct _zend_executor_globals {
 	zend_long precision;
 
 	int ticks_count;
+	int vm_count;
 
 	HashTable *in_autoload;
 	zend_function *autoload_func;
