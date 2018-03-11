@@ -2319,8 +2319,7 @@ skip_escape_conversion:
 			zval_dtor(&zv);
 
 			if (EG(exception)) {
-				OBJ_RELEASE(EG(exception));
-				EG(exception) = NULL;
+				zend_clear_exception();
 				break;
 			}
 
