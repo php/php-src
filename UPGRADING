@@ -154,6 +154,11 @@ JSON:
  Curl:
   . libcurl >= 7.15.5 is now required.
 
+ Filter:
+  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
+    defines the set of allowed thousand separator chars.  The default (`"',."`)
+    is fully backward compatible with former PHP versions.
+
  FTP:
   . Set default transfer mode to binary
 
