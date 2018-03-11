@@ -2287,10 +2287,6 @@ skip_escape_conversion:
 				RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 			}
 
-			if (*end == ';') {
-				end++;
-			}
-
 			BEGIN(ST_END_HEREDOC);
 			RETURN_TOKEN(T_START_HEREDOC);
 		} else {
@@ -2533,10 +2529,6 @@ double_quotes_scan_done:
 						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
 
-					if (*end == ';') {
-						end++;
-					}
-
 					/* newline before label will be subtracted from returned text, but
 					 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
 					if (!newline) {
@@ -2642,10 +2634,6 @@ heredoc_scan_done:
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
-					}
-
-					if (*end == ';') {
-						end++;
 					}
 
 					/* newline before label will be subtracted from returned text, but
