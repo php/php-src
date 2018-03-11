@@ -19,6 +19,9 @@ PHP                                                                        NEWS
 - iconv:
   . Fixed bug #75867 (Freeing uninitialized pointer). (Philip Prindeville)
 
+- Mbstring:
+  . Fixed bug #62545 (wrong unicode mapping in some charsets). (cmb)
+
 - Opcache:
   . Fixed bug #75969 (Assertion failure in live range DCE due to block pass
     misoptimization). (Nikita)
