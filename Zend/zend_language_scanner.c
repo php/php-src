@@ -1414,7 +1414,7 @@ yy3:
 		++YYCURSOR;
 		YYDEBUG(4, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2578 "Zend/zend_language_scanner.l"
+#line 2581 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -7542,7 +7542,7 @@ yy768:
 		++YYCURSOR;
 		YYDEBUG(769, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2578 "Zend/zend_language_scanner.l"
+#line 2581 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -7976,7 +7976,10 @@ yyc_ST_NOWDOC:
 						newline = 1;
 					}
 
-					CG(increment_lineno) = 1; /* For newline before label */
+					if (!indentation) {
+						CG(increment_lineno) = 1; /* For newline before label */
+					}
+
 					BEGIN(ST_END_HEREDOC);
 
 					goto nowdoc_scan_done;
@@ -7999,9 +8002,9 @@ nowdoc_scan_done:
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7972 "Zend/zend_language_scanner.c"
+#line 7975 "Zend/zend_language_scanner.c"
 }
-#line 2587 "Zend/zend_language_scanner.l"
+#line 2590 "Zend/zend_language_scanner.l"
 
 
 emit_token_with_str:

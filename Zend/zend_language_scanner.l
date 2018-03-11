@@ -2642,7 +2642,10 @@ heredoc_scan_done:
 						newline = 1;
 					}
 
-					CG(increment_lineno) = 1; /* For newline before label */
+					if (!indentation) {
+						CG(increment_lineno) = 1; /* For newline before label */
+					}
+
 					BEGIN(ST_END_HEREDOC);
 
 					goto nowdoc_scan_done;
