@@ -364,9 +364,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 	int already_stored = 0;
 	zend_op *persist_ptr;
 	zval *orig_literals = NULL;
-#ifdef HAVE_JIT
-	int do_jit = 1;
-#endif
 
 	if (op_array->refcount && --(*op_array->refcount) == 0) {
 		efree(op_array->refcount);
@@ -429,9 +426,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 		persist_ptr = zend_shared_alloc_get_xlat_entry(op_array->opcodes);
 		ZEND_ASSERT(persist_ptr != NULL);
 		op_array->opcodes = persist_ptr;
-#ifdef HAVE_JIT
-		do_jit = 0;
-#endif
 	} else {
 		zend_op *new_opcodes = zend_accel_memdup(op_array->opcodes, sizeof(zend_op) * op_array->last);
 		zend_op *opline = new_opcodes;
@@ -619,7 +613,8 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 
 #ifdef HAVE_JIT
 	if (ZCG(accel_directives).jit &&
-	    ZEND_JIT_LEVEL(ZCG(accel_directives).jit) <= ZEND_JIT_LEVEL_OPT_FUNCS) {
+	    ZEND_JIT_LEVEL(ZCG(accel_directives).jit) <= ZEND_JIT_LEVEL_OPT_FUNCS &&
+	    !already_stored) {
 		zend_jit_op_array(op_array, ZCG(current_persistent_script) ? &ZCG(current_persistent_script)->script : NULL);
 	}
 #endif
@@ -943,11 +938,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	}
 #endif
 
-	ZCG(current_persistent_script) = script;
 	zend_accel_persist_class_table(&script->script.class_table);
 	zend_hash_persist(&script->script.function_table, zend_persist_op_array);
 	zend_persist_op_array_ex(&script->script.main_op_array, script);
-	ZCG(current_persistent_script) = NULL;
 
 #ifdef HAVE_JIT
 	if (ZCG(accel_directives).jit) {
