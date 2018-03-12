@@ -570,9 +570,34 @@ static void auto_global_dtor(zval *zv) /* {{{ */
 static void function_copy_ctor(zval *zv) /* {{{ */
 {
 	zend_function *old_func = Z_FUNC_P(zv);
-	Z_FUNC_P(zv) = pemalloc(sizeof(zend_internal_function), 1);
-	memcpy(Z_FUNC_P(zv), old_func, sizeof(zend_internal_function));
-	function_add_ref(Z_FUNC_P(zv));
+	zend_function *func = pemalloc(sizeof(zend_internal_function), 1);
+
+	Z_FUNC_P(zv) = func;
+	memcpy(func, old_func, sizeof(zend_internal_function));
+	function_add_ref(func);
+	if ((old_func->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))
+	 && old_func->common.arg_info) {
+		uint32_t i;
+		uint32_t num_args = old_func->common.num_args + 1;
+		zend_arg_info *arg_info = old_func->common.arg_info - 1;
+		zend_arg_info *new_arg_info;
+
+		if (old_func->common.fn_flags & ZEND_ACC_VARIADIC) {
+			num_args++;
+		}
+		new_arg_info = pemalloc(sizeof(zend_arg_info) * num_args, 1);
+		memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
+		for (i = 0 ; i < num_args; i++) {
+			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
+				zend_string *name = zend_string_dup(ZEND_TYPE_NAME(arg_info[i].type), 1);
+
+				new_arg_info[i].type =
+					ZEND_TYPE_ENCODE_CLASS(
+						name, ZEND_TYPE_ALLOW_NULL(arg_info[i].type));
+			}
+		}
+		func->common.arg_info = new_arg_info + 1;
+	}
 }
 /* }}} */
 
