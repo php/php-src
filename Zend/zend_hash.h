@@ -325,7 +325,7 @@ static zend_always_inline int _zend_handle_numeric_str(const char *key, size_t l
 {
 	const char *tmp = key;
 
-	if (*tmp > '9') {
+	if (EXPECTED(*tmp > '9')) {
 		return 0;
 	} else if (*tmp < '0') {
 		if (*tmp != '-') {

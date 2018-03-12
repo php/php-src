@@ -118,9 +118,9 @@ PHP_FUNCTION( numfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto double NumberFormatter::parseCurrency( string $str, string $&currency[, int $&position] )
+/* {{{ proto float NumberFormatter::parseCurrency( string $str, string &$currency[, int &$position] )
  * Parse a number as currency. }}} */
-/* {{{ proto double numfmt_parse_currency( NumberFormatter $nf, string $str, string $&currency[, int $&position] )
+/* {{{ proto float numfmt_parse_currency( NumberFormatter $nf, string $str, string &$currency[, int &$position] )
  * Parse a number as currency.
  */
 PHP_FUNCTION( numfmt_parse_currency )

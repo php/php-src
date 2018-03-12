@@ -2,7 +2,7 @@
   regext.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -95,7 +95,7 @@ static int
 conv_encoding(OnigEncoding from, OnigEncoding to, const UChar* s, const UChar* end,
               UChar** conv, UChar** conv_end)
 {
-  int len = end - s;
+  int len = (int )(end - s);
 
   if (to == ONIG_ENCODING_UTF16_BE) {
     if (from == ONIG_ENCODING_ASCII || from == ONIG_ENCODING_ISO_8859_1) {
@@ -171,7 +171,7 @@ onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
   if (ci->pattern_enc != ci->target_enc) {
     r = conv_encoding(ci->pattern_enc, ci->target_enc, pattern, pattern_end,
                       &cpat, &cpat_end);
-    if (r) return r;
+    if (r != 0) return r;
   }
   else {
     cpat     = (UChar* )pattern;
@@ -186,10 +186,10 @@ onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
 
   r = onig_reg_init(*reg, ci->option, ci->case_fold_flag, ci->target_enc,
 		    ci->syntax);
-  if (r) goto err;
+  if (r != 0) goto err;
 
   r = onig_compile(*reg, cpat, cpat_end, einfo);
-  if (r) {
+  if (r != 0) {
   err:
     onig_free(*reg);
     *reg = NULL;

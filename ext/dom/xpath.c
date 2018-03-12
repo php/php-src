@@ -249,7 +249,7 @@ static void dom_xpath_ext_function_object_php(xmlXPathParserContextPtr ctxt, int
 }
 /* }}} */
 
-/* {{{ proto void DOMXPath::__construct(DOMDocument doc) U */
+/* {{{ proto DOMXPath::__construct(DOMDocument doc) U */
 PHP_METHOD(domxpath, __construct)
 {
 	zval *id = getThis(), *doc;

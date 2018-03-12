@@ -13,6 +13,8 @@ PHP                                                                        NEWS
   . Added support for references in list() and array destructuring, per
     RFC https://wiki.php.net/rfc/list_reference_assignment.
     (David Walker)
+  . Fixed bug #75683 (Memory leak in zend_register_functions() in ZTS mode).
+    (Dmitry)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
@@ -98,6 +100,7 @@ PHP                                                                        NEWS
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)
+  . Update to Oniguruma 6.7.1. (cmb)
 
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)
@@ -170,6 +173,7 @@ PHP                                                                        NEWS
   . Updated bundled libsqlite to 3.22.0. (cmb)
 
 - Standard:
+  . Added is_countable() function. (Gabriel Caruso)
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
   . Fixed unserialize(), to disable creation of unsupported data structures

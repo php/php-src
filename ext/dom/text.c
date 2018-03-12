@@ -61,7 +61,7 @@ const zend_function_entry php_dom_text_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMText::__construct([string value]); */
+/* {{{ proto DOMText::__construct([string value]); */
 PHP_METHOD(domtext, __construct)
 {
 

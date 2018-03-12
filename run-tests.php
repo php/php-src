@@ -497,7 +497,7 @@ $no_clean = false;
 $slow_min_ms = INF;
 
 $cfgtypes = array('show', 'keep');
-$cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp');
+$cfgfiles = array('skip', 'php', 'clean', 'out', 'diff', 'exp', 'mem');
 $cfg = array();
 
 foreach($cfgtypes as $type) {
@@ -860,7 +860,7 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'])) {
+		if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
 			exit(1);
 		}
 
@@ -997,8 +997,7 @@ if ($html_output) {
 save_or_mail_results();
 
 junit_save_xml();
-
-if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'])) {
+if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['LEAKED'])) {
 	exit(1);
 }
 exit(0);
@@ -2214,6 +2213,10 @@ $output
 			error("Cannot create test log - $log_filename");
 			error_report($file, $log_filename, $tested);
 		}
+	}
+	
+	if ($valgrind && $leaked && $cfg["show"]["mem"]) {
+		show_file_block('mem', file_get_contents($memcheck_filename));
 	}
 
 	show_result(implode('&', $restype), $tested, $tested_file, $info, $temp_filenames);

@@ -1038,7 +1038,7 @@ ZEND_METHOD(Generator, getReturn)
 }
 /* }}} */
 
-/* {{{ proto void Generator::__wakeup()
+/* {{{ proto Generator::__wakeup()
  * Throws an Exception as generators can't be serialized */
 ZEND_METHOD(Generator, __wakeup)
 {

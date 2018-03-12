@@ -395,7 +395,6 @@ PHP_FUNCTION(cal_from_jd)
 {
 	zend_long jd, cal;
 	int month, day, year, dow;
-	char date[16];
 	const struct cal_entry_t *calendar;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ll", &jd, &cal) == FAILURE) {
@@ -412,8 +411,8 @@ PHP_FUNCTION(cal_from_jd)
 
 	calendar->from_jd(jd, &year, &month, &day);
 
-	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
-	add_assoc_string(return_value, "date", date);
+	add_assoc_str(return_value, "date",
+		zend_strpprintf(0, "%i/%i/%i", month, day, year));
 
 	add_assoc_long(return_value, "month", month);
 	add_assoc_long(return_value, "day", day);
@@ -448,16 +447,14 @@ PHP_FUNCTION(jdtogregorian)
 {
 	zend_long julday;
 	int year, month, day;
-	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	SdnToGregorian(julday, &year, &month, &day);
-	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date);
+	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
 /* }}} */
 
@@ -481,16 +478,14 @@ PHP_FUNCTION(jdtojulian)
 {
 	zend_long julday;
 	int year, month, day;
-	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	SdnToJulian(julday, &year, &month, &day);
-	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date);
+	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
 /* }}} */
 
@@ -610,7 +605,6 @@ PHP_FUNCTION(jdtojewish)
 	zend_long julday, fl = 0;
 	zend_bool heb   = 0;
 	int year, month, day;
-	char date[16], hebdate[32];
 	char *dayp, *yearp;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l|bl", &julday, &heb, &fl) == FAILURE) {
@@ -619,15 +613,14 @@ PHP_FUNCTION(jdtojewish)
 
 	SdnToJewish(julday, &year, &month, &day);
 	if (!heb) {
-		snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
-		RETURN_STRING(date);
+		RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 	} else {
 		if (year <= 0 || year > 9999) {
 			php_error_docref(NULL, E_WARNING, "Year out of range (0-9999)");
 			RETURN_FALSE;
 		}
 
-		snprintf(hebdate, sizeof(hebdate), "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp));
+		RETVAL_NEW_STR(zend_strpprintf(0, "%s %s %s", heb_number_to_chars(day, fl, &dayp), JEWISH_HEB_MONTH_NAME(year)[month], heb_number_to_chars(year, fl, &yearp)));
 
 		if (dayp) {
 			efree(dayp);
@@ -635,9 +628,6 @@ PHP_FUNCTION(jdtojewish)
 		if (yearp) {
 			efree(yearp);
 		}
-
-		RETURN_STRING(hebdate);
-
 	}
 }
 /* }}} */
@@ -662,16 +652,14 @@ PHP_FUNCTION(jdtofrench)
 {
 	zend_long julday;
 	int year, month, day;
-	char date[16];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &julday) == FAILURE) {
 		RETURN_FALSE;
 	}
 
 	SdnToFrench(julday, &year, &month, &day);
-	snprintf(date, sizeof(date), "%i/%i/%i", month, day, year);
 
-	RETURN_STRING(date);
+	RETURN_NEW_STR(zend_strpprintf(0, "%i/%i/%i", month, day, year));
 }
 /* }}} */
 

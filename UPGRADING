@@ -58,8 +58,8 @@ Core:
   . Array destructuring now supports reference assignments using the syntax
     [&$a, [$b, &$c]] = $d. The same is also supported for list().
     (RFC: https://wiki.php.net/rfc/list_reference_assignment)
-  . instancof now allows literal as the first operand,
-    in this case the result always be FALSE.
+  . instanceof now allows literals as the first operand,
+    in which case the result is always FALSE.
 
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
@@ -129,8 +129,10 @@ Intl:
     URestrictionLevel under
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
 
-SPL:
-  . Added spl_object_id().
+Standard:
+  . Added is_countable() function, to check whether a value may be passed to
+    count().
+    (RFC: https://wiki.php.net/rfc/is-countable)
 
 ========================================
 7. New Classes and Interfaces

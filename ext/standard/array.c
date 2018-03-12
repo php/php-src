@@ -1387,7 +1387,6 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 
 	/* Iterate through hash */
 	do {
-		zend_bool was_ref;
 		/* Retrieve value */
 		zv = zend_hash_get_current_data_ex(target_hash, &pos);
 		if (zv == NULL) {
@@ -1402,8 +1401,6 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 				continue;
 			}
 		}
-
-		was_ref = Z_ISREF_P(zv);
 
 		/* Ensure the value is a reference. Otherwise the location of the value may be freed. */
 		ZVAL_MAKE_REF(zv);
@@ -1422,16 +1419,14 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			HashTable *thash;
 			zend_fcall_info orig_array_walk_fci;
 			zend_fcall_info_cache orig_array_walk_fci_cache;
-			zval rv;
+			zval ref;
+			ZVAL_COPY_VALUE(&ref, zv);
 
-			SEPARATE_ARRAY(Z_REFVAL_P(zv));
-			ZVAL_COPY_VALUE(&rv, Z_REFVAL_P(zv));
-			thash = Z_ARRVAL(rv);
+			ZVAL_DEREF(zv);
+			SEPARATE_ARRAY(zv);
+			thash = Z_ARRVAL_P(zv);
 			if (GC_IS_RECURSIVE(thash)) {
 				php_error_docref(NULL, E_WARNING, "recursion detected");
-				if (!was_ref) {
-					ZVAL_UNREF(zv);
-				}
 				result = FAILURE;
 				break;
 			}
@@ -1440,15 +1435,15 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 			orig_array_walk_fci = BG(array_walk_fci);
 			orig_array_walk_fci_cache = BG(array_walk_fci_cache);
 
-			Z_ADDREF(rv);
+			Z_ADDREF(ref);
 			GC_PROTECT_RECURSION(thash);
-			result = php_array_walk(&rv, userdata, recursive);
-			if (Z_TYPE_P(Z_REFVAL_P(zv)) == IS_ARRAY && thash == Z_ARRVAL_P(Z_REFVAL_P(zv))) {
+			result = php_array_walk(zv, userdata, recursive);
+			if (Z_TYPE_P(Z_REFVAL(ref)) == IS_ARRAY && thash == Z_ARRVAL_P(Z_REFVAL(ref))) {
 				/* If the hashtable changed in the meantime, we'll "leak" this apply count
 				 * increment -- our reference to thash is no longer valid. */
 				GC_UNPROTECT_RECURSION(thash);
 			}
-			zval_ptr_dtor(&rv);
+			zval_ptr_dtor(&ref);
 
 			/* restore the fcall info and cache */
 			BG(array_walk_fci) = orig_array_walk_fci;
@@ -1464,15 +1459,12 @@ static int php_array_walk(zval *array, zval *userdata, int recursive) /* {{{ */
 
 			zval_ptr_dtor(&args[0]);
 		}
+
 		if (Z_TYPE(args[1]) != IS_UNDEF) {
 			zval_ptr_dtor(&args[1]);
 			ZVAL_UNDEF(&args[1]);
 		}
-		if (!was_ref && Z_ISREF_P(zv)) {
-			if (Z_REFCOUNT_P(zv) == 1) {
-				ZVAL_UNREF(zv);
-			}
-		}
+
 		if (result == FAILURE) {
 			break;
 		}
@@ -4771,7 +4763,6 @@ static void php_array_intersect(INTERNAL_FUNCTION_PARAMETERS, int behavior, int 
 	} else if (behavior & INTERSECT_ASSOC) { /* triggered also when INTERSECT_KEY */
 		/* INTERSECT_KEY is subset of INTERSECT_ASSOC. When having the former
 		 * no comparison of the data is done (part of INTERSECT_ASSOC) */
-		intersect_key_compare_func = php_array_key_compare_string;
 
 		if (data_compare_type == INTERSECT_COMP_DATA_INTERNAL && key_compare_type == INTERSECT_COMP_KEY_INTERNAL) {
 			/* array_intersect_assoc() or array_intersect_key() */

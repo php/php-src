@@ -1250,7 +1250,7 @@ PHP_FUNCTION(dom_document_rename_node)
 }
 /* }}} end dom_document_rename_node */
 
-/* {{{ proto void DOMDocument::__construct([string version], [string encoding]); */
+/* {{{ proto DOMDocument::__construct([string version], [string encoding]); */
 PHP_METHOD(domdocument, __construct)
 {
 

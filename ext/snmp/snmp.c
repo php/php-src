@@ -1745,7 +1745,7 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ proto SNMP SNMP::__construct(int version, string hostname, string community|securityName [, int timeout [, int retries]])
+/* {{{ proto SNMP::__construct(int version, string hostname, string community|securityName [, int timeout [, int retries]])
 	Creates a new SNMP session to specified host. */
 PHP_METHOD(snmp, __construct)
 {

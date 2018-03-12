@@ -545,7 +545,7 @@ static void php_converter_resolve_callback(zval *zobj,
 }
 /* }}} */
 
-/* {{{ proto void UConverter::__construct([string dest = 'utf-8',[string src = 'utf-8']]) */
+/* {{{ proto UConverter::__construct([string dest = 'utf-8',[string src = 'utf-8']]) */
 ZEND_BEGIN_ARG_INFO_EX(php_converter_arginfo, 0, ZEND_RETURN_VALUE, 0)
 	ZEND_ARG_INFO(0, destination_encoding)
 	ZEND_ARG_INFO(0, source_encoding)

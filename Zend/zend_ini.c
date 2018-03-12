@@ -509,6 +509,17 @@ ZEND_API zend_string *zend_ini_get_value(zend_string *name) /* {{{ */
 }
 /* }}} */
 
+ZEND_API zend_bool zend_ini_parse_bool(zend_string *str)
+{
+	if ((ZSTR_LEN(str) == 4 && strcasecmp(ZSTR_VAL(str), "true") == 0)
+	  || (ZSTR_LEN(str) == 3 && strcasecmp(ZSTR_VAL(str), "yes") == 0)
+	  || (ZSTR_LEN(str) == 2 && strcasecmp(ZSTR_VAL(str), "on") == 0)) {
+		return 1;
+	} else {
+		return atoi(ZSTR_VAL(str)) != 0;
+	}
+}
+
 #if TONY_20070307
 static void zend_ini_displayer_cb(zend_ini_entry *ini_entry, int type) /* {{{ */
 {
@@ -563,15 +574,7 @@ ZEND_INI_DISP(zend_ini_boolean_displayer_cb) /* {{{ */
 	}
 
 	if (tmp_value) {
-		if (ZSTR_LEN(tmp_value) == 4 && strcasecmp(ZSTR_VAL(tmp_value), "true") == 0) {
-			value = 1;
-		} else if (ZSTR_LEN(tmp_value) == 3 && strcasecmp(ZSTR_VAL(tmp_value), "yes") == 0) {
-			value = 1;
-		} else if (ZSTR_LEN(tmp_value) == 2 && strcasecmp(ZSTR_VAL(tmp_value), "on") == 0) {
-			value = 1;
-		} else {
-			value = atoi(ZSTR_VAL(tmp_value));
-		}
+		value = zend_ini_parse_bool(tmp_value);
 	} else {
 		value = 0;
 	}
@@ -647,18 +650,7 @@ ZEND_API ZEND_INI_MH(OnUpdateBool) /* {{{ */
 
 	p = (zend_bool *) (base+(size_t) mh_arg1);
 
-	if (ZSTR_LEN(new_value) == 2 && strcasecmp("on", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 3 && strcasecmp("yes", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else if (ZSTR_LEN(new_value) == 4 && strcasecmp("true", ZSTR_VAL(new_value)) == 0) {
-		*p = (zend_bool) 1;
-	}
-	else {
-		*p = (zend_bool) atoi(ZSTR_VAL(new_value));
-	}
+	*p = zend_ini_parse_bool(new_value);
 	return SUCCESS;
 }
 /* }}} */

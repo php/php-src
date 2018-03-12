@@ -1134,10 +1134,10 @@ static const spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_clone
 };
 
-/* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
+/* {{{ proto Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
  *
- * proto void PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
+ * proto PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
  * Construct a PharData archive object
  *
  * This function is used as the constructor for both the Phar and PharData
@@ -1402,7 +1402,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		return; \
 	}
 
-/* {{{ proto void Phar::__destruct()
+/* {{{ proto Phar::__destruct()
  * if persistent, remove from the cache
  */
 PHP_METHOD(Phar, __destruct)
@@ -4497,7 +4497,7 @@ PHP_METHOD(Phar, extractTo)
 /* }}} */
 
 
-/* {{{ proto void PharFileInfo::__construct(string entry)
+/* {{{ proto PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
  */
 PHP_METHOD(PharFileInfo, __construct)
@@ -4572,7 +4572,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		return; \
 	}
 
-/* {{{ proto void PharFileInfo::__destruct()
+/* {{{ proto PharFileInfo::__destruct()
  * clean up directory-based entry objects
  */
 PHP_METHOD(PharFileInfo, __destruct)

@@ -2148,7 +2148,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::__wakeup()
+/* {{{ proto PDOStatement::__wakeup()
    Prevents use of a PDOStatement instance that has been unserialized */
 static PHP_METHOD(PDOStatement, __wakeup)
 {

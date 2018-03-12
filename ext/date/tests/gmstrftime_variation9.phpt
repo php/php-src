@@ -1,17 +1,17 @@
 --TEST--
-Test gmstrftime() function : usage variation - Checking week related formats which was not supported on Windows before vc14. 
+Test gmstrftime() function : usage variation - Checking week related formats which was not supported on Windows before vc14.
 --SKIPIF--
 <?php
 if (strtoupper(substr(PHP_OS, 0, 3)) != 'WIN') {
-    die("skip Test is not valid for Windows");
+    die("skip Test is only valid for Windows");
 }
 ?>
 --FILE--
 <?php
 /* Prototype  : string gmstrftime(string format [, int timestamp])
- * Description: Format a GMT/UCT time/date according to locale settings 
+ * Description: Format a GMT/UCT time/date according to locale settings
  * Source code: ext/date/php_date.c
- * Alias to functions: 
+ * Alias to functions:
  */
 
 echo "*** Testing gmstrftime() : usage variation ***\n";

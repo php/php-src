@@ -610,6 +610,7 @@ static const func_info_t func_infos[] = {
 	F0("is_object",                    MAY_BE_FALSE | MAY_BE_TRUE), // TODO: inline with support for incomplete class
 	F0("is_scalar",                    MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("is_callable",                  MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
+	F0("is_countable",                 MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_TRUE),
 	F0("pclose",                       MAY_BE_FALSE | MAY_BE_LONG),
 	F1("popen",                        MAY_BE_NULL | MAY_BE_FALSE | MAY_BE_RESOURCE),
 	F0("readfile",                     MAY_BE_FALSE | MAY_BE_LONG),

@@ -39,7 +39,7 @@
 
 #ifdef HAVE_OPCACHE_FILE_CACHE
 #define zend_set_str_gc_flags(str) do { \
-	if (ZCG(accel_directives).file_cache_only) { \
+	if (file_cache_only) { \
 		GC_TYPE_INFO(str) = IS_STRING | (IS_STR_INTERNED << GC_FLAGS_SHIFT); \
 	} else { \
 		GC_TYPE_INFO(str) = IS_STRING | ((IS_STR_INTERNED | IS_STR_PERMANENT) << GC_FLAGS_SHIFT); \
@@ -92,14 +92,25 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 	uint32_t idx, nIndex;
 	Bucket *p;
 
+	HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+	ht->pDestructor = NULL;
+
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		return;
 	}
 	if (ht->nNumUsed == 0) {
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
@@ -176,14 +187,25 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	uint32_t idx, nIndex;
 	Bucket *p;
 
+	HT_FLAGS(ht) |= HASH_FLAG_STATIC_KEYS;
+	ht->pDestructor = NULL;
+
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		return;
 	}
 	if (ht->nNumUsed == 0) {
 		efree(HT_GET_DATA_ADDR(ht));
 		ht->nTableMask = HT_MIN_MASK;
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!ZCG(current_persistent_script)->corrupted)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		HT_FLAGS(ht) &= ~HASH_FLAG_INITIALIZED;
 		return;
 	}
@@ -308,7 +330,6 @@ static void zend_persist_zval(zval *z)
 					Z_TYPE_FLAGS_P(z) = 0;
 					GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
 					GC_ADD_FLAGS(Z_COUNTED_P(z), IS_ARRAY_IMMUTABLE);
-					HT_FLAGS(Z_ARRVAL_P(z)) |= HASH_FLAG_STATIC_KEYS;
 				}
 			}
 			break;
@@ -331,7 +352,7 @@ static void zend_persist_zval(zval *z)
 				Z_ARR_P(z) = zend_accel_memdup(Z_AST_P(z), sizeof(zend_ast_ref));
 				zend_persist_ast(GC_AST(old_ref));
 				Z_TYPE_FLAGS_P(z) = 0;
-				GC_SET_REFCOUNT(Z_COUNTED_P(z), 2);
+				GC_SET_REFCOUNT(Z_COUNTED_P(z), 1);
 				efree(old_ref);
 			}
 			break;
@@ -377,7 +398,6 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			/* make immutable array */
 			GC_SET_REFCOUNT(op_array->static_variables, 2);
 			GC_TYPE_INFO(op_array->static_variables) = IS_ARRAY | (IS_ARRAY_IMMUTABLE << GC_FLAGS_SHIFT);
-			HT_FLAGS(op_array->static_variables) |= HASH_FLAG_STATIC_KEYS;
 		}
 	}
 
@@ -876,7 +896,7 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 	zend_hash_apply(class_table, (apply_func_t) zend_update_parent_ce);
 }
 
-zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length)
+zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, const char **key, unsigned int key_length, int for_shm)
 {
 #ifdef HAVE_JIT
 	zend_long orig_jit = 0;
@@ -891,6 +911,15 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	if (key && *key) {
 		*key = zend_accel_memdup(*key, key_length + 1);
 	}
+
+	script->corrupted = 0;
+	ZCG(current_persistent_script) = script;
+
+	if (!for_shm) {
+		/* script is not going to be saved in SHM */
+		script->corrupted = 1;
+	}
+
 	zend_accel_store_interned_string(script->script.filename);
 
 #if defined(__AVX__) || defined(__SSE2__)
@@ -930,6 +959,9 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 		ZCG(accel_directives).jit = orig_jit;
 	}
 #endif
+
+	script->corrupted = 0;
+	ZCG(current_persistent_script) = NULL;
 
 	return script;
 }
