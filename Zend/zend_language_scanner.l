@@ -2282,7 +2282,7 @@ skip_escape_conversion:
 		YYCTYPE *end = YYCURSOR + heredoc_label->length;
 
 		if (!IS_LABEL_START(*end)) {
-			if (!SCNG(tokenizer_scan) && spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 				RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 			}
@@ -2523,7 +2523,7 @@ double_quotes_scan_done:
 						continue;
 					}
 
-					if (!SCNG(tokenizer_scan) && spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
@@ -2537,7 +2537,7 @@ double_quotes_scan_done:
 					if (SCNG(heredoc_scan_ahead)) {
 						SCNG(heredoc_indentation) = indentation;
 						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
-					} else if (!SCNG(tokenizer_scan)) {
+					} else {
 						CG(increment_lineno) = 1;
 					}
 
@@ -2573,14 +2573,12 @@ heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	if (!SCNG(heredoc_scan_ahead)) {
-		if (SCNG(tokenizer_scan)
-		|| strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-			zend_string *copy = Z_STR_P(zendlval);
+	if (!SCNG(heredoc_scan_ahead)
+	    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+		zend_string *copy = Z_STR_P(zendlval);
 
-			zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
-			zend_string_release(copy);
-		}
+		zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
+		zend_string_release(copy);
 	}
 
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
@@ -2630,7 +2628,7 @@ heredoc_scan_done:
 						continue;
 					}
 
-					if (!SCNG(tokenizer_scan) && spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
@@ -2661,9 +2659,7 @@ nowdoc_scan_done:
 	if (spacing != -1) {
 		zend_copy_value(zendlval, yytext, yyleng - indentation);
 
-		if (!SCNG(tokenizer_scan)) {
-			strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
-		}
+		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);

@@ -268,8 +268,6 @@ PHP_FUNCTION(token_get_all)
 		Z_PARAM_LONG(flags)
 	ZEND_PARSE_PARAMETERS_END();
 
-	LANG_SCNG(tokenizer_scan) = 1;
-
 	if (flags & TOKEN_PARSE) {
 		success = tokenize_parse(return_value, source);
 	} else {
@@ -277,8 +275,6 @@ PHP_FUNCTION(token_get_all)
 		/* Normal token_get_all() should not throw. */
 		zend_clear_exception();
 	}
-
-	LANG_SCNG(tokenizer_scan) = 0;
 
 	if (!success) RETURN_FALSE;
 }
