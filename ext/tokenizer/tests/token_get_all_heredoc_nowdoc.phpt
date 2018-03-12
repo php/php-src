@@ -167,11 +167,5 @@ Line 3: T_ENCAPSED_AND_WHITESPACE (' 	XXX
 Line 4: T_END_HEREDOC ('DOC')
 
 
-Line 1: T_OPEN_TAG ('<?php
-')
-Line 2: T_WHITESPACE (' 	')
-Line 2: T_START_HEREDOC ('<<<'DOC'
-')
-Line 3: T_ENCAPSED_AND_WHITESPACE (' 	XXX
- 	')
-Line 4: T_END_HEREDOC ('DOC')
+
+Parse error: Invalid indentation - tabs and spaces cannot be mixed in  on line 3

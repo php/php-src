@@ -2525,7 +2525,6 @@ double_quotes_scan_done:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
-						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -2570,15 +2569,18 @@ double_quotes_scan_done:
 	}
 
 heredoc_scan_done:
-	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	if (!SCNG(heredoc_scan_ahead)
-	    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-		zend_string *copy = Z_STR_P(zendlval);
+	if (!EG(exception)) {
+		yyleng = YYCURSOR - SCNG(yy_text);
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-		zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
-		zend_string_release(copy);
+		if (!SCNG(heredoc_scan_ahead)
+		    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+			zend_string *copy = Z_STR_P(zendlval);
+
+			zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
+			zend_string_release(copy);
+		}
 	}
 
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
@@ -2630,7 +2632,6 @@ heredoc_scan_done:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
-						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -2656,7 +2657,7 @@ heredoc_scan_done:
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (spacing != -1) {
+	if (spacing != -1 && !EG(exception)) {
 		zend_copy_value(zendlval, yytext, yyleng - indentation);
 
 		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);

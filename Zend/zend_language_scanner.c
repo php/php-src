@@ -1414,7 +1414,7 @@ yy3:
 		++YYCURSOR;
 		YYDEBUG(4, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2588 "Zend/zend_language_scanner.l"
+#line 2589 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -7161,7 +7161,6 @@ yy739:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
-						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -7206,20 +7205,23 @@ yy739:
 	}
 
 heredoc_scan_done:
-	yyleng = YYCURSOR - SCNG(yy_text);
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	if (!SCNG(heredoc_scan_ahead)
-	    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-		zend_string *copy = Z_STR_P(zendlval);
+	if (!EG(exception)) {
+		yyleng = YYCURSOR - SCNG(yy_text);
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-		zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
-		zend_string_release(copy);
+		if (!SCNG(heredoc_scan_ahead)
+		    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+			zend_string *copy = Z_STR_P(zendlval);
+
+			zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
+			zend_string_release(copy);
+		}
 	}
 
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7202 "Zend/zend_language_scanner.c"
+#line 7204 "Zend/zend_language_scanner.c"
 yy740:
 		YYDEBUG(740, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7263,7 +7265,7 @@ yy744:
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 7246 "Zend/zend_language_scanner.c"
+#line 7248 "Zend/zend_language_scanner.c"
 yy745:
 		YYDEBUG(745, *YYCURSOR);
 		++YYCURSOR;
@@ -7274,7 +7276,7 @@ yy745:
 	yy_push_state(ST_LOOKING_FOR_VARNAME);
 	RETURN_TOKEN(T_DOLLAR_OPEN_CURLY_BRACES);
 }
-#line 7257 "Zend/zend_language_scanner.c"
+#line 7259 "Zend/zend_language_scanner.c"
 yy747:
 		YYDEBUG(747, *YYCURSOR);
 		++YYCURSOR;
@@ -7287,7 +7289,7 @@ yy747:
 	yyless(1);
 	RETURN_TOKEN(T_CURLY_OPEN);
 }
-#line 7270 "Zend/zend_language_scanner.c"
+#line 7272 "Zend/zend_language_scanner.c"
 yy749:
 		YYDEBUG(749, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7308,7 +7310,7 @@ yy751:
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 7291 "Zend/zend_language_scanner.c"
+#line 7293 "Zend/zend_language_scanner.c"
 yy753:
 		YYDEBUG(753, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7333,7 +7335,7 @@ yy754:
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 7316 "Zend/zend_language_scanner.c"
+#line 7318 "Zend/zend_language_scanner.c"
 	}
 /* *********************************** */
 yyc_ST_LOOKING_FOR_VARNAME:
@@ -7397,7 +7399,7 @@ yy759:
 	yy_push_state(ST_IN_SCRIPTING);
 	goto restart;
 }
-#line 7380 "Zend/zend_language_scanner.c"
+#line 7382 "Zend/zend_language_scanner.c"
 yy760:
 		YYDEBUG(760, *YYCURSOR);
 		yych = *(YYMARKER = ++YYCURSOR);
@@ -7452,7 +7454,7 @@ yy764:
 	yy_push_state(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_STRING_VARNAME);
 }
-#line 7435 "Zend/zend_language_scanner.c"
+#line 7437 "Zend/zend_language_scanner.c"
 	}
 /* *********************************** */
 yyc_ST_VAR_OFFSET:
@@ -7541,7 +7543,7 @@ yy768:
 		++YYCURSOR;
 		YYDEBUG(769, *YYCURSOR);
 		yyleng = YYCURSOR - SCNG(yy_text);
-#line 2588 "Zend/zend_language_scanner.l"
+#line 2589 "Zend/zend_language_scanner.l"
 		{
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -7550,7 +7552,7 @@ yy768:
 	zend_error(E_COMPILE_WARNING,"Unexpected character in input:  '%c' (ASCII=%d) state=%d", yytext[0], yytext[0], YYSTATE);
 	goto restart;
 }
-#line 7533 "Zend/zend_language_scanner.c"
+#line 7535 "Zend/zend_language_scanner.c"
 yy770:
 		YYDEBUG(770, *YYCURSOR);
 		++YYCURSOR;
@@ -7564,7 +7566,7 @@ yy770:
 	ZVAL_NULL(zendlval);
 	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7547 "Zend/zend_language_scanner.c"
+#line 7549 "Zend/zend_language_scanner.c"
 yy772:
 		YYDEBUG(772, *YYCURSOR);
 		++YYCURSOR;
@@ -7576,7 +7578,7 @@ yy773:
 	/* Only '[' or '-' can be valid, but returning other tokens will allow a more explicit parse error */
 	RETURN_TOKEN(yytext[0]);
 }
-#line 7559 "Zend/zend_language_scanner.c"
+#line 7561 "Zend/zend_language_scanner.c"
 yy774:
 		YYDEBUG(774, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7627,7 +7629,7 @@ string:
 	}
 	RETURN_TOKEN(T_NUM_STRING);
 }
-#line 7610 "Zend/zend_language_scanner.c"
+#line 7612 "Zend/zend_language_scanner.c"
 yy777:
 		YYDEBUG(777, *YYCURSOR);
 		++YYCURSOR;
@@ -7654,7 +7656,7 @@ yy779:
 	zend_copy_value(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_STRING);
 }
-#line 7637 "Zend/zend_language_scanner.c"
+#line 7639 "Zend/zend_language_scanner.c"
 yy782:
 		YYDEBUG(782, *YYCURSOR);
 		++YYCURSOR;
@@ -7665,7 +7667,7 @@ yy782:
 	yy_pop_state();
 	RETURN_TOKEN(']');
 }
-#line 7648 "Zend/zend_language_scanner.c"
+#line 7650 "Zend/zend_language_scanner.c"
 yy784:
 		YYDEBUG(784, *YYCURSOR);
 		++YYCURSOR;
@@ -7695,7 +7697,7 @@ yy786:
 	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
 	RETURN_TOKEN(T_VARIABLE);
 }
-#line 7678 "Zend/zend_language_scanner.c"
+#line 7680 "Zend/zend_language_scanner.c"
 yy787:
 		YYDEBUG(787, *YYCURSOR);
 		++YYCURSOR;
@@ -7712,7 +7714,7 @@ yy789:
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 	RETURN_TOKEN(T_NUM_STRING);
 }
-#line 7695 "Zend/zend_language_scanner.c"
+#line 7697 "Zend/zend_language_scanner.c"
 yy790:
 		YYDEBUG(790, *YYCURSOR);
 		yych = *++YYCURSOR;
@@ -7807,7 +7809,7 @@ inline_char_handler:
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_INLINE_HTML);
 }
-#line 7790 "Zend/zend_language_scanner.c"
+#line 7792 "Zend/zend_language_scanner.c"
 yy801:
 	YYDEBUG(801, *YYCURSOR);
 	yych = *++YYCURSOR;
@@ -7832,7 +7834,7 @@ yy803:
 		goto inline_char_handler;
 	}
 }
-#line 7815 "Zend/zend_language_scanner.c"
+#line 7817 "Zend/zend_language_scanner.c"
 yy804:
 	YYDEBUG(804, *YYCURSOR);
 	++YYCURSOR;
@@ -7843,7 +7845,7 @@ yy804:
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
 }
-#line 7826 "Zend/zend_language_scanner.c"
+#line 7828 "Zend/zend_language_scanner.c"
 yy806:
 	YYDEBUG(806, *YYCURSOR);
 	yych = *++YYCURSOR;
@@ -7880,7 +7882,7 @@ yy811:
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_OPEN_TAG);
 }
-#line 7863 "Zend/zend_language_scanner.c"
+#line 7865 "Zend/zend_language_scanner.c"
 yy812:
 	YYDEBUG(812, *YYCURSOR);
 	yych = *++YYCURSOR;
@@ -7908,7 +7910,7 @@ yyc_ST_END_HEREDOC:
 	BEGIN(ST_IN_SCRIPTING);
 	RETURN_TOKEN(T_END_HEREDOC);
 }
-#line 7891 "Zend/zend_language_scanner.c"
+#line 7893 "Zend/zend_language_scanner.c"
 /* *********************************** */
 yyc_ST_NOWDOC:
 	YYDEBUG(817, *YYCURSOR);
@@ -7918,7 +7920,7 @@ yyc_ST_NOWDOC:
 	++YYCURSOR;
 	YYDEBUG(820, *YYCURSOR);
 	yyleng = YYCURSOR - SCNG(yy_text);
-#line 2506 "Zend/zend_language_scanner.l"
+#line 2508 "Zend/zend_language_scanner.l"
 	{
 	int newline = 0, indentation = 0, spacing = -1;
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
@@ -7964,7 +7966,6 @@ yyc_ST_NOWDOC:
 
 					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
-						RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 					}
 
 					/* newline before label will be subtracted from returned text, but
@@ -7990,7 +7991,7 @@ yyc_ST_NOWDOC:
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (spacing != -1) {
+	if (spacing != -1 && !EG(exception)) {
 		zend_copy_value(zendlval, yytext, yyleng - indentation);
 
 		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
@@ -7999,9 +8000,9 @@ nowdoc_scan_done:
 	HANDLE_NEWLINES(yytext, yyleng - newline);
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
-#line 7982 "Zend/zend_language_scanner.c"
+#line 7983 "Zend/zend_language_scanner.c"
 }
-#line 2597 "Zend/zend_language_scanner.l"
+#line 2598 "Zend/zend_language_scanner.l"
 
 
 emit_token_with_str:
