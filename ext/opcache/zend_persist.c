@@ -901,7 +901,7 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 #ifdef HAVE_JIT
 	zend_long orig_jit = 0;
 #endif
-	
+
 	script->mem = ZCG(mem);
 
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
