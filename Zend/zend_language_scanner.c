@@ -7923,8 +7923,8 @@ yyc_ST_NOWDOC:
 	yyleng = YYCURSOR - SCNG(yy_text);
 #line 2509 "Zend/zend_language_scanner.l"
 	{
-	int newline = 0, indentation = 0, spacing = -1;
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+	int newline = 0, indentation = 0, spacing = -1;
 
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);

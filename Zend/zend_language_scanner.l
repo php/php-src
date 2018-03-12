@@ -2589,8 +2589,8 @@ heredoc_scan_done:
 
 
 <ST_NOWDOC>{ANY_CHAR} {
-	int newline = 0, indentation = 0, spacing = -1;
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+	int newline = 0, indentation = 0, spacing = -1;
 
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
