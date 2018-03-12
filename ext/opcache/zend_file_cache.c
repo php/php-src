@@ -902,7 +902,11 @@ static void zend_file_cache_unserialize_hash(HashTable               *ht,
 
 	ht->pDestructor = dtor;
 	if (!(ht->u.flags & HASH_FLAG_INITIALIZED)) {
-		HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		if (EXPECTED(!file_cache_only)) {
+			HT_SET_DATA_ADDR(ht, &ZCSG(uninitialized_bucket));
+		} else {
+			HT_SET_DATA_ADDR(ht, &uninitialized_bucket);
+		}
 		return;
 	}
 	if (IS_UNSERIALIZED(ht->arData)) {
