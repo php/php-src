@@ -20,7 +20,7 @@ echo <<<INNER_END
 INNER_END;
 OUTER_END));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
 <?php
@@ -28,7 +28,7 @@ echo <<<INNER_END
   INNER_END;
 OUTER_END));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
 <?php
@@ -36,7 +36,7 @@ echo <<<'INNER_END'
 INNER_END;
 OUTER_END));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
 <?php
@@ -44,7 +44,7 @@ echo <<<'INNER_END'
   INNER_END;
 OUTER_END));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
   <?php
@@ -53,7 +53,7 @@ output(token_get_all(<<<'OUTER_END'
   OUTER_END
 ));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
 <?php
@@ -62,7 +62,7 @@ a
 OUTER_END
 ));
 
-echo PHP_EOL;
+echo PHP_EOL, PHP_EOL;
 
 output(token_get_all(<<<'OUTER_END'
 <?php
@@ -70,6 +70,26 @@ echo <<<INNER_END
 a
 INNER_END;
 OUTER_END, TOKEN_PARSE));
+
+echo PHP_EOL, PHP_EOL;
+
+$code = <<<CODE
+<?php
+ \t<<<'DOC'
+ \tXXX
+ \tDOC;
+CODE;
+output(token_get_all($code));
+
+echo PHP_EOL, PHP_EOL;
+
+$code = <<<CODE
+<?php
+ \t<<<'DOC'
+ \tXXX
+ \tDOC;
+CODE;
+output(token_get_all($code, TOKEN_PARSE));
 
 --EXPECT--
 Line 1: T_OPEN_TAG ('<?php
@@ -80,6 +100,7 @@ Line 2: T_START_HEREDOC ('<<<INNER_END
 ')
 Line 3: T_END_HEREDOC ('INNER_END')
 
+
 Line 1: T_OPEN_TAG ('<?php
 ')
 Line 2: T_ECHO ('echo')
@@ -87,6 +108,7 @@ Line 2: T_WHITESPACE (' ')
 Line 2: T_START_HEREDOC ('<<<INNER_END
 ')
 Line 3: T_END_HEREDOC ('INNER_END')
+
 
 Line 1: T_OPEN_TAG ('<?php
 ')
@@ -96,6 +118,7 @@ Line 2: T_START_HEREDOC ('<<<'INNER_END'
 ')
 Line 3: T_END_HEREDOC ('INNER_END')
 
+
 Line 1: T_OPEN_TAG ('<?php
 ')
 Line 2: T_ECHO ('echo')
@@ -104,13 +127,6 @@ Line 2: T_START_HEREDOC ('<<<'INNER_END'
 ')
 Line 3: T_END_HEREDOC ('INNER_END')
 
-Line 1: T_OPEN_TAG ('<?php
-')
-Line 2: T_ECHO ('echo')
-Line 2: T_WHITESPACE (' ')
-Line 2: T_START_HEREDOC ('<<<INNER_END
-')
-Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
 
 Line 1: T_OPEN_TAG ('<?php
 ')
@@ -119,6 +135,16 @@ Line 2: T_WHITESPACE (' ')
 Line 2: T_START_HEREDOC ('<<<INNER_END
 ')
 Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
+
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_ECHO ('echo')
+Line 2: T_WHITESPACE (' ')
+Line 2: T_START_HEREDOC ('<<<INNER_END
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE ('a')
+
 
 Line 1: T_OPEN_TAG ('<?php
 ')
@@ -129,3 +155,23 @@ Line 2: T_START_HEREDOC ('<<<INNER_END
 Line 3: T_ENCAPSED_AND_WHITESPACE ('a
 ')
 Line 4: T_END_HEREDOC ('INNER_END')
+
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_WHITESPACE (' 	')
+Line 2: T_START_HEREDOC ('<<<'DOC'
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE (' 	XXX
+ 	')
+Line 4: T_END_HEREDOC ('DOC')
+
+
+Line 1: T_OPEN_TAG ('<?php
+')
+Line 2: T_WHITESPACE (' 	')
+Line 2: T_START_HEREDOC ('<<<'DOC'
+')
+Line 3: T_ENCAPSED_AND_WHITESPACE (' 	XXX
+ 	')
+Line 4: T_END_HEREDOC ('DOC')
