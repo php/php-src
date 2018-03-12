@@ -71,7 +71,7 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 	LocalFree( lpMsgBuf );
 
-	zend_accel_error(type, msg);
+	zend_accel_error(type, "%s", msg);
 }
 
 static char *create_name_with_username(char *name)
