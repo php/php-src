@@ -2660,7 +2660,7 @@ nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	if (spacing != -1 && !EG(exception)) {
-		zend_copy_value(zendlval, yytext, yyleng <= indentation ? 1 : yyleng - indentation);
+		zend_copy_value(zendlval, yytext, yyleng);
 
 		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
 	}

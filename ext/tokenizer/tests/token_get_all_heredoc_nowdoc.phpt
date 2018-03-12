@@ -180,8 +180,9 @@ Line 2: T_END_HEREDOC ('  INNER_END')
 Test case 5
 
 Line 1: T_OPEN_TAG ('<?php ')
-Line 1: T_SL ('<<')
-Line 1: T_STRING ('INNER_END')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('a')
 
 Test case 6
 
