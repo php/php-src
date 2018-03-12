@@ -2229,7 +2229,7 @@ skip_escape_conversion:
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 	char *s;
 	unsigned char *saved_cursor;
-	int bprefix = (yytext[0] != '<') ? 1 : 0, spacing = 0;
+	int bprefix = (yytext[0] != '<') ? 1 : 0, spacing = 0, indentation = 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
 	zend_bool is_heredoc = 1;
 
@@ -2269,6 +2269,7 @@ skip_escape_conversion:
 			spacing |= HEREDOC_USING_SPACES;
 		}
 		++YYCURSOR;
+		++indentation;
 	}
 
 	if (YYCURSOR == YYLIMIT) {
@@ -2279,22 +2280,20 @@ skip_escape_conversion:
 
 	/* Check for ending label on the next line */
 	if (heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, heredoc_label->length)) {
-		YYCTYPE *end = YYCURSOR + heredoc_label->length;
-
-		if (!IS_LABEL_START(*end)) {
+		if (!IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
 			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
-				RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
 			}
+
+			YYCURSOR = saved_cursor;
+			heredoc_label->length += indentation;
 
 			BEGIN(ST_END_HEREDOC);
 			RETURN_TOKEN(T_START_HEREDOC);
-		} else {
-			YYCURSOR = saved_cursor;
 		}
-	} else {
-		YYCURSOR = saved_cursor;
 	}
+
+	YYCURSOR = saved_cursor;
 
 	if (is_heredoc && !SCNG(heredoc_scan_ahead)) {
 		zend_lex_state current_state;
@@ -2538,6 +2537,8 @@ double_quotes_scan_done:
 						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
 					} else {
 						CG(increment_lineno) = 1;
+						YYCURSOR -= indentation;
+						heredoc_label->length += indentation;
 					}
 
 					BEGIN(ST_END_HEREDOC);
@@ -2640,9 +2641,10 @@ heredoc_scan_done:
 						newline = 1;
 					}
 
-					if (!indentation) {
-						CG(increment_lineno) = 1; /* For newline before label */
-					}
+					CG(increment_lineno) = 1; /* For newline before label */
+
+					YYCURSOR -= indentation;
+					heredoc_label->length += indentation;
 
 					BEGIN(ST_END_HEREDOC);
 
@@ -2658,7 +2660,7 @@ nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
 	if (spacing != -1 && !EG(exception)) {
-		zend_copy_value(zendlval, yytext, yyleng - indentation);
+		zend_copy_value(zendlval, yytext, yyleng <= indentation ? 1 : yyleng - indentation);
 
 		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
 	}
