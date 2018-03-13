@@ -33,7 +33,7 @@ Invalid numeric literal
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
-T_ERROR (078)
+T_LNUMBER (078)
 )
 ;
 
@@ -41,7 +41,7 @@ Invalid UTF-8 codepoint escape sequence
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
-T_ERROR ("\u{xyz}")
+T_CONSTANT_ENCAPSED_STRING ("\u{xyz}")
 )
 ;
 
@@ -49,7 +49,7 @@ Invalid UTF-8 codepoint escape sequence: Codepoint too large
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
-T_ERROR ("\u{ffffff}")
+T_CONSTANT_ENCAPSED_STRING ("\u{ffffff}")
 )
 ;
 
@@ -57,10 +57,10 @@ Invalid numeric literal
 T_OPEN_TAG (<?php )
 T_STRING (var_dump)
 (
-T_ERROR (078)
+T_LNUMBER (078)
 T_WHITESPACE ( )
 +
 T_WHITESPACE ( )
-T_ERROR (078)
+T_LNUMBER (078)
 )
 ;
