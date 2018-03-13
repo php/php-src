@@ -6,6 +6,8 @@ PHP                                                                        NEWS
   . Fixed bug #76088 (ODBC functions are not available by default on Windows).
     (cmb)
 
+- Standard:
+  . Fixed bug #74139 (mail.add_x_header default inconsistent with docs). (cmb)
 
 29 Mar 2018, PHP 7.2.4
 
