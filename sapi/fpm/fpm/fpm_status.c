@@ -46,9 +46,7 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array fpm_get_status
- * Returns the status of the fastcgi process manager */
-PHP_FUNCTION(fpm_get_status)
+int fpm_status_export_to_zval(zval *status)
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	struct fpm_scoreboard_proc_s proc;
@@ -62,12 +60,12 @@ PHP_FUNCTION(fpm_get_status)
 	scoreboard_p = fpm_scoreboard_get();
 	if (!scoreboard_p) {
 		zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
-		return;
+		return -1;
 	}
 
 	if (!fpm_spinlock(&scoreboard_p->lock, 1)) {
 		zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
-		return;
+		return -1;
 	}
 	/* copy the scoreboard not to bother other processes */
 	scoreboard = *scoreboard_p;
@@ -76,23 +74,23 @@ PHP_FUNCTION(fpm_get_status)
 	now_epoch = time(NULL);
 	fpm_clock_get(&now);
 
-	array_init(return_value);
-	add_assoc_string(return_value, "pool", scoreboard.pool);
-	add_assoc_string(return_value, "process-manager", PM2STR(scoreboard.pm));
-	add_assoc_long(return_value, "start-time", scoreboard.start_epoch);
-	add_assoc_long(return_value, "start-since", now_epoch - scoreboard.start_epoch);
-	add_assoc_long(return_value, "accepted-conn", scoreboard.requests);
+	array_init(status);
+	add_assoc_string(status, "pool", scoreboard.pool);
+	add_assoc_string(status, "process-manager", PM2STR(scoreboard.pm));
+	add_assoc_long(status, "start-time", scoreboard.start_epoch);
+	add_assoc_long(status, "start-since", now_epoch - scoreboard.start_epoch);
+	add_assoc_long(status, "accepted-conn", scoreboard.requests);
 #ifdef HAVE_FPM_LQ
-	add_assoc_long(return_value, "listen-queue", scoreboard.lq);
-	add_assoc_long(return_value, "max-listen-queue", scoreboard.lq_max);
-	add_assoc_long(return_value, "listen-queue-len", scoreboard.lq_len);
+	add_assoc_long(status, "listen-queue", scoreboard.lq);
+	add_assoc_long(status, "max-listen-queue", scoreboard.lq_max);
+	add_assoc_long(status, "listen-queue-len", scoreboard.lq_len);
 #endif
-	add_assoc_long(return_value, "idle-processes", scoreboard.idle);
-	add_assoc_long(return_value, "active-processes", scoreboard.active);
-	add_assoc_long(return_value, "total-processes", scoreboard.idle + scoreboard.active);
-	add_assoc_long(return_value, "max-active-processes", scoreboard.active_max);
-	add_assoc_long(return_value, "max-children-reached", scoreboard.max_children_reached);
-	add_assoc_long(return_value, "slow-requests", scoreboard.slow_rq);
+	add_assoc_long(status, "idle-processes", scoreboard.idle);
+	add_assoc_long(status, "active-processes", scoreboard.active);
+	add_assoc_long(status, "total-processes", scoreboard.idle + scoreboard.active);
+	add_assoc_long(status, "max-active-processes", scoreboard.active_max);
+	add_assoc_long(status, "max-children-reached", scoreboard.max_children_reached);
+	add_assoc_long(status, "slow-requests", scoreboard.slow_rq);
 
 	array_init(&fpm_proc_stats);
 	for(i=0; i<scoreboard.nprocs; i++) {
@@ -133,7 +131,8 @@ PHP_FUNCTION(fpm_get_status)
 		add_assoc_long(&fpm_proc_stat, "last-request-memory", proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
 		add_next_index_zval(&fpm_proc_stats, &fpm_proc_stat);
 	}
-	add_assoc_zval(return_value, "procs", &fpm_proc_stats);
+	add_assoc_zval(status, "procs", &fpm_proc_stats);
+	return 0;
 }
 /* }}} */
 
