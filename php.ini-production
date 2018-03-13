@@ -1043,7 +1043,7 @@ smtp_port = 25
 ;mail.force_extra_parameters =
 
 ; Add X-PHP-Originating-Script: that will include uid of the script followed by the filename
-mail.add_x_header = On
+mail.add_x_header = Off
 
 ; The path to a log file that will log all mail() calls. Log entries include
 ; the full path of the script, line number, To address and headers.
