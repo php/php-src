@@ -23,6 +23,7 @@ PHP                                                                        NEWS
     name contains a \n). (Laruence)
 
 - Standard:
+  . Fixed bug #74139 (mail.add_x_header default inconsistent with docs). (cmb)
   . Fixed bug #76068 (parse_ini_string fails to parse "[foo]\nbar=1|>baz" with
     segfault). (Anatol)
 
