@@ -11,6 +11,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed bug #73957 (signed integer conversion in imagescale()). (cmb)
 
+- ODBC:
+  . Fixed bug #76088 (ODBC functions are not available by default on Windows).
+    (cmb)
+
 - Opcache:
   . Fixed bug #76074 (opcache corrupts variable in for-loop). (Bob)
 
