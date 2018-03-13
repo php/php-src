@@ -45,11 +45,6 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-static void op_array_alloc_ops(zend_op_array *op_array, uint32_t size)
-{
-	op_array->opcodes = erealloc(op_array->opcodes, size * sizeof(zend_op));
-}
-
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
 {
 	op_array->type = type;
@@ -60,8 +55,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
-	op_array->opcodes = NULL;
-	op_array_alloc_ops(op_array, initial_ops_size);
+	op_array->opcodes = emalloc(initial_ops_size * sizeof(zend_op));;
 
 	op_array->last_var = 0;
 	op_array->vars = NULL;
@@ -452,36 +446,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 		efree(arg_info);
 	}
-}
-
-void init_op(zend_op *op)
-{
-	memset(op, 0, sizeof(zend_op));
-	op->lineno = CG(zend_lineno);
-}
-
-zend_op *get_next_op(zend_op_array *op_array)
-{
-	uint32_t next_op_num = op_array->last++;
-	zend_op *next_op;
-
-	if (next_op_num >= CG(context).opcodes_size) {
-		CG(context).opcodes_size *= 4;
-		op_array_alloc_ops(op_array, CG(context).opcodes_size);
-	}
-
-	next_op = &(op_array->opcodes[next_op_num]);
-
-	init_op(next_op);
-
-	return next_op;
-}
-
-zend_brk_cont_element *get_next_brk_cont_element(void)
-{
-	CG(context).last_brk_cont++;
-	CG(context).brk_cont_array = erealloc(CG(context).brk_cont_array, sizeof(zend_brk_cont_element) * CG(context).last_brk_cont);
-	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
 }
 
 static void zend_update_extended_info(zend_op_array *op_array)

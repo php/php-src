@@ -91,6 +91,37 @@ ZEND_API zend_executor_globals executor_globals;
 static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2);
 static zend_bool zend_try_ct_eval_array(zval *result, zend_ast *ast);
 
+static void init_op(zend_op *op)
+{
+	MAKE_NOP(op);
+	op->extended_value = 0;
+	op->lineno = CG(zend_lineno);
+}
+
+static zend_op *get_next_op(zend_op_array *op_array)
+{
+	uint32_t next_op_num = op_array->last++;
+	zend_op *next_op;
+
+	if (UNEXPECTED(next_op_num >= CG(context).opcodes_size)) {
+		CG(context).opcodes_size *= 4;
+		op_array->opcodes = erealloc(op_array->opcodes, CG(context).opcodes_size * sizeof(zend_op));
+	}
+
+	next_op = &(op_array->opcodes[next_op_num]);
+
+	init_op(next_op);
+
+	return next_op;
+}
+
+static zend_brk_cont_element *get_next_brk_cont_element(void)
+{
+	CG(context).last_brk_cont++;
+	CG(context).brk_cont_array = erealloc(CG(context).brk_cont_array, sizeof(zend_brk_cont_element) * CG(context).last_brk_cont);
+	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
+}
+
 static void zend_destroy_property_info_internal(zval *zv) /* {{{ */
 {
 	zend_property_info *property_info = Z_PTR_P(zv);
