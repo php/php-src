@@ -46,9 +46,9 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto array fastcgi_get_status
+/* {{{ proto array fpm_get_status
  * Returns the status of the fastcgi process manager */
-PHP_FUNCTION(fastcgi_get_status)
+PHP_FUNCTION(fpm_get_status)
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
 	struct fpm_scoreboard_proc_s proc;

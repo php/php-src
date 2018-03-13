@@ -1,5 +1,5 @@
 --TEST--
-FPM: Test fastcgi_get_status function
+FPM: Test fpm_get_status function
 --SKIPIF--
 <?php include "skipif.inc"; ?>
 --FILE--
@@ -26,7 +26,7 @@ EOT;
 $code = <<<EOT
 <?php
 echo "Test Start\n";
-var_dump(fastcgi_get_status());
+var_dump(fpm_get_status());
 echo "Test End\n";
 EOT;
 file_put_contents($srcfile, $code);
