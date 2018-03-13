@@ -33,6 +33,10 @@ PHP                                                                        NEWS
   . Fixed bug #75873 (pcntl_wexitstatus returns incorrect on Big_Endian platform
     (s390x)). (Sam Ding)
 
+- Phar:
+  . Fixed bug #76085 (Segmentation fault in buildFromIterator when directory
+    name contains a \n). (Laruence)
+
 - Standard:
   . Fixed bug #75961 (Strange references behavior). (Laruence)
   . Fixed some arginfos. (carusogabriel)
