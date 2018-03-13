@@ -691,7 +691,7 @@ void zend_file_context_end(zend_file_context *prev_context);
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
 
-ZEND_API int lex_scan(zval *zendlval);
+ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
 void startup_scanner(void);
 void shutdown_scanner(void);
 
@@ -800,7 +800,7 @@ ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
-int zendlex(zend_parser_stack_elem *elem);
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
 

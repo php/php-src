@@ -1675,44 +1675,16 @@ ZEND_API void zend_activate_auto_globals(void) /* {{{ */
 }
 /* }}} */
 
-int zendlex(zend_parser_stack_elem *elem) /* {{{ */
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem) /* {{{ */
 {
 	zval zv;
-	int retval;
-	uint32_t start_lineno;
 
 	if (CG(increment_lineno)) {
 		CG(zend_lineno)++;
 		CG(increment_lineno) = 0;
 	}
 
-again:
-	ZVAL_UNDEF(&zv);
-	start_lineno = CG(zend_lineno);
-	retval = lex_scan(&zv);
-	if (EG(exception)) {
-		return T_ERROR;
-	}
-
-	switch (retval) {
-		case T_COMMENT:
-		case T_DOC_COMMENT:
-		case T_OPEN_TAG:
-		case T_WHITESPACE:
-			goto again;
-
-		case T_CLOSE_TAG:
-			retval = ';'; /* implicit ; */
-			break;
-		case T_OPEN_TAG_WITH_ECHO:
-			retval = T_ECHO;
-			break;
-	}
-	if (Z_TYPE(zv) != IS_UNDEF) {
-		elem->ast = zend_ast_create_zval_with_lineno(&zv, 0, start_lineno);
-	}
-
-	return retval;
+	return lex_scan(&zv, elem);
 }
 /* }}} */
 
