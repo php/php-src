@@ -1586,8 +1586,6 @@ void zend_do_extended_info(void) /* {{{ */
 	opline = get_next_op(CG(active_op_array));
 
 	opline->opcode = ZEND_EXT_STMT;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 /* }}} */
 
@@ -1602,8 +1600,6 @@ void zend_do_extended_fcall_begin(void) /* {{{ */
 	opline = get_next_op(CG(active_op_array));
 
 	opline->opcode = ZEND_EXT_FCALL_BEGIN;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 /* }}} */
 
@@ -1618,8 +1614,6 @@ void zend_do_extended_fcall_end(void) /* {{{ */
 	opline = get_next_op(CG(active_op_array));
 
 	opline->opcode = ZEND_EXT_FCALL_END;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 }
 /* }}} */
 
@@ -2129,15 +2123,11 @@ static zend_op *zend_emit_op(znode *result, zend_uchar opcode, znode *op1, znode
 	zend_op *opline = get_next_op(CG(active_op_array));
 	opline->opcode = opcode;
 
-	if (op1 == NULL) {
-		SET_UNUSED(opline->op1);
-	} else {
+	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
 	}
 
-	if (op2 == NULL) {
-		SET_UNUSED(opline->op2);
-	} else {
+	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
 	}
 
@@ -2155,15 +2145,11 @@ static zend_op *zend_emit_op_tmp(znode *result, zend_uchar opcode, znode *op1, z
 	zend_op *opline = get_next_op(CG(active_op_array));
 	opline->opcode = opcode;
 
-	if (op1 == NULL) {
-		SET_UNUSED(opline->op1);
-	} else {
+	if (op1 != NULL) {
 		SET_NODE(opline->op1, op1);
 	}
 
-	if (op2 == NULL) {
-		SET_UNUSED(opline->op2);
-	} else {
+	if (op2 != NULL) {
 		SET_NODE(opline->op2, op2);
 	}
 
@@ -2189,8 +2175,6 @@ static void zend_emit_tick(void) /* {{{ */
 	opline = get_next_op(CG(active_op_array));
 
 	opline->opcode = ZEND_TICKS;
-	SET_UNUSED(opline->op1);
-	SET_UNUSED(opline->op2);
 	opline->extended_value = FC(declarables).ticks;
 }
 /* }}} */
@@ -2282,16 +2266,14 @@ static inline void zend_update_jump_target_to_next(uint32_t opnum_jump) /* {{{ *
 static inline zend_op *zend_delayed_emit_op(znode *result, zend_uchar opcode, znode *op1, znode *op2) /* {{{ */
 {
 	zend_op tmp_opline;
+
 	init_op(&tmp_opline);
+
 	tmp_opline.opcode = opcode;
-	if (op1 == NULL) {
-		SET_UNUSED(tmp_opline.op1);
-	} else {
+	if (op1 != NULL) {
 		SET_NODE(tmp_opline.op1, op1);
 	}
-	if (op2 == NULL) {
-		SET_UNUSED(tmp_opline.op2);
-	} else {
+	if (op2 != NULL) {
 		SET_NODE(tmp_opline.op2, op2);
 	}
 	if (result) {
@@ -3382,7 +3364,6 @@ void zend_compile_ns_call(znode *result, znode *name_node, zend_ast *args_ast) /
 {
 	zend_op *opline = get_next_op(CG(active_op_array));
 	opline->opcode = ZEND_INIT_NS_FCALL_BY_NAME;
-	SET_UNUSED(opline->op1);
 	opline->op2_type = IS_CONST;
 	opline->op2.constant = zend_add_ns_func_name_literal(
 		CG(active_op_array), Z_STR(name_node->u.constant));
@@ -3414,7 +3395,6 @@ void zend_compile_dynamic_call(znode *result, znode *name_node, zend_ast *args_a
 			zend_op *opline = get_next_op(CG(active_op_array));
 
 			opline->opcode = ZEND_INIT_FCALL_BY_NAME;
-			SET_UNUSED(opline->op1);
 			opline->op2_type = IS_CONST;
 			opline->op2.constant = zend_add_func_name_literal(CG(active_op_array), str);
 			opline->result.num = zend_alloc_cache_slot();
@@ -4402,11 +4382,8 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			opline->opcode = ZEND_FAST_CALL;
 			opline->result_type = IS_TMP_VAR;
 			opline->result.var = loop_var->var_num;
-			SET_UNUSED(opline->op1);
 			if (return_value) {
 				SET_NODE(opline->op2, return_value);
-			} else {
-				SET_UNUSED(opline->op2);
 			}
 			opline->op1.num = loop_var->u.try_catch_offset;
 		} else if (loop_var->opcode == ZEND_DISCARD_EXCEPTION) {
@@ -4414,7 +4391,6 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			opline->opcode = ZEND_DISCARD_EXCEPTION;
 			opline->op1_type = IS_TMP_VAR;
 			opline->op1.var = loop_var->var_num;
-			SET_UNUSED(opline->op2);
 		} else if (loop_var->opcode == ZEND_RETURN) {
 			/* Stack separator */
 			break;
@@ -4431,7 +4407,6 @@ static int zend_handle_loops_and_finally_ex(zend_long depth, znode *return_value
 			opline->opcode = loop_var->opcode;
 			opline->op1_type = loop_var->var_type;
 			opline->op1.var = loop_var->var_num;
-			SET_UNUSED(opline->op2);
 			opline->extended_value = ZEND_FREE_ON_RETURN;
 			depth--;
 	    }
@@ -5109,7 +5084,6 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 		opline = get_next_op(CG(active_op_array));
 		opline->opcode = ZEND_FREE;
 		SET_NODE(opline->op1, &expr_node);
-		SET_UNUSED(opline->op2);
 	} else if (expr_node.op_type == IS_CONST) {
 		zval_dtor(&expr_node.u.constant);
 	}
@@ -5973,7 +5947,6 @@ static void zend_begin_func_decl(znode *result, zend_op_array *op_array, zend_as
 		LITERAL_STR(opline->op1, zend_string_copy(lcname));
 		/* RTD key is placed after lcname literal in op1 */
 		zend_add_literal_string(CG(active_op_array), &key);
-		SET_UNUSED(opline->op2);
 	}
 
 	zend_string_release(lcname);
@@ -6432,7 +6405,6 @@ void zend_compile_class_decl(zend_ast *ast) /* {{{ */
 			SET_NODE(opline->op2, &extends_node);
 		} else {
 			opline->opcode = ZEND_DECLARE_CLASS;
-			SET_UNUSED(opline->op2);
 		}
 
 		key = zend_build_runtime_definition_key(lcname, decl->lex_pos);
@@ -7841,7 +7813,6 @@ static zend_op *zend_compile_rope_add(znode *result, uint32_t num, znode *elem_n
 		result->op_type = IS_TMP_VAR;
 		result->u.op.var = -1;
 		opline->opcode = ZEND_ROPE_INIT;
-		SET_UNUSED(opline->op1);
 	} else {
 		opline->opcode = ZEND_ROPE_ADD;
 		SET_NODE(opline->op1, result);
