@@ -1663,7 +1663,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_LNUMBER);
+			RETURN_TOKEN(T_ERROR);
 		}
 	} else {
 		errno = 0;
@@ -1680,7 +1680,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 				zend_throw_exception(zend_ce_parse_error,
 					"Invalid numeric literal", 0);
 				ZVAL_UNDEF(zendlval);
-				RETURN_TOKEN(T_DNUMBER);
+				RETURN_TOKEN(T_ERROR);
 			}
 			RETURN_TOKEN(T_DNUMBER);
 		}
@@ -1688,7 +1688,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_DNUMBER);
+			RETURN_TOKEN(T_ERROR);
 		}
 	}
 	ZEND_ASSERT(!errno);
@@ -2049,8 +2049,11 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
-				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
+				if (EXPECTED(zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == SUCCESS)) {
+					RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
+				} else {
+					RETURN_TOKEN(T_ERROR);
+				}
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
@@ -2216,8 +2219,11 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '"') == SUCCESS)) {
+		RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	} else {
+		RETURN_TOKEN(T_ERROR);
+	}
 }
 
 
@@ -2258,8 +2264,11 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '`') == SUCCESS)) {
+		RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	} else {
+		RETURN_TOKEN(T_ERROR);
+	}
 }
 
 
@@ -2332,8 +2341,11 @@ double_quotes_scan_done:
 heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0) == SUCCESS)) {
+		RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	} else {
+		RETURN_TOKEN(T_ERROR);
+	}
 }
 
 

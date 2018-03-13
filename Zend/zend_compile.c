@@ -1690,25 +1690,16 @@ again:
 	ZVAL_UNDEF(&zv);
 	start_lineno = CG(zend_lineno);
 	retval = lex_scan(&zv);
-	if (EG(exception)) {
-		return T_ERROR;
-	}
 
-	switch (retval) {
-		case T_COMMENT:
-		case T_DOC_COMMENT:
-		case T_OPEN_TAG:
-		case T_WHITESPACE:
+	if (retval >= T_WHITESPACE) {
+		if (EXPECTED(retval < T_OPEN_TAG_WITH_ECHO)) {
 			goto again;
-
-		case T_CLOSE_TAG:
-			retval = ';'; /* implicit ; */
-			break;
-		case T_OPEN_TAG_WITH_ECHO:
+		} else if (retval == T_OPEN_TAG_WITH_ECHO) {
 			retval = T_ECHO;
-			break;
-	}
-	if (Z_TYPE(zv) != IS_UNDEF) {
+		} else if (retval == T_CLOSE_TAG) {
+			retval = ';'; /* implicit ; */
+		}
+	} else if (Z_TYPE(zv) != IS_UNDEF) {
 		elem->ast = zend_ast_create_zval_with_lineno(&zv, 0, start_lineno);
 	}
 

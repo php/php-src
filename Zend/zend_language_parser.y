@@ -203,12 +203,6 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_TRAIT_C         "__TRAIT__ (T_TRAIT_C)"
 %token T_METHOD_C        "__METHOD__ (T_METHOD_C)"
 %token T_FUNC_C          "__FUNCTION__ (T_FUNC_C)"
-%token T_COMMENT         "comment (T_COMMENT)"
-%token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
-%token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
-%token T_OPEN_TAG_WITH_ECHO "open tag with echo (T_OPEN_TAG_WITH_ECHO)"
-%token T_CLOSE_TAG       "close tag (T_CLOSE_TAG)"
-%token T_WHITESPACE      "whitespace (T_WHITESPACE)"
 %token T_START_HEREDOC   "heredoc start (T_START_HEREDOC)"
 %token T_END_HEREDOC     "heredoc end (T_END_HEREDOC)"
 %token T_DOLLAR_OPEN_CURLY_BRACES "${ (T_DOLLAR_OPEN_CURLY_BRACES)"
@@ -221,6 +215,14 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_COALESCE        "?? (T_COALESCE)"
 %token T_POW             "** (T_POW)"
 %token T_POW_EQUAL       "**= (T_POW_EQUAL)"
+
+/* Special tokens (ignorred by PHP compiler, T_WHITESPACE must be first) */
+%token T_WHITESPACE      "whitespace (T_WHITESPACE)"
+%token T_COMMENT         "comment (T_COMMENT)"
+%token T_DOC_COMMENT     "doc comment (T_DOC_COMMENT)"
+%token T_OPEN_TAG        "open tag (T_OPEN_TAG)"
+%token T_OPEN_TAG_WITH_ECHO "open tag with echo (T_OPEN_TAG_WITH_ECHO)"
+%token T_CLOSE_TAG       "close tag (T_CLOSE_TAG)"
 
 /* Token used to force a parse error from the lexer */
 %token T_ERROR
