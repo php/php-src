@@ -877,7 +877,6 @@ default_socket_timeout = 60
 ;
 ; Notes for Windows environments :
 ;
-; - ODBC support is built in, so no dll is needed for it.
 ; - Many DLL files are located in the extensions/ (PHP 4) or ext/ (PHP 5+)
 ;   extension folders as well as the separate PECL DLL download (PHP 5+).
 ;   Be sure to appropriately set the extension_dir directive.
@@ -896,6 +895,7 @@ default_socket_timeout = 60
 ;extension=exif      ; Must be after mbstring as it depends on it
 ;extension=mysqli
 ;extension=oci8_12c  ; Use with Oracle Database 12c Instant Client
+;extension=odbc
 ;extension=openssl
 ;extension=pdo_firebird
 ;extension=pdo_mysql
