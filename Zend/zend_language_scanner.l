@@ -874,6 +874,8 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		SCNG(output_filter)((unsigned char **)&s, &sz, (unsigned char *)yytext, (size_t)yyleng); \
 		ZVAL_STRINGL(zendlval, s, sz); \
 		efree(s); \
+	} else if (yyleng == 1) { \
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext))); \
 	} else { \
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
@@ -883,11 +885,38 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 	register char *s, *t;
 	char *end;
 
+	if (len <= 1) {
+		if (len < 1) {
+			ZVAL_EMPTY_STRING(zendlval);
+		} else {
+			zend_uchar c = (zend_uchar)*str;
+			if (c == '\n' || c == '\r') {
+				CG(zend_lineno)++;
+			}
+			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+		}
+		goto skip_escape_conversion;
+	}
+
 	ZVAL_STRINGL(zendlval, str, len);
 
 	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
+	s = Z_STRVAL_P(zendlval);
 	end = s+Z_STRLEN_P(zendlval);
+	while (1) {
+		if (UNEXPECTED(*s=='\\')) {
+			break;
+		}
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
+		if (s == end) {
+			goto skip_escape_conversion;
+		}
+	}
+
+	t = s;
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -899,23 +928,18 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'r':
 					*t++ = '\r';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 't':
 					*t++ = '\t';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'f':
 					*t++ = '\f';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'v':
 					*t++ = '\v';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'e':
 #ifdef ZEND_WIN32
@@ -923,7 +947,6 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 #else
 					*t++ = '\e';
 #endif
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case '"':
 				case '`':
@@ -935,20 +958,15 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'x':
 				case 'X':
 					if (ZEND_IS_HEX(*(s+1))) {
 						char hex_buf[3] = { 0, 0, 0 };
 
-						Z_STRLEN_P(zendlval)--; /* for the 'x' */
-
 						hex_buf[0] = *(++s);
-						Z_STRLEN_P(zendlval)--;
 						if (ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
 						}
 						*t++ = (char) ZEND_STRTOL(hex_buf, NULL, 16);
 					} else {
@@ -964,7 +982,6 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						size_t len = 0;
 						zend_bool valid = 1;
 						unsigned long codepoint;
-						size_t byte_len = 0;
 
 						if (*start != '{') {
 							/* we silently let this pass to avoid breaking code
@@ -1020,27 +1037,20 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						/* based on https://en.wikipedia.org/wiki/UTF-8#Sample_code */
 						if (codepoint < 0x80) {
-							byte_len = 1;
 							*t++ = codepoint;
 						} else if (codepoint <= 0x7FF) {
-							byte_len = 2;
 							*t++ = (codepoint >> 6) + 0xC0;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						} else if (codepoint <= 0xFFFF) {
-							byte_len = 3;
 							*t++ = (codepoint >> 12) + 0xE0;
 							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						} else if (codepoint <= 0x10FFFF) {
-							byte_len = 4;
 							*t++ = (codepoint >> 18) + 0xF0;
 							*t++ = ((codepoint >> 12) & 0x3F) + 0x80;
 							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						}
-
-						Z_STRLEN_P(zendlval) -= 2; /* \u */
-						Z_STRLEN_P(zendlval) -= (len - byte_len);
 					}
 					break;
 				default:
@@ -1049,13 +1059,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						char octal_buf[4] = { 0, 0, 0, 0 };
 
 						octal_buf[0] = *s;
-						Z_STRLEN_P(zendlval)--;
 						if (ZEND_IS_OCT(*(s+1))) {
 							octal_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
 							if (ZEND_IS_OCT(*(s+1))) {
 								octal_buf[2] = *(++s);
-								Z_STRLEN_P(zendlval)--;
 							}
 						}
 						if (octal_buf[2] &&
@@ -1081,6 +1088,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 		s++;
 	}
 	*t = 0;
+	Z_STRLEN_P(zendlval) = t - Z_STRVAL_P(zendlval);
+
+skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		unsigned char *str;
@@ -1760,7 +1770,11 @@ string:
 }
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
+	if (yyleng == 1) {
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext)));
+	} else {
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
+	}
 	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
 
@@ -1875,8 +1889,10 @@ inline_char_handler:
 		if (readsize < yyleng) {
 			yyless(readsize);
 		}
+	} else if (yyleng == 1) {
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*yytext));
 	} else {
-	  ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN_WITH_VAL(T_INLINE_HTML);
@@ -2036,37 +2052,58 @@ inline_char_handler:
 		}
 	}
 
+	if (yyleng-bprefix-2 <= 1) {
+		if (yyleng-bprefix-2 < 1) {
+			ZVAL_EMPTY_STRING(zendlval);
+		} else {
+			zend_uchar c = (zend_uchar)*(yytext+bprefix+1);
+			if (c == '\n' || c == '\r') {
+				CG(zend_lineno)++;
+			}
+			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+		}
+		goto skip_escape_conversion;
+	}
 	ZVAL_STRINGL(zendlval, yytext+bprefix+1, yyleng-bprefix-2);
 
 	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
+	s = Z_STRVAL_P(zendlval);
 	end = s+Z_STRLEN_P(zendlval);
+	while (1) {
+		if (UNEXPECTED(*s=='\\')) {
+			break;
+		}
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
+		if (s == end) {
+			goto skip_escape_conversion;
+		}
+	}
+
+	t = s;
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-
-			switch(*s) {
-				case '\\':
-				case '\'':
-					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
-					break;
-				default:
-					*t++ = '\\';
-					*t++ = *s;
-					break;
+			if (*s == '\\' || *s == '\'') {
+				*t++ = *s;
+			} else {
+				*t++ = '\\';
+				*t++ = *s;
 			}
 		} else {
 			*t++ = *s;
 		}
-
 		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
 			CG(zend_lineno)++;
 		}
 		s++;
 	}
 	*t = 0;
+	Z_STRLEN_P(zendlval) = t - Z_STRVAL_P(zendlval);
 
+skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		char *str = NULL;
