@@ -2599,7 +2599,7 @@ function gen_vm($def, $skel) {
 		out($f,"#if defined(ZEND_VM_FP_GLOBAL_REG) && defined(ZEND_VM_IP_GLOBAL_REG)\n");
 		if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID) {
 			out($f,"#if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
-			out($f, "\thandler = (opcode_handler_t)zend_vm_get_opcode_handler_func(opline->opcode, opline);\n");
+			out($f, "\thandler = (opcode_handler_t)zend_vm_get_opcode_handler_func(zend_user_opcodes[opline->opcode], opline);\n");
 			out($f, "\thandler(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);\n");
 			out($f, "\tif (EXPECTED(opline != &hybrid_halt_op)) {\n");
 			out($f,"#else\n");
