@@ -211,7 +211,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
 ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast);
-ZEND_API void zend_ast_destroy(zend_ast *ast);
+ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
 ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
 typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);

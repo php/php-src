@@ -556,49 +556,41 @@ ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
 	return ref;
 }
 
-ZEND_API void zend_ast_destroy(zend_ast *ast) {
+ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast) {
 	if (!ast) {
 		return;
 	}
 
-	switch (ast->kind) {
-		case ZEND_AST_ZVAL:
-			zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
-			break;
-		case ZEND_AST_CONSTANT:
-			zend_string_release(zend_ast_get_constant_name(ast));
-			break;
-		case ZEND_AST_FUNC_DECL:
-		case ZEND_AST_CLOSURE:
-		case ZEND_AST_METHOD:
-		case ZEND_AST_CLASS:
-		{
-			zend_ast_decl *decl = (zend_ast_decl *) ast;
-			if (decl->name) {
-			    zend_string_release(decl->name);
-			}
-			if (decl->doc_comment) {
-				zend_string_release(decl->doc_comment);
-			}
-			zend_ast_destroy(decl->child[0]);
-			zend_ast_destroy(decl->child[1]);
-			zend_ast_destroy(decl->child[2]);
-			zend_ast_destroy(decl->child[3]);
-			break;
+	if (EXPECTED(ast->kind >= ZEND_AST_VAR)) {
+		uint32_t i, children = zend_ast_get_num_children(ast);
+
+		for (i = 0; i < children; i++) {
+			zend_ast_destroy(ast->child[i]);
 		}
-		default:
-			if (zend_ast_is_list(ast)) {
-				zend_ast_list *list = zend_ast_get_list(ast);
-				uint32_t i;
-				for (i = 0; i < list->children; i++) {
-					zend_ast_destroy(list->child[i]);
-				}
-			} else {
-				uint32_t i, children = zend_ast_get_num_children(ast);
-				for (i = 0; i < children; i++) {
-					zend_ast_destroy(ast->child[i]);
-				}
-			}
+	} else if (EXPECTED(ast->kind == ZEND_AST_ZVAL)) {
+		zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
+	} else if (EXPECTED(zend_ast_is_list(ast))) {
+		zend_ast_list *list = zend_ast_get_list(ast);
+		uint32_t i;
+
+		for (i = 0; i < list->children; i++) {
+			zend_ast_destroy(list->child[i]);
+		}
+	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
+		zend_string_release(zend_ast_get_constant_name(ast));
+	} else if (EXPECTED(ast->kind >= ZEND_AST_FUNC_DECL)) {
+		zend_ast_decl *decl = (zend_ast_decl *) ast;
+
+		if (decl->name) {
+		    zend_string_release(decl->name);
+		}
+		if (decl->doc_comment) {
+			zend_string_release(decl->doc_comment);
+		}
+		zend_ast_destroy(decl->child[0]);
+		zend_ast_destroy(decl->child[1]);
+		zend_ast_destroy(decl->child[2]);
+		zend_ast_destroy(decl->child[3]);
 	}
 }
 
