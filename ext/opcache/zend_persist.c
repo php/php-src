@@ -852,13 +852,6 @@ static void zend_accel_persist_class_table(HashTable *class_table)
 zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script, char **key, unsigned int key_length, int for_shm)
 {
 	script->mem = ZCG(mem);
-	script->corrupted = 0;
-	ZCG(current_persistent_script) = script;
-
-	if (!for_shm) {
-		/* script is not going to be saved in SHM */
-		script->corrupted = 1;
-	}
 
 	ZEND_ASSERT(((zend_uintptr_t)ZCG(mem) & 0x7) == 0); /* should be 8 byte aligned */
 	zend_shared_alloc_clear_xlat_table();
@@ -867,6 +860,15 @@ zend_persistent_script *zend_accel_script_persist(zend_persistent_script *script
 	if (key && *key) {
 		*key = zend_accel_memdup(*key, key_length + 1);
 	}
+
+	script->corrupted = 0;
+	ZCG(current_persistent_script) = script;
+
+	if (!for_shm) {
+		/* script is not going to be saved in SHM */
+		script->corrupted = 1;
+	}
+
 	zend_accel_store_interned_string(script->script.filename);
 
 #ifdef __SSE2__
