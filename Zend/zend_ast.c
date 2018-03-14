@@ -658,9 +658,9 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  *  270     non-associative clone new
  */
 
-static void zend_ast_export_ex(smart_str *str, zend_ast *ast, int priority, int indent);
+static ZEND_COLD void zend_ast_export_ex(smart_str *str, zend_ast *ast, int priority, int indent);
 
-static void zend_ast_export_str(smart_str *str, zend_string *s)
+static ZEND_COLD void zend_ast_export_str(smart_str *str, zend_string *s)
 {
 	size_t i;
 
@@ -675,7 +675,7 @@ static void zend_ast_export_str(smart_str *str, zend_string *s)
 	}
 }
 
-static void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
+static ZEND_COLD void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
 {
 	size_t i;
 
@@ -720,7 +720,7 @@ static void zend_ast_export_qstr(smart_str *str, char quote, zend_string *s)
 	}
 }
 
-static void zend_ast_export_indent(smart_str *str, int indent)
+static ZEND_COLD void zend_ast_export_indent(smart_str *str, int indent)
 {
 	while (indent > 0) {
 		smart_str_appends(str, "    ");
@@ -728,7 +728,7 @@ static void zend_ast_export_indent(smart_str *str, int indent)
 	}
 }
 
-static void zend_ast_export_name(smart_str *str, zend_ast *ast, int priority, int indent)
+static ZEND_COLD void zend_ast_export_name(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
@@ -741,7 +741,7 @@ static void zend_ast_export_name(smart_str *str, zend_ast *ast, int priority, in
 	zend_ast_export_ex(str, ast, priority, indent);
 }
 
-static void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int priority, int indent)
+static ZEND_COLD void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
@@ -759,7 +759,7 @@ static void zend_ast_export_ns_name(smart_str *str, zend_ast *ast, int priority,
 	zend_ast_export_ex(str, ast, priority, indent);
 }
 
-static int zend_ast_valid_var_char(char ch)
+static ZEND_COLD int zend_ast_valid_var_char(char ch)
 {
 	unsigned char c = (unsigned char)ch;
 
@@ -772,7 +772,7 @@ static int zend_ast_valid_var_char(char ch)
 	return 1;
 }
 
-static int zend_ast_valid_var_name(const char *s, size_t len)
+static ZEND_COLD int zend_ast_valid_var_name(const char *s, size_t len)
 {
 	unsigned char c;
 	size_t i;
@@ -798,7 +798,7 @@ static int zend_ast_valid_var_name(const char *s, size_t len)
 	return 1;
 }
 
-static void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
+static ZEND_COLD void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
@@ -816,7 +816,7 @@ static void zend_ast_export_var(smart_str *str, zend_ast *ast, int priority, int
 	smart_str_appendc(str, '}');
 }
 
-static void zend_ast_export_list(smart_str *str, zend_ast_list *list, int separator, int priority, int indent)
+static ZEND_COLD void zend_ast_export_list(smart_str *str, zend_ast_list *list, int separator, int priority, int indent)
 {
 	uint32_t i = 0;
 
@@ -829,7 +829,7 @@ static void zend_ast_export_list(smart_str *str, zend_ast_list *list, int separa
 	}
 }
 
-static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_list *list, int indent)
+static ZEND_COLD void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_list *list, int indent)
 {
 	uint32_t i = 0;
 	zend_ast *ast;
@@ -858,7 +858,7 @@ static void zend_ast_export_encaps_list(smart_str *str, char quote, zend_ast_lis
 	}
 }
 
-static void zend_ast_export_name_list_ex(smart_str *str, zend_ast_list *list, int indent, const char *separator)
+static ZEND_COLD void zend_ast_export_name_list_ex(smart_str *str, zend_ast_list *list, int indent, const char *separator)
 {
 	uint32_t i = 0;
 
@@ -874,7 +874,7 @@ static void zend_ast_export_name_list_ex(smart_str *str, zend_ast_list *list, in
 #define zend_ast_export_name_list(s, l, i) zend_ast_export_name_list_ex(s, l, i, ", ")
 #define zend_ast_export_catch_name_list(s, l, i) zend_ast_export_name_list_ex(s, l, i, "|")
 
-static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int indent)
+static ZEND_COLD void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int indent)
 {
 	uint32_t i = 0;
 
@@ -891,7 +891,7 @@ static void zend_ast_export_var_list(smart_str *str, zend_ast_list *list, int in
 	}
 }
 
-static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
+static ZEND_COLD void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 {
 	if (!ast) {
 		return;
@@ -933,7 +933,7 @@ static void zend_ast_export_stmt(smart_str *str, zend_ast *ast, int indent)
 	}
 }
 
-static void zend_ast_export_if_stmt(smart_str *str, zend_ast_list *list, int indent)
+static ZEND_COLD void zend_ast_export_if_stmt(smart_str *str, zend_ast_list *list, int indent)
 {
 	uint32_t i;
 	zend_ast *ast;
@@ -970,7 +970,7 @@ tail_call:
 	smart_str_appendc(str, '}');
 }
 
-static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
+static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int indent)
 {
 	zend_long idx;
 	zend_string *key;
@@ -1029,7 +1029,7 @@ static void zend_ast_export_zval(smart_str *str, zval *zv, int priority, int ind
 	}
 }
 
-static void zend_ast_export_class_no_header(smart_str *str, zend_ast_decl *decl, int indent) {
+static ZEND_COLD void zend_ast_export_class_no_header(smart_str *str, zend_ast_decl *decl, int indent) {
 	if (decl->child[0]) {
 		smart_str_appends(str, " extends ");
 		zend_ast_export_ns_name(str, decl->child[0], 0, indent);
@@ -1086,7 +1086,7 @@ static void zend_ast_export_class_no_header(smart_str *str, zend_ast_decl *decl,
 		goto append_default_value; \
 	} while (0)
 
-static void zend_ast_export_ex(smart_str *str, zend_ast *ast, int priority, int indent)
+static ZEND_COLD void zend_ast_export_ex(smart_str *str, zend_ast *ast, int priority, int indent)
 {
 	zend_ast_decl *decl;
 	int p, pl, pr;
@@ -1783,7 +1783,7 @@ append_default_value:
 	return;
 }
 
-ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix)
+ZEND_API ZEND_COLD zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix)
 {
 	smart_str str = {0};
 
