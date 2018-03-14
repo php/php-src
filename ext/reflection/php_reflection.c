@@ -6694,7 +6694,7 @@ static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	PHP_FE_END
 }; /* }}} */
 
-static zend_object_handlers *zend_std_obj_handlers;
+static const zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
 static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)

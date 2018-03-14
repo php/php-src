@@ -399,7 +399,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsl_object *intern;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
 	xmlNode *nodep = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	zval *cloneDocu, member, rv;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
@@ -483,7 +483,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	char **params = NULL;
 	int clone;
 	zval *doXInclude, member, rv;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
 	int secPrefsValue;

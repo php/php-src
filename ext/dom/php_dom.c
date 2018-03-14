@@ -319,7 +319,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void
 	zval *retval = NULL;
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
@@ -350,7 +350,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
 	}
 
@@ -372,7 +372,7 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
 	}
 
@@ -405,7 +405,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 			zval_dtor(&tmp);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->has_property(object, member, check_empty, cache_slot);
 	}
 
