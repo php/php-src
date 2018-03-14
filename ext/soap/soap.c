@@ -1532,6 +1532,7 @@ PHP_METHOD(SoapServer, handle)
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
+	zval tmp_soap, *tmp_soap_p;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1695,7 +1696,6 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-			zval *tmp_soap;
 			zval *session_vars;
 
 			if (PS(session_status) != php_session_active &&
@@ -1707,16 +1707,15 @@ PHP_METHOD(SoapServer, handle)
 			session_vars = &PS(http_session_vars);
 			ZVAL_DEREF(session_vars);
 			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-			    (tmp_soap = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
-			    Z_TYPE_P(tmp_soap) == IS_OBJECT &&
-			    Z_OBJCE_P(tmp_soap) == service->soap_class.ce) {
-				soap_obj = tmp_soap;
+			    (tmp_soap_p = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
+			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT &&
+			    Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce) {
+				soap_obj = tmp_soap_p;
 			}
 		}
 #endif
 		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
-			zval tmp_soap;
 
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
@@ -1769,13 +1768,12 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-				zval *tmp_soap_pp;
 				zval *session_vars = &PS(http_session_vars);
 
 				ZVAL_DEREF(session_vars);
 				if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-				    (tmp_soap_pp = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
-					soap_obj = tmp_soap_pp;
+				    (tmp_soap_p = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
+					soap_obj = tmp_soap_p;
 				} else {
 					soap_obj = &tmp_soap;
 				}
