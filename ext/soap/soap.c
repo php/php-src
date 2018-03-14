@@ -1521,7 +1521,7 @@ PHP_METHOD(SoapServer, handle)
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
-	zval tmp_soap, *tmp_soap_p;
+	zval tmp_soap;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1685,7 +1685,7 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-			zval *session_vars;
+			zval *session_vars, *tmp_soap_p;
 
 			if (PS(session_status) != php_session_active &&
 			    PS(session_status) != php_session_disabled) {
@@ -1757,7 +1757,7 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-				zval *session_vars = &PS(http_session_vars);
+				zval *session_vars = &PS(http_session_vars), *tmp_soap_p;
 
 				ZVAL_DEREF(session_vars);
 				if (Z_TYPE_P(session_vars) == IS_ARRAY &&
