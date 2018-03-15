@@ -47,7 +47,7 @@ static inline size_t zend_ast_list_size(uint32_t children) {
 	return sizeof(zend_ast_list) - sizeof(zend_ast *) + sizeof(zend_ast *) * children;
 }
 
-ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node) {
 	zend_ast_znode *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_znode));
@@ -58,7 +58,7 @@ ZEND_API zend_ast *zend_ast_create_znode(znode *node) {
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr, uint32_t lineno) {
+static zend_always_inline zend_ast * zend_ast_create_zval_int(zval *zv, uint32_t attr, uint32_t lineno) {
 	zend_ast_zval *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_zval));
@@ -69,11 +69,31 @@ ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr
 	return (zend_ast *) ast;
 }
 
-ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
-	return zend_ast_create_zval_with_lineno(zv, attr, CG(zend_lineno));
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_with_lineno(zval *zv, uint32_t lineno) {
+	return zend_ast_create_zval_int(zv, 0, lineno);
 }
 
-ZEND_API zend_ast *zend_ast_create_constant(zend_string *name, zend_ast_attr attr) {
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr) {
+	return zend_ast_create_zval_int(zv, attr, CG(zend_lineno));
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval(zval *zv) {
+	return zend_ast_create_zval_int(zv, 0, CG(zend_lineno));
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_str(zend_string *str) {
+	zval zv;
+	ZVAL_STR(&zv, str);
+	return zend_ast_create_zval_int(&zv, 0, CG(zend_lineno));
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval) {
+	zval zv;
+	ZVAL_LONG(&zv, lval);
+	return zend_ast_create_zval_int(&zv, 0, CG(zend_lineno));
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr) {
 	zend_ast_zval *ast;
 
 	ast = zend_ast_alloc(sizeof(zend_ast_zval));
@@ -107,6 +127,183 @@ ZEND_API zend_ast *zend_ast_create_decl(
 	return (zend_ast *) ast;
 }
 
+#if ZEND_AST_SPEC
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_0(zend_ast_kind kind) {
+	zend_ast *ast;
+
+	ZEND_ASSERT(kind >> ZEND_AST_NUM_CHILDREN_SHIFT == 0);
+	ast = zend_ast_alloc(zend_ast_size(0));
+	ast->kind = kind;
+	ast->attr = 0;
+	ast->lineno = CG(zend_lineno);
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_1(zend_ast_kind kind, zend_ast *child) {
+	zend_ast *ast;
+	uint32_t lineno;
+
+	ZEND_ASSERT(kind >> ZEND_AST_NUM_CHILDREN_SHIFT == 1);
+	ast = zend_ast_alloc(zend_ast_size(1));
+	ast->kind = kind;
+	ast->attr = 0;
+	ast->child[0] = child;
+	if (child) {
+		lineno = zend_ast_get_lineno(child);
+	} else {
+		lineno = CG(zend_lineno);
+	}
+	ast->lineno = lineno;
+	ast->lineno = lineno;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2) {
+	zend_ast *ast;
+	uint32_t lineno;
+
+	ZEND_ASSERT(kind >> ZEND_AST_NUM_CHILDREN_SHIFT == 2);
+	ast = zend_ast_alloc(zend_ast_size(2));
+	ast->kind = kind;
+	ast->attr = 0;
+	ast->child[0] = child1;
+	ast->child[1] = child2;
+	if (child1) {
+		lineno = zend_ast_get_lineno(child1);
+	} else if (child2) {
+		lineno = zend_ast_get_lineno(child2);
+	} else {
+		lineno = CG(zend_lineno);
+	}
+	ast->lineno = lineno;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_3(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3) {
+	zend_ast *ast;
+	uint32_t lineno;
+
+	ZEND_ASSERT(kind >> ZEND_AST_NUM_CHILDREN_SHIFT == 3);
+	ast = zend_ast_alloc(zend_ast_size(3));
+	ast->kind = kind;
+	ast->attr = 0;
+	ast->child[0] = child1;
+	ast->child[1] = child2;
+	ast->child[2] = child3;
+	if (child1) {
+		lineno = zend_ast_get_lineno(child1);
+	} else if (child2) {
+		lineno = zend_ast_get_lineno(child2);
+	} else if (child3) {
+		lineno = zend_ast_get_lineno(child3);
+	} else {
+		lineno = CG(zend_lineno);
+	}
+	ast->lineno = lineno;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_4(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4) {
+	zend_ast *ast;
+	uint32_t lineno;
+
+	ZEND_ASSERT(kind >> ZEND_AST_NUM_CHILDREN_SHIFT == 4);
+	ast = zend_ast_alloc(zend_ast_size(4));
+	ast->kind = kind;
+	ast->attr = 0;
+	ast->child[0] = child1;
+	ast->child[1] = child2;
+	ast->child[2] = child3;
+	ast->child[3] = child4;
+	if (child1) {
+		lineno = zend_ast_get_lineno(child1);
+	} else if (child2) {
+		lineno = zend_ast_get_lineno(child2);
+	} else if (child3) {
+		lineno = zend_ast_get_lineno(child3);
+	} else if (child4) {
+		lineno = zend_ast_get_lineno(child4);
+	} else {
+		lineno = CG(zend_lineno);
+	}
+	ast->lineno = lineno;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_0(zend_ast_kind kind) {
+	zend_ast *ast;
+	zend_ast_list *list;
+
+	ast = zend_ast_alloc(zend_ast_list_size(4));
+	list = (zend_ast_list *) ast;
+	list->kind = kind;
+	list->attr = 0;
+	list->lineno = CG(zend_lineno);
+	list->children = 0;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zend_ast *child) {
+	zend_ast *ast;
+	zend_ast_list *list;
+	uint32_t lineno;
+
+	ast = zend_ast_alloc(zend_ast_list_size(4));
+	list = (zend_ast_list *) ast;
+	list->kind = kind;
+	list->attr = 0;
+	list->children = 1;
+	list->child[0] = child;
+	if (child) {
+		lineno = zend_ast_get_lineno(child);
+		if (lineno > CG(zend_lineno)) {
+			lineno = CG(zend_lineno);
+		}
+	} else {
+		lineno = CG(zend_lineno);
+	}
+	list->lineno = lineno;
+
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2) {
+	zend_ast *ast;
+	zend_ast_list *list;
+	uint32_t lineno = zend_ast_get_lineno(child1);
+
+	ast = zend_ast_alloc(zend_ast_list_size(4));
+	list = (zend_ast_list *) ast;
+	list->kind = kind;
+	list->attr = 0;
+	list->children = 2;
+	list->child[0] = child1;
+	list->child[1] = child2;
+	if (child1) {
+		lineno = zend_ast_get_lineno(child1);
+		if (lineno > CG(zend_lineno)) {
+			lineno = CG(zend_lineno);
+		}
+	} else if (child2) {
+		lineno = zend_ast_get_lineno(child2);
+		if (lineno > CG(zend_lineno)) {
+			lineno = CG(zend_lineno);
+		}
+	} else {
+		list->children = 0;
+		lineno = CG(zend_lineno);
+	}
+	list->lineno = lineno;
+
+	return ast;
+}
+#else
 static zend_ast *zend_ast_create_from_va_list(zend_ast_kind kind, zend_ast_attr attr, va_list va) {
 	uint32_t i, children = kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
 	zend_ast *ast;
@@ -185,12 +382,13 @@ ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind ki
 
 	return ast;
 }
+#endif
 
 static inline zend_bool is_power_of_two(uint32_t n) {
 	return ((n != 0) && (n == (n & (~n + 1))));
 }
 
-ZEND_API zend_ast *zend_ast_list_add(zend_ast *ast, zend_ast *op) {
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *ast, zend_ast *op) {
 	zend_ast_list *list = zend_ast_get_list(ast);
 	if (list->children >= 4 && is_power_of_two(list->children)) {
 			list = zend_ast_realloc(list,
@@ -240,7 +438,7 @@ static int zend_ast_add_array_element(zval *result, zval *offset, zval *expr)
 	return SUCCESS;
 }
 
-ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
+ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope)
 {
 	zval op1, op2;
 	int ret = SUCCESS;
@@ -465,7 +663,7 @@ ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *sc
 	return ret;
 }
 
-static size_t zend_ast_tree_size(zend_ast *ast)
+static size_t ZEND_FASTCALL zend_ast_tree_size(zend_ast *ast)
 {
 	size_t size;
 
@@ -494,7 +692,7 @@ static size_t zend_ast_tree_size(zend_ast *ast)
 	return size;
 }
 
-static void* zend_ast_tree_copy(zend_ast *ast, void *buf)
+static void* ZEND_FASTCALL zend_ast_tree_copy(zend_ast *ast, void *buf)
 {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zend_ast_zval *new = (zend_ast_zval*)buf;
@@ -542,7 +740,7 @@ static void* zend_ast_tree_copy(zend_ast *ast, void *buf)
 	return buf;
 }
 
-ZEND_API zend_ast_ref *zend_ast_copy(zend_ast *ast)
+ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast)
 {
 	size_t tree_size;
 	zend_ast_ref *ref;

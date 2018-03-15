@@ -2500,7 +2500,7 @@ emit_token_with_str:
 emit_token_with_val:
 	if (PARSER_MODE()) {
 		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
-		elem->ast = zend_ast_create_zval_with_lineno(zendlval, 0, start_line);
+		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
 	}
 
 emit_token:

@@ -97,7 +97,8 @@ typedef struct _zend_ast_znode {
 	uint32_t lineno;
 	znode node;
 } zend_ast_znode;
-ZEND_API zend_ast *zend_ast_create_znode(znode *node);
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
 
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
