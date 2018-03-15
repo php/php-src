@@ -8019,7 +8019,7 @@ void zend_compile_const_expr_magic_const(zend_ast **ast_ptr) /* {{{ */
 	            (CG(active_class_entry)->ce_flags & ZEND_ACC_TRAIT) != 0);
 
 	zend_ast_destroy(ast);
-	*ast_ptr = zend_ast_create_ex(ZEND_AST_CONSTANT_CLASS, 0);
+	*ast_ptr = zend_ast_create(ZEND_AST_CONSTANT_CLASS);
 }
 /* }}} */
 
