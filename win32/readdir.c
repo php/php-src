@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 DIR *opendir(const char *dir)
-{
+{/*{{{*/
 	DIR *dp;
 	wchar_t *filespecw, *resolvedw;
 	HANDLE handle;
@@ -37,7 +37,7 @@ DIR *opendir(const char *dir)
 		return NULL;
 	}
 
-	dp = (DIR *) calloc(1, sizeof(DIR));
+	dp = (DIR *) calloc(1, sizeof(DIR) + (_MAX_FNAME*5+1)*sizeof(char));
 	if (dp == NULL) {
 		return NULL;
 	}
@@ -82,10 +82,10 @@ DIR *opendir(const char *dir)
 	free(resolvedw);
 
 	return dp;
-}
+}/*}}}*/
 
 struct dirent *readdir(DIR *dp)
-{
+{/*{{{*/
 	char *_tmp;
 	size_t reclen;
 
@@ -104,21 +104,20 @@ struct dirent *readdir(DIR *dp)
 		/* wide to utf8 failed, should never happen. */
 		return NULL;
 	}
-	if (dp->dent.d_name)
-		free(dp->dent.d_name);
-	dp->dent.d_name = _tmp;
+	memmove(dp->dent.d_name, _tmp, reclen + 1);
+	free(_tmp);
 	dp->dent.d_reclen = (unsigned short)reclen;
-	
+
 	dp->offset++;
 
 	dp->dent.d_ino = 1;
 	dp->dent.d_off = dp->offset;
 
 	return &(dp->dent);
-}
+}/*}}}*/
 
 int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
-{
+{/*{{{*/
 	char *_tmp;
 	size_t reclen;
 
@@ -141,9 +140,8 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 		result = NULL;
 		return 0;
 	}
-	if (dp->dent.d_name)
-		free(dp->dent.d_name);
-	dp->dent.d_name = _tmp;
+	memmove(dp->dent.d_name, _tmp, reclen + 1);
+	free(_tmp);
 	dp->dent.d_reclen = (unsigned short)reclen;
 
 	dp->offset++;
@@ -156,10 +154,10 @@ int readdir_r(DIR *dp, struct dirent *entry, struct dirent **result)
 	*result = &dp->dent;
 
 	return 0;
-}
+}/*}}}*/
 
 int closedir(DIR *dp)
-{
+{/*{{{*/
 	if (!dp)
 		return 0;
 	/* It is valid to scan an empty directory but we have an invalid
@@ -169,16 +167,14 @@ int closedir(DIR *dp)
 	}
 	if (dp->dirw)
 		free(dp->dirw);
-	if (dp->dent.d_name)
-		free(dp->dent.d_name);
 	if (dp)
 		free(dp);
 
 	return 0;
-}
+}/*}}}*/
 
 int rewinddir(DIR *dp)
-{
+{/*{{{*/
 	/* Re-set to the beginning */
 	wchar_t *filespecw;
 	HANDLE handle;
@@ -209,7 +205,7 @@ int rewinddir(DIR *dp)
 	dp->handle = handle;
 
 	return 0;
-}
+}/*}}}*/
 
 #ifdef __cplusplus
 }

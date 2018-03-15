@@ -14,6 +14,6 @@ foreach($certs as $cert) {
 	echo "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 163040343498260435477161879008842183802
 15

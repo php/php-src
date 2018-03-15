@@ -16,6 +16,6 @@ $interval = new DateInterval('P32D');
 echo date_interval_format($interval, '%d days');
 
 ?>
---EXPECTF--
+--EXPECT--
 4 days
 32 days

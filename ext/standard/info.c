@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -190,7 +190,7 @@ static int _display_module_info_def(zval *el) /* {{{ */
  */
 static void php_print_gpcse_array(char *name, uint32_t name_length)
 {
-	zval *data, *tmp, tmp2;
+	zval *data, *tmp;
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_string *key;
@@ -235,26 +235,20 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 					zend_print_zval_r(tmp, 0);
 				}
 			} else {
-				ZVAL_COPY_VALUE(&tmp2, tmp);
-				if (Z_TYPE(tmp2) != IS_STRING) {
-					tmp = NULL;
-					zval_copy_ctor(&tmp2);
-					convert_to_string(&tmp2);
-				}
+				zend_string *tmp2;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp2);
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (ZSTR_LEN(str) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					}
 				} else {
-					php_info_print(Z_STRVAL(tmp2));
+					php_info_print(ZSTR_VAL(str));
 				}
 
-				if (!tmp) {
-					zval_dtor(&tmp2);
-				}
+				zend_tmp_string_release(tmp2);
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -327,8 +321,8 @@ char* php_get_windows_name()
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
-					- if PHP DLL loaded under some binary that doesn't use the correct manifest 
-					
+					- if PHP DLL loaded under some binary that doesn't use the correct manifest
+
 					So keep the handling here as is for now, even if we know 6.2 is win8 and nothing else, and think about an improvement. */
 				OSVERSIONINFOEX osvi81;
 				DWORDLONG dwlConditionMask = 0;
@@ -766,7 +760,7 @@ PHPAPI void php_print_info_htmlhead(void)
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
 	php_info_print("<head>\n");
 	php_info_print_style();
-	php_info_print("<title>phpinfo()</title>");
+	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
@@ -876,6 +870,7 @@ PHPAPI void php_print_info(int flag)
 
 #ifdef ZTS
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
+		php_info_print_table_row(2, "Thread API", tsrm_api_name() );
 #else
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
@@ -1365,7 +1360,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 		return;
 	}
 
-	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
+	if (php_ini_scanned_files) {
 		RETURN_STRING(php_ini_scanned_files);
 	} else {
 		RETURN_FALSE;

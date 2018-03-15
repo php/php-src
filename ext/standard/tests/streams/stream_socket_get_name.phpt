@@ -2,12 +2,6 @@
 string stream_socket_get_name ( resource $handle , bool $want_peer ) ;
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - #phparty7 - @phpsp - novatec/2015 - sao paulo - br
---SKIPIF--
-<?php
-if (phpversion() < "5.3.0") {
-  die('SKIP php version so lower.');
-}
-?>
 --FILE--
 <?php
 $serverUri = "tcp://127.0.0.1:31854";

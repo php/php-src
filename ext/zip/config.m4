@@ -14,7 +14,7 @@ PHP_ARG_WITH(pcre-dir, pcre install prefix,
 [  --with-pcre-dir         ZIP: pcre install prefix], no, no)
 
 PHP_ARG_WITH(libzip, libzip,
-[  --with-libzip[=DIR]       ZIP: use libzip], no, no)
+[  --with-libzip[=DIR]       ZIP: use libzip], yes, no)
 
 if test "$PHP_ZIP" != "no"; then
 
@@ -104,6 +104,15 @@ if test "$PHP_ZIP" != "no"; then
       PHP_ADD_LIBRARY_WITH_PATH(zip, $LIBZIP_LIBDIR, ZIP_SHARED_LIBADD)
       AC_DEFINE(HAVE_ENCRYPTION, 1, [Libzip >= 1.2.0 with encryption support])
     ], [
+      AC_MSG_WARN(Libzip >= 1.2.0 needed for encryption support)
+    ], [
+      -L$LIBZIP_LIBDIR
+    ])
+
+    PHP_CHECK_LIBRARY(zip, zip_libzip_version,
+    [
+      AC_DEFINE(HAVE_LIBZIP_VERSION, 1, [Libzip >= 1.3.1 with zip_libzip_version function])
+    ], [
     ], [
       -L$LIBZIP_LIBDIR
     ])
@@ -112,6 +121,11 @@ if test "$PHP_ZIP" != "no"; then
     PHP_NEW_EXTENSION(zip, php_zip.c zip_stream.c, $ext_shared,, $LIBZIP_CFLAGS)
     PHP_SUBST(ZIP_SHARED_LIBADD)
   else
+    AC_MSG_WARN(========================================================)
+    AC_MSG_WARN(Use of bundled libzip is deprecated and will be removed.)
+    AC_MSG_WARN(Some features such as encryption and bzip2 are not available.)
+    AC_MSG_WARN(Use system library and --with-libzip is recommended.)
+    AC_MSG_WARN(========================================================)
 
 
   PHP_ZIP_SOURCES="$PHP_ZIP_SOURCES lib/zip_add.c lib/zip_add_dir.c lib/zip_add_entry.c\
@@ -181,21 +195,6 @@ in
     *) MANFMT=man;;
 esac
 AC_SUBST([MANFMT])
-
-AH_BOTTOM([
-#ifndef HAVE_SSIZE_T
-#  if SIZEOF_SIZE_T == SIZEOF_INT
-typedef int ssize_t;
-#  elif SIZEOF_SIZE_T == SIZEOF_LONG
-typedef long ssize_t;
-#  elif SIZEOF_SIZE_T == SIZEOF_LONG_LONG
-typedef long long ssize_t;
-#  else
-#error no suitable type for ssize_t found
-#  endif
-#endif
-])
-
 
   dnl so we always include the known-good working hack.
   PHP_ADD_MAKEFILE_FRAGMENT

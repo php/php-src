@@ -17,5 +17,5 @@ fa@php.net
 ?>
 --EXPECTF--
 
-Warning: socket_close() expects exactly 1 parameter, 0 given in %s on line %i
+Warning: socket_close() expects exactly 1 parameter, 0 given in %s on line %d
 NULL

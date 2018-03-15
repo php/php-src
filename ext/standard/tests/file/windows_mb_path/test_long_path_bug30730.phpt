@@ -35,7 +35,7 @@ var_dump(rmdir($dest_dir));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

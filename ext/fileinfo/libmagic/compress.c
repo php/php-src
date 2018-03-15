@@ -2,7 +2,7 @@
  * Copyright (c) Ian F. Darwin 1986-1995.
  * Software written by Ian F. Darwin and others;
  * maintained 1995-present by Christos Zoulas and others.
- * 
+ *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
@@ -12,7 +12,7 @@
  * 2. Redistributions in binary form must reproduce the above copyright
  *    notice, this list of conditions and the following disclaimer in the
  *    documentation and/or other materials provided with the distribution.
- *  
+ *
  * THIS SOFTWARE IS PROVIDED BY THE AUTHOR AND CONTRIBUTORS ``AS IS'' AND
  * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
  * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -29,13 +29,13 @@
  * compress routines:
  *	zmagic() - returns 0 if not recognized, uncompresses and prints
  *		   information if recognized
- *	uncompress(method, old, n, newch) - uncompress old into new, 
+ *	uncompress(method, old, n, newch) - uncompress old into new,
  *					    using method, return sizeof new
  */
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: compress.c,v 1.100 2016/10/24 18:02:17 christos Exp $")
+FILE_RCSID("@(#)$File: compress.c,v 1.104 2017/03/29 15:57:48 christos Exp $")
 #endif
 
 #include "magic.h"
@@ -50,7 +50,7 @@ FILE_RCSID("@(#)$File: compress.c,v 1.100 2016/10/24 18:02:17 christos Exp $")
 # ifndef HAVE_SIG_T
 typedef void (*sig_t)(int);
 # endif /* HAVE_SIG_T */
-#endif 
+#endif
 #ifndef PHP_WIN32
 #include <sys/ioctl.h>
 #endif
@@ -182,7 +182,7 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 		switch (urv) {
 		case OKDATA:
 		case ERRDATA:
-			
+
 			ms->flags &= ~MAGIC_COMPRESS;
 			if (urv == ERRDATA)
 				prv = file_printf(ms, "%s ERROR: %s",
@@ -452,13 +452,13 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	int rc;
 	z_stream z;
 
-	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL) 
+	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
 		return makeerror(newch, n, "No buffer, %s", strerror(errno));
 
 	z.next_in = CCAST(Bytef *, old);
 	z.avail_in = CAST(uint32_t, *n);
 	z.next_out = *newch;
-	z.avail_out = bytes_max;
+	z.avail_out = CAST(unsigned int, bytes_max);
 	z.zalloc = Z_NULL;
 	z.zfree = Z_NULL;
 	z.opaque = Z_NULL;
@@ -476,7 +476,7 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	rc = inflateEnd(&z);
 	if (rc != Z_OK)
 		goto err;
-	
+
 	/* let's keep the nul-terminate tradition */
 	(*newch)[*n] = '\0';
 
@@ -544,7 +544,7 @@ writechild(int fdp[3][2], const void *old, size_t n)
 	int status;
 
 	closefd(fdp[STDIN_FILENO], 0);
-	/* 
+	/*
 	 * fork again, to avoid blocking because both
 	 * pipes filled
 	 */
@@ -593,7 +593,7 @@ filter_error(unsigned char *ubuf, ssize_t n)
 		while (isspace((unsigned char)*p))
 			p++;
 		n = strlen(p);
-		memmove(ubuf, p, n + 1);
+		memmove(ubuf, p, CAST(size_t, n + 1));
 	}
 	DPRINTF("Filter error after[[[%s]]]\n", (char *)ubuf);
 	if (islower(*ubuf))
@@ -647,13 +647,13 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 			fdp[STDIN_FILENO][0] = fd;
 			(void) lseek(fd, (off_t)0, SEEK_SET);
 		}
-		
+
 		for (i = 0; i < __arraycount(fdp); i++)
-			copydesc(i, fdp[i]);
+			copydesc(CAST(int, i), fdp[i]);
 
 		(void)execvp(compr[method].argv[0],
 		    (char *const *)(intptr_t)compr[method].argv);
-		dprintf(STDERR_FILENO, "exec `%s' failed, %s", 
+		dprintf(STDERR_FILENO, "exec `%s' failed, %s",
 		    compr[method].argv[0], strerror(errno));
 		exit(1);
 		/*NOTREACHED*/

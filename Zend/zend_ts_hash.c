@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,24 +59,14 @@ static void end_write(TsHashTable *ht)
 }
 
 /* delegates */
-ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent ZEND_FILE_LINE_DC)
+ZEND_API void _zend_ts_hash_init(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 #ifdef ZTS
 	ht->mx_reader = tsrm_mutex_alloc();
 	ht->mx_writer = tsrm_mutex_alloc();
 	ht->reader = 0;
 #endif
-	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent ZEND_FILE_LINE_RELAY_CC);
-}
-
-ZEND_API void _zend_ts_hash_init_ex(TsHashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent, zend_bool bApplyProtection ZEND_FILE_LINE_DC)
-{
-#ifdef ZTS
-	ht->mx_reader = tsrm_mutex_alloc();
-	ht->mx_writer = tsrm_mutex_alloc();
-	ht->reader = 0;
-#endif
-	_zend_hash_init_ex(TS_HASH(ht), nSize, pDestructor, persistent, bApplyProtection ZEND_FILE_LINE_RELAY_CC);
+	_zend_hash_init(TS_HASH(ht), nSize, pDestructor, persistent);
 }
 
 ZEND_API void zend_ts_hash_destroy(TsHashTable *ht)

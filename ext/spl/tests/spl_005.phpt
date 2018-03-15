@@ -13,7 +13,7 @@ var_dump(spl_object_hash());
 --EXPECTF--
 string(32) "%s"
 
-Warning: spl_object_hash() expects parameter 1 to be object, integer given in %sspl_005.php on line %d
+Warning: spl_object_hash() expects parameter 1 to be object, int given in %sspl_005.php on line %d
 NULL
 
 Warning: spl_object_hash() expects exactly 1 parameter, 0 given in %sspl_005.php on line %d

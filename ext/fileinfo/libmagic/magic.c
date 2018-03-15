@@ -40,11 +40,7 @@ FILE_RCSID("@(#)$File: magic.c,v 1.100 2016/07/18 11:43:05 christos Exp $")
 #include <unistd.h>
 #endif
 #include <string.h>
-#ifdef PHP_WIN32
-# include "config.w32.h"
-#else
-# include "php_config.h"
-#endif
+#include "config.h"
 
 #ifdef PHP_WIN32
 #include <shlwapi.h>
@@ -299,7 +295,7 @@ magic_buffer(struct magic_set *ms, const void *buf, size_t nb)
 		return NULL;
 	/*
 	 * The main work is done here!
-	 * We have the file name and/or the data buffer to be identified. 
+	 * We have the file name and/or the data buffer to be identified.
 	 */
 	if (file_buffer(ms, NULL, NULL, buf, nb) == -1) {
 		return NULL;

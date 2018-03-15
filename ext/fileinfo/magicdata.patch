@@ -1,9 +1,6 @@
-Patches applied to file 5.17 sources tree before generating magic.mgc
-and before running create_data_file.php to create data_file.c.
-
-diff -u magic/Magdir.orig.0/cafebabe magic/Magdir/cafebabe
---- magic/Magdir.orig.0/cafebabe	2015-10-16 00:54:18.000000000 +0000
-+++ magic/Magdir/cafebabe	2016-11-24 15:59:25.553060242 +0000
+diff -u file-5.31.orig/magic/Magdir/cafebabe file-5.31/magic/Magdir/cafebabe
+--- file-5.31.orig/magic/Magdir/cafebabe	2017-03-17 21:35:28.000000000 +0000
++++ file-5.31/magic/Magdir/cafebabe	2017-10-11 14:30:57.476077825 +0000
 @@ -15,22 +15,6 @@
  # might add another one or two as time goes by...
  #
@@ -60,29 +57,41 @@ diff -u magic/Magdir.orig.0/cafebabe magic/Magdir/cafebabe
  >>>48	use		mach-o		\b
  >>4	belong		4
  >>>68	use		mach-o		\b
-diff -u magic/Magdir.orig.0/commands magic/Magdir/commands
---- magic/Magdir.orig.0/commands	2016-07-14 19:01:12.000000000 +0000
-+++ magic/Magdir/commands	2016-11-24 15:59:25.557060441 +0000
+diff -u file-5.31.orig/magic/Magdir/commands file-5.31/magic/Magdir/commands
+--- file-5.31.orig/magic/Magdir/commands	2017-04-04 20:34:24.000000000 +0000
++++ file-5.31/magic/Magdir/commands	2017-10-11 14:29:57.653552987 +0000
 @@ -56,7 +56,7 @@
  !:mime	text/x-awk
  0	string/wt	#!\ /usr/bin/awk	awk script text executable
  !:mime	text/x-awk
--0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk or perl script text
-+0	regex/4096	=^\\s{0,100}BEGIN\\s{0,100}[{]	awk script text
+-0	regex/4096	=^[A-Za-z0-9_]{0,100}BEGIN[A-Za-z0-9_]{0,100}[{]	awk or perl script text
++0	regex/4096	=^[\040\t\f\r\n]{0,100}BEGIN[\040\t\f\r\n]{0,100}[{]	awk or perl script text
  
  # AT&T Bell Labs' Plan 9 shell
  0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
-diff -u magic/Magdir.orig.0/filesystems magic/Magdir/filesystems
---- magic/Magdir.orig.0/filesystems	2016-09-05 08:34:25.000000000 +0000
-+++ magic/Magdir/filesystems	2016-11-24 15:59:25.553060242 +0000
+diff -u file-5.31.orig/magic/Magdir/dump file-5.31/magic/Magdir/dump
+--- file-5.31.orig/magic/Magdir/dump	2017-03-17 21:35:28.000000000 +0000
++++ file-5.31/magic/Magdir/dump	2017-10-11 14:30:09.622057792 +0000
+@@ -69,6 +69,8 @@
+ >0	use	old-dump-be
+ 
+ 24	lelong	60012		new-fs dump file (little endian),
++# to correctly recognize '*.mo' GNU message catalog (little endian)
++!:strength - 15
+ >0	use	\^new-dump-be
+ 
+ 24	lelong	60011		old-fs dump file (little endian),
+diff -u file-5.31.orig/magic/Magdir/filesystems file-5.31/magic/Magdir/filesystems
+--- file-5.31.orig/magic/Magdir/filesystems	2017-03-24 19:29:26.000000000 +0000
++++ file-5.31/magic/Magdir/filesystems	2017-10-11 14:30:57.476077825 +0000
 @@ -254,7 +254,7 @@
- 30		search/481	\x55\xAA	
+ 30		search/481	\x55\xAA
  # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
  # DOS BPB information (70) and after DOS floppy (120) like in previous file version
 -!:strength +65
 +!:strength +0
  # for sector sizes < 512 Bytes
- >11		uleshort	<512		
+ >11		uleshort	<512
  >>(11.s-2)	uleshort	0xAA55		DOS/MBR boot sector
 @@ -266,7 +266,7 @@
  0x1FE          leshort         0xAA55         	DOS/MBR boot sector
@@ -93,191 +102,74 @@ diff -u magic/Magdir.orig.0/filesystems magic/Magdir/filesystems
  >2		string		OSBS		OS/BS MBR
  # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
  # and http://en.wikipedia.org/wiki/Master_Boot_Record
-diff -u magic/Magdir.orig.0/msdos magic/Magdir/msdos
---- magic/Magdir.orig.0/msdos	2016-09-14 01:26:26.000000000 +0000
-+++ magic/Magdir/msdos	2016-11-24 15:58:56.327609010 +0000
-@@ -404,7 +404,7 @@
- # GRR: line below too general as it catches also 
- # rt.lib DYADISKS.PIC and many more
- # start with assembler instruction MOV
--0	ubyte		0x8c		
-+#0	ubyte		0x8c		
- # skip "AppleWorks word processor data" like ARTICLE.1 ./apple
- >4	string			!O====	
- # skip some unknown basic binaries like RocketRnger.SHR
-@@ -428,17 +428,17 @@
- # updated by Joerg Jenderek at Oct 2008
- 0	ulelong		0xffff10eb	DR-DOS executable (COM)
- # byte 0xeb conflicts with "sequent" magic leshort 0xn2eb
--0	ubeshort&0xeb8d	>0xeb00		
-+#0	ubeshort&0xeb8d	>0xeb00		
- # DR-DOS STACKER.COM SCREATE.SYS missed
+Only in file-5.31/magic/Magdir/: gconv
+diff -u file-5.31.orig/magic/Magdir/images file-5.31/magic/Magdir/images
+--- file-5.31.orig/magic/Magdir/images	2017-04-04 20:34:24.000000000 +0000
++++ file-5.31/magic/Magdir/images	2017-10-11 14:29:57.653552987 +0000
+@@ -175,42 +175,42 @@
+ >>>&0	regex		=[0-9]{1,50}			\b %s
  
- 0       name    msdos-com
- >0  byte        x               DOS executable (COM)
- >6	string		SFX\ of\ LHarc	\b, %s
-->0x1FE leshort	0xAA55		    \b, boot code
-->85	string		UPX		        \b, UPX compressed
-->4	string		\ $ARX		    \b, ARX self-extracting archive
-->4	string		\ $LHarc	    \b, LHarc self-extracting archive
-->0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
-+#>0x1FE leshort	0xAA55		    \b, boot code
-+#>85	string		UPX		        \b, UPX compressed
-+#>4	string		\ $ARX		    \b, ARX self-extracting archive
-+#>4	string		\ $LHarc	    \b, LHarc self-extracting archive
-+#>0x20e string	SFX\ by\ LARC	\b, LARC self-extracting archive
+ 0	search/1	P1
+->0	regex/4		P1[A-Za-z0-9_]
++>0	regex/4		P1[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, bitmap
+ !:strength + 45
+ !:mime	image/x-portable-bitmap
  
- # JMP 8bit
- 0	        byte	0xeb
-@@ -508,27 +508,27 @@
- # GRR search is not working
- #2	search/28	\xcd\x21	COM executable for MS-DOS
- #WHICHFAT.cOM
--2	string	\xcd\x21		COM executable for DOS
-+#2	string	\xcd\x21		COM executable for DOS
- #DELTREE.cOM DELTREE2.cOM
--4	string	\xcd\x21		COM executable for DOS
-+#4	string	\xcd\x21		COM executable for DOS
- #IFMEMDSK.cOM ASSIGN.cOM COMP.cOM
--5	string	\xcd\x21		COM executable for DOS
-+#5	string	\xcd\x21		COM executable for DOS
- #DELTMP.COm HASFAT32.cOM
--7	string	\xcd\x21		
-->0	byte	!0xb8			COM executable for DOS
-+#7	string	\xcd\x21		
-+#>0	byte	!0xb8			COM executable for DOS
- #COMP.cOM MORE.COm
--10	string	\xcd\x21		
-->5	string	!\xcd\x21		COM executable for DOS
-+#10	string	\xcd\x21		
-+#>5	string	!\xcd\x21		COM executable for DOS
- #comecho.com
--13	string	\xcd\x21		COM executable for DOS
-+#13	string	\xcd\x21		COM executable for DOS
- #HELP.COm EDIT.coM
--18	string	\xcd\x21		COM executable for MS-DOS
-+#18	string	\xcd\x21		COM executable for MS-DOS
- #NWRPLTRM.COm
--23	string	\xcd\x21		COM executable for MS-DOS
-+#23	string	\xcd\x21		COM executable for MS-DOS
- #LOADFIX.cOm LOADFIX.cOm
--30	string	\xcd\x21		COM executable for MS-DOS
-+#30	string	\xcd\x21		COM executable for MS-DOS
- #syslinux.com 3.11
--70	string	\xcd\x21		COM executable for DOS
-+#70	string	\xcd\x21		COM executable for DOS
- # many compressed/converted COMs start with a copy loop instead of a jump
- 0x6	search/0xa	\xfc\x57\xf3\xa5\xc3	COM executable for MS-DOS
- 0x6	search/0xa	\xfc\x57\xf3\xa4\xc3	COM executable for DOS
-diff -u magic/Magdir.orig.0/perl magic/Magdir/perl
---- magic/Magdir.orig.0/perl	2016-06-12 16:50:16.000000000 +0000
-+++ magic/Magdir/perl	2016-11-24 15:59:25.553060242 +0000
-@@ -7,40 +7,54 @@
- # Send additions to <perl5-porters@perl.org>
- 0	search/1024	eval\ "exec\ perl		Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ "exec\ /bin/perl		Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ "exec\ /usr/bin/perl	Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ "exec\ /usr/local/bin/perl	Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ 'exec\ perl		Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ 'exec\ /bin/perl		Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ 'exec\ /usr/bin/perl	Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ 'exec\ /usr/local/bin/perl	Perl script text
- !:mime	text/x-perl
-+!:strength + 30
- 0	search/1024	eval\ '(exit\ $?0)'\ &&\ eval\ 'exec	Perl script text
- !:mime	text/x-perl
-+!:strength + 1
- 0	string	#!/usr/bin/env\ perl	Perl script text executable
- !:mime	text/x-perl
-+!:strength + 30
- 0	string	#!\ /usr/bin/env\ perl	Perl script text executable
- !:mime	text/x-perl
-+!:strength + 30
- 0	string	#!
- >0	regex	\^#!.*/bin/perl([[:space:]].*)*$	Perl script text executable
- !:mime	text/x-perl
-+!:strength + 30
+ 0	search/1	P2
+->0	regex/4		P2[A-Za-z0-9_]
++>0	regex/4		P2[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, greymap
+ !:strength + 45
+ !:mime	image/x-portable-greymap
  
- # by Dmitry V. Levin and Alexey Tourbin
- # check the first line
- 0	search/1024	package
- >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;	Perl5 module source text
-+!:mime  text/x-perl
- !:strength + 10
- # not 'p', check other lines
- 0	search/1024	!p
- >0	regex		\^package[\ \t]+[0-9A-Za-z_:]+\ *;
- >>0	regex		\^1\ *;|\^(use|sub|my)\ .*[(;{=]	Perl5 module source text
--!:strength + 10
-+!:mime  text/x-perl
-+!:strength + 40
+ 0	search/1	P3
+->0	regex/4		P3[A-Za-z0-9_]
++>0	regex/4		P3[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, pixmap
+ !:strength + 45
+ !:mime	image/x-portable-pixmap
  
- # Perl POD documents
- # From: Tom Hukins <tom@eborcom.com>
-diff -u magic/Magdir.orig.0/python magic/Magdir/python
---- magic/Magdir.orig.0/python	2016-09-16 12:06:13.000000000 +0000
-+++ magic/Magdir/python	2016-11-24 15:59:25.549060044 +0000
-@@ -43,20 +43,24 @@
- # from module.submodule import func1, func2
- 0	regex	\^from\\s+(\\w|\\.)+\\s+import.*$	Python script text executable
- !:mime text/x-python
-+!:strength + 15
+ 0	string		P4
+->0	regex/4		P4[A-Za-z0-9_]
++>0	regex/4		P4[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, rawbits, bitmap
+ !:strength + 45
+ !:mime	image/x-portable-bitmap
  
- # def __init__ (self, ...):
- 0	search/4096	def\ __init__
- >&0	search/64 self	Python script text executable
- !:mime text/x-python
-+!:strength + 15
+ 0	string		P5
+->0	regex/4		P5[A-Za-z0-9_]
++>0	regex/4		P5[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, rawbits, greymap
+ !:strength + 45
+ !:mime	image/x-portable-greymap
  
- # comments
--#0	search/4096	'''
--#>&0	regex	.*'''$	Python script text executable
--#!:mime text/x-python
-+0	search/4096	'''
-+>&0	regex	.*'''$	Python script text executable
-+!:mime text/x-python
-+!:strength + 15
- 
--#0	search/4096	"""
--#>&0	regex	.*"""$	Python script text executable
--#!:mime text/x-python
-+0	search/4096	"""
-+>&0	regex	.*"""$	Python script text executable
-+!:mime text/x-python
-+!:strength + 15
- 
- # try:
+ 0	string		P6
+->0	regex/4		P6[A-Za-z0-9_]
++>0	regex/4		P6[\040\t\f\r\n]
+ >>0	use		netpbm
+ >>>0	string		x	\b, rawbits, pixmap
+ !:strength + 45
+diff -u file-5.31.orig/magic/Magdir/python file-5.31/magic/Magdir/python
+--- file-5.31.orig/magic/Magdir/python	2017-05-08 18:10:13.000000000 +0000
++++ file-5.31/magic/Magdir/python	2017-10-11 14:29:57.653552987 +0000
+@@ -64,7 +64,7 @@
  # except: or finally:
-@@ -66,8 +70,10 @@
+ # block
+ 0	search/4096	try:
+->&0	regex	\^[A-Za-z0-9_]*except.*:	Python script text executable
++>&0	regex	\^[\040\t\f\r\n]*except.*:	Python script text executable
+ !:strength + 15
  !:mime text/x-python
  >&0	search/4096	finally:	Python script text executable
- !:mime text/x-python
-+!:strength + 15
- 
- # def name(args, args):
--0	regex	 \^(\ |\\t){0,50}def\ {1,50}[a-zA-Z]{1,100}
-->&0	regex	\ {0,50}\\(([a-zA-Z]|,|\ ){1,255}\\):$ Python script text executable
-+0	regex	 \^(\ |\\t)*def\ +[a-zA-Z]+
-+>&0	regex	\ *\\(([a-zA-Z]|,|\ )*\\):$ Python script text executable
- !:mime text/x-python
-+!:strength + 15
-diff -u magic/Magdir.orig.0/rpm magic/Magdir/rpm
---- magic/Magdir.orig.0/rpm	2014-09-11 15:03:07.000000000 +0000
-+++ magic/Magdir/rpm	2016-11-24 15:58:28.458225125 +0000
+diff -u file-5.31.orig/magic/Magdir/rpm file-5.31/magic/Magdir/rpm
+--- file-5.31.orig/magic/Magdir/rpm	2017-03-17 21:34:26.000000000 +0000
++++ file-5.31/magic/Magdir/rpm	2017-10-11 14:30:57.480078009 +0000
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -286,18 +178,76 @@ diff -u magic/Magdir.orig.0/rpm magic/Magdir/rpm
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff -u magic/Magdir.orig.0/securitycerts magic/Magdir/securitycerts
---- magic/Magdir.orig.0/securitycerts	2014-09-11 15:03:07.000000000 +0000
-+++ magic/Magdir/securitycerts	2016-11-24 15:59:25.549060044 +0000
+diff -u file-5.31.orig/magic/Magdir/ruby file-5.31/magic/Magdir/ruby
+--- file-5.31.orig/magic/Magdir/ruby	2017-03-17 21:34:26.000000000 +0000
++++ file-5.31/magic/Magdir/ruby	2017-10-11 14:30:24.410682267 +0000
+@@ -6,27 +6,46 @@
+ # From: Reuben Thomas <rrt@sc3d.org>
+ 
+ # Ruby scripts
+-0	search/1/w	#!\ /usr/bin/ruby	Ruby script text executable
++0	search/1/w	#!\ /usr/bin/ruby				Ruby script text executable
+ !:strength + 15
+ !:mime text/x-ruby
+ 0	search/1/w	#!\ /usr/local/bin/ruby	Ruby script text executable
+ !:strength + 15
+ !:mime text/x-ruby
+-0	search/1	#!/usr/bin/env\ ruby	Ruby script text executable
++0	search/1	#!/usr/bin/env\ ruby				Ruby script text executable
+ !:strength + 15
+ !:mime text/x-ruby
+-0	search/1	#!\ /usr/bin/env\ ruby	Ruby script text executable
++0	search/1	#!\ /usr/bin/env\ ruby			Ruby script text executable
+ !:strength + 15
+ !:mime text/x-ruby
+ 
+ # What looks like ruby, but does not have a shebang
+ # (modules and such)
+ # From: Lubomir Rintel <lkundrak@v3.sk>
+-0	regex		\^[\ \t]*require[\ \t]'[A-Za-z_/]+'
+->0	regex		include\ [A-Z]|def\ [a-z]|\ do$
+->>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby script text
++0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
++>0	regex		def\ [a-z]|\ do$
++>>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++!:strength + 30
+ !:mime	text/x-ruby
+-0	regex		\^[\ \t]*(class|module)[\ \t][A-Z]
++0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
+ >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
+->>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby module source text
++>>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++!:strength + 30
++!:mime	text/x-ruby
++# Classes with no modules or defs, beats simple ASCII
++0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
++>&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
++!:strength + 10
++!:mime	text/x-ruby
++# Looks for function definiton to balance python magic
++# def name (args)
++# end
++0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
++>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
++!:strength + 10
++!:mime	text/x-ruby
++
++0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
++!:mime	text/x-ruby
++0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
+ !:mime	text/x-ruby
+diff -u file-5.31.orig/magic/Magdir/securitycerts file-5.31/magic/Magdir/securitycerts
+--- file-5.31.orig/magic/Magdir/securitycerts	2017-03-17 21:34:26.000000000 +0000
++++ file-5.31/magic/Magdir/securitycerts	2017-10-11 14:30:57.480078009 +0000
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-diff -u magic/Magdir.orig.0/varied.script magic/Magdir/varied.script
---- magic/Magdir.orig.0/varied.script	2015-03-27 17:59:39.000000000 +0000
-+++ magic/Magdir/varied.script	2016-11-24 15:59:25.557060441 +0000
+diff -u file-5.31.orig/magic/Magdir/varied.script file-5.31/magic/Magdir/varied.script
+--- file-5.31.orig/magic/Magdir/varied.script	2017-03-17 21:34:26.000000000 +0000
++++ file-5.31/magic/Magdir/varied.script	2017-10-11 14:30:57.480078009 +0000
 @@ -4,27 +4,35 @@
  
  0	string/t		#!\ /			a

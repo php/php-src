@@ -34,7 +34,7 @@ for ($i = $length; $i > 0; $i--) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing prev() : basic functionality ***
 2 => two
 string(3) "one"

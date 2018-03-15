@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,67 +47,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_set, 0, 0, 2)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_cat, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_sub, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mul, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_and, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_div, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_eqv, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_idiv, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_imp, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_mod, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_or, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_pow, 0, 0, 2)
-	ZEND_ARG_INFO(0, left)
-	ZEND_ARG_INFO(0, right)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(arginfo_variant_xor, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_left_right, 0, 0, 2)
 	ZEND_ARG_INFO(0, left)
 	ZEND_ARG_INFO(0, right)
 ZEND_END_ARG_INFO()
@@ -196,21 +136,21 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_com_load_typelib, 0, 0, 1)
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry com_dotnet_functions[] = {
+static const zend_function_entry com_dotnet_functions[] = {
 	PHP_FE(variant_set, arginfo_variant_set)
-	PHP_FE(variant_add, arginfo_variant_add)
-	PHP_FE(variant_cat, arginfo_variant_cat)
-	PHP_FE(variant_sub, arginfo_variant_sub)
-	PHP_FE(variant_mul, arginfo_variant_mul)
-	PHP_FE(variant_and, arginfo_variant_and)
-	PHP_FE(variant_div, arginfo_variant_div)
-	PHP_FE(variant_eqv, arginfo_variant_eqv)
-	PHP_FE(variant_idiv, arginfo_variant_idiv)
-	PHP_FE(variant_imp, arginfo_variant_imp)
-	PHP_FE(variant_mod, arginfo_variant_mod)
-	PHP_FE(variant_or, arginfo_variant_or)
-	PHP_FE(variant_pow, arginfo_variant_pow)
-	PHP_FE(variant_xor, arginfo_variant_xor)
+	PHP_FE(variant_add, arginfo_left_right)
+	PHP_FE(variant_cat, arginfo_left_right)
+	PHP_FE(variant_sub, arginfo_left_right)
+	PHP_FE(variant_mul, arginfo_left_right)
+	PHP_FE(variant_and, arginfo_left_right)
+	PHP_FE(variant_div, arginfo_left_right)
+	PHP_FE(variant_eqv, arginfo_left_right)
+	PHP_FE(variant_idiv, arginfo_left_right)
+	PHP_FE(variant_imp, arginfo_left_right)
+	PHP_FE(variant_mod, arginfo_left_right)
+	PHP_FE(variant_or, arginfo_left_right)
+	PHP_FE(variant_pow, arginfo_left_right)
+	PHP_FE(variant_xor, arginfo_left_right)
 	PHP_FE(variant_abs, arginfo_variant_abs)
 	PHP_FE(variant_fix, arginfo_variant_fix)
 	PHP_FE(variant_int, arginfo_variant_int)

@@ -169,7 +169,7 @@ PHP_FUNCTION(grapheme_strpos)
    Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
-	char *haystack, *needle, *haystack_dup, *needle_dup;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
@@ -201,6 +201,7 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
+		char *haystack_dup, *needle_dup;
 		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
@@ -804,8 +805,7 @@ PHP_FUNCTION(grapheme_extract)
 		} else {
 			ZVAL_DEREF(next);
 			/* initialize next */
-			SEPARATE_ZVAL_NOREF(next);
-			zval_dtor(next);
+			zval_ptr_dtor(next);
             ZVAL_LONG(next, lstart);
 		}
 	}

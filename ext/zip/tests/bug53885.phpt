@@ -20,5 +20,5 @@ $nx->statName("a",ZIPARCHIVE::FL_UNCHANGED);
 $fname = dirname(__FILE__)."/test53885.zip";
 unlink($fname);
 ?>
---EXPECTF--
+--EXPECT--
 ==DONE==

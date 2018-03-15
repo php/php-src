@@ -122,19 +122,19 @@ NULL
 NULL
 
 --empty array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, array given, %s(97)
 NULL
 
 --int indexed array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, array given, %s(97)
 NULL
 
 --associative array--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, array given, %s(97)
 NULL
 
 --nested arrays--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, array given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, array given, %s(97)
 NULL
 
 --uppercase NULL--
@@ -156,35 +156,35 @@ NULL
 NULL
 
 --empty string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --empty string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --string DQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --string SQ--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --mixed case string--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --heredoc--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, string given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, string given, %s(97)
 NULL
 
 --instance of classWithToString--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, object given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, object given, %s(97)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - ob_implicit_flush() expects parameter 1 to be integer, object given, %s(97)
+Error: 2 - ob_implicit_flush() expects parameter 1 to be int, object given, %s(97)
 NULL
 
 --undefined var--

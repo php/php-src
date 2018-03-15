@@ -24,5 +24,5 @@ if (microtime(true) - $before >= 0.8) {
     echo "failed\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 working

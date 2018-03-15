@@ -13,9 +13,13 @@ fputcsv($fp, $data);
 
 var_dump($data);
 
-@unlink($file);
-
 ?>
+--CLEAN--
+<?php
+$file = dirname(__FILE__) .'/fgetcsv-test.csv';
+unlink($file);
+?>
+
 --EXPECTF--
 Notice: Array to string conversion in %s on line %d
 array(7) {

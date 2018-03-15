@@ -103,5 +103,5 @@ die("skip - is the server still buggy?");
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

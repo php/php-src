@@ -34,7 +34,7 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : basic functionality ***
 array(2) {
   [1]=>

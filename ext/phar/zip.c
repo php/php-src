@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | ZIP archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2007-2017 The PHP Group                                |
+  | Copyright (c) 2007-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -167,7 +167,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 {
 	phar_zip_dir_end locator;
 	char buf[sizeof(locator) + 65536];
-	size_t size;
+	zend_off_t size;
 	uint16_t i;
 	phar_archive_data *mydata = NULL;
 	phar_entry_info entry = {0};
@@ -199,7 +199,7 @@ int phar_parse_zipfile(php_stream *fp, char *fname, int fname_len, char *alias, 
 	}
 
 	while ((p=(char *) memchr(p + 1, 'P', (size_t) (size - (p + 1 - buf)))) != NULL) {
-		if ((p - buf) + sizeof(locator) <= size && !memcmp(p + 1, "K\5\6", 3)) {
+		if ((p - buf) + sizeof(locator) <= (size_t)size && !memcmp(p + 1, "K\5\6", 3)) {
 			memcpy((void *)&locator, (void *) p, sizeof(locator));
 			if (PHAR_GET_16(locator.centraldisk) != 0 || PHAR_GET_16(locator.disknumber) != 0) {
 				/* split archives not handled */
@@ -293,11 +293,11 @@ foundit:
 	entry.is_persistent = mydata->is_persistent;
 #define PHAR_ZIP_FAIL_FREE(errmsg, save) \
 			zend_hash_destroy(&mydata->manifest); \
-			mydata->manifest.u.flags = 0; \
+			HT_FLAGS(&mydata->manifest) = 0; \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			mydata->mounted_dirs.u.flags = 0; \
+			HT_FLAGS(&mydata->mounted_dirs) = 0; \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			mydata->virtual_dirs.u.flags = 0; \
+			HT_FLAGS(&mydata->virtual_dirs) = 0; \
 			php_stream_close(fp); \
 			zval_dtor(&mydata->metadata); \
 			if (mydata->signature) { \
@@ -315,11 +315,11 @@ foundit:
 			return FAILURE;
 #define PHAR_ZIP_FAIL(errmsg) \
 			zend_hash_destroy(&mydata->manifest); \
-			mydata->manifest.u.flags = 0; \
+			HT_FLAGS(&mydata->manifest) = 0; \
 			zend_hash_destroy(&mydata->mounted_dirs); \
-			mydata->mounted_dirs.u.flags = 0; \
+			HT_FLAGS(&mydata->mounted_dirs) = 0; \
 			zend_hash_destroy(&mydata->virtual_dirs); \
-			mydata->virtual_dirs.u.flags = 0; \
+			HT_FLAGS(&mydata->virtual_dirs) = 0; \
 			php_stream_close(fp); \
 			zval_dtor(&mydata->metadata); \
 			if (mydata->signature) { \

@@ -39,7 +39,7 @@ string\(29\) "application\/x-shockwave-flash"
 string\(9\) "image\/psd"
 
 -- Iteration 6 --
-string\(14\) "image\/x-ms-bmp"
+string\(9\) "image\/bmp"
 
 -- Iteration 7 --
 string\(10\) "image\/tiff"

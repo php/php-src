@@ -78,7 +78,7 @@ mysqli autocommit/commit/rollback with innodb
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   string(1) "1"

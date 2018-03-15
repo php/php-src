@@ -97,7 +97,7 @@ print_r(unpack("v", pack("v", -1000)));
 print_r(unpack("v", pack("v", -64434)));
 print_r(unpack("v", pack("v", -65535)));
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [1] => h

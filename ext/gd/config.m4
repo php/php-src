@@ -11,7 +11,7 @@ PHP_ARG_WITH(gd, for GD support,
                           install directory [BUNDLED]])
 if test -z "$PHP_WEBP_DIR"; then
   PHP_ARG_WITH(webp-dir, for the location of libwebp,
-  [  --with-webp-dir[=DIR]      GD: Set the path to libwebp install prefix], no, no)
+  [  --with-webp-dir[=DIR]     GD: Set the path to libwebp install prefix], no, no)
 fi
 
 if test -z "$PHP_JPEG_DIR"; then
@@ -309,7 +309,6 @@ else
 
 dnl Various checks for GD features
   PHP_GD_ZLIB
-  PHP_GD_TTSTR
   PHP_GD_WEBP
   PHP_GD_JPEG
   PHP_GD_PNG

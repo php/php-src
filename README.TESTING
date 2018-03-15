@@ -9,7 +9,7 @@ it failed on your system without providing substantial backup information
 on *why* the test failed on your special setup. Thank you :-)
 
 
-[Testing Basics] 
+[Testing Basics]
 ----------------
  The easiest way to test your PHP build is to run "make test" from the
 command line after successfully compiling. This will run the complete
@@ -36,7 +36,7 @@ If you are running the run-tests.php script from the command line (as above)
 you must set the TEST_PHP_EXECUTABLE environment variable to explicitly
 select the PHP executable that is to be tested, that is, used to run the test scripts.
 
-If you run the tests using make test, the PHP CLI and CGI executables are 
+If you run the tests using make test, the PHP CLI and CGI executables are
 automatically set for you. "make test" executes "run-tests.php" script with the CLI binary.  Some
 test scripts such as session must be executed by CGI SAPI. Therefore,
 you must build PHP with CGI SAPI to perform all tests.
@@ -61,8 +61,8 @@ test scripts by extracting all directories named "tests"
 from the source root and any subdirectories below. If there are files,
 which have a "phpt" extension, "run-tests.php" looks at the sections
 in these files, determines whether it should run it, by evaluating
-the 'SKIP' section. If the test is eligible for execution, the 'FILE'
-section is extracted into a ".php" file (with the same name besides 
+the 'SKIPIF' section. If the test is eligible for execution, the 'FILE'
+section is extracted into a ".php" file (with the same name besides
 the extension) and gets executed.
 When an argument is given or TESTS environment variable is set, the
 GLOB is expanded by the shell and any file with extension "*.phpt" is
@@ -77,9 +77,9 @@ Examples:
 
 [Test results]
 --------------
- Test results are printed to standard output. If there is a failed test, 
+ Test results are printed to standard output. If there is a failed test,
 the "run-tests.php" script saves the result, the expected result and the
-code executed to the test script directory. For example, if 
+code executed to the test script directory. For example, if
 ext/myext/tests/myext.phpt fails to pass, the following files are created:
 
 ext/myext/tests/myext.php   - actual test file executed
@@ -151,20 +151,20 @@ advised to test for non-zero, rather then a specific value.
 
 [Creating new test files]
 -------------------------
- Writing test file is very easy if you are used to PHP. 
+ Writing test file is very easy if you are used to PHP.
 See the HOWTO at http://qa.php.net/write-test.php
 
 
 [How to help us]
 ----------------
- If you find bug in PHP, you can submit bug report AND test script 
+ If you find bug in PHP, you can submit bug report AND test script
 for us. You don't have to write complete script, just give us test
 script with following format. Please test the script and make sure
 you write the correct ACTUAL OUTPUT and EXPECTED OUTPUT before you
 submit.
 
 <?php
-/* 
+/*
 Bug #12345
 substr() bug. Do not return expected string.
 
@@ -179,3 +179,138 @@ $str = "XYZABCD";
 echo substr($str,3,7);
 
 ?>
+
+[IMPORTANT NOTICE]
+------------------
+This is an addendum to README.TESTING with additional information
+specific to server-tests.php.
+
+server-tests.php is backward compatible with tests developed for
+the original run-tests.php script.  server-tests is *not* used by
+'make test'.  server-tests was developed to provide support for
+testing PHP under it's primary environment, HTTP, and can run the
+PHP tests under any of the SAPI modules that are direct executables,
+or are accessible via HTTP.
+
+[New features]
+----------------
+* Command line interface:
+  You can run 'php server-tests.php -h' to get all the possible options.
+* Configuration file:
+  the -c argument will allow you to use a configuration file.  This is
+  handy if you are testing multiple environments and need various options
+  depending on the environment.
+  see server-tests-config.php for details.
+* CGI Emulation:
+  Will emulate a CGI environment when testing with the cgi sapi executable.
+* HTTP testing:
+  can be configured to run test scripts through an HTTP server running
+  on localhost.  localhost is required since either the web server must
+  alias a directory to the php source directory, or the test scripts
+  must be copied to a directory under the web server
+  (see config options TEST_WEB_BASE_URL, TEST_BASE_PATH, and TEST_WEB_EXT)
+* New sections supported for test files (see below)
+
+When running tests over http, tests that require ini settings different that what
+the web server runs under will be skipped.  Since the test harness defines a number
+of ini settings by default, the web server may require special configuration to
+make testing work.
+
+[Example Usage]
+----------------
+Some (but not all!) examples of usage:
+
+1. run tests from the php source directory
+    php server-tests.php -p /path/to/php-cli
+
+2. run tests using cgi emulation
+    php server-tests.php -p /path/to/php-cgi
+
+3. run tests over http, copying test files into document root
+    php server-tests.php -w -u http://localhost/test -m /path/to/htdocs/test
+
+4. run tests over http, php sources have been aliased in web server
+    php server-tests.php -w -u http://localhost/test
+
+5. run tests using configuration file
+    php server-tests.php -c /path/to/server-tests-config.php
+
+6. run tests using configuration file, but overriding some settings:
+   (config file must be first)
+    php server-tests.php -c /path/to/server-tests-config.php -w -t 3 -d /path/to/testdir
+
+NOTE: configuration as described in README.TESTING still works.
+
+[New Test Sections]
+----------------
+In addition to the traditional test sections
+(see http://qa.php.net/write-test.php), several new sections are available
+under server-tests.
+
+--POST--
+This is not a new section, but not multipart posts are supported for testing
+file uploads, or other types of POST data.
+
+--CGI--
+This section takes no value.  It merely provides a simple marker for tests
+that MUST be run as CGI, even if there is no --POST-- or --GET-- sections
+in the test file.
+
+--DESCRIPTION--
+Not used for anything, just a section for documenting the test
+
+--ENV--
+This section get's eval()'d to help build an environment for the
+execution of the test.  This can be used to change environment
+vars that are used for CGI emulation, or simply to set env vars
+for cli testing.  A full example looks like:
+
+  --ENV--
+  return <<<END
+  PATH_TRANSLATED=$filename
+  PATH_INFO=$scriptname
+  SCRIPT_NAME=$scriptname
+  END;
+
+Some variables are made easily available for use in this section, they
+include:
+  $filename     full native path to file, will become PATH_TRANSLATED
+  $filepath     =dirname($filename)
+  $scriptname   this is what will become SCRIPT_NAME unless you override it
+  $docroot      the equivalent of DOCUMENT_ROOT under Apache
+  $cwd          the directory that the test is being initiated from
+  $this->conf   all server-tests configuration vars
+  $this->env    all environment variables that will get passed to the test
+
+
+--REQUEST--
+This section is also eval'd, and is similar in nature to --ENV--.  However,
+this section is used to build the url used in an HTTP request.  Valid values
+to set in this section would include:
+  SCRIPT_NAME   The initial part of the request url
+  PATH_INFO     The pathinfo part of a request url
+  FRAGMENT      The fragment section of a url (after #)
+  QUERY_STRING  The query part of a url (after ?)
+
+  --REQUEST--
+  return <<<END
+  PATH_INFO=/path/info
+  END;
+
+--HEADERS--
+This section is also eval'd.  It is used to provide additional headers sent
+in an HTTP request, such as content type for multipart posts, cookies, etc.
+
+  --HEADERS--
+  return <<<END
+  Content-Type=multipart/form-data; boundary=---------------------------240723202011929
+  Content-Length=100
+  END;
+
+--EXPECTHEADERS--
+This section can be used to define what headers are required to be
+received back from a request, and is checked in addition to the
+regular expect sections.  For example:
+
+  --EXPECTHEADERS--
+  Status: 404

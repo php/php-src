@@ -25,7 +25,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_encode() : variation ***
 bool(true)
 string(34) "foo|a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}"

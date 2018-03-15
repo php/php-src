@@ -27,13 +27,13 @@ image_type_to_mime_type()
 --EXPECT--
 array(16) {
   ["test-1pix.bmp"]=>
-  string(14) "image/x-ms-bmp"
+  string(9) "image/bmp"
   ["test12pix.webp"]=>
   string(10) "image/webp"
   ["test1bpix.bmp"]=>
-  string(14) "image/x-ms-bmp"
+  string(9) "image/bmp"
   ["test1pix.bmp"]=>
-  string(14) "image/x-ms-bmp"
+  string(9) "image/bmp"
   ["test1pix.jp2"]=>
   string(9) "image/jp2"
   ["test1pix.jpc"]=>

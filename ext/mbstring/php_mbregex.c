@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,7 +65,6 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 {
 	pglobals->default_mbctype = ONIG_ENCODING_UTF8;
 	pglobals->current_mbctype = ONIG_ENCODING_UTF8;
-	zend_hash_init(&(pglobals->ht_rc), 0, NULL, php_mb_regex_free_cache, 1);
 	ZVAL_UNDEF(&pglobals->search_str);
 	pglobals->search_re = (php_mb_regex_t*)NULL;
 	pglobals->search_pos = 0;
@@ -79,7 +78,6 @@ static int _php_mb_regex_globals_ctor(zend_mb_regex_globals *pglobals)
 /* {{{ _php_mb_regex_globals_dtor */
 static void _php_mb_regex_globals_dtor(zend_mb_regex_globals *pglobals)
 {
-	zend_hash_destroy(&pglobals->ht_rc);
 }
 /* }}} */
 
@@ -126,7 +124,9 @@ PHP_MSHUTDOWN_FUNCTION(mb_regex)
 /* {{{ PHP_RINIT_FUNCTION(mb_regex) */
 PHP_RINIT_FUNCTION(mb_regex)
 {
-	return MBSTRG(mb_regex_globals) ? SUCCESS: FAILURE;
+	if (!MBSTRG(mb_regex_globals)) return FAILURE;
+	zend_hash_init(&MBREX(ht_rc), 0, NULL, php_mb_regex_free_cache, 0);
+	return SUCCESS;
 }
 /* }}} */
 
@@ -145,7 +145,7 @@ PHP_RSHUTDOWN_FUNCTION(mb_regex)
 		onig_region_free(MBREX(search_regs), 1);
 		MBREX(search_regs) = (OnigRegion *)NULL;
 	}
-	zend_hash_clean(&MBREX(ht_rc));
+	zend_hash_destroy(&MBREX(ht_rc));
 
 	return SUCCESS;
 }
@@ -183,7 +183,7 @@ typedef struct _php_mb_regex_enc_name_map_t {
 	OnigEncoding code;
 } php_mb_regex_enc_name_map_t;
 
-php_mb_regex_enc_name_map_t enc_name_map[] = {
+static const php_mb_regex_enc_name_map_t enc_name_map[] = {
 #ifdef ONIG_ENCODING_EUC_JP
 	{
 		"EUC-JP\0EUCJP\0X-EUC-JP\0UJIS\0EUCJP\0EUCJP-WIN\0",
@@ -366,7 +366,7 @@ php_mb_regex_enc_name_map_t enc_name_map[] = {
 static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 {
 	const char *p;
-	php_mb_regex_enc_name_map_t *mapping;
+	const php_mb_regex_enc_name_map_t *mapping;
 
 	if (pname == NULL || !*pname) {
 		return ONIG_ENCODING_UNDEF;
@@ -387,7 +387,7 @@ static OnigEncoding _php_mb_regex_name2mbctype(const char *pname)
 /* {{{ php_mb_regex_mbctype2name */
 static const char *_php_mb_regex_mbctype2name(OnigEncoding mbctype)
 {
-	php_mb_regex_enc_name_map_t *mapping;
+	const php_mb_regex_enc_name_map_t *mapping;
 
 	for (mapping = enc_name_map; mapping->names != NULL; mapping++) {
 		if (mapping->code == mbctype) {
@@ -1447,7 +1447,7 @@ PHP_FUNCTION(mb_ereg_search_setpos)
 	if ((position < 0) && (!Z_ISUNDEF(MBREX(search_str))) && (Z_TYPE(MBREX(search_str)) == IS_STRING)) {
 		position += Z_STRLEN(MBREX(search_str));
 	}
-		
+
 	if (position < 0 || (!Z_ISUNDEF(MBREX(search_str)) && Z_TYPE(MBREX(search_str)) == IS_STRING && (size_t)position > Z_STRLEN(MBREX(search_str)))) {
 		php_error_docref(NULL, E_WARNING, "Position is out of range");
 		MBREX(search_pos) = 0;

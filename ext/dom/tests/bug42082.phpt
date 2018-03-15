@@ -17,7 +17,7 @@ var_dump($doc->firstChild->nodeValue, empty($doc->firstChild->nodeValue), isset(
 var_dump(empty($doc->nodeType), empty($doc->firstChild->nodeType))
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 DOMNodeList
 int(0)
 bool(true)

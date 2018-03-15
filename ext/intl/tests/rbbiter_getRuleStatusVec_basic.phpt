@@ -25,7 +25,7 @@ $rules = <<<RULES
 !!safe_reverse;
 RULES;
 $rbbi = new IntlRuleBasedBreakIterator($rules);
-$rbbi->setText('sdfkjsdf88á.... ,;');;
+$rbbi->setText('sdfkjsdf88á.... ,;');
 
 do {
 	var_dump($rbbi->current(), $rbbi->getRuleStatusVec());

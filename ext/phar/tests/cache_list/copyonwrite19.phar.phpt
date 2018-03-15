@@ -10,5 +10,5 @@ phar.readonly=0
 files/write19.phar
 --EXPECTF--
 string(2) "hi"
-%string|unicode%(3) "hi2"
+string(3) "hi2"
 ok

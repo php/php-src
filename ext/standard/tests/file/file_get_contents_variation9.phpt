@@ -46,7 +46,7 @@ unlink($filename);
 
 echo "\n*** Done ***\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing file_get_contents() : variation ***
 string(330) "Here is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of data"
 string(330) "Here is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of dataHere is a repeated amount of data"

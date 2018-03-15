@@ -26,7 +26,7 @@ Warning: IntlCalendar::setLenient() expects exactly 1 parameter, 0 given in %s o
 Warning: IntlCalendar::setLenient(): intlcal_set_lenient: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::setLenient() expects parameter 1 to be boolean, array given in %s on line %d
+Warning: IntlCalendar::setLenient() expects parameter 1 to be bool, array given in %s on line %d
 
 Warning: IntlCalendar::setLenient(): intlcal_set_lenient: bad arguments in %s on line %d
 bool(false)
@@ -36,12 +36,12 @@ Warning: IntlCalendar::setLenient() expects exactly 1 parameter, 2 given in %s o
 Warning: IntlCalendar::setLenient(): intlcal_set_lenient: bad arguments in %s on line %d
 bool(false)
 
-Warning: intlcal_set_lenient() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: intlcal_set_lenient() expects parameter 2 to be bool, array given in %s on line %d
 
 Warning: intlcal_set_lenient(): intlcal_set_lenient: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_lenient() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_set_lenient() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_set_lenient(1, false)
 #1 {main}

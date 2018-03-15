@@ -62,7 +62,7 @@ foreach ($various_arrays as $array) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing arsort() : usage variations ***
 
 -- Testing arsort() by supplying various string arrays --

@@ -17,5 +17,5 @@ interface c extends a, b {
 echo "done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 done!

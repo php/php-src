@@ -12,5 +12,5 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 Can't peek at an empty heap

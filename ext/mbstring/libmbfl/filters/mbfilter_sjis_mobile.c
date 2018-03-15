@@ -54,7 +54,9 @@ const mbfl_encoding mbfl_encoding_sjis_docomo = {
  	"Shift_JIS",
  	(const char *(*)[])&mbfl_encoding_sjis_docomo_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+ 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_sjis_docomo_wchar,
+	&vtbl_wchar_sjis_docomo
 };
 
 const mbfl_encoding mbfl_encoding_sjis_kddi = {
@@ -63,7 +65,9 @@ const mbfl_encoding mbfl_encoding_sjis_kddi = {
  	"Shift_JIS",
  	(const char *(*)[])&mbfl_encoding_sjis_kddi_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+ 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_sjis_kddi_wchar,
+	&vtbl_wchar_sjis_kddi
 };
 
 const mbfl_encoding mbfl_encoding_sjis_sb = {
@@ -72,7 +76,9 @@ const mbfl_encoding mbfl_encoding_sjis_sb = {
  	"Shift_JIS",
  	(const char *(*)[])&mbfl_encoding_sjis_sb_aliases,
  	mblen_table_sjis,
- 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+ 	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_sjis_sb_wchar,
+	&vtbl_wchar_sjis_sb
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_sjis_docomo = {
@@ -291,7 +297,7 @@ mbfilter_sjis_emoji_docomo2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_docomo1[s - mb_tbl_code2uni_docomo1_min];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 			*snd = 0;
@@ -326,7 +332,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -344,7 +350,7 @@ mbfilter_sjis_emoji_kddi2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_kddi2[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -371,7 +377,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb1[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}
@@ -380,7 +386,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 		w = mb_tbl_code2uni_sb2[si];
 		if (w > 0xf000) {
 			w += 0x10000;
-		} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+		} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 			w += 0xf0000;
 		}
 	} else if (s >= mb_tbl_code2uni_sb3_min && s <= mb_tbl_code2uni_sb3_max) {
@@ -392,7 +398,7 @@ mbfilter_sjis_emoji_sb2unicode(int s, int *snd)
 			w = mb_tbl_code2uni_sb3[si];
 			if (w > 0xf000) {
 				w += 0x10000;
-			} else if (w > 0xe000) { /* unsuported by Unicode 6.0 */
+			} else if (w > 0xe000) { /* unsupported by Unicode 6.0 */
 				w += 0xf0000;
 			}
 		}

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -271,22 +271,19 @@ PHPAPI int php_network_getaddresses(const char *host, int socktype, struct socka
 #define O_NONBLOCK O_NDELAY
 #endif
 
-#if !defined(__BEOS__)
-# define HAVE_NON_BLOCKING_CONNECT 1
-# ifdef PHP_WIN32
+#ifdef PHP_WIN32
 typedef u_long php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
      save = TRUE; ioctlsocket(sock, FIONBIO, &save)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 ioctlsocket(sock, FIONBIO, &save)
-# else
+#else
 typedef int php_non_blocking_flags_t;
 #  define SET_SOCKET_BLOCKING_MODE(sock, save) \
 	 save = fcntl(sock, F_GETFL, 0); \
 	 fcntl(sock, F_SETFL, save | O_NONBLOCK)
 #  define RESTORE_SOCKET_BLOCKING_MODE(sock, save) \
 	 fcntl(sock, F_SETFL, save)
-# endif
 #endif
 
 /* Connect to a socket using an interruptible connect with optional timeout.
@@ -302,7 +299,6 @@ PHPAPI int php_network_connect_socket(php_socket_t sockfd,
 		zend_string **error_string,
 		int *error_code)
 {
-#if HAVE_NON_BLOCKING_CONNECT
 	php_non_blocking_flags_t orig_flags;
 	int n;
 	int error = 0;
@@ -380,12 +376,6 @@ ok:
 		}
 	}
 	return ret;
-#else
-	if (asynchronous) {
-		php_error_docref(NULL, E_WARNING, "Asynchronous connect() not supported on this platform");
-	}
-	return (connect(sockfd, addr, addrlen) == 0) ? 0 : -1;
-#endif
 }
 /* }}} */
 
@@ -649,7 +639,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 
 					if (ua->sun_path[0] == '\0') {
 						/* abstract name */
-						int len = strlen(ua->sun_path + 1) + 1;
+						int len = sl - sizeof(sa_family_t);
 						*textaddr = zend_string_init((char*)ua->sun_path, len, 0);
 					} else {
 						int len = strlen(ua->sun_path);
@@ -1275,11 +1265,11 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	int herr,res;
 
 	if (*hstbuflen == 0) {
-		*hstbuflen = 1024; 
+		*hstbuflen = 1024;
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while (( res = 
+	while (( res =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
@@ -1290,7 +1280,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	if (res != SUCCESS) {
 		return NULL;
 	}
-		
+
 	return hp;
 }
 #endif
@@ -1305,7 +1295,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while ((NULL == ( hp = 
+	while ((NULL == ( hp =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */

@@ -35,7 +35,7 @@ var_dump(parse_ini_file($file));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(2) {
   ["001099030277"]=>
   array(1) {

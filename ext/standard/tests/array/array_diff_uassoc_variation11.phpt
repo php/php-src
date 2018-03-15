@@ -20,7 +20,7 @@ var_dump( array_diff_uassoc($boolean_indx_array, $input_array, "strcasecmp") );
     
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Testing array_diff_key() function with float indexed array --

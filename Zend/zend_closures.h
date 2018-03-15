@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -23,6 +23,10 @@
 #define ZEND_CLOSURES_H
 
 BEGIN_EXTERN_C()
+
+/* This macro depends on zend_closure structure layout */
+#define ZEND_CLOSURE_OBJECT(op_array) \
+	((zend_object*)((char*)(op_array) - sizeof(zend_object)))
 
 void zend_register_closure_ce(void);
 void zend_closure_bind_var(zval *closure_zv, zend_string *var_name, zval *var);
@@ -45,4 +49,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

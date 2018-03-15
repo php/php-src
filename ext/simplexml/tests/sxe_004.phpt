@@ -84,7 +84,7 @@ foreach($rit as $data) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 SXETest::rewind
 SXETest::valid
 SXETest::hasChildren

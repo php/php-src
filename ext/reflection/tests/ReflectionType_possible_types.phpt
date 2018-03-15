@@ -21,7 +21,7 @@ foreach ($functions as $function) {
     var_dump($returnType->getName());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(4) "void"
 string(3) "int"
 string(5) "float"

@@ -32,7 +32,7 @@ foreach ( $mixed_array as $sub_array ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 -- Iteration 0 --
 int(0)
 int(0)

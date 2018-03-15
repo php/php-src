@@ -24,5 +24,5 @@ catch(Exception $e)
 }
 echo "okey"
 ?>
---EXPECTF--
+--EXPECT--
 okey

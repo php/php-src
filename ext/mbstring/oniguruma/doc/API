@@ -1,4 +1,4 @@
-Oniguruma API  Version 6.1.0  2016/08/22
+Oniguruma API  Version 6.7.0  2017/12/08
 
 #include <oniguruma.h>
 
@@ -83,6 +83,16 @@ Oniguruma API  Version 6.1.0  2016/08/22
       ONIG_OPTION_DONT_CAPTURE_GROUP only named group captured.
       ONIG_OPTION_CAPTURE_GROUP      named and no-named group captured.
 
+      ONIG_OPTION_WORD_IS_ASCII      ASCII only word (\w, \p{Word}, [[:word:]])
+                                     ASCII only word bound (\b)
+      ONIG_OPTION_DIGIT_IS_ASCII     ASCII only digit (\d, \p{Digit}, [[:digit:]])
+      ONIG_OPTION_SPACE_IS_ASCII     ASCII only space (\s, \p{Space}, [[:space:]])
+      ONIG_OPTION_POSIX_IS_ASCII     ASCII only POSIX properties
+                                     (includes word, digit, space)
+                                     (alnum, alpha, blank, cntrl, digit, graph,
+                                      lower, print, punct, space, upper, xdigit,
+                                      word)
+
   5 enc:        character encoding.
 
       ONIG_ENCODING_ASCII         ASCII
@@ -130,7 +140,8 @@ Oniguruma API  Version 6.1.0  2016/08/22
       ONIG_SYNTAX_PERL              Perl
       ONIG_SYNTAX_PERL_NG           Perl + named group
       ONIG_SYNTAX_RUBY              Ruby
-      ONIG_SYNTAX_DEFAULT           default (== Ruby)
+      ONIG_SYNTAX_ONIGURUMA         Oniguruma
+      ONIG_SYNTAX_DEFAULT           default (== ONIG_SYNTAX_ONIGURUMA)
                                    onig_set_default_syntax()
 
       or any OnigSyntaxType data address defined by user.
@@ -625,6 +636,20 @@ Oniguruma API  Version 6.1.0  2016/08/22
     [num-of-ranges, 1st-range-start, 1st-range-end, 2nd-range-start... ]
 
     * Don't destroy the ranges after having called this function.
+
+  normal return: ONIG_NORMAL
+
+
+# unsigned int onig_get_parse_depth_limit(void)
+
+  Return the maximum depth of parser recursion.
+  (default: DEFAULT_PARSE_DEPTH_LIMIT defined in regint.h. Currently 4096.)
+
+
+# int onig_set_parse_depth_limit(unsigned int depth)
+
+  Set the maximum depth of parser recursion.
+  (depth = 0: Set to the default value defined in regint.h.)
 
   normal return: ONIG_NORMAL
 

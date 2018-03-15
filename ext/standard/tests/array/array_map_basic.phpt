@@ -40,7 +40,7 @@ var_dump( array_map('concatenate', $arr1, $arr2) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_map() : basic functionality ***
 -- With two integer array --
 array(3) {

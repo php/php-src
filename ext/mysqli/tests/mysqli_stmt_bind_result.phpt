@@ -35,8 +35,8 @@ require_once('skipifconnectfailure.inc');
 	$label = null;
 	$foo = null;
 
-	if (!is_null($tmp = mysqli_stmt_bind_result($stmt, $id)))
-		printf("[003] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_stmt_bind_result($stmt, $id)))
+		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1"))
 		printf("[004] [%d] %s\n", mysqli_stmt_errno($stmt), mysqli_stmt_error($stmt));

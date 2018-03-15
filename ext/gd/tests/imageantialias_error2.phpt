@@ -19,5 +19,5 @@ $image = imagecreatetruecolor(180, 30);
 
 var_dump(imageantialias($image, 'wrong param')); // 'wrogn param' is converted to true
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

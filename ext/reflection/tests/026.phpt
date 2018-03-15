@@ -20,6 +20,7 @@ Version => %s
 date
 
 date/time support => enabled
+timelib version => %s
 "Olson" Timezone Database Version => %s
 Timezone Database => %s
 Default timezone => %s

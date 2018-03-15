@@ -1,7 +1,5 @@
 --TEST--
 Ensure the ReflectionProperty constructor triggers autoload.
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --FILE--
 <?php
 spl_autoload_register(function ($name) {
@@ -16,6 +14,6 @@ catch (ReflectionException $e) {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "UndefC"
 Class UndefC does not exist

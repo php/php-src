@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -211,7 +211,7 @@ PHP_MINIT_FUNCTION(sxe) /* {{{ */
 	ce_SimpleXMLIterator->create_object = ce_SimpleXMLElement->create_object;
 
 	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_RecursiveIterator);
-	zend_class_implements(ce_SimpleXMLIterator, 1, spl_ce_Countable);
+	zend_class_implements(ce_SimpleXMLIterator, 1, zend_ce_countable);
 
 	return SUCCESS;
 }

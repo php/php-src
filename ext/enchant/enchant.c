@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -122,7 +122,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
-zend_function_entry enchant_functions[] = {
+static const zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
 	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
@@ -323,7 +323,6 @@ PHP_MINFO_FUNCTION(enchant)
 #elif defined(HAVE_ENCHANT_BROKER_SET_PARAM)
 	php_info_print_table_row(2, "Libenchant Version", "1.5.0 or later");
 #endif
-	php_info_print_table_row(2, "Revision", "$Id$");
 	php_info_print_table_end();
 
 	php_info_print_table_start();
@@ -373,7 +372,7 @@ PHP_FUNCTION(enchant_broker_init)
 }
 /* }}} */
 
-/* {{{ proto boolean enchant_broker_free(resource broker)
+/* {{{ proto bool enchant_broker_free(resource broker)
    Destroys the broker object and its dictionnaries */
 PHP_FUNCTION(enchant_broker_free)
 {
@@ -483,6 +482,11 @@ PHP_FUNCTION(enchant_broker_get_dict_path)
 			RETURN_FALSE;
 	}
 
+	if (value == NULL) {
+		php_error_docref(NULL, E_WARNING, "dict_path not set");
+		RETURN_FALSE;
+	}
+
 	RETURN_STRING(value);
 }
 /* }}} */
@@ -563,7 +567,7 @@ PHP_FUNCTION(enchant_broker_request_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;
@@ -610,7 +614,7 @@ PHP_FUNCTION(enchant_broker_request_pwl_dict)
 		pbroker->dict[pos] = dict;
 
 		dict->rsrc = zend_register_resource(dict, le_enchant_dict);
-		pbroker->rsrc->gc.refcount++;
+		GC_ADDREF(pbroker->rsrc);
 		RETURN_RES(dict->rsrc);
 	} else {
 		RETURN_FALSE;

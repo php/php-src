@@ -48,7 +48,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : unsigned formats and unsigned values ***
 
 -- Iteration 1 --

@@ -103,5 +103,5 @@ if (!function_exists('mysqli_set_charset')) {
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

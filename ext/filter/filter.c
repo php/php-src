@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -379,10 +379,6 @@ static void php_zval_filter(zval *value, zend_long filter, zend_long flags, zval
 		filter_func = php_find_filter(FILTER_DEFAULT);
 	}
 
-	if (copy) {
-		SEPARATE_ZVAL(value);
-	}
-
 	/* #49274, fatal error with object without a toString method
 	  Fails nicely instead of getting a recovarable fatal error. */
 	if (Z_TYPE_P(value) == IS_OBJECT) {
@@ -503,21 +499,21 @@ static void php_zval_filter_recursive(zval *value, zend_long filter, zend_long f
 	if (Z_TYPE_P(value) == IS_ARRAY) {
 		zval *element;
 
-		if (Z_ARRVAL_P(value)->u.v.nApplyCount > 1) {
+		if (Z_IS_RECURSIVE_P(value)) {
 			return;
 		}
+		Z_PROTECT_RECURSION_P(value);
 
 		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(value), element) {
 			ZVAL_DEREF(element);
-			SEPARATE_ZVAL_NOREF(element);
 			if (Z_TYPE_P(element) == IS_ARRAY) {
-				Z_ARRVAL_P(element)->u.v.nApplyCount++;
+				SEPARATE_ARRAY(element);
 				php_zval_filter_recursive(element, filter, flags, options, charset, copy);
-				Z_ARRVAL_P(element)->u.v.nApplyCount--;
 			} else {
 				php_zval_filter(element, filter, flags, options, charset, copy);
 			}
 		} ZEND_HASH_FOREACH_END();
+		Z_UNPROTECT_RECURSION_P(value);
 	} else {
 		php_zval_filter(value, filter, flags, options, charset, copy);
 	}
@@ -634,9 +630,6 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 
 	if (Z_TYPE_P(filtered) == IS_ARRAY) {
 		if (filter_flags & FILTER_REQUIRE_SCALAR) {
-			if (copy) {
-				SEPARATE_ZVAL(filtered);
-			}
 			zval_ptr_dtor(filtered);
 			if (filter_flags & FILTER_NULL_ON_FAILURE) {
 				ZVAL_NULL(filtered);
@@ -649,9 +642,6 @@ static void php_filter_call(zval *filtered, zend_long filter, zval *filter_args,
 		return;
 	}
 	if (filter_flags & FILTER_REQUIRE_ARRAY) {
-		if (copy) {
-			SEPARATE_ZVAL(filtered);
-		}
 		zval_ptr_dtor(filtered);
 		if (filter_flags & FILTER_NULL_ON_FAILURE) {
 			ZVAL_NULL(filtered);
@@ -716,7 +706,7 @@ static void php_filter_array_handler(zval *input, zval *op, zval *return_value, 
 }
 /* }}} */
 
-/* {{{ proto mixed filter_input(constant type, string variable_name [, long filter [, mixed options]])
+/* {{{ proto mixed filter_input(constant type, string variable_name [, int filter [, mixed options]])
  * Returns the filtered variable 'name'* from source `type`.
  */
 PHP_FUNCTION(filter_input)
@@ -772,7 +762,7 @@ PHP_FUNCTION(filter_input)
 }
 /* }}} */
 
-/* {{{ proto mixed filter_var(mixed variable [, long filter [, mixed options]])
+/* {{{ proto mixed filter_var(mixed variable [, int filter [, mixed options]])
  * Returns the filtered version of the variable.
  */
 PHP_FUNCTION(filter_var)

@@ -90,7 +90,7 @@ expect_openssl_errors('openssl_pkey_export_to_file pem', ['0906D06C']);
 // file to export cannot be written
 @openssl_pkey_export_to_file($private_key_file, $invalid_file_for_write);
 expect_openssl_errors('openssl_pkey_export_to_file write', ['2006D002']);
-// succesful export
+// successful export
 @openssl_pkey_export($private_key_file_with_pass, $out, 'wrong pwd');
 expect_openssl_errors('openssl_pkey_export', ['06065064', '0906A065']);
 // invalid x509 for getting public key

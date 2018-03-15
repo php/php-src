@@ -18,7 +18,7 @@ $context = stream_context_create($httpContext);
 $headers = ["Host: bad.com"];
 print_r(stream_context_get_options($context));
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [http] => Array

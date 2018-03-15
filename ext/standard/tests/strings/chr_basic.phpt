@@ -16,7 +16,7 @@ echo "World";
 echo "\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing chr() : basic functionality ***
 Hello
 World

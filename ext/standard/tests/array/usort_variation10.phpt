@@ -42,7 +42,7 @@ var_dump( usort($array_arg, 'cmp') );
 var_dump($array_arg);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Array with duplicate keys --

@@ -42,5 +42,5 @@ echo "ReportCollision: ";
 $o = new ReportCollision;
 
 
---EXPECTF--
+--EXPECT--
 ReportCollision: New constructor executed

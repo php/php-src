@@ -43,7 +43,7 @@ delete_files($directory, 3, "私はガラスを食べられますfile");
 $directory = dirname(__FILE__) . '/私はガラスを食べられますscandir_basic';
 rmdir($directory);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : basic functionality ***
 
 -- scandir() with mandatory arguments --

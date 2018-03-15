@@ -109,208 +109,208 @@ foreach($inputs as $key =>$value) {
 
 --int 0--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --int 1--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --int 12345--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --int -12345--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --float 10.5--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --float -10.5--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --float .5--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --empty array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, array given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --lowercase null--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --lowercase true--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --lowercase false--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --uppercase TRUE--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --uppercase FALSE--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --empty string DQ--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, string given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
-Warning: date_sunset() expects parameter 1 to be integer, object given in %s on line %d
+Warning: date_sunset() expects parameter 1 to be int, object given in %s on line %d
 bool(false)
 
 --undefined var--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 
 --unset var--
 string(5) "18:22"
-float(18.377%d)
-int(62558)
+float(18.373%d)
+int(62545)
 ===DONE===

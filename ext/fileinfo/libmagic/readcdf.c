@@ -26,7 +26,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.63 2016/10/18 22:25:42 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.65 2017/04/08 20:58:03 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -140,7 +140,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
         struct timeval ts;
         char buf[64];
         const char *str = NULL;
-        const char *s;
+        const char *s, *e;
         int len;
 
 	memset(&ts, 0, sizeof(ts));
@@ -189,7 +189,9 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                 if (info[i].pi_type == CDF_LENGTH32_WSTRING)
                                     k++;
                                 s = info[i].pi_str.s_buf;
-                                for (j = 0; j < sizeof(vbuf) && len--; s += k) {
+				e = info[i].pi_str.s_buf + len;
+                                for (j = 0; s < e && j < sizeof(vbuf)
+				    && len--; s += k) {
                                         if (*s == '\0')
                                                 break;
                                         if (isprint((unsigned char)*s))
@@ -344,11 +346,11 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 #ifdef notdef
 private char *
 format_clsid(char *buf, size_t len, const uint64_t uuid[2]) {
-	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" 
+	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4"
 	    PRIx64 "-%.12" PRIx64,
 	    (uuid[0] >> 32) & (uint64_t)0x000000000ffffffffULL,
 	    (uuid[0] >> 16) & (uint64_t)0x0000000000000ffffULL,
-	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL, 
+	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >> 48) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >>  0) & (uint64_t)0x0000fffffffffffffULL);
 	return buf;
@@ -427,7 +429,7 @@ private struct sinfo {
 	const char *sections[5];
 	const int  types[5];
 } sectioninfo[] = {
-	{ "Encrypted", "encrypted", 
+	{ "Encrypted", "encrypted",
 		{
 			"EncryptedPackage", "EncryptedSummary",
 			NULL, NULL, NULL,
@@ -439,7 +441,7 @@ private struct sinfo {
 
 		},
 	},
-	{ "QuickBooks", "quickbooks", 
+	{ "QuickBooks", "quickbooks",
 		{
 #if 0
 			"TaxForms", "PDFTaxForms", "modulesInBackup",
@@ -596,7 +598,7 @@ file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
 	if ((i = cdf_read_user_stream(&info, &h, &sat, &ssat, &sst, &dir,
 	    "FileHeader", &scn)) != -1) {
 #define HWP5_SIGNATURE "HWP Document File"
-		if (scn.sst_dirlen >= sizeof(HWP5_SIGNATURE) - 1
+		if (scn.sst_len * scn.sst_ss >= sizeof(HWP5_SIGNATURE) - 1
 		    && memcmp(scn.sst_tab, HWP5_SIGNATURE,
 		    sizeof(HWP5_SIGNATURE) - 1) == 0) {
 		    if (NOTMIME(ms)) {

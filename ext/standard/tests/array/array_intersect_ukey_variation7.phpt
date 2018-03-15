@@ -34,7 +34,7 @@ echo "\n-- Result of strings containing integers and strings containing floating
 var_dump( array_intersect_ukey($arr1_string_int, $arr2_string_float, 'key_compare_func') );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_ukey() : usage variation ***
 
 -- Result of strings containing integers intersection --

@@ -18,8 +18,9 @@ if (empty($out)) die("skip local resolver does not return authority records");
 --FILE--
 <?php
 $auth = array();
-dns_get_record('php.net', DNS_MX, $auth);
-var_dump(empty($auth));
+$res = dns_get_record('php.net', DNS_MX, $auth);
+// only check $auth if dns_get_record is successful
+var_dump(!empty($res) && empty($auth));
 ?>
 --EXPECT--
 bool(false)

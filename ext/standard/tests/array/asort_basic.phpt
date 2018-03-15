@@ -75,7 +75,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing asort() : basic functionality ***
 
 -- Testing asort() by supplying string array, 'flag' value is default --

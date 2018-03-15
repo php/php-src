@@ -8,7 +8,6 @@ include("skipif.inc");
 _skip_lc_messages();
 
 ?>
---INI--
 --FILE--
 <?php
 include 'config.inc';

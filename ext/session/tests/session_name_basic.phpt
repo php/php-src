@@ -29,7 +29,7 @@ var_dump(session_name());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_name() : error functionality ***
 string(9) "PHPSESSID"
 string(9) "PHPSESSID"

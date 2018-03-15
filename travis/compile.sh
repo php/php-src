@@ -5,7 +5,7 @@ else
 	TS="";
 fi
 if [[ "$ENABLE_DEBUG" == 1 ]]; then
-	DEBUG="--enable-debug";
+	DEBUG="--enable-debug --without-pcre-valgrind";
 else
 	DEBUG="";
 fi
@@ -45,6 +45,7 @@ $TS \
 --with-png-dir=/usr \
 --enable-exif \
 --enable-zip \
+--without-libzip \
 --with-zlib \
 --with-zlib-dir=/usr \
 --enable-soap \

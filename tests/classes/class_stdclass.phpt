@@ -9,6 +9,6 @@ echo get_class($obj)."\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 stdClass
 Done

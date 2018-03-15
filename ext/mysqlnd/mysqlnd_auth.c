@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -79,11 +79,15 @@ mysqlnd_run_authentication(
 		struct st_mysqlnd_authentication_plugin * auth_plugin = conn->m->fetch_auth_plugin_by_name(requested_protocol);
 
 		if (!auth_plugin) {
-			php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
-			SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
-			goto end;
+			if (first_call) {
+				mnd_pefree(requested_protocol, FALSE);
+				requested_protocol = mnd_pestrdup(MYSQLND_DEFAULT_AUTH_PROTOCOL, FALSE);
+			} else {
+				php_error_docref(NULL, E_WARNING, "The server requested authentication method unknown to the client [%s]", requested_protocol);
+				SET_CLIENT_ERROR(conn->error_info, CR_NOT_IMPLEMENTED, UNKNOWN_SQLSTATE, "The server requested authentication method unknown to the client");
+				goto end;
+			}
 		}
-		DBG_INF("plugin found");
 
 		{
 			zend_uchar * switch_to_auth_protocol_data = NULL;
@@ -108,10 +112,13 @@ mysqlnd_run_authentication(
 
 			DBG_INF_FMT("salt(%d)=[%.*s]", plugin_data_len, plugin_data_len, plugin_data);
 			/* The data should be allocated with malloc() */
-			scrambled_data =
-				auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
-												   plugin_data, plugin_data_len, session_options,
-												   conn->protocol_frame_codec->data, mysql_flags);
+			if (auth_plugin) {
+				scrambled_data =
+					auth_plugin->methods.get_auth_data(NULL, &scrambled_data_len, conn, user, passwd, passwd_len,
+													   plugin_data, plugin_data_len, session_options,
+													   conn->protocol_frame_codec->data, mysql_flags);
+			}
+
 			if (conn->error_info->error_no) {
 				goto end;
 			}
@@ -186,11 +193,7 @@ mysqlnd_switch_to_ssl_if_needed(MYSQLND_CONN_DATA * conn,
 
 	{
 		size_t client_capabilities = mysql_flags;
-		struct st_mysqlnd_protocol_command * command = conn->command_factory(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
-		if (command) {
-			ret = command->run(command);
-			command->free_command(command);
-		}
+		ret = conn->run_command(COM_ENABLE_SSL, conn, client_capabilities, server_capabilities, charset_no);
 	}
 	DBG_RETURN(ret);
 }
@@ -251,100 +254,97 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * charset = NULL;
-	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE * change_auth_resp_packet = NULL;
-	MYSQLND_PACKET_AUTH_RESPONSE * auth_resp_packet = NULL;
-	MYSQLND_PACKET_AUTH * auth_packet = NULL;
+	MYSQLND_PACKET_AUTH_RESPONSE auth_resp_packet;
 
 	DBG_ENTER("mysqlnd_auth_handshake");
 
-	auth_resp_packet = conn->payload_decoder_factory->m.get_auth_response_packet(conn->payload_decoder_factory, FALSE);
-
-	if (!auth_resp_packet) {
-		SET_OOM_ERROR(conn->error_info);
-		goto end;
-	}
+	conn->payload_decoder_factory->m.init_auth_response_packet(&auth_resp_packet);
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->payload_decoder_factory->m.get_change_auth_response_packet(conn->payload_decoder_factory, FALSE);
-		if (!change_auth_resp_packet) {
-			SET_OOM_ERROR(conn->error_info);
-			goto end;
-		}
+		MYSQLND_PACKET_CHANGE_AUTH_RESPONSE change_auth_resp_packet;
 
-		change_auth_resp_packet->auth_data = auth_plugin_data;
-		change_auth_resp_packet->auth_data_len = auth_plugin_data_len;
+		conn->payload_decoder_factory->m.init_change_auth_response_packet(&change_auth_resp_packet);
 
-		if (!PACKET_WRITE(change_auth_resp_packet)) {
+		change_auth_resp_packet.auth_data = auth_plugin_data;
+		change_auth_resp_packet.auth_data_len = auth_plugin_data_len;
+
+		if (!PACKET_WRITE(conn, &change_auth_resp_packet)) {
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			PACKET_FREE(&change_auth_resp_packet);
 			goto end;
 		}
+		PACKET_FREE(&change_auth_resp_packet);
 	} else {
-		auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
+		MYSQLND_PACKET_AUTH auth_packet;
 
-		auth_packet->client_flags = mysql_flags;
-		auth_packet->max_packet_size = session_options->max_allowed_packet;
+		conn->payload_decoder_factory->m.init_auth_packet(&auth_packet);
+
+		auth_packet.client_flags = mysql_flags;
+		auth_packet.max_packet_size = session_options->max_allowed_packet;
 		if (session_options->charset_name && (charset = mysqlnd_find_charset_name(session_options->charset_name))) {
-			auth_packet->charset_no	= charset->nr;
+			auth_packet.charset_no	= charset->nr;
 		} else {
-			auth_packet->charset_no	= server_charset_no;
+			auth_packet.charset_no	= server_charset_no;
 		}
 
-		auth_packet->send_auth_data = TRUE;
-		auth_packet->user		= user;
-		auth_packet->db			= db;
-		auth_packet->db_len		= db_len;
+		auth_packet.send_auth_data = TRUE;
+		auth_packet.user		= user;
+		auth_packet.db			= db;
+		auth_packet.db_len		= db_len;
 
-		auth_packet->auth_data = auth_plugin_data;
-		auth_packet->auth_data_len = auth_plugin_data_len;
-		auth_packet->auth_plugin_name = auth_protocol;
+		auth_packet.auth_data = auth_plugin_data;
+		auth_packet.auth_data_len = auth_plugin_data_len;
+		auth_packet.auth_plugin_name = auth_protocol;
 
 		if (conn->server_capabilities & CLIENT_CONNECT_ATTRS) {
-			auth_packet->connect_attr = conn->options->connect_attr;
+			auth_packet.connect_attr = conn->options->connect_attr;
 		}
 
-		if (!PACKET_WRITE(auth_packet)) {
+		if (!PACKET_WRITE(conn, &auth_packet)) {
+			PACKET_FREE(&auth_packet);
 			goto end;
 		}
-	}
-	if (use_full_blown_auth_packet == TRUE) {
-		conn->charset = mysqlnd_find_charset_nr(auth_packet->charset_no);
+
+		if (use_full_blown_auth_packet == TRUE) {
+			conn->charset = mysqlnd_find_charset_nr(auth_packet.charset_no);
+		}
+
+		PACKET_FREE(&auth_packet);
 	}
 
-	if (FAIL == PACKET_READ(auth_resp_packet) || auth_resp_packet->response_code >= 0xFE) {
-		if (auth_resp_packet->response_code == 0xFE) {
+	if (FAIL == PACKET_READ(conn, &auth_resp_packet) || auth_resp_packet.response_code >= 0xFE) {
+		if (auth_resp_packet.response_code == 0xFE) {
 			/* old authentication with new server  !*/
-			if (!auth_resp_packet->new_auth_protocol) {
+			if (!auth_resp_packet.new_auth_protocol) {
 				DBG_ERR(mysqlnd_old_passwd);
 				SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 			} else {
-				*switch_to_auth_protocol = mnd_pestrndup(auth_resp_packet->new_auth_protocol, auth_resp_packet->new_auth_protocol_len, FALSE);
-				*switch_to_auth_protocol_len = auth_resp_packet->new_auth_protocol_len;
-				if (auth_resp_packet->new_auth_protocol_data) {
-					*switch_to_auth_protocol_data_len = auth_resp_packet->new_auth_protocol_data_len;
+				*switch_to_auth_protocol = mnd_pestrndup(auth_resp_packet.new_auth_protocol, auth_resp_packet.new_auth_protocol_len, FALSE);
+				*switch_to_auth_protocol_len = auth_resp_packet.new_auth_protocol_len;
+				if (auth_resp_packet.new_auth_protocol_data) {
+					*switch_to_auth_protocol_data_len = auth_resp_packet.new_auth_protocol_data_len;
 					*switch_to_auth_protocol_data = mnd_emalloc(*switch_to_auth_protocol_data_len);
-					memcpy(*switch_to_auth_protocol_data, auth_resp_packet->new_auth_protocol_data, *switch_to_auth_protocol_data_len);
+					memcpy(*switch_to_auth_protocol_data, auth_resp_packet.new_auth_protocol_data, *switch_to_auth_protocol_data_len);
 				} else {
 					*switch_to_auth_protocol_data = NULL;
 					*switch_to_auth_protocol_data_len = 0;
 				}
 			}
-		} else if (auth_resp_packet->response_code == 0xFF) {
-			if (auth_resp_packet->sqlstate[0]) {
-				strlcpy(conn->error_info->sqlstate, auth_resp_packet->sqlstate, sizeof(conn->error_info->sqlstate));
-				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", auth_resp_packet->error_no, auth_resp_packet->sqlstate, auth_resp_packet->error);
+		} else if (auth_resp_packet.response_code == 0xFF) {
+			if (auth_resp_packet.sqlstate[0]) {
+				strlcpy(conn->error_info->sqlstate, auth_resp_packet.sqlstate, sizeof(conn->error_info->sqlstate));
+				DBG_ERR_FMT("ERROR:%u [SQLSTATE:%s] %s", auth_resp_packet.error_no, auth_resp_packet.sqlstate, auth_resp_packet.error);
 			}
-			SET_CLIENT_ERROR(conn->error_info, auth_resp_packet->error_no, UNKNOWN_SQLSTATE, auth_resp_packet->error);
+			SET_CLIENT_ERROR(conn->error_info, auth_resp_packet.error_no, UNKNOWN_SQLSTATE, auth_resp_packet.error);
 		}
 		goto end;
 	}
 
-	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet->message, auth_resp_packet->message_len, conn->persistent);
+	SET_NEW_MESSAGE(conn->last_message.s, conn->last_message.l, auth_resp_packet.message, auth_resp_packet.message_len);
 	ret = PASS;
 end:
-	PACKET_FREE(change_auth_resp_packet);
-	PACKET_FREE(auth_packet);
-	PACKET_FREE(auth_resp_packet);
+	PACKET_FREE(&auth_resp_packet);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -372,79 +372,73 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 {
 	enum_func_status ret = FAIL;
 	const MYSQLND_CHARSET * old_cs = conn->charset;
-	MYSQLND_PACKET_CHANGE_AUTH_RESPONSE * change_auth_resp_packet = NULL;
-	MYSQLND_PACKET_CHG_USER_RESPONSE * chg_user_resp = NULL;
-	MYSQLND_PACKET_AUTH * auth_packet = NULL;
+	MYSQLND_PACKET_CHG_USER_RESPONSE chg_user_resp;
 
 	DBG_ENTER("mysqlnd_auth_change_user");
 
-	chg_user_resp = conn->payload_decoder_factory->m.get_change_user_response_packet(conn->payload_decoder_factory, FALSE);
-
-	if (!chg_user_resp) {
-		SET_OOM_ERROR(conn->error_info);
-		goto end;
-	}
+	conn->payload_decoder_factory->m.init_change_user_response_packet(&chg_user_resp);
 
 	if (use_full_blown_auth_packet != TRUE) {
-		change_auth_resp_packet = conn->payload_decoder_factory->m.get_change_auth_response_packet(conn->payload_decoder_factory, FALSE);
-		if (!change_auth_resp_packet) {
-			SET_OOM_ERROR(conn->error_info);
-			goto end;
-		}
+		MYSQLND_PACKET_CHANGE_AUTH_RESPONSE change_auth_resp_packet;
 
-		change_auth_resp_packet->auth_data = auth_plugin_data;
-		change_auth_resp_packet->auth_data_len = auth_plugin_data_len;
+		conn->payload_decoder_factory->m.init_change_auth_response_packet(&change_auth_resp_packet);
 
-		if (!PACKET_WRITE(change_auth_resp_packet)) {
+		change_auth_resp_packet.auth_data = auth_plugin_data;
+		change_auth_resp_packet.auth_data_len = auth_plugin_data_len;
+
+		if (!PACKET_WRITE(conn, &change_auth_resp_packet)) {
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			PACKET_FREE(&change_auth_resp_packet);
 			goto end;
 		}
+
+		PACKET_FREE(&change_auth_resp_packet);
 	} else {
-		auth_packet = conn->payload_decoder_factory->m.get_auth_packet(conn->payload_decoder_factory, FALSE);
+		MYSQLND_PACKET_AUTH auth_packet;
 
-		if (!auth_packet) {
-			SET_OOM_ERROR(conn->error_info);
-			goto end;
-		}
+		conn->payload_decoder_factory->m.init_auth_packet(&auth_packet);
 
-		auth_packet->is_change_user_packet = TRUE;
-		auth_packet->user		= user;
-		auth_packet->db			= db;
-		auth_packet->db_len		= db_len;
-		auth_packet->silent		= silent;
+		auth_packet.is_change_user_packet = TRUE;
+		auth_packet.user		= user;
+		auth_packet.db			= db;
+		auth_packet.db_len		= db_len;
+		auth_packet.silent		= silent;
 
-		auth_packet->auth_data = auth_plugin_data;
-		auth_packet->auth_data_len = auth_plugin_data_len;
-		auth_packet->auth_plugin_name = auth_protocol;
+		auth_packet.auth_data = auth_plugin_data;
+		auth_packet.auth_data_len = auth_plugin_data_len;
+		auth_packet.auth_plugin_name = auth_protocol;
 
 
 		if (conn->m->get_server_version(conn) >= 50123) {
-			auth_packet->charset_no	= conn->charset->nr;
+			auth_packet.charset_no	= conn->charset->nr;
 		}
 
-		if (!PACKET_WRITE(auth_packet)) {
+		if (!PACKET_WRITE(conn, &auth_packet)) {
 			SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 			SET_CLIENT_ERROR(conn->error_info, CR_SERVER_GONE_ERROR, UNKNOWN_SQLSTATE, mysqlnd_server_gone);
+			PACKET_FREE(&auth_packet);
 			goto end;
 		}
+
+		PACKET_FREE(&auth_packet);
 	}
 
-	ret = PACKET_READ(chg_user_resp);
-	COPY_CLIENT_ERROR(conn->error_info, chg_user_resp->error_info);
+	ret = PACKET_READ(conn, &chg_user_resp);
+	COPY_CLIENT_ERROR(conn->error_info, chg_user_resp.error_info);
 
-	if (0xFE == chg_user_resp->response_code) {
+	if (0xFE == chg_user_resp.response_code) {
 		ret = FAIL;
-		if (!chg_user_resp->new_auth_protocol) {
+		if (!chg_user_resp.new_auth_protocol) {
 			DBG_ERR(mysqlnd_old_passwd);
 			SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 		} else {
-			*switch_to_auth_protocol = mnd_pestrndup(chg_user_resp->new_auth_protocol, chg_user_resp->new_auth_protocol_len, FALSE);
-			*switch_to_auth_protocol_len = chg_user_resp->new_auth_protocol_len;
-			if (chg_user_resp->new_auth_protocol_data) {
-				*switch_to_auth_protocol_data_len = chg_user_resp->new_auth_protocol_data_len;
+			*switch_to_auth_protocol = mnd_pestrndup(chg_user_resp.new_auth_protocol, chg_user_resp.new_auth_protocol_len, FALSE);
+			*switch_to_auth_protocol_len = chg_user_resp.new_auth_protocol_len;
+			if (chg_user_resp.new_auth_protocol_data) {
+				*switch_to_auth_protocol_data_len = chg_user_resp.new_auth_protocol_data_len;
 				*switch_to_auth_protocol_data = mnd_emalloc(*switch_to_auth_protocol_data_len);
-				memcpy(*switch_to_auth_protocol_data, chg_user_resp->new_auth_protocol_data, *switch_to_auth_protocol_data_len);
+				memcpy(*switch_to_auth_protocol_data, chg_user_resp.new_auth_protocol_data, *switch_to_auth_protocol_data_len);
 			} else {
 				*switch_to_auth_protocol_data = NULL;
 				*switch_to_auth_protocol_data_len = 0;
@@ -460,14 +454,12 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		  When it gets fixed, there should be one more check here
 		*/
 		if (conn->m->get_server_version(conn) > 50113L &&conn->m->get_server_version(conn) < 50118L) {
-			MYSQLND_PACKET_OK * redundant_error_packet = conn->payload_decoder_factory->m.get_ok_packet(conn->payload_decoder_factory, FALSE);
-			if (redundant_error_packet) {
-				PACKET_READ(redundant_error_packet);
-				PACKET_FREE(redundant_error_packet);
-				DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn));
-			} else {
-				SET_OOM_ERROR(conn->error_info);
-			}
+			MYSQLND_PACKET_OK redundant_error_packet;
+
+			conn->payload_decoder_factory->m.init_ok_packet(&redundant_error_packet);
+			PACKET_READ(conn, &redundant_error_packet);
+			PACKET_FREE(&redundant_error_packet);
+			DBG_INF_FMT("Server is %u, buggy, sends two ERR messages", conn->m->get_server_version(conn));
 		}
 	}
 	if (ret == PASS) {
@@ -494,15 +486,13 @@ mysqlnd_auth_change_user(MYSQLND_CONN_DATA * const conn,
 		if (conn->m->get_server_version(conn) < 50123) {
 			ret = conn->m->set_charset(conn, old_cs->name);
 		}
-	} else if (ret == FAIL && chg_user_resp->server_asked_323_auth == TRUE) {
+	} else if (ret == FAIL && chg_user_resp.server_asked_323_auth == TRUE) {
 		/* old authentication with new server  !*/
 		DBG_ERR(mysqlnd_old_passwd);
 		SET_CLIENT_ERROR(conn->error_info, CR_UNKNOWN_ERROR, UNKNOWN_SQLSTATE, mysqlnd_old_passwd);
 	}
 end:
-	PACKET_FREE(change_auth_resp_packet);
-	PACKET_FREE(auth_packet);
-	PACKET_FREE(chg_user_resp);
+	PACKET_FREE(&chg_user_resp);
 	DBG_RETURN(ret);
 }
 /* }}} */
@@ -694,45 +684,36 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				 pfc_data->sha256_server_public_key? pfc_data->sha256_server_public_key:"n/a",
 				 MYSQLND_G(sha256_server_public_key)? MYSQLND_G(sha256_server_public_key):"n/a");
 	if (!fname || fname[0] == '\0') {
-		MYSQLND_PACKET_SHA256_PK_REQUEST * pk_req_packet = NULL;
-		MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE * pk_resp_packet = NULL;
+		MYSQLND_PACKET_SHA256_PK_REQUEST pk_req_packet;
+		MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE pk_resp_packet;
 
 		do {
 			DBG_INF("requesting the public key from the server");
-			pk_req_packet = conn->payload_decoder_factory->m.get_sha256_pk_request_packet(conn->payload_decoder_factory, FALSE);
-			if (!pk_req_packet) {
-				SET_OOM_ERROR(conn->error_info);
-				break;
-			}
-			pk_resp_packet = conn->payload_decoder_factory->m.get_sha256_pk_request_response_packet(conn->payload_decoder_factory, FALSE);
-			if (!pk_resp_packet) {
-				SET_OOM_ERROR(conn->error_info);
-				PACKET_FREE(pk_req_packet);
-				break;
-			}
+			conn->payload_decoder_factory->m.init_sha256_pk_request_packet(&pk_req_packet);
+			conn->payload_decoder_factory->m.init_sha256_pk_request_response_packet(&pk_resp_packet);
 
-			if (! PACKET_WRITE(pk_req_packet)) {
+			if (! PACKET_WRITE(conn, &pk_req_packet)) {
 				DBG_ERR_FMT("Error while sending public key request packet");
 				php_error(E_WARNING, "Error while sending public key request packet. PID=%d", getpid());
 				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
-			if (FAIL == PACKET_READ(pk_resp_packet) || NULL == pk_resp_packet->public_key) {
+			if (FAIL == PACKET_READ(conn, &pk_resp_packet) || NULL == pk_resp_packet.public_key) {
 				DBG_ERR_FMT("Error while receiving public key");
 				php_error(E_WARNING, "Error while receiving public key. PID=%d", getpid());
 				SET_CONNECTION_STATE(&conn->state, CONN_QUIT_SENT);
 				break;
 			}
-			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet->public_key_len, pk_resp_packet->public_key);
+			DBG_INF_FMT("Public key(%d):\n%s", pk_resp_packet.public_key_len, pk_resp_packet.public_key);
 			/* now extract the public key */
 			{
-				BIO * bio = BIO_new_mem_buf(pk_resp_packet->public_key, pk_resp_packet->public_key_len);
+				BIO * bio = BIO_new_mem_buf(pk_resp_packet.public_key, pk_resp_packet.public_key_len);
 				ret = PEM_read_bio_RSA_PUBKEY(bio, NULL, NULL, NULL);
 				BIO_free(bio);
 			}
 		} while (0);
-		PACKET_FREE(pk_req_packet);
-		PACKET_FREE(pk_resp_packet);
+		PACKET_FREE(&pk_req_packet);
+		PACKET_FREE(&pk_resp_packet);
 
 		DBG_INF_FMT("ret=%p", ret);
 		DBG_RETURN(ret);
@@ -780,7 +761,7 @@ mysqlnd_sha256_auth_get_auth_data(struct st_mysqlnd_authentication_plugin * self
 	DBG_INF_FMT("salt(%d)=[%.*s]", auth_plugin_data_len, auth_plugin_data_len, auth_plugin_data);
 
 
-	if (conn->protocol_frame_codec->data->ssl) {
+	if (conn->vio->data->ssl) {
 		DBG_INF("simple clear text under SSL");
 		/* clear text under SSL */
 		*auth_data_len = passwd_len;

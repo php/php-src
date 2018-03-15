@@ -23,6 +23,7 @@
  */
 
 #include "timelib.h"
+#include "timelib_private.h"
 
 /*                                    jan  feb  mrt  apr  may  jun  jul  aug  sep  oct  nov  dec */
 static int month_tab_leap[12]     = {  -1,  30,  59,  90, 120, 151, 181, 212, 243, 273, 304, 334 };
@@ -32,14 +33,14 @@ static int month_tab[12]          = {   0,  31,  59,  90, 120, 151, 181, 212, 24
 static int days_in_month_leap[13] = {  31,  31,  29,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 static int days_in_month[13]      = {  31,  31,  28,  31,  30,  31,  30,  31,  31,  30,  31,  30,  31 };
 
-static void do_range_limit_fraction(double *fraction, timelib_sll *seconds)
+static void do_range_limit_fraction(timelib_sll *fraction, timelib_sll *seconds)
 {
 	if (*fraction < 0) {
-		*fraction += 1;
+		*fraction += 1000000;
 		*seconds -= 1;
 	}
-	if (*fraction > 1) {
-		*fraction -= 1;
+	if (*fraction > 1000000) {
+		*fraction -= 1000000;
 		*seconds += 1;
 	}
 }
@@ -202,13 +203,46 @@ void timelib_do_rel_normalize(timelib_time *base, timelib_rel_time *rt)
 	do_range_limit(0, 12, 12, &rt->m, &rt->y);
 }
 
+#define EPOCH_DAY 719468
+
+static void magic_date_calc(timelib_time *time)
+{
+	timelib_sll y, ddd, mi, mm, dd, g;
+
+	/* The algorithm doesn't work before the year 1 */
+	if (time->d < -719498) {
+		return;
+	}
+
+	g = time->d + EPOCH_DAY - 1;
+
+	y = (10000 * g + 14780) / 3652425;
+	ddd = g - ((365*y) + (y/4) - (y/100) + (y/400));
+	if (ddd < 0) {
+		y--;
+		ddd = g - ((365*y) + (y/4) - (y/100) + (y/400));
+	}
+	mi = (100 * ddd + 52) / 3060;
+	mm = ((mi + 2) % 12) + 1;
+	y = y + (mi + 2) / 12;
+	dd = ddd - ((mi * 306 + 5) / 10) + 1;
+	time->y = y;
+	time->m = mm;
+	time->d = dd;
+}
+
 void timelib_do_normalize(timelib_time* time)
 {
-	if (time->f != TIMELIB_UNSET) do_range_limit_fraction(&time->f, &time->s);
+	if (time->us != TIMELIB_UNSET) do_range_limit_fraction(&time->us, &time->s);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->s, &time->i);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 60, 60, &time->i, &time->h);
 	if (time->s != TIMELIB_UNSET) do_range_limit(0, 24, 24, &time->h, &time->d);
 	do_range_limit(1, 13, 12, &time->m, &time->y);
+
+	/* Short cut if we're doing things against the Epoch */
+	if (time->y == 1970 && time->m == 1 && time->d != 1) {
+		magic_date_calc(time);
+	}
 
 	do {} while (do_range_limit_days(&time->y, &time->m, &time->d));
 	do_range_limit(1, 13, 12, &time->m, &time->y);
@@ -222,7 +256,7 @@ static void do_adjust_relative(timelib_time* time)
 	timelib_do_normalize(time);
 
 	if (time->have_relative) {
-		time->f += time->relative.f;
+		time->us += time->relative.us;
 
 		time->s += time->relative.s;
 		time->i += time->relative.i;
@@ -399,16 +433,15 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 		case TIMELIB_ZONETYPE_OFFSET:
 
 			tz->is_localtime = 1;
-			return tz->z * 60;
+			return -tz->z;
 			break;
 
 		case TIMELIB_ZONETYPE_ABBR: {
 			timelib_sll tmp;
 
 			tz->is_localtime = 1;
-			tmp = tz->z;
-			tmp -= tz->dst * 60;
-			tmp *= 60;
+			tmp = -tz->z;
+			tmp -= tz->dst * 3600;
 			return tmp;
 			}
 			break;
@@ -422,19 +455,19 @@ static timelib_sll do_adjust_timezone(timelib_time *tz, timelib_tzinfo *tzi)
 			if (tzi) {
 				timelib_time_offset *before, *after;
 				timelib_sll          tmp;
-				int                  in_transistion;
+				int                  in_transition;
 
 				tz->is_localtime = 1;
 				before = timelib_get_time_zone_info(tz->sse, tzi);
 				after = timelib_get_time_zone_info(tz->sse - before->offset, tzi);
 				timelib_set_timezone(tz, tzi);
 
-				in_transistion = (
-					((tz->sse - after->offset) >= (after->transistion_time + (before->offset - after->offset))) &&
-					((tz->sse - after->offset) < after->transistion_time)
+				in_transition = (
+					((tz->sse - after->offset) >= (after->transition_time + (before->offset - after->offset))) &&
+					((tz->sse - after->offset) < after->transition_time)
 				);
 
-				if ((before->offset != after->offset) && !in_transistion) {
+				if ((before->offset != after->offset) && !in_transition) {
 					tmp = -after->offset;
 				} else {
 					tmp = -tz->z;

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -207,55 +207,86 @@ PHP_FUNCTION(mt_srand)
 		default:
 			BG(mt_rand_mode) = MT_RAND_MT19937;
 	}
-	
+
 	php_mt_srand(seed);
 }
 /* }}} */
 
-/* {{{ php_mt_rand_range
- */
-PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
-{
-	zend_ulong umax = max - min;
-	zend_ulong limit;
-	zend_ulong result;
+static uint32_t rand_range32(uint32_t umax) {
+	uint32_t result, limit;
 
 	result = php_mt_rand();
-#if ZEND_ULONG_MAX > UINT32_MAX
-	if (umax > UINT32_MAX) {
-		result = (result << 32) | php_mt_rand();
-	}
-#endif
 
 	/* Special case where no modulus is required */
-	if (UNEXPECTED(umax == ZEND_ULONG_MAX)) {
-		return (zend_long)result;
+	if (UNEXPECTED(umax == UINT32_MAX)) {
+		return result;
 	}
 
 	/* Increment the max so the range is inclusive of max */
 	umax++;
 
 	/* Powers of two are not biased */
-	if (EXPECTED((umax & (umax - 1)) != 0)) {
-		/* Ceiling under which ZEND_LONG_MAX % max == 0 */
-		limit = ZEND_ULONG_MAX - (ZEND_ULONG_MAX % umax) - 1;
-
-		/* Discard numbers over the limit to avoid modulo bias */
-		while (UNEXPECTED(result > limit)) {
-#if ZEND_ULONG_MAX > UINT32_MAX
-			if (umax > UINT32_MAX) {
-				result = (result << 32) | php_mt_rand();
-			}
-			else {
-				result = php_mt_rand();
-			}
-#else
-			result = php_mt_rand();
-#endif
-		}
+	if ((umax & (umax - 1)) == 0) {
+		return result & (umax - 1);
 	}
 
-	return (zend_long)((result % umax) + min);
+	/* Ceiling under which UINT32_MAX % max == 0 */
+	limit = UINT32_MAX - (UINT32_MAX % umax) - 1;
+
+	/* Discard numbers over the limit to avoid modulo bias */
+	while (UNEXPECTED(result > limit)) {
+		result = php_mt_rand();
+	}
+
+	return result % umax;
+}
+
+#if ZEND_ULONG_MAX > UINT32_MAX
+static uint64_t rand_range64(uint64_t umax) {
+	uint64_t result, limit;
+
+	result = php_mt_rand();
+	result = (result << 32) | php_mt_rand();
+
+	/* Special case where no modulus is required */
+	if (UNEXPECTED(umax == UINT64_MAX)) {
+		return result;
+	}
+
+	/* Increment the max so the range is inclusive of max */
+	umax++;
+
+	/* Powers of two are not biased */
+	if ((umax & (umax - 1)) == 0) {
+		return result & (umax - 1);
+	}
+
+	/* Ceiling under which UINT64_MAX % max == 0 */
+	limit = UINT64_MAX - (UINT64_MAX % umax) - 1;
+
+	/* Discard numbers over the limit to avoid modulo bias */
+	while (UNEXPECTED(result > limit)) {
+		result = php_mt_rand();
+		result = (result << 32) | php_mt_rand();
+	}
+
+	return result % umax;
+}
+#endif
+
+/* {{{ php_mt_rand_range
+ */
+PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
+{
+	zend_ulong umax = max - min;
+
+#if ZEND_ULONG_MAX > UINT32_MAX
+	if (umax > UINT32_MAX) {
+		return (zend_long) (rand_range64(umax) + min);
+	}
+#endif
+
+	return (zend_long) (rand_range32(umax) + min);
 }
 /* }}} */
 
@@ -263,7 +294,7 @@ PHPAPI zend_long php_mt_rand_range(zend_long min, zend_long max)
  * rand() allows min > max, mt_rand does not */
 PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 {
-	zend_long n;
+	int64_t n;
 
 	if (BG(mt_rand_mode) == MT_RAND_MT19937) {
 		return php_mt_rand_range(min, max);
@@ -271,7 +302,7 @@ PHPAPI zend_long php_mt_rand_common(zend_long min, zend_long max)
 
 	/* Legacy mode deliberately not inside php_mt_rand_range()
 	 * to prevent other functions being affected */
-	n = (zend_long)php_mt_rand() >> 1;
+	n = (int64_t)php_mt_rand() >> 1;
 	RAND_RANGE_BADSCALING(n, min, max, PHP_MT_RAND_MAX);
 
 	return n;

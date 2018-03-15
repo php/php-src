@@ -8,7 +8,7 @@ if (setlocale(LC_NUMERIC, "de_DE") === false) {
 }
 ?>
 --INI--
-precision=14
+serialize_precision=-1
 --FILE--
 <?php
 
@@ -20,7 +20,7 @@ var_dump(json_decode('[123,13452345]'));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(1) {
   [0]=>
   float(2,1)

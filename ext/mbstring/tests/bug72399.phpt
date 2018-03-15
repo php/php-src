@@ -1,5 +1,7 @@
 --TEST--
 Bug #72399 (Use-After-Free in MBString (search_re))
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $var5 = mbereg_search_init("","2");

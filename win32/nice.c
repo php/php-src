@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 /*
  * Basic Windows implementation for the nice() function.
  *
- * This implementation uses SetPriorityClass() as a backend for defining 
+ * This implementation uses SetPriorityClass() as a backend for defining
  * a process priority.
  *
  * The following values of inc, defines the value sent to SetPriorityClass():
@@ -44,19 +44,19 @@
  *
  * These values tries to mimic that of the UNIX version of nice().
  *
- * This is applied to the main process, not per thread, although this could 
+ * This is applied to the main process, not per thread, although this could
  * be implemented using SetThreadPriority() at one point.
  *
  * Note, the following priority classes are left out with intention:
  *
  *   . REALTIME_PRIORITY_CLASS
- *     Realtime priority class requires special system permissions to set, and 
+ *     Realtime priority class requires special system permissions to set, and
  *     can be dangerous in certain cases.
  *
  *   . PROCESS_MODE_BACKGROUND_BEGIN
  *   . PROCESS_MODE_BACKGROUND_END
- *     Process mode is not covered because it can easily forgotten to be changed 
- *     back and can cause unforseen side effects that is hard to debug. Besides 
+ *     Process mode is not covered because it can easily forgotten to be changed
+ *     back and can cause unforseen side effects that is hard to debug. Besides
  *     that, these do generally not really fit into making a Windows somewhat
  *     compatible nice() function.
  */
@@ -65,7 +65,7 @@ PHPAPI int nice(zend_long p)
 {
 	DWORD dwFlag = NORMAL_PRIORITY_CLASS;
 
-	if (p < -9) { 
+	if (p < -9) {
 		dwFlag = HIGH_PRIORITY_CLASS;
 	} else if (p < -4) {
 		dwFlag = ABOVE_NORMAL_PRIORITY_CLASS;

@@ -71,7 +71,7 @@ $dir_path = dirname(__FILE__);
 rmdir("$dir_path/私はガラスを食べられますlevel_one/私はガラスを食べられますlevel_two");
 rmdir("$dir_path/私はガラスを食べられますlevel_one");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 
 -- $path = './私はガラスを食べられますlevel_one': --

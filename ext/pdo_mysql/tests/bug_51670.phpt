@@ -19,6 +19,6 @@ $query->execute();
 if(!is_array($query->getColumnMeta(0))) die('FAIL!');
 echo 'done!';
 ?>
---EXPECTF--
+--EXPECT--
 done!
 

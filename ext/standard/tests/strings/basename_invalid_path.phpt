@@ -17,6 +17,6 @@ var_dump(basename(chr(-1)));
 
 echo "Done\n";
 
---EXPECTF--
+--EXPECT--
 string(0) ""
 Done

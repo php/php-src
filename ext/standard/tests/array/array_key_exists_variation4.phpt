@@ -23,7 +23,7 @@ var_dump(array_key_exists('one', $search));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- $search is a reference to $array --

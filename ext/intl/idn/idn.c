@@ -203,8 +203,6 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 	int ustring_len = 0;
 	UErrorCode status;
 	zend_string *u8str;
-	UChar     converted[MAXPATHLEN];
-	int32_t   converted_ret_len;
 
 	/* convert the string to UTF-16. */
 	status = U_ZERO_ERROR;
@@ -221,6 +219,8 @@ static void php_intl_idn_to(INTERNAL_FUNCTION_PARAMETERS,
 		RETURN_FALSE;
 	} else {
 		UParseError parse_error;
+		UChar       converted[MAXPATHLEN];
+		int32_t     converted_ret_len;
 
 		status = U_ZERO_ERROR;
 		if (mode == INTL_IDN_TO_ASCII) {

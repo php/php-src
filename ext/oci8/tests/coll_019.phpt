@@ -4,16 +4,13 @@ Test collection Oracle error handling collections and numbers (2)
 <?php
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
 require(dirname(__FILE__).'/skipif.inc');
-?> 
-$target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
-?> 
+?>
 --FILE--
 <?php
 
 require dirname(__FILE__)."/connect.inc";
 
-$ora_sql = "DROP TYPE ".$type_name;;
+$ora_sql = "DROP TYPE ".$type_name;
 $statement = oci_parse($c,$ora_sql);
 @oci_execute($statement);
 

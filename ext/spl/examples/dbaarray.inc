@@ -49,12 +49,12 @@ class DbaArray extends DbaReader implements ArrayAccess
 	 */
 	function offsetGet($name)
 	{
-		$data = dba_fetch($name, $this->db); 
+		$data = dba_fetch($name, $this->db);
 		if($data) {
 			//return unserialize($data);
 			return $data;
 		}
-		else 
+		else
 		{
 			return NULL;
 		}

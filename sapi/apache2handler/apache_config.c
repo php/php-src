@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,7 +128,7 @@ static zend_bool should_overwrite_per_dir_entry(HashTable *target_ht, zval *zv, 
 
 	if (new_per_dir_entry->status >= orig_per_dir_entry->status) {
 		/* use new entry */
-		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", hash_key->arKey, new_per_dir_entry->status, orig_per_dir_entry->status));
+		phpapdebug((stderr, "ADDING/OVERWRITING %s (%d vs. %d)\n", ZSTR_VAL(hash_key->key), new_per_dir_entry->status, orig_per_dir_entry->status));
 		return 1;
 	} else {
 		return 0;
@@ -147,10 +147,28 @@ void config_entry_ctor(zval *zv)
 void *merge_php_config(apr_pool_t *p, void *base_conf, void *new_conf)
 {
 	php_conf_rec *d = base_conf, *e = new_conf, *n = NULL;
+#ifdef ZTS
+	zend_string *str;
+	zval *data;
+#endif
 
 	n = create_php_config(p, "merge_php_config");
 	/* copy old config */
+#ifdef ZTS
+	ZEND_HASH_FOREACH_STR_KEY_VAL(&d->config, str, data) {
+		zend_string *key;
+		zval *new_entry;
+
+		/* Avoid sharing the non interned string among threads. */
+		key = zend_string_dup(str, 1);
+
+		new_entry = zend_hash_add(&n->config, key, data);
+
+		config_entry_ctor(new_entry);
+	} ZEND_HASH_FOREACH_END();
+#else
 	zend_hash_copy(&n->config, &d->config, config_entry_ctor);
+#endif
 	/* merge new config */
 	phpapdebug((stderr, "Merge dir (%p)+(%p)=(%p)\n", base_conf, new_conf, n));
 	zend_hash_merge_ex(&n->config, &e->config, config_entry_ctor, should_overwrite_per_dir_entry, NULL);
@@ -176,7 +194,7 @@ void apply_config(void *dummy)
 	php_dir_entry *data;
 
 	ZEND_HASH_FOREACH_STR_KEY_PTR(&d->config, str, data) {
-		phpapdebug((stderr, "APPLYING (%s)(%s)\n", str, data->value));
+		phpapdebug((stderr, "APPLYING (%s)(%s)\n", ZSTR_VAL(str), data->value));
 		if (zend_alter_ini_entry_chars(str, data->value, data->value_len, data->status, data->htaccess?PHP_INI_STAGE_HTACCESS:PHP_INI_STAGE_ACTIVATE) == FAILURE) {
 			phpapdebug((stderr, "..FAILED\n"));
 		}

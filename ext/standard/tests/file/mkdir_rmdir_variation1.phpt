@@ -38,7 +38,7 @@ for($mode = 0000; $mode <= 0777; $mode++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mkdir() and rmdir() for different permissions ***
 -- Changing mode of directory to 0 --
 bool(true)

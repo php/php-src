@@ -45,7 +45,7 @@ foreach($entries as $entry) {
 $path = dirname(__FILE__) . '/私はガラスを食べられますreaddir_variation2';
 rmdir($path);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 
 -- Pass an empty directory to readdir() --

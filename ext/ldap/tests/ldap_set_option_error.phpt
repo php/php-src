@@ -20,8 +20,7 @@ $controls = array(
 		array("oid" => "1.2.752.58.1.10", "value" => "magic"),
 		"weird"
 	),
-	array(
-	),
+	"notanarray"
 );
 
 // Too few parameters
@@ -60,7 +59,7 @@ bool(false)
 Warning: ldap_set_option(): The array value must contain only arrays, where each array is a control in %s on line %d
 bool(false)
 
-Warning: ldap_set_option(): Expected non-empty array value for this option in %s on line %d
+Warning: ldap_set_option(): Expected array value for this option in %s on line %d
 bool(false)
 bool(false)
 ===DONE===

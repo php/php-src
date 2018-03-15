@@ -135,7 +135,7 @@ array(1) {
 }
 -- Iteration 7 --
 
-Warning: str_split() expects parameter 2 to be integer, float given in %s on line %d
+Warning: str_split() expects parameter 2 to be int, float given in %s on line %d
 NULL
 -- Iteration 8 --
 

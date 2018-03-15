@@ -64,7 +64,7 @@ unlink($file_path."/file3_variation.tmp");
 rmdir($file_path."/file_variation");
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Using various flags values with different data in a file
 --Iteration 1 --
 array(1) {

@@ -42,7 +42,7 @@ foreach ($classes as $class) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 ---( Interfaces implemented by A0 )---
  Array
 (

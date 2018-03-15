@@ -94,7 +94,7 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : heredoc strings for $var argument ***
 -- Iteration 1 --
 int(5)

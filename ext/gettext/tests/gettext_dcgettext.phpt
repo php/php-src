@@ -17,7 +17,7 @@ bindtextdomain('dngettextTest', './locale');
 
 var_dump(dcgettext('dngettextTest', 'item', LC_CTYPE));
 var_dump(dcgettext('dngettextTest', 'item', LC_MESSAGES));
---EXPECTF--
+--EXPECT--
 string(8) "cProdukt"
 string(7) "Produkt"
 --CREDITS--

@@ -1,6 +1,6 @@
 --TEST--
 imagegetclip() - basic functionality
---SKIP--
+--SKIPIF--
 <?php
 if (!extension_loaded('gd')) die('skip ext/gd required');
 ?>

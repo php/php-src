@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -211,7 +211,7 @@ static int php_bz2iop_flush(php_stream *stream)
 }
 /* }}} */
 
-php_stream_ops php_stream_bz2io_ops = {
+const php_stream_ops php_stream_bz2io_ops = {
 	php_bz2iop_write, php_bz2iop_read,
 	php_bz2iop_close, php_bz2iop_flush,
 	"BZip2",
@@ -231,7 +231,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open_from_BZFILE(BZFILE *bz,
 
 	self->stream = innerstream;
 	if (innerstream) {
-		GC_REFCOUNT(innerstream->res)++;
+		GC_ADDREF(innerstream->res);
 	}
 	self->bz_file = bz;
 
@@ -317,7 +317,7 @@ PHP_BZ2_API php_stream *_php_stream_bz2open(php_stream_wrapper *wrapper,
 
 /* }}} */
 
-static php_stream_wrapper_ops bzip2_stream_wops = {
+static const php_stream_wrapper_ops bzip2_stream_wops = {
 	_php_stream_bz2open,
 	NULL, /* close */
 	NULL, /* fstat */
@@ -331,7 +331,7 @@ static php_stream_wrapper_ops bzip2_stream_wops = {
 	NULL
 };
 
-static php_stream_wrapper php_stream_bzip2_wrapper = {
+static const php_stream_wrapper php_stream_bzip2_wrapper = {
 	&bzip2_stream_wops,
 	NULL,
 	0 /* is_url */

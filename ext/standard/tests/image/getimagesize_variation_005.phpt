@@ -19,7 +19,7 @@ var_dump( getimagesize(dirname(__FILE__)."/test13pix.swf", $info) );
 var_dump( $info );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing getimagesize() : basic functionality ***
 array(5) {
   [0]=>

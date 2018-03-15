@@ -15,20 +15,20 @@
  * @version 1.0
  * @since PHP 5.1
  *
- * This filter iterator assumes that the inner iterator 
+ * This filter iterator assumes that the inner iterator
  */
 class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 {
 	/**
-	 * Constructs a regular expression filter around an iterator whose 
+	 * Constructs a regular expression filter around an iterator whose
 	 * elemnts or keys are strings.
 	 *
 	 * @param it          inner iterator
 	 * @param regex       the regular expression to match
-	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH, 
+	 * @param mode        operation mode (one of self::MATCH, self::GET_MATCH,
 	 *                    self::ALL_MATCHES, self::SPLIT)
 	 * @param flags       special flags (self::USE_KEY)
-	 * @param preg_flags  global PREG_* flags, see preg_match(), 
+	 * @param preg_flags  global PREG_* flags, see preg_match(),
 	 *                    preg_match_all(), preg_split()
 	 */
 	function __construct(RecursiveIterator $it, $regex, $mode = 0, $flags = 0, $preg_flags = 0) {
@@ -54,7 +54,7 @@ class RecursiveRegexIterator extends RegexIterator implements RecursiveIterator
 		}
 		return $this->ref->newInstance($this->getInnerIterator()->getChildren());
 	}
-	
+
 	private $ref;
 }
 

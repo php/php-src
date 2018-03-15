@@ -37,7 +37,7 @@ delete_file($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_readable(): basic functionality ***
 -- Changing mode of file to 0 --
 bool(true)

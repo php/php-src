@@ -48,7 +48,7 @@ var_dump( range("abcd", "mnop", 2) );
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing range() function on basic operations ***
 
 -- Integers as Low and High --

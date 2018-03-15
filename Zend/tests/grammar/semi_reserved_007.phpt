@@ -26,7 +26,7 @@ new Bar;
 
 echo "\nDone\n";
 
---EXPECTF--
+--EXPECT--
 From Foo::__construct:
 self
 parent

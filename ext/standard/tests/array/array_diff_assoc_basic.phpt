@@ -36,7 +36,7 @@ var_dump(array_diff_assoc($array_string_key, $array_numeric_key));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_assoc() : basic functionality ***
 -- Compare Default keys to numeric keys --
 array(3) {

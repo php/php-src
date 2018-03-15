@@ -116,98 +116,98 @@ bool(false)
 
 --float 12.3456789000e10--
 
-Warning: date_sunrise() expects parameter 2 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 --float -12.3456789000e10--
 
-Warning: date_sunrise() expects parameter 2 to be integer, float given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, float given in %s on line %d
 bool(false)
 
 --float .5--
-int(1218174483)
+int(1218174468)
 
 --empty array--
 
-Warning: date_sunrise() expects parameter 2 to be integer, array given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --int indexed array--
 
-Warning: date_sunrise() expects parameter 2 to be integer, array given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --associative array--
 
-Warning: date_sunrise() expects parameter 2 to be integer, array given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --nested arrays--
 
-Warning: date_sunrise() expects parameter 2 to be integer, array given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, array given in %s on line %d
 bool(false)
 
 --uppercase NULL--
-int(1218174483)
+int(1218174468)
 
 --lowercase null--
-int(1218174483)
+int(1218174468)
 
 --lowercase true--
-string(5) "06:48"
+string(5) "06:47"
 
 --lowercase false--
-int(1218174483)
+int(1218174468)
 
 --uppercase TRUE--
-string(5) "06:48"
+string(5) "06:47"
 
 --uppercase FALSE--
-int(1218174483)
+int(1218174468)
 
 --empty string DQ--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --empty string SQ--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --string DQ--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --string SQ--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --mixed case string--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --heredoc--
 
-Warning: date_sunrise() expects parameter 2 to be integer, string given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, string given in %s on line %d
 bool(false)
 
 --instance of classWithToString--
 
-Warning: date_sunrise() expects parameter 2 to be integer, object given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 --instance of classWithoutToString--
 
-Warning: date_sunrise() expects parameter 2 to be integer, object given in %s on line %d
+Warning: date_sunrise() expects parameter 2 to be int, object given in %s on line %d
 bool(false)
 
 --undefined var--
-int(1218174483)
+int(1218174468)
 
 --unset var--
-int(1218174483)
+int(1218174468)
 ===DONE===

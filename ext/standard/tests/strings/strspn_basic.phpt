@@ -33,7 +33,7 @@ var_dump( strspn($str, $mask) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strspn() : basic functionality ***
 int(11)
 int(11)

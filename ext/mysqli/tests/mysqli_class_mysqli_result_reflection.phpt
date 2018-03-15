@@ -7,9 +7,6 @@ require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 require_once('connect.inc');
 
-if (($tmp = substr(PHP_VERSION, 0, strpos(PHP_VERSION, '.'))) && ($tmp < 5))
-	die("skip Reflection not available before PHP 5 (found PHP $tmp)");
-
 /*
 Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.
 Most of the things which we test are covered by mysqli_class_*_interface.phpt.
@@ -27,7 +24,7 @@ if ($MYSQLND_VERSION < 50004)
 	inspectClass($class);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Inspecting class 'mysqli_result'
 isInternal: yes
 isUserDefined: no
@@ -124,8 +121,15 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 0
+Number of Parameters: 1
 Number of Required Parameters: 0
+
+Inspecting parameter 'result_type' of method 'fetch_all'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
+isDefaultValueAvailable: no
 
 Inspecting method 'fetch_array'
 isFinal: no

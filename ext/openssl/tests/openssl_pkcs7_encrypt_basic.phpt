@@ -22,6 +22,7 @@ $wrong = "wrong";
 $empty = "";
 
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $single_cert, $headers));
+var_dump(openssl_pkcs7_encrypt($infile, $outfile, openssl_x509_read($single_cert), $headers));
 var_dump(openssl_pkcs7_decrypt($outfile, $outfile2, $single_cert, $privkey));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $single_cert, $assoc_headers));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $single_cert, $empty_headers));
@@ -33,6 +34,7 @@ var_dump(openssl_pkcs7_encrypt($infile, $outfile, $wrong, $headers));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $empty, $headers));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $single_cert, $empty));
 var_dump(openssl_pkcs7_encrypt($infile, $outfile, $multi_certs, $headers));
+var_dump(openssl_pkcs7_encrypt($infile, $outfile, array_map('openssl_x509_read', $multi_certs) , $headers));
 
 if (file_exists($outfile)) {
 	echo "true\n";
@@ -48,6 +50,7 @@ bool(true)
 bool(true)
 bool(true)
 bool(true)
+bool(true)
 
 Warning: openssl_pkcs7_encrypt() expects parameter 4 to be array, string given in %s on line %d
 bool(false)
@@ -59,6 +62,7 @@ bool(false)
 
 Warning: openssl_pkcs7_encrypt() expects parameter 4 to be array, string given in %s on line %d
 bool(false)
+bool(true)
 bool(true)
 true
 true

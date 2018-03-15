@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,8 +33,8 @@ PHAR_FUNC(phar_opendir) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -106,8 +106,8 @@ PHAR_FUNC(phar_file_get_contents) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		goto skip_phar;
 	}
 
@@ -239,8 +239,8 @@ PHAR_FUNC(phar_readfile) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p|br!", &filename, &filename_len, &use_include_path, &zcontext) == FAILURE) {
@@ -339,8 +339,8 @@ PHAR_FUNC(phar_fopen) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		/* no need to check, include_path not even specified in fopen/ no active phars */
 		goto skip_phar;
 	}
@@ -585,7 +585,7 @@ static void phar_fancy_stat(zend_stat_t *stat_sb, int type, zval *return_value)
 }
 /* }}} */
 
-static void phar_file_stat(const char *filename, size_t filename_length, int type, void (*orig_stat_func)(INTERNAL_FUNCTION_PARAMETERS), INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
+static void phar_file_stat(const char *filename, size_t filename_length, int type, zif_handler orig_stat_func, INTERNAL_FUNCTION_PARAMETERS) /* {{{ */
 {
 	if (!filename_length) {
 		RETURN_FALSE;
@@ -759,7 +759,7 @@ skip_phar:
 /* }}} */
 
 #define PharFileFunction(fname, funcnum, orig) \
-void fname(INTERNAL_FUNCTION_PARAMETERS) { \
+ZEND_NAMED_FUNCTION(fname) { \
 	if (!PHAR_G(intercepted)) { \
 		PHAR_G(orig)(INTERNAL_FUNCTION_PARAM_PASSTHRU); \
 	} else { \
@@ -854,8 +854,8 @@ PHAR_FUNC(phar_is_file) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
@@ -921,8 +921,8 @@ PHAR_FUNC(phar_is_link) /* {{{ */
 		goto skip_phar;
 	}
 
-	if ((PHAR_G(phar_fname_map.u.flags) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
-		&& !cached_phars.u.flags) {
+	if ((HT_FLAGS(&PHAR_G(phar_fname_map)) && !zend_hash_num_elements(&(PHAR_G(phar_fname_map))))
+		&& !HT_FLAGS(&cached_phars)) {
 		goto skip_phar;
 	}
 	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "p", &filename, &filename_len) == FAILURE) {
@@ -1080,28 +1080,28 @@ void phar_intercept_functions_shutdown(void)
 /* }}} */
 
 static struct _phar_orig_functions {
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 } phar_orig_functions = {NULL};
 
 void phar_save_orig_functions(void) /* {{{ */

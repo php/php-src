@@ -30,7 +30,7 @@ foreach ( $variation_array as $var ) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with boolean values ***
 bool(false)
 bool(false)

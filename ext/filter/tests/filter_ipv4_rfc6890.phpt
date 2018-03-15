@@ -1,5 +1,7 @@
 --TEST--
 Bug #71745 FILTER_FLAG_NO_RES_RANGE does not cover whole 127.0.0.0/8 range
+--SKIPIF--
+<?php if (!extension_loaded('filter')) die('skip filter extension not loaded'); ?>
 --FILE--
 <?php
 //https://tools.ietf.org/html/rfc6890#section-2.1
@@ -78,8 +80,7 @@ foreach ($reservedRanges as $key => $range) {
 	var_dump(filter_var($max, FILTER_VALIDATE_IP, FILTER_FLAG_IPV4 | FILTER_FLAG_NO_RES_RANGE));
 }
 
-
-
+?>
 --EXPECT--
 string(10) "10.0.0.0/8"
 bool(false)

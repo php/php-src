@@ -34,7 +34,7 @@ var_dump( array_chunk($input_array, $size, false) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk(), input array containing references 

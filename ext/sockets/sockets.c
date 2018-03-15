@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -339,7 +339,7 @@ PHP_FUNCTION(socket_addrinfo_explain);
 
 /* {{{ sockets_functions[]
  */
-const zend_function_entry sockets_functions[] = {
+static const zend_function_entry sockets_functions[] = {
 	PHP_FE(socket_select,			arginfo_socket_select)
 	PHP_FE(socket_create,			arginfo_socket_create)
 	PHP_FE(socket_create_listen,	arginfo_socket_create_listen)
@@ -796,13 +796,15 @@ static PHP_MINIT_FUNCTION(sockets)
 	REGISTER_LONG_CONSTANT("AI_ALL",			AI_ALL,				CONST_CS | CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("AI_ADDRCONFIG",		AI_ADDRCONFIG,		CONST_CS | CONST_PERSISTENT);
-#ifdef __USE_GNU
+#if HAVE_AI_IDN
 	REGISTER_LONG_CONSTANT("AI_IDN",			AI_IDN,				CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_CANONIDN",		AI_CANONIDN,		CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_IDN_ALLOW_UNASSIGNED",		AI_IDN_ALLOW_UNASSIGNED, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("AI_IDN_USE_STD3_ASCII_RULES",	AI_IDN_USE_STD3_ASCII_RULES, CONST_CS | CONST_PERSISTENT);
 #endif
+#ifdef AI_NUMERICSERV
 	REGISTER_LONG_CONSTANT("AI_NUMERICSERV",	AI_NUMERICSERV,		CONST_CS | CONST_PERSISTENT);
+#endif
 
 	php_socket_sendrecvmsg_init(INIT_FUNC_ARGS_PASSTHRU);
 
@@ -917,7 +919,7 @@ PHP_FUNCTION(socket_select)
 	int				retval, sets = 0;
 	zend_long			usec = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a/!a/!a/!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "a!a!a!z!|l", &r_array, &w_array, &e_array, &sec, &usec) == FAILURE) {
 		return;
 	}
 
@@ -938,29 +940,18 @@ PHP_FUNCTION(socket_select)
 
 	/* If seconds is not set to null, build the timeval, else we wait indefinitely */
 	if (sec != NULL) {
-		zval tmp;
-
-		if (Z_TYPE_P(sec) != IS_LONG) {
-			tmp = *sec;
-			zval_copy_ctor(&tmp);
-			convert_to_long(&tmp);
-			sec = &tmp;
-		}
+		zend_long s = zval_get_long(sec);
 
 		/* Solaris + BSD do not like microsecond values which are >= 1 sec */
 		if (usec > 999999) {
-			tv.tv_sec = Z_LVAL_P(sec) + (usec / 1000000);
+			tv.tv_sec = s + (usec / 1000000);
 			tv.tv_usec = usec % 1000000;
 		} else {
-			tv.tv_sec = Z_LVAL_P(sec);
+			tv.tv_sec = s;
 			tv.tv_usec = usec;
 		}
 
 		tv_p = &tv;
-
-		if (sec == &tmp) {
-			zval_dtor(&tmp);
-		}
 	}
 
 	retval = select(max_fd+1, &rfds, &wfds, &efds, tv_p);
@@ -1679,7 +1670,7 @@ PHP_FUNCTION(socket_recv)
 	recv_buf = zend_string_alloc(len, 0);
 
 	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
-		efree(recv_buf);
+		zend_string_free(recv_buf);
 
 		zval_dtor(buf);
 		ZVAL_NULL(buf);
@@ -1821,7 +1812,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin6.sin6_family = AF_INET6;
 
 			if (arg6 == NULL) {
-				efree(recv_buf);
+				zend_string_free(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
@@ -2529,7 +2520,7 @@ PHP_FUNCTION(socket_addrinfo_lookup)
 
 	memset(&hints, 0, sizeof(hints));
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS() TSRMLS_CC, "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|sa", &hostname, &service, &service_len, &zhints) == FAILURE) {
 		RETURN_NULL();
 	}
 

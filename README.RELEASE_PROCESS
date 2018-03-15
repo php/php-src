@@ -103,9 +103,9 @@ MD5 sums. If you do not have this directory, create it.
 15. Now the RC can be found on http://downloads.php.net/~yourname,
 f.e. http://downloads.php.net/~derick/
 
-16. Once the release has been tagged, contact the PHP Windows development team
-(internals-win@lists.php.net) so that Windows binaries can be created. Once
-those are made, they should be placed into the same directory as the source snapshots.
+16. Once the release has been tagged, contact the release-managers@ distribution list
+so that Windows binaries can be created.  Once those are made, they can be found at
+http://windows.php.net/download
 
 Getting the non stable release (alpha/beta/RC) announced
 --------------------------------------------------------
@@ -125,16 +125,27 @@ Getting the non stable release (alpha/beta/RC) announced
 
  b. ``$PHP_x_RC_DATE`` = "06 September 2007"
 
-3. Commit and push changes to qa and web
+3. Add a short notice to phpweb stating that there is a new release, and 
+highlight the major important things (security fixes) and when it is important
+to upgrade.
+
+ a. Call php bin/createNewsEntry in your local phpweb checkout
+    Use category "releases" for all stable releases.
+    Use category "frontpage" for X.Y.0 non-stable releases only (news only).
+
+ b. Add the content for the news entry. Be sure to include the text:
+    "THIS IS A DEVELOPMENT PREVIEW - DO NOT USE IT IN PRODUCTION!"
+
+4. Commit and push changes to qa and web
 
 *Wait for web and qa sites to update with new information before sending announce*
 
-4. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
+5. Send an email **To** ``internals@lists.php.net`` and ``php-general@lists.php.net`` 
 lists pointing out "the location of the release" and "the possible release date of
 either the next RC, or the final release". Include in this information the verification
 information output by ``gen_verify_stub``.
 
-5. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
+6. Send an email (see example here http://news.php.net/php.pear.qa/5201) **To**
 ``php-qa@lists.php.net`` and ``primary-qa-tester@lists.php.net``.
 This email is to notify the selected projects about a new release so that they
 can make sure their projects keep working. Make sure that you have been setup
@@ -145,7 +156,7 @@ Derick) run the following commands for you:
 
 ``sudo -u ezmlm ezmlm-sub ~ezmlm/primary-qa-tester/mod moderator-email-address``
 
-6. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
+7. For the first RC, write the doc team (phpdoc@lists.php.net) about updating the
 INSTALL and win32/install.txt files which are generated from the PHP manual sources.
 
 Rolling a stable release
@@ -176,7 +187,11 @@ credits files in ext/standard.
 
 9. run: ``PHPROOT=. ./makedist php 5.4.1``, this will export the tag, create configure
 and build three tarballs (gz, bz2 and xz).
-Check if the pear files are updated (phar).
+   Check if the pear files are updated (phar).
+   On some systems the behavior of GNU tar can default to produce POSIX complaint archives
+with PAX headers. As not every application is compatible with that format, creation of
+archives with PAX headers should be avoided. When packaging on such a system, the GNU tar
+can be influenced by defining the environment variable TAR_OPTIONS='--format=gnu'.
 
 10. Generate the GPG signature files for the archives.
   ``gpg -u YOUREMAIL --armor --detach-sign php-X.Y.Z.tar.xxx``
@@ -186,7 +201,8 @@ Check if the pear files are updated (phar).
     ``git submodule init;
     git submodule update;
     cd distributions;
-    git pull origin master;
+    git fetch;
+    git pull --rebase origin master;
     cd ..;
     git commit distributions;
     git push;``
@@ -316,14 +332,38 @@ Please make sure that the mail to php-announce@ is its own completely separate e
 This is to make sure that replies to the announcement on php-general@ or internals@
 will not accidentally hit the php-announce@ mailinglist.
 
+Forking a new release branch
+----------------------------
+
+1. One week prior to cutting X.Y.0beta1, warn internals@ that your version's branch
+   is about to be cut, and that PHP-X.Y will be moving into feature freeze.
+   Try to be specific about when the branch will be cut.
+      Example: http://news.php.net/php.internals/99864
+
+2. Just prior to cutting X.Y.0beta1, create the new branch locally.
+   Add a commit on master after the branch point clearing the NEWS file, and updating
+     main/php_versions.h and Zend/zend.h to update versions.
+     Example: https://github.com/php/php-src/commit/5230541ef59e0637d5522293a7d099bf18ce6af3
+   Push the new branch and the commit just added to master.
+
+3. Immediately notify internals@ of the branch cut and advise the new merging order:
+     Example: http://news.php.net/php.internals/99903
+
+4. Update php-web:git.php and wiki.php.net/vcs/gitworkflow to reflect the new branch:
+     Example: https://github.com/php/web-php/commit/74bcad4c770d95f21b7fbeeedbd76d943bb83f23
+
+5. Notify nlopess@ to add PHP_X_Y tag to gcov.php.net
+
 New Release Manager Checklist
 -----------------------------
 
-1. Email systems@ to get setup for access to downloads.php.net
+1. Email systems@ to get setup for access to downloads.php.net and to be added to the
+   release-managers@ distribution list.
 
 2. Create a GPG key for your @php.net address and publish it by editing `include/gpg-keys.inc`
    in the `web-php` repository, adding the output of `gpg --fingerprint "$USER@php.net"`. Let
-   one or more of the previous RMs sign your key.
+   one or more of the previous RMs sign your key. Publish your public key to pgp.mit.edu with:
+   `gpg --keyserver pgp.mit.edu --send-keys $KEYID`
 
 3. Request karma to eding main/php_version.h. Possibly karma for other restricted parts of 
    php-src might come in question.

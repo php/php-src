@@ -8,5 +8,5 @@ Bug #44849 (imagecolorclosesthwb is not available on Windows)
 <?php
 	var_dump(function_exists('imagecolorclosesthwb'));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

@@ -119,20 +119,20 @@ fclose( $file_handle );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_offset_get() : usage variation -  unexpected values to second argument $datetime***
 
 -- int 0 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int 1 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int 12345 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- int -12345 --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, integer given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, int given
 
 -- float 10.5 --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, float given
@@ -162,16 +162,16 @@ Argument 2 passed to timezone_offset_get() must implement interface DateTimeInte
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, null given
 
 -- lowercase true --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- lowercase false --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- uppercase TRUE --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- uppercase FALSE --
-Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, boolean given
+Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, bool given
 
 -- empty string DQ --
 Argument 2 passed to timezone_offset_get() must implement interface DateTimeInterface, string given

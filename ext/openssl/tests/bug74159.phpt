@@ -107,6 +107,6 @@ CODE;
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 ?>
---EXPECTF--
+--EXPECT--
 Written 1048575 bytes
 DONE

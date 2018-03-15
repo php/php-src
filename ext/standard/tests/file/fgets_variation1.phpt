@@ -48,7 +48,7 @@ foreach ($file_modes as $file_mode ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() with file opened in write only mode ***
 -- File opened in mode : w --
 bool(true)

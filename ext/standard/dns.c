@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -126,13 +126,13 @@ static zend_string *php_gethostbyname(char *name);
    Get the host name of the current machine */
 PHP_FUNCTION(gethostname)
 {
-	char buf[HOST_NAME_MAX];
+	char buf[HOST_NAME_MAX + 1];
 
 	if (zend_parse_parameters_none() == FAILURE) {
 		return;
 	}
 
-	if (gethostname(buf, sizeof(buf) - 1)) {
+	if (gethostname(buf, sizeof(buf))) {
 		php_error_docref(NULL, E_WARNING, "unable to fetch host [%d]: %s", errno, strerror(errno));
 		RETURN_FALSE;
 	}
@@ -304,7 +304,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -546,7 +546,10 @@ static u_char *php_parserr(u_char *cp, u_char *end, querybuf *answer, int type_t
 			CHECKCP(n);
 			add_assoc_stringl(subarray, "tag", (char*)cp, n);
 			cp += n;
-			add_assoc_string(subarray, "value", (char*)cp);
+			n = dlen - n - 2;
+			CHECKCP(n);
+			add_assoc_stringl(subarray, "value", (char*)cp, n);
+			cp += n;
 			break;
 		case DNS_T_TXT:
 			{
@@ -786,7 +789,7 @@ PHP_FUNCTION(dns_get_record)
 {
 	char *hostname;
 	size_t hostname_len;
-	long type_param = PHP_DNS_ANY;
+	zend_long type_param = PHP_DNS_ANY;
 	zval *authns = NULL, *addtl = NULL;
 	int type_to_fetch;
 #if defined(HAVE_DNS_SEARCH)
@@ -808,29 +811,29 @@ PHP_FUNCTION(dns_get_record)
 		Z_PARAM_STRING(hostname, hostname_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(type_param)
-		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 1)
-		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 1)
+		Z_PARAM_ZVAL_DEREF_EX(authns, 1, 0)
+		Z_PARAM_ZVAL_DEREF_EX(addtl, 1, 0)
 		Z_PARAM_BOOL(raw)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (authns) {
-		zval_dtor(authns);
+		zval_ptr_dtor(authns);
 		array_init(authns);
 	}
 	if (addtl) {
-		zval_dtor(addtl);
+		zval_ptr_dtor(addtl);
 		array_init(addtl);
 	}
 
 	if (!raw) {
 		if ((type_param & ~PHP_DNS_ALL) && (type_param != PHP_DNS_ANY)) {
-			php_error_docref(NULL, E_WARNING, "Type '%ld' not supported", type_param);
+			php_error_docref(NULL, E_WARNING, "Type '" ZEND_LONG_FMT "' not supported", type_param);
 			RETURN_FALSE;
 		}
 	} else {
 		if ((type_param < 1) || (type_param > 0xFFFF)) {
 			php_error_docref(NULL, E_WARNING,
-				"Numeric DNS record type must be between 1 and 65535, '%ld' given", type_param);
+				"Numeric DNS record type must be between 1 and 65535, '" ZEND_LONG_FMT "' given", type_param);
 			RETURN_FALSE;
 		}
 	}
@@ -1041,16 +1044,16 @@ PHP_FUNCTION(dns_get_mx)
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STRING(hostname, hostname_len)
-		Z_PARAM_ZVAL_DEREF_EX(mx_list, 0, 1)
+		Z_PARAM_ZVAL_DEREF(mx_list)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(weight_list, 0, 1)
+		Z_PARAM_ZVAL_DEREF(weight_list)
 	ZEND_PARSE_PARAMETERS_END();
 
-	zval_dtor(mx_list);
+	zval_ptr_dtor(mx_list);
 	array_init(mx_list);
 
 	if (weight_list) {
-		zval_dtor(weight_list);
+		zval_ptr_dtor(weight_list);
 		array_init(weight_list);
 	}
 
@@ -1114,7 +1117,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {

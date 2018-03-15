@@ -42,7 +42,7 @@ bool(false)
 Notice: unserialize(): Error at offset 17 of 33 bytes in %sbug25378.php on line %d
 bool(false)
 
-Notice: unserialize(): Error at offset 33 of 32 bytes in %sbug25378.php on line %d
+Notice: unserialize(): Error at offset 32 of 32 bytes in %sbug25378.php on line %d
 bool(false)
 
 Notice: unserialize(): Error at offset 2 of 13 bytes in %sbug25378.php on line %d

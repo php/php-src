@@ -14,7 +14,7 @@ PHP_ADD_BUILD_DIR([$ext_builddir/lib], 1)
 PHP_ADD_INCLUDE([$ext_builddir/lib])
 PHP_ADD_INCLUDE([$ext_srcdir/lib])
 
-PHP_INSTALL_HEADERS([ext/date], [php_date.h lib/timelib.h lib/timelib_structs.h lib/timelib_config.h])
+PHP_INSTALL_HEADERS([ext/date], [php_date.h lib/timelib.h lib/timelib_config.h])
 AC_DEFINE([HAVE_TIMELIB_CONFIG_H], [1], [Have timelib_config.h])
 
 cat > $ext_builddir/lib/timelib_config.h <<EOF

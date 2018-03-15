@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -307,8 +307,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 	obj = Z_MYSQLI_P(object);
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -322,7 +321,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
 	}
 
@@ -342,8 +341,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	mysqli_prop_handler *hnd = NULL;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
-		ZVAL_COPY(&tmp_member, member);
-		convert_to_string(&tmp_member);
+		ZVAL_STR(&tmp_member, zval_get_string_func(member));
 		member = &tmp_member;
 	}
 
@@ -356,7 +354,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
 	}
 
@@ -370,7 +368,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 void mysqli_add_property(HashTable *h, const char *pname, size_t pname_len, mysqli_read_t r_func, mysqli_write_t w_func) {
 	mysqli_prop_handler	p;
 
-	p.name = zend_string_init(pname, pname_len, 1);
+	p.name = zend_string_init_interned(pname, pname_len, 1);
 	p.read_func = (r_func) ? r_func : mysqli_read_na;
 	p.write_func = (w_func) ? w_func : mysqli_write_na;
 	zend_hash_add_mem(h, p.name, &p, sizeof(mysqli_prop_handler));
@@ -411,7 +409,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
 	}
 
@@ -424,8 +422,7 @@ HashTable *mysqli_object_get_debug_info(zval *object, int *is_temp)
 	HashTable *retval, *props = obj->prop_handler;
 	mysqli_prop_handler *entry;
 
-	ALLOC_HASHTABLE(retval);
-	ZEND_INIT_SYMTABLE_EX(retval, zend_hash_num_elements(props) + 1, 0);
+	retval = zend_new_array(zend_hash_num_elements(props) + 1);
 
 	ZEND_HASH_FOREACH_PTR(props, entry) {
 		zval rv, member;
@@ -449,7 +446,7 @@ PHP_MYSQLI_EXPORT(zend_object *) mysqli_objects_new(zend_class_entry *class_type
 	zend_class_entry *mysqli_base_class;
 	zend_object_handlers *handlers;
 
-	intern = ecalloc(1, sizeof(mysqli_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(mysqli_object), class_type);
 
 	mysqli_base_class = class_type;
 	while (mysqli_base_class->type != ZEND_INTERNAL_CLASS &&
@@ -501,7 +498,7 @@ static MYSQLND *mysqli_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API mysqli_reverse_api = {
+static const MYSQLND_REVERSE_API mysqli_reverse_api = {
 	&mysqli_module_entry,
 	mysqli_convert_zv_to_mysqlnd
 };
@@ -564,15 +561,13 @@ static PHP_GINIT_FUNCTION(mysqli)
 PHP_MINIT_FUNCTION(mysqli)
 {
 	zend_class_entry *ce,cex;
-	zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+	const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 	if (mysql_server_init(0, NULL, NULL)) {
 		return FAILURE;
 	}
-#endif
 #endif
 
 	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
@@ -691,9 +686,7 @@ PHP_MINIT_FUNCTION(mysqli)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_CONNECT_TIMEOUT", MYSQL_OPT_CONNECT_TIMEOUT, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_LOCAL_INFILE", MYSQL_OPT_LOCAL_INFILE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_INIT_COMMAND", MYSQL_INIT_COMMAND, CONST_CS | CONST_PERSISTENT);
-#if MYSQL_VERSION_ID > 40101 || defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_READ_TIMEOUT", MYSQL_OPT_READ_TIMEOUT, CONST_CS | CONST_PERSISTENT);
-#endif
 #if defined(MYSQLI_USE_MYSQLND)
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_CMD_BUFFER_SIZE", MYSQLND_OPT_NET_CMD_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("MYSQLI_OPT_NET_READ_BUFFER_SIZE", MYSQLND_OPT_NET_READ_BUFFER_SIZE, CONST_CS | CONST_PERSISTENT);
@@ -885,7 +878,6 @@ PHP_MINIT_FUNCTION(mysqli)
 PHP_MSHUTDOWN_FUNCTION(mysqli)
 {
 #ifndef MYSQLI_USE_MYSQLND
-#if MYSQL_VERSION_ID >= 40000
 #ifdef PHP_WIN32
 	zend_ulong client_ver = mysql_get_client_version();
 	/*
@@ -897,7 +889,6 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
 	}
 #else
 	mysql_server_end();
-#endif
 #endif
 #endif
 
@@ -917,7 +908,7 @@ PHP_MSHUTDOWN_FUNCTION(mysqli)
  */
 PHP_RINIT_FUNCTION(mysqli)
 {
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	if (mysql_thread_init()) {
 		return FAILURE;
 	}
@@ -954,7 +945,7 @@ PHP_RSHUTDOWN_FUNCTION(mysqli)
 {
 	/* check persistent connections, move used to free */
 
-#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS) && MYSQL_VERSION_ID >= 40000
+#if !defined(MYSQLI_USE_MYSQLND) && defined(ZTS)
 	mysql_thread_end();
 #endif
 	if (MyG(error_msg)) {
@@ -1152,7 +1143,7 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 {
 #if !defined(MYSQLI_USE_MYSQLND)
 	MYSQL_ROW row;
-	unsigned int	i;
+	unsigned int	i, num_fields;
 	MYSQL_FIELD		*fields;
 	zend_ulong	*field_len;
 
@@ -1166,8 +1157,9 @@ void php_mysqli_fetch_into_hash_aux(zval *return_value, MYSQL_RES * result, zend
 
 	array_init(return_value);
 	field_len = mysql_fetch_lengths(result);
+	num_fields = mysql_num_fields(result);
 
-	for (i = 0; i < mysql_num_fields(result); i++) {
+	for (i = 0; i < num_fields; i++) {
 		if (row[i]) {
 			zval res;
 
@@ -1247,6 +1239,10 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 			php_error_docref(NULL, E_WARNING, "Could not find class '%s'", ZSTR_VAL(class_name));
 			return;
 		}
+		if (UNEXPECTED(ce->ce_flags & (ZEND_ACC_INTERFACE|ZEND_ACC_TRAIT|ZEND_ACC_IMPLICIT_ABSTRACT_CLASS|ZEND_ACC_EXPLICIT_ABSTRACT_CLASS))) {
+			zend_throw_error(NULL, "Class '%s' cannot be instantiated", ZSTR_VAL(ce->name));
+			return;
+		}
 		fetchtype = MYSQLI_ASSOC;
 	} else {
 		if (override_flags) {
@@ -1307,7 +1303,6 @@ void php_mysqli_fetch_into_hash(INTERNAL_FUNCTION_PARAMETERS, int override_flags
 				}
 			}
 
-			fcc.initialized = 1;
 			fcc.function_handler = ce->constructor;
 			fcc.calling_scope = zend_get_executed_scope();
 			fcc.called_scope = Z_OBJCE_P(return_value);

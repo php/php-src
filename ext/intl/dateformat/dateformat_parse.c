@@ -121,9 +121,9 @@ static void internal_parse_to_localtime(IntlDateFormatter_object *dfo, char* tex
 /* }}} */
 
 
-/* {{{ proto integer IntlDateFormatter::parse( string $text_to_parse  [, int $parse_pos] )
+/* {{{ proto int IntlDateFormatter::parse( string $text_to_parse  [, int $parse_pos] )
  * Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
-/* {{{ proto integer datefmt_parse( IntlDateFormatter $fmt, string $text_to_parse [, int $parse_pos] )
+/* {{{ proto int datefmt_parse( IntlDateFormatter $fmt, string $text_to_parse [, int $parse_pos] )
  * Parse the string $value starting at parse_pos to a Unix timestamp -int }}}*/
 PHP_FUNCTION(datefmt_parse)
 {
@@ -135,7 +135,7 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
-	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z/!",
+	if( zend_parse_method_parameters( ZEND_NUM_ARGS(), getThis(), "Os|z!",
 		&object, IntlDateFormatter_ce_ptr, &text_to_parse, &text_len, &z_parse_pos ) == FAILURE ){
 		intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "datefmt_parse: unable to parse input params", 0 );
 		RETURN_FALSE;
@@ -145,29 +145,30 @@ PHP_FUNCTION(datefmt_parse)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		zend_long long_parse_pos;
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_long(z_parse_pos);
-		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
+		long_parse_pos = zval_get_long(z_parse_pos);
+		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
 			RETURN_FALSE;
 		}
-		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
+		parse_pos = (int32_t)long_parse_pos;
 		if((size_t)parse_pos > text_len) {
 			RETURN_FALSE;
 		}
 	}
 	internal_parse_to_timestamp( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value);
 	if(z_parse_pos) {
-		zval_dtor(z_parse_pos);
+		zval_ptr_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }
 /* }}} */
 
-/* {{{ proto integer IntlDateFormatter::localtime( string $text_to_parse[, int $parse_pos] )
+/* {{{ proto int IntlDateFormatter::localtime( string $text_to_parse[, int $parse_pos] )
  * Parse the string $value to a localtime array  }}}*/
-/* {{{ proto integer datefmt_localtime( IntlDateFormatter $fmt, string $text_to_parse[, int $parse_pos ])
+/* {{{ proto int datefmt_localtime( IntlDateFormatter $fmt, string $text_to_parse[, int $parse_pos ])
  * Parse the string $value to a localtime array  }}}*/
 PHP_FUNCTION(datefmt_localtime)
 {
@@ -189,21 +190,22 @@ PHP_FUNCTION(datefmt_localtime)
 	DATE_FORMAT_METHOD_FETCH_OBJECT;
 
 	if (z_parse_pos) {
+		zend_long long_parse_pos;
 		ZVAL_DEREF(z_parse_pos);
-		convert_to_long(z_parse_pos);
-		if (ZEND_LONG_INT_OVFL(Z_LVAL_P(z_parse_pos))) {
+		long_parse_pos = zval_get_long(z_parse_pos);
+		if (ZEND_LONG_INT_OVFL(long_parse_pos)) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "String index is out of valid range.", 0);
 			RETURN_FALSE;
 		}
-		parse_pos = (int32_t)Z_LVAL_P(z_parse_pos);
+		parse_pos = (int32_t)long_parse_pos;
 		if((size_t)parse_pos > text_len) {
 			RETURN_FALSE;
 		}
 	}
 	internal_parse_to_localtime( dfo, text_to_parse, text_len, z_parse_pos?&parse_pos:NULL, return_value);
 	if (z_parse_pos) {
-		zval_dtor(z_parse_pos);
+		zval_ptr_dtor(z_parse_pos);
 		ZVAL_LONG(z_parse_pos, parse_pos);
 	}
 }

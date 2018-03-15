@@ -137,5 +137,5 @@ mysqli_stmt_fetch - geometry / spatial types
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

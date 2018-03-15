@@ -1,206 +1,196 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2
+?? ??? ????, PHP 7.3.0alpha1
 
 - Core:
-  . Removed IS_TYPE_IMMUTABLE (it's the same as COPYABLE & !REFCOUNTED). (Dmitry)
-  . Removed the sql.safe_mode directive. (Kalle)
-  . Removed support for Netware. (Kalle)
-  . Fixed bug #54535 (WSA cleanup executes before MSHUTDOWN). (Kalle)
-  . Implemented FR #69791 (Disallow mail header injections by extra headers)
-    (Yasuo)
-  . Implemented FR #49806 (proc_nice() for Windows). (Kalle)
-  . Fix pthreads detection when cross-compiling (ffontaine)
-  . Fixed memory leaks caused by exceptions thrown from destructors. (Bob,
-    Dmitry).
-  . Fixed bug #73215 (uniqid() should use better random source). (Yasuo)
-  . Fixed bug #73337 (try/catch not working with two exceptions inside a same
-    operation). (Dmitry)
-  . Implemented FR #72768 (Add ENABLE_VIRTUAL_TERMINAL_PROCESSING flag for
-    php.exe). (Michele Locati)
-  . Implemented "Convert numeric keys in object/array casts" RFC, fixes
-    bugs #53838, #61655, #66173, #70925, #72254, etc. (Andrea)
-  . Implemented "Deprecate and Remove Bareword (Unquoted) Strings" RFC.
-    (Rowan Collins)
-  . Raised minimum supported Windows versions to Windows 7/Server 2008 R2.
-    (Anatol)
-  . Implemented minor optimization in array_keys/array_values(). (Sara)
-  . Fixed bug #73969 (segfault in debug_print_backtrace). (andrewnester)
-  . Added PHP_OS_FAMILY constant to determine on which OS we are. (Jan Altensen)
-  . Fixed bug #73994 (arginfo incorrect for unpack). (krakjoe)
-  . Fixed bug #73973 (assertion error in debug_zval_dump). (andrewnester)
-  . Fixed bug #73987 (Method compatibility check looks to original 
-    definition and not parent). (pmmaga)
-  . Fixed bug #73991 (JSON_OBJECT_AS_ARRAY not respected). (Sara)
-  . Fixed bug #74053 (Corrupted class entries on shutdown when a destructor
-    spawns another object). (jim at commercebyte dot com)
-  . Fixed bug #73971 (Filename got limited to MAX_PATH on Win32 when scan
-    directory). (Anatol)
-  . Fixed bug #74149 (static embed SAPI linkage error). (krakjoe)
-  . Fixed bug #72359, bug #72451, bug #73706, bug #71115 and others related
-    to interned strings handling in TS builds. (Anatol, Dmitry)
-  . Implemented "Trailing Commas In List Syntax" RFC for group use lists only.
-    (Sammy Kaye Powers)
-  . Fixed bug #74269 (It's possible to override trait property with different
-    loosely-equal value). (pmmaga)
-  . Fixed bug #61970 (Restraining __construct() access level in subclass gives
-    a fatal error). (pmmaga)
+  . Improved PHP GC. (Dmitry, Nikita)
+  . Redesigned the old ext_skel program written in PHP, run: 
+    'php ext_skel.php' for all options. This means there is no dependencies 
+    thrus making it work on Windows out of the box. (Kalle)
+  . Removed support for BeOS. (Kalle)
+  . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
+  . Add net_get_interfaces(). (Sara, Joe, Anatol)
+  . Added support for references in list() and array destructuring, per
+    RFC https://wiki.php.net/rfc/list_reference_assignment.
+    (David Walker)
+  . Fixed bug #75683 (Memory leak in zend_register_functions() in ZTS mode).
+    (Dmitry)
+  . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
+  . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
+    error_log set to "syslog"). (Philip Prindeville)
+  . Fixed bug #75220 (Segfault when calling is_callable on parent). 
+    (andrewnester)
+  . Fixed bug #69954 (broken links and unused config items in distributed ini
+    files). (petk)
+  . Fixed bug #74922 (Composed class has fatal error with duplicate, equal const
+    properties). (pmmaga)
+  . Fixed bug #63911 (identical trait methods raise errors during composition). 
+    (pmmaga)
+  . Fixed bug #75677 (Clang ignores fastcall calling convention on variadic
+    function). (Li-Wen Hsu)
+  . Fixed bug #54043 (Remove inconsitency of internal exceptions and user
+    defined exceptions). (Nikita)
+  . Fixed bug #53033 (Mathematical operations convert objects to integers).
+    (Nikita)
+  . Fixed bug #73108 (Internal class cast handler uses integer instead of
+    float). (Nikita)
+  . Fixed bug #75765 (Fatal error instead of Error exception when base class is
+    not found). (Timur Ibragimov)
 
 - BCMath:
-  . Fixed bug #46564 (bcmod truncates fractionals). (liborm85)
+  . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
+  . Implemented request #67855 (No way to get current scale in use). (Chris
+    Wright, cmb)
+  . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
+  . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
-- Calendar:
-  . Fix integer overflows (Joshua Rogers)
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
 
 - Date:
-  . Fixed bug #69587 (DateInterval properties and isset). (jhdxr)
-  . Fixed bug #74404 (Wrong reflection on DateTimeZone::getTransitions).
-    (krakjoe)
-  . Fixed bug #74080 (add constant for RFC7231 format datetime). (duncan3dc)
+  . Implemented FR #74668: Add DateTime::createFromImmutable() method.
+    (majkl578, Rican7)
+  . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
+  . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
+    (jhdxr)
 
-- DOM:
-  . Fixed bug #67474 (getElementsByTagNameNS filter on default ns). (aboks)
-  . Fixed bug #54382 (getAttributeNodeNS doesn't get xmlns* attributes).
-    (aboks)
-  . Fixed bug #74004 (LIBXML_NOWARNING (etc) ignored by DOMDocument::loadHTML).
-    (somedaysummer)
-
-- EXIF:
-  . Added support for vendor specific tags for the following formats:
-    Samsung, DJI, Panasonic, Sony, Pentax, Minolta & Sigma/Foveon. (Kalle)
-  . Fixed bug #72682 (exif_read_data() fails to read all data for some
-    images). (Kalle)
-  . Fixed bug #71534 (Type confusion in exif_read_data() leading to heap
-    overflow in debug mode). (hlt99 at blinkenshell dot org, Kalle)
-  . Fixed bug #68547 (Exif Header component value check error).
-    (sjh21a at gmail dot com, Kalle)
-  . Fixed bug #66443 (Corrupt EXIF header: maximum directory nesting level
-    reached for some cameras). (Kalle)
-  . Fixed Redhat bug #1362571 (PHP not returning full results for
-    exif_read_data function). (Kalle)
-
-- FPM:
-  . Configuration to limit fpm slow log trace callers. (Sannis)
-  . Fixed bug #69865 (php-fpm does not close stderr when using syslog). 
-    (Mike)
-
-- FTP:
-  . Implement MLSD for structured listing of directories. (blar)
+- DBA:
+  . Fixed bug #75264 (compiler warnings emitted). (petk)
 
 - GD:
-  . Implemented imageresolution as getter and setter (Christoph)
-  . Fixed bug #74343 (compile fails on solaris 11 with system gd2 library).
-    (krakjoe)
+  . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
 
 - GMP:
-  . Fixed bug #70896 (gmp_fact() silently ignores non-integer input). (Sara)
+  . Export internal structures and accessor helpers for GMP object. (Sara)
+  . Added gmp_binomial(n, k). (Nikita)
+  . Added gmp_lcm(a, b). (Nikita)
+  . Added gmp_perfect_power(a). (Nikita)
+  . Added gmp_kronecker(a, b). (Nikita)
 
-- hash:
-  . Fixed bug #73961 (environmental build dependency in hash sha3 source).
-    (krakjoe)
-  . Changed HashContext from resource to object. (Rouven Weßling, Sara)
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
 
 - intl:
-  . Fixed bug #74433 (wrong reflection for Normalizer methods). (villfa)
-  . Fixed bug #74439 (wrong reflection for Locale methods). (villfa)
-  . Fixed bug #74468 (wrong reflection on Collator::sortWithSortKeys). (villfa)
+  . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
+    of destination). (andrewnester)
+
+- JSON:
+  . Added JSON_THROW_ON_ERROR flag. (Andrea)
+
+- LDAP:
+  . Added ldap_exop_refresh helper for EXOP REFRESH operation with dds overlay. 
+    (Come)
+  . Added full support for sending and parsing ldap controls (Come)
+  . Fixed bug #49876 (Fix LDAP path lookup on 64-bit distros). (dzuelke)
+
+- libxml2:
+  . Fixed bug #75871 (use pkg-config where available). (pmmaga)
+
+- litespeed:
+  . Fixed bug #75248 (Binary directory doesn't get created when building 
+    only litespeed SAPI). (petk)
+  . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
 - Mbstring:
-  . Implemented request #66024 (mb_chr() and mb_ord()). (Masakielastic, Yasuo)
-  . Implemented request #65081 (mb_scrub()). (Masakielastic, Yasuo)
-  . Implemented request #69086 (enhancement for mb_convert_encoding() that
-    handles multibyte replacement char nicely). (Masakielastic, Yasuo)
-  . Added array input support to mb_convert_encoding(). (Yasuo)
-  . Added array input support to mb_check_encoding(). (Yasuo)
-  . Fixed bug #69079 (enhancement for mb_substitute_character). (masakielastic)
+  . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
+    capitalized). (Nikita)
+  . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
+    (Nikita)
+  . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
+  . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
+    on Windows). (Nikita)
+  . Update to Oniguruma 6.7.1. (cmb)
 
-- Mcrypt:
-  . The deprecated mcrypt extension has been moved to PECL. (leigh)
-
-- MySQLi:
-  . Fixed bug #73949 (leak in mysqli_fetch_object). (krakjoe)
-
-- mysqlnd:
-  . Fixed bug #73800 (sporadic segfault with MYSQLI_OPT_INT_AND_FLOAT_NATIVE). 
-	(vanviegen)
+- ODBC:
+  . Removed support for ODBCRouter. (Kalle)
+  . Removed support for Birdstep. (Kalle)
 
 - OpenSSL:
-  . Fixed bug #71519 (add serial hex to return value array). (xrobau)
+  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
 
 - PCRE:
-  . Fixed bug #61780 (Inconsistent PCRE captures in match results). (cmb)
-
-- PDO:
-  . Add "Sent SQL" to debug dump for emulated prepares. (Adam Baratz)
-  . Add parameter types for national character set strings. (Adam Baratz)
+  . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
+  . Fixed bug #75355 (preg_quote() does not quote # control character).
+    (Michael Moravec)
 
 - PDO_DBlib:
-  . Fixed bug #73234 (Emulated statements let value dictate parameter type).
-    (Adam Baratz)
-  . Fixed bug #73396 (bigint columns are returned as strings). (Adam Baratz)
-  . Expose DB-Library version as \PDO::DBLIB_ATTR_VERSION attribute on \PDO
-    instance. (Adam Baratz)
-  . Add test coverage for bug #72969. (Jeff Farr)
+  . Implemented request #69592 (allow 0-column rowsets to be skipped
+    automatically). (fandrieu)
+  . Fixed bug #74243 (allow locales.conf to drive datetime format). (fandrieu)
+  . Expose TDS version as \PDO::DBLIB_ATTR_TDS_VERSION attribute on \PDO
+    instance. (fandrieu)
+  . Treat DATETIME2 columns like DATETIME. (fandrieu)
 
 - PDO_OCI:
-  . Fixed bug #54379 (PDO_OCI: UTF-8 output gets truncated). (gureedo / Oracle)
+  . Fixed bug #74631 (PDO_PCO with PHP-FPM: OCI environment initialized
+    before PHP-FPM sets it up). (Ingmar Runge)
 
-- PDO_PgSQL:
-  . Fixed bug #73959 (lastInsertId fails to throw an exception for wrong 
-    sequence name). (andrewnester)
+- PDO SQLite
+  . Add support for additional open flags
 
-- PDO_Sqlite
-  . Switch to sqlite3_prepare_v2() and sqlite3_close_v2() functions (rasmus)
+- pgsql:
+  . Added new error constants for pg_result_error(): (Kalle)
+    - Requires Postgres 9.3
+      - PGSQL_DIAG_SCHEMA_NAME
+	  - PGSQL_DIAG_TABLE_NAME
+	  - PGSQL_DIAG_COLUMN_NAME
+	  - PGSQL_DIAG_DATATYPE_NAME
+	  - PGSQL_DIAG_CONSTRAINT_NAME
+	- Requires Postgres 9.6
+	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
 
 - phar:
-  . Fixed bug #74383 (phar method parameters reflection correction). 
-    (mhagstrand)
-  . Fixed bug #74196 (phar does not correctly handle names containing dots).
-    (mhagstrand)
-
-- PHPDBG
-  . Added extended_value to opcode dump output. (Sara)
-
-- posix:
-  . Fixed bug #71219 (configure script incorrectly checks for ttyname_r). (atoh)
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
 
 - Session:
-  . Fixed bug #73461 (Prohibit session save handler recursion). (Yasuo)
-  . PR #2233 Removed register_globals related code and "!" can be used as $_SESSION key name. (Yasuo)
-  . Improved bug #73100 fix. 'user' save handler can only be set by session_set_save_handler()
-  . Fixed bug #69582 (session not readable by root in CLI). (EvgeniySpinov)
+  . Fixed bug #74941 (session fails to start after having headers sent). 
+    (morozov)
+
+- SimpleXML:
+  . Fixed bug #54973 (SimpleXML casts integers wrong). (Nikita)
 
 - SOAP:
-  . Fixed bug #69137 (Peer verification fails when using a proxy with SoapClient)
-    (Keith Smiley)
+  . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
+
+- SPL:
+  . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
+    (Andrew Nester)
+  . Fixed bug #75173 (incorrect behavior of AppendIterator::append in foreach
+    loop). (jhdxr)
+  . Fixed bug #74372 (autoloading file with syntax error uses next autoloader,
+    may hide parse error). (Nikita)
+  . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
+    (cmb)
+  . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
 
 - SQLite3:
-  . Update to Sqlite 3.18.0. (cmb)
-  . Fixed bug #74413 (incorrect reflection for SQLite3::enableExceptions).
-    (krakjoe)
+  . Updated bundled libsqlite to 3.22.0. (cmb)
 
 - Standard:
-  . Add subject to mail log. (tomsommer)
-  . Fixed bug #31875 (get_defined_functions additional param to exclude
-	disabled functions). (willianveiga)
-  . Fixed bug #69442 (closing of fd incorrect when PTS enabled). (jaytaph)
-  . Fixed bug #72974 (imap is undefined service on AIX). (matthieu.sarter)
-  . Fixed bug #72979 (money_format stores wrong length AIX). (matthieu.sarter)
-  . Fixed bug #74300 (unserialize accepts two plus/minus signs for float number exponent part).
-    (xKerman)
+  . Added is_countable() function. (Gabriel Caruso)
+  . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
+    Philip Sharp)
+  . Fixed unserialize(), to disable creation of unsupported data structures
+    through manually crafted strings. (Dmitry)
+  . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
+    that getrandom() is missing). (sarciszewski)
+  . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
 
-- XML:
-  . Moved utf8_encode() and utf8_decode() to the Standard extension. (Andrea)
-  . Fixed bug #72135 (malformed XML causes fault) (edgarsandi)
+- Testing:
+  . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
+    (cmb)
 
-- xmlreader:
-  . Fixed bug #74457 (Wrong reflection on XMLReader::expand). (villfa)
+- Tidy:
+  . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
+    functions taking tidy). (Gabriel Caruso)
 
-- XMLRPC:
-  . Use Zend MM for allocation in bundled libxmlrpc (Joe)
-
-- ZIP:
-  . Add support for encrypted archives. (Remi)
-  . Fixed Bug #73803 (Reflection of ZipArchive does not show public properties). (Remi)
+- Zlib:
+  . Added zlib/level context option for compress.zlib wrapper. (Sara)
 
 <<< NOTE: Insert NEWS from last stable release here prior to actual release! >>>

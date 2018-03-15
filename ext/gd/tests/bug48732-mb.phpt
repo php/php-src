@@ -19,5 +19,5 @@ echo 'Left Bottom: (' . $bbox[0]  . ', ' . $bbox[1] . ')';
 ?>
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48732私はガラスを食べられます.png'); ?>
---EXPECTF--
+--EXPECT--
 Left Bottom: (0, 46)

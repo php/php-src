@@ -42,7 +42,7 @@ foreach($values as $str) {
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing base64_encode() : basic functionality ***
 
 --- Testing base64_encode() with binary string input ---

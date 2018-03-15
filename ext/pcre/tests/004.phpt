@@ -14,7 +14,7 @@ var_dump($m);
 
 var_dump(preg_split('/PHP_(?:NAMED_)?(?:FUNCTION|METHOD)\s*\((\w+(?:,\s*\w+)?)\)/S', "PHP_FUNCTION(s, preg_match)\n{\nlalala", -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_OFFSET_CAPTURE));
 ?>
---EXPECTF--
+--EXPECT--
 int(2)
 array(2) {
   [0]=>
@@ -24,7 +24,7 @@ array(2) {
     [1]=>
     string(12) "unsigned int"
     [2]=>
-    NULL
+    string(0) ""
     [3]=>
     string(0) ""
     [4]=>
@@ -41,13 +41,13 @@ array(2) {
     [1]=>
     string(5) "short"
     [2]=>
-    NULL
+    string(0) ""
     [3]=>
     string(0) ""
     [4]=>
     string(1) "a"
     [5]=>
-    NULL
+    string(0) ""
     [6]=>
     string(3) ", b"
   }

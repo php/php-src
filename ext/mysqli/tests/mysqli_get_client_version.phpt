@@ -10,5 +10,5 @@ mysqli_get_client_version()
 		
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

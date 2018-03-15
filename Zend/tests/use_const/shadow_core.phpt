@@ -11,6 +11,6 @@ var_dump(PHP_VERSION);
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 int(42)
 Done

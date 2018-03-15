@@ -90,7 +90,7 @@ fclose($fp);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --

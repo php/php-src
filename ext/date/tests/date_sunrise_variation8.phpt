@@ -36,7 +36,7 @@ foreach( $time_date as $date => $time ){
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_sunrise() : usage variation ***
 
 --12 Aug 2008--

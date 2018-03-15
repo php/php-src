@@ -70,7 +70,7 @@ check($a);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 
 --- 0 refs external:

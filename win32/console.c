@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
-{
+{/*{{{*/
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -33,10 +33,10 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_is_console(zend_long fileno)
 		}
 	}
 	return result;
-}
+}/*}}}*/
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
-{
+{/*{{{*/
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -55,10 +55,10 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_has_vt100(zend_long fileno)
 		}
 	}
 	return result;
-}
+}/*}}}*/
 
 PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL enable)
-{
+{/*{{{*/
 	BOOL result = FALSE;
 	HANDLE handle = (HANDLE) _get_osfhandle(fileno);
 
@@ -90,4 +90,32 @@ PHP_WINUTIL_API BOOL php_win32_console_fileno_set_vt100(zend_long fileno, BOOL e
 		}
 	}
 	return result;
-}
+}/*}}}*/
+
+PHP_WINUTIL_API BOOL php_win32_console_is_own(void)
+{/*{{{*/
+	if (!IsDebuggerPresent()) {
+		CONSOLE_SCREEN_BUFFER_INFO csbi;
+		DWORD pl[1];
+		BOOL ret0 = FALSE, ret1 = FALSE;
+
+		if (GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi)) {
+			ret0 = !csbi.dwCursorPosition.X && !csbi.dwCursorPosition.Y;
+		}
+
+		ret1 = GetConsoleProcessList(pl, 1) == 1;
+
+		return ret0 && ret1;
+	}
+
+	return FALSE;
+}/*}}}*/
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -34,11 +34,11 @@ array(3) {
     ["chr"]=>
     string(1) "b"
     [1]=>
-    NULL
+    string(0) ""
     ["num"]=>
-    NULL
+    string(0) ""
     [2]=>
-    NULL
+    string(0) ""
     [3]=>
     string(1) "b"
   }
@@ -77,11 +77,11 @@ array(3) {
     ["chr"]=>
     string(1) "b"
     [1]=>
-    NULL
+    string(0) ""
     ["num"]=>
-    NULL
+    string(0) ""
     [2]=>
-    NULL
+    string(0) ""
     [3]=>
     string(1) "b"
   }

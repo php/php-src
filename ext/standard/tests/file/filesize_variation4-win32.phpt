@@ -83,7 +83,7 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/filesize_variation4.tmp");
 unlink($file_path."/filesize_variation4_empty.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing filesize(): usage variations ***
 
 *** Testing filesize() with data written using different file modes and by creating holes in file ***

@@ -112,22 +112,22 @@ fclose( $file_handle );
 
 -- int 0 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int 1 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int 12345 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- int -12345 --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 -- float 10.5 --
@@ -177,22 +177,22 @@ bool(false)
 
 -- lowercase true --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- lowercase false --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase TRUE --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- uppercase FALSE --
 
-Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, boolean given in %s on line %d
+Warning: DateTime::setTimezone() expects parameter 1 to be DateTimeZone, bool given in %s on line %d
 bool(false)
 
 -- empty string DQ --

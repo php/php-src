@@ -16,7 +16,7 @@ echo IntlDateFormatter::formatObject ($date, $pattern2, 'ko_KR'), "\n";
 ?>
 ==DONE==
 
---EXPECTF--
+--EXPECT--
 tháng 04, 2015
 2015년 4월
 ==DONE==

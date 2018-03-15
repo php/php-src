@@ -81,7 +81,7 @@ var_dump( array_walk($input, "for_mixed"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : 'input' as an associative array ***
 -- Associative array with numeric keys --
 int(1)

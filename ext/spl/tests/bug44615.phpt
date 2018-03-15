@@ -20,7 +20,7 @@ foreach (new RecursiveIteratorIterator($rai) as $t) {
     var_dump($t);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "z"
 object(stdClass)#1 (0) {
 }

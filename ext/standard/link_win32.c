@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ TODO:
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	size_t link_len;
+	ssize_t link_len;
 	char target[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
@@ -74,7 +74,8 @@ PHP_FUNCTION(readlink)
 		RETURN_FALSE;
 	}
 
-	if (php_sys_readlink(link, target, MAXPATHLEN) == -1) {
+	link_len = php_sys_readlink(link, target, MAXPATHLEN);
+	if (link_len == -1) {
 		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
 		RETURN_FALSE;
 	}

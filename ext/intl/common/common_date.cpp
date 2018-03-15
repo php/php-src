@@ -50,8 +50,8 @@ U_CFUNC TimeZone *timezone_convert_datetimezone(int type,
 			break;
 		case TIMELIB_ZONETYPE_OFFSET: {
 			int offset_mins = is_datetime
-				? -((php_date_obj*)object)->time->z
-				: -(int)((php_timezone_obj*)object)->tzi.utc_offset,
+				? ((php_date_obj*)object)->time->z / 60
+				: (int)((php_timezone_obj*)object)->tzi.utc_offset / 60,
 				hours = offset_mins / 60,
 				minutes = offset_mins - hours * 60;
 			minutes *= minutes > 0 ? 1 : -1;
@@ -134,7 +134,7 @@ U_CFUNC int intl_datetime_decompose(zval *z, double *millis, TimeZone **tz,
 		}
 
 		datetime = Z_PHPDATE_P(z);
-		*millis = U_MILLIS_PER_SECOND * ((double)Z_LVAL(retval) + datetime->time->f);
+		*millis = U_MILLIS_PER_SECOND * (double)Z_LVAL(retval) + (datetime->time->us / 1000);
 		zval_ptr_dtor(&zfuncname);
 	}
 

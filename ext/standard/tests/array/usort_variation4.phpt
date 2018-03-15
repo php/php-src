@@ -67,7 +67,7 @@ var_dump( usort($empty_array, 'cmp_function') );
 var_dump($empty_array);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Sorting Integer array --

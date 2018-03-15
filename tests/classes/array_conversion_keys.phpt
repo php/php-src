@@ -10,7 +10,7 @@ class foo
 }
 var_export((array) new foo);
 ?>
---EXPECTF--
+--EXPECT--
 array (
   '' . "\0" . 'foo' . "\0" . 'private' => 'private',
   '' . "\0" . '*' . "\0" . 'protected' => 'protected',

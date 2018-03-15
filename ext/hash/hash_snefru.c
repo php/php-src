@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -151,7 +151,7 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length += len;
+		context->length += (unsigned char)len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
 
@@ -167,7 +167,7 @@ PHP_HASH_API void PHP_SNEFRUUpdate(PHP_SNEFRU_CTX *context, const unsigned char 
 
 		memcpy(context->buffer, input + i, r);
 		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
-		context->length = r;
+		context->length = (unsigned char)r;
 	}
 }
 

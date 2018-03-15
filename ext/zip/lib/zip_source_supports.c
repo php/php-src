@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -49,11 +49,11 @@ zip_source_make_command_bitmap(zip_source_cmd_t cmd0, ...)
 {
     zip_int64_t bitmap;
     va_list ap;
-    
+
     bitmap = ZIP_SOURCE_MAKE_COMMAND_BITMASK(cmd0);
-    
-    
-    
+
+
+
     va_start(ap, cmd0);
     for (;;) {
         int cmd = va_arg(ap, int);
@@ -63,6 +63,6 @@ zip_source_make_command_bitmap(zip_source_cmd_t cmd0, ...)
         bitmap |= ZIP_SOURCE_MAKE_COMMAND_BITMASK(cmd);
     }
     va_end(ap);
-    
+
     return bitmap;
 }

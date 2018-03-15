@@ -80,7 +80,7 @@ foreach($args_array as $args) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : octal formats and non-octal values ***
 
 -- Iteration 1 --

@@ -37,7 +37,7 @@ echo "\n---( Superclass: )---\n";
 $b->testA($b);
 
 ?>
---EXPECTF--
+--EXPECT--
 
 ---( Declaring class: )---
 B::testB

@@ -11,5 +11,5 @@ chgrp("sjhgfskhagkfdgskjfhgskfsdgfkdsajf", NULL);
 echo "ALIVE\n";
 ?>
 --EXPECTF--
-Warning: chgrp(): parameter 2 should be string or integer, null given in %schgrp.php on line 2
+Warning: chgrp(): parameter 2 should be string or int, null given in %schgrp.php on line 2
 ALIVE

@@ -7,7 +7,6 @@ Test mktime() function : basic functionality
  * Source code: ext/date/php_date.c
  * Alias to functions: 
  */
-error_reporting(E_ALL | E_STRICT);
 
 //Set the default time zone 
 date_default_timezone_set("Europe/London");

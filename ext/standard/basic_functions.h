@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,7 +56,7 @@ PHP_FUNCTION(time_sleep_until);
 #endif
 PHP_FUNCTION(flush);
 #ifdef HAVE_INET_NTOP
-PHP_NAMED_FUNCTION(php_inet_ntop);
+PHP_NAMED_FUNCTION(zif_inet_ntop);
 #endif
 #ifdef HAVE_INET_PTON
 PHP_NAMED_FUNCTION(php_inet_pton);
@@ -125,6 +125,8 @@ PHP_FUNCTION(sys_getloadavg);
 
 PHP_FUNCTION(is_uploaded_file);
 PHP_FUNCTION(move_uploaded_file);
+
+PHP_FUNCTION(net_get_interfaces);
 
 /* From the INI parser */
 PHP_FUNCTION(parse_ini_file);
@@ -248,7 +250,7 @@ typedef struct {
 	char *putenv_string;
 	char *previous_value;
 	char *key;
-	int key_len;
+	size_t key_len;
 } putenv_entry;
 #endif
 

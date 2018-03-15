@@ -1,7 +1,7 @@
-/*
+﻿/*
  *    PHP Sendmail for Windows.
  *
- *  This file is rewriten specificly for PHPFI.  Some functionality
+ *  This file is rewritten specificly for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
@@ -36,10 +36,7 @@
 
 #include "php_win32_globals.h"
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-#endif
-
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 
@@ -130,52 +127,43 @@ static char *ErrorMessages[] =
  */
 static zend_string *php_win32_mail_trim_header(char *header)
 {
-
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 	zend_string *result, *result2;
-	zval replace;
+	zend_string *replace;
 	zend_string *regex;
 
 	if (!header) {
 		return NULL;
 	}
 
-	ZVAL_STRINGL(&replace, PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE));
+	replace = zend_string_init(PHP_WIN32_MAIL_UNIFY_REPLACE, strlen(PHP_WIN32_MAIL_UNIFY_REPLACE), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
-				  NULL, header, (int)strlen(header),
-				  &replace,
-				  0,
+				  NULL, header, strlen(header),
+				  replace,
 				  -1,
 				  NULL);
 
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 
 	if (NULL == result) {
 		return NULL;
 	}
 
-	ZVAL_STRING(&replace, PHP_WIN32_MAIL_RMVDBL_PATTERN);
+	replace = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, strlen(PHP_WIN32_MAIL_RMVDBL_PATTERN), 0);
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
-				   &replace,
-				  0,
+				   result, ZSTR_VAL(result), ZSTR_LEN(result),
+				   replace,
 				  -1,
 				  NULL);
-	zval_ptr_dtor(&replace);
+	zend_string_release(replace);
 	zend_string_release(regex);
 	zend_string_release(result);
 
 	return result2;
-#else
-	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
-	return estrdup(header);
-#endif
 }
 
 /*********************************************************************
@@ -222,6 +210,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
+		if (headers_lc == headers_trim) {
+			zend_string_release(headers_lc);
+		}
 	}
 
 	/* Fall back to sendmail_from php.ini setting */
@@ -679,8 +670,12 @@ static int PostHeader(char *RPath, char *Subject, char *mailTo, char *xheaders)
 	size_t i;
 
 	if (xheaders) {
+		size_t headers_lc_len;
+
 		headers_lc = estrdup(xheaders);
-		for (i = 0; i < strlen(headers_lc); i++) {
+		headers_lc_len = strlen(headers_lc);
+
+		for (i = 0; i < headers_lc_len; i++) {
 			headers_lc[i] = tolower(headers_lc[i]);
 		}
 	}

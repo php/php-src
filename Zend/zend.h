@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #ifndef ZEND_H
 #define ZEND_H
 
-#define ZEND_VERSION "3.2.0-dev"
+#define ZEND_VERSION "3.3.0-dev"
 
 #define ZEND_ENGINE_3
 
@@ -189,7 +189,7 @@ typedef struct _zend_utility_functions {
 	void (*printf_to_smart_string_function)(smart_string *buf, const char *format, va_list ap);
 	void (*printf_to_smart_str_function)(smart_str *buf, const char *format, va_list ap);
 	char *(*getenv_function)(char *name, size_t name_len);
-	zend_string *(*resolve_path_function)(const char *filename, int filename_len);
+	zend_string *(*resolve_path_function)(const char *filename, size_t filename_len);
 } zend_utility_functions;
 
 typedef struct _zend_utility_values {
@@ -222,7 +222,7 @@ BEGIN_EXTERN_C()
 int zend_startup(zend_utility_functions *utility_functions, char **extensions);
 void zend_shutdown(void);
 void zend_register_standard_ini_entries(void);
-void zend_post_startup(void);
+int zend_post_startup(void);
 void zend_set_utility_values(zend_utility_values *utility_values);
 
 ZEND_API ZEND_COLD void _zend_bailout(const char *filename, uint32_t lineno);
@@ -231,6 +231,11 @@ ZEND_API size_t zend_vspprintf(char **pbuf, size_t max_len, const char *format, 
 ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 3, 4);
 ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap);
 ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
+
+/* Same as zend_spprintf and zend_strpprintf, without checking of format validity.
+ * For use with custom printf specifiers such as %H. */
+ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
+ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
 
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
@@ -269,7 +274,8 @@ extern ZEND_API int (*zend_stream_open_function)(const char *filename, zend_file
 extern void (*zend_printf_to_smart_string)(smart_string *buf, const char *format, va_list ap);
 extern void (*zend_printf_to_smart_str)(smart_str *buf, const char *format, va_list ap);
 extern ZEND_API char *(*zend_getenv)(char *name, size_t name_len);
-extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, int filename_len);
+extern ZEND_API zend_string *(*zend_resolve_path)(const char *filename, size_t filename_len);
+extern ZEND_API int (*zend_post_startup_cb)(void);
 
 ZEND_API ZEND_COLD void zend_error(int type, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 ZEND_API ZEND_COLD void zend_throw_error(zend_class_entry *exception_ce, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
@@ -283,7 +289,6 @@ ZEND_COLD void zenderror(const char *error);
 #define ZEND_STANDARD_CLASS_DEF_PTR zend_standard_class_def
 extern ZEND_API zend_class_entry *zend_standard_class_def;
 extern ZEND_API zend_utility_values zend_uv;
-extern ZEND_API zval zval_used_for_init;
 
 /* If DTrace is available and enabled */
 extern ZEND_API zend_bool zend_dtrace_enabled;
@@ -308,7 +313,6 @@ END_EXTERN_C()
 
 typedef enum {
 	EH_NORMAL = 0,
-	EH_SUPPRESS,
 	EH_THROW
 } zend_error_handling_t;
 
@@ -336,4 +340,6 @@ ZEND_API void zend_restore_error_handling(zend_error_handling *saved);
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

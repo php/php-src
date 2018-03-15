@@ -76,7 +76,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : basic functionality ***
 
 -- Testing sort() by supplying string array, 'flag' value is defualt --

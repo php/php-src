@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -258,8 +258,8 @@ PHP_FUNCTION(headers_sent)
 
 	ZEND_PARSE_PARAMETERS_START(0, 2)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF_EX(arg1, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(arg2, 0, 1)
+		Z_PARAM_ZVAL_DEREF(arg1)
+		Z_PARAM_ZVAL_DEREF(arg2)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (SG(headers_sent)) {
@@ -269,10 +269,10 @@ PHP_FUNCTION(headers_sent)
 
 	switch(ZEND_NUM_ARGS()) {
 	case 2:
-		zval_dtor(arg2);
+		zval_ptr_dtor(arg2);
 		ZVAL_LONG(arg2, line);
 	case 1:
-		zval_dtor(arg1);
+		zval_ptr_dtor(arg1);
 		if (file) {
 			ZVAL_STRING(arg1, file);
 		} else {
@@ -313,7 +313,7 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto long http_response_code([int response_code])
+/* {{{ proto int http_response_code([int response_code])
    Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {

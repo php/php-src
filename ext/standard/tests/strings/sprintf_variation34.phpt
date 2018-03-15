@@ -57,7 +57,7 @@ foreach($integer_values as $integer_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : hexa formats with integer values ***
 
 -- Iteration 1 --

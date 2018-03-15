@@ -43,7 +43,7 @@ var_dump( array_filter($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - 'input' containing references ***
 array(3) {
   [0]=>

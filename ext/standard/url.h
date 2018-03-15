@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,14 +21,14 @@
 #define URL_H
 
 typedef struct php_url {
-	char *scheme;
-	char *user;
-	char *pass;
-	char *host;
+	zend_string *scheme;
+	zend_string *user;
+	zend_string *pass;
+	zend_string *host;
 	unsigned short port;
-	char *path;
-	char *query;
-	char *fragment;
+	zend_string *path;
+	zend_string *query;
+	zend_string *fragment;
 } php_url;
 
 PHPAPI void php_url_free(php_url *theurl);

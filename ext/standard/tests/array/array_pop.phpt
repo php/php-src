@@ -42,7 +42,7 @@ foreach( $mixed_array as $sub_array )
 
 echo"\nDone";
 ?>
---EXPECTF--
+--EXPECT--
 *** Normal testing with various array inputs ***
 
 -- Input Array for Iteration 1 is --

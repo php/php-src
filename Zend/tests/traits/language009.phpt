@@ -32,5 +32,5 @@ $t = new MyClass;
 $t->foo();
 
 ?>
---EXPECTF--	
+--EXPECT--	
 b

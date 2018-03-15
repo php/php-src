@@ -29,7 +29,7 @@ NULL
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, float given in %s on line 10
 NULL
 
-Warning: ReflectionClass::isInstance() expects parameter 1 to be object, boolean given in %s on line 11
+Warning: ReflectionClass::isInstance() expects parameter 1 to be object, bool given in %s on line 11
 NULL
 
 Warning: ReflectionClass::isInstance() expects parameter 1 to be object, string given in %s on line 12

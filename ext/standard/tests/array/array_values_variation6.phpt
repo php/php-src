@@ -30,7 +30,7 @@ var_dump($result1);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_values() : usage variations ***
 
 -- $input is an array made up of referenced variables: --

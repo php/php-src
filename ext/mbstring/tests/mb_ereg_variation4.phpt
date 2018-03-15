@@ -73,7 +73,7 @@ function base64_encode_var_dump($regs) {
 echo "Done";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_ereg() : usage variations ***
 
 -- Iteration 1 --

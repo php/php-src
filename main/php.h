@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include <dmalloc.h>
 #endif
 
-#define PHP_API_VERSION 20160731
+#define PHP_API_VERSION 20180123
 #define PHP_HAVE_STREAMS
 #define YYDEBUG 0
 #define PHP_DEFAULT_CHARSET "UTF-8"
@@ -41,13 +41,13 @@
 #undef sprintf
 #define sprintf php_sprintf
 
-/* Operating system family defintion */
+/* Operating system family definition */
 #ifdef PHP_WIN32
 # define PHP_OS_FAMILY			"Windows"
 #elif defined(BSD) || defined(__DragonFly__) || defined(__FreeBSD__) || defined(__NetBSD__) || defined(__OpenBSD__)
 # define PHP_OS_FAMILY			"BSD"
 #elif defined(__APPLE__) || defined(__MACH__)
-# define PHP_OS_FAMILY			"OSX"
+# define PHP_OS_FAMILY			"Darwin"
 #elif defined(__sun__)
 # define PHP_OS_FAMILY			"Solaris"
 #elif defined(__linux__)
@@ -101,9 +101,7 @@ typedef int gid_t;
 typedef char * caddr_t;
 typedef unsigned int uint;
 typedef unsigned long ulong;
-# if !NSAPI
 typedef int pid_t;
-# endif
 
 # ifndef PHP_DEBUG
 #  ifdef inline
@@ -237,14 +235,6 @@ typedef unsigned int socklen_t;
 #else
 # if HAVE_SYS_VARARGS_H
 # include <sys/varargs.h>
-# endif
-#endif
-
-#ifndef va_copy
-# ifdef __va_copy
-#  define va_copy(ap1, ap2)         __va_copy((ap1), (ap2))
-# else
-#  define va_copy(ap1, ap2)         memcpy((&ap1), (&ap2), sizeof(va_list))
 # endif
 #endif
 

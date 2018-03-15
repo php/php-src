@@ -4,7 +4,7 @@
 #include "tsrm_strtok_r.h"
 
 static inline int in_character_class(char ch, const char *delim)
-{
+{/*{{{*/
 	while (*delim) {
 		if (*delim == ch) {
 			return 1;
@@ -12,10 +12,10 @@ static inline int in_character_class(char ch, const char *delim)
 		delim++;
 	}
 	return 0;
-}
+}/*}}}*/
 
 TSRM_API char *tsrm_strtok_r(char *s, const char *delim, char **last)
-{
+{/*{{{*/
 	char *token;
 
 	if (s == NULL) {
@@ -41,7 +41,7 @@ TSRM_API char *tsrm_strtok_r(char *s, const char *delim, char **last)
 		*last = s + 1;
 	}
 	return token;
-}
+}/*}}}*/
 
 #if 0
 
@@ -61,3 +61,12 @@ main()
 }
 
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

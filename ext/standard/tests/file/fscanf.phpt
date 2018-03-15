@@ -56,8 +56,12 @@ file_put_contents($filename, "data");
 $fp = fopen($filename, "rt");
 var_dump(fscanf($fp, "%s%d", $v));
 
-@unlink($filename);
 echo "Done\n";
+?>
+--CLEAN--
+<?php
+$filename = dirname(__FILE__)."/fscanf.dat";
+unlink($filename);
 ?>
 --EXPECTF--	
 Warning: fscanf() expects at least 2 parameters, 0 given in %s on line %d

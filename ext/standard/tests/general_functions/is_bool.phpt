@@ -7,7 +7,7 @@ Test is_bool() function
  */
 
 echo "*** Testing is_bool() with valid boolean values ***\n";
-// different valid  boolean vlaues 
+// different valid  boolean values 
 $valid_bools = array(
   TRUE,
   FALSE,
