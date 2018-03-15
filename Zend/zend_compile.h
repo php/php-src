@@ -303,6 +303,9 @@ typedef struct _zend_oparray_context {
 /* class constants updated */
 #define ZEND_ACC_CONSTANTS_UPDATED	  0x100000
 
+/* class contains built-in methods with allocated arginfo */
+#define ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO	0x200000
+
 /* user class has methods with static variables */
 #define ZEND_HAS_STATIC_IN_METHODS    0x800000
 

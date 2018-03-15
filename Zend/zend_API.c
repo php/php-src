@@ -1972,7 +1972,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	/* Collect internal classes with static members */
 	ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
 		if (ce->type == ZEND_INTERNAL_CLASS &&
-		    ce->default_static_members_count > 0) {
+			(ce->default_static_members_count > 0 ||
+			 (ce->ce_flags & ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO))) {
 		    class_count++;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1985,7 +1986,8 @@ ZEND_API void zend_collect_module_handlers(void) /* {{{ */
 	if (class_count) {
 		ZEND_HASH_FOREACH_PTR(CG(class_table), ce) {
 			if (ce->type == ZEND_INTERNAL_CLASS &&
-			    ce->default_static_members_count > 0) {
+				(ce->default_static_members_count > 0 ||
+				 (ce->ce_flags & ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO))) {
 			    class_cleanup_handlers[--class_count] = ce;
 			}
 		} ZEND_HASH_FOREACH_END();
@@ -2305,6 +2307,9 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			}
 			new_arg_info = malloc(sizeof(zend_arg_info) * num_args);
 			memcpy(new_arg_info, arg_info, sizeof(zend_arg_info) * num_args);
+			if (scope) {
+				scope->ce_flags |= ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO;
+			}
 			reg_function->common.arg_info = new_arg_info + 1;
 			for (i = 0; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(new_arg_info[i].type)) {
@@ -2483,6 +2488,28 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 }
 /* }}} */
 
+static zend_string *clean_function_arg_info(const char *fname, HashTable *function_table) /* {{{ */
+{
+	zend_function *reg_function;
+	zend_arg_info *arg_info;
+	zend_string *lowercase_name;
+	size_t fname_len;
+
+	fname_len = strlen(fname);
+	lowercase_name = zend_string_alloc(fname_len, 0);
+	zend_str_tolower_copy(ZSTR_VAL(lowercase_name), fname, fname_len);
+	reg_function = zend_hash_find_ptr(function_table, lowercase_name);
+	if (reg_function && reg_function->common.arg_info &&
+		(reg_function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
+		arg_info = reg_function->common.arg_info - 1;
+		free(arg_info);
+		reg_function->common.arg_info = NULL;
+	}
+
+	return lowercase_name;
+}
+/* }}} */
+
 /* count=-1 means erase all functions, otherwise,
  * erase the first count functions
  */
@@ -2492,7 +2519,6 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 	int i=0;
 	HashTable *target_function_table = function_table;
 	zend_string *lowercase_name;
-	size_t fname_len;
 
 	if (!target_function_table) {
 		target_function_table = CG(function_table);
@@ -2501,9 +2527,7 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 		if (count!=-1 && i>=count) {
 			break;
 		}
-		fname_len = strlen(ptr->fname);
-		lowercase_name = zend_string_alloc(fname_len, 0);
-		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ptr->fname, fname_len);
+		lowercase_name = clean_function_arg_info(ptr->fname, target_function_table);
 		zend_hash_del(target_function_table, lowercase_name);
 		zend_string_free(lowercase_name);
 		ptr++;
@@ -2535,6 +2559,13 @@ static int clean_module_class(zval *el, void *arg) /* {{{ */
 	zend_class_entry *ce = (zend_class_entry *)Z_PTR_P(el);
 	int module_number = *(int *)arg;
 	if (ce->type == ZEND_INTERNAL_CLASS && ce->info.internal.module->module_number == module_number) {
+		if ((ce->ce_flags & ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO) && ce->info.internal.builtin_functions) {
+			const zend_function_entry *ptr = ce->info.internal.builtin_functions;
+			while (ptr->fname) {
+				zend_string_free(clean_function_arg_info(ptr->fname, &ce->function_table));
+				ptr++;
+			}
+		}
 		return ZEND_HASH_APPLY_REMOVE;
 	} else {
 		return ZEND_HASH_APPLY_KEEP;
@@ -2645,9 +2676,22 @@ ZEND_API void zend_deactivate_modules(void) /* {{{ */
 ZEND_API void zend_cleanup_internal_classes(void) /* {{{ */
 {
 	zend_class_entry **p = class_cleanup_handlers;
+	const zend_function_entry *fe;
+	zend_class_entry *ce;
 
-	while (*p) {
-		zend_cleanup_internal_class_data(*p);
+	while ((ce = *p)) {
+		if (ce->default_static_members_count > 0) {
+			zend_cleanup_internal_class_data(ce);
+		}
+		if (ce->ce_flags & ZEND_ACC_BUILTIN_FUNCTIONS_ARGINFO) {
+			if (ce->info.internal.builtin_functions) {
+				fe = ce->info.internal.builtin_functions;
+				while (fe->fname) {
+					zend_string_free(clean_function_arg_info(fe->fname, &ce->function_table));
+					fe++;
+				}
+			}
+		}
 		p++;
 	}
 }
