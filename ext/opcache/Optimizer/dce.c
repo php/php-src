@@ -356,7 +356,8 @@ static zend_bool dce_instr(context *ctx, zend_op *opline, zend_ssa_op *ssa_op) {
 
 	if ((opline->op1_type & (IS_VAR|IS_TMP_VAR))&& !is_var_dead(ctx, ssa_op->op1_use)) {
 		if (!try_remove_var_def(ctx, ssa_op->op1_use, ssa_op->op1_use_chain, opline)) {
-			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)) {
+			if (ssa->var_info[ssa_op->op1_use].type & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_REF)
+				&& opline->opcode != ZEND_CASE) {
 				free_var = ssa_op->op1_use;
 				free_var_type = opline->op1_type;
 			}
