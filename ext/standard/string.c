@@ -5735,7 +5735,7 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
-/* static zend_string *php_str_rot13(zend_string *str) */
+/* static zend_string *php_str_rot13(zend_string *str) {{{ */
 #ifdef __SSE2__
 #include <emmintrin.h>
 #endif
