@@ -5735,8 +5735,101 @@ PHP_FUNCTION(sscanf)
 }
 /* }}} */
 
-static const char rot13_from[] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-static const char rot13_to[] = "nopqrstuvwxyzabcdefghijklmNOPQRSTUVWXYZABCDEFGHIJKLM";
+/* static zend_string *php_str_rot13(zend_string *str) */
+#ifdef __SSE2__
+#include <emmintrin.h>
+#endif
+static zend_string *php_str_rot13(zend_string *str)
+{
+	zend_string *ret;
+	const char *p, *e;
+	char *target;
+
+	if (UNEXPECTED(ZSTR_LEN(str) == 0)) {
+		return ZSTR_EMPTY_ALLOC();
+	}
+
+	ret = zend_string_alloc(ZSTR_LEN(str), 0);
+
+	p = ZSTR_VAL(str);
+	e = p + ZSTR_LEN(str);
+	target = ZSTR_VAL(ret);
+
+#ifdef __SSE2__
+	if (e - p > 15) {
+		const __m128i _a = _mm_set1_epi8('a' - 1);
+		const __m128i m_ = _mm_set1_epi8('m' + 1);
+		const __m128i _n = _mm_set1_epi8('n' - 1);
+		const __m128i z_ = _mm_set1_epi8('z' + 1);
+		const __m128i _A = _mm_set1_epi8('A' - 1);
+		const __m128i M_ = _mm_set1_epi8('M' + 1);
+		const __m128i _N = _mm_set1_epi8('N' - 1);
+		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
+		const __m128i add = _mm_set1_epi8(13);
+		const __m128i sub = _mm_set1_epi8(-13);
+
+		do {
+			__m128i in, gt, lt, cmp, delta;
+
+			delta = _mm_setzero_si128();
+			in = _mm_loadu_si128((__m128i *)p);
+
+			gt = _mm_cmpgt_epi8(in, _a);
+			lt = _mm_cmplt_epi8(in, m_);
+			cmp = _mm_and_si128(lt, gt);
+			if (_mm_movemask_epi8(cmp)) {
+				cmp = _mm_and_si128(cmp, add);
+				delta = _mm_or_si128(delta, cmp);
+			}
+
+			gt = _mm_cmpgt_epi8(in, _n);
+			lt = _mm_cmplt_epi8(in, z_);
+			cmp = _mm_and_si128(lt, gt);
+			if (_mm_movemask_epi8(cmp)) {
+				cmp = _mm_and_si128(cmp, sub);
+				delta = _mm_or_si128(delta, cmp);
+			}
+
+			gt = _mm_cmpgt_epi8(in, _A);
+			lt = _mm_cmplt_epi8(in, M_);
+			cmp = _mm_and_si128(lt, gt);
+			if (_mm_movemask_epi8(cmp)) {
+				cmp = _mm_and_si128(cmp, add);
+				delta = _mm_or_si128(delta, cmp);
+			}
+
+			gt = _mm_cmpgt_epi8(in, _N);
+			lt = _mm_cmplt_epi8(in, Z_);
+			cmp = _mm_and_si128(lt, gt);
+			if (_mm_movemask_epi8(cmp)) {
+				cmp = _mm_and_si128(cmp, sub);
+				delta = _mm_or_si128(delta, cmp);
+			}
+
+			in = _mm_add_epi8(in, delta);
+			_mm_storeu_si128((__m128i *)target, in);
+
+			p += 16;
+			target += 16;
+		} while (e - p > 15);
+	}
+#endif
+
+	while (p < e) {
+		if (*p >= 'a' && *p <= 'z') {
+			*target++ = 'a' + (((*p++ - 'a') + 13) % 26);
+		} else if (*p >= 'A' && *p <= 'Z') {
+			*target++ = 'A' + (((*p++ - 'A') + 13) % 26);
+		} else {
+			*target++ = *p++;
+		}
+	}
+
+	*target = '\0';
+
+	return ret;
+}
+/* }}} */
 
 /* {{{ proto string str_rot13(string str)
    Perform the rot13 transform on a string */
@@ -5748,11 +5841,7 @@ PHP_FUNCTION(str_rot13)
 		Z_PARAM_STR(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (ZSTR_LEN(arg) == 0) {
-		RETURN_EMPTY_STRING();
-	} else {
-		RETURN_STR(php_strtr_ex(arg, rot13_from, rot13_to, 52));
-	}
+	RETURN_STR(php_str_rot13(arg));
 }
 /* }}} */
 
