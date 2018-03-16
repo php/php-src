@@ -1117,7 +1117,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 #define EXPLODE_ALLOC_STEP 64
 	const char *p1 = ZSTR_VAL(str);
 	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
-	const char *p2 = (char *) php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
 	if (p2 == NULL) {
@@ -1137,7 +1137,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 				positions = erealloc(positions, allocated*sizeof(char *));
 			}
 			positions[found++] = p1 = p2 + ZSTR_LEN(delim);
-			p2 = (char *) php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+			p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 		} while (p2 != NULL);
 
 		to_return = limit + found;
@@ -1850,7 +1850,7 @@ PHP_FUNCTION(stristr)
 {
 	zval *needle;
 	zend_string *haystack;
-	char *found = NULL;
+	const char *found = NULL;
 	size_t  found_offset;
 	char *haystack_dup;
 	char needle_char[2];
@@ -1906,7 +1906,7 @@ PHP_FUNCTION(strstr)
 {
 	zval *needle;
 	zend_string *haystack;
-	char *found = NULL;
+	const char *found = NULL;
 	char needle_char[2];
 	zend_long found_offset;
 	zend_bool part = 0;
@@ -1924,14 +1924,14 @@ PHP_FUNCTION(strstr)
 			RETURN_FALSE;
 		}
 
-		found = (char*)php_memnstr(ZSTR_VAL(haystack), Z_STRVAL_P(needle), Z_STRLEN_P(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+		found = php_memnstr(ZSTR_VAL(haystack), Z_STRVAL_P(needle), Z_STRLEN_P(needle), ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 	} else {
 		if (php_needle_char(needle, needle_char) != SUCCESS) {
 			RETURN_FALSE;
 		}
 		needle_char[1] = 0;
 
-		found = (char*)php_memnstr(ZSTR_VAL(haystack), needle_char, 1, ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
+		found = php_memnstr(ZSTR_VAL(haystack), needle_char, 1, ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 	}
 
 	if (found) {
@@ -1956,7 +1956,7 @@ PHP_FUNCTION(strpos)
 {
 	zval *needle;
 	zend_string *haystack;
-	char *found = NULL;
+	const char *found = NULL;
 	char  needle_char[2];
 	zend_long  offset = 0;
 
@@ -2009,7 +2009,7 @@ PHP_FUNCTION(strpos)
    Finds position of first occurrence of a string within another, case insensitive */
 PHP_FUNCTION(stripos)
 {
-	char *found = NULL;
+	const char *found = NULL;
 	zend_string *haystack;
 	zend_long offset = 0;
 	char needle_char[2];
@@ -2076,12 +2076,11 @@ PHP_FUNCTION(stripos)
 PHP_FUNCTION(strrpos)
 {
 	zval *zneedle;
-	char *needle;
 	zend_string *haystack;
 	size_t needle_len;
 	zend_long offset = 0;
-	char *p, *e, ord_needle[2];
-	char *found;
+	char ord_needle[2];
+	const char *p, *e, *found, *needle;
 
 	ZEND_PARSE_PARAMETERS_START(2, 3)
 		Z_PARAM_STR(haystack)
@@ -2126,7 +2125,7 @@ PHP_FUNCTION(strrpos)
 		}
 	}
 
-	if ((found = (char *)zend_memnrstr(p, needle, needle_len, e))) {
+	if ((found = zend_memnrstr(p, needle, needle_len, e))) {
 		RETURN_LONG(found - ZSTR_VAL(haystack));
 	}
 
@@ -2142,8 +2141,7 @@ PHP_FUNCTION(strripos)
 	zend_string *needle;
 	zend_string *haystack;
 	zend_long offset = 0;
-	char *p, *e;
-	char *found;
+	const char *p, *e, *found;
 	zend_string *needle_dup, *haystack_dup, *ord_needle = NULL;
 	ALLOCA_FLAG(use_heap);
 
@@ -2280,9 +2278,10 @@ PHP_FUNCTION(strrchr)
 
 /* {{{ php_chunk_split
  */
-static zend_string *php_chunk_split(char *src, size_t srclen, char *end, size_t endlen, size_t chunklen)
+static zend_string *php_chunk_split(const char *src, size_t srclen, const char *end, size_t endlen, size_t chunklen)
 {
-	char *p, *q;
+	char *q;
+	const char *p;
 	size_t chunks; /* complete chunks! */
 	size_t restlen;
 	size_t out_len;
@@ -2713,8 +2712,8 @@ PHP_FUNCTION(substr_replace)
 PHP_FUNCTION(quotemeta)
 {
 	zend_string *old;
-	char *old_end;
-	char *p, *q;
+	const char *old_end, *p;
+	char *q;
 	char c;
 	zend_string *str;
 
@@ -2864,7 +2863,8 @@ PHP_FUNCTION(ucwords)
 {
 	zend_string *str;
 	char *delims = " \t\r\n\f\v";
-	register char *r, *r_end;
+	register char *r;
+	register const char *r_end;
 	size_t delims_len = 6;
 	char mask[256];
 
@@ -2986,7 +2986,7 @@ static zend_string *php_strtr_ex(zend_string *str, const char *str_from, const c
 /* {{{ php_strtr_array */
 static void php_strtr_array(zval *return_value, zend_string *input, HashTable *pats)
 {
-	char *str = ZSTR_VAL(input);
+	const char *str = ZSTR_VAL(input);
 	size_t slen = ZSTR_LEN(input);
 	zend_ulong num_key;
 	zend_string *str_key;
@@ -2996,7 +2996,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 	size_t maxlen = 0;
 	HashTable str_hash;
 	zval *entry;
-	char *key;
+	const char *key;
 	smart_str result = {0};
 	zend_ulong bitset[256/sizeof(zend_ulong)];
 	zend_ulong *num_bitset;
@@ -3127,7 +3127,8 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 	zend_string *result;
 	size_t char_count = 0;
 	char lc_from = 0;
-	char *source, *target, *source_end= ZSTR_VAL(str) + ZSTR_LEN(str);
+	const char *source, *source_end= ZSTR_VAL(str) + ZSTR_LEN(str);
+	char *target;
 
 	if (case_sensitivity) {
 		char *p = ZSTR_VAL(str), *e = p + ZSTR_LEN(str);
@@ -3194,13 +3195,14 @@ static zend_string* php_char_to_str_ex(zend_string *str, char from, char *to, si
 /* {{{ php_str_to_str_ex
  */
 static zend_string *php_str_to_str_ex(zend_string *haystack,
-	char *needle, size_t needle_len, char *str, size_t str_len, zend_long *replace_count)
+	const char *needle, size_t needle_len, const char *str, size_t str_len, zend_long *replace_count)
 {
 	zend_string *new_str;
 
 	if (needle_len < ZSTR_LEN(haystack)) {
-		char *end;
-		char *e, *s, *p, *r;
+		const char *end;
+		const char *s, *p, *r;
+		char *e;
 
 		if (needle_len == str_len) {
 			new_str = NULL;
@@ -3218,9 +3220,9 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 			return new_str;
 		} else {
 			size_t count = 0;
-			char *o = ZSTR_VAL(haystack);
-			char *n = needle;
-			char *endp = o + ZSTR_LEN(haystack);
+			const char *o = ZSTR_VAL(haystack);
+			const char *n = needle;
+			const char *endp = o + ZSTR_LEN(haystack);
 
 			while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
 				o += needle_len;
@@ -3236,7 +3238,7 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 				new_str = zend_string_alloc(count * (str_len - needle_len) + ZSTR_LEN(haystack), 0);
 			}
 
-			e = s = ZSTR_VAL(new_str);
+			s = e = ZSTR_VAL(new_str);
 			end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 			for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
 				memcpy(e, p, r - p);
@@ -3274,15 +3276,16 @@ nothing_todo:
 
 /* {{{ php_str_to_str_i_ex
  */
-static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack,
-	zend_string *needle, char *str, size_t str_len, zend_long *replace_count)
+static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_haystack,
+	zend_string *needle, const char *str, size_t str_len, zend_long *replace_count)
 {
 	zend_string *new_str = NULL;
 	zend_string *lc_needle;
 
 	if (ZSTR_LEN(needle) < ZSTR_LEN(haystack)) {
-		char *end;
-		char *e, *s, *p, *r;
+		const char *end;
+		const char *s, *p, *r;
+		char *e;
 
 		if (ZSTR_LEN(needle) == str_len) {
 			lc_needle = php_string_tolower(needle);
@@ -3302,9 +3305,9 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack
 			return new_str;
 		} else {
 			size_t count = 0;
-			char *o = lc_haystack;
-			char *n;
-			char *endp = o + ZSTR_LEN(haystack);
+			const char *o = lc_haystack;
+			const char *n;
+			const char *endp = o + ZSTR_LEN(haystack);
 
 			lc_needle = php_string_tolower(needle);
 			n = ZSTR_VAL(lc_needle);
@@ -3325,7 +3328,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, char *lc_haystack
 				new_str = zend_string_alloc(count * (str_len - ZSTR_LEN(lc_needle)) + ZSTR_LEN(haystack), 0);
 			}
 
-			e = s = ZSTR_VAL(new_str);
+			s = e = ZSTR_VAL(new_str);
 			end = lc_haystack + ZSTR_LEN(haystack);
 
 			for (p = lc_haystack; (r = (char*)php_memnstr(p, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle), end)); p = r + ZSTR_LEN(lc_needle)) {
@@ -3368,13 +3371,14 @@ nothing_todo:
 
 /* {{{ php_str_to_str
  */
-PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, size_t needle_len, char *str, size_t str_len)
+PHPAPI zend_string *php_str_to_str(const char *haystack, size_t length, const char *needle, size_t needle_len, const char *str, size_t str_len)
 {
 	zend_string *new_str;
 
 	if (needle_len < length) {
-		char *end;
-		char *e, *s, *p, *r;
+		const char *end;
+		const char *s, *p;
+		char *e, *r;
 
 		if (needle_len == str_len) {
 			new_str = zend_string_init(haystack, length, 0);
@@ -3388,9 +3392,9 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, 
 				new_str = zend_string_alloc(length, 0);
 			} else {
 				size_t count = 0;
-				char *o = haystack;
-				char *n = needle;
-				char *endp = o + length;
+				const char *o = haystack;
+				const char *n = needle;
+				const char *endp = o + length;
 
 				while ((o = (char*)php_memnstr(o, n, needle_len, endp))) {
 					o += needle_len;
@@ -3409,7 +3413,7 @@ PHPAPI zend_string *php_str_to_str(char *haystack, size_t length, char *needle, 
 				}
 			}
 
-			e = s = ZSTR_VAL(new_str);
+			s = e = ZSTR_VAL(new_str);
 			end = haystack + length;
 			for (p = haystack; (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
 				memcpy(e, p, r - p);
@@ -3522,7 +3526,8 @@ PHP_FUNCTION(strtr)
 PHP_FUNCTION(strrev)
 {
 	zend_string *str;
-	char *s, *e, *p;
+	const char *s, *e;
+	char *p;
 	zend_string *n;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
@@ -3564,9 +3569,9 @@ PHP_FUNCTION(strrev)
  */
 static void php_similar_str(const char *txt1, size_t len1, const char *txt2, size_t len2, size_t *pos1, size_t *pos2, size_t *max, size_t *count)
 {
-	char *p, *q;
-	char *end1 = (char *) txt1 + len1;
-	char *end2 = (char *) txt2 + len2;
+	const char *p, *q;
+	const char *end1 = (char *) txt1 + len1;
+	const char *end2 = (char *) txt2 + len2;
 	size_t l;
 
 	*max = 0;
@@ -3739,7 +3744,8 @@ char *php_strerror(int errnum)
  */
 PHPAPI void php_stripcslashes(zend_string *str)
 {
-	char *source, *target, *end;
+	const char *source, *end;
+	char *target;
 	size_t  nlen = ZSTR_LEN(str), i;
 	char numtmp[4];
 
@@ -3803,8 +3809,8 @@ PHPAPI void php_stripcslashes(zend_string *str)
 PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *what, size_t wlength)
 {
 	char flags[256];
-	char *source, *target;
-	char *end;
+	char *target;
+	const char *source, *end;
 	char c;
 	size_t  newlen;
 	zend_string *new_str = zend_string_safe_alloc(4, ZSTR_LEN(str), 0, 0);
@@ -3910,8 +3916,8 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 	__m128i w128, s128;
 	uint32_t res = 0;
 	/* maximum string length, worst case situation */
-	char *source, *target;
-	char *end;
+	char *target;
+	const char *source, *end;
 	size_t offset;
 	zend_string *new_str;
 
@@ -4056,8 +4062,8 @@ PHPAPI zend_string *php_addslashes(zend_string *str, int should_free)
 # endif
 {
 	/* maximum string length, worst case situation */
-	char *source, *target;
-	char *end;
+	char *target;
+	const char *source, *end;
 	size_t offset;
 	zend_string *new_str;
 
