@@ -741,9 +741,9 @@ PHP_FUNCTION(strcoll)
  * it needs to be incrementing.
  * Returns: FAILURE/SUCCESS whether the input was correct (i.e. no range errors)
  */
-static inline int php_charmask(unsigned char *input, size_t len, char *mask)
+static inline int php_charmask(const unsigned char *input, size_t len, char *mask)
 {
-	unsigned char *end;
+	const unsigned char *end;
 	unsigned char c;
 	int result = SUCCESS;
 
@@ -1078,9 +1078,9 @@ PHP_FUNCTION(wordwrap)
  */
 PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
-	char *p1 = ZSTR_VAL(str);
-	char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
-	char *p2 = (char *) php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+	const char *p1 = ZSTR_VAL(str);
+	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
+	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
 	if (p2 == NULL) {
@@ -1099,7 +1099,7 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 			}
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 			p1 = p2 + ZSTR_LEN(delim);
-			p2 = (char *) php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+			p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 		} while (p2 != NULL && --limit > 1);
 
 		if (p1 <= endp) {
@@ -1115,9 +1115,9 @@ PHPAPI void php_explode(const zend_string *delim, zend_string *str, zval *return
 PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *str, zval *return_value, zend_long limit)
 {
 #define EXPLODE_ALLOC_STEP 64
-	char *p1 = ZSTR_VAL(str);
-	char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
-	char *p2 = (char *) php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+	const char *p1 = ZSTR_VAL(str);
+	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
+	const char *p2 = (char *) php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
 	zval  tmp;
 
 	if (p2 == NULL) {
@@ -1128,7 +1128,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 	} else {
 		size_t allocated = EXPLODE_ALLOC_STEP, found = 0;
 		zend_long i, to_return;
-		char **positions = emalloc(allocated * sizeof(char *));
+		const char **positions = emalloc(allocated * sizeof(char *));
 
 		positions[found++] = p1;
 		do {
@@ -1146,7 +1146,7 @@ PHPAPI void php_explode_negative_limit(const zend_string *delim, zend_string *st
 			ZVAL_STRINGL(&tmp, positions[i], (positions[i+1] - ZSTR_LEN(delim)) - positions[i]);
 			zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
 		}
-		efree(positions);
+		efree((void *)positions);
 	}
 #undef EXPLODE_ALLOC_STEP
 }
@@ -1408,7 +1408,8 @@ restore:
  */
 PHPAPI char *php_strtoupper(char *s, size_t len)
 {
-	unsigned char *c, *e;
+	unsigned char *c;
+	const unsigned char *e;
 
 	c = (unsigned char *)s;
 	e = (unsigned char *)c+len;
@@ -1425,7 +1426,8 @@ PHPAPI char *php_strtoupper(char *s, size_t len)
  */
 PHPAPI zend_string *php_string_toupper(zend_string *s)
 {
-	unsigned char *c, *e;
+	unsigned char *c;
+	const unsigned char *e;
 
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
@@ -1471,7 +1473,8 @@ PHP_FUNCTION(strtoupper)
  */
 PHPAPI char *php_strtolower(char *s, size_t len)
 {
-	unsigned char *c, *e;
+	unsigned char *c;
+	const unsigned char *e;
 
 	c = (unsigned char *)s;
 	e = c+len;
@@ -1488,7 +1491,8 @@ PHPAPI char *php_strtolower(char *s, size_t len)
  */
 PHPAPI zend_string *php_string_tolower(zend_string *s)
 {
-	unsigned char *c, *e;
+	unsigned char *c;
+	const unsigned char *e;
 
 	c = (unsigned char *)ZSTR_VAL(s);
 	e = c + ZSTR_LEN(s);
@@ -1534,12 +1538,13 @@ PHP_FUNCTION(strtolower)
  */
 PHPAPI zend_string *php_basename(const char *s, size_t len, char *suffix, size_t sufflen)
 {
-	char *c, *comp, *cend;
+	char *c;
+	const char *comp, *cend;
 	size_t inc_len, cnt;
 	int state;
 	zend_string *ret;
 
-	c = comp = cend = (char*)s;
+	comp = cend = c = (char*)s;
 	cnt = len;
 	state = 0;
 	while (cnt > 0) {
