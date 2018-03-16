@@ -3918,7 +3918,7 @@ zend_string *php_addslashes_sse42(zend_string *str, int should_free)
 	end = source + ZSTR_LEN(str);
 
 	if (ZSTR_LEN(str) > 15) {
-		w128 = _mm_loadu_si128((__m128i *)slashchars);
+		w128 = _mm_load_si128((__m128i *)slashchars);
 		do {
 			s128 = _mm_loadu_si128((__m128i *)source);
 			res = _mm_cvtsi128_si32(_mm_cmpestrm(w128, 4, s128, 16, _SIDD_UBYTE_OPS | _SIDD_CMP_EQUAL_ANY | _SIDD_BIT_MASK));
@@ -3977,7 +3977,7 @@ do_escape:
 		}
 		source += 16;
 	} else if (end - source > 15) {
-		w128 = _mm_loadu_si128((__m128i *)slashchars);
+		w128 = _mm_load_si128((__m128i *)slashchars);
 	}
 
 	for (; end - source > 15; source += 16) {
