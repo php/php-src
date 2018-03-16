@@ -64,7 +64,7 @@ string(1) "?"
 string(1) ","
 string(1) " "
 ++++++++++++++++++++++
-string(25) "Czech_Czech Republic.1250"
+string(%d) "Czech_Czech%s.1250"
 string(1) ","
 string(1) " "
 string(3) "CZK"
