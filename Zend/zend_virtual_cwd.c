@@ -85,7 +85,7 @@ ts_rsrc_id cwd_globals_id;
 virtual_cwd_globals cwd_globals;
 #endif
 
-cwd_state main_cwd_state; /* True global */
+static cwd_state main_cwd_state; /* True global */
 
 #ifndef ZEND_WIN32
 #include <unistd.h>
