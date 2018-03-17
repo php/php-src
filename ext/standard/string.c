@@ -4226,7 +4226,7 @@ void php_stripslashes_default(zend_string *str) /* {{{ */
 PHPAPI void php_stripslashes(zend_string *str)
 # endif
 {
-	char *t = php_stripslashes_impl(ZSTR_VAL(str), ZSTR_VAL(str), ZSTR_LEN(str));
+	const char *t = php_stripslashes_impl(ZSTR_VAL(str), ZSTR_VAL(str), ZSTR_LEN(str));
 	if (t != (ZSTR_VAL(str) + ZSTR_LEN(str))) {
 		ZSTR_LEN(str) = t - ZSTR_VAL(str);
 		ZSTR_VAL(str)[ZSTR_LEN(str)] = '\0';
@@ -4486,8 +4486,8 @@ PHP_FUNCTION(str_ireplace)
  */
 static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 {
-	char *str;
-	char *heb_str, *tmp, *target;
+	char *str, *heb_str, *target;
+	const char *tmp;
 	size_t block_start, block_end, block_type, block_length, i;
 	zend_long max_chars=0, char_count;
 	size_t begin, end, orig_begin;
@@ -4674,9 +4674,9 @@ PHP_FUNCTION(hebrevc)
 PHP_FUNCTION(nl2br)
 {
 	/* in brief this inserts <br /> or <br> before matched regexp \n\r?|\r\n? */
-	char	*tmp;
+	const char	*tmp, *end;
 	zend_string *str;
-	char	*end, *target;
+	char *target;
 	size_t	repl_cnt = 0;
 	zend_bool	is_xhtml = 1;
 	zend_string *result;
@@ -4759,7 +4759,7 @@ PHP_FUNCTION(strip_tags)
 	zend_string *buf;
 	zend_string *str;
 	zval *allow=NULL;
-	char *allowed_tags=NULL;
+	const char *allowed_tags=NULL;
 	size_t allowed_tags_len=0;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -4788,7 +4788,7 @@ PHP_FUNCTION(setlocale)
 	zval *args = NULL;
 	zval *plocale;
 	zend_string *loc;
-	char *retval;
+	const char *retval;
 	zend_long cat;
 	int num_args, i = 0;
 	uint32_t idx;
@@ -4926,7 +4926,8 @@ PHP_FUNCTION(parse_str)
  * 1 first non-whitespace char seen
  */
 int php_tag_find(char *tag, size_t len, const char *set) {
-	char c, *n, *t;
+	char c, *n;
+	const char *t;
 	int state=0, done=0;
 	char *norm;
 
@@ -5008,7 +5009,8 @@ PHPAPI size_t php_strip_tags(char *rbuf, size_t len, uint8_t *stateptr, const ch
 */
 PHPAPI size_t php_strip_tags_ex(char *rbuf, size_t len, uint8_t *stateptr, const char *allow, size_t allow_len, zend_bool allow_tag_spaces)
 {
-	char *tbuf, *buf, *p, *tp, *rp, c, lc;
+	char *tbuf, *tp, *rp, c, lc;
+	const char *buf, *p;
 	int br, depth=0, in_q = 0;
 	uint8_t state = 0;
 	size_t pos, i = 0;
@@ -5268,7 +5270,7 @@ reg_char:
 	if (rp < rbuf + len) {
 		*rp = '\0';
 	}
-	efree(buf);
+	efree((void *)buf);
 	if (allow) {
 		efree(tbuf);
 		if (allow_free) {
@@ -5339,7 +5341,8 @@ PHP_FUNCTION(str_repeat)
 	if (ZSTR_LEN(input_str) == 1) {
 		memset(ZSTR_VAL(result), *ZSTR_VAL(input_str), mult);
 	} else {
-		char *s, *e, *ee;
+		const char *s, *ee;
+		char *e;
 		ptrdiff_t l=0;
 		memcpy(ZSTR_VAL(result), ZSTR_VAL(input_str), ZSTR_LEN(input_str));
 		s = ZSTR_VAL(result);
@@ -5366,7 +5369,7 @@ PHP_FUNCTION(count_chars)
 	zend_string *input;
 	int chars[256];
 	zend_long mymode=0;
-	unsigned char *buf;
+	const unsigned char *buf;
 	int inx;
 	char retstr[256];
 	size_t retlen=0;
@@ -5383,7 +5386,7 @@ PHP_FUNCTION(count_chars)
 		RETURN_FALSE;
 	}
 
-	buf = (unsigned char *) ZSTR_VAL(input);
+	buf = (const unsigned char *) ZSTR_VAL(input);
 	memset((void*) chars, 0, sizeof(chars));
 
 	while (tmp < ZSTR_LEN(input)) {
@@ -5581,7 +5584,8 @@ PHP_FUNCTION(substr_count)
 	int ac = ZEND_NUM_ARGS();
 	zend_long count = 0;
 	size_t haystack_len, needle_len;
-	char *p, *endp, cmp;
+	const char *p, *endp;
+	char cmp;
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_STRING(haystack, haystack_len)
@@ -5912,7 +5916,8 @@ PHP_FUNCTION(str_shuffle)
 PHP_FUNCTION(str_word_count)
 {
 	zend_string *str;
-	char *char_list = NULL, *p, *e, *s, ch[256];
+	char *char_list = NULL, ch[256];
+	const char *p, *e, *s;
 	size_t char_list_len = 0, word_count = 0;
 	zend_long type = 0;
 
@@ -6045,7 +6050,7 @@ PHP_FUNCTION(str_split)
 {
 	zend_string *str;
 	zend_long split_length = 1;
-	char *p;
+	const char *p;
 	size_t n_reg_segments;
 
 	ZEND_PARSE_PARAMETERS_START(1, 2)
@@ -6087,7 +6092,7 @@ PHP_FUNCTION(str_split)
 PHP_FUNCTION(strpbrk)
 {
 	zend_string *haystack, *char_list;
-	char *haystack_ptr, *cl_ptr;
+	const char *haystack_ptr, *cl_ptr;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
 		Z_PARAM_STR(haystack)
