@@ -570,11 +570,11 @@ int php_date_global_timezone_db_enabled;
 #define DATE_DEFAULT_LATITUDE "31.7667"
 #define DATE_DEFAULT_LONGITUDE "35.2333"
 
-/* on 90'35; common sunset declaration (start of sun body appear) */
-#define DATE_SUNSET_ZENITH "90.583333"
+/* on 90'50; common sunset declaration (start of sun body appear) */
+#define DATE_SUNSET_ZENITH "90.833333"
 
-/* on 90'35; common sunrise declaration (sun body disappeared) */
-#define DATE_SUNRISE_ZENITH "90.583333"
+/* on 90'50; common sunrise declaration (sun body disappeared) */
+#define DATE_SUNRISE_ZENITH "90.833333"
 
 static PHP_INI_MH(OnUpdate_date_timezone);
 
