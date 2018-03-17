@@ -1,0 +1,3 @@
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+CRC32	/home/khan/Documents/projects/OpenSource/php/rnaby-php-src/ext/standard/crc32.h	28;"	d	language:C++
+crc32tab	/home/khan/Documents/projects/OpenSource/php/rnaby-php-src/ext/standard/crc32.h	/^static const unsigned int crc32tab[256] = {$/;"	v	language:C++
