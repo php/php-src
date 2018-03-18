@@ -348,6 +348,7 @@ int fpm_sockets_init_main() /* {{{ */
 	unsigned i, lq_len;
 	struct fpm_worker_pool_s *wp;
 	char sockname[32];
+	char sockpath[256];
 	char *inherited;
 	struct listening_socket_s *ls;
 
@@ -363,7 +364,9 @@ int fpm_sockets_init_main() /* {{{ */
 			sprintf(sockname, "FPM_SOCKETS_%d", i);
 		}
 		inherited = getenv(sockname);
-		if (!inherited) break;
+		if (!inherited) {
+			break;
+		}
 
 		while (inherited && *inherited) {
 			char *comma = strchr(inherited, ',');
@@ -376,11 +379,17 @@ int fpm_sockets_init_main() /* {{{ */
 
 			eq = strchr(inherited, '=');
 			if (eq) {
-				*eq = '\0';
+				int sockpath_len = eq - inherited;
+				if (sockpath_len > 255) {
+					/* this should never happen as UDS limit is lower */
+					sockpath_len = 255;
+				}
+				memcpy(sockpath, inherited, sockpath_len);
+				sockpath[sockpath_len] = '\0';
 				fd_no = atoi(eq + 1);
-				type = fpm_sockets_domain_from_address(inherited);
-				zlog(ZLOG_NOTICE, "using inherited socket fd=%d, \"%s\"", fd_no, inherited);
-				fpm_sockets_hash_op(fd_no, 0, inherited, type, FPM_STORE_SOCKET);
+				type = fpm_sockets_domain_from_address(sockpath);
+				zlog(ZLOG_NOTICE, "using inherited socket fd=%d, \"%s\"", fd_no, sockpath);
+				fpm_sockets_hash_op(fd_no, 0, sockpath, type, FPM_STORE_SOCKET);
 			}
 
 			if (comma) {
