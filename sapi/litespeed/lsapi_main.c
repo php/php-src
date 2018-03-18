@@ -412,8 +412,8 @@ static int lsapi_activate_user_ini();
 
 static int sapi_lsapi_activate()
 {
-    char *path, *doc_root, *server_name;
-    size_t path_len, doc_root_len, server_name_len;
+    char *path, *server_name;
+    size_t path_len, server_name_len;
 
     /* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
     if (!SG(request_info).path_translated) {
@@ -500,7 +500,7 @@ static void init_request_info( void )
 {
     char * pContentType = LSAPI_GetHeader( H_CONTENT_TYPE );
     char * pAuth;
-    
+
     SG(request_info).content_type = pContentType ? pContentType : "";
     SG(request_info).request_method = LSAPI_GetRequestMethod();
     SG(request_info).query_string = LSAPI_GetQueryString();
@@ -510,7 +510,7 @@ static void init_request_info( void )
 
     /* It is not reset by zend engine, set it to 200. */
     SG(sapi_headers).http_response_code = 200;
-    
+
     pAuth = LSAPI_GetHeader( H_AUTHORIZATION );
     php_handle_auth_data(pAuth);
 }
@@ -767,7 +767,7 @@ static int lsapi_activate_user_ini_mk_user_config(_lsapi_activate_user_ini_ctx *
     /* Find cached config entry: If not found, create one */
     ctx->entry = zend_hash_str_find_ptr(&user_config_cache, ctx->path, ctx->path_len);
 
-    if (!ctx->entry) 
+    if (!ctx->entry)
     {
         ctx->entry = pemalloc(sizeof(user_config_cache_entry), 1);
         ctx->entry->expires = 0;
@@ -837,7 +837,7 @@ static int lsapi_activate_user_ini_finally(_lsapi_activate_user_ini_ctx *ctx,
     int rc = SUCCESS;
     fn_activate_user_ini_chain_t *fn_next = next;
 
-    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR, 
+    php_ini_activate_config(&ctx->entry->user_config, PHP_INI_PERDIR,
                             PHP_INI_STAGE_HTACCESS);
 
     if (*fn_next) {
@@ -1256,11 +1256,11 @@ int main( int argc, char * argv[] )
 #endif
 
 #if PHP_MAJOR_VERSION >= 7
-#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0  
+#if defined(ZEND_SIGNALS) || PHP_MINOR_VERSION > 0
     zend_signal_startup();
 #endif
 #endif
-    
+
     if (argc > 1 ) {
         if ( parse_opt( argc, argv, &climode,
                 &php_ini_path, &php_bind ) == -1 ) {
@@ -1331,7 +1331,7 @@ int main( int argc, char * argv[] )
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
     int is_criu = LSCRIU_Init(); // Must be called before the regular init as it unsets the parameters.
 #endif
-    
+
     LSAPI_Init_Env_Parameters( NULL );
     lsapi_mode = 1;
 
@@ -1343,9 +1343,8 @@ int main( int argc, char * argv[] )
         php_bind = NULL;
     }
 
-    int iRequestsProcessed = 0;
     int result;
-    
+
     while( ( result = LSAPI_Prefork_Accept_r( &g_req )) >= 0 ) {
 #if defined(linux) || defined(__linux) || defined(__linux__) || defined(__gnu_linux__)
         if (is_criu && !result) {
@@ -1540,5 +1539,3 @@ PHP_FUNCTION(apache_get_modules)
  * vim600: sw=4 ts=4 fdm=marker
  * vim<600: sw=4 ts=4
  */
-
-
