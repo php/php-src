@@ -2496,7 +2496,6 @@ double_quotes_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				newline = 2; /* Windows newline */
 				/* fall through */
 			case '\n':
 				indentation = spacing = 0;
@@ -2528,7 +2527,9 @@ double_quotes_scan_done:
 
 					/* newline before label will be subtracted from returned text, but
 					 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
-					if (!newline) {
+					if (YYCURSOR[-indentation - 2] == '\r' && YYCURSOR[-indentation - 1] == '\n') {
+						newline = 2; /* Windows newline */
+					} else {
 						newline = 1;
 					}
 
@@ -2604,7 +2605,6 @@ heredoc_scan_done:
 				if (*YYCURSOR == '\n') {
 					YYCURSOR++;
 				}
-				newline = 2; /* Windows newline */
 				/* fall through */
 			case '\n':
 				indentation = spacing = 0;
@@ -2637,7 +2637,9 @@ heredoc_scan_done:
 
 					/* newline before label will be subtracted from returned text, but
 					 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
-					if (!newline) {
+					if (YYCURSOR[-indentation - 2] == '\r' && YYCURSOR[-indentation - 1] == '\n') {
+						newline = 2; /* Windows newline */
+					} else {
 						newline = 1;
 					}
 
