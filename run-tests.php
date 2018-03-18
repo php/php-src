@@ -860,7 +860,9 @@ HELP;
 
 		junit_save_xml();
 
-		if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
+		if (getenv('REPORT_EXIT_STATUS') !== '0' &&
+			getenv('REPORT_EXIT_STATUS') !== 'no' &&
+			($sum_results['FAILED'] || $sum_results['BORKED'] || $sum_results['LEAKED'])) {
 			exit(1);
 		}
 
