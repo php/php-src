@@ -48,10 +48,11 @@ int fpm_status_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 int fpm_status_handle_request(void) /* {{{ */
 {
 	struct fpm_scoreboard_s scoreboard, *scoreboard_p;
-	struct fpm_scoreboard_proc_s proc;
+	struct fpm_scoreboard_proc_s *proc_p;
 	char *buffer, *time_format, time_buffer[64];
 	time_t now_epoch;
 	int full, encode;
+	unsigned int i;
 	char *short_syntax, *short_post;
 	char *full_pre, *full_syntax, *full_post, *full_separator;
 	zend_string *_GET_str;
@@ -81,6 +82,10 @@ int fpm_status_handle_request(void) /* {{{ */
 	if (fpm_status_uri && !strcmp(fpm_status_uri, SG(request_info).request_uri)) {
 		fpm_request_executing();
 
+		/* full status ? */
+		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
+		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
+
 		scoreboard_p = fpm_scoreboard_get();
 		if (!scoreboard_p) {
 			zlog(ZLOG_ERROR, "status: unable to find or access status shared memory");
@@ -91,6 +96,9 @@ int fpm_status_handle_request(void) /* {{{ */
 			PUTS("Internal error. Please review log file for errors.");
 			return 1;
 		}
+
+		struct fpm_scoreboard_proc_s procs[scoreboard_p->nprocs];
+		memset(procs, 0, sizeof(struct fpm_scoreboard_proc_s) * scoreboard_p->nprocs);
 
 		if (!fpm_spinlock(&scoreboard_p->lock, 1)) {
 			zlog(ZLOG_NOTICE, "[pool %s] status: scoreboard already in used.", scoreboard_p->pool);
@@ -103,6 +111,14 @@ int fpm_status_handle_request(void) /* {{{ */
 		}
 		/* copy the scoreboard not to bother other processes */
 		scoreboard = *scoreboard_p;
+
+		if (full){
+			for(i=0; i<scoreboard.nprocs; i++){
+				proc_p = fpm_scoreboard_proc_acquire(scoreboard_p, i, 0);
+				procs[i] = *proc_p;
+				fpm_scoreboard_proc_release(proc_p);
+			}
+		}
 		fpm_unlock(scoreboard_p->lock);
 
 		if (scoreboard.idle < 0 || scoreboard.active < 0) {
@@ -125,9 +141,6 @@ int fpm_status_handle_request(void) /* {{{ */
 			return 1;
 		}
 
-		/* full status ? */
-		_GET_str = zend_string_init("_GET", sizeof("_GET")-1, 0);
-		full = (fpm_php_get_string_from_table(_GET_str, "full") != NULL);
 		short_syntax = short_post = NULL;
 		full_separator = full_pre = full_syntax = full_post = NULL;
 		encode = 0;
@@ -385,7 +398,6 @@ int fpm_status_handle_request(void) /* {{{ */
 
 		/* no need to test the var 'full' */
 		if (full_syntax) {
-			unsigned int i;
 			int first;
 			zend_string *tmp_query_string;
 			char *query_string;
@@ -401,11 +413,10 @@ int fpm_status_handle_request(void) /* {{{ */
 			}
 
 			first = 1;
-			for (i=0; i<scoreboard_p->nprocs; i++) {
-				if (!scoreboard_p->procs[i] || !scoreboard_p->procs[i]->used) {
+			for (i=0; i<scoreboard.nprocs; i++) {
+				if (!procs[i].used) {
 					continue;
 				}
-				proc = *scoreboard_p->procs[i];
 
 				if (first) {
 					first = 0;
@@ -417,48 +428,48 @@ int fpm_status_handle_request(void) /* {{{ */
 
 				query_string = NULL;
 				tmp_query_string = NULL;
-				if (proc.query_string[0] != '\0') {
+				if (procs[i].query_string[0] != '\0') {
 					if (!encode) {
-						query_string = proc.query_string;
+						query_string = procs[i].query_string;
 					} else {
-						tmp_query_string = php_escape_html_entities_ex((unsigned char *)proc.query_string, strlen(proc.query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1);
+						tmp_query_string = php_escape_html_entities_ex((unsigned char *)procs[i].query_string, strlen(procs[i].query_string), 1, ENT_HTML_IGNORE_ERRORS & ENT_COMPAT, NULL, 1);
 						query_string = ZSTR_VAL(tmp_query_string);
 					}
 				}
 
 #ifdef HAVE_FPM_LQ
 				/* prevent NaN */
-				if (proc.cpu_duration.tv_sec == 0 && proc.cpu_duration.tv_usec == 0) {
+				if (procs[i].cpu_duration.tv_sec == 0 && procs[i].cpu_duration.tv_usec == 0) {
 					cpu = 0.;
 				} else {
-					cpu = (proc.last_request_cpu.tms_utime + proc.last_request_cpu.tms_stime + proc.last_request_cpu.tms_cutime + proc.last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (proc.cpu_duration.tv_sec + proc.cpu_duration.tv_usec / 1000000.) * 100.;
+					cpu = (procs[i].last_request_cpu.tms_utime + procs[i].last_request_cpu.tms_stime + procs[i].last_request_cpu.tms_cutime + procs[i].last_request_cpu.tms_cstime) / fpm_scoreboard_get_tick() / (procs[i].cpu_duration.tv_sec + procs[i].cpu_duration.tv_usec / 1000000.) * 100.;
 				}
 #endif
 
-				if (proc.request_stage == FPM_REQUEST_ACCEPTING) {
-					duration = proc.duration;
+				if (procs[i].request_stage == FPM_REQUEST_ACCEPTING) {
+					duration = procs[i].duration;
 				} else {
-					timersub(&now, &proc.accepted, &duration);
+					timersub(&now, &procs[i].accepted, &duration);
 				}
-				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&proc.start_epoch));
+				strftime(time_buffer, sizeof(time_buffer) - 1, time_format, localtime(&procs[i].start_epoch));
 				spprintf(&buffer, 0, full_syntax,
-					(int) proc.pid,
-					fpm_request_get_stage_name(proc.request_stage),
+					(int) procs[i].pid,
+					fpm_request_get_stage_name(procs[i].request_stage),
 					time_buffer,
-					(unsigned long) (now_epoch - proc.start_epoch),
-					proc.requests,
+					(unsigned long) (now_epoch - procs[i].start_epoch),
+					procs[i].requests,
 					duration.tv_sec * 1000000UL + duration.tv_usec,
-					proc.request_method[0] != '\0' ? proc.request_method : "-",
-					proc.request_uri[0] != '\0' ? proc.request_uri : "-",
+					procs[i].request_method[0] != '\0' ? procs[i].request_method : "-",
+					procs[i].request_uri[0] != '\0' ? procs[i].request_uri : "-",
 					query_string ? "?" : "",
 					query_string ? query_string : "",
-					proc.content_length,
-					proc.auth_user[0] != '\0' ? proc.auth_user : "-",
-					proc.script_filename[0] != '\0' ? proc.script_filename : "-",
+					procs[i].content_length,
+					procs[i].auth_user[0] != '\0' ? procs[i].auth_user : "-",
+					procs[i].script_filename[0] != '\0' ? procs[i].script_filename : "-",
 #ifdef HAVE_FPM_LQ
-					proc.request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
+					procs[i].request_stage == FPM_REQUEST_ACCEPTING ? cpu : 0.,
 #endif
-					proc.request_stage == FPM_REQUEST_ACCEPTING ? proc.memory : 0);
+					procs[i].request_stage == FPM_REQUEST_ACCEPTING ? procs[i].memory : 0);
 				PUTS(buffer);
 				efree(buffer);
 
@@ -478,4 +489,3 @@ int fpm_status_handle_request(void) /* {{{ */
 	return 0;
 }
 /* }}} */
-
