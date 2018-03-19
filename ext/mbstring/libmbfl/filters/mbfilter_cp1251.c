@@ -144,7 +144,7 @@ mbfl_filt_conv_wchar_cp1251(int c, mbfl_convert_filter *filter)
 /* all of this is so ugly now! */
 static int mbfl_filt_ident_cp1251(int c, mbfl_identify_filter *filter)
 {
-	if (c >= 0x80 && c < 0xff)
+	if (c >= 0x80 && c <= 0xff)
 		filter->flag = 0;
 	else
 		filter->flag = 1; /* not it */
