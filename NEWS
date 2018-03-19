@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - GD:
   . Fixed libpng warning when loading interlaced images. (Brett)
 
+- FPM:
+  . Fixed bug #76109 (Unsafe access to fpm scoreboard).
+    (Till Backhaus, Jakub Zelenka)
+
 - Iconv:
   . Fixed bug GH-7953 (ob_clean() only does not set Content-Encoding). (cmb)
   . Fixed bug GH-7980 (Unexpected result for iconv_mime_decode). (cmb)
