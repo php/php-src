@@ -979,7 +979,9 @@ save_or_mail_results();
 
 junit_save_xml();
 
-if (getenv('REPORT_EXIT_STATUS') == 1 && ($sum_results['FAILED'] || $sum_results['BORKED'])) {
+if (getenv('REPORT_EXIT_STATUS') !== '0' &&
+	getenv('REPORT_EXIT_STATUS') !== 'no' &&
+	($sum_results['FAILED'] || $sum_results['BORKED'])) {
 	exit(1);
 }
 exit(0);
