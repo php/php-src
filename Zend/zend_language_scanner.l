@@ -1114,6 +1114,22 @@ skip_escape_conversion:
 		goto emit_token; \
 	} while (0)
 
+#define RETURN_TOKEN_WITH_VAL(_token) do { \
+		token = _token; \
+		goto emit_token_with_val; \
+	} while (0)
+
+#define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
+		token = _token; \
+		offset = _offset; \
+		goto emit_token_with_str; \
+	} while (0)
+
+#define SKIP_TOKEN(_token) do { \
+		token = _token; \
+		goto skip_token; \
+	} while (0)
+
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 
@@ -1178,19 +1194,6 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
 }
-
-#define RETURN_TOKEN(token) return emit_token(token, start_line);
-
-#define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
-		token = _token; \
-		offset = _offset; \
-		goto emit_token_with_str; \
-	} while (0)
-
-#define SKIP_TOKEN(_token) do { \
-		token = _token; \
-		goto skip_token; \
-	} while (0)
 
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
@@ -2274,7 +2277,6 @@ skip_escape_conversion:
 
 	if (YYCURSOR == YYLIMIT) {
 		YYCURSOR = saved_cursor;
-		ZVAL_NULL(zendlval);
 		RETURN_TOKEN(T_START_HEREDOC);
 	}
 
@@ -2311,7 +2313,7 @@ skip_escape_conversion:
 			int retval;
 
 			ZVAL_UNDEF(&zv);
-			retval = lex_scan(&zv);
+			retval = lex_scan(&zv, NULL);
 			zval_dtor(&zv);
 
 			if (EG(exception)) {
@@ -2572,20 +2574,30 @@ double_quotes_scan_done:
 
 heredoc_scan_done:
 
-	if (!EG(exception)) {
-		yyleng = YYCURSOR - SCNG(yy_text);
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
-
-		if (!SCNG(heredoc_scan_ahead)
-		    && strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-			zend_string *copy = Z_STR_P(zendlval);
-
-			zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0);
-			zend_string_release(copy);
-		}
+	if (EG(exception)) {
+		RETURN_TOKEN(T_ERROR);
 	}
 
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	yyleng = YYCURSOR - SCNG(yy_text);
+	ZVAL_STRINGL(zendlval, yytext, yyleng);
+
+	if (!SCNG(heredoc_scan_ahead)) {
+		zend_string *copy = Z_STR_P(zendlval);
+
+	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+
+		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)
+		    && PARSER_MODE()) {
+			zend_string_free(copy);
+			RETURN_TOKEN(T_ERROR);
+		}
+
+		zend_string_free(copy);
+	}
+
+	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
@@ -2661,10 +2673,15 @@ heredoc_scan_done:
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (spacing != -1 && !EG(exception)) {
-		zend_copy_value(zendlval, yytext, yyleng);
+	if (EG(exception)) {
+		RETURN_TOKEN(T_ERROR);
+	}
 
-		strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES);
+	zend_copy_value(zendlval, yytext, yyleng);
+
+	if (spacing != -1
+	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
+		RETURN_TOKEN(T_ERROR);
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);
