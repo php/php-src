@@ -4215,7 +4215,7 @@ static int zend_jit_assign_to_variable(dasm_State    **Dst,
                                        zend_jit_addr   res_addr)
 /* Labels: 1,2,3,4,5 */
 {
-	ZEND_ASSERT(Z_MODE(var_addr) == IS_MEM_ZVAL);
+	//ZEND_ASSERT(Z_MODE(var_addr) == IS_MEM_ZVAL);
 	if (var_info & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT|MAY_BE_RESOURCE)) {
 		int in_cold = 0;
 
@@ -6558,7 +6558,7 @@ static int zend_jit_assign(dasm_State **Dst, const zend_op *opline, zend_op_arra
 	op1_info = OP1_INFO();
 	op2_info = OP2_INFO();
 
-	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_use : -1);
+	op1_addr = zend_jit_decode_op(op_array, opline->op1_type, opline->op1, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op1_def : -1);
 	op2_addr = zend_jit_decode_op(op_array, opline->op2_type, opline->op2, opline, ra, ra ? ssa->ops[opline - op_array->opcodes].op2_use : -1);
 	if (opline->result_type == IS_UNUSED) {
 		res_addr = 0;
