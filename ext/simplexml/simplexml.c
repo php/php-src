@@ -2009,34 +2009,7 @@ static zval *sxe_get_value(zval *z, zval *rv) /* {{{ */
 }
 /* }}} */
 
-static zend_object_handlers sxe_object_handlers = { /* {{{ */
-	ZEND_OBJECTS_STORE_HANDLERS,
-	sxe_property_read,
-	sxe_property_write,
-	sxe_dimension_read,
-	sxe_dimension_write,
-	sxe_property_get_adr,
-	sxe_get_value,			/* get */
-	NULL,
-	sxe_property_exists,
-	sxe_property_delete,
-	sxe_dimension_exists,
-	sxe_dimension_delete,
-	sxe_get_properties,
-	NULL, /* zend_get_std_object_handlers()->get_method,*/
-	NULL, /* zend_get_std_object_handlers()->call_method,*/
-	NULL, /* zend_get_std_object_handlers()->get_constructor, */
-	NULL, /* zend_get_std_object_handlers()->get_class_name,*/
-	sxe_objects_compare,
-	sxe_object_cast,
-	sxe_count_elements,
-	sxe_get_debug_info,
-	NULL,
-	sxe_get_gc,
-	NULL,
-	NULL
-};
-/* }}} */
+static zend_object_handlers sxe_object_handlers;
 
 /* {{{ sxe_object_clone()
  */
@@ -2715,13 +2688,30 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_class_entry->get_iterator = php_sxe_get_iterator;
 	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
 	zend_class_implements(sxe_class_entry, 1, zend_ce_traversable);
+
+	memcpy(&sxe_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
 	sxe_object_handlers.dtor_obj = sxe_object_dtor;
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
 	sxe_object_handlers.clone_obj = sxe_object_clone;
-	sxe_object_handlers.get_method = zend_get_std_object_handlers()->get_method;
-	sxe_object_handlers.get_constructor = zend_get_std_object_handlers()->get_constructor;
-	sxe_object_handlers.get_class_name = zend_get_std_object_handlers()->get_class_name;
+	sxe_object_handlers.read_property = sxe_property_read;
+	sxe_object_handlers.write_property = sxe_property_write;
+	sxe_object_handlers.read_dimension = sxe_dimension_read;
+	sxe_object_handlers.write_dimension = sxe_dimension_write;
+	sxe_object_handlers.get_property_ptr_ptr = sxe_property_get_adr;
+	sxe_object_handlers.get = sxe_get_value;
+	sxe_object_handlers.has_property = sxe_property_exists;
+	sxe_object_handlers.unset_property = sxe_property_delete;
+	sxe_object_handlers.has_dimension = sxe_dimension_exists;
+	sxe_object_handlers.unset_dimension = sxe_dimension_delete;
+	sxe_object_handlers.get_properties = sxe_get_properties;
+	sxe_object_handlers.compare_objects = sxe_objects_compare;
+	sxe_object_handlers.cast_object = sxe_object_cast;
+	sxe_object_handlers.count_elements = sxe_count_elements;
+	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
+	sxe_object_handlers.get_closure = NULL;
+	sxe_object_handlers.get_gc = sxe_get_gc;
+	
 	sxe_class_entry->serialize = zend_class_serialize_deny;
 	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 

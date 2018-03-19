@@ -878,7 +878,7 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -911,7 +911,7 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -948,7 +948,7 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 	ze_zip_object *obj;
 	zval tmp_member;
 	zip_prop_handler *hnd = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	int retval = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING) {

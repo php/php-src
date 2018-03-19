@@ -197,7 +197,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_store_del(zend_object *object) /* {{{ *
 }
 /* }}} */
 
-ZEND_API zend_object_handlers* ZEND_FASTCALL zend_get_std_object_handlers(void)
+ZEND_API const zend_object_handlers* ZEND_FASTCALL zend_get_std_object_handlers(void)
 {
 	return &std_object_handlers;
 }

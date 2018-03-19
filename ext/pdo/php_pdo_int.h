@@ -51,7 +51,7 @@ extern zend_object *pdo_row_new(zend_class_entry *ce);
 extern const zend_function_entry pdo_row_functions[];
 extern zend_class_entry *pdo_row_ce;
 void pdo_row_free_storage(zend_object *std);
-extern zend_object_handlers pdo_row_object_handlers;
+extern const zend_object_handlers pdo_row_object_handlers;
 
 zend_object_iterator *php_pdo_dbstmt_iter_get(zend_class_entry *ce, zval *object);
 

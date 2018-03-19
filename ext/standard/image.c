@@ -1512,6 +1512,7 @@ PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
+/* }}} */
 
 /*
  * Local variables:

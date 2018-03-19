@@ -2668,7 +2668,7 @@ static int row_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-zend_object_handlers pdo_row_object_handlers = {
+const zend_object_handlers pdo_row_object_handlers = {
 	0,
 	zend_objects_destroy_object,
 	pdo_row_free_storage,

@@ -208,7 +208,7 @@ static zend_always_inline const void *zend_memrchr(const void *s, int c, size_t 
 
 
 static zend_always_inline const char *
-zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, char *end)
+zend_memnrstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
 {
     const char *p = end;
     const char ne = needle[needle_len-1];

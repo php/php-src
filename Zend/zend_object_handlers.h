@@ -165,7 +165,7 @@ struct _zend_object_handlers {
 };
 
 BEGIN_EXTERN_C()
-extern ZEND_API zend_object_handlers std_object_handlers;
+extern const ZEND_API zend_object_handlers std_object_handlers;
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
