@@ -220,7 +220,7 @@ static int php_array_key_compare_string_case(const void *a, const void *b) /* {{
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-	char *s1, *s2;
+	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
 	char buf2[MAX_LENGTH_OF_LONG + 1];
@@ -253,7 +253,7 @@ static int php_array_key_compare_string(const void *a, const void *b) /* {{{ */
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-	char *s1, *s2;
+	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
 	char buf2[MAX_LENGTH_OF_LONG + 1];
@@ -286,7 +286,7 @@ static int php_array_key_compare_string_natural_general(const void *a, const voi
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-	char *s1, *s2;
+	const char *s1, *s2;
 	size_t l1, l2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
 	char buf2[MAX_LENGTH_OF_LONG + 1];
@@ -338,7 +338,7 @@ static int php_array_key_compare_string_locale(const void *a, const void *b) /* 
 {
 	Bucket *f = (Bucket *) a;
 	Bucket *s = (Bucket *) b;
-	char *s1, *s2;
+	const char *s1, *s2;
 	char buf1[MAX_LENGTH_OF_LONG + 1];
 	char buf2[MAX_LENGTH_OF_LONG + 1];
 
@@ -1656,7 +1656,7 @@ PHP_FUNCTION(array_search)
 }
 /* }}} */
 
-static zend_always_inline int php_valid_var_name(char *var_name, size_t var_name_len) /* {{{ */
+static zend_always_inline int php_valid_var_name(const char *var_name, size_t var_name_len) /* {{{ */
 {
 #if 1
 	/* first 256 bits for first character, and second 256 bits for the next */
@@ -1713,7 +1713,7 @@ static zend_always_inline int php_valid_var_name(char *var_name, size_t var_name
 }
 /* }}} */
 
-PHPAPI int php_prefix_varname(zval *result, zval *prefix, char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
+PHPAPI int php_prefix_varname(zval *result, const zval *prefix, const char *var_name, size_t var_name_len, zend_bool add_underscore) /* {{{ */
 {
 	ZVAL_NEW_STR(result, zend_string_alloc(Z_STRLEN_P(prefix) + (add_underscore ? 1 : 0) + var_name_len, 0));
 	memcpy(Z_STRVAL_P(result), Z_STRVAL_P(prefix), Z_STRLEN_P(prefix));
