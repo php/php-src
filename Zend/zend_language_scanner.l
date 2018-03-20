@@ -2574,18 +2574,15 @@ double_quotes_scan_done:
 
 heredoc_scan_done:
 
-	if (EG(exception)) {
-		RETURN_TOKEN(T_ERROR);
-	}
-
 	yyleng = YYCURSOR - SCNG(yy_text);
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	if (!SCNG(heredoc_scan_ahead)) {
+	if (!SCNG(heredoc_scan_ahead) && !EG(exception)) {
 		zend_string *copy = Z_STR_P(zendlval);
 
 	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-			RETURN_TOKEN(T_ERROR);
+			ZVAL_STRINGL(zendlval, yytext, yyleng);
+			RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 		}
 
 		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)
@@ -2672,16 +2669,11 @@ heredoc_scan_done:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
-
-	if (EG(exception)) {
-		RETURN_TOKEN(T_ERROR);
-	}
-
 	zend_copy_value(zendlval, yytext, yyleng);
 
-	if (spacing != -1
+	if (!EG(exception) && spacing != -1 && PARSER_MODE()
 	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
-		RETURN_TOKEN(T_ERROR);
+		zend_copy_value(zendlval, yytext, yyleng);
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);
