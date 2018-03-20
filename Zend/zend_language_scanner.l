@@ -2514,7 +2514,7 @@ double_quotes_scan_done:
 
 				if (YYCURSOR == YYLIMIT) {
 					ZVAL_NULL(zendlval);
-					RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 				}
 
 				/* Check for ending label on the next line */
@@ -2631,7 +2631,7 @@ heredoc_scan_done:
 				if (YYCURSOR == YYLIMIT) {
 					CG(increment_lineno) = 1;
 					ZVAL_NULL(zendlval);
-					RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 				}
 
 				/* Check for ending label on the next line */
