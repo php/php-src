@@ -1,4 +1,4 @@
-鬼車インターフェース Version 6.7.0   2017/12/08
+鬼車インターフェース Version 6.8.0   2018/03/13
 
 #include <oniguruma.h>
 
@@ -220,6 +220,77 @@
   1 reg: 正規表現オブジェクト
 
 
+# OnigMatchParam* onig_new_match_param()
+
+  OnigMatchParamオブジェクトを生成し、onig_initialize_match_param()を使用して
+  中身を初期化する。
+
+
+# void onig_free_match_param(OnigMatchParam* mp)
+
+  OnigMatchParamオブジェクトで使用しているメモリを開放する。
+
+  引数
+  1 mp: OnigMatchParamオブジェクト
+
+
+# void onig_initialize_match_param(OnigMatchParam* mp)
+
+  マッチパラメタ構造体にデフォルト値をセットする。
+  マッチパラメタは、onig_match_with_param(), onig_search_with_param()で
+  使用される。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+
+
+# int onig_set_match_stack_limit_size_of_match_param(OnigMatchParam* mp, unsigned int limit)
+
+  マッチスタックの最大深さをセットする。
+  0は、無制限を表す。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 limit: 制限数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_retry_limit_in_match_of_match_param(OnigMatchParam* mp, unsigned long limit)
+
+  一回のマッチでのリトライ数の最大値をセットする。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 limit: 制限回数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_progress_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  前進時の内容の呼び出し(callouts)で呼び出される関数をセットする。
+  もし０(NULL)がセットされると、前進時に呼び出しは起こらない。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 f: 呼び出される関数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_retraction_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  後退時の内容の呼び出し(callouts)で呼び出される関数をセットする。
+  もし０(NULL)がセットされると、後退時に呼び出しは起こらない。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 f: 呼び出される関数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
 
 # int onig_search(regex_t* reg, const UChar* str, const UChar* end, const UChar* start,
                    const UChar* range, OnigRegion* region, OnigOptionType option)
@@ -245,6 +316,15 @@
     ONIG_OPTION_POSIX_REGION  region引数をPOSIX APIのregmatch_t[]にする
 
 
+# int onig_search_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                   const UChar* start, const UChar* range, OnigRegion* region,
+                   OnigOptionType option, OnigMatchParam* mp)
+
+  引数
+  1-7:  onig_search()と同じ
+  8 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
+
+
 # int onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
 		 OnigRegion* region, OnigOptionType option)
 
@@ -264,6 +344,15 @@
     ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
     ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
     ONIG_OPTION_POSIX_REGION  region引数をPOSIX APIのregmatch_t[]にする
+
+
+# int onig_match_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                            const UChar* at, OnigRegion* region,
+                            OnigOptionType option, OnigMatchParam* mp)
+
+  引数
+  1-6:  onig_match()と同じ
+  7 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
 
 
 # int onig_scan(regex_t* reg, const UChar* str, const UChar* end,
@@ -625,6 +714,47 @@
 
   マッチスタックサイズの最大値を指定する。
   (size = 0: 無制限)
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# unsigned long onig_get_retry_limit_in_match(void)
+
+  マッチング関数内でのリトライ数の制限値を返す。
+  (デフォルト: 10000000)
+
+  正常終了戻り値: 制限値
+
+
+# int onig_set_retry_limit_in_match(unsigned long n)
+
+  マッチング関数内でのリトライ数の制限値を指定する。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_progress_callout(void)
+
+  前進時の内容の呼び出しで呼び出される関数を返す。
+
+
+# int onig_set_progress_callout(OnigCalloutFunc f)
+
+  前進時の内容の呼び出しで呼び出される関数を指定する。
+  もし0(NULL)を指定すると、前進時の内容の呼び出しで呼び出しは起こらない。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_retraction_callout(void)
+
+  後退時の内容の呼び出しで呼び出される関数を返す。
+
+
+# int onig_set_retraction_callout(OnigCalloutFunc f)
+
+  後退時の内容の呼び出しで呼び出される関数を指定する。
+  もし0(NULL)を指定すると、後退時の内容の呼び出しで呼び出しは起こらない。
 
   正常終了戻り値: ONIG_NORMAL
 

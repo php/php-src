@@ -2,7 +2,7 @@
   regparse.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -34,9 +34,16 @@
 #include <stdio.h>
 #endif
 
+#define INIT_TAG_NAMES_ALLOC_NUM   5
+
 #define WARN_BUFSIZE    256
 
 #define CASE_FOLD_IS_APPLIED_INSIDE_NEGATIVE_CCLASS
+
+#define IS_ALLOWED_CODE_IN_CALLOUT_NAME(c) \
+  ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_' /* || c == '!' */)
+#define IS_ALLOWED_CODE_IN_CALLOUT_TAG_NAME(c) \
+  ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || (c >= '0' && c <= '9') || c == '_')
 
 
 OnigSyntaxType OnigSyntaxOniguruma = {
@@ -51,6 +58,8 @@ OnigSyntaxType OnigSyntaxOniguruma = {
       ONIG_SYN_OP2_QMARK_LT_NAMED_GROUP | ONIG_SYN_OP2_ESC_K_NAMED_BACKREF |
       ONIG_SYN_OP2_QMARK_LPAREN_IF_ELSE |
       ONIG_SYN_OP2_QMARK_TILDE_ABSENT_GROUP |
+      ONIG_SYN_OP2_QMARK_BRACE_CALLOUT_CONTENTS |
+      ONIG_SYN_OP2_ASTERISK_CALLOUT_NAME    |
       ONIG_SYN_OP2_ESC_X_Y_GRAPHEME_CLUSTER |
       ONIG_SYN_OP2_ESC_CAPITAL_R_GENERAL_NEWLINE |
       ONIG_SYN_OP2_ESC_CAPITAL_N_O_SUPER_DOT |
@@ -342,25 +351,6 @@ onig_strcpy(UChar* dest, const UChar* src, const UChar* end)
   }
 }
 
-static UChar*
-strdup_with_null(OnigEncoding enc, UChar* s, UChar* end)
-{
-  int slen, term_len, i;
-  UChar *r;
-
-  slen = (int )(end - s);
-  term_len = ONIGENC_MBC_MINLEN(enc);
-
-  r = (UChar* )xmalloc(slen + term_len);
-  CHECK_NULL_RETURN(r);
-  xmemcpy(r, s, slen);
-
-  for (i = 0; i < term_len; i++)
-    r[slen + i] = (UChar )0;
-
-  return r;
-}
-
 static int
 save_entry(ScanEnv* env, enum SaveType type, int* id)
 {
@@ -532,6 +522,106 @@ onig_st_insert_strend(hash_table_type* table, const UChar* str_key,
   return result;
 }
 
+
+typedef struct {
+  OnigEncoding enc;
+  int    type; // callout type: single or not
+  UChar* s;
+  UChar* end;
+} st_callout_name_key;
+
+static int
+callout_name_table_cmp(st_callout_name_key* x, st_callout_name_key* y)
+{
+  UChar *p, *q;
+  int c;
+
+  if (x->enc  != y->enc)  return 1;
+  if (x->type != y->type) return 1;
+  if ((x->end - x->s) != (y->end - y->s))
+    return 1;
+
+  p = x->s;
+  q = y->s;
+  while (p < x->end) {
+    c = (int )*p - (int )*q;
+    if (c != 0) return c;
+
+    p++; q++;
+  }
+
+  return 0;
+}
+
+static int
+callout_name_table_hash(st_callout_name_key* x)
+{
+  UChar *p;
+  int val = 0;
+
+  p = x->s;
+  while (p < x->end) {
+    val = val * 997 + (int )*p++;
+  }
+
+  /* use intptr_t for escape warning in Windows */
+  return val + (val >> 5) + ((intptr_t )x->enc & 0xffff) + x->type;
+}
+
+extern hash_table_type*
+onig_st_init_callout_name_table_with_size(int size)
+{
+  static struct st_hash_type hashType = {
+    callout_name_table_cmp,
+    callout_name_table_hash,
+  };
+
+  return (hash_table_type* )
+           onig_st_init_table_with_size(&hashType, size);
+}
+
+extern int
+onig_st_lookup_callout_name_table(hash_table_type* table,
+                                  OnigEncoding enc,
+                                  int type,
+                                  const UChar* str_key,
+                                  const UChar* end_key,
+                                  hash_data_type *value)
+{
+  st_callout_name_key key;
+
+  key.enc  = enc;
+  key.type = type;
+  key.s    = (UChar* )str_key;
+  key.end  = (UChar* )end_key;
+
+  return onig_st_lookup(table, (st_data_t )(&key), value);
+}
+
+static int
+st_insert_callout_name_table(hash_table_type* table,
+                             OnigEncoding enc, int type,
+                             UChar* str_key, UChar* end_key,
+                             hash_data_type value)
+{
+  st_callout_name_key* key;
+  int result;
+
+  key = (st_callout_name_key* )xmalloc(sizeof(st_callout_name_key));
+  CHECK_NULL_RETURN_MEMERR(key);
+
+  /* key->s: don't duplicate, because str_key is duped in callout_name_entry() */
+  key->enc  = enc;
+  key->type = type;
+  key->s    = str_key;
+  key->end  = end_key;
+  result = onig_st_insert(table, (st_data_t )key, value);
+  if (result) {
+    xfree(key);
+  }
+  return result;
+}
+
 #endif /* USE_ST_LIBRARY */
 
 
@@ -547,6 +637,8 @@ typedef struct {
 } NameEntry;
 
 #ifdef USE_ST_LIBRARY
+
+#define INIT_NAMES_ALLOC_NUM    5
 
 typedef st_table  NameTable;
 typedef st_data_t HashDataType;   /* 1.6 st.h doesn't define st_data_t type */
@@ -873,13 +965,13 @@ name_add(regex_t* reg, UChar* name, UChar* name_end, int backref, ScanEnv* env)
   if (IS_NULL(e)) {
 #ifdef USE_ST_LIBRARY
     if (IS_NULL(t)) {
-      t = onig_st_init_strend_table_with_size(5);
+      t = onig_st_init_strend_table_with_size(INIT_NAMES_ALLOC_NUM);
       reg->name_table = (void* )t;
     }
     e = (NameEntry* )xmalloc(sizeof(NameEntry));
     CHECK_NULL_RETURN_MEMERR(e);
 
-    e->name = strdup_with_null(reg->enc, name, name_end);
+    e->name = onigenc_strdup(reg->enc, name, name_end);
     if (IS_NULL(e->name)) {
       xfree(e);  return ONIGERR_MEMORY;
     }
@@ -930,7 +1022,7 @@ name_add(regex_t* reg, UChar* name, UChar* name_end, int backref, ScanEnv* env)
     }
     e = &(t->e[t->num]);
     t->num++;
-    e->name = strdup_with_null(reg->enc, name, name_end);
+    e->name = onigenc_strdup(reg->enc, name, name_end);
     if (IS_NULL(e->name)) return ONIGERR_MEMORY;
     e->name_len = name_end - name;
 #endif
@@ -1029,6 +1121,781 @@ onig_noname_group_capture_is_active(regex_t* reg)
 
   return 1;
 }
+
+#ifdef USE_CALLOUT
+
+typedef struct {
+  OnigCalloutType type;
+  int             in;
+  OnigCalloutFunc start_func;
+  OnigCalloutFunc end_func;
+  int             arg_num;
+  int             opt_arg_num;
+  unsigned int    arg_types[ONIG_CALLOUT_MAX_ARGS_NUM];
+  OnigValue       opt_defaults[ONIG_CALLOUT_MAX_ARGS_NUM];
+  UChar*          name; /* reference to GlobalCalloutNameTable entry: e->name */
+} CalloutNameListEntry;
+
+typedef struct {
+  int  n;
+  int  alloc;
+  CalloutNameListEntry* v;
+} CalloutNameListType;
+
+static CalloutNameListType* GlobalCalloutNameList;
+
+static int
+make_callout_func_list(CalloutNameListType** rs, int init_size)
+{
+  CalloutNameListType* s;
+  CalloutNameListEntry* v;
+
+  *rs = 0;
+
+  s = xmalloc(sizeof(*s));
+  if (IS_NULL(s)) return ONIGERR_MEMORY;
+
+  v = (CalloutNameListEntry* )xmalloc(sizeof(CalloutNameListEntry) * init_size);
+  if (IS_NULL(v)) {
+    xfree(s);
+    return ONIGERR_MEMORY;
+  }
+
+  s->n = 0;
+  s->alloc = init_size;
+  s->v = v;
+
+  *rs = s;
+  return ONIG_NORMAL;
+}
+
+static void
+free_callout_func_list(CalloutNameListType* s)
+{
+  if (IS_NOT_NULL(s)) {
+    if (IS_NOT_NULL(s->v)) {
+      int i, j;
+
+      for (i = 0; i < s->n; i++) {
+        CalloutNameListEntry* e = s->v + i;
+        for (j = e->arg_num - e->opt_arg_num; j < e->arg_num; j++) {
+          if (e->arg_types[j] == ONIG_TYPE_STRING) {
+            UChar* p = e->opt_defaults[j].s.start;
+            if (IS_NOT_NULL(p)) xfree(p);
+          }
+        }
+      }
+      xfree(s->v);
+    }
+    xfree(s);
+  }
+}
+
+static int
+callout_func_list_add(CalloutNameListType* s, int* rid)
+{
+  if (s->n >= s->alloc) {
+    int new_size = s->alloc * 2;
+    CalloutNameListEntry* nv = (CalloutNameListEntry* )
+      xrealloc(s->v, sizeof(CalloutNameListEntry) * new_size);
+    if (IS_NULL(nv)) return ONIGERR_MEMORY;
+
+    s->alloc = new_size;
+    s->v = nv;
+  }
+
+  *rid = s->n;
+
+  xmemset(&(s->v[s->n]), 0, sizeof(*(s->v)));
+  s->n++;
+  return ONIG_NORMAL;
+}
+
+
+typedef struct {
+  UChar* name;
+  int    name_len;   /* byte length */
+  int    id;
+} CalloutNameEntry;
+
+#ifdef USE_ST_LIBRARY
+typedef st_table  CalloutNameTable;
+#else
+typedef struct {
+  CalloutNameEntry* e;
+  int               num;
+  int               alloc;
+} CalloutNameTable;
+#endif
+
+static CalloutNameTable* GlobalCalloutNameTable;
+static int CalloutNameIDCounter;
+
+#ifdef USE_ST_LIBRARY
+
+static int
+i_free_callout_name_entry(st_callout_name_key* key, CalloutNameEntry* e,
+                          void* arg ARG_UNUSED)
+{
+  xfree(e->name);
+  /*xfree(key->s); */ /* is same as e->name */
+  xfree(key);
+  xfree(e);
+  return ST_DELETE;
+}
+
+static int
+callout_name_table_clear(CalloutNameTable* t)
+{
+  if (IS_NOT_NULL(t)) {
+    onig_st_foreach(t, i_free_callout_name_entry, 0);
+  }
+  return 0;
+}
+
+static int
+global_callout_name_table_free(void)
+{
+  if (IS_NOT_NULL(GlobalCalloutNameTable)) {
+    int r = callout_name_table_clear(GlobalCalloutNameTable);
+    if (r != 0) return r;
+
+    onig_st_free_table(GlobalCalloutNameTable);
+    GlobalCalloutNameTable = 0;
+    CalloutNameIDCounter = 0;
+  }
+
+  return 0;
+}
+
+static CalloutNameEntry*
+callout_name_find(OnigEncoding enc, int is_not_single,
+                  const UChar* name, const UChar* name_end)
+{
+  int r;
+  CalloutNameEntry* e;
+  CalloutNameTable* t = GlobalCalloutNameTable;
+
+  e = (CalloutNameEntry* )NULL;
+  if (IS_NOT_NULL(t)) {
+    r = onig_st_lookup_callout_name_table(t, enc, is_not_single, name, name_end,
+                                          (HashDataType* )((void* )(&e)));
+    if (r == 0) { /* not found */
+      if (enc != ONIG_ENCODING_ASCII &&
+          ONIGENC_IS_ASCII_COMPATIBLE_ENCODING(enc)) {
+        enc = ONIG_ENCODING_ASCII;
+        onig_st_lookup_callout_name_table(t, enc, is_not_single, name, name_end,
+                                          (HashDataType* )((void* )(&e)));
+      }
+    }
+  }
+  return e;
+}
+
+#else
+
+static int
+callout_name_table_clear(CalloutNameTable* t)
+{
+  int i;
+  CalloutNameEntry* e;
+
+  if (IS_NOT_NULL(t)) {
+    for (i = 0; i < t->num; i++) {
+      e = &(t->e[i]);
+      if (IS_NOT_NULL(e->name)) {
+        xfree(e->name);
+        e->name     = NULL;
+        e->name_len = 0;
+        e->id       = 0;
+        e->func     = 0;
+      }
+    }
+    if (IS_NOT_NULL(t->e)) {
+      xfree(t->e);
+      t->e = NULL;
+    }
+    t->num = 0;
+  }
+  return 0;
+}
+
+static int
+global_callout_name_table_free(void)
+{
+  if (IS_NOT_NULL(GlobalCalloutNameTable)) {
+    int r = callout_name_table_clear(GlobalCalloutNameTable);
+    if (r != 0) return r;
+
+    xfree(GlobalCalloutNameTable);
+    GlobalCalloutNameTable = 0;
+    CalloutNameIDCounter = 0;
+  }
+  return 0;
+}
+
+static CalloutNameEntry*
+callout_name_find(UChar* name, UChar* name_end)
+{
+  int i, len;
+  CalloutNameEntry* e;
+  CalloutNameTable* t = Calloutnames;
+
+  if (IS_NOT_NULL(t)) {
+    len = name_end - name;
+    for (i = 0; i < t->num; i++) {
+      e = &(t->e[i]);
+      if (len == e->name_len && onig_strncmp(name, e->name, len) == 0)
+        return e;
+    }
+  }
+  return (CalloutNameEntry* )NULL;
+}
+
+#endif
+
+/* name string must be single byte char string. */
+static int
+callout_name_entry(CalloutNameEntry** rentry, OnigEncoding enc,
+                   int is_not_single, UChar* name, UChar* name_end)
+{
+  int r;
+  CalloutNameEntry* e;
+  CalloutNameTable* t = GlobalCalloutNameTable;
+
+  *rentry = 0;
+  if (name_end - name <= 0)
+    return ONIGERR_INVALID_CALLOUT_NAME;
+
+  e = callout_name_find(enc, is_not_single, name, name_end);
+  if (IS_NULL(e)) {
+#ifdef USE_ST_LIBRARY
+    if (IS_NULL(t)) {
+      t = onig_st_init_callout_name_table_with_size(INIT_NAMES_ALLOC_NUM);
+      GlobalCalloutNameTable = t;
+    }
+    e = (CalloutNameEntry* )xmalloc(sizeof(CalloutNameEntry));
+    CHECK_NULL_RETURN_MEMERR(e);
+
+    e->name = onigenc_strdup(enc, name, name_end);
+    if (IS_NULL(e->name)) {
+      xfree(e);  return ONIGERR_MEMORY;
+    }
+
+    r = st_insert_callout_name_table(t, enc, is_not_single,
+                                     e->name, (e->name + (name_end - name)),
+                                     (HashDataType )e);
+    if (r < 0) return r;
+
+#else
+
+    int alloc;
+
+    if (IS_NULL(t)) {
+      alloc = INIT_NAMES_ALLOC_NUM;
+      t = (CalloutNameTable* )xmalloc(sizeof(CalloutNameTable));
+      CHECK_NULL_RETURN_MEMERR(t);
+      t->e     = NULL;
+      t->alloc = 0;
+      t->num   = 0;
+
+      t->e = (CalloutNameEntry* )xmalloc(sizeof(CalloutNameEntry) * alloc);
+      if (IS_NULL(t->e)) {
+        xfree(t);
+        return ONIGERR_MEMORY;
+      }
+      t->alloc = alloc;
+      GlobalCalloutNameTable = t;
+      goto clear;
+    }
+    else if (t->num == t->alloc) {
+      int i;
+
+      alloc = t->alloc * 2;
+      t->e = (CalloutNameEntry* )xrealloc(t->e, sizeof(CalloutNameEntry) * alloc);
+      CHECK_NULL_RETURN_MEMERR(t->e);
+      t->alloc = alloc;
+
+    clear:
+      for (i = t->num; i < t->alloc; i++) {
+        t->e[i].name       = NULL;
+        t->e[i].name_len   = 0;
+        t->e[i].id         = 0;
+      }
+    }
+    e = &(t->e[t->num]);
+    t->num++;
+    e->name = onigenc_strdup(enc, name, name_end);
+    if (IS_NULL(e->name)) return ONIGERR_MEMORY;
+#endif
+
+    CalloutNameIDCounter++;
+    e->id = CalloutNameIDCounter;
+    e->name_len = (int )(name_end - name);
+  }
+
+  *rentry = e;
+  return e->id;
+}
+
+static int
+is_allowed_callout_name(OnigEncoding enc, UChar* name, UChar* name_end)
+{
+  UChar* p;
+  OnigCodePoint c;
+
+  if (name >= name_end) return 0;
+
+  p = name;
+  while (p < name_end) {
+    c = ONIGENC_MBC_TO_CODE(enc, p, name_end);
+    if (! IS_ALLOWED_CODE_IN_CALLOUT_NAME(c))
+      return 0;
+
+    if (p == name) {
+      if (c >= '0' && c <= '9') return 0;
+    }
+
+    p += ONIGENC_MBC_ENC_LEN(enc, p);
+  }
+
+  return 1;
+}
+
+static int
+is_allowed_callout_tag_name(OnigEncoding enc, UChar* name, UChar* name_end)
+{
+  UChar* p;
+  OnigCodePoint c;
+
+  if (name >= name_end) return 0;
+
+  p = name;
+  while (p < name_end) {
+    c = ONIGENC_MBC_TO_CODE(enc, p, name_end);
+    if (! IS_ALLOWED_CODE_IN_CALLOUT_TAG_NAME(c))
+      return 0;
+
+    if (p == name) {
+      if (c >= '0' && c <= '9') return 0;
+    }
+
+    p += ONIGENC_MBC_ENC_LEN(enc, p);
+  }
+
+  return 1;
+}
+
+extern int
+onig_set_callout_of_name(OnigEncoding enc, OnigCalloutType callout_type,
+                         UChar* name, UChar* name_end, int in,
+                         OnigCalloutFunc start_func,
+                         OnigCalloutFunc end_func,
+                         int arg_num, unsigned int arg_types[],
+                         int opt_arg_num, OnigValue opt_defaults[])
+{
+  int r;
+  int i;
+  int j;
+  int id;
+  int is_not_single;
+  CalloutNameEntry* e;
+  CalloutNameListEntry* fe;
+
+  if (callout_type != ONIG_CALLOUT_TYPE_SINGLE)
+    return ONIGERR_INVALID_ARGUMENT;
+
+  if (arg_num < 0 || arg_num > ONIG_CALLOUT_MAX_ARGS_NUM)
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  if (opt_arg_num < 0 || opt_arg_num > arg_num)
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  if (start_func == 0 && end_func == 0)
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  if ((in & ONIG_CALLOUT_IN_PROGRESS) == 0 && (in & ONIG_CALLOUT_IN_RETRACTION) == 0)
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  for (i = 0; i < arg_num; i++) {
+    unsigned int t = arg_types[i];
+    if (t == ONIG_TYPE_VOID)
+      return ONIGERR_INVALID_CALLOUT_ARG;
+    else {
+      if (i >= arg_num - opt_arg_num) {
+        if (t != ONIG_TYPE_LONG && t != ONIG_TYPE_CHAR && t != ONIG_TYPE_STRING &&
+            t != ONIG_TYPE_TAG)
+          return ONIGERR_INVALID_CALLOUT_ARG;
+      }
+      else {
+        if (t != ONIG_TYPE_LONG) {
+          t = t & ~ONIG_TYPE_LONG;
+          if (t != ONIG_TYPE_CHAR && t != ONIG_TYPE_STRING && t != ONIG_TYPE_TAG)
+            return ONIGERR_INVALID_CALLOUT_ARG;
+        }
+      }
+    }
+  }
+
+  if (! is_allowed_callout_name(enc, name, name_end)) {
+    return ONIGERR_INVALID_CALLOUT_NAME;
+  }
+
+  is_not_single = (callout_type != ONIG_CALLOUT_TYPE_SINGLE);
+  id = callout_name_entry(&e, enc, is_not_single, name, name_end);
+  if (id < 0) return id;
+
+  r = ONIG_NORMAL;
+  if (IS_NULL(GlobalCalloutNameList)) {
+    r = make_callout_func_list(&GlobalCalloutNameList, 10);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  while (id >= GlobalCalloutNameList->n) {
+    int rid;
+    r = callout_func_list_add(GlobalCalloutNameList, &rid);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  fe = GlobalCalloutNameList->v + id;
+  fe->type         = callout_type;
+  fe->in           = in;
+  fe->start_func   = start_func;
+  fe->end_func     = end_func;
+  fe->arg_num      = arg_num;
+  fe->opt_arg_num  = opt_arg_num;
+  fe->name         = e->name;
+
+  for (i = 0; i < arg_num; i++) {
+    fe->arg_types[i] = arg_types[i];
+  }
+  for (i = arg_num - opt_arg_num, j = 0; i < arg_num; i++, j++) {
+    if (fe->arg_types[i] == ONIG_TYPE_STRING) {
+      OnigValue* val = opt_defaults + j;
+      UChar* ds = onigenc_strdup(enc, val->s.start, val->s.end);
+      CHECK_NULL_RETURN_MEMERR(ds);
+
+      fe->opt_defaults[i].s.start = ds;
+      fe->opt_defaults[i].s.end   = ds + (val->s.end - val->s.start);
+    }
+    else {
+      fe->opt_defaults[i] = opt_defaults[j];
+    }
+  }
+
+  r = id; // return id
+  return r;
+}
+
+static int
+get_callout_name_id_by_name(OnigEncoding enc, int is_not_single,
+                            UChar* name, UChar* name_end, int* rid)
+{
+  int r;
+  CalloutNameEntry* e;
+
+  if (! is_allowed_callout_name(enc, name, name_end)) {
+    return ONIGERR_INVALID_CALLOUT_NAME;
+  }
+
+  e = callout_name_find(enc, is_not_single, name, name_end);
+  if (IS_NULL(e)) {
+    return ONIGERR_UNDEFINED_CALLOUT_NAME;
+  }
+
+  r = ONIG_NORMAL;
+  *rid = e->id;
+
+  return r;
+}
+
+extern OnigCalloutFunc
+onig_get_callout_start_func(regex_t* reg, int callout_num)
+{
+  /* If used for callouts of contents, return 0. */
+  CalloutListEntry* e;
+
+  e = onig_reg_callout_list_at(reg, callout_num);
+  return e->start_func;
+}
+
+extern const UChar*
+onig_get_callout_tag_start(regex_t* reg, int callout_num)
+{
+  CalloutListEntry* e = onig_reg_callout_list_at(reg, callout_num);
+  return e->tag_start;
+}
+
+extern const UChar*
+onig_get_callout_tag_end(regex_t* reg, int callout_num)
+{
+  CalloutListEntry* e = onig_reg_callout_list_at(reg, callout_num);
+  return e->tag_end;
+}
+
+
+extern OnigCalloutType
+onig_get_callout_type_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].type;
+}
+
+extern OnigCalloutFunc
+onig_get_callout_start_func_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].start_func;
+}
+
+extern OnigCalloutFunc
+onig_get_callout_end_func_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].end_func;
+}
+
+extern int
+onig_get_callout_in_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].in;
+}
+
+static int
+get_callout_arg_num_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].arg_num;
+}
+
+static int
+get_callout_opt_arg_num_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].opt_arg_num;
+}
+
+static unsigned int
+get_callout_arg_type_by_name_id(int name_id, int index)
+{
+  return GlobalCalloutNameList->v[name_id].arg_types[index];
+}
+
+static OnigValue
+get_callout_opt_default_by_name_id(int name_id, int index)
+{
+  return GlobalCalloutNameList->v[name_id].opt_defaults[index];
+}
+
+extern UChar*
+onig_get_callout_name_by_name_id(int name_id)
+{
+  return GlobalCalloutNameList->v[name_id].name;
+}
+
+extern int
+onig_global_callout_names_free(void)
+{
+  free_callout_func_list(GlobalCalloutNameList);
+  GlobalCalloutNameList = 0;
+
+  global_callout_name_table_free();
+  return ONIG_NORMAL;
+}
+
+
+typedef st_table   CalloutTagTable;
+typedef intptr_t   CalloutTagVal;
+
+#define CALLOUT_TAG_LIST_FLAG_TAG_EXIST     (1<<0)
+
+static int
+i_callout_callout_list_set(UChar* key, CalloutTagVal e, void* arg)
+{
+  int num;
+  RegexExt* ext = (RegexExt* )arg;
+
+  num = (int )e - 1;
+  ext->callout_list[num].flag |= CALLOUT_TAG_LIST_FLAG_TAG_EXIST;
+  return ST_CONTINUE;
+}
+
+static int
+setup_ext_callout_list_values(regex_t* reg)
+{
+  int i, j;
+  RegexExt* ext;
+
+  ext = REG_EXTP(reg);
+  if (IS_NOT_NULL(ext->tag_table)) {
+    onig_st_foreach((CalloutTagTable *)ext->tag_table, i_callout_callout_list_set,
+                    (st_data_t )ext);
+  }
+
+  for (i = 0; i < ext->callout_num; i++) {
+    CalloutListEntry* e = ext->callout_list + i;
+    if (e->of == ONIG_CALLOUT_OF_NAME) {
+      for (j = 0; j < e->u.arg.num; j++) {
+        if (e->u.arg.types[j] == ONIG_TYPE_TAG) {
+          UChar* start;
+          UChar* end;
+          int num;
+          start = e->u.arg.vals[j].s.start;
+          end   = e->u.arg.vals[j].s.end;
+          num = onig_get_callout_num_by_tag(reg, start, end);
+          if (num < 0) return num;
+          e->u.arg.vals[j].tag = num;
+        }
+      }
+    }
+  }
+
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_callout_tag_is_exist_at_callout_num(regex_t* reg, int callout_num)
+{
+  RegexExt* ext = REG_EXTP(reg);
+
+  if (IS_NULL(ext) || IS_NULL(ext->callout_list)) return 0;
+  if (callout_num > ext->callout_num) return 0;
+
+  return (ext->callout_list[callout_num].flag &
+          CALLOUT_TAG_LIST_FLAG_TAG_EXIST) != 0  ? 1 : 0;
+}
+
+static int
+i_free_callout_tag_entry(UChar* key, CalloutTagVal e, void* arg ARG_UNUSED)
+{
+  xfree(key);
+  return ST_DELETE;
+}
+
+static int
+callout_tag_table_clear(CalloutTagTable* t)
+{
+  if (IS_NOT_NULL(t)) {
+    onig_st_foreach(t, i_free_callout_tag_entry, 0);
+  }
+  return 0;
+}
+
+extern int
+onig_callout_tag_table_free(void* table)
+{
+  CalloutTagTable* t = (CalloutTagTable* )table;
+
+  if (IS_NOT_NULL(t)) {
+    int r = callout_tag_table_clear(t);
+    if (r != 0) return r;
+
+    onig_st_free_table(t);
+  }
+
+  return 0;
+}
+
+extern int
+onig_get_callout_num_by_tag(regex_t* reg,
+                            const UChar* tag, const UChar* tag_end)
+{
+  int r;
+  RegexExt* ext;
+  CalloutTagVal e;
+
+  ext = REG_EXTP(reg);
+  if (IS_NULL(ext) || IS_NULL(ext->tag_table))
+    return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+  r = onig_st_lookup_strend(ext->tag_table, tag, tag_end,
+                            (HashDataType* )((void* )(&e)));
+  if (r == 0) return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+  return (int )e;
+}
+
+static CalloutTagVal
+callout_tag_find(CalloutTagTable* t, const UChar* name, const UChar* name_end)
+{
+  CalloutTagVal e;
+
+  e = -1;
+  if (IS_NOT_NULL(t)) {
+    onig_st_lookup_strend(t, name, name_end, (HashDataType* )((void* )(&e)));
+  }
+  return e;
+}
+
+static int
+callout_tag_table_new(CalloutTagTable** rt)
+{
+  CalloutTagTable* t;
+
+  *rt = 0;
+  t = onig_st_init_strend_table_with_size(INIT_TAG_NAMES_ALLOC_NUM);
+  CHECK_NULL_RETURN_MEMERR(t);
+
+  *rt = t;
+  return ONIG_NORMAL;
+}
+
+static int
+callout_tag_entry_raw(CalloutTagTable* t, UChar* name, UChar* name_end,
+                      CalloutTagVal entry_val)
+{
+  int r;
+  CalloutTagVal val;
+
+  if (name_end - name <= 0)
+    return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+  val = callout_tag_find(t, name, name_end);
+  if (val >= 0)
+    return ONIGERR_MULTIPLEX_DEFINED_NAME;
+
+  r = onig_st_insert_strend(t, name, name_end, (HashDataType )entry_val);
+  if (r < 0) return r;
+
+  return ONIG_NORMAL;
+}
+
+static int
+ext_ensure_tag_table(regex_t* reg)
+{
+  int r;
+  RegexExt* ext;
+  CalloutTagTable* t;
+
+  ext = onig_get_regex_ext(reg);
+  CHECK_NULL_RETURN_MEMERR(ext);
+
+  if (IS_NULL(ext->tag_table)) {
+    r = callout_tag_table_new(&t);
+    if (r != ONIG_NORMAL) return r;
+
+    ext->tag_table = t;
+  }
+
+  return ONIG_NORMAL;
+}
+
+static int
+callout_tag_entry(regex_t* reg, UChar* name, UChar* name_end,
+                  CalloutTagVal entry_val)
+{
+  int r;
+  RegexExt* ext;
+  CalloutListEntry* e;
+
+  r = ext_ensure_tag_table(reg);
+  if (r != ONIG_NORMAL) return r;
+
+  ext = onig_get_regex_ext(reg);
+  r = callout_tag_entry_raw(ext->tag_table, name, name_end, entry_val);
+
+  e = onig_reg_callout_list_at(reg, (int )entry_val);
+  e->tag_start = name;
+  e->tag_end   = name_end;
+
+  return r;
+}
+
+#endif /* USE_CALLOUT */
 
 
 #define INIT_SCANENV_MEMENV_ALLOC_SIZE   16
@@ -1642,6 +2509,116 @@ node_new_keep(Node** node, ScanEnv* env)
   env->keep_num++;
   return ONIG_NORMAL;
 }
+
+#ifdef USE_CALLOUT
+
+extern void
+onig_free_reg_callout_list(int n, CalloutListEntry* list)
+{
+  int i;
+  int j;
+
+  if (IS_NULL(list)) return ;
+
+  for (i = 0; i < n; i++) {
+    if (list[i].of == ONIG_CALLOUT_OF_NAME) {
+      for (j = 0; j < list[i].u.arg.passed_num; j++) {
+        if (list[i].u.arg.types[j] == ONIG_TYPE_STRING) {
+          if (IS_NOT_NULL(list[i].u.arg.vals[j].s.start))
+            xfree(list[i].u.arg.vals[j].s.start);
+        }
+      }
+    }
+    else { /* ONIG_CALLOUT_OF_CONTENTS */
+      if (IS_NOT_NULL(list[i].u.content.start)) {
+        xfree((void* )list[i].u.content.start);
+      }
+    }
+  }
+
+  xfree(list);
+}
+
+extern CalloutListEntry*
+onig_reg_callout_list_at(regex_t* reg, int num)
+{
+  RegexExt* ext = REG_EXTP(reg);
+  CHECK_NULL_RETURN(ext);
+
+  if (num <= 0 || num > ext->callout_num)
+    return 0;
+
+  num--;
+  return ext->callout_list + num;
+}
+
+static int
+reg_callout_list_entry(ScanEnv* env, int* rnum)
+{
+#define INIT_CALLOUT_LIST_NUM  3
+
+  int num;
+  CalloutListEntry* list;
+  CalloutListEntry* e;
+  RegexExt* ext;
+
+  ext = onig_get_regex_ext(env->reg);
+  CHECK_NULL_RETURN_MEMERR(ext);
+
+  if (IS_NULL(ext->callout_list)) {
+    list = (CalloutListEntry* )xmalloc(sizeof(*list) * INIT_CALLOUT_LIST_NUM);
+    CHECK_NULL_RETURN_MEMERR(list);
+
+    ext->callout_list = list;
+    ext->callout_list_alloc = INIT_CALLOUT_LIST_NUM;
+    ext->callout_num = 0;
+  }
+
+  num = ext->callout_num + 1;
+  if (num > ext->callout_list_alloc) {
+    int alloc = ext->callout_list_alloc * 2;
+    list = (CalloutListEntry* )xrealloc(ext->callout_list,
+                                        sizeof(CalloutListEntry) * alloc);
+    CHECK_NULL_RETURN_MEMERR(list);
+
+    ext->callout_list       = list;
+    ext->callout_list_alloc = alloc;
+  }
+
+  e = ext->callout_list + (num - 1);
+
+  e->flag             = 0;
+  e->of               = 0;
+  e->in               = ONIG_CALLOUT_OF_CONTENTS;
+  e->type             = 0;
+  e->tag_start        = 0;
+  e->tag_end          = 0;
+  e->start_func       = 0;
+  e->end_func         = 0;
+  e->u.arg.num        = 0;
+  e->u.arg.passed_num = 0;
+
+  ext->callout_num = num;
+  *rnum = num;
+  return ONIG_NORMAL;
+}
+
+static int
+node_new_callout(Node** node, OnigCalloutOf callout_of, int num, int id,
+                 ScanEnv* env)
+{
+  *node = node_new();
+  CHECK_NULL_RETURN_MEMERR(*node);
+
+  NODE_SET_TYPE(*node, NODE_GIMMICK);
+  GIMMICK_(*node)->id          = id;
+  GIMMICK_(*node)->num         = num;
+  GIMMICK_(*node)->type        = GIMMICK_CALLOUT;
+  GIMMICK_(*node)->detail_type = (int )callout_of;
+
+  return ONIG_NORMAL;
+}
+#endif
 
 static int
 make_extended_grapheme_cluster(Node** node, ScanEnv* env)
@@ -5523,6 +6500,452 @@ parse_char_class(Node** np, OnigToken* tok, UChar** src, UChar* end, ScanEnv* en
 static int parse_subexp(Node** top, OnigToken* tok, int term,
                         UChar** src, UChar* end, ScanEnv* env);
 
+#ifdef USE_CALLOUT
+
+/* (?{...}[tag][+-]) (?{{...}}[tag][+-]) */
+static int
+parse_callout_of_contents(Node** np, int cterm, UChar** src, UChar* end, ScanEnv* env)
+{
+  int r;
+  int i;
+  int in;
+  int num;
+  OnigCodePoint c;
+  UChar* code_start;
+  UChar* code_end;
+  UChar* contents;
+  UChar* tag_start;
+  UChar* tag_end;
+  int brace_nest;
+  CalloutListEntry* e;
+  RegexExt* ext;
+  OnigEncoding enc = env->enc;
+  UChar* p = *src;
+
+  if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  brace_nest = 0;
+  while (PPEEK_IS('{')) {
+    brace_nest++;
+    PINC_S;
+    if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+  }
+
+  in = ONIG_CALLOUT_IN_PROGRESS;
+  code_start = p;
+  while (1) {
+    if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+    code_end = p;
+    PFETCH_S(c);
+    if (c == '}') {
+      i = brace_nest;
+      while (i > 0) {
+        if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+        PFETCH_S(c);
+        if (c == '}') i--;
+        else break;
+      }
+      if (i == 0) break;
+    }
+  }
+
+  if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+
+  PFETCH_S(c);
+  if (c == '[') {
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    tag_start = p;
+    while (! PEND) {
+      if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+      tag_end = p;
+      PFETCH_S(c);
+      if (c == ']') break;
+    }
+    if (! is_allowed_callout_tag_name(enc, tag_start, tag_end))
+      return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+  else {
+    tag_start = tag_end = 0;
+  }
+
+  if (c == 'X') {
+    in |= ONIG_CALLOUT_IN_RETRACTION;
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+  else if (c == '<') {
+    in = ONIG_CALLOUT_IN_RETRACTION;
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+  else if (c == '>') { /* no needs (default) */
+    //in = ONIG_CALLOUT_IN_PROGRESS;
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+
+  if (c != cterm)
+    return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  r = reg_callout_list_entry(env, &num);
+  if (r != 0) return r;
+
+  ext = onig_get_regex_ext(env->reg);
+  if (IS_NULL(ext->pattern)) {
+    r = onig_ext_set_pattern(env->reg, env->pattern, env->pattern_end);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  if (tag_start != tag_end) {
+    r = callout_tag_entry(env->reg, tag_start, tag_end, num);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  contents = onigenc_strdup(enc, code_start, code_end);
+  CHECK_NULL_RETURN_MEMERR(contents);
+
+  r = node_new_callout(np, ONIG_CALLOUT_OF_CONTENTS, num, ONIG_NON_NAME_ID, env);
+  if (r != 0) {
+    xfree(contents);
+    return r;
+  }
+
+  e = onig_reg_callout_list_at(env->reg, num);
+  e->of      = ONIG_CALLOUT_OF_CONTENTS;
+  e->in      = in;
+  e->name_id = ONIG_NON_NAME_ID;
+  e->u.content.start = contents;
+  e->u.content.end   = contents + (code_end - code_start);
+
+  *src = p;
+  return 0;
+}
+
+static long
+parse_long(OnigEncoding enc, UChar* s, UChar* end, int sign_on, long max, long* rl)
+{
+  long v;
+  long d;
+  int flag;
+  UChar* p;
+  OnigCodePoint c;
+
+  if (s >= end) return ONIGERR_INVALID_CALLOUT_ARG;
+
+  flag = 1;
+  v = 0;
+  p = s;
+  while (p < end) {
+    c = ONIGENC_MBC_TO_CODE(enc, p, end);
+    p += ONIGENC_MBC_ENC_LEN(enc, p);
+    if (c >= '0' && c <= '9') {
+      d = (long )(c - '0');
+      if (v > (max - d) / 10)
+        return ONIGERR_INVALID_CALLOUT_ARG;
+
+      v = v * 10 + d;
+    }
+    else if (sign_on != 0 && (c == '-' || c == '+')) {
+      if (c == '-') flag = -1;
+    }
+    else
+      return ONIGERR_INVALID_CALLOUT_ARG;
+
+    sign_on = 0;
+  }
+
+  *rl = flag * v;
+  return ONIG_NORMAL;
+}
+
+static int
+parse_callout_args(int skip_mode, int cterm, UChar** src, UChar* end,
+                   unsigned int types[], OnigValue vals[], ScanEnv* env)
+{
+#define MAX_CALLOUT_ARG_BYTE_LENGTH   128
+
+  int r;
+  int n;
+  int esc;
+  int cn;
+  UChar* s;
+  UChar* e;
+  UChar* eesc;
+  OnigCodePoint c;
+  UChar* bufend;
+  UChar buf[MAX_CALLOUT_ARG_BYTE_LENGTH];
+  OnigEncoding enc = env->enc;
+  UChar* p = *src;
+
+  if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  n = 0;
+  while (n < ONIG_CALLOUT_MAX_ARGS_NUM) {
+    c   = 0;
+    cn  = 0;
+    esc = 0;
+    eesc = 0;
+    bufend = buf;
+    s = e = p;
+    while (1) {
+      if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+      e = p;
+      PFETCH_S(c);
+      if (esc != 0) {
+        esc = 0;
+        if (c == '\\' || c == cterm || c == ',') {
+          /* */
+        }
+        else {
+          e = eesc;
+          cn++;
+        }
+        goto add_char;
+      }
+      else {
+        if (c == '\\') {
+          esc = 1;
+          eesc = e;
+        }
+        else if (c == cterm || c == ',')
+          break;
+        else {
+          size_t clen;
+
+        add_char:
+          if (skip_mode == 0) {
+            clen = p - e;
+            if (bufend + clen > buf + MAX_CALLOUT_ARG_BYTE_LENGTH)
+              return ONIGERR_INVALID_CALLOUT_ARG; /* too long argument */
+
+            xmemcpy(bufend, e, clen);
+            bufend += clen;
+          }
+          cn++;
+        }
+      }
+    }
+
+    if (cn != 0) {
+      if (skip_mode == 0) {
+        if ((types[n] & ONIG_TYPE_LONG) != 0) {
+          int fixed = 0;
+          if (cn > 0) {
+            long rl;
+            r = parse_long(enc, buf, bufend, 1, LONG_MAX, &rl);
+            if (r == ONIG_NORMAL) {
+              vals[n].l = rl;
+              fixed = 1;
+              types[n] = ONIG_TYPE_LONG;
+            }
+          }
+
+          if (fixed == 0) {
+            types[n] = (types[n] & ~ONIG_TYPE_LONG);
+            if (types[n] == ONIG_TYPE_VOID)
+              return ONIGERR_INVALID_CALLOUT_ARG;
+          }
+        }
+
+        switch (types[n]) {
+        case ONIG_TYPE_LONG:
+          break;
+
+        case ONIG_TYPE_CHAR:
+          if (cn != 1) return ONIGERR_INVALID_CALLOUT_ARG;
+          vals[n].c = ONIGENC_MBC_TO_CODE(enc, buf, bufend);
+          break;
+
+        case ONIG_TYPE_STRING:
+          {
+            UChar* rs = onigenc_strdup(enc, buf, bufend);
+            CHECK_NULL_RETURN_MEMERR(rs);
+            vals[n].s.start = rs;
+            vals[n].s.end   = rs + (e - s);
+          }
+          break;
+
+        case ONIG_TYPE_TAG:
+          if (eesc != 0 || ! is_allowed_callout_tag_name(enc, s, e))
+            return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+          vals[n].s.start = s;
+          vals[n].s.end   = e;
+          break;
+
+        case ONIG_TYPE_VOID:
+        case ONIG_TYPE_POINTER:
+          return ONIGERR_PARSER_BUG;
+          break;
+        }
+      }
+
+      n++;
+    }
+
+    if (c == cterm) break;
+  }
+
+  if (c != cterm) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  *src = p;
+  return n;
+}
+
+/* (*name[TAG]) (*name[TAG]{a,b,..}) */
+static int
+parse_callout_of_name(Node** np, int cterm, UChar** src, UChar* end, ScanEnv* env)
+{
+  int r;
+  int i;
+  int in;
+  int num;
+  int name_id;
+  int arg_num;
+  int max_arg_num;
+  int opt_arg_num;
+  int is_not_single;
+  OnigCodePoint c;
+  UChar* name_start;
+  UChar* name_end;
+  UChar* tag_start;
+  UChar* tag_end;
+  Node*  node;
+  CalloutListEntry* e;
+  RegexExt* ext;
+  unsigned int types[ONIG_CALLOUT_MAX_ARGS_NUM];
+  OnigValue    vals[ONIG_CALLOUT_MAX_ARGS_NUM];
+  OnigEncoding enc = env->enc;
+  UChar* p = *src;
+
+  //PFETCH_READY;
+  if (PEND) return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  node = 0;
+  name_start = p;
+  while (1) {
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    name_end = p;
+    PFETCH_S(c);
+    if (c == cterm || c == '[' || c == '{') break;
+  }
+
+  if (! is_allowed_callout_name(enc, name_start, name_end))
+    return ONIGERR_INVALID_CALLOUT_NAME;
+
+  if (c == '[') {
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    tag_start = p;
+    while (! PEND) {
+      if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+      tag_end = p;
+      PFETCH_S(c);
+      if (c == ']') break;
+    }
+    if (! is_allowed_callout_tag_name(enc, tag_start, tag_end))
+      return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+  else {
+    tag_start = tag_end = 0;
+  }
+
+  if (c == '{') {
+    UChar* save;
+
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+
+    /* read for single check only */
+    save = p;
+    arg_num = parse_callout_args(1, '}', &p, end, 0, 0, env);
+    if (arg_num < 0) return arg_num;
+
+    is_not_single = PPEEK_IS(cterm) ?  0 : 1;
+    p = save;
+    r = get_callout_name_id_by_name(enc, is_not_single, name_start, name_end,
+                                    &name_id);
+    if (r != ONIG_NORMAL) return r;
+
+    max_arg_num = get_callout_arg_num_by_name_id(name_id);
+    for (i = 0; i < max_arg_num; i++) {
+      types[i] = get_callout_arg_type_by_name_id(name_id, i);
+    }
+
+    arg_num = parse_callout_args(0, '}', &p, end, types, vals, env);
+    if (arg_num < 0) return arg_num;
+
+    if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
+    PFETCH_S(c);
+  }
+  else {
+    arg_num = 0;
+
+    is_not_single = 0;
+    r = get_callout_name_id_by_name(enc, is_not_single, name_start, name_end,
+                                      &name_id);
+    if (r != ONIG_NORMAL) return r;
+
+    max_arg_num = get_callout_arg_num_by_name_id(name_id);
+    for (i = 0; i < max_arg_num; i++) {
+      types[i] = get_callout_arg_type_by_name_id(name_id, i);
+    }
+  }
+
+  in = onig_get_callout_in_by_name_id(name_id);
+  opt_arg_num = get_callout_opt_arg_num_by_name_id(name_id);
+  if (arg_num > max_arg_num || arg_num < (max_arg_num - opt_arg_num))
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  if (c != cterm)
+    return ONIGERR_INVALID_CALLOUT_PATTERN;
+
+  r = reg_callout_list_entry(env, &num);
+  if (r != 0) return r;
+
+  ext = onig_get_regex_ext(env->reg);
+  if (IS_NULL(ext->pattern)) {
+    r = onig_ext_set_pattern(env->reg, env->pattern, env->pattern_end);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  if (tag_start != tag_end) {
+    r = callout_tag_entry(env->reg, tag_start, tag_end, num);
+    if (r != ONIG_NORMAL) return r;
+  }
+
+  r = node_new_callout(&node, ONIG_CALLOUT_OF_NAME, num, name_id, env);
+  if (r != ONIG_NORMAL) return r;
+
+  e = onig_reg_callout_list_at(env->reg, num);
+  e->of         = ONIG_CALLOUT_OF_NAME;
+  e->in         = in;
+  e->name_id    = name_id;
+  e->type       = onig_get_callout_type_by_name_id(name_id);
+  e->start_func = onig_get_callout_start_func_by_name_id(name_id);
+  e->end_func   = onig_get_callout_end_func_by_name_id(name_id);
+  e->u.arg.num        = max_arg_num;
+  e->u.arg.passed_num = arg_num;
+  for (i = 0; i < max_arg_num; i++) {
+    e->u.arg.types[i] = types[i];
+    if (i < arg_num)
+      e->u.arg.vals[i] = vals[i];
+    else
+      e->u.arg.vals[i] = get_callout_opt_default_by_name_id(name_id, i);
+  }
+
+  *np = node;
+  *src = p;
+  return 0;
+}
+#endif
+
 static int
 parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
                 ScanEnv* env)
@@ -5541,8 +6964,8 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
   if (PEND) return ONIGERR_END_PATTERN_WITH_UNMATCHED_PARENTHESIS;
 
   option = env->options;
-  if (PPEEK_IS('?') &&
-      IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_QMARK_GROUP_EFFECT)) {
+  c = PPEEK;
+  if (c == '?' && IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_QMARK_GROUP_EFFECT)) {
     PINC;
     if (PEND) return ONIGERR_END_PATTERN_IN_GROUP;
 
@@ -5688,6 +7111,18 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
       }
       break;
 
+#ifdef USE_CALLOUT
+    case '{':
+      if (! IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_QMARK_BRACE_CALLOUT_CONTENTS))
+        return ONIGERR_UNDEFINED_GROUP_OPTION;
+
+      r = parse_callout_of_contents(np, ')', &p, end, env);
+      if (r != 0) return r;
+
+      goto end;
+      break;
+#endif
+
     case '(':
       /* (?()...) */
       if (IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_QMARK_LPAREN_IF_ELSE)) {
@@ -5784,6 +7219,29 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
             if (c != ')') goto err_if_else;
           }
         }
+#ifdef USE_CALLOUT
+        else if (c == '?') {
+          if (IS_SYNTAX_OP2(env->syntax,
+                            ONIG_SYN_OP2_QMARK_BRACE_CALLOUT_CONTENTS)) {
+            if (! PEND && PPEEK_IS('{')) {
+              /* condition part is callouts of contents: (?(?{...})THEN|ELSE) */
+              condition_is_checker = 0;
+              PFETCH(c);
+              r = parse_callout_of_contents(&condition, ')', &p, end, env);
+              if (r != 0) return r;
+              goto end_condition;
+            }
+          }
+          goto any_condition;
+        }
+        else if (c == '*' &&
+                 IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_ASTERISK_CALLOUT_NAME)) {
+          condition_is_checker = 0;
+          r = parse_callout_of_name(&condition, ')', &p, end, env);
+          if (r != 0) return r;
+          goto end_condition;
+        }
+#endif
         else {
         any_condition:
           PUNFETCH;
@@ -5797,6 +7255,7 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
           }
         }
 
+      end_condition:
         CHECK_NULL_RETURN_MEMERR(condition);
 
         if (PEND) {
@@ -5985,6 +7444,16 @@ parse_enclosure(Node** np, OnigToken* tok, int term, UChar** src, UChar* end,
       return ONIGERR_UNDEFINED_GROUP_OPTION;
     }
   }
+#ifdef USE_CALLOUT
+  else if (c == '*' &&
+           IS_SYNTAX_OP2(env->syntax, ONIG_SYN_OP2_ASTERISK_CALLOUT_NAME)) {
+    PINC;
+    r = parse_callout_of_name(np, ')', &p, end, env);
+    if (r != 0) return r;
+
+    goto end;
+  }
+#endif
   else {
     if (ONIG_IS_OPTION_ON(env->options, ONIG_OPTION_DONT_CAPTURE_GROUP))
       goto group;
@@ -6059,7 +7528,7 @@ set_quantifier(Node* qnode, Node* target, int group, ScanEnv* env)
       int targetq_num = quantifier_type_num(qnt);
 
 #ifdef USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
-      if (! NODE_IS_BY_NUMBER(qnode) && ! NODE_IS_BY_NUMBER(target) &&
+      if (targetq_num >= 0 && nestq_num >= 0 &&
           IS_SYNTAX_BV(env->syntax, ONIG_SYN_WARN_REDUNDANT_NESTED_REPEAT)) {
         UChar buf[WARN_BUFSIZE];
 
@@ -6733,6 +8202,9 @@ onig_parse_tree(Node** root, const UChar* pattern, const UChar* end,
 {
   int r;
   UChar* p;
+#ifdef USE_CALLOUT
+  RegexExt* ext;
+#endif
 
   names_clear(reg);
 
@@ -6766,6 +8238,14 @@ onig_parse_tree(Node** root, const UChar* pattern, const UChar* end,
 #endif
 
   reg->num_mem = env->num_mem;
+
+#ifdef USE_CALLOUT
+  ext = REG_EXTP(reg);
+  if (IS_NOT_NULL(ext) && ext->callout_num > 0) {
+    r = setup_ext_callout_list_values(reg);
+  }
+#endif
+
   return r;
 }
 

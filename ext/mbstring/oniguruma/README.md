@@ -17,6 +17,7 @@ in other regular expression implementations.
 Its features include:
 * Character encoding can be specified per regular expression object.
 * Several regular expression types are supported:
+  * Oniguruma (native)
   * POSIX
   * Grep
   * GNU Regex
@@ -38,10 +39,29 @@ Supported character encodings:
 * CP1251:  contributed by Byte
 
 
+New feature of version 6.8.1
+--------------------------
+
+* Update shared library version to 5.0.0 for API incompatible changes from 6.7.1
+
+
+New feature of version 6.8.0
+--------------------------
+
+* Retry-limit-in-match function enabled by default
+* NEW: configure option --enable-posix-api=no  (* enabled by default)
+* NEW API: onig_search_with_param(), onig_match_with_param()
+* NEW: Callouts of contents  (?{...contents...}) (?{...}\[X<>]) (?{{....}})
+* NEW: Callouts of name      (*name) (*name\[tag]{args...})
+* NEW: Builtin callouts  (*FAIL) (*MISMATCH) (*ERROR{n}) (*COUNT) (*MAX{n}) etc..
+
+(* Callout function API is experimental level and isn't fixed definitely yet. Undocumented now)
+
+
 New feature of version 6.7.1
 --------------------------
 
-* NEW: Mechanism of try-in-match-limit (* disabled by default)
+* NEW: Mechanism of retry-limit-in-match (* disabled by default)
 
 
 New feature of version 6.7.0
@@ -50,13 +70,7 @@ New feature of version 6.7.0
 * NEW: hexadecimal codepoint \uHHHH
 * NEW: add ONIG_SYNTAX_ONIGURUMA (== ONIG_SYNTAX_DEFAULT)
 * Disabled \N and \O on ONIG_SYNTAX_RUBY
-* Reduced object size
-
-
-New feature of version 6.6.1
---------------------------
-
-* Fix definition of \X
+* Reduced size of object file
 
 
 New feature of version 6.6.0
@@ -65,7 +79,7 @@ New feature of version 6.6.0
 * NEW: ASCII only mode options for character type/property (?WDSP)
 * NEW: Extended Grapheme Cluster boundary \y, \Y (*original)
 * NEW: Extended Grapheme Cluster \X
-* Range-clear (Absent-clear) operator restores previous range in backtrack.
+* Range-clear (Absent-clear) operator restores previous range in retractions.
 
 
 New feature of version 6.5.0
@@ -74,9 +88,9 @@ New feature of version 6.5.0
 * NEW: \K (keep)
 * NEW: \R (general newline) \N (no newline)
 * NEW: \O (true anychar)
-* NEW: if-then-else syntax   (?(...)...\|...)
+* NEW: if-then-else   (?(...)...\|...)
 * NEW: Backreference validity checker (?(xxx)) (*original)
-* NEW: Absent repeater (?~absent)
+* NEW: Absent repeater (?~absent)  \[is equal to (?\~\|absent|\O*)]
 * NEW: Absent expression   (?~|absent|expr)  (*original)
 * NEW: Absent stopper (?~|absent)     (*original)
 
@@ -204,6 +218,7 @@ Sample Programs
 |sample/scan.c         |example of using onig_scan().             |
 |sample/sql.c          |example of the variable meta characters.  |
 |sample/user_property.c|example of user defined Unicode property. |
+|sample/callout.c      |example of callouts.                      |
 
 
 Test Programs

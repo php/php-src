@@ -2,7 +2,7 @@
   utf8.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -280,8 +280,8 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag,
 OnigEncodingType OnigEncodingUTF8 = {
   mbc_enc_len,
   "UTF-8",     /* name */
-  6,           /* max byte length */
-  1,           /* min byte length */
+  6,           /* max enc length */
+  1,           /* min enc length */
   onigenc_is_mbc_newline_0x0a,
   mbc_to_code,
   code_to_mbclen,

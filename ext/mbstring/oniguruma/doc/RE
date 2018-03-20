@@ -1,4 +1,4 @@
-Oniguruma Regular Expressions Version 6.7.0    2017/12/08
+Oniguruma Regular Expressions Version 6.8.0    2018/03/08
 
 syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
@@ -262,6 +262,24 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
 
                      Assigning the same name to two or more subexps is allowed.
 
+
+  <Callouts>
+
+  * Callouts of contents
+  (?{...contents...})         callouts in progress
+  (?{...contents...}D)        D is a direction flag char. ('X' or '<' or '>')
+                              D = 'X': progress and retraction, '<': retraction only
+                              '>': progress only (default)
+  (?{...contents...}[tag])    tag assigned
+  (?{...contents...}[tag]D)
+
+  * Callouts of name
+  (*name)
+  (*name{args...})            with args
+  (*name[tag])                tag assigned
+  (*name[tag]{args...})
+
+
   <Absent functions>
 
   (?~absent)         Absent repeater    (* proposed by Tanaka Akira)
@@ -288,6 +306,8 @@ syntax: ONIG_SYNTAX_ONIGURUMA (default)
      * Nested Absent functions are not supported and the behavior
        is undefined.
 
+
+  <if-then-else>
 
   (?(condition_exp)then_exp|else_exp)    if-then-else
   (?(condition_exp)then_exp)             if-then

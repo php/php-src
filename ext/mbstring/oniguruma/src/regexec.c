@@ -26,10 +26,7 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
-
 #include "regint.h"
-
-#define USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
 
 #define IS_MBC_WORD_ASCII_MODE(enc,s,end,mode) \
   ((mode) == 0 ? ONIGENC_IS_MBC_WORD(enc,s,end) : ONIGENC_IS_MBC_WORD_ASCII(enc,s,end))
@@ -42,13 +39,71 @@
 
 #define CHECK_INTERRUPT_IN_MATCH
 
+#ifdef USE_CALLOUT
+typedef struct {
+  int last_match_at_call_counter;
+  struct {
+    OnigType  type;
+    OnigValue val;
+  } slot[ONIG_CALLOUT_DATA_SLOT_NUM];
+} CalloutData;
+#endif
+
+struct OnigMatchParamStruct {
+  unsigned int    match_stack_limit;
+  unsigned long   retry_limit_in_match;
+  OnigCalloutFunc progress_callout_of_contents;
+  OnigCalloutFunc retraction_callout_of_contents;
+#ifdef USE_CALLOUT
+  int             match_at_call_counter;
+  void*           callout_user_data;
+  CalloutData*    callout_data;
+  int             callout_data_alloc_num;
+#endif
+};
+
+extern int
+onig_set_match_stack_limit_size_of_match_param(OnigMatchParam* param,
+                                               unsigned int limit)
+{
+  param->match_stack_limit = limit;
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_set_retry_limit_in_match_of_match_param(OnigMatchParam* param,
+                                             unsigned long limit)
+{
+  param->retry_limit_in_match = limit;
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_set_progress_callout_of_match_param(OnigMatchParam* param, OnigCalloutFunc f)
+{
+  param->progress_callout_of_contents = f;
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_set_retraction_callout_of_match_param(OnigMatchParam* param, OnigCalloutFunc f)
+{
+  param->retraction_callout_of_contents = f;
+  return ONIG_NORMAL;
+}
+
+
+
 typedef struct {
   void* stack_p;
   int   stack_n;
   OnigOptionType options;
   OnigRegion*    region;
-  int   ptr_num;
-  const UChar* start;   /* search start position (for \G: BEGIN_POSITION) */
+  int            ptr_num;
+  const UChar*   start;   /* search start position (for \G: BEGIN_POSITION) */
+  unsigned int   match_stack_limit;
+  unsigned long  retry_limit_in_match;
+  OnigMatchParam* mp;
 #ifdef USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
   int    best_len;      /* for ONIG_OPTION_FIND_LONGEST */
   UChar* best_s;
@@ -142,8 +197,8 @@ static OpInfoType OpInfo[] = {
   { OP_FAIL,                "fail",                 ARG_NON },
   { OP_JUMP,                "jump",                 ARG_RELADDR },
   { OP_PUSH,                "push",                 ARG_RELADDR },
-  { OP_PUSH_SUPER,          "push_SUPER",           ARG_RELADDR },
-  { OP_POP,                 "pop",                  ARG_NON },
+  { OP_PUSH_SUPER,          "push-super",           ARG_RELADDR },
+  { OP_POP_OUT,             "pop-out",              ARG_NON },
   { OP_PUSH_OR_JUMP_EXACT1, "push-or-jump-e1",      ARG_SPECIAL },
   { OP_PUSH_IF_PEEK_NEXT,   "push-if-peek-next",    ARG_SPECIAL },
   { OP_REPEAT,              "repeat",               ARG_SPECIAL },
@@ -169,6 +224,10 @@ static OpInfoType OpInfo[] = {
   { OP_RETURN,               "return",               ARG_NON },
   { OP_PUSH_SAVE_VAL,        "push-save-val",        ARG_SPECIAL },
   { OP_UPDATE_VAR,           "update-var",           ARG_SPECIAL },
+#ifdef USE_CALLOUT
+  { OP_CALLOUT_CONTENTS,     "callout-contents",     ARG_SPECIAL },
+  { OP_CALLOUT_NAME,         "callout-name",         ARG_SPECIAL },
+#endif
   { -1, "", ARG_NON }
 };
 
@@ -240,7 +299,6 @@ onig_print_compiled_byte_code(FILE* f, UChar* bp, UChar** nextp, UChar* start,
   RelAddrType addr;
   LengthType len;
   MemNumType mem;
-  StateCheckNumType scn;
   OnigCodePoint code;
   OnigOptionType option;
   ModeType mode;
@@ -484,6 +542,26 @@ onig_print_compiled_byte_code(FILE* f, UChar* bp, UChar** nextp, UChar* start,
         fprintf(f, ":%d:%d", type, mem);
       }
       break;
+
+#ifdef USE_CALLOUT
+    case OP_CALLOUT_CONTENTS:
+      {
+        GET_MEMNUM_INC(mem,  bp); // number
+        fprintf(f, ":%d", mem);
+      }
+      break;
+
+    case OP_CALLOUT_NAME:
+      {
+        int id;
+
+        GET_MEMNUM_INC(id,   bp); // id
+        GET_MEMNUM_INC(mem,  bp); // number
+
+        fprintf(f, ":%d:%d", id, mem);
+      }
+      break;
+#endif
 
     default:
       fprintf(stderr, "onig_print_compiled_byte_code: undefined code %d\n", *--bp);
@@ -782,6 +860,45 @@ onig_region_copy(OnigRegion* to, OnigRegion* from)
 #endif
 }
 
+#ifdef USE_CALLOUT
+#define CALLOUT_BODY(func, ain, aname_id, anum, user, args, result) do { \
+  args.in            = (ain);\
+  args.name_id       = (aname_id);\
+  args.num           = anum;\
+  args.regex         = reg;\
+  args.string        = str;\
+  args.string_end    = end;\
+  args.start         = sstart;\
+  args.right_range   = right_range;\
+  args.current       = s;\
+  args.retry_in_match_counter = retry_in_match_counter;\
+  args.msa           = msa;\
+  args.stk_base      = stk_base;\
+  args.stk           = stk;\
+  args.mem_start_stk = mem_start_stk;\
+  args.mem_end_stk   = mem_end_stk;\
+  result = (func)(&args, user);\
+} while (0)
+
+#define RETRACTION_CALLOUT(func, aname_id, anum, user) do {\
+  int result;\
+  OnigCalloutArgs args;\
+  CALLOUT_BODY(func, ONIG_CALLOUT_IN_RETRACTION, aname_id, anum, user, args, result);\
+  switch (result) {\
+  case ONIG_CALLOUT_FAIL:\
+  case ONIG_CALLOUT_SUCCESS:\
+    break;\
+  default:\
+    if (result > 0) {\
+      result = ONIGERR_INVALID_ARGUMENT;\
+    }\
+    best_len = result;\
+    goto finish;\
+    break;\
+  }\
+} while(0)
+#endif
+
 
 /** stack **/
 #define INVALID_STACK_INDEX   -1
@@ -794,32 +911,38 @@ onig_region_copy(OnigRegion* to, OnigRegion* from)
 #define STK_ALT                   (0x0002 | STK_ALT_FLAG)
 #define STK_ALT_PREC_READ_NOT     (0x0004 | STK_ALT_FLAG)
 #define STK_ALT_LOOK_BEHIND_NOT   (0x0006 | STK_ALT_FLAG)
+
 /* handled by normal-POP */
-#define STK_MEM_START              0x0100
-#define STK_MEM_END                0x8200
-#define STK_REPEAT_INC             0x0300
-//#define STK_STATE_CHECK_MARK       0x1000
+#define STK_MEM_START              0x0010
+#define STK_MEM_END                0x8030
+#define STK_REPEAT_INC             0x0050
+#ifdef USE_CALLOUT
+#define STK_CALLOUT                0x0070
+#endif
+
 /* avoided by normal-POP */
 #define STK_VOID                   0x0000  /* for fill a blank */
 #define STK_EMPTY_CHECK_START      0x3000
 #define STK_EMPTY_CHECK_END        0x5000  /* for recursive call */
-#define STK_MEM_END_MARK           0x8400
-#define STK_TO_VOID_START          0x0500  /* mark for "(?>...)" */
-#define STK_REPEAT                 0x0600
-#define STK_CALL_FRAME             0x0700
-#define STK_RETURN                 0x0800
-#define STK_SAVE_VAL               0x0900
+#define STK_MEM_END_MARK           0x8100
+#define STK_TO_VOID_START          0x1200  /* mark for "(?>...)" */
+#define STK_REPEAT                 0x0300
+#define STK_CALL_FRAME             0x0400
+#define STK_RETURN                 0x0500
+#define STK_SAVE_VAL               0x0600
 
 /* stack type check mask */
 #define STK_MASK_POP_USED          STK_ALT_FLAG
-#define STK_MASK_TO_VOID_TARGET    0x10fe
+#define STK_MASK_POP_HANDLED       0x0010
+#define STK_MASK_POP_HANDLED_TIL   (STK_MASK_POP_HANDLED | 0x0004)
+#define STK_MASK_TO_VOID_TARGET    0x100e
 #define STK_MASK_MEM_END_OR_MARK   0x8000  /* MEM_END or MEM_END_MARK */
 
 typedef intptr_t StackIndex;
 
 typedef struct _StackType {
   unsigned int type;
-  int id;
+  int zid;
   union {
     struct {
       UChar *pcode;      /* byte code position */
@@ -853,25 +976,61 @@ typedef struct _StackType {
       UChar* v;
       UChar* v2;
     } val;
+#ifdef USE_CALLOUT
+    struct {
+      int num;
+      OnigCalloutFunc func;
+    } callout;
+#endif
   } u;
 } StackType;
 
+#ifdef USE_CALLOUT
+
+struct OnigCalloutArgsStruct {
+  OnigCalloutIn    in;
+  int              name_id;   /* name id or ONIG_NON_NAME_ID */
+  int              num;
+  OnigRegex        regex;
+  const OnigUChar* string;
+  const OnigUChar* string_end;
+  const OnigUChar* start;
+  const OnigUChar* right_range;
+  const OnigUChar* current;  // current matching position
+  unsigned long    retry_in_match_counter;
+
+  /* invisible to users */
+  MatchArg*   msa;
+  StackType*  stk_base;
+  StackType*  stk;
+  StackIndex* mem_start_stk;
+  StackIndex* mem_end_stk;
+};
+
+#endif
+
 
 #ifdef USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
-#define MATCH_ARG_INIT(msa, reg, arg_option, arg_region, arg_start) do {\
+#define MATCH_ARG_INIT(msa, reg, arg_option, arg_region, arg_start, mp) do { \
   (msa).stack_p  = (void* )0;\
   (msa).options  = (arg_option);\
   (msa).region   = (arg_region);\
   (msa).start    = (arg_start);\
+  (msa).match_stack_limit  = (mp)->match_stack_limit;\
+  (msa).retry_limit_in_match = (mp)->retry_limit_in_match;\
+  (msa).mp = mp;\
   (msa).best_len = ONIG_MISMATCH;\
   (msa).ptr_num  = (reg)->num_repeat + ((reg)->num_mem + 1) * 2; \
 } while(0)
 #else
-#define MATCH_ARG_INIT(msa, reg, arg_option, arg_region, arg_start) do {\
+#define MATCH_ARG_INIT(msa, reg, arg_option, arg_region, arg_start, mp) do { \
   (msa).stack_p  = (void* )0;\
   (msa).options  = (arg_option);\
   (msa).region   = (arg_region);\
   (msa).start    = (arg_start);\
+  (msa).match_stack_limit  = (mp)->match_stack_limit;\
+  (msa).retry_limit_in_match = (mp)->retry_limit_in_match;\
+  (msa).mp = mp;\
   (msa).ptr_num  = (reg)->num_repeat + ((reg)->num_mem + 1) * 2; \
 } while(0)
 #endif
@@ -933,40 +1092,40 @@ typedef struct _StackType {
   mem_end_stk   = mem_start_stk + num_mem + 1;\
 } while(0)
 
-static unsigned int MatchStackLimitSize = DEFAULT_MATCH_STACK_LIMIT_SIZE;
+static unsigned int MatchStackLimit = DEFAULT_MATCH_STACK_LIMIT_SIZE;
 
 extern unsigned int
 onig_get_match_stack_limit_size(void)
 {
-  return MatchStackLimitSize;
+  return MatchStackLimit;
 }
 
 extern int
 onig_set_match_stack_limit_size(unsigned int size)
 {
-  MatchStackLimitSize = size;
+  MatchStackLimit = size;
   return 0;
 }
 
-#ifdef USE_TRY_IN_MATCH_LIMIT
+#ifdef USE_RETRY_LIMIT_IN_MATCH
 
-static unsigned long TryInMatchLimit = DEFAULT_TRY_IN_MATCH_LIMIT;
+static unsigned long RetryLimitInMatch = DEFAULT_RETRY_LIMIT_IN_MATCH;
 
-#define CHECK_TRY_IN_MATCH_LIMIT  do {\
-  if (try_in_match_counter++ > TryInMatchLimit) goto try_in_match_limit_over;\
+#define CHECK_RETRY_LIMIT_IN_MATCH  do {\
+  if (retry_in_match_counter++ > retry_limit_in_match) goto retry_limit_in_match_over;\
 } while (0)
 
 #else
 
-#define CHECK_TRY_IN_MATCH_LIMIT
+#define CHECK_RETRY_LIMIT_IN_MATCH
 
-#endif /* USE_TRY_IN_MATCH_LIMIT */
+#endif /* USE_RETRY_LIMIT_IN_MATCH */
 
 extern unsigned long
-onig_get_try_in_match_limit(void)
+onig_get_retry_limit_in_match(void)
 {
-#ifdef USE_TRY_IN_MATCH_LIMIT
-  return TryInMatchLimit;
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  return RetryLimitInMatch;
 #else
   //return ONIG_NO_SUPPORT_CONFIG;
   return 0;
@@ -974,15 +1133,256 @@ onig_get_try_in_match_limit(void)
 }
 
 extern int
-onig_set_try_in_match_limit(unsigned long size)
+onig_set_retry_limit_in_match(unsigned long size)
 {
-#ifdef USE_TRY_IN_MATCH_LIMIT
-  TryInMatchLimit = size;
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  RetryLimitInMatch = size;
   return 0;
 #else
   return ONIG_NO_SUPPORT_CONFIG;
 #endif
 }
+
+static OnigCalloutFunc DefaultProgressCallout;
+static OnigCalloutFunc DefaultRetractionCallout;
+
+extern OnigMatchParam*
+onig_new_match_param(void)
+{
+  OnigMatchParam* p;
+
+  p = (OnigMatchParam* )xmalloc(sizeof(*p));
+  if (IS_NOT_NULL(p)) {
+    onig_initialize_match_param(p);
+  }
+
+  return p;
+}
+
+extern void
+onig_free_match_param_content(OnigMatchParam* p)
+{
+#ifdef USE_CALLOUT
+  if (IS_NOT_NULL(p->callout_data)) {
+    xfree(p->callout_data);
+    p->callout_data = 0;
+  }
+#endif
+}
+
+extern void
+onig_free_match_param(OnigMatchParam* p)
+{
+  if (IS_NOT_NULL(p)) {
+    onig_free_match_param_content(p);
+    xfree(p);
+  }
+}
+
+extern int
+onig_initialize_match_param(OnigMatchParam* mp)
+{
+  mp->match_stack_limit  = MatchStackLimit;
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  mp->retry_limit_in_match = RetryLimitInMatch;
+#endif
+  mp->progress_callout_of_contents   = DefaultProgressCallout;
+  mp->retraction_callout_of_contents = DefaultRetractionCallout;
+
+#ifdef USE_CALLOUT
+  mp->match_at_call_counter  = 0;
+  mp->callout_user_data      = 0;
+  mp->callout_data           = 0;
+  mp->callout_data_alloc_num = 0;
+#endif
+
+  return ONIG_NORMAL;
+}
+
+#ifdef USE_CALLOUT
+
+static int
+adjust_match_param(regex_t* reg, OnigMatchParam* mp)
+{
+  RegexExt* ext = REG_EXTP(reg);
+
+  mp->match_at_call_counter = 0;
+
+  if (IS_NULL(ext) || ext->callout_num == 0) return ONIG_NORMAL;
+
+  if (ext->callout_num > mp->callout_data_alloc_num) {
+    CalloutData* d;
+    size_t n = ext->callout_num * sizeof(*d);
+    if (IS_NOT_NULL(mp->callout_data))
+      d = (CalloutData* )xrealloc(mp->callout_data, n);
+    else
+      d = (CalloutData* )xmalloc(n);
+    CHECK_NULL_RETURN_MEMERR(d);
+
+    mp->callout_data = d;
+    mp->callout_data_alloc_num = ext->callout_num;
+  }
+
+  xmemset(mp->callout_data, 0, mp->callout_data_alloc_num * sizeof(CalloutData));
+  return ONIG_NORMAL;
+}
+
+#define ADJUST_MATCH_PARAM(reg, mp) \
+  r = adjust_match_param(reg, mp);\
+  if (r != ONIG_NORMAL) return r;
+
+#define CALLOUT_DATA_AT_NUM(mp, num)  ((mp)->callout_data + ((num) - 1))
+
+extern int
+onig_check_callout_data_and_clear_old_values(OnigCalloutArgs* args)
+{
+  OnigMatchParam* mp;
+  int num;
+  CalloutData* d;
+
+  mp  = args->msa->mp;
+  num = args->num;
+
+  d = CALLOUT_DATA_AT_NUM(mp, num);
+  if (d->last_match_at_call_counter != mp->match_at_call_counter) {
+    xmemset(d, 0, sizeof(*d));
+    d->last_match_at_call_counter = mp->match_at_call_counter;
+    return d->last_match_at_call_counter;
+  }
+
+  return 0;
+}
+
+extern int
+onig_get_callout_data_dont_clear_old(regex_t* reg, OnigMatchParam* mp,
+                                     int callout_num, int slot,
+                                     OnigType* type, OnigValue* val)
+{
+  OnigType t;
+  CalloutData* d;
+
+  if (callout_num <= 0) return ONIGERR_INVALID_ARGUMENT;
+
+  d = CALLOUT_DATA_AT_NUM(mp, callout_num);
+  t = d->slot[slot].type;
+  if (IS_NOT_NULL(type)) *type = t;
+  if (IS_NOT_NULL(val))  *val  = d->slot[slot].val;
+  return (t == ONIG_TYPE_VOID ? 1 : ONIG_NORMAL);
+}
+
+extern int
+onig_get_callout_data_by_callout_args_self_dont_clear_old(OnigCalloutArgs* args,
+                                                          int slot, OnigType* type,
+                                                          OnigValue* val)
+{
+  return onig_get_callout_data_dont_clear_old(args->regex, args->msa->mp,
+                                              args->num, slot, type, val);
+}
+
+extern int
+onig_get_callout_data(regex_t* reg, OnigMatchParam* mp,
+                      int callout_num, int slot,
+                      OnigType* type, OnigValue* val)
+{
+  OnigType t;
+  CalloutData* d;
+
+  if (callout_num <= 0) return ONIGERR_INVALID_ARGUMENT;
+
+  d = CALLOUT_DATA_AT_NUM(mp, callout_num);
+  if (d->last_match_at_call_counter != mp->match_at_call_counter) {
+    xmemset(d, 0, sizeof(*d));
+    d->last_match_at_call_counter = mp->match_at_call_counter;
+  }
+
+  t = d->slot[slot].type;
+  if (IS_NOT_NULL(type)) *type = t;
+  if (IS_NOT_NULL(val))  *val  = d->slot[slot].val;
+  return (t == ONIG_TYPE_VOID ? 1 : ONIG_NORMAL);
+}
+
+extern int
+onig_get_callout_data_by_tag(regex_t* reg, OnigMatchParam* mp,
+                             const UChar* tag, const UChar* tag_end, int slot,
+                             OnigType* type, OnigValue* val)
+{
+  int num;
+
+  num = onig_get_callout_num_by_tag(reg, tag, tag_end);
+  if (num < 0)  return num;
+  if (num == 0) return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+  return onig_get_callout_data(reg, mp, num, slot, type, val);
+}
+
+extern int
+onig_get_callout_data_by_callout_args(OnigCalloutArgs* args,
+                                      int callout_num, int slot,
+                                      OnigType* type, OnigValue* val)
+{
+  return onig_get_callout_data(args->regex, args->msa->mp, callout_num, slot,
+                               type, val);
+}
+
+extern int
+onig_get_callout_data_by_callout_args_self(OnigCalloutArgs* args,
+                                           int slot, OnigType* type, OnigValue* val)
+{
+  return onig_get_callout_data(args->regex, args->msa->mp, args->num, slot,
+                               type, val);
+}
+
+extern int
+onig_set_callout_data(regex_t* reg, OnigMatchParam* mp,
+                      int callout_num, int slot,
+                      OnigType type, OnigValue* val)
+{
+  CalloutData* d;
+
+  if (callout_num <= 0) return ONIGERR_INVALID_ARGUMENT;
+
+  d = CALLOUT_DATA_AT_NUM(mp, callout_num);
+  d->slot[slot].type = type;
+  d->slot[slot].val  = *val;
+  d->last_match_at_call_counter = mp->match_at_call_counter;
+
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_set_callout_data_by_tag(regex_t* reg, OnigMatchParam* mp,
+                             const UChar* tag, const UChar* tag_end, int slot,
+                             OnigType type, OnigValue* val)
+{
+  int num;
+
+  num = onig_get_callout_num_by_tag(reg, tag, tag_end);
+  if (num < 0)  return num;
+  if (num == 0) return ONIGERR_INVALID_CALLOUT_TAG_NAME;
+
+  return onig_set_callout_data(reg, mp, num, slot, type, val);
+}
+
+extern int
+onig_set_callout_data_by_callout_args(OnigCalloutArgs* args,
+                                      int callout_num, int slot,
+                                      OnigType type, OnigValue* val)
+{
+  return onig_set_callout_data(args->regex, args->msa->mp, callout_num, slot,
+                               type, val);
+}
+
+extern int
+onig_set_callout_data_by_callout_args_self(OnigCalloutArgs* args,
+                                           int slot, OnigType type, OnigValue* val)
+{
+  return onig_set_callout_data(args->regex, args->msa->mp, args->num, slot,
+                               type, val);
+}
+
+#else
+#define ADJUST_MATCH_PARAM(reg, mp)
+#endif /* USE_CALLOUT */
 
 
 static int
@@ -1016,11 +1416,11 @@ stack_double(int is_alloca, char** arg_alloc_base,
     xmemcpy(new_alloc_base, alloc_base, size);
   }
   else {
-    if (MatchStackLimitSize != 0 && n > MatchStackLimitSize) {
-      if ((unsigned int )(stk_end - stk_base) == MatchStackLimitSize)
+    if (msa->match_stack_limit != 0 && n > msa->match_stack_limit) {
+      if ((unsigned int )(stk_end - stk_base) == msa->match_stack_limit)
         return ONIGERR_MATCH_STACK_LIMIT_OVER;
       else
-        n = MatchStackLimitSize;
+        n = msa->match_stack_limit;
     }
     new_alloc_base = (char* )xrealloc(alloc_base, new_size);
     if (IS_NULL(new_alloc_base)) {
@@ -1103,7 +1503,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_REPEAT(sid, pat) do {\
   STACK_ENSURE(1);\
   stk->type = STK_REPEAT;\
-  stk->id   = (sid);\
+  stk->zid  = (sid);\
   stk->u.repeat.pcode  = (pat);\
   stk->u.repeat.count  = 0;\
   STACK_INC;\
@@ -1119,7 +1519,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_MEM_START(mnum, s) do {\
   STACK_ENSURE(1);\
   stk->type = STK_MEM_START;\
-  stk->id   = (mnum);\
+  stk->zid  = (mnum);\
   stk->u.mem.pstr     = (s);\
   stk->u.mem.start    = mem_start_stk[mnum];\
   stk->u.mem.end      = mem_end_stk[mnum];\
@@ -1131,7 +1531,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_MEM_END(mnum, s) do {\
   STACK_ENSURE(1);\
   stk->type = STK_MEM_END;\
-  stk->id   = (mnum);\
+  stk->zid  = (mnum);\
   stk->u.mem.pstr   = (s);\
   stk->u.mem.start  = mem_start_stk[mnum];\
   stk->u.mem.end    = mem_end_stk[mnum];\
@@ -1142,7 +1542,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_MEM_END_MARK(mnum) do {\
   STACK_ENSURE(1);\
   stk->type = STK_MEM_END_MARK;\
-  stk->id   = (mnum);\
+  stk->zid  = (mnum);\
   STACK_INC;\
 } while(0)
 
@@ -1152,10 +1552,10 @@ stack_double(int is_alloca, char** arg_alloc_base,
   while (k > stk_base) {\
     k--;\
     if ((k->type & STK_MASK_MEM_END_OR_MARK) != 0 \
-      && k->id == (mnum)) {\
+      && k->zid == (mnum)) {\
       level++;\
     }\
-    else if (k->type == STK_MEM_START && k->id == (mnum)) {\
+    else if (k->type == STK_MEM_START && k->zid == (mnum)) {\
       if (level == 0) break;\
       level--;\
     }\
@@ -1183,7 +1583,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_EMPTY_CHECK_START(cnum, s) do {\
   STACK_ENSURE(1);\
   stk->type = STK_EMPTY_CHECK_START;\
-  stk->id   = (cnum);\
+  stk->zid  = (cnum);\
   stk->u.empty_check.pstr = (s);\
   STACK_INC;\
 } while(0)
@@ -1191,7 +1591,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_EMPTY_CHECK_END(cnum) do {\
   STACK_ENSURE(1);\
   stk->type = STK_EMPTY_CHECK_END;\
-  stk->id   = (cnum);\
+  stk->zid  = (cnum);\
   STACK_INC;\
 } while(0)
 
@@ -1211,7 +1611,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_SAVE_VAL(sid, stype, sval) do {\
   STACK_ENSURE(1);\
   stk->type = STK_SAVE_VAL;\
-  stk->id   = (sid);\
+  stk->zid  = (sid);\
   stk->u.val.type = (stype);\
   stk->u.val.v    = (UChar* )(sval);\
   STACK_INC;\
@@ -1220,7 +1620,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
 #define STACK_PUSH_SAVE_VAL_WITH_SPREV(sid, stype, sval) do {\
   STACK_ENSURE(1);\
   stk->type = STK_SAVE_VAL;\
-  stk->id   = (sid);\
+  stk->zid  = (sid);\
   stk->u.val.type = (stype);\
   stk->u.val.v    = (UChar* )(sval);\
   stk->u.val.v2   = sprev;\
@@ -1246,7 +1646,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_GET_SAVE_VAL_TYPE_LAST_ID"); \
     if (k->type == STK_SAVE_VAL && k->u.val.type == (stype)\
-        && k->id == (sid)) {\
+        && k->zid == (sid)) {\
       if (level == 0) {\
         (sval) = k->u.val.v;\
         break;\
@@ -1266,7 +1666,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_GET_SAVE_VAL_TYPE_LAST_ID"); \
     if (k->type == STK_SAVE_VAL && k->u.val.type == (stype)\
-        && k->id == (sid)) {\
+        && k->zid == (sid)) {\
       if (level == 0) {\
         (sval) = k->u.val.v;\
         sprev  = k->u.val.v2;\
@@ -1300,6 +1700,24 @@ stack_double(int is_alloca, char** arg_alloc_base,
   }\
 } while (0)
 
+#define STACK_PUSH_CALLOUT_CONTENTS(anum, func) do {\
+  STACK_ENSURE(1);\
+  stk->type = STK_CALLOUT;\
+  stk->zid  = ONIG_NON_NAME_ID;\
+  stk->u.callout.num = (anum);\
+  stk->u.callout.func = (func);\
+  STACK_INC;\
+} while(0)
+
+#define STACK_PUSH_CALLOUT_NAME(aid, anum, func) do {\
+  STACK_ENSURE(1);\
+  stk->type = STK_CALLOUT;\
+  stk->zid  = (aid);\
+  stk->u.callout.num = (anum);\
+  stk->u.callout.func = (func);\
+  STACK_INC;\
+} while(0)
+
 #ifdef ONIG_DEBUG
 #define STACK_BASE_CHECK(p, at) \
   if ((p) < stk_base) {\
@@ -1314,6 +1732,16 @@ stack_double(int is_alloca, char** arg_alloc_base,
   stk--;\
   STACK_BASE_CHECK(stk, "STACK_POP_ONE"); \
 } while(0)
+
+
+#ifdef USE_CALLOUT
+#define POP_CALLOUT_CASE \
+  else if (stk->type == STK_CALLOUT) {\
+    RETRACTION_CALLOUT(stk->u.callout.func, stk->zid, stk->u.callout.num, msa->mp->callout_user_data);\
+  }
+#else
+#define POP_CALLOUT_CASE
+#endif
 
 #define STACK_POP  do {\
   switch (pop_level) {\
@@ -1330,8 +1758,8 @@ stack_double(int is_alloca, char** arg_alloc_base,
       STACK_BASE_CHECK(stk, "STACK_POP 2"); \
       if ((stk->type & STK_MASK_POP_USED) != 0)  break;\
       else if (stk->type == STK_MEM_START) {\
-        mem_start_stk[stk->id] = stk->u.mem.start;\
-        mem_end_stk[stk->id]   = stk->u.mem.end;\
+        mem_start_stk[stk->zid] = stk->u.mem.start;\
+        mem_end_stk[stk->zid]   = stk->u.mem.end;\
       }\
     }\
     break;\
@@ -1340,59 +1768,57 @@ stack_double(int is_alloca, char** arg_alloc_base,
       stk--;\
       STACK_BASE_CHECK(stk, "STACK_POP 3"); \
       if ((stk->type & STK_MASK_POP_USED) != 0)  break;\
-      else if (stk->type == STK_MEM_START) {\
-        mem_start_stk[stk->id] = stk->u.mem.start;\
-        mem_end_stk[stk->id]   = stk->u.mem.end;\
-      }\
-      else if (stk->type == STK_REPEAT_INC) {\
-        STACK_AT(stk->u.repeat_inc.si)->u.repeat.count--;\
-      }\
-      else if (stk->type == STK_MEM_END) {\
-        mem_start_stk[stk->id] = stk->u.mem.start;\
-        mem_end_stk[stk->id]   = stk->u.mem.end;\
+      else if ((stk->type & STK_MASK_POP_HANDLED) != 0) {\
+        if (stk->type == STK_MEM_START) {\
+          mem_start_stk[stk->zid] = stk->u.mem.start;\
+          mem_end_stk[stk->zid]   = stk->u.mem.end;\
+        }\
+        else if (stk->type == STK_REPEAT_INC) {\
+          STACK_AT(stk->u.repeat_inc.si)->u.repeat.count--;\
+        }\
+        else if (stk->type == STK_MEM_END) {\
+          mem_start_stk[stk->zid] = stk->u.mem.start;\
+          mem_end_stk[stk->zid]   = stk->u.mem.end;\
+        }\
+        POP_CALLOUT_CASE\
       }\
     }\
     break;\
   }\
 } while(0)
 
-#define STACK_POP_TIL_ALT_PREC_READ_NOT  do {\
+#define POP_TIL_BODY(aname, til_type) do {\
   while (1) {\
     stk--;\
-    STACK_BASE_CHECK(stk, "STACK_POP_TIL_ALT_PREC_READ_NOT"); \
-    if (stk->type == STK_ALT_PREC_READ_NOT) break;\
-    else if (stk->type == STK_MEM_START) {\
-      mem_start_stk[stk->id] = stk->u.mem.start;\
-      mem_end_stk[stk->id]   = stk->u.mem.end;\
-    }\
-    else if (stk->type == STK_REPEAT_INC) {\
-      STACK_AT(stk->u.repeat_inc.si)->u.repeat.count--;\
-    }\
-    else if (stk->type == STK_MEM_END) {\
-      mem_start_stk[stk->id] = stk->u.mem.start;\
-      mem_end_stk[stk->id]   = stk->u.mem.end;\
+    STACK_BASE_CHECK(stk, (aname));\
+    if ((stk->type & STK_MASK_POP_HANDLED_TIL) != 0) {\
+      if (stk->type == (til_type)) break;\
+      else {\
+        if (stk->type == STK_MEM_START) {\
+          mem_start_stk[stk->zid] = stk->u.mem.start;\
+          mem_end_stk[stk->zid]   = stk->u.mem.end;\
+        }\
+        else if (stk->type == STK_REPEAT_INC) {\
+          STACK_AT(stk->u.repeat_inc.si)->u.repeat.count--;\
+        }\
+        else if (stk->type == STK_MEM_END) {\
+          mem_start_stk[stk->zid] = stk->u.mem.start;\
+          mem_end_stk[stk->zid]   = stk->u.mem.end;\
+        }\
+        /* Don't call callout here because negation of total success by (?!..) (?<!..) */\
+      }\
     }\
   }\
 } while(0)
 
-#define STACK_POP_TIL_ALT_LOOK_BEHIND_NOT  do {\
-  while (1) {\
-    stk--;\
-    STACK_BASE_CHECK(stk, "STACK_POP_TIL_ALT_LOOK_BEHIND_NOT"); \
-    if (stk->type == STK_ALT_LOOK_BEHIND_NOT) break;\
-    else if (stk->type == STK_MEM_START) {\
-      mem_start_stk[stk->id] = stk->u.mem.start;\
-      mem_end_stk[stk->id]   = stk->u.mem.end;\
-    }\
-    else if (stk->type == STK_REPEAT_INC) {\
-      STACK_AT(stk->u.repeat_inc.si)->u.repeat.count--;\
-    }\
-    else if (stk->type == STK_MEM_END) {\
-      mem_start_stk[stk->id] = stk->u.mem.start;\
-      mem_end_stk[stk->id]   = stk->u.mem.end;\
-    }\
-  }\
+#define STACK_POP_TIL_ALT_PREC_READ_NOT  do {\
+  POP_TIL_BODY("STACK_POP_TIL_ALT_PREC_READ_NOT", STK_ALT_PREC_READ_NOT);\
 } while(0)
+
+#define STACK_POP_TIL_ALT_LOOK_BEHIND_NOT  do {\
+  POP_TIL_BODY("STACK_POP_TIL_ALT_LOOK_BEHIND_NOT", STK_ALT_LOOK_BEHIND_NOT);\
+} while(0)
+
 
 #define STACK_EXEC_TO_VOID(k) do {\
   k = stk;\
@@ -1400,11 +1826,11 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_EXEC_TO_VOID"); \
     if (IS_TO_VOID_TARGET(k)) {\
+      if (k->type == STK_TO_VOID_START) {\
+        k->type = STK_VOID;\
+        break;\
+      }\
       k->type = STK_VOID;\
-    }\
-    else if (k->type == STK_TO_VOID_START) {\
-      k->type = STK_VOID;\
-      break;\
     }\
   }\
 } while(0)
@@ -1415,7 +1841,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_EMPTY_CHECK"); \
     if (k->type == STK_EMPTY_CHECK_START) {\
-      if (k->id == (sid)) {\
+      if (k->zid == (sid)) {\
         (isnull) = (k->u.empty_check.pstr == (s));\
         break;\
       }\
@@ -1430,7 +1856,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_EMPTY_CHECK_MEMST"); \
     if (k->type == STK_EMPTY_CHECK_START) {\
-      if (k->id == (sid)) {\
+      if (k->zid == (sid)) {\
         if (k->u.empty_check.pstr != (s)) {\
           (isnull) = 0;\
           break;\
@@ -1443,7 +1869,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
               if (k->u.mem.end == INVALID_STACK_INDEX) {\
                 (isnull) = 0; break;\
               }\
-              if (MEM_STATUS_AT(reg->bt_mem_end, k->id))\
+              if (MEM_STATUS_AT(reg->bt_mem_end, k->zid))\
                 endp = STACK_AT(k->u.mem.end)->u.mem.pstr;\
               else\
                 endp = (UChar* )k->u.mem.end;\
@@ -1471,7 +1897,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     k--;\
     STACK_BASE_CHECK(k, "STACK_EMPTY_CHECK_MEMST_REC"); \
     if (k->type == STK_EMPTY_CHECK_START) {\
-      if (k->id == (sid)) {\
+      if (k->zid == (sid)) {\
         if (level == 0) {\
           if (k->u.empty_check.pstr != (s)) {\
             (isnull) = 0;\
@@ -1485,7 +1911,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
                 if (k->u.mem.end == INVALID_STACK_INDEX) {\
                   (isnull) = 0; break;\
                 }\
-                if (MEM_STATUS_AT(reg->bt_mem_end, k->id))\
+                if (MEM_STATUS_AT(reg->bt_mem_end, k->zid))\
                   endp = STACK_AT(k->u.mem.end)->u.mem.pstr;\
                 else\
                   endp = (UChar* )k->u.mem.end;\
@@ -1507,7 +1933,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
       }\
     }\
     else if (k->type == STK_EMPTY_CHECK_END) {\
-      if (k->id == (sid)) level++;\
+      if (k->zid == (sid)) level++;\
     }\
   }\
 } while(0)
@@ -1542,7 +1968,7 @@ stack_double(int is_alloca, char** arg_alloc_base,
     STACK_BASE_CHECK(k, "STACK_GET_REPEAT"); \
     if (k->type == STK_REPEAT) {\
       if (level == 0) {\
-        if (k->id == (sid)) {\
+        if (k->zid == (sid)) {\
           break;\
         }\
       }\
@@ -1634,11 +2060,7 @@ static int string_cmp_ic(OnigEncoding enc, int case_fold_flag,
 #define DATA_ENSURE_CHECK(n)   (s + (n) <= right_range)
 #define DATA_ENSURE(n)         if (s + (n) > right_range) goto fail
 
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
 #define INIT_RIGHT_RANGE    right_range = (UChar* )in_right_range
-#else
-#define INIT_RIGHT_RANGE    right_range = (UChar* )end
-#endif
 
 #ifdef USE_CAPTURE_HISTORY
 static int
@@ -1651,7 +2073,7 @@ make_capture_history_tree(OnigCaptureTreeNode* node, StackType** kp,
 
   while (k < stk_top) {
     if (k->type == STK_MEM_START) {
-      n = k->id;
+      n = k->zid;
       if (n <= ONIG_MAX_CAPTURE_HISTORY_GROUP &&
           MEM_STATUS_AT(reg->capture_history, n) != 0) {
         child = history_node_new();
@@ -1669,7 +2091,7 @@ make_capture_history_tree(OnigCaptureTreeNode* node, StackType** kp,
       }
     }
     else if (k->type == STK_MEM_END) {
-      if (k->id == node->group) {
+      if (k->zid == node->group) {
         node->end = (int )(k->u.mem.pstr - str);
         *kp = k;
         return 0;
@@ -1718,7 +2140,7 @@ backref_match_at_nested_level(regex_t* reg,
     }
     else if (level == nest) {
       if (k->type == STK_MEM_START) {
-        if (mem_is_in_memp(k->id, mem_num, memp)) {
+        if (mem_is_in_memp(k->zid, mem_num, memp)) {
           pstart = k->u.mem.pstr;
           if (IS_NOT_NULL(pend)) {
             if (pend - pstart > send - *s) return 0; /* or goto next_mem; */
@@ -1742,7 +2164,7 @@ backref_match_at_nested_level(regex_t* reg,
         }
       }
       else if (k->type == STK_MEM_END) {
-        if (mem_is_in_memp(k->id, mem_num, memp)) {
+        if (mem_is_in_memp(k->zid, mem_num, memp)) {
           pend = k->u.mem.pstr;
         }
       }
@@ -1773,7 +2195,7 @@ backref_check_at_nested_level(regex_t* reg,
     }
     else if (level == nest) {
       if (k->type == STK_MEM_END) {
-        if (mem_is_in_memp(k->id, mem_num, memp)) {
+        if (mem_is_in_memp(k->zid, mem_num, memp)) {
           return 1;
         }
       }
@@ -1885,10 +2307,8 @@ typedef struct {
 /* if sstart == str then set sprev to NULL. */
 static int
 match_at(regex_t* reg, const UChar* str, const UChar* end,
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
-         const UChar* in_right_range,
-#endif
-         const UChar* sstart, UChar* sprev, MatchArg* msa)
+         const UChar* in_right_range, const UChar* sstart, UChar* sprev,
+         MatchArg* msa)
 {
   static UChar FinishCode[] = { OP_FINISH };
 
@@ -1906,13 +2326,27 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   StackIndex *repeat_stk;
   StackIndex *mem_start_stk, *mem_end_stk;
   UChar* keep;
-#ifdef USE_TRY_IN_MATCH_LIMIT
-  unsigned long try_in_match_counter;
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  unsigned long retry_limit_in_match;
+  unsigned long retry_in_match_counter;
 #endif
+
+#ifdef USE_CALLOUT
+  int of;
+#endif
+
   UChar *p = reg->p;
   OnigOptionType option = reg->options;
   OnigEncoding encode = reg->enc;
   OnigCaseFoldType case_fold_flag = reg->case_fold_flag;
+
+#ifdef USE_CALLOUT
+  msa->mp->match_at_call_counter++;
+#endif
+
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  retry_limit_in_match = msa->retry_limit_in_match;
+#endif
 
   //n = reg->num_repeat + reg->num_mem * 2;
   pop_level = reg->stack_pop_level;
@@ -1935,8 +2369,8 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   STACK_PUSH_BOTTOM(STK_ALT, FinishCode);  /* bottom stack */
   INIT_RIGHT_RANGE;
 
-#ifdef USE_TRY_IN_MATCH_LIMIT
-  try_in_match_counter = 0;
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+  retry_in_match_counter = 0;
 #endif
 
   while (1) {
@@ -3141,10 +3575,10 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       continue;
       break;
 
-    case OP_POP:  SOP_IN(OP_POP);
+    case OP_POP_OUT:  SOP_IN(OP_POP_OUT);
       STACK_POP_ONE;
       // for stop backtrack
-      //CHECK_TRY_IN_MATCH_LIMIT;
+      //CHECK_RETRY_LIMIT_IN_MATCH;
       SOP_OUT;
       continue;
       break;
@@ -3228,7 +3662,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
         p = stkp->u.repeat.pcode;
       }
       STACK_PUSH_REPEAT_INC(si);
-      CHECK_TRY_IN_MATCH_LIMIT;
       SOP_OUT;
       CHECK_INTERRUPT_IN_MATCH;
       continue;
@@ -3263,7 +3696,6 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       else if (stkp->u.repeat.count == reg->repeat_range[mem].upper) {
         STACK_PUSH_REPEAT_INC(si);
       }
-      CHECK_TRY_IN_MATCH_LIMIT;
       SOP_OUT;
       CHECK_INTERRUPT_IN_MATCH;
       continue;
@@ -3421,6 +3853,81 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       continue;
       break;
 
+#ifdef USE_CALLOUT
+    case OP_CALLOUT_CONTENTS: SOP_IN(OP_CALLOUT_CONTENTS);
+      of = ONIG_CALLOUT_OF_CONTENTS;
+      goto callout_common_entry;
+
+      SOP_OUT;
+      continue;
+      break;
+
+    case OP_CALLOUT_NAME: SOP_IN(OP_CALLOUT_NAME);
+      {
+        int call_result;
+        int name_id;
+        int num;
+        int in;
+        CalloutListEntry* e;
+        OnigCalloutFunc func;
+        OnigCalloutArgs args;
+
+        of = ONIG_CALLOUT_OF_NAME;
+        GET_MEMNUM_INC(name_id, p);
+
+      callout_common_entry:
+        GET_MEMNUM_INC(num, p);
+        e = onig_reg_callout_list_at(reg, num);
+        in = e->in;
+        if (of == ONIG_CALLOUT_OF_NAME) {
+          func = onig_get_callout_start_func(reg, num);
+        }
+        else {
+          name_id = ONIG_NON_NAME_ID;
+          func = msa->mp->progress_callout_of_contents;
+        }
+
+        if (IS_NOT_NULL(func) && (in & ONIG_CALLOUT_IN_PROGRESS) != 0) {
+          CALLOUT_BODY(func, ONIG_CALLOUT_IN_PROGRESS, name_id,
+                       num, msa->mp->callout_user_data, args, call_result);
+          switch (call_result) {
+          case ONIG_CALLOUT_FAIL:
+            goto fail;
+            break;
+          case ONIG_CALLOUT_SUCCESS:
+            goto retraction_callout2;
+            break;
+          default: /* error code */
+            if (call_result > 0) {
+              call_result = ONIGERR_INVALID_ARGUMENT;
+            }
+            best_len = call_result;
+            goto finish;
+            break;
+          }
+        }
+        else {
+        retraction_callout2:
+          if ((in & ONIG_CALLOUT_IN_RETRACTION) != 0) {
+            if (of == ONIG_CALLOUT_OF_NAME) {
+              if (IS_NOT_NULL(func)) {
+                STACK_PUSH_CALLOUT_NAME(name_id, num, func);
+              }
+            }
+            else {
+              func = msa->mp->retraction_callout_of_contents;
+              if (IS_NOT_NULL(func)) {
+                STACK_PUSH_CALLOUT_CONTENTS(num, func);
+              }
+            }
+          }
+        }
+      }
+      SOP_OUT;
+      continue;
+      break;
+#endif
+
     case OP_FINISH:
       goto finish;
       break;
@@ -3433,7 +3940,7 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
       p     = stk->u.state.pcode;
       s     = stk->u.state.pstr;
       sprev = stk->u.state.pstr_prev;
-      CHECK_TRY_IN_MATCH_LIMIT;
+      CHECK_RETRY_LIMIT_IN_MATCH;
       SOP_OUT;
       continue;
       break;
@@ -3463,10 +3970,10 @@ match_at(regex_t* reg, const UChar* str, const UChar* end,
   STACK_SAVE;
   return ONIGERR_UNEXPECTED_BYTECODE;
 
-#ifdef USE_TRY_IN_MATCH_LIMIT
- try_in_match_limit_over:
+#ifdef USE_RETRY_LIMIT_IN_MATCH
+ retry_limit_in_match_over:
   STACK_SAVE;
-  return ONIGERR_TRY_IN_MATCH_LIMIT_OVER;
+  return ONIGERR_RETRY_LIMIT_IN_MATCH_OVER;
 #endif
 }
 
@@ -3778,16 +4285,30 @@ map_search_backward(OnigEncoding enc, UChar map[],
   }
   return (UChar* )NULL;
 }
-
 extern int
 onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
            OnigRegion* region, OnigOptionType option)
 {
   int r;
+  OnigMatchParam mp;
+
+  onig_initialize_match_param(&mp);
+  r = onig_match_with_param(reg, str, end, at, region, option, &mp);
+  onig_free_match_param_content(&mp);
+  return r;
+}
+
+extern int
+onig_match_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                      const UChar* at, OnigRegion* region, OnigOptionType option,
+                      OnigMatchParam* mp)
+{
+  int r;
   UChar *prev;
   MatchArg msa;
 
-  MATCH_ARG_INIT(msa, reg, option, region, at);
+  ADJUST_MATCH_PARAM(reg, mp);
+  MATCH_ARG_INIT(msa, reg, option, region, at, mp);
   if (region
 #ifdef USE_POSIX_API_REGION_OPTION
       && !IS_POSIX_REGION(option)
@@ -3807,11 +4328,7 @@ onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
     }
 
     prev = (UChar* )onigenc_get_prev_char_head(reg->enc, str, at);
-    r = match_at(reg, str, end,
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
-                 end,
-#endif
-                 at, prev, &msa);
+    r = match_at(reg, str, end, end, at, prev, &msa);
   }
 
  end:
@@ -4073,18 +4590,33 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
             OnigOptionType option)
 {
   int r;
+  OnigMatchParam mp;
+
+  onig_initialize_match_param(&mp);
+  r = onig_search_with_param(reg, str, end, start, range, region, option, &mp);
+  onig_free_match_param_content(&mp);
+  return r;
+
+}
+
+extern int
+onig_search_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                       const UChar* start, const UChar* range, OnigRegion* region,
+                       OnigOptionType option, OnigMatchParam* mp)
+{
+  int r;
   UChar *s, *prev;
   MatchArg msa;
   const UChar *orig_start = start;
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
   const UChar *orig_range = range;
-#endif
 
 #ifdef ONIG_DEBUG_SEARCH
   fprintf(stderr,
      "onig_search (entry point): str: %p, end: %d, start: %d, range: %d\n",
      str, (int )(end - str), (int )(start - str), (int )(range - str));
 #endif
+
+  ADJUST_MATCH_PARAM(reg, mp);
 
   if (region
 #ifdef USE_POSIX_API_REGION_OPTION
@@ -4105,7 +4637,6 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
   }
 
 
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
 #ifdef USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
 #define MATCH_AND_RETURN_CHECK(upper_range) \
   r = match_at(reg, str, end, (upper_range), s, prev, &msa); \
@@ -4127,29 +4658,6 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
     else goto finish; /* error */ \
   }
 #endif /* USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE */
-#else
-#ifdef USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE
-#define MATCH_AND_RETURN_CHECK(none) \
-  r = match_at(reg, str, end, s, prev, &msa);\
-  if (r != ONIG_MISMATCH) {\
-    if (r >= 0) {\
-      if (! IS_FIND_LONGEST(reg->options)) {\
-        goto match;\
-      }\
-    }\
-    else goto finish; /* error */ \
-  }
-#else
-#define MATCH_AND_RETURN_CHECK(none) \
-  r = match_at(reg, str, end, s, prev, &msa);\
-  if (r != ONIG_MISMATCH) {\
-    if (r >= 0) {\
-      goto match;\
-    }\
-    else goto finish; /* error */ \
-  }
-#endif /* USE_FIND_LONGEST_SEARCH_ALL_OF_RANGE */
-#endif /* USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE */
 
 
   /* anchor optimize: resume search range */
@@ -4234,7 +4742,7 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
         goto end_buf;
       }
     }
-    else if ((reg->anchor & ANCHOR_ANYCHAR_STAR_ML)) {
+    else if ((reg->anchor & ANCHOR_ANYCHAR_INF_ML)) {
       goto begin_position;
     }
   }
@@ -4250,7 +4758,7 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
       s = (UChar* )start;
       prev = (UChar* )NULL;
 
-      MATCH_ARG_INIT(msa, reg, option, region, start);
+      MATCH_ARG_INIT(msa, reg, option, region, start, mp);
       MATCH_AND_RETURN_CHECK(end);
       goto mismatch;
     }
@@ -4262,7 +4770,7 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
           (int )(end - str), (int )(start - str), (int )(range - str));
 #endif
 
-  MATCH_ARG_INIT(msa, reg, option, region, orig_start);
+  MATCH_ARG_INIT(msa, reg, option, region, orig_start, mp);
 
   s = (UChar* )start;
   if (range > start) {   /* forward search */
@@ -4307,7 +4815,7 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
         if (! forward_search_range(reg, str, end, s, sch_range,
                                    &low, &high, (UChar** )NULL)) goto mismatch;
 
-        if ((reg->anchor & ANCHOR_ANYCHAR_STAR) != 0) {
+        if ((reg->anchor & ANCHOR_ANYCHAR_INF) != 0) {
           do {
             MATCH_AND_RETURN_CHECK(orig_range);
             prev = s;
@@ -4336,10 +4844,8 @@ onig_search(regex_t* reg, const UChar* str, const UChar* end,
     }
   }
   else {  /* backward search */
-#ifdef USE_MATCH_RANGE_MUST_BE_INSIDE_OF_SPECIFIED_RANGE
     if (orig_start < end)
       orig_start += enclen(reg->enc, orig_start); /* is upper range */
-#endif
 
     if (reg->optimize != OPTIMIZE_NONE) {
       UChar *low, *high, *adjrange, *sch_start;
@@ -4542,3 +5048,600 @@ onig_copy_encoding(OnigEncoding to, OnigEncoding from)
   *to = *from;
 }
 
+
+/* for callout functions */
+
+#ifdef USE_CALLOUT
+
+extern OnigCalloutFunc
+onig_get_progress_callout(void)
+{
+  return DefaultProgressCallout;
+}
+
+extern int
+onig_set_progress_callout(OnigCalloutFunc f)
+{
+  DefaultProgressCallout = f;
+  return ONIG_NORMAL;
+}
+
+extern OnigCalloutFunc
+onig_get_retraction_callout(void)
+{
+  return DefaultRetractionCallout;
+}
+
+extern int
+onig_set_retraction_callout(OnigCalloutFunc f)
+{
+  DefaultRetractionCallout = f;
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_get_callout_num_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->num;
+}
+
+extern OnigCalloutIn
+onig_get_callout_in_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->in;
+}
+
+extern int
+onig_get_name_id_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->name_id;
+}
+
+extern const UChar*
+onig_get_contents_by_callout_args(OnigCalloutArgs* args)
+{
+  int num;
+  CalloutListEntry* e;
+
+  num = args->num;
+  e = onig_reg_callout_list_at(args->regex, num);
+  if (IS_NULL(e)) return 0;
+  if (e->of == ONIG_CALLOUT_OF_CONTENTS) {
+    return e->u.content.start;
+  }
+
+  return 0;
+}
+
+extern const UChar*
+onig_get_contents_end_by_callout_args(OnigCalloutArgs* args)
+{
+  int num;
+  CalloutListEntry* e;
+
+  num = args->num;
+  e = onig_reg_callout_list_at(args->regex, num);
+  if (IS_NULL(e)) return 0;
+  if (e->of == ONIG_CALLOUT_OF_CONTENTS) {
+    return e->u.content.end;
+  }
+
+  return 0;
+}
+
+extern int
+onig_get_args_num_by_callout_args(OnigCalloutArgs* args)
+{
+  int num;
+  CalloutListEntry* e;
+
+  num = args->num;
+  e = onig_reg_callout_list_at(args->regex, num);
+  if (IS_NULL(e)) return 0;
+  if (e->of == ONIG_CALLOUT_OF_NAME) {
+    return e->u.arg.num;
+  }
+
+  return ONIGERR_INVALID_ARGUMENT;
+}
+
+extern int
+onig_get_passed_args_num_by_callout_args(OnigCalloutArgs* args)
+{
+  int num;
+  CalloutListEntry* e;
+
+  num = args->num;
+  e = onig_reg_callout_list_at(args->regex, num);
+  if (IS_NULL(e)) return 0;
+  if (e->of == ONIG_CALLOUT_OF_NAME) {
+    return e->u.arg.passed_num;
+  }
+
+  return ONIGERR_INVALID_ARGUMENT;
+}
+
+extern int
+onig_get_arg_by_callout_args(OnigCalloutArgs* args, int index,
+                             OnigType* type, OnigValue* val)
+{
+  int num;
+  CalloutListEntry* e;
+
+  num = args->num;
+  e = onig_reg_callout_list_at(args->regex, num);
+  if (IS_NULL(e)) return 0;
+  if (e->of == ONIG_CALLOUT_OF_NAME) {
+    if (IS_NOT_NULL(type)) *type = e->u.arg.types[index];
+    if (IS_NOT_NULL(val))  *val  = e->u.arg.vals[index];
+    return ONIG_NORMAL;
+  }
+
+  return ONIGERR_INVALID_ARGUMENT;
+}
+
+extern const UChar*
+onig_get_string_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->string;
+}
+
+extern const UChar*
+onig_get_string_end_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->string_end;
+}
+
+extern const UChar*
+onig_get_start_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->start;
+}
+
+extern const UChar*
+onig_get_right_range_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->right_range;
+}
+
+extern const UChar*
+onig_get_current_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->current;
+}
+
+extern OnigRegex
+onig_get_regex_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->regex;
+}
+
+extern unsigned long
+onig_get_retry_counter_by_callout_args(OnigCalloutArgs* args)
+{
+  return args->retry_in_match_counter;
+}
+
+
+extern int
+onig_get_capture_range_in_callout(OnigCalloutArgs* a, int mem_num, int* begin, int* end)
+{
+  OnigRegex    reg;
+  const UChar* str;
+  StackType*   stk_base;
+  int i;
+
+  i = mem_num;
+  reg = a->regex;
+  str = a->string;
+  stk_base = a->stk_base;
+
+  if (i > 0) {
+    if (a->mem_end_stk[i] != INVALID_STACK_INDEX) {
+      if (MEM_STATUS_AT(reg->bt_mem_start, i))
+        *begin = (int )(STACK_AT(a->mem_start_stk[i])->u.mem.pstr - str);
+      else
+        *begin = (int )((UChar* )((void* )a->mem_start_stk[i]) - str);
+
+      *end = (int )((MEM_STATUS_AT(reg->bt_mem_end, i)
+                     ? STACK_AT(a->mem_end_stk[i])->u.mem.pstr
+                     : (UChar* )((void* )a->mem_end_stk[i])) - str);
+    }
+    else {
+      *begin = *end = ONIG_REGION_NOTPOS;
+    }
+  }
+  else if (i == 0) {
+#if 0
+    *begin = a->start   - str;
+    *end   = a->current - str;
+#else
+    return ONIGERR_INVALID_ARGUMENT;
+#endif
+  }
+  else
+    return ONIGERR_INVALID_ARGUMENT;
+
+  return ONIG_NORMAL;
+}
+
+extern int
+onig_get_used_stack_size_in_callout(OnigCalloutArgs* a, int* used_num, int* used_bytes)
+{
+  int n;
+
+  n = (int )(a->stk - a->stk_base);
+
+  if (used_num != 0)
+    *used_num = n;
+
+  if (used_bytes != 0)
+    *used_bytes = n * sizeof(StackType);
+
+  return ONIG_NORMAL;
+}
+
+
+/* builtin callout functions */
+
+extern int
+onig_builtin_fail(OnigCalloutArgs* args ARG_UNUSED, void* user_data ARG_UNUSED)
+{
+  return ONIG_CALLOUT_FAIL;
+}
+
+extern int
+onig_builtin_mismatch(OnigCalloutArgs* args ARG_UNUSED, void* user_data ARG_UNUSED)
+{
+  return ONIG_MISMATCH;
+}
+
+#if 0
+extern int
+onig_builtin_success(OnigCalloutArgs* args ARG_UNUSED, void* user_data ARG_UNUSED)
+{
+  return ONIG_CALLOUT_SUCCESS;
+}
+#endif
+
+extern int
+onig_builtin_error(OnigCalloutArgs* args, void* user_data ARG_UNUSED)
+{
+  int r;
+  int n;
+  OnigValue val;
+
+  r = onig_get_arg_by_callout_args(args, 0, 0, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  n = (int )val.l;
+  if (n >= 0) {
+    n = ONIGERR_INVALID_CALLOUT_BODY;
+  }
+
+  return n;
+}
+
+extern int
+onig_builtin_count(OnigCalloutArgs* args, void* user_data)
+{
+  (void )onig_check_callout_data_and_clear_old_values(args);
+
+  return onig_builtin_total_count(args, user_data);
+}
+
+extern int
+onig_builtin_total_count(OnigCalloutArgs* args, void* user_data ARG_UNUSED)
+{
+  int r;
+  int slot;
+  OnigType  type;
+  OnigValue val;
+  OnigValue aval;
+  OnigCodePoint count_type;
+
+  r = onig_get_arg_by_callout_args(args, 0, &type, &aval);
+  if (r != ONIG_NORMAL) return r;
+
+  count_type = aval.c;
+  if (count_type != '>' && count_type != 'X' && count_type != '<')
+    return ONIGERR_INVALID_CALLOUT_ARG;
+
+  r = onig_get_callout_data_by_callout_args_self_dont_clear_old(args, 0,
+                                                                &type, &val);
+  if (r < ONIG_NORMAL)
+    return r;
+  else if (r > ONIG_NORMAL) {
+    /* type == void: initial state */
+    val.l = 0;
+  }
+
+  if (args->in == ONIG_CALLOUT_IN_RETRACTION) {
+    slot = 2;
+    if (count_type == '<')
+      val.l++;
+    else if (count_type == 'X')
+      val.l--;
+  }
+  else {
+    slot = 1;
+    if (count_type != '<')
+      val.l++;
+  }
+
+  r = onig_set_callout_data_by_callout_args_self(args, 0, ONIG_TYPE_LONG, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  /* slot 1: in progress counter, slot 2: in retraction counter */
+  r = onig_get_callout_data_by_callout_args_self_dont_clear_old(args, slot,
+                                                                &type, &val);
+  if (r < ONIG_NORMAL)
+    return r;
+  else if (r > ONIG_NORMAL) {
+    val.l = 0;
+  }
+
+  val.l++;
+  r = onig_set_callout_data_by_callout_args_self(args, slot, ONIG_TYPE_LONG, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  return ONIG_CALLOUT_SUCCESS;
+}
+
+extern int
+onig_builtin_max(OnigCalloutArgs* args, void* user_data ARG_UNUSED)
+{
+  int r;
+  int slot;
+  OnigType  type;
+  OnigValue val;
+  OnigValue aval;
+
+  (void )onig_check_callout_data_and_clear_old_values(args);
+
+  slot = 0;
+  r = onig_get_callout_data_by_callout_args_self(args, slot, &type, &val);
+  if (r < ONIG_NORMAL)
+    return r;
+  else if (r > ONIG_NORMAL) {
+    /* type == void: initial state */
+    type  = ONIG_TYPE_LONG;
+    val.l = 0;
+  }
+
+  r = onig_get_arg_by_callout_args(args, 0, &type, &aval);
+  if (r != ONIG_NORMAL) return r;
+
+  if (args->in == ONIG_CALLOUT_IN_RETRACTION) {
+    val.l--;
+  }
+  else {
+    if (val.l >= aval.l) return ONIG_CALLOUT_FAIL;
+    val.l++;
+  }
+
+  r = onig_set_callout_data_by_callout_args_self(args, slot, ONIG_TYPE_LONG, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  return ONIG_CALLOUT_SUCCESS;
+}
+
+enum OP_CMP {
+  OP_EQ,
+  OP_NE,
+  OP_LT,
+  OP_GT,
+  OP_LE,
+  OP_GE
+};
+
+extern int
+onig_builtin_cmp(OnigCalloutArgs* args, void* user_data ARG_UNUSED)
+{
+  int r;
+  int slot;
+  long lv;
+  long rv;
+  OnigType  type;
+  OnigValue val;
+  regex_t* reg;
+  enum OP_CMP op;
+
+  reg = args->regex;
+
+  r = onig_get_arg_by_callout_args(args, 0, &type, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  if (type == ONIG_TYPE_TAG) {
+    r = onig_get_callout_data_by_callout_args(args, val.tag, 0, &type, &val);
+    if (r < ONIG_NORMAL) return r;
+    else if (r > ONIG_NORMAL)
+      lv = 0L;
+    else
+      lv = val.l;
+  }
+  else { /* ONIG_TYPE_LONG */
+    lv = val.l;
+  }
+
+  r = onig_get_arg_by_callout_args(args, 2, &type, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  if (type == ONIG_TYPE_TAG) {
+    r = onig_get_callout_data_by_callout_args(args, val.tag, 0, &type, &val);
+    if (r < ONIG_NORMAL) return r;
+    else if (r > ONIG_NORMAL)
+      rv = 0L;
+    else
+      rv = val.l;
+  }
+  else { /* ONIG_TYPE_LONG */
+    rv = val.l;
+  }
+
+  slot = 0;
+  r = onig_get_callout_data_by_callout_args_self(args, slot, &type, &val);
+  if (r < ONIG_NORMAL)
+    return r;
+  else if (r > ONIG_NORMAL) {
+    /* type == void: initial state */
+    OnigCodePoint c1, c2;
+    UChar* p;
+
+    r = onig_get_arg_by_callout_args(args, 1, &type, &val);
+    if (r != ONIG_NORMAL) return r;
+
+    p = val.s.start;
+    c1 = ONIGENC_MBC_TO_CODE(reg->enc, p, val.s.end);
+    p += ONIGENC_MBC_ENC_LEN(reg->enc, p);
+    if (p < val.s.end) {
+      c2 = ONIGENC_MBC_TO_CODE(reg->enc, p, val.s.end);
+      p += ONIGENC_MBC_ENC_LEN(reg->enc, p);
+      if (p != val.s.end)  return ONIGERR_INVALID_CALLOUT_ARG;
+    }
+    else
+      c2 = 0;
+
+    switch (c1) {
+    case '=':
+      if (c2 != '=') return ONIGERR_INVALID_CALLOUT_ARG;
+      op = OP_EQ;
+      break;
+    case '!':
+      if (c2 != '=') return ONIGERR_INVALID_CALLOUT_ARG;
+      op = OP_NE;
+      break;
+    case '<':
+      if (c2 == '=') op = OP_LE;
+      else if (c2 == 0) op = OP_LT;
+      else  return ONIGERR_INVALID_CALLOUT_ARG;
+      break;
+    case '>':
+      if (c2 == '=') op = OP_GE;
+      else if (c2 == 0) op = OP_GT;
+      else  return ONIGERR_INVALID_CALLOUT_ARG;
+      break;
+    default:
+      return ONIGERR_INVALID_CALLOUT_ARG;
+      break;
+    }
+    val.l = (long )op;
+    r = onig_set_callout_data_by_callout_args_self(args, slot, ONIG_TYPE_LONG, &val);
+    if (r != ONIG_NORMAL) return r;
+  }
+  else {
+    op = (enum OP_CMP )val.l;
+  }
+
+  switch (op) {
+  case OP_EQ: r = (lv == rv); break;
+  case OP_NE: r = (lv != rv); break;
+  case OP_LT: r = (lv <  rv); break;
+  case OP_GT: r = (lv >  rv); break;
+  case OP_LE: r = (lv <= rv); break;
+  case OP_GE: r = (lv >= rv); break;
+  }
+
+  return r == 0 ? ONIG_CALLOUT_FAIL : ONIG_CALLOUT_SUCCESS;
+}
+
+
+#include <stdio.h>
+
+static FILE* OutFp;
+
+/* name start with "onig_" for macros. */
+static int
+onig_builtin_monitor(OnigCalloutArgs* args, void* user_data)
+{
+  int r;
+  int num;
+  size_t tag_len;
+  const UChar* start;
+  const UChar* right;
+  const UChar* current;
+  const UChar* string;
+  const UChar* strend;
+  const UChar* tag_start;
+  const UChar* tag_end;
+  regex_t* reg;
+  OnigCalloutIn in;
+  OnigType type;
+  OnigValue val;
+  char buf[20];
+  FILE* fp;
+
+  fp = OutFp;
+
+  r = onig_get_arg_by_callout_args(args, 0, &type, &val);
+  if (r != ONIG_NORMAL) return r;
+
+  in = onig_get_callout_in_by_callout_args(args);
+  if (in == ONIG_CALLOUT_IN_PROGRESS) {
+    if (val.c == '<')
+      return ONIG_CALLOUT_SUCCESS;
+  }
+  else {
+    if (val.c != 'X' && val.c != '<')
+      return ONIG_CALLOUT_SUCCESS;
+  }
+
+  num       = onig_get_callout_num_by_callout_args(args);
+  start     = onig_get_start_by_callout_args(args);
+  right     = onig_get_right_range_by_callout_args(args);
+  current   = onig_get_current_by_callout_args(args);
+  string    = onig_get_string_by_callout_args(args);
+  strend    = onig_get_string_end_by_callout_args(args);
+  reg       = onig_get_regex_by_callout_args(args);
+  tag_start = onig_get_callout_tag_start(reg, num);
+  tag_end   = onig_get_callout_tag_end(reg, num);
+
+  if (tag_start == 0)
+    xsnprintf(buf, sizeof(buf), "#%d", num);
+  else {
+    /* CAUTION: tag string is not terminated with NULL. */
+    int i;
+
+    tag_len = tag_end - tag_start;
+    if (tag_len >= sizeof(buf)) tag_len = sizeof(buf) - 1;
+    for (i = 0; i < tag_len; i++) buf[i] = tag_start[i];
+    buf[tag_len] = '\0';
+  }
+
+  fprintf(fp, "ONIG-MONITOR: %-4s %s at: %d [%d - %d] len: %d\n",
+          buf,
+          in == ONIG_CALLOUT_IN_PROGRESS ? "=>" : "<=",
+          (int )(current - string),
+          (int )(start   - string),
+          (int )(right   - string),
+          (int )(strend  - string));
+  fflush(fp);
+
+  return ONIG_CALLOUT_SUCCESS;
+}
+
+extern int
+onig_setup_builtin_monitors_by_ascii_encoded_name(void* fp /* FILE* */)
+{
+  int id;
+  char* name;
+  OnigEncoding enc;
+  unsigned int ts[4];
+  OnigValue opts[4];
+
+  if (IS_NOT_NULL(fp))
+    OutFp = (FILE* )fp;
+  else
+    OutFp = stdout;
+
+  enc = ONIG_ENCODING_ASCII;
+
+  name = "MON";
+  ts[0] = ONIG_TYPE_CHAR;
+  opts[0].c = '>';
+  BC_B_O(name, monitor, 1, ts, 1, opts);
+
+  return ONIG_NORMAL;
+}
+
+#endif /* USE_CALLOUT */
