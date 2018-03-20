@@ -4,6 +4,8 @@ PHP                                                                        NEWS
 
 - Mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
+  . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
+    (chrullrich, cmb)
 
 
 29 Mar 2018, PHP 7.1.16
