@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
 if (PHP_OS !== 'Darwin') {
-    die('is not OSX.');
+    die('skip Is not OSX.');
 }
 --FILE--
 <?php
