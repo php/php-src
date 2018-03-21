@@ -1833,7 +1833,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 	target->nTableSize = source->nTableSize;
 	target->pDestructor = ZVAL_PTR_DTOR;
 
-	if (source->nNumUsed == 0) {
+	if (source->nNumOfElements == 0) {
 		HT_FLAGS(target) = (HT_FLAGS(source) & ~(HASH_FLAG_INITIALIZED|HASH_FLAG_PACKED)) | HASH_FLAG_STATIC_KEYS;
 		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = 0;
@@ -1850,8 +1850,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		HT_SET_DATA_ADDR(target, emalloc(HT_SIZE(target)));
 		target->nInternalPointer = source->nInternalPointer;
 		memcpy(HT_GET_DATA_ADDR(target), HT_GET_DATA_ADDR(source), HT_USED_SIZE(source));
-		if (target->nNumOfElements > 0 &&
-		    target->nInternalPointer == HT_INVALID_IDX) {
+		if (target->nInternalPointer == HT_INVALID_IDX) {
 			idx = 0;
 			while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
 				idx++;
@@ -1860,7 +1859,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		}
 	} else if (HT_FLAGS(source) & HASH_FLAG_PACKED) {
 		HT_FLAGS(target) = HT_FLAGS(source);
-		target->nTableMask = source->nTableMask;
+		target->nTableMask = HT_MIN_MASK;
 		target->nNumUsed = source->nNumUsed;
 		target->nNumOfElements = source->nNumOfElements;
 		target->nNextFreeElement = source->nNextFreeElement;
@@ -1873,8 +1872,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		} else {
 			zend_array_dup_packed_elements(source, target, 1);
 		}
-		if (target->nNumOfElements > 0 &&
-		    target->nInternalPointer == HT_INVALID_IDX) {
+		if (target->nInternalPointer == HT_INVALID_IDX) {
 			idx = 0;
 			while (Z_TYPE(target->arData[idx].val) == IS_UNDEF) {
 				idx++;
@@ -1905,7 +1903,7 @@ ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source)
 		}
 		target->nNumUsed = idx;
 		target->nNumOfElements = idx;
-		if (idx > 0 && target->nInternalPointer == HT_INVALID_IDX) {
+		if (target->nInternalPointer == HT_INVALID_IDX) {
 			target->nInternalPointer = 0;
 		}
 	}
