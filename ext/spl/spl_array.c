@@ -134,7 +134,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
 static zend_never_inline void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
-	intern->ht_iter = zend_hash_iterator_add(ht, ht->nInternalPointer);
+	intern->ht_iter = zend_hash_iterator_add(ht, zend_hash_get_current_pos(ht));
 	zend_hash_internal_pointer_reset_ex(ht, &EG(ht_iterators)[intern->ht_iter].pos);
 	spl_array_skip_protected(intern, ht);
 }
@@ -1419,7 +1419,7 @@ static int spl_array_object_count_elements_helper(spl_array_object *intern, zend
 		pos = *pos_ptr;
 		*count = 0;
 		spl_array_rewind(intern);
-		while (*pos_ptr != HT_INVALID_IDX && spl_array_next(intern) == SUCCESS) {
+		while (*pos_ptr < aht->nNumUsed && spl_array_next(intern) == SUCCESS) {
 			(*count)++;
 		}
 		*pos_ptr = pos;

@@ -2684,7 +2684,6 @@ PHP_FUNCTION(array_fill)
 			zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
 			Z_ARRVAL_P(return_value)->nNumUsed = (uint32_t)(start_key + num);
 			Z_ARRVAL_P(return_value)->nNumOfElements = (uint32_t)num;
-			Z_ARRVAL_P(return_value)->nInternalPointer = (uint32_t)start_key;
 			Z_ARRVAL_P(return_value)->nNextFreeElement = (zend_long)(start_key + num);
 
 			if (Z_REFCOUNTED_P(val)) {
@@ -3428,36 +3427,22 @@ PHP_FUNCTION(array_unshift)
 		Z_TRY_ADDREF(args[i]);
 		zend_hash_next_index_insert_new(&new_hash, &args[i]);
 	}
-	if (EXPECTED(!HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
-			if (key) {
-				zend_hash_add_new(&new_hash, key, value);
-			} else {
-				zend_hash_next_index_insert_new(&new_hash, value);
-			}
-		} ZEND_HASH_FOREACH_END();
-	} else {
-		uint32_t old_idx;
-		uint32_t new_idx = i;
-		uint32_t iter_pos = zend_hash_iterators_lower_pos(Z_ARRVAL_P(stack), 0);
 
-		ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
-			if (key) {
-				zend_hash_add_new(&new_hash, key, value);
-			} else {
-				zend_hash_next_index_insert_new(&new_hash, value);
-			}
-			old_idx = (Bucket*)value - Z_ARRVAL_P(stack)->arData;
-			if (old_idx == iter_pos) {
-				zend_hash_iterators_update(Z_ARRVAL_P(stack), old_idx, new_idx);
-				iter_pos = zend_hash_iterators_lower_pos(Z_ARRVAL_P(stack), iter_pos + 1);
-			}
-			new_idx++;
-		} ZEND_HASH_FOREACH_END();
+	ZEND_HASH_FOREACH_STR_KEY_VAL(Z_ARRVAL_P(stack), key, value) {
+		if (key) {
+			zend_hash_add_new(&new_hash, key, value);
+		} else {
+			zend_hash_next_index_insert_new(&new_hash, value);
+		}
+	} ZEND_HASH_FOREACH_END();
+
+	if (EXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
+		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
+		HT_SET_ITERATORS_COUNT(&new_hash, HT_ITERATORS_COUNT(Z_ARRVAL_P(stack)));
+		HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
 	}
 
 	/* replace HashTable data */
-	HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
 	Z_ARRVAL_P(stack)->pDestructor = NULL;
 	zend_hash_destroy(Z_ARRVAL_P(stack));
 

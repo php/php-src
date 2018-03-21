@@ -181,7 +181,7 @@ static void zend_hash_clone_constants(HashTable *ht, HashTable *source)
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
 	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
@@ -232,7 +232,7 @@ static void zend_hash_clone_methods(HashTable *ht, HashTable *source, zend_class
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = ZEND_FUNCTION_DTOR;
 	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
@@ -290,7 +290,7 @@ static void zend_hash_clone_prop_info(HashTable *ht, HashTable *source, zend_cla
 	ht->nNextFreeElement = source->nNextFreeElement;
 	ht->pDestructor = NULL;
 	HT_FLAGS(ht) = (HT_FLAGS(source) & (HASH_FLAG_INITIALIZED | HASH_FLAG_STATIC_KEYS));
-	ht->nInternalPointer = source->nNumOfElements ? 0 : HT_INVALID_IDX;
+	ht->nInternalPointer = 0;
 
 	if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
 		ht->arData = source->arData;
@@ -492,7 +492,7 @@ static void zend_accel_function_hash_copy(HashTable *target, HashTable *source)
 			_zend_hash_append_ptr(target, p->key, Z_PTR(p->val));
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 
 failure:
@@ -536,7 +536,7 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 			_zend_hash_append_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 
 failure:
@@ -592,7 +592,7 @@ static void zend_accel_class_hash_copy(HashTable *target, HashTable *source, uni
 			}
 		}
 	}
-	target->nInternalPointer = target->nNumOfElements ? 0 : HT_INVALID_IDX;
+	target->nInternalPointer = 0;
 	return;
 }
 
