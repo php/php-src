@@ -4,7 +4,7 @@ DBA CDB handler test
 <?php 
 $handler = 'cdb';
 require_once(dirname(__FILE__) .'/skipif.inc');
-die('info CDB does not support replace or delete');
+die('skip Info CDB does not support replace or delete');
 ?>
 --FILE--
 <?php
