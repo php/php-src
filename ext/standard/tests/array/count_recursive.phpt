@@ -159,6 +159,8 @@ COUNT_NORMAL: should be 3, is 3
 COUNT_RECURSIVE: should be 13, is 13
 
 *** Testing possible variations of count() function on arrays ***
+Deprecated: In the next major version of PHP the implicit keys of this array will start from -1 instead of 0 in %s
+
 -- Iteration 0 --
 COUNT_NORMAL is 0
 COUNT_RECURSIVE is 0

@@ -475,7 +475,7 @@ static inline int ct_eval_del_array_elem(zval *result, zval *key) {
 static inline int ct_eval_add_array_elem(zval *result, zval *value, zval *key) {
 	if (!key) {
 		SEPARATE_ARRAY(result);
-		if ((value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
+		if (!HASH_ADD_NEXT_EMITS_DEPRECATED(Z_ARR_P(result)) && (value = zend_hash_next_index_insert(Z_ARR_P(result), value))) {
 			Z_TRY_ADDREF_P(value);
 			return SUCCESS;
 		}

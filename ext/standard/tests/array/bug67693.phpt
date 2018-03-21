@@ -14,7 +14,8 @@ var_dump($array);
 
 echo"\nDone";
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: In the next major version of PHP the implicit keys of this array will start from -1 instead of 0 in %s
 array(2) {
   [0]=>
   int(0)

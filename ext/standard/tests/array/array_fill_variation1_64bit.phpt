@@ -117,6 +117,8 @@ array(2) {
   int(100)
 }
 -- Iteration 2 --
+
+Deprecated: In the next major version of PHP the implicit keys of this array will start from -9 instead of 0 in %s
 array(2) {
   [-10]=>
   int(100)
