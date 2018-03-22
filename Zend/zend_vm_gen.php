@@ -792,6 +792,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/opline->extended_value\s*==\s*0/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
+			"/opline->extended_value\s*&\s*ZEND_ISSET/",
+			"/opline->extended_value\s*&\s*~\s*ZEND_ISSET/",
 		),
 		array(
 			$op1_type[$op1],
@@ -857,6 +859,12 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				: "\\0",
 			isset($extra_spec['DIM_OBJ']) ?
 				($extra_spec['DIM_OBJ'] == 2 ? "1" : "0")
+				: "\\0",
+			isset($extra_spec['ISSET']) ?
+				($extra_spec['ISSET'] == 0 ? "0" : "1")
+				: "\\0",
+			isset($extra_spec['ISSET']) ?
+				($extra_spec['ISSET'] == 0 ? "opline->extended_value" : "\\0")
 				: "\\0",
 		),
 		$code);
@@ -1490,6 +1498,13 @@ function extra_spec_name($extra_spec) {
 			$s .= "_OBJ";
 		}
 	}
+	if (isset($extra_spec["ISSET"])) {
+		if ($extra_spec["ISSET"] == 0) {
+			$s .= "_EMPTY";
+		} else {
+			$s .= "_SET";
+		}
+	}
 	return $s;
 }
 
@@ -1512,6 +1527,9 @@ function extra_spec_flags($extra_spec) {
 	}
 	if (isset($extra_spec["COMMUTATIVE"])) {
 		$s[] = "SPEC_RULE_COMMUTATIVE";
+	}
+	if (isset($extra_spec["ISSET"])) {
+		$s[] = "SPEC_RULE_ISSET";
 	}
 	return $s;
 }
@@ -1707,6 +1725,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 					out($f,"#define SPEC_RULE_SMART_BRANCH 0x00200000\n");
 					out($f,"#define SPEC_RULE_DIM_OBJ      0x00400000\n");
 					out($f,"#define SPEC_RULE_COMMUTATIVE  0x00800000\n");
+					out($f,"#define SPEC_RULE_ISSET        0x01000000\n");
 					out($f,"\n");
 					out($f,"static const uint32_t *zend_spec_handlers;\n");
 					out($f,"static const void * const *zend_opcode_handlers;\n");
@@ -2171,6 +2190,9 @@ function parse_spec_rules($def, $lineno, $str) {
 				case "COMMUTATIVE":
 					$ret["COMMUTATIVE"] = array(1);
 					break;
+				case "ISSET":
+					$ret["ISSET"] = array(0, 1);
+					break;
 				default:
 					die("ERROR ($def:$lineno): Wrong specialization rules '$str'\n");
 			}
@@ -2570,7 +2592,8 @@ function gen_vm($def, $skel) {
 		    isset($used_extra_spec["RETVAL"]) ||
 		    isset($used_extra_spec["QUICK_ARG"]) ||
 		    isset($used_extra_spec["SMART_BRANCH"]) ||
-		    isset($used_extra_spec["DIM_OBJ"])) {
+		    isset($used_extra_spec["DIM_OBJ"]) ||
+		    isset($used_extra_spec["ISSET"])) {
 
 			$else = "";
 			out($f, "\tif (spec & SPEC_EXTRA_MASK) {\n");
@@ -2607,6 +2630,10 @@ function gen_vm($def, $skel) {
 				out($f,	"\t\t\t\toffset += 2;\n");
 				out($f, "\t\t\t}\n");
 				out($f, "\t\t}\n");
+				$else = "else ";
+			}
+			if (isset($used_extra_spec["ISSET"])) {
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISSET);\n");
 				$else = "else ";
 			}
 			out($f, "\t}\n");
@@ -2653,7 +2680,8 @@ function gen_vm($def, $skel) {
 			    isset($used_extra_spec["RETVAL"]) ||
 			    isset($used_extra_spec["QUICK_ARG"]) ||
 			    isset($used_extra_spec["SMART_BRANCH"]) ||
-			    isset($used_extra_spec["DIM_OBJ"])) {
+			    isset($used_extra_spec["DIM_OBJ"]) ||
+			    isset($used_extra_spec["ISSET"])) {
 
 				$else = "";
 				out($f, "\tif (spec & SPEC_EXTRA_MASK) {\n");
@@ -2690,6 +2718,10 @@ function gen_vm($def, $skel) {
 					out($f,	"\t\t\t\toffset += 2;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");
+					$else = "else ";
+				}
+				if (isset($used_extra_spec["ISSET"])) {
+					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISSET);\n");
 					$else = "else ";
 				}
 				out($f, "\t}\n");

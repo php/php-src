@@ -316,6 +316,7 @@ static zend_uchar zend_user_opcodes[256] = {0,
 #define SPEC_RULE_SMART_BRANCH 0x00200000
 #define SPEC_RULE_DIM_OBJ      0x00400000
 #define SPEC_RULE_COMMUTATIVE  0x00800000
+#define SPEC_RULE_ISSET        0x01000000
 
 static const uint32_t *zend_spec_handlers;
 static const void * const *zend_opcode_handlers;
