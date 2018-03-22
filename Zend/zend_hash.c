@@ -114,45 +114,44 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 #endif
 }
 
+static zend_always_inline void zend_hash_real_init_packed_ex(HashTable *ht)
+{
+	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
+	HT_HASH_RESET_PACKED(ht);
+}
+
+static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
+{
+	(ht)->nTableMask = -(ht)->nTableSize;
+	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
+	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
+	if (EXPECTED(ht->nTableMask == (uint32_t)-8)) {
+		Bucket *arData = ht->arData;
+
+		HT_HASH_EX(arData, -8) = -1;
+		HT_HASH_EX(arData, -7) = -1;
+		HT_HASH_EX(arData, -6) = -1;
+		HT_HASH_EX(arData, -5) = -1;
+		HT_HASH_EX(arData, -4) = -1;
+		HT_HASH_EX(arData, -3) = -1;
+		HT_HASH_EX(arData, -2) = -1;
+		HT_HASH_EX(arData, -1) = -1;
+	} else {
+		HT_HASH_RESET(ht);
+	}
+}
+
 static zend_always_inline void zend_hash_real_init_ex(HashTable *ht, int packed)
 {
 	HT_ASSERT_RC1(ht);
 	ZEND_ASSERT(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED));
 	if (packed) {
-		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
-		HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED | HASH_FLAG_PACKED;
-		HT_HASH_RESET_PACKED(ht);
+		zend_hash_real_init_packed_ex(ht);
 	} else {
-		(ht)->nTableMask = -(ht)->nTableSize;
-		HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE(ht), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
-		HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
-		if (EXPECTED(ht->nTableMask == (uint32_t)-8)) {
-			Bucket *arData = ht->arData;
-
-			HT_HASH_EX(arData, -8) = -1;
-			HT_HASH_EX(arData, -7) = -1;
-			HT_HASH_EX(arData, -6) = -1;
-			HT_HASH_EX(arData, -5) = -1;
-			HT_HASH_EX(arData, -4) = -1;
-			HT_HASH_EX(arData, -3) = -1;
-			HT_HASH_EX(arData, -2) = -1;
-			HT_HASH_EX(arData, -1) = -1;
-		} else {
-			HT_HASH_RESET(ht);
-		}
+		zend_hash_real_init_mixed_ex(ht);
 	}
 }
-
-static zend_always_inline void zend_hash_check_init(HashTable *ht, int packed)
-{
-	HT_ASSERT_RC1(ht);
-	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		zend_hash_real_init_ex(ht, packed);
-	}
-}
-
-#define CHECK_INIT(ht, packed) \
-	zend_hash_check_init(ht, packed)
 
 static const uint32_t uninitialized_bucket[-HT_MIN_MASK] =
 	{HT_INVALID_IDX, HT_INVALID_IDX};
@@ -216,6 +215,22 @@ ZEND_API void ZEND_FASTCALL zend_hash_real_init(HashTable *ht, zend_bool packed)
 	zend_hash_real_init_ex(ht, packed);
 }
 
+ZEND_API void ZEND_FASTCALL zend_hash_real_init_packed(HashTable *ht)
+{
+	IS_CONSISTENT(ht);
+
+	HT_ASSERT_RC1(ht);
+	zend_hash_real_init_packed_ex(ht);
+}
+
+ZEND_API void ZEND_FASTCALL zend_hash_real_init_mixed(HashTable *ht)
+{
+	IS_CONSISTENT(ht);
+
+	HT_ASSERT_RC1(ht);
+	zend_hash_real_init_mixed_ex(ht);
+}
+
 ZEND_API void ZEND_FASTCALL zend_hash_packed_to_hash(HashTable *ht)
 {
 	void *new_data, *old_data = HT_GET_DATA_ADDR(ht);
@@ -254,7 +269,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_extend(HashTable *ht, uint32_t nSize, zend
 		if (nSize > ht->nTableSize) {
 			ht->nTableSize = zend_hash_check_size(nSize);
 		}
-		zend_hash_check_init(ht, packed);
+		zend_hash_real_init(ht, packed);
 	} else {
 		if (packed) {
 			ZEND_ASSERT(HT_FLAGS(ht) & HASH_FLAG_PACKED);
@@ -582,7 +597,7 @@ static zend_always_inline zval *_zend_hash_add_or_update_i(HashTable *ht, zend_s
 	HT_ASSERT_RC1(ht);
 
 	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		CHECK_INIT(ht, 0);
+		zend_hash_real_init_mixed(ht);
 		if (!ZSTR_IS_INTERNED(key)) {
 			zend_string_addref(key);
 			HT_FLAGS(ht) &= ~HASH_FLAG_STATIC_KEYS;
@@ -667,7 +682,7 @@ static zend_always_inline zval *_zend_hash_str_add_or_update_i(HashTable *ht, co
 	HT_ASSERT_RC1(ht);
 
 	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		CHECK_INIT(ht, 0);
+		zend_hash_real_init_mixed(ht);
 		goto add_to_hash;
 	} else if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		zend_hash_packed_to_hash(ht);
@@ -817,11 +832,12 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	HT_ASSERT_RC1(ht);
 
 	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		CHECK_INIT(ht, h < ht->nTableSize);
 		if (h < ht->nTableSize) {
+			zend_hash_real_init_packed_ex(ht);
 			p = ht->arData + h;
 			goto add_to_packed;
 		}
+		zend_hash_real_init_mixed(ht);
 		goto add_to_hash;
 	} else if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		if (h < ht->nNumUsed) {

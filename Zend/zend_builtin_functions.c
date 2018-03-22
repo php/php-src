@@ -475,7 +475,7 @@ ZEND_FUNCTION(func_get_args)
 	if (arg_count) {
 		array_init_size(return_value, arg_count);
 		first_extra_arg = ex->func->op_array.num_args;
-		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
 			i = 0;
 			p = ZEND_CALL_ARG(ex, 1);
@@ -644,7 +644,7 @@ ZEND_FUNCTION(each)
 		break;
 	}
 	array_init_size(return_value, 4);
-	zend_hash_real_init(Z_ARRVAL_P(return_value), 0);
+	zend_hash_real_init_mixed(Z_ARRVAL_P(return_value));
 
 	/* add value elements */
 	ZVAL_DEREF(entry);
@@ -2121,7 +2121,7 @@ static void debug_backtrace_get_args(zend_execute_data *call, zval *arg_array) /
 		zval *p = ZEND_CALL_ARG(call, 1);
 
 		array_init_size(arg_array, num_args);
-		zend_hash_real_init(Z_ARRVAL_P(arg_array), 1);
+		zend_hash_real_init_packed(Z_ARRVAL_P(arg_array));
 		ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(arg_array)) {
 			if (call->func->type == ZEND_USER_FUNCTION) {
 				uint32_t first_extra_arg = MIN(num_args, call->func->op_array.num_args);

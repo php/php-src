@@ -68,7 +68,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 
 		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
-			zend_hash_real_init(zobj->properties, 0);
+			zend_hash_real_init_mixed(zobj->properties);
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0) {

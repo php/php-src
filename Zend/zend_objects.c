@@ -196,7 +196,7 @@ ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, 
 
 		if (!new_object->properties) {
 			new_object->properties = zend_new_array(zend_hash_num_elements(old_object->properties));
-			zend_hash_real_init(new_object->properties, 0);
+			zend_hash_real_init_mixed(new_object->properties);
 		} else {
 			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
