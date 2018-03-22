@@ -3436,7 +3436,7 @@ PHP_FUNCTION(array_unshift)
 		}
 	} ZEND_HASH_FOREACH_END();
 
-	if (EXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
+	if (UNEXPECTED(HT_HAS_ITERATORS(Z_ARRVAL_P(stack)))) {
 		zend_hash_iterators_advance(Z_ARRVAL_P(stack), argc);
 		HT_SET_ITERATORS_COUNT(&new_hash, HT_ITERATORS_COUNT(Z_ARRVAL_P(stack)));
 		HT_SET_ITERATORS_COUNT(Z_ARRVAL_P(stack), 0);
