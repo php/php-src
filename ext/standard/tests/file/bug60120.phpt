@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 }
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
-	die("No php executable defined\n");
+	die("skip No php executable defined\n");
 }
 ?>
 --FILE--
