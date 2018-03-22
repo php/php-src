@@ -10,7 +10,7 @@ Emmanuel Dreyfus <manu@netbsd.org>
 	$r = ldap_read($link, '', 'objectClass=*', array('dynamicsubtrees'));
 	$info = ldap_get_entries($link, $r)[0];
 	if (!isset($info['dynamicsubtrees'])) {
-		die("Overlay DDS not available");
+		die("skip Overlay DDS not available");
 	}
 ?>
 --FILE--
