@@ -128,6 +128,8 @@ Intl:
     For the detailed documentation on the restriction levels, see
     URestrictionLevel under
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
+  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
+    to retrieve the Decomposition_Mapping property of a character.
 
 Standard:
   . Added is_countable() function, to check whether a value may be passed to
