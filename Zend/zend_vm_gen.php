@@ -1023,6 +1023,8 @@ function skip_extra_spec_function($op1, $op2, $extra_spec) {
 function is_hot_handler($hot, $op1, $op2, $extra_spec) {
 	if ($hot === 'HOT_') {
 		return true;
+	} else if ($hot === 'HOT_NOCONST_') {
+		return ($op1 !== 'CONST');
 	} else if ($hot === 'HOT_OBJ_') {
 		return (($op1 === 'UNUSED') || ($op1 === 'CV')) && ($op2 === 'CONST');
 	} else if ($hot === 'HOT_SEND_') {
@@ -2235,11 +2237,12 @@ function gen_vm($def, $skel) {
 		++$lineno;
 		if (strpos($line,"ZEND_VM_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_HOT_NOCONST_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_SEND_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_OBJ_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
@@ -2283,11 +2286,12 @@ function gen_vm($def, $skel) {
 			$list[$lineno] = array("handler"=>$handler);
 		} else if (strpos($line,"ZEND_VM_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_TYPE_SPEC_HANDLER(") === 0 ||
+		           strpos($line,"ZEND_VM_HOT_NOCONST_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_SEND_TYPE_SPEC_HANDLER(") === 0 ||
 		           strpos($line,"ZEND_VM_HOT_OBJ_TYPE_SPEC_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_)?TYPE_SPEC_HANDLER\(\s*([A-Z_]+)\s*,\s*((?:[^(,]|\([^()]*|(?R)*\))*),\s*([A-Za-z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_TYPE_HANDLER_HANDLER definition.\n");
