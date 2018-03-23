@@ -112,7 +112,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						} else {
 							parameter = &param->parameter;
 						}
-						if (Z_TYPE_P(parameter) == IS_NULL) {
+						if (ZVAL_IS_NULL(parameter)) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}
@@ -148,7 +148,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 								pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
 								return 0;
 							}
-						} else if (Z_TYPE_P(parameter) == IS_NULL) {
+						} else if (ZVAL_IS_NULL(parameter)) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}
@@ -173,7 +173,7 @@ static int pdo_sqlite_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_d
 						} else {
 							parameter = &param->parameter;
 						}
-						if (Z_TYPE_P(parameter) == IS_NULL) {
+						if (ZVAL_IS_NULL(parameter)) {
 							if (sqlite3_bind_null(S->stmt, param->paramno + 1) == SQLITE_OK) {
 								return 1;
 							}

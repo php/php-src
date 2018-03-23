@@ -1153,7 +1153,7 @@ static zend_always_inline int zend_parse_arg_bool(zval *arg, zend_bool *dest, ze
 		*dest = 1;
 	} else if (EXPECTED(Z_TYPE_P(arg) == IS_FALSE)) {
 		*dest = 0;
-	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+	} else if (check_null && ZVAL_IS_NULL(arg)) {
 		*is_null = 1;
 		*dest = 0;
 	} else {
@@ -1169,7 +1169,7 @@ static zend_always_inline int zend_parse_arg_long(zval *arg, zend_long *dest, ze
 	}
 	if (EXPECTED(Z_TYPE_P(arg) == IS_LONG)) {
 		*dest = Z_LVAL_P(arg);
-	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+	} else if (check_null && ZVAL_IS_NULL(arg)) {
 		*is_null = 1;
 		*dest = 0;
 	} else if (cap) {
@@ -1187,7 +1187,7 @@ static zend_always_inline int zend_parse_arg_double(zval *arg, double *dest, zen
 	}
 	if (EXPECTED(Z_TYPE_P(arg) == IS_DOUBLE)) {
 		*dest = Z_DVAL_P(arg);
-	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+	} else if (check_null && ZVAL_IS_NULL(arg)) {
 		*is_null = 1;
 		*dest = 0.0;
 	} else {
@@ -1200,7 +1200,7 @@ static zend_always_inline int zend_parse_arg_str(zval *arg, zend_string **dest, 
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_STRING)) {
 		*dest = Z_STR_P(arg);
-	} else if (check_null && Z_TYPE_P(arg) == IS_NULL) {
+	} else if (check_null && ZVAL_IS_NULL(arg)) {
 		*dest = NULL;
 	} else {
 		return zend_parse_arg_str_slow(arg, dest);
@@ -1256,7 +1256,7 @@ static zend_always_inline int zend_parse_arg_array(zval *arg, zval **dest, int c
 	if (EXPECTED(Z_TYPE_P(arg) == IS_ARRAY) ||
 		(or_object && EXPECTED(Z_TYPE_P(arg) == IS_OBJECT))) {
 		*dest = arg;
-	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	} else if (check_null && EXPECTED(ZVAL_IS_NULL(arg))) {
 		*dest = NULL;
 	} else {
 		return 0;
@@ -1278,7 +1278,7 @@ static zend_always_inline int zend_parse_arg_array_ht(zval *arg, HashTable **des
 			Z_OBJ_P(arg)->properties = zend_array_dup(Z_OBJ_P(arg)->properties);
 		}
 		*dest = Z_OBJ_HT_P(arg)->get_properties(arg);
-	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	} else if (check_null && EXPECTED(ZVAL_IS_NULL(arg))) {
 		*dest = NULL;
 	} else {
 		return 0;
@@ -1291,7 +1291,7 @@ static zend_always_inline int zend_parse_arg_object(zval *arg, zval **dest, zend
 	if (EXPECTED(Z_TYPE_P(arg) == IS_OBJECT) &&
 	    (!ce || EXPECTED(instanceof_function(Z_OBJCE_P(arg), ce) != 0))) {
 		*dest = arg;
-	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	} else if (check_null && EXPECTED(ZVAL_IS_NULL(arg))) {
 		*dest = NULL;
 	} else {
 		return 0;
@@ -1303,7 +1303,7 @@ static zend_always_inline int zend_parse_arg_resource(zval *arg, zval **dest, in
 {
 	if (EXPECTED(Z_TYPE_P(arg) == IS_RESOURCE)) {
 		*dest = arg;
-	} else if (check_null && EXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	} else if (check_null && EXPECTED(ZVAL_IS_NULL(arg))) {
 		*dest = NULL;
 	} else {
 		return 0;
@@ -1313,7 +1313,7 @@ static zend_always_inline int zend_parse_arg_resource(zval *arg, zval **dest, in
 
 static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *dest_fci, zend_fcall_info_cache *dest_fcc, int check_null, char **error)
 {
-	if (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) {
+	if (check_null && UNEXPECTED(ZVAL_IS_NULL(arg))) {
 		dest_fci->size = 0;
 		dest_fcc->function_handler = NULL;
 		*error = NULL;
@@ -1326,14 +1326,14 @@ static zend_always_inline int zend_parse_arg_func(zval *arg, zend_fcall_info *de
 static zend_always_inline void zend_parse_arg_zval(zval *arg, zval **dest, int check_null)
 {
 	*dest = (check_null &&
-	    (UNEXPECTED(Z_TYPE_P(arg) == IS_NULL) ||
+	    (UNEXPECTED(ZVAL_IS_NULL(arg)) ||
 	     (UNEXPECTED(Z_ISREF_P(arg)) &&
 	      UNEXPECTED(Z_TYPE_P(Z_REFVAL_P(arg)) == IS_NULL)))) ? NULL : arg;
 }
 
 static zend_always_inline void zend_parse_arg_zval_deref(zval *arg, zval **dest, int check_null)
 {
-	*dest = (check_null && UNEXPECTED(Z_TYPE_P(arg) == IS_NULL)) ? NULL : arg;
+	*dest = (check_null && UNEXPECTED(ZVAL_IS_NULL(arg))) ? NULL : arg;
 }
 
 END_EXTERN_C()

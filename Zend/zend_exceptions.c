@@ -98,7 +98,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		}
 		base_ce = i_get_exception_base(ex);
 		previous = zend_read_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
-		if (Z_TYPE_P(previous) == IS_NULL) {
+		if (ZVAL_IS_NULL(previous)) {
 			zend_update_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &pv);
 			GC_DELREF(add_previous);
 			return;

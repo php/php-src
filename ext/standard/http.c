@@ -144,7 +144,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				GC_UNPROTECT_RECURSION(ht);
 			}
 			efree(newprefix);
-		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
+		} else if (ZVAL_IS_NULL(zdata) || Z_TYPE_P(zdata) == IS_RESOURCE) {
 			/* Skip these types */
 			continue;
 		} else {

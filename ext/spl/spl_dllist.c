@@ -818,7 +818,7 @@ SPL_METHOD(SplDoublyLinkedList, offsetSet)
 
 	intern = Z_SPLDLLIST_P(getThis());
 
-	if (Z_TYPE_P(zindex) == IS_NULL) {
+	if (ZVAL_IS_NULL(zindex)) {
 		/* $obj[] = ... */
 		spl_ptr_llist_push(intern->llist, value);
 	} else {

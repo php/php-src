@@ -376,7 +376,7 @@ static int pgsql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_data *
 					}
 
 					if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL ||
-							Z_TYPE_P(parameter) == IS_NULL) {
+							ZVAL_IS_NULL(parameter)) {
 						S->param_values[param->paramno] = NULL;
 						S->param_lengths[param->paramno] = 0;
 					} else if (Z_TYPE_P(parameter) == IS_FALSE || Z_TYPE_P(parameter) == IS_TRUE) {

@@ -31,7 +31,7 @@
 BEGIN_EXTERN_C()
 struct _zend_fcall_info;
 ZEND_API extern void (*zend_execute_ex)(zend_execute_data *execute_data);
-ZEND_API extern void (*zend_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+ZEND_API extern void (*zend_execute_internal)(INTERNAL_FUNCTION_PARAMETERS);
 
 void init_executor(void);
 void shutdown_executor(void);
@@ -41,7 +41,7 @@ ZEND_API void zend_init_func_execute_data(zend_execute_data *execute_data, zend_
 ZEND_API void zend_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value);
 ZEND_API void zend_execute(zend_op_array *op_array, zval *return_value);
 ZEND_API void execute_ex(zend_execute_data *execute_data);
-ZEND_API void execute_internal(zend_execute_data *execute_data, zval *return_value);
+ZEND_API void execute_internal(INTERNAL_FUNCTION_PARAMETERS);
 ZEND_API zend_class_entry *zend_lookup_class(zend_string *name);
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload);
 ZEND_API zend_class_entry *zend_get_called_scope(zend_execute_data *ex);

@@ -549,7 +549,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 				ZVAL_NULL(dest);
 			}
 
-			if (Z_TYPE_P(dest) == IS_NULL) {
+			if (ZVAL_IS_NULL(dest)) {
 				type = new_type;
 			}
 			break;
@@ -652,7 +652,7 @@ static inline void fetch_value(pdo_stmt_t *stmt, zval *dest, int colno, int *typ
 		}
 	}
 
-	if (Z_TYPE_P(dest) == IS_NULL && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
+	if (ZVAL_IS_NULL(dest) && stmt->dbh->oracle_nulls == PDO_NULL_TO_STRING) {
 		ZVAL_EMPTY_STRING(dest);
 	}
 }

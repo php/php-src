@@ -496,14 +496,14 @@ static int pdo_mysql_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_da
 				}
 
 #if PDO_USE_MYSQLND
-				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || (Z_TYPE_P(parameter) == IS_NULL)) {
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || (ZVAL_IS_NULL(parameter))) {
 					mysqlnd_stmt_bind_one_param(S->stmt, param->paramno, parameter, MYSQL_TYPE_NULL);
 					PDO_DBG_RETURN(1);
 				}
 #else
 				b = (PDO_MYSQL_PARAM_BIND*)param->driver_data;
 				*b->is_null = 0;
-				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || Z_TYPE_P(parameter) == IS_NULL) {
+				if (PDO_PARAM_TYPE(param->param_type) == PDO_PARAM_NULL || ZVAL_IS_NULL(parameter)) {
 					*b->is_null = 1;
 					b->buffer_type = MYSQL_TYPE_STRING;
 					b->buffer = NULL;

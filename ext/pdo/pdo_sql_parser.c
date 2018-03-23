@@ -558,7 +558,7 @@ safe:
 					zend_string *buf = NULL;
 
 					/* assume all types are nullable */
-					if (Z_TYPE_P(parameter) == IS_NULL) {
+					if (ZVAL_IS_NULL(parameter)) {
 						param_type = PDO_PARAM_NULL;
 					}
 

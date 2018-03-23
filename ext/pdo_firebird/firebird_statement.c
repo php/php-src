@@ -582,7 +582,7 @@ static int firebird_stmt_param_hook(pdo_stmt_t *stmt, struct pdo_bound_param_dat
 					return 0;
 
 				case SQL_BLOB: {
-					if (Z_TYPE_P(parameter) == IS_NULL) {
+					if (ZVAL_IS_NULL(parameter)) {
 						/* Check if field allow NULL values */
 						if (~var->sqltype & 1) {
 							strcpy(stmt->error_code, "HY105");

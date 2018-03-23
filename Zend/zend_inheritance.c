@@ -495,7 +495,7 @@ static ZEND_COLD zend_string *zend_get_function_declaration(const zend_function 
 							smart_str_appends(&str, "false");
 						} else if (Z_TYPE_P(zv) == IS_TRUE) {
 							smart_str_appends(&str, "true");
-						} else if (Z_TYPE_P(zv) == IS_NULL) {
+						} else if (ZVAL_IS_NULL(zv)) {
 							smart_str_appends(&str, "NULL");
 						} else if (Z_TYPE_P(zv) == IS_STRING) {
 							smart_str_appendc(&str, '\'');

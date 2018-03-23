@@ -1577,7 +1577,7 @@ PHP_METHOD(sqlite3stmt, execute)
 			}
 
 			/* If the ZVAL is null then it should be bound as that */
-			if (Z_TYPE_P(parameter) == IS_NULL) {
+			if (ZVAL_IS_NULL(parameter)) {
 				sqlite3_bind_null(stmt_obj->stmt, param->param_number);
 				continue;
 			}

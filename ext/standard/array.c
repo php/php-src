@@ -3548,7 +3548,7 @@ PHP_FUNCTION(array_slice)
 	num_in = zend_hash_num_elements(Z_ARRVAL_P(input));
 
 	/* We want all entries from offset to the end if length is not passed or is null */
-	if (ZEND_NUM_ARGS() < 3 || Z_TYPE_P(z_length) == IS_NULL) {
+	if (ZEND_NUM_ARGS() < 3 || ZVAL_IS_NULL(z_length)) {
 		length = num_in;
 	} else {
 		length = zval_get_long(z_length);
@@ -3651,7 +3651,7 @@ PHPAPI int php_array_merge_recursive(HashTable *dest, HashTable *src) /* {{{ */
 				SEPARATE_ZVAL(dest_entry);
 				dest_zval = dest_entry;
 
-				if (Z_TYPE_P(dest_zval) == IS_NULL) {
+				if (ZVAL_IS_NULL(dest_zval)) {
 					convert_to_array_ex(dest_zval);
 					add_next_index_null(dest_zval);
 				} else if (Z_TYPE_P(dest_zval) == IS_ARRAY) {

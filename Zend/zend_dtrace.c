@@ -26,7 +26,7 @@
 
 ZEND_API zend_op_array *(*zend_dtrace_compile_file)(zend_file_handle *file_handle, int type);
 ZEND_API void (*zend_dtrace_execute)(zend_op_array *op_array);
-ZEND_API void (*zend_dtrace_execute_internal)(zend_execute_data *execute_data, zval *return_value);
+ZEND_API void (*zend_dtrace_execute_internal)(INTERNAL_FUNCTION_PARAMETERS);
 
 /* PHP DTrace probes {{{ */
 static inline const char *dtrace_get_executed_filename(void)
@@ -91,7 +91,7 @@ ZEND_API void dtrace_execute_ex(zend_execute_data *execute_data)
 	}
 }
 
-ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *return_value)
+ZEND_API void dtrace_execute_internal(INTERNAL_FUNCTION_PARAMETERS)
 {
 	int lineno;
 	const char *filename;
@@ -104,7 +104,7 @@ ZEND_API void dtrace_execute_internal(zend_execute_data *execute_data, zval *ret
 		DTRACE_EXECUTE_ENTRY((char *)filename, lineno);
 	}
 
-	execute_internal(execute_data, return_value);
+	execute_internal(INTERNAL_FUNCTION_PARAM_PASSTHRU);
 
 	if (DTRACE_EXECUTE_RETURN_ENABLED()) {
 		DTRACE_EXECUTE_RETURN((char *)filename, lineno);
