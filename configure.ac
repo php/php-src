@@ -753,7 +753,36 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-PHP_CHECK_VALGRIND
+dnl Check valgrind support
+PHP_ARG_WITH(valgrind-support, [whether to enable valgrind support],
+[  --with-valgrind-support=DIR
+                          Enable valgrind support], DEFAULT, no)
+
+if test "$PHP_VALGRIND_SUPPORT" != "no"; then
+
+  AC_MSG_CHECKING([for valgrind header])
+
+  if test "$PHP_VALGRIND_SUPPORT" = "DEFAULT" || test "$PHP_VALGRIND_SUPPORT" = "yes"; then
+    SEARCH_PATH="/usr/local /usr"
+  else
+    SEARCH_PATH="$PHP_VALGRIND_SUPPORT"
+  fi
+
+  SEARCH_FOR="/include/valgrind/valgrind.h"
+  for i in $SEARCH_PATH ; do
+    if test -r $i/$SEARCH_FOR; then
+      VALGRIND_DIR=$i
+    fi
+  done
+
+  if test -z "$VALGRIND_DIR"; then
+    AC_MSG_RESULT([not found])
+  else
+    AC_MSG_RESULT(found in $VALGRIND_DIR)
+    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
+  fi
+
+fi
 
 dnl General settings.
 dnl -------------------------------------------------------------------------
