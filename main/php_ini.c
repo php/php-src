@@ -350,6 +350,7 @@ static void php_load_php_extension_cb(void *arg)
 
 /* {{{ php_load_zend_extension_cb
  */
+#ifdef HAVE_LIBDL
 static void php_load_zend_extension_cb(void *arg)
 {
 	char *filename = *((char **) arg);
@@ -409,6 +410,9 @@ static void php_load_zend_extension_cb(void *arg)
 		efree(libpath);
 	}
 }
+#else
+static void php_load_zend_extension_cb(void *arg) { }
+#endif
 /* }}} */
 
 /* {{{ php_init_config
