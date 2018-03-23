@@ -394,7 +394,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_date_period_construct, 0, 0, 3)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_set_state, 0, 0, 1)
-	ZEND_ARG_INFO(0, array)
+	ZEND_ARG_ARRAY_INFO(0, array, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_interval_construct, 0, 0, 1)
