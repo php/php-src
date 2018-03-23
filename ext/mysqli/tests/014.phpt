@@ -8,10 +8,10 @@ mysqli autocommit/commit/rollback
 
 	$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket);
 	if (!$link)
-		die(sprintf("Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
+		die(sprintf("skip Cannot connect, [%d] %s", mysqli_connect_errno(), mysqli_connect_error()));
 
 	if (!have_innodb($link))
-		die(sprintf("Needs InnoDB support, [%d] %s", $link->errno, $link->error));
+		die(sprintf("skip Needs InnoDB support, [%d] %s", $link->errno, $link->error));
 ?>
 --FILE--
 <?php
