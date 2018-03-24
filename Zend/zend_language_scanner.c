@@ -1108,30 +1108,6 @@ skip_escape_conversion:
 	return SUCCESS;
 }
 
-#define PARSER_MODE() \
-	EXPECTED(elem != NULL)
-
-#define RETURN_TOKEN(_token) do { \
-		token = _token; \
-		goto emit_token; \
-	} while (0)
-
-#define RETURN_TOKEN_WITH_VAL(_token) do { \
-		token = _token; \
-		goto emit_token_with_val; \
-	} while (0)
-
-#define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
-		token = _token; \
-		offset = _offset; \
-		goto emit_token_with_str; \
-	} while (0)
-
-#define SKIP_TOKEN(_token) do { \
-		token = _token; \
-		goto skip_token; \
-	} while (0)
-
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 
@@ -1196,6 +1172,30 @@ static void copy_heredoc_label_stack(void *void_heredoc_label)
 
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
 }
+
+#define PARSER_MODE() \
+	EXPECTED(elem != NULL)
+
+#define RETURN_TOKEN(_token) do { \
+		token = _token; \
+		goto emit_token; \
+	} while (0)
+
+#define RETURN_TOKEN_WITH_VAL(_token) do { \
+		token = _token; \
+		goto emit_token_with_val; \
+	} while (0)
+
+#define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
+		token = _token; \
+		offset = _offset; \
+		goto emit_token_with_str; \
+	} while (0)
+
+#define SKIP_TOKEN(_token) do { \
+		token = _token; \
+		goto skip_token; \
+	} while (0)
 
 int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
 {
