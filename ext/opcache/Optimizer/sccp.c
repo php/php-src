@@ -820,7 +820,8 @@ static inline int ct_eval_func_call(
 		} else if (zend_string_equals_literal(name, "substr")) {
 			if (Z_TYPE_P(args[0]) != IS_STRING
 					|| Z_TYPE_P(args[1]) != IS_LONG
-					|| Z_TYPE_P(args[2]) != IS_LONG) {
+					|| Z_TYPE_P(args[2]) != IS_LONG
+					|| (CG(compiler_options) & ZEND_COMPILE_NO_BUILTIN_STRLEN)) {
 				return FAILURE;
 			}
 			/* pass */
