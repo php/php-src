@@ -153,7 +153,7 @@ static zend_always_inline uint32_t *spl_array_get_pos_ptr(HashTable *ht, spl_arr
 static void spl_array_object_free_storage(zend_object *object)
 {
 	spl_array_object *intern = spl_array_from_obj(object);
-	
+
 	if (intern->ht_iter != (uint32_t) -1) {
 		zend_hash_iterator_del(intern->ht_iter);
 	}
@@ -1859,8 +1859,8 @@ outexcept:
 
 /* {{{ arginfo and function table */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, array)
-	ZEND_ARG_INFO(0, ar_flags)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, iterator_class)
 ZEND_END_ARG_INFO()
 
