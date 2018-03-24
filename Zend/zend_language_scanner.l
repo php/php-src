@@ -2288,7 +2288,7 @@ skip_escape_conversion:
 			}
 
 			YYCURSOR = saved_cursor;
-			heredoc_label->length += indentation;
+			heredoc_label->indentation = indentation;
 
 			BEGIN(ST_END_HEREDOC);
 			RETURN_TOKEN(T_START_HEREDOC);
@@ -2353,8 +2353,8 @@ skip_escape_conversion:
 <ST_END_HEREDOC>{ANY_CHAR} {
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_pop(&SCNG(heredoc_label_stack));
 
-	YYCURSOR += heredoc_label->length - 1;
-	yyleng = heredoc_label->length;
+	yyleng = heredoc_label->indentation + heredoc_label->length;
+	YYCURSOR += yyleng - 1;
 
 	heredoc_label_dtor(heredoc_label);
 	efree(heredoc_label);
@@ -2541,7 +2541,6 @@ double_quotes_scan_done:
 					} else {
 						CG(increment_lineno) = 1;
 						YYCURSOR -= indentation;
-						heredoc_label->length += indentation;
 					}
 
 					BEGIN(ST_END_HEREDOC);
@@ -2655,7 +2654,7 @@ heredoc_scan_done:
 					CG(increment_lineno) = 1; /* For newline before label */
 
 					YYCURSOR -= indentation;
-					heredoc_label->length += indentation;
+					heredoc_label->indentation = indentation;
 
 					BEGIN(ST_END_HEREDOC);
 
