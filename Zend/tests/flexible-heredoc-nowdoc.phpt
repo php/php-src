@@ -12,6 +12,12 @@ var_dump(<<<END
 
   END);
 
+// Insufficient indentation is fine if the line is whitespace-only
+// Using eval() here to avoid issue with trailing whitespace trimming
+var_dump(eval("return <<<END
+\x20 
+\x20\x20END;"));
+
 echo <<<'END'
      a
     b
@@ -60,8 +66,10 @@ echo <<<'END'
  d
 e
 END, PHP_EOL;
+
 ?>
 --EXPECT--
+string(0) ""
 string(0) ""
 string(0) ""
     a
