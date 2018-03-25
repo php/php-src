@@ -112,6 +112,20 @@ $tests[16] = <<<'OUTER_END'
    INNER_END;
 OUTER_END;
 
+$tests[17] = <<<OUTER_END
+<?php <<<INNER_END
+ab
+ab
+\t
+OUTER_END;
+
+$tests[18] = <<<OUTER_END
+<?php <<<'INNER_END'
+ab
+ab
+\t
+OUTER_END;
+
 echo "Without TOKEN_PARSE:\n";
 foreach ($tests as $i => $test) {
     echo "\nTest case $i\n\n";
@@ -261,6 +275,24 @@ Line 2: T_ENCAPSED_AND_WHITESPACE ('
 ')
 Line 3: T_END_HEREDOC ('   INNER_END')
 
+Test case 17
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('ab
+ab
+	')
+
+Test case 18
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('ab
+ab
+	')
+
 With TOKEN_PARSE:
 
 Test case 1
@@ -373,3 +405,10 @@ Line 1: T_START_HEREDOC ('<<<'INNER_END'
 Line 2: T_ENCAPSED_AND_WHITESPACE ('
 ')
 Line 3: T_END_HEREDOC ('   INNER_END')
+
+Test case 17
+
+Parse error: syntax error, unexpected end of file, expecting variable (T_VARIABLE) or heredoc end (T_END_HEREDOC) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN) on line 4
+Test case 18
+
+Parse error: syntax error, unexpected end of file, expecting variable (T_VARIABLE) or heredoc end (T_END_HEREDOC) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN) on line 4

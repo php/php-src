@@ -2516,6 +2516,8 @@ double_quotes_scan_done:
 				}
 
 				if (YYCURSOR == YYLIMIT) {
+					yyleng = YYCURSOR - SCNG(yy_text);
+					HANDLE_NEWLINES(yytext, yyleng);
 					ZVAL_NULL(zendlval);
 					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 				}
@@ -2632,7 +2634,8 @@ heredoc_scan_done:
 				}
 
 				if (YYCURSOR == YYLIMIT) {
-					CG(increment_lineno) = 1;
+					yyleng = YYCURSOR - SCNG(yy_text);
+					HANDLE_NEWLINES(yytext, yyleng);
 					ZVAL_NULL(zendlval);
 					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 				}
