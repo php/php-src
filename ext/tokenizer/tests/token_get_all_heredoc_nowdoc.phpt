@@ -293,11 +293,11 @@ Line 2: T_END_HEREDOC ('  INNER_END')
 
 Test case 5
 
-Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+Parse error: syntax error, unexpected end of file, expecting variable (T_VARIABLE) or heredoc end (T_END_HEREDOC) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN) on line 2
 
 Test case 6
 
-Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+Parse error: syntax error, unexpected end of file, expecting variable (T_VARIABLE) or heredoc end (T_END_HEREDOC) or ${ (T_DOLLAR_OPEN_CURLY_BRACES) or {$ (T_CURLY_OPEN) on line 2
 
 Test case 7
 

@@ -2304,6 +2304,8 @@ skip_escape_conversion:
 		zend_save_lexical_state(&current_state);
 
 		SCNG(heredoc_scan_ahead) = 1;
+		SCNG(heredoc_indentation) = 0;
+		SCNG(heredoc_indentation_uses_spaces) = 0;
 		LANG_SCNG(on_event) = NULL;
 
 		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
