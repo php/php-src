@@ -250,6 +250,10 @@ PHP_FUNCTION(readline_info)
 	}
 
 	if (!what) {
+#ifdef HAVE_LIBREADLINE
+		char completion_append_str[2];
+#endif
+
 		array_init(return_value);
 		add_assoc_string(return_value,"line_buffer",SAFE_STRING(rl_line_buffer));
 		add_assoc_long(return_value,"point",rl_point);
@@ -262,6 +266,10 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
 		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
 		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
+		completion_append_str[0] = (char)rl_completion_append_character;
+		completion_append_str[1] = '\0';
+		add_assoc_string(return_value,"completion_append_character",completion_append_str);
+		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
@@ -307,6 +315,22 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING(SAFE_STRING(rl_prompt));
 		} else if (!strcasecmp(what, "terminal_name")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name));
+		} else if (!strcasecmp(what, "completion_suppress_append")) {
+			oldval = rl_completion_suppress_append;
+			if (value) {
+				rl_completion_suppress_append = zend_is_true(value);
+			}
+			RETVAL_BOOL(oldval);
+		} else if (!strcasecmp(what, "completion_append_character")) {
+			char completion_append_str[2];
+			oldval = rl_completion_append_character;
+			if (value) {
+				convert_to_string_ex(value)
+				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
+			}
+			completion_append_str[0] = (char)oldval;
+			completion_append_str[1] = '\0';
+			RETVAL_STRING(completion_append_str);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		} else if (!strcasecmp(what, "erase_empty_line")) {
