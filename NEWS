@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.18
 
+- Reflection:
+  . Fixed arginfo for array_replace(_recursive) and array_merge(_recursive).
+    (carusogabriel)
 
 
 26 Apr 2018, PHP 7.1.17
