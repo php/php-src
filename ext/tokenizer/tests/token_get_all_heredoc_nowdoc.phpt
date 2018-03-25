@@ -5,150 +5,128 @@ Flexible heredoc and nowdoc testing with token_get_all
 --FILE--
 <?php
 
-function output(array $tokens)
+function test(string $code, int $flags)
 {
-    foreach ($tokens as $token) {
-        if (is_array($token)) {
-            echo "Line {$token[2]}: ", token_name($token[0]), " ('{$token[1]}')", PHP_EOL;
+    try {
+        $tokens = token_get_all($code, $flags);
+        foreach ($tokens as $token) {
+            if (is_array($token)) {
+                echo "Line {$token[2]}: ", token_name($token[0]), " ('{$token[1]}')\n";
+            }
         }
+    } catch (ParseError $e) {
+        echo "Parse error: {$e->getMessage()} on line {$e->getLine()}\n";
     }
 }
 
-echo 'Test case 1', PHP_EOL, PHP_EOL;
+$tests = [];
 
-output(token_get_all(<<<'OUTER_END'
+$tests[1] = <<<'OUTER_END'
 <?php <<<INNER_END
 INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 2', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[2] = <<<'OUTER_END'
 <?php <<<INNER_END
   INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 3', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[3] = <<<'OUTER_END'
 <?php <<<'INNER_END'
 INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 4', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[4] = <<<'OUTER_END'
 <?php <<<'INNER_END'
   INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 5', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[5] = <<<'OUTER_END'
   <?php <<<INNER_END
   a
-  OUTER_END));
+  OUTER_END;
 
-echo PHP_EOL, 'Test case 6', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[6] = <<<'OUTER_END'
 <?php <<<INNER_END
 ab
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 7', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[7] = <<<'OUTER_END'
 <?php <<<INNER_END
 a
 INNER_END;
-OUTER_END, TOKEN_PARSE));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 8', PHP_EOL, PHP_EOL;
-
-$code = <<<CODE
+$tests[8] = <<<CODE
 <?php
  \t<<<'DOC'
  \tXXX
  \tDOC;
 CODE;
-output(token_get_all($code));
 
-echo PHP_EOL, 'Test case 9', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[9] = <<<'OUTER_END'
 <?php <<<INNER_END
 ab
 INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 10', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[10] = <<<'OUTER_END'
 <?php <<<INNER_END
   ab
   INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 11', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[11] = <<<'OUTER_END'
 <?php <<<INNER_END
 abc
    INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 12', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[12] = <<<'OUTER_END'
 <?php <<<INNER_END
 
    INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 13', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[13] = <<<'OUTER_END'
 <?php <<<'INNER_END'
 ab
 INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 14', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[14] = <<<'OUTER_END'
 <?php <<<'INNER_END'
   ab
   INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 15', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[15] = <<<'OUTER_END'
 <?php <<<'INNER_END'
 abc
    INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 16', PHP_EOL, PHP_EOL;
-
-output(token_get_all(<<<'OUTER_END'
+$tests[16] = <<<'OUTER_END'
 <?php <<<'INNER_END'
 
    INNER_END;
-OUTER_END));
+OUTER_END;
 
-echo PHP_EOL, 'Test case 17', PHP_EOL, PHP_EOL;
+echo "Without TOKEN_PARSE:\n";
+foreach ($tests as $i => $test) {
+    echo "\nTest case $i\n\n";
+    test($test, 0);
+}
 
-$code = <<<CODE
-<?php
- \t<<<'DOC'
- \tXXX
- \tDOC;
-CODE;
-output(token_get_all($code, TOKEN_PARSE));
+echo "\nWith TOKEN_PARSE:\n";
+foreach ($tests as $i => $test) {
+    echo "\nTest case $i\n\n";
+    test($test, TOKEN_PARSE);
+}
 
 --EXPECT--
+Without TOKEN_PARSE:
+
 Test case 1
 
 Line 1: T_OPEN_TAG ('<?php ')
@@ -283,7 +261,115 @@ Line 2: T_ENCAPSED_AND_WHITESPACE ('
 ')
 Line 3: T_END_HEREDOC ('   INNER_END')
 
-Test case 17
+With TOKEN_PARSE:
 
+Test case 1
 
-Parse error: Invalid indentation - tabs and spaces cannot be mixed in  on line 3
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_END_HEREDOC ('INNER_END')
+
+Test case 2
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_END_HEREDOC ('  INNER_END')
+
+Test case 3
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_END_HEREDOC ('INNER_END')
+
+Test case 4
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_END_HEREDOC ('  INNER_END')
+
+Test case 5
+
+Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+
+Test case 6
+
+Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+
+Test case 7
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('a
+')
+Line 3: T_END_HEREDOC ('INNER_END')
+
+Test case 8
+
+Parse error: Invalid indentation - tabs and spaces cannot be mixed on line 3
+
+Test case 9
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('ab
+')
+Line 3: T_END_HEREDOC ('INNER_END')
+
+Test case 10
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('  ab
+')
+Line 3: T_END_HEREDOC ('  INNER_END')
+
+Test case 11
+
+Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+
+Test case 12
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<INNER_END
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('
+')
+Line 3: T_END_HEREDOC ('   INNER_END')
+
+Test case 13
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('ab
+')
+Line 3: T_END_HEREDOC ('INNER_END')
+
+Test case 14
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('  ab
+')
+Line 3: T_END_HEREDOC ('  INNER_END')
+
+Test case 15
+
+Parse error: Invalid body indentation level (expecting an indentation level of at least 3) on line 2
+
+Test case 16
+
+Line 1: T_OPEN_TAG ('<?php ')
+Line 1: T_START_HEREDOC ('<<<'INNER_END'
+')
+Line 2: T_ENCAPSED_AND_WHITESPACE ('
+')
+Line 3: T_END_HEREDOC ('   INNER_END')
