@@ -2340,6 +2340,7 @@ skip_escape_conversion:
 
 		zend_restore_lexical_state(&current_state);
 		SCNG(heredoc_scan_ahead) = 0;
+		CG(increment_lineno) = 0;
 	}
 
 	RETURN_TOKEN(T_START_HEREDOC);
@@ -2537,11 +2538,12 @@ double_quotes_scan_done:
 						newline = 1;
 					}
 
+					CG(increment_lineno) = 1; /* For newline before label */
+
 					if (SCNG(heredoc_scan_ahead)) {
 						SCNG(heredoc_indentation) = indentation;
 						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
 					} else {
-						CG(increment_lineno) = 1;
 						YYCURSOR -= indentation;
 					}
 
