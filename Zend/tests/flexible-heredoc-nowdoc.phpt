@@ -67,6 +67,17 @@ echo <<<'END'
 e
 END, PHP_EOL;
 
+$var = 'Bar';
+var_dump(<<<TEST
+$var
+TEST);
+
+$var = 'Bar';
+var_dump(<<<TEST
+
+$var
+TEST);
+
 ?>
 --EXPECT--
 string(0) ""
@@ -112,3 +123,6 @@ e
   c
  d
 e
+string(3) "Bar"
+string(4) "
+Bar"

@@ -1156,7 +1156,7 @@ skip:
 		}
 	}
 
-	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline) {
+	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline && indentation) {
 		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
 		goto error;
 	}
