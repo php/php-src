@@ -85,7 +85,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 {
 	Scanner s;
 	char *ptr, *newbuffer;
-	int t;
+	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
@@ -102,7 +102,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
-				int len = s.cur - s.tok;
+				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}
