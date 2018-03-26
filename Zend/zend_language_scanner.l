@@ -1113,8 +1113,11 @@ static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline,
 {
 	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip;
 	char *copy = Z_STRVAL_P(zendlval);
+	zend_bool trailing_newline = 0;
 
 	while (j < len) {
+		trailing_newline = 0;
+
 		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
 			if (copy[j] == '\r' || copy[j] == '\n') {
 				goto skip;
@@ -1141,11 +1144,18 @@ static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline,
 skip:
 		if (copy[j] == '\r') {
 			copy[i++] = copy[j++];
+			trailing_newline = 1;
 		}
 
 		if (copy[j] == '\n') {
 			copy[i++] = copy[j++];
+			trailing_newline = 1;
 		}
+	}
+
+	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline) {
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
+		goto error;
 	}
 
 	Z_STRVAL_P(zendlval)[new_len - newline] = '\0';
@@ -2300,6 +2310,7 @@ skip_escape_conversion:
 	if (is_heredoc && !SCNG(heredoc_scan_ahead)) {
 		zend_lex_state current_state;
 		int heredoc_nesting_level = 1;
+		int first_token = 0;
 
 		zend_save_lexical_state(&current_state);
 
@@ -2323,6 +2334,10 @@ skip_escape_conversion:
 				break;
 			}
 
+			if (!first_token) {
+				first_token = retval;
+			}
+
 			switch (retval) {
 				case T_START_HEREDOC:
 					++heredoc_nesting_level;
@@ -2333,6 +2348,10 @@ skip_escape_conversion:
 				case END:
 					heredoc_nesting_level = 0;
 			}
+		}
+
+		if (first_token == T_VARIABLE && SCNG(heredoc_indentation)) {
+			zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", SCNG(heredoc_indentation));
 		}
 
 		heredoc_label->indentation = SCNG(heredoc_indentation);
