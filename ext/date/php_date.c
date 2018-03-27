@@ -162,7 +162,7 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create, 0, 0, 0)
 	ZEND_ARG_INFO(0, time)
-	ZEND_ARG_INFO(0, object)
+	ZEND_ARG_INFO(0, timezone)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_date_create_from_format, 0, 0, 2)
@@ -2042,9 +2042,9 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 		}
 		return retval;
 	}
-	
+
 	prop = date_interval_read_property(object, member, BP_VAR_IS, cache_slot, &rv);
-	
+
 	if (prop != &EG(uninitialized_zval)) {
 		if (type == 2) {
 			retval = 1;
@@ -2062,7 +2062,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	}
 
 	return retval;
-	
+
 }
 /* }}} */
 
@@ -2435,7 +2435,7 @@ static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp
 
 	*is_temp = 1;
 	ht = zend_array_dup(props);
-	
+
 	ZVAL_LONG(&zv, tzobj->type);
 	zend_hash_str_update(ht, "timezone_type", sizeof("timezone_type")-1, &zv);
 

@@ -6,7 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #75722 (Convert valgrind detection to configure option).
     (Michael Heimpold)
 
-- Mbstring:
+- Date:
+  . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
+
+- mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
     (chrullrich, cmb)
@@ -17,6 +20,10 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #76094 (Access violation when using opcache). (Laruence)
+
+- SPL:
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+    (carusogabriel)
 
 - Standard:
   . Fixed bug #74139 (mail.add_x_header default inconsistent with docs). (cmb)
