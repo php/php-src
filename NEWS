@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #76044 ('date: illegal option -- -' in ./configure on FreeBSD).
     (Anatol)
 
+- FPM:
+  . Fixed bug #75605 (Dumpable FPM child processes allow bypassing opcache
+    access controls). (Jakub Zelenka)
+
 - GD:
   . Fixed bug #73957 (signed integer conversion in imagescale()). (cmb)
 
