@@ -189,6 +189,7 @@ PHP                                                                        NEWS
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
   . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
+  . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
