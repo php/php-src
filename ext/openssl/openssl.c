@@ -4920,10 +4920,11 @@ PHP_FUNCTION(openssl_dh_compute_key)
 			}
 			case IS_RESOURCE: {
 			    EVP_PKEY *pub;
+			    BIGNUM *dh_priv;
 			    if ((pub = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(peer_key), "OpenSSL key", le_key)) == NULL || EVP_PKEY_base_id(pub) != EVP_PKEY_DH) {
 				RETURN_FALSE;
 			    }
-			    dh_pub = EVP_PKEY_get0_DH(pub)->pub_key;
+			    DH_get0_key(EVP_PKEY_get0_DH(pub), &dh_pub, &dh_priv);
 			    dh_free = 0;
 			    break;
 			}
@@ -4946,6 +4947,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		}
 		break;
 	    }
+#ifdef HAVE_EVP_PKEY_EC
 	    case EVP_PKEY_EC: {
 		if (Z_TYPE_P(peer_key) != IS_RESOURCE) RETURN_FALSE;
 		EVP_PKEY *pub;
@@ -4972,6 +4974,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 		}
 		break;
 	    }
+#endif
 	    default:
 		RETVAL_FALSE;
 	}
@@ -4979,7 +4982,6 @@ PHP_FUNCTION(openssl_dh_compute_key)
 /* }}} */
 
 /* }}} */
-
 
 /* {{{ proto string openssl_pbkdf2(string password, string salt, int key_length, int iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
