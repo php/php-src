@@ -25,8 +25,9 @@ PHP                                                                        NEWS
   . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
     (carusogabriel)
 
-- Standard:
+- standard:
   . Fixed bug #74139 (mail.add_x_header default inconsistent with docs). (cmb)
+  . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
 
 29 Mar 2018, PHP 7.2.4
 

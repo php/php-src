@@ -34,7 +34,7 @@
 /*
 	The following php_mt_...() functions are based on a C++ class MTRand by
 	Richard J. Wagner. For more information see the web page at
-	http://www-personal.engin.umich.edu/~wagnerr/MersenneTwister.html
+	http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/VERSIONS/C-LANG/MersenneTwister.h
 
 	Mersenne Twister random number generator -- a C++ class MTRand
 	Based on code by Makoto Matsumoto, Takuji Nishimura, and Shawn Cokus
@@ -45,7 +45,7 @@
 	The period, 2^19937-1, and the order of equidistribution, 623 dimensions,
 	are far greater.  The generator is also fast; it avoids multiplication and
 	division, and it benefits from caches and pipelines.  For more information
-	see the inventors' web page at http://www.math.keio.ac.jp/~matumoto/emt.html
+	see the inventors' web page at http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/emt.html
 
 	Reference
 	M. Matsumoto and T. Nishimura, "Mersenne Twister: A 623-Dimensionally
