@@ -21,18 +21,18 @@ All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are
-met: 
+met:
 
     * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer. 
+      notice, this list of conditions and the following disclaimer.
     * Redistributions in binary form must reproduce the above
       copyright notice, this list of conditions and the following
       disclaimer in the documentation and/or other materials provided
-      with the distribution. 
+      with the distribution.
     * Neither the name of the Lite Speed Technologies Inc nor the
       names of its contributors may be used to endorse or promote
       products derived from this software without specific prior
-      written permission.  
+      written permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -44,7 +44,7 @@ LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
 DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
 THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
 (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
-OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE. 
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
 #define HAVE_MSGHDR_MSG_CONTROL
@@ -104,7 +104,7 @@ static int s_native = 0;
 static int s_tried_checkpoint = 0;
 static int s_criu_debug = 0;
 
-typedef enum 
+typedef enum
 {
     CRIU_GCOUNTER_SHM,
     CRIU_GCOUNTER_SIG,
@@ -124,15 +124,15 @@ int LSAPI_Get_ppid();
 #define lscriu_dbg(...) \
     do { if (s_criu_debug) fprintf(stderr, __VA_ARGS__); } while(0)
 #else
-#define lscriu_dbg(...) 
+#define lscriu_dbg(...)
 #endif
-        
+
 #define lscriu_err(...) fprintf(stderr, __VA_ARGS__)
 
-        
+
 #define SUN_PATH_MAX   (sizeof(((struct sockaddr_un *)NULL)->sun_path))
 
-typedef struct 
+typedef struct
 {
     pid_t m_iPidToDump;
     char  m_chImageDirectory[1024];
@@ -140,7 +140,7 @@ typedef struct
     char  m_chServiceAddress[SUN_PATH_MAX];
 } criu_native_dump_t;
 
-typedef struct 
+typedef struct
 {
     int   m_iDumpResult;
     char  m_chDumpResponseMessage[1024];
@@ -212,10 +212,10 @@ static int LSCRIU_Init_Global_Counter(int value)
     }
 
     s_shm_global_counter = mmap(NULL, sizeof * s_shm_global_counter,
-                                PROT_READ | PROT_WRITE, 
+                                PROT_READ | PROT_WRITE,
                                 MAP_SHARED | MAP_ANONYMOUS, -1, 0);
     if (!s_shm_global_counter) {
-        fprintf(stderr, "LSCRIU (%d): memory for global counter allocation error\n", 
+        fprintf(stderr, "LSCRIU (%d): memory for global counter allocation error\n",
                 getpid());
         return -1;
     }
@@ -246,7 +246,7 @@ static void LSCRIU_Increase_Global_Counter(void)
 
     if (s_shm_global_counter) {
         s_requests_count = __sync_add_and_fetch(s_shm_global_counter, 1);
-        //lscriu_dbg("LSCRIU (%d): increase counter %d\n", getpid(), 
+        //lscriu_dbg("LSCRIU (%d): increase counter %d\n", getpid(),
         //           s_requests_count);
     } else {
         s_requests_count = 0;
@@ -263,7 +263,7 @@ static void LSCRIU_Get_Global_Counter(void)
 
     if (s_shm_global_counter) {
         s_requests_count = __sync_fetch_and_or(s_shm_global_counter, 0);
-        //lscriu_dbg("LSCRIU (%d): get counter value %d\n", getpid(), 
+        //lscriu_dbg("LSCRIU (%d): get counter value %d\n", getpid(),
         //           s_requests_count);
     } else {
         lscriu_dbg("LSCRIU (%d): Reset requests in get\n", getpid());
@@ -331,30 +331,30 @@ static int LSCRIU_load_liblscapi(void)
     void *lib_handle = NULL;
     void *pthread_lib_handle = NULL;
     char ch;
-    
+
     char *pchForceNative = NULL;
     char *pchNative = NULL;
-    
+
     pchForceNative = getenv("LSAPI_CRIU_FORCE_NATIVE");
     pchNative = getenv("LSCAPI_CRIU_NATIVE");
-    
-    if (pchForceNative 
-        && ((ch = *pchForceNative | 0x20) == '1' || ch == 't' 
+
+    if (pchForceNative
+        && ((ch = *pchForceNative | 0x20) == '1' || ch == 't'
             || (ch == 'o' && ((*(pchForceNative + 1) | 0x20) == 'n'))))
         s_native = 1;
     else if (pchNative
         && ((ch = *pchNative | 0x20) == '1' || ch == 't'
-            || (ch == 'o' && ((*(pchNative + 1) | 0x20) == 'n')))) 
+            || (ch == 'o' && ((*(pchNative + 1) | 0x20) == 'n'))))
         s_native = 1;
     else if (!s_native)
     {
         // Numerical signals indicates Apache
         int error = 1;
         char *last;
-        
+
         if (!(lib_handle = dlopen(last = "liblscapi.so", RTLD_LAZY)) /*||
             !(pthread_lib_handle = dlopen(last = "libpthread.so", RTLD_LAZY))*/)
-            fprintf(stderr, "LSCRIU (%d): failed to dlopen %s: %s - ignore CRIU\n", 
+            fprintf(stderr, "LSCRIU (%d): failed to dlopen %s: %s - ignore CRIU\n",
                     getpid(), last, dlerror());
         else if (!(s_lscapi_dump_me = dlsym(lib_handle, last = "lscapi_dump_me")) ||
                  !(s_lscapi_prepare_me = dlsym(lib_handle, last = "lscapi_prepare_me")) ||
@@ -365,10 +365,10 @@ static int LSCRIU_load_liblscapi(void)
                     getpid(), last, dlerror());
         else
             error = 0;
-        if (error) 
+        if (error)
         {
             // close the dll handles so we release the resources
-            if (lib_handle) 
+            if (lib_handle)
                 dlclose(lib_handle);
             if (pthread_lib_handle)
                 dlclose(pthread_lib_handle);
@@ -387,10 +387,10 @@ static void LSCRIU_Wink_Server_is_Ready(void)
         // Not used for native
         return;
     }
-    if (getenv("LSAPI_UNIQE")) 
+    if (getenv("LSAPI_UNIQE"))
         snprintf(sem_name, sizeof sem_name - 1, "lsphp[hash=%s].is_ready",
                  getenv("LSAPI_UNIQE"));
-    else 
+    else
         snprintf(sem_name, sizeof sem_name - 1, "lsphp[euid=0x%x].is_ready",
                  geteuid());
 
@@ -402,9 +402,9 @@ static void LSCRIU_Wink_Server_is_Ready(void)
         if (psem_close(is_ready_sem) < 0)
             lsapi_error(sem_name, errno);
     }
-    else if (errno != ENOENT) 
+    else if (errno != ENOENT)
         lsapi_error(sem_name, errno);
-    
+
 }
 
 
@@ -435,22 +435,22 @@ length len */
 #define CMSG_SPACE(len) (__CMSG_ALIGN(sizeof(struct cmsghdr)) + __CMSG_ALIGN(len))
 #endif
 
-static char *LSCRIU_Error_File_Name(char *pchFile, int max_len) 
+static char *LSCRIU_Error_File_Name(char *pchFile, int max_len)
 {
     const char *pchDefaultSocketPath = "/tmp/";
     const char *pchDefaultLogFileName = "lsws_error.log";
-    snprintf(pchFile, max_len, "%s%s", pchDefaultSocketPath, 
+    snprintf(pchFile, max_len, "%s%s", pchDefaultSocketPath,
              pchDefaultLogFileName);
     return pchFile;
 }
-    
-#ifdef LSAPILIB_DEBUG_CRIU    
+
+#ifdef LSAPILIB_DEBUG_CRIU
 static void LSCRIU_Debugging(void) {
     char *pchCRIUDebug;
     pchCRIUDebug = getenv("LSAPI_CRIU_DEBUG");
-    if (!pchCRIUDebug) 
+    if (!pchCRIUDebug)
         pchCRIUDebug = getenv("LSCAPI_CRIU_DEBUG");
-    //fprintf(stderr,"(%d) LSCRIU: CRIU debug environment variable: %s\n",  
+    //fprintf(stderr,"(%d) LSCRIU: CRIU debug environment variable: %s\n",
     //        getpid(), pchCRIUDebug);
     // I've made it easy to turn on debugging.  CloudLinux Apache sets
     // LSCAPI_CRIU_DEBUG to nothing to indicate it's on.  Sigh.
@@ -462,7 +462,7 @@ static void LSCRIU_Debugging(void) {
          (((*pchCRIUDebug == 'O') ||
             (*pchCRIUDebug == 'o')) &&
            ((*(pchCRIUDebug + 1)) &&
-            ((*(pchCRIUDebug + 1) == 'F') || (*(pchCRIUDebug + 1) == 'f')))))) 
+            ((*(pchCRIUDebug + 1) == 'F') || (*(pchCRIUDebug + 1) == 'f'))))))
     {
         lscriu_dbg("LSCRIU (%d): CRIU Debugging disabled by environment\n", getpid());
         s_criu_debug = 0;
@@ -470,7 +470,7 @@ static void LSCRIU_Debugging(void) {
     else {
         s_criu_debug = 1;
         lscriu_dbg("LSCRIU (%d): CRIU Debugging enabled by environment\n", getpid());
-        fprintf(stderr,"LSCRIU (%d): CRIU debug environment variable: %s\n",  
+        fprintf(stderr,"LSCRIU (%d): CRIU debug environment variable: %s\n",
                 getpid(), pchCRIUDebug);
     }
 }
@@ -481,7 +481,7 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
     int iOldUMask;
     int iFd = -1;
     char chFile[1024];
-    
+
     if (!iFatal) {
         // LSCRIU_Debugging();
         if (!s_criu_debug) {
@@ -494,7 +494,7 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
         return;
     }
     iOldUMask = umask(0);
-    iFd = open( chFile, O_WRONLY | O_APPEND | O_CREAT, 
+    iFd = open( chFile, O_WRONLY | O_APPEND | O_CREAT,
                 S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH);
     umask(iOldUMask);
     if (iFd >= 0) {
@@ -508,9 +508,9 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
         char buf[0x1000];
         vsnprintf(buf, sizeof(buf), format, ap);
         va_end(ap);
-        
+
         int n = snprintf(chFullMessage, sizeof(chFullMessage),
-                "%04d-%02d-%02d %02d:%02d:%02d.%03d: LSCRIU (%d): %s %s\n", 
+                "%04d-%02d-%02d %02d:%02d:%02d.%03d: LSCRIU (%d): %s %s\n",
                 sTm.tm_year + 1900,
                 sTm.tm_mon + 1,
                 sTm.tm_mday,
@@ -518,8 +518,8 @@ static void LSCRIU_Restored_Error(int iFatal, char *format, ...) {
                 sTm.tm_min,
                 sTm.tm_sec,
                 sTimeb.millitm,
-                getpid(), 
-                iFatal ? "FATAL! " : "(debug) ", 
+                getpid(),
+                iFatal ? "FATAL! " : "(debug) ",
                 buf);
         if (n > (int)sizeof(chFullMessage))
             n = sizeof(chFullMessage);
@@ -603,7 +603,7 @@ static char *CloudLinux_Socket_Name(pid_t iPidDumped,
 
 static int LSCRIU_Receive_Handles(char  *pchSocketPath,
                                   pid_t *piPidSender,
-                                  int   iDumped) 
+                                  int   iDumped)
 {
     time_t iTime;
     int  iError = 0;
@@ -619,21 +619,21 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
         struct sockaddr_un sSockaddrUn, sSockaddrUnRemote;
         int iRc, iRemoteLength;
         char chSocketPath[SUN_PATH_MAX];
-        
+
         int path_len = strlen(pchSocketPath);
         if (path_len > (int)sizeof(chSocketPath) - 1)
             return -1;
         memmove(chSocketPath, pchSocketPath, path_len + 1);
         pchSocketPath = chSocketPath;
-        
+
         fdSave = g_req.m_fdListen;
         LSCRIU_Restored_Error(0, "Opening domain socket defined at "
-                              "LSCAPI_CRIU_SOCKET_NAME: %s, comm #%d, %s", 
+                              "LSCAPI_CRIU_SOCKET_NAME: %s, comm #%d, %s",
                               pchSocketPath, fdSave, iDumped ? "DUMP" : "RESTORE");
         // Before listening, let's delete it, just in case
         fdSocket = socket(AF_UNIX, SOCK_STREAM, 0);
         if (fdSocket == -1) {
-            LSCRIU_Restored_Error(1, "Error performing simple socket call: %s", 
+            LSCRIU_Restored_Error(1, "Error performing simple socket call: %s",
                                   strerror(errno));
             iError = 1;
         }
@@ -641,10 +641,10 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
             memset(&sSockaddrUn, 0, sizeof(sSockaddrUn));
             sSockaddrUn.sun_family = AF_UNIX;
             memmove(sSockaddrUn.sun_path, pchSocketPath, path_len);
-            iRc = bind(fdSocket, (struct sockaddr *) &sSockaddrUn, 
+            iRc = bind(fdSocket, (struct sockaddr *) &sSockaddrUn,
                        sizeof(sSockaddrUn));
             if (iRc == -1) {
-                LSCRIU_Restored_Error( 1, "Error binding socket %s: %s", 
+                LSCRIU_Restored_Error( 1, "Error binding socket %s: %s",
                                        pchSocketPath, strerror(errno));
                 iError = 1;
             }
@@ -652,33 +652,33 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
         if (!iError) {
             iRc = listen(fdSocket, 5);
             if (iRc == -1) {
-                LSCRIU_Restored_Error( 1, "Error listening on socket %s: %s", 
+                LSCRIU_Restored_Error( 1, "Error listening on socket %s: %s",
                                        pchSocketPath, strerror(errno));
                 iError = 1;
             }
         }
         if (!iError) {
-            fdConnected = accept(fdSocket, (struct sockaddr *)&sSockaddrUnRemote, 
+            fdConnected = accept(fdSocket, (struct sockaddr *)&sSockaddrUnRemote,
                                  (unsigned int *)&iRemoteLength);
             if (fdConnected == -1) {
-                LSCRIU_Restored_Error( 1, "Error accepting on socket %s: %s", 
+                LSCRIU_Restored_Error( 1, "Error accepting on socket %s: %s",
                                        pchSocketPath, strerror(errno));
                 iError = 1;
             }
         }
         if (!iError) {
-            LSCRIU_Restored_Error( 0, "Connected - now receive the file handles");          
-            // Zero is only used on a restore - it's the fd_listen handle on a dump.  
+            LSCRIU_Restored_Error( 0, "Connected - now receive the file handles");
+            // Zero is only used on a restore - it's the fd_listen handle on a dump.
             iRc = read_fd(fdConnected, piPidSender, sizeof(pid_t), &fdZero);
             if (iRc == -1) {
                 LSCRIU_Restored_Error( 1, "Error reading handle %d through "
-                                       "sockets: %s", 
+                                       "sockets: %s",
                                        (iDumped ? fdSave : 0), strerror(errno));
                 iError = 1;
             }
         }
         if (!iError) {
-            LSCRIU_Restored_Error(0, "Now receive handle 2");            
+            LSCRIU_Restored_Error(0, "Now receive handle 2");
             iRc = read_fd(fdConnected, piPidSender, sizeof(pid_t), &fdTwo);
             if (iRc == -1) {
                 LSCRIU_Restored_Error( 1, "Error reading handle 2 through "
@@ -701,7 +701,7 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
                 dup2(fdTwo,2);
             }
             dup2(2,1);
-            // Theoretically I can now go back to normal tracing...but keep 
+            // Theoretically I can now go back to normal tracing...but keep
             // logging the other way, just in case...
             LSCRIU_Restored_Error( 0, "One final trace before writing to "
                                    "stderr\n");
@@ -709,23 +709,23 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
             LSCRIU_Restored_Error( 0, "We just wrote to stderr");
         }
         if ((fdTwo > 3) && (fdTwo != fdSave)) { // So we don't close something we need!
-            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdTwo: %d\n", 
+            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdTwo: %d\n",
                        getpid(), fdTwo);
             close(fdTwo);
         }
         if ((fdZero > 3) && (fdZero != fdSave)) {
             // We verify that we're not closing a socket we just dup-ed to!
-            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdZero: %d\n", 
+            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdZero: %d\n",
                        getpid(), fdZero);
             close(fdZero);
         }
         if ((fdConnected > 3) && (fdConnected != fdSave)) {
-            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdConnected: %d\n", 
+            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdConnected: %d\n",
                        getpid(), fdConnected);
             close(fdConnected);
         }
         if ((fdSocket > 3) && (fdSocket != fdSave)) {
-            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdSocket: %d\n", 
+            lscriu_dbg("LSCRIU (%d): Restored handles - about to close fdSocket: %d\n",
                        getpid(), fdSocket);
             close(fdSocket);
         }
@@ -733,7 +733,7 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
         lscriu_dbg("LSCRIU (%d): Closed the sockets, now delete the socket file\n", getpid());
         if (pchSocketPath) {
             if (unlink(pchSocketPath) == -1) {
-                lscriu_err("LSCRIU (%d): Error deleting socket path: %s: %s\n", 
+                lscriu_err("LSCRIU (%d): Error deleting socket path: %s: %s\n",
                            getpid(), pchSocketPath, strerror(errno));
             }
             else {
@@ -742,19 +742,19 @@ static int LSCRIU_Receive_Handles(char  *pchSocketPath,
         }
         else {
             char buf[0x1000];
-            snprintf(buf, sizeof(buf) - 1, 
+            snprintf(buf, sizeof(buf) - 1,
                      "LSCRIU (%d): Lost the LSCAPI_CRIU_SOCKET_NAME environment"
                      " variable", getpid());
             fprintf(stderr, "%s\n", buf );
-            LSCRIU_Restored_Error(1, buf );            
+            LSCRIU_Restored_Error(1, buf );
         }
         */
-    }    
-    return(iError ? -1 : 0);    
+    }
+    return(iError ? -1 : 0);
 }
 
 
-/* This is pretty standard code taken from: 
+/* This is pretty standard code taken from:
  * http://www.cs.cmu.edu/afs/cs/academic/class/15213-f00/unpv12e/lib/write_fd.c
  * But also in UNIX Network Programming */
 static ssize_t write_fd(int fd, void *ptr, size_t nbytes, int sendfd)
@@ -795,7 +795,7 @@ static ssize_t write_fd(int fd, void *ptr, size_t nbytes, int sendfd)
 
 
 /*
-int LSCRIU_Send_File_Handles(char *pchSocketName) 
+int LSCRIU_Send_File_Handles(char *pchSocketName)
 {
     // Called by the child after the fork, sends the two closed handles
     struct sockaddr_un  sSockaddrUn;
@@ -806,7 +806,7 @@ int LSCRIU_Send_File_Handles(char *pchSocketName)
     time_t iTimeNow;
     int    iError = 0;
     int    iConnected = 0;
-    
+
     sSockaddrUn.sun_family = AF_UNIX;
     LSCRIU_Restored_Error(0, "Send file handles using socket file: %s",
                           pchSocketName);
@@ -847,12 +847,12 @@ int LSCRIU_Send_File_Handles(char *pchSocketName)
         }
         if (write_fd(iFdSocket, &iPid, sizeof(iPid), g_req.m_fdListen) == -1) {
             LSCRIU_Restored_Error( 1, "Error writing listen socket #%d to "
-                                   "parent: %s", g_req.m_fdListen, 
+                                   "parent: %s", g_req.m_fdListen,
                                    strerror(errno));
             iError = 1;
         }
         else if (write_fd(iFdSocket, &iPid, sizeof(iPid), 2) == -1) {
-            LSCRIU_Restored_Error( 1, "Error writing socket #2 to parent: %s", 
+            LSCRIU_Restored_Error( 1, "Error writing socket #2 to parent: %s",
                                    strerror(errno));
             iError = 1;
         }
@@ -864,7 +864,7 @@ int LSCRIU_Send_File_Handles(char *pchSocketName)
     if (iFdSocket != -1) {
         close(iFdSocket);
     }
-    return(!iError);       
+    return(!iError);
 }
 */
 
@@ -876,9 +876,9 @@ static int LSCRIU_Native_Dump(pid_t iPid,
     criu_native_dump_t criu_native_dump;
     char *pchLastSlash;
     criu_native_dump_response_t criu_native_dump_response;
-        
+
     criu_native_dump.m_iPidToDump = iPid;
-    strncpy(criu_native_dump.m_chServiceAddress, pchSocketPath, 
+    strncpy(criu_native_dump.m_chServiceAddress, pchSocketPath,
             sizeof(criu_native_dump.m_chServiceAddress));
     strncpy(criu_native_dump.m_chImageDirectory, pchImagePath,
             sizeof(criu_native_dump.m_chImageDirectory));
@@ -892,7 +892,7 @@ static int LSCRIU_Native_Dump(pid_t iPid,
     if (write(iFdNative,
               &criu_native_dump,
               sizeof(criu_native_dump)) == -1) {
-        lscriu_err("LSCRIU (%d): Error sending dump request to the listener: %s\n", 
+        lscriu_err("LSCRIU (%d): Error sending dump request to the listener: %s\n",
                    getpid(), strerror(errno));
         return(-1);
     }
@@ -902,18 +902,18 @@ static int LSCRIU_Native_Dump(pid_t iPid,
              &criu_native_dump_response,
              sizeof(criu_native_dump_response)) == -1) {
         // The test will actually fail it!
-        //LSCRIU_Restored_Error(1, "Error reading dump socket #%d from parent: %s", 
+        //LSCRIU_Restored_Error(1, "Error reading dump socket #%d from parent: %s",
         //                      iFdNative, strerror(errno));
         //return(-1);
     }
-    return(0);       
+    return(0);
 }
 
 
 static void LSCRIU_CloudLinux_Checkpoint(void)
 {
     int iRet;
-    
+
     if ((!s_native) && (!s_lscapi_dump_me)) {
         lscriu_dbg("LSCRIU (%d): Not native and unable to dump - abandon one-time "
                    "dump\n", getpid());
@@ -926,14 +926,13 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
     //if (iRet) {
         //LSCRIU_Restored_Error(1, "lscapi_prepare_me failed: %s",
         //                      strerror(errno));
-        //lscriu_err("LSCRIU (%d): failed to lscapi_prepare_me: %s\n", 
+        //lscriu_err("LSCRIU (%d): failed to lscapi_prepare_me: %s\n",
         //           getpid(), strerror(errno));
         //But keep going anyway!  Not fatal yet
     //}
     iRet = s_lscapi_dump_me();
     if (iRet < 0) {
-        char *pchError;
-        lscriu_err("LSCRIU: CloudLinux dump of PID: %d, error: %s\n", 
+        lscriu_err("LSCRIU: CloudLinux dump of PID: %d, error: %s\n",
                    getpid(), strerror(errno));
     }
     if (iRet == 0) {
@@ -944,11 +943,11 @@ static void LSCRIU_CloudLinux_Checkpoint(void)
         s_restored = 1;
         LSAPI_reset_server_state();
         /*
-         Here we have restored the php process, so we should to tell (via 
+         Here we have restored the php process, so we should to tell (via
          semaphore) mod_lsapi that we are started and ready to receive data.
         */
         LSCRIU_Wink_Server_is_Ready();
-        lscriu_err("LSCRIU: Successful CloudLinux restore of PID: %d, parent: %d.\n", 
+        lscriu_err("LSCRIU: Successful CloudLinux restore of PID: %d, parent: %d.\n",
                    getpid(), getppid());
     }
     LSCRIU_Set_Initial_Start_Reqs(0);
@@ -964,7 +963,7 @@ static void LSCRIU_try_checkpoint(void)
     char *pchImagePath;
     char *pchSocketPath;
     char *pchSocketName;
-    
+
     if (s_tried_checkpoint) {
         lscriu_dbg("LSCRIU (%d): Already tried checkpoint - one time per customer\n",
                    getpid());
@@ -987,7 +986,7 @@ static void LSCRIU_try_checkpoint(void)
     unlink(pchSocketName);
     pchFd = getenv("LSCAPI_CRIU_SYNC_FD");
     pchImagePath = getenv("LSCAPI_CRIU_IMAGE_PATH");
-    pchSocketPath = getenv("LSAPI_CRIU_SOCKET_PATH");                
+    pchSocketPath = getenv("LSAPI_CRIU_SOCKET_PATH");
     if (!pchSocketPath) {
         pchSocketPath = getenv("LSCAPI_CRIU_SOCKET_PATH");
     }
@@ -995,7 +994,7 @@ static void LSCRIU_try_checkpoint(void)
         lscriu_err("LSCRIU (%d): LSCAPI_CRIU_SYNC_FD internal environment "
                    "variable not set - contact Litespeed tech support\n", getpid());
         return;
-    }        
+    }
     if (!pchImagePath) {
         lscriu_err("LSCRIU (%d): LSCAPI_CRIU_IMAGE_PATH internal environment "
                    "variable not set - contact Litespeed tech support\n", getpid());
@@ -1008,27 +1007,27 @@ static void LSCRIU_try_checkpoint(void)
     }
     lscriu_dbg("LSCRIU (%d): Checkpoint dump.  ImagePath: %s, SocketName %s, "
                "SocketPath: %s\n", getpid(), pchImagePath, pchSocketName, pchSocketPath);
-        
+
     iFdNative = atoi(pchFd);
     lscriu_dbg("LSCRIU (%d): Native checkpoint.  Use filepointer %d (%s) to send "
                "pid %d\n", getpid(), iFdNative, pchFd, iPidDump);
-    
-    // Handle 0 is the connected comm handle, handle 1 and 2 are the output data 
-    // streams.  We can't do a dump with 1 or 2 open.  And there's no reason to 
-    // dump 0 since it will change.  So on George's advice, we'll fork here, let 
-    // the child close the handles and do the dump.  
-    // On restore, the recovered child will create a domain socket, and the 
+
+    // Handle 0 is the connected comm handle, handle 1 and 2 are the output data
+    // streams.  We can't do a dump with 1 or 2 open.  And there's no reason to
+    // dump 0 since it will change.  So on George's advice, we'll fork here, let
+    // the child close the handles and do the dump.
+    // On restore, the recovered child will create a domain socket, and the
     // parent will send it the handles it can use to continue.
-    
+
     lscriu_dbg("LSCRIU (%d): fork!\n", getpid());
     iPid = fork();
     if (iPid < 0) {
-        lscriu_err("LSCRIU (%d): Can't checkpoint due to a fork error: %s\n", 
+        lscriu_err("LSCRIU (%d): Can't checkpoint due to a fork error: %s\n",
                    getpid(), strerror(errno));
         return;
     }
     if (iPid > 0) {
-        // We're the parent.  Close the handles, do the dump and receive them 
+        // We're the parent.  Close the handles, do the dump and receive them
         // back from the child or the parent
         //close(0);
         // Let the child do the dump
@@ -1040,24 +1039,23 @@ static void LSCRIU_try_checkpoint(void)
                                   pchImagePath,
                                   iFdNative);
         if (iRet == 0) {
-            if (iPidParent != getppid()) 
+            if (iPidParent != getppid())
                 lscriu_dbg("LSCRIU (%d): PID %d dumped to disk; PID %d killed in "
-                           "prior message - is this the restore?\n", getpid(), 
+                           "prior message - is this the restore?\n", getpid(),
                            iPidDump, iPid);
-            else 
+            else
                 lscriu_err("LSCRIU (%d): PID %d dumped to disk and killed in "
                            "prior message\n", getpid(), iPid);
         }
-        else 
+        else
             lscriu_err("LSCRIU (%d): Native dump of PID: %d FAILED\n", getpid(),
                        iPid);
         LSCRIU_Restored_Error(1, "Restored child process - this is unexpected!");
     }
     else {
-        int     iResult;
         pid_t   iPidSender;
         pid_t   iPidParent = getppid();
-        
+
         setsid();
         close(1);
         close(2);
@@ -1075,7 +1073,7 @@ static void LSCRIU_try_checkpoint(void)
                 if (!iTimeStart) {
                     iTimeStart = iTimeNow;
                 }
-                else if ((iPidParent != getppid()) || 
+                else if ((iPidParent != getppid()) ||
                          (iTimeNow - iTimeStart > 10)) {
                     iRestored = 1;
                 }
@@ -1090,7 +1088,7 @@ static void LSCRIU_try_checkpoint(void)
         if (iRet == 0) {
             //lscriu_dbg("LSCRIU (%d): Fully restored, parent: %d.\n", getpid(), iPidSender);
             LSAPI_Set_Restored_Parent_Pid(iPidSender);
-            lscriu_err("LSCRIU: Fully restored, pid: %d, parent: %d.\n", 
+            lscriu_err("LSCRIU: Fully restored, pid: %d, parent: %d.\n",
                        getpid(), iPidSender);
             LSAPI_reset_server_state();
             s_restored = 1;
@@ -1125,7 +1123,7 @@ static int LSCRIU_Init_Env_Parameters(void)
     //     (*p == 't') ||
     //     (*p == 'Y') ||
     //     (*p == 'y') ||
-    //     (((*p == 'O') || 
+    //     (((*p == 'O') ||
     //       (*p == 'o')) &&
     //      (((*(p + 1)) == 'N') ||
     //       ((*(p + 1)) == 'n'))))) {
@@ -1137,43 +1135,43 @@ static int LSCRIU_Init_Env_Parameters(void)
     //    return 0;
     //}
     p = getenv("LSAPI_INITIAL_START");
-    if (!p) 
+    if (!p)
         p = getenv("LSAPI_BACKEND_INITIAL_START");
     if (p)
     {
         n = atoi(p);
 
-        if (n > 0) 
+        if (n > 0)
         {
-            lscriu_dbg("LSCRIU (%d): Set start requests based on environment (%d)\n", 
+            lscriu_dbg("LSCRIU (%d): Set start requests based on environment (%d)\n",
                        getpid(), n);
             LSCRIU_Set_Initial_Start_Reqs(n);
         }
-        else 
+        else
         {
-            lscriu_dbg("LSCRIU (%d): LSAPI_INITIAL_START set to 0 disabled\n", 
+            lscriu_dbg("LSCRIU (%d): LSAPI_INITIAL_START set to 0 disabled\n",
                        getpid());
             return 0;
         }
     }
-    else 
+    else
     {
-        lscriu_dbg("LSCRIU (%d): LSAPI_INITIAL_START NOT set - disabled\n", 
+        lscriu_dbg("LSCRIU (%d): LSAPI_INITIAL_START NOT set - disabled\n",
                    getpid());
         return 0;
     }
-    if (LSAPI_Is_Listen()) 
+    if (LSAPI_Is_Listen())
     {
         lscriu_dbg("LSCRIU (%d): Listening...\n", getpid());
         GlobalCounterType_t gc_type = CRIU_GCOUNTER_SHM;
         char *env;
         if ((env = getenv("LSAPI_CRIU_USE_SHM")))
         {
-            // CloudLinux doc: Off (shared memory) or Signals.  
+            // CloudLinux doc: Off (shared memory) or Signals.
             // Litespeed doc: On (shared memory) or Signals
-            // So just check the first character for an 'S' and if not, then 
+            // So just check the first character for an 'S' and if not, then
             // use shared memory.  Pipe support is lost (sigh).
-            if ((*env == 'S') || (*env == 's')) 
+            if ((*env == 'S') || (*env == 's'))
                 gc_type = CRIU_GCOUNTER_SIG; // Just assume the rest is signals
             // else use the default of shared memory
         }
@@ -1187,11 +1185,11 @@ static int LSCRIU_Init_Env_Parameters(void)
                 (((*env == 'O') || (*env == 'o')) &&
                  ((*(env + 1) == 'N') || (*(env + 1) == 'n'))))
                 gc_type = CRIU_GCOUNTER_SIG;
-            else if (*env == 2) 
+            else if (*env == 2)
                 gc_type = CRIU_GCOUNTER_PIPE; // The only case for pipe
             //else use the default of shared memory
         }
-        if (gc_type != CRIU_GCOUNTER_SHM) 
+        if (gc_type != CRIU_GCOUNTER_SHM)
         {
             lscriu_dbg("LSCRIU (%d): Use %s\n", getpid(),
                        gc_type == CRIU_GCOUNTER_SIG ? "signals" : "pipe");
@@ -1201,7 +1199,7 @@ static int LSCRIU_Init_Env_Parameters(void)
             lscriu_dbg("LSCRIU (%d): Use shared memory\n", getpid());
         LSCRIU_Set_Global_Counter_Type(gc_type);
     }
-    else 
+    else
         lscriu_dbg("LSCRIU (%d): NOT Listening\n", getpid());
     //unset_lsapi_envs();
     return 0;
@@ -1214,7 +1212,7 @@ void LSCRIU_inc_req_procssed()
         ++s_requests_count;
     }
 
-    lscriu_dbg("LSCRIU (%d): s_requests_count %d counter %d\n", getpid(), 
+    lscriu_dbg("LSCRIU (%d): s_requests_count %d counter %d\n", getpid(),
                s_requests_count, s_initial_start_reqs);
 
     if (s_initial_start_reqs > 0 && s_requests_count <= s_initial_start_reqs) {
@@ -1261,4 +1259,3 @@ int LSCRIU_Init(void)
     }
     return s_initial_start_reqs > 0;
 }
-
