@@ -2,19 +2,20 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.4
 
-
-15 Mar 2018, PHP 7.2.4RC1
-
 - Core:
   . Fixed bug #76025 (Segfault while throwing exception in error_handler).
     (Dmitry, Laruence)
   . Fixed bug #76044 ('date: illegal option -- -' in ./configure on FreeBSD).
     (Anatol)
 
+- FPM:
+  . Fixed bug #75605 (Dumpable FPM child processes allow bypassing opcache
+    access controls). (Jakub Zelenka)
+
 - FTP:
   . Fixed ftp_pasv arginfo. (carusogabriel)
 
--GD:
+- GD:
   . Fixed bug #73957 (signed integer conversion in imagescale()). (cmb)
   . Fixed bug #76041 (null pointer access crashed php). (cmb)
   . Fixed imagesetinterpolation arginfo. (Gabriel Caruso)
