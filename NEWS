@@ -54,6 +54,7 @@ PHP                                                                        NEWS
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
   . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
     (jhdxr)
+  . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
 
 - DBA:
   . Fixed bug #75264 (compiler warnings emitted). (petk)
@@ -92,7 +93,7 @@ PHP                                                                        NEWS
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
-- Mbstring:
+- mbstring:
   . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
     capitalized). (Nikita)
   . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
@@ -172,6 +173,8 @@ PHP                                                                        NEWS
   . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
     (cmb)
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+    (carusogabriel)
 
 - SQLite3:
   . Updated bundled libsqlite to 3.22.0. (cmb)
