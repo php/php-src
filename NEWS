@@ -2,7 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018 PHP 7.0.29
 
-
+- FPM:
+  . Fixed bug #75605 (Dumpable FPM child processes allow bypassing opcache
+    access controls). (Jakub Zelenka)
 
 01 Mar 2018 PHP 7.0.28
 
