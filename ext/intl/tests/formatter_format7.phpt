@@ -1,9 +1,8 @@
 --TEST--
-numfmt_format() icu >= 56.1 && icu < 61.1
+numfmt_format() icu >= 61.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '61.1') >= 0) die('skip for ICU < 61.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '56.1') < 0) die('skip for ICU >= 56.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '61.1') < 0) die('skip for ICU >= 61.1'); ?>
 --FILE--
 <?php
 
@@ -71,23 +70,23 @@ ut_run();
 ?>
 --EXPECTREGEX--
 Locale is: en_US
-'1234567.89123457'
+'1234567.8912345\d+'
 '1,234,567.891'
 '\$1,234,567.89'
 '123,456,789%'
-'1.23456789123457E6'
-'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five seven'
+'1.2345678912345\d+E6'
+'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five( six)? seven( nine)?'
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
 'USD1,234,567.89'
 
 Locale is: ru_UA
-'1234567,89123457'
+'1234567.8912345\d+'
 '1 234 567,891'
 '1 234 567,89 ?(грн\.|₴)'
 '123 456 789 ?%'
-'1,23456789123457E6'
+'1.2345678912345\d+E6'
 'один миллион двести тридцать четыре тысячи пятьсот шестьдесят семь целых восемьдесят девять миллионов сто двадцать три тысячи четыреста пятьдесят семь стомиллионных'
 '1 234 567.?'
 '1 234 567'
@@ -95,36 +94,36 @@ Locale is: ru_UA
 '1 234 567,89 UAH'
 
 Locale is: de
-'1234567,89123457'
+'1234567.8912345\d+'
 '1.234.567,891'
 '(¤ )?1.234.567,89( ¤)?'
 '123\.456\.789 %'
-'1,23456789123457E6'
-'eine Million zwei­hundert­vier­und­dreißig­tausend­fünf­hundert­sieben­und­sechzig Komma acht neun eins zwei drei vier fünf sieben'
+'1.2345678912345\d+E6'
+'eine Million zwei­hundert­vier­und­dreißig­tausend­fünf­hundert­sieben­und­sechzig Komma acht neun eins zwei drei vier fünf( sechs)? sieben( neun)?'
 '1.234.567.?'
 '1.234.567'
 '#####.###'
 '1.234.567,89 ¤¤'
 
 Locale is: fr
-'1234567,89123457'
+'1234567.8912345\d+'
 '1 234 567,891'
 '1 234 567,89 ¤'
 '123 456 789 ?%'
-'1,23456789123457E6'
-'un million deux cent trente-quatre mille cinq cent soixante-sept virgule huit neuf un deux trois quatre cinq sept'
+'1.2345678912345\d+E6'
+'un million deux cent trente-quatre mille cinq cent soixante-sept virgule huit neuf un deux trois quatre cinq( six)? sept( neuf)?'
 '1 234 567e'
 '1 234 567'
 '#####.###'
 '1 234 567,89 ¤¤'
 
 Locale is: en_UK
-'1234567.89123457'
+'1234567.8912345\d+'
 '1,234,567.891'
 '¤1,234,567.89'
 '123,456,789%'
-'1.23456789123457E6'
-'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five seven'
+'1.2345678912345\d+E6'
+'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five( six)? seven( nine)?'
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
