@@ -1997,11 +1997,11 @@ PHP_FUNCTION(strpos)
 		                    ZSTR_VAL(haystack) + ZSTR_LEN(haystack));
 	}
 
-	if (found) {
-		RETURN_LONG(found - ZSTR_VAL(haystack));
-	} else {
+	if (!found) {
 		RETURN_FALSE;
 	}
+	
+	RETURN_LONG(found - ZSTR_VAL(haystack));
 }
 /* }}} */
 
