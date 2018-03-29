@@ -3944,12 +3944,10 @@ PHP_NAMED_FUNCTION(zif_inet_ntop)
 	} else
 #endif
 	if (address_len != 4) {
-		php_error_docref(NULL, E_WARNING, "Invalid in_addr value");
 		RETURN_FALSE;
 	}
 
 	if (!inet_ntop(af, address, buffer, sizeof(buffer))) {
-		php_error_docref(NULL, E_WARNING, "An unknown error occurred");
 		RETURN_FALSE;
 	}
 
@@ -3980,14 +3978,12 @@ PHP_NAMED_FUNCTION(php_inet_pton)
 	} else
 #endif
 	if (!strchr(address, '.')) {
-		php_error_docref(NULL, E_WARNING, "Unrecognized address %s", address);
 		RETURN_FALSE;
 	}
 
 	ret = inet_pton(af, address, buffer);
 
 	if (ret <= 0) {
-		php_error_docref(NULL, E_WARNING, "Unrecognized address %s", address);
 		RETURN_FALSE;
 	}
 
