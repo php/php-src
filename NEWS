@@ -9,6 +9,11 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
 
+- FPM:
+  . Fixed bug #68440 (ERROR: failed to reload: execvp() failed: Argument list
+    too long). (Jacob Hipps)
+  . Fixed incorrect write to getenv result in FPM reload. (Jakub Zelenka)
+
 - mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
