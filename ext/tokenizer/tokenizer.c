@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,7 +59,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in tokenizer_functions[].
  */
-const zend_function_entry tokenizer_functions[] = {
+static const zend_function_entry tokenizer_functions[] = {
 	PHP_FE(token_get_all,	arginfo_token_get_all)
 	PHP_FE(token_name,		arginfo_token_name)
 	PHP_FE_END
@@ -144,8 +144,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	LANG_SCNG(yy_state) = yycINITIAL;
 	array_init(return_value);
 
-	ZVAL_UNDEF(&token);
-	while ((token_type = lex_scan(&token))) {
+	while ((token_type = lex_scan(&token, NULL))) {
 		add_token(return_value, token_type, zendtext, zendleng, token_line);
 
 		if (Z_TYPE(token) != IS_UNDEF) {

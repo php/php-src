@@ -14,7 +14,7 @@ var_dump(array_multisort(array(1,3,2,4)));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : Testing with anonymous arguments ***
 bool(true)
 ===DONE===

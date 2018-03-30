@@ -1,5 +1,7 @@
 --TEST--
 Unicode case mapping
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

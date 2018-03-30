@@ -24,7 +24,7 @@ try {
 }
 var_dump("end");
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "try"
 string(7) "finally"
 string(8) "finally2"

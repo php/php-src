@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -298,7 +298,7 @@ typedef struct _php_pgsql_notice {
 	size_t len;
 } php_pgsql_notice;
 
-static php_stream_ops php_stream_pgsql_fd_ops = {
+static const php_stream_ops php_stream_pgsql_fd_ops = {
 	php_pgsql_fd_write,
 	php_pgsql_fd_read,
 	php_pgsql_fd_close,

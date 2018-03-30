@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,7 +29,7 @@
  *    PS_READ_FUNC()  - Read data from storage.
  *    PS_GC_FUNC()    - Perform GC. Called by probability
  *                                (session.gc_probability/session.gc_divisor).
- *    PS_WRITE_FUNC() or PS_UPDATE_TIMESTAMP() 
+ *    PS_WRITE_FUNC() or PS_UPDATE_TIMESTAMP()
  *                    - Write session data or update session data timestamp.
  *                      It depends on session data change.
  *    PS_CLOSE_FUNC() - Clean up module data created by PS_OPEN_FUNC().
@@ -100,7 +100,7 @@ typedef struct {
 	int fd;
 } ps_files;
 
-ps_module ps_mod_files = {
+const ps_module ps_mod_files = {
 	/* New save handlers MUST use PS_MOD_UPDATE_TIMESTAMP macro */
 	PS_MOD_UPDATE_TIMESTAMP(files)
 };

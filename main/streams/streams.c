@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -24,6 +24,7 @@
 #define _GNU_SOURCE
 #include "php.h"
 #include "php_globals.h"
+#include "php_memory_streams.h"
 #include "php_network.h"
 #include "php_open_temporary_file.h"
 #include "ext/standard/file.h"
@@ -229,7 +230,7 @@ static void wrapper_list_dtor(zval *item) {
 	efree(list);
 }
 
-PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int options, const char *fmt, ...)
+PHPAPI void php_stream_wrapper_log_error(const php_stream_wrapper *wrapper, int options, const char *fmt, ...)
 {
 	va_list args;
 	char *buffer = NULL;
@@ -266,7 +267,7 @@ PHPAPI void php_stream_wrapper_log_error(php_stream_wrapper *wrapper, int option
 /* }}} */
 
 /* allocate a new stream for a particular ops */
-PHPAPI php_stream *_php_stream_alloc(php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC) /* {{{ */
+PHPAPI php_stream *_php_stream_alloc(const php_stream_ops *ops, void *abstract, const char *persistent_id, const char *mode STREAMS_DC) /* {{{ */
 {
 	php_stream *ret;
 
@@ -704,8 +705,10 @@ PHPAPI size_t _php_stream_read(php_stream *stream, char *buf, size_t size)
 			break;
 		}
 
-		/* just break anyway, to avoid greedy read */
-		if (stream->wrapper != &php_plain_files_wrapper) {
+		/* just break anyway, to avoid greedy read for file://, php://memory, and php://temp */
+		if ((stream->wrapper != &php_plain_files_wrapper) &&
+			(stream->ops != &php_stream_memory_ops) &&
+			(stream->ops != &php_stream_temp_ops)) {
 			break;
 		}
 	}
@@ -1662,15 +1665,20 @@ static inline int php_stream_wrapper_scheme_validate(const char *protocol, unsig
 }
 
 /* API for registering GLOBAL wrappers */
-PHPAPI int php_register_url_stream_wrapper(const char *protocol, php_stream_wrapper *wrapper)
+PHPAPI int php_register_url_stream_wrapper(const char *protocol, const php_stream_wrapper *wrapper)
 {
 	unsigned int protocol_len = (unsigned int)strlen(protocol);
+	int ret;
+	zend_string *str;
 
 	if (php_stream_wrapper_scheme_validate(protocol, protocol_len) == FAILURE) {
 		return FAILURE;
 	}
 
-	return zend_hash_add_ptr(&url_stream_wrappers_hash, zend_string_init_interned(protocol, protocol_len, 1), wrapper) ? SUCCESS : FAILURE;
+	str = zend_string_init_interned(protocol, protocol_len, 1);
+	ret = zend_hash_add_ptr(&url_stream_wrappers_hash, str, (void*)wrapper) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 
 PHPAPI int php_unregister_url_stream_wrapper(const char *protocol)
@@ -1722,7 +1730,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	}
 
 	if (options & IGNORE_URL) {
-		return (options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper;
+		return (php_stream_wrapper*)((options & STREAM_LOCATE_WRAPPERS_ONLY) ? NULL : &php_plain_files_wrapper);
 	}
 
 	for (p = path; isalnum((int)*p) || *p == '+' || *p == '-' || *p == '.'; p++) {
@@ -1734,10 +1742,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	}
 
 	if (protocol) {
-		char *tmp = estrndup(protocol, n);
-		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, (char*)tmp, n))) {
+		if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, protocol, n))) {
+			char *tmp = estrndup(protocol, n);
+
 			php_strtolower(tmp, n);
-			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, (char*)tmp, n))) {
+			if (NULL == (wrapper = zend_hash_str_find_ptr(wrapper_hash, tmp, n))) {
 				char wrapper_name[32];
 
 				if (n >= sizeof(wrapper_name)) {
@@ -1750,13 +1759,13 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 				wrapper = NULL;
 				protocol = NULL;
 			}
+			efree(tmp);
 		}
-		efree(tmp);
 	}
 	/* TODO: curl based streams probably support file:// properly */
 	if (!protocol || !strncasecmp(protocol, "file", n))	{
 		/* fall back on regular file access */
-		php_stream_wrapper *plain_files_wrapper = &php_plain_files_wrapper;
+		php_stream_wrapper *plain_files_wrapper = (php_stream_wrapper*)&php_plain_files_wrapper;
 
 		if (protocol) {
 			int localhost = 0;
@@ -1805,7 +1814,7 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 			}
 
 			/* Check again, the original check might have not known the protocol name */
-			if ((wrapper = zend_hash_str_find_ptr(wrapper_hash, "file", sizeof("file")-1)) != NULL) {
+			if ((wrapper = zend_hash_find_ex_ptr(wrapper_hash, ZSTR_KNOWN(ZEND_STR_FILE), 1)) != NULL) {
 				return wrapper;
 			}
 
@@ -1825,13 +1834,11 @@ PHPAPI php_stream_wrapper *php_stream_locate_url_wrapper(const char *path, const
 	       PG(in_user_include)) && !PG(allow_url_include)))) {
 		if (options & REPORT_ERRORS) {
 			/* protocol[n] probably isn't '\0' */
-			char *protocol_dup = estrndup(protocol, n);
 			if (!PG(allow_url_fopen)) {
-				php_error_docref(NULL, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_fopen=0", protocol_dup);
+				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_fopen=0", (int)n, protocol);
 			} else {
-				php_error_docref(NULL, E_WARNING, "%s:// wrapper is disabled in the server configuration by allow_url_include=0", protocol_dup);
+				php_error_docref(NULL, E_WARNING, "%.*s:// wrapper is disabled in the server configuration by allow_url_include=0", (int)n, protocol);
 			}
-			efree(protocol_dup);
 		}
 		return NULL;
 	}

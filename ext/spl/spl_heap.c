@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -97,9 +97,7 @@ static void spl_ptr_heap_zval_dtor(zval *elem) { /* {{{ */
 /* }}} */
 
 static void spl_ptr_heap_zval_ctor(zval *elem) { /* {{{ */
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
+	Z_TRY_ADDREF_P(elem);
 }
 /* }}} */
 
@@ -365,7 +363,7 @@ static zend_object *spl_heap_object_new_ex(zend_class_entry *class_type, zval *o
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_heap_object) + zend_object_properties_size(parent));
+	intern = zend_object_alloc(sizeof(spl_heap_object), parent);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -1062,7 +1060,7 @@ SPL_METHOD(SplPriorityQueue, current)
 /* }}} */
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_heap_it_funcs = {
+static const zend_object_iterator_funcs spl_heap_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_heap_it_get_current_data,
@@ -1072,7 +1070,7 @@ zend_object_iterator_funcs spl_heap_it_funcs = {
 	NULL
 };
 
-zend_object_iterator_funcs spl_pqueue_it_funcs = {
+static const zend_object_iterator_funcs spl_pqueue_it_funcs = {
 	spl_heap_it_dtor,
 	spl_heap_it_valid,
 	spl_pqueue_it_get_current_data,

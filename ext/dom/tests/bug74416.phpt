@@ -3,7 +3,6 @@ Bug #74416 Wrong reflection on DOMNode::cloneNode
 --SKIPIF--
 <?php
 require_once('skipif.inc');
-if (!extension_loaded('reflection')) die('skip reflection extension not available');
 ?>
 --FILE--
 <?php

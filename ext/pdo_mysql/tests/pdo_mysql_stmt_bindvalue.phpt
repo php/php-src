@@ -300,7 +300,7 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 Testing native PS...
 Binding variable...
 in = 0 -> id = 1 (integer) / label = 'a' (string)

@@ -46,7 +46,7 @@ Rein Velt (rein@velt.org)
 	echo $results2;
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["test"]=>
   string(7) "getpost"

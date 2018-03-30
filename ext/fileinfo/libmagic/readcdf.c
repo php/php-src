@@ -346,11 +346,11 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 #ifdef notdef
 private char *
 format_clsid(char *buf, size_t len, const uint64_t uuid[2]) {
-	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" 
+	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4"
 	    PRIx64 "-%.12" PRIx64,
 	    (uuid[0] >> 32) & (uint64_t)0x000000000ffffffffULL,
 	    (uuid[0] >> 16) & (uint64_t)0x0000000000000ffffULL,
-	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL, 
+	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >> 48) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >>  0) & (uint64_t)0x0000fffffffffffffULL);
 	return buf;
@@ -429,7 +429,7 @@ private struct sinfo {
 	const char *sections[5];
 	const int  types[5];
 } sectioninfo[] = {
-	{ "Encrypted", "encrypted", 
+	{ "Encrypted", "encrypted",
 		{
 			"EncryptedPackage", "EncryptedSummary",
 			NULL, NULL, NULL,
@@ -441,7 +441,7 @@ private struct sinfo {
 
 		},
 	},
-	{ "QuickBooks", "quickbooks", 
+	{ "QuickBooks", "quickbooks",
 		{
 #if 0
 			"TaxForms", "PDFTaxForms", "modulesInBackup",

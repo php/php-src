@@ -441,51 +441,43 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			switch (argType) {
 			case Formattable::kString:
 				{
+					zend_string *str, *tmp_str;
+
 	string_arg:
 					/* This implicitly converts objects
 					 * Note that our vectors will leak if object conversion fails
 					 * and PHP ends up with a fatal error and calls longjmp
 					 * as a result of that.
 					 */
-					convert_to_string_ex(elem);
+					str = zval_get_tmp_string(elem, &tmp_str);
 
 					UnicodeString *text = new UnicodeString();
 					intl_stringFromChar(*text,
-						Z_STRVAL_P(elem), Z_STRLEN_P(elem), &err.code);
+						ZSTR_VAL(str), ZSTR_LEN(str), &err.code);
 
 					if (U_FAILURE(err.code)) {
 						char *message;
 						spprintf(&message, 0, "Invalid UTF-8 data in string argument: "
-							"'%s'", Z_STRVAL_P(elem));
+							"'%s'", ZSTR_VAL(str));
 						intl_errors_set(&err, err.code, message, 1);
 						efree(message);
 						delete text;
 						continue;
 					}
 					formattable.adoptString(text);
+					zend_tmp_string_release(tmp_str);
 					break;
 				}
 			case Formattable::kDouble:
 				{
-					double d;
-					if (Z_TYPE_P(elem) == IS_DOUBLE) {
-						d = Z_DVAL_P(elem);
-					} else if (Z_TYPE_P(elem) == IS_LONG) {
-						d = (double)Z_LVAL_P(elem);
-					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						d = (Z_TYPE_P(elem) == IS_DOUBLE)
-							? Z_DVAL_P(elem)
-							: (double)Z_LVAL_P(elem);
-					}
+					double d = zval_get_double(elem);
 					formattable.setDouble(d);
 					break;
 				}
 			case Formattable::kLong:
 				{
 					int32_t tInt32 = 0;
-retry_klong:
+
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
 						if (Z_DVAL_P(elem) > (double)INT32_MAX ||
 								Z_DVAL_P(elem) < (double)INT32_MIN) {
@@ -505,9 +497,7 @@ retry_klong:
 							tInt32 = (int32_t)Z_LVAL_P(elem);
 						}
 					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						goto retry_klong;
+						tInt32 = (int32_t)zval_get_long(elem);
 					}
 					formattable.setLong(tInt32);
 					break;
@@ -515,7 +505,7 @@ retry_klong:
 			case Formattable::kInt64:
 				{
 					int64_t tInt64 = 0;
-retry_kint64:
+
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
 						if (Z_DVAL_P(elem) > (double)U_INT64_MAX ||
 								Z_DVAL_P(elem) < (double)U_INT64_MIN) {
@@ -529,9 +519,7 @@ retry_kint64:
 						/* assume long is not wider than 64 bits */
 						tInt64 = (int64_t)Z_LVAL_P(elem);
 					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						goto retry_kint64;
+						tInt64 = (int64_t)zval_get_long(elem);
 					}
 					formattable.setInt64(tInt64);
 					break;
@@ -569,15 +557,15 @@ retry_kint64:
 			case IS_DOUBLE:
 				formattable.setDouble(Z_DVAL_P(elem));
 				break;
-			case IS_TRUE:
-			case IS_FALSE:
-				convert_to_long_ex(elem);
-				/* Intentional fallthrough */
 			case IS_LONG:
 				formattable.setInt64((int64_t)Z_LVAL_P(elem));
 				break;
 			case IS_NULL:
+			case IS_FALSE:
 				formattable.setInt64((int64_t)0);
+				break;
+			case IS_TRUE:
+				formattable.setInt64((int64_t)1);
 				break;
 			case IS_STRING:
 			case IS_OBJECT:

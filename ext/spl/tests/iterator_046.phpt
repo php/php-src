@@ -42,7 +42,7 @@ $it->show();
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 MyCachingIterator::fill()
 MyCachingIterator::show()
 string(1) "0"

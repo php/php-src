@@ -49,7 +49,7 @@ echo "Done\n";
 unlink(dirname(__FILE__)."/perm.tmp");
 rmdir(dirname(__FILE__)."/perm");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fileperms(), chmod() with files and dirs ***
 bool(true)
 100755

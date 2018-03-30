@@ -19,5 +19,5 @@ $matches[2] = $dummy;
 preg_match_all("/(\d)+/", "foo123456bar", $matches);
 echo "okey";
 ?>
---EXPECTF--
+--EXPECT--
 okey

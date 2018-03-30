@@ -378,10 +378,8 @@ gdImagePtr gdImageCreateFromBmp (FILE * inFile);
 gdImagePtr gdImageCreateFromBmpPtr (int size, void *data);
 gdImagePtr gdImageCreateFromBmpCtx (gdIOCtxPtr infile);
 
-int gdJpegGetVersionInt();
 const char * gdPngGetVersionString();
 
-int gdJpegGetVersionInt();
 const char * gdJpegGetVersionString();
 
 /* A custom data source. */

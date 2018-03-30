@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ typedef struct php_cli_server_ext_mime_type_pair {
 	const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
-static php_cli_server_ext_mime_type_pair mime_type_map[] = {
+static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 	{ "ez", "application/andrew-inset" },
 	{ "aw", "application/applixware" },
 	{ "atom", "application/atom+xml" },

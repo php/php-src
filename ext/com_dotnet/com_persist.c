@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -645,7 +645,7 @@ CPH_METHOD(SaveToStream)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::__construct([object com_object])
+/* {{{ proto COMPersistHelper::__construct([object com_object])
    Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
 {

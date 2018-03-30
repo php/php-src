@@ -108,7 +108,7 @@ mysqli.max_persistent=1
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   ["id"]=>
   string(2) "97"

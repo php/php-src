@@ -54,7 +54,7 @@ __HALT_COMPILER();
 ?>
 --EXPECT--
 bool(false)
-int(6651)
+int(6641)
 string(2) "hi"
 bool(true)
 string(60) "<?php // tar-based phar archive stub file
@@ -62,10 +62,10 @@ __HALT_COMPILER();"
 string(2) "hi"
 bool(true)
 int(4096)
-int(6651)
+int(6641)
 string(2) "hi"
 bool(true)
 bool(true)
-int(6651)
+int(6641)
 string(2) "hi"
 ===DONE===

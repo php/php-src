@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -71,7 +71,7 @@ static void zend_win_error_message(int type, char *msg, int err)
 
 	LocalFree( lpMsgBuf );
 
-	zend_accel_error(type, msg);
+	zend_accel_error(type, "%s", msg);
 }
 
 static char *create_name_with_username(char *name)
@@ -181,9 +181,6 @@ static int zend_shared_alloc_reattach(size_t requested_size, char **error_in)
 				return ALLOC_FAILURE;
 			}
 			accel_shared_globals = (zend_accel_shared_globals *)((char *)((zend_smm_shared_globals *)mapping_base)->app_shared_globals + ((char *)mapping_base - (char *)wanted_mb_save));
-
-			/* Make this process to use file-cache only */
-			ZCG(accel_directives).file_cache_only = 1;
 
 			return ALLOC_FALLBACK;
 		}

@@ -35,7 +35,7 @@ foreach ($callables as $callable) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Bar
 int
 Bar

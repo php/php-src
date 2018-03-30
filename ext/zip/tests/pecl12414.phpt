@@ -33,6 +33,5 @@ if ($res === TRUE) {
 }
 
 ?>
---DONE--
 --EXPECTF--
 zip_readfile could not read from %specl12414.zip : MYLOGOV2.GFX

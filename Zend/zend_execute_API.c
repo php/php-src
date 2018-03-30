@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -47,7 +47,7 @@ ZEND_API void (*zend_execute_internal)(zend_execute_data *execute_data, zval *re
 
 /* true globals */
 ZEND_API const zend_fcall_info empty_fcall_info = { 0, {{0}, {{0}}, {0}}, NULL, NULL, NULL, 0, 0 };
-ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { 0, NULL, NULL, NULL, NULL };
+ZEND_API const zend_fcall_info_cache empty_fcall_info_cache = { NULL, NULL, NULL, NULL };
 
 #ifdef ZEND_WIN32
 ZEND_TLS HANDLE tq_timer = NULL;
@@ -296,11 +296,13 @@ void shutdown_executor(void) /* {{{ */
 				break;
 			}
 		} ZEND_HASH_FOREACH_END_DEL();
+
+		zend_cleanup_internal_classes();
 	} else {
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
 #if ZEND_DEBUG
-		if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		if (gc_enabled() && !CG(unclean_shutdown)) {
 			gc_collect_cycles();
 		}
 #endif
@@ -358,6 +360,8 @@ void shutdown_executor(void) /* {{{ */
 			} ZEND_HASH_FOREACH_END_DEL();
 		}
 
+		zend_cleanup_internal_classes();
+
 		while (EG(symtable_cache_ptr)>=EG(symtable_cache)) {
 			zend_hash_destroy(*EG(symtable_cache_ptr));
 			FREE_HASHTABLE(*EG(symtable_cache_ptr));
@@ -387,8 +391,6 @@ void shutdown_executor(void) /* {{{ */
 #endif
 
 	EG(ht_iterators_used) = 0;
-
-	zend_cleanup_internal_classes();
 
 	zend_shutdown_fpu();
 }
@@ -675,7 +677,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(current_execute_data) = &dummy_execute_data;
 	}
 
-	if (!fci_cache || !fci_cache->initialized) {
+	if (!fci_cache || !fci_cache->function_handler) {
 		char *error = NULL;
 
 		if (!fci_cache) {
@@ -774,8 +776,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 	if (UNEXPECTED(func->op_array.fn_flags & ZEND_ACC_CLOSURE)) {
 		uint32_t call_info;
 
-		ZEND_ASSERT(GC_TYPE((zend_object*)func->op_array.prototype) == IS_OBJECT);
-		GC_ADDREF((zend_object*)func->op_array.prototype);
+		GC_ADDREF(ZEND_CLOSURE_OBJECT(func));
 		call_info = ZEND_CALL_CLOSURE;
 		if (func->common.fn_flags & ZEND_ACC_FAKE_CLOSURE) {
 			call_info |= ZEND_CALL_FAKE_CLOSURE;
@@ -783,7 +784,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		ZEND_ADD_CALL_FLAG(call, call_info);
 	}
 
-	if (func->type == ZEND_USER_FUNCTION) {		
+	if (func->type == ZEND_USER_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
 		const zend_op *current_opline_before_exception = EG(opline_before_exception);
 
@@ -792,7 +793,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		EG(opline_before_exception) = current_opline_before_exception;
 		if (call_via_handler) {
 			/* We must re-initialize function again */
-			fci_cache->initialized = 0;
+			fci_cache->function_handler = NULL;
 		}
 	} else if (func->type == ZEND_INTERNAL_FUNCTION) {
 		int call_via_handler = (func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) != 0;
@@ -816,7 +817,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 
 		if (call_via_handler) {
 			/* We must re-initialize function again */
-			fci_cache->initialized = 0;
+			fci_cache->function_handler = NULL;
 		}
 	} else { /* ZEND_OVERLOADED_FUNCTION */
 		ZVAL_NULL(fci->retval);
@@ -866,7 +867,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *key, int use_autoload) /* {{{ */
 {
 	zend_class_entry *ce = NULL;
-	zval args[1];
+	zval args[1], *zv;
 	zval local_retval;
 	zend_string *lc_name;
 	zend_fcall_info fcall_info;
@@ -887,12 +888,12 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 		}
 	}
 
-	ce = zend_hash_find_ptr(EG(class_table), lc_name);
-	if (ce) {
+	zv = zend_hash_find(EG(class_table), lc_name);
+	if (zv) {
 		if (!key) {
 			zend_string_release(lc_name);
 		}
-		return ce;
+		return (zend_class_entry*)Z_PTR_P(zv);
 	}
 
 	/* The compiler is not-reentrant. Make sure we __autoload() only during run-time
@@ -906,9 +907,9 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zend_function *func = zend_hash_find_ptr(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
-		if (func) {
-			EG(autoload_func) = func;
+		zval *zv = zend_hash_find_ex(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD), 1);
+		if (zv) {
+			EG(autoload_func) = (zend_function*)Z_PTR_P(zv);
 		} else {
 			if (!key) {
 				zend_string_release(lc_name);
@@ -952,7 +953,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_info.object = NULL;
 	fcall_info.no_separation = 1;
 
-	fcall_cache.initialized = 1;
 	fcall_cache.function_handler = EG(autoload_func);
 	fcall_cache.calling_scope = NULL;
 	fcall_cache.called_scope = NULL;
@@ -1505,7 +1505,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		if (!ex->func->op_array.last_var) {
 			return symbol_table;
 		}
-		zend_hash_real_init(symbol_table, 0);
+		zend_hash_real_init_mixed(symbol_table);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
 	if (EXPECTED(ex->func->op_array.last_var)) {
@@ -1536,7 +1536,7 @@ ZEND_API void zend_attach_symbol_table(zend_execute_data *execute_data) /* {{{ *
 		zval *var = EX_VAR_NUM(0);
 
 		do {
-			zval *zv = zend_hash_find(ht, *str);
+			zval *zv = zend_hash_find_ex(ht, *str, 1);
 
 			if (zv) {
 				if (Z_TYPE_P(zv) == IS_INDIRECT) {
@@ -1602,8 +1602,7 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 
 				do {
 					if (ZSTR_H(*str) == h &&
-					    ZSTR_LEN(*str) == ZSTR_LEN(name) &&
-					    memcmp(ZSTR_VAL(*str), ZSTR_VAL(name), ZSTR_LEN(name)) == 0) {
+					    zend_string_equal_content(*str, name)) {
 						zval *var = EX_VAR_NUM(str - op_array->vars);
 						ZVAL_COPY_VALUE(var, value);
 						return SUCCESS;

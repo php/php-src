@@ -66,7 +66,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS type_change"))
 mysqli_close($link);
 ?>
 
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 ---- Row 1

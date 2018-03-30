@@ -56,7 +56,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing printf() : basic functionality - using hexadecimal format ***
 
 -- Calling printf() with no arguments --

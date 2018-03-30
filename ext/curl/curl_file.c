@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,7 @@ static void curlfile_ctor(INTERNAL_FUNCTION_PARAMETERS)
 	}
 }
 
-/* {{{ proto void CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
+/* {{{ proto CURLFile::__construct(string $name, [string $mimetype [, string $postfilename]])
    Create the CURLFile object */
 ZEND_METHOD(CURLFile, __construct)
 {
@@ -133,7 +133,7 @@ ZEND_METHOD(CURLFile, setPostFilename)
 }
 /* }}} */
 
-/* {{{ proto void CURLFile::__wakeup()
+/* {{{ proto CURLFile::__wakeup()
    Unserialization handler */
 ZEND_METHOD(CURLFile, __wakeup)
 {

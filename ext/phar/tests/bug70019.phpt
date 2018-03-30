@@ -19,6 +19,6 @@ $dir = __DIR__."/bug70019";
 unlink("$dir/ThisIsATestFile.txt");
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 ===DONE===

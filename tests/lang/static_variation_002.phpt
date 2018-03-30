@@ -33,7 +33,7 @@ $e = new E;
 $e->f();
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

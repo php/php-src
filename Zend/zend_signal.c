@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | Zend Signal Handling                                                 |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2008 The PHP Group                                     |
+  | Copyright (c) 2008-2018 The PHP Group                                     |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -184,7 +184,7 @@ static void zend_signal_handler(int signo, siginfo_t *siginfo, void *context)
 	if (NULL == TSRMLS_CACHE || NULL == TSRMG_BULK_STATIC(zend_signal_globals_id, zend_signal_globals_t *)) {
 		p_sig.flags = 0;
 		p_sig.handler = SIG_DFL;
-	} else 
+	} else
 #endif
 	p_sig = SIGG(handlers)[signo-1];
 

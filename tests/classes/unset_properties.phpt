@@ -127,7 +127,7 @@ echo "\n\n";
 
 ?>
 
---EXPECTF--
+--EXPECT--
 publicProperty set
 true
 __isset "publicProperty"

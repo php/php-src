@@ -17,5 +17,5 @@ setUp();
 setUp();
 echo "done";
 ?>
---EXPECTF--
+--EXPECT--
 done

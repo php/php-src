@@ -24,7 +24,7 @@ echo key($stack) . " => " . current ($stack) . "\n";
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 *** Testing array_push() : usage variations ***
 

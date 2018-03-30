@@ -38,7 +38,7 @@ foreach($single_quote_string as $string_value)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(51) "<html> \$ -> This represents the dollar sign</html>"

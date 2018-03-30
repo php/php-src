@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -929,9 +929,10 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 	*ptr = '\0';
 
 	do {
+		ZEND_ASSERT(ptr > buf);
 		*--ptr = digits[value % base];
 		value /= base;
-	} while (ptr > buf && value);
+	} while (value);
 
 	return zend_string_init(ptr, end - ptr, 0);
 }

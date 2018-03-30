@@ -19,7 +19,7 @@ echo $baz;
 show_source(__FILE__);
 echo $foo;
 ?>
---EXPECTF--
+--EXPECT--
 *** Test by calling method or function with its expected arguments and php output ***
 baz
 <code><span style="color: #000000">

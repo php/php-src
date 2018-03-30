@@ -178,13 +178,11 @@ double_offset:
 		convert_to_string_ex(arg);
 		switch (is_numeric_string(Z_STRVAL_P(arg), Z_STRLEN_P(arg), &lval, &dval, 0)) {
 		case IS_DOUBLE:
-			SEPARATE_ZVAL(arg);
-			zval_dtor(arg);
+			zval_ptr_dtor(arg);
 			ZVAL_DOUBLE(arg, dval);
 			goto double_offset;
 		case IS_LONG:
-			SEPARATE_ZVAL(arg);
-			zval_dtor(arg);
+			zval_ptr_dtor(arg);
 			ZVAL_LONG(arg, lval);
 			goto int_offset;
 		}

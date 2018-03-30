@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -399,7 +399,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsl_object *intern;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
 	xmlNode *nodep = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	zval *cloneDocu, member, rv;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
@@ -483,7 +483,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	char **params = NULL;
 	int clone;
 	zval *doXInclude, member, rv;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
 	int secPrefsValue;
@@ -764,9 +764,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(entry);
-			if (Z_REFCOUNTED_P(entry)) {
-				Z_ADDREF_P(entry);
-			}
+			Z_TRY_ADDREF_P(entry);
 			zend_hash_update(intern->parameter, string_key, entry);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
@@ -803,8 +801,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	}
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
-		convert_to_string_ex(value);
-		RETURN_STR_COPY(Z_STR_P(value));
+		RETURN_STR(zval_get_string(value));
 	} else {
 		RETURN_FALSE;
 	}
@@ -897,7 +894,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 }
 /* }}} end xsl_xsltprocessor_set_profiling */
 
-/* {{{ proto long xsl_xsltprocessor_set_security_prefs(long securityPrefs) */
+/* {{{ proto int xsl_xsltprocessor_set_security_prefs(int securityPrefs) */
 PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
@@ -917,7 +914,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
 
-/* {{{ proto long xsl_xsltprocessor_get_security_prefs() */
+/* {{{ proto int xsl_xsltprocessor_get_security_prefs() */
 PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 {
 	zval *id;

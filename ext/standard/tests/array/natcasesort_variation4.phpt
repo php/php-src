@@ -33,7 +33,7 @@ foreach ($inputs as $array_arg) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : usage variation ***
 bool(true)
 array(11) {

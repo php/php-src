@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -21,6 +21,10 @@
 #include "zend.h"
 #include "zend_globals.h"
 
+#ifdef HAVE_VALGRIND
+# include "valgrind/callgrind.h"
+#endif
+
 ZEND_API zend_string *(*zend_new_interned_string)(zend_string *str);
 ZEND_API zend_string *(*zend_string_init_interned)(const char *str, size_t size, int permanent);
 
@@ -30,7 +34,7 @@ static zend_string *zend_string_init_interned_permanent(const char *str, size_t 
 static zend_string *zend_string_init_interned_request(const char *str, size_t size, int permanent);
 
 /* Any strings interned in the startup phase. Common to all the threads,
-   won't be free'd until process exit. If we want an ability to 
+   won't be free'd until process exit. If we want an ability to
    add permanent strings even after startup, it would be still
    possible on costs of locking in the thread safe builds. */
 static HashTable interned_strings_permanent;
@@ -38,6 +42,7 @@ static HashTable interned_strings_permanent;
 static zend_new_interned_string_func_t interned_string_request_handler = zend_new_interned_string_request;
 static zend_string_init_interned_func_t interned_string_init_request_handler = zend_string_init_interned_request;
 static zend_string_copy_storage_func_t interned_string_copy_storage = NULL;
+static zend_string_copy_storage_func_t interned_string_restore_storage = NULL;
 
 ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
@@ -64,7 +69,7 @@ ZEND_KNOWN_STRINGS(_ZEND_STR_DSC)
 static void zend_init_interned_strings_ht(HashTable *interned_strings, int permanent)
 {
 	zend_hash_init(interned_strings, 1024, NULL, _str_dtor, permanent);
-	zend_hash_real_init(interned_strings, 0);
+	zend_hash_real_init_mixed(interned_strings);
 }
 
 ZEND_API void zend_interned_strings_init(void)
@@ -72,6 +77,14 @@ ZEND_API void zend_interned_strings_init(void)
 	char s[2];
 	int i;
 	zend_string *str;
+
+	interned_string_request_handler = zend_new_interned_string_request;
+	interned_string_init_request_handler = zend_string_init_interned_request;
+	interned_string_copy_storage = NULL;
+	interned_string_restore_storage = NULL;
+
+	zend_empty_string = NULL;
+	zend_known_strings = NULL;
 
 	zend_init_interned_strings_ht(&interned_strings_permanent, 1);
 
@@ -128,7 +141,22 @@ static zend_always_inline zend_string *zend_interned_string_ht_lookup_ex(zend_ul
 
 static zend_always_inline zend_string *zend_interned_string_ht_lookup(zend_string *str, HashTable *interned_strings)
 {
-	return zend_interned_string_ht_lookup_ex(ZSTR_H(str), ZSTR_VAL(str), ZSTR_LEN(str), interned_strings);
+	zend_ulong h = ZSTR_H(str);
+	uint32_t nIndex;
+	uint32_t idx;
+	Bucket *p;
+
+	nIndex = h | interned_strings->nTableMask;
+	idx = HT_HASH(interned_strings, nIndex);
+	while (idx != HT_INVALID_IDX) {
+		p = HT_HASH_TO_BUCKET(interned_strings, idx);
+		if ((p->h == h) && zend_string_equal_content(p->key, str)) {
+			return p->key;
+		}
+		idx = Z_NEXT(p->val);
+	}
+
+	return NULL;
 }
 
 /* This function might be not thread safe at least because it would update the
@@ -138,7 +166,7 @@ static zend_always_inline zend_string *zend_add_interned_string(zend_string *str
 	zval val;
 
 	GC_SET_REFCOUNT(str, 1);
-	GC_FLAGS(str) |= IS_STR_INTERNED | flags;
+	GC_ADD_FLAGS(str, IS_STR_INTERNED | flags);
 
 	ZVAL_INTERNED_STR(&val, str);
 
@@ -168,6 +196,14 @@ static zend_string *zend_new_interned_string_permanent(zend_string *str)
 		return ret;
 	}
 
+	ZEND_ASSERT(GC_FLAGS(str) & GC_PERSISTENT);
+	if (GC_REFCOUNT(str) > 1) {
+		zend_ulong h = ZSTR_H(str);
+		zend_string_delref(str);
+		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 1);
+		ZSTR_H(str) = h;
+	}
+
 	return zend_add_interned_string(str, &interned_strings_permanent, IS_STR_PERMANENT);
 }
 
@@ -195,6 +231,14 @@ static zend_string *zend_new_interned_string_request(zend_string *str)
 	}
 
 	/* Create a short living interned, freed after the request. */
+	ZEND_ASSERT(!(GC_FLAGS(str) & GC_PERSISTENT));
+	if (GC_REFCOUNT(str) > 1) {
+		zend_ulong h = ZSTR_H(str);
+		zend_string_delref(str);
+		str = zend_string_init(ZSTR_VAL(str), ZSTR_LEN(str), 0);
+		ZSTR_H(str) = h;
+	}
+
 	ret = zend_add_interned_string(str, &CG(interned_strings), 0);
 
 	return ret;
@@ -254,19 +298,166 @@ ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_intern
 	interned_string_init_request_handler = init_handler;
 }
 
-ZEND_API void zend_interned_strings_set_permanent_storage_copy_handler(zend_string_copy_storage_func_t handler)
+ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler)
 {
-	interned_string_copy_storage = handler;
+	interned_string_copy_storage = copy_handler;
+	interned_string_restore_storage = restore_handler;
 }
 
-ZEND_API void zend_interned_strings_switch_storage(void)
+ZEND_API void zend_interned_strings_switch_storage(zend_bool request)
 {
-	if (interned_string_copy_storage) {
-		interned_string_copy_storage();
+	if (request) {
+		if (interned_string_copy_storage) {
+			interned_string_copy_storage();
+		}
+		zend_new_interned_string = interned_string_request_handler;
+		zend_string_init_interned = interned_string_init_request_handler;
+	} else {
+		zend_new_interned_string = zend_new_interned_string_permanent;
+		zend_string_init_interned = zend_string_init_interned_permanent;
+		if (interned_string_restore_storage) {
+			interned_string_restore_storage();
+		}
 	}
-	zend_new_interned_string = interned_string_request_handler;
-	zend_string_init_interned = interned_string_init_request_handler;
 }
+
+#if defined(__GNUC__) && defined(__i386__)
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	char *ptr = ZSTR_VAL(s1);
+	size_t delta = (char*)s2 - (char*)s1;
+	size_t len = ZSTR_LEN(s1);
+	zend_ulong ret;
+
+	__asm__ (
+		".LL0%=:\n\t"
+		"movl (%2,%3), %0\n\t"
+		"xorl (%2), %0\n\t"
+		"jne .LL1%=\n\t"
+		"addl $0x4, %2\n\t"
+		"subl $0x4, %1\n\t"
+		"ja .LL0%=\n\t"
+		"movl $0x1, %0\n\t"
+		"jmp .LL3%=\n\t"
+		".LL1%=:\n\t"
+		"cmpl $0x4,%1\n\t"
+		"jb .LL2%=\n\t"
+		"xorl %0, %0\n\t"
+		"jmp .LL3%=\n\t"
+		".LL2%=:\n\t"
+		"negl %1\n\t"
+		"lea 0x20(,%1,8), %1\n\t"
+		"shll %b1, %0\n\t"
+		"sete %b0\n\t"
+		"movzbl %b0, %0\n\t"
+		".LL3%=:\n"
+		: "=&a"(ret),
+		  "+c"(len),
+		  "+r"(ptr)
+		: "r"(delta)
+		: "cc");
+	return ret;
+}
+
+#ifdef HAVE_VALGRIND
+ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+{
+	size_t len = ZSTR_LEN(s1);
+	char *ptr1 = ZSTR_VAL(s1);
+	char *ptr2 = ZSTR_VAL(s2);
+	zend_ulong ret;
+
+	__asm__ (
+		"test %1, %1\n\t"
+		"jnz .LL1%=\n\t"
+		"movl $0x1, %0\n\t"
+		"jmp .LL2%=\n\t"
+		".LL1%=:\n\t"
+		"cld\n\t"
+		"rep\n\t"
+		"cmpsb\n\t"
+		"sete %b0\n\t"
+		"movzbl %b0, %0\n\t"
+		".LL2%=:\n"
+		: "=a"(ret),
+		  "+c"(len),
+		  "+D"(ptr1),
+		  "+S"(ptr2)
+		:
+		: "cc");
+	return ret;
+}
+#endif
+
+#elif defined(__GNUC__) && defined(__x86_64__)
+ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2)
+{
+	char *ptr = ZSTR_VAL(s1);
+	size_t delta = (char*)s2 - (char*)s1;
+	size_t len = ZSTR_LEN(s1);
+	zend_ulong ret;
+
+	__asm__ (
+		".LL0%=:\n\t"
+		"movq (%2,%3), %0\n\t"
+		"xorq (%2), %0\n\t"
+		"jne .LL1%=\n\t"
+		"addq $0x8, %2\n\t"
+		"subq $0x8, %1\n\t"
+		"ja .LL0%=\n\t"
+		"movq $0x1, %0\n\t"
+		"jmp .LL3%=\n\t"
+		".LL1%=:\n\t"
+		"cmpq $0x8,%1\n\t"
+		"jb .LL2%=\n\t"
+		"xorq %0, %0\n\t"
+		"jmp .LL3%=\n\t"
+		".LL2%=:\n\t"
+		"negq %1\n\t"
+		"lea 0x40(,%1,8), %1\n\t"
+		"shlq %b1, %0\n\t"
+		"sete %b0\n\t"
+		"movzbq %b0, %0\n\t"
+		".LL3%=:\n"
+		: "=&a"(ret),
+		  "+c"(len),
+		  "+r"(ptr)
+		: "r"(delta)
+		: "cc");
+	return ret;
+}
+
+#ifdef HAVE_VALGRIND
+ZEND_API zend_bool ZEND_FASTCALL I_WRAP_SONAME_FNNAME_ZU(NONE,zend_string_equal_val)(zend_string *s1, zend_string *s2)
+{
+	size_t len = ZSTR_LEN(s1);
+	char *ptr1 = ZSTR_VAL(s1);
+	char *ptr2 = ZSTR_VAL(s2);
+	zend_ulong ret;
+
+	__asm__ (
+		"test %1, %1\n\t"
+		"jnz .LL1%=\n\t"
+		"movq $0x1, %0\n\t"
+		"jmp .LL2%=\n\t"
+		".LL1%=:\n\t"
+		"cld\n\t"
+		"rep\n\t"
+		"cmpsb\n\t"
+		"sete %b0\n\t"
+		"movzbq %b0, %0\n\t"
+		".LL2%=:\n"
+		: "=a"(ret),
+		  "+c"(len),
+		  "+D"(ptr1),
+		  "+S"(ptr2)
+		:
+		: "cc");
+	return ret;
+}
+#endif
+
+#endif
 
 /*
  * Local variables:

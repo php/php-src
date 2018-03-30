@@ -39,7 +39,7 @@ var_dump( array_flip($input) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_flip() : 'input' array with repeatitive keys/values ***
 array(3) {
   ["VaLuE"]=>

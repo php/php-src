@@ -100,7 +100,7 @@ foreach($inputs as $key => $input) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_change_key_case() : usage variations ***
 
 -- Iteration 1 : int data --

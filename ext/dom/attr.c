@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,7 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMAttr::__construct(string name, [string value]) */
+/* {{{ proto DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
 	zval *id = getThis();
@@ -220,7 +220,7 @@ int dom_attr_schema_type_info_read(dom_object *obj, zval *retval)
 
 /* }}} */
 
-/* {{{ proto boolean dom_attr_is_id()
+/* {{{ proto bool dom_attr_is_id()
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Attr-isId
 Since: DOM Level 3
 */

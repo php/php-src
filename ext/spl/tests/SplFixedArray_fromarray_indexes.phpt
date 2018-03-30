@@ -16,7 +16,7 @@ object(SplFixedArray)#1 (4) {
   [1]=>
   int(1)
   [2]=>
-  %string|unicode%(1) "2"
+  string(1) "2"
   [3]=>
   bool(false)
 }

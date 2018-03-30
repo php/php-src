@@ -23,7 +23,7 @@ var_dump($ao1->ksort());
 var_dump($ao1, $c);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::ksort() : basic functionality ***
 bool(true)
 object(ArrayObject)#2 (1) {

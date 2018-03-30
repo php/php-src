@@ -30,7 +30,7 @@ var_dump( array_slice($input, $offset) );
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : basic functionality ***
 
 -- All arguments --

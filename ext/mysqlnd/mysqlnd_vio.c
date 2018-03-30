@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -514,6 +514,7 @@ MYSQLND_METHOD(mysqlnd_vio, enable_ssl)(MYSQLND_VIO * const net)
 		zval cafile_zval;
 		ZVAL_STRING(&cafile_zval, net->data->options.ssl_ca);
 		php_stream_context_set_option(context, "ssl", "cafile", &cafile_zval);
+		zval_ptr_dtor(&cafile_zval);
 		any_flag = TRUE;
 	}
 	if (net->data->options.ssl_capath) {
@@ -692,7 +693,6 @@ MYSQLND_METHOD(mysqlnd_vio, dtor)(MYSQLND_VIO * const vio, MYSQLND_STATS * const
 		vio->data->m.free_contents(vio);
 		vio->data->m.close_stream(vio, stats, error_info);
 
-		mnd_pefree(vio->data, vio->data->persistent);
 		mnd_pefree(vio, vio->persistent);
 	}
 	DBG_VOID_RETURN;

@@ -25,7 +25,7 @@ foreach ($values as $value){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_keys() on all the types other than arrays ***
 array(0) {
 }

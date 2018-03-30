@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -880,9 +880,11 @@ PHP_FUNCTION(mysqli_stmt_execute)
 			}
 			for (j = i + 1; j < stmt->param.var_cnt; j++) {
 				/* Oops, someone binding the same variable - clone */
-				if (Z_TYPE(stmt->param.vars[j]) == Z_TYPE(stmt->param.vars[i]) &&
+				if (Z_ISREF(stmt->param.vars[j]) &&
 					   	Z_REFVAL(stmt->param.vars[j]) == Z_REFVAL(stmt->param.vars[i])) {
-					SEPARATE_ZVAL(&stmt->param.vars[j]);
+					/*SEPARATE_ZVAL(&stmt->param.vars[j]);*/
+					Z_DELREF_P(&stmt->param.vars[j]);
+					ZVAL_COPY(&stmt->param.vars[j], Z_REFVAL(stmt->param.vars[j]));
 					break;
 				}
 			}
@@ -1179,7 +1181,7 @@ static void php_add_field_properties(zval *value, const MYSQL_FIELD *field)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_field (object result)
+/* {{{ proto mixed mysqli_fetch_field(object result)
    Get column information from a result and return as an object */
 PHP_FUNCTION(mysqli_fetch_field)
 {
@@ -1202,7 +1204,7 @@ PHP_FUNCTION(mysqli_fetch_field)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_fields (object result)
+/* {{{ proto mixed mysqli_fetch_fields(object result)
    Return array of objects containing field meta-data */
 PHP_FUNCTION(mysqli_fetch_fields)
 {
@@ -1232,7 +1234,7 @@ PHP_FUNCTION(mysqli_fetch_fields)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_field_direct (object result, int offset)
+/* {{{ proto mixed mysqli_fetch_field_direct(object result, int offset)
    Fetch meta-data for a single field */
 PHP_FUNCTION(mysqli_fetch_field_direct)
 {
@@ -1261,7 +1263,7 @@ PHP_FUNCTION(mysqli_fetch_field_direct)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_lengths (object result)
+/* {{{ proto mixed mysqli_fetch_lengths(object result)
    Get the length of each output in a result */
 PHP_FUNCTION(mysqli_fetch_lengths)
 {
@@ -1293,7 +1295,7 @@ PHP_FUNCTION(mysqli_fetch_lengths)
 }
 /* }}} */
 
-/* {{{ proto array mysqli_fetch_row (object result)
+/* {{{ proto array mysqli_fetch_row(object result)
    Get a result row as an enumerated array */
 PHP_FUNCTION(mysqli_fetch_row)
 {
@@ -1394,7 +1396,7 @@ PHP_FUNCTION(mysqli_get_client_version)
 }
 /* }}} */
 
-/* {{{ proto string mysqli_get_host_info (object link)
+/* {{{ proto string mysqli_get_host_info(object link)
    Get MySQL host info */
 PHP_FUNCTION(mysqli_get_host_info)
 {
@@ -1870,6 +1872,9 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(sqlstate, mysql->mysql->net.sqlstate, SQLSTATE_LENGTH+1);
 #else
 			MYSQLND_ERROR_INFO error_info = *mysql->mysql->data->error_info;
+			mysql->mysql->data->error_info->error_list.head = NULL;
+			mysql->mysql->data->error_info->error_list.tail = NULL;
+			mysql->mysql->data->error_info->error_list.count = 0;
 #endif
 			mysqli_stmt_close(stmt->stmt, FALSE);
 			stmt->stmt = NULL;
@@ -1880,6 +1885,7 @@ PHP_FUNCTION(mysqli_prepare)
 			memcpy(mysql->mysql->net.last_error, last_error, MYSQL_ERRMSG_SIZE);
 			memcpy(mysql->mysql->net.sqlstate, sqlstate, SQLSTATE_LENGTH+1);
 #else
+			zend_llist_clean(&mysql->mysql->data->error_info->error_list);
 			*mysql->mysql->data->error_info = error_info;
 #endif
 		}
@@ -2293,7 +2299,7 @@ PHP_FUNCTION(mysqli_stat)
 
 /* }}} */
 
-/* {{{ proto bool mysqli_refresh(object link, long options)
+/* {{{ proto bool mysqli_refresh(object link, int options)
    Flush tables or caches, or reset replication server information */
 PHP_FUNCTION(mysqli_refresh)
 {
@@ -2313,7 +2319,7 @@ PHP_FUNCTION(mysqli_refresh)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_stmt_attr_set(object stmt, long attr, long mode)
+/* {{{ proto int mysqli_stmt_attr_set(object stmt, int attr, int mode)
 */
 PHP_FUNCTION(mysqli_stmt_attr_set)
 {
@@ -2360,7 +2366,7 @@ PHP_FUNCTION(mysqli_stmt_attr_set)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_stmt_attr_get(object stmt, long attr)
+/* {{{ proto int mysqli_stmt_attr_get(object stmt, int attr)
 */
 PHP_FUNCTION(mysqli_stmt_attr_get)
 {
@@ -2663,7 +2669,7 @@ PHP_FUNCTION(mysqli_use_result)
 }
 /* }}} */
 
-/* {{{ proto int mysqli_warning_count (object link)
+/* {{{ proto int mysqli_warning_count(object link)
    Return number of warnings from the last query for the given link */
 PHP_FUNCTION(mysqli_warning_count)
 {

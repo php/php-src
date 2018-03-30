@@ -11,7 +11,7 @@ $x->finfo();
 echo "done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 done!
 
 

@@ -247,6 +247,52 @@ PHP_FUNCTION( normalizer_is_normalized )
 }
 /* }}} */
 
+/* {{{ proto string|null Normalizer::getRawDecomposition( string $input )
+ * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
+/* {{{ proto string|null normalizer_get_raw_decomposition( string $input )
+ * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
+ */
+PHP_FUNCTION( normalizer_get_raw_decomposition )
+{
+	char* input = NULL;
+	size_t input_length = 0;
+
+	UChar32 codepoint = -1;
+	int32_t offset = 0;
+
+    UErrorCode status = U_ZERO_ERROR;
+    const UNormalizer2 *nfkc = unorm2_getNFKCInstance(&status);
+    UChar decomposition[32];
+    int32_t decomposition_length;
+
+	intl_error_reset(NULL);
+
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_length) == FAILURE)) {
+		return;
+	}
+
+	U8_NEXT(input, offset, input_length, codepoint);
+	if ((size_t)offset != input_length) {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Input string must be exactly one UTF-8 encoded code point long.", 0);
+		return;
+	}
+
+	if ((codepoint < UCHAR_MIN_VALUE) || (codepoint > UCHAR_MAX_VALUE)) {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
+		return;
+	}
+	
+	decomposition_length = unorm2_getRawDecomposition(nfkc, codepoint, decomposition, 32, &status);
+	if (decomposition_length == -1) {
+		RETURN_NULL();
+	}
+
+	RETVAL_NEW_STR(intl_convert_utf16_to_utf8(decomposition, decomposition_length, &status));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -204,14 +204,15 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				default:
 					{
 						zend_string *ekey;
-						zend_string *tmp = zval_get_string(zdata);
+						zend_string *tmp;
+						zend_string *str= zval_get_tmp_string(zdata, &tmp);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+							ekey = php_raw_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
 						} else {
-							ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+							ekey = php_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
 						}
 						smart_str_append(formstr, ekey);
-						zend_string_release(tmp);
+						zend_tmp_string_release(tmp);
 						zend_string_free(ekey);
 					}
 			}

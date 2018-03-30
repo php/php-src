@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -848,7 +848,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixconcat, 0)
 	ZEND_ARG_INFO(0, m2)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagesetinterpolation, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
@@ -863,7 +863,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ gd_functions[]
  */
-const zend_function_entry gd_functions[] = {
+static const zend_function_entry gd_functions[] = {
 	PHP_FE(gd_info,                                 arginfo_gd_info)
 	PHP_FE(imagearc,								arginfo_imagearc)
 	PHP_FE(imageellipse,							arginfo_imageellipse)
@@ -3911,7 +3911,7 @@ PHP_FUNCTION(imagesetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	zend_long x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll", &im_zval, &x1, &y1, &x2, &y2) == FAILURE) {
 		return;
 	}
@@ -3932,7 +3932,7 @@ PHP_FUNCTION(imagegetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	int x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &im_zval) == FAILURE) {
 		return;
 	}
@@ -3942,7 +3942,7 @@ PHP_FUNCTION(imagegetclip)
 	}
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
-	
+
 	array_init(return_value);
 	add_next_index_long(return_value, x1);
 	add_next_index_long(return_value, y1);
@@ -4088,7 +4088,7 @@ PHP_FUNCTION(image2wbmp)
 /* }}} */
 
 #if defined(HAVE_GD_JPG)
-/* {{{ proto bool jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool jpeg2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
 {
@@ -4098,7 +4098,7 @@ PHP_FUNCTION(jpeg2wbmp)
 #endif
 
 #if defined(HAVE_GD_PNG)
-/* {{{ proto bool png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool png2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
 {
@@ -4831,7 +4831,7 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_w <= 0) {
+	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
 		RETURN_FALSE;
 	}
 

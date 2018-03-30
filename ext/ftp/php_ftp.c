@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -142,7 +142,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_nb_fget, 0, 0, 3)
 	ZEND_ARG_INFO(0, resumepos)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_pasv, 0, 0, 1)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_ftp_pasv, 0, 0, 2)
 	ZEND_ARG_INFO(0, ftp)
 	ZEND_ARG_INFO(0, pasv)
 ZEND_END_ARG_INFO()
@@ -249,7 +249,7 @@ ZEND_END_ARG_INFO()
 
 /* }}} */
 
-const zend_function_entry php_ftp_functions[] = {
+static const zend_function_entry php_ftp_functions[] = {
 	PHP_FE(ftp_connect,			arginfo_ftp_connect)
 #ifdef HAVE_FTP_SSL
 	PHP_FE(ftp_ssl_connect,		arginfo_ftp_ssl_connect)
@@ -1543,7 +1543,7 @@ PHP_FUNCTION(ftp_set_option)
 	switch (option) {
 		case PHP_FTP_OPT_TIMEOUT_SEC:
 			if (Z_TYPE_P(z_value) != IS_LONG) {
-				php_error_docref(NULL, E_WARNING, "Option TIMEOUT_SEC expects value of type long, %s given",
+				php_error_docref(NULL, E_WARNING, "Option TIMEOUT_SEC expects value of type int, %s given",
 					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
@@ -1556,7 +1556,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_AUTOSEEK:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option AUTOSEEK expects value of type boolean, %s given",
+				php_error_docref(NULL, E_WARNING, "Option AUTOSEEK expects value of type bool, %s given",
 					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}
@@ -1565,7 +1565,7 @@ PHP_FUNCTION(ftp_set_option)
 			break;
 		case PHP_FTP_OPT_USEPASVADDRESS:
 			if (Z_TYPE_P(z_value) != IS_TRUE && Z_TYPE_P(z_value) != IS_FALSE) {
-				php_error_docref(NULL, E_WARNING, "Option USEPASVADDRESS expects value of type boolean, %s given",
+				php_error_docref(NULL, E_WARNING, "Option USEPASVADDRESS expects value of type bool, %s given",
 					zend_zval_type_name(z_value));
 				RETURN_FALSE;
 			}

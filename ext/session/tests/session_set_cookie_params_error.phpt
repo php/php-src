@@ -268,10 +268,10 @@ bool(true)
 bool(true)
 bool(true)
 
-Warning: session_set_cookie_params() expects parameter 4 to be boolean, object given in %s on line 84
+Warning: session_set_cookie_params() expects parameter 4 to be bool, object given in %s on line 84
 NULL
 
-Warning: session_set_cookie_params() expects parameter 5 to be boolean, object given in %s on line 85
+Warning: session_set_cookie_params() expects parameter 5 to be bool, object given in %s on line 85
 NULL
 bool(true)
 
@@ -300,10 +300,10 @@ NULL
 Warning: session_set_cookie_params() expects parameter 3 to be string, resource given in %s on line 83
 NULL
 
-Warning: session_set_cookie_params() expects parameter 4 to be boolean, resource given in %s on line 84
+Warning: session_set_cookie_params() expects parameter 4 to be bool, resource given in %s on line 84
 NULL
 
-Warning: session_set_cookie_params() expects parameter 5 to be boolean, resource given in %s on line 85
+Warning: session_set_cookie_params() expects parameter 5 to be bool, resource given in %s on line 85
 NULL
 bool(true)
 Done

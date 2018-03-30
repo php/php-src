@@ -37,7 +37,7 @@ echo "Text has child nodes: ";
 var_dump($text->hasChildNodes());
 
 ?>
---EXPECTF--
+--EXPECT--
 Root has child nodes: bool(true)
 Title has child nodes: bool(true)
 Text has child nodes: bool(false)

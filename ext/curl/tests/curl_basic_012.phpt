@@ -32,7 +32,7 @@ TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>
   var_dump( $curl_content );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl with HTTP/1.0 ***
 string(8) "HTTP/1.0"
 ===DONE===

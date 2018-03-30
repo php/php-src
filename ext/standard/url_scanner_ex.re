@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -87,13 +87,17 @@ static int php_ini_on_update_tags(zend_ini_entry *entry, zend_string *new_value,
 		if (val) {
 			char *q;
 			size_t keylen;
+			zend_string *str;
 
 			*val++ = '\0';
 			for (q = key; *q; q++) {
 				*q = tolower(*q);
 			}
 			keylen = q - key;
-			zend_hash_str_add_mem(ctx->tags, key, keylen, val, strlen(val)+1);
+			str = zend_string_init(key, keylen, 1);
+			GC_MAKE_PERSISTENT_LOCAL(str);
+			zend_hash_add_mem(ctx->tags, str, val, strlen(val)+1);
+			zend_string_release(str);
 		}
 	}
 
@@ -900,7 +904,7 @@ static inline int php_url_scanner_reset_var_impl(zend_string *name, int encode, 
 		php_url_scanner_reset_vars_impl(type);
 		goto finish;
 	}
-	/* Check preceeding separator */
+	/* Check preceding separator */
 	if (!sep_removed
 		&& (size_t)(start - PG(arg_separator).output) >= separator_len
 		&& !memcmp(start - separator_len, PG(arg_separator).output, separator_len)) {

@@ -8,6 +8,6 @@ abstract class TestClass
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 
 ===DONE===

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -232,6 +232,11 @@ ZEND_API size_t zend_spprintf(char **message, size_t max_len, const char *format
 ZEND_API zend_string *zend_vstrpprintf(size_t max_len, const char *format, va_list ap);
 ZEND_API zend_string *zend_strpprintf(size_t max_len, const char *format, ...) ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
+/* Same as zend_spprintf and zend_strpprintf, without checking of format validity.
+ * For use with custom printf specifiers such as %H. */
+ZEND_API size_t zend_spprintf_unchecked(char **message, size_t max_len, const char *format, ...);
+ZEND_API zend_string *zend_strpprintf_unchecked(size_t max_len, const char *format, ...);
+
 ZEND_API char *get_zend_version(void);
 ZEND_API int zend_make_printable_zval(zval *expr, zval *expr_copy);
 ZEND_API size_t zend_print_zval(zval *expr, int indent);
@@ -308,7 +313,6 @@ END_EXTERN_C()
 
 typedef enum {
 	EH_NORMAL = 0,
-	EH_SUPPRESS,
 	EH_THROW
 } zend_error_handling_t;
 

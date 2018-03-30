@@ -19,12 +19,7 @@ if (!$socket) {
 	die("could not start/bind the ftp server\n");
 }
 
-
-
-
 $pid = pcntl_fork();
-
-
 
 function pasv_listen($action){
 	global $pasv_port, $tmp_file;
@@ -55,8 +50,6 @@ function pasv_listen($action){
 		exit;
 	}
 }
-
-
 
 if ($pid) {
 
@@ -461,11 +454,13 @@ if ($pid) {
 		} elseif (preg_match('/^SITE CHMOD/', $buf, $matches)) {
 			fputs($s, "200 OK\r\n");
 
+		} elseif (preg_match('/^DELE/', $buf, $matches)) {
+			fputs($s, "250 OK\r\n");
+
 		} elseif (preg_match('/^ALLO (\d+)/', $buf, $matches)) {
 			fputs($s, "200 " . $matches[1] . " bytes allocated\r\n");
 
 		}elseif (preg_match('/^LIST www\//', $buf, $matches)) {
-			fputs($s, "150 Opening ASCII mode data connection for file list\r\n");
 			fputs($s, "226 Transfer complete\r\n");
 
 		}elseif (preg_match('/^LIST no_exists\//', $buf, $matches)) {
@@ -524,8 +519,9 @@ if ($pid) {
 
 			fputs($s, "226 Closing data Connection.\r\n");
 			fclose($fs);
-		}else {
+		}elseif (preg_match("/^SITE/", $buf)) {
 			fputs($s, "500 Syntax error, command unrecognized.\r\n");
+		}else {
 			dump_and_exit($buf);
 		}
 	}

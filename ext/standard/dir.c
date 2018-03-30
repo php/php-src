@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -493,7 +493,9 @@ PHP_FUNCTION(glob)
 
 	/* now catch the FreeBSD style of "no matches" */
 	if (!globbuf.gl_pathc || !globbuf.gl_pathv) {
+#ifdef GLOB_NOMATCH
 no_results:
+#endif
 #ifndef PHP_WIN32
 		/* Paths containing '*', '?' and some other chars are
 		illegal on Windows but legit on other platforms. For

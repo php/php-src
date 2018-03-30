@@ -65,7 +65,7 @@ $dir_path = dirname(__FILE__);
 rmdir("$dir_path/level_one/level_two");
 rmdir("$dir_path/level_one");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing scandir() : usage variations ***
 
 -- $path = './level_one': --

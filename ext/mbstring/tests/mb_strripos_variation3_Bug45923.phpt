@@ -165,32 +165,32 @@ int(8)
 
 -- Iteration 16 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 17 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 18 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 19 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 20 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, string given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 -- Iteration 21 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, object given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, object given in %s on line %d
 NULL
 
 -- Iteration 22 --
@@ -201,7 +201,7 @@ int(8)
 
 -- Iteration 24 --
 
-Warning: mb_strripos() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: mb_strripos() expects parameter 3 to be int, resource given in %s on line %d
 NULL
 Done
 

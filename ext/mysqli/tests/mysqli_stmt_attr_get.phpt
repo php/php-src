@@ -53,8 +53,8 @@ require_once('skipifconnectfailure.inc');
 	$stmt->close();
 
 	foreach ($valid_attr as $k => $attr) {
-		if (!is_null($tmp = @mysqli_stmt_attr_get($stmt, $attr))) {
-			printf("[007] Expecting NULL/NULL, got %s/%s for attribute %s/%s\n",
+		if (false !== ($tmp = @mysqli_stmt_attr_get($stmt, $attr))) {
+			printf("[007] Expecting false, got %s/%s for attribute %s/%s\n",
 				gettype($tmp), $tmp, $k, $attr);
 		}
 	}
@@ -66,5 +66,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

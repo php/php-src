@@ -65,5 +65,5 @@ bool(true)
 bool(false)
 
 Warning: mysqli_set_opt(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

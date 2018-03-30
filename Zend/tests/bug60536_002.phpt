@@ -2,7 +2,6 @@
 The same rules are applied for properties that are defined in the class hierarchy. Thus, if the properties are compatible, a notice is issued, if not a fatal error occures. (relevant with #60536)
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class Base {
   private $hello;    

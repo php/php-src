@@ -64,7 +64,7 @@ echo "Done\n";
 $file_path = dirname(__FILE__);
 unlink("$file_path/readfile_variation2.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readfile() on soft link ***
 bool(true)
 line

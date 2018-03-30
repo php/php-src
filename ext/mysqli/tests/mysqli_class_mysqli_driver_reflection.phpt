@@ -5,8 +5,6 @@ Interface of the class mysqli_driver - Reflection
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
-if (($tmp = substr(PHP_VERSION, 0, strpos(PHP_VERSION, '.'))) && ($tmp < 5))
-	die("skip Reflection not available before PHP 5 (found PHP $tmp)");
 
 /*
 Let's not deal with cross-version issues in the EXPECTF/UEXPECTF.

@@ -1,7 +1,7 @@
-/*
+﻿/*
  *    PHP Sendmail for Windows.
  *
- *  This file is rewriten specificly for PHPFI.  Some functionality
+ *  This file is rewritten specificly for PHPFI.  Some functionality
  *  has been removed (MIME and file attachments).  This code was
  *  modified from code based on code written by Jarle Aase.
  *
@@ -36,10 +36,7 @@
 
 #include "php_win32_globals.h"
 
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
 #include "ext/pcre/php_pcre.h"
-#endif
-
 #include "ext/standard/php_string.h"
 #include "ext/date/php_date.h"
 
@@ -130,9 +127,6 @@ static char *ErrorMessages[] =
  */
 static zend_string *php_win32_mail_trim_header(char *header)
 {
-
-#if HAVE_PCRE || HAVE_BUNDLED_PCRE
-
 	zend_string *result, *result2;
 	zend_string *replace;
 	zend_string *regex;
@@ -145,7 +139,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_UNIFY_PATTERN, sizeof(PHP_WIN32_MAIL_UNIFY_PATTERN)-1, 0);
 
 	result = php_pcre_replace(regex,
-				  NULL, header, (int)strlen(header),
+				  NULL, header, strlen(header),
 				  replace,
 				  -1,
 				  NULL);
@@ -161,7 +155,7 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	regex = zend_string_init(PHP_WIN32_MAIL_RMVDBL_PATTERN, sizeof(PHP_WIN32_MAIL_RMVDBL_PATTERN)-1, 0);
 
 	result2 = php_pcre_replace(regex,
-				   result, ZSTR_VAL(result), (int)ZSTR_LEN(result),
+				   result, ZSTR_VAL(result), ZSTR_LEN(result),
 				   replace,
 				  -1,
 				  NULL);
@@ -170,10 +164,6 @@ static zend_string *php_win32_mail_trim_header(char *header)
 	zend_string_release(result);
 
 	return result2;
-#else
-	/* In case we don't have PCRE support (for whatever reason...) simply do nothing and return the unmodified header */
-	return zend_string_init(header, strlen(header), 0);
-#endif
 }
 
 /*********************************************************************
@@ -220,6 +210,9 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		/* Create a lowercased header for all the searches so we're finally case
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
+		if (headers_lc == headers_trim) {
+			zend_string_release(headers_lc);
+		}
 	}
 
 	/* Fall back to sendmail_from php.ini setting */

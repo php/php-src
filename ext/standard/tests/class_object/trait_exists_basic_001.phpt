@@ -33,7 +33,7 @@ var_dump( trait_exists('MyTrait') );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing trait_exists() : basic functionality ***
 Calling trait_exists() on non-existent trait with autoload explicitly enabled:
 In autoload(C)

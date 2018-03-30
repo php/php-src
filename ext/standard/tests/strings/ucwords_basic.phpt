@@ -41,7 +41,7 @@ for($index = 0; $index < count($str_array); $index++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ucwords() : basic functionality ***
 -- Iteration 1 --
 string(15) "Testing Ucwords"

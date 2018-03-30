@@ -35,7 +35,7 @@ TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
   }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl_exec() : basic functionality ***
 string(25) "Hello World!
 Hello World!"

@@ -45,7 +45,7 @@ echo "Done\n";
 Warning: shm_get_var() expects exactly 2 parameters, 0 given in %s005.php on line %d
 NULL
 
-Warning: shm_get_var() expects parameter 1 to be resource, integer given in %s005.php on line %d
+Warning: shm_get_var() expects parameter 1 to be resource, int given in %s005.php on line %d
 NULL
 
 Warning: shm_get_var(): variable key 1000 doesn't exist in %s005.php on line %d
@@ -54,7 +54,7 @@ bool(false)
 Warning: shm_get_var(): variable key -10000 doesn't exist in %s005.php on line %d
 bool(false)
 
-Warning: shm_get_var() expects parameter 2 to be integer, array given in %s005.php on line %d
+Warning: shm_get_var() expects parameter 2 to be int, array given in %s005.php on line %d
 NULL
 string(11) "test string"
 object(stdClass)#%d (0) {

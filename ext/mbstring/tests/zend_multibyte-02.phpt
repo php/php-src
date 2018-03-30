@@ -1,5 +1,7 @@
 --TEST--
 zend multibyte (2)
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --INI--
 error_reporting=E_ALL & ~E_DEPRECATED
 zend.multibyte=On
@@ -9,5 +11,5 @@ mbstring.internal_encoding=CP932
 <?php
 var_dump(bin2hex("テスト"));
 ?>
---EXPECTF--
+--EXPECT--
 string(12) "836583588367"

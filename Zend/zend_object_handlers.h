@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -115,7 +115,8 @@ typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
 typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2);
 
-/* Cast an object to some other type
+/* Cast an object to some other type.
+ * readobj and retval must point to distinct zvals.
  */
 typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type);
 
@@ -164,7 +165,7 @@ struct _zend_object_handlers {
 };
 
 BEGIN_EXTERN_C()
-extern ZEND_API zend_object_handlers std_object_handlers;
+extern const ZEND_API zend_object_handlers std_object_handlers;
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)

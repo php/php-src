@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -121,14 +121,6 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
 /* See http://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
-		fflush(stderr);
-#endif
-		DL_UNLOAD(handle);
-		return FAILURE;
-	} else if (zend_get_extension(new_extension->name)) {
-		fprintf(stderr, "Cannot load %s - extension already loaded\n", new_extension->name);
-/* See http://support.microsoft.com/kb/190351 */
-#ifdef PHP_WIN32
 		fflush(stderr);
 #endif
 		DL_UNLOAD(handle);

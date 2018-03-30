@@ -34,7 +34,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fprintf() for hexadecimals ***
 
 0

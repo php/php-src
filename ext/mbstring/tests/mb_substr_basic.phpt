@@ -40,7 +40,7 @@ var_dump(base64_encode($result_2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_substr() : basic functionality ***
 
 -- ASCII string 1 --

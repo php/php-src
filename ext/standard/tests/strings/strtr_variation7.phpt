@@ -58,7 +58,7 @@ $to_arr =  array (
 		  TRUE,
 		  FALSE,
 		
-		  // null vlaues
+		  // null values
 /*14*/	  NULL,
 		  null,
 		

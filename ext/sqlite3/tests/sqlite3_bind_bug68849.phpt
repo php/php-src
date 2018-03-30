@@ -35,7 +35,7 @@ var_dump($r->fetchArray(SQLITE3_ASSOC));
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 array(3) {
   ["a"]=>
   int(1)

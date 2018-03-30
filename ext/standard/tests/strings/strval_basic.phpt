@@ -47,7 +47,7 @@ foreach($values as $value) {
 };
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strval() : basic variations ***
 
 -- Iteration 1 --

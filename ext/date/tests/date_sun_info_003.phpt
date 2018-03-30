@@ -19,7 +19,7 @@ foreach ($sun_info as $key => $elem ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 sunrise: 21:00:00
 sunset: 21:00:00
 transit: 10:03:48

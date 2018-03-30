@@ -33,7 +33,7 @@ for ($cs=-1; $cs<10; $cs++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 
 ----( chunk_size: -1, output append size: 1 )----
 f[call:1; len:8]12345678

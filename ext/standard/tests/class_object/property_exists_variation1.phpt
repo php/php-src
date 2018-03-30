@@ -22,7 +22,7 @@ var_dump(property_exists("AutoTest", "foo"));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing property_exists() : class auto loading ***
 
 testing property in autoloaded class

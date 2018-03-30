@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -468,7 +468,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ imap_functions[]
  */
-const zend_function_entry imap_functions[] = {
+static const zend_function_entry imap_functions[] = {
 	PHP_FE(imap_open,								arginfo_imap_open)
 	PHP_FE(imap_reopen,								arginfo_imap_reopen)
 	PHP_FE(imap_close,								arginfo_imap_close)
@@ -1312,18 +1312,18 @@ PHP_FUNCTION(imap_append)
 	zend_string *folder, *message, *internal_date = NULL, *flags = NULL;
 	pils *imap_le_struct;
 	STRING st;
-	zend_string* regex;
-	pcre_cache_entry *pce;				/* Compiled regex */
-	zval *subpats = NULL;				/* Parts (not used) */
-	int global = 0;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rSS|SS", &streamind, &folder, &message, &flags, &internal_date) == FAILURE) {
 		return;
 	}
 
-	regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
 
 	if (internal_date) {
+		zend_string *regex  = zend_string_init("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/", sizeof("/[0-3][0-9]-((Jan)|(Feb)|(Mar)|(Apr)|(May)|(Jun)|(Jul)|(Aug)|(Sep)|(Oct)|(Nov)|(Dec))-[0-9]{4} [0-2][0-9]:[0-5][0-9]:[0-5][0-9] [+-][0-9]{4}/") - 1, 0);
+		pcre_cache_entry *pce;				/* Compiled regex */
+		zval *subpats = NULL;				/* Parts (not used) */
+		int global = 0;
+
 		/* Make sure the given internal_date string matches the RFC specifiedformat */
 		if ((pce = pcre_get_compiled_regex_cache(regex))== NULL) {
 			zend_string_free(regex);
@@ -1340,7 +1340,6 @@ PHP_FUNCTION(imap_append)
 		}
 	}
 
-	zend_string_free(regex);
 	if ((imap_le_struct = (pils *)zend_fetch_resource(Z_RES_P(streamind), "imap", le_imap)) == NULL) {
 		RETURN_FALSE;
 	}
@@ -3609,12 +3608,10 @@ PHP_FUNCTION(imap_mail_compose)
 			topbod = bod;
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->type = (short) Z_LVAL_P(pvalue);
+				bod->type = (short) zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->encoding = (short) Z_LVAL_P(pvalue);
+				bod->encoding = (short) zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
@@ -3682,12 +3679,10 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->size.lines = Z_LVAL_P(pvalue);
+				bod->size.lines = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->size.bytes = Z_LVAL_P(pvalue);
+				bod->size.bytes = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
@@ -3696,8 +3691,7 @@ PHP_FUNCTION(imap_mail_compose)
 		} else if (Z_TYPE_P(data) == IS_ARRAY) {
 			short type = -1;
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "type", sizeof("type") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				type = (short) Z_LVAL_P(pvalue);
+				type = (short) zval_get_long(pvalue);
 			}
 
 			if (!toppart) {
@@ -3716,8 +3710,7 @@ PHP_FUNCTION(imap_mail_compose)
 			}
 
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "encoding", sizeof("encoding") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->encoding = (short) Z_LVAL_P(pvalue);
+				bod->encoding = (short) zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "charset", sizeof("charset") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);
@@ -3786,12 +3779,10 @@ PHP_FUNCTION(imap_mail_compose)
 				bod->contents.text.size = 0;
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "lines", sizeof("lines") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->size.lines = Z_LVAL_P(pvalue);
+				bod->size.lines = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "bytes", sizeof("bytes") - 1)) != NULL) {
-				convert_to_long_ex(pvalue);
-				bod->size.bytes = Z_LVAL_P(pvalue);
+				bod->size.bytes = zval_get_long(pvalue);
 			}
 			if ((pvalue = zend_hash_str_find(Z_ARRVAL_P(data), "md5", sizeof("md5") - 1)) != NULL) {
 				convert_to_string_ex(pvalue);

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -334,13 +334,12 @@ ZEND_METHOD(exception, __wakeup)
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
-	char  *message = NULL, *filename = NULL;
+	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	zval   tmp, *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
-	size_t message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
 		if (Z_TYPE(EX(This)) == IS_OBJECT) {
@@ -357,7 +356,7 @@ ZEND_METHOD(error_exception, __construct)
 	object = getThis();
 
 	if (message) {
-		ZVAL_STRING(&tmp, message);
+		ZVAL_STR_COPY(&tmp, message);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 		zval_ptr_dtor(&tmp);
 	}
@@ -375,7 +374,7 @@ ZEND_METHOD(error_exception, __construct)
 	zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
 	if (argc >= 4) {
-		ZVAL_STRING(&tmp, filename);
+		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
     	if (argc < 5) {
@@ -547,14 +546,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
-	file = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_FILE));
+	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "Function name is no string");
 			smart_str_appends(str, "[unknown function]");
 		} else{
 			zend_long line;
-			tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_LINE));
+			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
@@ -577,7 +576,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
 	smart_str_appendc(str, '(');
-	tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);
@@ -743,7 +742,7 @@ ZEND_METHOD(exception, __toString)
 /* }}} */
 
 /** {{{ Throwable method definition */
-const zend_function_entry zend_funcs_throwable[] = {
+static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
 	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
 	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)

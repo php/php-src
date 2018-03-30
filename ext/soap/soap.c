@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -529,7 +529,7 @@ static HashTable defEnc, defEncIndex, defEncNs;
 static void php_soap_prepare_globals()
 {
 	int i;
-	encodePtr enc;
+	const encode* enc;
 
 	zend_hash_init(&defEnc, 0, NULL, NULL, 1);
 	zend_hash_init(&defEncIndex, 0, NULL, NULL, 1);
@@ -544,15 +544,15 @@ static void php_soap_prepare_globals()
 			if (defaultEncoding[i].details.ns != NULL) {
 				char *ns_type;
 				spprintf(&ns_type, 0, "%s:%s", defaultEncoding[i].details.ns, defaultEncoding[i].details.type_str);
-				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), enc);
+				zend_hash_str_add_ptr(&defEnc, ns_type, strlen(ns_type), (void*)enc);
 				efree(ns_type);
 			} else {
-				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), enc);
+				zend_hash_str_add_ptr(&defEnc, defaultEncoding[i].details.type_str, strlen(defaultEncoding[i].details.type_str), (void*)enc);
 			}
 		}
 		/* Index everything by number */
 		if (!zend_hash_index_exists(&defEncIndex, defaultEncoding[i].details.type)) {
-			zend_hash_index_update_ptr(&defEncIndex, defaultEncoding[i].details.type, enc);
+			zend_hash_index_update_ptr(&defEncIndex, defaultEncoding[i].details.type, (void*)enc);
 		}
 		i++;
 	} while (defaultEncoding[i].details.type != END_KNOWN_TYPES);
@@ -801,7 +801,7 @@ PHP_MINFO_FUNCTION(soap)
 }
 
 
-/* {{{ proto object SoapParam::SoapParam ( mixed data, string name)
+/* {{{ proto object SoapParam::SoapParam(mixed data, string name)
    SoapParam constructor */
 PHP_METHOD(SoapParam, SoapParam)
 {
@@ -825,7 +825,7 @@ PHP_METHOD(SoapParam, SoapParam)
 /* }}} */
 
 
-/* {{{ proto object SoapHeader::SoapHeader ( string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]])
+/* {{{ proto object SoapHeader::SoapHeader(string namespace, string name [, mixed data [, bool mustUnderstand [, mixed actor]]])
    SoapHeader constructor */
 PHP_METHOD(SoapHeader, SoapHeader)
 {
@@ -867,7 +867,7 @@ PHP_METHOD(SoapHeader, SoapHeader)
 	}
 }
 
-/* {{{ proto object SoapFault::SoapFault ( string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
+/* {{{ proto object SoapFault::SoapFault(string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
    SoapFault constructor */
 PHP_METHOD(SoapFault, SoapFault)
 {
@@ -919,7 +919,7 @@ PHP_METHOD(SoapFault, SoapFault)
 /* }}} */
 
 
-/* {{{ proto object SoapFault::SoapFault ( string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
+/* {{{ proto object SoapFault::SoapFault(string faultcode, string faultstring [, string faultactor [, mixed detail [, string faultname [, mixed headerfault]]]])
    SoapFault constructor */
 PHP_METHOD(SoapFault, __toString)
 {
@@ -971,7 +971,7 @@ PHP_METHOD(SoapFault, __toString)
 }
 /* }}} */
 
-/* {{{ proto object SoapVar::SoapVar ( mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]])
+/* {{{ proto object SoapVar::SoapVar(mixed data, int encoding [, string type_name [, string type_namespace [, string node_name [, string node_namespace]]]])
    SoapVar constructor */
 PHP_METHOD(SoapVar, SoapVar)
 {
@@ -1118,7 +1118,7 @@ static HashTable* soap_create_typemap(sdlPtr sdl, HashTable *ht)
 }
 
 
-/* {{{ proto object SoapServer::SoapServer ( mixed wsdl [, array options])
+/* {{{ proto object SoapServer::SoapServer(mixed wsdl [, array options])
    SoapServer constructor */
 PHP_METHOD(SoapServer, SoapServer)
 {
@@ -1246,7 +1246,7 @@ PHP_METHOD(SoapServer, SoapServer)
 /* }}} */
 
 
-/* {{{ proto object SoapServer::setPersistence ( int mode )
+/* {{{ proto object SoapServer::setPersistence(int mode )
    Sets persistence mode of SoapServer */
 PHP_METHOD(SoapServer, setPersistence)
 {
@@ -1423,8 +1423,7 @@ PHP_METHOD(SoapServer, addFunction)
 					return;
 				}
 
-				key = zend_string_alloc(Z_STRLEN_P(tmp_function), 0);
-				zend_str_tolower_copy(ZSTR_VAL(key), Z_STRVAL_P(tmp_function), Z_STRLEN_P(tmp_function));
+				key = zend_string_tolower(Z_STR_P(tmp_function));
 
 				if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 					php_error_docref(NULL, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_P(tmp_function));
@@ -1441,8 +1440,7 @@ PHP_METHOD(SoapServer, addFunction)
 		zend_string *key;
 		zend_function *f;
 
-		key = zend_string_alloc(Z_STRLEN_P(function_name), 0);
-		zend_str_tolower_copy(ZSTR_VAL(key), Z_STRVAL_P(function_name), Z_STRLEN_P(function_name));
+		key = zend_string_tolower(Z_STR_P(function_name));
 
 		if ((f = zend_hash_find_ptr(EG(function_table), key)) == NULL) {
 			php_error_docref(NULL, E_WARNING, "Tried to add a non existent function '%s'", Z_STRVAL_P(function_name));
@@ -1495,7 +1493,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 }
 /* }}} */
 
-/* {{{ proto void SoapServer::handle ( [string soap_request])
+/* {{{ proto void SoapServer::handle([string soap_request])
    Handles a SOAP request */
 PHP_METHOD(SoapServer, handle)
 {
@@ -1515,6 +1513,7 @@ PHP_METHOD(SoapServer, handle)
 	xmlCharEncodingHandlerPtr old_encoding;
 	HashTable *old_class_map, *old_typemap;
 	int old_features;
+	zval tmp_soap;
 
 	SOAP_SERVER_BEGIN_CODE();
 
@@ -1678,8 +1677,7 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 		/* If persistent then set soap_obj from from the previous created session (if available) */
 		if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-			zval *tmp_soap;
-			zval *session_vars;
+			zval *session_vars, *tmp_soap_p;
 
 			if (PS(session_status) != php_session_active &&
 			    PS(session_status) != php_session_disabled) {
@@ -1690,16 +1688,15 @@ PHP_METHOD(SoapServer, handle)
 			session_vars = &PS(http_session_vars);
 			ZVAL_DEREF(session_vars);
 			if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-			    (tmp_soap = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
-			    Z_TYPE_P(tmp_soap) == IS_OBJECT &&
-			    Z_OBJCE_P(tmp_soap) == service->soap_class.ce) {
-				soap_obj = tmp_soap;
+			    (tmp_soap_p = zend_hash_str_find(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1)) != NULL &&
+			    Z_TYPE_P(tmp_soap_p) == IS_OBJECT &&
+			    Z_OBJCE_P(tmp_soap_p) == service->soap_class.ce) {
+				soap_obj = tmp_soap_p;
 			}
 		}
 #endif
 		/* If new session or something weird happned */
 		if (soap_obj == NULL) {
-			zval tmp_soap;
 
 			object_init_ex(&tmp_soap, service->soap_class.ce);
 
@@ -1752,13 +1749,12 @@ PHP_METHOD(SoapServer, handle)
 #if HAVE_PHP_SESSION && !defined(COMPILE_DL_SESSION)
 			/* If session then update session hash with new object */
 			if (service->soap_class.persistence == SOAP_PERSISTENCE_SESSION) {
-				zval *tmp_soap_pp;
-				zval *session_vars = &PS(http_session_vars);
+				zval *session_vars = &PS(http_session_vars), *tmp_soap_p;
 
 				ZVAL_DEREF(session_vars);
 				if (Z_TYPE_P(session_vars) == IS_ARRAY &&
-				    (tmp_soap_pp = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
-					soap_obj = tmp_soap_pp;
+				    (tmp_soap_p = zend_hash_str_update(Z_ARRVAL_P(session_vars), "_bogus_session_name", sizeof("_bogus_session_name")-1, &tmp_soap)) != NULL) {
+					soap_obj = tmp_soap_p;
 				} else {
 					soap_obj = &tmp_soap;
 				}
@@ -2043,8 +2039,7 @@ PHP_METHOD(SoapServer, addSoapHeader)
 	*p = emalloc(sizeof(soapHeader));
 	memset(*p, 0, sizeof(soapHeader));
 	ZVAL_NULL(&(*p)->function_name);
-	(*p)->retval = *fault;
-	zval_copy_ctor(&(*p)->retval);
+	ZVAL_COPY(&(*p)->retval, fault);
 
 	SOAP_SERVER_END_CODE();
 }
@@ -2147,8 +2142,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			char buffer[1024];
 			size_t buffer_len;
 			va_list argcopy;
-			zend_object **old_objects;
-			int old = PG(display_errors);
 
 			va_copy(argcopy, args);
 			buffer_len = vslprintf(buffer, sizeof(buffer)-1, format, argcopy);
@@ -2165,24 +2158,6 @@ static void soap_error_handler(int error_num, const char *error_filename, const 
 			add_soap_fault_ex(&fault, &SOAP_GLOBAL(error_object), code, buffer, NULL, NULL);
 			Z_ADDREF(fault);
 			zend_throw_exception_object(&fault);
-
-			old_objects = EG(objects_store).object_buckets;
-			EG(objects_store).object_buckets = NULL;
-			PG(display_errors) = 0;
-			SG(sapi_headers).http_status_line = NULL;
-			zend_try {
-				call_old_error_handler(error_num, error_filename, error_lineno, format, args);
-			} zend_catch {
-				CG(in_compilation) = _old_in_compilation;
-				EG(current_execute_data) = _old_current_execute_data;
-				if (SG(sapi_headers).http_status_line) {
-					efree(SG(sapi_headers).http_status_line);
-				}
-				SG(sapi_headers).http_status_line = _old_http_status_line;
-				SG(sapi_headers).http_response_code = _old_http_response_code;
-			} zend_end_try();
-			EG(objects_store).object_buckets = old_objects;
-			PG(display_errors) = old;
 			zend_bailout();
 		} else if (!use_exceptions ||
 		           !SOAP_GLOBAL(error_code) ||
@@ -2289,7 +2264,7 @@ PHP_FUNCTION(is_soap_fault)
 
 /* SoapClient functions */
 
-/* {{{ proto object SoapClient::SoapClient ( mixed wsdl [, array options])
+/* {{{ proto object SoapClient::SoapClient(mixed wsdl [, array options])
    SoapClient constructor */
 PHP_METHOD(SoapClient, SoapClient)
 {
@@ -2345,7 +2320,7 @@ PHP_METHOD(SoapClient, SoapClient)
 			context = php_stream_context_from_zval(tmp, 1);
 			Z_ADDREF_P(tmp);
 		} else {
-			context = php_stream_context_alloc(); 
+			context = php_stream_context_alloc();
 		}
 
 		if ((tmp = zend_hash_str_find(ht, "location", sizeof("location")-1)) != NULL &&
@@ -2833,7 +2808,7 @@ static void verify_soap_headers_array(HashTable *ht)
 }
 
 
-/* {{{ proto mixed SoapClient::__call ( string function_name, array arguments [, array options [, array input_headers [, array output_headers]]])
+/* {{{ proto mixed SoapClient::__call(string function_name, array arguments [, array options [, array input_headers [, array output_headers]]])
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
@@ -2940,7 +2915,7 @@ PHP_METHOD(SoapClient, __call)
 /* }}} */
 
 
-/* {{{ proto array SoapClient::__getFunctions ( void )
+/* {{{ proto array SoapClient::__getFunctions(void)
    Returns list of SOAP functions */
 PHP_METHOD(SoapClient, __getFunctions)
 {
@@ -2967,7 +2942,7 @@ PHP_METHOD(SoapClient, __getFunctions)
 /* }}} */
 
 
-/* {{{ proto array SoapClient::__getTypes ( void )
+/* {{{ proto array SoapClient::__getTypes(void)
    Returns list of SOAP types */
 PHP_METHOD(SoapClient, __getTypes)
 {
@@ -2996,7 +2971,7 @@ PHP_METHOD(SoapClient, __getTypes)
 /* }}} */
 
 
-/* {{{ proto string SoapClient::__getLastRequest ( void )
+/* {{{ proto string SoapClient::__getLastRequest(void)
    Returns last SOAP request */
 PHP_METHOD(SoapClient, __getLastRequest)
 {
@@ -3015,7 +2990,7 @@ PHP_METHOD(SoapClient, __getLastRequest)
 /* }}} */
 
 
-/* {{{ proto object SoapClient::__getLastResponse ( void )
+/* {{{ proto object SoapClient::__getLastResponse(void)
    Returns last SOAP response */
 PHP_METHOD(SoapClient, __getLastResponse)
 {
@@ -3144,7 +3119,7 @@ PHP_METHOD(SoapClient, __setCookie)
 }
 /* }}} */
 
-/* {{{ proto array SoapClient::__getCookies ( void )
+/* {{{ proto array SoapClient::__getCookies(void)
    Returns list of cookies */
 PHP_METHOD(SoapClient, __getCookies)
 {

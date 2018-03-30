@@ -41,12 +41,11 @@ void Spoofchecker_objects_free(zend_object *object)
 /* }}} */
 
 /* {{{ Spoofchecker_object_create */
-zend_object *Spoofchecker_object_create(
-	zend_class_entry *ce)
+zend_object *Spoofchecker_object_create(zend_class_entry *ce)
 {
 	Spoofchecker_object*     intern;
 
-	intern = ecalloc(1, sizeof(Spoofchecker_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(Spoofchecker_object), ce);
 	intl_error_init(SPOOFCHECKER_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce);
 	object_properties_init(&intern->zo, ce);
@@ -96,7 +95,7 @@ ZEND_END_ARG_INFO()
  * Every 'Spoofchecker' class method has an entry in this table
  */
 
-zend_function_entry Spoofchecker_class_functions[] = {
+static const zend_function_entry Spoofchecker_class_functions[] = {
 	PHP_ME(Spoofchecker, __construct, spoofchecker_0_args, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR)
 	PHP_ME(Spoofchecker, isSuspicious, spoofchecker_is_suspicous, ZEND_ACC_PUBLIC)
 	PHP_ME(Spoofchecker, areConfusable, spoofchecker_are_confusable, ZEND_ACC_PUBLIC)

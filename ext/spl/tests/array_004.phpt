@@ -17,7 +17,7 @@ foreach($obj as $ak=>$av) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 0=>0 - 0=>0
 0=>0 - 1=>1
 0=>0 - 2=>2

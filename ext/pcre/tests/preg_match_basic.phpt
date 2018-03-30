@@ -19,7 +19,7 @@ var_dump(preg_match('/hello world/', $string, $match5)); //tries to find "hello 
 var_dump($match5);
 ?>
 
---EXPECTF--
+--EXPECT--
 
 int(1)
 array(1) {

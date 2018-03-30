@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -370,7 +370,7 @@ static PHP_FUNCTION(phpdbg_break_next)
 	phpdbg_set_breakpoint_opline_ex((phpdbg_opline_ptr_t) ex->opline + 1);
 } /* }}} */
 
-/* {{{ proto void phpdbg_break_file(string file, integer line) */
+/* {{{ proto void phpdbg_break_file(string file, int line) */
 static PHP_FUNCTION(phpdbg_break_file)
 {
 	char *file;
@@ -425,7 +425,7 @@ static PHP_FUNCTION(phpdbg_clear)
 	zend_hash_clean(&PHPDBG_G(bp)[PHPDBG_BREAK_COND]);
 } /* }}} */
 
-/* {{{ proto void phpdbg_color(integer element, string color) */
+/* {{{ proto void phpdbg_color(int element, string color) */
 static PHP_FUNCTION(phpdbg_color)
 {
 	zend_long element;
@@ -783,7 +783,7 @@ ZEND_BEGIN_ARG_INFO_EX(phpdbg_get_executable_arginfo, 0, 0, 0)
 	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
-zend_function_entry phpdbg_user_functions[] = {
+static const zend_function_entry phpdbg_user_functions[] = {
 	PHP_FE(phpdbg_clear, phpdbg_clear_arginfo)
 	PHP_FE(phpdbg_break_next, phpdbg_break_next_arginfo)
 	PHP_FE(phpdbg_break_file, phpdbg_break_file_arginfo)
@@ -1324,7 +1324,7 @@ void phpdbg_free_wrapper(void *p ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC) /* {{
 {
 	zend_mm_heap *heap = zend_mm_get_heap();
 	if (UNEXPECTED(heap == p)) {
-		/* TODO: heap maybe allocated by mmap(zend_mm_init) or malloc(USE_ZEND_ALLOC=0) 
+		/* TODO: heap maybe allocated by mmap(zend_mm_init) or malloc(USE_ZEND_ALLOC=0)
 		 * let's prevent it from segfault for now
 		 */
 	} else {
@@ -1356,7 +1356,7 @@ php_stream *phpdbg_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *
 		return stream;
 	}
 
-	return PHPDBG_G(orig_url_wrap_php)(wrapper, path, mode, options, opened_path, context STREAMS_CC);
+	return PHPDBG_G(orig_url_wrap_php)->wops->stream_opener(wrapper, path, mode, options, opened_path, context STREAMS_CC);
 } /* }}} */
 
 int main(int argc, char **argv) /* {{{ */
@@ -1399,6 +1399,8 @@ int main(int argc, char **argv) /* {{{ */
 	void* (*_malloc)(size_t);
 	void (*_free)(void*);
 	void* (*_realloc)(void*, size_t);
+	php_stream_wrapper wrapper;
+	php_stream_wrapper_ops wops;
 
 
 #ifndef _WIN32
@@ -1697,7 +1699,7 @@ phpdbg_main:
 				phpdbg_do_help_cmd(exec);
 			} else if (show_version) {
 				phpdbg_out(
-					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2017 The PHP Group\n%s",
+					"phpdbg %s (built: %s %s)\nPHP %s, Copyright (c) 1997-2018 The PHP Group\n%s",
 					PHPDBG_VERSION,
 					__DATE__,
 					__TIME__,
@@ -1867,9 +1869,14 @@ phpdbg_main:
 		}
 
 		{
-			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
-			PHPDBG_G(orig_url_wrap_php) = wrapper->wops->stream_opener;
-			wrapper->wops->stream_opener = phpdbg_stream_url_wrap_php;
+			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			php_stream_wrapper *tmp_wrapper = Z_PTR_P(zv);
+			PHPDBG_G(orig_url_wrap_php) = tmp_wrapper;
+			memcpy(&wrapper, tmp_wrapper, sizeof(wrapper));
+			memcpy(&wops, tmp_wrapper->wops, sizeof(wops));
+			wops.stream_opener = phpdbg_stream_url_wrap_php;
+			wrapper.wops = (const php_stream_wrapper_ops*)&wops;
+			Z_PTR_P(zv) = &wrapper;
 		}
 
 		/* Make stdin, stdout and stderr accessible from PHP scripts */
@@ -2096,6 +2103,7 @@ phpdbg_out:
 		if (PHPDBG_G(exec) && strcmp("Standard input code", PHPDBG_G(exec)) == SUCCESS) { /* i.e. execution context has been read from stdin - back it up */
 			phpdbg_file_source *data = zend_hash_str_find_ptr(&PHPDBG_G(file_sources), PHPDBG_G(exec), PHPDBG_G(exec_len));
 			backup_phpdbg_compile = zend_string_alloc(data->len + 2, 1);
+			GC_MAKE_PERSISTENT_LOCAL(backup_phpdbg_compile);
 			sprintf(ZSTR_VAL(backup_phpdbg_compile), "?>%.*s", (int) data->len, data->buf);
 		}
 
@@ -2147,8 +2155,8 @@ phpdbg_out:
 		}
 
 		{
-			php_stream_wrapper *wrapper = zend_hash_str_find_ptr(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
-			wrapper->wops->stream_opener = PHPDBG_G(orig_url_wrap_php);
+			zval *zv = zend_hash_str_find(php_stream_get_url_stream_wrappers_hash(), ZEND_STRL("php"));
+			Z_PTR_P(zv) = (void*)PHPDBG_G(orig_url_wrap_php);
 		}
 
 		zend_hash_destroy(&PHPDBG_G(file_sources));

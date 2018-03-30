@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,8 +88,10 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 		err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 		if (err && (*err)) {
+			size_t i = strlen(err);
 			(*errp)=estrdup(err);
 			LocalFree(err);
+			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
 		}

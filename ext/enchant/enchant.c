@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -122,7 +122,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in enchant_functions[].
  */
-zend_function_entry enchant_functions[] = {
+static const zend_function_entry enchant_functions[] = {
 	PHP_FE(enchant_broker_init, 			arginfo_enchant_broker_init)
 	PHP_FE(enchant_broker_free, 			arginfo_enchant_broker_free)
 	PHP_FE(enchant_broker_get_error, 		arginfo_enchant_broker_free)
@@ -372,7 +372,7 @@ PHP_FUNCTION(enchant_broker_init)
 }
 /* }}} */
 
-/* {{{ proto boolean enchant_broker_free(resource broker)
+/* {{{ proto bool enchant_broker_free(resource broker)
    Destroys the broker object and its dictionnaries */
 PHP_FUNCTION(enchant_broker_free)
 {

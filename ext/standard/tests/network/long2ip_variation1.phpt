@@ -126,19 +126,19 @@ string(15) "255.255.255.246"
 string(7) "0.0.0.0"
 
 --empty array--
-Error: 2 - long2ip() expects parameter 1 to be integer, array given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, array given, %slong2ip_variation1.php(%d)
 NULL
 
 --int indexed array--
-Error: 2 - long2ip() expects parameter 1 to be integer, array given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, array given, %slong2ip_variation1.php(%d)
 NULL
 
 --associative array--
-Error: 2 - long2ip() expects parameter 1 to be integer, array given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, array given, %slong2ip_variation1.php(%d)
 NULL
 
 --nested arrays--
-Error: 2 - long2ip() expects parameter 1 to be integer, array given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, array given, %slong2ip_variation1.php(%d)
 NULL
 
 --uppercase NULL--
@@ -160,35 +160,35 @@ string(7) "0.0.0.1"
 string(7) "0.0.0.0"
 
 --empty string DQ--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --string DQ--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --string SQ--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --mixed case string--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --heredoc--
-Error: 2 - long2ip() expects parameter 1 to be integer, string given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, string given, %slong2ip_variation1.php(%d)
 NULL
 
 --instance of classWithToString--
-Error: 2 - long2ip() expects parameter 1 to be integer, object given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, object given, %slong2ip_variation1.php(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - long2ip() expects parameter 1 to be integer, object given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, object given, %slong2ip_variation1.php(%d)
 NULL
 
 --undefined var--
@@ -198,6 +198,6 @@ string(7) "0.0.0.0"
 string(7) "0.0.0.0"
 
 --resource--
-Error: 2 - long2ip() expects parameter 1 to be integer, resource given, %slong2ip_variation1.php(%d)
+Error: 2 - long2ip() expects parameter 1 to be int, resource given, %slong2ip_variation1.php(%d)
 NULL
 ===DONE===

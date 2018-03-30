@@ -27,7 +27,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_lower() : usage variations ***
 character code 97 is a lower case character
 character code 98 is a lower case character

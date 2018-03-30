@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -84,8 +84,8 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 
 	if (php_win32_cp_use_unicode()) {
 		/* First try the pure ascii conversion. This is the fastest way to do the
-			thing. Only applicable if the source string is UTF-8 in general. 
-			While it could possibly be ok with European encodings, usage with 
+			thing. Only applicable if the source string is UTF-8 in general.
+			While it could possibly be ok with European encodings, usage with
 			Asian encodings can cause unintended side effects. Lookup the term
 			"mojibake" if need more. */
 		ret = php_win32_cp_conv_ascii_to_w(in, in_len, out_len);
@@ -97,7 +97,7 @@ __forceinline static wchar_t *php_win32_cp_conv_any_to_w(const char* in, size_t 
 			/* Still need this fallback with regard to possible broken data
 				in the existing scripts. Broken data might be hardcoded in
 				the user scripts, as UTF-8 settings was de facto ignored in
-				older PHP versions. The fallback can be removed later for 
+				older PHP versions. The fallback can be removed later for
 				the sake of purity, keep now for BC reasons. */
 			if (!ret) {
 				const struct php_win32_cp *acp = php_win32_cp_get_by_id(GetACP());

@@ -86,7 +86,7 @@ foreach($heredoc_array as $str) {
  
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
 array(1) {

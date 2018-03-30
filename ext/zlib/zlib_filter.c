@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -167,7 +167,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_inflate_ops = {
+static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
@@ -276,7 +276,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_deflate_ops = {
+static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
@@ -288,7 +288,7 @@ static php_stream_filter_ops php_zlib_deflate_ops = {
 
 static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
 	int status;
 
@@ -421,7 +421,7 @@ factory_setlevel:
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory php_zlib_filter_factory = {
+const php_stream_filter_factory php_zlib_filter_factory = {
 	php_zlib_filter_create
 };
 /* }}} */

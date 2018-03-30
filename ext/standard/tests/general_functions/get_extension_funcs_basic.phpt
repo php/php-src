@@ -16,7 +16,7 @@ var_dump(in_array("cos", $result));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Simple testcase for get_extension_funcs() function
 string(5) "array"
 bool(true)

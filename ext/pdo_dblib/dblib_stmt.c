@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -260,7 +260,7 @@ static int pdo_dblib_stmt_describe(pdo_stmt_t *stmt, int colno)
 	return 1;
 }
 
-static int pdo_dblib_stmt_stringify_col(pdo_stmt_t *stmt, int coltype)
+static int pdo_dblib_stmt_should_stringify_col(pdo_stmt_t *stmt, int coltype)
 {
 	pdo_dblib_stmt *S = (pdo_dblib_stmt*)stmt->driver_data;
 	pdo_dblib_db_handle *H = S->H;
@@ -294,6 +294,9 @@ static int pdo_dblib_stmt_stringify_col(pdo_stmt_t *stmt, int coltype)
 			}
 			break;
 
+#ifdef SQLMSDATETIME2
+		case SQLMSDATETIME2:
+#endif
 		case SQLDATETIME:
 		case SQLDATETIM4:
 			if (H->datetime_convert) {
@@ -303,6 +306,48 @@ static int pdo_dblib_stmt_stringify_col(pdo_stmt_t *stmt, int coltype)
 	}
 
 	return 0;
+}
+
+static void pdo_dblib_stmt_stringify_col(int coltype, LPBYTE data, DBINT data_len, zval **ptr)
+{
+	DBCHAR *tmp_data;
+	DBINT tmp_data_len;
+	zval *zv;
+
+	/* FIXME: We allocate more than we need here */
+	tmp_data_len = 32 + (2 * (data_len));
+
+	switch (coltype) {
+		case SQLDATETIME:
+		case SQLDATETIM4: {
+			if (tmp_data_len < DATETIME_MAX_LEN) {
+				tmp_data_len = DATETIME_MAX_LEN;
+			}
+			break;
+		}
+	}
+
+	tmp_data = emalloc(tmp_data_len);
+	data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, tmp_data_len);
+
+	zv = emalloc(sizeof(zval));
+	if (data_len > 0) {
+		/* to prevent overflows, tmp_data_len is provided as a dest len for dbconvert()
+		 * this code previously passed a dest len of -1
+		 * the FreeTDS impl of dbconvert() does an rtrim with that value, so replicate that behavior
+		 */
+		while (data_len > 0 && tmp_data[data_len - 1] == ' ') {
+			data_len--;
+		}
+
+		ZVAL_STRINGL(zv, tmp_data, data_len);
+	} else {
+		ZVAL_EMPTY_STRING(zv);
+	}
+
+	efree(tmp_data);
+
+	*ptr = zv;
 }
 
 static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
@@ -323,15 +368,8 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 	data_len = dbdatlen(H->link, colno+1);
 
 	if (data_len != 0 || data != NULL) {
-		if (pdo_dblib_stmt_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
-			tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
-			tmp_data = emalloc(tmp_data_len);
-			data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
-
-			zv = emalloc(sizeof(zval));
-			ZVAL_STRING(zv, tmp_data);
-
-			efree(tmp_data);
+		if (pdo_dblib_stmt_should_stringify_col(stmt, coltype) && dbwillconvert(coltype, SQLCHAR)) {
+			pdo_dblib_stmt_stringify_col(coltype, data, data_len, &zv);
 		}
 
 		if (!zv) {
@@ -353,6 +391,9 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 					break;
 				}
+#ifdef SQLMSDATETIME2
+				case SQLMSDATETIME2:
+#endif
 				case SQLDATETIME:
 				case SQLDATETIM4: {
 					size_t dl;
@@ -438,7 +479,6 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 						zv = emalloc(sizeof(zval));
 						ZVAL_STRINGL(zv, tmp_data, data_len);
 						efree(tmp_data);
-
 					} else {
 						/* 16-byte binary representation */
 						zv = emalloc(sizeof(zval));
@@ -449,14 +489,7 @@ static int pdo_dblib_stmt_get_col(pdo_stmt_t *stmt, int colno, char **ptr,
 
 				default: {
 					if (dbwillconvert(coltype, SQLCHAR)) {
-						tmp_data_len = 32 + (2 * (data_len)); /* FIXME: We allocate more than we need here */
-						tmp_data = emalloc(tmp_data_len);
-						data_len = dbconvert(NULL, coltype, data, data_len, SQLCHAR, (LPBYTE) tmp_data, -1);
-
-						zv = emalloc(sizeof(zval));
-						ZVAL_STRING(zv, tmp_data);
-
-						efree(tmp_data);
+						pdo_dblib_stmt_stringify_col(coltype, data, data_len, &zv);
 					}
 
 					break;
@@ -521,7 +554,7 @@ static int pdo_dblib_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zva
 }
 
 
-struct pdo_stmt_methods dblib_stmt_methods = {
+const struct pdo_stmt_methods dblib_stmt_methods = {
 	pdo_dblib_stmt_dtor,
 	pdo_dblib_stmt_execute,
 	pdo_dblib_stmt_fetch,

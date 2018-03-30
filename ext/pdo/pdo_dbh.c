@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -192,7 +192,7 @@ static char *dsn_from_uri(char *uri, char *buf, size_t buflen) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
+/* {{{ proto PDO::__construct(string dsn[, string username[, string passwd [, array options]]])
    */
 static PHP_METHOD(PDO, dbh_constructor)
 {
@@ -442,7 +442,6 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 
 		zend_fcall_info_args(&fci, ctor_args);
 
-		fcc.initialized = 1;
 		fcc.function_handler = dbstmt_ce->constructor;
 		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
@@ -815,7 +814,7 @@ fail:
 }
 /* }}} */
 
-/* {{{ proto bool PDO::setAttribute(long attribute, mixed value)
+/* {{{ proto bool PDO::setAttribute(int attribute, mixed value)
    Set an attribute */
 static PHP_METHOD(PDO, setAttribute)
 {
@@ -838,7 +837,7 @@ static PHP_METHOD(PDO, setAttribute)
 }
 /* }}} */
 
-/* {{{ proto mixed PDO::getAttribute(long attribute)
+/* {{{ proto mixed PDO::getAttribute(int attribute)
    Get an attribute */
 static PHP_METHOD(PDO, getAttribute)
 {
@@ -903,7 +902,7 @@ static PHP_METHOD(PDO, getAttribute)
 }
 /* }}} */
 
-/* {{{ proto long PDO::exec(string query)
+/* {{{ proto int PDO::exec(string query)
    Execute a query that does not return a row set, returning the number of affected rows */
 static PHP_METHOD(PDO, exec)
 {
@@ -1157,7 +1156,7 @@ static PHP_METHOD(PDO, quote)
 }
 /* }}} */
 
-/* {{{ proto int PDO::__wakeup()
+/* {{{ proto PDO::__wakeup()
    Prevents use of a PDO instance that has been unserialized */
 static PHP_METHOD(PDO, __wakeup)
 {
@@ -1345,9 +1344,6 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 	pdo_dbh_object_t *dbh_obj = php_pdo_dbh_fetch_object(*object);
 	zend_string *lc_method_name;
 
-	lc_method_name = zend_string_init(ZSTR_VAL(method_name), ZSTR_LEN(method_name), 0);
-	zend_str_tolower_copy(ZSTR_VAL(lc_method_name), ZSTR_VAL(method_name), ZSTR_LEN(method_name));
-
 	if ((fbc = std_object_handlers.get_method(object, method_name, key)) == NULL) {
 		/* not a pre-defined method, nor a user-defined method; check
 		 * the driver specific methods */
@@ -1359,11 +1355,12 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 			}
 		}
 
+		lc_method_name = zend_string_tolower(method_name);
 		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
+		zend_string_release(lc_method_name);
 	}
 
 out:
-	zend_string_release(lc_method_name);
 	return fbc;
 }
 
@@ -1554,7 +1551,7 @@ zend_object *pdo_dbh_new(zend_class_entry *ce)
 {
 	pdo_dbh_object_t *dbh;
 
-	dbh = ecalloc(1, sizeof(pdo_dbh_object_t) + zend_object_properties_size(ce));
+	dbh = zend_object_alloc(sizeof(pdo_dbh_object_t), ce);
 	zend_object_std_init(&dbh->std, ce);
 	object_properties_init(&dbh->std, ce);
 	rebuild_object_properties(&dbh->std);

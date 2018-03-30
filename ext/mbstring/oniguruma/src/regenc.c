@@ -2,7 +2,7 @@
   regenc.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -31,6 +31,66 @@
 
 OnigEncoding OnigEncDefaultCharEncoding = ONIG_ENCODING_INIT_DEFAULT;
 
+#define INITED_LIST_SIZE  20
+
+static int InitedListNum;
+
+static struct {
+  OnigEncoding enc;
+  int          inited;
+} InitedList[INITED_LIST_SIZE];
+
+static int
+enc_inited_entry(OnigEncoding enc)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    if (InitedList[i].enc == enc) {
+      InitedList[i].inited = 1;
+      return i;
+    }
+  }
+
+  i = InitedListNum;
+  if (i < INITED_LIST_SIZE - 1) {
+    InitedList[i].enc    = enc;
+    InitedList[i].inited = 1;
+    InitedListNum++;
+    return i;
+  }
+
+  return -1;
+}
+
+static int
+enc_is_inited(OnigEncoding enc)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    if (InitedList[i].enc == enc) {
+      return InitedList[i].inited;
+    }
+  }
+
+  return 0;
+}
+
+extern int
+onigenc_end(void)
+{
+  int i;
+
+  for (i = 0; i < InitedListNum; i++) {
+    InitedList[i].enc    = 0;
+    InitedList[i].inited = 0;
+  }
+
+  InitedListNum = 0;
+  return ONIG_NORMAL;
+}
+
 extern int
 onigenc_init(void)
 {
@@ -40,8 +100,23 @@ onigenc_init(void)
 extern int
 onig_initialize_encoding(OnigEncoding enc)
 {
-  if (enc->init != 0 && (enc->is_initialized() == 0)) {
-    int r = (enc->init)();
+  int r;
+
+  if (enc != ONIG_ENCODING_ASCII &&
+      ONIGENC_IS_ASCII_COMPATIBLE_ENCODING(enc)) {
+    OnigEncoding ascii = ONIG_ENCODING_ASCII;
+    if (ascii->init != 0 && enc_is_inited(ascii) == 0) {
+      r = ascii->init();
+      if (r != ONIG_NORMAL) return r;
+      enc_inited_entry(ascii);
+    }
+  }
+
+  if (enc->init != 0 &&
+      enc_is_inited(enc) == 0) {
+    r = (enc->init)();
+    if (r == ONIG_NORMAL)
+      enc_inited_entry(enc);
     return r;
   }
 
@@ -59,6 +134,25 @@ onigenc_set_default_encoding(OnigEncoding enc)
 {
   OnigEncDefaultCharEncoding = enc;
   return 0;
+}
+
+extern UChar*
+onigenc_strdup(OnigEncoding enc, const UChar* s, const UChar* end)
+{
+  int slen, term_len, i;
+  UChar *r;
+
+  slen = (int )(end - s);
+  term_len = ONIGENC_MBC_MINLEN(enc);
+
+  r = (UChar* )xmalloc(slen + term_len);
+  CHECK_NULL_RETURN(r);
+  xmemcpy(r, s, slen);
+
+  for (i = 0; i < term_len; i++)
+    r[slen + i] = (UChar )0;
+
+  return r;
 }
 
 extern UChar*
@@ -780,7 +874,7 @@ onigenc_mb2_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -803,7 +897,7 @@ onigenc_mb4_code_to_mbc(OnigEncoding enc, OnigCodePoint code, UChar *buf)
   if (enclen(enc, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif
-  return p - buf;
+  return (int )(p - buf);
 }
 
 extern int
@@ -838,6 +932,16 @@ onigenc_minimum_property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
   }
 
   return ONIGERR_INVALID_CHAR_PROPERTY_NAME;
+}
+
+extern int
+onigenc_is_mbc_word_ascii(OnigEncoding enc, UChar* s, const UChar* end)
+{
+  OnigCodePoint code = ONIGENC_MBC_TO_CODE(enc, s, end);
+
+  if (code > 127) return 0;
+
+  return ONIGENC_IS_ASCII_CODE_WORD(code);
 }
 
 extern int

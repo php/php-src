@@ -24,7 +24,7 @@ echo "Initial values: ini.get(\"assert.bail\") => [".ini_get("assert.bail")."]\n
 echo "Initial values: ini.get(\"assert.quiet_eval\") => [".ini_get("assert.quiet_eval")."]\n";
 echo "Initial values: ini.get(\"assert.callback\") => [".ini_get("assert.callback")."]\n\n";
 
---EXPECTF--
+--EXPECT--
 Initial values: assert_options(ASSERT_ACTIVE) => [0]
 Initial values: assert_options(ASSERT_WARNING) => [0]
 Initial values: assert_options(ASSERT_BAIL) => [0]

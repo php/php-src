@@ -103,7 +103,7 @@ foreach($heredoc_strings as $str) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strcspn() : with different start values ***
 
 -- Iteration 1 --

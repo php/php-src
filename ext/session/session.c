@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -268,12 +268,10 @@ static int php_session_decode(zend_string *data) /* {{{ */
 
 static char hexconvtab[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ,-";
 
-/* returns a pointer to the byte after the last valid character in out */
-static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char nbits) /* {{{ */
+static void bin_to_readable(unsigned char *in, size_t inlen, char *out, size_t outlen, char nbits) /* {{{ */
 {
 	unsigned char *p, *q;
 	unsigned short w;
-	size_t len = inlen;
 	int mask;
 	int have;
 
@@ -284,16 +282,15 @@ static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char n
 	have = 0;
 	mask = (1 << nbits) - 1;
 
-	while (inlen--) {
+	while (outlen--) {
 		if (have < nbits) {
 			if (p < q) {
 				w |= *p++ << have;
 				have += 8;
 			} else {
-				/* consumed everything? */
-				if (have == 0) break;
-				/* No? We need a final round */
-				have = nbits;
+				/* Should never happen. Input must be large enough. */
+				ZEND_ASSERT(0);
+				break;
 			}
 		}
 
@@ -304,7 +301,6 @@ static size_t bin_to_readable(unsigned char *in, size_t inlen, char *out, char n
 	}
 
 	*out = '\0';
-	return len;
 }
 /* }}} */
 
@@ -315,13 +311,18 @@ PHPAPI zend_string *php_session_create_id(PS_CREATE_SID_ARGS) /* {{{ */
 	unsigned char rbuf[PS_MAX_SID_LENGTH + PS_EXTRA_RAND_BYTES];
 	zend_string *outid;
 
+	/* It would be enough to read ceil(sid_length * sid_bits_per_character / 8) bytes here.
+	 * We read sid_length bytes instead for simplicity. */
 	/* Read additional PS_EXTRA_RAND_BYTES just in case CSPRNG is not safe enough */
 	if (php_random_bytes_throw(rbuf, PS(sid_length) + PS_EXTRA_RAND_BYTES) == FAILURE) {
 		return NULL;
 	}
 
 	outid = zend_string_alloc(PS(sid_length), 0);
-	ZSTR_LEN(outid) = bin_to_readable(rbuf, PS(sid_length), ZSTR_VAL(outid), (char)PS(sid_bits_per_character));
+	bin_to_readable(
+		rbuf, PS(sid_length),
+		ZSTR_VAL(outid), ZSTR_LEN(outid),
+		(char)PS(sid_bits_per_character));
 
 	return outid;
 }
@@ -532,7 +533,7 @@ static void php_session_normalize_vars() /* {{{ */
 
 static PHP_INI_MH(OnUpdateSaveHandler) /* {{{ */
 {
-	ps_module *tmp;
+	const ps_module *tmp;
 
 	SESSION_CHECK_ACTIVE_STATE;
 	SESSION_CHECK_OUTPUT_STATE;
@@ -1058,12 +1059,12 @@ PHPAPI int php_session_register_serializer(const char *name, zend_string *(*enco
 #define MAX_MODULES 32
 #define PREDEFINED_MODULES 2
 
-static ps_module *ps_modules[MAX_MODULES + 1] = {
+static const ps_module *ps_modules[MAX_MODULES + 1] = {
 	ps_files_ptr,
 	ps_user_ptr
 };
 
-PHPAPI int php_session_register_module(ps_module *ptr) /* {{{ */
+PHPAPI int php_session_register_module(const ps_module *ptr) /* {{{ */
 {
 	int ret = FAILURE;
 	int i;
@@ -1207,7 +1208,7 @@ CACHE_LIMITER_FUNC(nocache) /* {{{ */
 }
 /* }}} */
 
-static php_session_cache_limiter_t php_session_cache_limiters[] = {
+static const php_session_cache_limiter_t php_session_cache_limiters[] = {
 	CACHE_LIMITER_ENTRY(public)
 	CACHE_LIMITER_ENTRY(private)
 	CACHE_LIMITER_ENTRY(private_no_expire)
@@ -1217,7 +1218,7 @@ static php_session_cache_limiter_t php_session_cache_limiters[] = {
 
 static int php_session_cache_limiter(void) /* {{{ */
 {
-	php_session_cache_limiter_t *lim;
+	const php_session_cache_limiter_t *lim;
 
 	if (PS(cache_limiter)[0] == '\0') return 0;
 	if (PS(session_status) != php_session_active) return -1;
@@ -1373,10 +1374,10 @@ static int php_session_send_cookie(void) /* {{{ */
 }
 /* }}} */
 
-PHPAPI ps_module *_php_find_ps_module(char *name) /* {{{ */
+PHPAPI const ps_module *_php_find_ps_module(char *name) /* {{{ */
 {
-	ps_module *ret = NULL;
-	ps_module **mod;
+	const ps_module *ret = NULL;
+	const ps_module **mod;
 	int i;
 
 	for (i = 0, mod = ps_modules; i < MAX_MODULES; i++, mod++) {
@@ -1433,7 +1434,7 @@ PHPAPI int php_session_reset_id(void) /* {{{ */
 	}
 
 	/* If the SID constant exists, destroy it. */
-	/* We must not delete any items in EG(zend_contants) */
+	/* We must not delete any items in EG(zend_constants) */
 	/* zend_hash_str_del(EG(zend_constants), "sid", sizeof("sid") - 1); */
 	sid = zend_get_constant_str("SID", sizeof("SID") - 1);
 
@@ -2382,11 +2383,12 @@ static PHP_FUNCTION(session_start)
 						if (zend_string_equals_literal(str_idx, "read_and_close")) {
 							read_and_close = zval_get_long(value);
 						} else {
-							zend_string *val = zval_get_string(value);
+							zend_string *tmp_val;
+							zend_string *val = zval_get_tmp_string(value, &tmp_val);
 							if (php_session_start_set_ini(str_idx, val) == FAILURE) {
 								php_error_docref(NULL, E_WARNING, "Setting option '%s' failed", ZSTR_VAL(str_idx));
 							}
-							zend_string_release(val);
+							zend_tmp_string_release(tmp_val);
 						}
 						break;
 					default:
@@ -2847,7 +2849,7 @@ static PHP_MINIT_FUNCTION(session) /* {{{ */
 {
 	zend_class_entry ce;
 
-	zend_register_auto_global(zend_string_init("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL);
+	zend_register_auto_global(zend_string_init_interned("_SESSION", sizeof("_SESSION") - 1, 1), 0, NULL);
 
 	my_module_number = module_number;
 	PS(module_number) = module_number;
@@ -2911,7 +2913,7 @@ static PHP_MSHUTDOWN_FUNCTION(session) /* {{{ */
 
 static PHP_MINFO_FUNCTION(session) /* {{{ */
 {
-	ps_module **mod;
+	const ps_module **mod;
 	ps_serializer *ser;
 	smart_str save_handlers = {0};
 	smart_str ser_handlers = {0};

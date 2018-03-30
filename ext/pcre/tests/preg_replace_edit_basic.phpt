@@ -29,7 +29,7 @@ var_dump(preg_replace('<(\w)\s*-\s*(\w)>',
 var_dump(preg_replace('<(^[a-z]\w+)@(\w+)\.(\w+)\.([a-z]{2,}$)>', 
                       '\\1 at \\2 dot \\3 dot \\4', 'josmessa@uk.ibm.com'));	//finds the e-mail address and replaces the @ and . with "at" and "dot" (uses backreferences) ('josmessa at uk dot ibm dot com')
 ?>
---EXPECTF--
+--EXPECT--
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "123456789 - Hello, world -           This is a string."
 string(54) "444444789 - Hello, world -           This is a string."

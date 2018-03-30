@@ -71,7 +71,7 @@ foreach($args_array as $args) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : int formats and non-integer values ***
 
 -- Iteration 1 --

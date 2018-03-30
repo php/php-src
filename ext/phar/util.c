@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -922,7 +922,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 
 PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len) /* {{{ */ {
 	phar_archive_data *fd_ptr;
-	if (PHAR_G(phar_alias_map.u.flags)
+	if (HT_FLAGS(&PHAR_G(phar_alias_map))
 			&& NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 		*filename = fd_ptr->fname;
 		*filename_len = fd_ptr->fname_len;
@@ -1246,7 +1246,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_FLAGS(&phar->manifest)) {
 		return NULL;
 	}
 
@@ -1291,7 +1291,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		}
 	}
 
-	if (phar->mounted_dirs.u.flags && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (HT_FLAGS(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
@@ -1948,10 +1948,22 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len) /* {{{ */
 {
 	const char *s;
+	zend_string *str;
+	zval *ret;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;
-		if (!filename_len || NULL == zend_hash_str_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+		if (!filename_len) {
+			break;
+		}
+		if (GC_FLAGS(&phar->virtual_dirs) & GC_PERSISTENT) {
+			str = zend_string_init_interned(filename, filename_len, 1);
+		} else {
+			str = zend_string_init(filename, filename_len, 0);
+		}
+		ret = zend_hash_add_empty_element(&phar->virtual_dirs, str);
+		zend_string_release(str);
+		if (ret == NULL) {
 			break;
 		}
 	}

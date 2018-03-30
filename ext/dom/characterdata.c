@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -213,7 +213,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 
 	DOM_GET_OBJ(nodep, id, xmlNodePtr, intern);
 #if LIBXML_VERSION < 20627
-/* Implement logic from libxml xmlTextConcat to add suport for comments and PI */
+/* Implement logic from libxml xmlTextConcat to add support for comments and PI */
     if ((nodep->content == (xmlChar *) &(nodep->properties)) ||
         ((nodep->doc != NULL) && (nodep->doc->dict != NULL) &&
 		xmlDictOwns(nodep->doc->dict, nodep->content))) {

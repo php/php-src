@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ static int pgsql_stmt_dtor(pdo_stmt_t *stmt)
 	pdo_pgsql_stmt *S = (pdo_pgsql_stmt*)stmt->driver_data;
 	zend_bool server_obj_usable = !Z_ISUNDEF(stmt->database_object_handle)
 		&& IS_OBJ_VALID(EG(objects_store).object_buckets[Z_OBJ_HANDLE(stmt->database_object_handle)])
-		&& !(GC_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
+		&& !(OBJ_FLAGS(Z_OBJ(stmt->database_object_handle)) & IS_OBJ_FREE_CALLED);
 
 	if (S->result) {
 		/* free the resource */
@@ -618,10 +618,12 @@ static zend_always_inline char * pdo_pgsql_translate_oid_to_table(Oid oid, PGcon
 	}
 	efree(querystr);
 
-	if ((table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
+	if (1 == PQgetisnull(tmp_res, 0, 0) || (table_name = PQgetvalue(tmp_res, 0, 0)) == NULL) {
 		PQclear(tmp_res);
 		return 0;
 	}
+
+	table_name = estrdup(table_name);
 
 	PQclear(tmp_res);
 	return table_name;
@@ -652,6 +654,7 @@ static int pgsql_stmt_get_column_meta(pdo_stmt_t *stmt, zend_long colno, zval *r
 	table_name = pdo_pgsql_translate_oid_to_table(table_oid, S->H->server);
 	if (table_name) {
 		add_assoc_string(return_value, "table", table_name);
+		efree(table_name);
 	}
 
 	switch (S->cols[colno].pgsql_type) {
@@ -707,7 +710,7 @@ static int pdo_pgsql_stmt_cursor_closer(pdo_stmt_t *stmt)
 	return 1;
 }
 
-struct pdo_stmt_methods pgsql_stmt_methods = {
+const struct pdo_stmt_methods pgsql_stmt_methods = {
 	pgsql_stmt_dtor,
 	pgsql_stmt_execute,
 	pgsql_stmt_fetch,

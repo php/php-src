@@ -13,4 +13,4 @@ new $baz();
 
 ?>
 --EXPECTF--
-%string|unicode%(11) "Foo\Bar\Baz"
+string(11) "Foo\Bar\Baz"

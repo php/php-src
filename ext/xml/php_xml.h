@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -34,9 +34,9 @@ extern zend_module_entry xml_module_entry;
 #define xml_module_ptr NULL
 #endif
 
-#ifdef HAVE_XML 
+#ifdef HAVE_XML
 
-#include "ext/xml/expat_compat.h"
+#include "expat_compat.h"
 
 #ifdef XML_UNICODE
 #error "UTF-16 Unicode support not implemented!"
@@ -60,7 +60,7 @@ typedef struct {
 	zval unparsedEntityDeclHandler;
 	zval notationDeclHandler;
 	zval externalEntityRefHandler;
-	zval unknownEncodingHandler;	
+	zval unknownEncodingHandler;
 	zval startNamespaceDeclHandler;
 	zval endNamespaceDeclHandler;
 
@@ -88,7 +88,7 @@ typedef struct {
 	int lastwasopen;
 	int skipwhite;
 	int isparsing;
-	
+
 	XML_Char *baseURI;
 } xml_parser;
 
@@ -108,9 +108,9 @@ enum php_xml_option {
 };
 
 /* for xml_parse_into_struct */
-	
+
 #define XML_MAXLEVEL 255 /* XXX this should be dynamic */
-	
+
 PHP_FUNCTION(xml_parser_create);
 PHP_FUNCTION(xml_parser_create_ns);
 PHP_FUNCTION(xml_set_object);

@@ -6,5 +6,5 @@ preg_match("/(?:F?+(?:^(?(R)a+\"){99}-))(?J)(?'R'(?'R'<((?'RR'(?'R'\){97)?J)?J
 ?>
 ==DONE==
 --EXPECTF--
-Warning: preg_match(): Compilation failed: unmatched parentheses at offset %d in %s on line %d
+Warning: preg_match(): Compilation failed: unmatched closing parenthesis at offset %d in %s on line %d
 ==DONE==

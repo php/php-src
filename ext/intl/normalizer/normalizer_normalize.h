@@ -21,5 +21,6 @@
 
 PHP_FUNCTION( normalizer_normalize );
 PHP_FUNCTION( normalizer_is_normalized );
+PHP_FUNCTION( normalizer_get_raw_decomposition );
 
 #endif // NORMALIZER_NORMALIZE_H

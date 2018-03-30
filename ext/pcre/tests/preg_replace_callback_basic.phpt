@@ -26,7 +26,7 @@ $new_subject3 = preg_replace_callback('/\d/', "integer_word", $subject3, 5, $cou
 print "$new_subject3 \n";
 print $count;
 ?>
---EXPECTF--
+--EXPECT--
 there are seven words in this sentence. 
 one two three 4 is now written in words 
 there are no numbers in this string 

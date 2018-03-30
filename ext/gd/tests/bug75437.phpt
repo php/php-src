@@ -2,7 +2,6 @@
 Bug #75437 Wrong reflection on imagewebp
 --SKIPIF--
 <?php
-if (!extension_loaded('reflection')) die('skip reflection not available');
 if (!extension_loaded('gd')) die('skip gd extension not available');
 if (!GD_BUNDLED && version_compare(GD_VERSION, '2.2.0', '<')) die("skip test requires GD 2.2.0 or higher");
 if (!function_exists('imagewebp')) die('skip WebP support not available');

@@ -33,7 +33,7 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_reduce() : variation ***
 
 --- Testing with a callback with too few parameters ---

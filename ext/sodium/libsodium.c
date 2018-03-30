@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -233,7 +233,20 @@ ZEND_END_ARG_INFO()
 # undef crypto_secretstream_xchacha20poly1305_ABYTES
 #endif
 
-const zend_function_entry sodium_functions[] = {
+#ifndef crypto_pwhash_OPSLIMIT_MIN
+# define crypto_pwhash_OPSLIMIT_MIN crypto_pwhash_OPSLIMIT_INTERACTIVE
+#endif
+#ifndef crypto_pwhash_MEMLIMIT_MIN
+# define crypto_pwhash_MEMLIMIT_MIN crypto_pwhash_MEMLIMIT_INTERACTIVE
+#endif
+#ifndef crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN
+# define crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_MIN crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE
+#endif
+#ifndef crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN
+# define crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_MIN crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE
+#endif
+
+static const zend_function_entry sodium_functions[] = {
 	PHP_FE(sodium_crypto_aead_aes256gcm_is_available, AI_None)
 #ifdef HAVE_AESGCM
 	PHP_FE(sodium_crypto_aead_aes256gcm_decrypt, AI_StringAndADAndNonceAndKey)
@@ -1839,12 +1852,14 @@ PHP_FUNCTION(sodium_crypto_pwhash)
 		zend_throw_exception(sodium_exception_ce, "salt should be SODIUM_CRYPTO_PWHASH_SALTBYTES bytes", 0);
 		return;
 	}
-	if (opslimit < crypto_pwhash_OPSLIMIT_INTERACTIVE) {
-		zend_error(E_WARNING,
-				   "number of operations for the password hashing function is low");
+	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
+		zend_throw_exception(sodium_exception_ce,
+							 "number of operations for the password hashing function is too low", 0);
+		return;
 	}
-	if (memlimit < crypto_pwhash_MEMLIMIT_INTERACTIVE) {
-		zend_error(E_WARNING, "maximum memory for the password hashing function is low");
+	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
+		zend_throw_exception(sodium_exception_ce,
+							 "maximum memory for the password hashing function is too low", 0);
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	ret = -1;
@@ -1902,13 +1917,13 @@ PHP_FUNCTION(sodium_crypto_pwhash_str)
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
-	if (opslimit < crypto_pwhash_OPSLIMIT_INTERACTIVE) {
-		zend_error(E_WARNING,
-				   "number of operations for the password hashing function is low");
+	if (opslimit < crypto_pwhash_OPSLIMIT_MIN) {
+		zend_throw_exception(sodium_exception_ce,
+							 "number of operations for the password hashing function is too low", 0);
 	}
-	if (memlimit < crypto_pwhash_MEMLIMIT_INTERACTIVE) {
-		zend_error(E_WARNING,
-				   "maximum memory for the password hashing function is low");
+	if (memlimit < crypto_pwhash_MEMLIMIT_MIN) {
+		zend_throw_exception(sodium_exception_ce,
+							 "maximum memory for the password hashing function is too low", 0);
 	}
 	hash_str = zend_string_alloc(crypto_pwhash_STRBYTES - 1, 0);
 	if (crypto_pwhash_str
@@ -2016,13 +2031,13 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256)
 				   0);
 		return;
 	}
-	if (opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
-		zend_error(E_WARNING,
-				   "number of operations for the scrypt function is low");
+	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
+		zend_throw_exception(sodium_exception_ce,
+							 "number of operations for the scrypt function is too low", 0);
 	}
-	if (memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
-		zend_error(E_WARNING,
-				   "maximum memory for the scrypt function is low");
+	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
+		zend_throw_exception(sodium_exception_ce,
+							 "maximum memory for the scrypt function is too low", 0);
 	}
 	hash = zend_string_alloc((size_t) hash_len, 0);
 	if (crypto_pwhash_scryptsalsa208sha256
@@ -2063,13 +2078,13 @@ PHP_FUNCTION(sodium_crypto_pwhash_scryptsalsa208sha256_str)
 	if (passwd_len <= 0) {
 		zend_error(E_WARNING, "empty password");
 	}
-	if (opslimit < crypto_pwhash_scryptsalsa208sha256_opslimit_interactive()) {
-		zend_error(E_WARNING,
-				   "number of operations for the scrypt function is low");
+	if (opslimit < crypto_pwhash_scryptsalsa208sha256_OPSLIMIT_INTERACTIVE) {
+		zend_throw_exception(sodium_exception_ce,
+							 "number of operations for the scrypt function is too low", 0);
 	}
-	if (memlimit < crypto_pwhash_scryptsalsa208sha256_memlimit_interactive()) {
-		zend_error(E_WARNING,
-				   "maximum memory for the scrypt function is low");
+	if (memlimit < crypto_pwhash_scryptsalsa208sha256_MEMLIMIT_INTERACTIVE) {
+		zend_throw_exception(sodium_exception_ce,
+							 "maximum memory for the scrypt function is too low", 0);
 	}
 	hash_str = zend_string_alloc
 		(crypto_pwhash_scryptsalsa208sha256_STRBYTES - 1, 0);

@@ -481,7 +481,7 @@ static void timelib_skip_day_suffix(char **ptr)
 	if (isspace(**ptr)) {
 		return;
 	}
-	if (!strncasecmp(*ptr, "nd", 2) || !strncasecmp(*ptr, "rd", 2) ||!strncasecmp(*ptr, "st", 2) || !strncasecmp(*ptr, "th", 2)) {
+	if (!timelib_strncasecmp(*ptr, "nd", 2) || !timelib_strncasecmp(*ptr, "rd", 2) ||!timelib_strncasecmp(*ptr, "st", 2) || !timelib_strncasecmp(*ptr, "th", 2)) {
 		*ptr += 2;
 	}
 }
@@ -547,7 +547,7 @@ static timelib_sll timelib_lookup_relative_text(char **ptr, int *behavior)
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_reltext_lookup; tp->name; tp++) {
-		if (strcasecmp(word, tp->name) == 0) {
+		if (timelib_strcasecmp(word, tp->name) == 0) {
 			value = tp->value;
 			*behavior = tp->type;
 		}
@@ -580,7 +580,7 @@ static timelib_long timelib_lookup_month(char **ptr)
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_month_lookup; tp->name; tp++) {
-		if (strcasecmp(word, tp->name) == 0) {
+		if (timelib_strcasecmp(word, tp->name) == 0) {
 			value = tp->value;
 		}
 	}
@@ -627,7 +627,7 @@ static const timelib_relunit* timelib_lookup_relunit(char **ptr)
 	memcpy(word, begin, end - begin);
 
 	for (tp = timelib_relunit_lookup; tp->name; tp++) {
-		if (strcasecmp(word, tp->name) == 0) {
+		if (timelib_strcasecmp(word, tp->name) == 0) {
 			value = tp;
 			break;
 		}
@@ -676,12 +676,12 @@ static const timelib_tz_lookup_table* abbr_search(const char *word, timelib_long
 	const timelib_tz_lookup_table  *tp, *first_found_elem = NULL;
 	const timelib_tz_lookup_table  *fmp;
 
-	if (strcasecmp("utc", word) == 0 || strcasecmp("gmt", word) == 0) {
+	if (timelib_strcasecmp("utc", word) == 0 || timelib_strcasecmp("gmt", word) == 0) {
 		return timelib_timezone_utc;
 	}
 
 	for (tp = timelib_timezone_lookup; tp->name; tp++) {
-		if (strcasecmp(word, tp->name) == 0) {
+		if (timelib_strcasecmp(word, tp->name) == 0) {
 			if (!first_found) {
 				first_found = 1;
 				first_found_elem = tp;

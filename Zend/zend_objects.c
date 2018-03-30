@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
 
-ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
+ZEND_API void ZEND_FASTCALL zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
 	GC_SET_REFCOUNT(object, 1);
 	GC_TYPE_INFO(object) = IS_OBJECT | (GC_COLLECTABLE << GC_FLAGS_SHIFT);
@@ -35,7 +35,6 @@ ZEND_API void zend_object_std_init(zend_object *object, zend_class_entry *ce)
 	object->properties = NULL;
 	zend_objects_store_put(object);
 	if (UNEXPECTED(ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
-		GC_FLAGS(object) |= IS_OBJ_USE_GUARDS;
 		ZVAL_UNDEF(object->properties_table + object->ce->default_properties_count);
 	}
 }
@@ -59,13 +58,12 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			p++;
 		} while (p != end);
 	}
-	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_HAS_GUARDS)) {
+	if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
 			zend_string_release(Z_STR_P(p));
-		} else {
+		} else if (Z_TYPE_P(p) == IS_ARRAY) {
 			HashTable *guards;
 
-			ZEND_ASSERT(Z_TYPE_P(p) == IS_ARRAY);
 			guards = Z_ARRVAL_P(p);
 			ZEND_ASSERT(guards != NULL);
 			zend_hash_destroy(guards);
@@ -156,7 +154,7 @@ ZEND_API void zend_objects_destroy_object(zend_object *object)
 	}
 }
 
-ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
+ZEND_API zend_object* ZEND_FASTCALL zend_objects_new(zend_class_entry *ce)
 {
 	zend_object *object = emalloc(sizeof(zend_object) + zend_object_properties_size(ce));
 
@@ -165,7 +163,7 @@ ZEND_API zend_object *zend_objects_new(zend_class_entry *ce)
 	return object;
 }
 
-ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
+ZEND_API void ZEND_FASTCALL zend_objects_clone_members(zend_object *new_object, zend_object *old_object)
 {
 	if (old_object->ce->default_properties_count) {
 		zval *src = old_object->properties_table;
@@ -198,13 +196,13 @@ ZEND_API void zend_objects_clone_members(zend_object *new_object, zend_object *o
 
 		if (!new_object->properties) {
 			new_object->properties = zend_new_array(zend_hash_num_elements(old_object->properties));
-			zend_hash_real_init(new_object->properties, 0);
+			zend_hash_real_init_mixed(new_object->properties);
 		} else {
 			zend_hash_extend(new_object->properties, new_object->properties->nNumUsed + zend_hash_num_elements(old_object->properties), 0);
 		}
 
-		new_object->properties->u.v.flags |=
-			old_object->properties->u.v.flags & HASH_FLAG_HAS_EMPTY_IND;
+		HT_FLAGS(new_object->properties) |=
+			HT_FLAGS(old_object->properties) & HASH_FLAG_HAS_EMPTY_IND;
 
 		ZEND_HASH_FOREACH_KEY_VAL(old_object->properties, num_key, key, prop) {
 			if (Z_TYPE_P(prop) == IS_INDIRECT) {

@@ -28,7 +28,7 @@ var_dump($res);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 array(1) {
   ["CLOB"]=>

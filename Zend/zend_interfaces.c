@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,6 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 		zend_fcall_info_cache fcic;
 		ZVAL_UNDEF(&fci.function_name); /* Unused */
 
-		fcic.initialized = 1;
 		if (!obj_ce) {
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
@@ -224,7 +223,7 @@ ZEND_API void zend_user_it_rewind(zend_object_iterator *_iter)
 }
 /* }}} */
 
-zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
+static const zend_object_iterator_funcs zend_interface_iterator_funcs_iterator = {
 	zend_user_it_dtor,
 	zend_user_it_valid,
 	zend_user_it_get_current_data,
@@ -479,12 +478,12 @@ static int zend_implement_countable(zend_class_entry *interface, zend_class_entr
 /* }}}*/
 
 /* {{{ function tables */
-const zend_function_entry zend_funcs_aggregate[] = {
+static const zend_function_entry zend_funcs_aggregate[] = {
 	ZEND_ABSTRACT_ME(iterator, getIterator, NULL)
 	ZEND_FE_END
 };
 
-const zend_function_entry zend_funcs_iterator[] = {
+static const zend_function_entry zend_funcs_iterator[] = {
 	ZEND_ABSTRACT_ME(iterator, current,  NULL)
 	ZEND_ABSTRACT_ME(iterator, next,     NULL)
 	ZEND_ABSTRACT_ME(iterator, key,      NULL)
@@ -493,7 +492,7 @@ const zend_function_entry zend_funcs_iterator[] = {
 	ZEND_FE_END
 };
 
-const zend_function_entry *zend_funcs_traversable    = NULL;
+static const zend_function_entry *zend_funcs_traversable = NULL;
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset, 0, 0, 1)
 	ZEND_ARG_INFO(0, offset)
@@ -508,7 +507,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_arrayaccess_offset_value, 0, 0, 2)
 	ZEND_ARG_INFO(0, value)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry zend_funcs_arrayaccess[] = {
+static const zend_function_entry zend_funcs_arrayaccess[] = {
 	ZEND_ABSTRACT_ME(arrayaccess, offsetExists, arginfo_arrayaccess_offset)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetGet,    arginfo_arrayaccess_offset_get)
 	ZEND_ABSTRACT_ME(arrayaccess, offsetSet,    arginfo_arrayaccess_offset_value)
@@ -520,7 +519,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_serializable_serialize, 0)
 	ZEND_ARG_INFO(0, serialized)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry zend_funcs_serializable[] = {
+static const zend_function_entry zend_funcs_serializable[] = {
 	ZEND_ABSTRACT_ME(serializable, serialize,   NULL)
 	ZEND_FENTRY(unserialize, NULL, arginfo_serializable_serialize, ZEND_ACC_PUBLIC|ZEND_ACC_ABSTRACT|ZEND_ACC_CTOR)
 	ZEND_FE_END
@@ -529,7 +528,7 @@ const zend_function_entry zend_funcs_serializable[] = {
 ZEND_BEGIN_ARG_INFO(arginfo_countable_count, 0)
 ZEND_END_ARG_INFO()
 
-const zend_function_entry zend_funcs_countable[] = {
+static const zend_function_entry zend_funcs_countable[] = {
 	ZEND_ABSTRACT_ME(Countable, count, arginfo_countable_count)
 	ZEND_FE_END
 };

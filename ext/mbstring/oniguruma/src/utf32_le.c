@@ -2,7 +2,7 @@
   utf32_le.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -174,8 +174,8 @@ utf32le_get_case_fold_codes_by_str(OnigCaseFoldType flag,
 OnigEncodingType OnigEncodingUTF32_LE = {
   utf32le_mbc_enc_len,
   "UTF-32LE",   /* name */
-  4,            /* max byte length */
-  4,            /* min byte length */
+  4,            /* max enc length */
+  4,            /* min enc length */
   utf32le_is_mbc_newline,
   utf32le_mbc_to_code,
   utf32le_code_to_mbclen,

@@ -29,5 +29,5 @@ if ($flags&16 && !function_exists("imagecreatefromxpm")) {
 }
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 ok

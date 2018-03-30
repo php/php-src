@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -55,7 +55,7 @@ static int user_wrapper_metadata(php_stream_wrapper *wrapper, const char *url, i
 static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char *filename, const char *mode,
 		int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 
-static php_stream_wrapper_ops user_stream_wops = {
+static const php_stream_wrapper_ops user_stream_wops = {
 	user_wrapper_opener,
 	NULL, /* close - the streams themselves know how */
 	NULL, /* stat - the streams themselves know how */
@@ -311,7 +311,6 @@ static void user_stream_create_object(struct php_user_stream_wrapper *uwrap, php
 		fci.params = NULL;
 		fci.no_separation = 1;
 
-		fcc.initialized = 1;
 		fcc.function_handler = uwrap->ce->constructor;
 		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
@@ -491,7 +490,7 @@ static php_stream *user_wrapper_opendir(php_stream_wrapper *wrapper, const char 
 }
 
 
-/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, integer flags])
+/* {{{ proto bool stream_wrapper_register(string protocol, string classname[, int flags])
    Registers a custom URL protocol handler class */
 PHP_FUNCTION(stream_wrapper_register)
 {
@@ -546,7 +545,7 @@ PHP_FUNCTION(stream_wrapper_unregister)
 
 	if (php_unregister_url_stream_wrapper_volatile(protocol) == FAILURE) {
 		/* We failed */
-		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", protocol);
+		php_error_docref(NULL, E_WARNING, "Unable to unregister protocol %s://", ZSTR_VAL(protocol));
 		RETURN_FALSE;
 	}
 
@@ -1542,7 +1541,7 @@ static int php_userstreamop_cast(php_stream *stream, int castas, void **retptr)
 	return ret;
 }
 
-php_stream_ops php_stream_userspace_ops = {
+const php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_write, php_userstreamop_read,
 	php_userstreamop_close, php_userstreamop_flush,
 	"user-space",
@@ -1552,7 +1551,7 @@ php_stream_ops php_stream_userspace_ops = {
 	php_userstreamop_set_option,
 };
 
-php_stream_ops php_stream_userspace_dir_ops = {
+const php_stream_ops php_stream_userspace_dir_ops = {
 	NULL, /* write */
 	php_userstreamop_readdir,
 	php_userstreamop_closedir,

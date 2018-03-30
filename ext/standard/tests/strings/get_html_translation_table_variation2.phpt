@@ -52,7 +52,7 @@ $values =  array (
   "",
   '',
 
-  // null vlaues
+  // null values
   NULL,
   null,
 
@@ -88,23 +88,23 @@ echo "Done\n";
 --- Testing get_html_translation_table() by supplying different values for 'quote_style' argument ---
 -- Iteration 1 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, array given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 2 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, array given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 3 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, array given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 4 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, array given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 5 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, array given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 6 --
 array(4) {
@@ -148,23 +148,23 @@ array(3) {
 }
 -- Iteration 10 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, object given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, object given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, string given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 15 --
 array(3) {
@@ -186,7 +186,7 @@ array(3) {
 }
 -- Iteration 17 --
 
-Warning: get_html_translation_table() expects parameter 2 to be integer, resource given in %s on line %s
+Warning: get_html_translation_table() expects parameter 2 to be int, resource given in %s on line %d
 NULL
 -- Iteration 18 --
 array(3) {

@@ -69,7 +69,7 @@ __attribute__ ((__gnu_inline__))
 int
 unicode_fold2_key(OnigCodePoint codes[])
 {
-  static const int wordlist[] =
+  static const short int wordlist[] =
     {
 
       101,

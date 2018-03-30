@@ -52,7 +52,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : hexa formats with float values ***
 
 -- Iteration 1 --

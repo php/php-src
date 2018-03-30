@@ -84,7 +84,7 @@ foreach($heredoc_arr as $str) {
  
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : heredoc strings as 'str' argument ***
 -- Iteration 1 --
 string(2) "

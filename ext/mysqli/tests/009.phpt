@@ -92,7 +92,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch_uint"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(8) {
   [0]=>
   int(5)

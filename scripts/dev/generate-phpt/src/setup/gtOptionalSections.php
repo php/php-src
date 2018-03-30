@@ -56,17 +56,11 @@ class gtOptionalSections {
   }
 
   public function hasSkipifKey() {
-    if($this->skipifKey != '') {
-      return true;
-    }
-    return false;
+    return $this->skipifKey != '';
   }
   
   public function hasSkipifExt() {
-    if($this->skipifExt != '') {
-      return true;
-    }
-    return false;
+    return $this->skipifExt != '';
   }
   public function hasIni() {
     return $this->optSections['ini'];

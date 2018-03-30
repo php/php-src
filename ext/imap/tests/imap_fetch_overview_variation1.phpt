@@ -99,22 +99,22 @@ foreach($inputs as $input) {
 
 -- Testing with first argument value: int(0)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- Testing with first argument value: int(1)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- Testing with first argument value: int(12345)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- Testing with first argument value: int(-2345)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, integer given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, int given in %s on line %d
 NULL
 
 -- Testing with first argument value: float(10.5)
@@ -154,30 +154,30 @@ NULL
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(true)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
 -- Testing with first argument value: bool(false)
 
-Warning: imap_fetch_overview() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 1 to be resource, bool given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(0) ""
+-- Testing with first argument value: string(0) ""
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(0) ""
+-- Testing with first argument value: string(0) ""
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
@@ -188,17 +188,17 @@ NULL
 Warning: imap_fetch_overview() expects parameter 1 to be resource, array given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(6) "string"
+-- Testing with first argument value: string(6) "string"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(6) "string"
+-- Testing with first argument value: string(6) "string"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL
 
--- Testing with first argument value: %string|unicode%(11) "hello world"
+-- Testing with first argument value: string(11) "hello world"
 
 Warning: imap_fetch_overview() expects parameter 1 to be resource, string given in %s on line %d
 NULL

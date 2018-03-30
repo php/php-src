@@ -209,7 +209,7 @@ getlength(const uint8_t *c, size_t *p, size_t l)
 static const char *
 der_tag(char *buf, size_t len, uint32_t tag)
 {
-	if (tag < DER_TAG_LONG) 
+	if (tag < DER_TAG_LONG)
 		strlcpy(buf, der__tag[tag], len);
 	else
 		snprintf(buf, len, "%#x", tag);
@@ -231,7 +231,7 @@ der_data(char *buf, size_t blen, uint32_t tag, const void *q, uint32_t len)
 	default:
 		break;
 	}
-		
+
 	for (i = 0; i < len; i++) {
 		uint32_t z = i << 1;
 		if (z < blen - 2)
@@ -346,7 +346,7 @@ printtag(uint32_t tag, const void *q, uint32_t len)
 	default:
 		break;
 	}
-		
+
 	for (uint32_t i = 0; i < len; i++)
 		printf("%.2x", d[i]);
 	printf("\n");
@@ -370,7 +370,7 @@ printdata(size_t level, const void *v, size_t x, size_t l)
 		if (p + x >= ep)
 			break;
 		uint32_t len = getlength(p, &x, ep - p + x);
-		
+
 		printf("%zu %zu-%zu %c,%c,%s,%u:", level, ox, x,
 		    der_class[c], der_type[t],
 		    der_tag(buf, sizeof(buf), tag), len);

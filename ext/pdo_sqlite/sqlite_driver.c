@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -722,7 +722,7 @@ static void pdo_sqlite_request_shutdown(pdo_dbh_t *dbh)
 	}
 }
 
-static struct pdo_dbh_methods sqlite_methods = {
+static const struct pdo_dbh_methods sqlite_methods = {
 	sqlite_handle_closer,
 	sqlite_handle_preparer,
 	sqlite_handle_doer,
@@ -845,7 +845,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_sqlite_driver = {
+const pdo_driver_t pdo_sqlite_driver = {
 	PDO_DRIVER_HEADER(sqlite),
 	pdo_sqlite_handle_factory
 };

@@ -25,7 +25,7 @@ var_dump(in_array('AutoInterface', get_declared_interfaces()));
 
 echo "\nDONE\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_declared_interfaces() : autoloading of interfaces ***
 
 -- before interface is used --

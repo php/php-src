@@ -109,7 +109,7 @@ fclose( $file_handle );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing DateTime::__construct() : usage variation -  unexpected values to first argument $timezone***
 
 -- int 0 --

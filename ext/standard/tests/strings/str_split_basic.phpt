@@ -26,7 +26,7 @@ var_dump( str_split($str) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing str_split() : basic functionality ***
 -- With all possible arguments --
 array(5) {

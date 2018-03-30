@@ -7014,7 +7014,7 @@
 >>>>>>>>>>>>>8		uleshort	>0		\b, at offset %d
 >>>>>>>>>>>>>(8.s+1)	ubyte		>0
 >>>>>>>>>>>>>>&-1	string		>\0		1st record "%s"
-# for multiple index files (*.MDX) Production flag,tag numbers(<=0x30),tag length(<=0x20), reserverd (NULL)
+# for multiple index files (*.MDX) Production flag,tag numbers(<=0x30),tag length(<=0x20), reserved (NULL)
 >>>>>>>24	ubelong&0x0133f7ff	>0
 # test for reserved NULL byte
 >>>>>>>>47	ubyte			0

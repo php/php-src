@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache, Escape Analysis                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -177,9 +177,14 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 			    /* objects with destructors should escape */
 				if (opline->op1_type == IS_CONST) {
 					zend_class_entry *ce = get_class_entry(script, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op1, ssa->rt_constants)+1));
+					uint32_t forbidden_flags = ZEND_ACC_INHERITED
+						/* These flags will always cause an exception */
+						| ZEND_ACC_IMPLICIT_ABSTRACT_CLASS | ZEND_ACC_EXPLICIT_ABSTRACT_CLASS
+						| ZEND_ACC_INTERFACE | ZEND_ACC_TRAIT;
 					if (ce && !ce->create_object && !ce->constructor &&
 					    !ce->destructor && !ce->__get && !ce->__set &&
-					    !(ce->ce_flags & ZEND_ACC_INHERITED)) {
+					    !(ce->ce_flags & forbidden_flags) &&
+						(ce->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
 						return 1;
 					}
 				}

@@ -53,7 +53,7 @@ foreach ($stmt->fetchAll() as $row) {
 $dbh->query('DROP TABLE nodes');
 
 ?>
---EXPECTF--
+--EXPECT--
 1 - 1 - 1 - 1 - 1 - 1 - 6 - 6
 2 - 2 - 1 - 1 - 2 - 2 - 3 - 3
 3 - 3 - 1 - 1 - 4 - 4 - 5 - 5

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -132,7 +132,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ wddx_functions[]
  */
-const zend_function_entry wddx_functions[] = {
+static const zend_function_entry wddx_functions[] = {
 	PHP_FE(wddx_serialize_value, arginfo_wddx_serialize_value)
 	PHP_FE(wddx_serialize_vars,	arginfo_wddx_serialize_vars)
 	PHP_FE(wddx_packet_start,	arginfo_wddx_serialize_start)
@@ -421,7 +421,7 @@ static void php_wddx_serialize_string(wddx_packet *packet, zval *var)
 static void php_wddx_serialize_number(wddx_packet *packet, zval *var)
 {
 	char tmp_buf[WDDX_BUF_LEN], *dec_point;
-	zend_string *str = zval_get_string(var);
+	zend_string *str = zval_get_string_func(var);
 	snprintf(tmp_buf, sizeof(tmp_buf), WDDX_NUMBER, ZSTR_VAL(str));
 	zend_string_release(str);
 
@@ -991,7 +991,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 						zval_ptr_dtor(&ent1->data);
 					} else if (Z_TYPE(ent2->data) == IS_OBJECT) {
 						zend_update_property(Z_OBJCE(ent2->data), &ent2->data, ent1->varname, strlen(ent1->varname), &ent1->data);
-						if Z_REFCOUNTED(ent1->data) Z_DELREF(ent1->data);
+						Z_TRY_DELREF(ent1->data);
 					} else {
 						zend_symtable_str_update(target_hash, ent1->varname, strlen(ent1->varname), &ent1->data);
 					}

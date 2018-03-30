@@ -54,7 +54,7 @@ foreach($vars as $var) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : double quoted strings for $var argument ***
 -- Iteration 1 --
 int(5)

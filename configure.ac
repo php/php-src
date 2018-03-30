@@ -495,7 +495,10 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h
+assert.h \
+tmmintrin.h \
+nmmintrin.h \
+immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -565,6 +568,16 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_init
+PHP_CHECK_BUILTIN_CPU_INIT
+dnl Check __builtin_cpu_supports
+PHP_CHECK_BUILTIN_CPU_SUPPORTS
+
+dnl Check instructions
+PHP_CHECK_CPU_SUPPORTS([ssse3])
+PHP_CHECK_CPU_SUPPORTS([sse4.2])
+PHP_CHECK_CPU_SUPPORTS([avx])
+PHP_CHECK_CPU_SUPPORTS([avx2])
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -585,6 +598,9 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
+AX_GCC_FUNC_ATTRIBUTE([ifunc])
+AX_GCC_FUNC_ATTRIBUTE([target])
+
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_TRY_LINK([ #include <sys/types.h>
@@ -603,6 +619,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+explicit_memset \
 flock \
 ftok \
 funopen \
@@ -753,7 +770,49 @@ if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
 fi
 
-PHP_CHECK_VALGRIND
+dnl Check for asm goto support
+AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
+[AC_TRY_RUN([
+int main(void) {
+    __asm__ goto("jmp %l0\n" :::: end);
+end:
+    return 0;
+}
+  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+
+if test "$ac_cv__asm_goto" = yes; then
+  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+fi
+
+dnl Check valgrind support
+PHP_ARG_WITH(valgrind, [whether to enable valgrind support],
+[  --with-valgrind=DIR     Enable valgrind support], yes, no)
+
+if test "$PHP_VALGRIND" != "no"; then
+
+  AC_MSG_CHECKING([for valgrind header])
+
+  if test "$PHP_VALGRIND" = "yes"; then
+    SEARCH_PATH="/usr/local /usr"
+  else
+    SEARCH_PATH="$PHP_VALGRIND"
+  fi
+
+  SEARCH_FOR="/include/valgrind/valgrind.h"
+  for i in $SEARCH_PATH ; do
+    if test -r $i/$SEARCH_FOR; then
+      VALGRIND_DIR=$i
+    fi
+  done
+
+  if test -z "$VALGRIND_DIR"; then
+    AC_MSG_RESULT([not found])
+  else
+    AC_MSG_RESULT(found in $VALGRIND_DIR)
+    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
+  fi
+
+fi
 
 dnl General settings.
 dnl -------------------------------------------------------------------------
@@ -1268,7 +1327,11 @@ fi
 EXTRA_LDFLAGS="$EXTRA_LDFLAGS $PHP_LDFLAGS"
 EXTRA_LDFLAGS_PROGRAM="$EXTRA_LDFLAGS_PROGRAM $PHP_LDFLAGS"
 
-PHP_BUILD_DATE=`date '+%Y-%m-%d'`
+# SOURCE_DATE_EPOCH for reproducible builds https://reproducible-builds.org/specs/source-date-epoch/
+PHP_BUILD_DATE=`date --utc --date="@${SOURCE_DATE_EPOCH:-$(date +%s)}" +%Y-%m-%d 2>/dev/null`
+if test $? -ne 0 ; then
+PHP_BUILD_DATE=`date -u +%Y-%m-%d`
+fi
 AC_DEFINE_UNQUOTED(PHP_BUILD_DATE,"$PHP_BUILD_DATE",[PHP build date])
 
 PHP_UNAME=`uname -a | xargs`
@@ -1356,12 +1419,7 @@ old_CC=$CC
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
+  CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
 dnl This will go away, if we have a facility to run per-extension code
@@ -1466,7 +1524,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 dnl Selectively disable optimization due to high RAM usage during

@@ -21,5 +21,5 @@ var_dump($bi->preceding(-1));
 --EXPECTF--
 int(4)
 int(21)
-int(%d)
+int(%i)
 ==DONE==

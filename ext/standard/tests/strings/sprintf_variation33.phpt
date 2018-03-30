@@ -37,7 +37,7 @@ foreach($boolean_values as $boolean_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with boolean values ***
 
 -- Iteration 1 --

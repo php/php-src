@@ -26,15 +26,15 @@ foreach ( $variation as $var ) {
 ===DONE===
 --EXPECTF--
 
-Warning: readgzfile() expects parameter 2 to be integer, array given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
-Warning: readgzfile() expects parameter 2 to be integer, array given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
-Warning: readgzfile() expects parameter 2 to be integer, array given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, array given in %s on line %d
 NULL
 
-Warning: readgzfile() expects parameter 2 to be integer, array given in %s on line %d
+Warning: readgzfile() expects parameter 2 to be int, array given in %s on line %d
 NULL
 ===DONE===

@@ -23,7 +23,7 @@ var_dump(`cat "$filename_txt" | "$php" -n -B 'var_dump("start");' -E 'var_dump("
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(18) "string(5) "start"
 "
 string(16) "string(3) "end"

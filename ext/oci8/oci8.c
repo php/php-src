@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1537,7 +1537,7 @@ sb4 php_oci_error(OCIError *err_p, sword errstatus)
 		case OCI_ERROR:
 			errcode = php_oci_fetch_errmsg(err_p, errbuf, sizeof(errbuf));
 			if (errcode) {
-				php_error_docref(NULL, E_WARNING, "%s", errbuf, sizeof(errbuf));
+				php_error_docref(NULL, E_WARNING, "%s", errbuf);
 			} else {
 				php_error_docref(NULL, E_WARNING, "failed to fetch error message");
 			}
@@ -1872,7 +1872,7 @@ php_oci_connection *php_oci_do_connect_ex(char *username, int username_len, char
 								if ((tmp_val != NULL) && (Z_TYPE_P(tmp_val) == IS_RESOURCE)) {
 									tmp = Z_RES_VAL_P(tmp_val);
 								}
-							
+
 								if ((tmp_val != NULL) && (tmp != NULL) &&
 									(ZSTR_LEN(tmp->hash_key) == ZSTR_LEN(hashed_details.s)) &&
 									(memcmp(ZSTR_VAL(tmp->hash_key), ZSTR_VAL(hashed_details.s),

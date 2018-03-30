@@ -274,7 +274,7 @@ typedef struct {
 typedef struct {
 	uint16_t ce_namlen;
 	uint32_t ce_num;
-	uint64_t ce_timestamp; 
+	uint64_t ce_timestamp;
 	uint16_t ce_name[256];
 } cdf_catalog_entry_t;
 

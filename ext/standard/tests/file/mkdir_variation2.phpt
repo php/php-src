@@ -130,16 +130,16 @@ Directory created
 Directory created
 
 --empty array--
-Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, array given, %s(%d)
 
 --int indexed array--
-Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, array given, %s(%d)
 
 --associative array--
-Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, array given, %s(%d)
 
 --nested arrays--
-Error: 2 - mkdir() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, array given, %s(%d)
 
 --uppercase NULL--
 Directory created
@@ -160,28 +160,28 @@ Directory created
 Directory created
 
 --empty string DQ--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --empty string SQ--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --string DQ--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --string SQ--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --mixed case string--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --heredoc--
-Error: 2 - mkdir() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, string given, %s(%d)
 
 --instance of classWithToString--
-Error: 2 - mkdir() expects parameter 2 to be integer, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, object given, %s(%d)
 
 --instance of classWithoutToString--
-Error: 2 - mkdir() expects parameter 2 to be integer, object given, %s(%d)
+Error: 2 - mkdir() expects parameter 2 to be int, object given, %s(%d)
 
 --undefined var--
 Directory created

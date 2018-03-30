@@ -20,5 +20,5 @@ try {
     var_dump($e->getMessage());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(9) "serialize"

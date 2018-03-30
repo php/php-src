@@ -5,7 +5,6 @@
 /* from gd_compat.c */
 const char * gdPngGetVersionString();
 const char * gdJpegGetVersionString();
-int gdJpegGetVersionInt();
 #endif
 
 /* from gd_compat.c of libgd/gd_security.c */

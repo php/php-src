@@ -179,7 +179,7 @@ foreach ($var_values as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 8: Undefined variable: unset_var
 8: Undefined variable: undef_var
 

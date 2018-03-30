@@ -22,7 +22,7 @@ $stmt = $db->prepare('INSERT INTO test VALUES(?)');
 $stmt->execute(array($value));
 var_dump($db->query('SELECT * from test')->fetchAll(PDO::FETCH_ASSOC));
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(1) {

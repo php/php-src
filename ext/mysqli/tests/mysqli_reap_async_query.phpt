@@ -87,7 +87,7 @@ if (!$IS_MYSQLND)
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [012 + 2] array (
   '_one' => '1',
 )

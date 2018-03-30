@@ -49,7 +49,7 @@ foreach($file_modes as $file_mode) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fgets() : basic functionality ***
 
 -- Testing fgets() with file opened using mode r --

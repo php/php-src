@@ -21,5 +21,5 @@ for ($i = 0; $i < 2; $i++) {
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Done

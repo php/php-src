@@ -90,7 +90,7 @@ foreach($heredoc_strings as $str)  {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strspn() : with different mask strings ***
 
 -- Iteration 1 --

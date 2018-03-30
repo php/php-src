@@ -68,7 +68,7 @@ foreach($file_content_types as $file_content_type) {
 }//end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ftruncate() : usage variations ***
 
 -- Testing ftruncate() with file having data of type numeric --

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,6 +29,22 @@
 
 #define BLOB_CLOSE		1
 #define BLOB_CANCEL		2
+
+#define PARSE_PARAMETERS \
+	switch (ZEND_NUM_ARGS()) { \
+		default: \
+			WRONG_PARAM_COUNT; \
+		case 1: \
+			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) { \
+				RETURN_FALSE; \
+			} \
+			break; \
+		case 2: \
+			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) { \
+				RETURN_FALSE; \
+			} \
+			break; \
+	} \
 
 static int le_blob;
 
@@ -242,21 +258,7 @@ PHP_FUNCTION(ibase_blob_open)
 	ibase_blob *ib_blob;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
@@ -405,21 +407,7 @@ PHP_FUNCTION(ibase_blob_info)
 	IBASE_BLOBINFO bl_info;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 
@@ -482,21 +470,7 @@ PHP_FUNCTION(ibase_blob_echo)
 	unsigned short seg_len;
 
 	RESET_ERRMSG;
-
-	switch (ZEND_NUM_ARGS()) {
-		default:
-			WRONG_PARAM_COUNT;
-		case 1:
-			if (FAILURE == zend_parse_parameters(1, "s", &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-		case 2:
-			if (FAILURE == zend_parse_parameters(2, "rs", &link, &blob_id, &blob_id_len)) {
-				RETURN_FALSE;
-			}
-			break;
-	}
+	PARSE_PARAMETERS;
 
 	PHP_IBASE_LINK_TRANS(link, ib_link, trans);
 

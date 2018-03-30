@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -512,7 +512,7 @@ carry_on:
 		}
 
 		return;
-	} else if (PHAR_G(phar_fname_map.u.flags) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
+	} else if (HT_FLAGS(&PHAR_G(phar_fname_map)) && NULL != (pphar = zend_hash_str_find_ptr(&(PHAR_G(phar_fname_map)), fname, fname_len))) {
 		goto carry_on;
 	} else if (PHAR_G(manifest_cached) && NULL != (pphar = zend_hash_str_find_ptr(&cached_phars, fname, fname_len))) {
 		if (SUCCESS == phar_copy_on_write(&pphar)) {
@@ -1129,15 +1129,15 @@ static void phar_spl_foreign_clone(spl_filesystem_object *src, spl_filesystem_ob
 }
 /* }}} */
 
-static spl_other_handler phar_spl_foreign_handler = {
+static const spl_other_handler phar_spl_foreign_handler = {
 	phar_spl_foreign_dtor,
 	phar_spl_foreign_clone
 };
 
-/* {{{ proto void Phar::__construct(string fname [, int flags [, string alias]])
+/* {{{ proto Phar::__construct(string fname [, int flags [, string alias]])
  * Construct a Phar archive object
  *
- * proto void PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
+ * proto PharData::__construct(string fname [[, int flags [, string alias]], int file format = Phar::TAR])
  * Construct a PharData archive object
  *
  * This function is used as the constructor for both the Phar and PharData
@@ -1402,7 +1402,7 @@ PHP_METHOD(Phar, unlinkArchive)
 		return; \
 	}
 
-/* {{{ proto void Phar::__destruct()
+/* {{{ proto Phar::__destruct()
  * if persistent, remove from the cache
  */
 PHP_METHOD(Phar, __destruct)
@@ -1481,7 +1481,7 @@ static int phar_build(zend_object_iterator *iter, void *puser) /* {{{ */
 
 				if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN(key))) {
 					zval_dtor(&key);
-					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (too long)", ZSTR_VAL(ce->name));
+					zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (too long)", ZSTR_VAL(ce->name));
 					return ZEND_HASH_APPLY_STOP;
 				}
 
@@ -1615,7 +1615,7 @@ phar_spl_fileinfo:
 
 			if (ZEND_SIZE_T_INT_OVFL(Z_STRLEN(key))) {
 				zval_dtor(&key);
-				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %v returned an invalid key (too long)", ZSTR_VAL(ce->name));
+				zend_throw_exception_ex(spl_ce_UnexpectedValueException, 0, "Iterator %s returned an invalid key (too long)", ZSTR_VAL(ce->name));
 				return ZEND_HASH_APPLY_STOP;
 			}
 
@@ -3682,14 +3682,18 @@ PHP_METHOD(Phar, offsetGet)
  */
 static void phar_add_file(phar_archive_data **pphar, char *filename, int filename_len, char *cont_str, size_t cont_len, zval *zresource)
 {
+	int start_pos=0;
 	char *error;
 	size_t contents_len;
 	phar_entry_data *data;
 	php_stream *contents_file;
 
-	if (filename_len >= (int)sizeof(".phar")-1 && !memcmp(filename, ".phar", sizeof(".phar")-1) && (filename[5] == '/' || filename[5] == '\\' || filename[5] == '\0')) {
-		zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
-		return;
+	if (filename_len >= (int)sizeof(".phar")-1) {
+		start_pos = ('/' == filename[0] ? 1 : 0); /* account for any leading slash: multiple-leads handled elsewhere */
+		if (!memcmp(&filename[start_pos], ".phar", sizeof(".phar")-1) && (filename[start_pos+5] == '/' || filename[start_pos+5] == '\\' || filename[start_pos+5] == '\0')) {
+			zend_throw_exception_ex(spl_ce_BadMethodCallException, 0, "Cannot create any files in magic \".phar\" directory");
+			return;
+		}
 	}
 
 	if (!(data = phar_get_or_create_entry_data((*pphar)->fname, (*pphar)->fname_len, filename, filename_len, "w+b", 0, &error, 1))) {
@@ -4346,21 +4350,50 @@ static int phar_extract_file(zend_bool overwrite, phar_entry_info *entry, char *
 }
 /* }}} */
 
+static int extract_helper(phar_archive_data *archive, zend_string *search, char *pathto, size_t pathto_len, zend_bool overwrite, char **error) { /* {{{ */
+	int extracted = 0;
+	phar_entry_info *entry;
+
+	if (!search) {
+		/* nothing to match -- extract all files */
+		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+			extracted++;
+		} ZEND_HASH_FOREACH_END();
+	} else if ('/' == ZSTR_VAL(search)[ZSTR_LEN(search) - 1]) {
+		/* ends in "/" -- extract all entries having that prefix */
+		ZEND_HASH_FOREACH_PTR(&archive->manifest, entry) {
+			if (0 != strncmp(ZSTR_VAL(search), entry->filename, ZSTR_LEN(search))) continue;
+			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+			extracted++;
+		} ZEND_HASH_FOREACH_END();
+	} else {
+		/* otherwise, looking for an exact match */
+		entry = zend_hash_find_ptr(&archive->manifest, search);
+		if (NULL == entry) return 0;
+		if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, error)) return -1;
+		return 1;
+	}
+
+	return extracted;
+}
+/* }}} */
+
 /* {{{ proto bool Phar::extractTo(string pathto[[, mixed files], bool overwrite])
  * Extract one or more file from a phar archive, optionally overwriting existing files
  */
 PHP_METHOD(Phar, extractTo)
 {
-	char *error = NULL;
 	php_stream *fp;
 	php_stream_statbuf ssb;
-	phar_entry_info *entry;
-	char *pathto, *filename;
-	size_t pathto_len, filename_len;
-	int ret, i;
-	int nelems;
+	char *pathto;
+	zend_string *filename;
+	size_t pathto_len;
+	int ret;
+	zval *zval_file;
 	zval *zval_files = NULL;
 	zend_bool overwrite = 0;
+	char *error = NULL;
 
 	PHAR_ARCHIVE_OBJECT();
 
@@ -4408,82 +4441,63 @@ PHP_METHOD(Phar, extractTo)
 	if (zval_files) {
 		switch (Z_TYPE_P(zval_files)) {
 			case IS_NULL:
-				goto all_files;
+				filename = NULL;
+				break;
 			case IS_STRING:
-				filename = Z_STRVAL_P(zval_files);
-				filename_len = Z_STRLEN_P(zval_files);
+				filename = Z_STR_P(zval_files);
 				break;
 			case IS_ARRAY:
-				nelems = zend_hash_num_elements(Z_ARRVAL_P(zval_files));
-				if (nelems == 0 ) {
+				if (zend_hash_num_elements(Z_ARRVAL_P(zval_files)) == 0) {
 					RETURN_FALSE;
 				}
-				for (i = 0; i < nelems; i++) {
-					zval *zval_file;
-					if ((zval_file = zend_hash_index_find(Z_ARRVAL_P(zval_files), i)) != NULL) {
-						switch (Z_TYPE_P(zval_file)) {
-							case IS_STRING:
-								break;
-							default:
-								zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
-									"Invalid argument, array of filenames to extract contains non-string value");
-								return;
-						}
-						if (NULL == (entry = zend_hash_find_ptr(&phar_obj->archive->manifest, Z_STR_P(zval_file)))) {
-							zend_throw_exception_ex(phar_ce_PharException, 0,
-								"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", Z_STRVAL_P(zval_file), phar_obj->archive->fname);
-						}
-						if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
-							zend_throw_exception_ex(phar_ce_PharException, 0,
-								"Extraction from phar \"%s\" failed: %s", phar_obj->archive->fname, error);
+
+				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(zval_files), zval_file) {
+					ZVAL_DEREF(zval_file);
+					if (IS_STRING != Z_TYPE_P(zval_file)) {
+						zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
+							"Invalid argument, array of filenames to extract contains non-string value");
+						return;
+					}
+					switch (extract_helper(phar_obj->archive, Z_STR_P(zval_file), pathto, pathto_len, overwrite, &error)) {
+						case -1:
+							zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
+								phar_obj->archive->fname, error);
 							efree(error);
 							return;
-						}
+						case 0:
+							zend_throw_exception_ex(phar_ce_PharException, 0,
+								"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+								ZSTR_VAL(Z_STR_P(zval_file)), phar_obj->archive->fname);
+							return;
 					}
-				}
+				} ZEND_HASH_FOREACH_END();
 				RETURN_TRUE;
 			default:
 				zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0,
 					"Invalid argument, expected a filename (string) or array of filenames");
 				return;
 		}
-
-		if (NULL == (entry = zend_hash_str_find_ptr(&phar_obj->archive->manifest, filename, filename_len))) {
-			zend_throw_exception_ex(phar_ce_PharException, 0,
-				"Phar Error: attempted to extract non-existent file \"%s\" from phar \"%s\"", filename, phar_obj->archive->fname);
-			return;
-		}
-
-		if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
-			zend_throw_exception_ex(phar_ce_PharException, 0,
-				"Extraction from phar \"%s\" failed: %s", phar_obj->archive->fname, error);
-			efree(error);
-			return;
-		}
 	} else {
-		phar_archive_data *phar;
-all_files:
-		phar = phar_obj->archive;
-		/* Extract all files */
-		if (!zend_hash_num_elements(&(phar->manifest))) {
-			RETURN_TRUE;
-		}
-
-		ZEND_HASH_FOREACH_PTR(&phar->manifest, entry) {
-			if (FAILURE == phar_extract_file(overwrite, entry, pathto, pathto_len, &error)) {
-				zend_throw_exception_ex(phar_ce_PharException, 0,
-					"Extraction from phar \"%s\" failed: %s", phar->fname, error);
-				efree(error);
-				return;
-			}
-		} ZEND_HASH_FOREACH_END();
+		filename = NULL;
 	}
-	RETURN_TRUE;
+
+	ret = extract_helper(phar_obj->archive, filename, pathto, pathto_len, overwrite, &error);
+	if (-1 == ret) {
+		zend_throw_exception_ex(phar_ce_PharException, 0, "Extraction from phar \"%s\" failed: %s",
+			phar_obj->archive->fname, error);
+		efree(error);
+	} else if (0 == ret && NULL != filename) {
+		zend_throw_exception_ex(phar_ce_PharException, 0,
+			"Phar Error: attempted to extract non-existent file or directory \"%s\" from phar \"%s\"",
+			ZSTR_VAL(filename), phar_obj->archive->fname);
+	} else {
+		RETURN_TRUE;
+	}
 }
 /* }}} */
 
 
-/* {{{ proto void PharFileInfo::__construct(string entry)
+/* {{{ proto PharFileInfo::__construct(string entry)
  * Construct a Phar entry object
  */
 PHP_METHOD(PharFileInfo, __construct)
@@ -4558,7 +4572,7 @@ PHP_METHOD(PharFileInfo, __construct)
 		return; \
 	}
 
-/* {{{ proto void PharFileInfo::__destruct()
+/* {{{ proto PharFileInfo::__destruct()
  * clean up directory-based entry objects
  */
 PHP_METHOD(PharFileInfo, __destruct)
@@ -5296,7 +5310,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_phar__void, 0)
 ZEND_END_ARG_INFO()
 
 
-zend_function_entry php_archive_methods[] = {
+static const zend_function_entry php_archive_methods[] = {
 	PHP_ME(Phar, __construct,           arginfo_phar___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
 	PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
@@ -5365,7 +5379,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_data___construct, 0, 0, 1)
     ZEND_ARG_INFO(0, fileformat)
 ZEND_END_ARG_INFO()
 
-zend_function_entry php_data_methods[] = {
+static const zend_function_entry php_data_methods[] = {
     PHP_ME(Phar, __construct,           arginfo_data___construct,  ZEND_ACC_PUBLIC)
     PHP_ME(Phar, __destruct,            arginfo_phar__void,        ZEND_ACC_PUBLIC)
     PHP_ME(Phar, addEmptyDir,           arginfo_phar_emptydir,     ZEND_ACC_PUBLIC)
@@ -5434,7 +5448,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_entry_chmod, 0, 0, 1)
 	ZEND_ARG_INFO(0, perms)
 ZEND_END_ARG_INFO()
 
-zend_function_entry php_entry_methods[] = {
+static const zend_function_entry php_entry_methods[] = {
 	PHP_ME(PharFileInfo, __construct,        arginfo_entry___construct,  ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, __destruct,         arginfo_phar__void,         ZEND_ACC_PUBLIC)
 	PHP_ME(PharFileInfo, chmod,              arginfo_entry_chmod,        ZEND_ACC_PUBLIC)
@@ -5453,7 +5467,7 @@ zend_function_entry php_entry_methods[] = {
 	PHP_FE_END
 };
 
-zend_function_entry phar_exception_methods[] = {
+static const zend_function_entry phar_exception_methods[] = {
 	PHP_FE_END
 };
 /* }}} */

@@ -22,7 +22,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "12"
 string(4) "7556"
 string(4) "7556"

@@ -2,7 +2,7 @@
   euc_jp.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -152,7 +152,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
   if (enclen(ONIG_ENCODING_EUC_JP, buf) != (p - buf))
     return ONIGERR_INVALID_CODE_POINT_VALUE;
 #endif  
-  return p - buf;
+  return (int )(p - buf);
 }
 
 static int
@@ -230,7 +230,7 @@ static int
 property_name_to_ctype(OnigEncoding enc, UChar* p, UChar* end)
 {
   struct PropertyNameCtype* pc;
-  int len = end - p;
+  int len = (int )(end - p);
   char q[32];
 
   if (len < sizeof(q) - 1) {
@@ -252,7 +252,7 @@ is_code_ctype(OnigCodePoint code, unsigned int ctype)
       return ONIGENC_IS_ASCII_CODE_CTYPE(code, ctype);
     else {
       if (CTYPE_IS_WORD_GRAPH_PRINT(ctype)) {
-	return (code_to_mbclen(code) > 1 ? TRUE : FALSE);
+        return (code_to_mbclen(code) > 1 ? TRUE : FALSE);
       }
     }
   }
@@ -306,5 +306,6 @@ OnigEncodingType OnigEncodingEUC_JP = {
   is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  0, 0, 0
 };

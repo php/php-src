@@ -43,7 +43,7 @@ foreach ($stmt as $line) {
 
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [1]=>
   int(1)

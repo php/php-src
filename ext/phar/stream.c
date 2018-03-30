@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar:// stream wrapper support                                       |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
 #include "stream.h"
 #include "dirstream.h"
 
-php_stream_ops phar_ops = {
+const php_stream_ops phar_ops = {
 	phar_stream_write, /* write */
 	phar_stream_read,  /* read */
 	phar_stream_close, /* close */
@@ -34,7 +34,7 @@ php_stream_ops phar_ops = {
 	NULL, /* set option */
 };
 
-php_stream_wrapper_ops phar_stream_wops = {
+const php_stream_wrapper_ops phar_stream_wops = {
 	phar_wrapper_open_url,
 	NULL,                  /* phar_wrapper_close */
 	NULL,                  /* phar_wrapper_stat, */
@@ -48,7 +48,7 @@ php_stream_wrapper_ops phar_stream_wops = {
 	NULL
 };
 
-php_stream_wrapper php_stream_phar_wrapper = {
+const php_stream_wrapper php_stream_phar_wrapper = {
 	&phar_stream_wops,
 	NULL,
 	0 /* is_url */
@@ -106,7 +106,7 @@ php_url* phar_parse_url(php_stream_wrapper *wrapper, const char *filename, const
 	if (mode[0] == 'w' || (mode[0] == 'r' && mode[1] == '+')) {
 		phar_archive_data *pphar = NULL, *phar;
 
-		if (PHAR_G(request_init) && PHAR_G(phar_fname_map.u.flags) && NULL == (pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host))) {
+		if (PHAR_G(request_init) && HT_FLAGS(&PHAR_G(phar_fname_map)) && NULL == (pphar = zend_hash_find_ptr(&(PHAR_G(phar_fname_map)), resource->host))) {
 			pphar = NULL;
 		}
 		if (PHAR_G(readonly) && (!pphar || !pphar->is_data)) {
@@ -597,7 +597,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		php_url_free(resource);
 		return SUCCESS;
 	}
-	if (!phar->manifest.u.flags) {
+	if (!HT_FLAGS(&phar->manifest)) {
 		php_url_free(resource);
 		return FAILURE;
 	}
@@ -614,7 +614,7 @@ static int phar_wrapper_stat(php_stream_wrapper *wrapper, const char *url, int f
 		return SUCCESS;
 	}
 	/* check for mounted directories */
-	if (phar->mounted_dirs.u.flags && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (HT_FLAGS(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {

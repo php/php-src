@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -174,7 +174,7 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 }
 /* }}} */
 
-static zend_function_entry zend_test_trait_methods[] = {
+static const zend_function_entry zend_test_trait_methods[] = {
     ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
@@ -228,7 +228,7 @@ PHP_MINFO_FUNCTION(zend_test)
 	php_info_print_table_end();
 }
 
-const zend_function_entry zend_test_functions[] = {
+static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
