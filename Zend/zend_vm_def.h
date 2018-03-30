@@ -5024,8 +5024,9 @@ ZEND_VM_HANDLER(99, ZEND_FETCH_CONSTANT, UNUSED|CONST_FETCH, CONST, CACHE_SLOT)
 	USE_OPLINE
 	zend_constant *c;
 
-	if (EXPECTED(CACHED_PTR(opline->extended_value))) {
-		c = CACHED_PTR(opline->extended_value);
+	c = CACHED_PTR(opline->extended_value);
+	if (EXPECTED(c != NULL) && EXPECTED(!IS_SPECIAL_CACHE_VAL(c))) {
+		/* pass */
 	} else if (UNEXPECTED((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op2) + 1, opline->op1.num)) == NULL)) {
 		SAVE_OPLINE();
 
@@ -7640,14 +7641,25 @@ ZEND_VM_HANDLER(122, ZEND_DEFINED, CONST, ANY, CACHE_SLOT)
 	zend_constant *c;
 	int result;
 
-	if (EXPECTED(CACHED_PTR(opline->extended_value))) {
-		result = 1;
-	} else if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op1), 0)) == NULL) {
-		result = 0;
-	} else {
-		CACHE_PTR(opline->extended_value, c);
-		result = 1;
-	}
+	c = CACHED_PTR(opline->extended_value);
+	do {
+		if (EXPECTED(c != NULL)) {
+			if (!IS_SPECIAL_CACHE_VAL(c)) {
+				result = 1;
+				break;
+			} else if (EXPECTED(zend_hash_num_elements(EG(zend_constants)) == DECODE_SPECIAL_CACHE_NUM(c))) {
+				result = 0;
+				break;
+			}
+		}
+		if ((c = zend_quick_get_constant(RT_CONSTANT(opline, opline->op1), 0)) == NULL) {
+			CACHE_PTR(opline->extended_value, ENCODE_SPECIAL_CACHE_NUM(zend_hash_num_elements(EG(zend_constants))));
+			result = 0;
+		} else {
+			CACHE_PTR(opline->extended_value, c);
+			result = 1;
+		}
+	} while (0);
 	ZEND_VM_SMART_BRANCH(result, 0);
 	ZVAL_BOOL(EX_VAR(opline->result.var), result);
 	ZEND_VM_NEXT_OPCODE();
