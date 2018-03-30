@@ -1392,7 +1392,6 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		} else {
 			wid = 1;
 		}
-		wid = (int)(thick * sin(atan2(dy, dx)));
 		vert = 1;
 
 		d = 2 * dy - dx;

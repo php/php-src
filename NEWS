@@ -10,6 +10,10 @@ PHP                                                                        NEWS
     too long). (Jacob Hipps)
   . Fixed incorrect write to getenv result in FPM reload. (Jakub Zelenka)
 
+- GD:
+  . Fixed bug #52070 (imagedashedline() - dashed line sometimes is not visible).
+    (cmb)
+
 - mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
