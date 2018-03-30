@@ -83,6 +83,7 @@ SimpleXML:
     treated as integers unconditionally.
 
 Standard:
+  . Undefined variables passed to compact() will now be reported as a notice.
   . getimagesize() and related functions now report the mime type of BMP images
 	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
 		with the IANA (see RFC 7903).
