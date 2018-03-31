@@ -6,6 +6,7 @@ $server = stream_socket_server("tcp://[::1]:1337/");
 echo stream_socket_get_name($server, false).PHP_EOL;
 $server = stream_socket_server("tcp://127.0.0.1:1337/");
 echo stream_socket_get_name($server, false);
---EXPECTF--
+?>
+--EXPECT--
 [::1]:1337
 127.0.0.1:1337
