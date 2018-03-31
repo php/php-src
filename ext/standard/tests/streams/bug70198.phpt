@@ -7,13 +7,13 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 --FILE--
 <?php
 
-/* What is checked here is 
+/* What is checked here is
 	- start a server and listen
 	- as soon as client connects, close connection and exit
 	- on the client side - sleep(1) and check feof()
 */
 
-$srv_addr = "tcp://127.0.0.1:8964";
+$srv_addr = "tcp://127.0.0.1:10000";
 $srv_fl = dirname(__FILE__) . "/bug70198_svr_" . md5(uniqid()) . ".php";
 $srv_fl_cont = <<<SRV
 <?php
@@ -58,4 +58,3 @@ unlink($srv_fl);
 --EXPECT--
 int(0)
 ==DONE==
-
