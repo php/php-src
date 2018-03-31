@@ -215,8 +215,6 @@ static int zend_fiber_start(zend_fiber *fiber, zval *params, uint32_t param_coun
 						zend_vm_stack_free_args(call);
 						zend_vm_stack_free_call_frame(call);
 
-						// TODO: cleanup
-
 						EG(vm_stack) = current_stack;
 						EG(vm_stack_top) = current_stack->top;
 						EG(vm_stack_end) = current_stack->end;
@@ -575,7 +573,7 @@ void zend_register_fiber_ce()
 	/* Create new user opcode to terminate Fiber */
 	while (1) {
 		if (opcode == 255) {
-			// TODO FAIL
+			// Fiber will be not registed
 			return;
 		} else if (zend_get_user_opcode_handler(opcode) == NULL) {
 			break;
