@@ -633,6 +633,7 @@ PHP_INI_BEGIN()
 	STD_PHP_INI_ENTRY("user_ini.filename",		".user.ini",	PHP_INI_SYSTEM,		OnUpdateString,		user_ini_filename,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("user_ini.cache_ttl",		"300",			PHP_INI_SYSTEM,		OnUpdateLong,		user_ini_cache_ttl,	php_core_globals,		core_globals)
 	STD_PHP_INI_ENTRY("hard_timeout",			"2",			PHP_INI_SYSTEM,		OnUpdateLong,		hard_timeout,		zend_executor_globals,	executor_globals)
+	STD_PHP_INI_ENTRY("fiber.stack_size",		"4096",			PHP_INI_SYSTEM,		OnUpdateLongGEZero,	fiber_stack_page_size,	zend_executor_globals,	executor_globals)
 #ifdef PHP_WIN32
 	STD_PHP_INI_BOOLEAN("windows.show_crt_warning",		"0",		PHP_INI_ALL,		OnUpdateBool,			windows_show_crt_warning,			php_core_globals,	core_globals)
 #endif

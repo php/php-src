@@ -157,6 +157,8 @@ struct _zend_executor_globals {
 	zend_vm_stack  vm_stack;
 	size_t         vm_stack_page_size;
 
+	zend_long fiber_stack_page_size;
+
 	struct _zend_execute_data *current_execute_data;
 	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
 

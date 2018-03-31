@@ -16,7 +16,7 @@ libZend_la_SOURCES=\
 	zend_ini.c zend_sort.c zend_objects.c zend_object_handlers.c \
 	zend_objects_API.c zend_ts_hash.c zend_stream.c \
 	zend_default_classes.c \
-	zend_iterators.c zend_interfaces.c zend_exceptions.c \
+	zend_iterators.c zend_interfaces.c zend_exceptions.c zend_fiber.c \
 	zend_strtod.c zend_closures.c zend_float.c zend_string.c zend_signal.c \
 	zend_generators.c zend_virtual_cwd.c zend_ast.c zend_smart_str.c zend_cpuinfo.c
 
