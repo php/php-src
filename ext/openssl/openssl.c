@@ -128,6 +128,7 @@ PHP_FUNCTION(openssl_decrypt);
 PHP_FUNCTION(openssl_cipher_iv_length);
 
 PHP_FUNCTION(openssl_dh_compute_key);
+PHP_FUNCTION(openssl_derive);
 PHP_FUNCTION(openssl_random_pseudo_bytes);
 
 /* {{{ arginfo */
@@ -430,6 +431,12 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
 	ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO(arginfo_openssl_derive, 0)
+	ZEND_ARG_INFO(0, peer_pub_key)
+	ZEND_ARG_INFO(0, priv_key)
+	ZEND_ARG_INFO(0, keylen)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_random_pseudo_bytes, 0, 0, 1)
 	ZEND_ARG_INFO(0, length)
 	ZEND_ARG_INFO(1, result_is_strong)
@@ -534,6 +541,7 @@ static const zend_function_entry openssl_functions[] = {
 #endif
 
 	PHP_FE(openssl_dh_compute_key,		arginfo_openssl_dh_compute_key)
+	PHP_FE(openssl_derive,			arginfo_openssl_derive)
 
 	PHP_FE(openssl_random_pseudo_bytes,	arginfo_openssl_random_pseudo_bytes)
 	PHP_FE(openssl_error_string, arginfo_openssl_error_string)
@@ -4933,6 +4941,44 @@ PHP_FUNCTION(openssl_dh_compute_key)
 }
 /* }}} */
 
+/* {{{ proto string openssl_derive(resource peer_pub_key, resource priv_key,int keylen=NULL)
+   Computes shared secret for public value of remote and local DH or ECDH key */
+PHP_FUNCTION(openssl_derive)
+{
+	zval *priv_key;
+	zval *peer_pub_key;
+	EVP_PKEY *pkey;
+	EVP_PKEY *peer_key;
+	zend_long keylen = 0;
+	zend_string *result;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|l", &peer_pub_key, &priv_key, &keylen) == FAILURE) {
+		return;
+	}
+	if ((pkey = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(priv_key), "OpenSSL key", le_key)) == NULL
+	 || (peer_key = (EVP_PKEY *)zend_fetch_resource(Z_RES_P(peer_pub_key), "OpenSSL key", le_key)) == NULL) {
+		RETURN_FALSE;
+	}
+	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pkey, NULL);
+	if (!ctx) RETURN_FALSE;
+	if (EVP_PKEY_derive_init(ctx) > 0
+	 && EVP_PKEY_derive_set_peer(ctx, peer_key) > 0
+	 && (keylen > 0 || EVP_PKEY_derive(ctx, NULL, &keylen) > 0)
+	 && (result = zend_string_alloc(keylen, 0)) != NULL) {
+		if (EVP_PKEY_derive(ctx, (unsigned char*)ZSTR_VAL(result), &keylen) > 0) {
+			ZSTR_LEN(result) = keylen;
+			ZSTR_VAL(result)[keylen] = 0;
+			RETVAL_STR(result);
+		} else {
+			php_openssl_store_errors();
+			zend_string_release(result);
+			RETVAL_FALSE;
+		}
+	} else {
+		RETVAL_FALSE;
+	}
+	EVP_PKEY_CTX_free(ctx);
+}
 /* }}} */
 
 /* {{{ proto string openssl_pbkdf2(string password, string salt, int key_length, int iterations [, string digest_method = "sha1"])
