@@ -54,7 +54,7 @@ ZEND_END_MODULE_GLOBALS(fiber)
 
 #define FIBER_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(fiber, v)
 
-void zend_register_generator_ce(void);
+void zend_register_fiber_ce(void);
 
 #endif	/* PHP_FIBER_H */
 /*
