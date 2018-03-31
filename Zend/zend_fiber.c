@@ -563,12 +563,19 @@ static const zend_function_entry fiber_functions[] = {/*{{{*/
 	ZEND_FE_END
 };/*}}}*/
 
+static void fiber_init_globals(zend_fiber_globals *cg)
+{
+	memset(cg, 0, sizeof(zend_fiber_globals));
+}
+
 /* {{{ PHP_MINIT_FUNCTION
  **/
 void zend_register_fiber_ce()
 {
 	zend_class_entry ce;
 	zend_uchar opcode = ZEND_VM_LAST_OPCODE + 1;
+
+	ZEND_INIT_MODULE_GLOBALS(fiber, fiber_init_globals, NULL);
 
 	/* Create new user opcode to terminate Fiber */
 	while (1) {

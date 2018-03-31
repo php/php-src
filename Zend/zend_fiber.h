@@ -52,6 +52,8 @@ ZEND_BEGIN_MODULE_GLOBALS(fiber)
 	volatile zend_bool release_this;
 ZEND_END_MODULE_GLOBALS(fiber)
 
+ZEND_EXTERN_MODULE_GLOBALS(fiber);
+
 #define FIBER_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(fiber, v)
 
 void zend_register_fiber_ce(void);
