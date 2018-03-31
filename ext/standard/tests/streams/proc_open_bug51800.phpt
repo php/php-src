@@ -2,13 +2,10 @@
 Bug #51800 proc_open on Windows hangs forever
 --SKIPIF--
 <?php
-	echo 'skip expected to fail or take too long';
 	if (getenv("SKIP_SLOW_TESTS")) {
 		die("skip slow test");
 	}
 ?>
---XFAIL--
-pipes have to be read/written simultaneously
 --FILE--
 <?php
 /* This is the wrong way to do it. The parent will block till it has read all the STDIN.
@@ -92,4 +89,3 @@ array(3) {
 int(10000)
 int(10000)
 ===DONE===
-
