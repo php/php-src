@@ -27,7 +27,7 @@
 #ifndef USE_CALENDAR_POINTER
 typedef void Calendar;
 #else
-using U_ICU_NAMESPACE::Calendar;
+using icu::Calendar;
 #endif
 
 typedef struct {

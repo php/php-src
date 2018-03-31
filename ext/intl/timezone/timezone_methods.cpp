@@ -38,8 +38,8 @@ extern "C" {
 }
 #include "common/common_enum.h"
 
-using U_ICU_NAMESPACE::Locale;
-using U_ICU_NAMESPACE::Calendar;
+using icu::Locale;
+using icu::Calendar;
 
 U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 {

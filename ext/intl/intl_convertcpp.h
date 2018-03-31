@@ -26,7 +26,7 @@
 #include <unicode/unistr.h>
 #include <zend_types.h>
 
-using U_ICU_NAMESPACE::UnicodeString;
+using icu::UnicodeString;
 
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 

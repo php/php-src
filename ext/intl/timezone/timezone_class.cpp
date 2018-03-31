@@ -37,7 +37,7 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
-using U_ICU_NAMESPACE::Calendar;
+using icu::Calendar;
 
 /* {{{ Global variables */
 U_CDECL_BEGIN

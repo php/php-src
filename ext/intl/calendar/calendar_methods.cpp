@@ -43,7 +43,7 @@ extern "C" {
 }
 #include "../common/common_enum.h"
 
-using U_ICU_NAMESPACE::Locale;
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {

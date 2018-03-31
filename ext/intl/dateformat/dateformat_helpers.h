@@ -28,9 +28,9 @@ extern "C" {
 #include "../php_intl.h"
 }
 
-using U_ICU_NAMESPACE::Locale;
-using U_ICU_NAMESPACE::Calendar;
-using U_ICU_NAMESPACE::DateFormat;
+using icu::Locale;
+using icu::Calendar;
+using icu::DateFormat;
 
 int datefmt_process_calendar_arg(zval* calendar_zv,
 								 Locale const& locale,

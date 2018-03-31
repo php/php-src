@@ -26,8 +26,8 @@ extern "C" {
 #include "../intl_convertcpp.h"
 #include "../intl_common.h"
 
-using U_ICU_NAMESPACE::RuleBasedBreakIterator;
-using U_ICU_NAMESPACE::Locale;
+using icu::RuleBasedBreakIterator;
+using icu::Locale;
 
 static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;

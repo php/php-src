@@ -20,9 +20,9 @@
 #include <unicode/brkiter.h>
 #include <unicode/unistr.h>
 
-using U_ICU_NAMESPACE::BreakIterator;
-using U_ICU_NAMESPACE::CharacterIterator;
-using U_ICU_NAMESPACE::UnicodeString;
+using icu::BreakIterator;
+using icu::CharacterIterator;
+using icu::UnicodeString;
 
 namespace PHP {
 

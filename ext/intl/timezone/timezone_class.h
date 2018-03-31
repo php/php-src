@@ -30,7 +30,7 @@
 #ifndef USE_TIMEZONE_POINTER
 typedef void TimeZone;
 #else
-using U_ICU_NAMESPACE::TimeZone;
+using icu::TimeZone;
 #endif
 
 typedef struct {

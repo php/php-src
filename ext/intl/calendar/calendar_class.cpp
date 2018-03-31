@@ -34,8 +34,8 @@ extern "C" {
 #include <assert.h>
 }
 
-using U_ICU_NAMESPACE::GregorianCalendar;
-using U_ICU_NAMESPACE::Locale;
+using icu::GregorianCalendar;
+using icu::Locale;
 
 /* {{{ Global variables */
 zend_class_entry *Calendar_ce_ptr;

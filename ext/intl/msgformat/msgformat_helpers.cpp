@@ -76,15 +76,15 @@ MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
 #endif
 U_NAMESPACE_END
 
-using U_ICU_NAMESPACE::Formattable;
-using U_ICU_NAMESPACE::Format;
-using U_ICU_NAMESPACE::DateFormat;
-using U_ICU_NAMESPACE::MessageFormat;
+using icu::Formattable;
+using icu::Format;
+using icu::DateFormat;
+using icu::MessageFormat;
 #ifdef HAS_MESSAGE_PATTERN
-using U_ICU_NAMESPACE::MessagePattern;
+using icu::MessagePattern;
 #endif
-using U_ICU_NAMESPACE::MessageFormatAdapter;
-using U_ICU_NAMESPACE::FieldPosition;
+using icu::MessageFormatAdapter;
+using icu::FieldPosition;
 
 U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 {

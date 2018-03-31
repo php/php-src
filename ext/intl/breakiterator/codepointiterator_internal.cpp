@@ -33,7 +33,7 @@ typedef union {
 
 using namespace PHP;
 
-using U_ICU_NAMESPACE::UCharCharacterIterator;
+using icu::UCharCharacterIterator;
 
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);
 
