@@ -152,8 +152,10 @@ SimpleXML:
 Standard:
   . Undefined variables passed to compact() will now be reported as a notice.
   . getimagesize() and related functions now report the mime type of BMP images
-	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
-		with the IANA (see RFC 7903).
+    as image/bmp instead of image/x-ms-bmp, since the former has been registered
+    with the IANA (see RFC 7903).
+  . stream_socket_get_name() will now return IPv6 addresses wrapped in brackets.
+    For example "[::1]:1337" will be returned instead of "::1:1337".
 
 ========================================
 2. New Features

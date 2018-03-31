@@ -626,7 +626,7 @@ PHPAPI void php_network_populate_name_from_sockaddr(
 			case AF_INET6:
 				buf = (char*)inet_ntop(sa->sa_family, &((struct sockaddr_in6*)sa)->sin6_addr, (char *)&abuf, sizeof(abuf));
 				if (buf) {
-					*textaddr = strpprintf(0, "%s:%d",
+					*textaddr = strpprintf(0, "[%s]:%d",
 						buf, ntohs(((struct sockaddr_in6*)sa)->sin6_port));
 				}
 
