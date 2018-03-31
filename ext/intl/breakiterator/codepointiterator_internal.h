@@ -18,8 +18,11 @@
 #define CODEPOINTITERATOR_INTERNAL_H
 
 #include <unicode/brkiter.h>
+#include <unicode/unistr.h>
 
 using U_ICU_NAMESPACE::BreakIterator;
+using U_ICU_NAMESPACE::CharacterIterator;
+using U_ICU_NAMESPACE::UnicodeString;
 
 namespace PHP {
 

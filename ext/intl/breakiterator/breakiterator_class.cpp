@@ -38,6 +38,7 @@ extern "C" {
 }
 
 using PHP::CodePointBreakIterator;
+using U_ICU_NAMESPACE::RuleBasedBreakIterator;
 
 /* {{{ Global variables */
 zend_class_entry *BreakIterator_ce_ptr;

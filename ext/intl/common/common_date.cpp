@@ -25,6 +25,9 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
+using U_ICU_NAMESPACE::TimeZone;
+using U_ICU_NAMESPACE::UnicodeString;
+
 #include "zend_portability.h"
 
 /* {{{ timezone_convert_datetimezone

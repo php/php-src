@@ -23,6 +23,8 @@
 #include <unicode/locid.h>
 #include <unicode/calendar.h>
 #include <unicode/gregocal.h>
+#include <unicode/ustring.h>
+
 extern "C" {
 #include "../php_intl.h"
 #include "../intl_common.h"
@@ -33,6 +35,11 @@ extern "C" {
 #include <ext/date/php_date.h>
 #include "zend_exceptions.h"
 }
+
+using U_ICU_NAMESPACE::GregorianCalendar;
+using U_ICU_NAMESPACE::Locale;
+using U_ICU_NAMESPACE::UnicodeString;
+using U_ICU_NAMESPACE::StringPiece;
 
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 	return (GregorianCalendar*)co->ucal;
