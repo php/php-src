@@ -229,7 +229,7 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	 * i.e. If URL is only "?foo=bar", should not add "/?".
 	 */
 	if (!url_parts->path && !url_parts->query && !url_parts->fragment) {
-		/* URL is http://php.net or like */
+		/* URL is https://php.net or like */
 		smart_str_append_smart_str(dest, url);
 		smart_str_appendc(dest, '/');
 		smart_str_appendc(dest, '?');

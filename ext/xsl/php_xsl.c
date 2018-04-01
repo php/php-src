@@ -139,10 +139,10 @@ PHP_MINIT_FUNCTION(xsl)
 #endif
 
 	xsltRegisterExtModuleFunction ((const xmlChar *) "functionString",
-				   (const xmlChar *) "https://php.net/xsl",
+				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_string_php);
 	xsltRegisterExtModuleFunction ((const xmlChar *) "function",
-				   (const xmlChar *) "https://php.net/xsl",
+				   (const xmlChar *) "http://php.net/xsl",
 				   xsl_ext_function_object_php);
 	xsltSetGenericErrorFunc(NULL, php_libxml_error_handler);
 
@@ -237,9 +237,9 @@ void php_xsl_create_object(xsltStylesheetPtr obj, zval *wrapper_in, zval *return
 PHP_MSHUTDOWN_FUNCTION(xsl)
 {
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "functionString",
-				   (const xmlChar *) "https://php.net/xsl");
+				   (const xmlChar *) "http://php.net/xsl");
 	xsltUnregisterExtModuleFunction ((const xmlChar *) "function",
-				   (const xmlChar *) "https://php.net/xsl");
+				   (const xmlChar *) "http://php.net/xsl");
 	xsltSetGenericErrorFunc(NULL, NULL);
 	xsltCleanupGlobals();
 

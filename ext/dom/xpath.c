@@ -279,10 +279,10 @@ PHP_METHOD(domxpath, __construct)
 		}
 
 		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "functionString",
-					   (const xmlChar *) "https://php.net/xpath",
+					   (const xmlChar *) "http://php.net/xpath",
 					   dom_xpath_ext_function_string_php);
 		xmlXPathRegisterFuncNS (ctx, (const xmlChar *) "function",
-					   (const xmlChar *) "https://php.net/xpath",
+					   (const xmlChar *) "http://php.net/xpath",
 					   dom_xpath_ext_function_object_php);
 
 		intern->dom.ptr = ctx;
