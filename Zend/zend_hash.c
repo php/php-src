@@ -533,7 +533,7 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 		p = HT_HASH_TO_BUCKET_EX(arData, idx);
 		if (EXPECTED(p->key == key)) { /* check for the same interned string */
 			return p;
-		} else if (EXPECTED(p->h == h) &&
+		} else if (EXPECTED(p->h == ZSTR_H(key)) &&
 		     EXPECTED(p->key) &&
 		     EXPECTED(zend_string_equal_content(p->key, key))) {
 			return p;
