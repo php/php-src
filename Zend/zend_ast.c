@@ -276,7 +276,7 @@ ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zen
 ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2) {
 	zend_ast *ast;
 	zend_ast_list *list;
-	uint32_t lineno = zend_ast_get_lineno(child1);
+	uint32_t lineno;
 
 	ast = zend_ast_alloc(zend_ast_list_size(4));
 	list = (zend_ast_list *) ast;
