@@ -563,8 +563,8 @@ typedef int (*sqlite3_loadext_entry)(
 #define sqlite3_value_pointer          sqlite3_api->value_pointer
 /* Version 3.22.0 and later */
 #define sqlite3_vtab_nochange          sqlite3_api->vtab_nochange
-#define sqlite3_value_nochange         sqltie3_api->value_nochange
-#define sqlite3_vtab_collation         sqltie3_api->vtab_collation
+#define sqlite3_value_nochange         sqlite3_api->value_nochange
+#define sqlite3_vtab_collation         sqlite3_api->vtab_collation
 #endif /* !defined(SQLITE_CORE) && !defined(SQLITE_OMIT_LOAD_EXTENSION) */
 
 #if !defined(SQLITE_CORE) && !defined(SQLITE_OMIT_LOAD_EXTENSION)
