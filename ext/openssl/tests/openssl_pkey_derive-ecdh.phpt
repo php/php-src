@@ -1,5 +1,5 @@
 --TEST--
-openssl_derive() ECDH
+openssl_pkey_derive() ECDH
 --SKIPIF--
 <?php if (!extension_loaded("openssl") || !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
 --FILE--
@@ -22,11 +22,8 @@ N2IRPU2MF6S0S6i44MU=
 -----END PUBLIC KEY-----
 ");
 
-echo bin2hex(openssl_derive($pub,$priv));
-echo "\n";
-echo bin2hex(openssl_derive($priv,$priv));
+echo bin2hex(openssl_pkey_derive($pub,$priv));
 echo "\n";
 ?>
 --EXPECTF--
 01171967cc0ddc553b46c6a821502aaea44aa04e6933d897ea11222efa0556f2d5d972816676c9ccf4e2430a26e07193ad39373050f6e54e4059f17720d7dd667635
-0129ed9749701a48f01a70757c8d967007cb7abeff2ec46ce18b51f1e7daeae81aaef146a0a585db5ee3c5469c0c4bd3a2395f79d36b4a800ac08e866fc96548fad8
