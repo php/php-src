@@ -574,6 +574,7 @@ static int alter_ini( const char * pKey, int keyLen, const char * pValue, int va
         ++pKey;
         if ( *pKey == 4 ) {
             type = ZEND_INI_SYSTEM;
+            stage = PHP_INI_STAGE_ACTIVATE;
         }
         else
         {
