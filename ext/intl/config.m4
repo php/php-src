@@ -69,7 +69,7 @@ if test "$PHP_INTL" != "no"; then
     idn/idn.c \
     $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,cxx)
 
-  PHP_ADD_SOURCES(PHP_EXT_DIR(intl), intl_convertcpp.cpp \
+  PHP_INTL_CPP_SOURCES="intl_convertcpp.cpp \
     common/common_enum.cpp \
     common/common_date.cpp \
     dateformat/dateformat_format_object.cpp \
@@ -87,8 +87,13 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/breakiterator_methods.cpp \
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
-    breakiterator/codepointiterator_methods.cpp, \
-    $ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $ICU_EXTRA_FLAGS)
+    breakiterator/codepointiterator_methods.cpp"
+  PHP_INTL_CPP_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $ICU_EXTRA_FLAGS"
+  if test "$ext_shared" = "no"; then
+    PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CPP_SOURCES, $PHP_INTL_CPP_FLAGS)
+  else
+    PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CPP_SOURCES, $PHP_INTL_CPP_FLAGS, shared_objects_intl, yes)
+  fi
 
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
   PHP_ADD_BUILD_DIR($ext_builddir/converter)
