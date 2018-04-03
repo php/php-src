@@ -26,18 +26,19 @@
 BEGIN_EXTERN_C()
 
 typedef void (*zend_string_copy_storage_func_t)(void);
-typedef zend_string *(*zend_new_interned_string_func_t)(zend_string *str);
-typedef zend_string *(*zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
+typedef zend_string *(ZEND_FASTCALL *zend_new_interned_string_func_t)(zend_string *str);
+typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const char *str, size_t size, int permanent);
 
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
-ZEND_API zend_ulong zend_hash_func(const char *str, size_t len);
+ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
+ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
+
 ZEND_API void zend_interned_strings_init(void);
 ZEND_API void zend_interned_strings_dtor(void);
 ZEND_API void zend_interned_strings_activate(void);
 ZEND_API void zend_interned_strings_deactivate(void);
-ZEND_API zend_string *zend_interned_string_find_permanent(zend_string *str);
 ZEND_API void zend_interned_strings_set_request_storage_handlers(zend_new_interned_string_func_t handler, zend_string_init_interned_func_t init_handler);
 ZEND_API void zend_interned_strings_set_permanent_storage_copy_handlers(zend_string_copy_storage_func_t copy_handler, zend_string_copy_storage_func_t restore_handler);
 ZEND_API void zend_interned_strings_switch_storage(zend_bool request);

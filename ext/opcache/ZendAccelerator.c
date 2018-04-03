@@ -437,7 +437,7 @@ static zend_always_inline zend_string *accel_find_interned_string(zend_string *s
 	return NULL;
 }
 
-zend_string *accel_new_interned_string(zend_string *str)
+zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str)
 {
 	zend_ulong   h;
 	uint32_t     pos, *hash_slot;
@@ -493,7 +493,7 @@ zend_string *accel_new_interned_string(zend_string *str)
 	return s;
 }
 
-static zend_string *accel_new_interned_string_for_php(zend_string *str)
+static zend_string* ZEND_FASTCALL accel_new_interned_string_for_php(zend_string *str)
 {
 	zend_string_hash_val(str);
 	if (ZCG(counted)) {
@@ -528,7 +528,7 @@ static zend_always_inline zend_string *accel_find_interned_string_ex(zend_ulong 
 	return NULL;
 }
 
-static zend_string *accel_init_interned_string_for_php(const char *str, size_t size, int permanent)
+static zend_string* ZEND_FASTCALL accel_init_interned_string_for_php(const char *str, size_t size, int permanent)
 {
 	if (ZCG(counted)) {
 	    zend_ulong h = zend_inline_hash_func(str, size);
@@ -708,7 +708,7 @@ static void accel_copy_permanent_strings(zend_new_interned_string_func_t new_int
 	} ZEND_HASH_FOREACH_END();
 }
 
-static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
+static zend_string* ZEND_FASTCALL accel_replace_string_by_shm_permanent(zend_string *str)
 {
 	zend_string *ret = accel_find_interned_string(str);
 
@@ -719,7 +719,7 @@ static zend_string *accel_replace_string_by_shm_permanent(zend_string *str)
 	return str;
 }
 
-static zend_string *accel_replace_string_by_process_permanent(zend_string *str)
+static zend_string* ZEND_FASTCALL accel_replace_string_by_process_permanent(zend_string *str)
 {
 	zend_string *ret = zend_interned_string_find_permanent(str);
 
