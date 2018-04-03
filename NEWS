@@ -18,6 +18,9 @@ PHP                                                                        NEWS
   . Fixed bug #52070 (imagedashedline() - dashed line sometimes is not visible).
     (cmb)
 
+- intl:
+  . Fixed bug #76153 (Intl compilation fails with icu4c 61.1). (Anatol)
+
 - mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
