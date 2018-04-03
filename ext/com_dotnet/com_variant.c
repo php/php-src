@@ -1012,13 +1012,13 @@ PHP_FUNCTION(variant_date_from_timestamp)
 	tzset();
 	ttstamp = timestamp;
 	tmv = localtime(&ttstamp);
-#if ZEND_ENABLE_ZVAL_LONG64
+
 	/* Invalid after 23:59:59, December 31, 3000, UTC */
 	if (!tmv) {
 		php_error_docref(NULL, E_WARNING, "Invalid timestamp " ZEND_LONG_FMT, timestamp);
 		RETURN_FALSE;
 	}
-#endif
+
 	memset(&systime, 0, sizeof(systime));
 
 	systime.wDay = tmv->tm_mday;
