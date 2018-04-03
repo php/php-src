@@ -3,7 +3,6 @@ Bug #72498 variant_date_from_timestamp null dereference
 --SKIPIF--
 <?php # vim:ft=php
 if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present";
-if (PHP_INT_SIZE != 8) print  "skip 64-bit only";
 ?>
 --FILE--
 <?php
