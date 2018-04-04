@@ -4958,8 +4958,8 @@ PHP_FUNCTION(openssl_pkey_derive)
 	if (keylen < 0) {
 		php_error_docref(NULL, E_WARNING, "keylen < 0, assuming NULL");
 	}
-	if ((pkey = php_openssl_evp_from_zval(priv_key,0,"",0,0,NULL)) == NULL
-		|| (peer_key = php_openssl_evp_from_zval(peer_pub_key,1,NULL,0,0,NULL)) == NULL) {
+	if ((pkey = php_openssl_evp_from_zval(priv_key, 0, "", 0, 0, NULL)) == NULL
+		|| (peer_key = php_openssl_evp_from_zval(peer_pub_key, 1, NULL, 0, 0, NULL)) == NULL) {
 		RETURN_FALSE;
 	}
 	EVP_PKEY_CTX *ctx = EVP_PKEY_CTX_new(pkey, NULL);
