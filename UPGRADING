@@ -20,20 +20,26 @@ PHP 7.3 UPGRADE NOTES
 ========================================
 
 Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
+  . The ext_skel utility has been completely redesigned with new options and
+    some old options removed. This is now written in PHP and has no external
 	dependencies.
   . Support for BeOS has been dropped.
   . Exceptions thrown due to automatic conversion of warnings into exceptions
     in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
     error_get_last() state. As such, they now work the same way as manually
     thrown exceptions.
+  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
+    and `boolean`.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+Reflection:
+  . Reflection results now returns `int` and `bool` instead of `integer`
+    and `boolean`.
 
 SPL:
   . If an SPL autoloader throws an exception, following autoloaders will not be
@@ -169,7 +175,7 @@ JSON:
  FTP:
   . Set default transfer mode to binary
 
- ODBC: 
+ ODBC:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
@@ -222,4 +228,3 @@ PGSQL:
 ========================================
 13. Other Changes
 ========================================
-
