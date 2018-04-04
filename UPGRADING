@@ -169,6 +169,9 @@ JSON:
  FTP:
   . Set default transfer mode to binary
 
+ MBString:
+  . The configuration option --with-libmbfl is no longer available.
+
  ODBC: 
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
