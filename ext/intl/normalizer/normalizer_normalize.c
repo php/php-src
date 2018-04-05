@@ -255,6 +255,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 /* {{{ proto string|null normalizer_get_raw_decomposition( string $input )
  * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
  */
+#if U_ICU_VERSION_MAJOR_NUM >= 49
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
 	char* input = NULL;
@@ -294,6 +295,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 
 	RETVAL_NEW_STR(intl_convert_utf16_to_utf8(decomposition, decomposition_length, &status));
 }
+#endif
 /* }}} */
 
 /*

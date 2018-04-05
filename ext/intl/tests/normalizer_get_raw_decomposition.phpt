@@ -2,6 +2,7 @@
 normalizer_get_raw_decomposition()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
+<?php if( !function_exists( 'normalizer_get_raw_decomposition' ) ) print 'skip'; ?>
 --FILE--
 <?php
 
