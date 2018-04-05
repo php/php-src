@@ -2239,7 +2239,7 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
     ICU_EXTRA_FLAGS=`$ICU_CONFIG --cxxflags`
-    if test "$icu_version" -lt "49000"; then
+    if test "$icu_version" -ge "49000"; then
       ICU_EXTRA_FLAGS="$ICU_EXTRA_FLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
     fi
   fi
