@@ -129,7 +129,7 @@ if (PHP_INTL != "no") {
 			ADD_FLAG("LIBS_INTL", "iculx.lib");
 		}
 
-		ADD_FLAG("CFLAGS_INTL", "/EHsc");
+		ADD_FLAG("CFLAGS_INTL", "/EHsc /DUNISTR_FROM_CHAR_EXPLICIT=explicit /DUNISTR_FROM_STRING_EXPLICIT=explicit");
 		AC_DEFINE("HAVE_INTL", 1, "Internationalization support enabled");
 	} else {
 		WARNING("intl not enabled; libraries and/or headers not found");

@@ -237,15 +237,16 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					UnicodeString typeString = mp.getSubstring(type_part);
 					/* This is all based on the rules in the docs for MessageFormat
 					 * @see http://icu-project.org/apiref/icu4c/classMessageFormat.html */
-					if (typeString == "number") {
+#define ASCII_LITERAL(s) UNICODE_STRING(s, sizeof(s)-1)
+					if (typeString == ASCII_LITERAL("number")) {
 						MessagePattern::Part style_part = mp.getPart(i + 1); /* Not advancing i */
 						if (style_part.getType() == UMSGPAT_PART_TYPE_ARG_STYLE) {
 							UnicodeString styleString = mp.getSubstring(style_part);
-							if (styleString == "integer") {
+							if (styleString == ASCII_LITERAL("integer")) {
 								type = Formattable::kInt64;
-							} else if (styleString == "currency") {
+							} else if (styleString == ASCII_LITERAL("currency")) {
 								type = Formattable::kDouble;
-							} else if (styleString == "percent") {
+							} else if (styleString == ASCII_LITERAL("percent")) {
 								type = Formattable::kDouble;
 							} else { /* some style invalid/unknown to us */
 								type = Formattable::kDouble;
@@ -253,12 +254,13 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 						} else { // if missing style, part, make it a double
 							type = Formattable::kDouble;
 						}
-					} else if ((typeString == "date") || (typeString == "time")) {
+					} else if ((typeString == ASCII_LITERAL("date")) || (typeString == ASCII_LITERAL("time"))) {
 						type = Formattable::kDate;
-					} else if ((typeString == "spellout") || (typeString == "ordinal")
-							|| (typeString == "duration")) {
+					} else if ((typeString == ASCII_LITERAL("spellout")) || (typeString == ASCII_LITERAL("ordinal"))
+							|| (typeString == ASCII_LITERAL("duration"))) {
 						type = Formattable::kDouble;
 					}
+#undef ASCII_LITERAL
 				} else {
 					/* If there's no UMSGPAT_PART_TYPE_ARG_TYPE right after a
 					 * UMSGPAT_ARG_TYPE_SIMPLE argument, then the pattern
