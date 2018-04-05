@@ -88,7 +88,7 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp"
-  PHP_INTL_CPP_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $ICU_EXTRA_FLAGS"
+  PHP_INTL_CPP_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $ICU_CXXFLAGS"
   if test "$ext_shared" = "no"; then
     PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CPP_SOURCES, $PHP_INTL_CPP_FLAGS)
   else
