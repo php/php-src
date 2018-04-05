@@ -154,6 +154,7 @@ PHP_XML_API const XML_Char *XML_ExpatVersion(void);
 PHP_XML_API void XML_ParserFree(XML_Parser);
 
 #elif defined(HAVE_LIBEXPAT)
+#include "php.h"
 #include <expat.h>
 #endif /* HAVE_LIBEXPAT */
 
