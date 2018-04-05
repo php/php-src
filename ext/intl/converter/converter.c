@@ -18,6 +18,10 @@
 #include "zend_exceptions.h"
 
 #include <unicode/utypes.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#include <unicode/utf16.h>
+#endif
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 

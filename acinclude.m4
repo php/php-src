@@ -2241,6 +2241,10 @@ AC_DEFUN([PHP_SETUP_ICU],[
     ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
     if test "$icu_version" -ge "49000"; then
       ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
+    fi
+    if test "$icu_version" -ge "60000"; then
+      ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
     fi
   fi
 ])

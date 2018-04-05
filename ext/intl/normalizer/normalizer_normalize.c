@@ -24,6 +24,9 @@
 #include "normalizer_class.h"
 #include "normalizer_normalize.h"
 #include "intl_convert.h"
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 
 /* {{{ proto string Normalizer::normalize( string $input [, string $form = FORM_C] )
  * Normalize a string. }}} */
