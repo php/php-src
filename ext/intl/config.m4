@@ -9,6 +9,7 @@ if test "$PHP_INTL" != "no"; then
   PHP_SETUP_ICU(INTL_SHARED_LIBADD)
   PHP_SUBST(INTL_SHARED_LIBADD)
   PHP_REQUIRE_CXX()
+  INTL_COMMON_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
   if test "$icu_version" -ge "4002"; then
     icu_spoof_src=" spoofchecker/spoofchecker_class.c \
     spoofchecker/spoofchecker.c\
@@ -67,9 +68,9 @@ if test "$PHP_INTL" != "no"; then
     transliterator/transliterator_methods.c \
     uchar/uchar.c \
     idn/idn.c \
-    $icu_spoof_src, $ext_shared,,$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1,cxx)
+    $icu_spoof_src, $ext_shared,,$INTL_COMMON_FLAGS,cxx)
 
-  PHP_INTL_CPP_SOURCES="intl_convertcpp.cpp \
+  PHP_INTL_CXX_SOURCES="intl_convertcpp.cpp \
     common/common_enum.cpp \
     common/common_date.cpp \
     dateformat/dateformat_format_object.cpp \
@@ -88,11 +89,11 @@ if test "$PHP_INTL" != "no"; then
     breakiterator/rulebasedbreakiterator_methods.cpp \
     breakiterator/codepointiterator_internal.cpp \
     breakiterator/codepointiterator_methods.cpp"
-  PHP_INTL_CPP_FLAGS="$ICU_INCS -Wno-write-strings -D__STDC_LIMIT_MACROS -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1 $ICU_CXXFLAGS"
+  PHP_INTL_CXX_FLAGS="$INTL_COMMON_FLAGS $ICU_CXXFLAGS"
   if test "$ext_shared" = "no"; then
-    PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CPP_SOURCES, $PHP_INTL_CPP_FLAGS)
+    PHP_ADD_SOURCES(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS)
   else
-    PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CPP_SOURCES, $PHP_INTL_CPP_FLAGS, shared_objects_intl, yes)
+    PHP_ADD_SOURCES_X(PHP_EXT_DIR(intl), $PHP_INTL_CXX_SOURCES, $PHP_INTL_CXX_FLAGS, shared_objects_intl, yes)
   fi
 
   PHP_ADD_BUILD_DIR($ext_builddir/collator)
