@@ -331,9 +331,9 @@ PHP_FUNCTION( normalizer_is_normalized )
 }
 /* }}} */
 
-/* {{{ proto string|null Normalizer::getRawDecomposition( string $input )
+/* {{{ proto string|null Normalizer::getRawDecomposition( string $input [, string $form = FORM_C] )
  * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
-/* {{{ proto string|null normalizer_get_raw_decomposition( string $input )
+/* {{{ proto string|null normalizer_get_raw_decomposition( string $input [, string $form = FORM_C] )
  * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
  */
 #if U_ICU_VERSION_MAJOR_NUM >= 49
@@ -346,15 +346,19 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 	int32_t offset = 0;
 
     UErrorCode status = U_ZERO_ERROR;
-    const UNormalizer2 *nfkc = unorm2_getNFKCInstance(&status);
+    const UNormalizer2 *norm;
     UChar decomposition[32];
     int32_t decomposition_length;
 
+	zend_long form = NORMALIZER_DEFAULT;
+
 	intl_error_reset(NULL);
 
-	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s", &input, &input_length) == FAILURE)) {
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &input, &input_length, &form) == FAILURE)) {
 		return;
 	}
+
+	norm = intl_get_normalizer(form, &status);
 
 	U8_NEXT(input, offset, input_length, codepoint);
 	if ((size_t)offset != input_length) {
@@ -369,7 +373,7 @@ PHP_FUNCTION( normalizer_get_raw_decomposition )
 		return;
 	}
 	
-	decomposition_length = unorm2_getRawDecomposition(nfkc, codepoint, decomposition, 32, &status);
+	decomposition_length = unorm2_getRawDecomposition(norm, codepoint, decomposition, 32, &status);
 	if (decomposition_length == -1) {
 		RETURN_NULL();
 	}
