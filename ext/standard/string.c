@@ -796,68 +796,68 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 	const char *end = start + ZSTR_LEN(str);
 	char mask[256];
 
-	if (what) {
-		if (what_len == 1) {
-			char p = *what;
-			if (mode & 1) {
-				while (start != end) {
-					if (*start == p) {
-						start++;
-					} else {
-						break;
-					}
-				}
-			}
-			if (mode & 2) {
-				while (start != end) {
-					if (*(end-1) == p) {
-						end--;
-					} else {
-						break;
-					}
-				}
-			}
-		} else {
-			php_charmask((unsigned char*)what, what_len, mask);
+	if (what && what_len == 1) {
+		char p = *what;
 
-			if (mode & 1) {
-				while (start != end) {
-					if (mask[(unsigned char)*start]) {
-						start++;
-					} else {
-						break;
-					}
+		if (mode & 1) {
+			while (start != end) {
+				if (*start != p) {
+					break;
 				}
-			}
-			if (mode & 2) {
-				while (start != end) {
-					if (mask[(unsigned char)*(end-1)]) {
-						end--;
-					} else {
-						break;
-					}
-				}
+				start++;
 			}
 		}
+
+		if (mode & 2) {
+			while (start != end) {
+				if (*(end-1) != p) {
+					break
+				}
+				end--;
+			}
+		}
+
+	} else if (what && what_len != 1) {
+		php_charmask((unsigned char*)what, what_len, mask);
+
+		if (mode & 1) {
+			while (start != end) {
+				if (!mask[(unsigned char)*start]) {
+					break;
+				}
+				start++;
+			}
+		}
+
+		if (mode & 2) {
+			while (start != end) {
+				if (!mask[(unsigned char)*(end-1)]) {
+					break;
+				}
+				end--;
+			}
+		}
+
 	} else {
 		if (mode & 1) {
 			while (start != end) {
 				unsigned char c = (unsigned char)*start;
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					(c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					start++;
 				} else {
 					break;
 				}
 			}
 		}
+
 		if (mode & 2) {
 			while (start != end) {
 				unsigned char c = (unsigned char)*(end-1);
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					(c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					end--;
 				} else {
 					break;
