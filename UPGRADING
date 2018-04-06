@@ -137,6 +137,7 @@ Intl:
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
   . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
     to retrieve the Decomposition_Mapping property of a character.
+  . Normalizer::NONE is deprecated, when PHP is linked with ICU 56 and above
 
 Standard:
   . Added is_countable() function, to check whether a value may be passed to
