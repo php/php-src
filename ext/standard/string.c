@@ -804,7 +804,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 				if (*start != p) {
 					break;
 				}
-			    start++;
+				start++;
 			}
 		}
 
@@ -816,10 +816,10 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 				end--;
 			}
 		}
-		
+
 	} else if (what && what_len != 1) {
 		php_charmask((unsigned char*)what, what_len, mask);
-		
+
 		if (mode & 1) {
 			while (start != end) {
 				if (!mask[(unsigned char)*start]) {
@@ -828,7 +828,7 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 				start++;
 			}
 		}
-		
+
 		if (mode & 2) {
 			while (start != end) {
 				if (!mask[(unsigned char)*(end-1)]) {
@@ -837,27 +837,27 @@ static zend_always_inline zend_string *php_trim_int(zend_string *str, char *what
 				end--;
 			}
 		}
-		
+
 	} else {
 		if (mode & 1) {
 			while (start != end) {
 				unsigned char c = (unsigned char)*start;
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					(c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					start++;
 				} else {
 					break;
 				}
 			}
 		}
-		
+
 		if (mode & 2) {
 			while (start != end) {
 				unsigned char c = (unsigned char)*(end-1);
 
 				if (c <= ' ' &&
-				    (c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
+					(c == ' ' || c == '\n' || c == '\r' || c == '\t' || c == '\v' || c == '\0')) {
 					end--;
 				} else {
 					break;
