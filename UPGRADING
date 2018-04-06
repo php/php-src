@@ -137,7 +137,6 @@ Intl:
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
   . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
     to retrieve the Decomposition_Mapping property of a character.
-  . Normalizer::NONE is deprecated, when PHP is linked with ICU 56 and above
 
 Standard:
   . Added is_countable() function, to check whether a value may be passed to
@@ -169,6 +168,11 @@ JSON:
 
  FTP:
   . Set default transfer mode to binary
+
+ Intl:
+  . Normalizer::NONE is deprecated, when PHP is linked with ICU >= 56
+  . Introduced Normalizer::FORM_KC_CF as Normalizer::normalize() argument
+    for NFKC_Casefold normalization, available when linked with ICU >= 56
 
  MBString:
   . The configuration option --with-libmbfl is no longer available.

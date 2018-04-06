@@ -51,6 +51,9 @@ static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 		case NORMALIZER_FORM_KD:
 			return unorm2_getNFKDInstance(err);
 			break;
+		case NORMALIZER_FORM_KC_CF:
+			return unorm2_getNFKCCasefoldInstance(err);
+			break;
 	}
 
 	*err = U_ILLEGAL_ARGUMENT_ERROR;
@@ -146,6 +149,9 @@ PHP_FUNCTION( normalizer_normalize )
 			break;
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+		case NORMALIZER_FORM_KC_CF:
+#endif
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -279,6 +285,9 @@ PHP_FUNCTION( normalizer_is_normalized )
 		case NORMALIZER_FORM_KD:
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+		case NORMALIZER_FORM_KC_CF:
+#endif
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
