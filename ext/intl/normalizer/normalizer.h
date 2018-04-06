@@ -19,7 +19,7 @@
 
 #include <php.h>
 #include <unicode/utypes.h>
-#if U_ICU_VERSION_MAJOR_NUM < 49
+#if U_ICU_VERSION_MAJOR_NUM < 56
 #include <unicode/unorm.h>
 
 #define NORMALIZER_NONE UNORM_NONE

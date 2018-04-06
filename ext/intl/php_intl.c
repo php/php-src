@@ -206,7 +206,7 @@ ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
 
-#if U_ICU_VERSION_MAJOR_NUM >= 49
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 ZEND_END_ARG_INFO();
@@ -668,7 +668,7 @@ static const zend_function_entry intl_functions[] = {
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, normalizer_args )
 	PHP_FE( normalizer_is_normalized, normalizer_args )
-#if U_ICU_VERSION_MAJOR_NUM >= 49
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
 #endif
 

@@ -21,8 +21,7 @@
 #include "php_intl.h"
 #if U_ICU_VERSION_MAJOR_NUM < 56
 #include "unicode/unorm.h"
-#endif
-#if U_ICU_VERSION_MAJOR_NUM >= 49
+#else
 #include <unicode/unorm2.h>
 #endif
 #include "normalizer.h"
@@ -34,7 +33,7 @@
 #endif
 
 
-#if U_ICU_VERSION_MAJOR_NUM >= 49
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
 {/*{{{*/
 	switch (form)
@@ -345,7 +344,7 @@ PHP_FUNCTION( normalizer_is_normalized )
 /* {{{ proto string|null normalizer_get_raw_decomposition( string $input [, string $form = FORM_C] )
  * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
  */
-#if U_ICU_VERSION_MAJOR_NUM >= 49
+#if U_ICU_VERSION_MAJOR_NUM >= 56
 PHP_FUNCTION( normalizer_get_raw_decomposition )
 {
 	char* input = NULL;
