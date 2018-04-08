@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -40,19 +40,17 @@
 #endif
 
 /* {{{ pdo_pgsql_functions[] */
-const zend_function_entry pdo_pgsql_functions[] = {
-	{NULL, NULL, NULL}
+static const zend_function_entry pdo_pgsql_functions[] = {
+	PHP_FE_END
 };
 /* }}} */
 
 /* {{{ pdo_sqlite_deps
  */
-#if ZEND_MODULE_API_NO >= 20050922
 static const zend_module_dep pdo_pgsql_deps[] = {
 	ZEND_MOD_REQUIRED("pdo")
 	ZEND_MOD_END
 };
-#endif
 /* }}} */
 
 /* {{{ pdo_pgsql_module_entry */

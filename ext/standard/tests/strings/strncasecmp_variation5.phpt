@@ -112,23 +112,23 @@ int(0)
 int(0)
 -- Iteration 8 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 9 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 10 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, array given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 13 --
 int(0)
@@ -144,11 +144,11 @@ int(0)
 int(0)
 -- Iteration 19 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, string given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, string given in %s on line %d
 NULL
 -- Iteration 21 --
 int(0)
@@ -156,10 +156,10 @@ int(0)
 int(0)
 -- Iteration 23 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, resource given in %s on line %d
 NULL
 -- Iteration 24 --
 
-Warning: strncasecmp() expects parameter 3 to be integer, object given in %s on line %d
+Warning: strncasecmp() expects parameter 3 to be int, object given in %s on line %d
 NULL
 *** Done ***

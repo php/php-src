@@ -4,7 +4,7 @@ SQLite3::re-initialize object tests
 Jelle Lampaert
 #Belgian Testfest 2009
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
@@ -19,4 +19,4 @@ try {
 --CLEAN--
 <?php @unlink(__DIR__ . '/db1.db'); ?>
 --EXPECTF--
-%string|unicode%(29) "Already initialised DB Object"
+string(29) "Already initialised DB Object"

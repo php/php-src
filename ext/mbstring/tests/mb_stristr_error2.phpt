@@ -17,8 +17,8 @@ echo "*** Testing mb_stristr() : error conditions ***\n";
 
 
 echo "\n-- Testing mb_stristr() with unknown encoding --\n";
-$haystack = b'Hello, world';
-$needle = b'world';
+$haystack = 'Hello, world';
+$needle = 'world';
 $encoding = 'unknown-encoding';
 $part = true;
 var_dump( mb_stristr($haystack, $needle, $part, $encoding) );

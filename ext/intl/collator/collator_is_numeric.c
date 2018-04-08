@@ -17,17 +17,6 @@
 
 #include "collator_is_numeric.h"
 
-#if ZEND_MODULE_API_NO < 20071006
-/* not 5.3 */
-#ifndef ALLOCA_FLAG
-#define ALLOCA_FLAG(use_heap)
-#endif
-#define _do_alloca(x, y) do_alloca((x))
-#define _free_alloca(x, y) free_alloca((x))
-#else
-#define _do_alloca do_alloca
-#define _free_alloca free_alloca
-#endif
 /* {{{ collator_u_strtod
  * Taken from PHP6:zend_u_strtod()
  */
@@ -36,7 +25,6 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 	const UChar *u = nptr, *nstart;
 	UChar c = *u;
 	int any = 0;
-	ALLOCA_FLAG(use_heap);
 
 	while (u_isspace(c)) {
 		c = *++u;
@@ -81,13 +69,14 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 
 	if (any) {
 		char buf[64], *numbuf, *bufpos;
-		int length = u - nstart;
+		size_t length = u - nstart;
 		double value;
+		ALLOCA_FLAG(use_heap);
 
 		if (length < sizeof(buf)) {
 			numbuf = buf;
 		} else {
-			numbuf = (char *) _do_alloca(length + 1, use_heap);
+			numbuf = (char *) do_alloca(length + 1, use_heap);
 		}
 
 		bufpos = numbuf;
@@ -100,7 +89,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		value = zend_strtod(numbuf, NULL);
 
 		if (numbuf != buf) {
-			_free_alloca(numbuf, use_heap);
+			free_alloca(numbuf, use_heap);
 		}
 
 		if (endptr != NULL) {

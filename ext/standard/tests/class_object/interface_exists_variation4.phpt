@@ -10,17 +10,16 @@ Test interface_exists() function : test autoload default value
 
 echo "*** Testing interface_exists() : test autoload default value ***\n";
 
-function __autoload($class_name) {
+spl_autoload_register(function ($class_name) {
     require_once $class_name . '.inc';
-}
-
+});
 
 var_dump(interface_exists("AutoInterface"));
 
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing interface_exists() : test autoload default value ***
 bool(true)
 

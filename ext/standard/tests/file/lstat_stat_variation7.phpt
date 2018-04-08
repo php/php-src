@@ -29,7 +29,7 @@ echo "*** Testing stat() on file after data is written in it ***\n";
 $fh = fopen($file_name,"w");
 $old_stat = stat($file_name);
 clearstatcache();
-fwrite($fh, str_repeat((binary)"Hello World", $old_stat['blksize']));
+fwrite($fh, str_repeat("Hello World", $old_stat['blksize']));
 $new_stat = stat($file_name);
 
 // compare self stats
@@ -48,7 +48,7 @@ echo "\n--- Done ---";
 $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation7.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat() on file after data is written in it ***
 bool(true)
 bool(true)

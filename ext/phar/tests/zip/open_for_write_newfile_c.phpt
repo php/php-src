@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (new file) zip-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=0
@@ -31,7 +30,7 @@ $phar->stopBuffering();
 ini_set('phar.readonly', 1);
 
 $fp = fopen($alias . '/b/new.php', 'wb');
-fwrite($fp, b'extra');
+fwrite($fp, 'extra');
 fclose($fp);
 
 include $alias . '/b/c.php';
@@ -45,9 +44,9 @@ include $alias . '/b/new.php';
 
 Warning: fopen(phar://%sopen_for_write_newfile_c.phar.zip/b/new.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_newfile_c.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %sopen_for_write_newfile_c.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, bool given in %sopen_for_write_newfile_c.php on line %d
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %sopen_for_write_newfile_c.php on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %sopen_for_write_newfile_c.php on line %d
 This is b/c
 
 Warning: include(phar://%sopen_for_write_newfile_c.phar.zip/b/new.php): failed to open stream: phar error: "b/new.php" is not a file in phar "%sopen_for_write_newfile_c.phar.zip" in %sopen_for_write_newfile_c.php on line %d

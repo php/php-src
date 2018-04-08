@@ -48,30 +48,30 @@ session_destroy();
 --EXPECTF--
 string(%d) "rfc1867-tests"
 array(2) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
-    %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
-    %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
-    %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["name"]=>
+    string(9) "file1.txt"
+    ["type"]=>
+    string(0) ""
+    ["tmp_name"]=>
+    string(%d) "%s"
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
-  [%u|b%"file2"]=>
+  ["file2"]=>
   array(5) {
-    [%u|b%"name"]=>
-    %string|unicode%(9) "file2.txt"
-    [%u|b%"type"]=>
-    %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
-    %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["name"]=>
+    string(9) "file2.txt"
+    ["type"]=>
+    string(0) ""
+    ["tmp_name"]=>
+    string(%d) "%s"
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
 }

@@ -47,7 +47,6 @@ opcache.memory_consumption=128
 opcache.interned_strings_buffer=8
 opcache.max_accelerated_files=4000
 opcache.revalidate_freq=60
-opcache.fast_shutdown=1
 opcache.enable_cli=1
 
 You also may add the following, but it may break some applications and
@@ -88,7 +87,13 @@ opcache.max_accelerated_files (default "2000")
 	between 200 and 1000000 are allowed.
 
 opcache.max_wasted_percentage (default "5")
-	The maximum percentage of "wasted" memory until a restart is scheduled.
+    When the cache fills up this setting decides when to actually reset (dump
+    all entries) it. At the default of 5% it means that if less than 5% of
+    the entries in the now full cache are wasted/orphaned, then you have a good
+    active cache. There is no point emptying a cache full of good entries
+    only to most likely refill it with those same entries. Once more than 5%
+    of the cache consists of wasted entries, the cache will reset in this
+    cache-full scenario. This can be set up to as high as 50%.
 
 opcache.use_cwd (default "1")
 	When this directive is enabled, the OPcache appends the current working
@@ -137,30 +142,12 @@ opcache.save_comments (default "1")
 	size of the optimized code. Disabling "Doc Comments" may break some
 	existing applications and frameworks (e.g. Doctrine, ZF2, PHPUnit)
 
-opcache.fast_shutdown (default "0")
-	If enabled, a fast shutdown sequence is used for the accelerated code
-	The fast shutdown sequence doesn't free each allocated block, but lets
-	the Zend Engine Memory Manager do the work.
-
 opcache.enable_file_override (default "0")
 	Allow file existence override (file_exists, etc.) performance feature.
 
 opcache.optimization_level (default "0xffffffff")
 	A bitmask, where each bit enables or disables the appropriate OPcache
 	passes
-
-opcache.inherited_hack (default "1")
-	Enable this hack as a workaround for "Cannot redeclare class" errors.
-	The OPcache stores the places where DECLARE_CLASS opcodes use
-	inheritance (These are the only opcodes that can be executed by PHP,
-	but which may not be executed because the parent class is missing due to
-	optimization). When the file is loaded, OPcache tries to bind the
-	inherited classes by using the current environment. The problem with this
-	scenario is that, while the DECLARE_CLASS opcode may not be needed for the
-	current script, if the script requires that the opcode at least be defined,
-	it may not run. The default for this directive is disabled, which means
-	that optimization is active. In php-5.3 and above this hack is not needed
-	anymore and this setting has no effect.
 
 opcache.dups_fix (default "0")
 	Enable this hack as a workaround for "Cannot redeclare class" errors.

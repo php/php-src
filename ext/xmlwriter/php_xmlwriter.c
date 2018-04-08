@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ static zend_object *xmlwriter_object_new(zend_class_entry *class_type)
 {
 	ze_xmlwriter_object *intern;
 
-	intern = ecalloc(1, sizeof(ze_xmlwriter_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(ze_xmlwriter_object), class_type);
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
 	intern->std.handlers = &xmlwriter_object_handlers;
@@ -568,7 +568,7 @@ static const zend_function_entry xmlwriter_class_functions[] = {
 #endif
 	PHP_ME_MAPPING(outputMemory,	xmlwriter_output_memory,	arginfo_xmlwriter_method_output_memory, 0)
 	PHP_ME_MAPPING(flush,			xmlwriter_flush,			arginfo_xmlwriter_method_flush, 0)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -695,7 +695,8 @@ static void php_xmlwriter_string_arg(INTERNAL_FUNCTION_PARAMETERS, xmlwriter_rea
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	size_t name_len, retval;
+	size_t name_len;
+	int retval;
 
 	zval *self = getThis();
 
@@ -1581,7 +1582,8 @@ static PHP_FUNCTION(xmlwriter_start_dtd_entity)
 	xmlwriter_object *intern;
 	xmlTextWriterPtr ptr;
 	char *name;
-	size_t name_len, retval;
+	size_t name_len;
+	int retval;
 	zend_bool isparm;
 	zval *self = getThis();
 

@@ -58,7 +58,7 @@ int transliterator_object_construct( zval *object,
 	ZVAL_NEW_STR(&tmp, u8str);
 	zend_update_property(Transliterator_ce_ptr, object,
 		"id", sizeof( "id" ) - 1, &tmp );
-	GC_REFCOUNT(u8str)--;
+	GC_DELREF(u8str);
 	return SUCCESS;
 }
 /* }}} */
@@ -97,14 +97,6 @@ static void transliterator_object_destroy( Transliterator_object* to )
 }
 /* }}} */
 
-/* {{{ Transliterator_objects_dtor */
-static void Transliterator_objects_dtor(
-	zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ Transliterator_objects_free */
 static void Transliterator_objects_free( zend_object *object )
 {
@@ -117,12 +109,11 @@ static void Transliterator_objects_free( zend_object *object )
 /* }}} */
 
 /* {{{ Transliterator_object_create */
-static zend_object *Transliterator_object_create(
-	zend_class_entry *ce )
+static zend_object *Transliterator_object_create( zend_class_entry *ce )
 {
 	Transliterator_object* intern;
 
-	intern = ecalloc( 1, sizeof( Transliterator_object ) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(Transliterator_object), ce);
 
 	zend_object_std_init( &intern->zo, ce );
     object_properties_init( &intern->zo, ce );
@@ -155,11 +146,10 @@ static zend_object *Transliterator_clone_obj( zval *object )
 
 	if( to_orig->utrans != NULL )
 	{
-		UTransliterator *utrans = NULL;
 		zval			tempz; /* dummy zval to pass to transliterator_object_construct */
 
 		/* guaranteed to return NULL if it fails */
-		utrans = utrans_clone( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
+		UTransliterator *utrans = utrans_clone( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
 
 		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) )
 			goto err;
@@ -183,7 +173,7 @@ err:
 				"Could not clone transliterator", 0 );
 
 			err_msg = intl_error_get_message( TRANSLITERATOR_ERROR_P( to_orig ) );
-			php_error_docref( NULL, E_ERROR, "%s", ZSTR_VAL(err_msg) );
+			zend_throw_error( NULL, "%s", ZSTR_VAL(err_msg) );
 			zend_string_free( err_msg ); /* if it's changed into a warning */
 			/* do not destroy tempz; we need to return something */
 		}
@@ -203,9 +193,8 @@ err:
 	zval tmp_member;							\
 	if( Z_TYPE_P( member ) != IS_STRING )		\
 	{											\
-		tmp_member = *member;					\
-		zval_copy_ctor( &tmp_member );			\
-		convert_to_string( &tmp_member );		\
+		ZVAL_STR(&tmp_member,					\
+			zval_get_string_func(member));		\
 		member = &tmp_member;					\
 		cache_slot = NULL;						\
     }
@@ -269,9 +258,15 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 static void Transliterator_write_property( zval *object, zval *member, zval *value,
 	void **cache_slot )
 {
+	zend_class_entry *scope;
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
 
-	if( ( EG( scope ) != Transliterator_ce_ptr ) &&
+	if (EG(fake_scope)) {
+		scope = EG(fake_scope);
+	} else {
+		scope = zend_get_executed_scope();
+	}
+	if( ( scope != Transliterator_ce_ptr ) &&
 		( zend_binary_strcmp( "id", sizeof( "id" ) - 1,
 		Z_STRVAL_P( member ), Z_STRLEN_P( member ) ) == 0 ) )
 	{
@@ -305,26 +300,17 @@ ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_from_rules, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, direction )
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_create_inverse, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, orig_trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_me_transliterate, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, subject )
 	ZEND_ARG_INFO( 0, start )
 	ZEND_ARG_INFO( 0, end )
 ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX( ainfo_trans_error, 0, 0, 1 )
-	ZEND_ARG_OBJ_INFO( 0, trans, Transliterator, 0 )
-ZEND_END_ARG_INFO()
-
 /* }}} */
 
 /* {{{ Transliterator_class_functions
  * Every 'Transliterator' class method has an entry in this table
  */
-zend_function_entry Transliterator_class_functions[] = {
+static const zend_function_entry Transliterator_class_functions[] = {
 	PHP_ME( Transliterator,			__construct,						ainfo_trans_void,				ZEND_ACC_PRIVATE | ZEND_ACC_CTOR | ZEND_ACC_FINAL )
 	PHP_ME_MAPPING( create,			transliterator_create,				ainfo_trans_create,				ZEND_ACC_STATIC |ZEND_ACC_PUBLIC )
 	PHP_ME_MAPPING( createFromRules,transliterator_create_from_rules,	ainfo_trans_create_from_rules,	ZEND_ACC_STATIC | ZEND_ACC_PUBLIC )
@@ -351,7 +337,6 @@ void transliterator_register_Transliterator_class( void )
 	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
-	Transliterator_handlers.dtor_obj = Transliterator_objects_dtor;
 	Transliterator_handlers.free_obj = Transliterator_objects_free;
 	Transliterator_handlers.clone_obj = Transliterator_clone_obj;
 	Transliterator_handlers.get_property_ptr_ptr = Transliterator_get_property_ptr_ptr;

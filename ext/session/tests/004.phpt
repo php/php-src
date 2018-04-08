@@ -11,6 +11,7 @@ session.serialize_handler=php
 --FILE--
 <?php
 error_reporting(E_ALL);
+ob_start();
 
 class handler {
     public $data = 'baz|O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}arr|a:1:{i:3;O:3:"foo":2:{s:3:"bar";s:2:"ok";s:3:"yes";i:1;}}';

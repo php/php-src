@@ -14,7 +14,7 @@ $file_path = dirname(__FILE__);
 echo "*** Test copy() function: With source file names containing wild-card chars ***\n";
 $src_file = $file_path."/copy_variation17.tmp";
 $file_handle =  fopen($src_file, "w");
-fwrite($file_handle, str_repeat(b"Hello2world...\n", 100));
+fwrite($file_handle, str_repeat("Hello2world...\n", 100));
 fclose($file_handle);
 
 $dir = $file_path."/copy_variation17";

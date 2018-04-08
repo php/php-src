@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -151,22 +151,40 @@ static zend_long dblib_handle_doer(pdo_dbh_t *dbh, const char *sql, size_t sql_l
 
 static int dblib_handle_quoter(pdo_dbh_t *dbh, const char *unquoted, size_t unquotedlen, char **quoted, size_t *quotedlen, enum pdo_param_type paramtype)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+	zend_bool use_national_character_set = 0;
 
 	size_t i;
 	char * q;
 	*quotedlen = 0;
 
+	if (H->assume_national_character_set_strings) {
+		use_national_character_set = 1;
+	}
+	if ((paramtype & PDO_PARAM_STR_NATL) == PDO_PARAM_STR_NATL) {
+		use_national_character_set = 1;
+	}
+	if ((paramtype & PDO_PARAM_STR_CHAR) == PDO_PARAM_STR_CHAR) {
+		use_national_character_set = 0;
+	}
+
 	/* Detect quoted length, adding extra char for doubled single quotes */
-	for(i=0;i<unquotedlen;i++) {
-		if(unquoted[i] == '\'') ++*quotedlen;
+	for (i = 0; i < unquotedlen; i++) {
+		if (unquoted[i] == '\'') ++*quotedlen;
 		++*quotedlen;
 	}
 
 	*quotedlen += 2; /* +2 for opening, closing quotes */
-	q  = *quoted = emalloc(*quotedlen+1); /* Add byte for terminal null */
+	if (use_national_character_set) {
+		++*quotedlen; /* N prefix */
+	}
+	q = *quoted = emalloc(*quotedlen + 1); /* Add byte for terminal null */
+	if (use_national_character_set) {
+		*q++ = 'N';
+	}
 	*q++ = '\'';
 
-	for (i=0;i<unquotedlen;i++) {
+	for (i = 0; i < unquotedlen; i++) {
 		if (unquoted[i] == '\'') {
 			*q++ = '\'';
 			*q++ = '\'';
@@ -257,23 +275,128 @@ char *dblib_handle_last_id(pdo_dbh_t *dbh, const char *name, size_t *len)
 
 static int dblib_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
 	switch(attr) {
+		case PDO_ATTR_DEFAULT_STR_PARAM:
+			H->assume_national_character_set_strings = zval_get_long(val) == PDO_PARAM_STR_NATL ? 1 : 0;
+			return 1;
 		case PDO_ATTR_TIMEOUT:
 		case PDO_DBLIB_ATTR_QUERY_TIMEOUT:
 			return SUCCEED == dbsettime(zval_get_long(val)) ? 1 : 0;
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier = zval_get_long(val);
+			H->stringify_uniqueidentifier = zval_get_long(val);
+			return 1;
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			H->skip_empty_rowsets = zval_is_true(val);
+			return 1;
+		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
+			H->datetime_convert = zval_get_long(val);
 			return 1;
 		default:
 			return 0;
 	}
 }
 
+static void dblib_get_tds_version(zval *return_value, int tds)
+{
+	switch (tds) {
+		case DBTDS_2_0:
+			ZVAL_STRING(return_value, "2.0");
+			break;
+
+		case DBTDS_3_4:
+			ZVAL_STRING(return_value, "3.4");
+			break;
+
+		case DBTDS_4_0:
+			ZVAL_STRING(return_value, "4.0");
+			break;
+
+		case DBTDS_4_2:
+			ZVAL_STRING(return_value, "4.2");
+			break;
+
+		case DBTDS_4_6:
+			ZVAL_STRING(return_value, "4.6");
+			break;
+
+		case DBTDS_4_9_5:
+			ZVAL_STRING(return_value, "4.9.5");
+			break;
+
+		case DBTDS_5_0:
+			ZVAL_STRING(return_value, "5.0");
+			break;
+
+#ifdef DBTDS_7_0
+		case DBTDS_7_0:
+			ZVAL_STRING(return_value, "7.0");
+			break;
+#endif
+
+#ifdef DBTDS_7_1
+		case DBTDS_7_1:
+			ZVAL_STRING(return_value, "7.1");
+			break;
+#endif
+
+#ifdef DBTDS_7_2
+		case DBTDS_7_2:
+			ZVAL_STRING(return_value, "7.2");
+			break;
+#endif
+
+#ifdef DBTDS_7_3
+		case DBTDS_7_3:
+			ZVAL_STRING(return_value, "7.3");
+			break;
+#endif
+
+#ifdef DBTDS_7_4
+		case DBTDS_7_4:
+			ZVAL_STRING(return_value, "7.4");
+			break;
+#endif
+
+		default:
+			ZVAL_FALSE(return_value);
+			break;
+	}
+}
+
 static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_value)
 {
+	pdo_dblib_db_handle *H = (pdo_dblib_db_handle *)dbh->driver_data;
+
 	switch (attr) {
+		case PDO_ATTR_DEFAULT_STR_PARAM:
+			ZVAL_LONG(return_value, H->assume_national_character_set_strings ? PDO_PARAM_STR_NATL : PDO_PARAM_STR_CHAR);
+			break;
+
+		case PDO_ATTR_EMULATE_PREPARES:
+			/* this is the only option available, but expose it so common tests and whatever else can introspect */
+			ZVAL_TRUE(return_value);
+			break;
+
 		case PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER:
-			ZVAL_BOOL(return_value, ((pdo_dblib_db_handle *)dbh->driver_data)->stringify_uniqueidentifier);
+			ZVAL_BOOL(return_value, H->stringify_uniqueidentifier);
+			break;
+
+		case PDO_DBLIB_ATTR_VERSION:
+			ZVAL_STRING(return_value, dbversion());
+			break;
+
+		case PDO_DBLIB_ATTR_TDS_VERSION:
+			dblib_get_tds_version(return_value, dbtds(H->link));
+			break;
+
+		case PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS:
+			ZVAL_BOOL(return_value, H->skip_empty_rowsets);
+			break;
+
+		case PDO_DBLIB_ATTR_DATETIME_CONVERT:
+			ZVAL_BOOL(return_value, H->datetime_convert);
 			break;
 
 		default:
@@ -283,7 +406,7 @@ static int dblib_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *return_valu
 	return 1;
 }
 
-static struct pdo_dbh_methods dblib_methods = {
+static const struct pdo_dbh_methods dblib_methods = {
 	dblib_handle_closer,
 	dblib_handle_preparer,
 	dblib_handle_doer,
@@ -329,7 +452,7 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		,{"auto",0} /* Only works with FreeTDS. Other drivers will bork */
 
 	};
-	
+
 	struct pdo_data_src_parser vars[] = {
 		{ "charset",	NULL,	0 }
 		,{ "appname",	"PHP " PDO_DBLIB_FLAVOUR,	0 }
@@ -341,13 +464,16 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 
 	nvars = sizeof(vars)/sizeof(vars[0]);
 	nvers = sizeof(tdsver)/sizeof(tdsver[0]);
-	
+
 	php_pdo_parse_data_source(dbh->data_source, dbh->data_source_len, vars, nvars);
 
 	H = pecalloc(1, sizeof(*H), dbh->is_persistent);
 	H->login = dblogin();
 	H->err.sqlstate = dbh->error_code;
+	H->assume_national_character_set_strings = 0;
 	H->stringify_uniqueidentifier = 0;
+	H->skip_empty_rowsets = 0;
+	H->datetime_convert = 0;
 
 	if (!H->login) {
 		goto cleanup;
@@ -368,7 +494,10 @@ static int pdo_dblib_handle_factory(pdo_dbh_t *dbh, zval *driver_options)
 		dbsetlogintime(connect_timeout); /* Connection/Login Timeout */
 		dbsettime(query_timeout); /* Statement Timeout */
 
+		H->assume_national_character_set_strings = pdo_attr_lval(driver_options, PDO_ATTR_DEFAULT_STR_PARAM, 0) == PDO_PARAM_STR_NATL ? 1 : 0;
 		H->stringify_uniqueidentifier = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_STRINGIFY_UNIQUEIDENTIFIER, 0);
+		H->skip_empty_rowsets = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_SKIP_EMPTY_ROWSETS, 0);
+		H->datetime_convert = pdo_attr_lval(driver_options, PDO_DBLIB_ATTR_DATETIME_CONVERT, 0);
 	}
 
 	DBERRHANDLE(H->login, (EHANDLEFUNC) pdo_dblib_error_handler);
@@ -471,7 +600,7 @@ cleanup:
 	return ret;
 }
 
-pdo_driver_t pdo_dblib_driver = {
+const pdo_driver_t pdo_dblib_driver = {
 #if PDO_DBLIB_IS_MSSQL
 	PDO_DRIVER_HEADER(mssql),
 #elif defined(PHP_WIN32)
@@ -482,4 +611,3 @@ pdo_driver_t pdo_dblib_driver = {
 #endif
 	pdo_dblib_handle_factory
 };
-

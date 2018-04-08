@@ -51,7 +51,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_fetch_null"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(11) {
   [0]=>
   int(1)
@@ -72,8 +72,8 @@ array(11) {
   [8]=>
   NULL
   [9]=>
-  %unicode|string%(4) "foo1"
+  string(4) "foo1"
   [10]=>
-  %unicode|string%(4) "1000"
+  string(4) "1000"
 }
 done!

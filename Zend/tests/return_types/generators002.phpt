@@ -8,4 +8,4 @@ function test1() : StdClass {
 }
 
 --EXPECTF--
-Fatal error: Generators may only declare a return type of Generator, Iterator or Traversable, StdClass is not permitted in %s on line %d
+Fatal error: Generators may only declare a return type of Generator, Iterator, Traversable, or iterable, StdClass is not permitted in %s on line %d

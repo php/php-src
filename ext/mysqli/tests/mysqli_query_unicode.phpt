@@ -85,48 +85,17 @@ mysqli_close($link);
 		}
 	}
 
-	/*
-	Trying to test what Ramil suggests in http://bugs.mysql.com/bug.php?id=29576
-	However, this won't work, because we're lacking MYSQLI_SET_CHARSET_NAME.
-	if ((version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-		if (mysqli_get_server_version() > 50002) {
-			@mysqli_query($link, "DROP USER IF EXISTS 'тест'@'%'");
-			if (TRUE !== mysqli_query($link, "CREATE USER 'тест'@'%'")) {
-				var_dump(mysqli_error($link);
-			}
-		}
-		if (TRUE !== mysqli_query($link, "GRANT SELECT ON $db.* TO 'тест'@'%' IDENTIFIED BY 'парола'")) {
-			var_dump(mysqli_error($link);
-		} else {
-			$link2 = mysqli_init();
-			if (!(mysqli_real_connect($link2, $host, "тест", 'парола', $db, $port, $socket))) {
-				printf("[011] Cannot connect to the server using host=%s, user=%s, passwd=парола, dbname=%s, port=%s, socket=%s, [%d] %s\n",
-					$host, "тест", $db, $port, $socket,
-					mysqli_connect_errno(), mysqli_connect_error());
-			}
-			mysqli_close($link2);
-			if (mysqli_get_server_version() > 50002) {
-				if (!mysqli_query($link, "DROP USER 'тест'@'%'"))
-					printf("[013] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-				} else {
-					printf("[015] Cannot create user or grant privileges, [%d] %s\n", mysqli_errno($link), mysqli_error($link));
-				}
-			}
-		}
-	}
-	*/
-
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[014] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
+		printf("[014] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"правилен"]=>
-  %unicode|string%(%d) "това ескюел, но с точка и запетая"
+  ["правилен"]=>
+  string(%d) "това ескюел, но с точка и запетая"
 }
 
 Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d

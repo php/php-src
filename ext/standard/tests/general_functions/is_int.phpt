@@ -11,7 +11,7 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
  */
 
 echo "*** Testing is_int(), is_integer() & is_long()  with valid integer values ***\n";
-// different valid  integer vlaues 
+// different valid  integer values 
 $valid_ints = array(
   0,
   1,

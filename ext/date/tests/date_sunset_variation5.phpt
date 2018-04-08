@@ -114,8 +114,8 @@ bool(false)
 
 --int 12345--
 string(5) "19:20"
-float(19.340%d)
-int(1218203424)
+float(19.343%d)
+int(1218203437)
 
 --int -12345--
 bool(false)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,6 +37,7 @@ union _phpdbg_btree_branch {
 typedef struct {
 	zend_ulong count;
 	zend_ulong depth;
+	zend_bool persistent;
 	phpdbg_btree_branch *branch;
 } phpdbg_btree;
 
@@ -47,6 +48,7 @@ typedef struct {
 } phpdbg_btree_position;
 
 void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth);
+void phpdbg_btree_clean(phpdbg_btree *tree);
 phpdbg_btree_result *phpdbg_btree_find(phpdbg_btree *tree, zend_ulong idx);
 phpdbg_btree_result *phpdbg_btree_find_closest(phpdbg_btree *tree, zend_ulong idx);
 phpdbg_btree_position phpdbg_btree_find_between(phpdbg_btree *tree, zend_ulong lower_idx, zend_ulong higher_idx);

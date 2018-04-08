@@ -71,7 +71,7 @@ PHP_FUNCTION( collator_create )
 }
 /* }}} */
 
-/* {{{ proto Collator Collator::__construct( string $locale )
+/* {{{ proto Collator::__construct( string $locale )
  * Collator object constructor.
  */
 PHP_METHOD( Collator, __construct )

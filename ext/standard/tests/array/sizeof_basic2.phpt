@@ -67,7 +67,7 @@ var_dump( sizeof($mixed_array, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : basic functionality ***
 -- Testing sizeof() with integer array in default, COUNT_NORMAL, COUNT_RECURSIVE modes --
 default mode: int(4)

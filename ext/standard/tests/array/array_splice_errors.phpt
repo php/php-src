@@ -33,7 +33,7 @@ NULL
 Warning: array_splice() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_splice() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_splice() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: array_splice() expects parameter 1 to be array, object given in %s on line %d

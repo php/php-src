@@ -37,7 +37,7 @@ var_dump( chunk_split($str) );
 	
 echo "Done"   
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : basic functionality ***
 -- Testing chunk_split() with all possible arguments --
 string(15) "Te##st##in##g##"

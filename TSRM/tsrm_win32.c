@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -33,6 +33,7 @@
 #include <Sddl.h>
 #include "tsrm_win32.h"
 #include "zend_virtual_cwd.h"
+#include "win32/ioutil.h"
 
 #ifdef ZTS
 static ts_rsrc_id win32_globals_id;
@@ -41,7 +42,7 @@ static tsrm_win32_globals win32_globals;
 #endif
 
 static void tsrm_win32_ctor(tsrm_win32_globals *globals)
-{
+{/*{{{*/
 #ifdef ZTS
 TSRMLS_CACHE_UPDATE();
 #endif
@@ -60,10 +61,10 @@ TSRMLS_CACHE_UPDATE();
 	 */
 	globals->impersonation_token = INVALID_HANDLE_VALUE;
 	globals->impersonation_token_sid = NULL;
-}
+}/*}}}*/
 
 static void tsrm_win32_dtor(tsrm_win32_globals *globals)
-{
+{/*{{{*/
 	shm_pair *ptr;
 
 	if (globals->process) {
@@ -88,51 +89,48 @@ static void tsrm_win32_dtor(tsrm_win32_globals *globals)
 	if (globals->impersonation_token_sid) {
 		free(globals->impersonation_token_sid);
 	}
-}
+}/*}}}*/
 
 TSRM_API void tsrm_win32_startup(void)
-{
+{/*{{{*/
 #ifdef ZTS
 	ts_allocate_id(&win32_globals_id, sizeof(tsrm_win32_globals), (ts_allocate_ctor)tsrm_win32_ctor, (ts_allocate_ctor)tsrm_win32_dtor);
 #else
 	tsrm_win32_ctor(&win32_globals);
 #endif
-}
+}/*}}}*/
 
 TSRM_API void tsrm_win32_shutdown(void)
-{
+{/*{{{*/
 #ifndef ZTS
 	tsrm_win32_dtor(&win32_globals);
 #endif
-}
+}/*}}}*/
 
-char * tsrm_win32_get_path_sid_key(const char *pathname)
-{
+char * tsrm_win32_get_path_sid_key(const char *pathname, size_t pathname_len, size_t *key_len)
+{/*{{{*/
 	PSID pSid = TWG(impersonation_token_sid);
-	TCHAR *ptcSid = NULL;
+	char *ptcSid = NULL;
 	char *bucket_key = NULL;
-	size_t ptc_sid_len, pathname_len;
-
-	pathname_len = strlen(pathname);
+	size_t ptc_sid_len;
 
 	if (!pSid) {
-		bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + 1);
-		if (!bucket_key) {
-			return NULL;
-		}
-		memcpy(bucket_key, pathname, pathname_len);
-		return bucket_key;
+		*key_len = pathname_len;
+		return pathname;
 	}
 
 	if (!ConvertSidToStringSid(pSid, &ptcSid)) {
+		*key_len = 0;
 		return NULL;
 	}
 
 
 	ptc_sid_len = strlen(ptcSid);
-	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, pathname_len + ptc_sid_len + 1);
+	*key_len = pathname_len + ptc_sid_len;
+	bucket_key = (char *)HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, *key_len + 1);
 	if (!bucket_key) {
 		LocalFree(ptcSid);
+		*key_len = 0;
 		return NULL;
 	}
 
@@ -141,11 +139,11 @@ char * tsrm_win32_get_path_sid_key(const char *pathname)
 
 	LocalFree(ptcSid);
 	return bucket_key;
-}
+}/*}}}*/
 
 
 PSID tsrm_win32_get_token_sid(HANDLE hToken)
-{
+{/*{{{*/
 	DWORD dwLength = 0;
 	PTOKEN_USER pTokenUser = NULL;
 	DWORD sid_len;
@@ -192,10 +190,10 @@ Finished:
 		HeapFree(GetProcessHeap(), 0, (LPVOID)pTokenUser);
 	}
 	return NULL;
-}
+}/*}}}*/
 
 TSRM_API int tsrm_win32_access(const char *pathname, int mode)
-{
+{/*{{{*/
 	time_t t;
 	HANDLE thread_token = NULL;
 	PSID token_sid;
@@ -209,182 +207,175 @@ TSRM_API int tsrm_win32_access(const char *pathname, int mode)
 	BOOL fAccess = FALSE;
 
 	realpath_cache_bucket * bucket = NULL;
-	char * real_path = NULL;
+	char real_path[MAXPATHLEN] = {0};
 
-	if (mode == 1 /*X_OK*/) {
-		DWORD type;
-		return GetBinaryType(pathname, &type) ? 0 : -1;
-	} else {
-		if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
-			real_path = (char *)malloc(MAX_PATH);
-			if(tsrm_realpath(pathname, real_path) == NULL) {
-				goto Finished;
-			}
-			pathname = real_path;
- 		}
-
-		if(access(pathname, mode)) {
-			free(real_path);
-			return errno;
+	if(!IS_ABSOLUTE_PATH(pathname, strlen(pathname)+1)) {
+		if(tsrm_realpath(pathname, real_path) == NULL) {
+			SET_ERRNO_FROM_WIN32_CODE(ERROR_FILE_NOT_FOUND);
+			return -1;
 		}
+		pathname = real_path;
+	}
 
- 		/* If only existence check is made, return now */
- 		if (mode == 0) {
-			free(real_path);
-			return 0;
-		}
+	PHP_WIN32_IOUTIL_INIT_W(pathname)
+	if (!pathw) {
+		return -1;
+	}
+
+	/* Either access call failed, or the mode was asking for a specific check.*/
+	int ret = php_win32_ioutil_access_w(pathw, mode);
+	if (0 > ret || X_OK == mode || F_OK == mode) {
+		PHP_WIN32_IOUTIL_CLEANUP_W()
+		return ret;
+	}
 
 /* Only in NTS when impersonate==1 (aka FastCGI) */
 
-		/*
-		 AccessCheck() requires an impersonation token.  We first get a primary
-		 token and then create a duplicate impersonation token.  The
-		 impersonation token is not actually assigned to the thread, but is
-		 used in the call to AccessCheck.  Thus, this function itself never
-		 impersonates, but does use the identity of the thread.  If the thread
-		 was impersonating already, this function uses that impersonation context.
-		*/
-		if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
-			if (GetLastError() == ERROR_NO_TOKEN) {
-				if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
-					 TWG(impersonation_token) = NULL;
-					 goto Finished;
-				 }
-			}
-		}
-
-		/* token_sid will be freed in tsrmwin32_dtor */
-		token_sid = tsrm_win32_get_token_sid(thread_token);
-		if (!token_sid) {
-			if (TWG(impersonation_token_sid)) {
-				free(TWG(impersonation_token_sid));
-			}
-			TWG(impersonation_token_sid) = NULL;
-			goto Finished;
-		}
-
-		/* Different identity, we need a new impersontated token as well */
-		if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
-			if (TWG(impersonation_token_sid)) {
-				free(TWG(impersonation_token_sid));
-			}
-			TWG(impersonation_token_sid) = token_sid;
-
-			/* Duplicate the token as impersonated token */
-			if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
-				goto Finished;
-			}
-		} else {
-			/* we already have it, free it then */
-			free(token_sid);
-		}
-
-		if (CWDG(realpath_cache_size_limit)) {
-			t = time(0);
-			bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
-			if(bucket == NULL && real_path == NULL) {
-				/* We used the pathname directly. Call tsrm_realpath */
-				/* so that entry is created in realpath cache */
-				real_path = (char *)malloc(MAX_PATH);
-				if(tsrm_realpath(pathname, real_path) != NULL) {
-					pathname = real_path;
-					bucket = realpath_cache_lookup(pathname, (int)strlen(pathname), t);
-				}
-			}
- 		}
-
- 		/* Do a full access check because access() will only check read-only attribute */
- 		if(mode == 0 || mode > 6) {
-			if(bucket != NULL && bucket->is_rvalid) {
-				fAccess = bucket->is_readable;
-				goto Finished;
-			}
- 			desired_access = FILE_GENERIC_READ;
- 		} else if(mode <= 2) {
-			if(bucket != NULL && bucket->is_wvalid) {
-				fAccess = bucket->is_writable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_WRITE;
- 		} else if(mode <= 4) {
-			if(bucket != NULL && bucket->is_rvalid) {
-				fAccess = bucket->is_readable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS;
- 		} else { // if(mode <= 6)
-			if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
-				fAccess = bucket->is_readable & bucket->is_writable;
-				goto Finished;
-			}
-			desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
- 		}
-
-		if(TWG(impersonation_token) == NULL) {
-			goto Finished;
-		}
-
-		/* Get size of security buffer. Call is expected to fail */
-		if(GetFileSecurity(pathname, sec_info, NULL, 0, &sec_desc_length)) {
-			goto Finished;
-		}
-
-		psec_desc = (BYTE *)malloc(sec_desc_length);
-		if(psec_desc == NULL ||
-			 !GetFileSecurity(pathname, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
-			goto Finished;
-		}
-
-		MapGenericMask(&desired_access, &gen_map);
-
-		if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
-			goto Finished_Impersonate;
-		}
-
-		/* Keep the result in realpath_cache */
-		if(bucket != NULL) {
-			if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
-				bucket->is_rvalid = 1;
-				bucket->is_readable = fAccess;
-			}
-			else if(desired_access == FILE_GENERIC_WRITE) {
-				bucket->is_wvalid = 1;
-				bucket->is_writable = fAccess;
-			} else if (desired_access == (FILE_GENERIC_READ | FILE_GENERIC_WRITE)) {
-				bucket->is_rvalid = 1;
-				bucket->is_readable = fAccess;
-				bucket->is_wvalid = 1;
-				bucket->is_writable = fAccess;
-			}
-		}
-
-Finished_Impersonate:
-		if(psec_desc != NULL) {
-			free(psec_desc);
-			psec_desc = NULL;
-		}
-
-Finished:
-		if(thread_token != NULL) {
-			CloseHandle(thread_token);
-		}
-		if(real_path != NULL) {
-			free(real_path);
-			real_path = NULL;
-		}
-
-		if(fAccess == FALSE) {
-			errno = EACCES;
-			return errno;
-		} else {
-			return 0;
+	/*
+	 AccessCheck() requires an impersonation token.  We first get a primary
+	 token and then create a duplicate impersonation token.  The
+	 impersonation token is not actually assigned to the thread, but is
+	 used in the call to AccessCheck.  Thus, this function itself never
+	 impersonates, but does use the identity of the thread.  If the thread
+	 was impersonating already, this function uses that impersonation context.
+	*/
+	if(!OpenThreadToken(GetCurrentThread(), TOKEN_ALL_ACCESS, TRUE, &thread_token)) {
+		if (GetLastError() == ERROR_NO_TOKEN) {
+			if (!OpenProcessToken(GetCurrentProcess(), TOKEN_ALL_ACCESS, &thread_token)) {
+				 TWG(impersonation_token) = NULL;
+				 goto Finished;
+			 }
 		}
 	}
-}
+
+	/* token_sid will be freed in tsrmwin32_dtor */
+	token_sid = tsrm_win32_get_token_sid(thread_token);
+	if (!token_sid) {
+		if (TWG(impersonation_token_sid)) {
+			free(TWG(impersonation_token_sid));
+		}
+		TWG(impersonation_token_sid) = NULL;
+		goto Finished;
+	}
+
+	/* Different identity, we need a new impersontated token as well */
+	if (!TWG(impersonation_token_sid) || !EqualSid(token_sid, TWG(impersonation_token_sid))) {
+		if (TWG(impersonation_token_sid)) {
+			free(TWG(impersonation_token_sid));
+		}
+		TWG(impersonation_token_sid) = token_sid;
+
+		/* Duplicate the token as impersonated token */
+		if (!DuplicateToken(thread_token, SecurityImpersonation, &TWG(impersonation_token))) {
+			goto Finished;
+		}
+	} else {
+		/* we already have it, free it then */
+		free(token_sid);
+	}
+
+	if (CWDG(realpath_cache_size_limit)) {
+		t = time(0);
+		bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
+		if(bucket == NULL && !real_path[0]) {
+			/* We used the pathname directly. Call tsrm_realpath */
+			/* so that entry is created in realpath cache */
+			if(tsrm_realpath(pathname, real_path) != NULL) {
+				pathname = real_path;
+				bucket = realpath_cache_lookup(pathname, strlen(pathname), t);
+				PHP_WIN32_IOUTIL_REINIT_W(pathname);
+			}
+		}
+	}
+
+	/* Do a full access check because access() will only check read-only attribute */
+	if(mode == 0 || mode > 6) {
+		if(bucket != NULL && bucket->is_rvalid) {
+			fAccess = bucket->is_readable;
+			goto Finished;
+		}
+		desired_access = FILE_GENERIC_READ;
+	} else if(mode <= 2) {
+		if(bucket != NULL && bucket->is_wvalid) {
+			fAccess = bucket->is_writable;
+			goto Finished;
+		}
+		desired_access = FILE_GENERIC_WRITE;
+	} else if(mode <= 4) {
+		if(bucket != NULL && bucket->is_rvalid) {
+			fAccess = bucket->is_readable;
+			goto Finished;
+		}
+		desired_access = FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS;
+	} else { // if(mode <= 6)
+		if(bucket != NULL && bucket->is_rvalid && bucket->is_wvalid) {
+			fAccess = bucket->is_readable & bucket->is_writable;
+			goto Finished;
+		}
+		desired_access = FILE_GENERIC_READ | FILE_GENERIC_WRITE;
+	}
+
+	if(TWG(impersonation_token) == NULL) {
+		goto Finished;
+	}
+
+	/* Get size of security buffer. Call is expected to fail */
+	if(GetFileSecurityW(pathw, sec_info, NULL, 0, &sec_desc_length)) {
+		goto Finished;
+	}
+
+	psec_desc = (BYTE *)malloc(sec_desc_length);
+	if(psec_desc == NULL ||
+		 !GetFileSecurityW(pathw, sec_info, (PSECURITY_DESCRIPTOR)psec_desc, sec_desc_length, &sec_desc_length)) {
+		goto Finished;
+	}
+
+	MapGenericMask(&desired_access, &gen_map);
+
+	if(!AccessCheck((PSECURITY_DESCRIPTOR)psec_desc, TWG(impersonation_token), desired_access, &gen_map, &privilege_set, &priv_set_length, &granted_access, &fAccess)) {
+		goto Finished_Impersonate;
+	}
+
+	/* Keep the result in realpath_cache */
+	if(bucket != NULL) {
+		if(desired_access == (FILE_GENERIC_READ|FILE_FLAG_BACKUP_SEMANTICS)) {
+			bucket->is_rvalid = 1;
+			bucket->is_readable = fAccess;
+		}
+		else if(desired_access == FILE_GENERIC_WRITE) {
+			bucket->is_wvalid = 1;
+			bucket->is_writable = fAccess;
+		} else if (desired_access == (FILE_GENERIC_READ | FILE_GENERIC_WRITE)) {
+			bucket->is_rvalid = 1;
+			bucket->is_readable = fAccess;
+			bucket->is_wvalid = 1;
+			bucket->is_writable = fAccess;
+		}
+	}
+
+Finished_Impersonate:
+	if(psec_desc != NULL) {
+		free(psec_desc);
+		psec_desc = NULL;
+	}
+
+Finished:
+	if(thread_token != NULL) {
+		CloseHandle(thread_token);
+	}
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
+	if(fAccess == FALSE) {
+		errno = EACCES;
+		return errno;
+	} else {
+		return 0;
+	}
+}/*}}}*/
 
 
 static process_pair *process_get(FILE *stream)
-{
+{/*{{{*/
 	process_pair *ptr;
 	process_pair *newptr;
 
@@ -407,10 +398,10 @@ static process_pair *process_get(FILE *stream)
 	ptr = newptr + TWG(process_size);
 	TWG(process_size)++;
 	return ptr;
-}
+}/*}}}*/
 
-static shm_pair *shm_get(int key, void *addr)
-{
+static shm_pair *shm_get(key_t key, void *addr)
+{/*{{{*/
 	shm_pair *ptr;
 	shm_pair *newptr;
 
@@ -439,34 +430,36 @@ static shm_pair *shm_get(int key, void *addr)
 	TWG(shm_size)++;
 	memset(ptr, 0, sizeof(*ptr));
 	return ptr;
-}
+}/*}}}*/
 
-static HANDLE dupHandle(HANDLE fh, BOOL inherit) {
+static HANDLE dupHandle(HANDLE fh, BOOL inherit)
+{/*{{{*/
 	HANDLE copy, self = GetCurrentProcess();
 	if (!DuplicateHandle(self, fh, self, &copy, 0, inherit, DUPLICATE_SAME_ACCESS|DUPLICATE_CLOSE_SOURCE)) {
 		return NULL;
 	}
 	return copy;
-}
+}/*}}}*/
 
 TSRM_API FILE *popen(const char *command, const char *type)
-{
+{/*{{{*/
 
 	return popen_ex(command, type, NULL, NULL);
-}
+}/*}}}*/
 
 TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, char *env)
-{
+{/*{{{*/
 	FILE *stream = NULL;
 	int fno, type_len, read, mode;
-	STARTUPINFO startup;
+	STARTUPINFOW startup;
 	PROCESS_INFORMATION process;
 	SECURITY_ATTRIBUTES security;
 	HANDLE in, out;
 	DWORD dwCreateFlags = 0;
 	BOOL res;
 	process_pair *proc;
-	char *cmd;
+	char *cmd = NULL;
+	wchar_t *cmdw = NULL, *cwdw = NULL, *envw = NULL;
 	int i;
 	char *ptype = (char *)type;
 	HANDLE thread_token = NULL;
@@ -490,18 +483,42 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		ptype++;
 	}
 
+	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
+	if (!cmd) {
+		return NULL;
+	}
+
+	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
+	cmdw = php_win32_cp_any_to_w(cmd);
+	if (!cmdw) {
+		free(cmd);
+		return NULL;
+	}
+
+	if (cwd) {
+		cwdw = php_win32_ioutil_any_to_w(cwd);
+		if (!cwdw) {
+			free(cmd);
+			free(cmdw);
+			return NULL;
+		}
+	}
+
 	security.nLength				= sizeof(SECURITY_ATTRIBUTES);
 	security.bInheritHandle			= TRUE;
 	security.lpSecurityDescriptor	= NULL;
 
 	if (!type_len || !CreatePipe(&in, &out, &security, 2048L)) {
+		free(cmdw);
+		free(cwdw);
+		free(cmd);
 		return NULL;
 	}
 
-	memset(&startup, 0, sizeof(STARTUPINFO));
+	memset(&startup, 0, sizeof(STARTUPINFOW));
 	memset(&process, 0, sizeof(PROCESS_INFORMATION));
 
-	startup.cb			= sizeof(STARTUPINFO);
+	startup.cb			= sizeof(STARTUPINFOW);
 	startup.dwFlags		= STARTF_USESTDHANDLES;
 	startup.hStdError	= GetStdHandle(STD_ERROR_HANDLE);
 
@@ -533,19 +550,28 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 		}
 	}
 
-	cmd = (char*)malloc(strlen(command)+strlen(TWG(comspec))+sizeof(" /c ")+2);
-	if (!cmd) {
-		return NULL;
+	envw = php_win32_cp_env_any_to_w(env);
+	if (envw) {
+		dwCreateFlags |= CREATE_UNICODE_ENVIRONMENT;
+	} else {
+		if (env) {
+			free(cmd);
+			free(cmdw);
+			free(cwdw);
+			return NULL;
+		}
 	}
 
-	sprintf(cmd, "%s /c \"%s\"", TWG(comspec), command);
 	if (asuser) {
-		res = CreateProcessAsUser(token_user, NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		res = CreateProcessAsUserW(token_user, NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 		CloseHandle(token_user);
 	} else {
-		res = CreateProcess(NULL, cmd, &security, &security, security.bInheritHandle, dwCreateFlags, env, cwd, &startup, &process);
+		res = CreateProcessW(NULL, cmdw, &security, &security, security.bInheritHandle, dwCreateFlags, envw, cwdw, &startup, &process);
 	}
 	free(cmd);
+	free(cmdw);
+	free(cwdw);
+	free(envw);
 
 	if (!res) {
 		return NULL;
@@ -566,10 +592,10 @@ TSRM_API FILE *popen_ex(const char *command, const char *type, const char *cwd, 
 	proc->prochnd = process.hProcess;
 	proc->stream = stream;
 	return stream;
-}
+}/*}}}*/
 
 TSRM_API int pclose(FILE *stream)
-{
+{/*{{{*/
 	DWORD termstat = 0;
 	process_pair *process;
 
@@ -586,18 +612,14 @@ TSRM_API int pclose(FILE *stream)
 	CloseHandle(process->prochnd);
 
 	return termstat;
-}
+}/*}}}*/
 
-TSRM_API int shmget(int key, int size, int flags)
-{
+TSRM_API int shmget(key_t key, size_t size, int flags)
+{/*{{{*/
 	shm_pair *shm;
 	char shm_segment[26], shm_info[29];
 	HANDLE shm_handle, info_handle;
 	BOOL created = FALSE;
-
-	if (size < 0) {
-		return -1;
-	}
 
 	snprintf(shm_segment, sizeof(shm_segment), "TSRM_SHM_SEGMENT:%d", key);
 	snprintf(shm_info, sizeof(shm_info), "TSRM_SHM_DESCRIPTOR:%d", key);
@@ -607,7 +629,14 @@ TSRM_API int shmget(int key, int size, int flags)
 
 	if (!shm_handle && !info_handle) {
 		if (flags & IPC_CREAT) {
-			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, size, shm_segment);
+#if SIZEOF_SIZE_T == 8
+			DWORD high = size >> 32;
+			DWORD low = (DWORD)size;
+#else
+			DWORD high = 0;
+			DWORD low = size;
+#endif
+			shm_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, high, low, shm_segment);
 			info_handle	= CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(shm->descriptor), shm_info);
 			created		= TRUE;
 		}
@@ -666,10 +695,10 @@ TSRM_API int shmget(int key, int size, int flags)
 	}
 
 	return key;
-}
+}/*}}}*/
 
 TSRM_API void *shmat(int key, const void *shmaddr, int flags)
-{
+{/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
 	if (!shm->segment) {
@@ -680,10 +709,7 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 
 	if (NULL == shm->addr) {
 		int err = GetLastError();
-		/* Catch more errors */
-		if (ERROR_NOT_ENOUGH_MEMORY == err) {
-			_set_errno(ENOMEM);
-		}
+		SET_ERRNO_FROM_WIN32_CODE(err);
 		return (void*)-1;
 	}
 
@@ -692,10 +718,10 @@ TSRM_API void *shmat(int key, const void *shmaddr, int flags)
 	shm->descriptor->shm_nattch++;
 
 	return shm->addr;
-}
+}/*}}}*/
 
 TSRM_API int shmdt(const void *shmaddr)
-{
+{/*{{{*/
 	shm_pair *shm = shm_get(0, (void*)shmaddr);
 
 	if (!shm->segment) {
@@ -707,9 +733,10 @@ TSRM_API int shmdt(const void *shmaddr)
 	shm->descriptor->shm_nattch--;
 
 	return UnmapViewOfFile(shm->addr) ? 0 : -1;
-}
+}/*}}}*/
 
-TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf) {
+TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf)
+{/*{{{*/
 	shm_pair *shm = shm_get(key, NULL);
 
 	if (!shm->segment) {
@@ -737,16 +764,7 @@ TSRM_API int shmctl(int key, int cmd, struct shmid_ds *buf) {
 		default:
 			return -1;
 	}
-}
-
-TSRM_API char *realpath(char *orig_path, char *buffer)
-{
-	int ret = GetFullPathName(orig_path, _MAX_PATH, buffer, NULL);
-	if(!ret || ret > _MAX_PATH) {
-		return NULL;
-	}
-	return buffer;
-}
+}/*}}}*/
 
 #if HAVE_UTIME
 static zend_always_inline void UnixTimeToFileTime(time_t t, LPFILETIME pft) /* {{{ */
@@ -764,9 +782,16 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 {
 	FILETIME mtime, atime;
 	HANDLE hFile;
+	PHP_WIN32_IOUTIL_INIT_W(filename)
 
-	hFile = CreateFile(filename, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
+	if (!pathw) {
+		return -1;
+	}
+
+	hFile = CreateFileW(pathw, GENERIC_WRITE, FILE_SHARE_WRITE|FILE_SHARE_READ, NULL,
 				 OPEN_ALWAYS, FILE_FLAG_BACKUP_SEMANTICS, NULL);
+
+	PHP_WIN32_IOUTIL_CLEANUP_W()
 
 	/* OPEN_ALWAYS mode sets the last error to ERROR_ALREADY_EXISTS but
 	   the CreateFile operation succeeds */
@@ -797,3 +822,12 @@ TSRM_API int win32_utime(const char *filename, struct utimbuf *buf) /* {{{ */
 /* }}} */
 #endif
 #endif
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -27,7 +27,7 @@ static zend_class_entry zend_iterator_class_entry;
 static void iter_wrapper_free(zend_object *object);
 static void iter_wrapper_dtor(zend_object *object);
 
-static zend_object_handlers iterator_object_handlers = {
+static const zend_object_handlers iterator_object_handlers = {
 	0,
 	iter_wrapper_free,
 	iter_wrapper_dtor,
@@ -81,7 +81,7 @@ ZEND_API void zend_iterator_init(zend_object_iterator *iter)
 
 ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 {
-	if (--GC_REFCOUNT(&iter->std) > 0) {
+	if (GC_DELREF(&iter->std) > 0) {
 		return;
 	}
 
@@ -90,8 +90,8 @@ ZEND_API void zend_iterator_dtor(zend_object_iterator *iter)
 
 ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
 {
-	if (Z_TYPE_P(array_ptr) &&
-	    Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
+	ZEND_ASSERT(Z_TYPE_P(array_ptr) == IS_OBJECT);
+	if (Z_OBJ_HT_P(array_ptr) == &iterator_object_handlers) {
 		return (zend_object_iterator *)Z_OBJ_P(array_ptr);
 	}
 	return NULL;
@@ -103,4 +103,6 @@ ZEND_API zend_object_iterator* zend_iterator_unwrap(zval *array_ptr)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

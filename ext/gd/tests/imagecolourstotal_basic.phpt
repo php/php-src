@@ -40,7 +40,7 @@ imagedestroy( $img );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing imagecolorstotal() : basic functionality ***
 int(0)
 int(1)

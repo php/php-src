@@ -22,8 +22,10 @@ var_dump("$a" instanceof stdClass);
 --EXPECTF--
 bool(true)
 bool(true)
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 bool(true)
 bool(true)
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

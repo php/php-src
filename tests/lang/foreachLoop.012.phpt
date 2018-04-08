@@ -68,7 +68,7 @@ withRefValue(3, $transform);
 withRefValue(4, $transform);
 
 ?>
---EXPECTF--
+--EXPECT--
 
 Popping elements off end of an unreferenced array
 ---( Array with 1 element(s): )---

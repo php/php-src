@@ -55,7 +55,7 @@ try {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 inserted 1
 Exception: foo
 Exception: Heap is corrupted, heap properties are no longer ensured.

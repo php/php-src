@@ -97,7 +97,7 @@ valid output
 
 Arg value 101234567000 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, float given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, float given in %s on line %d
 valid output
 
 Arg value 1.07654321E-9 
@@ -110,35 +110,35 @@ Notice: Array to string conversion in %sposix_getpgid_variation.php on line %d
 
 Arg value Array 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpgid_variation.php on line %d
 
 Arg value Array 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpgid_variation.php on line %d
 
 Arg value Array 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpgid_variation.php on line %d
 
 Arg value Array 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, array given in %s on line %d
 valid output
 
 Notice: Array to string conversion in %sposix_getpgid_variation.php on line %d
 
 Arg value Array 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, array given in %s on line %d
 valid output
 
 Arg value  
@@ -161,22 +161,22 @@ valid output
 
 Arg value  
 
-Warning: posix_getpgid() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, string given in %s on line %d
 valid output
 
 Arg value  
 
-Warning: posix_getpgid() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, string given in %s on line %d
 valid output
 
 Arg value string 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, string given in %s on line %d
 valid output
 
 Arg value string 
 
-Warning: posix_getpgid() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_getpgid() expects parameter 1 to be int, string given in %s on line %d
 valid output
 
 Arg value  
@@ -185,4 +185,4 @@ valid output
 Arg value  
 valid output
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

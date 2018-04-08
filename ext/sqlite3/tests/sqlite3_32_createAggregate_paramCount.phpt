@@ -4,7 +4,7 @@ SQLite3::createAggregate Test that an error is thrown when no parameters are pre
 James Cauwelier
 # Belgium PHP TestFest
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 

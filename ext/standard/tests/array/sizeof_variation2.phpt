@@ -59,7 +59,7 @@ for($i = 0; $i < count($values); $i++)
          
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : usage variations ***
 --- Testing sizeof() with different array values for 'var' argument ---
 -- Iteration 1 --

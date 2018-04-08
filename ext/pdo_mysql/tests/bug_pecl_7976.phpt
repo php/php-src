@@ -58,35 +58,35 @@ $db->exec('DROP PROCEDURE IF EXISTS p');
 ?>
 --XFAIL--
 Works with mysqlnd. It is not supported by libmysql. For libmysql is good enough to see no crash.
---EXPECTF--
+--EXPECT--
 Emulated...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_one"]=>
-    %unicode|string%(1) "1"
+    ["_one"]=>
+    string(1) "1"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_one"]=>
-    %unicode|string%(1) "1"
+    ["_one"]=>
+    string(1) "1"
   }
 }
 Native...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_one"]=>
-    %unicode|string%(1) "1"
+    ["_one"]=>
+    string(1) "1"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"_one"]=>
-    %unicode|string%(1) "1"
+    ["_one"]=>
+    string(1) "1"
   }
 }
 done!

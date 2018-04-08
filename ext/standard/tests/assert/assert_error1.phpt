@@ -37,9 +37,10 @@ var_dump($rc = assert('aa=sd+as+safsafasfaçsafçsafç'));
 Warning: assert_options() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: assert_options() expects parameter 1 to be integer, string given in %s on line %d
+Warning: assert_options() expects parameter 1 to be int, string given in %s on line %d
 NULL
 
 Warning: assert() expects at most 2 parameters, 3 given in %s on line %d
 NULL
 
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d

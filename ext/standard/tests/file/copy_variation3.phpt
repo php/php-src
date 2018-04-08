@@ -20,7 +20,7 @@ echo "*** Test copy() function: destination file names containing whitespaces **
 $file_path = dirname(__FILE__);
 $src_file_name = $file_path."/copy_variation3.tmp";
 $file_handle = fopen($src_file_name, "w");
-fwrite( $file_handle, str_repeat(b"Hello2World...\n", 100) );
+fwrite( $file_handle, str_repeat("Hello2World...\n", 100) );
 fclose($file_handle);
 
 /* array of destination file names */
@@ -75,7 +75,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_variation3.tmp");
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Test copy() function: destination file names containing whitespaces ***
 Size of the source file before copy operation => int(1500)
 

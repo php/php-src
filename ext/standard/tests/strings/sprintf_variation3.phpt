@@ -9,7 +9,7 @@ Test sprintf() function : usage variations - int formats with int values
 
 echo "*** Testing sprintf() : integer formats with integer values ***\n";
 
-// different valid  integer vlaues
+// different valid  integer values
 $valid_ints = array(
   0,
   1,
@@ -50,7 +50,7 @@ foreach($valid_ints as $int_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : integer formats with integer values ***
 
 -- Iteration 1 --

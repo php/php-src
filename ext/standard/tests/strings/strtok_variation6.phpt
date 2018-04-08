@@ -47,7 +47,7 @@ foreach( $string_array as $string )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with invalid escape sequences in token ***
 
 --- Iteration 1 ---

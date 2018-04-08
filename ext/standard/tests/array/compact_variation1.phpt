@@ -37,10 +37,6 @@ array(1) {
 Warning: compact(): recursion detected in %s on line %d
 
 Warning: compact(): recursion detected in %s on line %d
-
-Warning: compact(): recursion detected in %s on line %d
-
-Warning: compact(): recursion detected in %s on line %d
 array(2) {
   ["a"]=>
   int(1)

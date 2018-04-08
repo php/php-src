@@ -43,7 +43,7 @@ var_dump($foo["errors"]==IDNA_ERROR_CONTEXTJ);
 => PHP level errors
 bad args:
 
-Warning: idn_to_ascii() expects parameter 3 to be integer, array given in %s on line %d
+Warning: idn_to_ascii() expects parameter 3 to be int, array given in %s on line %d
 
 Warning: idn_to_ascii(): idn_to_ascii: bad arguments in %s on line %d
 NULL
@@ -61,6 +61,8 @@ empty domain:
 Warning: idn_to_ascii(): idn_to_ascii: empty domain name in %s on line %d
 bool(false)
 fourth arg for 2003 variant (only notice raised):
+
+Deprecated: idn_to_ascii(): INTL_IDNA_VARIANT_2003 is deprecated in %s on line %d
 
 Notice: idn_to_ascii(): 4 arguments were provided, but INTL_IDNA_VARIANT_2003 only takes 3 - extra argument ignored in %s on line %d
 string(7) "foo.com"

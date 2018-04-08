@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -673,7 +673,7 @@ static PHP_FUNCTION(name) \
 		} \
 	} \
 	if (level < -1 || level > 9) { \
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level); \
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level); \
 		RETURN_FALSE; \
 	} \
 	switch (encoding) { \
@@ -702,7 +702,7 @@ static PHP_FUNCTION(name) \
 		return; \
 	} \
 	if (max_len < 0) { \
-		php_error_docref(NULL, E_WARNING, "length (%pd) must be greater or equal zero", max_len); \
+		php_error_docref(NULL, E_WARNING, "length (" ZEND_LONG_FMT ") must be greater or equal zero", max_len); \
 		RETURN_FALSE; \
 	} \
 	if (SUCCESS != php_zlib_decode(in_buf, in_len, &out_buf, &out_len, encoding, max_len)) { \
@@ -776,7 +776,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 					zend_string **end, **ptr = strings - 1;
 
 					ZEND_HASH_FOREACH_VAL(dictionary, cur) {
-						int i;
+						size_t i;
 
 						*++ptr = zval_get_string(cur);
 						if (!*ptr || ZSTR_LEN(*ptr) == 0) {
@@ -845,7 +845,7 @@ PHP_FUNCTION(inflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (lograithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -868,6 +868,7 @@ PHP_FUNCTION(inflate_init)
 	ctx->zfree = php_zlib_free;
 	((php_zlib_context *) ctx)->inflateDict = dict;
 	((php_zlib_context *) ctx)->inflateDictlen = dictlen;
+	((php_zlib_context *) ctx)->status = Z_OK;
 
 	if (encoding < 0) {
 		encoding += 15 - window;
@@ -936,6 +937,13 @@ PHP_FUNCTION(inflate_add)
 			RETURN_FALSE;
 	}
 
+	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
+	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
+	{
+		((php_zlib_context *) ctx)->status = Z_OK;
+		inflateReset(ctx);
+	}
+
 	if (in_len <= 0 && flush_type != Z_FINISH) {
 		RETURN_EMPTY_STRING();
 	}
@@ -950,6 +958,8 @@ PHP_FUNCTION(inflate_add)
 		status = inflate(ctx, flush_type);
 		buffer_used = ZSTR_LEN(out) - ctx->avail_out;
 
+		((php_zlib_context *) ctx)->status = status; /* Save status for exposing to userspace */
+
 		switch (status) {
 			case Z_OK:
 				if (ctx->avail_out == 0) {
@@ -962,7 +972,6 @@ PHP_FUNCTION(inflate_add)
 					goto complete;
 				}
 			case Z_STREAM_END:
-				inflateReset(ctx);
 				goto complete;
 			case Z_BUF_ERROR:
 				if (flush_type == Z_FINISH && ctx->avail_out == 0) {
@@ -1011,6 +1020,48 @@ PHP_FUNCTION(inflate_add)
 }
 /* }}} */
 
+/* {{{ proto bool inflate_get_status(resource context)
+   Get decompression status, usually returns either ZLIB_OK or ZLIB_STREAM_END. */
+PHP_FUNCTION(inflate_get_status)
+{
+	zval *res;
+	z_stream *ctx;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
+	{
+		RETURN_NULL();
+	}
+
+	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
+		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(((php_zlib_context *) ctx)->status);
+}
+/* }}} */
+
+/* {{{ proto bool inflate_get_read_len(resource context)
+   Get number of bytes read so far. */
+PHP_FUNCTION(inflate_get_read_len)
+{
+	zval *res;
+	z_stream *ctx;
+
+	if (SUCCESS != zend_parse_parameters(ZEND_NUM_ARGS(), "r", &res))
+	{
+		RETURN_NULL();
+	}
+
+	if (!(ctx = zend_fetch_resource_ex(res, NULL, le_inflate))) {
+		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
+		RETURN_FALSE;
+	}
+
+	RETURN_LONG(ctx->total_in);
+}
+/* }}} */
+
 /* {{{ proto resource deflate_init(int encoding[, array options])
    Initialize an incremental deflate context using the specified encoding */
 PHP_FUNCTION(deflate_init)
@@ -1030,7 +1081,7 @@ PHP_FUNCTION(deflate_init)
 		level = zval_get_long(option_buffer);
 	}
 	if (level < -1 || level > 9) {
-		php_error_docref(NULL, E_WARNING, "compression level (%pd) must be within -1..9", level);
+		php_error_docref(NULL, E_WARNING, "compression level (" ZEND_LONG_FMT ") must be within -1..9", level);
 		RETURN_FALSE;
 	}
 
@@ -1038,7 +1089,7 @@ PHP_FUNCTION(deflate_init)
 		memory = zval_get_long(option_buffer);
 	}
 	if (memory < 1 || memory > 9) {
-		php_error_docref(NULL, E_WARNING, "compression memory level (%pd) must be within 1..9", memory);
+		php_error_docref(NULL, E_WARNING, "compression memory level (" ZEND_LONG_FMT ") must be within 1..9", memory);
 		RETURN_FALSE;
 	}
 
@@ -1046,7 +1097,7 @@ PHP_FUNCTION(deflate_init)
 		window = zval_get_long(option_buffer);
 	}
 	if (window < 8 || window > 15) {
-		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (%pd) must be within 8..15", window);
+		php_error_docref(NULL, E_WARNING, "zlib window size (logarithm) (" ZEND_LONG_FMT ") must be within 8..15", window);
 		RETURN_FALSE;
 	}
 
@@ -1315,11 +1366,21 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, encoded_data)
+	ZEND_ARG_INFO(0, flush_mode)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)
 	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, flush_behavior)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_read_len, 0, 0, 1)
+	ZEND_ARG_INFO(0, resource)
 ZEND_END_ARG_INFO()
 
 /* }}} */
@@ -1354,6 +1415,8 @@ static const zend_function_entry php_zlib_functions[] = {
 	PHP_FE(deflate_add,						arginfo_deflate_add)
 	PHP_FE(inflate_init,					arginfo_inflate_init)
 	PHP_FE(inflate_add,						arginfo_inflate_add)
+	PHP_FE(inflate_get_status,				arginfo_inflate_get_status)
+	PHP_FE(inflate_get_read_len,				arginfo_inflate_get_read_len)
 	PHP_FE(ob_gzhandler,					arginfo_ob_gzhandler)
 	PHP_FE_END
 };
@@ -1468,6 +1531,16 @@ static PHP_MINIT_FUNCTION(zlib)
 
 	REGISTER_STRING_CONSTANT("ZLIB_VERSION", ZLIB_VERSION, CONST_CS|CONST_PERSISTENT);
 	REGISTER_LONG_CONSTANT("ZLIB_VERNUM", ZLIB_VERNUM, CONST_CS|CONST_PERSISTENT);
+
+	REGISTER_LONG_CONSTANT("ZLIB_OK", Z_OK, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_STREAM_END", Z_STREAM_END, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_NEED_DICT", Z_NEED_DICT, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_ERRNO", Z_ERRNO, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_STREAM_ERROR", Z_STREAM_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_DATA_ERROR", Z_DATA_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_MEM_ERROR", Z_MEM_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_BUF_ERROR", Z_BUF_ERROR, CONST_CS|CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("ZLIB_VERSION_ERROR", Z_VERSION_ERROR, CONST_CS|CONST_PERSISTENT);
 
 	REGISTER_INI_ENTRIES();
 	return SUCCESS;

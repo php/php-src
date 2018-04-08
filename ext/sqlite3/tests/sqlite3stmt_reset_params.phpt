@@ -4,7 +4,7 @@ SQLite3Stmt::reset with parameter test
 Jelle Lampaert
 #Belgian Testfest 2009
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

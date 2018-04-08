@@ -4,7 +4,7 @@ SQLite3Result::fetchArray() test, testing two params causes a failure
 Michelangelo van Dam
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

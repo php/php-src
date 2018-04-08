@@ -37,6 +37,8 @@ echo "Done";
 *** Testing each() : usage variations ***
 
 -- Pass each() a two-dimensional array --
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 array(4) {
   [1]=>
   string(4) "zero"

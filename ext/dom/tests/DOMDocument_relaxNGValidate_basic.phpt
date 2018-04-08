@@ -20,5 +20,5 @@ $doc->loadXML($xml);
 $result = $doc->relaxNGValidate($rng);
 var_dump($result);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

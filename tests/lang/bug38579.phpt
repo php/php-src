@@ -2,7 +2,7 @@
 Bug #38579 (include_once() may include the same file twice)
 --SKIPIF--
 <?php
-if (substr(PHP_OS, 0, 3) != 'WIN') {
+if(PHP_OS_FAMILY !== "WIN") {
     die('skip only for Windows');
 }
 ?>

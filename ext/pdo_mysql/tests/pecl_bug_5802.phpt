@@ -40,22 +40,22 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   array(1) {
-    [%u|b%"bar"]=>
-    %unicode|string%(3) "foo"
+    ["bar"]=>
+    string(3) "foo"
   }
   [1]=>
   array(1) {
-    [%u|b%"bar"]=>
+    ["bar"]=>
     NULL
   }
   [2]=>
   array(1) {
-    [%u|b%"bar"]=>
-    %unicode|string%(3) "qaz"
+    ["bar"]=>
+    string(3) "qaz"
   }
 }
 done!

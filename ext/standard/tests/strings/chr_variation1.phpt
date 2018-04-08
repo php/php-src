@@ -78,7 +78,7 @@ fclose($file_handle);  //closing the file handle
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing chr() function: with unexpected inputs for 'ascii' argument ***
 -- Iteration 1 --
 string(2) "00"

@@ -2,7 +2,6 @@
 Phar: create and modify tar-based phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -44,7 +43,7 @@ include $pname . '/b.php';
 ===DONE===
 --CLEAN--
 <?php unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.tar.php'); ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 brand new!
 bool(true)

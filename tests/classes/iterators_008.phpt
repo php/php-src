@@ -34,7 +34,7 @@ class D extends C implements Iterator {
 
 foreach (new D as $x) {}
 ?>
---EXPECTF--
+--EXPECT--
 D::rewind(2)
 D::valid(2)
 D::current(2)

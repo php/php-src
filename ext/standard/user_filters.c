@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -180,7 +180,7 @@ php_stream_filter_status_t userfilter_filter(
 
 		/* Give the userfilter class a hook back to the stream */
 		php_stream_to_zval(stream, &tmp);
-		zval_copy_ctor(&tmp);
+		Z_ADDREF(tmp);
 		add_property_zval(obj, "stream", &tmp);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&tmp);
@@ -254,14 +254,14 @@ php_stream_filter_status_t userfilter_filter(
 	return ret;
 }
 
-static php_stream_filter_ops userfilter_ops = {
+static const php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
 	userfilter_dtor,
 	"user-filter"
 };
 
 static php_stream_filter *user_filter_factory_create(const char *filtername,
-		zval *filterparams, int persistent)
+		zval *filterparams, uint8_t persistent)
 {
 	struct php_user_filter_data *fdat = NULL;
 	php_stream_filter *filter;
@@ -380,7 +380,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	return filter;
 }
 
-static php_stream_filter_factory user_filter_factory = {
+static const php_stream_filter_factory user_filter_factory = {
 	user_filter_factory_create
 };
 
@@ -399,9 +399,9 @@ PHP_FUNCTION(stream_bucket_make_writeable)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &zbrigade) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_RESOURCE(zbrigade)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if ((brigade = (php_stream_bucket_brigade*)zend_fetch_resource(
 					Z_RES_P(zbrigade), PHP_STREAM_BRIGADE_RES_NAME, le_bucket_brigade)) == NULL) {
@@ -430,9 +430,10 @@ static void php_stream_bucket_attach(int append, INTERNAL_FUNCTION_PARAMETERS)
 	php_stream_bucket_brigade *brigade;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "ro", &zbrigade, &zobject) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_RESOURCE(zbrigade)
+		Z_PARAM_OBJECT(zobject)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (NULL == (pzbucket = zend_hash_str_find(Z_OBJPROP_P(zobject), "bucket", sizeof("bucket")-1))) {
 		php_error_docref(NULL, E_WARNING, "Object has no bucket property");
@@ -500,15 +501,14 @@ PHP_FUNCTION(stream_bucket_new)
 	size_t buffer_len;
 	php_stream_bucket *bucket;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zs", &zstream, &buffer, &buffer_len) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_ZVAL(zstream)
+		Z_PARAM_STRING(buffer, buffer_len)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, zstream);
 
-	if (!(pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream)))) {
-		RETURN_FALSE;
-	}
+	pbuffer = pemalloc(buffer_len, php_stream_is_persistent(stream));
 
 	memcpy(pbuffer, buffer, buffer_len);
 
@@ -561,9 +561,10 @@ PHP_FUNCTION(stream_filter_register)
 	zend_string *filtername, *classname;
 	struct php_user_filter_data *fdat;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "SS", &filtername, &classname) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(2, 2)
+		Z_PARAM_STR(filtername)
+		Z_PARAM_STR(classname)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	RETVAL_FALSE;
 
@@ -586,7 +587,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(ZSTR_VAL(filtername), &user_filter_factory) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

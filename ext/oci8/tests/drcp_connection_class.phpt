@@ -24,7 +24,7 @@ echo "The New oci8.connection_class is $new_cc \n";
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Setting a new connection class now
 The New oci8.connection_class is New cc 
 Done

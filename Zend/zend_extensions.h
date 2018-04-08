@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,10 +25,28 @@
 #include "zend_compile.h"
 #include "zend_build.h"
 
+/*
+The constants below are derived from ext/opcache/ZendAccelerator.h
+
+You can use the following macro to check the extension API version for compatibilities:
+
+#define	ZEND_EXTENSION_API_NO_5_0_X	220040412
+#define	ZEND_EXTENSION_API_NO_5_1_X	220051025
+#define	ZEND_EXTENSION_API_NO_5_2_X	220060519
+#define	ZEND_EXTENSION_API_NO_5_3_X	220090626
+#define	ZEND_EXTENSION_API_NO_5_4_X	220100525
+#define	ZEND_EXTENSION_API_NO_5_5_X	220121212
+#define	ZEND_EXTENSION_API_NO_5_6_X	220131226
+#define	ZEND_EXTENSION_API_NO_7_0_X	320151012
+
+#if ZEND_EXTENSION_API_NO < ZEND_EXTENSION_API_NO_5_5_X
+   // do something for php versions lower than 5.5.x
+#endif
+*/
+
 /* The first number is the engine version and the rest is the date (YYYYMMDD).
- * This way engine 2/3 API no. is always greater than engine 1 API no..
- */
-#define ZEND_EXTENSION_API_NO	320151012
+ * This way engine 2/3 API no. is always greater than engine 1 API no..  */
+#define ZEND_EXTENSION_API_NO	320170718
 
 typedef struct _zend_extension_version_info {
 	int zend_extension_api_no;
@@ -49,9 +67,9 @@ typedef void (*message_handler_func_t)(int message, void *arg);
 
 typedef void (*op_array_handler_func_t)(zend_op_array *op_array);
 
-typedef void (*statement_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_begin_handler_func_t)(zend_op_array *op_array);
-typedef void (*fcall_end_handler_func_t)(zend_op_array *op_array);
+typedef void (*statement_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_begin_handler_func_t)(zend_execute_data *frame);
+typedef void (*fcall_end_handler_func_t)(zend_execute_data *frame);
 
 typedef void (*op_array_ctor_func_t)(zend_op_array *op_array);
 typedef void (*op_array_dtor_func_t)(zend_op_array *op_array);
@@ -127,6 +145,7 @@ void zend_shutdown_extensions(void);
 
 BEGIN_EXTERN_C()
 ZEND_API int zend_load_extension(const char *path);
+ZEND_API int zend_load_extension_handle(DL_HANDLE handle, const char *path);
 ZEND_API int zend_register_extension(zend_extension *new_extension, DL_HANDLE handle);
 ZEND_API zend_extension *zend_get_extension(const char *extension_name);
 ZEND_API size_t zend_extensions_op_array_persist_calc(zend_op_array *op_array);
@@ -141,4 +160,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

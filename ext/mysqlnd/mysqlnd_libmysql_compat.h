@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -17,7 +17,6 @@
   |          Georg Richter <georg@php.net>                               |
   +----------------------------------------------------------------------+
 */
-
 #ifndef MYSQLND_LIBMYSQL_COMPAT_H
 #define MYSQLND_LIBMYSQL_COMPAT_H
 
@@ -58,11 +57,10 @@
 #define mysql_field_count(r)			mysqlnd_field_count((r))
 #define mysql_field_seek(r,o)			mysqlnd_field_seek((r), (o))
 #define mysql_field_tell(r)				mysqlnd_field_tell((r))
-#define mysql_init(a)					mysqlnd_init((a))
+#define mysql_init(a)					mysqlnd_connection_init((a), false)
 #define mysql_insert_id(r)				mysqlnd_insert_id((r))
 #define mysql_kill(r,n)					mysqlnd_kill((r), (n))
 #define mysql_list_dbs(c, wild)			mysqlnd_list_dbs((c), (wild))
-#define mysql_list_fields(c, tab, wild)	mysqlnd_list_fields((c), (tab), (wild))
 #define mysql_list_processes(c)			mysqlnd_list_processes((c))
 #define mysql_list_tables(c, wild)		mysqlnd_list_tables((c), (wild))
 #define mysql_more_results(r)			mysqlnd_more_results((r))

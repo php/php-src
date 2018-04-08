@@ -53,12 +53,12 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(2) "20"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "1"
+  ["id"]=>
+  string(2) "20"
+  ["label"]=>
+  string(1) "1"
 }
 int(1)
 done!

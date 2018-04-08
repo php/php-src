@@ -11,4 +11,4 @@ $x->openFile(NULL, NULL, NULL);
 
 var_dump($x->getPathName());
 --EXPECTF--
-%unicode|string%(%d) "%sbug46051.php"
+string(%d) "%sbug46051.php"

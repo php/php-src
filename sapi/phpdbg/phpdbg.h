@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,8 +45,11 @@
 #include "zend_globals.h"
 #include "zend_ini_scanner.h"
 #include "zend_stream.h"
-#ifndef _WIN32
-#	include "zend_signal.h"
+#include "zend_signal.h"
+#if !defined(_WIN32) && !defined(ZEND_SIGNALS) && defined(HAVE_SIGNAL_H)
+#	include <signal.h>
+#elif defined(PHP_WIN32)
+#	include "win32/signal.h"
 #endif
 #include "SAPI.h"
 #include <fcntl.h>
@@ -251,12 +254,15 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 #endif
 	phpdbg_btree watchpoint_tree;                /* tree with watchpoints */
 	phpdbg_btree watch_HashTables;               /* tree with original dtors of watchpoints */
-	HashTable watchpoints;                       /* watchpoints */
+	HashTable watch_elements;                    /* user defined watch elements */
 	HashTable watch_collisions;                  /* collision table to check if multiple watches share the same recursive watchpoint */
-	zend_llist watchlist_mem;                    /* triggered watchpoints */
+	HashTable watch_recreation;                  /* watch elements pending recreation of their respective watchpoints */
+	HashTable watch_free;                        /* pointers to watch for being freed */
+	HashTable *watchlist_mem;                    /* triggered watchpoints */
+	HashTable *watchlist_mem_backup;             /* triggered watchpoints backup table while iterating over it */
 	zend_bool watchpoint_hit;                    /* a watchpoint was hit */
 	void (*original_free_function)(void *);      /* the original AG(mm_heap)->_free function */
-	phpdbg_watchpoint_t *watch_tmp;              /* temporary pointer for a watchpoint */
+	phpdbg_watch_element *watch_tmp;             /* temporary pointer for a watch element */
 
 	char *exec;                                  /* file to execute */
 	size_t exec_len;                             /* size of exec */
@@ -302,7 +308,7 @@ ZEND_BEGIN_MODULE_GLOBALS(phpdbg)
 	zend_bool last_was_newline;                  /* check if we don't need to output a newline upon next phpdbg_error or phpdbg_notice */
 
 	FILE *stdin_file;                            /* FILE pointer to stdin source file */
-	php_stream *(*orig_url_wrap_php)(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
+	const php_stream_wrapper *orig_url_wrap_php;
 
 	char input_buffer[PHPDBG_MAX_CMD];           /* stdin input buffer */
 	int input_buflen;                            /* length of stdin input buffer */

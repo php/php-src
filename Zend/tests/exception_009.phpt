@@ -25,4 +25,4 @@ throw new my_exception;
 
 ?>
 --EXPECT--
-Catchable fatal error: Object of class stdClass could not be converted to string in Unknown on line 0
+Recoverable fatal error: Object of class stdClass could not be converted to string in Unknown on line 0

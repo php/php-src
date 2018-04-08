@@ -107,8 +107,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
-		printf("[011] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_query($link, "SELECT id FROM test")))
+		printf("[011] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -128,14 +128,14 @@ mysqli_close($link);
 ?>
 --EXPECTF--
 array(1) {
-  [%u|b%"valid"]=>
-  %unicode|string%(30) "this is sql but with semicolon"
+  ["valid"]=>
+  string(30) "this is sql but with semicolon"
 }
 array(1) {
-  [%u|b%""]=>
-  %unicode|string%(1) "a"
+  [""]=>
+  string(1) "a"
 }
-%unicode|string%(1) "a"
+string(1) "a"
 
 Warning: mysqli_query(): Couldn't fetch mysqli in %s on line %d
 done!

@@ -5,7 +5,7 @@ Bug #39760 (autocreating element doesn't assign value to first node)
 --FILE--
 <?php
 
-$sx1 = new SimpleXMLElement((binary)"<root />");
+$sx1 = new SimpleXMLElement("<root />");
 
 $sx1->node[0] = 'node1';
 $sx1->node[1] = 'node2';
@@ -17,7 +17,7 @@ $node[0] = 'New Value';
 print $sx1->asXML();
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 <root><node>node1</node><node>node2</node></root>
 

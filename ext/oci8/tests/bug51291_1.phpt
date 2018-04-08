@@ -167,7 +167,7 @@ array(4) {
 
 Test 2 - Parse
 
-Warning: oci_error() expects parameter 1 to be resource, boolean given in %sbug51291_1.php on line %d
+Warning: oci_error() expects parameter 1 to be resource, bool given in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>
@@ -182,7 +182,7 @@ array(4) {
 NULL
 2nd call
 
-Warning: oci_error() expects parameter 1 to be resource, boolean given in %sbug51291_1.php on line %d
+Warning: oci_error() expects parameter 1 to be resource, bool given in %sbug51291_1.php on line %d
 bool(false)
 array(4) {
   ["code"]=>

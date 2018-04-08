@@ -19,6 +19,8 @@ print_r(read_exif_data(dirname(__FILE__).'/test2.jpg'));
 ===Done===
 --EXPECTF--
 *** Testing read_exif_data() : basic functionality ***
+
+Deprecated: Function read_exif_data() is deprecated in %sexif_read_exif_data_basic.php on line 9
 Array
 (
     [FileName] => test2.jpg

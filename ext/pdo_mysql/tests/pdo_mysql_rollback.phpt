@@ -88,7 +88,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 $db->exec('DROP TABLE IF EXISTS test2');
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(0)
 int(1)

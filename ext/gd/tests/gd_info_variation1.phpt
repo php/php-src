@@ -44,6 +44,8 @@ array(%d) {
   bool(%s)
   ["WebP Support"]=>
   bool(%s)
+  ["BMP Support"]=>
+  bool%a
   ["JIS-mapped Japanese Font Support"]=>
   bool(%s)
 }

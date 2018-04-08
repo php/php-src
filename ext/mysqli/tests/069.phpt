@@ -26,13 +26,13 @@ require_once('skipifconnectfailure.inc');
 	$mysql->close();
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [1]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 array(1) {
   [2]=>
-  %unicode|string%(1) "2"
+  string(1) "2"
 }
 done!

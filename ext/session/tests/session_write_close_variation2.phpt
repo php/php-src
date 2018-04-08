@@ -33,27 +33,26 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_write_close() : variation ***
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 array(0) {
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)
 bool(true)
 Done
-

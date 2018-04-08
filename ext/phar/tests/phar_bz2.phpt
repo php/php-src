@@ -3,7 +3,6 @@ Phar: bzipped phar
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 if (!extension_loaded("bz2")) die("skip bz2 not available");
 ?>
 --INI--
@@ -55,11 +54,11 @@ echo $e->getMessage(),"\n";
 @unlink(dirname(__FILE__) . '/phar_bz2.2.phar');
 ?>
 --EXPECTF--
-%unicode|string%(9) "it worked"
-%unicode|string%(%d) "phar://%sphar_bz2.phar/tar_004.php"
+string(9) "it worked"
+string(%d) "phar://%sphar_bz2.phar/tar_004.php"
 bool(true)
 bool(true)
 
-Warning: Phar::isFileFormat() expects parameter 1 to be integer, array given in %sphar_bz2.php on line %d
+Warning: Phar::isFileFormat() expects parameter 1 to be int, array given in %sphar_bz2.php on line %d
 Unknown file format specified
 ===DONE===

@@ -45,15 +45,15 @@ require_once('skipifconnectfailure.inc');
 [004]
 array(3) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "a"
+  string(1) "a"
   [2]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 [005]
 NULL
 
 Warning: mysqli_fetch_row(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

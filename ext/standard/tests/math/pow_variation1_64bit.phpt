@@ -143,26 +143,36 @@ int(1)
 int(0)
 
 -- Iteration 17 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 18 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 19 --
 int(0)
 
 -- Iteration 20 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 21 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 22 --
+
+Warning: A non-numeric value encountered in %s on line %d
 int(0)
 
 -- Iteration 23 --
 
-Notice: Object of class classA could not be converted to int in %s on line %d
+Notice: Object of class classA could not be converted to number in %s on line %d
 int(1)
 
 -- Iteration 24 --

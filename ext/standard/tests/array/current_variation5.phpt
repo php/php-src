@@ -41,7 +41,7 @@ current_variation5($a);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 *** Testing current() : usage variations ***
 
 -- Function: reference parameter --

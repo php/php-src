@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -739,7 +739,7 @@ int fcgi_listen(const char *path, int backlog)
 		return listen_socket;
 
 #else
-		int path_len = strlen(path);
+		size_t path_len = strlen(path);
 
 		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
 			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
@@ -1088,11 +1088,14 @@ static int fcgi_read_request(fcgi_request *req)
 	req->id = (hdr.requestIdB1 << 8) + hdr.requestIdB0;
 
 	if (hdr.type == FCGI_BEGIN_REQUEST && len == sizeof(fcgi_begin_request)) {
+		fcgi_begin_request *b;
+
 		if (safe_read(req, buf, len+padding) != len+padding) {
 			return 0;
 		}
 
-		req->keep = (((fcgi_begin_request*)buf)->flags & FCGI_KEEP_CONN);
+		b = (fcgi_begin_request*)buf;
+		req->keep = (b->flags & FCGI_KEEP_CONN);
 #ifdef TCP_NODELAY
 		if (req->keep && req->tcp && !req->nodelay) {
 # ifdef _WIN32
@@ -1105,7 +1108,7 @@ static int fcgi_read_request(fcgi_request *req)
 			req->nodelay = 1;
 		}
 #endif
-		switch ((((fcgi_begin_request*)buf)->roleB1 << 8) + ((fcgi_begin_request*)buf)->roleB0) {
+		switch ((b->roleB1 << 8) + b->roleB0) {
 			case FCGI_RESPONDER:
 				fcgi_hash_set(&req->env, FCGI_HASH_FUNC("FCGI_ROLE", sizeof("FCGI_ROLE")-1), "FCGI_ROLE", sizeof("FCGI_ROLE")-1, "RESPONDER", sizeof("RESPONDER")-1);
 				break;
@@ -1591,7 +1594,7 @@ int fcgi_write(fcgi_request *req, fcgi_request_type type, const char *str, int l
 		}
 		memcpy(req->out_pos, str, len);
 		req->out_pos += len;
-	} else if (len - limit < sizeof(req->out_buf) - sizeof(fcgi_header)) {
+	} else if (len - limit < (int)(sizeof(req->out_buf) - sizeof(fcgi_header))) {
 		if (!req->out_hdr) {
 			open_packet(req, type);
 		}
@@ -1731,8 +1734,12 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
+	zend_string *key = zend_string_init(name, name_len, 1);
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
-	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
+	GC_MAKE_PERSISTENT_LOCAL(key);
+	GC_MAKE_PERSISTENT_LOCAL(Z_STR(zvalue));
+	zend_hash_add(&fcgi_mgmt_vars, key, &zvalue);
+	zend_string_release(key);
 }
 
 void fcgi_free_mgmt_var_cb(zval *zv)

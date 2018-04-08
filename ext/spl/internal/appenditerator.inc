@@ -34,7 +34,7 @@ class AppendIterator implements OuterIterator
 	 * the AppendIterator itself becomes valid. However there will be no
 	 * call to $it->rewind(). Also if the current state is invalid the inner
 	 * ArrayIterator will be rewound und forwarded to the appended element.
-	 */	
+	 */
 	function append(Iterator $it)
 	{
 		$this->iterators->append($it);
@@ -84,7 +84,7 @@ class AppendIterator implements OuterIterator
 		return $this->iterators->valid() ? $this->getInnerIterator()->key() : NULL;
 	}
 
-	/** Move to the next element. If this means to another Iterator that 
+	/** Move to the next element. If this means to another Iterator that
 	 * rewind that Iterator.
 	 * @return void
 	 */
@@ -112,7 +112,7 @@ class AppendIterator implements OuterIterator
 	}
 
 	/** Aggregates the inner iterator
-	 */	
+	 */
 	function __call($func, $params)
 	{
 		return call_user_func_array(array($this->getInnerIterator(), $func), $params);

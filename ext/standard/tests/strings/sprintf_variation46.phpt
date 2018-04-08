@@ -51,7 +51,7 @@ foreach($integer_values as $integer_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : scientific formats with integer values ***
 
 -- Iteration 1 --

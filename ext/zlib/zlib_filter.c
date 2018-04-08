@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -167,7 +167,7 @@ static void php_zlib_inflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_inflate_ops = {
+static const php_stream_filter_ops php_zlib_inflate_ops = {
 	php_zlib_inflate_filter,
 	php_zlib_inflate_dtor,
 	"zlib.inflate"
@@ -276,7 +276,7 @@ static void php_zlib_deflate_dtor(php_stream_filter *thisfilter)
 	}
 }
 
-static php_stream_filter_ops php_zlib_deflate_ops = {
+static const php_stream_filter_ops php_zlib_deflate_ops = {
 	php_zlib_deflate_filter,
 	php_zlib_deflate_dtor,
 	"zlib.deflate"
@@ -286,9 +286,9 @@ static php_stream_filter_ops php_zlib_deflate_ops = {
 
 /* {{{ zlib.* common factory */
 
-static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, int persistent)
+static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *filterparams, uint8_t persistent)
 {
-	php_stream_filter_ops *fops = NULL;
+	const php_stream_filter_ops *fops = NULL;
 	php_zlib_filter_data *data;
 	int status;
 
@@ -333,7 +333,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 				/* log-2 base of history window (9 - 15) */
 				zend_long tmp = zval_get_long(tmpzval);
 				if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 32) {
-					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", tmp);
+					php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
 				} else {
 					windowBits = tmp;
 				}
@@ -365,7 +365,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* Memory Level (1 - 9) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < 1 || tmp > MAX_MEM_LEVEL) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (%pd)", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for memory level. (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							memLevel = tmp;
 						}
@@ -375,7 +375,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 						/* log-2 base of history window (9 - 15) */
 						tmp = zval_get_long(tmpzval);
 						if (tmp < -MAX_WBITS || tmp > MAX_WBITS + 16) {
-							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (%pd)", tmp);
+							php_error_docref(NULL, E_WARNING, "Invalid parameter give for window size. (" ZEND_LONG_FMT ")", tmp);
 						} else {
 							windowBits = tmp;
 						}
@@ -395,7 +395,7 @@ static php_stream_filter *php_zlib_filter_create(const char *filtername, zval *f
 factory_setlevel:
 					/* Set compression level within reason (-1 == default, 0 == none, 1-9 == least to most compression */
 					if (tmp < -1 || tmp > 9) {
-						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (%pd)", tmp);
+						php_error_docref(NULL, E_WARNING, "Invalid compression level specified. (" ZEND_LONG_FMT ")", tmp);
 					} else {
 						level = tmp;
 					}
@@ -421,7 +421,7 @@ factory_setlevel:
 	return php_stream_filter_alloc(fops, data, persistent);
 }
 
-php_stream_filter_factory php_zlib_filter_factory = {
+const php_stream_filter_factory php_zlib_filter_factory = {
 	php_zlib_filter_create
 };
 /* }}} */

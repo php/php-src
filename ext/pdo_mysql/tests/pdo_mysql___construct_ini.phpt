@@ -51,6 +51,6 @@ pdo.dsn.mysql="mysql:dbname=phptest;socket=/tmp/mysql.sock"
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 pdo.dsn.mysql cannot be accessed through ini_get_all()/ini_get()
 done!

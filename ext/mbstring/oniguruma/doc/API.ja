@@ -1,84 +1,98 @@
-���֥��󥿡��ե����� Version 5.9.2   2008/02/19
+鬼車インターフェース Version 6.8.0   2018/03/13
 
 #include <oniguruma.h>
 
 
-# int onig_init(void)
+# int onig_initialize(OnigEncoding use_encodings[], int num_encodings)
 
-  �饤�֥��ν����
+  ライブラリの初期化
+  最初に呼び出す必要がある。
 
-  onig_new()����ǸƤӽФ����Τǡ����δؿ�������Ū�˸ƤӽФ��ʤ��Ƥ�褤��
+  * onig_init() は廃止
+
+  引数
+  1 use_encodings:         使用する文字エンコーディングの配列
+  2 num_encodings:         文字エンコーディングの数
 
 
 # int onig_error_code_to_str(UChar* err_buf, int err_code, ...)
 
-  ���顼��å�������������롣
+  エラーメッセージを取得する。
 
-  ���δؿ���onig_new()�η�̤��Ф��ƸƤӽФ����ˤϡ�onig_new()��pattern������
-  �����������������˸ƤӽФ��ʤ���Фʤ�ʤ���
+  この関数を、onig_new()の結果に対して呼び出す場合には、onig_new()のpattern引数を
+  メモリ解放するよりも前に呼び出さなければならない。
 
-  ���ｪλ�����: ���顼��å�����ʸ����ΥХ���Ĺ
+  正常終了戻り値: エラーメッセージ文字列のバイト長
 
-  ����
-  1 err_buf:              ���顼��å��������Ǽ�����ΰ�
-                          (ɬ�פʥ�����: ONIG_MAX_ERROR_MESSAGE_LEN)
-  2 err_code:             ���顼������
-  3 err_info (optional):  onig_new()��err_info
+  引数
+  1 err_buf:              エラーメッセージを格納する領域
+                          (必要なサイズ: ONIG_MAX_ERROR_MESSAGE_LEN)
+  2 err_code:             エラーコード
+  3 err_info (optional):  onig_new()のerr_info
 
 
 # void onig_set_warn_func(OnigWarnFunc func)
 
-  �ٹ����δؿ��򥻥åȤ��롣
+  警告通知関数をセットする。
 
-  �ٹ�:
+  警告:
     '[', '-', ']' in character class without escape.
     ']' in pattern without escape.
 
-  ����
-  1 func:    �ٹ�ؿ�    void (*func)(char* warning_message)
+  引数
+  1 func:    警告関数    void (*func)(char* warning_message)
 
 
 # void onig_set_verb_warn_func(OnigWarnFunc func)
 
-  �ܺٷٹ����δؿ��򥻥åȤ��롣
+  詳細警告通知関数をセットする。
 
-  �ܺٷٹ�:
+  詳細警告:
     redundant nested repeat operator.
 
-  ����
-  1 func:    �ܺٷٹ�ؿ�    void (*func)(char* warning_message)
+  引数
+  1 func:    詳細警告関数    void (*func)(char* warning_message)
 
 
 # int onig_new(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
             OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax,
             OnigErrorInfo* err_info)
 
-  ����ɽ�����֥�������(regex)��������롣
+  正規表現オブジェクト(regex)を作成する。
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
-  ����
-  1 reg:         �������줿����ɽ�����֥������Ȥ��֤����ɥ쥹
-  2 pattern:     ����ɽ���ѥ�����ʸ����
-  3 pattern_end: ����ɽ���ѥ�����ʸ����ν�ü���ɥ쥹(pattern + pattern length)
-  4 option:      ����ɽ������ѥ�������ץ����
+  引数
+  1 reg:         作成された正規表現オブジェクトを返すアドレス
+  2 pattern:     正規表現パターン文字列
+  3 pattern_end: 正規表現パターン文字列の終端アドレス(pattern + pattern length)
+  4 option:      正規表現コンパイル時オプション
 
-      ONIG_OPTION_NONE               ���ץ����ʤ�
+      ONIG_OPTION_NONE               オプションなし
       ONIG_OPTION_SINGLELINE         '^' -> '\A', '$' -> '\Z'
-      ONIG_OPTION_MULTILINE          '.'�����Ԥ˥ޥå�����
-      ONIG_OPTION_IGNORECASE         ۣ��ޥå� ����
-      ONIG_OPTION_EXTEND             �ѥ������ĥ����
-      ONIG_OPTION_FIND_LONGEST       ��Ĺ�ޥå�
-      ONIG_OPTION_FIND_NOT_EMPTY     ���ޥå���̵��
+      ONIG_OPTION_MULTILINE          '.'が改行にマッチする
+      ONIG_OPTION_IGNORECASE         曖昧マッチ オン
+      ONIG_OPTION_EXTEND             パターン拡張形式
+      ONIG_OPTION_FIND_LONGEST       最長マッチ
+      ONIG_OPTION_FIND_NOT_EMPTY     空マッチを無視
       ONIG_OPTION_NEGATE_SINGLELINE
             ONIG_SYNTAX_POSIX_BASIC, ONIG_SYNTAX_POSIX_EXTENDED,
-            ONIG_SYNTAX_PERL, ONIG_SYNTAX_PERL_NG, ONIG_SYNTAX_JAVA��
-            �ǥե���Ȥ�ͭ����ONIG_OPTION_SINGLELINE�򥯥ꥢ���롣
+            ONIG_SYNTAX_PERL, ONIG_SYNTAX_PERL_NG, ONIG_SYNTAX_JAVAで
+            デフォルトで有効なONIG_OPTION_SINGLELINEをクリアする。
 
-      ONIG_OPTION_DONT_CAPTURE_GROUP ̾���դ���ͼ�����Τ����
-      ONIG_OPTION_CAPTURE_GROUP      ̾��̵����ͼ���������
+      ONIG_OPTION_DONT_CAPTURE_GROUP 名前付き捕獲式集合のみ捕獲
+      ONIG_OPTION_CAPTURE_GROUP      名前無し捕獲式集合も捕獲
+      ONIG_OPTION_WORD_IS_ASCII      wordがASCIIのみ (\w, \p{Word}, [[:word:]])
+                                     word boundがASCIIのみ (\b)
+      ONIG_OPTION_DIGIT_IS_ASCII     digitがASCIIのみ (\d, \p{Digit}, [[:digit:]])
+      ONIG_OPTION_SPACE_IS_ASCII     spaceがASCIIのみ (\s, \p{Space}, [[:space:]])
+      ONIG_OPTION_POSIX_IS_ASCII     POSIXプロパティがASCIIのみ
+                                     (word, digit, spaceを全て含んでいる)
+                                     (alnum, alpha, blank, cntrl, digit, graph,
+                                      lower, print, punct, space, upper, xdigit,
+                                      word)
 
-  5 enc:        ʸ�����󥳡��ǥ���
+  5 enc:        文字エンコーディング
 
       ONIG_ENCODING_ASCII         ASCII
       ONIG_ENCODING_ISO_8859_1    ISO 8859-1
@@ -111,9 +125,9 @@
       ONIG_ENCODING_BIG5          Big5
       ONIG_ENCODING_GB18030       GB18030
 
-      �ޤ��ϡ��桼�����������OnigEncodingType�ǡ����Υ��ɥ쥹
+      または、ユーザが定義したOnigEncodingTypeデータのアドレス
 
-  6 syntax:     ����ɽ���ѥ�����ʸˡ���
+  6 syntax:     正規表現パターン文法定義
 
       ONIG_SYNTAX_ASIS              plain text
       ONIG_SYNTAX_POSIX_BASIC       POSIX Basic RE
@@ -123,15 +137,16 @@
       ONIG_SYNTAX_GNU_REGEX         GNU regex
       ONIG_SYNTAX_JAVA              Java (Sun java.util.regex)
       ONIG_SYNTAX_PERL              Perl
-      ONIG_SYNTAX_PERL_NG           Perl + ̾���դ���ͼ�����
+      ONIG_SYNTAX_PERL_NG           Perl + 名前付き捕獲式集合
       ONIG_SYNTAX_RUBY              Ruby
-      ONIG_SYNTAX_DEFAULT           default (== Ruby)
+      ONIG_SYNTAX_ONIGURUMA         Oniguruma
+      ONIG_SYNTAX_DEFAULT           default (== ONIG_SYNTAX_ONIGURUMA)
                                     onig_set_default_syntax()
 
-      �ޤ��ϡ��桼�����������OnigSyntaxType�ǡ����Υ��ɥ쥹
+      または、ユーザが定義したOnigSyntaxTypeデータのアドレス
 
-  7 err_info: ���顼������֤�����Υ��ɥ쥹
-              onig_error_code_to_str()�λ����ܤΰ����Ȥ��ƻ��Ѥ���
+  7 err_info: エラー情報を返すためのアドレス
+              onig_error_code_to_str()の三番目の引数として使用する
 
 
 
@@ -140,44 +155,44 @@
             OnigOptionType option, OnigEncoding enc, OnigSyntaxType* syntax,
             OnigErrorInfo* err_info)
 
-  ����ɽ�����֥�������(regex)��������롣
-  reg���ΰ�������ǳ�����Ƥʤ���
+  正規表現オブジェクト(regex)を作成する。
+  regの領域を内部で割り当てない。
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
 
 
 # int onig_new_deluxe(regex_t** reg, const UChar* pattern, const UChar* pattern_end,
                       OnigCompileInfo* ci, OnigErrorInfo* einfo)
 
-  ����ɽ�����֥�������(regex)��������롣
-  ���δؿ��ϡ�onig_new()�Υǥ�å����ǡ�
+  正規表現オブジェクト(regex)を作成する。
+  この関数は、onig_new()のデラックス版。
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
-  ����
-  1 reg:         �������줿����ɽ�����֥������Ȥ��֤����ɥ쥹
-  2 pattern:     ����ɽ���ѥ�����ʸ����
-  3 pattern_end: ����ɽ���ѥ�����ʸ����ν�ü���ɥ쥹(pattern + pattern length)
-  4 ci:          ����ѥ������
+  引数
+  1 reg:         作成された正規表現オブジェクトを返すアドレス
+  2 pattern:     正規表現パターン文字列
+  3 pattern_end: 正規表現パターン文字列の終端アドレス(pattern + pattern length)
+  4 ci:          コンパイル情報
 
-    ci->num_of_elements: ci�����ǿ� (���ߤ��ǤǤ�: 5)
-    ci->pattern_enc:     �ѥ�����ʸ�����ʸ�����󥳡��ǥ���
-    ci->target_enc:      �о�ʸ�����ʸ�����󥳡��ǥ���
-    ci->syntax:          ����ɽ���ѥ�����ʸˡ���
-    ci->option:          ����ɽ������ѥ�������ץ����
-    ci->case_fold_flag:  ONIG_OPTION_IGNORECASE�⡼�ɤǤ�
-                         ʸ��ۣ��ޥå�����ӥåȥե饰
+    ci->num_of_elements: ciの要素数 (現在の版では: 5)
+    ci->pattern_enc:     パターン文字列の文字エンコーディング
+    ci->target_enc:      対象文字列の文字エンコーディング
+    ci->syntax:          正規表現パターン文法定義
+    ci->option:          正規表現コンパイル時オプション
+    ci->case_fold_flag:  ONIG_OPTION_IGNORECASEモードでの
+                         文字曖昧マッチ指定ビットフラグ
 
-       ONIGENC_CASE_FOLD_MIN:           �Ǿ�
-       ONIGENC_CASE_FOLD_DEFAULT:       �Ǿ�
+       ONIGENC_CASE_FOLD_MIN:           最小
+       ONIGENC_CASE_FOLD_DEFAULT:       最小
                                         onig_set_default_case_fold_flag()
 
-  5 err_info:    ���顼������֤�����Υ��ɥ쥹
-                 onig_error_code_to_str()�λ����ܤΰ����Ȥ��ƻ��Ѥ���
+  5 err_info:    エラー情報を返すためのアドレス
+                 onig_error_code_to_str()の三番目の引数として使用する
 
 
-  �ۤʤ�ʸ�����󥳡��ǥ��󥰤��Ȥ߹�碌�ϡ��ʲ��ξ��ˤΤߵ�����롣
+  異なる文字エンコーディングの組み合わせは、以下の場合にのみ許される。
 
     pattern_enc: ASCII, ISO_8859_1
     target_enc:  UTF16_BE, UTF16_LE, UTF32_BE, UTF32_LE
@@ -191,171 +206,281 @@
 
 # void onig_free(regex_t* reg)
 
-  ����ɽ�����֥������ȤΥ����������롣
+  正規表現オブジェクトのメモリを解放する。
 
-  ����
-  1 reg: ����ɽ�����֥�������
+  引数
+  1 reg: 正規表現オブジェクト
 
 
 # void onig_free_body(regex_t* reg)
 
-  ����ɽ�����֥������ȤΥ����������롣(reg���Ȥ��ΰ�������)
+  正規表現オブジェクトのメモリを解放する。(reg自身の領域を除いて)
 
-  ����
-  1 reg: ����ɽ�����֥�������
+  引数
+  1 reg: 正規表現オブジェクト
+
+
+# OnigMatchParam* onig_new_match_param()
+
+  OnigMatchParamオブジェクトを生成し、onig_initialize_match_param()を使用して
+  中身を初期化する。
+
+
+# void onig_free_match_param(OnigMatchParam* mp)
+
+  OnigMatchParamオブジェクトで使用しているメモリを開放する。
+
+  引数
+  1 mp: OnigMatchParamオブジェクト
+
+
+# void onig_initialize_match_param(OnigMatchParam* mp)
+
+  マッチパラメタ構造体にデフォルト値をセットする。
+  マッチパラメタは、onig_match_with_param(), onig_search_with_param()で
+  使用される。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+
+
+# int onig_set_match_stack_limit_size_of_match_param(OnigMatchParam* mp, unsigned int limit)
+
+  マッチスタックの最大深さをセットする。
+  0は、無制限を表す。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 limit: 制限数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_retry_limit_in_match_of_match_param(OnigMatchParam* mp, unsigned long limit)
+
+  一回のマッチでのリトライ数の最大値をセットする。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 limit: 制限回数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_progress_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  前進時の内容の呼び出し(callouts)で呼び出される関数をセットする。
+  もし０(NULL)がセットされると、前進時に呼び出しは起こらない。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 f: 呼び出される関数
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_set_retraction_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  後退時の内容の呼び出し(callouts)で呼び出される関数をセットする。
+  もし０(NULL)がセットされると、後退時に呼び出しは起こらない。
+
+  引数
+  1 mp: マッチパラメタオブジェクトアドレス
+  2 f: 呼び出される関数
+
+  正常終了戻り値: ONIG_NORMAL
 
 
 
 # int onig_search(regex_t* reg, const UChar* str, const UChar* end, const UChar* start,
                    const UChar* range, OnigRegion* region, OnigOptionType option)
 
-  ����ɽ����ʸ����򸡺�����������̤ȥޥå��ΰ���֤���
+  正規表現で文字列を検索し、検索結果とマッチ領域を返す。
 
-  ���ｪλ�����: �ޥå����� (p - str >= 0)
-  ��������:       ONIG_MISMATCH (< 0)
+  正常終了戻り値: マッチ位置 (p - str >= 0)
+  検索失敗:       ONIG_MISMATCH (< 0)
 
-  ����
-  1 reg:    ����ɽ�����֥�������
-  2 str:    �����о�ʸ����
-  3 end:    �����о�ʸ����ν�ü���ɥ쥹
-  4 start:  �����о�ʸ����θ�����Ƭ���֥��ɥ쥹
-  5 range:  �����о�ʸ����θ�����λ���֥��ɥ쥹
-    ����õ��  (start <= õ�������ʸ���� < range)
-    ����õ��  (range <= õ�������ʸ���� <= start)
-  6 region: �ޥå��ΰ����(region)  (NULL��������)
-  7 option: ���������ץ����
+  引数
+  1 reg:    正規表現オブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 start:  検索対象文字列の検索先頭位置アドレス
+  5 range:  検索対象文字列の検索終了位置アドレス
+    前方探索  (start <= 探索される文字列 < range)
+    後方探索  (range <= 探索される文字列 <= start)
+  6 region: マッチ領域情報(region)  (NULLも許される)
+  7 option: 検索時オプション
 
-    ONIG_OPTION_NOTBOL        ʸ�������Ƭ(str)���Ƭ�ȴ������ʤ�
-    ONIG_OPTION_NOTEOL        ʸ����ν�ü(end)������ȴ������ʤ�
-    ONIG_OPTION_POSIX_REGION  region������POSIX API��regmatch_t[]�ˤ���
+    ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
+    ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
+    ONIG_OPTION_POSIX_REGION  region引数をPOSIX APIのregmatch_t[]にする
+
+
+# int onig_search_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                   const UChar* start, const UChar* range, OnigRegion* region,
+                   OnigOptionType option, OnigMatchParam* mp)
+
+  引数
+  1-7:  onig_search()と同じ
+  8 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
 
 
 # int onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
 		 OnigRegion* region, OnigOptionType option)
 
-  ʸ����λ�����֤ǥޥå��󥰤�Ԥ�����̤ȥޥå��ΰ���֤���
+  文字列の指定位置でマッチングを行い、結果とマッチ領域を返す。
 
-  ���ｪλ�����: �ޥå������Х���Ĺ (>= 0)
+  正常終了戻り値: マッチしたバイト長 (>= 0)
   not match:      ONIG_MISMATCH      ( < 0)
 
-  ����
-  1 reg:    ����ɽ�����֥�������
-  2 str:    �����о�ʸ����
-  3 end:    �����о�ʸ����ν�ü���ɥ쥹
-  4 at:     �����о�ʸ����θ������ɥ쥹
-  5 region: �ޥå��ΰ����(region)  (NULL��������)
-  6 option: ���������ץ����
+  引数
+  1 reg:    正規表現オブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 at:     検索対象文字列の検索アドレス
+  5 region: マッチ領域情報(region)  (NULLも許される)
+  6 option: 検索時オプション
 
-    ONIG_OPTION_NOTBOL        ʸ�������Ƭ(str)���Ƭ�ȴ������ʤ�
-    ONIG_OPTION_NOTEOL        ʸ����ν�ü(end)������ȴ������ʤ�
-    ONIG_OPTION_POSIX_REGION  region������POSIX API��regmatch_t[]�ˤ���
+    ONIG_OPTION_NOTBOL        文字列の先頭(str)を行頭と看做さない
+    ONIG_OPTION_NOTEOL        文字列の終端(end)を行末と看做さない
+    ONIG_OPTION_POSIX_REGION  region引数をPOSIX APIのregmatch_t[]にする
+
+
+# int onig_match_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                            const UChar* at, OnigRegion* region,
+                            OnigOptionType option, OnigMatchParam* mp)
+
+  引数
+  1-6:  onig_match()と同じ
+  7 mp: マッチパラメタ値 (match_stack_limit, retry_limit_in_match)
+
+
+# int onig_scan(regex_t* reg, const UChar* str, const UChar* end,
+                OnigRegion* region, OnigOptionType option,
+                int (*scan_callback)(int, int, OnigRegion*, void*),
+                void* callback_arg)
+
+  正規表現で文字列をスキャンして、マッチングする毎にコールバック関数を呼び出す。
+
+  正常終了: マッチ回数 (0回も含める)
+  エラー:   エラーコード (< 0)
+  中断: コールバック関数が０以外の戻り値を返したとき、その値を戻り値として中断
+
+  引数
+  1 reg:    正規表現オブジェクト
+  2 str:    検索対象文字列
+  3 end:    検索対象文字列の終端アドレス
+  4 region: マッチ領域情報(region)  (NULLも許される)
+  5 option: 検索時オプション
+  6 scan_callback: コールバック関数
+  7 callback_arg:  コールバック関数に渡される付加引数値
 
 
 # OnigRegion* onig_region_new(void)
 
-  �ޥå��ΰ����(region)��������롣
+  マッチ領域情報(region)を作成する。
 
 
 # void onig_region_free(OnigRegion* region, int free_self)
 
-  �ޥå��ΰ����(region)�ǻ��Ѥ���Ƥ�������������롣
+  マッチ領域情報(region)で使用されているメモリを解放する。
 
-  ����
-  1 region:    �ޥå��ΰ���󥪥֥�������
-  2 free_self:  [1: region���Ȥ�ޤ�����Ʋ���, 0: region���Ȥϲ������ʤ�]
+  引数
+  1 region:    マッチ領域情報オブジェクト
+  2 free_self:  [1: region自身を含めて全て解放, 0: region自身は解放しない]
 
 
 # void onig_region_copy(OnigRegion* to, OnigRegion* from)
 
-  �ޥå��ΰ����(region)��ʣ�����롣
+  マッチ領域情報(region)を複製する。
 
-  ����
-  1 to:   �о��ΰ�
-  2 from: ���ΰ�
+  引数
+  1 to:   対象領域
+  2 from: 元領域
 
 
 # void onig_region_clear(OnigRegion* region)
 
-  �ޥå��ΰ����(region)����̣�򥯥ꥢ���롣
+  マッチ領域情報(region)の中味をクリアする。
 
-  ����
-  1 region: �о��ΰ�
+  引数
+  1 region: 対象領域
 
 
 # int onig_region_resize(OnigRegion* region, int n)
 
-  �ޥå��ΰ����(region)����ͼ�����(���롼��)�����ѹ����롣
+  マッチ領域情報(region)の捕獲式集合(グループ)数を変更する。
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
-  ����
-  1 region: �о��ΰ�
-  2 n:      ������������
+  引数
+  1 region: 対象領域
+  2 n:      新しいサイズ
 
 
 # int onig_name_to_group_numbers(regex_t* reg, const UChar* name, const UChar* name_end,
                                   int** num_list)
 
-  ���ꤷ��̾�����Ф���̾���դ���ͼ�����(���롼��)��
-  ���롼���ֹ�ꥹ�Ȥ��֤���
-  ̾���դ���ͼ�����ϡ�(?<name>....)�ˤ�ä�����Ǥ��롣
+  指定した名前に対する名前付き捕獲式集合(グループ)の
+  グループ番号リストを返す。
+  名前付き捕獲式集合は、(?<name>....)によって定義できる。
 
-  ���ｪλ�����:  ���ꤵ�줿̾�����Ф��륰�롼�׿�
-                   (�� /(?<x>..)(?<x>..)/  ==>  2)
-  ̾�����Ф��륰�롼�פ�¸�ߤ��ʤ�: -1
+  正常終了戻り値:  指定された名前に対するグループ数
+                   (例 /(?<x>..)(?<x>..)/  ==>  2)
+  名前に対するグループが存在しない: -1
 
-  ����
-  1 reg:       ����ɽ�����֥�������
-  2 name:      ��ͼ�����(���롼��)̾
-  3 name_end:  ��ͼ�����(���롼��)̾�ν�ü���ɥ쥹
-  4 num_list:  �ֹ�ꥹ�Ȥ��֤����ɥ쥹
+  引数
+  1 reg:       正規表現オブジェクト
+  2 name:      捕獲式集合(グループ)名
+  3 name_end:  捕獲式集合(グループ)名の終端アドレス
+  4 num_list:  番号リストを返すアドレス
 
 
 # int onig_name_to_backref_number(regex_t* reg, const UChar* name, const UChar* name_end,
                                   OnigRegion *region)
 
-  ���ꤵ�줿̾���θ�������(\k<name>)���Ф�����ͼ�����(���롼��)���ֹ���֤���
-  ̾�����Ф��ơ�ʣ���Υޥå��ΰ褬ͭ���Ǥ���С�������κ�����ֹ���֤���
-  ̾�����Ф�����ͼ����礬��Ĥ����ʤ��Ȥ��ˤϡ��б�����ޥå��ΰ褬ͭ����
-  �ɤ����˴ط��ʤ��������ֹ���֤���(���äơ�region�ˤ�NULL���Ϥ��Ƥ�褤��)
+  指定された名前の後方参照(\k<name>)に対する捕獲式集合(グループ)の番号を返す。
+  名前に対して、複数のマッチ領域が有効であれば、その中の最大の番号を返す。
+  名前に対する捕獲式集合が一個しかないときには、対応するマッチ領域が有効か
+  どうかに関係なく、その番号を返す。(従って、regionにはNULLを渡してもよい。)
 
-  ���ｪλ�����: �ֹ�
+  正常終了戻り値: 番号
 
-  ����
-  1 reg:       ����ɽ�����֥�������
-  2 name:      ��ͼ�����(���롼��)̾
-  3 name_end:  ��ͼ�����(���롼��)̾�ν�ü���ɥ쥹
-  4 region:    search/match��̤Υޥå��ΰ�
+  引数
+  1 reg:       正規表現オブジェクト
+  2 name:      捕獲式集合(グループ)名
+  3 name_end:  捕獲式集合(グループ)名の終端アドレス
+  4 region:    search/match結果のマッチ領域
 
 
 # int onig_foreach_name(regex_t* reg,
                         int (*func)(const UChar*, const UChar*, int,int*,regex_t*,void*),
                         void* arg)
 
-  ���Ƥ�̾�����Ф��ƥ�����Хå��ؿ��ƤӽФ���¹Ԥ��롣
+  全ての名前に対してコールバック関数呼び出しを実行する。
 
-  ���ｪλ�����: 0
-  ���顼:         ������Хå��ؿ��������
+  正常終了戻り値: 0
+  エラー:         コールバック関数の戻り値
 
-  ����
-  1 reg:     ����ɽ�����֥�������
-  2 func:    ������Хå��ؿ�
+  引数
+  1 reg:     正規表現オブジェクト
+  2 func:    コールバック関数
              func(name, name_end, <number of groups>, <group number's list>,
                   reg, arg);
 
-             func��0�ʳ����ͤ��֤��ȡ�����ʹߤΥ�����Хå��ϹԤʤ鷺��
-             ��λ���롣
+             funcが0以外の値を返すと、それ以降のコールバックは行なわずに
+             終了する。
 
-  3 arg:     func���Ф����ɲð���
+  3 arg:     funcに対する追加引数
 
 
 # int onig_number_of_names(regex_t* reg)
 
-  �ѥ��������������줿̾���ο����֤���
-  ��Ĥ�̾����¿������ϰ�Ĥȴ�������
+  パターン中で定義された名前の数を返す。
+  一個の名前の多重定義は一個と看做す。
 
-  ����
-  1 reg:    ����ɽ�����֥�������
+  引数
+  1 reg:    正規表現オブジェクト
 
 
 # OnigEncoding     onig_get_encoding(regex_t* reg)
@@ -363,157 +488,157 @@
 # OnigCaseFoldType onig_get_case_fold_flag(regex_t* reg)
 # OnigSyntaxType*  onig_get_syntax(regex_t* reg)
 
-  ����ɽ�����֥������Ȥ��Ф��ơ��б������ͤ��֤���
+  正規表現オブジェクトに対して、対応する値を返す。
 
-  ����
-  1 reg:    ����ɽ�����֥�������
+  引数
+  1 reg:    正規表現オブジェクト
 
 
 # int onig_number_of_captures(regex_t* reg)
 
-  �ѥ��������������줿��ͥ��롼�פο����֤���
+  パターン中で定義された捕獲グループの数を返す。
 
-  ����
-  1 reg:    ����ɽ�����֥�������
+  引数
+  1 reg:    正規表現オブジェクト
 
 
 # int onig_number_of_capture_histories(regex_t* reg)
 
-  �ѥ��������������줿�������(?@...)�ο����֤���
+  パターン中で定義された捕獲履歴(?@...)の数を返す。
 
-  ���Ѥ���ʸˡ���������ǽ��ͭ��(ONIG_SYN_OP2_ATMARK_CAPTURE_HISTORY)
-  �Ǥʤ���С��������ǽ�ϻ��ѤǤ��ʤ���
+  使用する文法で捕獲履歴機能が有効(ONIG_SYN_OP2_ATMARK_CAPTURE_HISTORY)
+  でなければ、捕獲履歴機能は使用できない。
 
-  ����
-  1 reg:    ����ɽ�����֥�������
+  引数
+  1 reg:    正規表現オブジェクト
 
 
 # OnigCaptureTreeNode* onig_get_capture_tree(OnigRegion* region)
 
-  �������ǡ����Υ롼�ȥΡ��ɤ��֤���
+  捕獲履歴データのルートノードを返す。
 
-  �ޥå������Ԥ��Ƥ�����ˤϡ������ͤ�����Ǥ��롣
+  マッチが失敗している場合には、この値は不定である。
 
-  ����
-  1 region: �ޥå��ΰ�
+  引数
+  1 region: マッチ領域
 
 
 # int onig_capture_tree_traverse(OnigRegion* region, int at,
                   int(*func)(int,int,int,int,int,void*), void* arg)
 
-  �������ǡ����ڤ��󤷤ƥ�����Хå����롣
+  捕獲履歴データ木を巡回してコールバックする。
 
-  ���ｪλ�����: 0
-  ���顼:         ������Хå��ؿ��������
+  正常終了戻り値: 0
+  エラー:         コールバック関数の戻り値
 
-  ����
-  1 region:  �ޥå��ΰ�
-  2 at:      ������Хå���Ԥʤ������ߥ�
+  引数
+  1 region:  マッチ領域
+  2 at:      コールバックを行なうタイミング
 
     ONIG_TRAVERSE_CALLBACK_AT_FIRST:
-        �ǽ�˥�����Хå����ơ��ҥΡ��ɤ���
+        最初にコールバックして、子ノードを巡回
     ONIG_TRAVERSE_CALLBACK_AT_LAST:
-        �ҥΡ��ɤ��󤷤ơ�������Хå�
+        子ノードを巡回して、コールバック
     ONIG_TRAVERSE_CALLBACK_AT_BOTH:
-        �ǽ�˥�����Хå����ơ��ҥΡ��ɤ��󡢺Ǹ�ˤ⤦���٥�����Хå�
+        最初にコールバックして、子ノードを巡回、最後にもう一度コールバック
 
-  3 func:    ������Хå��ؿ�
-             func��0�ʳ����ͤ��֤��ȡ�����ʹߤν��ϹԤʤ鷺��
-             ��λ���롣
+  3 func:    コールバック関数
+             funcが0以外の値を返すと、それ以降の巡回は行なわずに
+             終了する。
 
              int func(int group, int beg, int end, int level, int at,
                       void* arg)
-               group: ���롼���ֹ�
-               beg:   �ޥå����ϰ���
-               end    �ޥå���λ����
-               level: �ͥ��ȥ�٥� (0����)
-               at:    ������Хå����ƤӽФ��줿�����ߥ�
+               group: グループ番号
+               beg:   マッチ開始位置
+               end    マッチ終了位置
+               level: ネストレベル (0から)
+               at:    コールバックが呼び出されたタイミング
                       ONIG_TRAVERSE_CALLBACK_AT_FIRST
                       ONIG_TRAVERSE_CALLBACK_AT_LAST
-               arg:   �ɲð���
+               arg:   追加引数
 
-  4 arg;     func���Ф����ɲð���
+  4 arg;     funcに対する追加引数
 
 
 # int onig_noname_group_capture_is_active(regex_t* reg)
 
-  ̾���ʤ����������͵�ǽ��ͭ�����ɤ������֤���
+  名前なし式集合の捕獲機能が有効かどうかを返す。
 
-  ͭ��: 1
-  ̵��: 0
+  有効: 1
+  無効: 0
 
-  ����
-  1 reg:    ����ɽ�����֥�������
+  引数
+  1 reg:    正規表現オブジェクト
 
 
-  ���ץ�����ONIG_OPTION_DONT_CAPTURE_GROUP��ON --> ̵��
+  オプションのONIG_OPTION_DONT_CAPTURE_GROUPがON --> 無効
 
-  �ѥ�����̾���Ĥ����������Ѥ��Ƥ���
-  AND ����ʸˡ�ǡ�ONIG_SYN_CAPTURE_ONLY_NAMED_GROUP��ON
-  AND ���ץ�����ONIG_OPTION_CAPTURE_GROUP��OFF
-  --> ̵��
+  パターンが名前つき式集合を使用している
+  AND 使用文法で、ONIG_SYN_CAPTURE_ONLY_NAMED_GROUPがON
+  AND オプションのONIG_OPTION_CAPTURE_GROUPがOFF
+  --> 無効
 
-  �嵭�ʳ��ξ�� --> ͭ��
+  上記以外の場合 --> 有効
 
 
 # UChar* onigenc_get_prev_char_head(OnigEncoding enc, const UChar* start, const UChar* s)
 
-  ʸ�����ʬ����ʸ������֤��֤���
+  文字一個分前の文字列位置を返す。
 
-  ����
-  1 enc:   ʸ�����󥳡��ǥ���
-  2 start: ʸ�������Ƭ���ɥ쥹
-  3 s:     ʸ������ΰ���
+  引数
+  1 enc:   文字エンコーディング
+  2 start: 文字列の先頭アドレス
+  3 s:     文字列中の位置
 
 
 # UChar* onigenc_get_left_adjust_char_head(OnigEncoding enc,
                                            const UChar* start, const UChar* s)
 
-  ʸ������Ƭ�Х��Ȱ��֤ˤʤ�褦�˺�¦��Ĵ���������ɥ쥹���֤���
+  文字の先頭バイト位置になるように左側に調整したアドレスを返す。
 
-  ����
-  1 enc:   ʸ�����󥳡��ǥ���
-  2 start: ʸ�������Ƭ���ɥ쥹
-  3 s:     ʸ������ΰ���
+  引数
+  1 enc:   文字エンコーディング
+  2 start: 文字列の先頭アドレス
+  3 s:     文字列中の位置
 
 
 # UChar* onigenc_get_right_adjust_char_head(OnigEncoding enc,
                                             const UChar* start, const UChar* s)
 
-  ʸ������Ƭ�Х��Ȱ��֤ˤʤ�褦�˱�¦��Ĵ���������ɥ쥹���֤���
+  文字の先頭バイト位置になるように右側に調整したアドレスを返す。
 
-  ����
-  1 enc:   ʸ�����󥳡��ǥ���
-  2 start: ʸ�������Ƭ���ɥ쥹
-  3 s:     ʸ������ΰ���
+  引数
+  1 enc:   文字エンコーディング
+  2 start: 文字列の先頭アドレス
+  3 s:     文字列中の位置
 
 
 # int onigenc_strlen(OnigEncoding enc, const UChar* s, const UChar* end)
 # int onigenc_strlen_null(OnigEncoding enc, const UChar* s)
 
-  ʸ�����ʸ�������֤���
+  文字列の文字数を返す。
 
 
 # int onigenc_str_bytelen_null(OnigEncoding enc, const UChar* s)
 
-  ʸ����ΥХ��ȿ����֤���
+  文字列のバイト数を返す。
 
 
 # int onig_set_default_syntax(OnigSyntaxType* syntax)
 
-  �ǥե���Ȥ�����ɽ���ѥ�����ʸˡ�򥻥åȤ��롣
+  デフォルトの正規表現パターン文法をセットする。
 
-  ����
-  1 syntax: ����ɽ���ѥ�����ʸˡ
+  引数
+  1 syntax: 正規表現パターン文法
 
 
 # void onig_copy_syntax(OnigSyntaxType* to, OnigSyntaxType* from)
 
-  ����ɽ���ѥ�����ʸˡ�򥳥ԡ����롣
+  正規表現パターン文法をコピーする。
 
-  ����
-  1 to:   �о�
-  2 from: ��
+  引数
+  1 to:   対象
+  2 from: 元
 
 
 # unsigned int onig_get_syntax_op(OnigSyntaxType* syntax)
@@ -526,35 +651,35 @@
 # void onig_set_syntax_behavior(OnigSyntaxType* syntax, unsigned int behavior)
 # void onig_set_syntax_options(OnigSyntaxType* syntax, OnigOptionType options)
 
-  ����ɽ���ѥ�����ʸˡ�����Ǥ򻲾�/�������롣
+  正規表現パターン文法の要素を参照/取得する。
 
-  ����
-  1 syntax:                     ����ɽ���ѥ�����ʸˡ
-  2 op, op2, behavior, options: ���Ǥ���
+  引数
+  1 syntax:                     正規表現パターン文法
+  2 op, op2, behavior, options: 要素の値
 
 
-# void onig_copy_encoding(OnigEncoding to, OnigOnigEncoding from)
+# void onig_copy_encoding(OnigEncoding to, OnigEncoding from)
 
-  ʸ�����󥳡��ǥ��󥰤򥳥ԡ����롣
+  文字エンコーディングをコピーする。
 
-  ����
-  1 to:   �о�
-  2 from: ��
+  引数
+  1 to:   対象
+  2 from: 元
 
 
 # int onig_set_meta_char(OnigSyntaxType* syntax, unsigned int what,
                          OnigCodePoint code)
 
-  �᥿ʸ������ꤷ�������ɥݥ�����ͤ˥��åȤ��롣
-  ONIG_SYN_OP_VARIABLE_META_CHARACTERS������ɽ���ѥ�����ʸˡ��ͭ����
-  �ʤäƤ��ʤ����ˤϡ�����������ʸ��������ơ������ǻ��ꤷ���᥿ʸ����
-  ��ǽ���ʤ���(�ȹ��ߤ�ʸˡ�Ǥ�ͭ���ˤ��Ƥ��ʤ���)
+  メタ文字を指定したコードポイント値にセットする。
+  ONIG_SYN_OP_VARIABLE_META_CHARACTERSが正規表現パターン文法で有効に
+  なっていない場合には、エスケープ文字を除いて、ここで指定したメタ文字は
+  機能しない。(組込みの文法では有効にしていない。)
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
-  ����
-  1 syntax: �о�ʸˡ
-  2 what:   �᥿ʸ����ǽ�λ���
+  引数
+  1 syntax: 対象文法
+  2 what:   メタ文字機能の指定
 
           ONIG_META_CHAR_ESCAPE
           ONIG_META_CHAR_ANYCHAR
@@ -563,48 +688,120 @@
           ONIG_META_CHAR_ONE_OR_MORE_TIME
           ONIG_META_CHAR_ANYCHAR_ANYTIME
 
-  3 code: �᥿ʸ���Υ����ɥݥ���� �ޤ��� ONIG_INEFFECTIVE_META_CHAR.
+  3 code: メタ文字のコードポイント または ONIG_INEFFECTIVE_META_CHAR.
 
 
 # OnigCaseFoldType onig_get_default_case_fold_flag()
 
-  �ǥե���Ȥ�case fold�ե饰��������롣
+  デフォルトのcase foldフラグを取得する。
 
 
 # int onig_set_default_case_fold_flag(OnigCaseFoldType case_fold_flag)
 
-  �ǥե���Ȥ�case fold�ե饰�򥻥åȤ��롣
+  デフォルトのcase foldフラグをセットする。
 
-  ����
-  1 case_fold_flag: case fold�ե饰
+  引数
+  1 case_fold_flag: case foldフラグ
 
 
 # unsigned int onig_get_match_stack_limit_size(void)
 
-  �ޥå������å��������κ����ͤ��֤���
-  (�ǥե����: 0 == ̵����)
+  マッチスタックサイズの最大値を返す。
+  (デフォルト: 0 == 無制限)
 
 
 # int onig_set_match_stack_limit_size(unsigned int size)
 
-  �ޥå������å��������κ����ͤ���ꤹ�롣
-  (size = 0: ̵����)
+  マッチスタックサイズの最大値を指定する。
+  (size = 0: 無制限)
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
+
+
+# unsigned long onig_get_retry_limit_in_match(void)
+
+  マッチング関数内でのリトライ数の制限値を返す。
+  (デフォルト: 10000000)
+
+  正常終了戻り値: 制限値
+
+
+# int onig_set_retry_limit_in_match(unsigned long n)
+
+  マッチング関数内でのリトライ数の制限値を指定する。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_progress_callout(void)
+
+  前進時の内容の呼び出しで呼び出される関数を返す。
+
+
+# int onig_set_progress_callout(OnigCalloutFunc f)
+
+  前進時の内容の呼び出しで呼び出される関数を指定する。
+  もし0(NULL)を指定すると、前進時の内容の呼び出しで呼び出しは起こらない。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_retraction_callout(void)
+
+  後退時の内容の呼び出しで呼び出される関数を返す。
+
+
+# int onig_set_retraction_callout(OnigCalloutFunc f)
+
+  後退時の内容の呼び出しで呼び出される関数を指定する。
+  もし0(NULL)を指定すると、後退時の内容の呼び出しで呼び出しは起こらない。
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# int onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges))
+
+  新しいUnicodeプロパティを定義する。
+  (この関数はスレッドセーフではない)
+
+  引数
+  1 name:    プロパティ名 (ASCIIコードのみ。 文字 ' ', '-', '_' は無視される。)
+  2 ranges:  プロパティコードポイント範囲
+             (最初の要素は範囲の数)
+
+    [num-of-ranges, 1st-range-start, 1st-range-end, 2nd-range-start... ]
+
+    * この関数を呼んだ後で、rangesを変更/破壊しないこと
+
+  正常終了戻り値: ONIG_NORMAL
+
+
+# unsigned int onig_get_parse_depth_limit(void)
+
+  再帰パース処理の最大深さを返す。
+  (デフォルト: regint.h で定義されている DEFAULT_PARSE_DEPTH_LIMIT。現在は 4096)
+
+
+# int onig_set_parse_depth_limit(unsigned int depth)
+
+  再帰パース処理の最大深さを指定する。
+  (depth = 0: regint.h で定義されたデフォルト値に設定する。)
+
+  正常終了戻り値: ONIG_NORMAL
 
 
 # int onig_end(void)
 
-  �饤�֥��λ��Ѥ�λ���롣
+  ライブラリの使用を終了する。
 
-  ���ｪλ�����: ONIG_NORMAL
+  正常終了戻り値: ONIG_NORMAL
 
-  onig_init()����ٸƤӽФ��Ƥ⡢�����˺�����������ɽ�����֥�������
-  ����Ѥ��뤳�ȤϤǤ��ʤ���
+  onig_init()を再度呼び出しても、以前に作成した正規表現オブジェクト
+  を使用することはできない。
 
 
 # const char* onig_version(void)
 
-  �С������ʸ������֤���(�� "5.0.3")
+  バージョン文字列を返す。(例 "5.0.3")
 
 // END

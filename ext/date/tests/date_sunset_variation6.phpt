@@ -103,24 +103,24 @@ foreach($inputs as $key =>$value) {
 *** Testing date_sunset() : usage variation ***
 
 --int 0--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --int 1--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+string(5) "13:41"
+float(13.684%d)
+int(1218199264)
 
 --int 12345--
-string(5) "21:40"
-float(21.681%d)
-int(1218199253)
+string(5) "21:41"
+float(21.684%d)
+int(1218199264)
 
 --int -12345--
-string(5) "19:40"
-float(19.681%d)
-int(1218199253)
+string(5) "19:41"
+float(19.684%d)
+int(1218199264)
 
 --empty array--
 
@@ -167,34 +167,34 @@ Warning: date_sunset() expects parameter 6 to be float, array given in %s on lin
 bool(false)
 
 --uppercase NULL--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --lowercase null--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --lowercase true--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+string(5) "13:41"
+float(13.684%d)
+int(1218199264)
 
 --lowercase false--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --uppercase TRUE--
-string(5) "13:40"
-float(13.681%d)
-int(1218199253)
+string(5) "13:41"
+float(13.684%d)
+int(1218199264)
 
 --uppercase FALSE--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --empty string DQ--
 
@@ -285,12 +285,12 @@ Warning: date_sunset() expects parameter 6 to be float, object given in %s on li
 bool(false)
 
 --undefined var--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 
 --unset var--
-string(5) "12:40"
-float(12.681%d)
-int(1218199253)
+string(5) "12:41"
+float(12.684%d)
+int(1218199264)
 ===DONE===

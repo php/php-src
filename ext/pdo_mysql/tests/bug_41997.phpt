@@ -38,17 +38,17 @@ var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 var_dump($stmt->errorInfo());
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"one"]=>
-    %unicode|string%(1) "1"
+    ["one"]=>
+    string(1) "1"
   }
 }
 array(3) {
   [0]=>
-  %unicode|string%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
   [2]=>
@@ -57,13 +57,13 @@ array(3) {
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"two"]=>
-    %unicode|string%(1) "2"
+    ["two"]=>
+    string(1) "2"
   }
 }
 array(3) {
   [0]=>
-  %unicode|string%(5) "00000"
+  string(5) "00000"
   [1]=>
   NULL
   [2]=>

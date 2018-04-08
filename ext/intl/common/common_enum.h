@@ -75,6 +75,7 @@ U_CFUNC zval *zoi_with_current_get_current_data(zend_object_iterator *iter);
 U_CFUNC void zoi_with_current_invalidate_current(zend_object_iterator *iter);
 
 #ifdef __cplusplus
+using icu::StringEnumeration;
 U_CFUNC void IntlIterator_from_StringEnumeration(StringEnumeration *se, zval *object);
 #endif
 

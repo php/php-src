@@ -31,7 +31,7 @@ try {
 
 echo "\ndone!\n";
 ?>
---EXPECTF--
+--EXPECT--
 NULL-Byte before first placeholder:
 Length of item 0: 3, Value of item 1: c
 

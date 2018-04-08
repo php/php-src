@@ -19,7 +19,7 @@ Ensure class constants are not evaluated when a class is looked up to resolve in
   
   var_dump(C::X, C::$a, D::X, D::$a, E::X, E::$a);
 ?>
---EXPECTF--
+--EXPECT--
 string(5) "hello"
 array(2) {
   ["nasty"]=>

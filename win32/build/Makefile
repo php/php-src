@@ -1,7 +1,7 @@
 #  +----------------------------------------------------------------------+
 #  | PHP Version 7                                                        |
 #  +----------------------------------------------------------------------+
-#  | Copyright (c) 1997-2017 The PHP Group                                |
+#  | Copyright (c) 1997-2018 The PHP Group                                |
 #  +----------------------------------------------------------------------+
 #  | This source file is subject to version 3.01 of the PHP license,      |
 #  | that is bundled with this package in the file LICENSE, and is        |
@@ -25,9 +25,25 @@ RE2C="$(RE2C)"
 PGOMGR="$(PGOMGR)"
 PHP_BUILD=$(PHP_BUILD)
 
+!if "$(PHP_SIMD_SCALE)" == ""
+SIMD_SUFFIX=
+!else
+!if "$(PHP_SIMD_SCALE)" == "SSE2"
+SIMD_SUFFIX=
+!else
+SIMD_SUFFIX=-$(PHP_SIMD_SCALE)
+!endif
+!endif
+
 MCFILE=$(BUILD_DIR)\wsyslog.rc
-BUILD_DIR_DEV_NAME=php-$(PHP_VERSION_STRING)-devel-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)
+BUILD_DIR_DEV_NAME=php-$(PHP_VERSION_STRING)-devel-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)$(SIMD_SUFFIX)
 BUILD_DIR_DEV=$(BUILD_DIR)\$(BUILD_DIR_DEV_NAME)
+
+DIST_ZIP_SNAP=php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)$(SIMD_SUFFIX).zip
+DIST_ZIP_PECL=pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)$(SIMD_SUFFIX).zip
+DIST_ZIP_DEV_PACK=php-devel-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)$(SIMD_SUFFIX).zip
+DIST_ZIP_TEST_PACK=php-test-pack-$(PHP_VERSION_STRING)$(SIMD_SUFFIX).zip
+DIST_ZIP_DEBUG_PACK=php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE)$(SIMD_SUFFIX).zip
 
 !if "$(DEBUGGER)" == "1"
 DEBUGGER_CMD=devenv
@@ -108,7 +124,7 @@ _VC_MANIFEST_EMBED_DLL= if exist $@.manifest $(MT) -nologo -manifest $@.manifest
 !endif
 
 $(PHPDLL_RES): win32\build\template.rc
-	$(RC) /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
+	$(RC) /nologo /fo $(PHPDLL_RES) /d FILE_DESCRIPTION="\"PHP Script Interpreter\"" \
 		/d FILE_NAME="\"$(PHPDLL)\"" /d PRODUCT_NAME="\"PHP Script Interpreter\"" \
 		/I$(BUILD_DIR) /d MC_INCLUDE="\"$(MCFILE)\"" \
 		win32\build\template.rc
@@ -160,10 +176,10 @@ clean-pgo: clean-all
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
-	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	-del /f /q $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING).zip
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_SNAP)
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_DEBUG_PACK)
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_PECL)
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_TEST_PACK)
 
 
 !if $(PHP_TEST_INI_PATH) == ""
@@ -189,29 +205,26 @@ build-snap: set-tmp-env generated_files
 build-dist: $(BUILD_DIR)\deplister.exe
 	-rd /s /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
 	-rd /s /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
-	-del /f /q $(BUILD_DIR)\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	-del /f /q $(BUILD_DIR)\php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	-del /f /q $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip
-	$(BUILD_DIR)\php.exe -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_SNAP)
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_DEBUG_PACK)
+	-del /f /q $(BUILD_DIR)\$(DIST_ZIP_PECL)
+	$(PHP_SDK_PHP_CMD) -d date.timezone=UTC -n -dphar.readonly=0 win32/build/mkdist.php "$(PHP_VERSION_STRING)" "$(BUILD_DIR)" "$(PHP_BUILD)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS) $(PHP_EXTRA_DIST_FILES)" "$(PECL_TARGETS) $(PECL_EXTRA_DIST_FILES)" "$(SNAPSHOT_TEMPLATE)"
 	cd $(BUILD_DIR)\php-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\php-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
+	-$(7ZA) a ..\$(DIST_ZIP_SNAP) .
 	cd $(BUILD_DIR)\pecl-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\pecl-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip .
+	-$(7ZA) a ..\$(DIST_ZIP_PECL) .
 	cd $(BUILD_DIR)\php-test-pack-$(PHP_VERSION_STRING)
-	-$(ZIP) -9 -q -r ..\php-test-pack-$(PHP_VERSION_STRING).zip .
+	-$(7ZA) a ..\$(DIST_ZIP_TEST_PACK) .
 	cd $(BUILD_DIR)
-	-$(ZIP) -9 -q php-debug-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip *.pdb
-	-$(ZIP) -9 -q -r php-devel-pack-$(PHP_VERSION_STRING)$(PHP_ZTS_ARCHIVE_POSTFIX)-Win32-$(PHP_COMPILER_SHORT)-$(PHP_ARCHITECTURE).zip $(BUILD_DIR_DEV_NAME)
+	-$(7ZA) a $(DIST_ZIP_DEBUG_PACK) *.pdb
+	-$(7ZA) a $(DIST_ZIP_DEV_PACK) $(BUILD_DIR_DEV_NAME)
 	cd $(BUILD_DIR)
 
 dist: all build-dist
 snap: build-snap build-devel build-dist
 
 $(BUILD_DIR)\deplister.exe:	win32\build\deplister.c
-	$(PHP_CL) /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
-
-msi-installer: dist
-	$(BUILD_DIR)\php.exe ..\php-installer\build-installer.php "$(BUILD_DIR)" "$(PHPDLL)" "$(SAPI_TARGETS)" "$(EXT_TARGETS)" "$(PECL_TARGETS)"
+	$(CC) /nologo /Fo$(BUILD_DIR)\ /Fd$(BUILD_DIR)\ /Fp$(BUILD_DIR)\ /FR$(BUILD_DIR) /Fe$(BUILD_DIR)\deplister.exe win32\build\deplister.c imagehlp.lib
 
 # need to redirect, since INSTALL is a file in the root...
 install: really-install install-sdk
@@ -242,9 +255,9 @@ really-install:
 	@if not exist $(PHP_PREFIX) mkdir $(PHP_PREFIX)
 	@if not exist $(PHP_PREFIX)\ext mkdir $(PHP_PREFIX)\ext
 	@echo Installing files under $(PHP_PREFIX)
-	@copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
-	@copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul
-	dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
+	@if exist $(BUILD_DIR)\*.exe copy $(BUILD_DIR)\*.exe $(PHP_PREFIX) /y >nul
+	@type nul > $(BUILD_DIR)\extension_dlls.txt
+	@if exist $(BUILD_DIR)\php_*.dll copy $(BUILD_DIR)\php_*.dll $(PHP_PREFIX)\ext /y >nul & dir /b $(BUILD_DIR)\php_*.dll > $(BUILD_DIR)\extension_dlls.txt
 	@xcopy $(BUILD_DIR)\*.dll /exclude:$(BUILD_DIR)\extension_dlls.txt $(PHP_PREFIX) /y >nul
 	@echo Registering event source with syslog (requires admin rights)
 	@echo It's okay for this step to fail:

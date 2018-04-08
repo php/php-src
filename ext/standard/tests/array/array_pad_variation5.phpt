@@ -31,7 +31,7 @@ var_dump( array_pad($input, -$pad_size, $pad_value) );  // negative 'pad_value'
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_pad() : Passing 2-d array to $pad_value argument ***
 array(5) {
   [0]=>

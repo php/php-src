@@ -76,6 +76,16 @@ MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
 #endif
 U_NAMESPACE_END
 
+using icu::Formattable;
+using icu::Format;
+using icu::DateFormat;
+using icu::MessageFormat;
+#ifdef HAS_MESSAGE_PATTERN
+using icu::MessagePattern;
+#endif
+using icu::MessageFormatAdapter;
+using icu::FieldPosition;
+
 U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 {
 	int32_t fmt_count = 0;
@@ -227,15 +237,16 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 					UnicodeString typeString = mp.getSubstring(type_part);
 					/* This is all based on the rules in the docs for MessageFormat
 					 * @see http://icu-project.org/apiref/icu4c/classMessageFormat.html */
-					if (typeString == "number") {
+#define ASCII_LITERAL(s) UNICODE_STRING(s, sizeof(s)-1)
+					if (typeString == ASCII_LITERAL("number")) {
 						MessagePattern::Part style_part = mp.getPart(i + 1); /* Not advancing i */
 						if (style_part.getType() == UMSGPAT_PART_TYPE_ARG_STYLE) {
 							UnicodeString styleString = mp.getSubstring(style_part);
-							if (styleString == "integer") {
+							if (styleString == ASCII_LITERAL("integer")) {
 								type = Formattable::kInt64;
-							} else if (styleString == "currency") {
+							} else if (styleString == ASCII_LITERAL("currency")) {
 								type = Formattable::kDouble;
-							} else if (styleString == "percent") {
+							} else if (styleString == ASCII_LITERAL("percent")) {
 								type = Formattable::kDouble;
 							} else { /* some style invalid/unknown to us */
 								type = Formattable::kDouble;
@@ -243,12 +254,13 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 						} else { // if missing style, part, make it a double
 							type = Formattable::kDouble;
 						}
-					} else if ((typeString == "date") || (typeString == "time")) {
+					} else if ((typeString == ASCII_LITERAL("date")) || (typeString == ASCII_LITERAL("time"))) {
 						type = Formattable::kDate;
-					} else if ((typeString == "spellout") || (typeString == "ordinal")
-							|| (typeString == "duration")) {
+					} else if ((typeString == ASCII_LITERAL("spellout")) || (typeString == ASCII_LITERAL("ordinal"))
+							|| (typeString == ASCII_LITERAL("duration"))) {
 						type = Formattable::kDouble;
 					}
+#undef ASCII_LITERAL
 				} else {
 					/* If there's no UMSGPAT_PART_TYPE_ARG_TYPE right after a
 					 * UMSGPAT_ARG_TYPE_SIMPLE argument, then the pattern
@@ -441,51 +453,43 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 			switch (argType) {
 			case Formattable::kString:
 				{
+					zend_string *str, *tmp_str;
+
 	string_arg:
 					/* This implicitly converts objects
 					 * Note that our vectors will leak if object conversion fails
 					 * and PHP ends up with a fatal error and calls longjmp
 					 * as a result of that.
 					 */
-					convert_to_string_ex(elem);
+					str = zval_get_tmp_string(elem, &tmp_str);
 
 					UnicodeString *text = new UnicodeString();
 					intl_stringFromChar(*text,
-						Z_STRVAL_P(elem), Z_STRLEN_P(elem), &err.code);
+						ZSTR_VAL(str), ZSTR_LEN(str), &err.code);
 
 					if (U_FAILURE(err.code)) {
 						char *message;
 						spprintf(&message, 0, "Invalid UTF-8 data in string argument: "
-							"'%s'", Z_STRVAL_P(elem));
+							"'%s'", ZSTR_VAL(str));
 						intl_errors_set(&err, err.code, message, 1);
 						efree(message);
 						delete text;
 						continue;
 					}
 					formattable.adoptString(text);
+					zend_tmp_string_release(tmp_str);
 					break;
 				}
 			case Formattable::kDouble:
 				{
-					double d;
-					if (Z_TYPE_P(elem) == IS_DOUBLE) {
-						d = Z_DVAL_P(elem);
-					} else if (Z_TYPE_P(elem) == IS_LONG) {
-						d = (double)Z_LVAL_P(elem);
-					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						d = (Z_TYPE_P(elem) == IS_DOUBLE)
-							? Z_DVAL_P(elem)
-							: (double)Z_LVAL_P(elem);
-					}
+					double d = zval_get_double(elem);
 					formattable.setDouble(d);
 					break;
 				}
 			case Formattable::kLong:
 				{
 					int32_t tInt32 = 0;
-retry_klong:
+
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
 						if (Z_DVAL_P(elem) > (double)INT32_MAX ||
 								Z_DVAL_P(elem) < (double)INT32_MIN) {
@@ -505,9 +509,7 @@ retry_klong:
 							tInt32 = (int32_t)Z_LVAL_P(elem);
 						}
 					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						goto retry_klong;
+						tInt32 = (int32_t)zval_get_long(elem);
 					}
 					formattable.setLong(tInt32);
 					break;
@@ -515,7 +517,7 @@ retry_klong:
 			case Formattable::kInt64:
 				{
 					int64_t tInt64 = 0;
-retry_kint64:
+
 					if (Z_TYPE_P(elem) == IS_DOUBLE) {
 						if (Z_DVAL_P(elem) > (double)U_INT64_MAX ||
 								Z_DVAL_P(elem) < (double)U_INT64_MIN) {
@@ -529,9 +531,7 @@ retry_kint64:
 						/* assume long is not wider than 64 bits */
 						tInt64 = (int64_t)Z_LVAL_P(elem);
 					} else {
-						SEPARATE_ZVAL_IF_NOT_REF(elem);
-						convert_scalar_to_number(elem);
-						goto retry_kint64;
+						tInt64 = (int64_t)zval_get_long(elem);
 					}
 					formattable.setInt64(tInt64);
 					break;
@@ -569,15 +569,15 @@ retry_kint64:
 			case IS_DOUBLE:
 				formattable.setDouble(Z_DVAL_P(elem));
 				break;
-			case IS_TRUE:
-			case IS_FALSE:
-				convert_to_long_ex(elem);
-				/* Intentional fallthrough */
 			case IS_LONG:
 				formattable.setInt64((int64_t)Z_LVAL_P(elem));
 				break;
 			case IS_NULL:
+			case IS_FALSE:
 				formattable.setInt64((int64_t)0);
+				break;
+			case IS_TRUE:
+				formattable.setInt64((int64_t)1);
 				break;
 			case IS_STRING:
 			case IS_OBJECT:

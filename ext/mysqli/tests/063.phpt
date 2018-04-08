@@ -20,5 +20,5 @@ require_once('skipifconnectfailure.inc');
 
 	var_dump($foo);
 ?>
---EXPECTF--
-%unicode|string%(3) "foo"
+--EXPECT--
+string(3) "foo"

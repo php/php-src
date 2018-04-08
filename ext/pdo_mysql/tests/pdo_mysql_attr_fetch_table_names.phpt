@@ -24,19 +24,19 @@ MySQLPDOTest::skip();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"test.label"]=>
-    %unicode|string%(1) "a"
+    ["test.label"]=>
+    string(1) "a"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    ["label"]=>
+    string(1) "a"
   }
 }
 done!

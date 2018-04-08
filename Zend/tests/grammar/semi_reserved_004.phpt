@@ -162,7 +162,7 @@ echo Obj::$__halt_compiler, PHP_EOL;
 
 echo "\nDone\n";
 
---EXPECTF--
+--EXPECT--
 empty
 callable
 class

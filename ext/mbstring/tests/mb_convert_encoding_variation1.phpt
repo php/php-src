@@ -21,7 +21,7 @@ echo "*** Testing mb_convert_encoding() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
 mb_internal_encoding('utf-8');
-$sourcestring = b'hello, world';
+$sourcestring = 'hello, world';
 
 //get an unset variable
 $unset_var = 10;

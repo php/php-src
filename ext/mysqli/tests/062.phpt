@@ -22,9 +22,9 @@ require_once('skipifconnectfailure.inc');
 	var_dump($row);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
-  %unicode|string%(3) "foo"
+  string(3) "foo"
 }
 done!

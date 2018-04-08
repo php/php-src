@@ -47,8 +47,8 @@ $file_handle = popen("sort", "w");
 $counter = 0;
 $newline = "\n";
 foreach($arr as $str) {
-  fwrite($file_handle, (binary)$str);
-  fwrite($file_handle, (binary)$newline);
+  fwrite($file_handle, $str);
+  fwrite($file_handle, $newline);
 }
 pclose($file_handle);
 
@@ -72,7 +72,7 @@ unlink($dirpath."/popen_basic1.tmp");
 rmdir($dirpath);
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing popen() and pclose() with different processes ***
 -- Testing popen(): reading from the pipe --
 popen_basic.tmp

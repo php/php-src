@@ -129,9 +129,6 @@ if (!$TEST_EXPERIMENTAL)
 	$warning = new mysqli_warning($mysqli);
 		$i = 1;
 	while ($warning->next() && ('' != ($tmp = $warning->message))) {
-		if ((version_compare(PHP_VERSION, '6.0', '==') == 1) &&
-		    !is_unicode($tmp))
-			printf("[033a] Warning should have been a unicode string, got %s/%s", gettype($tmp), $tmp);
 		$i++;
 	}
 	if (3 != $i)
@@ -157,5 +154,5 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS t1"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 done!

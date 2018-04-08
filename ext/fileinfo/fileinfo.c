@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.0 of the PHP license,       |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ PHP_FILEINFO_API zend_object *finfo_objects_new(zend_class_entry *class_type)
 {
 	finfo_object *intern;
 
-	intern = ecalloc(1, sizeof(finfo_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(finfo_object), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -162,7 +162,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ finfo_class_functions
  */
-zend_function_entry finfo_class_functions[] = {
+static const zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(finfo,          finfo_open,     arginfo_finfo_open, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
@@ -173,7 +173,7 @@ zend_function_entry finfo_class_functions[] = {
 
 #define FINFO_SET_OPTION(magic, options) \
 	if (magic_setflags(magic, options) == -1) { \
-		php_error_docref(NULL, E_WARNING, "Failed to set option '%pd' %d:%s", \
+		php_error_docref(NULL, E_WARNING, "Failed to set option '" ZEND_LONG_FMT "' %d:%s", \
 				options, magic_errno(magic), magic_error(magic)); \
 		RETURN_FALSE; \
 	}
@@ -196,14 +196,14 @@ void finfo_resource_destructor(zend_resource *rsrc) /* {{{ */
 
 /* {{{ fileinfo_functions[]
  */
-zend_function_entry fileinfo_functions[] = {
+static const zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_open,		arginfo_finfo_open)
 	PHP_FE(finfo_close,		arginfo_finfo_close)
 	PHP_FE(finfo_set_flags,	arginfo_finfo_set_flags)
 	PHP_FE(finfo_file,		arginfo_finfo_file)
 	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
 	PHP_FE(mime_content_type, arginfo_mime_content_type)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 /* }}} */
 
@@ -237,6 +237,11 @@ PHP_MINIT_FUNCTION(finfo)
 #ifdef MAGIC_RAW
 	REGISTER_LONG_CONSTANT("FILEINFO_RAW",			MAGIC_RAW, CONST_CS|CONST_PERSISTENT);
 #endif
+#if 0
+	/* seems not usable yet. */
+	REGISTER_LONG_CONSTANT("FILEINFO_APPLE",		MAGIC_APPLE, CONST_CS|CONST_PERSISTENT);
+#endif
+	REGISTER_LONG_CONSTANT("FILEINFO_EXTENSION",	MAGIC_EXTENSION, CONST_CS|CONST_PERSISTENT);
 
 	return SUCCESS;
 }
@@ -340,7 +345,7 @@ PHP_FUNCTION(finfo_open)
 
 	if (finfo->magic == NULL) {
 		efree(finfo);
-		php_error_docref(NULL, E_WARNING, "Invalid mode '%pd'.", options);
+		php_error_docref(NULL, E_WARNING, "Invalid mode '" ZEND_LONG_FMT "'.", options);
 		if (object) {
 			zend_restore_error_handling(&zeh);
 			if (!EG(exception)) {
@@ -548,11 +553,7 @@ static void _php_finfo_get_type(INTERNAL_FUNCTION_PARAMETERS, int mode, int mime
 				}
 #endif
 
-#if PHP_API_VERSION < 20100412
-				stream = php_stream_open_wrapper_ex(buffer, "rb", ENFORCE_SAFE_MODE | REPORT_ERRORS, NULL, context);
-#else
 				stream = php_stream_open_wrapper_ex(buffer, "rb", REPORT_ERRORS, NULL, context);
-#endif
 
 				if (!stream) {
 					RETVAL_FALSE;

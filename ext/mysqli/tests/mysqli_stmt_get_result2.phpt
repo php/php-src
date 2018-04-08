@@ -144,8 +144,8 @@ if (!function_exists('mysqli_stmt_get_result'))
 	mysqli_stmt_close($stmt);
 	mysqli_close($link);
 
-	if (NULL !== ($res = mysqli_stmt_get_result($stmt))) {
-		printf("[022] Expecting NULL got %s/%s\n",
+	if (false !== ($res = mysqli_stmt_get_result($stmt))) {
+		printf("[026] Expecting false got %s/%s\n",
 			gettype($res), $res);
 	}
 
@@ -157,17 +157,17 @@ if (!function_exists('mysqli_stmt_get_result'))
 ?>
 --EXPECTF--
 array(2) {
-  [%u|b%"id"]=>
+  ["id"]=>
   int(1)
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["label"]=>
+  string(1) "a"
 }
 NULL
 array(2) {
-  [%u|b%"id"]=>
+  ["id"]=>
   int(1)
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["label"]=>
+  string(1) "a"
 }
 NULL
 [017] [2014] Commands out of sync; you can't run this command now

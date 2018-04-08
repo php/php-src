@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -59,6 +59,7 @@ typedef int32_t zend_off_t;
 #ifdef ZEND_ENABLE_ZVAL_LONG64
 # define ZEND_LONG_FMT "%" PRId64
 # define ZEND_ULONG_FMT "%" PRIu64
+# define ZEND_XLONG_FMT "%" PRIx64
 # define ZEND_LONG_FMT_SPEC PRId64
 # define ZEND_ULONG_FMT_SPEC PRIu64
 # ifdef ZEND_WIN32
@@ -87,6 +88,7 @@ typedef int32_t zend_off_t;
 # define ZEND_STRTOUL(s0, s1, base) strtoul((s0), (s1), (base))
 # define ZEND_LONG_FMT "%" PRId32
 # define ZEND_ULONG_FMT "%" PRIu32
+# define ZEND_XLONG_FMT "%" PRIx32
 # define ZEND_LONG_FMT_SPEC PRId32
 # define ZEND_ULONG_FMT_SPEC PRIu32
 # ifdef ZEND_WIN32
@@ -117,6 +119,16 @@ typedef int32_t zend_off_t;
 
 static const char long_min_digits[] = LONG_MIN_DIGITS;
 
+#ifdef _WIN64
+# define ZEND_ADDR_FMT "0x%016I64x"
+#elif SIZEOF_SIZE_T == 4
+# define ZEND_ADDR_FMT "0x%08zx"
+#elif SIZEOF_SIZE_T == 8
+# define ZEND_ADDR_FMT "0x%016zx"
+#else
+# error "Unknown SIZEOF_SIZE_T"
+#endif
+
 #endif /* ZEND_LONG_H */
 
 /*
@@ -125,4 +137,6 @@ static const char long_min_digits[] = LONG_MIN_DIGITS;
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

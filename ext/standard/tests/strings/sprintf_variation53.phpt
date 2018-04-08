@@ -32,7 +32,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : with  white spaces in format strings ***
 string(4) "1234"
 string(4) "1234"

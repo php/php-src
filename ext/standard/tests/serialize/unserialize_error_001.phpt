@@ -13,40 +13,11 @@ var_dump(unserialize($s, ["allowed_classes" => 0]));
 var_dump(unserialize($s, ["allowed_classes" => 1]));
 
 --EXPECTF--
-array(3) {
-  [0]=>
-  object(__PHP_Incomplete_Class)#%d (2) {
-    ["__PHP_Incomplete_Class_Name"]=>
-    string(3) "foo"
-    ["x"]=>
-    string(3) "bar"
-  }
-  [1]=>
-  int(2)
-  [2]=>
-  string(1) "3"
-}
-array(3) {
-  [0]=>
-  object(__PHP_Incomplete_Class)#%d (2) {
-    ["__PHP_Incomplete_Class_Name"]=>
-    string(3) "foo"
-    ["x"]=>
-    string(3) "bar"
-  }
-  [1]=>
-  int(2)
-  [2]=>
-  string(1) "3"
-}
-array(3) {
-  [0]=>
-  object(foo)#%d (1) {
-    ["x"]=>
-    string(3) "bar"
-  }
-  [1]=>
-  int(2)
-  [2]=>
-  string(1) "3"
-}
+Warning: unserialize(): allowed_classes option should be array or boolean in %s on line %d
+bool(false)
+
+Warning: unserialize(): allowed_classes option should be array or boolean in %s on line %d
+bool(false)
+
+Warning: unserialize(): allowed_classes option should be array or boolean in %s on line %d
+bool(false)

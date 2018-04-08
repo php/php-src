@@ -35,8 +35,8 @@ require_once('skipifconnectfailure.inc');
 
 		mysqli_free_result($res);
 
-		if ($test_free && (NULL !== ($tmp = mysqli_num_rows($res))))
-			printf("[%03d] Expecting NULL, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
+		if ($test_free && (false !== ($tmp = mysqli_num_rows($res))))
+			printf("[%03d] Expecting false, got %s/%s\n", $offset + 2, gettype($tmp), $tmp);
 
 	}
 
@@ -78,9 +78,9 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
-Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_num_rows() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 
-Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 
 Warning: mysqli_num_rows(): Couldn't fetch mysqli_result in %s on line %d
 run_tests.php don't fool me with your 'ungreedy' expression '.+?'!

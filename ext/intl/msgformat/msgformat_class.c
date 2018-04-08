@@ -33,13 +33,6 @@ static zend_object_handlers MessageFormatter_handlers;
  * Auxiliary functions needed by objects of 'MessageFormatter' class
  */
 
-/* {{{ MessageFormatter_objects_dtor */
-static void MessageFormatter_object_dtor(zend_object *object )
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ MessageFormatter_objects_free */
 void MessageFormatter_object_free( zend_object *object )
 {
@@ -56,7 +49,7 @@ zend_object *MessageFormatter_object_create(zend_class_entry *ce)
 {
 	MessageFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(MessageFormatter_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(MessageFormatter_object), ce);
 	msgformat_data_init( &intern->mf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -131,7 +124,7 @@ ZEND_END_ARG_INFO()
 /* {{{ MessageFormatter_class_functions
  * Every 'MessageFormatter' class method has an entry in this table
  */
-static zend_function_entry MessageFormatter_class_functions[] = {
+static const zend_function_entry MessageFormatter_class_functions[] = {
 	PHP_ME( MessageFormatter, __construct, arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY(  create, ZEND_FN( msgfmt_create ), arginfo_messageformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( msgfmt_format ), arginfo_messageformatter_format )
@@ -163,16 +156,7 @@ void msgformat_register_class( void )
 		sizeof MessageFormatter_handlers);
 	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;
-	MessageFormatter_handlers.dtor_obj = MessageFormatter_object_dtor;
 	MessageFormatter_handlers.free_obj = MessageFormatter_object_free;
-
-
-	/* Declare 'MessageFormatter' class properties. */
-	if( !MessageFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register MessageFormatter class");
-		return;
-	}
 }
 /* }}} */
 

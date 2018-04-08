@@ -8,6 +8,7 @@ Simone Gentili (sensorario@gmail.com)
 --SKIPIF--
 <?php
 if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
+if(substr(strtoupper(PHP_OS), 0, 3) == 'WIN') die('skip. not for Windows');
 ?>
 --FILE--
 <?php
@@ -27,5 +28,5 @@ if(!function_exists('proc_nice')) die("skip. proc_nice not available ");
 	$niceAfter = getNice($pid);
 	var_dump($niceBefore == ($niceAfter - $delta));
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)

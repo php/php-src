@@ -4,11 +4,11 @@ class ReflectionExceptionEx extends ReflectionException {
                 $this->errno = $_errno;
                 $this->errmsg = $_errmsg;
         }
-                                                                                                                                                            
+
         function getErrno() {
                 return $this->errno;
         }
-                                                                                                                                                            
+
         function getErrmsg() {
                 return $this->errmsg;
         }

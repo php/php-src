@@ -165,8 +165,8 @@ require_once('skipifconnectfailure.inc');
 		@mysqli_close($link);
 	}
 
-	if (NULL !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
-		printf("[026] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_real_connect($link, $host, $user, $passwd, $db, $port, $socket)))
+		printf("[026] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -177,44 +177,44 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 Warning: mysqli_real_connect(): (%s/%d): Access denied for user '%s'@'%s' (using password: YES) in %s on line %d
 object(mysqli)#%d (%d) {
-  [%u|b%"affected_rows"]=>
-  NULL
-  [%u|b%"client_info"]=>
+  ["affected_rows"]=>
+  bool(false)
+  ["client_info"]=>
   %s
-  [%u|b%"client_version"]=>
+  ["client_version"]=>
   int(%d)
-  [%u|b%"connect_errno"]=>
+  ["connect_errno"]=>
   int(%d)
-  [%u|b%"connect_error"]=>
+  ["connect_error"]=>
   NULL
-  [%u|b%"errno"]=>
+  ["errno"]=>
   %s
-  [%u|b%"error"]=>
+  ["error"]=>
   %s
-  [%u|b%"error_list"]=>
-  NULL
-  [%u|b%"field_count"]=>
-  NULL
-  [%u|b%"host_info"]=>
-  NULL
-  [%u|b%"info"]=>
-  NULL
-  [%u|b%"insert_id"]=>
-  NULL
-  [%u|b%"server_info"]=>
-  NULL
-  [%u|b%"server_version"]=>
-  NULL
-  [%u|b%"stat"]=>
-  NULL
-  [%u|b%"sqlstate"]=>
-  NULL
-  [%u|b%"protocol_version"]=>
-  NULL
-  [%u|b%"thread_id"]=>
-  NULL
-  [%u|b%"warning_count"]=>
-  NULL
+  ["error_list"]=>
+  bool(false)
+  ["field_count"]=>
+  bool(false)
+  ["host_info"]=>
+  bool(false)
+  ["info"]=>
+  bool(false)
+  ["insert_id"]=>
+  bool(false)
+  ["server_info"]=>
+  bool(false)
+  ["server_version"]=>
+  bool(false)
+  ["stat"]=>
+  bool(false)
+  ["sqlstate"]=>
+  bool(false)
+  ["protocol_version"]=>
+  bool(false)
+  ["thread_id"]=>
+  bool(false)
+  ["warning_count"]=>
+  bool(false)
 }
 
 Warning: mysqli_real_connect(): Couldn't fetch mysqli in %s on line %d

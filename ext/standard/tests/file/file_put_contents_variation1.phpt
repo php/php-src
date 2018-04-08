@@ -32,7 +32,7 @@ unlink($filename);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing file_put_contents() : variation ***
 int(25)
 int(18)

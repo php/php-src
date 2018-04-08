@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -122,16 +122,10 @@ PHPAPI int php_random_bytes(void *bytes, size_t size, zend_bool should_throw)
 			} else if (errno == EINTR || errno == EAGAIN) {
 				/* Try again */
 				continue;
+			} else {
+			    /* If the syscall fails, fall back to reading from /dev/urandom */
+				break;
 			}
-			/*
-				If the syscall fails, we are doomed. The loop that calls
-				php_random_bytes should be terminated by the exception instead
-				of proceeding to demand more entropy.
-			*/
-			if (should_throw) {
-				zend_throw_exception(zend_ce_exception, "Could not gather sufficient random data", errno);
-			}
-			return FAILURE;
 		}
 
 		read_bytes += (size_t) n;
@@ -195,9 +189,9 @@ PHP_FUNCTION(random_bytes)
 	zend_long size;
 	zend_string *bytes;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "l", &size) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
+		Z_PARAM_LONG(size)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (size < 1) {
 		zend_throw_exception(zend_ce_error, "Length must be greater than 0", 0);
@@ -269,9 +263,10 @@ PHP_FUNCTION(random_int)
 	zend_long max;
 	zend_long result;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "ll", &min, &max) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
+		Z_PARAM_LONG(min)
+		Z_PARAM_LONG(max)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (min > max) {
 		zend_throw_exception(zend_ce_error, "Minimum value must be less than or equal to the maximum value", 0);

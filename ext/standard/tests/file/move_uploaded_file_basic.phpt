@@ -28,7 +28,7 @@ $destination1 = __FILE__ . ".tmp";
 
 var_dump(move_uploaded_file($_FILES['file1']['tmp_name'], $destination1));
 $file_contents = file_get_contents($destination1);
-$contents_matches = ($file_contents == b"abcdef123456789xxxDDDxxxDDDxxxDDD");
+$contents_matches = ($file_contents == "abcdef123456789xxxDDDxxxDDDxxxDDD");
 var_dump($contents_matches);
 unlink($destination1);
 echo "\n";

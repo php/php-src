@@ -182,12 +182,10 @@ PHP_FUNCTION( numfmt_set_attribute )
 		case UNUM_MIN_SIGNIFICANT_DIGITS:
 		case UNUM_MAX_SIGNIFICANT_DIGITS:
 		case UNUM_LENIENT_PARSE:
-			convert_to_long_ex(value);
-			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, Z_LVAL_P(value));
+			unum_setAttribute(FORMATTER_OBJECT(nfo), attribute, zval_get_long(value));
 			break;
 		case UNUM_ROUNDING_INCREMENT:
-			convert_to_double_ex(value);
-			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, Z_DVAL_P(value));
+			unum_setDoubleAttribute(FORMATTER_OBJECT(nfo), attribute, zval_get_double(value));
 			break;
 		default:
 			INTL_DATA_ERROR_CODE(nfo) = U_UNSUPPORTED_ERROR;
@@ -252,7 +250,7 @@ PHP_FUNCTION( numfmt_get_symbol )
 	zend_long symbol;
 	UChar value_buf[4];
 	UChar *value = value_buf;
-	int32_t length = USIZE(value_buf);
+	uint32_t length = USIZE(value_buf);
 	FORMATTER_METHOD_INIT_VARS;
 
 	/* Parse parameters. */
@@ -345,7 +343,7 @@ PHP_FUNCTION( numfmt_set_symbol )
 PHP_FUNCTION( numfmt_get_pattern )
 {
 	UChar   value_buf[64];
-	int32_t length = USIZE( value_buf );
+	uint32_t length = USIZE( value_buf );
 	UChar*  value  = value_buf;
 	FORMATTER_METHOD_INIT_VARS;
 

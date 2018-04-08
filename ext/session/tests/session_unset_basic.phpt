@@ -26,14 +26,14 @@ var_dump($_SESSION);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_unset() : basic functionality ***
 bool(true)
 array(1) {
   ["foo"]=>
   string(12) "Hello World!"
 }
-NULL
+bool(true)
 array(0) {
 }
 bool(true)

@@ -56,8 +56,8 @@ Interoperability Support" (ID 207303.1) for details.
  <time>12:00:00</time>
 
   <version>
-   <release>2.1.7</release>
-   <api>2.1.7</api>
+   <release>2.1.8</release>
+   <api>2.1.8</api>
   </version>
   <stability>
    <release>stable</release>
@@ -66,7 +66,7 @@ Interoperability Support" (ID 207303.1) for details.
   <license uri="http://www.php.net/license">PHP</license>
   <notes>
 This version is for PHP 7 only.
-Added oci_unregister_taf_callback()    
+Fixed reference counting and memory issues. (Dmitry, Tianfang)
   </notes>
  <contents>
   <dir name="/">
@@ -475,6 +475,22 @@ Added oci_unregister_taf_callback()
   <configureoption default="autodetect" name="with-oci8" prompt="Please provide the path to the ORACLE_HOME directory. Use &apos;instantclient,/path/to/instant/client/lib&apos; if you&apos;re compiling with Oracle Instant Client" />
  </extsrcrelease>
  <changelog>
+
+<release>
+  <version>
+   <release>2.1.7</release>
+   <api>2.1.7</api>
+  </version>
+  <stability>
+   <release>stable</release>
+   <api>stable</api>
+  </stability>
+  <license uri="http://www.php.net/license">PHP</license>
+  <notes>
+This version is for PHP 7 only.
+Added oci_unregister_taf_callback()
+  </notes>
+</release>
 
 <release>
   <version>

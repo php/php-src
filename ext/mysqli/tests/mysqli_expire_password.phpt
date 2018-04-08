@@ -6,10 +6,6 @@ require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('connect.inc');
 
-if ($IS_MYSQLND && !version_compare(PHP_VERSION, '5.4.12-dev', ">=")) {
-	die("SKIP Available in mysqlnd as of PHP 5.4.12-dev");
-}
-
 if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket)) {
 	die(sprintf("SKIP Cannot connect to the server using host=%s, user=%s, passwd=***, dbname=%s, port=%s, socket=%s\n",
 		$host, $user, $db, $port, $socket));

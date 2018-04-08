@@ -18,7 +18,7 @@
 
 ; Error log file
 ; If it's set to "syslog", log is sent to syslogd instead of being written
-; in a local file.
+; into a local file.
 ; Note: the default prefix is @EXPANDED_LOCALSTATEDIR@
 ; Default Value: log/php-fpm.log
 ;error_log = log/php-fpm.log
@@ -61,7 +61,7 @@
 ; Default Value: 0
 ;process_control_timeout = 0
 
-; The maximum number of processes FPM will fork. This has been design to control
+; The maximum number of processes FPM will fork. This has been designed to control
 ; the global number of processes when using dynamic PM within a lot of pools.
 ; Use it with caution.
 ; Note: A value of 0 indicates no limit
@@ -69,10 +69,10 @@
 ; process.max = 128
 
 ; Specify the nice(2) priority to apply to the master process (only if set)
-; The value can vary from -19 (highest priority) to 20 (lower priority)
+; The value can vary from -19 (highest priority) to 20 (lowest priority)
 ; Note: - It will only work if the FPM master process is launched as root
 ;       - The pool process will inherit the master process priority
-;         unless it specified otherwise
+;         unless specified otherwise
 ; Default Value: no set
 ; process.priority = -19
 
@@ -99,8 +99,8 @@
 ; Default Value: not set (auto detection)
 ;events.mechanism = epoll
 
-; When FPM is build with systemd integration, specify the interval,
-; in second, between health report notification to systemd.
+; When FPM is built with systemd integration, specify the interval,
+; in seconds, between health report notification to systemd.
 ; Set to 0 to disable.
 ; Available Units: s(econds), m(inutes), h(ours)
 ; Default Unit: seconds

@@ -70,7 +70,7 @@ withRefValue(3, $transform);
 withRefValue(4, $transform);
 
 ?>
---EXPECTF--
+--EXPECT--
 Popping elements off end of a referenced array
 ---( Array with 1 element(s): )---
 --> State of referenced array before loop:

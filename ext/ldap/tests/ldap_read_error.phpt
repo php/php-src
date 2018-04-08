@@ -17,7 +17,7 @@ var_dump(ldap_read($link));
 var_dump(ldap_read($link, $link));
 
 // Too many parameters
-var_dump(ldap_read($link, "$base", "(objectClass=*)", array(), 0, 0, 0, 0 , "Additional data"));
+var_dump(ldap_read($link, "$base", "(objectClass=*)", array(), 0, 0, 0, 0, [], "Additional data"));
 ?>
 ===DONE===
 --EXPECTF--
@@ -30,6 +30,6 @@ NULL
 Warning: ldap_read() expects at least 3 parameters, 2 given in %s on line %d
 NULL
 
-Warning: ldap_read() expects at most 8 parameters, 9 given in %s on line %d
+Warning: ldap_read() expects at most 9 parameters, 10 given in %s on line %d
 NULL
 ===DONE===

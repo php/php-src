@@ -48,7 +48,7 @@ foreach($file_content_types as $file_content_type){
     $data_to_be_written="";
     fill_buffer($data_to_be_written, $file_content_type, 512); //get the data of size 512
     $data_to_be_written = $data_to_be_written;
-    fwrite($file_handle,(binary)$data_to_be_written);
+    fwrite($file_handle,$data_to_be_written);
     rewind($file_handle);
 
     echo "-- Testing fseek() without using argument whence --\n";
@@ -68,7 +68,7 @@ foreach($file_content_types as $file_content_type){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : default whence & all w and x modes ***
 
 -- File having data of type text_with_new_line --

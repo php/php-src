@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #define HAVE_MYSQLI_GET_CHARSET
 #endif
 
-#if defined(MYSQLND_VERSION_ID) || (MYSQL_VERSION_ID > 40112 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID > 50005
+#if defined(MYSQLND_VERSION_ID) || MYSQL_VERSION_ID > 50005
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 
@@ -77,10 +77,6 @@ extern void php_free_stmt_bind_buffer(BIND_BUFFER bbuf, int type);
 extern void php_mysqli_report_error(const char *sqlstate, int errorno, const char *error);
 extern void php_mysqli_report_index(const char *query, unsigned int status);
 extern void php_mysqli_throw_sql_exception(char *sqlstate, int errorno, char *format, ...);
-
-#ifdef HAVE_SPL
-extern PHPAPI zend_class_entry *spl_ce_RuntimeException;
-#endif
 
 #define PHP_MYSQLI_EXPORT(__type) PHP_MYSQLI_API __type
 

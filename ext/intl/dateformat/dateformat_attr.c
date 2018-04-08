@@ -86,7 +86,7 @@ PHP_FUNCTION( datefmt_get_timetype )
 PHP_FUNCTION( datefmt_get_pattern )
 {
 	UChar  value_buf[64];
-	int    length = USIZE( value_buf );
+	uint32_t    length = USIZE( value_buf );
 	UChar* value  = value_buf;
 	zend_bool   is_pattern_localized =FALSE;
 

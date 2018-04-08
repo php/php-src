@@ -66,7 +66,7 @@ echo "\n*** Done ***";
 $file_path = dirname(__FILE__);
 unlink("$file_path/stat_variation8.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stat(): on file by truncating it to given size ***
 bool(true)
 bool(true)

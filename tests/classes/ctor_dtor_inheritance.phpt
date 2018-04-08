@@ -1,7 +1,5 @@
 --TEST--
 ZE2 A derived class can use the inherited constructor/destructor
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 
@@ -54,7 +52,7 @@ unset($t);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Testing class base
 base::__construct
 base Object

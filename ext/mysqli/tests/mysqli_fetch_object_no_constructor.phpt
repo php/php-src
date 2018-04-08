@@ -51,9 +51,9 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 No exception with PHP:
 object(mysqli_fetch_object_test)#%d (%d) {
-  [%u|b%"a"]=>
+  ["a"]=>
   NULL
-  [%u|b%"b"]=>
+  ["b"]=>
   NULL
 }
 

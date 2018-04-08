@@ -33,13 +33,6 @@ static zend_object_handlers NumberFormatter_handlers;
  * Auxiliary functions needed by objects of 'NumberFormatter' class
  */
 
-/* {{{ NumberFormatter_objects_dtor */
-static void NumberFormatter_object_dtor(zend_object *object)
-{
-	zend_objects_destroy_object( object );
-}
-/* }}} */
-
 /* {{{ NumberFormatter_objects_free */
 void NumberFormatter_object_free( zend_object *object )
 {
@@ -56,7 +49,7 @@ zend_object *NumberFormatter_object_create(zend_class_entry *ce)
 {
 	NumberFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(NumberFormatter_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(NumberFormatter_object), ce);
 	formatter_data_init( &intern->nf_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -157,7 +150,7 @@ ZEND_END_ARG_INFO()
 /* {{{ NumberFormatter_class_functions
  * Every 'NumberFormatter' class method has an entry in this table
  */
-static zend_function_entry NumberFormatter_class_functions[] = {
+static const zend_function_entry NumberFormatter_class_functions[] = {
 	PHP_ME( NumberFormatter, __construct, arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY( create, ZEND_FN( numfmt_create ), arginfo_numberformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( format, ZEND_FN( numfmt_format ), arginfo_numberformatter_format )
@@ -195,15 +188,7 @@ void formatter_register_class( void )
 		sizeof(NumberFormatter_handlers));
 	NumberFormatter_handlers.offset = XtOffsetOf(NumberFormatter_object, zo);
 	NumberFormatter_handlers.clone_obj = NumberFormatter_object_clone;
-	NumberFormatter_handlers.dtor_obj = NumberFormatter_object_dtor;
 	NumberFormatter_handlers.free_obj = NumberFormatter_object_free;
-
-	/* Declare 'NumberFormatter' class properties. */
-	if( !NumberFormatter_ce_ptr )
-	{
-		zend_error(E_ERROR, "Failed to register NumberFormatter class");
-		return;
-	}
 }
 /* }}} */
 

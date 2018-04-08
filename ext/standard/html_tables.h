@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1437,7 +1437,7 @@ static const entity_stage3_row stage3_table_html5_00000[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"colon", 5} } }, {0, { {"semi", 4} } },
-	{1, { {(void *)multi_cp_html5_0003C} } }, {1, { {(void *)multi_cp_html5_0003D} } }, {1, { {(void *)multi_cp_html5_0003E} } }, {0, { {"quest", 5} } },
+	{1, { {(void *)multi_cp_html5_0003C, 0} } }, {1, { {(void *)multi_cp_html5_0003D, 0} } }, {1, { {(void *)multi_cp_html5_0003E, 0} } }, {0, { {"quest", 5} } },
 };
 
 static const entity_stage3_row stage3_table_html5_00040[] = {
@@ -1450,7 +1450,7 @@ static const entity_stage3_row stage3_table_html5_00040[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"lbrack", 6} } },
 	{0, { {"bsol", 4} } }, {0, { {"rsqb", 4} } }, {0, { {"Hat", 3} } }, {0, { {"lowbar", 6} } },
 	{0, { {"grave", 5} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_00066} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_00066, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -1733,7 +1733,7 @@ static const entity_stage3_row stage3_table_html5_02040[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"qprime", 6} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_0205F} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_0205F, 0} } },
 	{0, { {"NoBreak", 7} } }, {0, { {"af", 2} } }, {0, { {"InvisibleTimes", 14} } }, {0, { {"ic", 2} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -1828,7 +1828,7 @@ static const entity_stage3_row stage3_table_html5_02180[] = {
 	{0, { {"larr", 4} } }, {0, { {"uarr", 4} } }, {0, { {"srarr", 5} } }, {0, { {"darr", 4} } },
 	{0, { {"harr", 4} } }, {0, { {"UpDownArrow", 11} } }, {0, { {"nwarrow", 7} } }, {0, { {"UpperRightArrow", 15} } },
 	{0, { {"LowerRightArrow", 15} } }, {0, { {"swarr", 5} } }, {0, { {"nleftarrow", 10} } }, {0, { {"nrarr", 5} } },
-	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_0219D} } }, {0, { {"Larr", 4} } }, {0, { {"Uarr", 4} } },
+	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_0219D, 0} } }, {0, { {"Larr", 4} } }, {0, { {"Uarr", 4} } },
 	{0, { {"twoheadrightarrow", 17} } }, {0, { {"Darr", 4} } }, {0, { {"larrtl", 6} } }, {0, { {"rarrtl", 6} } },
 	{0, { {"LeftTeeArrow", 12} } }, {0, { {"UpTeeArrow", 10} } }, {0, { {"map", 3} } }, {0, { {"DownTeeArrow", 12} } },
 	{0, { {NULL, 0} } }, {0, { {"larrhk", 6} } }, {0, { {"rarrhk", 6} } }, {0, { {"larrlp", 6} } },
@@ -1859,7 +1859,7 @@ static const entity_stage3_row stage3_table_html5_021C0[] = {
 };
 
 static const entity_stage3_row stage3_table_html5_02200[] = {
-	{0, { {"forall", 6} } }, {0, { {"comp", 4} } }, {1, { {(void *)multi_cp_html5_02202} } }, {0, { {"Exists", 6} } },
+	{0, { {"forall", 6} } }, {0, { {"comp", 4} } }, {1, { {(void *)multi_cp_html5_02202, 0} } }, {0, { {"Exists", 6} } },
 	{0, { {"nexist", 6} } }, {0, { {"empty", 5} } }, {0, { {NULL, 0} } }, {0, { {"nabla", 5} } },
 	{0, { {"isinv", 5} } }, {0, { {"notin", 5} } }, {0, { {NULL, 0} } }, {0, { {"ReverseElement", 14} } },
 	{0, { {"notniva", 7} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"prod", 4} } },
@@ -1867,42 +1867,42 @@ static const entity_stage3_row stage3_table_html5_02200[] = {
 	{0, { {"plusdo", 6} } }, {0, { {NULL, 0} } }, {0, { {"ssetmn", 6} } }, {0, { {"lowast", 6} } },
 	{0, { {"compfn", 6} } }, {0, { {NULL, 0} } }, {0, { {"Sqrt", 4} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {"prop", 4} } }, {0, { {"infin", 5} } }, {0, { {"angrt", 5} } },
-	{1, { {(void *)multi_cp_html5_02220} } }, {0, { {"angmsd", 6} } }, {0, { {"angsph", 6} } }, {0, { {"mid", 3} } },
+	{1, { {(void *)multi_cp_html5_02220, 0} } }, {0, { {"angmsd", 6} } }, {0, { {"angsph", 6} } }, {0, { {"mid", 3} } },
 	{0, { {"nshortmid", 9} } }, {0, { {"shortparallel", 13} } }, {0, { {"nparallel", 9} } }, {0, { {"and", 3} } },
-	{0, { {"or", 2} } }, {1, { {(void *)multi_cp_html5_02229} } }, {1, { {(void *)multi_cp_html5_0222A} } }, {0, { {"Integral", 8} } },
+	{0, { {"or", 2} } }, {1, { {(void *)multi_cp_html5_02229, 0} } }, {1, { {(void *)multi_cp_html5_0222A, 0} } }, {0, { {"Integral", 8} } },
 	{0, { {"Int", 3} } }, {0, { {"tint", 4} } }, {0, { {"ContourIntegral", 15} } }, {0, { {"DoubleContourIntegral", 21} } },
 	{0, { {"Cconint", 7} } }, {0, { {"cwint", 5} } }, {0, { {"cwconint", 8} } }, {0, { {"awconint", 8} } },
 	{0, { {"there4", 6} } }, {0, { {"Because", 7} } }, {0, { {"ratio", 5} } }, {0, { {"Colon", 5} } },
 	{0, { {"minusd", 6} } }, {0, { {NULL, 0} } }, {0, { {"mDDot", 5} } }, {0, { {"homtht", 6} } },
-	{1, { {(void *)multi_cp_html5_0223C} } }, {1, { {(void *)multi_cp_html5_0223D} } }, {1, { {(void *)multi_cp_html5_0223E} } }, {0, { {"acd", 3} } },
+	{1, { {(void *)multi_cp_html5_0223C, 0} } }, {1, { {(void *)multi_cp_html5_0223D, 0} } }, {1, { {(void *)multi_cp_html5_0223E, 0} } }, {0, { {"acd", 3} } },
 };
 
 static const entity_stage3_row stage3_table_html5_02240[] = {
-	{0, { {"wr", 2} } }, {0, { {"NotTilde", 8} } }, {1, { {(void *)multi_cp_html5_02242} } }, {0, { {"simeq", 5} } },
+	{0, { {"wr", 2} } }, {0, { {"NotTilde", 8} } }, {1, { {(void *)multi_cp_html5_02242, 0} } }, {0, { {"simeq", 5} } },
 	{0, { {"nsime", 5} } }, {0, { {"TildeFullEqual", 14} } }, {0, { {"simne", 5} } }, {0, { {"ncong", 5} } },
-	{0, { {"approx", 6} } }, {0, { {"napprox", 7} } }, {0, { {"ape", 3} } }, {1, { {(void *)multi_cp_html5_0224B} } },
-	{0, { {"bcong", 5} } }, {1, { {(void *)multi_cp_html5_0224D} } }, {1, { {(void *)multi_cp_html5_0224E} } }, {1, { {(void *)multi_cp_html5_0224F} } },
-	{1, { {(void *)multi_cp_html5_02250} } }, {0, { {"doteqdot", 8} } }, {0, { {"fallingdotseq", 13} } }, {0, { {"risingdotseq", 12} } },
+	{0, { {"approx", 6} } }, {0, { {"napprox", 7} } }, {0, { {"ape", 3} } }, {1, { {(void *)multi_cp_html5_0224B, 0} } },
+	{0, { {"bcong", 5} } }, {1, { {(void *)multi_cp_html5_0224D, 0} } }, {1, { {(void *)multi_cp_html5_0224E, 0} } }, {1, { {(void *)multi_cp_html5_0224F, 0} } },
+	{1, { {(void *)multi_cp_html5_02250, 0} } }, {0, { {"doteqdot", 8} } }, {0, { {"fallingdotseq", 13} } }, {0, { {"risingdotseq", 12} } },
 	{0, { {"coloneq", 7} } }, {0, { {"eqcolon", 7} } }, {0, { {"ecir", 4} } }, {0, { {"circeq", 6} } },
 	{0, { {NULL, 0} } }, {0, { {"wedgeq", 6} } }, {0, { {"veeeq", 5} } }, {0, { {NULL, 0} } },
 	{0, { {"triangleq", 9} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"equest", 6} } },
-	{0, { {"NotEqual", 8} } }, {1, { {(void *)multi_cp_html5_02261} } }, {0, { {"NotCongruent", 12} } }, {0, { {NULL, 0} } },
-	{1, { {(void *)multi_cp_html5_02264} } }, {1, { {(void *)multi_cp_html5_02265} } }, {1, { {(void *)multi_cp_html5_02266} } }, {1, { {(void *)multi_cp_html5_02267} } },
-	{1, { {(void *)multi_cp_html5_02268} } }, {1, { {(void *)multi_cp_html5_02269} } }, {1, { {(void *)multi_cp_html5_0226A} } }, {1, { {(void *)multi_cp_html5_0226B} } },
+	{0, { {"NotEqual", 8} } }, {1, { {(void *)multi_cp_html5_02261, 0} } }, {0, { {"NotCongruent", 12} } }, {0, { {NULL, 0} } },
+	{1, { {(void *)multi_cp_html5_02264, 0} } }, {1, { {(void *)multi_cp_html5_02265, 0} } }, {1, { {(void *)multi_cp_html5_02266, 0} } }, {1, { {(void *)multi_cp_html5_02267, 0} } },
+	{1, { {(void *)multi_cp_html5_02268, 0} } }, {1, { {(void *)multi_cp_html5_02269, 0} } }, {1, { {(void *)multi_cp_html5_0226A, 0} } }, {1, { {(void *)multi_cp_html5_0226B, 0} } },
 	{0, { {"between", 7} } }, {0, { {"NotCupCap", 9} } }, {0, { {"NotLess", 7} } }, {0, { {"ngtr", 4} } },
 	{0, { {"NotLessEqual", 12} } }, {0, { {"ngeq", 4} } }, {0, { {"LessTilde", 9} } }, {0, { {"GreaterTilde", 12} } },
 	{0, { {"nlsim", 5} } }, {0, { {"ngsim", 5} } }, {0, { {"lessgtr", 7} } }, {0, { {"gl", 2} } },
 	{0, { {"ntlg", 4} } }, {0, { {"NotGreaterLess", 14} } }, {0, { {"prec", 4} } }, {0, { {"succ", 4} } },
-	{0, { {"PrecedesSlantEqual", 18} } }, {0, { {"succcurlyeq", 11} } }, {0, { {"precsim", 7} } }, {1, { {(void *)multi_cp_html5_0227F} } },
+	{0, { {"PrecedesSlantEqual", 18} } }, {0, { {"succcurlyeq", 11} } }, {0, { {"precsim", 7} } }, {1, { {(void *)multi_cp_html5_0227F, 0} } },
 };
 
 static const entity_stage3_row stage3_table_html5_02280[] = {
-	{0, { {"npr", 3} } }, {0, { {"NotSucceeds", 11} } }, {1, { {(void *)multi_cp_html5_02282} } }, {1, { {(void *)multi_cp_html5_02283} } },
+	{0, { {"npr", 3} } }, {0, { {"NotSucceeds", 11} } }, {1, { {(void *)multi_cp_html5_02282, 0} } }, {1, { {(void *)multi_cp_html5_02283, 0} } },
 	{0, { {"nsub", 4} } }, {0, { {"nsup", 4} } }, {0, { {"SubsetEqual", 11} } }, {0, { {"supe", 4} } },
-	{0, { {"NotSubsetEqual", 14} } }, {0, { {"NotSupersetEqual", 16} } }, {1, { {(void *)multi_cp_html5_0228A} } }, {1, { {(void *)multi_cp_html5_0228B} } },
-	{0, { {NULL, 0} } }, {0, { {"cupdot", 6} } }, {0, { {"UnionPlus", 9} } }, {1, { {(void *)multi_cp_html5_0228F} } },
-	{1, { {(void *)multi_cp_html5_02290} } }, {0, { {"SquareSubsetEqual", 17} } }, {0, { {"SquareSupersetEqual", 19} } }, {1, { {(void *)multi_cp_html5_02293} } },
-	{1, { {(void *)multi_cp_html5_02294} } }, {0, { {"CirclePlus", 10} } }, {0, { {"ominus", 6} } }, {0, { {"CircleTimes", 11} } },
+	{0, { {"NotSubsetEqual", 14} } }, {0, { {"NotSupersetEqual", 16} } }, {1, { {(void *)multi_cp_html5_0228A, 0} } }, {1, { {(void *)multi_cp_html5_0228B, 0} } },
+	{0, { {NULL, 0} } }, {0, { {"cupdot", 6} } }, {0, { {"UnionPlus", 9} } }, {1, { {(void *)multi_cp_html5_0228F, 0} } },
+	{1, { {(void *)multi_cp_html5_02290, 0} } }, {0, { {"SquareSubsetEqual", 17} } }, {0, { {"SquareSupersetEqual", 19} } }, {1, { {(void *)multi_cp_html5_02293, 0} } },
+	{1, { {(void *)multi_cp_html5_02294, 0} } }, {0, { {"CirclePlus", 10} } }, {0, { {"ominus", 6} } }, {0, { {"CircleTimes", 11} } },
 	{0, { {"osol", 4} } }, {0, { {"CircleDot", 9} } }, {0, { {"ocir", 4} } }, {0, { {"oast", 4} } },
 	{0, { {NULL, 0} } }, {0, { {"odash", 5} } }, {0, { {"boxplus", 7} } }, {0, { {"boxminus", 8} } },
 	{0, { {"timesb", 6} } }, {0, { {"sdotb", 5} } }, {0, { {"vdash", 5} } }, {0, { {"dashv", 5} } },
@@ -1910,7 +1910,7 @@ static const entity_stage3_row stage3_table_html5_02280[] = {
 	{0, { {"DoubleRightTee", 14} } }, {0, { {"Vdash", 5} } }, {0, { {"Vvdash", 6} } }, {0, { {"VDash", 5} } },
 	{0, { {"nvdash", 6} } }, {0, { {"nvDash", 6} } }, {0, { {"nVdash", 6} } }, {0, { {"nVDash", 6} } },
 	{0, { {"prurel", 6} } }, {0, { {NULL, 0} } }, {0, { {"vartriangleleft", 15} } }, {0, { {"vrtri", 5} } },
-	{1, { {(void *)multi_cp_html5_022B4} } }, {1, { {(void *)multi_cp_html5_022B5} } }, {0, { {"origof", 6} } }, {0, { {"imof", 4} } },
+	{1, { {(void *)multi_cp_html5_022B4, 0} } }, {1, { {(void *)multi_cp_html5_022B5, 0} } }, {0, { {"origof", 6} } }, {0, { {"imof", 4} } },
 	{0, { {"mumap", 5} } }, {0, { {"hercon", 6} } }, {0, { {"intcal", 6} } }, {0, { {"veebar", 6} } },
 	{0, { {NULL, 0} } }, {0, { {"barvee", 6} } }, {0, { {"angrtvb", 7} } }, {0, { {"lrtri", 5} } },
 };
@@ -1922,15 +1922,15 @@ static const entity_stage3_row stage3_table_html5_022C0[] = {
 	{0, { {"rthree", 6} } }, {0, { {"backsimeq", 9} } }, {0, { {"curlyvee", 8} } }, {0, { {"curlywedge", 10} } },
 	{0, { {"Sub", 3} } }, {0, { {"Supset", 6} } }, {0, { {"Cap", 3} } }, {0, { {"Cup", 3} } },
 	{0, { {"pitchfork", 9} } }, {0, { {"epar", 4} } }, {0, { {"lessdot", 7} } }, {0, { {"gtrdot", 6} } },
-	{1, { {(void *)multi_cp_html5_022D8} } }, {1, { {(void *)multi_cp_html5_022D9} } }, {1, { {(void *)multi_cp_html5_022DA} } }, {1, { {(void *)multi_cp_html5_022DB} } },
+	{1, { {(void *)multi_cp_html5_022D8, 0} } }, {1, { {(void *)multi_cp_html5_022D9, 0} } }, {1, { {(void *)multi_cp_html5_022DA, 0} } }, {1, { {(void *)multi_cp_html5_022DB, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"curlyeqprec", 11} } }, {0, { {"cuesc", 5} } },
 	{0, { {"NotPrecedesSlantEqual", 21} } }, {0, { {"NotSucceedsSlantEqual", 21} } }, {0, { {"NotSquareSubsetEqual", 20} } }, {0, { {"NotSquareSupersetEqual", 22} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"lnsim", 5} } }, {0, { {"gnsim", 5} } },
 	{0, { {"precnsim", 8} } }, {0, { {"scnsim", 6} } }, {0, { {"nltri", 5} } }, {0, { {"ntriangleright", 14} } },
 	{0, { {"nltrie", 6} } }, {0, { {"NotRightTriangleEqual", 21} } }, {0, { {"vellip", 6} } }, {0, { {"ctdot", 5} } },
 	{0, { {"utdot", 5} } }, {0, { {"dtdot", 5} } }, {0, { {"disin", 5} } }, {0, { {"isinsv", 6} } },
-	{0, { {"isins", 5} } }, {1, { {(void *)multi_cp_html5_022F5} } }, {0, { {"notinvc", 7} } }, {0, { {"notinvb", 7} } },
-	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_022F9} } }, {0, { {"nisd", 4} } }, {0, { {"xnis", 4} } },
+	{0, { {"isins", 5} } }, {1, { {(void *)multi_cp_html5_022F5, 0} } }, {0, { {"notinvc", 7} } }, {0, { {"notinvb", 7} } },
+	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_022F9, 0} } }, {0, { {"nisd", 4} } }, {0, { {"xnis", 4} } },
 	{0, { {"nis", 3} } }, {0, { {"notnivc", 7} } }, {0, { {"notnivb", 7} } }, {0, { {NULL, 0} } },
 };
 
@@ -2232,7 +2232,7 @@ static const entity_stage3_row stage3_table_html5_02900[] = {
 	{0, { {"nearhk", 6} } }, {0, { {"searhk", 6} } }, {0, { {"swarhk", 6} } }, {0, { {"nwnear", 6} } },
 	{0, { {"toea", 4} } }, {0, { {"seswar", 6} } }, {0, { {"swnwar", 6} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02933} } },
+	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02933, 0} } },
 	{0, { {NULL, 0} } }, {0, { {"cudarrr", 7} } }, {0, { {"ldca", 4} } }, {0, { {"rdca", 4} } },
 	{0, { {"cudarrl", 7} } }, {0, { {"larrpl", 6} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {"curarrm", 7} } }, {0, { {"cularrp", 7} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
@@ -2280,8 +2280,8 @@ static const entity_stage3_row stage3_table_html5_029C0[] = {
 	{0, { {"olt", 3} } }, {0, { {"ogt", 3} } }, {0, { {"cirscir", 7} } }, {0, { {"cirE", 4} } },
 	{0, { {"solb", 4} } }, {0, { {"bsolb", 5} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {"boxbox", 6} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {0, { {"trisb", 5} } }, {0, { {"rtriltri", 8} } }, {1, { {(void *)multi_cp_html5_029CF} } },
-	{1, { {(void *)multi_cp_html5_029D0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {0, { {"trisb", 5} } }, {0, { {"rtriltri", 8} } }, {1, { {(void *)multi_cp_html5_029CF, 0} } },
+	{1, { {(void *)multi_cp_html5_029D0, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {"iinfin", 6} } }, {0, { {"infintie", 8} } }, {0, { {"nvinfin", 7} } }, {0, { {NULL, 0} } },
@@ -2326,11 +2326,11 @@ static const entity_stage3_row stage3_table_html5_02A40[] = {
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"sdote", 5} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"simdot", 6} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02A6D} } }, {0, { {"easter", 6} } }, {0, { {"apacir", 6} } },
-	{1, { {(void *)multi_cp_html5_02A70} } }, {0, { {"eplus", 5} } }, {0, { {"pluse", 5} } }, {0, { {"Esim", 4} } },
+	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02A6D, 0} } }, {0, { {"easter", 6} } }, {0, { {"apacir", 6} } },
+	{1, { {(void *)multi_cp_html5_02A70, 0} } }, {0, { {"eplus", 5} } }, {0, { {"pluse", 5} } }, {0, { {"Esim", 4} } },
 	{0, { {"Colone", 6} } }, {0, { {"Equal", 5} } }, {0, { {NULL, 0} } }, {0, { {"ddotseq", 7} } },
 	{0, { {"equivDD", 7} } }, {0, { {"ltcir", 5} } }, {0, { {"gtcir", 5} } }, {0, { {"ltquest", 7} } },
-	{0, { {"gtquest", 7} } }, {1, { {(void *)multi_cp_html5_02A7D} } }, {1, { {(void *)multi_cp_html5_02A7E} } }, {0, { {"lesdot", 6} } },
+	{0, { {"gtquest", 7} } }, {1, { {(void *)multi_cp_html5_02A7D, 0} } }, {1, { {(void *)multi_cp_html5_02A7E, 0} } }, {0, { {"lesdot", 6} } },
 };
 
 static const entity_stage3_row stage3_table_html5_02A80[] = {
@@ -2342,11 +2342,11 @@ static const entity_stage3_row stage3_table_html5_02A80[] = {
 	{0, { {"gesles", 6} } }, {0, { {"els", 3} } }, {0, { {"egs", 3} } }, {0, { {"elsdot", 6} } },
 	{0, { {"egsdot", 6} } }, {0, { {"el", 2} } }, {0, { {"eg", 2} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {"siml", 4} } }, {0, { {"simg", 4} } }, {0, { {"simlE", 5} } },
-	{0, { {"simgE", 5} } }, {1, { {(void *)multi_cp_html5_02AA1} } }, {1, { {(void *)multi_cp_html5_02AA2} } }, {0, { {NULL, 0} } },
+	{0, { {"simgE", 5} } }, {1, { {(void *)multi_cp_html5_02AA1, 0} } }, {1, { {(void *)multi_cp_html5_02AA2, 0} } }, {0, { {NULL, 0} } },
 	{0, { {"glj", 3} } }, {0, { {"gla", 3} } }, {0, { {"ltcc", 4} } }, {0, { {"gtcc", 4} } },
 	{0, { {"lescc", 5} } }, {0, { {"gescc", 5} } }, {0, { {"smt", 3} } }, {0, { {"lat", 3} } },
-	{1, { {(void *)multi_cp_html5_02AAC} } }, {1, { {(void *)multi_cp_html5_02AAD} } }, {0, { {"bumpE", 5} } }, {1, { {(void *)multi_cp_html5_02AAF} } },
-	{1, { {(void *)multi_cp_html5_02AB0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"prE", 3} } },
+	{1, { {(void *)multi_cp_html5_02AAC, 0} } }, {1, { {(void *)multi_cp_html5_02AAD, 0} } }, {0, { {"bumpE", 5} } }, {1, { {(void *)multi_cp_html5_02AAF, 0} } },
+	{1, { {(void *)multi_cp_html5_02AB0, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"prE", 3} } },
 	{0, { {"scE", 3} } }, {0, { {"precneqq", 8} } }, {0, { {"scnE", 4} } }, {0, { {"precapprox", 10} } },
 	{0, { {"succapprox", 10} } }, {0, { {"precnapprox", 11} } }, {0, { {"succnapprox", 11} } }, {0, { {"Pr", 2} } },
 	{0, { {"Sc", 2} } }, {0, { {"subdot", 6} } }, {0, { {"supdot", 6} } }, {0, { {"subplus", 7} } },
@@ -2354,9 +2354,9 @@ static const entity_stage3_row stage3_table_html5_02A80[] = {
 
 static const entity_stage3_row stage3_table_html5_02AC0[] = {
 	{0, { {"supplus", 7} } }, {0, { {"submult", 7} } }, {0, { {"supmult", 7} } }, {0, { {"subedot", 7} } },
-	{0, { {"supedot", 7} } }, {1, { {(void *)multi_cp_html5_02AC5} } }, {1, { {(void *)multi_cp_html5_02AC6} } }, {0, { {"subsim", 6} } },
-	{0, { {"supsim", 6} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02ACB} } },
-	{1, { {(void *)multi_cp_html5_02ACC} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"csub", 4} } },
+	{0, { {"supedot", 7} } }, {1, { {(void *)multi_cp_html5_02AC5, 0} } }, {1, { {(void *)multi_cp_html5_02AC6, 0} } }, {0, { {"subsim", 6} } },
+	{0, { {"supsim", 6} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02ACB, 0} } },
+	{1, { {(void *)multi_cp_html5_02ACC, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {"csub", 4} } },
 	{0, { {"csup", 4} } }, {0, { {"csube", 5} } }, {0, { {"csupe", 5} } }, {0, { {"subsup", 6} } },
 	{0, { {"supsub", 6} } }, {0, { {"subsub", 6} } }, {0, { {"supsup", 6} } }, {0, { {"suphsub", 7} } },
 	{0, { {"supdsub", 7} } }, {0, { {"forkv", 5} } }, {0, { {"topfork", 7} } }, {0, { {"mlcp", 4} } },
@@ -2368,7 +2368,7 @@ static const entity_stage3_row stage3_table_html5_02AC0[] = {
 	{0, { {"midcir", 6} } }, {0, { {"topcir", 6} } }, {0, { {"nhpar", 5} } }, {0, { {"parsim", 6} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 	{0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
-	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02AFD} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
+	{0, { {NULL, 0} } }, {1, { {(void *)multi_cp_html5_02AFD, 0} } }, {0, { {NULL, 0} } }, {0, { {NULL, 0} } },
 };
 
 static const entity_stage3_row stage3_table_html5_0FB00[] = {

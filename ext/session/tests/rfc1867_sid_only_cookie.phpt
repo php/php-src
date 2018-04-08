@@ -54,76 +54,76 @@ session_destroy();
 string(%d) "rfc1867-tests"
 bool(true)
 array(2) {
-  [%u|b%"file1"]=>
+  ["file1"]=>
   array(5) {
-    [%u|b%"name"]=>
-    %string|unicode%(9) "file1.txt"
-    [%u|b%"type"]=>
-    %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
-    %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["name"]=>
+    string(9) "file1.txt"
+    ["type"]=>
+    string(0) ""
+    ["tmp_name"]=>
+    string(%d) "%s"
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
-  [%u|b%"file2"]=>
+  ["file2"]=>
   array(5) {
-    [%u|b%"name"]=>
-    %string|unicode%(9) "file2.txt"
-    [%u|b%"type"]=>
-    %string|unicode%(0) ""
-    [%u|b%"tmp_name"]=>
-    %string|unicode%(%d) "%s"
-    [%u|b%"error"]=>
+    ["name"]=>
+    string(9) "file2.txt"
+    ["type"]=>
+    string(0) ""
+    ["tmp_name"]=>
+    string(%d) "%s"
+    ["error"]=>
     int(0)
-    [%u|b%"size"]=>
+    ["size"]=>
     int(1)
   }
 }
 array(5) {
-  [%u|b%"start_time"]=>
+  ["start_time"]=>
   int(%d)
-  [%u|b%"content_length"]=>
+  ["content_length"]=>
   int(%d)
-  [%u|b%"bytes_processed"]=>
+  ["bytes_processed"]=>
   int(%d)
-  [%u|b%"done"]=>
+  ["done"]=>
   bool(true)
-  [%u|b%"files"]=>
+  ["files"]=>
   array(2) {
     [0]=>
     array(7) {
-      [%u|b%"field_name"]=>
-      %unicode|string%(5) "file1"
-      [%u|b%"name"]=>
-      %unicode|string%(9) "file1.txt"
-      [%u|b%"tmp_name"]=>
-      %unicode|string%(%d) "%s"
-      [%u|b%"error"]=>
+      ["field_name"]=>
+      string(5) "file1"
+      ["name"]=>
+      string(9) "file1.txt"
+      ["tmp_name"]=>
+      string(%d) "%s"
+      ["error"]=>
       int(0)
-      [%u|b%"done"]=>
+      ["done"]=>
       bool(true)
-      [%u|b%"start_time"]=>
+      ["start_time"]=>
       int(%d)
-      [%u|b%"bytes_processed"]=>
+      ["bytes_processed"]=>
       int(1)
     }
     [1]=>
     array(7) {
-      [%u|b%"field_name"]=>
-      %unicode|string%(5) "file2"
-      [%u|b%"name"]=>
-      %unicode|string%(9) "file2.txt"
-      [%u|b%"tmp_name"]=>
-      %unicode|string%(%d) "%s"
-      [%u|b%"error"]=>
+      ["field_name"]=>
+      string(5) "file2"
+      ["name"]=>
+      string(9) "file2.txt"
+      ["tmp_name"]=>
+      string(%d) "%s"
+      ["error"]=>
       int(0)
-      [%u|b%"done"]=>
+      ["done"]=>
       bool(true)
-      [%u|b%"start_time"]=>
+      ["start_time"]=>
       int(%d)
-      [%u|b%"bytes_processed"]=>
+      ["bytes_processed"]=>
       int(1)
     }
   }

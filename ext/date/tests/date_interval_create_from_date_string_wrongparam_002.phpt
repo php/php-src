@@ -1,6 +1,5 @@
 --TEST--
 Test date_interval_create_from_date_string() function : with 2 parameters (wrong).
-Rodrigo Prado de Jesus <royopa [at] gmail [dot] com>
 --FILE--
 <?php
 $i = date_interval_create_from_date_string('1 year', 'wrong');

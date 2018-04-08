@@ -20,7 +20,7 @@ foreach ($urls as $url) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --> 64.246.30.37   : string(12) "64.246.30.37"
 --> http://64.246.30.37   : NULL
 --> http://64.246.30.37/   : string(1) "/"
@@ -80,6 +80,7 @@ echo "Done";
 --> /foo.php?a=b&c=d   : string(8) "/foo.php"
 --> foo.php?a=b&c=d   : string(7) "foo.php"
 --> http://user:passwd@www.example.com:8080?bar=1&boom=0   : NULL
+--> http://user_me-you:my_pas-word@www.example.com:8080?bar=1&boom=0   : NULL
 --> file:///path/to/file   : string(13) "/path/to/file"
 --> file://path/to/file   : string(8) "/to/file"
 --> file:/path/to/file   : string(13) "/path/to/file"

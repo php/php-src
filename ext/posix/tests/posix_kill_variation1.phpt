@@ -91,7 +91,7 @@ bool(false)
 
 Arg value 101234567000 
 
-Warning: posix_kill() expects parameter 1 to be integer, float given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, float given in %s on line %d
 bool(false)
 
 Arg value 1.07654321E-9 
@@ -104,35 +104,35 @@ Notice: Array to string conversion in %sposix_kill_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 Notice: Array to string conversion in %sposix_kill_variation1.php on line %d
 
 Arg value Array 
 
-Warning: posix_kill() expects parameter 1 to be integer, array given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, array given in %s on line %d
 bool(false)
 
 Arg value  
@@ -155,22 +155,22 @@ bool(false)
 
 Arg value  
 
-Warning: posix_kill() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 Arg value  
 
-Warning: posix_kill() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: posix_kill() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 Arg value string 
 
-Warning: posix_kill() expects parameter 1 to be integer, string given in %s on line %d
+Warning: posix_kill() expects parameter 1 to be int, string given in %s on line %d
 bool(false)
 
 Arg value  
@@ -179,4 +179,4 @@ bool(false)
 Arg value  
 bool(false)
 
-Catchable fatal error: Object of class stdClass could not be converted to string in %s on line %d
+Recoverable fatal error: Object of class stdClass could not be converted to string in %s on line %d

@@ -64,6 +64,7 @@ struct fpm_worker_pool_config_s {
 	char *listen_mode;
 	char *listen_allowed_clients;
 	int process_priority;
+	int process_dumpable;
 	int pm;
 	int pm_max_children;
 	int pm_start_servers;
@@ -78,6 +79,7 @@ struct fpm_worker_pool_config_s {
 	char *access_format;
 	char *slowlog;
 	int request_slowlog_timeout;
+	int request_slowlog_trace_depth;
 	int request_terminate_timeout;
 	int rlimit_files;
 	int rlimit_core;

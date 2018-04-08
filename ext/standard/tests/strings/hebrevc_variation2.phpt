@@ -254,15 +254,15 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 10 --
 
-Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: hebrevc() expects parameter 2 to be integer, array given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, array given in %s on line %d
 NULL
 -- Iteration 13 --
 string(331) "xttel uaisv<br />
@@ -338,11 +338,11 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 19 --
 
-Warning: hebrevc() expects parameter 2 to be integer, string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: hebrevc() expects parameter 2 to be integer, string given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, string given in %s on line %d
 NULL
 -- Iteration 21 --
 
@@ -391,11 +391,11 @@ string(241) ".The hebrevcc function converts logical Hebrew text to visual text<
 "
 -- Iteration 24 --
 
-Warning: hebrevc() expects parameter 2 to be integer, object given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, object given in %s on line %d
 NULL
 -- Iteration 25 --
 
-Warning: hebrevc() expects parameter 2 to be integer, resource given in %s on line %d
+Warning: hebrevc() expects parameter 2 to be int, resource given in %s on line %d
 NULL
 -- Iteration 26 --
 string(241) ".The hebrevcc function converts logical Hebrew text to visual text<br />

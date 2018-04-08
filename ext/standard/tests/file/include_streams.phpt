@@ -32,7 +32,7 @@ class mystream
 		$this->options = $options;
 
 		$split = parse_url($path);
-		if ($split["host"] !== b"GLOBALS" || 
+		if ($split["host"] !== "GLOBALS" || 
 		    empty($split["path"]) ||
 		    empty($GLOBALS[substr($split["path"],1)])) {
 		    return false;

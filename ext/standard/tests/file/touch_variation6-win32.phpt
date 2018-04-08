@@ -184,10 +184,10 @@ PASSED: %s\touchVar5.tmp\..\touchVar5.tmp\aSubDirOrFile - created
 Warning: touch(): Unable to create file %s\BADDIR\aSubDirOrFile because %s in %s on line %d
 --- testing touchVar5.tmp\aSubDirOrFile\ ---
 
-Warning: touch(): Unable to create file touchVar5.tmp\aSubDirOrFile\ because Invalid argument in %s on line %d
+Warning: touch(): Unable to create file touchVar5.tmp\aSubDirOrFile\ because %s in %s on line %d
 --- testing %s\touchVar5.tmp\aSubDirOrFile\ ---
 
-Warning: touch(): Unable to create file %s\touchVar5.tmp\aSubDirOrFile\ because Invalid argument in %s on line %d
+Warning: touch(): Unable to create file %s\touchVar5.tmp\aSubDirOrFile\ because %s in %s on line %d
 --- testing touchVar5.tmp\\aSubDirOrFile ---
 PASSED: touchVar5.tmp\\aSubDirOrFile - created
 --- testing %s\\touchVar5.tmp\\aSubDirOrFile ---

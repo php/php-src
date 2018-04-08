@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,6 +67,7 @@ static int dummy_internal_encoding_setter(const zend_encoding *encoding)
 	return FAILURE;
 }
 
+static zend_multibyte_functions multibyte_functions_dummy;
 static zend_multibyte_functions multibyte_functions = {
 	NULL,
 	dummy_encoding_fetcher,
@@ -108,6 +109,7 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 		return FAILURE;
 	}
 
+	multibyte_functions_dummy = multibyte_functions;
 	multibyte_functions = *functions;
 
 	/* As zend_multibyte_set_functions() gets called after ini settings were
@@ -118,6 +120,11 @@ ZEND_API int zend_multibyte_set_functions(const zend_multibyte_functions *functi
 		zend_multibyte_set_script_encoding_by_string(value, strlen(value));
 	}
 	return SUCCESS;
+}
+
+ZEND_API void zend_multibyte_restore_functions(void)
+{
+	multibyte_functions = multibyte_functions_dummy;
 }
 
 ZEND_API const zend_multibyte_functions *zend_multibyte_get_functions(void)
@@ -211,6 +218,6 @@ ZEND_API int zend_multibyte_set_script_encoding_by_string(const char *new_value,
  * tab-width: 4
  * c-basic-offset: 4
  * End:
- * vim600: sw=4 ts=4 tw=78
- * vim<600: sw=4 ts=4 tw=78
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

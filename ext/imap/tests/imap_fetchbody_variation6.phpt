@@ -61,10 +61,10 @@ bool(false)
 -- $msg_no is 1,3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
 
 -- $msg_no is 1:3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "1: this is a test message, please ignore%a"
+string(%d) "1: this is a test message, please ignore%a"
 ===DONE===

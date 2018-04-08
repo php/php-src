@@ -32,7 +32,7 @@ $paths = array (
   "$file_path/foo".chr(47)."symlink.link",
   "$file_path".chr(47)."foo/symlink.link",
   "$file_path".chr(47)."foo".chr(47)."symlink.link",
-  b"$file_path/foo/symlink.link",
+  "$file_path/foo/symlink.link",
 
   /* Testing directories */
   ".",  // current directory
@@ -68,184 +68,184 @@ echo "Done\n";
 --EXPECTF--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 2 --
-%unicode|string%(1) "."
-%unicode|string%(17) "www.example.co.in"
-%unicode|string%(2) "in"
-%unicode|string%(14) "www.example.co"
+string(1) "."
+string(17) "www.example.co.in"
+string(2) "in"
+string(14) "www.example.co"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(17) "www.example.co.in"
-  [%u|b%"extension"]=>
-  %unicode|string%(2) "in"
-  [%u|b%"filename"]=>
-  %unicode|string%(14) "www.example.co"
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(17) "www.example.co.in"
+  ["extension"]=>
+  string(2) "in"
+  ["filename"]=>
+  string(14) "www.example.co"
 }
 -- Iteration 3 --
-%unicode|string%(13) "/var/www/html"
-%unicode|string%(12) "example.html"
-%unicode|string%(4) "html"
-%unicode|string%(7) "example"
+string(13) "/var/www/html"
+string(12) "example.html"
+string(4) "html"
+string(7) "example"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(13) "/var/www/html"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "example.html"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "html"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "example"
+  ["dirname"]=>
+  string(13) "/var/www/html"
+  ["basename"]=>
+  string(12) "example.html"
+  ["extension"]=>
+  string(4) "html"
+  ["filename"]=>
+  string(7) "example"
 }
 -- Iteration 4 --
-%unicode|string%(4) "/dir"
-%unicode|string%(11) "test.tar.gz"
-%unicode|string%(2) "gz"
-%unicode|string%(8) "test.tar"
+string(4) "/dir"
+string(11) "test.tar.gz"
+string(2) "gz"
+string(8) "test.tar"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(4) "/dir"
-  [%u|b%"basename"]=>
-  %unicode|string%(11) "test.tar.gz"
-  [%u|b%"extension"]=>
-  %unicode|string%(2) "gz"
-  [%u|b%"filename"]=>
-  %unicode|string%(8) "test.tar"
+  ["dirname"]=>
+  string(4) "/dir"
+  ["basename"]=>
+  string(11) "test.tar.gz"
+  ["extension"]=>
+  string(2) "gz"
+  ["filename"]=>
+  string(8) "test.tar"
 }
 -- Iteration 5 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 6 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 7 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 8 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 9 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 10 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 11 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 12 --
-%unicode|string%(%d) "%s/foo"
-%unicode|string%(12) "symlink.link"
-%unicode|string%(4) "link"
-%unicode|string%(7) "symlink"
+string(%d) "%s/foo"
+string(12) "symlink.link"
+string(4) "link"
+string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(12) "symlink.link"
-  [%u|b%"extension"]=>
-  %unicode|string%(4) "link"
-  [%u|b%"filename"]=>
-  %unicode|string%(7) "symlink"
+  ["dirname"]=>
+  string(%d) "%s/foo"
+  ["basename"]=>
+  string(12) "symlink.link"
+  ["extension"]=>
+  string(4) "link"
+  ["filename"]=>
+  string(7) "symlink"
 }
 -- Iteration 13 --
 string(%d) "%s/foo"
@@ -253,149 +253,149 @@ string(12) "symlink.link"
 string(4) "link"
 string(7) "symlink"
 array(4) {
-  [%u|b%"dirname"]=>
+  ["dirname"]=>
   string(%d) "%s/foo"
-  [%u|b%"basename"]=>
+  ["basename"]=>
   string(12) "symlink.link"
-  [%u|b%"extension"]=>
+  ["extension"]=>
   string(4) "link"
-  [%u|b%"filename"]=>
+  ["filename"]=>
   string(7) "symlink"
 }
 -- Iteration 14 --
-%unicode|string%(1) "."
-%unicode|string%(1) "."
-%unicode|string%(0) ""
-%unicode|string%(0) ""
+string(1) "."
+string(1) "."
+string(0) ""
+string(0) ""
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(1) "."
-  [%u|b%"basename"]=>
-  %unicode|string%(1) "."
-  [%u|b%"extension"]=>
-  %unicode|string%(0) ""
-  [%u|b%"filename"]=>
-  %unicode|string%(0) ""
+  ["dirname"]=>
+  string(1) "."
+  ["basename"]=>
+  string(1) "."
+  ["extension"]=>
+  string(0) ""
+  ["filename"]=>
+  string(0) ""
 }
 -- Iteration 15 --
-%unicode|string%(%d) "%s"
-%unicode|string%(3) "foo"
-%unicode|string%(0) ""
-%unicode|string%(3) "foo"
+string(%d) "%s"
+string(3) "foo"
+string(0) ""
+string(3) "foo"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "foo"
+  ["dirname"]=>
+  string(%d) "%s"
+  ["basename"]=>
+  string(3) "foo"
+  ["filename"]=>
+  string(3) "foo"
 }
 -- Iteration 16 --
-%unicode|string%(%d) "%s"
-%unicode|string%(3) "foo"
-%unicode|string%(0) ""
-%unicode|string%(3) "foo"
+string(%d) "%s"
+string(3) "foo"
+string(0) ""
+string(3) "foo"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "foo"
+  ["dirname"]=>
+  string(%d) "%s"
+  ["basename"]=>
+  string(3) "foo"
+  ["filename"]=>
+  string(3) "foo"
 }
 -- Iteration 17 --
-%unicode|string%(%d) "%s/.."
-%unicode|string%(3) "foo"
-%unicode|string%(0) ""
-%unicode|string%(3) "foo"
+string(%d) "%s/.."
+string(3) "foo"
+string(0) ""
+string(3) "foo"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(%d) "%s/.."
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "foo"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "foo"
+  ["dirname"]=>
+  string(%d) "%s/.."
+  ["basename"]=>
+  string(3) "foo"
+  ["filename"]=>
+  string(3) "foo"
 }
 -- Iteration 18 --
-%unicode|string%(6) "../foo"
-%unicode|string%(3) "bar"
-%unicode|string%(0) ""
-%unicode|string%(3) "bar"
+string(6) "../foo"
+string(3) "bar"
+string(0) ""
+string(3) "bar"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(6) "../foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "bar"
+  ["dirname"]=>
+  string(6) "../foo"
+  ["basename"]=>
+  string(3) "bar"
+  ["filename"]=>
+  string(3) "bar"
 }
 -- Iteration 19 --
-%unicode|string%(5) "./foo"
-%unicode|string%(3) "bar"
-%unicode|string%(0) ""
-%unicode|string%(3) "bar"
+string(5) "./foo"
+string(3) "bar"
+string(0) ""
+string(3) "bar"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(5) "./foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "bar"
+  ["dirname"]=>
+  string(5) "./foo"
+  ["basename"]=>
+  string(3) "bar"
+  ["filename"]=>
+  string(3) "bar"
 }
 -- Iteration 20 --
-%unicode|string%(5) "//foo"
-%unicode|string%(3) "bar"
-%unicode|string%(0) ""
-%unicode|string%(3) "bar"
+string(5) "//foo"
+string(3) "bar"
+string(0) ""
+string(3) "bar"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(5) "//foo"
-  [%u|b%"basename"]=>
-  %unicode|string%(3) "bar"
-  [%u|b%"filename"]=>
-  %unicode|string%(3) "bar"
+  ["dirname"]=>
+  string(5) "//foo"
+  ["basename"]=>
+  string(3) "bar"
+  ["filename"]=>
+  string(3) "bar"
 }
 -- Iteration 21 --
-%unicode|string%(5) "~/PHP"
-%unicode|string%(8) "php5.2.0"
-%unicode|string%(1) "0"
-%unicode|string%(6) "php5.2"
+string(5) "~/PHP"
+string(8) "php5.2.0"
+string(1) "0"
+string(6) "php5.2"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(5) "~/PHP"
-  [%u|b%"basename"]=>
-  %unicode|string%(8) "php5.2.0"
-  [%u|b%"extension"]=>
-  %unicode|string%(1) "0"
-  [%u|b%"filename"]=>
-  %unicode|string%(6) "php5.2"
+  ["dirname"]=>
+  string(5) "~/PHP"
+  ["basename"]=>
+  string(8) "php5.2.0"
+  ["extension"]=>
+  string(1) "0"
+  ["filename"]=>
+  string(6) "php5.2"
 }
 -- Iteration 22 --
-%unicode|string%(13) "/home/example"
-%unicode|string%(4) "test"
-%unicode|string%(0) ""
-%unicode|string%(4) "test"
+string(13) "/home/example"
+string(4) "test"
+string(0) ""
+string(4) "test"
 array(3) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(13) "/home/example"
-  [%u|b%"basename"]=>
-  %unicode|string%(4) "test"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "test"
+  ["dirname"]=>
+  string(13) "/home/example"
+  ["basename"]=>
+  string(4) "test"
+  ["filename"]=>
+  string(4) "test"
 }
 -- Iteration 23 --
-%unicode|string%(23) "http://httpd.apache.org"
-%unicode|string%(24) "core.html#acceptpathinfo"
-%unicode|string%(19) "html#acceptpathinfo"
-%unicode|string%(4) "core"
+string(23) "http://httpd.apache.org"
+string(24) "core.html#acceptpathinfo"
+string(19) "html#acceptpathinfo"
+string(4) "core"
 array(4) {
-  [%u|b%"dirname"]=>
-  %unicode|string%(23) "http://httpd.apache.org"
-  [%u|b%"basename"]=>
-  %unicode|string%(24) "core.html#acceptpathinfo"
-  [%u|b%"extension"]=>
-  %unicode|string%(19) "html#acceptpathinfo"
-  [%u|b%"filename"]=>
-  %unicode|string%(4) "core"
+  ["dirname"]=>
+  string(23) "http://httpd.apache.org"
+  ["basename"]=>
+  string(24) "core.html#acceptpathinfo"
+  ["extension"]=>
+  string(19) "html#acceptpathinfo"
+  ["filename"]=>
+  string(4) "core"
 }
 Done

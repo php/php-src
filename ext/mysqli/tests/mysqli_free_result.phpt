@@ -60,19 +60,19 @@ NULL
 b
 
 Warning: mysqli_free_result(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 c
 bool(false)
 %s(0) ""
 [005]
 
-Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 NULL
 d
 bool(false)
 %s(0) ""
 [007]
 
-Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, boolean given in %s on line %d
+Warning: mysqli_free_result() expects parameter 1 to be mysqli_result, bool given in %s on line %d
 NULL
 done!

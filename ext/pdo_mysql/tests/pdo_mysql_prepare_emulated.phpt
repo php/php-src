@@ -327,93 +327,93 @@ $db->exec('DROP TABLE IF EXISTS test');
 --XFAIL--
 PDO's PS parser has some problems with invalid SQL and crashes from time to time
 (check with valgrind...)
---EXPECTF--
+--EXPECT--
 array(1) {
-  [%u|b%"one"]=>
-  %unicode|string%(1) "1"
+  ["one"]=>
+  string(1) "1"
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(12) ":placeholder"
+    ["label"]=>
+    string(12) ":placeholder"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(12) ":placeholder"
+    ["label"]=>
+    string(12) ":placeholder"
   }
 }
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(9) "first row"
+    ["label"]=>
+    string(9) "first row"
   }
   [1]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(10) "second row"
+    ["label"]=>
+    string(10) "second row"
   }
 }
 array(2) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(3) "row"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(3) "row"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(3) "row"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(3) "row"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "?"
+    ["label"]=>
+    string(1) "?"
   }
 }
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(1) "?"
+    ["label"]=>
+    string(1) "?"
   }
 }
 array(2) {
   [0]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(9) "first row"
+    ["label"]=>
+    string(9) "first row"
   }
   [1]=>
   array(1) {
-    [%u|b%"label"]=>
-    %unicode|string%(10) "second row"
+    ["label"]=>
+    string(10) "second row"
   }
 }
 array(2) {
   [0]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(3) "row"
+    ["id"]=>
+    string(1) "1"
+    ["label"]=>
+    string(3) "row"
   }
   [1]=>
   array(2) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(3) "row"
+    ["id"]=>
+    string(1) "2"
+    ["label"]=>
+    string(3) "row"
   }
 }
 done!

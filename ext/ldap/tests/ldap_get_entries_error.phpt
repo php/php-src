@@ -28,6 +28,6 @@ NULL
 Warning: ldap_get_entries() expects exactly 2 parameters, 3 given in %s on line %d
 NULL
 
-Warning: ldap_get_entries() expects parameter 2 to be resource, %unicode_string_optional% given in %s on line %d
+Warning: ldap_get_entries() expects parameter 2 to be resource, string given in %s on line %d
 NULL
 ===DONE===

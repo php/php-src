@@ -83,21 +83,21 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(7) {
   [0]=>
-  %unicode|string%(10) "2002-01-02"
+  string(10) "2002-01-02"
   [1]=>
-  %unicode|string%(8) "12:49:00"
+  string(8) "12:49:00"
   [2]=>
-  %unicode|string%(19) "2002-01-02 17:46:59"
+  string(19) "2002-01-02 17:46:59"
   [3]=>
   int(2010)
   [4]=>
-  %unicode|string%(19) "2010-07-10 00:00:00"
+  string(19) "2010-07-10 00:00:00"
   [5]=>
-  %unicode|string%(19) "0000-00-00 00:00:00"
+  string(19) "0000-00-00 00:00:00"
   [6]=>
-  %unicode|string%(19) "1999-12-29 00:00:00"
+  string(19) "1999-12-29 00:00:00"
 }
 done!

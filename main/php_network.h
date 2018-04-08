@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -28,6 +28,7 @@
 #else
 # undef closesocket
 # define closesocket close
+# include <netinet/tcp.h>
 #endif
 
 #ifndef HAVE_SHUTDOWN
@@ -115,6 +116,7 @@ typedef int php_socket_t;
 #define STREAM_SOCKOP_SO_BROADCAST        (1 << 2)
 #define STREAM_SOCKOP_IPV6_V6ONLY         (1 << 3)
 #define STREAM_SOCKOP_IPV6_V6ONLY_ENABLED (1 << 4)
+#define STREAM_SOCKOP_TCP_NODELAY         (1 << 5)
 
 
 /* uncomment this to debug poll(2) emulation on systems that have poll(2) */
@@ -269,7 +271,8 @@ PHPAPI php_socket_t php_network_accept_incoming(php_socket_t srvsock,
 		socklen_t *addrlen,
 		struct timeval *timeout,
 		zend_string **error_string,
-		int *error_code
+		int *error_code,
+		int tcp_nodelay
 		);
 
 PHPAPI int php_network_get_sock_name(php_socket_t sock,
@@ -296,8 +299,8 @@ struct _php_netstream_data_t	{
 	size_t ownsize;
 };
 typedef struct _php_netstream_data_t php_netstream_data_t;
-PHPAPI extern php_stream_ops php_stream_socket_ops;
-extern php_stream_ops php_stream_generic_socket_ops;
+PHPAPI extern const php_stream_ops php_stream_socket_ops;
+extern const php_stream_ops php_stream_generic_socket_ops;
 #define PHP_STREAM_IS_SOCKET	(&php_stream_socket_ops)
 
 BEGIN_EXTERN_C()
@@ -341,7 +344,9 @@ END_EXTERN_C()
 
 /*
  * Local variables:
- * tab-width: 8
- * c-basic-offset: 8
+ * tab-width: 4
+ * c-basic-offset: 4
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

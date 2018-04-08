@@ -39,9 +39,9 @@ mysqlnd.net_read_timeout=0
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
-  [%u|b%"SLEEP(2)"]=>
-  %unicode|string%(1) "0"
+  ["SLEEP(2)"]=>
+  string(1) "0"
 }
 done!

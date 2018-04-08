@@ -68,9 +68,13 @@ function ut_main()
 		array( "abc", "a", 0 ),
 		array( "abc", "a", 0, 0 ),
 		array( "abc", "a", 1, "false" ),
+		array( "abc", "a", -1, "false" ),
 		array( "ababc", "a", 1, 2 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", 2, 6 ),
+		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", -1, 6 ),
+		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o", "o", -5, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
+		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc", $char_a_ring_nfd, -4, 3 ),
 		
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "op", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "opq", "opq", 5 ),
@@ -91,6 +95,7 @@ function ut_main()
 		array( "ababc", "ab", 1, 2 ),
 		array( "ababc", "abc", 1, 2 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o" . $char_a_ring_nfd . "bc", "o" . $char_a_ring_nfd . "bc", 2, 6 ),
+		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o" . $char_a_ring_nfd . "bc", "o" . $char_a_ring_nfd . "bc", -8, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_a_ring_nfd . "bc" . $char_a_ring_nfd . "def", $char_a_ring_nfd . "bc" . $char_a_ring_nfd, 2, 3 ),
 	);
 
@@ -120,10 +125,12 @@ function ut_main()
 	
 	$tests = array(
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 2, 6 ),
+		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "Oo", "o", -6, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_A_ring_nfd . "bc", $char_a_ring_nfd, 2, 3 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "O", "o", 5 ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd, "O", "false" ),
 		array( "a" . $char_a_ring_nfd . "bc" . $char_O_diaeresis_nfd, $char_o_diaeresis_nfd, 4 ),
+		array( "a" . $char_a_ring_nfd . "bc" . $char_O_diaeresis_nfd, $char_o_diaeresis_nfd, -1, 4 ),
 		array( $char_o_diaeresis_nfd . "a" . $char_a_ring_nfd . "bc", $char_A_ring_nfd, 2 ),
 		array( "a" . $char_A_ring_nfd . "bc", $char_a_ring_nfd, 1 ),
 		array( "Abc", $char_a_ring_nfd, "false" ),
@@ -153,6 +160,7 @@ function ut_main()
 		array( "aBc", "abC", 0, 0 ),
 		array( "abc", "aBc", 1, "false" ),
 		array( "ABabc", "AB", 1, 2 ),
+		array( "ABabc", "AB", -4, 2 ),
 		array( "abaBc", "aBc", 1, 2 ),
 		array( "ao" . $char_a_ring_nfd . "bc" . $char_o_diaeresis_nfd . "o" . $char_A_ring_nfd . "bC", "O" . $char_a_ring_nfd . "bC", 2, 6 ),
 		array( $char_o_diaeresis_nfd . $char_a_ring_nfd . "a" . $char_A_ring_nfd . "bC" . $char_a_ring_nfd . "def", $char_a_ring_nfd . "Bc" . $char_a_ring_nfd, 2, 3 ),
@@ -559,6 +567,7 @@ function ut_main()
 		array( "abc", 1, 0, 1, "a" ),
 		array( "abc", 1, 1, 2, "b" ),
 		array( "abc", 1, 2, 3, "c" ),
+		array( "abc", 1, -2, 2, "b" ),
 		array( "abc", 0, 2, 2, "" ),
         array( "http://news.bbc.co.uk/2/hi/middle_east/7831588.stm", 48, 48 , 50 , "tm" ),
 
@@ -569,8 +578,11 @@ function ut_main()
 		array( $char_a_ring_nfd . "bc", 2, 0, 4, $char_a_ring_nfd . "b" ),
 		array( $char_a_ring_nfd . "bc", 1, 0, 3, $char_a_ring_nfd . "" ),
 		array( $char_a_ring_nfd . "bcde", 2, 3, 5, "bc" ),
+		array( $char_a_ring_nfd . "bcde", 2, -4, 5, "bc" ),
 		array( $char_a_ring_nfd . "bcde", 2, 4, 6, "cd" ),
+		array( $char_a_ring_nfd . "bcde", 2, -7, 4, $char_a_ring_nfd . "b" ),
 		array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, 5, 11, "de" . $char_a_ring_nfd . "f" ),
+		array( $char_a_ring_nfd . "bcde" . $char_a_ring_nfd . "f", 4, -6, 11, "de" . $char_a_ring_nfd . "f" ),
 
 		array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 3, $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd ),
 		array( $char_a_ring_nfd . $char_o_diaeresis_nfd . $char_o_diaeresis_nfd, 2, $char_a_ring_nfd . $char_o_diaeresis_nfd ),
@@ -794,9 +806,13 @@ find "b" in "abc" - grapheme_strpos = 1 == 1
 find "a" in "abc" - grapheme_strpos = 0 == 0
 find "a" in "abc" - grapheme_strpos from 0 = 0 == 0
 find "a" in "abc" - grapheme_strpos from 1 = false == false
+find "a" in "abc" - grapheme_strpos from -1 = false == false
 find "a" in "ababc" - grapheme_strpos from 1 = 2 == 2
 find "o" in "aoa%CC%8Abco%CC%88o" - grapheme_strpos from 2 = 6 == 6
+find "o" in "aoa%CC%8Abco%CC%88o" - grapheme_strpos from -1 = 6 == 6
+find "o" in "aoa%CC%8Abco%CC%88o" - grapheme_strpos from -5 = 6 == 6
 find "a%CC%8A" in "o%CC%88a%CC%8Aaa%CC%8Abc" - grapheme_strpos from 2 = 3 == 3
+find "a%CC%8A" in "o%CC%88a%CC%8Aaa%CC%8Abc" - grapheme_strpos from -4 = 3 == 3
 find "op" in "aa%CC%8Abco%CC%88opq" - grapheme_strpos = 5 == 5
 find "opq" in "aa%CC%8Abco%CC%88opq" - grapheme_strpos = 5 == 5
 find "abc" in "aa%CC%8Abco%CC%88" - grapheme_strpos = false == false
@@ -816,15 +832,18 @@ find "abc" in "abc" - grapheme_strpos from 1 = false == false
 find "ab" in "ababc" - grapheme_strpos from 1 = 2 == 2
 find "abc" in "ababc" - grapheme_strpos from 1 = 2 == 2
 find "oa%CC%8Abc" in "aoa%CC%8Abco%CC%88oa%CC%8Abc" - grapheme_strpos from 2 = 6 == 6
+find "oa%CC%8Abc" in "aoa%CC%8Abco%CC%88oa%CC%8Abc" - grapheme_strpos from -8 = 6 == 6
 find "a%CC%8Abca%CC%8A" in "o%CC%88a%CC%8Aaa%CC%8Abca%CC%8Adef" - grapheme_strpos from 2 = 3 == 3
 
 function grapheme_stripos($haystack, $needle, $offset = 0) {}
 
 find "o" in "aoa%CC%8Abco%CC%88O" - grapheme_stripos from 2 = 6 == 6
+find "o" in "aoa%CC%8Abco%CC%88Oo" - grapheme_stripos from -6 = 6 == 6
 find "a%CC%8A" in "o%CC%88a%CC%8AaA%CC%8Abc" - grapheme_stripos from 2 = 3 == 3
 find "o" in "aa%CC%8Abco%CC%88O" - grapheme_stripos = 5 == 5
 find "O" in "aa%CC%8Abco%CC%88" - grapheme_stripos = false == false
 find "o%CC%88" in "aa%CC%8AbcO%CC%88" - grapheme_stripos = 4 == 4
+find "o%CC%88" in "aa%CC%8AbcO%CC%88" - grapheme_stripos from -1 = 4 == 4
 find "A%CC%8A" in "o%CC%88aa%CC%8Abc" - grapheme_stripos = 2 == 2
 find "a%CC%8A" in "aA%CC%8Abc" - grapheme_stripos = 1 == 1
 find "a%CC%8A" in "Abc" - grapheme_stripos = false == false
@@ -853,6 +872,7 @@ find "ab" in "ABc" - grapheme_stripos from 0 = 0 == 0
 find "abC" in "aBc" - grapheme_stripos from 0 = 0 == 0
 find "aBc" in "abc" - grapheme_stripos from 1 = false == false
 find "AB" in "ABabc" - grapheme_stripos from 1 = 2 == 2
+find "AB" in "ABabc" - grapheme_stripos from -4 = 2 == 2
 find "aBc" in "abaBc" - grapheme_stripos from 1 = 2 == 2
 find "Oa%CC%8AbC" in "aoa%CC%8Abco%CC%88oA%CC%8AbC" - grapheme_stripos from 2 = 6 == 6
 find "a%CC%8ABca%CC%8A" in "o%CC%88a%CC%8AaA%CC%8AbCa%CC%8Adef" - grapheme_stripos from 2 = 3 == 3
@@ -1094,6 +1114,7 @@ extract from "abc" "0" graphemes - grapheme_extract starting at byte position 0 
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a == a $next=1 == 1 
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 1 with $next = b == b $next=2 == 2 
 extract from "abc" "1" graphemes - grapheme_extract starting at byte position 2 with $next = c == c $next=3 == 3 
+extract from "abc" "1" graphemes - grapheme_extract starting at byte position -2 with $next = b == b $next=2 == 2 
 extract from "abc" "0" graphemes - grapheme_extract starting at byte position 2 with $next =  ==  $next=2 == 2 
 extract from "http%3A%2F%2Fnews.bbc.co.uk%2F2%2Fhi%2Fmiddle_east%2F7831588.stm" "48" graphemes - grapheme_extract starting at byte position 48 with $next = tm == tm $next=50 == 50 
 extract from "a%CC%8Abc" "3" graphemes - grapheme_extract = a%CC%8Abc == a%CC%8Abc
@@ -1103,8 +1124,11 @@ extract from "a%CC%8Abc" "3" graphemes - grapheme_extract starting at byte posit
 extract from "a%CC%8Abc" "2" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4 
 extract from "a%CC%8Abc" "1" graphemes - grapheme_extract starting at byte position 0 with $next = a%CC%8A == a%CC%8A $next=3 == 3 
 extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 3 with $next = bc == bc $next=5 == 5 
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -4 with $next = bc == bc $next=5 == 5 
 extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position 4 with $next = cd == cd $next=6 == 6 
+extract from "a%CC%8Abcde" "2" graphemes - grapheme_extract starting at byte position -7 with $next = a%CC%8Ab == a%CC%8Ab $next=4 == 4 
 extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position 5 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
+extract from "a%CC%8Abcdea%CC%8Af" "4" graphemes - grapheme_extract starting at byte position -6 with $next = dea%CC%8Af == dea%CC%8Af $next=11 == 11 
 extract from "a%CC%8Ao%CC%88o%CC%88" "3" graphemes - grapheme_extract = a%CC%8Ao%CC%88o%CC%88 == a%CC%8Ao%CC%88o%CC%88
 extract from "a%CC%8Ao%CC%88o%CC%88" "2" graphemes - grapheme_extract = a%CC%8Ao%CC%88 == a%CC%8Ao%CC%88
 extract from "a%CC%8Ao%CC%88c" "1" graphemes - grapheme_extract = a%CC%8A == a%CC%8A

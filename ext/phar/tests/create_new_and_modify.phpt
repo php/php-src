@@ -2,7 +2,6 @@
 Phar: create and modify phar
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1
@@ -35,9 +34,9 @@ file_put_contents($pname .'/b.php', "another!\n");
 $phar = new Phar($fname);
 $sig2 = $phar->getSignature();
 
-var_dump($sig1[b'hash']);
-var_dump($sig2[b'hash']);
-var_dump($sig1[b'hash'] != $sig2[b'hash']);
+var_dump($sig1['hash']);
+var_dump($sig2['hash']);
+var_dump($sig1['hash'] != $sig2['hash']);
 
 include $pname . '/a.php';
 include $pname . '/b.php';

@@ -28,12 +28,6 @@
 #include <unicode/ustring.h>
 #include <php.h>
 
-#if PHP_VERSION_ID <= 50100
-#define CAST_OBJECT_SHOULD_FREE ,0
-#else
-#define CAST_OBJECT_SHOULD_FREE
-#endif
-
 #define COLLATOR_CONVERT_RETURN_FAILED(retval) { \
 			Z_TRY_ADDREF_P(retval);              \
 			return retval;                       \
@@ -258,7 +252,7 @@ zval* collator_convert_object_to_string( zval* obj, zval *rv )
 	{
 		zstr = rv;
 
-		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING CAST_OBJECT_SHOULD_FREE ) == FAILURE )
+		if( Z_OBJ_HT_P(obj)->cast_object( obj, zstr, IS_STRING ) == FAILURE )
 		{
 			/* cast_object failed => bail out. */
 			zval_ptr_dtor( zstr );
@@ -388,13 +382,12 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 zval* collator_make_printable_zval( zval* arg, zval *rv)
 {
 	zval arg_copy;
-	int use_copy = 0;
 	zval* str    = NULL;
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
 
-		use_copy = zend_make_printable_zval(arg, &arg_copy);
+		int use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{

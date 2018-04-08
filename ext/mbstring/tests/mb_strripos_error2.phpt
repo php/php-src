@@ -18,8 +18,8 @@ function_exists('mb_strripos') or die("skip mb_strripos() is not available in th
  */
 
 echo "*** Testing mb_strripos() : error conditions ***\n";
-$haystack = b'Hello, world';
-$needle = b'world';
+$haystack = 'Hello, world';
+$needle = 'world';
 $offset = 2;
 $encoding = 'unknown-encoding';
 

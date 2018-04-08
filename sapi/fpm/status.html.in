@@ -4,7 +4,7 @@
 	$Id$
 	(c) 2011 Jerome Loyet
 	The PHP License, version 3.01
-	This is sample real-time status page for FPM. You can change it to better feet your needs.
+	This is sample real-time status page for FPM. You can change it to better fit your needs.
 -->
 	<head> 
 		<meta http-equiv="Content-Type" content="text/html;charset=utf-8" />

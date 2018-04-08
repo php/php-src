@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -31,6 +31,7 @@ extern zend_module_entry openssl_module_entry;
 
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
+#define OPENSSL_DONT_ZERO_PAD_KEY 4
 
 #define OPENSSL_ERROR_X509_PRIVATE_KEY_VALUES_MISMATCH 0x0B080074
 
@@ -46,11 +47,33 @@ extern zend_module_entry openssl_module_entry;
 	"DHE-DSS-AES128-SHA256:DHE-RSA-AES256-SHA256:DHE-DSS-AES256-SHA:DHE-RSA-AES256-SHA:AES128-GCM-SHA256:" \
 	"AES256-GCM-SHA384:AES128:AES256:HIGH:!SSLv2:!aNULL:!eNULL:!EXPORT:!DES:!MD5:!RC4:!ADH"
 
+#include <openssl/err.h>
+
+struct php_openssl_errors {
+	int buffer[ERR_NUM_ERRORS];
+	int top;
+	int bottom;
+};
+
+ZEND_BEGIN_MODULE_GLOBALS(openssl)
+	struct php_openssl_errors *errors;
+ZEND_END_MODULE_GLOBALS(openssl)
+
+#define OPENSSL_G(v) ZEND_MODULE_GLOBALS_ACCESSOR(openssl, v)
+
+#if defined(ZTS) && defined(COMPILE_DL_OPENSSL)
+ZEND_TSRMLS_CACHE_EXTERN();
+#endif
+
 php_stream_transport_factory_func php_openssl_ssl_socket_factory;
+
+void php_openssl_store_errors();
 
 PHP_MINIT_FUNCTION(openssl);
 PHP_MSHUTDOWN_FUNCTION(openssl);
 PHP_MINFO_FUNCTION(openssl);
+PHP_GINIT_FUNCTION(openssl);
+PHP_GSHUTDOWN_FUNCTION(openssl);
 
 PHP_FUNCTION(openssl_pkey_get_private);
 PHP_FUNCTION(openssl_pkey_get_public);
@@ -75,6 +98,7 @@ PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
 PHP_FUNCTION(openssl_pkcs7_encrypt);
+PHP_FUNCTION(openssl_pkcs7_read);
 
 PHP_FUNCTION(openssl_error_string);
 
@@ -104,11 +128,21 @@ PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
 
 PHP_FUNCTION(openssl_get_cert_locations);
+
+#ifdef PHP_WIN32
+#define PHP_OPENSSL_BIO_MODE_R(flags) (((flags) & PKCS7_BINARY) ? "rb" : "r")
+#define PHP_OPENSSL_BIO_MODE_W(flags) (((flags) & PKCS7_BINARY) ? "wb" : "w")
+#else
+#define PHP_OPENSSL_BIO_MODE_R(flags) "r"
+#define PHP_OPENSSL_BIO_MODE_W(flags) "w"
+#endif
+
 #else
 
 #define phpext_openssl_ptr NULL
 
 #endif
+
 
 #endif
 

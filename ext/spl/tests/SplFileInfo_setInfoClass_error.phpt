@@ -12,5 +12,5 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 SplFileInfo::setInfoClass() expects parameter 1 to be a class name derived from SplFileInfo, 'stdClass' given

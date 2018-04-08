@@ -1,11 +1,11 @@
 --TEST--
 SQLite3 error functions
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 
 echo "SELECTING from invalid table\n";
 $result = $db->query("SELECT * FROM non_existent_table");

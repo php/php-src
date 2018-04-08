@@ -49,5 +49,5 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
---EXPECTF--
+--EXPECT--
 Hello World!

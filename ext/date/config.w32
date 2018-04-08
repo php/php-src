@@ -11,6 +11,7 @@ var tl_config = FSO.CreateTextFile("ext/date/lib/timelib_config.h", true);
 tl_config.WriteLine("#include \"config.w32.h\"");
 tl_config.WriteLine("#include <php_stdint.h>");
 tl_config.WriteLine("#define TIMELIB_OMIT_STDINT 1");
+tl_config.WriteLine("#define HAVE_GETTIMEOFDAY 1");
 tl_config.WriteLine("#include \"zend.h\"");
 tl_config.WriteLine("#define timelib_malloc  emalloc");
 tl_config.WriteLine("#define timelib_realloc erealloc");
@@ -19,5 +20,5 @@ tl_config.WriteLine("#define timelib_strdup  estrdup");
 tl_config.WriteLine("#define timelib_free    efree");
 tl_config.Close();
 
-PHP_INSTALL_HEADERS("ext/date/", "php_date.h lib/timelib.h lib/timelib_structs.h lib/timelib_config.h");
+PHP_INSTALL_HEADERS("ext/date/", "php_date.h lib/timelib.h lib/timelib_config.h");
 AC_DEFINE('HAVE_TIMELIB_CONFIG_H', 1, 'Have timelib_config.h')

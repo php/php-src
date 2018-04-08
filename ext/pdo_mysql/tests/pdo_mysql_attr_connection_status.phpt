@@ -13,13 +13,8 @@ $db = MySQLPDOTest::factory();
 	$db = MySQLPDOTest::factory();
 
 	$status = $db->getAttribute(PDO::ATTR_CONNECTION_STATUS);
-	if (ini_get('unicode.semantics')) {
-		if (!is_unicode($status))
-			printf("[001] Expecting unicode, got '%s'\n", var_export($status, true));
-	} else {
-		if (!is_string($status))
-			printf("[002] Expecting string, got '%s'\n", var_export($status, true));
-	}
+    if (!is_string($status))
+        printf("[002] Expecting string, got '%s'\n", var_export($status, true));
 
 	if ('' == $status)
 		printf("[003] Connection status string must not be empty\n");
@@ -33,5 +28,5 @@ $db = MySQLPDOTest::factory();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

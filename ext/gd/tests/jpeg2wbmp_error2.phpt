@@ -20,9 +20,15 @@ jpeg2wbmp(null, $file, 20, 120, 8);
 jpeg2wbmp(false, $file, 20, 120, 8);
 ?>
 --EXPECTF--
-Warning: jpeg2wbmp(): Unable to open '' for reading in %s on line %d
+Deprecated: Function jpeg2wbmp() is deprecated in %s on line %d
 
 Warning: jpeg2wbmp(): Unable to open '' for reading in %s on line %d
+
+Deprecated: Function jpeg2wbmp() is deprecated in %s on line %d
+
+Warning: jpeg2wbmp(): Unable to open '' for reading in %s on line %d
+
+Deprecated: Function jpeg2wbmp() is deprecated in %s on line %d
 
 Warning: jpeg2wbmp(): Unable to open '' for reading in %s on line %d
 --CLEAN--

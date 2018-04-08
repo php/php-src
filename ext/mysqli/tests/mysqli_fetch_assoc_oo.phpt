@@ -16,8 +16,8 @@ require_once('skipifconnectfailure.inc');
 	// Note: no SQL type tests, internally the same function gets used as for mysqli_fetch_array() which does a lot of SQL type test
 	$mysqli = new mysqli();
 	$res = @new mysqli_result($mysqli);
-	if (!is_null($tmp = @$res->fetch_assoc()))
-		printf("[001] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$res->fetch_assoc()))
+		printf("[001] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	require('table.inc');
 	if (!$mysqli = new my_mysqli($host, $user, $passwd, $db, $port, $socket))
@@ -47,8 +47,8 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (NULL !== ($tmp = $res->fetch_assoc()))
-		printf("[008] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = $res->fetch_assoc()))
+		printf("[008] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 
@@ -61,25 +61,25 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [005]
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 [006]
 NULL
 [008]
 array(5) {
-  [%u|b%"a"]=>
-  %unicode|string%(1) "2"
-  [%u|b%"c"]=>
-  %unicode|string%(1) "3"
-  [%u|b%"C"]=>
-  %unicode|string%(1) "4"
-  [%u|b%"d"]=>
+  ["a"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
+  ["C"]=>
+  string(1) "4"
+  ["d"]=>
   NULL
-  [%u|b%"e"]=>
-  %unicode|string%(1) "1"
+  ["e"]=>
+  string(1) "1"
 }
 
 Warning: mysqli_result::fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d

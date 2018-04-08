@@ -4,7 +4,6 @@
 <?php
 /* $Id: bug38943_2.phpt 271800 2008-12-24 11:28:25Z pajoye $ */
 if(!extension_loaded('zip')) die('skip');
-if (version_compare(PHP_VERSION, "5.3", "<")) die('skip test for5.3+ only');
 ?>
 --FILE--
 <?php

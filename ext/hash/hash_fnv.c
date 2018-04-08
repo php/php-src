@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,17 +31,19 @@ const php_hash_ops php_hash_fnv132_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
-	const php_hash_ops php_hash_fnv1a32_ops = {
+const php_hash_ops php_hash_fnv1a32_ops = {
 	(php_hash_init_func_t) PHP_FNV132Init,
 	(php_hash_update_func_t) PHP_FNV1a32Update,
  	(php_hash_final_func_t) PHP_FNV132Final,
 	(php_hash_copy_func_t) php_hash_copy,
 	4,
 	4,
-	sizeof(PHP_FNV132_CTX)
+	sizeof(PHP_FNV132_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv164_ops = {
@@ -51,7 +53,8 @@ const php_hash_ops php_hash_fnv164_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 const php_hash_ops php_hash_fnv1a64_ops = {
@@ -61,7 +64,8 @@ const php_hash_ops php_hash_fnv1a64_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	8,
 	4,
-	sizeof(PHP_FNV164_CTX)
+	sizeof(PHP_FNV164_CTX),
+	0
 };
 
 /* {{{ PHP_FNV132Init
@@ -147,8 +151,8 @@ PHP_HASH_API void PHP_FNV164Final(unsigned char digest[8], PHP_FNV164_CTX * cont
  * returns:
  *  32 bit hash as a static hash type
  */
-static php_hash_uint32
-fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
+static uint32_t
+fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
 {
 	unsigned char *bp = (unsigned char *)buf;   /* start of buffer */
 	unsigned char *be = bp + len;	   /* beyond end of buffer */
@@ -156,17 +160,18 @@ fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
 	/*
 	 * FNV-1 hash each octet in the buffer
 	 */
-	while (bp < be) {
-
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 32 bit FNV magic prime mod 2^32 */
 			hval *= PHP_FNV_32_PRIME;
 
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint32)*bp++;
-		} else {
+			hval ^= (uint32_t)*bp++;
+		}
+	} else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint32)*bp++;
+			hval ^= (uint32_t)*bp++;
 
 			/* multiply by the 32 bit FNV magic prime mod 2^32 */
 			hval *= PHP_FNV_32_PRIME;
@@ -189,8 +194,8 @@ fnv_32_buf(void *buf, size_t len, php_hash_uint32 hval, int alternate)
  * returns:
  *  64 bit hash as a static hash type
  */
-static php_hash_uint64
-fnv_64_buf(void *buf, size_t len, php_hash_uint64 hval, int alternate)
+static uint64_t
+fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 {
 	unsigned char *bp = (unsigned char *)buf;   /* start of buffer */
 	unsigned char *be = bp + len;	   /* beyond end of buffer */
@@ -198,17 +203,19 @@ fnv_64_buf(void *buf, size_t len, php_hash_uint64 hval, int alternate)
 	/*
 	 * FNV-1 hash each octet of the buffer
 	 */
-	while (bp < be) {
 
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 64 bit FNV magic prime mod 2^64 */
 			hval *= PHP_FNV_64_PRIME;
 
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint64)*bp++;
-		 } else {
+			hval ^= (uint64_t)*bp++;
+		}
+	 } else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
-			hval ^= (php_hash_uint64)*bp++;
+			hval ^= (uint64_t)*bp++;
 
 			/* multiply by the 64 bit FNV magic prime mod 2^64 */
 			hval *= PHP_FNV_64_PRIME;

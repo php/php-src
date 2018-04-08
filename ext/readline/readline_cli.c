@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -67,7 +67,7 @@
 #include "sapi/cli/cli.h"
 #include "readline_cli.h"
 
-#ifdef COMPILE_DL_READLINE
+#if defined(COMPILE_DL_READLINE) && !defined(PHP_WIN32)
 #include <dlfcn.h>
 #endif
 
@@ -592,8 +592,9 @@ static int readline_shell_run(void) /* {{{ */
 
 	if (PG(auto_prepend_file) && PG(auto_prepend_file)[0]) {
 		zend_file_handle *prepend_file_p;
-		zend_file_handle prepend_file = {{0}};
+		zend_file_handle prepend_file;
 
+		memset(&prepend_file, 0, sizeof(prepend_file));
 		prepend_file.filename = PG(auto_prepend_file);
 		prepend_file.opened_path = NULL;
 		prepend_file.free_filename = 0;
@@ -603,9 +604,15 @@ static int readline_shell_run(void) /* {{{ */
 		zend_execute_scripts(ZEND_REQUIRE, NULL, 1, prepend_file_p);
 	}
 
+#ifndef PHP_WIN32
 	history_file = tilde_expand("~/.php_history");
+#else
+	spprintf(&history_file, MAX_PATH, "%s/.php_history", getenv("USERPROFILE"));
+#endif
 	rl_attempted_completion_function = cli_code_completion;
+#ifndef PHP_WIN32
 	rl_special_prefixes = "$";
+#endif
 	read_history(history_file);
 
 	EG(exit_status) = 0;
@@ -691,13 +698,33 @@ static int readline_shell_run(void) /* {{{ */
 
 		php_last_char = '\0';
 	}
+#ifdef PHP_WIN32
+	efree(history_file);
+#else
 	free(history_file);
+#endif
 	efree(code);
 	zend_string_release(prompt);
 	return EG(exit_status);
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+typedef cli_shell_callbacks_t *(__cdecl *get_cli_shell_callbacks)(void);
+#define GET_SHELL_CB(cb) \
+	do { \
+		get_cli_shell_callbacks get_callbacks; \
+		HMODULE hMod = GetModuleHandle("php.exe"); \
+		(cb) = NULL; \
+		if (strlen(sapi_module.name) >= 3 && 0 == strncmp("cli", sapi_module.name, 3)) { \
+			get_callbacks = (get_cli_shell_callbacks)GetProcAddress(hMod, "php_cli_get_shell_callbacks"); \
+			if (get_callbacks) { \
+				(cb) = get_callbacks(); \
+			} \
+		} \
+	} while(0)
+
+#else
 /*
 #ifdef COMPILE_DL_READLINE
 This dlsym() is always used as even the CGI SAPI is linked against "CLI"-only
@@ -716,6 +743,7 @@ this extension sharedto offer compatibility.
 /*#else
 #define GET_SHELL_CB(cb) (cb) = php_cli_get_shell_callbacks()
 #endif*/
+#endif
 
 PHP_MINIT_FUNCTION(cli_readline)
 {
@@ -760,7 +788,11 @@ PHP_MINFO_FUNCTION(cli_readline)
 {
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Readline Support", "enabled");
+#ifdef PHP_WIN32
+	php_info_print_table_row(2, "Readline library", "WinEditLine");
+#else
 	php_info_print_table_row(2, "Readline library", (rl_library_version ? rl_library_version : "Unknown"));
+#endif
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();

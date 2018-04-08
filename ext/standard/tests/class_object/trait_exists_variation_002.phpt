@@ -8,9 +8,9 @@ Test trait_exists() function : usage variations  - unexpected types for argument
  * Alias to functions: 
  */
 
-function __autoload($traitName) {
-	echo "In __autoload($traitName)\n";
-}
+spl_autoload_register(function ($traitName) {
+	echo "In autoload($traitName)\n";
+});
 
 function test_error_handler($err_no, $err_msg, $filename, $linenum, $vars) {
 	echo "Error: $err_no - $err_msg, $filename($linenum)\n";
@@ -95,60 +95,60 @@ Arg value 0
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 12345 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value -2345 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 10.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value -10.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 101234567000 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 1.07654321E-9 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value 0.5 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 Error: 8 - Array to string conversion, %strait_exists_variation_002.php(%d)
 
 Arg value Array 
-Error: 2 - trait_exists() expects parameter 2 to be boolean, array given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, array given, %s(81)
 NULL
 
 Arg value  
@@ -158,14 +158,14 @@ Arg value
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value  
 bool(false)
 
 Arg value 1 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value  
@@ -178,16 +178,16 @@ Arg value
 bool(false)
 
 Arg value string 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 
 Arg value string 
-In __autoload(string_val)
+In autoload(string_val)
 bool(false)
 Error: 4096 - Object of class stdClass could not be converted to string, %s(80)
 
 Arg value  
-Error: 2 - trait_exists() expects parameter 2 to be boolean, object given, %s(81)
+Error: 2 - trait_exists() expects parameter 2 to be bool, object given, %s(81)
 NULL
 
 Arg value  

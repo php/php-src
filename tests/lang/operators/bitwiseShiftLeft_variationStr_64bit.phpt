@@ -226,17 +226,17 @@ int(984)
 --- testing: '123abc' << 'a5.9' ---
 int(123)
 --- testing: '123e5' << '0' ---
-int(123)
+int(12300000)
 --- testing: '123e5' << '65' ---
 int(0)
 --- testing: '123e5' << '-44' ---
 Exception: Bit shift by negative number
 --- testing: '123e5' << '1.2' ---
-int(246)
+int(24600000)
 --- testing: '123e5' << '-7.7' ---
 Exception: Bit shift by negative number
 --- testing: '123e5' << 'abc' ---
-int(123)
+int(12300000)
 --- testing: '123e5' << '123abc' ---
 int(0)
 --- testing: '123e5' << '123e5' ---
@@ -250,21 +250,21 @@ int(0)
 --- testing: '123e5' << '123abc ' ---
 int(0)
 --- testing: '123e5' << '3.4a' ---
-int(984)
+int(98400000)
 --- testing: '123e5' << 'a5.9' ---
-int(123)
+int(12300000)
 --- testing: '123e5xyz' << '0' ---
-int(123)
+int(12300000)
 --- testing: '123e5xyz' << '65' ---
 int(0)
 --- testing: '123e5xyz' << '-44' ---
 Exception: Bit shift by negative number
 --- testing: '123e5xyz' << '1.2' ---
-int(246)
+int(24600000)
 --- testing: '123e5xyz' << '-7.7' ---
 Exception: Bit shift by negative number
 --- testing: '123e5xyz' << 'abc' ---
-int(123)
+int(12300000)
 --- testing: '123e5xyz' << '123abc' ---
 int(0)
 --- testing: '123e5xyz' << '123e5' ---
@@ -278,9 +278,9 @@ int(0)
 --- testing: '123e5xyz' << '123abc ' ---
 int(0)
 --- testing: '123e5xyz' << '3.4a' ---
-int(984)
+int(98400000)
 --- testing: '123e5xyz' << 'a5.9' ---
-int(123)
+int(12300000)
 --- testing: ' 123abc' << '0' ---
 int(123)
 --- testing: ' 123abc' << '65' ---

@@ -49,7 +49,7 @@ foreach ($create_st as $statement) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 int(1)
 int(2)
 int(3)

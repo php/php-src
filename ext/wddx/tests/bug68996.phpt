@@ -10,6 +10,6 @@ if (getenv("USE_ZEND_ALLOC") !== "0")
 echo wddx_serialize_value("\xfc\x63") . "\n";
 echo wddx_serialize_value([ "\xfc\x63" => "foo" ]) . "\n";
 ?>
---EXPECTF--
+--EXPECT--
 <wddxPacket version='1.0'><header/><data><string></string></data></wddxPacket>
 <wddxPacket version='1.0'><header/><data><struct><var name=''><string>foo</string></var></struct></data></wddxPacket>

@@ -3,17 +3,29 @@
 #include "intl_convert.h"
 
 #include <unicode/uchar.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
 static inline int convert_cp(UChar32* pcp, zval *zcp) {
 	zend_long cp = -1;
+
 	if (Z_TYPE_P(zcp) == IS_LONG) {
 		cp = Z_LVAL_P(zcp);
 	} else if (Z_TYPE_P(zcp) == IS_STRING) {
-		int i = 0;
-		U8_NEXT(Z_STRVAL_P(zcp), i, Z_STRLEN_P(zcp), cp);
-		if (i != Z_STRLEN_P(zcp)) {
+		int32_t i = 0;
+		size_t zcp_len = Z_STRLEN_P(zcp);
+
+		if (ZEND_SIZE_T_INT_OVFL(zcp_len)) {
+			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+			intl_error_set_custom_msg(NULL, "Input string is too long.", 0);
+			return FAILURE;
+		}
+
+		U8_NEXT(Z_STRVAL_P(zcp), i, zcp_len, cp);
+		if ((size_t)i != zcp_len) {
 			intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
 			intl_error_set_custom_msg(NULL, "Passing a UTF-8 character for codepoint requires a string which is exactly one UTF-8 codepoint long.", 0);
 			return FAILURE;
@@ -132,7 +144,7 @@ IC_METHOD(getIntPropertyMinValue) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getIntPropertyMxValue(int $property) */
+/* {{{ proto int IntlChar::getIntPropertyMaxValue(int $property) */
 ZEND_BEGIN_ARG_INFO_EX(getIntPropertyMaxValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, property)
 ZEND_END_ARG_INFO();
@@ -179,7 +191,7 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	zval args[3];
 
 	ZVAL_NULL(&retval);
-	/* Note that $start is INclusive, whiel $limit is EXclusive
+	/* Note that $start is INclusive, while $limit is EXclusive
 	 * Therefore (0, 32, 15) means CPs 0..31 are of type 15
 	 */
 	ZVAL_LONG(&args[0], start);
@@ -656,7 +668,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-static zend_function_entry intlchar_methods[] = {
+static const zend_function_entry intlchar_methods[] = {
 #define IC_ME(mname) PHP_ME(IntlChar, mname, mname##_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	IC_ME(chr)
 	IC_ME(ord)

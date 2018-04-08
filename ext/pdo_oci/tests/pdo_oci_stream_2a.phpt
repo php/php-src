@@ -53,16 +53,16 @@ $a10 = str_repeat('j', 4095);
 
 printf("Inserting 10000 Records ... ");
 for($i=0; $i<1000; $i++) {
-    do_insert($db, 1, $a1, $a10);
-    do_insert($db, 1, $a2, $a9);
-    do_insert($db, 1, $a3, $a8);
-    do_insert($db, 1, $a4, $a7);
-    do_insert($db, 1, $a5, $a6);
-    do_insert($db, 1, $a6, $a5);
-    do_insert($db, 1, $a7, $a4);
-    do_insert($db, 1, $a8, $a3);
-    do_insert($db, 1, $a9, $a2);
-    do_insert($db, 1, $a10, $a1);
+    do_insert($db, $i * 10 + 1, $a1, $a10);
+    do_insert($db, $i * 10 + 2, $a2, $a9);
+    do_insert($db, $i * 10 + 3, $a3, $a8);
+    do_insert($db, $i * 10 + 4, $a4, $a7);
+    do_insert($db, $i * 10 + 5, $a5, $a6);
+    do_insert($db, $i * 10 + 6, $a6, $a5);
+    do_insert($db, $i * 10 + 7, $a7, $a4);
+    do_insert($db, $i * 10 + 8, $a8, $a3);
+    do_insert($db, $i * 10 + 9, $a9, $a2);
+    do_insert($db, $i * 10 + 10, $a10, $a1);
 }
 printf("Done\n");
 

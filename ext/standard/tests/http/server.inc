@@ -54,13 +54,13 @@ function http_server($socket_string, array $files, &$output = null) {
 			if (!stream_select($r, $w, $e, 1)) continue;
 
 			$line = stream_get_line($sock, 8192, "\r\n");
-			if ($line === b'') {
-				fwrite($output, b"\r\n");
+			if ($line === '') {
+				fwrite($output, "\r\n");
 				break;
 			} else if ($line !== false) {
-				fwrite($output, b"$line\r\n");
+				fwrite($output, "$line\r\n");
 
-				if (preg_match(b'#^Content-Length\s*:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
+				if (preg_match('#^Content-Length\s*:\s*([[:digit:]]+)\s*$#i', $line, $matches)) {
 					$content_length = (int) $matches[1];
 				}
 			}

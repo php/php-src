@@ -58,8 +58,8 @@ require_once('skipifconnectfailure.inc');
 	mysqli_free_result($res);
 
 	// Read http://bugs.php.net/bug.php?id=42344 on defaults!
-	if (NULL !== ($tmp = mysqli_fetch_field($res)))
-		printf("[006] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_field($res)))
+		printf("[006] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_query($link, "DROP TABLE IF EXISTS test"))
 		printf("[007] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
@@ -88,94 +88,94 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 object(stdClass)#%d (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(2) "ID"
-  [%u|b%"orgname"]=>
-  %unicode|string%(2) "id"
-  [%u|b%"table"]=>
-  %unicode|string%(4) "TEST"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(2) "ID"
+  ["orgname"]=>
+  string(2) "id"
+  ["table"]=>
+  string(4) "TEST"
+  ["orgtable"]=>
+  string(%d) "%s"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(1)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(11)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(63)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(49155)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(3)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 object(stdClass)#%d (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(5) "label"
-  [%u|b%"orgname"]=>
-  %unicode|string%(5) "label"
-  [%u|b%"table"]=>
-  %unicode|string%(4) "TEST"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(5) "label"
+  ["orgname"]=>
+  string(5) "label"
+  ["table"]=>
+  string(4) "TEST"
+  ["orgtable"]=>
+  string(%d) "%s"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(%d)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(%d)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(%d)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(0)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(254)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 bool(false)
 
 Warning: mysqli_fetch_field(): Couldn't fetch mysqli_result in %s on line %d
 array(1) {
-  [%u|b%"_default_test"]=>
-  %unicode|string%(1) "2"
+  ["_default_test"]=>
+  string(1) "2"
 }
 object(stdClass)#%d (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(13) "_default_test"
-  [%u|b%"orgname"]=>
-  %unicode|string%(2) "id"
-  [%u|b%"table"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(13) "_default_test"
+  ["orgname"]=>
+  string(2) "id"
+  ["table"]=>
+  string(%d) "%s"
+  ["orgtable"]=>
+  string(%d) "%s"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(1)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(11)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(63)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(32769)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(3)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 done!

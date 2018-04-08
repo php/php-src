@@ -77,37 +77,37 @@ mysqli_close($link);
 bool(true)
 bool(true)
 object(mysqli_stmt)#%d (%d) {
-  [%u|b%"affected_rows"]=>
+  ["affected_rows"]=>
   int(%i)
-  [%u|b%"insert_id"]=>
+  ["insert_id"]=>
   int(0)
-  [%u|b%"num_rows"]=>
+  ["num_rows"]=>
   int(0)
-  [%u|b%"param_count"]=>
+  ["param_count"]=>
   int(0)
-  [%u|b%"field_count"]=>
+  ["field_count"]=>
   int(1)
-  [%u|b%"errno"]=>
+  ["errno"]=>
   int(0)
-  [%u|b%"error"]=>
-  %unicode|string%(0) ""
-  [%u|b%"error_list"]=>
+  ["error"]=>
+  string(0) ""
+  ["error_list"]=>
   array(0) {
   }
-  [%u|b%"sqlstate"]=>
-  %unicode|string%(5) "00000"
-  [%u|b%"id"]=>
+  ["sqlstate"]=>
+  string(5) "00000"
+  ["id"]=>
   int(3)
 }
 bool(true)
 bool(false)
-%unicode|string%(0) ""
+string(0) ""
 
-Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, boolean given in %s on line %d
+Warning: mysqli_stmt_reset() expects parameter 1 to be mysqli_stmt, bool given in %s on line %d
 NULL
 Rows: 3
 array(1) {
   [0]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
 }
 done!

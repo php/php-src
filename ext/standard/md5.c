@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -48,23 +48,23 @@ PHP_NAMED_FUNCTION(php_if_md5)
 {
 	zend_string *arg;
 	zend_bool raw_output = 0;
-	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|b", &arg, &raw_output) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_STR(arg)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
-	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 16);
 	} else {
-		make_digest_ex(md5str, digest, 16);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 
 }
@@ -77,16 +77,17 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	char          *arg;
 	size_t           arg_len;
 	zend_bool raw_output = 0;
-	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
 	size_t           n;
 	php_stream    *stream;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p|b", &arg, &arg_len, &raw_output) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, 2)
+		Z_PARAM_PATH(arg, arg_len)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_BOOL(raw_output)
+	ZEND_PARSE_PARAMETERS_END();
 
 	stream = php_stream_open_wrapper(arg, "rb", REPORT_ERRORS, NULL);
 	if (!stream) {
@@ -114,8 +115,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 16);
 	} else {
-		make_digest_ex(md5str, digest, 16);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 }
 /* }}} */
@@ -169,16 +170,16 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
  */
 #if defined(__i386__) || defined(__x86_64__) || defined(__vax__)
 # define SET(n) \
-	(*(php_uint32 *)&ptr[(n) * 4])
+	(*(uint32_t *)&ptr[(n) * 4])
 # define GET(n) \
 	SET(n)
 #else
 # define SET(n) \
 	(ctx->block[(n)] = \
-	(php_uint32)ptr[(n) * 4] | \
-	((php_uint32)ptr[(n) * 4 + 1] << 8) | \
-	((php_uint32)ptr[(n) * 4 + 2] << 16) | \
-	((php_uint32)ptr[(n) * 4 + 3] << 24))
+	(uint32_t)ptr[(n) * 4] | \
+	((uint32_t)ptr[(n) * 4 + 1] << 8) | \
+	((uint32_t)ptr[(n) * 4 + 2] << 16) | \
+	((uint32_t)ptr[(n) * 4 + 3] << 24))
 # define GET(n) \
 	(ctx->block[(n)])
 #endif
@@ -190,8 +191,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 static const void *body(PHP_MD5_CTX *ctx, const void *data, size_t size)
 {
 	const unsigned char *ptr;
-	php_uint32 a, b, c, d;
-	php_uint32 saved_a, saved_b, saved_c, saved_d;
+	uint32_t a, b, c, d;
+	uint32_t saved_a, saved_b, saved_c, saved_d;
 
 	ptr = data;
 
@@ -307,8 +308,8 @@ PHPAPI void PHP_MD5Init(PHP_MD5_CTX *ctx)
 
 PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size)
 {
-	php_uint32 saved_lo;
-	php_uint32 used, free;
+	uint32_t saved_lo;
+	uint32_t used, free;
 
 	saved_lo = ctx->lo;
 	if ((ctx->lo = (saved_lo + size) & 0x1fffffff) < saved_lo) {
@@ -342,7 +343,7 @@ PHPAPI void PHP_MD5Update(PHP_MD5_CTX *ctx, const void *data, size_t size)
 
 PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 {
-	php_uint32 used, free;
+	uint32_t used, free;
 
 	used = ctx->lo & 0x3f;
 
@@ -390,3 +391,12 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 
 	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

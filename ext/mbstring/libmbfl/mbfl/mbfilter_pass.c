@@ -46,7 +46,9 @@ const mbfl_encoding mbfl_encoding_pass = {
 	NULL,
 	(const char *(*)[])&mbfl_encoding_pass_aliases,
 	NULL,
-	0
+	0,
+	NULL,
+	NULL
 };
 
 const struct mbfl_convert_vtbl vtbl_pass = {

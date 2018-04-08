@@ -22,7 +22,7 @@ foreach($classes as $class) {
 	var_dump($rc->getConstants());
 }
 ?>
---EXPECTF--
+--EXPECT--
 Constants from class C: 
 array(1) {
   ["a"]=>

@@ -13,7 +13,7 @@ if (getenv("SKIP_SLOW_TESTS")) die("skip slow test");
 
 echo "*** Testing sleep() : basic functionality ***\n";
 
-$sleeptime = 5; // sleep for 5 seconds 
+$sleeptime = 1; // sleep for 1 seconds
 
 set_time_limit(20); 
 

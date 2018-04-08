@@ -49,7 +49,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 2 --
 Without $regs arg:
@@ -60,7 +61,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 3 --
 Without $regs arg:
@@ -71,7 +73,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 4 --
 Without $regs arg:
@@ -82,7 +85,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 5 --
 Without $regs arg:
@@ -93,7 +97,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 6 --
 Without $regs arg:
@@ -104,7 +109,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 7 --
 Without $regs arg:
@@ -115,7 +121,8 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}
 
 -- Iteration 8 --
 Without $regs arg:
@@ -126,4 +133,5 @@ With $regs arg:
 
 Warning: mb_ereg(): empty pattern in %s on line %d
 bool(false)
-NULL
+array(0) {
+}

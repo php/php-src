@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,10 +25,18 @@
 struct _zend_property_info;
 
 #define ZEND_WRONG_PROPERTY_INFO \
-	((struct _zend_property_info*)((zend_intptr_t)-1))
+	((struct _zend_property_info*)((intptr_t)-1))
 
-#define ZEND_DYNAMIC_PROPERTY_OFFSET (-1)
-#define ZEND_WRONG_PROPERTY_OFFSET   (-2)
+#define ZEND_DYNAMIC_PROPERTY_OFFSET               ((uintptr_t)(intptr_t)(-1))
+
+#define IS_VALID_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) > 0)
+#define IS_WRONG_PROPERTY_OFFSET(offset)           ((intptr_t)(offset) == 0)
+#define IS_DYNAMIC_PROPERTY_OFFSET(offset)         ((intptr_t)(offset) < 0)
+
+#define IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET(offset) (offset == ZEND_DYNAMIC_PROPERTY_OFFSET)
+#define ZEND_DECODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-(intptr_t)(offset) - 2))
+#define ZEND_ENCODE_DYN_PROP_OFFSET(offset)        ((uintptr_t)(-((intptr_t)(offset) + 2)))
+
 
 /* The following rule applies to read_property() and read_dimension() implementations:
    If you return a zval which is not otherwise referenced by the extension or the engine's
@@ -107,7 +115,8 @@ typedef zend_string *(*zend_object_get_class_name_t)(const zend_object *object);
 typedef int (*zend_object_compare_t)(zval *object1, zval *object2);
 typedef int (*zend_object_compare_zvals_t)(zval *resul, zval *op1, zval *op2);
 
-/* Cast an object to some other type
+/* Cast an object to some other type.
+ * readobj and retval must point to distinct zvals.
  */
 typedef int (*zend_object_cast_t)(zval *readobj, zval *retval, int type);
 
@@ -156,7 +165,7 @@ struct _zend_object_handlers {
 };
 
 BEGIN_EXTERN_C()
-extern ZEND_API zend_object_handlers std_object_handlers;
+extern const ZEND_API zend_object_handlers std_object_handlers;
 
 #define zend_get_function_root_class(fbc) \
 	((fbc)->common.prototype ? (fbc)->common.prototype->common.scope : (fbc)->common.scope)
@@ -180,6 +189,8 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 
 ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend_string *method_name, int is_static);
 
+ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *member);
+
 #define zend_free_trampoline(func) do { \
 		if ((func) == &EG(trampoline)) { \
 			EG(trampoline).common.function_name = NULL; \
@@ -198,4 +209,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

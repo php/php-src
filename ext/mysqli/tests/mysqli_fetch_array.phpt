@@ -287,8 +287,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (null !== ($tmp = mysqli_fetch_array($res, MYSQLI_ASSOC)))
-		printf("[015] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_array($res, MYSQLI_ASSOC)))
+		printf("[015] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -296,74 +296,74 @@ require_once('skipifconnectfailure.inc');
 [005]
 array(4) {
   [0]=>
-  %unicode|string%(1) "1"
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
+  ["id"]=>
+  string(1) "1"
   [1]=>
-  %unicode|string%(1) "a"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  string(1) "a"
+  ["label"]=>
+  string(1) "a"
 }
 [006]
 array(2) {
   [0]=>
-  %unicode|string%(1) "2"
+  string(1) "2"
   [1]=>
-  %unicode|string%(1) "b"
+  string(1) "b"
 }
 [007]
 array(4) {
   [0]=>
-  %unicode|string%(1) "3"
-  [%u|b%"id"]=>
-  %unicode|string%(1) "3"
+  string(1) "3"
+  ["id"]=>
+  string(1) "3"
   [1]=>
-  %unicode|string%(1) "c"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "c"
+  string(1) "c"
+  ["label"]=>
+  string(1) "c"
 }
 [008]
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "4"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "d"
+  ["id"]=>
+  string(1) "4"
+  ["label"]=>
+  string(1) "d"
 }
 [009]
 array(4) {
   [0]=>
-  %unicode|string%(1) "5"
-  [%u|b%"id"]=>
-  %unicode|string%(1) "5"
+  string(1) "5"
+  ["id"]=>
+  string(1) "5"
   [1]=>
-  %unicode|string%(1) "e"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "e"
+  string(1) "e"
+  ["label"]=>
+  string(1) "e"
 }
 [011]
 array(11) {
   [0]=>
-  %unicode|string%(1) "1"
-  [%u|b%"a"]=>
-  %unicode|string%(1) "2"
+  string(1) "1"
+  ["a"]=>
+  string(1) "2"
   [1]=>
-  %unicode|string%(1) "2"
+  string(1) "2"
   [2]=>
-  %unicode|string%(1) "3"
-  [%u|b%"c"]=>
-  %unicode|string%(1) "3"
+  string(1) "3"
+  ["c"]=>
+  string(1) "3"
   [3]=>
-  %unicode|string%(1) "4"
-  [%u|b%"C"]=>
-  %unicode|string%(1) "4"
+  string(1) "4"
+  ["C"]=>
+  string(1) "4"
   [4]=>
   NULL
-  [%u|b%"d"]=>
+  ["d"]=>
   NULL
   [5]=>
-  %unicode|string%(1) "1"
-  [%u|b%"e"]=>
-  %unicode|string%(1) "1"
+  string(1) "1"
+  ["e"]=>
+  string(1) "1"
 }
 
 Warning: mysqli_fetch_array(): The result type should be either MYSQLI_NUM, MYSQLI_ASSOC or MYSQLI_BOTH in %s on line %d

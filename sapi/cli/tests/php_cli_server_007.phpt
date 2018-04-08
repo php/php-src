@@ -34,6 +34,7 @@ HEADER
 --EXPECTF--	
 HTTP/1.1 401 Unauthorized
 Host: %s
+Date: %s
 Connection: close
 X-Powered-By: PHP/%s
 WWW-Authenticate: Digest realm="foo",qop="auth",nonce="XXXXX",opaque="acbd18db4cc2f85cedef654fccc4a4d8"

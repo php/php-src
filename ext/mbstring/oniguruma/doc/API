@@ -1,13 +1,19 @@
-Oniguruma API  Version 5.9.2  2008/02/19
+Oniguruma API  Version 6.8.0  2018/03/13
 
 #include <oniguruma.h>
 
 
-# int onig_init(void)
+# int onig_initialize(OnigEncoding use_encodings[], int num_encodings)
 
   Initialize library.
 
-  You don't have to call it explicitly, because it is called in onig_new().
+  You have to call it explicitly.
+
+  * onig_init() is deprecated.
+
+  arguments
+  1 use_encodings:         array of encodings used in application.
+  2 num_encodings:         number of encodings.
 
 
 # int onig_error_code_to_str(UChar* err_buf, int err_code, ...)
@@ -77,6 +83,16 @@ Oniguruma API  Version 5.9.2  2008/02/19
       ONIG_OPTION_DONT_CAPTURE_GROUP only named group captured.
       ONIG_OPTION_CAPTURE_GROUP      named and no-named group captured.
 
+      ONIG_OPTION_WORD_IS_ASCII      ASCII only word (\w, \p{Word}, [[:word:]])
+                                     ASCII only word bound (\b)
+      ONIG_OPTION_DIGIT_IS_ASCII     ASCII only digit (\d, \p{Digit}, [[:digit:]])
+      ONIG_OPTION_SPACE_IS_ASCII     ASCII only space (\s, \p{Space}, [[:space:]])
+      ONIG_OPTION_POSIX_IS_ASCII     ASCII only POSIX properties
+                                     (includes word, digit, space)
+                                     (alnum, alpha, blank, cntrl, digit, graph,
+                                      lower, print, punct, space, upper, xdigit,
+                                      word)
+
   5 enc:        character encoding.
 
       ONIG_ENCODING_ASCII         ASCII
@@ -124,7 +140,8 @@ Oniguruma API  Version 5.9.2  2008/02/19
       ONIG_SYNTAX_PERL              Perl
       ONIG_SYNTAX_PERL_NG           Perl + named group
       ONIG_SYNTAX_RUBY              Ruby
-      ONIG_SYNTAX_DEFAULT           default (== Ruby)
+      ONIG_SYNTAX_ONIGURUMA         Oniguruma
+      ONIG_SYNTAX_DEFAULT           default (== ONIG_SYNTAX_ONIGURUMA)
                                    onig_set_default_syntax()
 
       or any OnigSyntaxType data address defined by user.
@@ -205,6 +222,77 @@ Oniguruma API  Version 5.9.2  2008/02/19
   1 reg: regex object.
 
 
+# OnigMatchParam* onig_new_match_param()
+
+  Allocate a OnigMatchParam object and initialize the contents by
+  onig_initialize_match_param().
+
+
+# void onig_free_match_param(OnigMatchParam* mp)
+
+  Free memory used by a OnigMatchParam object.
+
+  arguments
+  1 mp: OnigMatchParam object
+
+
+# void onig_initialize_match_param(OnigMatchParam* mp)
+
+  Set match-param fields to default values.
+  Match-param is used in onig_match_with_param() and onig_search_with_param().
+
+  arguments
+  1 mp: match-param pointer
+
+
+# int onig_set_match_stack_limit_size_of_match_param(OnigMatchParam* mp, unsigned int limit)
+
+  Set a maximum number of match-stack depth.
+  0 means unlimited.
+
+  arguments
+  1 mp: match-param pointer
+  2 limit: number of limit
+
+  normal return: ONIG_NORMAL
+
+
+# int onig_set_retry_limit_in_match_of_match_param(OnigMatchParam* mp, unsigned long limit)
+
+  Set a retry limit count of a match process.
+
+  arguments
+  1 mp: match-param pointer
+  2 limit: number of limit
+
+  normal return: ONIG_NORMAL
+
+
+# int onig_set_progress_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  Set a function for callouts of contents in progress.
+  If 0 (NULL) is set, never called in progress.
+
+  arguments
+  1 mp: match-param pointer
+  2 f: function
+
+  normal return: ONIG_NORMAL
+
+
+# int onig_set_retraction_callout_of_match_param(OnigMatchParam* mp, OnigCalloutFunc f)
+
+  Set a function for callouts of contents in retraction (backtrack).
+  If 0 (NULL) is set, never called in retraction.
+
+  arguments
+  1 mp: match-param pointer
+  2 f: function
+
+  normal return: ONIG_NORMAL
+
+
+
 # int onig_search(regex_t* reg, const UChar* str, const UChar* end, const UChar* start,
                    const UChar* range, OnigRegion* region, OnigOptionType option)
 
@@ -229,8 +317,17 @@ Oniguruma API  Version 5.9.2  2008/02/19
     ONIG_OPTION_POSIX_REGION  region argument is regmatch_t[] of POSIX API.
 
 
+# int onig_search_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                   const UChar* start, const UChar* range, OnigRegion* region,
+                   OnigOptionType option, OnigMatchParam* mp)
+
+   arguments
+   1-7:  same as onig_search()
+   8 mp: match parameter values (match_stack_limit, retry_limit_in_match)
+
+
 # int onig_match(regex_t* reg, const UChar* str, const UChar* end, const UChar* at,
-		 OnigRegion* region, OnigOptionType option)
+                 OnigRegion* region, OnigOptionType option)
 
   Match string and return result and matching region.
 
@@ -248,6 +345,36 @@ Oniguruma API  Version 5.9.2  2008/02/19
     ONIG_OPTION_NOTBOL       string head(str) isn't considered as begin of line
     ONIG_OPTION_NOTEOL       string end (end) isn't considered as end of line
     ONIG_OPTION_POSIX_REGION region argument is regmatch_t[] type of POSIX API.
+
+
+# int onig_match_with_param(regex_t* reg, const UChar* str, const UChar* end,
+                            const UChar* at, OnigRegion* region,
+                            OnigOptionType option, OnigMatchParam* mp)
+
+   arguments
+   1-6:  same as onig_match()
+   7 mp: match parameter values (match_stack_limit, retry_limit_in_match)
+
+
+# int onig_scan(regex_t* reg, const UChar* str, const UChar* end,
+                OnigRegion* region, OnigOptionType option,
+                int (*scan_callback)(int, int, OnigRegion*, void*),
+                void* callback_arg)
+
+  Scan string and callback with matching region.
+
+  normal return: number of matching times
+  error:         error code
+  interruption:  return value of callback function (!= 0)
+
+  arguments
+  1 reg:    regex object
+  2 str:    target string
+  3 end:    terminate address of target string
+  4 region: address for return group match range info (NULL is allowed)
+  5 option: search time option
+  6 scan_callback: callback function (defined by user)
+  7 callback_arg:  optional argument passed to callback
 
 
 # OnigRegion* onig_region_new(void)
@@ -405,9 +532,9 @@ Oniguruma API  Version 5.9.2  2008/02/19
   1 region:  match region data.
   2 at:      callback position.
 
-    ONIG_TRAVERSE_CALLBACK_AT_FIRST: callback first, then traverse childs.
-    ONIG_TRAVERSE_CALLBACK_AT_LAST:  traverse childs first, then callback.
-    ONIG_TRAVERSE_CALLBACK_AT_BOTH:  callback first, then traverse childs,
+    ONIG_TRAVERSE_CALLBACK_AT_FIRST: callback first, then traverse children.
+    ONIG_TRAVERSE_CALLBACK_AT_LAST:  traverse children first, then callback.
+    ONIG_TRAVERSE_CALLBACK_AT_BOTH:  callback first, then traverse children,
                                      and at last callback again.
 
   3 func:    callback function.
@@ -526,7 +653,7 @@ Oniguruma API  Version 5.9.2  2008/02/19
   2 op, op2, behavior, options: value of element.
 
 
-# void onig_copy_encoding(OnigEncoding to, OnigOnigEncoding from)
+# void onig_copy_encoding(OnigEncoding to, OnigEncoding from)
 
   Copy encoding.
 
@@ -581,6 +708,78 @@ Oniguruma API  Version 5.9.2  2008/02/19
 
   Set the maximum number of stack size.
   (size = 0: unlimited)
+
+  normal return: ONIG_NORMAL
+
+
+# unsigned long onig_get_retry_limit_in_match(void)
+
+  Return the limit of retry counts in matching process.
+  (default: 10000000)
+
+  normal return: limit value
+
+
+# int onig_set_retry_limit_in_match(unsigned long n)
+
+  Set the limit of retry counts in matching process.
+
+  normal return: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_progress_callout(void)
+
+  Get a function for callouts of contents in progress.
+
+
+# int onig_set_progress_callout(OnigCalloutFunc f)
+
+  Set a function for callouts of contents in progress.
+  If 0 (NULL) is set, never called in progress.
+
+  normal return: ONIG_NORMAL
+
+
+# OnigCalloutFunc onig_get_retraction_callout(void)
+
+  Get a function for callouts of contents in retraction (backtrack).
+
+
+# int onig_set_retraction_callout(OnigCalloutFunc f)
+
+  Set a function for callouts of contents in retraction (backtrack).
+  If 0 (NULL) is set, never called in retraction.
+
+  normal return: ONIG_NORMAL
+
+
+# int onig_unicode_define_user_property(const char* name, OnigCodePoint* ranges))
+
+  Define new Unicode property.
+  (This function is not thread safe.)
+
+  arguments
+  1 name:    property name (ASCII only. character ' ', '-', '_' are ignored.)
+  2 ranges:  property code point ranges
+             (first element is number of ranges.)
+
+    [num-of-ranges, 1st-range-start, 1st-range-end, 2nd-range-start... ]
+
+    * Don't destroy the ranges after having called this function.
+
+  normal return: ONIG_NORMAL
+
+
+# unsigned int onig_get_parse_depth_limit(void)
+
+  Return the maximum depth of parser recursion.
+  (default: DEFAULT_PARSE_DEPTH_LIMIT defined in regint.h. Currently 4096.)
+
+
+# int onig_set_parse_depth_limit(unsigned int depth)
+
+  Set the maximum depth of parser recursion.
+  (depth = 0: Set to the default value defined in regint.h.)
 
   normal return: ONIG_NORMAL
 

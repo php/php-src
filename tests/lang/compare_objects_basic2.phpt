@@ -18,7 +18,7 @@ $obj2 = new DateTime(("2009-02-12 12:47:41 GMT"));
 var_dump($obj1 == $obj2);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Simple test comparing two objects with different compare callback handler
 bool(false)
 ===DONE===

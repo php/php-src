@@ -69,6 +69,12 @@ listen = 127.0.0.1:9000
 ; Default Value: no set
 ; process.priority = -19
 
+; Set the process dumpable flag (PR_SET_DUMPABLE prctl) even if the process user
+; or group is differrent than the master process user. It allows to create process
+; core dump and ptrace the process for the pool user.
+; Default Value: no
+; process.dumpable = yes
+
 ; Choose how the process manager will control the number of child processes.
 ; Possible Values:
 ;   static  - a fixed number (pm.max_children) of child processes;
@@ -323,6 +329,10 @@ pm.max_spare_servers = 3
 ; Available units: s(econds)(default), m(inutes), h(ours), or d(ays)
 ; Default Value: 0
 ;request_slowlog_timeout = 0
+
+; Depth of slow log stack trace.
+; Default Value: 20
+;request_slowlog_trace_depth = 20
 
 ; The timeout for serving a single request after which the worker process will
 ; be killed. This option should be used when the 'max_execution_time' ini option

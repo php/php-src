@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | TAR archive support for Phar                                         |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -19,9 +19,9 @@
 
 #include "phar_internal.h"
 
-static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
+static uint32_t phar_tar_number(char *buf, int len) /* {{{ */
 {
-	php_uint32 num = 0;
+	uint32_t num = 0;
 	int i = 0;
 
 	while (i < len && buf[i] == ' ') {
@@ -62,7 +62,7 @@ static php_uint32 phar_tar_number(char *buf, int len) /* {{{ */
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
  * THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-static int phar_tar_octal(char *buf, php_uint32 val, int len) /* {{{ */
+static int phar_tar_octal(char *buf, uint32_t val, int len) /* {{{ */
 {
 	char *p = buf;
 	int s = len;
@@ -84,9 +84,9 @@ static int phar_tar_octal(char *buf, php_uint32 val, int len) /* {{{ */
 }
 /* }}} */
 
-static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
+static uint32_t phar_tar_checksum(char *buf, int len) /* {{{ */
 {
-	php_uint32 sum = 0;
+	uint32_t sum = 0;
 	char *end = buf + len;
 
 	while (buf != end) {
@@ -100,8 +100,8 @@ static php_uint32 phar_tar_checksum(char *buf, int len) /* {{{ */
 int phar_is_tar(char *buf, char *fname) /* {{{ */
 {
 	tar_header *header = (tar_header *) buf;
-	php_uint32 checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
-	php_uint32 ret;
+	uint32_t checksum = phar_tar_number(header->checksum, sizeof(header->checksum));
+	uint32_t ret;
 	char save[sizeof(header->checksum)], *bname;
 
 	/* assume that the first filename in a tar won't begin with <?php */
@@ -202,13 +202,13 @@ static size_t strnlen(const char *s, size_t maxlen) {
 }
 #endif
 
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error) /* {{{ */
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error) /* {{{ */
 {
 	char buf[512], *actual_alias = NULL, *p;
 	phar_entry_info entry = {0};
 	size_t pos = 0, read, totalsize;
 	tar_header *hdr;
-	php_uint32 sum1, sum2, size, old;
+	uint32_t sum1, sum2, size, old;
 	phar_archive_data *myphar, *actual;
 	int last_was_longlink = 0;
 	int linkname_len;
@@ -299,7 +299,7 @@ bail:
 		| ((((unsigned char*)(buffer))[1]) <<  8) \
 		| (((unsigned char*)(buffer))[0]))
 #else
-# define PHAR_GET_32(buffer) (php_uint32) *(buffer)
+# define PHAR_GET_32(buffer) (uint32_t) *(buffer)
 #endif
 			myphar->sig_flags = PHAR_GET_32(buf);
 			if (FAILURE == phar_verify_signature(fp, php_stream_tell(fp) - size - 512, myphar->sig_flags, buf + 8, size - 8, fname, &myphar->signature, &myphar->sig_len, error)) {
@@ -315,7 +315,7 @@ bail:
 			if (((hdr->typeflag == '\0') || (hdr->typeflag == TAR_FILE)) && size > 0) {
 				/* this is not good enough - seek succeeds even on truncated tars */
 				php_stream_seek(fp, 512, SEEK_CUR);
-				if ((uint)php_stream_tell(fp) > totalsize) {
+				if ((uint32_t)php_stream_tell(fp) > totalsize) {
 					if (error) {
 						spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 					}
@@ -383,7 +383,7 @@ bail:
 
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint)php_stream_tell(fp) > totalsize) {
+			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				efree(entry.filename);
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
@@ -570,7 +570,7 @@ bail:
 next:
 			/* this is not good enough - seek succeeds even on truncated tars */
 			php_stream_seek(fp, size, SEEK_CUR);
-			if ((uint)php_stream_tell(fp) > totalsize) {
+			if ((uint32_t)php_stream_tell(fp) > totalsize) {
 				if (error) {
 					spprintf(error, 4096, "phar error: \"%s\" is a corrupted tar file (truncated)", fname);
 				}
@@ -959,6 +959,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 	entry.tar_type = '0';
 	entry.phar = phar;
 	entry.fp_type = PHAR_MOD;
+	entry.fp = NULL;
+	entry.filename = NULL;
 
 	if (phar->is_persistent) {
 		if (error) {
@@ -977,6 +979,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 		entry.fp = php_stream_fopen_tmpfile();
 		if (entry.fp == NULL) {
+			efree(entry.filename);
 			spprintf(error, 0, "phar error: unable to create temporary file");
 			return -1;
 		}
@@ -984,6 +987,8 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
 
@@ -993,8 +998,12 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 			if (error) {
 				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
 			}
+			php_stream_close(entry.fp);
+			efree(entry.filename);
 			return EOF;
 		}
+		/* At this point the entry is saved into the manifest. The manifest destroy
+			routine will care about any resources to be freed. */
 	} else {
 		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
@@ -1230,12 +1239,12 @@ nostub:
 		}
 #ifdef WORDS_BIGENDIAN
 # define PHAR_SET_32(var, buffer) \
-	*(php_uint32 *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
+	*(uint32_t *)(var) = (((((unsigned char*)&(buffer))[3]) << 24) \
 		| ((((unsigned char*)&(buffer))[2]) << 16) \
 		| ((((unsigned char*)&(buffer))[1]) << 8) \
 		| (((unsigned char*)&(buffer))[0]))
 #else
-# define PHAR_SET_32(var, buffer) *(php_uint32 *)(var) = (php_uint32) (buffer)
+# define PHAR_SET_32(var, buffer) *(uint32_t *)(var) = (uint32_t) (buffer)
 #endif
 		PHAR_SET_32(sigbuf, phar->sig_flags);
 		PHAR_SET_32(sigbuf + 4, signature_length);

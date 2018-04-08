@@ -58,7 +58,7 @@ foreach($ao as $key=>$value) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 --> Access using MyIterator:
 string(10) "MyIterator"
 object(MyIterator)#2 (1) {

@@ -11,15 +11,20 @@ co-ordination.
 PHP welcomes pull requests to [add tests](#writing-tests), fix bugs and to
 implement RFCs. Please be sure to include tests as appropriate!
 
-If you are fixing a bug, then please submit your PR against the lowest branch
-of PHP that the bug affects, or the oldest fully supported version (the first
-green branch on
-[the supported version page](http://php.net/supported-versions.php). For
-example, at the time of writing in mid-2015, this is PHP 5.5, which corresponds
-to the `PHP-5.5` branch in Git. Please also make sure you add a link to the PR
-in the bug on [the bug tracker](https://bugs.php.net/).
+If you are fixing a bug, then please submit your PR against the lowest actively
+supported branch of PHP that the bug affects (only green branches on
+[the supported version page](http://php.net/supported-versions.php) are supported).
+For example, at the time of writing in early-2018, the lowest supported version is
+PHP 7.1, which corresponds to the `PHP-7.1` branch in Git. Please also make sure you
+add a link to the PR in the bug on [the bug tracker](https://bugs.php.net/).
 
-Pull requests to implement RFCs should be submitted against `master`.
+Pull requests implementing RFCs should be submitted against `master`.
+
+Pull requests should *never* be submitted against `PHP-x.y.z` branches, as
+these are only used for release management.
+
+If your pull request exhibits conflicts with the base branch, please resolve them
+by using `git rebase` instead of `git merge`.
 
 ## Filing bugs
 

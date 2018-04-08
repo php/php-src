@@ -17,7 +17,8 @@ var_dump(strripos($string, '</body>'));
 var_dump(mb_strripos($string, '</body>'));
 
 ?>
---EXPECTF--
+--EXPECT--
+Deprecated: The mbstring.func_overload directive is deprecated in Unknown on line 0
 int(27)
 int(27)
 int(20)

@@ -1563,8 +1563,12 @@ array(6) {
 }
 
 *** Testing var_dump() on anonymous functions ***
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 New anonymous function:  lambda_1
 string(9) "2 * 3 = 6"
+
+Deprecated: Function create_function() is deprecated in %s on line %d
 string(9) " lambda_2"
 
 *** Testing error conditions ***

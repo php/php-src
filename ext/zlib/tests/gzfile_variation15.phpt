@@ -79,7 +79,7 @@ function test_gzfile() {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   string(22) "This is a file in dir2"

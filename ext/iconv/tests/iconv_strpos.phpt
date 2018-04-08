@@ -24,6 +24,7 @@ function foo($haystk, $needle, $offset, $to_charset = false, $from_charset = fal
 	}
 }
 foo("abecdbcdabef", "bcd", -1);
+foo("abecdbcdabef", "bcd", -7);
 foo("abecdbcdabef", "bcd", 100000);
 foo("abcabcabcdabcababcdabc", "bcd", 0);
 foo("abcabcabcdabcababcdabc", "bcd", 10);
@@ -37,10 +38,10 @@ var_dump(iconv_strpos("", "string"));
 
 ?>
 --EXPECTF--
-2: %s
 bool(false)
-2: %s
 bool(false)
+int(5)
+int(5)
 2: %s
 bool(false)
 bool(false)

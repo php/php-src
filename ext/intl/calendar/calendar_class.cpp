@@ -34,6 +34,9 @@ extern "C" {
 #include <assert.h>
 }
 
+using icu::GregorianCalendar;
+using icu::Locale;
+
 /* {{{ Global variables */
 zend_class_entry *Calendar_ce_ptr;
 zend_class_entry *GregorianCalendar_ce_ptr;
@@ -154,8 +157,7 @@ static HashTable *Calendar_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	co  = Z_INTL_CALENDAR_P(object);
 	cal = co->ucal;
@@ -228,13 +230,6 @@ static void calendar_object_init(Calendar_object *co)
 {
 	intl_error_init(CALENDAR_ERROR_P(co));
 	co->ucal = NULL;
-}
-/* }}} */
-
-/* {{{ Calendar_objects_dtor */
-static void Calendar_objects_dtor(zend_object *object)
-{
-	zend_objects_destroy_object(object);
 }
 /* }}} */
 
@@ -463,18 +458,12 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlCalendar", Calendar_class_functions);
 	ce.create_object = Calendar_object_create;
 	Calendar_ce_ptr = zend_register_internal_class(&ce);
-	if (!Calendar_ce_ptr) {
-		//can't happen now without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlCalendar: class registration has failed.");
-		return;
-	}
+
 	memcpy( &Calendar_handlers, zend_get_std_object_handlers(),
 		sizeof Calendar_handlers);
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;
 	Calendar_handlers.get_debug_info = Calendar_get_debug_info;
-	Calendar_handlers.dtor_obj = Calendar_objects_dtor;
 	Calendar_handlers.free_obj = Calendar_objects_free;
 
 	/* Declare 'IntlCalendar' class constants */
@@ -492,8 +481,6 @@ void calendar_register_IntlCalendar_class(void)
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK",			UCAL_DAY_OF_WEEK);
 	CALENDAR_DECL_LONG_CONST("FIELD_DAY_OF_WEEK_IN_MONTH",	UCAL_DAY_OF_WEEK_IN_MONTH);
 	CALENDAR_DECL_LONG_CONST("FIELD_AM_PM",					UCAL_AM_PM);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
-	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR",					UCAL_HOUR);
 	CALENDAR_DECL_LONG_CONST("FIELD_HOUR_OF_DAY",			UCAL_HOUR_OF_DAY);
 	CALENDAR_DECL_LONG_CONST("FIELD_MINUTE",				UCAL_MINUTE);
@@ -535,11 +522,5 @@ void calendar_register_IntlCalendar_class(void)
 	INIT_CLASS_ENTRY(ce, "IntlGregorianCalendar", GregorianCalendar_class_functions);
 	GregorianCalendar_ce_ptr = zend_register_internal_class_ex(&ce,
 		Calendar_ce_ptr);
-	if (!GregorianCalendar_ce_ptr) {
-		//can't happen know without bigger problems before
-		php_error_docref0(NULL, E_ERROR,
-			"IntlGregorianCalendar: class registration has failed.");
-		return;
-	}
 }
 /* }}} */

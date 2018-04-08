@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -21,7 +21,6 @@
 #endif
 #include "php.h"
 #if HAVE_ZIP
-#if defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3)
 
 #include "php_streams.h"
 #include "ext/standard/file.h"
@@ -30,6 +29,9 @@
 #include "php_zip.h"
 
 #include "ext/standard/url.h"
+
+/* needed for ssize_t definition */
+#include <sys/types.h>
 
 struct php_zip_stream_data_t {
 	struct zip *za;
@@ -197,7 +199,7 @@ static int php_zip_ops_stat(php_stream *stream, php_stream_statbuf *ssb) /* {{{ 
 }
 /* }}} */
 
-php_stream_ops php_stream_zipio_ops = {
+const php_stream_ops php_stream_zipio_ops = {
 	php_zip_ops_write, php_zip_ops_read,
 	php_zip_ops_close, php_zip_ops_flush,
 	"zip",
@@ -310,6 +312,14 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 
 	za = zip_open(file_dirname, ZIP_CREATE, &err);
 	if (za) {
+		zval *tmpzval;
+
+		if (context && NULL != (tmpzval = php_stream_context_get_option(context, "zip", "password"))) {
+			if (Z_TYPE_P(tmpzval) != IS_STRING || zip_set_default_password(za, Z_STRVAL_P(tmpzval))) {
+				php_error_docref(NULL, E_WARNING, "Can't set zip password");
+			}
+		}
+
 		zf = zip_fopen(za, fragment, 0);
 		if (zf) {
 			self = emalloc(sizeof(*self));
@@ -338,7 +348,7 @@ php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper,
 }
 /* }}} */
 
-static php_stream_wrapper_ops zip_stream_wops = {
+static const php_stream_wrapper_ops zip_stream_wops = {
 	php_stream_zip_opener,
 	NULL,	/* close */
 	NULL,	/* fstat */
@@ -348,13 +358,13 @@ static php_stream_wrapper_ops zip_stream_wops = {
 	NULL,	/* unlink */
 	NULL,	/* rename */
 	NULL,	/* mkdir */
-	NULL	/* rmdir */
+	NULL,	/* rmdir */
+	NULL	/* metadata */
 };
 
-php_stream_wrapper php_stream_zip_wrapper = {
+const php_stream_wrapper php_stream_zip_wrapper = {
 	&zip_stream_wops,
 	NULL,
 	0 /* is_url */
 };
-#endif /* defined(ZEND_ENGINE_2) || defined(ZEND_ENGINE_3) */
 #endif /* HAVE_ZIP */

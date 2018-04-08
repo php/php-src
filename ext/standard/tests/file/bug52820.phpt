@@ -2,7 +2,7 @@
 Bug #52820 (writes to fopencookie FILE* not committed when seeking the stream)
 --SKIPIF--
 <?php
-if (!function_exists('leak_variable'))
+if (!function_exists('zend_leak_variable'))
    die("skip only for debug builds");
 /* unfortunately no standard function does a cast to FILE*, so we need
  * curl to test this */
@@ -33,10 +33,10 @@ echo "\nmemory stream (close after):\n";
 fclose(do_stuff("php://memory"));
 
 echo "\ntemp stream (leak):\n";
-leak_variable(do_stuff("php://temp"), true);
+zend_leak_variable(do_stuff("php://temp"));
 
 echo "\nmemory stream (leak):\n";
-leak_variable(do_stuff("php://memory"), true);
+zend_leak_variable(do_stuff("php://memory"));
 
 echo "\nDone.\n";
 --EXPECTF--

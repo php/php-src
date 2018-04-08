@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ const zend_function_entry php_xsl_xsltprocessor_class_functions[] = {
 	PHP_FALIAS(setProfiling, xsl_xsltprocessor_set_profiling, arginfo_xsl_xsltprocessor_set_profiling)
 	PHP_FALIAS(setSecurityPrefs, xsl_xsltprocessor_set_security_prefs, arginfo_xsl_xsltprocessor_set_security_prefs)
 	PHP_FALIAS(getSecurityPrefs, xsl_xsltprocessor_get_security_prefs, arginfo_xsl_xsltprocessor_get_security_prefs)
-	{NULL, NULL, NULL}
+	PHP_FE_END
 };
 
 /* {{{ php_xsl_xslt_string_to_xpathexpr()
@@ -138,7 +138,6 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	zval *value;
 	char *xpath_expr;
 	zend_string *string_key;
-	zend_ulong num_key;
 	char **params = NULL;
 	int i = 0;
 
@@ -146,7 +145,7 @@ static char **php_xsl_xslt_make_params(HashTable *parht, int xpath_params)
 	params = (char **)safe_emalloc((2 * zend_hash_num_elements(parht) + 1), sizeof(char *), 0);
 	memset((char *)params, 0, parsize);
 
-	ZEND_HASH_FOREACH_KEY_VAL(parht, num_key, string_key, value) {
+	ZEND_HASH_FOREACH_STR_KEY_VAL(parht, string_key, value) {
 		if (string_key == NULL) {
 			php_error_docref(NULL, E_WARNING, "Invalid argument or parameter array");
 			efree(params);
@@ -253,8 +252,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				} else if (type == 2) {
 					int j;
 					dom_object *domintern = (dom_object *)intern->doc;
-					array_init(&args[i]);
 					if (obj->nodesetval && obj->nodesetval->nodeNr > 0) {
+						array_init(&args[i]);
 						for (j = 0; j < obj->nodesetval->nodeNr; j++) {
 							xmlNodePtr node = obj->nodesetval->nodeTab[j];
 							zval child;
@@ -266,10 +265,10 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 								nsparent = node->_private;
 								curns = xmlNewNs(NULL, node->name, NULL);
 								if (node->children) {
-									curns->prefix = xmlStrdup((char *)node->children);
+									curns->prefix = xmlStrdup((xmlChar *)node->children);
 								}
 								if (node->children) {
-									node = xmlNewDocNode(node->doc, NULL, (char *) node->children, node->name);
+									node = xmlNewDocNode(node->doc, NULL, (xmlChar *) node->children, node->name);
 								} else {
 									node = xmlNewDocNode(node->doc, NULL, (const xmlChar *) "xmlns", node->name);
 								}
@@ -283,6 +282,8 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 							php_dom_create_object(node, &child, domintern);
 							add_next_index_zval(&args[i], &child);
 						}
+					} else {
+						ZVAL_EMPTY_ARRAY(&args[i]);
 					}
 				}
 				break;
@@ -295,7 +296,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	}
 
 	fci.size = sizeof(fci);
-	fci.function_table = EG(function_table);
 	if (fci.param_count > 0) {
 		fci.params = args;
 	} else {
@@ -320,7 +320,6 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 	xmlXPathFreeObject(obj);
 
 	ZVAL_COPY_VALUE(&fci.function_name, &handler);
-	fci.symbol_table = NULL;
 	fci.object = NULL;
 	fci.retval = &retval;
 	fci.no_separation = 0;
@@ -346,8 +345,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 				xmlNode *nodep;
 				dom_object *obj;
 				if (intern->node_list == NULL) {
-					ALLOC_HASHTABLE(intern->node_list);
-					zend_hash_init(intern->node_list, 0, NULL, ZVAL_PTR_DTOR, 0);
+					intern->node_list = zend_new_array(0);
 				}
 				Z_ADDREF(retval);
 				zend_hash_next_index_insert(intern->node_list, &retval);
@@ -401,7 +399,7 @@ PHP_FUNCTION(xsl_xsltprocessor_import_stylesheet)
 	xsl_object *intern;
 	int prevSubstValue, prevExtDtdValue, clone_docu = 0;
 	xmlNode *nodep = NULL;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	zval *cloneDocu, member, rv;
 
 	if (zend_parse_method_parameters(ZEND_NUM_ARGS(), getThis(), "Oo", &id, xsl_xsltprocessor_class_entry, &docp) == FAILURE) {
@@ -485,7 +483,7 @@ static xmlDocPtr php_xsl_apply_stylesheet(zval *id, xsl_object *intern, xsltStyl
 	char **params = NULL;
 	int clone;
 	zval *doXInclude, member, rv;
-	zend_object_handlers *std_hnd;
+	const zend_object_handlers *std_hnd;
 	FILE *f;
 	int secPrefsError = 0;
 	int secPrefsValue;
@@ -766,9 +764,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_parameter)
 				RETURN_FALSE;
 			}
 			convert_to_string_ex(entry);
-			if (Z_REFCOUNTED_P(entry)) {
-				Z_ADDREF_P(entry);
-			}
+			Z_TRY_ADDREF_P(entry);
 			zend_hash_update(intern->parameter, string_key, entry);
 		} ZEND_HASH_FOREACH_END();
 		RETURN_TRUE;
@@ -805,8 +801,7 @@ PHP_FUNCTION(xsl_xsltprocessor_get_parameter)
 	}
 	intern = Z_XSL_P(id);
 	if ((value = zend_hash_find(intern->parameter, name)) != NULL) {
-		convert_to_string_ex(value);
-		RETURN_STR_COPY(Z_STR_P(value));
+		RETURN_STR(zval_get_string(value));
 	} else {
 		RETURN_FALSE;
 	}
@@ -899,7 +894,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_profiling)
 }
 /* }}} end xsl_xsltprocessor_set_profiling */
 
-/* {{{ proto long xsl_xsltprocessor_set_security_prefs(long securityPrefs) */
+/* {{{ proto int xsl_xsltprocessor_set_security_prefs(int securityPrefs) */
 PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 {
 	zval *id;
@@ -919,7 +914,7 @@ PHP_FUNCTION(xsl_xsltprocessor_set_security_prefs)
 }
 /* }}} end xsl_xsltprocessor_set_security_prefs */
 
-/* {{{ proto long xsl_xsltprocessor_get_security_prefs() */
+/* {{{ proto int xsl_xsltprocessor_get_security_prefs() */
 PHP_FUNCTION(xsl_xsltprocessor_get_security_prefs)
 {
 	zval *id;

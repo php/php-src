@@ -155,6 +155,10 @@ float(5000000)
 float(-5000000)
 
 *** Testing floatval() on non floating types ***
+
+Notice: A non well formed numeric value encountered in %s on line 69
+
+Notice: A non well formed numeric value encountered in %s on line 70
 float(-2147483648)
 float(2147483648)
 float(%d)

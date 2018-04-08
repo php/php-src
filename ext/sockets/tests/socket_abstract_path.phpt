@@ -37,7 +37,7 @@ checktimeout($conns, 500);
 if (!socket_recv($conns, $buf, 20, 0)) die("recv");
 print_r($buf);
 ?>
---EXPECTF--
+--EXPECT--
 creating server socket
 creating client socket
 int(11)

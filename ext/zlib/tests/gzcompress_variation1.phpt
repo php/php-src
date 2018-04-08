@@ -25,7 +25,7 @@ var_dump(md5(gzcompress($output)));
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing gzcompress() : variation ***
 
 -- Testing multiple compression --

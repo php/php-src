@@ -46,6 +46,8 @@ array(4) {
 }
 
 -- Initial position: --
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 array(4) {
   [1]=>
   int(1)

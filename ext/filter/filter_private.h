@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -56,6 +56,8 @@
 #define FILTER_FLAG_NO_PRIV_RANGE           0x800000
 
 #define FILTER_FLAG_HOSTNAME               0x100000
+
+#define FILTER_FLAG_EMAIL_UNICODE          0x100000
 
 #define FILTER_VALIDATE_INT           0x0101
 #define FILTER_VALIDATE_BOOLEAN       0x0102

@@ -28,7 +28,7 @@ echo "\n-- Call to reset() --\n";
 var_dump(reset($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : basic functionality ***
 
 -- Initial Position: --

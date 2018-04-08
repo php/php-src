@@ -1,6 +1,5 @@
 --TEST--
 setcookie() tests
---DESCRIPTION--
 --INI--
 date.timezone=UTC
 --FILE--

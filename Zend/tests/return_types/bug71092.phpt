@@ -9,14 +9,14 @@ function boom(): array {
 	$data = [['id']];
 	switch ($data[0]) {
 	case ['id']:
-		return;
+		return null;
 	}
 }
 
 boom();
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Return value of boom() must be of the type array, none returned in %sbug71092.php:%d
+Fatal error: Uncaught TypeError: Return value of boom() must be of the type array, null returned in %sbug71092.php:%d
 Stack trace:
 #0 %s(%d): boom()
 #1 {main}

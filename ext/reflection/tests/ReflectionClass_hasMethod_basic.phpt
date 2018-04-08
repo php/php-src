@@ -48,7 +48,7 @@ Class C {
   }
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

@@ -85,7 +85,6 @@ $inputs = array(
 /*24*/ $fp
 );
 
-session_start();
 
 $iterator = 1;
 foreach($inputs as $input) {
@@ -94,7 +93,6 @@ foreach($inputs as $input) {
     $iterator++;
 };
 
-session_destroy();
 fclose($fp);
 echo "Done";
 ob_end_flush();

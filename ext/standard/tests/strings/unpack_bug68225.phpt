@@ -16,7 +16,7 @@ var_dump($result);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 array(1) {
   ["a"]=>
   int(1)

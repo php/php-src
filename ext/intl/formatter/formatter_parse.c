@@ -18,10 +18,11 @@
 #include "config.h"
 #endif
 
+#include "php_intl.h"
+
 #include <unicode/ustring.h>
 #include <locale.h>
 
-#include "php_intl.h"
 #include "formatter_class.h"
 #include "formatter_format.h"
 #include "formatter_parse.h"
@@ -68,8 +69,7 @@ PHP_FUNCTION( numfmt_parse )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 
@@ -97,7 +97,7 @@ PHP_FUNCTION( numfmt_parse )
 			RETVAL_DOUBLE(val_double);
 			break;
 		default:
-			php_error_docref(NULL, E_WARNING, "Unsupported format type %pd", type);
+			php_error_docref(NULL, E_WARNING, "Unsupported format type " ZEND_LONG_FMT, type);
 			RETVAL_FALSE;
 			break;
 	}
@@ -118,9 +118,9 @@ PHP_FUNCTION( numfmt_parse )
 }
 /* }}} */
 
-/* {{{ proto double NumberFormatter::parseCurrency( string $str, string $&currency[, int $&position] )
+/* {{{ proto float NumberFormatter::parseCurrency( string $str, string &$currency[, int &$position] )
  * Parse a number as currency. }}} */
-/* {{{ proto double numfmt_parse_currency( NumberFormatter $nf, string $str, string $&currency[, int $&position] )
+/* {{{ proto float numfmt_parse_currency( NumberFormatter $nf, string $str, string &$currency[, int &$position] )
  * Parse a number as currency.
  */
 PHP_FUNCTION( numfmt_parse_currency )
@@ -156,8 +156,7 @@ PHP_FUNCTION( numfmt_parse_currency )
 
 	if(zposition) {
 		ZVAL_DEREF(zposition);
-		convert_to_long(zposition);
-		position = (int32_t)Z_LVAL_P( zposition );
+		position = (int32_t)zval_get_long( zposition );
 		position_p = &position;
 	}
 

@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) != 'WIN') {
 }
 $php = getenv('TEST_PHP_EXECUTABLE');
 if (!$php) {
-	die("No php executable defined\n");
+	die("skip No php executable defined\n");
 }
 ?>
 --FILE--
@@ -49,7 +49,7 @@ while ($pipes || $writePipes) {
 
     }
     if ($w) {
-        $written = fwrite($writePipes[0], (binary)substr($stdin, $stdinOffset), 8192);
+        $written = fwrite($writePipes[0], substr($stdin, $stdinOffset), 8192);
         if (false !== $written) {
             $stdinOffset += $written;
         }

@@ -17,7 +17,7 @@ foreach ($xml->xpath("//*") as $element) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(101) "<?xml version="1.0"?>
 <code>
 	<a href="javascript:alert('1');"><strong>Item Two</strong></a>

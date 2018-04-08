@@ -2,10 +2,6 @@
 mysqli_real_escape_string() - sjis
 --SKIPIF--
 <?php
-if (version_compare(PHP_VERSION, '6.0', '==') == 1) {
-	die('skip set character set not functional with PHP 6 (fomerly PHP 6 && unicode.semantics=On)');
-}
-
 require_once('skipif.inc');
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
@@ -50,7 +46,7 @@ mysqli_close($link);
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 done!

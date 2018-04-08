@@ -42,21 +42,21 @@ bug_pecl_1295($db);
 $db->exec('DROP TABLE IF EXISTS test');
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Emulated...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "c"
   }
 }
 Native...
 array(1) {
   [0]=>
   array(1) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "c"
+    ["id"]=>
+    string(1) "c"
   }
 }
 done!

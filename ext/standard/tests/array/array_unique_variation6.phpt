@@ -33,12 +33,12 @@ var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : array with reference variables for $input argument ***
 array(2) {
   [0]=>
   int(0)
   [1]=>
-  &%unicode|string%(5) "hello"
+  &string(5) "hello"
 }
 Done

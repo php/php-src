@@ -92,7 +92,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_fetch_uint"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(8) {
   [0]=>
   int(5)
@@ -101,7 +101,7 @@ array(8) {
   [2]=>
   int(4)
   [3]=>
-  %unicode|string%(14) "33333333333333"
+  string(14) "33333333333333"
   [4]=>
   int(0)
   [5]=>

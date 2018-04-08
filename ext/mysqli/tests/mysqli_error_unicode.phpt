@@ -24,9 +24,7 @@ require_once('skipifconnectfailure.inc');
 			$host, $user, $db, $port, $socket);
 	}
 
-	if (!(version_compare(PHP_VERSION, '6.0', '==') == 1)) {
-		mysqli_query($link, "set names utf8");
-	}
+	mysqli_query($link, "set names utf8");
 
 	$tmp = mysqli_error($link);
 	if (!is_string($tmp) || ('' !== $tmp))
@@ -44,8 +42,8 @@ require_once('skipifconnectfailure.inc');
 	print "done!";
 ?>
 --EXPECTF--
-%unicode|string%(%d) "Table 'няма_такава_таблица' doesn't exist"
+string(%d) "Table 'няма_такава_таблица' doesn't exist"
 
 Warning: mysqli_error(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

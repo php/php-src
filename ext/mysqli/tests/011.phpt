@@ -56,7 +56,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS test_bind_result"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(8) {
   [0]=>
   int(19)
@@ -73,6 +73,6 @@ array(8) {
   [6]=>
   string(6) "foobar"
   [7]=>
-  %unicode|string%(11) "mysql rulez"
+  string(11) "mysql rulez"
 }
 done!

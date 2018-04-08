@@ -8,13 +8,13 @@ ini_set('ibase.default_user',$user);
 ini_set('ibase.default_password',$password);
 
 /* we need just the generated name, not the file itself */
-unlink($test_base = tempnam('/tmp',"php_ibase_test"));
+unlink($test_base = tempnam(sys_get_temp_dir(),"php_ibase_test"));
 
 function init_db()
 {
 	global $test_base, $user, $password;
 
-	$test_db = ibase_query(IBASE_CREATE, 
+	$test_db = ibase_query(IBASE_CREATE,
 		sprintf("CREATE SCHEMA '%s' USER '%s' PASSWORD '%s' DEFAULT CHARACTER SET %s",$test_base,
 		$user, $password, ($charset = ini_get('ibase.default_charset')) ? $charset : 'NONE'));
 	$tr = ibase_trans($test_db);
@@ -28,7 +28,7 @@ function init_db()
 function cleanup_db()
 {
 	global $test_base;
-    
+
 	$r = ibase_connect($test_base);
 	ibase_drop_db($r);
 }

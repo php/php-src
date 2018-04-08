@@ -97,74 +97,122 @@ echo "Done";
 *** Testing count() : usage variations ***
 
 -- Iteration 1 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 2 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 3 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 4 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 5 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 6 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 7 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 8 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 9 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 10 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(0)
 
 -- Iteration 11 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(0)
 
 -- Iteration 12 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 13 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 14 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 15 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 16 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 17 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 18 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 19 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 20 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 21 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 
 -- Iteration 22 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(0)
 
 -- Iteration 23 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(0)
 
 -- Iteration 24 --
+
+Warning: count(): Parameter must be an array or an object that implements Countable in %s on line %d
 int(1)
 Done

@@ -1,11 +1,11 @@
 --TEST--
 SQLite3::createAggregate() test
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require_once(__DIR__ . '/skipif.inc'); ?>
 --FILE--
 <?php
 
-require_once(dirname(__FILE__) . '/new_db.inc');
+require_once(__DIR__ . '/new_db.inc');
 
 function sum_list_step($context, $rows, $string) {
 	if (empty($context))
@@ -39,7 +39,7 @@ echo "Closing database\n";
 var_dump($db->close());
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Creating Table
 bool(true)
 INSERT into table

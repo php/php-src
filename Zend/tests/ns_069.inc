@@ -1,3 +1,3 @@
 <?php
 
-var_dump((binary)__NAMESPACE__);
+var_dump(__NAMESPACE__);

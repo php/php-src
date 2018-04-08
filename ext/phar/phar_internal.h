@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | phar php single-file executable PHP extension                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -55,13 +55,11 @@
 #include "TSRM/tsrm_strtok_r.h"
 #endif
 #include "Zend/zend_virtual_cwd.h"
-#if HAVE_SPL
 #include "ext/spl/spl_array.h"
 #include "ext/spl/spl_directory.h"
 #include "ext/spl/spl_engine.h"
 #include "ext/spl/spl_exceptions.h"
 #include "ext/spl/spl_iterators.h"
-#endif
 #include "php_phar.h"
 #ifdef PHAR_HASH_OK
 #include "ext/hash/php_hash.h"
@@ -157,28 +155,28 @@ ZEND_BEGIN_MODULE_GLOBALS(phar)
 	int         require_hash;
 	int         request_done;
 	int         request_ends;
-	void        (*orig_fopen)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_get_contents)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_file)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_link)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_dir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_opendir)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_file_exists)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileperms)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileinode)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filesize)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileowner)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filegroup)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_fileatime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filemtime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filectime)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_filetype)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_writable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_readable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_is_executable)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_lstat)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_readfile)(INTERNAL_FUNCTION_PARAMETERS);
-	void        (*orig_stat)(INTERNAL_FUNCTION_PARAMETERS);
+	zif_handler orig_fopen;
+	zif_handler orig_file_get_contents;
+	zif_handler orig_is_file;
+	zif_handler orig_is_link;
+	zif_handler orig_is_dir;
+	zif_handler orig_opendir;
+	zif_handler orig_file_exists;
+	zif_handler orig_fileperms;
+	zif_handler orig_fileinode;
+	zif_handler orig_filesize;
+	zif_handler orig_fileowner;
+	zif_handler orig_filegroup;
+	zif_handler orig_fileatime;
+	zif_handler orig_filemtime;
+	zif_handler orig_filectime;
+	zif_handler orig_filetype;
+	zif_handler orig_is_writable;
+	zif_handler orig_is_readable;
+	zif_handler orig_is_executable;
+	zif_handler orig_lstat;
+	zif_handler orig_readfile;
+	zif_handler orig_stat;
 	/* used for includes with . in them inside front controller */
 	char*       cwd;
 	int         cwd_len;
@@ -201,19 +199,10 @@ ZEND_EXTERN_MODULE_GLOBALS(phar)
 ZEND_TSRMLS_CACHE_EXTERN()
 #endif
 
-#ifndef php_uint16
-# if SIZEOF_SHORT == 2
-#  define php_uint16 unsigned short
-# else
-#  define php_uint16 uint16_t
-# endif
-#endif
 #include "pharzip.h"
 
-#if HAVE_SPL
 typedef union _phar_archive_object  phar_archive_object;
 typedef union _phar_entry_object    phar_entry_object;
-#endif
 
 /*
  * used in phar_entry_info->fp_type to
@@ -233,17 +222,17 @@ enum phar_fp_type {
 /* entry for one file in a phar file */
 typedef struct _phar_entry_info {
 	/* first bytes are exactly as in file */
-	php_uint32               uncompressed_filesize;
-	php_uint32               timestamp;
-	php_uint32               compressed_filesize;
-	php_uint32               crc32;
-	php_uint32               flags;
+	uint32_t                 uncompressed_filesize;
+	uint32_t                 timestamp;
+	uint32_t                 compressed_filesize;
+	uint32_t                 crc32;
+	uint32_t                 flags;
 	/* remainder */
 	/* when changing compression, save old flags in case fp is NULL */
-	php_uint32               old_flags;
+	uint32_t                 old_flags;
 	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	php_uint32               filename_len;
+	uint32_t                 filename_len;
 	char                     *filename;
 	enum phar_fp_type        fp_type;
 	/* offset within original phar file of the file contents */
@@ -261,7 +250,7 @@ typedef struct _phar_entry_info {
 	char                     *link; /* symbolic link to another file */
 	char                     tar_type;
 	/* position in the manifest */
-	uint                     manifest_pos;
+	uint32_t                     manifest_pos;
 	/* for stat */
 	unsigned short           inode;
 
@@ -299,19 +288,19 @@ struct _phar_archive_data {
 	HashTable                virtual_dirs;
 	/* hash of mounted directory paths */
 	HashTable                mounted_dirs;
-	php_uint32               flags;
-	php_uint32               min_timestamp;
-	php_uint32               max_timestamp;
+	uint32_t                 flags;
+	uint32_t                 min_timestamp;
+	uint32_t                 max_timestamp;
 	php_stream               *fp;
 	/* decompressed file contents are stored here */
 	php_stream               *ufp;
 	int                      refcount;
-	php_uint32               sig_flags;
+	uint32_t                 sig_flags;
 	int                      sig_len;
 	char                     *signature;
 	zval                     metadata;
 	int                      metadata_len; /* only used for cached manifests */
-	uint                     phar_pos;
+	uint32_t                     phar_pos;
 	/* if 1, then this alias was manually specified by the user and is not a permanent alias */
 	unsigned int             is_temporary_alias:1;
 	unsigned int             is_modified:1;
@@ -473,21 +462,17 @@ typedef struct _phar_entry_data {
 	phar_entry_info          *internal_file;
 } phar_entry_data;
 
-#if HAVE_SPL
 /* archive php object */
 union _phar_archive_object {
 	spl_filesystem_object    spl;
 	phar_archive_data        *archive;
 };
-#endif
 
-#if HAVE_SPL
 /* entry php object */
 union _phar_entry_object {
 	spl_filesystem_object    spl;
 	phar_entry_info          *entry;
 };
-#endif
 
 #ifndef PHAR_MAIN
 extern zend_string *(*phar_save_resolve_path)(const char *filename, int filename_len);
@@ -544,7 +529,7 @@ void phar_object_init(void);
 void phar_destroy_phar_data(phar_archive_data *phar);
 
 int phar_open_entry_file(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_postprocess_file(phar_entry_data *idata, php_uint32 crc32, char **error, int process_zip);
+int phar_postprocess_file(phar_entry_data *idata, uint32_t crc32, char **error, int process_zip);
 int phar_open_from_filename(char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, char **error);
 int phar_open_or_create_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
 int phar_create_or_parse_filename(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
@@ -552,7 +537,7 @@ int phar_open_executed_filename(char *alias, int alias_len, char **error);
 int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len);
 int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error);
 int phar_open_parsed_phar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error);
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error);
 int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, int *signature_length, char **error);
 
 /* utility functions */
@@ -566,7 +551,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 zend_string *phar_find_in_include_path(char *file, int file_len, phar_archive_data **pphar);
 char *phar_fix_filepath(char *path, int *new_len, int use_cwd);
 phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry, char **error);
-int phar_parse_metadata(char **buffer, zval *metadata, php_uint32 zip_metadata_len);
+int phar_parse_metadata(char **buffer, zval *metadata, uint32_t zip_metadata_len);
 void destroy_phar_manifest_entry(zval *zv);
 int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_off_t position, int follow_links);
 php_stream *phar_get_efp(phar_entry_info *entry, int follow_links);
@@ -580,7 +565,7 @@ int phar_copy_on_write(phar_archive_data **pphar);
 
 /* tar functions in tar.c */
 int phar_is_tar(char *buf, char *fname);
-int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, php_uint32 compression, char **error);
+int phar_parse_tarfile(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, phar_archive_data** pphar, int is_data, uint32_t compression, char **error);
 int phar_open_or_create_tar(char *fname, int fname_len, char *alias, int alias_len, int is_data, int options, phar_archive_data** pphar, char **error);
 int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int defaultstub, char **error);
 
@@ -591,7 +576,7 @@ int phar_zip_flush(phar_archive_data *archive, char *user_stub, zend_long len, i
 
 #ifdef PHAR_MAIN
 static int phar_open_from_fp(php_stream* fp, char *fname, int fname_len, char *alias, int alias_len, int options, phar_archive_data** pphar, int is_data, char **error);
-extern php_stream_wrapper php_stream_phar_wrapper;
+extern const php_stream_wrapper php_stream_phar_wrapper;
 #else
 extern HashTable cached_phars;
 extern HashTable cached_alias;

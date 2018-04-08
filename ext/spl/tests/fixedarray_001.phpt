@@ -45,7 +45,7 @@ $a[0] = "valueNew";
 var_dump($b[0]);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Exception: Index invalid or out of range
 Exception: Index invalid or out of range
 Exception: Index invalid or out of range

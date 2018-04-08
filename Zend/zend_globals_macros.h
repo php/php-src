@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -68,34 +68,6 @@ extern ZEND_API zend_ini_scanner_globals ini_scanner_globals;
 
 END_EXTERN_C()
 
-/* For limited downwards source compatibility */
-#define CLS_FETCH()
-#define ELS_FETCH()
-#define ALS_FETCH()
-#define PLS_FETCH()
-#define SLS_FETCH()
-#define CLS_D
-#define ELS_D
-#define ALS_D
-#define PLS_D
-#define SLS_D
-#define CLS_DC
-#define ELS_DC
-#define ALS_DC
-#define PLS_DC
-#define SLS_DC
-#define CLS_C
-#define ELS_C
-#define ALS_C
-#define PLS_C
-#define SLS_C
-#define CLS_CC
-#define ELS_CC
-#define ALS_CC
-#define PLS_CC
-#define SLS_CC
-
-
 #endif /* ZEND_GLOBALS_MACROS_H */
 
 /*
@@ -104,4 +76,6 @@ END_EXTERN_C()
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

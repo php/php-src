@@ -10,7 +10,8 @@ var_dump($func());
 var_dump($func());
 var_dump($func());
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
 int(0)
 int(1)
 int(2)

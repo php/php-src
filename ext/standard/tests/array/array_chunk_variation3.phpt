@@ -241,7 +241,7 @@ array(1) {
 
 -- Iteration 16 --
 
-Warning: array_chunk() expects parameter 3 to be boolean, object given in %s on line %d
+Warning: array_chunk() expects parameter 3 to be bool, object given in %s on line %d
 NULL
 
 -- Iteration 17 --

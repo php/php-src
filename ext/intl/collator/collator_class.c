@@ -35,13 +35,6 @@ static zend_object_handlers Collator_handlers;
  * Auxiliary functions needed by objects of 'Collator' class
  */
 
-/* {{{ Collator_objects_dtor */
-static void Collator_objects_dtor(zend_object *object )
-{
-	zend_objects_destroy_object(object );
-}
-/* }}} */
-
 /* {{{ Collator_objects_free */
 void Collator_objects_free(zend_object *object )
 {
@@ -56,9 +49,7 @@ void Collator_objects_free(zend_object *object )
 /* {{{ Collator_object_create */
 zend_object *Collator_object_create(zend_class_entry *ce )
 {
-	Collator_object*     intern;
-
-	intern = ecalloc(1, sizeof(Collator_object) + zend_object_properties_size(ce));
+	Collator_object *intern = zend_object_alloc(sizeof(Collator_object), ce);
 	intl_error_init(COLLATOR_ERROR_P(intern));
 	zend_object_std_init(&intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -105,7 +96,7 @@ ZEND_END_ARG_INFO()
  * Every 'Collator' class method has an entry in this table
  */
 
-zend_function_entry Collator_class_functions[] = {
+static const zend_function_entry Collator_class_functions[] = {
 	PHP_ME( Collator, __construct, collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY( create, ZEND_FN( collator_create ), collator_1_arg, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( compare, ZEND_FN( collator_compare ), collator_2_args )
@@ -142,7 +133,6 @@ void collator_register_Collator_class( void )
 	   for which we don't have the place to keep */
 	Collator_handlers.offset = XtOffsetOf(Collator_object, zo);
 	Collator_handlers.clone_obj = NULL;
-	Collator_handlers.dtor_obj = Collator_objects_dtor;
 	Collator_handlers.free_obj = Collator_objects_free;
 
 	/* Declare 'Collator' class properties. */

@@ -21,7 +21,7 @@ if test "$PHP_SIMPLEXML" != "no"; then
     PHP_INSTALL_HEADERS([ext/simplexml/php_simplexml.h ext/simplexml/php_simplexml_exports.h])
     PHP_SUBST(SIMPLEXML_SHARED_LIBADD)
   ], [
-    AC_MSG_ERROR([xml2-config not found. Please check your libxml2 installation.])
+    AC_MSG_ERROR([libxml2 not found. Please check your libxml2 installation.])
   ])
   PHP_ADD_EXTENSION_DEP(simplexml, libxml)
   PHP_ADD_EXTENSION_DEP(simplexml, spl, true)

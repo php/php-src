@@ -49,7 +49,7 @@ var_dump(ob_get_contents());
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ob_get_contents() : basic functionality ***
 
 -- Testing ob_get_contents() function with Zero arguments --

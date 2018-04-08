@@ -32,7 +32,7 @@ unlink($outFile);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing mail() : send email without additional headers ***
 bool(true)
 To: user@company.com

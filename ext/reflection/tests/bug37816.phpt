@@ -23,6 +23,6 @@ catch (Exception $e)
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Caught: Cannot access non-public member TestClass::p
 ===DONE===

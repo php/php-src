@@ -34,7 +34,7 @@ array(1) {
   string(2) "-1"
 }
 
-Warning: mbereg_search_init() expects parameter 3 to be %binary_string_optional%, array given in %s on line %d
+Warning: mbereg_search_init() expects parameter 3 to be string, array given in %s on line %d
 int(-1)
 int(-1)
 array(1) {

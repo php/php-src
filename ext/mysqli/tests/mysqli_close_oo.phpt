@@ -24,13 +24,13 @@ require_once('skipifconnectfailure.inc');
 	if (true !== $tmp)
 		printf("[003] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_null($tmp = @$mysqli->close()))
-		printf("[004] Expecting NULL got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->close()))
+		printf("[004] Expecting false got %s/%s\n", gettype($tmp), $tmp);
 
-	if (!is_null($tmp = @$mysqli->query("SELECT 1")))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->query("SELECT 1")))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

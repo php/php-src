@@ -81,7 +81,7 @@ sleep(2);
 /* filemtime + 2 & filectime + 2 */
 echo "\n-- Checking different times, after writing into the file --\n";
 $file_write_handle = fopen($file_name, "w");
-fwrite($file_write_handle, b"Hello, world");
+fwrite($file_write_handle, "Hello, world");
 fclose($file_write_handle);
 stat_fn($file_name);
 sleep(2);

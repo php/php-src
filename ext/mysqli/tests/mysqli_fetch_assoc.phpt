@@ -60,8 +60,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_free_result($res);
 
-	if (NULL !== ($tmp = mysqli_fetch_assoc($res)))
-		printf("[008] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_fetch_assoc($res)))
+		printf("[008] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	mysqli_close($link);
 
@@ -74,45 +74,45 @@ require_once('skipifconnectfailure.inc');
 --EXPECTF--
 [005]
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 [006]
 NULL
 [008]
 array(15) {
-  [%u|b%"a"]=>
-  %unicode|string%(1) "2"
-  [%u|b%"c"]=>
-  %unicode|string%(1) "3"
-  [%u|b%"C"]=>
-  %unicode|string%(1) "4"
-  [%u|b%"d"]=>
+  ["a"]=>
+  string(1) "2"
+  ["c"]=>
+  string(1) "3"
+  ["C"]=>
+  string(1) "4"
+  ["d"]=>
   NULL
-  [%u|b%"e"]=>
-  %unicode|string%(1) "1"
+  ["e"]=>
+  string(1) "1"
   [-1]=>
-  %unicode|string%(1) "5"
+  string(1) "5"
   [-10]=>
-  %unicode|string%(1) "6"
+  string(1) "6"
   [-100]=>
-  %unicode|string%(1) "7"
+  string(1) "7"
   [-1000]=>
-  %unicode|string%(1) "8"
+  string(1) "8"
   [10000]=>
-  %unicode|string%(1) "9"
+  string(1) "9"
   [100000]=>
-  %unicode|string%(1) "a"
+  string(1) "a"
   [1000000]=>
-  %unicode|string%(1) "b"
+  string(1) "b"
   [9]=>
-  %unicode|string%(1) "d"
-  [%u|b%"01"]=>
-  %unicode|string%(1) "e"
-  [%u|b%"-02"]=>
-  %unicode|string%(1) "f"
+  string(1) "d"
+  ["01"]=>
+  string(1) "e"
+  ["-02"]=>
+  string(1) "f"
 }
 
 Warning: mysqli_fetch_assoc(): Couldn't fetch mysqli_result in %s on line %d

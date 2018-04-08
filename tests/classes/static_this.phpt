@@ -28,12 +28,4 @@ TestClass::Test2(new stdClass);
 ?>
 ===DONE===
 --EXPECTF--
-
-Notice: Undefined variable: this in %sstatic_this.php on line %d
-NULL
-
-Notice: Undefined variable: this in %sstatic_this.php on line %d
-NULL
-object(stdClass)#%d (0) {
-}
-===DONE===
+Fatal error: Cannot use $this as parameter in %sstatic_this.php on line 16

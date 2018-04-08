@@ -68,14 +68,14 @@ Create a temporary mailbox and add 1 msgs
 
 -- All possible arguments --
 -- Option is FT_UID --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 -- Option is FT_PEEK --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 Seen Flag: int(%d)
 -- Option is FT_INTERNAL --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 
 -- Mandatory arguments --
-%unicode|string%(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
+string(36) "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy"
 Seen Flag: int(%d)
 ===DONE===

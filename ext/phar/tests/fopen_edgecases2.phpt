@@ -2,7 +2,6 @@
 Phar: test edge cases of fopen() function interception #2
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(phpversion(), '6.0', '>=')) die('skip parameter parsing changed in 6.0'); ?>
 --INI--
 phar.readonly=0
 --FILE--
@@ -13,14 +12,14 @@ $pname = 'phar://' . $fname;
 
 fopen(array(), 'r');
 chdir(dirname(__FILE__));
-file_put_contents($fname, b"blah\n");
-file_put_contents("foob", b"test\n");
+file_put_contents($fname, "blah\n");
+file_put_contents("foob", "test\n");
 $a = fopen($fname, 'rb');
 echo fread($a, 1000);
 fclose($a);
 unlink($fname);
 mkdir($pname . '/oops');
-file_put_contents($pname . '/foo/hi', b'<?php
+file_put_contents($pname . '/foo/hi', '<?php
 $context = stream_context_create();
 $a = fopen("foob", "rb", false, $context);
 echo fread($a, 1000);

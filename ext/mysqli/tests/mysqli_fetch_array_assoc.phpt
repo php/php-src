@@ -31,19 +31,19 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 [002]
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 [004]
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 done!

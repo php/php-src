@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,10 +41,7 @@
 #include "php_string.h"
 
 #ifdef PHP_WIN32
-typedef void (WINAPI *PGNSI)(LPSYSTEM_INFO);
-typedef BOOL (WINAPI *PGPI)(DWORD, DWORD, DWORD, DWORD, PDWORD);
 # include "winver.h"
-
 #endif
 
 #define SECTION(name)	if (!sapi_module.phpinfo_as_text) { \
@@ -191,9 +188,9 @@ static int _display_module_info_def(zval *el) /* {{{ */
 
 /* {{{ php_print_gpcse_array
  */
-static void php_print_gpcse_array(char *name, uint name_length)
+static void php_print_gpcse_array(char *name, uint32_t name_length)
 {
-	zval *data, *tmp, tmp2;
+	zval *data, *tmp;
 	zend_string *string_key;
 	zend_ulong num_key;
 	zend_string *key;
@@ -229,33 +226,29 @@ static void php_print_gpcse_array(char *name, uint name_length)
 			}
 			if (Z_TYPE_P(tmp) == IS_ARRAY) {
 				if (!sapi_module.phpinfo_as_text) {
+					zend_string *str = zend_print_zval_r_to_str(tmp, 0);
 					php_info_print("<pre>");
-					zend_print_zval_r_ex((zend_write_func_t) php_info_print_html_esc, tmp, 0);
+					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
+					zend_string_release(str);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}
 			} else {
-				ZVAL_COPY_VALUE(&tmp2, tmp);
-				if (Z_TYPE(tmp2) != IS_STRING) {
-					tmp = NULL;
-					zval_copy_ctor(&tmp2);
-					convert_to_string(&tmp2);
-				}
+				zend_string *tmp2;
+				zend_string *str = zval_get_tmp_string(tmp, &tmp2);
 
 				if (!sapi_module.phpinfo_as_text) {
-					if (Z_STRLEN(tmp2) == 0) {
+					if (ZSTR_LEN(str) == 0) {
 						php_info_print("<i>no value</i>");
 					} else {
-						php_info_print_html_esc(Z_STRVAL(tmp2), Z_STRLEN(tmp2));
+						php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					}
 				} else {
-					php_info_print(Z_STRVAL(tmp2));
+					php_info_print(ZSTR_VAL(str));
 				}
 
-				if (!tmp) {
-					zval_dtor(&tmp2);
-				}
+				zend_tmp_string_release(tmp2);
 			}
 			if (!sapi_module.phpinfo_as_text) {
 				php_info_print("</td></tr>\n");
@@ -293,19 +286,12 @@ char* php_get_windows_name()
 {
 	OSVERSIONINFOEX osvi = EG(windows_version_info);
 	SYSTEM_INFO si;
-	PGNSI pGNSI;
-	PGPI pGPI;
 	DWORD dwType;
 	char *major = NULL, *sub = NULL, *retval;
 
 	ZeroMemory(&si, sizeof(SYSTEM_INFO));
 
-	pGNSI = (PGNSI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetNativeSystemInfo");
-	if(NULL != pGNSI) {
-		pGNSI(&si);
-	} else {
-		GetSystemInfo(&si);
-	}
+	GetNativeSystemInfo(&si);
 
 	if (VER_PLATFORM_WIN32_NT==osvi.dwPlatformId && osvi.dwMajorVersion >= 10) {
 		if (osvi.dwMajorVersion == 10) {
@@ -335,8 +321,8 @@ char* php_get_windows_name()
 				/* could be Windows 8/Windows Server 2012, could be Windows 8.1/Windows Server 2012 R2 */
 				/* XXX and one more X - the above comment is true if no manifest is used for two cases:
 					- if the PHP build doesn't use the correct manifest
-					- if PHP DLL loaded under some binary that doesn't use the correct manifest 
-					
+					- if PHP DLL loaded under some binary that doesn't use the correct manifest
+
 					So keep the handling here as is for now, even if we know 6.2 is win8 and nothing else, and think about an improvement. */
 				OSVERSIONINFOEX osvi81;
 				DWORDLONG dwlConditionMask = 0;
@@ -378,8 +364,8 @@ char* php_get_windows_name()
 				major = "Unknown Windows version";
 			}
 
-			pGPI = (PGPI) GetProcAddress(GetModuleHandle("kernel32.dll"), "GetProductInfo");
-			pGPI(6, 0, 0, 0, &dwType);
+			/* No return value check, as it can only fail if the input parameters are broken (which we manually supply) */
+			GetProductInfo(6, 0, 0, 0, &dwType);
 
 			switch (dwType) {
 				case PRODUCT_ULTIMATE:
@@ -741,30 +727,6 @@ PHPAPI zend_string *php_get_uname(char mode)
 	if (uname((struct utsname *)&buf) == -1) {
 		php_uname = PHP_UNAME;
 	} else {
-#ifdef NETWARE
-		if (mode == 's') {
-			php_uname = buf.sysname;
-		} else if (mode == 'r') {
-			snprintf(tmp_uname, sizeof(tmp_uname), "%d.%d.%d",
-					 buf.netware_major, buf.netware_minor, buf.netware_revision);
-			php_uname = tmp_uname;
-		} else if (mode == 'n') {
-			php_uname = buf.servername;
-		} else if (mode == 'v') {
-			snprintf(tmp_uname, sizeof(tmp_uname), "libc-%d.%d.%d #%d",
-					 buf.libmajor, buf.libminor, buf.librevision, buf.libthreshold);
-			php_uname = tmp_uname;
-		} else if (mode == 'm') {
-			php_uname = buf.machine;
-		} else { /* assume mode == 'a' */
-			snprintf(tmp_uname, sizeof(tmp_uname), "%s %s %d.%d.%d libc-%d.%d.%d #%d %s",
-					 buf.sysname, buf.servername,
-					 buf.netware_major, buf.netware_minor, buf.netware_revision,
-					 buf.libmajor, buf.libminor, buf.librevision, buf.libthreshold,
-					 buf.machine);
-			php_uname = tmp_uname;
-		}
-#else
 		if (mode == 's') {
 			php_uname = buf.sysname;
 		} else if (mode == 'r') {
@@ -781,7 +743,6 @@ PHPAPI zend_string *php_get_uname(char mode)
 					 buf.machine);
 			php_uname = tmp_uname;
 		}
-#endif /* NETWARE */
 	}
 #else
 	php_uname = PHP_UNAME;
@@ -799,7 +760,7 @@ PHPAPI void php_print_info_htmlhead(void)
 	php_info_print("<html xmlns=\"http://www.w3.org/1999/xhtml\">");
 	php_info_print("<head>\n");
 	php_info_print_style();
-	php_info_print("<title>phpinfo()</title>");
+	php_info_printf("<title>PHP %s - phpinfo()</title>", PHP_VERSION);
 	php_info_print("<meta name=\"ROBOTS\" content=\"NOINDEX,NOFOLLOW,NOARCHIVE\" />");
 	php_info_print("</head>\n");
 	php_info_print("<body><div class=\"center\">\n");
@@ -909,6 +870,7 @@ PHPAPI void php_print_info(int flag)
 
 #ifdef ZTS
 		php_info_print_table_row(2, "Thread Safety", "enabled" );
+		php_info_print_table_row(2, "Thread API", tsrm_api_name() );
 #else
 		php_info_print_table_row(2, "Thread Safety", "disabled" );
 #endif
@@ -1300,9 +1262,10 @@ PHP_FUNCTION(phpinfo)
 {
 	zend_long flag = PHP_INFO_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	/* Andale!  Andale!  Yee-Hah! */
 	php_output_start_default();
@@ -1321,9 +1284,10 @@ PHP_FUNCTION(phpversion)
 	char *ext_name = NULL;
 	size_t ext_name_len = 0;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &ext_name, &ext_name_len) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(ext_name, ext_name_len)
+	ZEND_PARSE_PARAMETERS_END();
 
 	if (!ext_name) {
 		RETURN_STRING(PHP_VERSION);
@@ -1344,9 +1308,10 @@ PHP_FUNCTION(phpcredits)
 {
 	zend_long flag = PHP_CREDITS_ALL;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|l", &flag) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_LONG(flag)
+	ZEND_PARSE_PARAMETERS_END();
 
 	php_print_credits((int)flag);
 	RETURN_TRUE;
@@ -1377,9 +1342,11 @@ PHP_FUNCTION(php_uname)
 	char *mode = "a";
 	size_t modelen = sizeof("a")-1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s", &mode, &modelen) == FAILURE) {
-		return;
-	}
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(mode, modelen)
+	ZEND_PARSE_PARAMETERS_END();
+
 	RETURN_STR(php_get_uname(*mode));
 }
 
@@ -1393,7 +1360,7 @@ PHP_FUNCTION(php_ini_scanned_files)
 		return;
 	}
 
-	if (strlen(PHP_CONFIG_FILE_SCAN_DIR) && php_ini_scanned_files) {
+	if (php_ini_scanned_files) {
 		RETURN_STRING(php_ini_scanned_files);
 	} else {
 		RETURN_FALSE;

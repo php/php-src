@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -207,10 +207,10 @@
 		AA(v, l, r); \
 	}
 
-static inline void Gost(PHP_GOST_CTX *context, php_hash_uint32 data[8])
+static inline void Gost(PHP_GOST_CTX *context, uint32_t data[8])
 {
 	int i;
-	php_hash_uint32 l, r, t, key[8], u[8], v[8], w[8], s[8], *h = context->state, *m = data;
+	uint32_t l, r, t, key[8], u[8], v[8], w[8], s[8], *h = context->state, *m = data;
 
 	memcpy(u, context->state, sizeof(u));
 	memcpy(v, data, sizeof(v));
@@ -227,11 +227,11 @@ static inline void Gost(PHP_GOST_CTX *context, php_hash_uint32 data[8])
 static inline void GostTransform(PHP_GOST_CTX *context, const unsigned char input[32])
 {
 	int i, j;
-	php_hash_uint32 data[8], temp = 0;
+	uint32_t data[8], temp = 0;
 
 	for (i = 0, j = 0; i < 8; ++i, j += 4) {
-		data[i] =	((php_hash_uint32) input[j]) | (((php_hash_uint32) input[j + 1]) << 8) |
-					(((php_hash_uint32) input[j + 2]) << 16) | (((php_hash_uint32) input[j + 3]) << 24);
+		data[i] =	((uint32_t) input[j]) | (((uint32_t) input[j + 1]) << 8) |
+					(((uint32_t) input[j + 2]) << 16) | (((uint32_t) input[j + 3]) << 24);
 		context->state[i + 8] += data[i] + temp;
 		temp = context->state[i + 8] < data[i] ? 1 : (context->state[i + 8] == data[i] ? temp : 0);
 	}
@@ -251,7 +251,7 @@ PHP_HASH_API void PHP_GOSTInitCrypto(PHP_GOST_CTX *context)
 	context->tables = &tables_crypto;
 }
 
-static const php_hash_uint32 MAX32 = 0xffffffffLU;
+static const uint32_t MAX32 = 0xffffffffLU;
 
 PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *input, size_t len)
 {
@@ -265,7 +265,7 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 
 	if (context->length + len < 32) {
 		memcpy(&context->buffer[context->length], input, len);
-		context->length += len;
+		context->length += (unsigned char)len;
 	} else {
 		size_t i = 0, r = (context->length + len) % 32;
 
@@ -281,13 +281,13 @@ PHP_HASH_API void PHP_GOSTUpdate(PHP_GOST_CTX *context, const unsigned char *inp
 
 		memcpy(context->buffer, input + i, r);
 		ZEND_SECURE_ZERO(&context->buffer[r], 32 - r);
-		context->length = r;
+		context->length = (unsigned char)r;
 	}
 }
 
 PHP_HASH_API void PHP_GOSTFinal(unsigned char digest[32], PHP_GOST_CTX *context)
 {
-	php_hash_uint32 i, j, l[8] = {0};
+	uint32_t i, j, l[8] = {0};
 
 	if (context->length) {
 		GostTransform(context, context->buffer);
@@ -315,7 +315,8 @@ const php_hash_ops php_hash_gost_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
-	sizeof(PHP_GOST_CTX)
+	sizeof(PHP_GOST_CTX),
+	1
 };
 
 const php_hash_ops php_hash_gost_crypto_ops = {
@@ -325,7 +326,8 @@ const php_hash_ops php_hash_gost_crypto_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	32,
-	sizeof(PHP_GOST_CTX)
+	sizeof(PHP_GOST_CTX),
+	1
 };
 
 /*

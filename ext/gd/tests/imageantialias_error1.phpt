@@ -6,7 +6,6 @@ Guilherme Blanco <guilhermeblanco [at] hotmail [dot] com>
 --SKIPIF--
 <?php 
 if (!extension_loaded("gd")) die("skip GD not present");
-if (!GD_BUNDLED) die("skip requires bundled GD library\n");
 ?>
 --FILE--
 <?php

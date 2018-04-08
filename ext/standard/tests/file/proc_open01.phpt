@@ -18,7 +18,7 @@ if ($proc === false) {
 }
 var_dump($pipes);
 stream_set_blocking($pipes[1], FALSE);
-$test_string = b"yay!\n";
+$test_string = "yay!\n";
 fwrite($pipes[0], $test_string);
 fflush($pipes[0]);
 fclose($pipes[0]);
@@ -57,7 +57,7 @@ array(2) {
   [1]=>
   resource(%d) of type (stream)
 }
-%unicode|string%(5) "yay!
+string(5) "yay!
 "
 array(3) {
   [0]=>

@@ -1,7 +1,7 @@
 
 version: "{branch}.build.{build}"
 
-image: Visual Studio 2015
+image: Visual Studio 2017
 
 branches:
         except:
@@ -18,13 +18,13 @@ clone_depth: 64
 
 cache:
         - c:\build-cache
-        - c:\build-cache\sdk -> .appveyor.yml
 
 environment:
         PHP_BUILD_CACHE_BASE_DIR: c:\build-cache  
         PHP_BUILD_OBJ_DIR: c:\obj
         PHP_BUILD_CACHE_SDK_DIR: c:\build-cache\sdk
-        PHP_BUILD_SDK_BRANCH: php-sdk-2.0.9
+        PHP_BUILD_SDK_BRANCH: php-sdk-2.1.3
+        PHP_BUILD_CRT: vc15
         # ext and env setup for tests
         #MYSQL_TEST_PASSWD: Password12!
         #MYSQL_TEST_USER: root
@@ -43,7 +43,8 @@ environment:
 services:
         # the setup scripts have to be touched, once some other db version is used
         - mysql
-        - postgresql96
+        - postgresql101
+        - mssql2017
 
 platform:
         - x64

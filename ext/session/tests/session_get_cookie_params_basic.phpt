@@ -30,7 +30,7 @@ var_dump(session_get_cookie_params());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(5) {
   ["lifetime"]=>
@@ -44,7 +44,7 @@ array(5) {
   ["httponly"]=>
   bool(false)
 }
-NULL
+bool(true)
 array(5) {
   ["lifetime"]=>
   int(3600)
@@ -57,7 +57,7 @@ array(5) {
   ["httponly"]=>
   bool(false)
 }
-NULL
+bool(true)
 array(5) {
   ["lifetime"]=>
   int(1234567890)

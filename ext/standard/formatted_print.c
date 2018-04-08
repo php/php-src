@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,8 +52,8 @@
 # define PRINTF_DEBUG(arg)
 #endif
 
-static char hexchars[] = "0123456789abcdef";
-static char HEXCHARS[] = "0123456789ABCDEF";
+static const char hexchars[] = "0123456789abcdef";
+static const char HEXCHARS[] = "0123456789ABCDEF";
 
 /* php_spintf_appendchar() {{{ */
 inline static void
@@ -87,7 +87,7 @@ php_sprintf_appendstring(zend_string **buffer, size_t *pos, char *add,
 	m_width = MAX(min_width, copy_len);
 
 	if(m_width > INT_MAX - *pos - 1) {
-		zend_error_noreturn(E_ERROR, "Field width %d is too long", m_width);
+		zend_error_noreturn(E_ERROR, "Field width %zd is too long", m_width);
 	}
 
 	req_size = *pos + m_width + 1;
@@ -309,7 +309,7 @@ php_sprintf_appenddouble(zend_string **buffer, size_t *pos,
 inline static void
 php_sprintf_append2n(zend_string **buffer, size_t *pos, zend_long number,
 					 size_t width, char padding, size_t alignment, int n,
-					 char *chartable, int expprec)
+					 const char *chartable, int expprec)
 {
 	char numbuf[NUM_BUF_SIZE];
 	register zend_ulong num;
@@ -564,14 +564,15 @@ php_formatted_print(zend_execute_data *execute_data, int use_array, int format_o
 			tmp = &args[argnum];
 			switch (format[inpos]) {
 				case 's': {
-					zend_string *str = zval_get_string(tmp);
+					zend_string *t;
+					zend_string *str = zval_get_tmp_string(tmp, &t);
 					php_sprintf_appendstring(&result, &outpos,
 											 ZSTR_VAL(str),
 											 width, precision, padding,
 											 alignment,
 											 ZSTR_LEN(str),
 											 0, expprec, 0);
-					zend_string_release(str);
+					zend_tmp_string_release(t);
 					break;
 				}
 
@@ -727,9 +728,10 @@ PHP_FUNCTION(fprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 
@@ -756,9 +758,10 @@ PHP_FUNCTION(vfprintf)
 		WRONG_PARAM_COUNT;
 	}
 
-	if (zend_parse_parameters(1, "r", &arg1) == FAILURE) {
-		RETURN_FALSE;
-	}
+	ZEND_PARSE_PARAMETERS_START(1, -1)
+		Z_PARAM_RESOURCE(arg1)
+		/* php_formatted_print does its own zpp for extra args */
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	php_stream_from_zval(stream, arg1);
 

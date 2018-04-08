@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,7 +31,12 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 
 PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
 {
-	return zend_hash_str_update_ptr(&xport_hash, protocol, strlen(protocol), factory) ? SUCCESS : FAILURE;
+	int ret;
+	zend_string *str = zend_string_init_interned(protocol, strlen(protocol), 1);
+
+	ret = zend_hash_update_ptr(&xport_hash, str, factory) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 
 PHPAPI int php_stream_xport_unregister(const char *protocol)
@@ -60,7 +65,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	php_stream *stream = NULL;
 	php_stream_transport_factory factory = NULL;
 	const char *p, *protocol = NULL;
-	int n = 0, failed = 0;
+	size_t n = 0;
+	int failed = 0;
 	zend_string *error_text = NULL;
 	struct timeval default_timeout = { 0, 0 };
 
@@ -106,8 +112,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 	}
 
 	if (protocol) {
-		char *tmp = estrndup(protocol, n);
-		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, tmp, n))) {
+		if (NULL == (factory = zend_hash_str_find_ptr(&xport_hash, protocol, n))) {
 			char wrapper_name[32];
 
 			if (n >= sizeof(wrapper_name))
@@ -117,10 +122,8 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 			ERR_REPORT(error_string, "Unable to find the socket transport \"%s\" - did you forget to enable it when you configured PHP?",
 					wrapper_name);
 
-			efree(tmp);
 			return NULL;
 		}
-		efree(tmp);
 	}
 
 	if (factory == NULL) {
@@ -161,13 +164,7 @@ PHPAPI php_stream *_php_stream_xport_create(const char *name, size_t namelen, in
 					int backlog = 32;
 
 					if (PHP_STREAM_CONTEXT(stream) && (zbacklog = php_stream_context_get_option(PHP_STREAM_CONTEXT(stream), "socket", "backlog")) != NULL) {
-						zval *ztmp = zbacklog;
-
-						convert_to_long_ex(ztmp);
-						backlog = Z_LVAL_P(ztmp);
-						if (ztmp != zbacklog) {
-							zval_ptr_dtor(ztmp);
-						}
+						backlog = zval_get_long(zbacklog);
 					}
 
 					if (0 != php_stream_xport_listen(stream, backlog, &error_text)) {

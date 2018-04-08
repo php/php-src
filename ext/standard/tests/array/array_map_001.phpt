@@ -17,6 +17,6 @@ try {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(17) "exception caught!"
 Done

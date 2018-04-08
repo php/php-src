@@ -24,7 +24,7 @@ var_dump( disk_total_space( $file_path, "extra argument") ); // More than valid 
 var_dump( disk_total_space( $file_path."/dir1" )); // Invalid directory
 
 $fh = fopen( $file_path."/disk_total_space.tmp", "w" );
-fwrite( $fh, (binary)" Garbage data for the temporary file" );
+fwrite( $fh, " Garbage data for the temporary file" );
 var_dump( disk_total_space( $file_path."/disk_total_space.tmp" )); // file input instead of directory
 fclose($fh);
 

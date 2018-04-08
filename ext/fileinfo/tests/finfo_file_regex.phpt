@@ -25,5 +25,5 @@ var_dump( finfo_file( $finfo, $file, FILEINFO_CONTINUE ) );
 --EXPECTF--
 *** Testing finfo_file() : regex rules ***
 string(28) "text/plain; charset=us-ascii"
-string(30) "awk or perl script, ASCII text"
+string(%d) "awk%sscript, ASCII text\012- data"
 ===DONE===

@@ -20,8 +20,8 @@ function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available i
 echo "*** Testing iconv_strrpos() : usage variations ***\n";
 
 // Initialise function arguments not being substituted
-$haystack = b'hello, world';
-$needle = b'world';
+$haystack = 'hello, world';
+$needle = 'world';
 
 //get an unset variable
 $unset_var = 10;

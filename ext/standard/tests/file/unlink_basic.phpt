@@ -32,7 +32,7 @@ var_dump( file_exists($filename) );  // confirm file doesnt exist
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing unlink() on a file ***
 bool(true)
 bool(false)

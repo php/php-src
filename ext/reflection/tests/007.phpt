@@ -25,6 +25,10 @@ function test($class)
 	{
 		var_dump($e->getMessage());
 	}
+	catch (Throwable $e)
+	{
+		echo "Exception: " . $e->getMessage() . "\n";
+	}
 	
 	echo "====>newInstance(25)\n";
 	try
@@ -49,10 +53,9 @@ function test($class)
 	echo "\n";
 }
 
-function __autoload($class)
-{
+spl_autoload_register(function ($class) {
 	echo __FUNCTION__ . "($class)\n";
-}
+});
 
 test('Class_does_not_exist');
 
@@ -90,7 +93,7 @@ test('WithCtorWithArgs');
 --EXPECTF--
 
 ====>Class_does_not_exist
-__autoload(Class_does_not_exist)
+{closure}(Class_does_not_exist)
 string(41) "Class Class_does_not_exist does not exist"
 ====>NoCtor
 ====>newInstance()
@@ -129,15 +132,7 @@ object(WithCtor)#%d (0) {
 
 ====>WithCtorWithArgs
 ====>newInstance()
-
-Warning: Missing argument 1 for WithCtorWithArgs::__construct() in %s007.php on line %d
-
-Notice: Undefined variable: arg in %s007.php on line %d
-WithCtorWithArgs::__construct()
-array(0) {
-}
-object(WithCtorWithArgs)#%d (0) {
-}
+Exception: Too few arguments to function WithCtorWithArgs::__construct(), 0 passed and exactly 1 expected
 ====>newInstance(25)
 WithCtorWithArgs::__construct(25)
 array(1) {

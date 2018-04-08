@@ -14,13 +14,13 @@ echo "Done\n";
 ?>
 --EXPECTF--
 Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 5
-NULL
+bool(true)
 
 Warning: strlen() expects parameter 1 to be string, array given in %sbug41970.php on line 6
 NULL
 
 Warning: Parameter 1 to sort() expected to be a reference, value given in %sbug41970.php on line 7
-NULL
+bool(true)
 
 Warning: strlen() expects parameter 1 to be string, array given in %sbug41970.php on line 8
 NULL

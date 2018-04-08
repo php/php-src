@@ -3,7 +3,6 @@ Phar: fopen a .phar for writing (existing file) tar-based
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (version_compare(PHP_VERSION, "5.3", "<")) die("skip requires 5.3 or later");
 ?>
 --INI--
 phar.readonly=0
@@ -45,9 +44,9 @@ include $alias . '/b/c.php';
 
 Warning: fopen(phar://%sopen_for_write_existing_c.phar.tar/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_c.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, bool given in %spen_for_write_existing_c.php on line %d
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %spen_for_write_existing_c.php on line %d
 This is b/c
 
 ===DONE===

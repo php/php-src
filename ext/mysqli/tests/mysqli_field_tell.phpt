@@ -65,31 +65,31 @@ Warning: mysqli_field_seek() expects exactly 2 parameters, 1 given in %s on line
 NULL
 int(0)
 object(stdClass)#%d (13) {
-  [%u|b%"name"]=>
-  %unicode|string%(2) "id"
-  [%u|b%"orgname"]=>
-  %unicode|string%(2) "id"
-  [%u|b%"table"]=>
-  %unicode|string%(4) "test"
-  [%u|b%"orgtable"]=>
-  %unicode|string%(4) "test"
-  [%u|b%"def"]=>
-  %unicode|string%(0) ""
-  [%u|b%"db"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"catalog"]=>
-  %unicode|string%(%d) "%s"
-  [%u|b%"max_length"]=>
+  ["name"]=>
+  string(2) "id"
+  ["orgname"]=>
+  string(2) "id"
+  ["table"]=>
+  string(4) "test"
+  ["orgtable"]=>
+  string(4) "test"
+  ["def"]=>
+  string(0) ""
+  ["db"]=>
+  string(%d) "%s"
+  ["catalog"]=>
+  string(%d) "%s"
+  ["max_length"]=>
   int(0)
-  [%u|b%"length"]=>
+  ["length"]=>
   int(11)
-  [%u|b%"charsetnr"]=>
+  ["charsetnr"]=>
   int(63)
-  [%u|b%"flags"]=>
+  ["flags"]=>
   int(49155)
-  [%u|b%"type"]=>
+  ["type"]=>
   int(3)
-  [%u|b%"decimals"]=>
+  ["decimals"]=>
   int(0)
 }
 bool(false)
@@ -106,5 +106,5 @@ bool(true)
 int(0)
 
 Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

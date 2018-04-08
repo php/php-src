@@ -6,9 +6,9 @@ Bug #70213: Unserialize context shared on double class lookup
 ini_set('unserialize_callback_func', 'evil');
 
 function evil() {
-	function __autoload($arg) {
+	spl_autoload_register(function ($arg) {
         var_dump(unserialize('R:1;'));
-    }
+    });
 }
 
 var_dump(unserialize('a:2:{i:0;i:42;i:1;O:4:"evil":0:{}}'));
@@ -23,7 +23,7 @@ array(2) {
   [0]=>
   int(42)
   [1]=>
-  object(__PHP_Incomplete_Class)#1 (1) {
+  object(__PHP_Incomplete_Class)#2 (1) {
     ["__PHP_Incomplete_Class_Name"]=>
     string(4) "evil"
   }

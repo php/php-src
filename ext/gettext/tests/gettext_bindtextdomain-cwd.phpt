@@ -19,9 +19,9 @@ bindtextdomain('messages', './locale');
 var_dump(gettext('Basic test'));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(10) "Basic test"
 string(12) "A basic test"
---CREDIT--
+--CREDITS--
 Moritz Neuhaeuser, info@xcompile.net
 PHP Testfest Berlin 2009-05-09

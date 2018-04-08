@@ -60,7 +60,7 @@ foreach ($arrays as $item) {
 
 echo "end\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic operations ***
 ** Iteration 1 **
 array(0) {

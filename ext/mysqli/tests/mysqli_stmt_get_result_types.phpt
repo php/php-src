@@ -15,8 +15,6 @@ mysqli_stmt_get_result - data types
 	if (!$link = my_mysqli_connect($host, $user, $passwd, $db, $port, $socket))
 		printf("[001] [%d] %s\n", mysqli_connect_errno(), mysqli_connect_error());
 
-	$hint_str_or_unicode = (version_compare(PHP_VERSION, '6.0', '==') == 1) ? 'unicode' : 'string';
-
 	function func_mysqli_stmt_get_result($link, $engine, $bind_type, $sql_type, $bind_value, $offset, $type_hint = null) {
 
 		if (!mysqli_query($link, "DROP TABLE IF EXISTS test")) {
@@ -201,16 +199,16 @@ mysqli_stmt_get_result - data types
 	func_mysqli_stmt_get_result($link, $engine, "s", "YEAR", NULL, 1080);
 
 	$string255 = func_mysqli_stmt_bind_make_string(255);
-	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(1)", "a", 1110, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(255)", $string255, 1120, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(1) NOT NULL", "a", 1140, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(1)", "a", 1110, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(255)", $string255, 1120, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(1) NOT NULL", "a", 1140, 'string');
 	func_mysqli_stmt_get_result($link, $engine, "s", "CHAR(1)", NULL, 1160);
 
 	$string65k = func_mysqli_stmt_bind_make_string(65535);
-	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(1)", "a", 1180, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(255)", $string255, 1200, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(65635)", $string65k, 1220, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(1) NOT NULL", "a", 1240, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(1)", "a", 1180, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(255)", $string255, 1200, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(65635)", $string65k, 1220, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(1) NOT NULL", "a", 1240, 'string');
 	func_mysqli_stmt_get_result($link, $engine, "s", "VARCHAR(1)", NULL, 1260);
 
 	func_mysqli_stmt_get_result($link, $engine, "s", "BINARY(1)", "a", 1280);
@@ -228,25 +226,25 @@ mysqli_stmt_get_result - data types
 	func_mysqli_stmt_get_result($link, $engine, "s", "TINYBLOB NOT NULL", "b", 1480);
 	func_mysqli_stmt_get_result($link, $engine, "s", "TINYBLOB", NULL, 1500);
 
-	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT", "a", 1520, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT NOT NULL", "a", 1540, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT", NULL, 1560, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT", "a", 1520, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT NOT NULL", "a", 1540, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "TINYTEXT", NULL, 1560, 'string');
 
 	// Note: you cannot insert any blob values this way. But you can check the API at least partly this way
 	// Extra BLOB tests are in mysqli_stmt_send_long()
-	func_mysqli_stmt_get_result($link, $engine, "b", "BLOB", b"", 1580);
-	func_mysqli_stmt_get_result($link, $engine, "b", "TEXT", "", 1600, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "b", "MEDIUMBLOB", b"", 1620);
-	func_mysqli_stmt_get_result($link, $engine, "b", "MEDIUMTEXT", "", 1640, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "b", "BLOB", "", 1580);
+	func_mysqli_stmt_get_result($link, $engine, "b", "TEXT", "", 1600, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "b", "MEDIUMBLOB", "", 1620);
+	func_mysqli_stmt_get_result($link, $engine, "b", "MEDIUMTEXT", "", 1640, 'string');
 
 	/* Is this one related? http://bugs.php.net/bug.php?id=35759 */
 	func_mysqli_stmt_get_result($link, $engine, "b", "LONGBLOB", "", 1660);
-	func_mysqli_stmt_get_result($link, $engine, "b", "LONGTEXT", "", 1680, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "b", "LONGTEXT", "", 1680, 'string');
 
-	func_mysqli_stmt_get_result($link, $engine, "s", "ENUM('a', 'b')", "a", 1700, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "ENUM('a', 'b')", NULL, 1720, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "SET('a', 'b')", "a", 1740, $hint_str_or_unicode);
-	func_mysqli_stmt_get_result($link, $engine, "s", "SET('a', 'b')", NULL, 1760, $hint_str_or_unicode);
+	func_mysqli_stmt_get_result($link, $engine, "s", "ENUM('a', 'b')", "a", 1700, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "ENUM('a', 'b')", NULL, 1720, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "SET('a', 'b')", "a", 1740, 'string');
+	func_mysqli_stmt_get_result($link, $engine, "s", "SET('a', 'b')", NULL, 1760, 'string');
 
 	mysqli_close($link);
 	print "done!";
@@ -255,5 +253,5 @@ mysqli_stmt_get_result - data types
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

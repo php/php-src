@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,	  |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,14 +25,17 @@
 	branch = branch->branches[!!(n)];
 
 #ifdef _Win32
-# define emalloc malloc
-# define efree free
+# undef pemalloc
+# undef pefree
+# define pemalloc(size, persistent) malloc(size)
+# define pefree(ptr, persistent) free(ptr)
 #endif
 
 /* depth in bits */
 void phpdbg_btree_init(phpdbg_btree *tree, zend_ulong depth) {
 	tree->depth = depth;
 	tree->branch = NULL;
+	tree->persistent = 0;
 	tree->count = 0;
 }
 
@@ -157,7 +160,7 @@ int phpdbg_btree_insert_or_update(phpdbg_btree *tree, zend_ulong idx, void *ptr,
 		}
 
 		{
-			phpdbg_btree_branch *memory = *branch = emalloc((i + 2) * sizeof(phpdbg_btree_branch));
+			phpdbg_btree_branch *memory = *branch = pemalloc((i + 2) * sizeof(phpdbg_btree_branch), tree->persistent);
 			do {
 				(*branch)->branches[!((idx >> i) % 2)] = NULL;
 				branch = &(*branch)->branches[(idx >> i) % 2];
@@ -199,14 +202,14 @@ check_branch_existence:
 	tree->count--;
 
 	if (i_last_dual_branch == -1) {
-		efree(tree->branch);
+		pefree(tree->branch, tree->persistent);
 		tree->branch = NULL;
 	} else {
 		if (last_dual_branch->branches[last_dual_branch_branch] == last_dual_branch + 1) {
 			phpdbg_btree_branch *original_branch = last_dual_branch->branches[!last_dual_branch_branch];
 
 			memcpy(last_dual_branch + 1, last_dual_branch->branches[!last_dual_branch_branch], (i_last_dual_branch + 1) * sizeof(phpdbg_btree_branch));
-			efree(last_dual_branch->branches[!last_dual_branch_branch]);
+			pefree(last_dual_branch->branches[!last_dual_branch_branch], tree->persistent);
 			last_dual_branch->branches[!last_dual_branch_branch] = last_dual_branch + 1;
 
 			branch = last_dual_branch->branches[!last_dual_branch_branch];
@@ -214,13 +217,33 @@ check_branch_existence:
 				branch = (branch->branches[branch->branches[1] == ++original_branch] = last_dual_branch + i_last_dual_branch - i + 1);
 			}
 		} else {
-			efree(last_dual_branch->branches[last_dual_branch_branch]);
+			pefree(last_dual_branch->branches[last_dual_branch_branch], tree->persistent);
 		}
 
 		last_dual_branch->branches[last_dual_branch_branch] = NULL;
 	}
 
 	return SUCCESS;
+}
+
+void phpdbg_btree_clean_recursive(phpdbg_btree_branch *branch, zend_ulong depth, zend_bool persistent) {
+	phpdbg_btree_branch *start = branch;
+	while (depth--) {
+		zend_bool use_branch = branch + 1 == branch->branches[0];
+		if (branch->branches[use_branch]) {
+			phpdbg_btree_clean_recursive(branch->branches[use_branch], depth, persistent);
+		}
+	}
+
+	pefree(start, persistent);
+}
+
+void phpdbg_btree_clean(phpdbg_btree *tree) {
+	if (tree->branch) {
+		phpdbg_btree_clean_recursive(tree->branch, tree->depth, tree->persistent);
+		tree->branch = NULL;
+		tree->count = 0;
+	}
 }
 
 void phpdbg_btree_branch_dump(phpdbg_btree_branch *branch, zend_ulong depth) {

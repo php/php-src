@@ -15,7 +15,7 @@ call_user_func(array($c, 'none'));
 call_user_func(array($c, 'prot'));
 call_user_func(array($c, 'priv'));
 ?>
---EXPECTF--
+--EXPECT--
 In __call() for method none()
 In __call() for method prot()
 In __call() for method priv()

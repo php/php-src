@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -178,7 +178,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
-	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -199,13 +199,6 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 			entry.tmp = estrndup(filename, filename_len);
 		}
 	}
-#if PHP_API_VERSION < 20100412
-	if (PG(safe_mode) && !is_phar && (!php_checkuid(entry.tmp, NULL, CHECKUID_CHECK_FILE_AND_DIR))) {
-		efree(entry.tmp);
-		efree(entry.filename);
-		return FAILURE;
-	}
-#endif
 	filename = entry.tmp;
 
 	/* only check openbasedir for files, not for phar streams */
@@ -929,7 +922,7 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 
 PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len) /* {{{ */ {
 	phar_archive_data *fd_ptr;
-	if (PHAR_G(phar_alias_map.u.flags)
+	if (HT_FLAGS(&PHAR_G(phar_alias_map))
 			&& NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 		*filename = fd_ptr->fname;
 		*filename_len = fd_ptr->fname_len;
@@ -1184,7 +1177,7 @@ char * phar_compress_filter(phar_entry_info * entry, int return_unknown) /* {{{ 
  */
 char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{{ */
 {
-	php_uint32 flags;
+	uint32_t flags;
 
 	if (entry->is_modified) {
 		flags = entry->old_flags;
@@ -1232,7 +1225,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		*error = NULL;
 	}
 
-	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1253,7 +1246,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_FLAGS(&phar->manifest)) {
 		return NULL;
 	}
 
@@ -1298,7 +1291,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		}
 	}
 
-	if (phar->mounted_dirs.u.flags && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (HT_FLAGS(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
@@ -1410,7 +1403,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 		ZVAL_EMPTY_STRING(&zp[0]);
 	}
 
-	if (end != Z_STRLEN(zp[0])) {
+	if ((size_t)end != Z_STRLEN(zp[0])) {
 		zval_dtor(&zp[0]);
 		zval_dtor(&zp[1]);
 		zval_dtor(&zp[2]);
@@ -1480,7 +1473,7 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
 {
 	int read_size, len;
 	zend_off_t read_len;
@@ -1571,7 +1564,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			EVP_VerifyInit(md_ctx, mdtype);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1620,7 +1613,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			PHP_SHA512Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1660,7 +1653,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			PHP_SHA256Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1708,7 +1701,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			PHP_SHA1Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1748,7 +1741,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, php_uint32 sig_typ
 			PHP_MD5Init(&context);
 			read_len = end_of_phar;
 
-			if (read_len > sizeof(buf)) {
+			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
 				read_size = (int)read_len;
@@ -1955,10 +1948,22 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len) /* {{{ */
 {
 	const char *s;
+	zend_string *str;
+	zval *ret;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;
-		if (!filename_len || NULL == zend_hash_str_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+		if (!filename_len) {
+			break;
+		}
+		if (GC_FLAGS(&phar->virtual_dirs) & GC_PERSISTENT) {
+			str = zend_string_init_interned(filename, filename_len, 1);
+		} else {
+			str = zend_string_init(filename, filename_len, 0);
+		}
+		ret = zend_hash_add_empty_element(&phar->virtual_dirs, str);
+		zend_string_release(str);
+		if (ret == NULL) {
 			break;
 		}
 	}

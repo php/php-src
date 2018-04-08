@@ -1,5 +1,7 @@
 --TEST--
 Test simple recursive watchpoint
+--INI--
+opcache.optimization_level=0
 --PHPDBG--
 b 3
 r
@@ -16,7 +18,7 @@ prompt> [Breakpoint #0 at %s:3, hits: 1]
 >00003: $a = 1;
  00004: $b = [$a];
  00005: 
-prompt> [Set recursive watchpoint on $b]
+prompt> [Added recursive watchpoint #0 for $b]
 prompt> [Breaking on watchpoint $b]
 Old value: 
 New value: Array ([0] => 1)
@@ -32,7 +34,7 @@ prompt> [Breaking on watchpoint $b]
 Old value: 
 New value: 2
 >00008: 
-prompt> [$b was removed, removing watchpoint recursively]
+prompt> [$b has been removed, removing watchpoint recursively]
 [Script ended normally]
 prompt> 
 --FILE--

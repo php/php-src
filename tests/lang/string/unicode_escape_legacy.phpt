@@ -8,7 +8,7 @@ var_dump("\u");
 var_dump("\u202e");
 var_dump("\ufoobar");
 
---EXPECTF--
+--EXPECT--
 string(2) "\u"
 string(6) "\u202e"
 string(8) "\ufoobar"

@@ -186,21 +186,21 @@ if (false == MySQLPDOTest::detect_transactional_mysql_engine($db))
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "a"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "a"
 }
 bool(false)
 array(2) {
-  [%u|b%"id"]=>
-  %unicode|string%(1) "1"
-  [%u|b%"label"]=>
-  %unicode|string%(1) "z"
+  ["id"]=>
+  string(1) "1"
+  ["label"]=>
+  string(1) "z"
 }
 [026] Autocommit mode of the MySQL Server should be off, got '1', [0] 00000
 [028] I'm confused, how can autocommit be on? Didn't I say I want to manually control transactions?
-%unicode|string%(5) "00000"
+string(5) "00000"
 done!

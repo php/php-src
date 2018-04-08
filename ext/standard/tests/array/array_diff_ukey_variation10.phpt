@@ -33,7 +33,7 @@ NULL
 Warning: array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
 NULL
 
-Notice: Use of undefined constant unknown_function - assumed 'unknown_function' in %s on line %d
+Warning: Use of undefined constant unknown_function - assumed 'unknown_function' (this will throw an Error in a future version of PHP) in %s on line %d
 
 Warning: array_diff_ukey() expects parameter 3 to be a valid callback, function 'unknown_function' not found or invalid function name in %s on line %d
 NULL

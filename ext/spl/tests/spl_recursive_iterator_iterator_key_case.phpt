@@ -14,20 +14,20 @@ TestFest London May 2009
     var_dump($k);
   }
 ?>
---EXPECTF--
+--EXPECT--
 one=>1
-%unicode|string%(3) "one"
+string(3) "one"
 two=>2
-%unicode|string%(3) "two"
+string(3) "two"
 four=>4
-%unicode|string%(4) "four"
+string(4) "four"
 five=>5
-%unicode|string%(4) "five"
+string(4) "five"
 seven=>7
-%unicode|string%(5) "seven"
+string(5) "seven"
 eight=>8
-%unicode|string%(5) "eight"
+string(5) "eight"
 -100=>10
 int(-100)
 =>null
-%unicode|string%(0) ""
+string(0) ""

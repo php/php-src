@@ -23,9 +23,6 @@
 
 static const char rcsid[] = "#(@) $Id:";
 
-#ifdef _WIN32
-#include "xmlrpc_win32.h"
-#endif
 #include <string.h>
 #include <stdlib.h>
 #include "xml_to_soap.h"
@@ -66,10 +63,10 @@ static inline int is_soap_type(const char* soap_type) {
 
 /* utility func to generate a new attribute. possibly should be in xml_element.c?? */
 static xml_element_attr* new_attr(const char* key, const char* val) {
-	xml_element_attr* attr = malloc(sizeof(xml_element_attr));
+	xml_element_attr* attr = emalloc(sizeof(xml_element_attr));
 	if (attr) {
-		attr->key = key ? strdup(key) : NULL;
-		attr->val = val ? strdup(val) : NULL;
+		attr->key = key ? estrdup(key) : NULL;
+		attr->val = val ? estrdup(val) : NULL;
 	}
 	return attr;
 }
@@ -87,7 +84,7 @@ struct array_info {
 static struct array_info* parse_array_type_info(const char* array_type) {
 	struct array_info* ai = NULL;
 	if (array_type) {
-		ai = (struct array_info*)calloc(1, sizeof(struct array_info));
+		ai = (struct array_info*)ecalloc(1, sizeof(struct array_info));
 		if (ai) {
 			char buf[128], *p;
 			snprintf(buf, sizeof(buf), "%s", array_type);
@@ -407,7 +404,7 @@ XMLRPC_VALUE xml_element_to_SOAP_REQUEST_worker(XMLRPC_REQUEST request,
 			}
 			/* cleanup */
 			if (ai) {
-				free(ai);
+				efree(ai);
 			}
 		}
 	}
@@ -563,7 +560,7 @@ xml_element* SOAP_to_xml_element_worker(XMLRPC_REQUEST request, XMLRPC_VALUE nod
 				}
 			}
 		}
-		elem_val->name = strdup(pName);
+		elem_val->name = estrdup(pName);
 
 		/* cleanup */
 		if (bFreeNode) {
@@ -585,7 +582,7 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 	/* safety first. */
 	if (root) {
 		xml_element* body = xml_elem_new();
-		root->name = strdup("SOAP-ENV:Envelope");
+		root->name = estrdup("SOAP-ENV:Envelope");
 
 		/* silly namespace stuff */
 		Q_PushTail(&root->attrs, new_attr("xmlns:SOAP-ENV", "http://schemas.xmlsoap.org/soap/envelope/"));
@@ -620,7 +617,7 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 					/* if we are making a request, we want to use the methodname as is. */
 					if (rtype == xmlrpc_request_call) {
 						if (methodname) {
-							rpc->name = strdup(methodname);
+							rpc->name = estrdup(methodname);
 						}
 					}
 					/* if it's a response, we append "Response". Also, given xmlrpc-epi
@@ -632,7 +629,7 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 									methodname ? methodname : "",
 									"Response");
 
-						rpc->name = strdup(buf);
+						rpc->name = estrdup(buf);
 					}
 
 					/* add serialized data to method call/response.
@@ -660,7 +657,7 @@ xml_element* SOAP_REQUEST_to_xml_element(XMLRPC_REQUEST request) {
 					}
 				}
 			}
-			body->name = strdup("SOAP-ENV:Body");
+			body->name = estrdup("SOAP-ENV:Body");
 			Q_PushTail(&root->children, body);
 		}
 	}

@@ -30,7 +30,7 @@ Warning: posix_ttyname() expects exactly 1 parameter, 0 given in %s on line %d
 bool(false)
 bool(false)
 
-Warning: posix_ttyname(): supplied resource is not a valid stream resource in %s on line %s
+Warning: posix_ttyname(): supplied resource is not a valid stream resource in %s on line %d
 
 Warning: posix_ttyname(): expects argument 1 to be a valid stream resource in %s on line %d
 bool(false)

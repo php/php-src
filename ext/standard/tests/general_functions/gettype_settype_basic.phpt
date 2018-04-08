@@ -8,11 +8,11 @@ precision=14
    Description: Returns the type of the PHP variable var
 
    Prototype: bool settype ( mixed &$var, string $type );
-   Description: Set the type of variable var to type 
+   Description: Set the type of variable var to type
 */
 
 /* Test the basic functionalities of settype() & gettype() functions.
-   Use the gettype() to get the type of regular data and use settype() 
+   Use the gettype() to get the type of regular data and use settype()
    to change its type to other types */
 
 /* function to handle catchable errors */
@@ -22,8 +22,8 @@ function foo($errno, $errstr, $errfile, $errline) {
    echo "$errno: $errstr\n";
 }
 //set the error handler, this is required as
-// settype() would fail with catachable fatal error 
-set_error_handler("foo"); 
+// settype() would fail with catachable fatal error
+set_error_handler("foo");
 
 echo "**** Testing gettype() and settype() functions ****\n";
 
@@ -89,24 +89,24 @@ foreach ($values as $value) {
 
 echo "\n*** Testing settype(): basic operations ***\n";
 foreach ($types as $type) {
-  echo "\n-- Setting type of data to $type --\n"; 
+  echo "\n-- Setting type of data to $type --\n";
   $loop_count = 1;
   foreach ($values as $var) {
      echo "-- Iteration $loop_count --\n"; $loop_count ++;
      // set to new type
      var_dump( settype($var, $type) );
-    
-     // dump the var 
+
+     // dump the var
      var_dump( $var );
-  
-     // check the new type 
-     var_dump( gettype($var) );  
+
+     // check the new type
+     var_dump( gettype($var) );
   }
 }
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 **** Testing gettype() and settype() functions ****
 
 *** Testing gettype(): basic operations ***
@@ -740,11 +740,11 @@ string(5) "array"
 -- Iteration 1 --
 bool(true)
 object(stdClass)#2 (3) {
-  [0]=>
+  ["0"]=>
   int(1)
-  [1]=>
+  ["1"]=>
   int(2)
-  [2]=>
+  ["2"]=>
   int(3)
 }
 string(6) "object"
@@ -758,11 +758,11 @@ string(6) "object"
 -- Iteration 3 --
 bool(true)
 object(stdClass)#2 (3) {
-  [0]=>
+  ["0"]=>
   int(2)
-  [1]=>
+  ["1"]=>
   int(3)
-  [2]=>
+  ["2"]=>
   int(4)
 }
 string(6) "object"

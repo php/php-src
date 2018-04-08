@@ -53,7 +53,7 @@ void intl_convert_utf8_to_utf16(
 	UErrorCode* status )
 {
 	UChar*      dst_buf = NULL;
-	uint32_t    dst_len = 0;
+	int32_t     dst_len = 0;
 
 	/* If *target is NULL determine required destination buffer size (pre-flighting).
 	 * Otherwise, attempt to convert source string; if *target buffer is not large enough

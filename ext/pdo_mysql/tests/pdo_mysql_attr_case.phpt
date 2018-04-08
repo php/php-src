@@ -89,83 +89,83 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
-%unicode|string%(15) "PDO::CASE_LOWER"
+--EXPECT--
+string(15) "PDO::CASE_LOWER"
 array(2) {
   [0]=>
   array(6) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
     [0]=>
-    %unicode|string%(1) "1"
-    [%u|b%"id_upper"]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
+    ["id_upper"]=>
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
     [2]=>
-    %unicode|string%(1) "a"
+    string(1) "a"
   }
   [1]=>
   array(6) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
     [0]=>
-    %unicode|string%(1) "2"
-    [%u|b%"id_upper"]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
+    ["id_upper"]=>
+    string(1) "2"
     [1]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
     [2]=>
-    %unicode|string%(1) "b"
+    string(1) "b"
   }
 }
 array(2) {
   [0]=>
   array(10) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
     [0]=>
-    %unicode|string%(1) "1"
-    [%u|b%"id_upper"]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
+    ["id_upper"]=>
+    string(1) "1"
     [1]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
     [2]=>
-    %unicode|string%(1) "a"
-    [%u|b%"mixed"]=>
+    string(1) "a"
+    ["mixed"]=>
     NULL
     [3]=>
     NULL
-    [%u|b%"myupper"]=>
+    ["myupper"]=>
     NULL
     [4]=>
     NULL
   }
   [1]=>
   array(10) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "2"
+    ["id"]=>
+    string(1) "2"
     [0]=>
-    %unicode|string%(1) "2"
-    [%u|b%"id_upper"]=>
-    %unicode|string%(1) "2"
+    string(1) "2"
+    ["id_upper"]=>
+    string(1) "2"
     [1]=>
-    %unicode|string%(1) "2"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "b"
+    string(1) "2"
+    ["label"]=>
+    string(1) "b"
     [2]=>
-    %unicode|string%(1) "b"
-    [%u|b%"mixed"]=>
+    string(1) "b"
+    ["mixed"]=>
     NULL
     [3]=>
     NULL
-    [%u|b%"myupper"]=>
+    ["myupper"]=>
     NULL
     [4]=>
     NULL
@@ -174,23 +174,23 @@ array(2) {
 array(1) {
   [0]=>
   array(10) {
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
+    ["ID"]=>
+    string(1) "1"
     [0]=>
-    %unicode|string%(1) "1"
-    [%u|b%"LABEL"]=>
-    %unicode|string%(1) "a"
+    string(1) "1"
+    ["LABEL"]=>
+    string(1) "a"
     [1]=>
-    %unicode|string%(1) "a"
-    [%u|b%"MIXED"]=>
+    string(1) "a"
+    ["MIXED"]=>
     NULL
     [2]=>
     NULL
-    [%u|b%"MYUPPER"]=>
+    ["MYUPPER"]=>
     NULL
     [3]=>
     NULL
-    [%u|b%"LOWER"]=>
+    ["LOWER"]=>
     NULL
     [4]=>
     NULL
@@ -199,26 +199,26 @@ array(1) {
 array(1) {
   [0]=>
   array(10) {
-    [%u|b%"id"]=>
-    %unicode|string%(1) "1"
+    ["id"]=>
+    string(1) "1"
     [0]=>
-    %unicode|string%(1) "1"
-    [%u|b%"label"]=>
-    %unicode|string%(1) "a"
+    string(1) "1"
+    ["label"]=>
+    string(1) "a"
     [1]=>
-    %unicode|string%(1) "a"
-    [%u|b%"MiXeD"]=>
+    string(1) "a"
+    ["MiXeD"]=>
     NULL
     [2]=>
     NULL
-    [%u|b%"MYUPPER"]=>
+    ["MYUPPER"]=>
     NULL
     [3]=>
     NULL
-    [%u|b%"ID"]=>
-    %unicode|string%(1) "1"
+    ["ID"]=>
+    string(1) "1"
     [4]=>
-    %unicode|string%(1) "1"
+    string(1) "1"
   }
 }
 done!

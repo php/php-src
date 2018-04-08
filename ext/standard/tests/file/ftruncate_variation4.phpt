@@ -77,6 +77,8 @@ echo "Done\n";
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -85,6 +87,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -93,6 +97,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -101,6 +107,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -109,6 +117,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -117,6 +127,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -125,6 +137,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -133,6 +147,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -141,6 +157,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -149,6 +167,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -157,6 +177,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -165,6 +187,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -173,6 +197,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -181,6 +207,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -189,6 +217,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -197,6 +227,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -205,6 +237,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -213,6 +247,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -221,6 +257,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -229,6 +267,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -237,6 +277,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -245,6 +287,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -253,6 +297,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -261,6 +307,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -271,6 +319,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -279,6 +329,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -287,6 +339,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -295,6 +349,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -303,6 +359,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -311,6 +369,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -319,6 +379,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -327,6 +389,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -335,6 +399,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -343,6 +409,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -351,6 +419,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -359,6 +429,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -367,6 +439,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -375,6 +449,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -383,6 +459,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -391,6 +469,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -399,6 +479,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -407,6 +489,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -415,6 +499,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -423,6 +509,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -431,6 +519,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -439,6 +529,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -447,6 +539,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)
@@ -455,6 +549,8 @@ int(1024)
 -- Testing ftruncate(): try truncating file to a negative size --
 int(1024)
 int(0)
+
+Warning: ftruncate(): Negative size is not supported in %s on line %d
 bool(false)
 int(0)
 bool(false)

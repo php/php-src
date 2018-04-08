@@ -7,5 +7,5 @@ mysqli get_client_info
 	$s = mysqli_get_client_info();
 	echo gettype($s);
 ?>
---EXPECTF--
-%unicode|string%
+--EXPECT--
+string

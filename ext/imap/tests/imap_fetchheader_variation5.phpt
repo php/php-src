@@ -62,7 +62,7 @@ bool(false)
 -- $msg_no is 1,3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "From: foo@anywhere.com
+string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
 MIME-Version: 1.0
@@ -73,7 +73,7 @@ Content-Type: MULTIPART/mixed; BOUNDARY="%s"
 -- $msg_no is 1:3 --
 
 Notice: A non well formed numeric value encountered in %s on line %d
-%unicode|string%(%d) "From: foo@anywhere.com
+string(%d) "From: foo@anywhere.com
 Subject: Test msg 1
 To: %s
 MIME-Version: 1.0

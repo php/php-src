@@ -32,7 +32,8 @@ var_dump($result);
 $e = $result[1] = $result[6];
 var_dump($result);
 var_dump($a, $b, $c, $d, $e);
-$result[-1] = 'a';
+$result[0] = $result[-4] = $result[-1] = 'a';
+var_dump($result);
 ?>
 --EXPECT--
 string(5) "* *-*"
@@ -50,4 +51,4 @@ string(1) "s"
 string(1) "4"
 string(1) "5"
 string(1) "5"
-[Illegal string offset:  -1]
+string(9) "a54s4a50a"

@@ -28,11 +28,11 @@ var_dump(session_unset());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_unset() : variation ***
 bool(false)
 bool(true)
-NULL
+bool(true)
 array(1) {
   ["foo"]=>
   string(12) "Hello World!"

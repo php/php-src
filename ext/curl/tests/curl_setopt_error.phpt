@@ -38,8 +38,8 @@ Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
 
 Warning: curl_setopt() expects exactly 3 parameters, 2 given in %s on line %d
 
-Warning: curl_setopt() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: curl_setopt() expects parameter 1 to be resource, bool given in %s on line %d
 
-Warning: curl_setopt() expects parameter 2 to be integer, %unicode_string_optional% given in %s on line %d
+Warning: curl_setopt() expects parameter 2 to be int, string given in %s on line %d
 
 Warning: curl_setopt(): Invalid curl configuration option in %scurl_setopt_error.php on line %d

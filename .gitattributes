@@ -3,7 +3,7 @@ ext/simplexml/simplexml.c       ident
 ext/iconv/php_iconv.h           ident
 ext/posix/posix.c               ident
 ext/recode/recode.c             ident
-ext/skeleton/create_stubs       ident
+ext/ext_skel.php                ident
 ext/phar/phar/pharcommand.inc   ident
 ext/phar/phar.c                 ident
 ext/sysvmsg/sysvmsg.c           ident
@@ -15,13 +15,8 @@ ext/dba/libflatfile/flatfile.c  ident
 ext/dba/libcdb/cdb_make.c       ident
 ext/dba/libcdb/cdb.c            ident
 ext/filter/filter.c             ident
-ext/zip/php_zip.c               ident
 README.input_filter             ident
 run-tests.php                   ident
-sapi/nsapi/nsapi.c              ident
-sapi/continuity/capi.c          ident
-Zend/RFCs/002.txt               ident
-Zend/RFCs/003.txt               ident
 ext/exif/exif.c                 ident
 ext/ldap/ldap.c                 ident
 ext/pdo_pgsql/pdo_pgsql.c       ident
@@ -32,7 +27,6 @@ UPGRADING.INTERNALS             merge=NEWS
 /ext/bz2/tests/with_strings.phpt	-crlf
 /ext/dom/tests/bug40836.phpt	-crlf
 /ext/dom/tests/domelement.phpt	-crlf
-/ext/ereg/tests/eregi_basic_002.phpt	-crlf
 /ext/iconv/tests/iconv004.phpt	-crlf
 /ext/iconv/tests/iconv_basic.phpt	-crlf
 /ext/iconv/tests/iconv_strpos.phpt	-crlf

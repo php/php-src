@@ -7,9 +7,9 @@ if (PHP_FTP != "no") {
 
 	EXTENSION("ftp", "php_ftp.c ftp.c");
 
-	if (CHECK_HEADER_ADD_INCLUDE("openssl/ssl.h", "CFLAGS_FTP") &&
-		CHECK_LIB("ssleay32.lib", "ftp", PHP_FTP) &&
-		CHECK_LIB("libeay32.lib", "ftp", PHP_FTP)) {
+	var ret = SETUP_OPENSSL("ftp", PHP_FTP);
+
+	if (ret > 0) {
 		MESSAGE("Enabling SSL support for ext\\ftp");
 		AC_DEFINE('HAVE_FTP_SSL', 1, 'Have FTP over SSL support');
 	}

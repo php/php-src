@@ -11,7 +11,5 @@ var_dump($b);
 
 ?>
 --EXPECTF--
-Warning: Attempt to modify property of non-object in %sbug72911.php on line %d
-
-Warning: Attempt to assign property of non-object in %sbug72911.php on line %d
+Warning: Attempt to modify property 'b' of non-object in %sbug72911.php on line %d
 NULL

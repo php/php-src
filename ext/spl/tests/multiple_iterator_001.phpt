@@ -68,7 +68,7 @@ try {
 echo "-- Flags |= MultipleIterator::MIT_KEYS_ASSOC --\n";
 
 $m->attachIterator($iter1, "iter1");
-$m->attachIterator($iter2, b"iter2");
+$m->attachIterator($iter2, "iter2");
 $m->attachIterator($iter3, 3);
 
 foreach($m as $key => $value) {

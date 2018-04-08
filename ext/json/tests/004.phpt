@@ -32,7 +32,7 @@ bool(false)
 int(6)
 string(%d) "Recursion detected"
 
-string(22) "{"prop":{"prop":null}}"
+string(13) "{"prop":null}"
 int(6)
 string(%d) "Recursion detected"
 Done

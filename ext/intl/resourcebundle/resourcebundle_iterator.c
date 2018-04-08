@@ -135,7 +135,7 @@ static void resourcebundle_iterator_reset( zend_object_iterator *iter )
 /* }}} */
 
 /* {{{ resourcebundle_iterator_funcs */
-static zend_object_iterator_funcs resourcebundle_iterator_funcs = {
+static const zend_object_iterator_funcs resourcebundle_iterator_funcs = {
 	resourcebundle_iterator_dtor,
 	resourcebundle_iterator_has_more,
 	resourcebundle_iterator_current,

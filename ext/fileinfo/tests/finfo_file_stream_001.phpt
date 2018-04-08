@@ -20,7 +20,7 @@ var_dump(
          finfo_file($fp, $png)
 );
 ?>
---EXPECTF--
+--EXPECT--
 string(15) "application/zip"
 string(9) "directory"
 string(9) "image/png"

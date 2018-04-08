@@ -41,7 +41,7 @@ mysqli.reconnect = Off
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 Warning: : 
 Warning: 1050: Table 't54221' already exists
 done!

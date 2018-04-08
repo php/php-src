@@ -39,14 +39,14 @@ ob_end_flush();
 ?>
 --EXPECTF--
 *** Testing session_module_name() : variation ***
-string(%d) "%s"
+string(5) "files"
 string(4) "user"
 
-Warning: Uncaught Exception: Stop...! in %s:%d
+Warning: session_start(): Failed to initialize storage module: user (path: ) in %s on line 25
+
+Fatal error: Uncaught Exception: Stop...! in %s:13
 Stack trace:
 #0 [internal function]: open('', 'PHPSESSID')
-#1 %s(%d): session_start()
+#1 %s(25): session_start()
 #2 {main}
-  thrown in %s on line %d
-
-Fatal error: session_start(): Failed to initialize storage module: %s in %s%esession_module_name_variation3.php on line %d
+  thrown in %s on line 13

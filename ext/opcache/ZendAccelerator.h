@@ -1,8 +1,8 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,7 +64,7 @@
 #endif
 
 #ifndef ZEND_EXT_API
-# if WIN32|WINNT
+# ifdef ZEND_WIN32
 #  define ZEND_EXT_API __declspec(dllexport)
 # elif defined(__GNUC__) && __GNUC__ >= 4
 #  define ZEND_EXT_API __attribute__ ((visibility("default")))
@@ -75,7 +75,8 @@
 
 #ifdef ZEND_WIN32
 # ifndef MAXPATHLEN
-#  define MAXPATHLEN     _MAX_PATH
+#  include "win32/ioutil.h"
+#  define MAXPATHLEN PHP_WIN32_IOUTIL_MAXPATHLEN
 # endif
 # include <direct.h>
 #else
@@ -84,14 +85,6 @@
 # endif
 # include <sys/param.h>
 #endif
-
-#define PHP_5_0_X_API_NO		220040412
-#define PHP_5_1_X_API_NO		220051025
-#define PHP_5_2_X_API_NO		220060519
-#define PHP_5_3_X_API_NO		220090626
-#define PHP_5_4_X_API_NO		220100525
-#define PHP_5_5_X_API_NO		220121212
-#define PHP_5_6_X_API_NO		220131226
 
 /*** file locking ***/
 #ifndef ZEND_WIN32
@@ -125,20 +118,10 @@ extern int lock_file;
 # endif
 #endif
 
-#define PZ_REFCOUNT_P(pz)				(pz)->refcount__gc
-#define PZ_SET_REFCOUNT_P(pz, v)		(pz)->refcount__gc = (v)
-#define PZ_ADDREF_P(pz)					++((pz)->refcount__gc)
-#define PZ_DELREF_P(pz)					--((pz)->refcount__gc)
-#define PZ_ISREF_P(pz)					(pz)->is_ref__gc
-#define PZ_SET_ISREF_P(pz)				Z_SET_ISREF_TO_P(pz, 1)
-#define PZ_UNSET_ISREF_P(pz)			Z_SET_ISREF_TO_P(pz, 0)
-#define PZ_SET_ISREF_TO_P(pz, isref)	(pz)->is_ref__gc = (isref)
-
-#define DO_ALLOCA(x)	do_alloca(x, use_heap)
-#define FREE_ALLOCA(x)	free_alloca(x, use_heap)
-
 #if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
+#else
+# define ENABLE_FILE_CACHE_FALLBACK 0
 #endif
 
 #if ZEND_WIN32
@@ -154,11 +137,8 @@ typedef enum _zend_accel_restart_reason {
 } zend_accel_restart_reason;
 
 typedef struct _zend_persistent_script {
-	zend_string   *full_path;              /* full real path with resolved symlinks */
-	zend_op_array  main_op_array;
-	HashTable      function_table;
-	HashTable      class_table;
-	zend_long           compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
+	zend_script    script;
+	zend_long      compiler_halt_offset;   /* position of __HALT_COMPILER or -1 */
 	int            ping_auto_globals_mask; /* which autoglobals are used by the script */
 	accel_time_t   timestamp;              /* the script modification time */
 	zend_bool      corrupted;
@@ -197,10 +177,8 @@ typedef struct _zend_accel_directives {
 	zend_bool      validate_timestamps;
 	zend_bool      revalidate_path;
 	zend_bool      save_comments;
-	zend_bool      fast_shutdown;
 	zend_bool      protect_memory;
 	zend_bool      file_override_enabled;
-	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
 #ifndef ZEND_WIN32
@@ -216,6 +194,7 @@ typedef struct _zend_accel_directives {
 	zend_long           log_verbosity_level;
 
 	zend_long           optimization_level;
+	zend_long           opt_debug_level;
 	zend_long           max_file_size;
 	zend_long           interned_strings_buffer;
 	char          *restrict_api;
@@ -273,6 +252,15 @@ typedef struct _zend_accel_globals {
 	char                    key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
+typedef struct _zend_string_table {
+	uint32_t     nTableMask;
+	uint32_t     nNumOfElements;
+	zend_string *start;
+	zend_string *top;
+	zend_string *end;
+	zend_string *saved_top;
+} zend_string_table;
+
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
 	zend_ulong   hits;
@@ -296,15 +284,18 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	zend_bool       restart_in_progress;
-	/* Interned Strings Support */
-	char           *interned_strings_start;
-	char           *interned_strings_top;
-	char           *interned_strings_end;
-	char           *interned_strings_saved_top;
-	HashTable       interned_strings;
+
+	/* uninitialized HashTable Support */
+	uint32_t uninitialized_bucket[-HT_MIN_MASK];
+
+	/* Interned Strings Support (must be the last element) */
+	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+extern zend_bool file_cache_only;
+#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
@@ -332,38 +323,16 @@ void zend_accel_schedule_restart_if_necessary(zend_accel_restart_reason reason);
 accel_time_t zend_get_file_handle_timestamp(zend_file_handle *file_handle, size_t *size);
 int  validate_timestamp_and_record(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
 int  validate_timestamp_and_record_ex(zend_persistent_script *persistent_script, zend_file_handle *file_handle);
-int  zend_accel_invalidate(const char *filename, int filename_len, zend_bool force);
-int  zend_accel_script_optimize(zend_persistent_script *persistent_script);
+int  zend_accel_invalidate(const char *filename, size_t filename_len, zend_bool force);
 int  accelerator_shm_read_lock(void);
 void accelerator_shm_read_unlock(void);
 
-char *accel_make_persistent_key(const char *path, int path_length, int *key_len);
+char *accel_make_persistent_key(const char *path, size_t path_length, int *key_len);
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
-#if !defined(ZEND_DECLARE_INHERITED_CLASS_DELAYED)
-# define ZEND_DECLARE_INHERITED_CLASS_DELAYED 145
-#endif
-
-#define ZEND_DECLARE_INHERITED_CLASS_DELAYED_FLAG 0x80
-
 #define IS_ACCEL_INTERNED(str) \
-	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
+	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
-zend_string *accel_new_interned_string(zend_string *str);
-
-# define ZEND_RESULT_TYPE(opline)	(opline)->result_type
-# define ZEND_RESULT(opline)		(opline)->result
-# define ZEND_OP1_TYPE(opline)		(opline)->op1_type
-# define ZEND_OP1(opline)			(opline)->op1
-# define ZEND_OP1_CONST(opline)		(*(opline)->op1.zv)
-# define ZEND_OP1_LITERAL(opline)	(op_array)->literals[(opline)->op1.constant]
-# define ZEND_OP2_TYPE(opline)		(opline)->op2_type
-# define ZEND_OP2(opline)			(opline)->op2
-# define ZEND_OP2_CONST(opline)		(*(opline)->op2.zv)
-# define ZEND_OP2_LITERAL(opline)	(op_array)->literals[(opline)->op2.constant]
-# define ZEND_DONE_PASS_TWO(op_array)	(((op_array)->fn_flags & ZEND_ACC_DONE_PASS_TWO) != 0)
-# define ZEND_CE_FILENAME(ce)			(ce)->info.user.filename
-# define ZEND_CE_DOC_COMMENT(ce)        (ce)->info.user.doc_comment
-# define ZEND_CE_DOC_COMMENT_LEN(ce)	(ce)->info.user.doc_comment_len
+zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 #endif /* ZEND_ACCELERATOR_H */

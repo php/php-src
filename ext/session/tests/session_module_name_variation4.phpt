@@ -40,7 +40,7 @@ var_dump(session_destroy());
 
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_module_name() : variation ***
 
 array(3) {
@@ -51,7 +51,7 @@ array(3) {
   ["Guff"]=>
   int(1234567890)
 }
-NULL
+bool(true)
 array(3) {
   ["Blah"]=>
   string(12) "Hello World!"

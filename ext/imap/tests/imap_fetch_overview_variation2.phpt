@@ -192,25 +192,25 @@ udate is OK
 -- Testing with second argument value: bool(false)
 Sequence out of range
 
--- Testing with second argument value: %string|unicode%(0) ""
+-- Testing with second argument value: string(0) ""
 Sequence out of range
 
--- Testing with second argument value: %string|unicode%(0) ""
+-- Testing with second argument value: string(0) ""
 Sequence out of range
 
 -- Testing with second argument value: array(0) {
 }
 
-Warning: imap_fetch_overview() expects parameter 2 to be %binary_string_optional%, array given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 2 to be string, array given in %s on line %d
 Sequence out of range
 
--- Testing with second argument value: %string|unicode%(6) "string"
+-- Testing with second argument value: string(6) "string"
 Syntax error in sequence
 
--- Testing with second argument value: %string|unicode%(6) "string"
+-- Testing with second argument value: string(6) "string"
 Syntax error in sequence
 
--- Testing with second argument value: %string|unicode%(11) "hello world"
+-- Testing with second argument value: string(11) "hello world"
 Syntax error in sequence
 
 -- Testing with second argument value: object(classA)#1 (0) {
@@ -225,6 +225,6 @@ Syntax error in sequence
 
 -- Testing with second argument value: resource(%d) of type (stream)
 
-Warning: imap_fetch_overview() expects parameter 2 to be %binary_string_optional%, resource given in %s on line %d
+Warning: imap_fetch_overview() expects parameter 2 to be string, resource given in %s on line %d
 Syntax error in sequence
 ===DONE===

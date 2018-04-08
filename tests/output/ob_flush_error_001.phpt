@@ -12,7 +12,7 @@ echo "*** Testing ob_flush() : error conditions ***\n";
 
 // One argument
 echo "\n-- Testing ob_flush() function with one argument --\n";
-$extra_arg = 10;;
+$extra_arg = 10;
 var_dump( ob_flush($extra_arg) );
 
 echo "Done";

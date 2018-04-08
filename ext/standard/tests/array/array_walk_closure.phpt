@@ -97,7 +97,7 @@ echo "Done\n";
 Warning: array_walk() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_walk() expects parameter 1 to be array, boolean given in %s on line %d
+Warning: array_walk() expects parameter 1 to be array, bool given in %s on line %d
 NULL
 
 Warning: array_walk() expects parameter 1 to be array, null given in %s on line %d

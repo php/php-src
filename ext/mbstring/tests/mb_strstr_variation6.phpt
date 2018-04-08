@@ -18,10 +18,10 @@ echo "*** Testing mb_strstr() : variation ***\n";
 mb_internal_encoding('UTF-8');
 
 //ascii
-$string_ascii = b'abcdef';
-$needle_ascii_upper = b"BCD";
-$needle_ascii_mixed = b"bCd";
-$needle_ascii_lower = b"bcd";
+$string_ascii = 'abcdef';
+$needle_ascii_upper = "BCD";
+$needle_ascii_mixed = "bCd";
+$needle_ascii_lower = "bcd";
 
 //Greek string in lower case UTF-8
 $string_mb = base64_decode('zrHOss6zzrTOtc62zrfOuM65zrrOu868zr3Ovs6/z4DPgc+Dz4TPhc+Gz4fPiM+J');

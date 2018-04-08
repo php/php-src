@@ -8,5 +8,5 @@ if (!extension_loaded("openssl")) die("skip");
 var_dump(openssl_decrypt('kzo w2RMExUTYQXW2Xzxmg==', 'aes-128-cbc', 'pass', false, 'pass'));
 
 --EXPECTF--
-Warning: openssl_decrypt(): Failed to base64 decode the input in %s on line %s
+Warning: openssl_decrypt(): IV passed is only 4 bytes long, cipher expects an IV of precisely 16 bytes, padding with \0 in %s on line %d
 bool(false)

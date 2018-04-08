@@ -53,4 +53,4 @@ $uri = 'php://output';
 echo $proc->transformToURI($xsldoc, $uri, 'stringValue');
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToUri() expects exactly 2 parameters, 3 given in %s on line %i
+Warning: XSLTProcessor::transformToUri() expects exactly 2 parameters, 3 given in %s on line %d
