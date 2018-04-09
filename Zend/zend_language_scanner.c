@@ -8081,11 +8081,11 @@ yyc_ST_NOWDOC:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
-	zend_copy_value(zendlval, yytext, yyleng);
+	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
 	if (!EG(exception) && spacing != -1 && PARSER_MODE()
 	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
-		zend_copy_value(zendlval, yytext, yyleng);
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);
