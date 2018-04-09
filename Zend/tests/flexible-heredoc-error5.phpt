@@ -5,5 +5,7 @@ Flexible heredoc syntax error 5: mixing spaces and tabs in ending marker for 0 l
 
 echo <<<END
 	 END;
+
+?>
 --EXPECTF--
 Parse error: Invalid indentation - tabs and spaces cannot be mixed in %s on line %d

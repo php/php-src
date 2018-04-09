@@ -19,6 +19,8 @@ var_dump(<<<DOC1
     }
     c
     DOC1);
+
+?>
 --EXPECT--
 string(5) "a
 b

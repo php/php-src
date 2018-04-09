@@ -26,6 +26,8 @@ the same delimiter name as the heredoc
     FOO;
     var_dump($b);
 }
+
+?>
 --EXPECT--
 string(8) "Test
 FOO"

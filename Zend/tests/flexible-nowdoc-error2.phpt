@@ -8,5 +8,7 @@ echo <<<'END'
     	b
     	c
      END;
+
+?>
 --EXPECTF--
 Parse error: Invalid indentation - tabs and spaces cannot be mixed in %s on line %d

@@ -24,5 +24,7 @@ try {
 } catch (Exception $e) {
 	var_dump($e->getLine());
 }
+
+?>
 --EXPECT--
 int(20)

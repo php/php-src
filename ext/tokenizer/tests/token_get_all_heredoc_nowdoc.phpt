@@ -138,6 +138,7 @@ foreach ($tests as $i => $test) {
     test($test, TOKEN_PARSE);
 }
 
+?>
 --EXPECT--
 Without TOKEN_PARSE:
 
