@@ -2350,7 +2350,11 @@ skip_escape_conversion:
 			}
 		}
 
-		if (first_token == T_VARIABLE && SCNG(heredoc_indentation)) {
+		if (
+		    (first_token == T_VARIABLE
+		     || first_token == T_DOLLAR_OPEN_CURLY_BRACES
+		     || first_token == T_CURLY_OPEN
+		    ) && SCNG(heredoc_indentation)) {
 			zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", SCNG(heredoc_indentation));
 		}
 
