@@ -1111,7 +1111,7 @@ skip_escape_conversion:
 
 static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
 {
-	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip;
+	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip, newline_count = 0;
 	char *copy = Z_STRVAL_P(zendlval);
 	zend_bool trailing_newline = 0;
 
@@ -1124,11 +1124,13 @@ static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline,
 			}
 
 			if (copy[j] != ' ' && copy[j] != '\t') {
+				CG(zend_lineno) += newline_count;
 				zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
 				goto error;
 			}
 
 			if ((!using_spaces && copy[j] == ' ') || (using_spaces && copy[j] == '\t')) {
+				CG(zend_lineno) += newline_count;
 				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 				goto error;
 			}
@@ -1151,9 +1153,14 @@ skip:
 			copy[i++] = copy[j++];
 			trailing_newline = 1;
 		}
+
+		if (trailing_newline) {
+			++newline_count;
+		}
 	}
 
 	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline && indentation) {
+		CG(zend_lineno) += newline_count;
 		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
 		goto error;
 	}
