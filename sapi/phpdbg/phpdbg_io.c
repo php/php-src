@@ -290,7 +290,7 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 			}
 		}
 
-		snprintf(port_buf, 7, "%u", port);
+		snprintf(port_buf, sizeof(port_buf), "%u", port);
 		if (!any_addr) {
 			rc = getaddrinfo(addr, port_buf, &hints, &res);
 		} else {
@@ -301,20 +301,18 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 #ifndef PHP_WIN32
 			if (rc == EAI_SYSTEM) {
 				char buf[128];
-				int wrote;
 
-				wrote = snprintf(buf, 128, "Could not translate address '%s'", addr);
-				buf[wrote] = '\0';
+				snprintf(buf, sizeof(buf), "Could not translate address '%s'", addr);
+
 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
 			} else {
 #endif
 				char buf[256];
-				int wrote;
 
-				wrote = snprintf(buf, 256, "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
-				buf[wrote] = '\0';
+				snprintf(buf, sizeof(buf), "Host '%s' not found. %s", addr, estrdup(gai_strerror(rc)));
+
 				zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
 
 				return sock;
@@ -324,13 +322,10 @@ PHPDBG_API int phpdbg_create_listenable_socket(const char *addr, unsigned short 
 			return sock;
 		}
 
-		if((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
-			char buf[128];
-			int wrote;
+		if ((sock = socket(res->ai_family, res->ai_socktype, res->ai_protocol)) == -1) {
+			const char *msg = "Unable to create socket";
 
-			wrote = sprintf(buf, "Unable to create socket");
-			buf[wrote] = '\0';
-			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, buf, strlen(buf));
+			zend_quiet_write(PHPDBG_G(io)[PHPDBG_STDERR].fd, msg, strlen(msg));
 
 			return sock;
 		}
