@@ -123,9 +123,9 @@ extern "C" {
 ** [sqlite3_libversion_number()], [sqlite3_sourceid()],
 ** [sqlite_version()] and [sqlite_source_id()].
 */
-#define SQLITE_VERSION        "3.23.0"
-#define SQLITE_VERSION_NUMBER 3023000
-#define SQLITE_SOURCE_ID      "2018-04-02 11:04:16 736b53f57f70b23172c30880186dce7ad9baa3b74e3838cae5847cffb98f5cd2"
+#define SQLITE_VERSION        "3.23.1"
+#define SQLITE_VERSION_NUMBER 3023001
+#define SQLITE_SOURCE_ID      "2018-04-10 17:39:29 4bb2294022060e61de7da5c227a69ccd846ba330e31626ebcd59a94efd148b3b"
 
 /*
 ** CAPI3REF: Run-Time Library Version Numbers
@@ -10106,6 +10106,13 @@ SQLITE_API void sqlite3changegroup_delete(sqlite3_changegroup*);
 ** is only allocated and populated if one or more conflicts were encountered
 ** while applying the patchset. See comments surrounding the sqlite3_rebaser
 ** APIs for further details.
+**
+** The behavior of sqlite3changeset_apply_v2() and its streaming equivalent
+** may be modified by passing a combination of
+** [SQLITE_CHANGESETAPPLY_NOSAVEPOINT | supported flags] as the 9th parameter.
+**
+** Note that the sqlite3changeset_apply_v2() API is still <b>experimental</b>
+** and therefore subject to change.
 */
 SQLITE_API int sqlite3changeset_apply(
   sqlite3 *db,                    /* Apply change to "main" db of this handle */
@@ -10136,8 +10143,27 @@ SQLITE_API int sqlite3changeset_apply_v2(
     sqlite3_changeset_iter *p     /* Handle describing change and conflict */
   ),
   void *pCtx,                     /* First argument passed to xConflict */
-  void **ppRebase, int *pnRebase
+  void **ppRebase, int *pnRebase, /* OUT: Rebase data */
+  int flags                       /* Combination of SESSION_APPLY_* flags */
 );
+
+/*
+** CAPI3REF: Flags for sqlite3changeset_apply_v2
+**
+** The following flags may passed via the 9th parameter to
+** [sqlite3changeset_apply_v2] and [sqlite3changeset_apply_v2_strm]:
+**
+** <dl>
+** <dt>SQLITE_CHANGESETAPPLY_NOSAVEPOINT <dd>
+**   Usually, the sessions module encloses all operations performed by
+**   a single call to apply_v2() or apply_v2_strm() in a [SAVEPOINT]. The
+**   SAVEPOINT is committed if the changeset or patchset is successfully
+**   applied, or rolled back if an error occurs. Specifying this flag
+**   causes the sessions module to omit this savepoint. In this case, if the
+**   caller has an open transaction or savepoint when apply_v2() is called, 
+**   it may revert the partially applied changeset by rolling it back.
+*/
+#define SQLITE_CHANGESETAPPLY_NOSAVEPOINT   0x0001
 
 /* 
 ** CAPI3REF: Constants Passed To The Conflict Handler
@@ -10399,6 +10425,7 @@ SQLITE_API void sqlite3rebaser_delete(sqlite3_rebaser *p);
 ** <table border=1 style="margin-left:8ex;margin-right:8ex">
 **   <tr><th>Streaming function<th>Non-streaming equivalent</th>
 **   <tr><td>sqlite3changeset_apply_strm<td>[sqlite3changeset_apply] 
+**   <tr><td>sqlite3changeset_apply_strm_v2<td>[sqlite3changeset_apply_v2] 
 **   <tr><td>sqlite3changeset_concat_strm<td>[sqlite3changeset_concat] 
 **   <tr><td>sqlite3changeset_invert_strm<td>[sqlite3changeset_invert] 
 **   <tr><td>sqlite3changeset_start_strm<td>[sqlite3changeset_start] 
@@ -10508,7 +10535,8 @@ SQLITE_API int sqlite3changeset_apply_v2_strm(
     sqlite3_changeset_iter *p     /* Handle describing change and conflict */
   ),
   void *pCtx,                     /* First argument passed to xConflict */
-  void **ppRebase, int *pnRebase
+  void **ppRebase, int *pnRebase,
+  int flags
 );
 SQLITE_API int sqlite3changeset_concat_strm(
   int (*xInputA)(void *pIn, void *pData, int *pnData),
