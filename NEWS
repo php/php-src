@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
     (chrullrich, cmb)
 
+- phpdbg:
+  . Fixed bug #76143 (Memory corruption: arbitrary NUL overwrite). (Laruence)
+
 - SPL:
   . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
     (carusogabriel)
