@@ -33,6 +33,9 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #76094 (Access violation when using opcache). (Laruence)
 
+- phpdbg:
+  . Fixed bug #76143 (Memory corruption: arbitrary NUL overwrite). (Laruence)
+
 - SPL:
   . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
     (carusogabriel)
