@@ -151,6 +151,7 @@ static int *s_accepting_workers = NULL;
 static int *s_global_counter = &s_req_processed;
 static int s_max_busy_workers = -1;
 static char *s_stderr_log_path = NULL;
+static int s_ignore_pid = -1;
 
 LSAPI_Request g_req = 
 { .m_fdListen = -1, .m_fd = -1 };
@@ -1140,7 +1141,13 @@ static int lsapi_changeUGid( LSAPI_Request * pReq )
     }
 
     s_uid = uid;
-    
+
+    if ( pReq->m_fdListen != -1 )
+    {
+        close( pReq->m_fdListen );
+        pReq->m_fdListen = -1;
+    }
+
     pStderrLog = LSAPI_GetEnv_r( pReq, "LSAPI_STDERR_LOG");
     if (pStderrLog)
         lsapi_reopen_stderr(pStderrLog);
@@ -2806,6 +2813,12 @@ static void lsapi_sigchild( int signal )
             pid = 0;
             continue;
         }
+        if ( pid == s_ignore_pid )
+        {
+            pid = 0;
+            s_ignore_pid = -1;
+            continue;
+        }
         child_status = find_child_status( pid );
         if ( child_status )
         {
@@ -3024,7 +3037,7 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
     while( !s_stop )
     {
         if (s_proc_group_timer_cb != NULL) {
-            s_proc_group_timer_cb();
+            s_proc_group_timer_cb(&s_ignore_pid);
         }
 
         curTime = time( NULL );
@@ -3119,13 +3132,14 @@ static int lsapi_prefork_server_accept( lsapi_prefork_server * pServer,
                 if (s_busy_workers)
                     __sync_add_and_fetch(s_busy_workers, 1);
                 lsapi_set_nblock( pReq->m_fd, 0 );
-                //keep it open if busy_count is used. 
-                s_keepListener = 1;
-//                 if ( pReq->m_fdListen != -1 )
-//                 {
-//                     close( pReq->m_fdListen );
-//                     pReq->m_fdListen = -1;
-//                 }
+                //keep it open if busy_count is used.
+                if (s_busy_workers && s_uid != 0)
+                    s_keepListener = 1;
+                else if ( pReq->m_fdListen != -1 )
+                {
+                    close( pReq->m_fdListen );
+                    pReq->m_fdListen = -1;
+                }
                 /* don't catch our signals */
                 sigaction( SIGCHLD, &old_child, 0 );
                 sigaction( SIGTERM, &old_term, 0 );
