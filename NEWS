@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.17
+26 Apr 2018, PHP 7.1.17
 
 - Date:
   . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
