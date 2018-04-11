@@ -42,5 +42,5 @@ HEADER
 
 fclose($fp);
 ?>
---EXPECTF--
-HTTP/1.1 404 Not Found
+--EXPECT--
+HTTP/1.1 200 OK

@@ -21,7 +21,7 @@ if (!$fp) {
 }
 
 if(fwrite($fp, <<<HEADER
-GET /foo/bar HTTP/1.1
+GET /foo/bar.anyext HTTP/1.1
 Host: {$host}
 
 
@@ -39,9 +39,8 @@ if (!$fp) {
   die("connect failed");
 }
 
-
 if(fwrite($fp, <<<HEADER
-GET /foo/bar/ HTTP/1.0
+GET /foo/bar.php HTTP/1.1
 Host: {$host}
 
 
@@ -49,26 +48,7 @@ HEADER
 )) {
 	while (!feof($fp)) {
 		echo fgets($fp);
-	}
-}
-
-fclose($fp);
-
-$fp = fsockopen($host, $port, $errno, $errstr, 0.5);
-if (!$fp) {
-  die("connect failed");
-}
-
-
-if(fwrite($fp, <<<HEADER
-GET /foo/bar.js HTTP/1.0
-Host: {$host}
-
-
-HEADER
-)) {
-	while (!feof($fp)) {
-		echo fgets($fp);
+    break;
 	}
 }
 
@@ -82,20 +62,5 @@ Connection: close
 X-Powered-By: PHP/%s
 Content-type: text/html; charset=UTF-8
 
-string(8) "/foo/bar"
-HTTP/1.0 200 OK
-Host: %s
-Date: %s
-Connection: close
-X-Powered-By: PHP/%s
-Content-type: text/html; charset=UTF-8
-
-string(9) "/foo/bar/"
-HTTP/1.0 200 OK
-Host: %s
-Date: %s
-Connection: close
-X-Powered-By: PHP/%s
-Content-type: text/html; charset=UTF-8
-
-string(11) "/foo/bar.js"
+string(15) "/foo/bar.anyext"
+HTTP/1.1 404 Not Found
