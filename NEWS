@@ -1,6 +1,9 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.2.5
+?? ??? 2018, PHP 7.2.6
+
+
+26 Apr 2018, PHP 7.2.5
 
 - Core:
   . Fixed bug #75722 (Convert valgrind detection to configure option).
