@@ -28,12 +28,18 @@ Core:
     in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
     error_get_last() state. As such, they now work the same way as manually
     thrown exceptions.
+  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
+    and `boolean`.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+Reflection:
+  . Reflection results now return `int` and `bool` instead of `integer`
+    and `boolean`.
 
 SPL:
   . If an SPL autoloader throws an exception, following autoloaders will not be
