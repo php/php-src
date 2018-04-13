@@ -2612,16 +2612,14 @@ heredoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	if (!SCNG(heredoc_scan_ahead) && !EG(exception)) {
+	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
 		zend_string *copy = Z_STR_P(zendlval);
 
 	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
-			ZVAL_STRINGL(zendlval, yytext, yyleng);
-			RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+			RETURN_TOKEN(T_ERROR);
 		}
 
-		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)
-		    && PARSER_MODE()) {
+		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)) {
 			zend_string_free(copy);
 			RETURN_TOKEN(T_ERROR);
 		}
@@ -2709,7 +2707,7 @@ nowdoc_scan_done:
 
 	if (!EG(exception) && spacing != -1 && PARSER_MODE()
 	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
-		ZVAL_STRINGL(zendlval, yytext, yyleng);
+		RETURN_TOKEN(T_ERROR);
 	}
 
 	HANDLE_NEWLINES(yytext, yyleng - newline);
