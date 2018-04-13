@@ -3902,7 +3902,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 }
 /* }}} */
 
-/* {{{ proto array array_merge(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_merge(array arr1 [, array ...])
    Merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge)
 {
@@ -3910,7 +3910,7 @@ PHP_FUNCTION(array_merge)
 }
 /* }}} */
 
-/* {{{ proto array array_merge_recursive(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_merge_recursive(array arr1 [, array ...])
    Recursively merges elements from passed arrays into one array */
 PHP_FUNCTION(array_merge_recursive)
 {
@@ -3918,7 +3918,7 @@ PHP_FUNCTION(array_merge_recursive)
 }
 /* }}} */
 
-/* {{{ proto array array_replace(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_replace(array arr1 [, array ...])
    Replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace)
 {
@@ -3926,7 +3926,7 @@ PHP_FUNCTION(array_replace)
 }
 /* }}} */
 
-/* {{{ proto array array_replace_recursive(array arr1, array arr2 [, array ...])
+/* {{{ proto array array_replace_recursive(array arr1 [, array ...])
    Recursively replaces elements from passed arrays into one array */
 PHP_FUNCTION(array_replace_recursive)
 {
