@@ -2625,6 +2625,8 @@ heredoc_scan_done:
 		}
 
 		zend_string_free(copy);
+	} else {
+		HANDLE_NEWLINES(yytext, yyleng - newline);
 	}
 
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
