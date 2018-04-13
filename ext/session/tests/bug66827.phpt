@@ -8,5 +8,5 @@ $_COOKIE[session_name()] = array();
 session_start();
 echo 'OK';
 ?>
---EXPECTF--
+--EXPECT--
 OK

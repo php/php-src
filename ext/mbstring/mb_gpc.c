@@ -261,7 +261,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	num = n; /* make sure to process initialized vars only */
 
 	/* initialize converter */
-	if (info->num_from_encodings <= 0) {
+	if (info->num_from_encodings == 0) {
 		from_encoding = &mbfl_encoding_pass;
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];

@@ -59,7 +59,7 @@ foreach( $str_array as $str )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripslashes() : with strings containing newline and tab characters ***
 
 -- Iteration 1 --

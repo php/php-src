@@ -154,5 +154,5 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS t1"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 done!

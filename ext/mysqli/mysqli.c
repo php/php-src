@@ -321,7 +321,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
 	}
 
@@ -354,7 +354,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
 	}
 
@@ -409,7 +409,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
 	}
 
@@ -561,7 +561,7 @@ static PHP_GINIT_FUNCTION(mysqli)
 PHP_MINIT_FUNCTION(mysqli)
 {
 	zend_class_entry *ce,cex;
-	zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+	const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND

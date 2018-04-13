@@ -25,7 +25,7 @@ echo $d->format("F j, Y, g:i:s a") . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing new DateTime() : with user space __construct magic method ***
 May 1, 1967, 10:30:41 pm
 ===DONE===

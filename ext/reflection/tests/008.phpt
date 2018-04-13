@@ -26,7 +26,7 @@ foreach ($a as $key=>$val) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(20) "Invalid method name "
 string(21) "Invalid method name 1"
 string(21) "Class  does not exist"

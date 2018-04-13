@@ -34,7 +34,7 @@ var_dump( array_chunk($input_array, $size, false) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_chunk() : usage variations ***
 
 -- Testing array_chunk() by supplying an array containing different sub arrays & 'preserve_key' as defualt --

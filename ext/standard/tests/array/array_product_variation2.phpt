@@ -14,7 +14,7 @@ echo "\n-- Testing array_product() function with a keyed array array --\n";
 var_dump( array_product(array("bob" => 2, "janet" => 5)) );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_product() : variations ***
 
 -- Testing array_product() function with a keyed array array --

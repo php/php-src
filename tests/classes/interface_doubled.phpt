@@ -153,7 +153,7 @@ echo $t->test('if_e');
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 class_a
 is_a(class_a, if_a) yes
 is_a(class_a, if_b) no

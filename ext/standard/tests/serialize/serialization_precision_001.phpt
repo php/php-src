@@ -17,5 +17,5 @@ serialize_precision=10
 
 var_dump(serialize(0.1));
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "d:0.1;"

@@ -3,6 +3,7 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.3.0alpha1
 
 - Core:
+  . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
     'php ext_skel.php' for all options. This means there is no dependencies 
     thrus making it work on Windows out of the box. (Kalle)
@@ -12,6 +13,8 @@ PHP                                                                        NEWS
   . Added support for references in list() and array destructuring, per
     RFC https://wiki.php.net/rfc/list_reference_assignment.
     (David Walker)
+  . Fixed bug #75683 (Memory leak in zend_register_functions() in ZTS mode).
+    (Dmitry)
   . Fixed bug #75031 (support append mode in temp/memory streams). (adsr)
   . Fixed bug #74860 (Uncaught exceptions not being formatted properly when
     error_log set to "syslog"). (Philip Prindeville)
@@ -41,19 +44,20 @@ PHP                                                                        NEWS
   . Fixed bug #75164 (split_bc_num() is pointless). (cmb)
   . Fixed bug #75169 (BCMath errors/warnings bypass PHP's error handling). (cmb)
 
+- cURL:
+  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
+    (cebe)
+
 - Date:
   . Implemented FR #74668: Add DateTime::createFromImmutable() method.
     (majkl578, Rican7)
   . Fixed bug #75222 (DateInterval microseconds property always 0). (jhdxr)
   . Fixed bug #68406 (calling var_dump on a DateTimeZone object modifies it).
     (jhdxr)
+  . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
 
 - DBA:
   . Fixed bug #75264 (compiler warnings emitted). (petk)
-
-- cURL:
-  . Fixed bug #74125 (Fixed finding CURL on systems with multiarch support).
-    (cebe)
 
 - GD:
   . Added support for WebP in imagecreatefromstring() (Andreas Treichel, cmb).
@@ -65,12 +69,12 @@ PHP                                                                        NEWS
   . Added gmp_perfect_power(a). (Nikita)
   . Added gmp_kronecker(a, b). (Nikita)
 
+- interbase:
+  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
+
 - intl:
   . Fixed bug #75317 (UConverter::setDestinationEncoding changes source instead 
     of destination). (andrewnester)
-
-- interbase:
-  . Fixed bug #75453 (Incorrect reflection for ibase_[p]connect). (villfa)
 
 - JSON:
   . Added JSON_THROW_ON_ERROR flag. (Andrea)
@@ -89,7 +93,7 @@ PHP                                                                        NEWS
     only litespeed SAPI). (petk)
   . Fixed bug #75251 (Missing program prefix and suffix). (petk)
 
-- Mbstring:
+- mbstring:
   . Fixed bug #65544 (mb title case conversion-first word in quotation isn't
     capitalized). (Nikita)
   . Fixed bug #71298 (MB_CASE_TITLE misbehaves with curled apostrophe/quote.
@@ -97,6 +101,7 @@ PHP                                                                        NEWS
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)
+  . Update to Oniguruma 6.8.1. (cmb)
 
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)
@@ -125,12 +130,6 @@ PHP                                                                        NEWS
 - PDO SQLite
   . Add support for additional open flags
 
-- phar:
-  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
-    (bwbroersma)
-  . Fixed bug #65414 (deal with leading slash when adding files correctly).
-    (bishopb)
-
 - pgsql:
   . Added new error constants for pg_result_error(): (Kalle)
     - Requires Postgres 9.3
@@ -142,6 +141,16 @@ PHP                                                                        NEWS
 	- Requires Postgres 9.6
 	  - PGSQL_DIAG_SEVERITY_NONLOCALIZED
 
+- phar:
+  . Fixed bug #74991 (include_path has a 4096 char limit in some cases).
+    (bwbroersma)
+  . Fixed bug #65414 (deal with leading slash when adding files correctly).
+    (bishopb)
+
+- readline:
+  . Added completion_append_character and completion_suppress_append options
+    to readline_info() if linked against libreadline. (krageon)
+
 - Session:
   . Fixed bug #74941 (session fails to start after having headers sent). 
     (morozov)
@@ -151,6 +160,8 @@ PHP                                                                        NEWS
 
 - SOAP:
   . Fixed bug #75464 (Wrong reflection on SoapClient::__setSoapHeaders). (villfa)
+  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
+    used). (Anton Artamonov)
 
 - SPL:
   . Fixed bug #74977 (Appending AppendIterator leads to segfault). 
@@ -162,15 +173,14 @@ PHP                                                                        NEWS
   . Fixed bug #75878 (RecursiveTreeIterator::setPostfix has wrong signature).
     (cmb)
   . Fixed bug #74519 (strange behavior of AppendIterator). (jhdxr)
+  . Fixed bug #76131 (mismatch arginfo for splarray constructor). 
+    (carusogabriel)
 
 - SQLite3:
-  . Updated bundled libsqlite to 3.22.0. (cmb)
-
-- Soap:
-  . Fixed bug #70469 (SoapClient generates E_ERROR even if exceptions=1 is
-    used). (Anton Artamonov)
+  . Updated bundled libsqlite to 3.23.1. (cmb)
 
 - Standard:
+  . Added is_countable() function. (Gabriel Caruso)
   . Fixed bug #75916 (DNS_CAA record results contain garbage). (Mike, 
     Philip Sharp)
   . Fixed unserialize(), to disable creation of unsupported data structures
@@ -178,6 +188,9 @@ PHP                                                                        NEWS
   . Fixed bug #75409 (accept EFAULT in addition to ENOSYS as indicator 
     that getrandom() is missing). (sarciszewski)
   . Fixed bug #74719 (fopen() should accept NULL as context). (Alexander Holman)
+  . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
+  . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
+  . Remove superfluous warnings from inet_ntop()/inet_pton(). (daverandom)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).

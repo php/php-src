@@ -49,7 +49,7 @@ const zend_function_entry php_dom_documentfragment_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMDocumentFragment::__construct() */
+/* {{{ proto DOMDocumentFragment::__construct() */
 PHP_METHOD(domdocumentfragment, __construct)
 {
 
@@ -57,7 +57,7 @@ PHP_METHOD(domdocumentfragment, __construct)
 	xmlNodePtr nodep = NULL, oldnode = NULL;
 	dom_object *intern;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 

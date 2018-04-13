@@ -15,6 +15,6 @@ try {
   echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 In autoload: string(6) "UndefI"
 Interface UndefI does not exist

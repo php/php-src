@@ -29,5 +29,5 @@ require_once('skipifconnectfailure.inc');
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

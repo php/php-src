@@ -21,7 +21,7 @@ $str2 = " 00";
 var_dump( strnatcmp( $str1, $str2) );
 ?>
 
---EXPECTF--
+--EXPECT--
 -- Testing strnatcmp() function whitespace, left-align, digit --
 -- Leading whitespace, digits, string 1 longer --
 int(1)

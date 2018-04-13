@@ -25,5 +25,5 @@ try {
     var_dump($e->getMessage());
 }
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "Failed"

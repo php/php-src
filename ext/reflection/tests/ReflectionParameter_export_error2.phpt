@@ -26,6 +26,6 @@ catch (ReflectionException $e) {
 	echo $e->getMessage() . "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Method ReflectionFunction::__invoke() does not exist
 The parameter class is expected to be either a string, an array(class, method) or a callable object

@@ -97,7 +97,8 @@ typedef struct _zend_ast_znode {
 	uint32_t lineno;
 	znode node;
 } zend_ast_znode;
-ZEND_API zend_ast *zend_ast_create_znode(znode *node);
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_znode(znode *node);
 
 static zend_always_inline znode *zend_ast_get_znode(zend_ast *ast) {
 	return &((zend_ast_znode *) ast)->node;
@@ -691,7 +692,7 @@ void zend_file_context_end(zend_file_context *prev_context);
 extern ZEND_API zend_op_array *(*zend_compile_file)(zend_file_handle *file_handle, int type);
 extern ZEND_API zend_op_array *(*zend_compile_string)(zval *source_string, char *filename);
 
-ZEND_API int lex_scan(zval *zendlval);
+ZEND_API int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem);
 void startup_scanner(void);
 void shutdown_scanner(void);
 
@@ -772,10 +773,7 @@ ZEND_API int zend_unmangle_property_name_ex(const zend_string *name, const char 
 #define ZEND_FUNCTION_DTOR zend_function_dtor
 #define ZEND_CLASS_DTOR destroy_zend_class
 
-zend_op *get_next_op(zend_op_array *op_array);
-void init_op(zend_op *op);
 ZEND_API int pass_two(zend_op_array *op_array);
-zend_brk_cont_element *get_next_brk_cont_element(void);
 ZEND_API zend_bool zend_is_compiling(void);
 ZEND_API char *zend_make_compiled_string_description(const char *name);
 ZEND_API void zend_initialize_class_data(zend_class_entry *ce, zend_bool nullify_handlers);
@@ -803,7 +801,7 @@ ZEND_API zend_bool zend_is_auto_global_str(char *name, size_t len);
 ZEND_API size_t zend_dirname(char *path, size_t len);
 ZEND_API void zend_set_function_arg_flags(zend_function *func);
 
-int zendlex(zend_parser_stack_elem *elem);
+int ZEND_FASTCALL zendlex(zend_parser_stack_elem *elem);
 
 int zend_add_literal(zend_op_array *op_array, zval *zv);
 
@@ -1010,7 +1008,7 @@ END_EXTERN_C()
 /* generate ZEND_INIT_FCALL_BY_NAME for userland functions instead of ZEND_INIT_FCALL */
 #define ZEND_COMPILE_IGNORE_USER_FUNCTIONS      (1<<8)
 
-/* force IS_OBJ_USE_GUARDS for all classes */
+/* force ZEND_ACC_USE_GUARDS for all classes */
 #define ZEND_COMPILE_GUARDS						(1<<9)
 
 /* disable builtin special case function calls */

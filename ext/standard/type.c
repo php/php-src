@@ -395,6 +395,20 @@ PHP_FUNCTION(is_iterable)
 }
 /* }}} */
 
+/* {{{ proto bool is_countable(mixed var)
+   Returns true if var is countable (array or instance of Countable). */
+PHP_FUNCTION(is_countable)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_is_countable(var));
+}
+/* }}} */
+
 /*
  * Local variables:
  * tab-width: 4

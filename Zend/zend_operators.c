@@ -543,10 +543,9 @@ try_again:
 		case IS_STRING:
 			break;
 		case IS_RESOURCE: {
-			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-			int len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
+			zend_string *str = zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 			zval_ptr_dtor(op);
-			ZVAL_NEW_STR(op, zend_string_init(buf, len, 0));
+			ZVAL_NEW_STR(op, str);
 			break;
 		}
 		case IS_LONG: {
@@ -861,11 +860,7 @@ try_again:
 		case IS_TRUE:
 			return ZSTR_CHAR('1');
 		case IS_RESOURCE: {
-			char buf[sizeof("Resource id #") + MAX_LENGTH_OF_LONG];
-			int len;
-
-			len = snprintf(buf, sizeof(buf), "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
-			return zend_string_init(buf, len, 0);
+			return zend_strpprintf(0, "Resource id #" ZEND_LONG_FMT, (zend_long)Z_RES_HANDLE_P(op));
 		}
 		case IS_LONG: {
 			return zend_long_to_str(Z_LVAL_P(op));

@@ -38,7 +38,7 @@ $time = ftp_mdtm($ftp, "MdTm 19990929043300 file6");
 var_dump($time);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 June 15 1998 10:00:45 000000
 June 15 1998 10:00:45 000000

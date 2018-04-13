@@ -72,7 +72,7 @@ require dirname(__FILE__) . '/mysql_pdo_test.inc';
 $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 ?>
---EXPECTF--
+--EXPECT--
 [003] Execute has failed, 'HY093' array (
   0 => 'HY093',
   1 => NULL,

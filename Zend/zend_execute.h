@@ -92,8 +92,12 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			garbage = Z_COUNTED_P(variable_ptr);
 			if (GC_DELREF(garbage) == 0) {
 				ZVAL_COPY_VALUE(variable_ptr, value);
-				if (value_type & (IS_CONST|IS_CV)) {
+				if (ZEND_CONST_COND(value_type  == IS_CONST, 0)) {
 					if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+						Z_ADDREF_P(variable_ptr);
+					}
+				} else if (value_type & (IS_CONST|IS_CV)) {
+					if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
 						Z_ADDREF_P(variable_ptr);
 					}
 				} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
@@ -115,8 +119,12 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 	} while (0);
 
 	ZVAL_COPY_VALUE(variable_ptr, value);
-	if (value_type & (IS_CONST|IS_CV)) {
+	if (ZEND_CONST_COND(value_type == IS_CONST, 0)) {
 		if (UNEXPECTED(Z_OPT_REFCOUNTED_P(variable_ptr))) {
+			Z_ADDREF_P(variable_ptr);
+		}
+	} else if (value_type & (IS_CONST|IS_CV)) {
+		if (Z_OPT_REFCOUNTED_P(variable_ptr)) {
 			Z_ADDREF_P(variable_ptr);
 		}
 	} else if (ZEND_CONST_COND(value_type == IS_VAR, 1) && UNEXPECTED(ref)) {
@@ -362,6 +370,23 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 		(slot)[0] = (ce); \
 		(slot)[1] = (ptr); \
 	} while (0)
+
+#define CACHE_SPECIAL (1<<0)
+
+#define IS_SPECIAL_CACHE_VAL(ptr) \
+	(((uintptr_t)(ptr)) & CACHE_SPECIAL)
+
+#define ENCODE_SPECIAL_CACHE_NUM(num) \
+	((void*)((((uintptr_t)(num)) << 1) | CACHE_SPECIAL))
+
+#define DECODE_SPECIAL_CACHE_NUM(ptr) \
+	(((uintptr_t)(ptr)) >> 1)
+
+#define ENCODE_SPECIAL_CACHE_PTR(ptr) \
+	((void*)(((uintptr_t)(ptr)) | CACHE_SPECIAL))
+
+#define DECODE_SPECIAL_CACHE_PTR(ptr) \
+	((void*)(((uintptr_t)(ptr)) & ~CACHE_SPECIAL))
 
 #define SKIP_EXT_OPLINE(opline) do { \
 		while (UNEXPECTED((opline)->opcode >= ZEND_EXT_STMT \

@@ -47,7 +47,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           fpm
-PRIMARY MAINTAINER:  Antony Dovgal <tony2001@php.net>, Jerome Loyet <fat@php.net>
+PRIMARY MAINTAINER:  Jakub Zelenka <bukka@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3.3

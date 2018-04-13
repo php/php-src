@@ -74,7 +74,7 @@ foreach ($needles as $needle) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strripos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)

@@ -27,7 +27,7 @@ var_dump(session_name());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_name() : variation ***
 string(4) "blah"
 string(4) "blah"

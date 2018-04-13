@@ -20,11 +20,11 @@ array(1) {
   ["file1"]=>
   array(5) {
     ["name"]=>
-    %string|unicode%(9) "file1.txt"
+    string(9) "file1.txt"
     ["type"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["tmp_name"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["error"]=>
     int(3)
     ["size"]=>

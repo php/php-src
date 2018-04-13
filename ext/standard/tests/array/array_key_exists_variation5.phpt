@@ -28,7 +28,7 @@ var_dump(array_key_exists(0, $multi_array['sub1']));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : usage variations ***
 
 -- Attempt to match key in sub-array --

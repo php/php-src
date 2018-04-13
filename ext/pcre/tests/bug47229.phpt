@@ -20,18 +20,18 @@ var_dump($m);
 
 ?>
 --EXPECTF--
-%string|unicode%(13) "\-oh really\?"
+string(13) "\-oh really\?"
 array(1) {
   [0]=>
-  %string|unicode%(4) "a---"
+  string(4) "a---"
 }
 array(1) {
   [0]=>
-  %string|unicode%(1) "a"
+  string(1) "a"
 }
 array(1) {
   [0]=>
-  %string|unicode%(5) "a----"
+  string(5) "a----"
 }
 array(0) {
 }

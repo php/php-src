@@ -40,7 +40,7 @@ var_dump(session_destroy());
 
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_module_name() : variation ***
 
 array(3) {

@@ -140,7 +140,7 @@ function process_args($argv, $argc) {
 					continue;
 				}
 
-				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) : $argv[$i + 1]);
+				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
 			}
 			break;
 			default: {
@@ -249,9 +249,7 @@ function copy_config_scripts() {
 		$files[] = 'config.w32';
 	}
 
-	if (!$files) {
-		return;
-	}
+	$files[] = '.gitignore';
 
 	foreach($files as $config_script) {
 		$new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;

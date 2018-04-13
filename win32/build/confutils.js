@@ -76,6 +76,7 @@ VC_VERSIONS[1910] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1911] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1912] = 'MSVC15 (Visual C++ 2017)';
 VC_VERSIONS[1913] = 'MSVC15 (Visual C++ 2017)';
+VC_VERSIONS[1914] = 'MSVC15 (Visual C++ 2017)';
 
 var VC_VERSIONS_SHORT = new Array();
 VC_VERSIONS_SHORT[1700] = 'VC11';
@@ -85,6 +86,7 @@ VC_VERSIONS_SHORT[1910] = 'VC15';
 VC_VERSIONS_SHORT[1911] = 'VC15';
 VC_VERSIONS_SHORT[1912] = 'VC15';
 VC_VERSIONS_SHORT[1913] = 'VC15';
+VC_VERSIONS_SHORT[1914] = 'VC15';
 
 if (PROGRAM_FILES == null) {
 	PROGRAM_FILES = "C:\\Program Files";
@@ -1141,7 +1143,7 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	 */
 	if (FSO.FileExists(creditspath + '\\template.rc')) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": " + creditspath + "\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo $(BASE_INCLUDES) /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"' +
 			makefiletarget + '\\"" /d PRODUCT_NAME="\\"' + res_prod_name +
 			versioning + '\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" ' +
@@ -1150,14 +1152,14 @@ function generate_version_info_resource(makefiletarget, basename, creditspath, s
 	}
 	if (MODE_PHPIZE) {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": $(PHP_DIR)\\build\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo  $(BASE_INCLUDES) /I $(PHP_DIR)/include /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
 			'\\"" /d THANKS_GUYS="\\"' + thanks + '\\"" $(PHP_DIR)\\build\\template.rc');
 	} else {
 		MFO.WriteLine("$(BUILD_DIR)\\" + resname + ": win32\\build\\template.rc");
-		MFO.WriteLine("\t$(RC) /nologo /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
+		MFO.WriteLine("\t$(RC) /nologo  $(BASE_INCLUDES) /n /fo $(BUILD_DIR)\\" + resname + logo + debug +
 			' /d FILE_DESCRIPTION="\\"' + res_desc + '\\"" /d FILE_NAME="\\"'
 			+ makefiletarget + '\\"" /d URL="\\"' + project_url + 
 			'\\"" /d INTERNAL_NAME="\\"' + internal_name + versioning + 
@@ -1530,7 +1532,11 @@ function EXTENSION(extname, file_list, shared, cflags, dllname, obj_dir)
 	
 		DEFINE('CFLAGS_' + EXT + '_OBJ', '$(CFLAGS_PHP) $(CFLAGS_' + EXT + ')');
 	}
-	if (MODE_PHPIZE && FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+	if (MODE_PHPIZE) {
+		if (!FSO.FileExists(PHP_DIR + "/include/main/config.pickle.h")) {
+			var _tmp = FSO.CreateTextFile(PHP_DIR + "/include/main/config.pickle.h", true);
+			_tmp.Close();
+		}
 		cflags = "/FI main/config.pickle.h " + cflags;
 	}
 	ADD_FLAG("CFLAGS_" + EXT, cflags);
@@ -1670,7 +1676,7 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 				vc_ver = probe_binary(PATH_PROG('cl', null));
 			}
 
-			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions -Xclang -analyzer-output=text";
+			analyzer_base_args += " -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions -Xclang -analyzer-output=text -Xclang -fmodules";
 		} else if (PHP_ANALYZER == "cppcheck") {
 			var analyzer_base_args = "";
 			var analyzer_base_flags = "";
@@ -1690,6 +1696,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 
 			var vc_incs = WshShell.Environment("Process").Item("INCLUDE").split(";")
 			for (i in vc_incs) {
+				if (!vc_incs[i].length) {
+					continue;
+				}
 				analyzer_base_flags += " -I " + "\"" + vc_incs[i] + "\"";
 			}
 
@@ -1702,7 +1711,9 @@ function ADD_SOURCES(dir, file_list, target, obj_dir)
 						"--library=" + cppcheck_lib + " " +
 						/* "--rule-file=win32\build\cppcheck_rules.xml " + */
 						" --std=c89 --std=c++11 " + 
-						"--quiet --inconclusive --template=vs ";
+						"--quiet --inconclusive --template=vs -j 4 " +
+						"--suppress=unmatchedSuppression " +
+						"--suppressions-list=win32\\build\\cppcheck_suppress.txt ";
 
 			var cppcheck_build_dir = get_define("CPPCHECK_BUILD_DIR");
 			if (!!cppcheck_build_dir) {
@@ -1930,6 +1941,7 @@ function write_extensions_summary()
 function write_summary()
 {
 	var ar = new Array();
+	var k = 0;
 
 	STDOUT.WriteBlankLines(2);
 	write_extensions_summary();
@@ -1939,27 +1951,31 @@ function write_summary()
 		output_as_table(["Sapi Name"], sapi_enabled);
 		STDOUT.WriteBlankLines(2);
 	}
-	ar[0] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
-	ar[1] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
-	ar[2] = ['Compiler', COMPILER_NAME];
-	ar[3] = ['Architecture', X64 ? 'x64' : 'x86'];
+	ar[k++] = ['Build type', PHP_DEBUG == "yes" ? "Debug" : "Release"];
+	ar[k++] = ['Thread Safety', PHP_ZTS == "yes" ? "Yes" : "No"];
+	ar[k++] = ['Compiler', COMPILER_NAME];
+	ar[k++] = ['Architecture', X64 ? 'x64' : 'x86'];
 	if (PHP_PGO == "yes") {
-		ar[4] = ['Optimization', "PGO"];
+		ar[k++] = ['Optimization', "PGO"];
 	} else if (PHP_PGI == "yes") {
-		ar[4] = ['Optimization', "PGI"];
+		ar[k++] = ['Optimization', "PGI"];
 	} else {
-		ar[4] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+		ar[k++] = ['Optimization', PHP_DEBUG == "yes" ? "disabled" : "PGO disabled"];
+	}
+	var simd = configure_subst.Item("PHP_SIMD_SCALE");
+	if (!!simd) {
+		ar[k++] = ["Native intrinsics", simd];
 	}
 	if (PHP_ANALYZER == "vs") {
-		ar[5] = ['Static analyzer', 'Visual Studio'];
+		ar[k++] = ['Static analyzer', 'Visual Studio'];
 	} else if (PHP_ANALYZER == "clang") {
-		ar[5] = ['Static analyzer', 'clang'];
+		ar[k++] = ['Static analyzer', 'clang'];
 	} else if (PHP_ANALYZER == "cppcheck") {
-		ar[5] = ['Static analyzer', 'Cppcheck'];
+		ar[k++] = ['Static analyzer', 'Cppcheck'];
 	} else if (PHP_ANALYZER == "pvs") {
-		ar[5] = ['Static analyzer', 'PVS-Studio'];
+		ar[k++] = ['Static analyzer', 'PVS-Studio'];
 	} else {
-		ar[5] = ['Static analyzer', 'disabled'];
+		ar[k++] = ['Static analyzer', 'disabled'];
 	}
 
 	output_as_table(["",""], ar);
@@ -2443,7 +2459,8 @@ function handle_analyzer_makefile_flags(fd, key, val)
 				.replace("/guard:cf ", "")
 				.replace(/\/MP \d+ /, "")
 				.replace(/\/MP /, "")
-				.replace("/LD ", "");
+				.replace("/LD ", "")
+				.replace("/Qspectre ", "");
 		} else if ("cppcheck" == PHP_ANALYZER) {
 			new_val = "";
 
@@ -3122,16 +3139,20 @@ function toolset_setup_arch()
 
 function toolset_setup_codegen_arch()
 {
-	if("no" == PHP_CODEGEN_ARCH) {
+	if("no" == PHP_CODEGEN_ARCH || "yes" == PHP_CODEGEN_ARCH) {
 		return;
 	}
 
 	if (VS_TOOLSET) {
 		var arc = PHP_CODEGEN_ARCH.toUpperCase();
 
-		if ("AVX2" == arc || "AVX" == arc || "SSE2" == arc || "SSE" == arc || "IA32" == arc) {
-			ADD_FLAG("CFLAGS", "/arch:" + arc);
+		if ("IA32" != arc) {
+			ERROR("Only IA32 arch is supported by --with-codegen-arch, got '" + arc + "'");
+		} else if (X64) {
+			ERROR("IA32 arch is only supported with 32-bit build");
 		}
+		ADD_FLAG("CFLAGS", "/arch:" + arc);
+		PHP_NATIVE_INTRINSICS = "disabled";
 	}
 }
 
@@ -3214,6 +3235,7 @@ function toolset_setup_common_cflags()
 			ADD_FLAG('CFLAGS', '-m32');
 		}
 		ADD_FLAG("CFLAGS", " /fallback ");
+		ADD_FLAG("CFLAGS", "-Xclang -fmodules");
 
 		var vc_ver = probe_binary(PATH_PROG('cl', null));
 		ADD_FLAG("CFLAGS"," -fms-compatibility -fms-compatibility-version=" + vc_ver + " -fms-extensions");
@@ -3236,6 +3258,10 @@ function toolset_setup_intrinsic_cflags()
 	var scale = new Array("sse", "sse2", "sse3", "ssse3", "sse4.1", "sse4.2", "avx", "avx2");
 
 	if (VS_TOOLSET) {
+		if ("disabled" == PHP_NATIVE_INTRINSICS) {
+			ERROR("Can't enable intrinsics, --with-codegen-arch passed with an incompatible option. ")
+		}
+
 		if ("no" == PHP_NATIVE_INTRINSICS || "yes" == PHP_NATIVE_INTRINSICS) {
 			PHP_NATIVE_INTRINSICS = default_enabled;
 		}
@@ -3249,6 +3275,7 @@ function toolset_setup_intrinsic_cflags()
 
 			/* All means all. __AVX__ and __AVX2__ are defined by compiler. */
 			ADD_FLAG("CFLAGS","/arch:AVX2");
+			configure_subst.Add("PHP_SIMD_SCALE", "AVX2");
 		} else {
 			var list = PHP_NATIVE_INTRINSICS.split(",");
 			var j = 0;
@@ -3262,6 +3289,18 @@ function toolset_setup_intrinsic_cflags()
 					}
 				}
 			}
+			if (!X64) {
+				/* SSE2 is currently the default on 32-bit. It could change later,
+					for now no need to pass it. But, if SSE only was chosen,
+					/arch:SSE is required. */
+				if ("sse" == scale[j]) {
+					ADD_FLAG("CFLAGS","/arch:SSE");
+				}
+			}
+			configure_subst.Add("PHP_SIMD_SCALE", scale[j].toUpperCase());
+			/* There is no explicit way to enable intrinsics between SSE3 and SSE4.2.
+				The declared macros therefore won't affect the code generation,
+				but will enable the guarded code parts. */
 			if ("avx2" == scale[j]) {
 				ADD_FLAG("CFLAGS","/arch:AVX2");
 				j -= 2;
@@ -3588,6 +3627,10 @@ function add_asan_opts(cflags_name, libs_name, ldflags_name)
 
 	if (!!cflags_name) {
 		ADD_FLAG(cflags_name, "-fsanitize=address");
+		ADD_FLAG(cflags_name, "-fsanitize-address-use-after-scope");
+		ADD_FLAG(cflags_name, "-fsanitize-cfi-cross-dso");
+		ADD_FLAG(cflags_name, "-fsanitize-memory-track-origins");
+		ADD_FLAG(cflags_name, "-fsanitize-memory-use-after-dtor");
 	}
 	if (!!libs_name) {
 		if (X64) {

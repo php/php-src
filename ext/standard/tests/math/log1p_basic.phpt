@@ -35,7 +35,7 @@ foreach($values as $value) {
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing log1p() : basic functionality ***
 
  LOG1p tests

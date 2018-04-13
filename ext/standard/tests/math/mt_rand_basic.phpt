@@ -79,7 +79,7 @@ for ($x = 0; $x < count($min); $x++) {
 	}	
 }
 ?>
---EXPECTF--
+--EXPECT--
 mt_rand() tests with default min and max value (i.e 0 thru 2147483647)
 PASSED: range min = 0  max = 2147483647
 

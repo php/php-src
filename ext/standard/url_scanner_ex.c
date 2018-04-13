@@ -196,6 +196,13 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 		return;
 	}
 
+	/* Don't modify URLs of the format "#mark" */
+	if (url_parts->fragment && '#' == ZSTR_VAL(url->s)[0]) {
+		smart_str_append_smart_str(dest, url);
+		php_url_free(url_parts);
+		return;
+	}
+
 	/* Check protocol. Only http/https is allowed. */
 	if (url_parts->scheme
 		&& !zend_string_equals_literal_ci(url_parts->scheme, "http")
@@ -221,13 +228,12 @@ static inline void append_modified_url(smart_str *url, smart_str *dest, smart_st
 	 * When URL does not have path and query string add "/?".
 	 * i.e. If URL is only "?foo=bar", should not add "/?".
 	 */
-	if (!url_parts->path && !url_parts->query) {
+	if (!url_parts->path && !url_parts->query && !url_parts->fragment) {
 		/* URL is http://php.net or like */
 		smart_str_append_smart_str(dest, url);
 		smart_str_appendc(dest, '/');
 		smart_str_appendc(dest, '?');
 		smart_str_append_smart_str(dest, url_app);
-		/* There should not be fragment. Just return */
 		php_url_free(url_parts);
 		return;
 	}
@@ -515,42 +521,42 @@ state_plain_begin:
 state_plain:
 	start = YYCURSOR;
 
-#line 519 "ext/standard/url_scanner_ex.c"
+#line 525 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128,   0, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128,   0, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
 	};
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -565,57 +571,57 @@ yy2:
 	if (yybm[0+yych] & 128) {
 		goto yy2;
 	}
-#line 522 "ext/standard/url_scanner_ex.re"
+#line 528 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain; }
-#line 571 "ext/standard/url_scanner_ex.c"
+#line 577 "ext/standard/url_scanner_ex.c"
 yy5:
 	++YYCURSOR;
-#line 521 "ext/standard/url_scanner_ex.re"
+#line 527 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_TAG; goto state_tag; }
-#line 576 "ext/standard/url_scanner_ex.c"
+#line 582 "ext/standard/url_scanner_ex.c"
 }
-#line 523 "ext/standard/url_scanner_ex.re"
+#line 529 "ext/standard/url_scanner_ex.re"
 
 
 state_tag:
 	start = YYCURSOR;
 
-#line 584 "ext/standard/url_scanner_ex.c"
+#line 590 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0, 128,   0,   0,   0,   0,   0,
-		  0, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128,   0,   0,   0,   0,   0,
-		  0, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0, 128,   0,   0,   0,   0,   0, 
+		  0, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128,   0,   0,   0,   0,   0, 
+		  0, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
 	};
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -623,9 +629,9 @@ state_tag:
 		goto yy11;
 	}
 	++YYCURSOR;
-#line 529 "ext/standard/url_scanner_ex.re"
+#line 535 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 629 "ext/standard/url_scanner_ex.c"
+#line 635 "ext/standard/url_scanner_ex.c"
 yy11:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -633,11 +639,11 @@ yy11:
 	if (yybm[0+yych] & 128) {
 		goto yy11;
 	}
-#line 528 "ext/standard/url_scanner_ex.re"
+#line 534 "ext/standard/url_scanner_ex.re"
 	{ handle_tag(STD_ARGS); /* Sets STATE */; passthru(STD_ARGS); if (STATE == STATE_PLAIN) goto state_plain; else goto state_next_arg; }
-#line 639 "ext/standard/url_scanner_ex.c"
+#line 645 "ext/standard/url_scanner_ex.c"
 }
-#line 530 "ext/standard/url_scanner_ex.re"
+#line 536 "ext/standard/url_scanner_ex.re"
 
 
 state_next_arg_begin:
@@ -646,42 +652,42 @@ state_next_arg_begin:
 state_next_arg:
 	start = YYCURSOR;
 
-#line 650 "ext/standard/url_scanner_ex.c"
+#line 656 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0, 128, 128, 128,   0, 128,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		128,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0, 128, 128, 128,   0, 128,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		128,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
 	};
 	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 	yych = *YYCURSOR;
@@ -702,9 +708,9 @@ state_next_arg:
 yy16:
 	++YYCURSOR;
 yy17:
-#line 541 "ext/standard/url_scanner_ex.re"
+#line 547 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_plain_begin; }
-#line 708 "ext/standard/url_scanner_ex.c"
+#line 714 "ext/standard/url_scanner_ex.c"
 yy18:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -712,65 +718,65 @@ yy18:
 	if (yybm[0+yych] & 128) {
 		goto yy18;
 	}
-#line 539 "ext/standard/url_scanner_ex.re"
+#line 545 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg; }
-#line 718 "ext/standard/url_scanner_ex.c"
+#line 724 "ext/standard/url_scanner_ex.c"
 yy21:
 	yych = *++YYCURSOR;
 	if (yych != '>') goto yy17;
 yy22:
 	++YYCURSOR;
-#line 538 "ext/standard/url_scanner_ex.re"
+#line 544 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_form(STD_ARGS); goto state_plain_begin; }
-#line 726 "ext/standard/url_scanner_ex.c"
+#line 732 "ext/standard/url_scanner_ex.c"
 yy24:
 	++YYCURSOR;
-#line 540 "ext/standard/url_scanner_ex.re"
+#line 546 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; STATE = STATE_ARG; goto state_arg; }
-#line 731 "ext/standard/url_scanner_ex.c"
+#line 737 "ext/standard/url_scanner_ex.c"
 }
-#line 542 "ext/standard/url_scanner_ex.re"
+#line 548 "ext/standard/url_scanner_ex.re"
 
 
 state_arg:
 	start = YYCURSOR;
 
-#line 739 "ext/standard/url_scanner_ex.c"
+#line 745 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0, 128,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128,   0,   0,   0,   0,   0,
-		  0, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128, 128, 128, 128, 128, 128,
-		128, 128, 128,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0, 128,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128,   0,   0,   0,   0,   0, 
+		  0, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128, 128, 128, 128, 128, 128, 
+		128, 128, 128,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
 	};
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
 	yych = *YYCURSOR;
@@ -780,9 +786,9 @@ state_arg:
 	if (yych <= 'z') goto yy30;
 yy28:
 	++YYCURSOR;
-#line 548 "ext/standard/url_scanner_ex.re"
+#line 554 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_NEXT_ARG; goto state_next_arg; }
-#line 786 "ext/standard/url_scanner_ex.c"
+#line 792 "ext/standard/url_scanner_ex.c"
 yy30:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -790,52 +796,52 @@ yy30:
 	if (yybm[0+yych] & 128) {
 		goto yy30;
 	}
-#line 547 "ext/standard/url_scanner_ex.re"
+#line 553 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); handle_arg(STD_ARGS); STATE = STATE_BEFORE_VAL; goto state_before_val; }
-#line 796 "ext/standard/url_scanner_ex.c"
+#line 802 "ext/standard/url_scanner_ex.c"
 }
-#line 549 "ext/standard/url_scanner_ex.re"
+#line 555 "ext/standard/url_scanner_ex.re"
 
 
 state_before_val:
 	start = YYCURSOR;
 
-#line 804 "ext/standard/url_scanner_ex.c"
+#line 810 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		128,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
-		  0,   0,   0,   0,   0,   0,   0,   0,
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		128,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
+		  0,   0,   0,   0,   0,   0,   0,   0, 
 	};
 	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 	yych = *YYCURSOR;
@@ -843,9 +849,9 @@ state_before_val:
 	if (yych == '=') goto yy38;
 	++YYCURSOR;
 yy36:
-#line 555 "ext/standard/url_scanner_ex.re"
+#line 561 "ext/standard/url_scanner_ex.re"
 	{ --YYCURSOR; goto state_next_arg_begin; }
-#line 849 "ext/standard/url_scanner_ex.c"
+#line 855 "ext/standard/url_scanner_ex.c"
 yy37:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == ' ') goto yy41;
@@ -857,9 +863,9 @@ yy38:
 	if (yybm[0+yych] & 128) {
 		goto yy38;
 	}
-#line 554 "ext/standard/url_scanner_ex.re"
+#line 560 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); STATE = STATE_VAL; goto state_val; }
-#line 863 "ext/standard/url_scanner_ex.c"
+#line 869 "ext/standard/url_scanner_ex.c"
 yy41:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -869,49 +875,49 @@ yy41:
 	YYCURSOR = YYMARKER;
 	goto yy36;
 }
-#line 556 "ext/standard/url_scanner_ex.re"
+#line 562 "ext/standard/url_scanner_ex.re"
 
 
 
 state_val:
 	start = YYCURSOR;
 
-#line 880 "ext/standard/url_scanner_ex.c"
+#line 886 "ext/standard/url_scanner_ex.c"
 {
 	YYCTYPE yych;
 	static const unsigned char yybm[] = {
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 192, 192, 224, 224, 192, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		192, 224, 128, 224, 224, 224, 224,  64,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224,   0, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
-		224, 224, 224, 224, 224, 224, 224, 224,
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 192, 192, 224, 224, 192, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		192, 224, 128, 224, 224, 224, 224,  64, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224,   0, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
+		224, 224, 224, 224, 224, 224, 224, 224, 
 	};
 	if ((YYLIMIT - YYCURSOR) < 2) YYFILL(2);
 	yych = *YYCURSOR;
@@ -929,15 +935,15 @@ yy46:
 	if (yybm[0+yych] & 32) {
 		goto yy46;
 	}
-#line 564 "ext/standard/url_scanner_ex.re"
+#line 570 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 0, ' '); goto state_next_arg_begin; }
-#line 935 "ext/standard/url_scanner_ex.c"
+#line 941 "ext/standard/url_scanner_ex.c"
 yy49:
 	++YYCURSOR;
 yy50:
-#line 565 "ext/standard/url_scanner_ex.re"
+#line 571 "ext/standard/url_scanner_ex.re"
 	{ passthru(STD_ARGS); goto state_next_arg_begin; }
-#line 941 "ext/standard/url_scanner_ex.c"
+#line 947 "ext/standard/url_scanner_ex.c"
 yy51:
 	yych = *(YYMARKER = ++YYCURSOR);
 	if (yych == '>') goto yy50;
@@ -960,9 +966,9 @@ yy55:
 	goto yy50;
 yy56:
 	++YYCURSOR;
-#line 562 "ext/standard/url_scanner_ex.re"
+#line 568 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '"'); goto state_next_arg_begin; }
-#line 966 "ext/standard/url_scanner_ex.c"
+#line 972 "ext/standard/url_scanner_ex.c"
 yy58:
 	++YYCURSOR;
 	if (YYLIMIT <= YYCURSOR) YYFILL(1);
@@ -973,11 +979,11 @@ yy59:
 	}
 	if (yych >= '(') goto yy55;
 	++YYCURSOR;
-#line 563 "ext/standard/url_scanner_ex.re"
+#line 569 "ext/standard/url_scanner_ex.re"
 	{ handle_val(STD_ARGS, 1, '\''); goto state_next_arg_begin; }
-#line 979 "ext/standard/url_scanner_ex.c"
+#line 985 "ext/standard/url_scanner_ex.c"
 }
-#line 566 "ext/standard/url_scanner_ex.re"
+#line 572 "ext/standard/url_scanner_ex.re"
 
 
 stop:

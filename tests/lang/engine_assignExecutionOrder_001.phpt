@@ -77,7 +77,7 @@ var_dump(C::$string);
 Order with local assignment:
 in f()
 in g()
-%string|unicode%(14) "assigned value"
+string(14) "assigned value"
 
 
 Order with array assignment:
@@ -85,7 +85,7 @@ in f()
 in g()
 array(1) {
   ["name"]=>
-  %string|unicode%(14) "assigned value"
+  string(14) "assigned value"
 }
 
 
@@ -94,7 +94,7 @@ in f()
 in g()
 object(stdClass)#%d (1) {
   ["assigned value"]=>
-  %string|unicode%(14) "assigned value"
+  string(14) "assigned value"
 }
 
 
@@ -107,7 +107,7 @@ object(stdClass)#%d (1) {
     ["o2"]=>
     object(stdClass)#%d (1) {
       ["assigned value"]=>
-      %string|unicode%(14) "assigned value"
+      string(14) "assigned value"
     }
   }
 }
@@ -120,7 +120,7 @@ object(stdClass)#%d (1) {
   ["a"]=>
   array(1) {
     ["assigned value"]=>
-    %string|unicode%(14) "assigned value"
+    string(14) "assigned value"
   }
 }
 
@@ -128,7 +128,7 @@ object(stdClass)#%d (1) {
 Order with static property assignment:
 in f()
 in g()
-%string|unicode%(14) "assigned value"
+string(14) "assigned value"
 
 
 Order with static array property assignment:
@@ -136,17 +136,17 @@ in f()
 in g()
 array(1) {
   ["name"]=>
-  %string|unicode%(14) "assigned value"
+  string(14) "assigned value"
 }
 
 
 Order with indexed string assignment:
 in getOffset()
 in newChar()
-%string|unicode%(5) "jello"
+string(5) "jello"
 
 
 Order with static string property assignment:
 in getOffset()
 in newChar()
-%string|unicode%(5) "jello"
+string(5) "jello"

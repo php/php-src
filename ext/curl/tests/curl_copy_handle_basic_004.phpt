@@ -31,7 +31,7 @@ Rick Buitenman <rick@meritos.nl>
   var_dump( $curl_content_copy );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Test curl_copy_handle() after exec() ***
 string(106) "array(2) {
   ["test"]=>

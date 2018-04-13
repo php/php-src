@@ -28,7 +28,7 @@ var_dump(foo());
 var_dump(foo(new Exception()));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "finally1"
 string(8) "finally2"
 string(5) "label"

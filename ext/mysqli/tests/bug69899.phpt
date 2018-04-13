@@ -12,7 +12,7 @@ require_once __DIR__ . '/skipif.inc';
 require_once __DIR__ . '/skipifconnectfailure.inc';
 require_once __DIR__ . '/connect.inc';
 if (!$IS_MYSQLND) {
-	die('mysqlnd only');
+	die('skip mysqlnd only');
 }
 ?>
 --FILE--

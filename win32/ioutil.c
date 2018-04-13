@@ -286,7 +286,7 @@ PW32IO int php_win32_ioutil_close(int fd)
 PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
 	size_t path_len;
-	wchar_t *my_path;
+	const wchar_t *my_path;
 
 	if (!path) {
 		SET_ERRNO_FROM_WIN32_CODE(ERROR_INVALID_PARAMETER);
@@ -340,7 +340,6 @@ PW32IO int php_win32_ioutil_mkdir_w(const wchar_t *path, mode_t mode)
 
 PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 {/*{{{*/
-	int ret = 0;
 	DWORD err = 0;
 	HANDLE h;
 	BY_HANDLE_FILE_INFORMATION info;
@@ -413,12 +412,11 @@ PW32IO int php_win32_ioutil_unlink_w(const wchar_t *path)
 PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(path, -1, 0)
 
 	if (!RemoveDirectoryW(path)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -429,10 +427,9 @@ PW32IO int php_win32_ioutil_rmdir_w(const wchar_t *path)
 PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
 
 	if (!SetCurrentDirectoryW(path)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -443,14 +440,13 @@ PW32IO int php_win32_ioutil_chdir_w(const wchar_t *path)
 PW32IO int php_win32_ioutil_rename_w(const wchar_t *oldname, const wchar_t *newname)
 {/*{{{*/
 	int ret = 0;
-	DWORD err = 0;
 
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(oldname, -1, 0)
 	PHP_WIN32_IOUTIL_CHECK_PATH_W(newname, -1, 0)
 
 
 	if (!MoveFileExW(oldname, newname, MOVEFILE_REPLACE_EXISTING|MOVEFILE_COPY_ALLOWED)) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		ret = -1;
 		SET_ERRNO_FROM_WIN32_CODE(err);
 	}
@@ -640,7 +636,7 @@ BOOL php_win32_ioutil_init(void)
 
 PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 {/*{{{*/
-	DWORD attr, err;
+	DWORD attr;
 
 	if ((mode & X_OK) == X_OK) {
 		DWORD type;
@@ -649,7 +645,7 @@ PW32IO int php_win32_ioutil_access_w(const wchar_t *path, mode_t mode)
 
 	attr = GetFileAttributesW(path);
 	if (attr == INVALID_FILE_ATTRIBUTES) {
-		err = GetLastError();
+		DWORD err = GetLastError();
 		SET_ERRNO_FROM_WIN32_CODE(err);
 		return -1;
 	}

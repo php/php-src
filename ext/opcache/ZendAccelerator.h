@@ -120,6 +120,8 @@ extern int lock_file;
 
 #if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
+#else
+# define ENABLE_FILE_CACHE_FALLBACK 0
 #endif
 
 #if ZEND_WIN32
@@ -283,11 +285,17 @@ typedef struct _zend_accel_shared_globals {
 #endif
 	zend_bool       restart_in_progress;
 
+	/* uninitialized HashTable Support */
+	uint32_t uninitialized_bucket[-HT_MIN_MASK];
+
 	/* Interned Strings Support (must be the last element) */
 	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+extern zend_bool file_cache_only;
+#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
@@ -325,6 +333,6 @@ zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 #define IS_ACCEL_INTERNED(str) \
 	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
-zend_string *accel_new_interned_string(zend_string *str);
+zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 #endif /* ZEND_ACCELERATOR_H */

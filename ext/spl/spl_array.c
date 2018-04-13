@@ -134,7 +134,7 @@ static int spl_array_skip_protected(spl_array_object *intern, HashTable *aht);
 
 static zend_never_inline void spl_array_create_ht_iter(HashTable *ht, spl_array_object* intern) /* {{{ */
 {
-	intern->ht_iter = zend_hash_iterator_add(ht, ht->nInternalPointer);
+	intern->ht_iter = zend_hash_iterator_add(ht, zend_hash_get_current_pos(ht));
 	zend_hash_internal_pointer_reset_ex(ht, &EG(ht_iterators)[intern->ht_iter].pos);
 	spl_array_skip_protected(intern, ht);
 }
@@ -1175,7 +1175,8 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 	spl_array_object *array_object = Z_SPLARRAY_P(object);
 
 	if (by_ref && (array_object->ar_flags & SPL_ARRAY_OVERLOADED_CURRENT)) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		return NULL;
 	}
 
 	iterator = emalloc(sizeof(zend_user_iterator));
@@ -1191,7 +1192,7 @@ zend_object_iterator *spl_array_get_iterator(zend_class_entry *ce, zval *object,
 }
 /* }}} */
 
-/* {{{ proto void ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
+/* {{{ proto ArrayObject::__construct([array|object ar = array() [, int flags = 0 [, string iterator_class = "ArrayIterator"]]])
    Constructs a new array object from an array or object. */
 SPL_METHOD(Array, __construct)
 {
@@ -1221,7 +1222,7 @@ SPL_METHOD(Array, __construct)
 }
  /* }}} */
 
-/* {{{ proto void ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
+/* {{{ proto ArrayIterator::__construct([array|object ar = array() [, int flags = 0]])
    Constructs a new array iterator from an array or object. */
 SPL_METHOD(ArrayIterator, __construct)
 {
@@ -1418,7 +1419,7 @@ static int spl_array_object_count_elements_helper(spl_array_object *intern, zend
 		pos = *pos_ptr;
 		*count = 0;
 		spl_array_rewind(intern);
-		while (*pos_ptr != HT_INVALID_IDX && spl_array_next(intern) == SUCCESS) {
+		while (*pos_ptr < aht->nNumUsed && spl_array_next(intern) == SUCCESS) {
 			(*count)++;
 		}
 		*pos_ptr = pos;
@@ -1883,8 +1884,8 @@ outexcept:
 
 /* {{{ arginfo and function table */
 ZEND_BEGIN_ARG_INFO_EX(arginfo_array___construct, 0, 0, 0)
-	ZEND_ARG_INFO(0, array)
-	ZEND_ARG_INFO(0, ar_flags)
+	ZEND_ARG_INFO(0, input)
+	ZEND_ARG_INFO(0, flags)
 	ZEND_ARG_INFO(0, iterator_class)
 ZEND_END_ARG_INFO()
 

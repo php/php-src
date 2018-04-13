@@ -7,7 +7,7 @@ Olivier Doucet Olivier Doucet Boris Lytochkin
 require_once(dirname(__FILE__).'/skipif.inc');
 require_once(dirname(__FILE__).'/snmp_include.inc');
 
-if (!file_exists($mibdir . '/SNMPv2-MIB.txt')) die('MIB file not in the system');
+if (!file_exists($mibdir . '/SNMPv2-MIB.txt')) die('skip MIB file not in the system');
 
 ?>
 --FILE--

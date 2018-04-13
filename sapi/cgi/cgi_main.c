@@ -379,7 +379,6 @@ static void sapi_fcgi_flush(void *server_context)
 
 static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 {
-	char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 	sapi_header_struct *h;
 	zend_llist_position pos;
 	zend_bool ignore_status = 0;
@@ -393,6 +392,7 @@ static int sapi_cgi_send_headers(sapi_headers_struct *sapi_headers)
 	{
 		int len;
 		zend_bool has_status = 0;
+		char buf[SAPI_CGI_MAX_HEADER_LENGTH];
 
 		if (CGIG(rfc2616_headers) && SG(sapi_headers).http_status_line) {
 			char *s;
@@ -674,15 +674,17 @@ static void cgi_php_load_env_var(char *var, unsigned int var_len, char *val, uns
 
 static void cgi_php_import_environment_variables(zval *array_ptr)
 {
-	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
-		zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
-	}
+	if (PG(variables_order) && (strchr(PG(variables_order),'E') || strchr(PG(variables_order),'e'))) {
+		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) != IS_ARRAY) {
+			zend_is_auto_global_str("_ENV", sizeof("_ENV")-1);
+		}
 
-	if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
-		Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) {
-		zend_array_destroy(Z_ARR_P(array_ptr));
-		Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
-		return;
+		if (Z_TYPE(PG(http_globals)[TRACK_VARS_ENV]) == IS_ARRAY &&
+			Z_ARR_P(array_ptr) != Z_ARR(PG(http_globals)[TRACK_VARS_ENV])) {
+			zend_array_destroy(Z_ARR_P(array_ptr));
+			Z_ARR_P(array_ptr) = zend_array_dup(Z_ARR(PG(http_globals)[TRACK_VARS_ENV]));
+			return;
+		}
 	}
 
 	/* call php's original import as a catch-all */
@@ -790,7 +792,6 @@ static void sapi_cgi_log_message(char *message, int syslog_type_int)
  */
 static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const char *doc_root, size_t doc_root_len, int start)
 {
-	char *ptr;
 	user_config_cache_entry *new_entry, *entry;
 	time_t request_time = (time_t)sapi_get_request_time();
 
@@ -806,7 +807,6 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 	/* Check whether cache entry has expired and rescan if it is */
 	if (request_time > entry->expires) {
 		char *real_path = NULL;
-		size_t real_path_len;
 		char *s1, *s2;
 		size_t s_len;
 
@@ -814,6 +814,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 		zend_hash_clean(entry->user_config);
 
 		if (!IS_ABSOLUTE_PATH(path, path_len)) {
+			size_t real_path_len;
 			real_path = tsrm_realpath(path, NULL);
 			if (real_path == NULL) {
 				return;
@@ -842,7 +843,7 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 #else
 		if (strncmp(s1, s2, s_len) == 0) {
 #endif
-			ptr = s2 + start;  /* start is the point where doc_root ends! */
+			char *ptr = s2 + start;  /* start is the point where doc_root ends! */
 			while ((ptr = strchr(ptr, DEFAULT_SLASH)) != NULL) {
 				*ptr = 0;
 				php_parse_user_ini_file(path, PG(user_ini_filename), entry->user_config);
@@ -866,15 +867,14 @@ static void php_cgi_ini_activate_user_config(char *path, size_t path_len, const 
 
 static int sapi_cgi_activate(void)
 {
-	char *path, *doc_root, *server_name;
-	size_t path_len, doc_root_len, server_name_len;
-
 	/* PATH_TRANSLATED should be defined at this stage but better safe than sorry :) */
 	if (!SG(request_info).path_translated) {
 		return FAILURE;
 	}
 
 	if (php_ini_has_per_host_config()) {
+		char *server_name;
+
 		/* Activate per-host-system-configuration defined in php.ini and stored into configuration_hash during startup */
 		if (fcgi_is_fastcgi()) {
 			fcgi_request *request = (fcgi_request*) SG(server_context);
@@ -885,7 +885,7 @@ static int sapi_cgi_activate(void)
 		}
 		/* SERVER_NAME should also be defined at this stage..but better check it anyway */
 		if (server_name) {
-			server_name_len = strlen(server_name);
+			size_t server_name_len = strlen(server_name);
 			server_name = estrndup(server_name, server_name_len);
 			zend_str_tolower(server_name, server_name_len);
 			php_ini_activate_per_host_config(server_name, server_name_len);
@@ -896,6 +896,9 @@ static int sapi_cgi_activate(void)
 	if (php_ini_has_per_dir_config() ||
 		(PG(user_ini_filename) && *PG(user_ini_filename))
 	) {
+		char *path;
+		size_t path_len;
+
 		/* Prepare search path */
 		path_len = strlen(SG(request_info).path_translated);
 
@@ -916,6 +919,8 @@ static int sapi_cgi_activate(void)
 
 		/* Load and activate user ini files in path starting from DOCUMENT_ROOT */
 		if (PG(user_ini_filename) && *PG(user_ini_filename)) {
+			char *doc_root;
+
 			if (fcgi_is_fastcgi()) {
 				fcgi_request *request = (fcgi_request*) SG(server_context);
 
@@ -925,7 +930,7 @@ static int sapi_cgi_activate(void)
 			}
 			/* DOCUMENT_ROOT should also be defined at this stage..but better check it anyway */
 			if (doc_root) {
-				doc_root_len = strlen(doc_root);
+				size_t doc_root_len = strlen(doc_root);
 				if (doc_root_len > 0 && IS_SLASH(doc_root[doc_root_len - 1])) {
 					--doc_root_len;
 				}
@@ -1363,9 +1368,8 @@ static void init_request_info(fcgi_request *request)
 							/* PATH_TRANSLATED = PATH_TRANSLATED - SCRIPT_NAME + PATH_INFO */
 							size_t ptlen = strlen(pt) - strlen(env_script_name);
 							size_t path_translated_len = ptlen + (env_path_info ? strlen(env_path_info) : 0);
-							char *path_translated = NULL;
 
-							path_translated = (char *) emalloc(path_translated_len + 1);
+							char *path_translated = (char *) emalloc(path_translated_len + 1);
 							memcpy(path_translated, pt, ptlen);
 							if (env_path_info) {
 								memcpy(path_translated + ptlen, env_path_info, path_translated_len - ptlen);
@@ -1590,7 +1594,7 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 {
 	zval *return_value = (zval*)arg;
 	char *str = NULL;
-	char *p;
+
 	ALLOCA_FLAG(use_heap)
 
 	if (var_len > 5 &&
@@ -1599,6 +1603,8 @@ static void add_request_header(char *var, unsigned int var_len, char *val, unsig
 	    var[2] == 'T' &&
 	    var[3] == 'P' &&
 	    var[4] == '_') {
+
+		char *p;
 
 		var_len -= 5;
 		p = var + 5;
@@ -1719,12 +1725,12 @@ PHP_FUNCTION(apache_request_headers) /* {{{ */
 
 static void add_response_header(sapi_header_struct *h, zval *return_value) /* {{{ */
 {
-	char *s, *p;
-	size_t len = 0;
-	ALLOCA_FLAG(use_heap)
-
 	if (h->header_len > 0) {
-		p = strchr(h->header, ':');
+		char *s;
+		size_t len = 0;
+		ALLOCA_FLAG(use_heap)
+
+		char *p = strchr(h->header, ':');
 		if (NULL != p) {
 			len = p - h->header;
 		}
@@ -2418,10 +2424,8 @@ consult the installation file that came with this distribution, or visit \n\
 								php_module_shutdown();
 								return FAILURE;
 							}
-							if (no_headers) {
-								SG(headers_sent) = 1;
-								SG(request_info).no_headers = 1;
-							}
+							SG(headers_sent) = 1;
+							SG(request_info).no_headers = 1;
 #if ZEND_DEBUG
 							php_printf("PHP %s (%s) (built: %s %s) (DEBUG)\nCopyright (c) 1997-2018 The PHP Group\n%s", PHP_VERSION, sapi_module.name, __DATE__, __TIME__, get_zend_version());
 #else

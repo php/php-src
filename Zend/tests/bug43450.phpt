@@ -1,7 +1,7 @@
 --TEST--
 Bug #43450 (Memory leak on some functions with implicit object __toString() call)
 --SKIPIF--
-<?php if (!function_exists('memory_get_usage')) die('memory_get_usage() not installed'); ?>
+<?php if (!function_exists('memory_get_usage')) die('skip memory_get_usage() not installed'); ?>
 --INI--
 opcache.enable_cli=0
 --FILE--

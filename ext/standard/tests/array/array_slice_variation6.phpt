@@ -29,7 +29,7 @@ var_dump(array_slice($input, $offset, -PHP_INT_MAX));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- $length is -6 --

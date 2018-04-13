@@ -848,7 +848,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_imageaffinematrixconcat, 0)
 	ZEND_ARG_INFO(0, m2)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_imagesetinterpolation, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_imagesetinterpolation, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, method)
 ZEND_END_ARG_INFO()
@@ -4088,7 +4088,7 @@ PHP_FUNCTION(image2wbmp)
 /* }}} */
 
 #if defined(HAVE_GD_JPG)
-/* {{{ proto bool jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool jpeg2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
 {
@@ -4098,7 +4098,7 @@ PHP_FUNCTION(jpeg2wbmp)
 #endif
 
 #if defined(HAVE_GD_PNG)
-/* {{{ proto bool png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool png2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
 {
@@ -4831,7 +4831,7 @@ PHP_FUNCTION(imagescale)
 		}
 	}
 
-	if (tmp_h <= 0 || tmp_w <= 0) {
+	if (tmp_h <= 0 || tmp_h > INT_MAX || tmp_w <= 0 || tmp_w > INT_MAX) {
 		RETURN_FALSE;
 	}
 

@@ -29,7 +29,7 @@ catch(\Exception $e) {
     echo "Exception: ".$e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 callback
 Exception: oops
 

@@ -36,7 +36,7 @@ mbstring.func_overload=0
 	}
 ?>
 
---EXPECTF--
+--EXPECT--
 bool(true)
 ok
 ok

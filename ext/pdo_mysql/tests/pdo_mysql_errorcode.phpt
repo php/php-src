@@ -82,5 +82,5 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 done!

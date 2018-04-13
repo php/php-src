@@ -1630,7 +1630,6 @@ PHP_FUNCTION(odbc_exec)
 {
 	zval *pv_conn;
 	zend_long pv_flags;
-	int numArgs;
 	char *query;
 	size_t query_len;
 	odbc_result *result = NULL;
@@ -1639,8 +1638,6 @@ PHP_FUNCTION(odbc_exec)
 #ifdef HAVE_SQL_EXTENDED_FETCH
 	SQLUINTEGER      scrollopts;
 #endif
-
-	numArgs = ZEND_NUM_ARGS();
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rs|l", &pv_conn, &query, &query_len, &pv_flags) == FAILURE) {
 		return;

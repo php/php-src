@@ -37,7 +37,7 @@ echo "sha256(raw): " . bin2hex(hash_hmac('sha256', $content, $key, TRUE)) . "\n"
 
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing hash_hmac() : basic functionality ***
 gost: a4a3c80bdf3f8665bf07376a34dc9c1b11af7c813f4928f62e39f0c0dc564dad
 haval128,3: 4d1318607f0406bd1b7bd50907772672

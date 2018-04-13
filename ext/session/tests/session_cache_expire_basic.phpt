@@ -26,7 +26,7 @@ var_dump(session_cache_expire());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_cache_expire() : basic functionality ***
 int(180)
 int(180)

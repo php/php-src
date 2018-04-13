@@ -34,7 +34,7 @@ var_dump($a, $b);
 $a++; $b++;
 var_dump($ref);
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(1)
 array(2) {

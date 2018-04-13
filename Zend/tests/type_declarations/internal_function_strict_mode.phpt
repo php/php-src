@@ -26,7 +26,7 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Trying Ord With Integer
 *** Caught ord() expects parameter 1 to be string, int given
 *** Trying Array Map With Invalid Callback

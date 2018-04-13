@@ -882,7 +882,7 @@ PHP_FUNCTION(hash_equals)
 }
 /* }}} */
 
-/* {{{ proto void HashContext::__construct() */
+/* {{{ proto HashContext::__construct() */
 static PHP_METHOD(HashContext, __construct) {
 	/* Normally unreachable as private/final */
 	zend_throw_exception(zend_ce_error, "Illegal call to private/final constructor", 0);
@@ -937,7 +937,7 @@ static void mhash_init(INIT_FUNC_ARGS)
 			continue;
 		}
 
-		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name, strlen(algorithm.mhash_name));
+		len = slprintf(buf, 127, "MHASH_%s", algorithm.mhash_name);
 		zend_register_long_constant(buf, len, algorithm.value, CONST_CS | CONST_PERSISTENT, module_number);
 	}
 

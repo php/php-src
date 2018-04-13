@@ -39,7 +39,7 @@ unlink($outputfile);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek() : variation - beyond file boundaries ***
 --- fseek beyond start of file ---
 int(-1)

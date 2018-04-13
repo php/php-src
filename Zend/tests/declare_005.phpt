@@ -12,6 +12,6 @@ foo();
 
 }
 ?>
---EXPECTF--
+--EXPECT--
 tick
 tick

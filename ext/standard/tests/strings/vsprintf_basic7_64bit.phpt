@@ -28,7 +28,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using unsigned format ***
 string(20) "18446744073709550505"
 string(41) "18446744073709550505 18446744073708317049"

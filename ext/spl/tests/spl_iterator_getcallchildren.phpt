@@ -24,7 +24,7 @@ var_dump($output);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
   array(3) {
   [0]=>
   int(7)

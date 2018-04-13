@@ -22,7 +22,7 @@ for ($i=0; $i<256; $i++) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing base64_encode() : basic functionality ***
 0x0: AA==
 0x1: AQ==

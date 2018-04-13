@@ -41,7 +41,7 @@ var_dump(mb_ereg_match($regex2, $string_mb));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 *** Testing mb_ereg_match() : basic functionality ***
 

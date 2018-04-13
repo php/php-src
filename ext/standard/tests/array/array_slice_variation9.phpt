@@ -30,7 +30,7 @@ var_dump(array_slice($input, 1, 2, true));
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_slice() : usage variations ***
 
 -- Array of referenced variables ($preserve_keys = default) --

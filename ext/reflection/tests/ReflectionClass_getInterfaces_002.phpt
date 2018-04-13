@@ -17,7 +17,7 @@ $rc = new ReflectionClass('I7');
 $interfaces = $rc->getInterfaces();
 print_r($interfaces);
 ?>
---EXPECTF--
+--EXPECT--
 Array
 (
     [I6] => ReflectionClass Object

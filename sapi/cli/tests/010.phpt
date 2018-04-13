@@ -38,7 +38,7 @@ var_dump(`cat "$filename_txt" | "$php" -n -F "$filename"`);
 @unlink(__DIR__."/010.test.php");
 @unlink(__DIR__."/010.test.txt");
 ?>
---EXPECTF--	
+--EXPECT--	
 string(25) "
 string(10) "test
 hello"

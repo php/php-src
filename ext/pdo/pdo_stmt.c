@@ -2148,7 +2148,7 @@ static PHP_METHOD(PDOStatement, debugDumpParams)
 }
 /* }}} */
 
-/* {{{ proto int PDOStatement::__wakeup()
+/* {{{ proto PDOStatement::__wakeup()
    Prevents use of a PDOStatement instance that has been unserialized */
 static PHP_METHOD(PDOStatement, __wakeup)
 {
@@ -2469,7 +2469,8 @@ zend_object_iterator *pdo_stmt_iter_get(zend_class_entry *ce, zval *object, int 
 	struct php_pdo_iterator *I;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_error(NULL, "An iterator cannot be used with foreach by reference");
+		return NULL;
 	}
 
 	I = ecalloc(1, sizeof(struct php_pdo_iterator));
@@ -2667,7 +2668,7 @@ static int row_compare(zval *object1, zval *object2)
 	return -1;
 }
 
-zend_object_handlers pdo_row_object_handlers = {
+const zend_object_handlers pdo_row_object_handlers = {
 	0,
 	zend_objects_destroy_object,
 	pdo_row_free_storage,

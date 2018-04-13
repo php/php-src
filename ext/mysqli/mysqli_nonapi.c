@@ -35,11 +35,6 @@
 
 #define SAFE_STR(a) ((a)?a:"")
 
-#ifndef zend_parse_parameters_none
-#define zend_parse_parameters_none()	\
-        zend_parse_parameters(ZEND_NUM_ARGS(), "")
-#endif
-
 /* {{{ php_mysqli_set_error
  */
 static void php_mysqli_set_error(zend_long mysql_errno, char *mysql_err)
@@ -341,7 +336,7 @@ PHP_FUNCTION(mysqli_connect_error)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_array (object result [,int resulttype])
+/* {{{ proto mixed mysqli_fetch_array(object result [,int resulttype])
    Fetch a result row as an associative array, a numeric array, or both */
 PHP_FUNCTION(mysqli_fetch_array)
 {
@@ -349,7 +344,7 @@ PHP_FUNCTION(mysqli_fetch_array)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_assoc (object result)
+/* {{{ proto mixed mysqli_fetch_assoc(object result)
    Fetch a result row as an associative array */
 PHP_FUNCTION(mysqli_fetch_assoc)
 {
@@ -357,7 +352,7 @@ PHP_FUNCTION(mysqli_fetch_assoc)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_all (object result [,int resulttype])
+/* {{{ proto mixed mysqli_fetch_all(object result [,int resulttype])
    Fetches all result rows as an associative array, a numeric array, or both */
 #if defined(MYSQLI_USE_MYSQLND)
 PHP_FUNCTION(mysqli_fetch_all)
@@ -410,7 +405,7 @@ PHP_FUNCTION(mysqli_get_connection_stats)
 #endif
 /* }}} */
 
-/* {{{ proto mixed mysqli_error_list (object connection)
+/* {{{ proto mixed mysqli_error_list(object connection)
    Fetches all client errors */
 PHP_FUNCTION(mysqli_error_list)
 {
@@ -502,7 +497,7 @@ PHP_FUNCTION(mysqli_stmt_error_list)
 }
 /* }}} */
 
-/* {{{ proto mixed mysqli_fetch_object (object result [, string class_name [, NULL|array ctor_params]])
+/* {{{ proto mixed mysqli_fetch_object(object result [, string class_name [, NULL|array ctor_params]])
    Fetch a result row as an object */
 PHP_FUNCTION(mysqli_fetch_object)
 {
@@ -762,7 +757,7 @@ static int mysqlnd_dont_poll_zval_array_from_mysqlnd_array(MYSQLND **in_array, z
 }
 /* }}} */
 
-/* {{{ proto int mysqli_poll(array read, array write, array error, long sec [, long usec]) U
+/* {{{ proto int mysqli_poll(array read, array write, array error, int sec [, int usec]) U
    Poll connections */
 PHP_FUNCTION(mysqli_poll)
 {

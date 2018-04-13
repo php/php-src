@@ -34,7 +34,7 @@ foreach($strings as $value)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strip_tags() : usage variations ***
 -- Iteration 1 --
 string(18) " I am html string "

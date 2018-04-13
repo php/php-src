@@ -60,6 +60,6 @@ Got       <$res>\n";
 }
 echo "Passes.";
 ?>
---EXPECTF--
+--EXPECT--
 Passes.
 

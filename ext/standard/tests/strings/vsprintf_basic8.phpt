@@ -24,7 +24,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using octal format ***
 string(2) "21"
 string(6) "21 347"

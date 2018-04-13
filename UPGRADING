@@ -28,12 +28,18 @@ Core:
     in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
     error_get_last() state. As such, they now work the same way as manually
     thrown exceptions.
+  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
+    and `boolean`.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+Reflection:
+  . Reflection results now return `int` and `bool` instead of `integer`
+    and `boolean`.
 
 SPL:
   . If an SPL autoloader throws an exception, following autoloaders will not be
@@ -58,11 +64,16 @@ Core:
   . Array destructuring now supports reference assignments using the syntax
     [&$a, [$b, &$c]] = $d. The same is also supported for list().
     (RFC: https://wiki.php.net/rfc/list_reference_assignment)
-  . instancof now allows literal as the first operand,
-    in this case the result always be FALSE.
+  . instanceof now allows literals as the first operand,
+    in which case the result is always FALSE.
 
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
+
+readline:
+  . Support for the completion_append_character and completion_suppress_append
+    options has been added to readline_info(). These options are only available
+    if PHP is linked against libreadline (rather than libedit).
 
 ========================================
 3. Changes in SAPI modules
@@ -87,6 +98,8 @@ JSON:
 Standard:
   . debug_zval_dump() was changed to display recursive arrays and objects
     in the same way as var_dump(). Now, it doesn't display them twice.
+  . array_push() and array_unshift() can now also be called with a single
+    argument, which is particularly convenient wrt. the spread operator.
 
 PCRE:
   . preg_quote() now also escapes the '#' character.
@@ -128,9 +141,13 @@ Intl:
     For the detailed documentation on the restriction levels, see
     URestrictionLevel under
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
+  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
+    to retrieve the Decomposition_Mapping property of a character.
 
-SPL:
-  . Added spl_object_id().
+Standard:
+  . Added is_countable() function, to check whether a value may be passed to
+    count().
+    (RFC: https://wiki.php.net/rfc/is-countable)
 
 ========================================
 7. New Classes and Interfaces
@@ -150,8 +167,21 @@ JSON:
  Curl:
   . libcurl >= 7.15.5 is now required.
 
+ Filter:
+  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
+    defines the set of allowed thousand separator chars.  The default (`"',."`)
+    is fully backward compatible with former PHP versions.
+
  FTP:
   . Set default transfer mode to binary
+
+ Intl:
+  . Normalizer::NONE is deprecated, when PHP is linked with ICU >= 56
+  . Introduced Normalizer::FORM_KC_CF as Normalizer::normalize() argument
+    for NFKC_Casefold normalization, available when linked with ICU >= 56
+
+ MBString:
+  . The configuration option --with-libmbfl is no longer available.
 
  ODBC: 
   . Support for ODBCRouter has been removed.

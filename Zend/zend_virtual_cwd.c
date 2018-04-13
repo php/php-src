@@ -85,7 +85,7 @@ ts_rsrc_id cwd_globals_id;
 virtual_cwd_globals cwd_globals;
 #endif
 
-cwd_state main_cwd_state; /* True global */
+static cwd_state main_cwd_state; /* True global */
 
 #ifndef ZEND_WIN32
 #include <unistd.h>
@@ -1454,7 +1454,7 @@ CWD_API int virtual_chdir(const char *path) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
 {
-	int length = (int)strlen(path);
+	size_t length = strlen(path);
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
@@ -1462,10 +1462,10 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
 	}
-	while(--length >= 0 && !IS_SLASH(path[length])) {
+	while(--length < SIZE_MAX && !IS_SLASH(path[length])) {
 	}
 
-	if (length == -1) {
+	if (length == SIZE_MAX) {
 		/* No directory only file name */
 		errno = ENOENT;
 		return -1;

@@ -302,7 +302,7 @@ void shutdown_executor(void) /* {{{ */
 		zend_hash_graceful_reverse_destroy(&EG(symbol_table));
 
 #if ZEND_DEBUG
-		if (GC_G(gc_enabled) && !CG(unclean_shutdown)) {
+		if (gc_enabled() && !CG(unclean_shutdown)) {
 			gc_collect_cycles();
 		}
 #endif
@@ -1505,7 +1505,7 @@ ZEND_API zend_array *zend_rebuild_symbol_table(void) /* {{{ */
 		if (!ex->func->op_array.last_var) {
 			return symbol_table;
 		}
-		zend_hash_real_init(symbol_table, 0);
+		zend_hash_real_init_mixed(symbol_table);
 		/*printf("Cache miss!  Initialized %x\n", EG(active_symbol_table));*/
 	}
 	if (EXPECTED(ex->func->op_array.last_var)) {

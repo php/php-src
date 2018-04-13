@@ -22,7 +22,7 @@ foreach(array('?','','??') as $subst) {
   }
 }
 
---EXPECTF--
+--EXPECT--
 string(23) "This is an ascii string"
 string(12) "Snowman: (?)"
 Error: transcode() returned error 1: U_ILLEGAL_ARGUMENT_ERROR: U_ILLEGAL_ARGUMENT_ERROR

@@ -48,7 +48,6 @@ PHP_NAMED_FUNCTION(php_if_md5)
 {
 	zend_string *arg;
 	zend_bool raw_output = 0;
-	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 
@@ -58,15 +57,14 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		Z_PARAM_BOOL(raw_output)
 	ZEND_PARSE_PARAMETERS_END();
 
-	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 16);
 	} else {
-		make_digest_ex(md5str, digest, 16);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 
 }
@@ -79,7 +77,6 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	char          *arg;
 	size_t           arg_len;
 	zend_bool raw_output = 0;
-	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
@@ -118,8 +115,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 16);
 	} else {
-		make_digest_ex(md5str, digest, 16);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 16);
 	}
 }
 /* }}} */
@@ -394,3 +391,12 @@ PHPAPI void PHP_MD5Final(unsigned char *result, PHP_MD5_CTX *ctx)
 
 	ZEND_SECURE_ZERO(ctx, sizeof(*ctx));
 }
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -80,7 +80,7 @@ oci_close($c);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
 f1 ended
 Test 2

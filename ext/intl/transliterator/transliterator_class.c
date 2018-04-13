@@ -146,11 +146,10 @@ static zend_object *Transliterator_clone_obj( zval *object )
 
 	if( to_orig->utrans != NULL )
 	{
-		UTransliterator *utrans = NULL;
 		zval			tempz; /* dummy zval to pass to transliterator_object_construct */
 
 		/* guaranteed to return NULL if it fails */
-		utrans = utrans_clone( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
+		UTransliterator *utrans = utrans_clone( to_orig->utrans, TRANSLITERATOR_ERROR_CODE_P( to_orig ) );
 
 		if( U_FAILURE( TRANSLITERATOR_ERROR_CODE( to_orig ) ) )
 			goto err;

@@ -42,7 +42,7 @@ var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using hexadecimal format ***
 string(6) "format"
 string(1) "b"

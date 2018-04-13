@@ -9,5 +9,5 @@ function obh($s)
 ob_start("obh");
 echo "foo\n";
 ?>
---EXPECTF--
+--EXPECT--
 foo

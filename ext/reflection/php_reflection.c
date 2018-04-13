@@ -4328,7 +4328,6 @@ ZEND_METHOD(reflection_class, getProperty)
 		}
 	}
 	str_name = ZSTR_VAL(name);
-	str_name_len = ZSTR_LEN(name);
 	if ((tmp = strstr(ZSTR_VAL(name), "::")) != NULL) {
 		classname_len = tmp - ZSTR_VAL(name);
 		classname = zend_string_alloc(classname_len, 0);
@@ -6695,7 +6694,7 @@ static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	PHP_FE_END
 }; /* }}} */
 
-static zend_object_handlers *zend_std_obj_handlers;
+static const zend_object_handlers *zend_std_obj_handlers;
 
 /* {{{ _reflection_write_property */
 static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)

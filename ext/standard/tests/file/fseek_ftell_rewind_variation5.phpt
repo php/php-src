@@ -59,7 +59,7 @@ foreach($file_content_types as $file_content_type){
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fseek(), ftell(), rewind() : whence = SEEK_CUR & all r and a modes ***
 -- File having data of type text_with_new_line --
 -- File opened in mode r --

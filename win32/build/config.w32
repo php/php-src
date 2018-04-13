@@ -325,7 +325,7 @@ if (CLANG_TOOLSET) {
 	}
 }
 
-ARG_WITH("codegen-arch", "Architecture for code generation: ia32, sse, sse2, avx, avx2", "no");
+ARG_WITH("codegen-arch", "Architecture for code generation: ia32. Use --enable-native-intrinsics to enable SIMD optimizations.", "no");
 toolset_setup_codegen_arch();
 
 ARG_WITH("all-shared", "Force all the non obligatory extensions to be shared", "no");
@@ -343,9 +343,10 @@ ARG_WITH("test-ini-ext-exclude", "Comma separated list of shared extensions to \
 		be excluded from the test.ini", "no");
 
 ARG_ENABLE("native-intrinsics", "Comma separated list of intrinsic optimizations to enable. \
-	Available optimization names are sse, sse2, sse4.1, sse4.2. SSE and SSE2 are enabled \
-	by default. The best optimization specified will automatically enable all the older \
-	optimizations. Note, that the produced binary might not work properly, if the \
-	optimizations are not available on the target processor.", "no");
+	Available instruction set names are sse, sse2, sse3, ssse3, sse4.1, sse4.2, avx, avx2. \
+	SSE and SSE2 are enabled by default. The best instruction set specified will \
+	automatically enable all the older instruction sets. Note, that the produced binary \
+	might not work properly, if the chosen instruction sets are not available on the target \
+	processor.", "no");
 toolset_setup_intrinsic_cflags();
 

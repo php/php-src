@@ -243,7 +243,7 @@ BEGIN_EXTERN_C()
 
 int zend_ssa_find_false_dependencies(const zend_op_array *op_array, zend_ssa *ssa);
 int zend_ssa_find_sccs(const zend_op_array *op_array, zend_ssa *ssa);
-int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa);
+int zend_ssa_inference(zend_arena **raena, const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_long optimization_level);
 
 uint32_t zend_array_element_type(uint32_t t1, int write, int insert);
 
@@ -253,7 +253,7 @@ int  zend_inference_narrowing_meet(zend_ssa_var_info *var_info, zend_ssa_range *
 int  zend_inference_widening_meet(zend_ssa_var_info *var_info, zend_ssa_range *r);
 void zend_inference_check_recursive_dependencies(zend_op_array *op_array);
 
-int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist);
+int  zend_infer_types_ex(const zend_op_array *op_array, const zend_script *script, zend_ssa *ssa, zend_bitset worklist, zend_long optimization_level);
 
 void zend_init_func_return_info(const zend_op_array   *op_array,
                                 const zend_script     *script,

@@ -236,7 +236,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS messages"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["message"]=>
   string(20) "dumped by the parent"

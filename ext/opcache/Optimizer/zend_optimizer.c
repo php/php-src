@@ -566,14 +566,9 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 	if (op_array->last_live_range) {
 		int i = 0;
 		int j = 0;
-		uint32_t *map;
-		ALLOCA_FLAG(use_heap);
-
-		map = (uint32_t *)do_alloca(sizeof(uint32_t) * op_array->last_live_range, use_heap);
 
 		do {
 			if ((op_array->live_range[i].var & ~ZEND_LIVE_MASK) != var) {
-				map[i] = j;
 				if (i != j) {
 					op_array->live_range[j] = op_array->live_range[i];
 				}
@@ -582,23 +577,12 @@ void zend_optimizer_remove_live_range(zend_op_array *op_array, uint32_t var)
 			i++;
 		} while (i < op_array->last_live_range);
 		if (i != j) {
-			if ((op_array->last_live_range = j)) {
-				zend_op *opline = op_array->opcodes;
-				zend_op *end = opline + op_array->last;
-
-				while (opline != end) {
-					if ((opline->opcode == ZEND_FREE || opline->opcode == ZEND_FE_FREE) &&
-							opline->extended_value == ZEND_FREE_ON_RETURN) {
-						opline->op2.num = map[opline->op2.num];
-					}
-					opline++;
-				}
-			} else {
+			op_array->last_live_range = j;
+			if (j == 0) {
 				efree(op_array->live_range);
 				op_array->live_range = NULL;
 			}
 		}
-		free_alloca(map, use_heap);
 	}
 }
 

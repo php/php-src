@@ -216,8 +216,6 @@ typedef struct _zend_fcall_info_cache {
 		class_container.__debugInfo = NULL;					\
 		class_container.serialize_func = NULL;					\
 		class_container.unserialize_func = NULL;				\
-		class_container.serialize = NULL;						\
-		class_container.unserialize = NULL;						\
 		class_container.parent = NULL;							\
 		class_container.num_interfaces = 0;						\
 		class_container.traits = NULL;							\
@@ -301,10 +299,10 @@ ZEND_API void zend_class_implements(zend_class_entry *class_entry, int num_inter
 
 ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zend_class_entry *ce, int persistent);
 
-#define zend_register_class_alias(name, ce, persistent) \
-	zend_register_class_alias_ex(name, sizeof(name)-1, ce, persistent)
-#define zend_register_ns_class_alias(ns, name, ce, persistent) \
-	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, persistent)
+#define zend_register_class_alias(name, ce) \
+	zend_register_class_alias_ex(name, sizeof(name)-1, ce, 1)
+#define zend_register_ns_class_alias(ns, name, ce) \
+	zend_register_class_alias_ex(ZEND_NS_NAME(ns, name), sizeof(ZEND_NS_NAME(ns, name))-1, ce, 1)
 
 ZEND_API int zend_disable_function(char *function_name, size_t function_name_length);
 ZEND_API int zend_disable_class(char *class_name, size_t class_name_length);
@@ -563,6 +561,8 @@ ZEND_API zend_string *zend_resolve_method_name(zend_class_entry *ce, zend_functi
 ZEND_API const char *zend_get_object_type(const zend_class_entry *ce);
 
 ZEND_API zend_bool zend_is_iterable(zval *iterable);
+
+ZEND_API zend_bool zend_is_countable(zval *countable);
 
 #define add_method(arg, key, method)	add_assoc_function((arg), (key), (method))
 

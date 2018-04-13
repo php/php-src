@@ -71,7 +71,7 @@ for($index =0; $index < count($res_heredoc_strings); $index ++) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing htmlspecialchars_decode() : usage variations ***
 -- Iteration 1 --
 string(0) ""

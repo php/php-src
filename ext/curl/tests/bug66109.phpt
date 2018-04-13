@@ -19,6 +19,6 @@ var_dump(curl_exec($ch));
 curl_close($ch);
 
 ?>
---EXPECTF--
+--EXPECT--
 string(6) "DELETE"
 string(3) "GET"

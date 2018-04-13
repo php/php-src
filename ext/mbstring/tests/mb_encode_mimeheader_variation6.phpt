@@ -37,7 +37,7 @@ foreach ($linefeeds as $linefeed) {
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing mb_encode_mimeheader() : usage variations ***
 
 -- Iteration 1 --

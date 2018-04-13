@@ -7,7 +7,7 @@ if (2147483647 == PHP_INT_MAX) {
     die('skip ot supported on this system');
 }
 if (disk_free_space(__DIR__) < 10*1024*1024*1024) {
-    die('not enough disk space');
+    die('skip Not enough disk space');
 }
 ?>
 --FILE--

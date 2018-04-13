@@ -770,14 +770,17 @@ PHP_FUNCTION(pcntl_wifexited)
 {
 #ifdef WIFEXITED
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	if (WIFEXITED(status_word))
+	int_status_word = (int) status_word;
+	if (WIFEXITED(int_status_word))
 		RETURN_TRUE;
 #endif
+
 	RETURN_FALSE;
 }
 /* }}} */
@@ -788,12 +791,14 @@ PHP_FUNCTION(pcntl_wifstopped)
 {
 #ifdef WIFSTOPPED
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	if (WIFSTOPPED(status_word))
+	int_status_word = (int) status_word;
+	if (WIFSTOPPED(int_status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -806,12 +811,14 @@ PHP_FUNCTION(pcntl_wifsignaled)
 {
 #ifdef WIFSIGNALED
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	if (WIFSIGNALED(status_word))
+	int_status_word = (int) status_word;
+	if (WIFSIGNALED(int_status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -823,12 +830,14 @@ PHP_FUNCTION(pcntl_wifcontinued)
 {
 #ifdef HAVE_WCONTINUED
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	if (WIFCONTINUED(status_word))
+	int_status_word = (int) status_word;
+	if (WIFCONTINUED(int_status_word))
 		RETURN_TRUE;
 #endif
 	RETURN_FALSE;
@@ -842,12 +851,14 @@ PHP_FUNCTION(pcntl_wexitstatus)
 {
 #ifdef WEXITSTATUS
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	RETURN_LONG(WEXITSTATUS(status_word));
+	int_status_word = (int) status_word;
+	RETURN_LONG(WEXITSTATUS(int_status_word));
 #else
 	RETURN_FALSE;
 #endif
@@ -860,12 +871,14 @@ PHP_FUNCTION(pcntl_wtermsig)
 {
 #ifdef WTERMSIG
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	RETURN_LONG(WTERMSIG(status_word));
+	int_status_word = (int) status_word;
+	RETURN_LONG(WTERMSIG(int_status_word));
 #else
 	RETURN_FALSE;
 #endif
@@ -878,12 +891,14 @@ PHP_FUNCTION(pcntl_wstopsig)
 {
 #ifdef WSTOPSIG
 	zend_long status_word;
+	int int_status_word;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "l", &status_word) == FAILURE) {
 	       return;
 	}
 
-	RETURN_LONG(WSTOPSIG(status_word));
+	int_status_word = (int) status_word;
+	RETURN_LONG(WSTOPSIG(int_status_word));
 #else
 	RETURN_FALSE;
 #endif

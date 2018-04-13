@@ -50,7 +50,7 @@ foreach ($a as $k => $v) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 ==Direct instance==
 0 => a
 1 => c

@@ -334,13 +334,12 @@ ZEND_METHOD(exception, __wakeup)
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
-	char  *message = NULL, *filename = NULL;
+	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	zval   tmp, *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
-	size_t message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
 		if (Z_TYPE(EX(This)) == IS_OBJECT) {
@@ -357,7 +356,7 @@ ZEND_METHOD(error_exception, __construct)
 	object = getThis();
 
 	if (message) {
-		ZVAL_STRING(&tmp, message);
+		ZVAL_STR_COPY(&tmp, message);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 		zval_ptr_dtor(&tmp);
 	}
@@ -375,7 +374,7 @@ ZEND_METHOD(error_exception, __construct)
 	zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
 	if (argc >= 4) {
-		ZVAL_STRING(&tmp, filename);
+		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
     	if (argc < 5) {

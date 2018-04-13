@@ -645,7 +645,7 @@ CPH_METHOD(SaveToStream)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::__construct([object com_object])
+/* {{{ proto COMPersistHelper::__construct([object com_object])
    Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
 {

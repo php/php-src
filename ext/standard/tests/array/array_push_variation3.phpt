@@ -27,7 +27,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_push() : usage variations ***
 
 -- Pass array as $var argument --

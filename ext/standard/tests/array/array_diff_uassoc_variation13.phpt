@@ -33,7 +33,7 @@ var_dump( array_diff_uassoc($array2, $array1, "strcasecmp") );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Testing array_diff_uassoc() function with referenced variable $ref_var has value 'a' --

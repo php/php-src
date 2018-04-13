@@ -905,7 +905,7 @@ PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zva
 	case FS_IS_R:
 		RETURN_BOOL((ssb.sb.st_mode&rmask)!=0);
 	case FS_IS_X:
-		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0 && !S_ISDIR(ssb.sb.st_mode));
+		RETURN_BOOL((ssb.sb.st_mode&xmask)!=0);
 	case FS_IS_FILE:
 		RETURN_BOOL(S_ISREG(ssb.sb.st_mode));
 	case FS_IS_DIR:

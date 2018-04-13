@@ -22,7 +22,7 @@ var_dump(libxml_use_internal_errors(false));
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 Done

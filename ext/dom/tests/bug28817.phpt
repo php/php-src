@@ -24,7 +24,7 @@ $z=new z();
 var_dump($z->p_array);
 var_dump($z->p_variable);
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   string(5) "bonus"

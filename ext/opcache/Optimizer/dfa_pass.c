@@ -110,7 +110,7 @@ int zend_dfa_analyze_op_array(zend_op_array *op_array, zend_optimizer_ctx *ctx, 
 		return FAILURE;
 	}
 
-	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa) != SUCCESS) {
+	if (zend_ssa_inference(&ctx->arena, op_array, ctx->script, ssa, ctx->optimization_level) != SUCCESS) {
 		return FAILURE;
 	}
 
@@ -810,30 +810,30 @@ optimize_jmpnz:
 					}
 					break;
 				case ZEND_COALESCE:
-					if (opline->op1_type == IS_CONST) {
+				{
+					zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
+					if (opline->op1_type == IS_CONST
+							&& var->use_chain < 0 && var->phi_use_chain == NULL) {
 						if (Z_TYPE_P(CT_CONSTANT_EX(op_array, opline->op1.constant)) == IS_NULL) {
+							zend_ssa_remove_result_def(ssa, ssa_op);
 							MAKE_NOP(opline);
 							removed_ops++;
 							take_successor_1(ssa, block_num, block);
 							goto optimize_nop;
 						} else {
-							zend_ssa_var *var = &ssa->vars[ssa_op->result_def];
-							if (var->use_chain < 0 && var->phi_use_chain == NULL) {
-								ssa_op->result_def = -1;
-								if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
-									zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
-								}
-								zend_ssa_unlink_use_chain(ssa, opline - op_array->opcodes, ssa_op->op1_use);
-								ssa_op->op1_use = -1;
-								ssa_op->op1_use_chain = -1;
-								opline->opcode = ZEND_JMP;
-								COPY_NODE(opline->op1, opline->op2);
-								take_successor_0(ssa, block_num, block);
-								goto optimize_jmp;
+							if (opline->result_type & (IS_TMP_VAR|IS_VAR)) {
+								zend_optimizer_remove_live_range_ex(op_array, opline->result.var, var->definition);
 							}
+							opline->opcode = ZEND_JMP;
+							opline->result_type = IS_UNUSED;
+							zend_ssa_remove_result_def(ssa, ssa_op);
+							COPY_NODE(opline->op1, opline->op2);
+							take_successor_0(ssa, block_num, block);
+							goto optimize_jmp;
 						}
 					}
 					break;
+				}
 				case ZEND_NOP:
 optimize_nop:
 					compress_block(op_array, block);

@@ -2237,6 +2237,15 @@ AC_DEFUN([PHP_SETUP_ICU],[
     ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
     PHP_EVAL_INCLINE($ICU_INCS)
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
+
+    ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
+    if test "$icu_version" -ge "49000"; then
+      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
+    fi
+    if test "$icu_version" -ge "60000"; then
+      ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
+    fi
   fi
 ])
 
@@ -3310,9 +3319,12 @@ dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
 
 m4_include([build/ax_gcc_func_attribute.m4])
+<<<<<<< HEAD
 
 dnl PHP_CHECK_VALGRIND
 AC_DEFUN([PHP_CHECK_VALGRIND], [
   AC_MSG_CHECKING([for valgrind])
   AC_CHECK_HEADERS([valgrind/valgrind.h])
 ])
+=======
+>>>>>>> 9993304da4559a936246e118cfefa1bcedaa84a5

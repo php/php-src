@@ -2,7 +2,7 @@
   regposerr.c - Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2007  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,6 +26,13 @@
  * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
  * SUCH DAMAGE.
  */
+
+/* Can't include regint.h etc.. for conflict of regex_t.
+   Define ONIGURUMA_EXPORT here for onigposix.h.
+ */
+#ifndef ONIGURUMA_EXPORT
+#define ONIGURUMA_EXPORT
+#endif
 
 #include "config.h"
 #include "onigposix.h"

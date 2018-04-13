@@ -24,7 +24,7 @@ fclose($fp);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing unlink() on a file which is in use ***
 bool(true)
 bool(false)

@@ -3328,7 +3328,7 @@ PHP_FUNCTION(ldap_parse_result)
 	zval *link, *result, *errcode, *matcheddn, *errmsg, *referrals, *serverctrls;
 	ldap_linkdata *ld;
 	LDAPMessage *ldap_result;
-	LDAPControl **lserverctrls = NULL, **ctrlp = NULL;
+	LDAPControl **lserverctrls = NULL;
 	char **lreferrals, **refp;
 	char *lmatcheddn, *lerrmsg;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();

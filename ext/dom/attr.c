@@ -52,7 +52,7 @@ const zend_function_entry php_dom_attr_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMAttr::__construct(string name, [string value]) */
+/* {{{ proto DOMAttr::__construct(string name, [string value]) */
 PHP_METHOD(domattr, __construct)
 {
 	zval *id = getThis();

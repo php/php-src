@@ -22,7 +22,7 @@ pcntl_signal_dispatch();
 
 echo "ok\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(10) "pcntl_test"
 int(0)

@@ -40,7 +40,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ksort() : usage variations ***
 
 -- Testing ksort() by supplying boolean value array, 'flag' value is defualt --

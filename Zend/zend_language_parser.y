@@ -758,9 +758,9 @@ trait_precedence:
 
 trait_alias:
 		trait_method_reference T_AS T_STRING
-			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, 0, $1, $3); }
+			{ $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, $3); }
 	|	trait_method_reference T_AS reserved_non_modifiers
-			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, 0, $1, zend_ast_create_zval(&zv)); }
+			{ zval zv; zend_lex_tstring(&zv); $$ = zend_ast_create(ZEND_AST_TRAIT_ALIAS, $1, zend_ast_create_zval(&zv)); }
 	|	trait_method_reference T_AS member_modifier identifier
 			{ $$ = zend_ast_create_ex(ZEND_AST_TRAIT_ALIAS, $3, $1, $4); }
 	|	trait_method_reference T_AS member_modifier

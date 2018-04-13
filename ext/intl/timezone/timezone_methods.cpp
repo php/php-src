@@ -23,6 +23,7 @@
 #include <unicode/locid.h>
 #include <unicode/timezone.h>
 #include <unicode/ustring.h>
+#include <unicode/calendar.h>
 #include "intl_convertcpp.h"
 
 #include "../common/common_date.h"
@@ -36,6 +37,9 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "common/common_enum.h"
+
+using icu::Locale;
+using icu::Calendar;
 
 U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 {

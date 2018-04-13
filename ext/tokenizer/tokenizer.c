@@ -144,8 +144,7 @@ static zend_bool tokenize(zval *return_value, zend_string *source)
 	LANG_SCNG(yy_state) = yycINITIAL;
 	array_init(return_value);
 
-	ZVAL_UNDEF(&token);
-	while ((token_type = lex_scan(&token))) {
+	while ((token_type = lex_scan(&token, NULL))) {
 		add_token(return_value, token_type, zendtext, zendleng, token_line);
 
 		if (Z_TYPE(token) != IS_UNDEF) {

@@ -1745,7 +1745,7 @@ PHP_FUNCTION(snmp_read_mib)
 }
 /* }}} */
 
-/* {{{ proto SNMP SNMP::__construct(int version, string hostname, string community|securityName [, long timeout [, long retries]])
+/* {{{ proto SNMP::__construct(int version, string hostname, string community|securityName [, int timeout [, int retries]])
 	Creates a new SNMP session to specified host. */
 PHP_METHOD(snmp, __construct)
 {
@@ -1868,7 +1868,7 @@ PHP_METHOD(snmp, setSecurity)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getErrno()
+/* {{{ proto int SNMP::getErrno()
 	Get last error code number */
 PHP_METHOD(snmp, getErrno)
 {
@@ -1882,7 +1882,7 @@ PHP_METHOD(snmp, getErrno)
 }
 /* }}} */
 
-/* {{{ proto long SNMP::getError()
+/* {{{ proto int SNMP::getError()
 	Get last error message */
 PHP_METHOD(snmp, getError)
 {
@@ -1938,7 +1938,7 @@ zval *php_snmp_read_property(zval *object, zval *member, int type, void **cache_
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
 	}
 
@@ -1976,7 +1976,7 @@ void php_snmp_write_property(zval *object, zval *member, zval *value, void **cac
 		}
 		*/
 	} else {
-		zend_object_handlers * std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers * std_hnd = zend_get_std_object_handlers();
 		std_hnd->write_property(object, member, value, cache_slot);
 	}
 
@@ -2017,7 +2017,7 @@ static int php_snmp_has_property(zval *object, zval *member, int has_set_exists,
 			}
 		}
 	} else {
-		zend_object_handlers *std_hnd = zend_get_std_object_handlers();
+		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
 	}
 	return ret;

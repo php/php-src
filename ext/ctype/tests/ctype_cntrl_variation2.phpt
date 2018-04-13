@@ -27,7 +27,7 @@ for ($i = 0; $i < 256; $i++) {
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_cntrl() : usage variations ***
 character code 0 is control character
 character code 1 is control character
