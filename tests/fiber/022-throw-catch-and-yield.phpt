@@ -13,5 +13,5 @@ $f->resume();
 echo $f->throw(new Exception("foo"));
 echo $f->resume("bar");
 ?>
---EXPECTF--
+--EXPECT--
 foobar

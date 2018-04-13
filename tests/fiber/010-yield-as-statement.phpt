@@ -11,4 +11,4 @@ $f->resume(1);
 $f->resume(1);
 $f->resume(1);
 ?>
---EXPECTF--
+--EXPECT--

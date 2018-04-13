@@ -12,5 +12,5 @@ $f = new Fiber(function () {
 $f->resume();
 $f->resume('foo');
 ?>
---EXPECTF--
+--EXPECT--
 foo

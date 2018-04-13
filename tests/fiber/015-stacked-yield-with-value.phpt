@@ -14,6 +14,6 @@ $f = new Fiber(function () {
 var_dump($f->resume());
 var_dump($f->resume());
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)

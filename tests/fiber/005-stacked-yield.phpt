@@ -19,7 +19,7 @@ $f->resume();
 echo "await2\n";
 $f->resume();
 ?>
---EXPECTF--
+--EXPECT--
 before
 await
 after

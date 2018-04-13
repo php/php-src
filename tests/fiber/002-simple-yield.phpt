@@ -11,7 +11,7 @@ $f->resume();
 echo "fiber\n";
 $f->resume();
 ?>
---EXPECTF--
+--EXPECT--
 start
 fiber
 end
