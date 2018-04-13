@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.18
 
+- FPM:
+  . Fixed bug #76075 --with-fpm-acl wrongly tries to find libacl on FreeBSD.
+    (mgorny)
+
 - Reflection:
   . Fixed arginfo for array_replace(_recursive) and array_merge(_recursive).
     (carusogabriel)
