@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #76164 (exif_read_data zend_mm_heap corrupted). (cmb)
 
+- Reflection:
+  . Fixed arginfo of array_replace(_recursive) and array_merge(_recursive).
+    (carusogabriel)
+
 - Session:
   . Fixed bug #74892 (Url Rewriting (trans_sid) not working on urls that start
     with "#"). (Andrew Nester)

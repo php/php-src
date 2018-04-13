@@ -391,22 +391,22 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_array_slice, 0, 0, 2)
 	ZEND_ARG_INFO(0, preserve_keys)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge, 0, 0, 1)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_merge_recursive, 0, 0, 1)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace, 0, 0, 1)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace_recursive, 0, 0, 2)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_array_replace_recursive, 0, 0, 1)
 	ZEND_ARG_INFO(0, arr1) /* ARRAY_INFO(0, arg, 0) */
 	ZEND_ARG_VARIADIC_INFO(0, arrays)
 ZEND_END_ARG_INFO()
@@ -4040,7 +4040,7 @@ PHP_FUNCTION(long2ip)
  ********************/
 
 /* {{{ proto string getenv(string varname[, bool local_only]
-   Get the value of an environment variable or every available environment variable 
+   Get the value of an environment variable or every available environment variable
    if no varname is present  */
 PHP_FUNCTION(getenv)
 {
