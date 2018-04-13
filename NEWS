@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #76164 (exif_read_data zend_mm_heap corrupted). (cmb)
 
+- FPM:
+  . Fixed bug #76075 --with-fpm-acl wrongly tries to find libacl on FreeBSD.
+    (mgorny)
+
 - Reflection:
   . Fixed arginfo of array_replace(_recursive) and array_merge(_recursive).
     (carusogabriel)
