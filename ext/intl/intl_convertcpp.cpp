@@ -20,9 +20,12 @@
 
 #include "intl_convertcpp.h"
 #include <unicode/ustring.h>
+#include <unicode/unistr.h>
 extern "C" {
 #include <php.h>
 }
+
+using icu::UnicodeString;
 
 /* {{{ intl_stringFromChar */
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status)

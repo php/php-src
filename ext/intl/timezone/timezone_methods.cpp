@@ -37,6 +37,10 @@ extern "C" {
 }
 #include "common/common_enum.h"
 
+using icu::UnicodeString;
+using icu::StringEnumeration;
+using icu::Locale;
+
 U_CFUNC PHP_METHOD(IntlTimeZone, __construct)
 {
 	zend_throw_exception( NULL,

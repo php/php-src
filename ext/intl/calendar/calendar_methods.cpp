@@ -40,6 +40,11 @@ extern "C" {
 }
 #include "../common/common_enum.h"
 
+using icu::Locale;
+using icu::Calendar;
+using icu::StringEnumeration;
+using icu::UnicodeString;
+
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
 	zend_throw_exception( NULL,

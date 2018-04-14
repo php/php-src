@@ -34,6 +34,11 @@ extern "C" {
 #include "zend_exceptions.h"
 }
 
+using icu::StringPiece;
+using icu::UnicodeString;
+using icu::GregorianCalendar;
+using icu::Locale;
+
 static inline GregorianCalendar *fetch_greg(Calendar_object *co) {
 	return (GregorianCalendar*)co->ucal;
 }

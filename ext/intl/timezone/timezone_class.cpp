@@ -37,6 +37,10 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
+using icu::TimeZone;
+using icu::UnicodeString;
+using icu::Calendar;
+
 /* {{{ Global variables */
 U_CDECL_BEGIN
 zend_class_entry *TimeZone_ce_ptr = NULL;

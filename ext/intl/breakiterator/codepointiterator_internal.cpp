@@ -31,6 +31,7 @@ typedef union {
 #define U_ALIGNMENT_OFFSET(ptr) U_POINTER_MASK_LSB(ptr, sizeof(UAlignedMemory) - 1)
 #define U_ALIGNMENT_OFFSET_UP(ptr) (sizeof(UAlignedMemory) - U_ALIGNMENT_OFFSET(ptr))
 
+using icu::UCharCharacterIterator;
 using namespace PHP;
 
 UOBJECT_DEFINE_RTTI_IMPLEMENTATION(CodePointBreakIterator);

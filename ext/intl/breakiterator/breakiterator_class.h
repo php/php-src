@@ -28,6 +28,11 @@
 typedef void BreakIterator;
 #endif
 
+#ifdef __cplusplus
+#include <unicode/brkiter.h>
+using icu::BreakIterator;
+#endif
+
 typedef struct {
 	// 	error handling
 	intl_error  err;

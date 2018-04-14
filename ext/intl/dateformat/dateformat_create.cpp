@@ -48,6 +48,8 @@ extern "C" {
 	 UDAT_SHORT_RELATIVE == (i) || UDAT_NONE == (i) || \
 	 UDAT_PATTERN == (i))
 
+using icu::DateFormat;
+
 /* {{{ */
 static int datefmt_ctor(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_constructor)
 {

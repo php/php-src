@@ -48,6 +48,9 @@ extern "C" {
 #endif
 
 U_NAMESPACE_BEGIN
+
+using icu::MessageFormat;
+
 /**
  * This class isolates our access to private internal methods of
  * MessageFormat.  It is never instantiated; it exists only for C++
@@ -75,6 +78,15 @@ MessageFormatAdapter::getMessagePattern(MessageFormat* m) {
 }
 #endif
 U_NAMESPACE_END
+
+using icu::MessageFormatAdapter;
+using icu::MessageFormat;
+using icu::Formattable;
+using icu::MessagePattern;
+using icu::UnicodeString;
+using icu::Format;
+using icu::DateFormat;
+using icu::FieldPosition;
 
 U_CFUNC int32_t umsg_format_arg_count(UMessageFormat *fmt)
 {

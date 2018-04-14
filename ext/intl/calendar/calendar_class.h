@@ -28,6 +28,10 @@
 typedef void Calendar;
 #endif
 
+#ifdef __cplusplus
+using icu::Calendar;
+#endif
+
 typedef struct {
 	// 	error handling
 	intl_error  err;

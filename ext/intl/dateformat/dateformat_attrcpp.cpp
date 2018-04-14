@@ -33,6 +33,9 @@ extern "C" {
 #include "../intl_convertcpp.h"
 #include "dateformat_helpers.h"
 
+using icu::DateFormat;
+using icu::UnicodeString;
+
 static inline DateFormat *fetch_datefmt(IntlDateFormatter_object *dfo) {
 	return (DateFormat *)dfo->datef_data.udatf;
 }
