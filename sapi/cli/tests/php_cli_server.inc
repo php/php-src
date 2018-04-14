@@ -1,6 +1,6 @@
 <?php
 define ("PHP_CLI_SERVER_HOSTNAME", "localhost");
-define ("PHP_CLI_SERVER_PORT", 8964);
+define ("PHP_CLI_SERVER_PORT", 10000);
 define ("PHP_CLI_SERVER_ADDRESS", PHP_CLI_SERVER_HOSTNAME.":".PHP_CLI_SERVER_PORT);
 
 function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.php', $cmd_args = null) {
@@ -91,4 +91,3 @@ function php_cli_server_stop($handle) {
     return $success;
 }
 ?>
-
