@@ -1082,6 +1082,7 @@ PHP_RSHUTDOWN_FUNCTION(imap)
 			}
 		}
 		mail_free_errorlist(&IMAPG(imap_errorstack));
+		IMAPG(imap_errorstack) = NIL;
 	}
 
 	if (IMAPG(imap_alertstack) != NIL) {
