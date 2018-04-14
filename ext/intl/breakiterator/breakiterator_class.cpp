@@ -37,6 +37,7 @@ extern "C" {
 #include <assert.h>
 }
 
+using icu::RuleBasedBreakIterator;
 using PHP::CodePointBreakIterator;
 
 /* {{{ Global variables */

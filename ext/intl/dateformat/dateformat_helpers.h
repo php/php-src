@@ -27,6 +27,9 @@ extern "C" {
 #include "../php_intl.h"
 }
 
+using icu::Locale;
+using icu::Calendar;
+
 int datefmt_process_calendar_arg(zval* calendar_zv,
 								 Locale const& locale,
 								 const char *func_name,

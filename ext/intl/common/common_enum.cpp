@@ -30,6 +30,8 @@ extern "C" {
 #include <zend_exceptions.h>
 }
 
+using icu::StringEnumeration;
+
 zend_class_entry *IntlIterator_ce_ptr;
 zend_object_handlers IntlIterator_handlers;
 

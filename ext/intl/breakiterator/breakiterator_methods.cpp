@@ -31,6 +31,7 @@ extern "C" {
 #include <zend_exceptions.h>
 }
 
+using icu::Locale;
 using PHP::CodePointBreakIterator;
 
 U_CFUNC PHP_METHOD(BreakIterator, __construct)

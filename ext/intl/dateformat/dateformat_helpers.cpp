@@ -28,6 +28,9 @@ extern "C" {
 #include "../calendar/calendar_class.h"
 }
 
+using icu::Locale;
+using icu::GregorianCalendar;
+
 int datefmt_process_calendar_arg(zval* calendar_zv,
 								 Locale const& locale,
 								 const char *func_name,

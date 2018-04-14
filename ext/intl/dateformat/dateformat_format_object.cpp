@@ -33,6 +33,15 @@ extern "C" {
 #include "../common/common_date.h"
 }
 
+using icu::UnicodeString;
+using icu::SimpleDateFormat;
+using icu::Locale;
+using icu::StringPiece;
+using icu::GregorianCalendar;
+using icu::Calendar;
+using icu::DateFormat;
+using icu::TimeZone;
+
 static const DateFormat::EStyle valid_styles[] = {
 		DateFormat::kNone,
 		DateFormat::kFull,

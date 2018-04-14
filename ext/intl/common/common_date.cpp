@@ -33,6 +33,10 @@ extern "C" {
 #define NAN (INFINITY-INFINITY)
 #endif
 
+using icu::TimeZone;
+using icu::Calendar;
+using icu::UnicodeString;
+
 /* {{{ timezone_convert_datetimezone
  *      The timezone in DateTime and DateTimeZone is not unified. */
 U_CFUNC TimeZone *timezone_convert_datetimezone(int type,

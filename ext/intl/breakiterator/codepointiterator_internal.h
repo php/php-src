@@ -19,6 +19,8 @@
 
 #include <unicode/brkiter.h>
 
+using icu::UnicodeString;
+using icu::CharacterIterator;
 using U_ICU_NAMESPACE::BreakIterator;
 
 namespace PHP {

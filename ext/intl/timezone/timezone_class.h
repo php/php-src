@@ -31,6 +31,10 @@
 typedef void TimeZone;
 #endif
 
+#ifdef __cplusplus
+using icu::TimeZone;
+#endif
+
 typedef struct {
 	// 	error handling
 	intl_error		err;
