@@ -132,6 +132,37 @@ php_apache_sapi_header_handler(sapi_header_struct *sapi_header, sapi_header_op_e
 				}
 
 				ap_set_content_length(ctx->r, clen);
+			} else if (!strcasecmp(sapi_header->header, "set-cookie") && op == SAPI_HEADER_ADD) {
+				zend_llist_element *current;
+				sapi_header_struct *curr_header;
+				char *curr_val;
+
+				apr_table_unset(ctx->r->headers_out, sapi_header->header);
+				
+				current = sapi_headers->headers.head;
+				while(current) {
+					curr_header = (sapi_header_struct *)(current->data);
+
+					if(!strcasecmp(curr_header->header, "set-cookie")) {
+						curr_val = strchr(curr_header->header, ':');
+
+						if (!curr_val) {
+							break;
+						}
+
+						*curr_val = '\0';
+
+						do {
+							curr_val++;
+						} while (*curr_val == ' ');
+						
+						apr_table_add(ctx->r->headers_out, curr_header->header, curr_val);
+					}
+
+					current = current->next;
+				}
+
+				apr_table_add(ctx->r->headers_out, sapi_header->header, val);
 			} else if (op == SAPI_HEADER_REPLACE) {
 				apr_table_set(ctx->r->headers_out, sapi_header->header, val);
 			} else {
