@@ -23,7 +23,7 @@
 #include "spoofchecker_create.h"
 #include "intl_data.h"
 
-/* {{{ proto Spoofchecker Spoofchecker::__construct()
+/* {{{ proto Spoofchecker::__construct()
  * Spoofchecker object constructor.
  */
 PHP_METHOD(Spoofchecker, __construct)
@@ -34,7 +34,7 @@ PHP_METHOD(Spoofchecker, __construct)
 	zend_error_handling error_handling;
 	SPOOFCHECKER_METHOD_INIT_VARS;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "") == FAILURE) {
+	if (zend_parse_parameters_none_throw() == FAILURE) {
 		return;
 	}
 

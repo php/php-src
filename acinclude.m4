@@ -2239,7 +2239,13 @@ AC_DEFUN([PHP_SETUP_ICU],[
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
 
     ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
-    ICU_CXXFLAGS="$ICU_CXXFLAGS -DU_USING_ICU_NAMESPACE=1"
+    if test "$icu_version" -ge "49000"; then
+      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
+    fi
+    if test "$icu_version" -ge "60000"; then
+      ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
+    fi
   fi
 ])
 
@@ -3250,5 +3256,66 @@ AC_DEFUN([PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW], [
 
 ])
 
+dnl PHP_CHECK_BUILTIN_CPU_INIT
+AC_DEFUN([PHP_CHECK_BUILTIN_CPU_INIT], [
+  AC_MSG_CHECKING([for __builtin_cpu_init])
+
+  AC_TRY_LINK(, [
+    return __builtin_cpu_init()? 1 : 0;
+  ], [
+    have_builtin_cpu_init=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_cpu_init=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_INIT],
+   [$have_builtin_cpu_init], [Whether the compiler supports __builtin_cpu_init])
+
+])
+
+dnl PHP_CHECK_BUILTIN_CPU_SUPPORTS
+AC_DEFUN([PHP_CHECK_BUILTIN_CPU_SUPPORTS], [
+  AC_MSG_CHECKING([for __builtin_cpu_supports])
+
+  AC_TRY_LINK(, [
+    return __builtin_cpu_supports("sse")? 1 : 0;
+  ], [
+    have_builtin_cpu_supports=1
+    AC_MSG_RESULT([yes])
+  ], [
+    have_builtin_cpu_supports=0
+    AC_MSG_RESULT([no])
+  ])
+
+  AC_DEFINE_UNQUOTED([PHP_HAVE_BUILTIN_CPU_SUPPORTS],
+   [$have_builtin_cpu_supports], [Whether the compiler supports __builtin_cpu_supports])
+])
+
+dnl PHP_CHECK_CPU_SUPPORTS
+AC_DEFUN([PHP_CHECK_CPU_SUPPORTS], [
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_INIT])
+  AC_REQUIRE([PHP_CHECK_BUILTIN_CPU_SUPPORTS])
+  have_ext_instructions=0
+  if test $have_builtin_cpu_supports = 1; then
+    AC_MSG_CHECKING([for $1 instructions supports])
+    AC_TRY_RUN([
+int main() {
+	return __builtin_cpu_supports("$1")? 0 : 1;
+}
+    ], [
+      have_ext_instructions=1
+      AC_MSG_RESULT([yes])
+    ], [
+      AC_MSG_RESULT([no])
+    ])
+  fi
+  AC_DEFINE_UNQUOTED(AS_TR_CPP([PHP_HAVE_$1_INSTRUCTIONS]),
+   [$have_ext_instructions], [Whether the compiler supports $1 instructions])
+])
+
 dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
+
+m4_include([build/ax_gcc_func_attribute.m4])

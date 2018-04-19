@@ -708,8 +708,8 @@ static int validateHeaders( LSAPI_Request * pReq )
     {
         if ( pReq->m_pHeaderIndex->m_headerOff[i] )
         {
-            if (pReq->m_pHeaderIndex->m_headerOff[i] > totalLen 
-                || pReq->m_pHeaderIndex->m_headerLen[i] 
+            if (pReq->m_pHeaderIndex->m_headerOff[i] > totalLen
+                || pReq->m_pHeaderIndex->m_headerLen[i]
                     + pReq->m_pHeaderIndex->m_headerOff[i] > totalLen)
                 return -1;
         }
@@ -721,8 +721,8 @@ static int validateHeaders( LSAPI_Request * pReq )
         pEnd = pCur + pReq->m_pHeader->m_cntUnknownHeaders;
         while( pCur < pEnd )
         {
-            if (pCur->nameOff > totalLen 
-                || pCur->nameOff + pCur->nameLen > totalLen 
+            if (pCur->nameOff > totalLen
+                || pCur->nameOff + pCur->nameLen > totalLen
                 || pCur->valueOff > totalLen
                 || pCur->valueOff + pCur->valueLen > totalLen)
                 return -1;
@@ -1194,13 +1194,13 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     if ( parseEnv( pReq->m_pEnvList, pReq->m_pHeader->m_cntEnv,
                 &pBegin, pEnd ) == -1 )
         return -1;
-    if (pReq->m_pHeader->m_scriptFileOff < 0 
-        || pReq->m_pHeader->m_scriptFileOff >= totalLen 
+    if (pReq->m_pHeader->m_scriptFileOff < 0
+        || pReq->m_pHeader->m_scriptFileOff >= totalLen
         || pReq->m_pHeader->m_scriptNameOff < 0
         || pReq->m_pHeader->m_scriptNameOff >= totalLen
         || pReq->m_pHeader->m_queryStringOff < 0
         || pReq->m_pHeader->m_queryStringOff >= totalLen
-        || pReq->m_pHeader->m_requestMethodOff < 0 
+        || pReq->m_pHeader->m_requestMethodOff < 0
         || pReq->m_pHeader->m_requestMethodOff >= totalLen)
     {
         fprintf(stderr, "%d: bad request header - ERROR#1\n", getpid());
@@ -1231,13 +1231,13 @@ static int parseRequest( LSAPI_Request * pReq, int totalLen )
     {
         fixHeaderIndexEndian( pReq );
     }
-    
+
     if (validateHeaders(pReq) == -1)
     {
         fprintf(stderr, "%d: bad request header - ERROR#2\n", getpid());
         return -1;
     }
-    
+
     pReq->m_reqBodyLen = pReq->m_pHeader->m_reqBodyLen;
     if ( pReq->m_reqBodyLen == -2 )
     {
@@ -1639,10 +1639,10 @@ char * LSAPI_GetHeader_r( LSAPI_Request * pReq, int headerIndex )
     off = pReq->m_pHeaderIndex->m_headerOff[ headerIndex ];
     if ( !off )
         return NULL;
-    if ( *(pReq->m_pHttpHeader + off 
+    if ( *(pReq->m_pHttpHeader + off
         + pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) )
     {
-        *( pReq->m_pHttpHeader + off 
+        *( pReq->m_pHttpHeader + off
             + pReq->m_pHeaderIndex->m_headerLen[ headerIndex ]) = 0;
     }
     return pReq->m_pHttpHeader + off;
@@ -2092,7 +2092,7 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
         {
             if ( strcmp( name, CGI_HEADERS[i] ) == 0 )
             {
-                pValue = pReq->m_pHttpHeader 
+                pValue = pReq->m_pHttpHeader
                          + pReq->m_pHeaderIndex->m_headerOff[i];
                 if ( *(pValue + pReq->m_pHeaderIndex->m_headerLen[i]) != '\0')
                 {
@@ -2128,7 +2128,7 @@ static char * GetHeaderVar( LSAPI_Request * pReq, const char * name )
             if (( pKey == pKeyEnd )&& (!*p ))
             {
                 pValue = pReq->m_pHttpHeader + pCur->valueOff;
-                
+
                 if ( *(pValue + pCur->valueLen) != '\0')
                 {
                     *(pValue + pCur->valueLen) = '\0';

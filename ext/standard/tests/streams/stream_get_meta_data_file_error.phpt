@@ -37,21 +37,21 @@ echo "Done";
 
 -- Testing stream_get_meta_data() function with Zero arguments --
 
-Warning: stream_get_meta_data() expects exactly 1 parameter, 0 given in %s on line %i
+Warning: stream_get_meta_data() expects exactly 1 parameter, 0 given in %s on line %d
 NULL
 
 -- Testing stream_get_meta_data() function with more than expected no. of arguments --
 
-Warning: stream_get_meta_data() expects exactly 1 parameter, 2 given in %s on line %i
+Warning: stream_get_meta_data() expects exactly 1 parameter, 2 given in %s on line %d
 NULL
 
 -- Testing stream_get_meta_data() function with invalid stream resource --
 
-Warning: stream_get_meta_data() expects parameter 1 to be resource, null given in %s on line %i
+Warning: stream_get_meta_data() expects parameter 1 to be resource, null given in %s on line %d
 NULL
 
 -- Testing stream_get_meta_data() function with closed stream resource --
 
-Warning: stream_get_meta_data(): supplied resource is not a valid stream resource in %s on line %i
+Warning: stream_get_meta_data(): supplied resource is not a valid stream resource in %s on line %d
 bool(false)
 Done

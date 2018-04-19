@@ -25,6 +25,6 @@ $obj->sort = 'desc,name';
 echo http_build_query($obj) . PHP_EOL;
 echo http_build_query(new UrlBuilder());
 ?>
---EXPECTF--
+--EXPECT--
 name=homepage&page=1&sort=desc%2Cname
 name=homepage&page=1

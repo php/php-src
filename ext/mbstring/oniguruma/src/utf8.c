@@ -2,7 +2,7 @@
   utf8.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -90,6 +90,7 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
   return TRUE;
 }
 
+#if 0
 static int
 is_mbc_newline(const UChar* p, const UChar* end)
 {
@@ -114,6 +115,7 @@ is_mbc_newline(const UChar* p, const UChar* end)
 
   return 0;
 }
+#endif
 
 static OnigCodePoint
 mbc_to_code(const UChar* p, const UChar* end)
@@ -122,7 +124,7 @@ mbc_to_code(const UChar* p, const UChar* end)
   OnigCodePoint n;
 
   len = mbc_enc_len(p);
-  if (len > end - p) len = end - p;
+  if (len > (int )(end - p)) len = (int )(end - p);
 
   c = *p++;
   if (len > 1) {
@@ -214,7 +216,7 @@ code_to_mbc(OnigCodePoint code, UChar *buf)
     }
 
     *p++ = UTF8_TRAIL0(code);
-    return p - buf;
+    return (int )(p - buf);
   }
 }
 
@@ -245,43 +247,6 @@ mbc_case_fold(OnigCaseFoldType flag, const UChar** pp,
 					 pp, end, fold);
   }
 }
-
-#if 0
-static int
-is_mbc_ambiguous(OnigCaseFoldType flag, const UChar** pp, const UChar* end)
-{
-  const UChar* p = *pp;
-
-  if (ONIGENC_IS_MBC_ASCII(p)) {
-    (*pp)++;
-    return ONIGENC_IS_ASCII_CODE_CASE_AMBIG(*p);
-  }
-  else {
-    (*pp) += enclen(ONIG_ENCODING_UTF8, p);
-
-    if (*p == 0xc3) {
-      int c = *(p + 1);
-      if (c >= 0x80) {
-        if (c <= (UChar )0x9e) { /* upper */
-          if (c == (UChar )0x97) return FALSE;
-          return TRUE;
-        }
-        else if (c >= (UChar )0xa0 && c <= (UChar )0xbe) { /* lower */
-          if (c == (UChar )'\267') return FALSE;
-          return TRUE;
-        }
-        else if (c == (UChar )0x9f &&
-                 (flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
-          return TRUE;
-        }
-      }
-    }
-  }
-
-  return FALSE;
-}
-#endif
-
 
 static int
 get_ctype_code_range(OnigCtype ctype, OnigCodePoint *sb_out,
@@ -315,9 +280,9 @@ get_case_fold_codes_by_str(OnigCaseFoldType flag,
 OnigEncodingType OnigEncodingUTF8 = {
   mbc_enc_len,
   "UTF-8",     /* name */
-  6,           /* max byte length */
-  1,           /* min byte length */
-  is_mbc_newline,
+  6,           /* max enc length */
+  1,           /* min enc length */
+  onigenc_is_mbc_newline_0x0a,
   mbc_to_code,
   code_to_mbclen,
   code_to_mbc,

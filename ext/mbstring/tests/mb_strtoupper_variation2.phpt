@@ -158,14 +158,10 @@ Warning: mb_strtoupper(): Unknown encoding "0.5" in %s on line %d
 bool(false)
 
 -- Iteration 10 --
-
-Warning: mb_strtoupper(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 11 --
-
-Warning: mb_strtoupper(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 12 --
 
@@ -210,14 +206,10 @@ string(24) "48454c4c4f2c20574f524c44"
 string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 22 --
-
-Warning: mb_strtoupper(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 23 --
-
-Warning: mb_strtoupper(): Unknown encoding "(null)" in %s on line %d
-bool(false)
+string(24) "48454c4c4f2c20574f524c44"
 
 -- Iteration 24 --
 

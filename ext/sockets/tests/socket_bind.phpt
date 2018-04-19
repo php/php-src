@@ -33,7 +33,7 @@ fa@php.net
     var_dump($s_close);
 ?>
 
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 int(16)

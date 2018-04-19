@@ -26,7 +26,7 @@ namespace foo {
 }
 	
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(12) "/** test1 */"
 string(12) "/** test2 */"

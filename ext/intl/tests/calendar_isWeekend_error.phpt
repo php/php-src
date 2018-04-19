@@ -36,7 +36,7 @@ Warning: intlcal_is_weekend() expects parameter 2 to be float, string given in %
 Warning: intlcal_is_weekend(): intlcal_is_weekend: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_is_weekend() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_is_weekend(1)
 #1 {main}

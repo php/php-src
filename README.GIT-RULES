@@ -44,16 +44,19 @@ Having said that, here are the organizational rules::
 
 Currently we have the following branches in use::
 
-  master    The active development branch. 
+  master    The active development branch.
 
-  PHP-7.1   Is used to release the PHP 7.1.x series. This is a prerelease
-            version.
-
-  PHP-7.0   Is used to release the PHP 7.0.x series. This is a current
+  PHP-7.2   Is used to release the PHP 7.2.x series. This is a current
             stable version and is open for bugfixes only.
 
-  PHP-5.6   Is used to release the PHP 5.6.x series. This is a current
+  PHP-7.1   Is used to release the PHP 7.1.x series. This is a current
             stable version and is open for bugfixes only.
+
+  PHP-7.0   Is used to release the PHP 7.0.x series. This is an old
+            stable version and is open for security fixes only.
+
+  PHP-5.6   Is used to release the PHP 5.6.x series. This is an old
+            stable version and is open for security fixes only.
 
   PHP-5.5   This branch is closed.
 
@@ -74,7 +77,7 @@ The next few rules are more of a technical nature::
 
    1. All changes should first go to the lowest branch (i.e. 5.6) and then
       get merged up to all other branches. If a change is not needed for
-      later branches (i.e. fixes for features which where dropped from later
+      later branches (i.e. fixes for features which were dropped from later
       branches) an empty merge should be done.
 
    2. All news updates intended for public viewing, such as new features,
@@ -110,7 +113,7 @@ The format of the commit messages is pretty simple.
 An Example from the git project (commit 2b34e486bc):
 
 pack-objects: Fix compilation with NO_PTHREDS
-  
+
 It looks like commit 99fb6e04 (pack-objects: convert to use
 parse_options(), 2012-02-01) moved the #ifdef NO_PTHREDS around but
 hasn't noticed that the 'arg' variable no longer is available.

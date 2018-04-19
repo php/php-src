@@ -38,7 +38,7 @@ foreach( $str_array as $arr )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripslashes() : with double dimensional arrays ***
 
 -- Iteration 1 --

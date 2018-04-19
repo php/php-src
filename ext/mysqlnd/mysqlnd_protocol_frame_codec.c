@@ -441,7 +441,6 @@ MYSQLND_METHOD(mysqlnd_pfc, dtor)(MYSQLND_PFC * const pfc, MYSQLND_STATS * const
 			pfc->cmd_buffer.buffer = NULL;
 		}
 
-		mnd_pefree(pfc->data, pfc->data->persistent);
 		mnd_pefree(pfc, pfc->persistent);
 	}
 	DBG_VOID_RETURN;

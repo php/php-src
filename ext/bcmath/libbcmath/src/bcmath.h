@@ -42,7 +42,6 @@ typedef struct bc_struct
       int   n_len;	/* The number of digits before the decimal point. */
       int   n_scale;	/* The number of digits after the decimal point. */
       int   n_refs;     /* The number of pointers to this number. */
-      bc_num n_next;	/* Linked list for available list. */
       char *n_ptr;	/* The pointer to the actual storage.
 			   If NULL, n_value points to the inside of
 			   another number (bc_multiply...) and should
@@ -111,7 +110,7 @@ _PROTOTYPE(void bc_init_num, (bc_num *num));
 
 _PROTOTYPE(void bc_str2num, (bc_num *num, char *str, int scale));
 
-_PROTOTYPE(zend_string *bc_num2str, (bc_num num));
+_PROTOTYPE(zend_string *bc_num2str_ex, (bc_num num, int scale));
 
 _PROTOTYPE(void bc_int2num, (bc_num *num, int val));
 
@@ -152,11 +151,10 @@ _PROTOTYPE(void bc_out_num, (bc_num num, int o_base, void (* out_char)(int),
 
 /* Prototypes needed for external utility routines. */
 
-_PROTOTYPE(void bc_rt_warn, (char *mesg ,...));
-_PROTOTYPE(void bc_rt_error, (char *mesg ,...));
 _PROTOTYPE(void bc_out_of_memory, (void));
 
 #define bc_new_num(length, scale)	_bc_new_num_ex((length), (scale), 0)
 #define bc_free_num(num)			_bc_free_num_ex((num), 0)
+#define bc_num2str(num)				bc_num2str_ex((num), (num->n_scale))
 
 #endif

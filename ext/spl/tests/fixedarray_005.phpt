@@ -24,7 +24,7 @@ try {
 ?>
 ===DONE===
 --EXPECT--
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, object given
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
-Ok - SplFixedArray::__construct() expects parameter 1 to be integer, string given
+Ok - SplFixedArray::__construct() expects parameter 1 to be int, object given
+Ok - SplFixedArray::__construct() expects parameter 1 to be int, string given
+Ok - SplFixedArray::__construct() expects parameter 1 to be int, string given
 ===DONE===

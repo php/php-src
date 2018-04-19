@@ -28,7 +28,7 @@
 PHP_MINIT_FUNCTION(ps_mm);
 PHP_MSHUTDOWN_FUNCTION(ps_mm);
 
-extern ps_module ps_mod_mm;
+extern const ps_module ps_mod_mm;
 #define ps_mm_ptr &ps_mod_mm
 
 PS_FUNCS(mm);

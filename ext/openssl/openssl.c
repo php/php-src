@@ -459,7 +459,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ openssl_functions[]
  */
-const zend_function_entry openssl_functions[] = {
+static const zend_function_entry openssl_functions[] = {
 	PHP_FE(openssl_get_cert_locations, arginfo_openssl_get_cert_locations)
 
 /* spki functions */
@@ -3365,7 +3365,7 @@ PHP_FUNCTION(openssl_csr_export)
 }
 /* }}} */
 
-/* {{{ proto resource openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, long days [, array config_args [, long serial]])
+/* {{{ proto resource openssl_csr_sign(mixed csr, mixed x509, mixed priv_key, int days [, array config_args [, int serial]])
    Signs a cert with another CERT */
 PHP_FUNCTION(openssl_csr_sign)
 {
@@ -4935,7 +4935,7 @@ PHP_FUNCTION(openssl_dh_compute_key)
 
 /* }}} */
 
-/* {{{ proto string openssl_pbkdf2(string password, string salt, long key_length, long iterations [, string digest_method = "sha1"])
+/* {{{ proto string openssl_pbkdf2(string password, string salt, int key_length, int iterations [, string digest_method = "sha1"])
    Generates a PKCS5 v2 PBKDF2 string, defaults to sha1 */
 PHP_FUNCTION(openssl_pbkdf2)
 {
@@ -4993,7 +4993,7 @@ PHP_FUNCTION(openssl_pbkdf2)
 
 /* {{{ PKCS7 S/MIME functions */
 
-/* {{{ proto bool openssl_pkcs7_verify(string filename, long flags [, string signerscerts [, array cainfo [, string extracerts [, string content [, string pk7]]]]])
+/* {{{ proto bool openssl_pkcs7_verify(string filename, int flags [, string signerscerts [, array cainfo [, string extracerts [, string content [, string pk7]]]]])
    Verifys that the data block is intact, the signer is who they say they are, and returns the CERTs of the signers */
 PHP_FUNCTION(openssl_pkcs7_verify)
 {
@@ -5143,7 +5143,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers [, long flags [, long cipher]])
+/* {{{ proto bool openssl_pkcs7_encrypt(string infile, string outfile, mixed recipcerts, array headers [, int flags [, int cipher]])
    Encrypts the message in the file named infile with the certificates in recipcerts and output the result to the file named outfile */
 PHP_FUNCTION(openssl_pkcs7_encrypt)
 {
@@ -5378,7 +5378,7 @@ clean_exit:
 }
 /* }}} */
 
-/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers [, long flags [, string extracertsfilename]])
+/* {{{ proto bool openssl_pkcs7_sign(string infile, string outfile, mixed signcert, mixed signkey, array headers [, int flags [, string extracertsfilename]])
    Signs the MIME message in the file named infile with signcert/signkey and output the result to file name outfile. headers lists plain text headers to exclude from the signed portion of the message, and should include to, from and subject as a minimum */
 
 PHP_FUNCTION(openssl_pkcs7_sign)
@@ -6011,7 +6011,7 @@ PHP_FUNCTION(openssl_seal)
 	const EVP_CIPHER *cipher;
 	EVP_CIPHER_CTX *ctx;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a/|sz/", &data, &data_len,
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sz/z/a|sz/", &data, &data_len,
 				&sealdata, &ekeys, &pubkeys, &method, &method_len, &iv) == FAILURE) {
 		return;
 	}
@@ -6528,7 +6528,7 @@ static int php_openssl_cipher_update(const EVP_CIPHER *cipher_type,
 }
 /* }}} */
 
-/* {{{ proto string openssl_encrypt(string data, string method, string password [, long options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, long $tag_length = 16]]]]])
+/* {{{ proto string openssl_encrypt(string data, string method, string password [, int options=0 [, string $iv=''[, string &$tag = ''[, string $aad = ''[, int $tag_length = 16]]]]])
    Encrypts given data with given method and key, returns raw or base64 encoded string */
 PHP_FUNCTION(openssl_encrypt)
 {
@@ -6627,7 +6627,7 @@ PHP_FUNCTION(openssl_encrypt)
 }
 /* }}} */
 
-/* {{{ proto string openssl_decrypt(string data, string method, string password [, long options=0 [, string $iv = ''[, string $tag = ''[, string $aad = '']]]])
+/* {{{ proto string openssl_decrypt(string data, string method, string password [, int options=0 [, string $iv = ''[, string $tag = ''[, string $aad = '']]]])
    Takes raw or base64 encoded string and decrypts it using given method and key */
 PHP_FUNCTION(openssl_decrypt)
 {
@@ -6741,7 +6741,7 @@ PHP_FUNCTION(openssl_cipher_iv_length)
 /* }}} */
 
 
-/* {{{ proto string openssl_random_pseudo_bytes(integer length [, &bool returned_strong_result])
+/* {{{ proto string openssl_random_pseudo_bytes(int length [, &bool returned_strong_result])
    Returns a string of the length specified filled with random pseudo bytes */
 PHP_FUNCTION(openssl_random_pseudo_bytes)
 {

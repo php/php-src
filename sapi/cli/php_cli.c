@@ -593,17 +593,17 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &ec.value);
 
 	ic.flags = CONST_CS;
-	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
 	oc.flags = CONST_CS;
-	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
 	ec.flags = CONST_CS;
-	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	ec.module_number = 0;
 	zend_register_constant(&ec);
 }
@@ -917,7 +917,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 		if (!interactive) {
 		/* The -a option was not passed. If there is no file, it could
-		 	still make sense to run interactively. The presense of a file
+		 	still make sense to run interactively. The presence of a file
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||

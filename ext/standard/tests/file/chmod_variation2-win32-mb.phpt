@@ -52,7 +52,7 @@ rmdir($test_dirname);
 unlink($filepath);
 
 ?>
---EXPECTF--
+--EXPECT--
 chmod() on a path containing .. and .
 bool(true)
 bool(true)

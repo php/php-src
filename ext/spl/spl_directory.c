@@ -99,6 +99,8 @@ static void spl_filesystem_object_destroy_object(zend_object *object) /* {{{ */
 			}
 		}
 		break;
+	default:
+		break;
 	}
 } /* }}} */
 
@@ -155,7 +157,7 @@ static zend_object *spl_filesystem_object_new_ex(zend_class_entry *class_type)
 {
 	spl_filesystem_object *intern;
 
-	intern = ecalloc(1, sizeof(spl_filesystem_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(spl_filesystem_object), class_type);
 	/* intern->type = SPL_FS_INFO; done by set 0 */
 	intern->file_class = spl_ce_SplFileObject;
 	intern->info_class = spl_ce_SplFileInfo;
@@ -748,7 +750,7 @@ void spl_filesystem_object_construct(INTERNAL_FUNCTION_PARAMETERS, zend_long cto
 }
 /* }}} */
 
-/* {{{ proto void DirectoryIterator::__construct(string path)
+/* {{{ proto DirectoryIterator::__construct(string path)
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(DirectoryIterator, __construct)
 {
@@ -1115,7 +1117,7 @@ SPL_METHOD(DirectoryIterator, isDot)
 }
 /* }}} */
 
-/* {{{ proto void SplFileInfo::__construct(string file_name)
+/* {{{ proto SplFileInfo::__construct(string file_name)
  Cronstructs a new SplFileInfo from a path. */
 /* When the constructor gets called the object is already created
    by the engine, so we must only call 'additional' initializations.
@@ -1235,7 +1237,7 @@ FileInfoFunction(isLink, FS_IS_LINK)
 SPL_METHOD(SplFileInfo, getLinkTarget)
 {
 	spl_filesystem_object *intern = Z_SPLFILESYSTEM_P(getThis());
-	int ret;
+	ssize_t ret;
 	char buff[MAXPATHLEN];
 	zend_error_handling error_handling;
 
@@ -1277,7 +1279,7 @@ SPL_METHOD(SplFileInfo, getLinkTarget)
 }
 /* }}} */
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 /* {{{ proto string SplFileInfo::getRealPath()
    Return the resolved path */
 SPL_METHOD(SplFileInfo, getRealPath)
@@ -1418,7 +1420,7 @@ SPL_METHOD(SplFileInfo, _bad_state_ex)
 }
 /* }}} */
 
-/* {{{ proto void FilesystemIterator::__construct(string path [, int flags])
+/* {{{ proto FilesystemIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(FilesystemIterator, __construct)
 {
@@ -1573,7 +1575,7 @@ SPL_METHOD(RecursiveDirectoryIterator, getSubPathname)
 }
 /* }}} */
 
-/* {{{ proto int RecursiveDirectoryIterator::__construct(string path [, int flags])
+/* {{{ proto RecursiveDirectoryIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a path. */
 SPL_METHOD(RecursiveDirectoryIterator, __construct)
 {
@@ -1582,7 +1584,7 @@ SPL_METHOD(RecursiveDirectoryIterator, __construct)
 /* }}} */
 
 #ifdef HAVE_GLOB
-/* {{{ proto int GlobIterator::__construct(string path [, int flags])
+/* {{{ proto GlobIterator::__construct(string path [, int flags])
  Cronstructs a new dir iterator from a glob expression (no glob:// needed). */
 SPL_METHOD(GlobIterator, __construct)
 {
@@ -1619,7 +1621,7 @@ static void spl_filesystem_dir_it_move_forward(zend_object_iterator *iter);
 static void spl_filesystem_dir_it_rewind(zend_object_iterator *iter);
 
 /* iterator handler table */
-zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
+static const zend_object_iterator_funcs spl_filesystem_dir_it_funcs = {
 	spl_filesystem_dir_it_dtor,
 	spl_filesystem_dir_it_valid,
 	spl_filesystem_dir_it_current_data,
@@ -1637,7 +1639,8 @@ zend_object_iterator *spl_filesystem_dir_get_iterator(zend_class_entry *ce, zval
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		return NULL;
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
@@ -1818,7 +1821,7 @@ static void spl_filesystem_tree_it_rewind(zend_object_iterator *iter)
 /* }}} */
 
 /* {{{ iterator handler table */
-zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
+static const zend_object_iterator_funcs spl_filesystem_tree_it_funcs = {
 	spl_filesystem_tree_it_dtor,
 	spl_filesystem_dir_it_valid,
 	spl_filesystem_tree_it_current_data,
@@ -1836,7 +1839,8 @@ zend_object_iterator *spl_filesystem_tree_get_iterator(zend_class_entry *ce, zva
 	spl_filesystem_object *dir_object;
 
 	if (by_ref) {
-		zend_error(E_ERROR, "An iterator cannot be used with foreach by reference");
+		zend_throw_exception(spl_ce_RuntimeException, "An iterator cannot be used with foreach by reference", 0);
+		return NULL;
 	}
 	dir_object = Z_SPLFILESYSTEM_P(object);
 	iterator = spl_filesystem_object_to_iterator(dir_object);
@@ -1861,36 +1865,15 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 		switch (intern->type) {
 		case SPL_FS_INFO:
 		case SPL_FS_FILE:
-			if (readobj == writeobj) {
-				zval retval;
-				zval *retval_ptr = &retval;
-
-				ZVAL_STRINGL(retval_ptr, intern->file_name, intern->file_name_len);
-				zval_ptr_dtor(readobj);
-				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
-			} else {
-				ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
-			}
+			ZVAL_STRINGL(writeobj, intern->file_name, intern->file_name_len);
 			return SUCCESS;
 		case SPL_FS_DIR:
-			if (readobj == writeobj) {
-				zval retval;
-				zval *retval_ptr = &retval;
-
-				ZVAL_STRING(retval_ptr, intern->u.dir.entry.d_name);
-				zval_ptr_dtor(readobj);
-				ZVAL_NEW_STR(writeobj, Z_STR_P(retval_ptr));
-			} else {
-				ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
-			}
+			ZVAL_STRING(writeobj, intern->u.dir.entry.d_name);
 			return SUCCESS;
 		}
 	} else if (type == _IS_BOOL) {
 		ZVAL_TRUE(writeobj);
 		return SUCCESS;
-	}
-	if (readobj == writeobj) {
-		zval_ptr_dtor(readobj);
 	}
 	ZVAL_NULL(writeobj);
 	return FAILURE;
@@ -1945,7 +1928,7 @@ static const zend_function_entry spl_SplFileInfo_functions[] = {
 	SPL_ME(SplFileInfo,       isDir,         arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       isLink,        arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 	SPL_ME(SplFileInfo,       getLinkTarget, arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 	SPL_ME(SplFileInfo,       getRealPath,   arginfo_splfileinfo_void, ZEND_ACC_PUBLIC)
 #endif
 	SPL_ME(SplFileInfo,       getFileInfo,   arginfo_info_optinalFileClass, ZEND_ACC_PUBLIC)
@@ -2101,7 +2084,6 @@ static int spl_filesystem_file_call(spl_filesystem_object *intern, zend_function
 	fci.no_separation = 1;
 	ZVAL_STR(&fci.function_name, func_ptr->common.function_name);
 
-	fcic.initialized = 1;
 	fcic.function_handler = func_ptr;
 	fcic.calling_scope = NULL;
 	fcic.called_scope = NULL;
@@ -2264,7 +2246,7 @@ static void spl_filesystem_file_rewind(zval * this_ptr, spl_filesystem_object *i
 	}
 } /* }}} */
 
-/* {{{ proto void SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
+/* {{{ proto SplFileObject::__construct(string filename [, string mode = 'r' [, bool use_include_path  [, resource context]]]])
    Construct a new file object */
 SPL_METHOD(SplFileObject, __construct)
 {
@@ -2324,7 +2306,7 @@ SPL_METHOD(SplFileObject, __construct)
 
 } /* }}} */
 
-/* {{{ proto void SplTempFileObject::__construct([int max_memory])
+/* {{{ proto SplTempFileObject::__construct([int max_memory])
    Construct a new temp file object */
 SPL_METHOD(SplTempFileObject, __construct)
 {

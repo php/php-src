@@ -50,6 +50,15 @@
 #define PHP_GDIMG_TYPE_WEBP     11
 #define PHP_GDIMG_TYPE_BMP      12
 
+#define PHP_IMG_GIF    1
+#define PHP_IMG_JPG    2
+#define PHP_IMG_JPEG   2
+#define PHP_IMG_PNG    4
+#define PHP_IMG_WBMP   8
+#define PHP_IMG_XPM   16
+#define PHP_IMG_WEBP  32
+#define PHP_IMG_BMP   64
+
 #ifdef PHP_WIN32
 #	define PHP_GD_API __declspec(dllexport)
 #elif defined(__GNUC__) && __GNUC__ >= 4
@@ -62,6 +71,8 @@ PHPAPI extern const char php_sig_gif[3];
 PHPAPI extern const char php_sig_jpg[3];
 PHPAPI extern const char php_sig_png[8];
 PHPAPI extern const char php_sig_bmp[2];
+PHPAPI extern const char php_sig_riff[4];
+PHPAPI extern const char php_sig_webp[4];
 
 extern zend_module_entry gd_module_entry;
 #define phpext_gd_ptr &gd_module_entry

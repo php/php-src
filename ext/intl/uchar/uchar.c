@@ -3,6 +3,9 @@
 #include "intl_convert.h"
 
 #include <unicode/uchar.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -665,7 +668,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-static zend_function_entry intlchar_methods[] = {
+static const zend_function_entry intlchar_methods[] = {
 #define IC_ME(mname) PHP_ME(IntlChar, mname, mname##_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	IC_ME(chr)
 	IC_ME(ord)

@@ -58,7 +58,7 @@ A::test($b);
 echo "\n---( Unrelated class: )---\n";
 X::test($b);
 ?>
---EXPECTF--
+--EXPECT--
 
 ---( Global scope: )---
 array(1) {

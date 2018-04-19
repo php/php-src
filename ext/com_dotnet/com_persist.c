@@ -281,7 +281,7 @@ PHP_COM_DOTNET_API IStream *php_com_wrapper_export_stream(php_stream *stream)
 	stm->refcount = 1;
 	stm->stream = stream;
 
-	GC_REFCOUNT(stream->res)++;
+	GC_ADDREF(stream->res);
 	tmp = zend_list_insert(stm, le_istream);
 	stm->res = Z_RES_P(tmp);
 
@@ -645,7 +645,7 @@ CPH_METHOD(SaveToStream)
 }
 /* }}} */
 
-/* {{{ proto int COMPersistHelper::__construct([object com_object])
+/* {{{ proto COMPersistHelper::__construct([object com_object])
    Creates a persistence helper object, usually associated with a com_object */
 CPH_METHOD(__construct)
 {

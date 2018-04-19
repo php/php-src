@@ -11,6 +11,6 @@ $wddx = wddx_deserialize($data);
 var_dump($wddx);
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 NULL
 DONE

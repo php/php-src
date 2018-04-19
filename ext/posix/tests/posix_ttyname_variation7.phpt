@@ -34,7 +34,7 @@ foreach ( $variation_array as $var ) {
   var_dump(posix_ttyname( $var  ) );
 }
 ?>
---EXPECTF--
+--EXPECT--
 *** Test substituting argument 1 with string values ***
 bool(false)
 bool(false)

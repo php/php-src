@@ -48,5 +48,5 @@ int(0)
 int(%d)
 
 Warning: mysqli_errno(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

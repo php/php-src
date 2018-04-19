@@ -11,6 +11,6 @@ set_time_limit(2);
 var_dump(preg_replace("/.*/", "b", "a"));
 var_dump(mb_ereg_replace(".*", "b", "a"));
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "bb"
 string(2) "bb"

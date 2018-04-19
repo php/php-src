@@ -55,7 +55,7 @@ var_dump($array_arg);
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing uasort() : 'array_arg' with elements as reference ***
 -- Sorting 'array_arg' containing different references --
 bool(true)

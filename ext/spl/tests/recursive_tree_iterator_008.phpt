@@ -31,7 +31,7 @@ try {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 [a] => 035Array
 [0] => 0145b
 [c] => 045Array

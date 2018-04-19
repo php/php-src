@@ -23,7 +23,7 @@ $t2->show();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Call to function first::show()
 Call to function second::show()
 Done

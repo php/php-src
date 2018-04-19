@@ -50,7 +50,7 @@ try{
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Too few arguments:
 Ok - ReflectionMethod::__construct() expects exactly 1 parameter, 0 given
 

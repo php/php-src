@@ -57,7 +57,7 @@ PHP_FUNCTION(readlink)
 	char *link;
 	size_t link_len;
 	char buff[MAXPATHLEN];
-	int ret;
+	ssize_t ret;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_PATH(link, link_len)
@@ -76,7 +76,7 @@ PHP_FUNCTION(readlink)
 	/* Append NULL to the end of the string */
 	buff[ret] = '\0';
 
-	RETURN_STRING(buff);
+	RETURN_STRINGL(buff, ret);
 }
 /* }}} */
 

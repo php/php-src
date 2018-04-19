@@ -30,11 +30,11 @@ if (file_exists(dirname(__FILE__)."/details_local.inc")) {
 		$dbase						= "localhost/XE";
 		$test_drcp					= FALSE;
 	}
-	
+
 	/*
 	 * Common object names for scripts to use
 	 */
-	
+
 	$table_name = "tb".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5);
 	$type_name = strtoupper("tp".substr(str_replace(Array(".", "-"), "_", php_uname("n")), 0, 5));
 	$schema = '';

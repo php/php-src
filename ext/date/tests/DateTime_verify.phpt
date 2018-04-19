@@ -10,12 +10,17 @@ $class = new ReflectionClass('DateTime');
 var_dump($class);
 
 echo "..and get names of all its methods\n";
-$methods = $class->getMethods(); 
+$methods = $class->getMethods();
 var_dump($methods);
 
-echo "..and get names of all its class constants\n"; 
+echo "..and get names of all its class constants\n";
 $constants = $class->getConstants();
 var_dump($constants);
+
+echo "..and get __set_state arguments\n";
+$method = new ReflectionMethod('DateTime', '__set_state');
+var_dump($method->getParameters());
+var_dump($method->getParameters()[0]->isOptional());
 
 ?>
 ===DONE===
@@ -27,7 +32,7 @@ object(ReflectionClass)#%d (1) {
   string(8) "DateTime"
 }
 ..and get names of all its methods
-array(18) {
+array(19) {
   [0]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
@@ -52,102 +57,109 @@ array(18) {
   [3]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(16) "createFromFormat"
+    string(19) "createFromImmutable"
     ["class"]=>
     string(8) "DateTime"
   }
   [4]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(13) "getLastErrors"
+    string(16) "createFromFormat"
     ["class"]=>
     string(8) "DateTime"
   }
   [5]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(6) "format"
+    string(13) "getLastErrors"
     ["class"]=>
     string(8) "DateTime"
   }
   [6]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(6) "modify"
+    string(6) "format"
     ["class"]=>
     string(8) "DateTime"
   }
   [7]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(3) "add"
+    string(6) "modify"
     ["class"]=>
     string(8) "DateTime"
   }
   [8]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(3) "sub"
+    string(3) "add"
     ["class"]=>
     string(8) "DateTime"
   }
   [9]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(11) "getTimezone"
+    string(3) "sub"
     ["class"]=>
     string(8) "DateTime"
   }
   [10]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(11) "setTimezone"
+    string(11) "getTimezone"
     ["class"]=>
     string(8) "DateTime"
   }
   [11]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(9) "getOffset"
+    string(11) "setTimezone"
     ["class"]=>
     string(8) "DateTime"
   }
   [12]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(7) "setTime"
+    string(9) "getOffset"
     ["class"]=>
     string(8) "DateTime"
   }
   [13]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(7) "setDate"
+    string(7) "setTime"
     ["class"]=>
     string(8) "DateTime"
   }
   [14]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(10) "setISODate"
+    string(7) "setDate"
     ["class"]=>
     string(8) "DateTime"
   }
   [15]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(12) "setTimestamp"
+    string(10) "setISODate"
     ["class"]=>
     string(8) "DateTime"
   }
   [16]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
-    string(12) "getTimestamp"
+    string(12) "setTimestamp"
     ["class"]=>
     string(8) "DateTime"
   }
   [17]=>
+  object(ReflectionMethod)#%d (2) {
+    ["name"]=>
+    string(12) "getTimestamp"
+    ["class"]=>
+    string(8) "DateTime"
+  }
+  [18]=>
   object(ReflectionMethod)#%d (2) {
     ["name"]=>
     string(4) "diff"
@@ -184,4 +196,13 @@ array(13) {
   ["W3C"]=>
   string(13) "Y-m-d\TH:i:sP"
 }
+..and get __set_state arguments
+array(1) {
+  [0]=>
+  object(ReflectionParameter)#%d (1) {
+    ["name"]=>
+    string(5) "array"
+  }
+}
+bool(false)
 ===DONE===

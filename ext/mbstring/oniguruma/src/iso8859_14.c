@@ -2,7 +2,7 @@
   iso8859_14.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2016  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -240,5 +240,6 @@ OnigEncodingType OnigEncodingISO_8859_14 = {
   onigenc_always_true_is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  onigenc_always_true_is_valid_mbc_string
+  onigenc_always_true_is_valid_mbc_string,
+  0, 0, 0
 };

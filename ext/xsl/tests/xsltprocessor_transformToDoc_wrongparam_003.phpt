@@ -53,4 +53,4 @@ $wrong_parameter = 'stringValue';
 echo $proc->transformToDoc($wrong_parameter);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToDoc() expects parameter 1 to be object, string given in %s on line %i
+Warning: XSLTProcessor::transformToDoc() expects parameter 1 to be object, string given in %s on line %d

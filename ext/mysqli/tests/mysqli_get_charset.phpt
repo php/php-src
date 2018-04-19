@@ -101,8 +101,8 @@ if (!function_exists('mysqli_get_charset'))
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_get_charset($link)))
-		printf("[023] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_get_charset($link)))
+		printf("[023] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>

@@ -30,7 +30,7 @@ var_dump(ini_get("session.cache_expire"));
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_cache_expire() : variation ***
 string(3) "180"
 int(180)

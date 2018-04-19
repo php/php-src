@@ -28,6 +28,7 @@
 #include "php.h"
 #include "php_globals.h"
 #include "php_standard.h"
+#include "php_memory_streams.h"
 #include "php_fopen_wrappers.h"
 #include "SAPI.h"
 
@@ -51,7 +52,7 @@ static int php_stream_output_close(php_stream *stream, int close_handle) /* {{{ 
 }
 /* }}} */
 
-php_stream_ops php_stream_output_ops = {
+const php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
 	php_stream_output_read,
 	php_stream_output_close,
@@ -136,7 +137,7 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 }
 /* }}} */
 
-php_stream_ops php_stream_input_ops = {
+const php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
 	php_stream_input_read,
 	php_stream_input_close,
@@ -203,20 +204,12 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 				return NULL;
 			}
 		}
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
+		mode_rw = php_stream_mode_from_str(mode);
 		return php_stream_temp_create(mode_rw, max_memory);
 	}
 
 	if (!strcasecmp(path, "memory")) {
-		if (strpbrk(mode, "wa+")) {
-			mode_rw = TEMP_STREAM_DEFAULT;
-		} else {
-			mode_rw = TEMP_STREAM_READONLY;
-		}
+		mode_rw = php_stream_mode_from_str(mode);
 		return php_stream_memory_create(mode_rw);
 	}
 
@@ -395,7 +388,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 		return NULL;
 	}
 
-#if defined(S_IFSOCK) && !defined(WIN32) && !defined(__BEOS__)
+#if defined(S_IFSOCK) && !defined(PHP_WIN32)
 	do {
 		zend_stat_t st;
 		memset(&st, 0, sizeof(st));
@@ -422,8 +415,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	if (pipe_requested && stream && context) {
 		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
 		if (blocking_pipes) {
-			convert_to_long(blocking_pipes);
-			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, zval_get_long(blocking_pipes), NULL);
 		}
 	}
 #endif
@@ -431,7 +423,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 }
 /* }}} */
 
-static php_stream_wrapper_ops php_stdio_wops = {
+static const php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
 	NULL, /* close */
 	NULL, /* fstat */
@@ -445,7 +437,7 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_php_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_php_wrapper =	{
 	&php_stdio_wops,
 	NULL,
 	0, /* is_url */

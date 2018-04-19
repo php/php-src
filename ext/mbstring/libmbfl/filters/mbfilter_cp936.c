@@ -65,7 +65,9 @@ const mbfl_encoding mbfl_encoding_cp936 = {
 	"CP936",
 	(const char *(*)[])&mbfl_encoding_cp936_aliases,
 	mblen_table_cp936,
-	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE
+	MBFL_ENCTYPE_MBCS | MBFL_ENCTYPE_GL_UNSAFE,
+	&vtbl_cp936_wchar,
+	&vtbl_wchar_cp936
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp936 = {

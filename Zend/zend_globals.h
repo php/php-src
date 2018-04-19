@@ -155,6 +155,7 @@ struct _zend_executor_globals {
 	zval          *vm_stack_top;
 	zval          *vm_stack_end;
 	zend_vm_stack  vm_stack;
+	size_t         vm_stack_page_size;
 
 	struct _zend_execute_data *current_execute_data;
 	zend_class_entry *fake_scope; /* used to avoid checks accessing properties */
@@ -272,6 +273,9 @@ struct _zend_php_scanner_globals {
 	int yy_state;
 	zend_stack state_stack;
 	zend_ptr_stack heredoc_label_stack;
+	zend_bool heredoc_scan_ahead;
+	int heredoc_indentation;
+	zend_bool heredoc_indentation_uses_spaces;
 
 	/* original (unfiltered) script */
 	unsigned char *script_org;

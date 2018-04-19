@@ -48,7 +48,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing number_format() : basic functionality ***
 
 -- number_format tests.....default --

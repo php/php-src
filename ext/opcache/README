@@ -149,19 +149,6 @@ opcache.optimization_level (default "0xffffffff")
 	A bitmask, where each bit enables or disables the appropriate OPcache
 	passes
 
-opcache.inherited_hack (default "1")
-	Enable this hack as a workaround for "Cannot redeclare class" errors.
-	The OPcache stores the places where DECLARE_CLASS opcodes use
-	inheritance (These are the only opcodes that can be executed by PHP,
-	but which may not be executed because the parent class is missing due to
-	optimization). When the file is loaded, OPcache tries to bind the
-	inherited classes by using the current environment. The problem with this
-	scenario is that, while the DECLARE_CLASS opcode may not be needed for the
-	current script, if the script requires that the opcode at least be defined,
-	it may not run. The default for this directive is disabled, which means
-	that optimization is active. In php-5.3 and above this hack is not needed
-	anymore and this setting has no effect.
-
 opcache.dups_fix (default "0")
 	Enable this hack as a workaround for "Cannot redeclare class" errors.
 

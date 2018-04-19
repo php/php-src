@@ -487,9 +487,9 @@ PHPAPI char * ap_php_conv_p2(register u_wide_int num, register int nbits, char f
 {
 	register int mask = (1 << nbits) - 1;
 	register char *p = buf_end;
-	static char low_digits[] = "0123456789abcdef";
-	static char upper_digits[] = "0123456789ABCDEF";
-	register char *digits = (format == 'X') ? upper_digits : low_digits;
+	static const char low_digits[] = "0123456789abcdef";
+	static const char upper_digits[] = "0123456789ABCDEF";
+	register const char *digits = (format == 'X') ? upper_digits : low_digits;
 
 	do {
 		*--p = digits[num & mask];

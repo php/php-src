@@ -81,7 +81,7 @@ $t->test();
 
 
 ?>
---EXPECTF--
+--EXPECT--
 >>> With Defined class
 is_a( OBJECT:base, base) =                                  yes
 is_a( STRING:base, base) =                                  no

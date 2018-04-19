@@ -3,7 +3,6 @@ Phar object: iterator & entries
 --SKIPIF--
 <?php
 if (!extension_loaded("phar")) die("skip");
-if (!extension_loaded("spl")) die("skip SPL not available");
 ?>
 --INI--
 phar.readonly=1
@@ -48,7 +47,7 @@ foreach(new RecursiveIteratorIterator($phar) as $name => $ent)
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/files/phar_oo_002.phar.php');
 __halt_compiler();
 ?>
@@ -72,7 +71,7 @@ int(0)
 string(3) "dir"
 bool(false)
 bool(true)
-bool(false)
+bool(true)
 bool(false)
 bool(true)
 bool(false)

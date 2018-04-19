@@ -79,7 +79,6 @@ PHP_FUNCTION(curl_multi_add_handle)
 	zval      *z_ch;
 	php_curlm *mh;
 	php_curl  *ch;
-	zval tmp_val;
 	CURLMcode error = CURLM_OK;
 
 	ZEND_PARSE_PARAMETERS_START(2,2)
@@ -97,10 +96,8 @@ PHP_FUNCTION(curl_multi_add_handle)
 
 	_php_curl_cleanup_handle(ch);
 
-	/* we want to create a copy of this zval that we store in the multihandle structure element "easyh" */
-	ZVAL_DUP(&tmp_val, z_ch);
-
-	zend_llist_add_element(&mh->easyh, &tmp_val);
+	GC_ADDREF(Z_RES_P(z_ch));
+	zend_llist_add_element(&mh->easyh, z_ch);
 
 	error = curl_multi_add_handle(mh->multi, ch->cp);
 	SAVE_CURLM_ERROR(mh, error);
@@ -314,7 +311,7 @@ PHP_FUNCTION(curl_multi_getcontent)
 }
 /* }}} */
 
-/* {{{ proto array curl_multi_info_read(resource mh [, long &msgs_in_queue])
+/* {{{ proto array curl_multi_info_read(resource mh [, int &msgs_in_queue])
    Get information about the current transfers */
 PHP_FUNCTION(curl_multi_info_read)
 {
@@ -439,7 +436,6 @@ PHP_FUNCTION(curl_multi_errno)
 }
 /* }}} */
 
-#if LIBCURL_VERSION_NUM >= 0x070c00 /* Available since 7.12.0 */
 /* {{{ proto bool curl_multi_strerror(int code)
          return string describing error code */
 PHP_FUNCTION(curl_multi_strerror)
@@ -459,7 +455,6 @@ PHP_FUNCTION(curl_multi_strerror)
 	}
 }
 /* }}} */
-#endif
 
 #if LIBCURL_VERSION_NUM >= 0x072C00 /* Available since 7.44.0 */
 
@@ -522,11 +517,8 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 	} else if (!Z_ISUNDEF(retval)) {
 		if (CURL_PUSH_DENY != zval_get_long(&retval)) {
 		    rval = CURL_PUSH_OK;
-
-			/* we want to create a copy of this zval that we store in the multihandle structure element "easyh" */
-			zval tmp_val;
-			ZVAL_DUP(&tmp_val, &pz_ch);
-			zend_llist_add_element(&mh->easyh, &tmp_val);
+			GC_ADDREF(Z_RES(pz_ch));
+			zend_llist_add_element(&mh->easyh, &pz_ch);
 		} else {
 			/* libcurl will free this easy handle, avoid double free */
 			ch->cp = NULL;
@@ -535,10 +527,10 @@ static int _php_server_push_callback(CURL *parent_ch, CURL *easy, size_t num_hea
 
 	return rval;
 }
+/* }}} */
 
 #endif
 
-#if LIBCURL_VERSION_NUM >= 0x070f04 /* 7.15.4 */
 static int _php_curl_multi_setopt(php_curlm *mh, zend_long option, zval *zvalue, zval *return_value) /* {{{ */
 {
 	CURLMcode error = CURLM_OK;
@@ -622,7 +614,6 @@ PHP_FUNCTION(curl_multi_setopt)
 	}
 }
 /* }}} */
-#endif
 
 #endif
 

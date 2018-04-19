@@ -51,4 +51,4 @@ $proc->importStyleSheet($xsldoc);
 echo $proc->transformToXML($xmldoc, 'string', 98);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToXml() expects exactly 1 parameter, 3 given in %s on line %i
+Warning: XSLTProcessor::transformToXml() expects exactly 1 parameter, 3 given in %s on line %d

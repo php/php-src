@@ -18,7 +18,7 @@ echo get_class($testClass) . "\n";
 echo get_class($childClass) . "\n";
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 TestClass
 ChildClass
 ==DONE==

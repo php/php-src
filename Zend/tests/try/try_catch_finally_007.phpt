@@ -34,7 +34,7 @@ var_dump(foo());
 var_dump(foo(true));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(8) "finally1"
 string(7) "catched"
 string(8) "finally2"

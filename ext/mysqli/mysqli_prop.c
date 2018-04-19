@@ -32,7 +32,7 @@
 #define CHECK_STATUS(value) \
 	if (!obj->ptr || ((MYSQLI_RESOURCE *)obj->ptr)->status < value ) { \
 		php_error_docref(NULL, E_WARNING, "Property access is not allowed yet"); \
-		ZVAL_NULL(retval); \
+		ZVAL_FALSE(retval); \
 		return retval; \
 	} \
 
@@ -40,7 +40,7 @@
 MYSQL *p; \
 if (!obj->ptr || !(MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr) { \
 	php_error_docref(NULL, E_WARNING, "Couldn't fetch %s", ZSTR_VAL(obj->zo.ce->name));\
-	ZVAL_NULL(retval);\
+	ZVAL_FALSE(retval);\
 	return retval; \
 } else { \
 	CHECK_STATUS(statusval);\
@@ -184,15 +184,15 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval)
 
  	mysql = (MY_MYSQL *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
 
-	array_init(retval);
 	if (mysql) {
+		array_init(retval);
 #if defined(MYSQLI_USE_MYSQLND)
-		if (mysql->mysql->data->error_info->error_list) {
+		if (1) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
-			for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(mysql->mysql->data->error_info->error_list, &pos);
+			for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&mysql->mysql->data->error_info->error_list, &pos);
 				 message;
-				 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(mysql->mysql->data->error_info->error_list, &pos))
+				 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&mysql->mysql->data->error_info->error_list, &pos))
 			{
 				zval single_error;
 				array_init(&single_error);
@@ -212,6 +212,8 @@ static zval *link_error_list_read(mysqli_object *obj, zval *retval)
 			add_next_index_zval(retval, &single_error);
 		}
 #endif
+	} else {
+		ZVAL_EMPTY_ARRAY(retval);
 	}
 
 	return retval;
@@ -374,15 +376,15 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
 	CHECK_STATUS(MYSQLI_STATUS_INITIALIZED);
 
  	stmt = (MY_STMT *)((MYSQLI_RESOURCE *)(obj->ptr))->ptr;
-	array_init(retval);
 	if (stmt && stmt->stmt) {
+		array_init(retval);
 #if defined(MYSQLI_USE_MYSQLND)
-		if (stmt->stmt->data && stmt->stmt->data->error_info->error_list) {
+		if (stmt->stmt->data && stmt->stmt->data->error_info) {
 			MYSQLND_ERROR_LIST_ELEMENT * message;
 			zend_llist_position pos;
-			for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(stmt->stmt->data->error_info->error_list, &pos);
+			for (message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_first_ex(&stmt->stmt->data->error_info->error_list, &pos);
 				 message;
-				 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(stmt->stmt->data->error_info->error_list, &pos))
+				 message = (MYSQLND_ERROR_LIST_ELEMENT *) zend_llist_get_next_ex(&stmt->stmt->data->error_info->error_list, &pos))
 			{
 				zval single_error;
 				array_init(&single_error);
@@ -402,6 +404,8 @@ static zval *stmt_error_list_read(mysqli_object *obj, zval *retval)
 			add_next_index_zval(retval, &single_error);
 		}
 #endif
+	} else {
+		ZVAL_EMPTY_ARRAY(retval);
 	}
 	return retval;
 }

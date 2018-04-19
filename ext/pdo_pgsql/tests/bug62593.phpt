@@ -58,7 +58,7 @@ foreach ($errors as $error)
 }
 echo $expect;
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(true)

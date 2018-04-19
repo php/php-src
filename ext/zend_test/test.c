@@ -174,7 +174,7 @@ static ZEND_METHOD(_ZendTestTrait, testMethod) /* {{{ */ {
 }
 /* }}} */
 
-static zend_function_entry zend_test_trait_methods[] = {
+static const zend_function_entry zend_test_trait_methods[] = {
     ZEND_ME(_ZendTestTrait, testMethod, NULL, ZEND_ACC_PUBLIC)
     ZEND_FE_END
 };
@@ -228,7 +228,7 @@ PHP_MINFO_FUNCTION(zend_test)
 	php_info_print_table_end();
 }
 
-const zend_function_entry zend_test_functions[] = {
+static const zend_function_entry zend_test_functions[] = {
 	ZEND_FE(zend_test_array_return, arginfo_zend_test_array_return)
 	ZEND_FE(zend_test_nullable_array_return, arginfo_zend_test_nullable_array_return)
 	ZEND_FE(zend_create_unterminated_string, NULL)
@@ -240,7 +240,7 @@ const zend_function_entry zend_test_functions[] = {
 
 zend_module_entry zend_test_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"test",
+	"zend-test",
 	zend_test_functions,
 	PHP_MINIT(zend_test),
 	PHP_MSHUTDOWN(zend_test),

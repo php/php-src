@@ -69,6 +69,13 @@ function insert_dummy_data($link, $base) {
 	        "sn" => "testSN3",
 	        "userPassword" => "0r1g1na1 passw0rd",
 	));
+	ldap_add($link, "o=test2,$base", array(
+	        "objectClass"   => array(
+            "top",
+            "organization"),
+	        "o"             => "test2",
+	        "l" => array("here", "there", "Antarctica"),
+	));
 }
 
 function remove_dummy_data($link, $base) {
@@ -76,5 +83,6 @@ function remove_dummy_data($link, $base) {
 	ldap_delete($link, "cn=userA,$base");
 	ldap_delete($link, "cn=userB,$base");
 	ldap_delete($link, "o=test,$base");
+	ldap_delete($link, "o=test2,$base");
 }
 ?>

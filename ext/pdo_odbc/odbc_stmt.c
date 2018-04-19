@@ -578,7 +578,7 @@ static int odbc_stmt_describe(pdo_stmt_t *stmt, int colno)
 	may affect others as well.  If we are SQL_VARCHAR,
 	SQL_VARBINARY, or SQL_WVARCHAR (or any of the long variations)
 	and zero is returned from colsize then consider it long */
-	if (0 == colsize && 
+	if (0 == colsize &&
 		(S->cols[colno].coltype == SQL_VARCHAR ||
 		 S->cols[colno].coltype == SQL_LONGVARCHAR ||
 #ifdef SQL_WVARCHAR
@@ -856,7 +856,7 @@ static int odbc_stmt_next_rowset(pdo_stmt_t *stmt)
 	return 1;
 }
 
-struct pdo_stmt_methods odbc_stmt_methods = {
+const struct pdo_stmt_methods odbc_stmt_methods = {
 	odbc_stmt_dtor,
 	odbc_stmt_execute,
 	odbc_stmt_fetch,

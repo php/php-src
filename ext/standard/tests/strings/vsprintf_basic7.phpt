@@ -6,8 +6,8 @@ if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string vsprintf(string $format , aaray $args)
- * Description: Return a formatted string 
+/* Prototype  : string vsprintf(string $format , array $args)
+ * Description: Return a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -28,7 +28,7 @@ var_dump( vsprintf($format3,$arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : basic functionality - using unsigned format ***
 string(10) "4294966185"
 string(21) "4294966185 4293732729"

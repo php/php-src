@@ -58,7 +58,7 @@ require_once(dirname(__FILE__).'/clean.inc');
 Create a temporary mailbox and add 1 msgs
 .. mailbox '{%s}%s' created
 
-Testing with option value:%string|unicode%(1) "1"
+Testing with option value:string(1) "1"
 imap_fetch_overview() returns an object
 
 Testing with option value:bool(true)

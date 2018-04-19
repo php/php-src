@@ -29,7 +29,7 @@ $t = new late();
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 early::__construct
 early::__construct
 early::__destruct

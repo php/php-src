@@ -2,7 +2,6 @@
 Properties should be initialized correctly (relevant to #60536)
 --FILE--
 <?php
-error_reporting(E_ALL | E_STRICT);
 
 class BaseWithPropA {
   private $hello = 0;

@@ -41,7 +41,7 @@ ftok(const char *pathname, int proj_id)
 		return (key_t)-1;
 	}
 
-	if ((fh = CreateFileW(pathw, GENERIC_READ, 0, 0, OPEN_EXISTING, 0, 0)) == INVALID_HANDLE_VALUE) {
+	if ((fh = CreateFileW(pathw, FILE_GENERIC_READ, PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE, 0, OPEN_EXISTING, 0, 0)) == INVALID_HANDLE_VALUE) {
 		PHP_WIN32_IOUTIL_CLEANUP_W()
 		return (key_t)-1;
 	}

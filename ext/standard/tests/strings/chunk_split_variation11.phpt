@@ -43,7 +43,7 @@ for($count = 0; $count < count($values); $count++) {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing chunk_split() : different values for 'ending' with heredoc 'str'***
 -- Iteration 1 --
 string(113) "This is heredoc string with 	 and 

@@ -7,4 +7,4 @@ PHPNW Testfest 2009 - Lorna Mitchell
 echo SplFixedArray::fromArray(17954);
 ?>
 --EXPECTF--
-Warning: SplFixedArray::fromArray() expects parameter 1 to be array, integer given in %s on line %d
+Warning: SplFixedArray::fromArray() expects parameter 1 to be array, int given in %s on line %d

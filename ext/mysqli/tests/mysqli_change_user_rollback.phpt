@@ -66,5 +66,5 @@ if (!have_innodb($link))
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

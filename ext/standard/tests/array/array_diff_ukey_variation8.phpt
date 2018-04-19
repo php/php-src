@@ -25,7 +25,7 @@ var_dump( array_diff_ukey($input_array, $boolean_indx_array, 'key_compare_func')
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
 -- Testing array_diff_ukey() function with boolean indexed array --

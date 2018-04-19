@@ -106,8 +106,8 @@ int zend_sprintf(char *buffer, const char *format, ...);
 ])
 
 PHP_MAJOR_VERSION=7
-PHP_MINOR_VERSION=2
-PHP_RELEASE_VERSION=6
+PHP_MINOR_VERSION=3
+PHP_RELEASE_VERSION=0
 PHP_EXTRA_VERSION="-dev"
 PHP_VERSION="$PHP_MAJOR_VERSION.$PHP_MINOR_VERSION.$PHP_RELEASE_VERSION$PHP_EXTRA_VERSION"
 PHP_VERSION_ID=`expr [$]PHP_MAJOR_VERSION \* 10000 + [$]PHP_MINOR_VERSION \* 100 + [$]PHP_RELEASE_VERSION`
@@ -495,7 +495,10 @@ utime.h \
 sys/utsname.h \
 sys/ipc.h \
 dlfcn.h \
-assert.h
+assert.h \
+tmmintrin.h \
+nmmintrin.h \
+immintrin.h
 ],[],[],[
 #ifdef HAVE_SYS_PARAM_H
 #include <sys/param.h>
@@ -565,6 +568,16 @@ dnl Check __builtin_ssubl_overflow
 PHP_CHECK_BUILTIN_SSUBL_OVERFLOW
 dnl Check __builtin_ssubll_overflow
 PHP_CHECK_BUILTIN_SSUBLL_OVERFLOW
+dnl Check __builtin_cpu_init
+PHP_CHECK_BUILTIN_CPU_INIT
+dnl Check __builtin_cpu_supports
+PHP_CHECK_BUILTIN_CPU_SUPPORTS
+
+dnl Check instructions
+PHP_CHECK_CPU_SUPPORTS([ssse3])
+PHP_CHECK_CPU_SUPPORTS([sse4.2])
+PHP_CHECK_CPU_SUPPORTS([avx])
+PHP_CHECK_CPU_SUPPORTS([avx2])
 
 dnl Check for members of the stat structure
 AC_STRUCT_ST_BLKSIZE
@@ -585,6 +598,9 @@ AC_TYPE_UID_T
 dnl Checks for sockaddr_storage and sockaddr.sa_len
 PHP_SOCKADDR_CHECKS
 
+AX_GCC_FUNC_ATTRIBUTE([ifunc])
+AX_GCC_FUNC_ATTRIBUTE([target])
+
 dnl Check for IPv6 support
 AC_CACHE_CHECK([for IPv6 support], ac_cv_ipv6_support,
 [AC_TRY_LINK([ #include <sys/types.h>
@@ -603,6 +619,7 @@ chroot \
 ctime_r \
 cuserid \
 crypt \
+explicit_memset \
 flock \
 ftok \
 funopen \
@@ -751,6 +768,20 @@ PHP_CHECK_IN_ADDR_T
 AC_CHECK_FUNCS(crypt_r, [ php_crypt_r="1" ], [ php_crypt_r="0" ])
 if test "x$php_crypt_r" = "x1"; then
   PHP_CRYPT_R_STYLE
+fi
+
+dnl Check for asm goto support
+AC_CACHE_CHECK([for asm goto], ac_cv__asm_goto,
+[AC_TRY_RUN([
+int main(void) {
+    __asm__ goto("jmp %l0\n" :::: end);
+end:
+    return 0;
+}
+  ],ac_cv__asm_goto=yes, ac_cv__asm_goto=no, ac_cv__asm_goto=no)])
+
+if test "$ac_cv__asm_goto" = yes; then
+  AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
 fi
 
 dnl Check valgrind support
@@ -1388,12 +1419,7 @@ old_CC=$CC
 if test "$PHP_THREAD_SAFETY" = "yes" && test -n "$ac_cv_pthreads_cflags"; then
   CXXFLAGS="$CXXFLAGS $ac_cv_pthreads_cflags"
   INLINE_CFLAGS="$INLINE_CFLAGS $ac_cv_pthreads_cflags"
-  cat >meta_ccld<<EOF
-#! /bin/sh
-exec $CC $ac_cv_pthreads_cflags \$@
-EOF
-  CC="$abs_builddir/meta_ccld"
-  chmod +x meta_ccld
+  CPPFLAGS="$CPPFLAGS $ac_cv_pthreads_cflags"
 fi
 
 dnl This will go away, if we have a facility to run per-extension code
@@ -1475,7 +1501,7 @@ PHP_ADD_SOURCES(main, main.c snprintf.c spprintf.c php_sprintf.c \
        php_ini.c SAPI.c rfc1867.c php_content_types.c strlcpy.c \
        strlcat.c explicit_bzero.c mergesort.c reentrancy.c php_variables.c php_ticks.c \
        network.c php_open_temporary_file.c \
-       output.c getopt.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
+       output.c getopt.c php_syslog.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 PHP_ADD_SOURCES_X(main, fastcgi.c, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1, PHP_FASTCGI_OBJS, no)
 
@@ -1498,7 +1524,7 @@ PHP_ADD_SOURCES(Zend, \
     zend_iterators.c zend_interfaces.c zend_exceptions.c zend_strtod.c zend_gc.c \
     zend_closures.c zend_float.c zend_string.c zend_signal.c zend_generators.c \
     zend_virtual_cwd.c zend_ast.c zend_objects.c zend_object_handlers.c zend_objects_API.c \
-    zend_default_classes.c zend_inheritance.c zend_smart_str.c, \
+    zend_default_classes.c zend_inheritance.c zend_smart_str.c zend_cpuinfo.c, \
 	-DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
 
 dnl Selectively disable optimization due to high RAM usage during
@@ -1576,15 +1602,6 @@ dnl mv -f main/internal_functions.c main/internal_functions.c.old 2>/dev/null
   cli_extensions="$EXT_CLI_STATIC"
   sh $srcdir/build/genif.sh $srcdir/main/internal_functions.c.in $srcdir "$EXTRA_MODULE_PTRS" $AWK \$cli_extensions > main/internal_functions_cli.c
 
-  if test "$UNAME" = "FreeBSD" && test "$PHP_SAPI" = "apache2filter" && test "$TSRM_PTH" != "pth-config" ; then
-    echo "+--------------------------------------------------------------------+"
-    echo "|                        *** WARNING ***                             |"
-    echo "|                                                                    |"
-    echo "| In order to build PHP as a Apache2 module on FreeBSD, you have to  |"
-    echo "| add  --with-tsrm-pth to your ./configure line. Therefore you need  |"
-    echo "| to install gnu-pth from /usr/ports/devel/pth.                      |"
-  fi
-
   if test -n "$PHP_APXS_BROKEN"; then
     echo "+--------------------------------------------------------------------+"
     echo "| WARNING: Your $APXS script is most likely broken."
@@ -1610,7 +1627,7 @@ cat <<X
 X
   fi
 
-    if test "$PHP_SAPI" = "apache2handler" || test "$PHP_SAPI" = "apache2filter"; then
+    if test "$PHP_SAPI" = "apache2handler"; then
       if test "$APACHE_VERSION" -ge 2004001; then
         if test -z "$APACHE_THREADED_MPM"; then
 cat <<X

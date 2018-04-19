@@ -42,7 +42,7 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 		return FAILURE;
 	}
 
-	if (ht->u.v.nApplyCount > 0) {
+	if (GC_IS_RECURSIVE(ht)) {
 		/* Prevent recursion */
 		return SUCCESS;
 	}
@@ -136,12 +136,12 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				*(p++) = 'B';
 				*p = '\0';
 			}
-			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount++;
+			if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+				GC_PROTECT_RECURSION(ht);
 			}
 			php_url_encode_hash_ex(HASH_OF(zdata), formstr, NULL, 0, newprefix, newprefix_len, "%5D", 3, (Z_TYPE_P(zdata) == IS_OBJECT ? zdata : NULL), arg_sep, enc_type);
-			if (ZEND_HASH_APPLY_PROTECTION(ht)) {
-				ht->u.v.nApplyCount--;
+			if (!(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+				GC_UNPROTECT_RECURSION(ht);
 			}
 			efree(newprefix);
 		} else if (Z_TYPE_P(zdata) == IS_NULL || Z_TYPE_P(zdata) == IS_RESOURCE) {
@@ -204,14 +204,15 @@ PHPAPI int php_url_encode_hash_ex(HashTable *ht, smart_str *formstr,
 				default:
 					{
 						zend_string *ekey;
-						zend_string *tmp = zval_get_string(zdata);
+						zend_string *tmp;
+						zend_string *str= zval_get_tmp_string(zdata, &tmp);
 						if (enc_type == PHP_QUERY_RFC3986) {
-							ekey = php_raw_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+							ekey = php_raw_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
 						} else {
-							ekey = php_url_encode(ZSTR_VAL(tmp), ZSTR_LEN(tmp));
+							ekey = php_url_encode(ZSTR_VAL(str), ZSTR_LEN(str));
 						}
 						smart_str_append(formstr, ekey);
-						zend_string_release(tmp);
+						zend_tmp_string_release(tmp);
 						zend_string_free(ekey);
 					}
 			}

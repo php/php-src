@@ -1,14 +1,22 @@
-PHP 7.2 INTERNALS UPGRADE NOTES
+PHP 7.3 INTERNALS UPGRADE NOTES
 
 1. Internal API changes
-  a. Path related functions
-  b. php_win32_get_random_bytes()
-  c. nice() Windows implementation
-  d. ZEND_ACC_CLONE removed
-  e. IS_TYPE_IMMUTABLE removed
-  f. zend_arg_info.class_name removed
-  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX changed
-  h. valid_symbol_table removed
+  a. array_init() and array_init_size()
+  b. Run-time constant operand addressing
+  c. Array/Object recursion protection
+  d. HASH_FLAG_PERSISTENT
+  e. AST and IS_CONSTANT
+  f. GC_REFCOUNT()
+  g. zend_get_parameters()
+  h. zend_register_persistent_resource()
+  i. RAND_RANGE()
+  j. cast_object() with _IS_NUMBER
+  k. zend_fcall_info_cache.initialized
+  l. php_hrtime_current()
+  m. zend_cpu_supports()
+  n. IS_TYPE_COPYABLE
+  o. IS_UNUSED
+  p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
 
 2. Build system changes
   a. Unix build system changes
@@ -21,32 +29,99 @@ PHP 7.2 INTERNALS UPGRADE NOTES
 1. Internal API changes
 ========================
 
-  a. Path related functions
-    - CWD_API void realpath_cache_del(const char *path, size_t path_len);
-    - CWD_API realpath_cache_bucket* realpath_cache_lookup(const char *path, size_t path_len, time_t t);
-    - PHPAPI void php_clear_stat_cache(zend_bool clear_realpath_cache, const char *filename, size_t filename_len);
-    - PHPAPI void php_stat(const char *filename, size_t filename_length, int type, zval *return_value);
+  a. array_init() and array_init_size() are not functions anymore.
+     They don't return any values.
 
-  b. php_win32_get_random_bytes()
-    The internal randomness source on Windows switched to use CNG API.
+  b. In 64-bit builds PHP-7.2 and below used relative run-time constant operand
+     addressing. E.g. opline->op1.constant kept an offset from start of literals
+     table - op_array->literals. To speedup access op_array->literals was cached
+     in execute_data->literals. So the resulting address calculated as
+     EX(literals) + opline->op1.constant.
 
-  c. nice() now have a Windows alternative that is implemented in win32/nice.c, using
-	   SetPriorityClass(). See the implementation for more in-depth details. This also 
-	   defines HAVE_NICE.
+     Now at run-time literals allocated close to opcodes, and addressed
+     relatively from current opline. This eliminates load of EX(literals) on
+     each constant access as well as EX(literals) initialization on each call.
 
-  d. ZEND_ACC_CLONE is removed, but was not used in previous versions
+     As result some related macros were removed (ZEND_EX_USE_LITERALS,
+     EX_LOAD_LITERALS, EX_LITERALS, RT_CONSTANT_EX, EX_CONSTANT) or changed
+     (RT_CONSTANT, ZEND_PASS_TWO_UPDATE_CONSTANT, ZEND_PASS_TWO_UNDO_CONSTANT).
+     This change way affect only some "system" extensions. EX_LITERALS,
+     RT_CONSTANT_EX, EX_CONSTANT should be substituted by RT_CONSTANT than now
+     use "opline" (instead of "op_array") as first argument.
 
-  e. IS_TYPE_IMMUTABLE is removed, IS_TYPE_COPYABLE can be used instead
-     Z_IMMUTABLE() check function is still available
+  c. Protection from recursion during processing circular data structures was
+     refactored. HashTable.nApplyCount and IS_OBJ_APPLY_COUNT are replaced by
+     single flag GC_PROTECTED. Corresponding macros Z_OBJ_APPLY_COUNT,
+     Z_OBJ_INC_APPLY_COUNT, Z_OBJ_DEC_APPLY_COUNT, ZEND_HASH_GET_APPLY_COUNT,
+     ZEND_HASH_INC_APPLY_COUNT, ZEND_HASH_DEC_APPLY_COUNT are replaced with
+     GC_IS_RECURSIVE, GC_PROTECT_RECURSION, GC_UNPROTECT_RECURSION,
+     Z_IS_RECURSIVE, Z_PROTECT_RECURSION, Z_UNPROTECT_RECURSION.
 
-  f. zend_arg_info class_name member is removed, use ZEND_TYPE_NAME instead
+     HASH_FLAG_APPLY_PROTECTION flag and ZEND_HASH_APPLY_PROTECTION() macro
+     are removed. All mutable arrays should use recursion protection.
+     Corresponding checks should be replaced by Z_REFCOUNTED() or
+     !(GC_GLAGS(p) & GC_IMMUTABLE).
 
-  g. ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX classname option is removed
-     use ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX for simple type
-     use ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX for object
+  d. HASH_FLAG_PERSISTENT renamed into IS_ARRAY_PERSISTENT and moved into
+     GC_FLAGS (to be consistent with IS_STR_PERSISTENT).
 
-  h. valid_symbol_table is removed from executor_globals.
-     Use EG(active) instead of removed EG(valid_symbol_table)
+  e. zend_ast_ref structure is changed to use only one allocation.
+     zend_ast_copy() now returns zend_ast_ref (instead of zend_asr).
+     zend_ast_destroy_and_free() is removed. ZVAL_NEW_AST() is replaced
+     by ZVAL_AST().
+
+     IS_CONSTANT type and Z_CONST_FLAGS() are removed. Now constants are always
+     represented using IS_CONSTANT_AST (ZEND_AST_CONSTANT kind). AST node
+     attributes are used instead of constant flags. IS_TYPE_CONSTANT flag is
+     removed, but Z_CONSTANT() macro is kept for compatibility.
+
+  f. GC_REFCOUNT() is turned into inline function and can't be modified direcly.
+     All reference-counting operations should be done through corresponding
+     macros GC_SET_REFCOUNT(), GC_ADDREF() and GC_DELREF().
+
+     GC_REFCOUNT(p)++ should be changed into GC_ADDREF(p),
+     GC_REFCOUNT(p)-- into GC_DELREF(p),
+     GC_REFCOUNT(p) = 1 into GC_SET_REFCOUNT(p, 1).
+
+  g. The zend_get_parameters() and zend_get_parameters_ex() functions were
+     removed. Instead zend_parse_parameters() should be used.
+
+  h. New functions zend_register_persistent_resource() or
+     zend_register_persistent_resource_ex() should beused to register
+     persistent resources, instead of manual insertion into EG(persistent_list).
+
+  i. The RANGE_RANGE() macro has been removed. php_mt_rand_range() should be
+     used instead.
+
+  j. The cast_object() object handler now also accepts the _IS_NUMBER type. The
+     handler should return either an integer or float value in this case,
+     whichever is more appropriate.
+
+  k. zend_fcall_info_cache.initialized is removed. zend_fcall_info_cache is
+     initialized if zend_fcall_info_cache.function_handler is set.
+
+  l. php_hrtime_current() delivers the number of nanoseconds since an uncertain
+     point in the past.
+
+  m. zend_cpu_supports() determines if a feature is supported by current cpu.
+     Also serial inline zend_cpu_supports_xxx() are added, which is designed for
+     ifunc resolver function, as resolver function should not depend on any
+     external function.
+
+  n. IS_TYPE_COPYABLE flag is removed. IS_STRING zvals didn't need to be
+     duplication by zval_copy_ctor(), ZVAL_DUP() and SEPARATE_ZVAL*() macros.
+     Interned strings didn't set IS_TYPE_COPYALE, so they aren't affected at
+     all. Now instead of checking for IS_TYPE_COPYABLE, engine checks for
+     IS_ARRAY type (it may be IS_TYPE_REFCOUNTED or not). All the related
+     macros: Z_COPYABLE..., Z_IMMUTABLE... are kept for compatibility.
+
+  o. IS_UNUSED became zero and can't be used as a bitmask (there were no such
+     usages in PHP sources).
+
+  p. Operands of few VM instructions were changed
+    - FETCH_CLASS     op1<fetch-flags>, op2<name>, result<var>
+    - FETCH_CONSTANT  op1<fetch-flags>, op2<name>, result<tmp>
+    - CATCH           ext<last-flag>, op1<name>, op2<jump_addr>, result<cv>
 
 ========================
 2. Build system changes
@@ -55,29 +130,19 @@ PHP 7.2 INTERNALS UPGRADE NOTES
   a. Unix build system changes
 
   b. Windows build system changes
-
-    .  Minimum supported Windows versions are Windows 7/Server 2008 R2.
-    . --enable-one-shot configure option is removed, --with-mp is usable.
-    . The new binary tools SDK is required for Windows builds, the
-      documentation is available under https://wiki.php.net/internals/windows/stepbystepbuild_sdk_2
-    . Visual Studio 2017 is utilized for the Windows builds
-    . Clang build with ASAN is supported with clang 5+
+    - ZEND_WIN32_FORCE_INLINE doesn't affect C++ anymore. zend_always_inline is
+      still usable in C++, but anything else inlining related is up to
+      compiler.
+    - ZEND_WIN32_KEEP_INLINE was removed, it was only needed for C++
+      convenience and is now default behavior with C++.
+    - New configure option --enable-native-intrinsics accepts a list of the
+      intrinsic optimizations to enable. It affects both the code generation
+      and the explicit optimizations guarded by preprocessor macros.
+    - The configure option --with-codegen-arch accepts only ia32 as a value.
+      Use it, to produce builds suitable for older processors without SSE2 or
+      even SSE support.
 
 ========================
 3. Module changes
 ========================
-
-- Pcre:
-  . php_pcre_replace and php_pcre_replace_impl expect a zend_string instead of a zval and
-    is_callable_replace options is removed:
-    - PHPAPI zend_string *php_pcre_replace(zend_string *regex, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
-    - PHPAPI zend_string *php_pcre_replace_impl(pcre_cache_entry *pce, zend_string *subject_str, char *subject, int subject_len, zend_string *replace_str, int limit, int *replace_count);
-
-- Session:
-  . php_session_start()/session_reset_id() return value is changed from void to int.
-    It returns SUCCESS/FAILURE.
-  . Session module manages session status correctly.
-
-- OpenSSL:
-  . Windows builds ship with OpenSSL 1.1 by default, lower versions are still supported with custom deps.
 

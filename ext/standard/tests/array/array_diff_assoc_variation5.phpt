@@ -47,7 +47,7 @@ var_dump(array_diff_assoc($arr_default_int, $arr_float, $arr_string, $arr_string
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 *** Testing array_diff_assoc() : usage variations ***
 -- Result of comparing integers and floating point numbers: --

@@ -94,7 +94,7 @@ $file_path = dirname(__FILE__);
 $filename = "$file_path/fscanf_variation55.tmp";
 unlink($filename);
 ?>
---EXPECTF--
+--EXPECT--
 *** Test fscanf(): tracking file pointer along with reading data from file ***
 
 *** File opened in r mode ***

@@ -23,7 +23,7 @@ $it->show();
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(0)
 string(3) "Bar"
 int(2)

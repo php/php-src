@@ -27,7 +27,7 @@ var_dump($blob->read(2));
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 string(4) "test"
 bool(true)

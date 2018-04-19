@@ -30,7 +30,7 @@ Warning: IntlGregorianCalendar::isLeapYear() expects exactly 1 parameter, 0 give
 Warning: IntlGregorianCalendar::isLeapYear(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlGregorianCalendar::isLeapYear() expects parameter 1 to be integer, string given in %s on line %d
+Warning: IntlGregorianCalendar::isLeapYear() expects parameter 1 to be int, string given in %s on line %d
 
 Warning: IntlGregorianCalendar::isLeapYear(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
@@ -45,7 +45,7 @@ Warning: intlgregcal_is_leap_year() expects exactly 2 parameters, 1 given in %s 
 Warning: intlgregcal_is_leap_year(): intlgregcal_is_leap_year: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlgregcal_is_leap_year() must be an instance of IntlGregorianCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlgregcal_is_leap_year() must be an instance of IntlGregorianCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlgregcal_is_leap_year(1, 2)
 #1 {main}

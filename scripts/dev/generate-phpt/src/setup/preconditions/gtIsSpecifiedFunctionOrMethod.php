@@ -5,15 +5,11 @@
  *
  */
 class gtIsSpecifiedFunctionOrMethod extends gtPreCondition {
-  
+
   public function check( $clo) {
-    if($clo->hasOption('f') || $clo->hasOption('m')) {
-    
-        return true;
-      }
-    return false;
+    return $clo->hasOption('f') || $clo->hasOption('m');
   }
-  
+
   public function getMessage() {
     return gtText::get('functionOrMethodNotSpecified');
   }

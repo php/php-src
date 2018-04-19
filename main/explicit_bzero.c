@@ -30,15 +30,22 @@
 
 #include <string.h>
 
-__attribute__((weak)) void
-__explicit_bzero_hook(void *dst, size_t siz)
-{
-}
-
 PHPAPI void php_explicit_bzero(void *dst, size_t siz)
 {
+#if HAVE_EXPLICIT_MEMSET
+    explicit_memset(dst, 0, siz);
+#elif defined(PHP_WIN32)
+	RtlSecureZeroMemory(dst, siz);
+#elif defined(__GNUC__)
 	memset(dst, 0, siz);
-	__explicit_bzero_hook(dst, siz);
+	asm __volatile__("" :: "r"(dst) : "memory");
+#else
+	size_t i = 0;
+	volatile unsigned char *buf = (volatile unsigned char *)dst;
+
+	for (; i < siz; i ++)
+		buf[i] = 0;
+#endif
 }
 #endif
 /*

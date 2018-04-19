@@ -71,7 +71,7 @@ void zend_accel_hash_init(zend_accel_hash *accel_hash, uint32_t hash_size)
  * Returns pointer the actual hash entry on success
  * key needs to be already allocated as it is not copied
  */
-zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_bool indirect, void *data)
+zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, const char *key, uint32_t key_length, zend_bool indirect, void *data)
 {
 	zend_ulong hash_value;
 	zend_ulong index;
@@ -140,7 +140,7 @@ zend_accel_hash_entry* zend_accel_hash_update(zend_accel_hash *accel_hash, char 
 	return entry;
 }
 
-static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, char *key, uint32_t key_length, zend_ulong hash_value, int data)
+static zend_always_inline void* zend_accel_hash_find_ex(zend_accel_hash *accel_hash, const char *key, uint32_t key_length, zend_ulong hash_value, int data)
 {
 	zend_ulong index;
 	zend_accel_hash_entry *entry;
@@ -203,7 +203,7 @@ zend_accel_hash_entry* zend_accel_hash_find_entry(zend_accel_hash *accel_hash, z
 /* Returns the data associated with key on success
  * Returns NULL if data doesn't exist
  */
-void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
 {
 	return zend_accel_hash_find_ex(
 		accel_hash,
@@ -216,7 +216,7 @@ void* zend_accel_hash_str_find(zend_accel_hash *accel_hash, char *key, uint32_t 
 /* Returns the hash entry associated with key on success
  * Returns NULL if it doesn't exist
  */
-zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
 {
 	return (zend_accel_hash_entry *)zend_accel_hash_find_ex(
 		accel_hash,
@@ -226,7 +226,7 @@ zend_accel_hash_entry* zend_accel_hash_str_find_entry(zend_accel_hash *accel_has
 		0);
 }
 
-int zend_accel_hash_unlink(zend_accel_hash *accel_hash, char *key, uint32_t key_length)
+int zend_accel_hash_unlink(zend_accel_hash *accel_hash, const char *key, uint32_t key_length)
 {
     zend_ulong hash_value;
     zend_ulong index;

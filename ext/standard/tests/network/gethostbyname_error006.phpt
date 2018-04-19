@@ -7,4 +7,4 @@ gethostbyname() function - basic invalid parameter test
 	var_dump(gethostbyname(".toto.toto.toto"));
 ?>
 --EXPECTF--
-%string|unicode%(15) ".toto.toto.toto"
+string(15) ".toto.toto.toto"

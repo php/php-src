@@ -62,7 +62,7 @@ require dirname(__FILE__).'/drop_table.inc';
 echo "Done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Test 1: A CLOB with an even number of bytes
 int(1050000)
 Test 2: A CLOB with an odd number of bytes

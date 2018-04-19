@@ -13,7 +13,7 @@ var_dump($xml->xpath("BBBB"));
 --EXPECTF--
 Notice: Undefined variable: x in %s on line %d
 
-Warning: simplexml_load_string() expects parameter 3 to be integer, float given in %s on line %d
+Warning: simplexml_load_string() expects parameter 3 to be int, float given in %s on line %d
 
 Fatal error: Uncaught Error: Call to a member function xpath() on null in %s:%d
 Stack trace:

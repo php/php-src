@@ -73,7 +73,7 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : two dimensional arrays for $array argument ***
 int(4)
 array(4) {

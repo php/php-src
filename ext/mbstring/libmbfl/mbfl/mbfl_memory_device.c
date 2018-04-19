@@ -36,6 +36,7 @@
 #include <stddef.h>
 #endif
 
+#include <string.h>
 #include "mbfl_allocators.h"
 #include "mbfl_string.h"
 #include "mbfl_memory_device.h"
@@ -44,18 +45,18 @@
  * memory device output functions
  */
 void
-mbfl_memory_device_init(mbfl_memory_device *device, int initsz, int allocsz)
+mbfl_memory_device_init(mbfl_memory_device *device, size_t initsz, size_t allocsz)
 {
 	if (device) {
 		device->length = 0;
-		device->buffer = (unsigned char *)0;
+		device->buffer = NULL;
 		if (initsz > 0) {
-			device->buffer = (unsigned char *)mbfl_malloc(initsz*sizeof(unsigned char));
+			device->buffer = (unsigned char *)mbfl_malloc(initsz);
 			if (device->buffer != NULL) {
 				device->length = initsz;
 			}
 		}
-		device->pos= 0;
+		device->pos = 0;
 		if (allocsz > MBFL_MEMORY_DEVICE_ALLOC_SIZE) {
 			device->allocsz = allocsz;
 		} else {
@@ -65,13 +66,13 @@ mbfl_memory_device_init(mbfl_memory_device *device, int initsz, int allocsz)
 }
 
 void
-mbfl_memory_device_realloc(mbfl_memory_device *device, int initsz, int allocsz)
+mbfl_memory_device_realloc(mbfl_memory_device *device, size_t initsz, size_t allocsz)
 {
 	unsigned char *tmp;
 
 	if (device) {
 		if (initsz > device->length) {
-			tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, initsz*sizeof(unsigned char));
+			tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, initsz);
 			if (tmp != NULL) {
 				device->buffer = tmp;
 				device->length = initsz;
@@ -92,7 +93,7 @@ mbfl_memory_device_clear(mbfl_memory_device *device)
 		if (device->buffer) {
 			mbfl_free(device->buffer);
 		}
-		device->buffer = (unsigned char *)0;
+		device->buffer = NULL;
 		device->length = 0;
 		device->pos = 0;
 	}
@@ -119,9 +120,9 @@ mbfl_memory_device_result(mbfl_memory_device *device, mbfl_string *result)
 {
 	if (device && result) {
 		result->len = device->pos;
-		mbfl_memory_device_output4('\0', device);
+		mbfl_memory_device_output('\0', device);
 		result->val = device->buffer;
-		device->buffer = (unsigned char *)0;
+		device->buffer = NULL;
 		device->length = 0;
 		device->pos= 0;
 		if (result->val == NULL) {
@@ -142,15 +143,16 @@ mbfl_memory_device_output(int c, void *data)
 
 	if (device->pos >= device->length) {
 		/* reallocate buffer */
-		int newlen;
+		size_t newlen;
 		unsigned char *tmp;
 
-		newlen = device->length + device->allocsz;
-		if (newlen <= 0) {
+		if (device->length > SIZE_MAX - device->allocsz) {
 			/* overflow */
 			return -1;
 		}
-		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen*sizeof(unsigned char));
+
+		newlen = device->length + device->allocsz;
+		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen);
 		if (tmp == NULL) {
 			return -1;
 		}
@@ -167,17 +169,18 @@ mbfl_memory_device_output2(int c, void *data)
 {
 	mbfl_memory_device *device = (mbfl_memory_device *)data;
 
-	if ((device->pos + 2) >= device->length) {
+	if (2 > device->length - device->pos) {
 		/* reallocate buffer */
-		int newlen;
+		size_t newlen;
 		unsigned char *tmp;
 
-		newlen = device->length + device->allocsz;
-		if (newlen <= 0) {
+		if (device->length > SIZE_MAX - device->allocsz) {
 			/* overflow */
 			return -1;
 		}
-		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen*sizeof(unsigned char));
+
+		newlen = device->length + device->allocsz;
+		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen);
 		if (tmp == NULL) {
 			return -1;
 		}
@@ -196,17 +199,18 @@ mbfl_memory_device_output4(int c, void* data)
 {
 	mbfl_memory_device *device = (mbfl_memory_device *)data;
 
-	if ((device->pos + 4) >= device->length) {
+	if (4 > device->length - device->pos) {
 		/* reallocate buffer */
-		int newlen;
+		size_t newlen;
 		unsigned char *tmp;
 
-		newlen = device->length + device->allocsz;
-		if (newlen <= 0) {
+		if (device->length > SIZE_MAX - device->allocsz) {
 			/* overflow */
 			return -1;
 		}
-		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen*sizeof(unsigned char));
+
+		newlen = device->length + device->allocsz;
+		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen);
 		if (tmp == NULL) {
 			return -1;
 		}
@@ -225,114 +229,53 @@ mbfl_memory_device_output4(int c, void* data)
 int
 mbfl_memory_device_strcat(mbfl_memory_device *device, const char *psrc)
 {
-	int len;
-	unsigned char *w;
-	const unsigned char *p;
-
-	len = 0;
-	p = (const unsigned char*)psrc;
-	while (*p) {
-		p++;
-		len++;
-	}
-
-	if ((device->pos + len) >= device->length) {
-		/* reallocate buffer */
-		int newlen = device->length + (len + MBFL_MEMORY_DEVICE_ALLOC_SIZE)*sizeof(unsigned char);
-		unsigned char *tmp;
-		if (newlen <= 0) {
-			/* overflow */
-			return -1;
-		}
-		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen*sizeof(unsigned char));
-		if (tmp == NULL) {
-			return -1;
-		}
-		device->length = newlen;
-		device->buffer = tmp;
-	}
-
-	p = (const unsigned char*)psrc;
-	w = &device->buffer[device->pos];
-	device->pos += len;
-	while (len > 0) {
-		*w++ = *p++;
-		len--;
-	}
-
-	return len;
+	return mbfl_memory_device_strncat(device, psrc, strlen(psrc));
 }
 
 int
-mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, int len)
+mbfl_memory_device_strncat(mbfl_memory_device *device, const char *psrc, size_t len)
 {
 	unsigned char *w;
 
-	if ((device->pos + len) >= device->length) {
+	if (len > device->length - device->pos) {
 		/* reallocate buffer */
-		int newlen = device->length + len + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
+		size_t newlen;
 		unsigned char *tmp;
-		if (newlen <= 0) {
+
+		if (len > SIZE_MAX - MBFL_MEMORY_DEVICE_ALLOC_SIZE
+				|| device->length > SIZE_MAX - (len + MBFL_MEMORY_DEVICE_ALLOC_SIZE)) {
 			/* overflow */
 			return -1;
 		}
-		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen*sizeof(unsigned char));
+
+		newlen = device->length + len + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
+		tmp = (unsigned char *)mbfl_realloc((void *)device->buffer, newlen);
 		if (tmp == NULL) {
 			return -1;
 		}
+
 		device->length = newlen;
 		device->buffer = tmp;
 	}
 
 	w = &device->buffer[device->pos];
+	memcpy(w, psrc, len);
 	device->pos += len;
-	while (len > 0) {
-		*w++ = *psrc++;
-		len--;
-	}
 
-	return len;
+	return 0;
 }
 
 int
 mbfl_memory_device_devcat(mbfl_memory_device *dest, mbfl_memory_device *src)
 {
-	int n;
-	unsigned char *p, *w;
-
-	if ((dest->pos + src->pos) >= dest->length) {
-		/* reallocate buffer */
-		int newlen = dest->length + src->pos + MBFL_MEMORY_DEVICE_ALLOC_SIZE;
-		unsigned char *tmp;
-		if (newlen <= 0) {
-			/* overflow */
-			return -1;
-		}
-		tmp = (unsigned char *)mbfl_realloc((void *)dest->buffer, newlen*sizeof(unsigned char));
-		if (tmp == NULL) {
-			return -1;
-		}
-		dest->length = newlen;
-		dest->buffer = tmp;
-	}
-
-	p = src->buffer;
-	w = &dest->buffer[dest->pos];
-	n = src->pos;
-	dest->pos += n;
-	while (n > 0) {
-		*w++ = *p++;
-		n--;
-	}
-
-	return n;
+	return mbfl_memory_device_strncat(dest, (const char *) src->buffer, src->pos);
 }
 
 void
 mbfl_wchar_device_init(mbfl_wchar_device *device)
 {
 	if (device) {
-		device->buffer = (unsigned int *)0;
+		device->buffer = NULL;
 		device->length = 0;
 		device->pos= 0;
 		device->allocsz = MBFL_MEMORY_DEVICE_ALLOC_SIZE;
@@ -346,7 +289,7 @@ mbfl_wchar_device_clear(mbfl_wchar_device *device)
 		if (device->buffer) {
 			mbfl_free(device->buffer);
 		}
-		device->buffer = (unsigned int*)0;
+		device->buffer = NULL;
 		device->length = 0;
 		device->pos = 0;
 	}
@@ -359,14 +302,20 @@ mbfl_wchar_device_output(int c, void *data)
 
 	if (device->pos >= device->length) {
 		/* reallocate buffer */
-		int newlen;
+		size_t newlen;
 		unsigned int *tmp;
 
-		newlen = device->length + device->allocsz;
-		if (newlen <= 0) {
+		if (device->length > SIZE_MAX - device->allocsz) {
 			/* overflow */
 			return -1;
 		}
+
+		newlen = device->length + device->allocsz;
+		if (newlen > SIZE_MAX / sizeof(int)) {
+			/* overflow */
+			return -1;
+		}
+
 		tmp = (unsigned int *)mbfl_realloc((void *)device->buffer, newlen*sizeof(int));
 		if (tmp == NULL) {
 			return -1;

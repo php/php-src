@@ -11,7 +11,7 @@
 
 /** @ingroup SPL
  * @brief Implementation of a Queue through a DoublyLinkedList. As SplQueue
- *        extends SplDoublyLinkedList, unshift() and pop() are still available 
+ *        extends SplDoublyLinkedList, unshift() and pop() are still available
  *        even though they don't make much sense for a queue. For convenience,
  *        two aliases are available:
  *         - enqueue() is an alias of push()
@@ -26,7 +26,7 @@ class SplQueue extends SplDoublyLinkedList
 {
 	protected $_it_mode = parent::IT_MODE_FIFO;
 
-	/** Changes the iteration mode. There are two orthogonal sets of modes that 
+	/** Changes the iteration mode. There are two orthogonal sets of modes that
 	 * can be set:
 	 *
 	 * - The behavior of the iterator (either one or the other)

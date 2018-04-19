@@ -17,6 +17,6 @@ $res = $db->exec('SELECT * from generate_series(1, 42);');
 var_dump($res);
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 Done

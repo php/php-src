@@ -19,4 +19,4 @@ string(2) "42"
 int(42)
 float(42)
 
-Recoverable fatal error: Object of class GMP could not be converted to boolean in %s on line %d
+Recoverable fatal error: Object of class GMP could not be converted to bool in %s on line %d

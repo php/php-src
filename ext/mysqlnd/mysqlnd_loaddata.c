@@ -216,8 +216,7 @@ infile_error:
 											PROT_OK_PACKET, FALSE, COM_QUERY, FALSE,
 											conn->error_info,
 											conn->upsert_status,
-											&conn->last_message,
-											conn->persistent)) {
+											&conn->last_message)) {
 		result = FAIL;
 	}
 

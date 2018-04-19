@@ -46,7 +46,7 @@ const zend_function_entry php_dom_comment_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMComment::__construct([string value]); */
+/* {{{ proto DOMComment::__construct([string value]); */
 PHP_METHOD(domcomment, __construct)
 {
 

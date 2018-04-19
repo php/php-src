@@ -27,6 +27,7 @@
 #include "zend_compile.h"
 #include "zend_extensions.h"
 #include "zend_API.h"
+#include "zend_sort.h"
 
 #include "zend_vm.h"
 
@@ -44,11 +45,6 @@ static void zend_extension_op_array_dtor_handler(zend_extension *extension, zend
 	}
 }
 
-static void op_array_alloc_ops(zend_op_array *op_array, uint32_t size)
-{
-	op_array->opcodes = erealloc(op_array->opcodes, size * sizeof(zend_op));
-}
-
 void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_size)
 {
 	op_array->type = type;
@@ -59,8 +55,7 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 	op_array->refcount = (uint32_t *) emalloc(sizeof(uint32_t));
 	*op_array->refcount = 1;
 	op_array->last = 0;
-	op_array->opcodes = NULL;
-	op_array_alloc_ops(op_array, initial_ops_size);
+	op_array->opcodes = emalloc(initial_ops_size * sizeof(zend_op));;
 
 	op_array->last_var = 0;
 	op_array->vars = NULL;
@@ -87,8 +82,6 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 	op_array->fn_flags = 0;
 
-	op_array->early_binding = -1;
-
 	op_array->last_literal = 0;
 	op_array->literals = NULL;
 
@@ -112,7 +105,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 		zend_string_release(function->common.function_name);
 
 		if (function->common.arg_info &&
-		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) { 
+		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
 			uint32_t i;
 			uint32_t num_args = function->common.num_args + 1;
 			zend_arg_info *arg_info = function->common.arg_info - 1;
@@ -142,7 +135,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
 		zend_string_release(function->common.function_name);
-#ifndef ZTS
+
 		if ((function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 		    !function->common.scope && function->common.arg_info) {
 
@@ -160,7 +153,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 			free(arg_info);
 		}
-#endif
+
 		if (!(function->common.fn_flags & ZEND_ACC_ARENA_ALLOCATED)) {
 			pefree(function, 1);
 		}
@@ -246,9 +239,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 {
 	zend_property_info *prop_info;
 	zend_class_entry *ce = Z_PTR_P(zv);
-#ifndef ZTS
 	zend_function *fn;
-#endif
 
 	if (--ce->refcount > 0) {
 		return;
@@ -291,7 +282,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
 					if (c->ce == ce) {
-						zval_ptr_dtor(&c->value);
+						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
 							zend_string_release(c->doc_comment);
 						}
@@ -332,7 +323,8 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			zend_hash_destroy(&ce->properties_info);
 			zend_string_release(ce->name);
-#ifndef ZTS
+
+			/* TODO: eliminate this loop for classes without functions with arg_info */
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
 				if ((fn->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 				    fn->common.scope == ce) {
@@ -340,16 +332,19 @@ ZEND_API void destroy_zend_class(zval *zv)
 					fn->common.scope = NULL;
 				}
 			} ZEND_HASH_FOREACH_END();
-#endif
+
 			zend_hash_destroy(&ce->function_table);
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
 
 				ZEND_HASH_FOREACH_PTR(&ce->constants_table, c) {
-					zval_internal_ptr_dtor(&c->value);
-					if (c->doc_comment && c->ce == ce) {
-						zend_string_release(c->doc_comment);
+					if (c->ce == ce) {
+						zval_internal_ptr_dtor(&c->value);
+						if (c->doc_comment) {
+							zend_string_release(c->doc_comment);
+						}
 					}
+					free(c);
 				} ZEND_HASH_FOREACH_END();
 				zend_hash_destroy(&ce->constants_table);
 			}
@@ -370,13 +365,11 @@ void zend_class_add_ref(zval *zv)
 
 ZEND_API void destroy_op_array(zend_op_array *op_array)
 {
-	zval *literal = op_array->literals;
-	zval *end;
 	uint32_t i;
 
 	if (op_array->static_variables &&
 	    !(GC_FLAGS(op_array->static_variables) & IS_ARRAY_IMMUTABLE)) {
-		if (--GC_REFCOUNT(op_array->static_variables) == 0) {
+		if (GC_DELREF(op_array->static_variables) == 0) {
 			zend_array_destroy(op_array->static_variables);
 		}
 	}
@@ -401,13 +394,17 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		efree(op_array->vars);
 	}
 
-	if (literal) {
-	 	end = literal + op_array->last_literal;
+	if (op_array->literals) {
+		zval *literal = op_array->literals;
+		zval *end = literal + op_array->last_literal;
 	 	while (literal < end) {
 			zval_ptr_dtor_nogc(literal);
 			literal++;
 		}
-		efree(op_array->literals);
+		if (ZEND_USE_ABS_CONST_ADDR
+		 || !(op_array->fn_flags & ZEND_ACC_DONE_PASS_TWO)) {
+			efree(op_array->literals);
+		}
 	}
 	efree(op_array->opcodes);
 
@@ -449,42 +446,6 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 		efree(arg_info);
 	}
-}
-
-void init_op(zend_op *op)
-{
-	memset(op, 0, sizeof(zend_op));
-	op->lineno = CG(zend_lineno);
-	SET_UNUSED(op->result);
-}
-
-zend_op *get_next_op(zend_op_array *op_array)
-{
-	uint32_t next_op_num = op_array->last++;
-	zend_op *next_op;
-
-	if (next_op_num >= CG(context).opcodes_size) {
-		CG(context).opcodes_size *= 4;
-		op_array_alloc_ops(op_array, CG(context).opcodes_size);
-	}
-
-	next_op = &(op_array->opcodes[next_op_num]);
-
-	init_op(next_op);
-
-	return next_op;
-}
-
-uint32_t get_next_op_number(zend_op_array *op_array)
-{
-	return op_array->last;
-}
-
-zend_brk_cont_element *get_next_brk_cont_element(void)
-{
-	CG(context).last_brk_cont++;
-	CG(context).brk_cont_array = erealloc(CG(context).brk_cont_array, sizeof(zend_brk_cont_element) * CG(context).last_brk_cont);
-	return &CG(context).brk_cont_array[CG(context).last_brk_cont-1];
 }
 
 static void zend_update_extended_info(zend_op_array *op_array)
@@ -556,6 +517,20 @@ static uint32_t zend_get_brk_cont_target(const zend_op_array *op_array, const ze
 	return opline->opcode == ZEND_BRK ? jmp_to->brk : jmp_to->cont;
 }
 
+/* Live ranges must be sorted by increasing start opline */
+static int cmp_live_range(const zend_live_range *a, const zend_live_range *b) {
+	return a->start - b->start;
+}
+static void swap_live_range(zend_live_range *a, zend_live_range *b) {
+	zend_live_range tmp = *a;
+	*a = *b;
+	*b = tmp;
+}
+static void zend_sort_live_ranges(zend_op_array *op_array) {
+	zend_sort(op_array->live_range, op_array->last_live_range, sizeof(zend_live_range),
+			(compare_func_t) cmp_live_range, (swap_func_t) swap_live_range);
+}
+
 ZEND_API int pass_two(zend_op_array *op_array)
 {
 	zend_op *opline, *end;
@@ -576,6 +551,8 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->vars = (zend_string**) erealloc(op_array->vars, sizeof(zend_string*)*op_array->last_var);
 		CG(context).vars_size = op_array->last_var;
 	}
+
+#if ZEND_USE_ABS_CONST_ADDR
 	if (CG(context).opcodes_size != op_array->last) {
 		op_array->opcodes = (zend_op *) erealloc(op_array->opcodes, sizeof(zend_op)*op_array->last);
 		CG(context).opcodes_size = op_array->last;
@@ -584,6 +561,20 @@ ZEND_API int pass_two(zend_op_array *op_array)
 		op_array->literals = (zval*)erealloc(op_array->literals, sizeof(zval) * op_array->last_literal);
 		CG(context).literals_size = op_array->last_literal;
 	}
+#else
+	op_array->opcodes = (zend_op *) erealloc(op_array->opcodes,
+		ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16) +
+		sizeof(zval) * op_array->last_literal);
+	if (op_array->literals) {
+		memcpy(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16),
+			op_array->literals, sizeof(zval) * op_array->last_literal);
+		efree(op_array->literals);
+		op_array->literals = (zval*)(((char*)op_array->opcodes) + ZEND_MM_ALIGNED_SIZE_EX(sizeof(zend_op) * op_array->last, 16));
+	}
+	CG(context).opcodes_size = op_array->last;
+	CG(context).literals_size = op_array->last_literal;
+#endif
+
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
@@ -644,11 +635,15 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			}
 			case ZEND_DECLARE_ANON_CLASS:
 			case ZEND_DECLARE_ANON_INHERITED_CLASS:
-			case ZEND_CATCH:
 			case ZEND_FE_FETCH_R:
 			case ZEND_FE_FETCH_RW:
 				/* absolute index to relative offset */
 				opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, opline, opline->extended_value);
+				break;
+			case ZEND_CATCH:
+				if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op2);
+				}
 				break;
 			case ZEND_RETURN:
 			case ZEND_RETURN_BY_REF:
@@ -671,12 +666,12 @@ ZEND_API int pass_two(zend_op_array *op_array)
 			}
 		}
 		if (opline->op1_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op1);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		} else if (opline->op1_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op1.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op1.var);
 		}
 		if (opline->op2_type == IS_CONST) {
-			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline->op2);
+			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op2);
 		} else if (opline->op2_type & (IS_VAR|IS_TMP_VAR)) {
 			opline->op2.var = (uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + opline->op2.var);
 		}
@@ -690,6 +685,7 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	if (op_array->live_range) {
 		int i;
 
+		zend_sort_live_ranges(op_array);
 		for (i = 0; i < op_array->last_live_range; i++) {
 			op_array->live_range[i].var =
 				(uint32_t)(zend_intptr_t)ZEND_CALL_VAR_NUM(NULL, op_array->last_var + (op_array->live_range[i].var / sizeof(zval))) |

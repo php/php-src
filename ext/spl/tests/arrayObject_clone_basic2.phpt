@@ -15,7 +15,7 @@ $ao1['new.ao1'] = 'new element added to ao1';
 $ao2['new.ao2'] = 'new element added to ao2';
 var_dump($c, $ao1, $ao2);
 ?>
---EXPECTF--
+--EXPECT--
 object(C)#1 (3) {
   ["p1"]=>
   string(32) "new prop added to c before clone"

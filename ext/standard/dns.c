@@ -304,7 +304,7 @@ static zend_string *php_gethostbyname(char *name)
 #endif /* HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32) */
 
 /* Note: These functions are defined in ext/standard/dns_win32.c for Windows! */
-#if !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__))
+#if !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC
 
 #ifndef HFIXEDSZ
 #define HFIXEDSZ        12      /* fixed data in header <arpa/nameser.h> */
@@ -1117,7 +1117,7 @@ PHP_FUNCTION(dns_get_mx)
 }
 /* }}} */
 #endif /* HAVE_FULL_DNS_FUNCS */
-#endif /* !defined(PHP_WIN32) && (HAVE_DNS_SEARCH_FUNC && !defined(__BEOS__)) */
+#endif /* !defined(PHP_WIN32) && HAVE_DNS_SEARCH_FUNC */
 
 #if HAVE_FULL_DNS_FUNCS || defined(PHP_WIN32)
 PHP_MINIT_FUNCTION(dns) {

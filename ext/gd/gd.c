@@ -133,7 +133,7 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS);
 static gdImagePtr _php_image_create_from_string (zval *Data, char *tn, gdImagePtr (*ioctx_func_p)());
 static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, gdImagePtr (*func_p)(), gdImagePtr (*ioctx_func_p)());
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
-static int _php_image_type(char data[8]);
+static int _php_image_type(char data[12]);
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
 static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
@@ -863,7 +863,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ gd_functions[]
  */
-const zend_function_entry gd_functions[] = {
+static const zend_function_entry gd_functions[] = {
 	PHP_FE(gd_info,                                 arginfo_gd_info)
 	PHP_FE(imagearc,								arginfo_imagearc)
 	PHP_FE(imageellipse,							arginfo_imageellipse)
@@ -1102,14 +1102,14 @@ PHP_MINIT_FUNCTION(gd)
 
 	REGISTER_INI_ENTRIES();
 
-	REGISTER_LONG_CONSTANT("IMG_GIF", 1, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPG", 2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_JPEG", 2, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_PNG", 4, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WBMP", 8, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_XPM", 16, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_WEBP", 32, CONST_CS | CONST_PERSISTENT);
-	REGISTER_LONG_CONSTANT("IMG_BMP", 64, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_GIF", PHP_IMG_GIF, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_JPG", PHP_IMG_JPG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_JPEG", PHP_IMG_JPEG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_PNG", PHP_IMG_PNG, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_WBMP", PHP_IMG_WBMP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_XPM", PHP_IMG_XPM, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_WEBP", PHP_IMG_WEBP, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("IMG_BMP", PHP_IMG_BMP, CONST_CS | CONST_PERSISTENT);
 
 	/* special colours for gd */
 	REGISTER_LONG_CONSTANT("IMG_COLOR_TILED", gdTiled, CONST_CS | CONST_PERSISTENT);
@@ -1324,7 +1324,7 @@ PHP_MINFO_FUNCTION(gd)
 PHP_FUNCTION(gd_info)
 {
 	if (zend_parse_parameters_none() == FAILURE) {
-		RETURN_FALSE;
+		return;
 	}
 
 	array_init(return_value);
@@ -2175,23 +2175,23 @@ PHP_FUNCTION(imagecreate)
    Return the types of images supported in a bitfield - 1=GIF, 2=JPEG, 4=PNG, 8=WBMP, 16=XPM */
 PHP_FUNCTION(imagetypes)
 {
-	int ret=0;
-	ret = 1;
+	int ret = 0;
+	ret = PHP_IMG_GIF;
 #ifdef HAVE_GD_JPG
-	ret |= 2;
+	ret |= PHP_IMG_JPG;
 #endif
 #ifdef HAVE_GD_PNG
-	ret |= 4;
+	ret |= PHP_IMG_PNG;
 #endif
-	ret |= 8;
+	ret |= PHP_IMG_WBMP;
 #if defined(HAVE_GD_XPM)
-	ret |= 16;
+	ret |= PHP_IMG_XPM;
 #endif
 #ifdef HAVE_GD_WEBP
-	ret |= 32;
+	ret |= PHP_IMG_WEBP;
 #endif
 #ifdef HAVE_GD_BMP
-	ret |= 64;
+	ret |= PHP_IMG_BMP;
 #endif
 
 	if (zend_parse_parameters_none() == FAILURE) {
@@ -2225,7 +2225,7 @@ static int _php_ctx_getmbi(gdIOCtx *ctx)
  */
 static const char php_sig_gd2[3] = {'g', 'd', '2'};
 
-static int _php_image_type (char data[8])
+static int _php_image_type (char data[12])
 {
 	/* Based on ext/standard/image.c */
 
@@ -2233,18 +2233,18 @@ static int _php_image_type (char data[8])
 		return -1;
 	}
 
-	if (!memcmp(data, php_sig_gd2, 3)) {
+	if (!memcmp(data, php_sig_gd2, sizeof(php_sig_gd2))) {
 		return PHP_GDIMG_TYPE_GD2;
-	} else if (!memcmp(data, php_sig_jpg, 3)) {
+	} else if (!memcmp(data, php_sig_jpg, sizeof(php_sig_jpg))) {
 		return PHP_GDIMG_TYPE_JPG;
-	} else if (!memcmp(data, php_sig_png, 3)) {
-		if (!memcmp(data, php_sig_png, 8)) {
-			return PHP_GDIMG_TYPE_PNG;
-		}
-	} else if (!memcmp(data, php_sig_gif, 3)) {
+	} else if (!memcmp(data, php_sig_png, sizeof(php_sig_png))) {
+		return PHP_GDIMG_TYPE_PNG;
+	} else if (!memcmp(data, php_sig_gif, sizeof(php_sig_gif))) {
 		return PHP_GDIMG_TYPE_GIF;
 	} else if (!memcmp(data, php_sig_bmp, sizeof(php_sig_bmp))) {
 		return PHP_GDIMG_TYPE_BMP;
+	} else if(!memcmp(data, php_sig_riff, sizeof(php_sig_riff)) && !memcmp(data + sizeof(php_sig_riff) + sizeof(uint32_t), php_sig_webp, sizeof(php_sig_webp))) {
+		return PHP_GDIMG_TYPE_WEBP;
 	}
 	else {
 		gdIOCtx *io_ctx;
@@ -2295,19 +2295,19 @@ PHP_FUNCTION(imagecreatefromstring)
 	zval *data;
 	gdImagePtr im;
 	int imtype;
-	char sig[8];
+	char sig[12];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z", &data) == FAILURE) {
 		return;
 	}
 
 	convert_to_string_ex(data);
-	if (Z_STRLEN_P(data) < 8) {
+	if (Z_STRLEN_P(data) < sizeof(sig)) {
 		php_error_docref(NULL, E_WARNING, "Empty string or invalid image");
 		RETURN_FALSE;
 	}
 
-	memcpy(sig, Z_STRVAL_P(data), 8);
+	memcpy(sig, Z_STRVAL_P(data), sizeof(sig));
 
 	imtype = _php_image_type(sig);
 
@@ -2345,6 +2345,15 @@ PHP_FUNCTION(imagecreatefromstring)
 		case PHP_GDIMG_TYPE_BMP:
 			im = _php_image_create_from_string(data, "BMP", gdImageCreateFromBmpCtx);
 			break;
+
+		case PHP_GDIMG_TYPE_WEBP:
+#ifdef HAVE_GD_WEBP
+			im = _php_image_create_from_string(data, "WEBP", gdImageCreateFromWebpCtx);
+			break;
+#else
+			php_error_docref(NULL, E_WARNING, "No WEBP support in this PHP build");
+			RETURN_FALSE;
+#endif
 
 		default:
 			php_error_docref(NULL, E_WARNING, "Data is not in a recognized format");
@@ -3028,7 +3037,7 @@ PHP_FUNCTION(imagecolorexact)
 }
 /* }}} */
 
-/* {{{ proto void imagecolorset(resource im, int col, int red, int green, int blue)
+/* {{{ proto bool imagecolorset(resource im, int col, int red, int green, int blue)
    Set the color for the specified palette index */
 PHP_FUNCTION(imagecolorset)
 {
@@ -3902,7 +3911,7 @@ PHP_FUNCTION(imagesetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	zend_long x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rllll", &im_zval, &x1, &y1, &x2, &y2) == FAILURE) {
 		return;
 	}
@@ -3923,7 +3932,7 @@ PHP_FUNCTION(imagegetclip)
 	zval *im_zval;
 	gdImagePtr im;
 	int x1, y1, x2, y2;
-	
+
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r", &im_zval) == FAILURE) {
 		return;
 	}
@@ -3933,7 +3942,7 @@ PHP_FUNCTION(imagegetclip)
 	}
 
 	gdImageGetClip(im, &x1, &y1, &x2, &y2);
-	
+
 	array_init(return_value);
 	add_next_index_long(return_value, x1);
 	add_next_index_long(return_value, y1);
@@ -4079,7 +4088,7 @@ PHP_FUNCTION(image2wbmp)
 /* }}} */
 
 #if defined(HAVE_GD_JPG)
-/* {{{ proto bool jpeg2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool jpeg2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert JPEG image to WBMP image */
 PHP_FUNCTION(jpeg2wbmp)
 {
@@ -4089,7 +4098,7 @@ PHP_FUNCTION(jpeg2wbmp)
 #endif
 
 #if defined(HAVE_GD_PNG)
-/* {{{ proto bool png2wbmp (string f_org, string f_dest, int d_height, int d_width, int threshold)
+/* {{{ proto bool png2wbmp(string f_org, string f_dest, int d_height, int d_width, int threshold)
    Convert PNG image to WBMP image */
 PHP_FUNCTION(png2wbmp)
 {
@@ -4388,10 +4397,6 @@ static void php_image_filter_brightness(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageBrightness(im_src, (int)brightness) == 1) {
 		RETURN_TRUE;
 	}
@@ -4410,10 +4415,6 @@ static void php_image_filter_contrast(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4436,10 +4437,6 @@ static void php_image_filter_colorize(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im_src = (gdImagePtr)zend_fetch_resource(Z_RES_P(SIM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im_src == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4520,10 +4517,6 @@ static void php_image_filter_smooth(INTERNAL_FUNCTION_PARAMETERS)
 		RETURN_FALSE;
 	}
 
-	if (im_src == NULL) {
-		RETURN_FALSE;
-	}
-
 	if (gdImageSmooth(im_src, (float)weight)==1) {
 		RETURN_TRUE;
 	}
@@ -4543,10 +4536,6 @@ static void php_image_filter_pixelate(INTERNAL_FUNCTION_PARAMETERS)
 	}
 
 	if ((im = (gdImagePtr)zend_fetch_resource(Z_RES_P(IM), "Image", le_gd)) == NULL) {
-		RETURN_FALSE;
-	}
-
-	if (im == NULL) {
 		RETURN_FALSE;
 	}
 
@@ -4646,7 +4635,7 @@ PHP_FUNCTION(imageconvolution)
 /* }}} */
 /* End section: Filters */
 
-/* {{{ proto void imageflip(resource im, int mode)
+/* {{{ proto bool imageflip(resource im, int mode)
    Flip an image (in place) horizontally, vertically or both directions. */
 PHP_FUNCTION(imageflip)
 {
@@ -4704,7 +4693,7 @@ PHP_FUNCTION(imageantialias)
 }
 /* }}} */
 
-/* {{{ proto void imagecrop(resource im, array rect)
+/* {{{ proto resource imagecrop(resource im, array rect)
    Crop an image using the given coordinates and size, x, y, width and height. */
 PHP_FUNCTION(imagecrop)
 {
@@ -4761,7 +4750,7 @@ PHP_FUNCTION(imagecrop)
 }
 /* }}} */
 
-/* {{{ proto void imagecropauto(resource im [, int mode [, float threshold [, int color]]])
+/* {{{ proto resource imagecropauto(resource im [, int mode [, float threshold [, int color]]])
    Crop an image automatically using one of the available modes. */
 PHP_FUNCTION(imagecropauto)
 {

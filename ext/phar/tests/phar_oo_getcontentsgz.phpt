@@ -2,7 +2,6 @@
 Phar object: getContent() (verify it works with compression)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (!extension_loaded("zlib")) die("skip zlib not available"); ?>
 --INI--
 phar.readonly=0
@@ -22,7 +21,7 @@ echo $phar2['a']->getContent() . "\n";
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.phar.php');
 __halt_compiler();

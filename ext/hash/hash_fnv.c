@@ -160,15 +160,16 @@ fnv_32_buf(void *buf, size_t len, uint32_t hval, int alternate)
 	/*
 	 * FNV-1 hash each octet in the buffer
 	 */
-	while (bp < be) {
-
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 32 bit FNV magic prime mod 2^32 */
 			hval *= PHP_FNV_32_PRIME;
 
 			/* xor the bottom with the current octet */
 			hval ^= (uint32_t)*bp++;
-		} else {
+		}
+	} else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
 			hval ^= (uint32_t)*bp++;
 
@@ -202,15 +203,17 @@ fnv_64_buf(void *buf, size_t len, uint64_t hval, int alternate)
 	/*
 	 * FNV-1 hash each octet of the buffer
 	 */
-	while (bp < be) {
 
-		if (alternate == 0) {
+	if (alternate == 0) {
+		while (bp < be) {
 			/* multiply by the 64 bit FNV magic prime mod 2^64 */
 			hval *= PHP_FNV_64_PRIME;
 
 			/* xor the bottom with the current octet */
 			hval ^= (uint64_t)*bp++;
-		 } else {
+		}
+	 } else {
+		while (bp < be) {
 			/* xor the bottom with the current octet */
 			hval ^= (uint64_t)*bp++;
 

@@ -54,8 +54,7 @@ DBA_OPEN_FUNC(gdbm)
 		return FAILURE; /* not possible */
 
 	if(info->argc > 0) {
-		convert_to_long_ex(&info->argv[0]);
-		filemode = Z_LVAL(info->argv[0]);
+		filemode = zval_get_long(&info->argv[0]);
 	}
 
 	dbf = gdbm_open(info->path, 0, gmode, filemode, NULL);
@@ -66,7 +65,7 @@ DBA_OPEN_FUNC(gdbm)
 		((dba_gdbm_data *) info->dbf)->dbf = dbf;
 		return SUCCESS;
 	}
-	*error = gdbm_strerror(gdbm_errno);
+	*error = (char *)gdbm_strerror(gdbm_errno);
 	return FAILURE;
 }
 

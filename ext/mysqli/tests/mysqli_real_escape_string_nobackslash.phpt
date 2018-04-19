@@ -57,7 +57,7 @@ require_once('skipifconnectfailure.inc');
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["label"]=>
   string(1) "\"

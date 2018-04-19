@@ -37,7 +37,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sort() : usage variations ***
 
 -- Testing sort() by supplying hexadecimal value array, 'flag' value is defualt  --

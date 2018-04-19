@@ -29,7 +29,7 @@
 
 @EXT_INCLUDE_CODE@
 
-static zend_module_entry *php_builtin_extensions[] = {
+static zend_module_entry * const php_builtin_extensions[] = {
 @EXT_MODULE_PTRS@
 };
 

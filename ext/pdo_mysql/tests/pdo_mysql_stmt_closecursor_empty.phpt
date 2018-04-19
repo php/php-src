@@ -66,7 +66,7 @@ $db = MySQLPDOTest::factory();
 require dirname(__FILE__) . '/mysql_pdo_test.inc';
 MySQLPDOTest::dropTestTable();
 ?>
---EXPECTF--
+--EXPECT--
 in = 0 -> id = 1 (integer) / label = 'a' (string)
 in = 0 -> id = 2 (integer) / label = 'b' (string)
 in = 0 -> id = 1 (integer) / label = 'a' (string)

@@ -1,4 +1,4 @@
-PHP 7.2 UPGRADE NOTES
+PHP 7.3 UPGRADE NOTES
 
 1. Backward Incompatible Changes
 2. New Features
@@ -19,144 +19,66 @@ PHP 7.2 UPGRADE NOTES
 1. Backward Incompatible Changes
 ========================================
 
-- Core:
-  . gettype() will now return "resource (closed)" instead of "unknown type" for
-    closed resources.
-  . is_object() will now return true for objects of class
-    __PHP_Incomplete_Class.
-  . Support for Netware operating systems has been removed.
-  . Casting arrays to objects (with (object) or settype()) will now convert
-    integer keys to string property names. This fixes the behaviour of previous
-    versions, where integer keys would become inaccessible properties with
-    integer names.
-  . Casting objects to arrays (with (array) or settype()), and retrieving
-    object properties in an array with get_object_vars(), will now convert
-    numeric string property names (that is, property names of the format
-    /^(0|(-?[1-9][0-9]*))$/ where PHP_INT_MIN <= n <= PHP_INT_MAX) to integer
-    keys. This fixes the behaviour of previous versions, where numeric string
-    property names would become inaccessible string keys.
-  . Unqualified references to undefined constants now generate a Warning instead
-    of a notice. They will generate an Error in a future version of PHP.
-    (https://wiki.php.net/rfc/deprecate-bareword-strings)
-  . Minimum supported Windows versions are Windows 7/Server 2008 R2.
-  . Initial trait property value compatibility check will no longer perform
-    any casts. (Bug #74269)
-  . "object" (in any case) can no longer be used as a class name.
+Core:
+  . The ext_skel utility has been completely redesigned with new options and 
+    some old options removed. This is now written in PHP and has no external 
+	dependencies.
+  . Support for BeOS has been dropped.
+  . Exceptions thrown due to automatic conversion of warnings into exceptions
+    in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
+    error_get_last() state. As such, they now work the same way as manually
+    thrown exceptions.
+  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
+    and `boolean`.
 
-- BCMath:
-  . The bcmod() function no longer truncates fractional numbers to integers. As
-    such, its behavior now follows fmod() rather than the `%` operator. For
-    example `bcmod('4', '3.5')` now returns '0.5' instead of '1'.
+BCMath:
+  . All warnings thrown by BCMath functions are now using PHP's error handling.
+    Formerly some warnings have directly been written to stderr.
+  . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
+    the returned numbers may have omitted trailing decimal zeroes.
 
-- Hash:
-  . The hash_hmac(), hash_hmac_file(), hash_pbkdf2() and hash_init() (with
-    HASH_HMAC) functions no longer accept non-cryptographic hashes.
+Reflection:
+  . Reflection results now return `int` and `bool` instead of `integer`
+    and `boolean`.
 
-- JSON
-  . The json_decode() option JSON_OBJECT_AS_ARRAY is used if the second
-    parameter (assoc) is null. Previously JSON_OBJECT_AS_ARRAY was always
-    ignored.
+SPL:
+  . If an SPL autoloader throws an exception, following autoloaders will not be
+    executed. Previously all autoloaders were executed and exceptions were
+    chained.
 
-- Session:
-  . Removed register_globals related code and "!" can be used as $_SESSION key name.
-  . Session is made to manage session status correctly and prevents invalid operations.
-    Only inappropriate codes are affected by this change. If you have problems with this,
-    it means you have problem in your code.
-    . Functions are made to set or return correct session status.
-        session_start(), session_status(), session_regenerate_id()
-    . Functions are made to return bool from null. These functions have void parameter
-      and void parameter is checked.
-        session_unset(), session_write_close()/session_commit(), session_abort(),
-        session_reset()
-    . Functions prohibit invalid operations with regard to session status and
-      HTTP header status, returns correct bool return value.
-        session_start(), session_set_cookie_params(), session_name(), session_module_name(),
-        session_set_save_handler(), session_regenerate_id(), session_cache_limiter(),
-        session_cache_expire(), session_unset(), session_destroy(),
-        session_write_close()/session_commit(), session_reset()
-    . INI value change by ini_set() returns update status correctly.　Invalid INI modifications
-      are checked and made to fail.
-        session.name, session.save_path, session.cookie_lifetime, session.cookie_path,
-        session.cookie_domain, session.cookie_httponly, session.cookie_secure,
-        session.use_cookies, session.use_only_cookies, session.use_strict_mode,
-        session.referer_check, session.cache_limiter, session.cache_expire,
-        session.lazy_write, session.save_handler, session.serialize_handler,
-        session.gc_probability, session.gc_divior, session.gc_maxlifetime,
-    . Some E_ERRORs are changed to E_WARNING since session status is managed correctly.
-        session_start()
-    . Session no longer initialize $_SESSION for invalid and useless session.
-        session_start()
-    . When headers are already sent and try to set new INI values, session_name(),
-      session_module_name(), session_save_path(), session_cache_limiter() and
-      session_cache_expire() are no longer works. Older PHPs accepts new values even
-      if new values will not be effective.
-      This new corrected behavior may affect command line mode CLI scripts that manage
-      sessions. Use output buffer just like web applications to resolve problems on
-      CLI scripts.
+SimpleXML:
+  . Mathematic operations involving SimpleXML objects will now treat the text as
+    an integer or float, whichever is more appropriate. Previously values were
+    treated as integers unconditionally.
 
-- Standard:
-  . Sequences generated by mt_rand() and rand() for a specific seed may differ
-    from PHP 7.1 on 64-bit machines. This change was necessary to resolve a
-    modulo bias bug in the implementation.
+Standard:
+  . getimagesize() and related functions now report the mime type of BMP images
+	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
+		with the IANA (see RFC 7903).
 
 ========================================
 2. New Features
 ========================================
 
-- Core:
-  . It is now possible to remove argument type annotations when overriding an
-    inherited method. This complies with contravariance of method argument types
-    under the Liskov Substitution Principle.
-    (https://wiki.php.net/rfc/parameter-no-type-variance)
-  . It is now allowed to override an abstract method with another abstract
-    method in a child class.
-    (https://wiki.php.net/rfc/allow-abstract-function-override)
-  . A trailing comma in group use statements is now allowed.
-    (https://wiki.php.net/rfc/list-syntax-trailing-commas)
-  . The "object" type annotation is now supported.
-    (https://wiki.php.net/rfc/object-typehint)
+Core:
+  . Implemented flexible heredoc and nowdoc syntax: The closing marker for doc
+    strings is no longer required to be followed by a semicolon or newline.
+    Additionally the closing marker may be indented, in which case the
+    indentation will be stripped from all lines in the doc string.
+    (RFC: https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes)
+  . Array destructuring now supports reference assignments using the syntax
+    [&$a, [$b, &$c]] = $d. The same is also supported for list().
+    (RFC: https://wiki.php.net/rfc/list_reference_assignment)
+  . instanceof now allows literals as the first operand,
+    in which case the result is always FALSE.
 
-- DBA:
-  . Implemented support for the LMDB backend.
+BCMath:
+  . bcscale() can now also be used as getter to retrieve the current scale in use.
 
-- JSON:
-  . Added JSON_INVALID_UTF8_IGNORE and JSON_INVALID_UTF8_SUBSTITUTE options for
-    json_encode() and json_decode() to ignore and replace invalid UTF-8 byte
-    sequences, respectively.
-
-- OCI8:
-  . Added Oracle Database Transparent Application Failover (TAF) callback support.
-
-- PCRE:
-  . Added `J` modifier for setting PCRE_DUPNAMES.
-  . Added `PREG_UNMATCHED_AS_NULL` flag to allow distinguish between unmatched
-    subpatterns and empty matches by reporting NULL and "" (empty string),
-    respectively.
-
-- Sodium
-  . New cryptographic extension
-
-- SQLite3:
-  . Implemented writing to BLOBs.
-
-- Standard:
-  . Simplified password hashing API updated to support Argon2i hashes when PHP is compiled with libargon2
-    (https://wiki.php.net/rfc/argon2_password_hash).
-  . proc_nice() is now supported on Windows platforms.
-
-- Zip:
-  . read/write encrypted archive, relying on libzip 1.2.0,
-    using new methods:
-      ZipArchive::setEncryptionName($name, $method [, $password]);
-      ZipArchive::setEncryptionIndex($index, $method [, $password]);
-    and new constants:
-      ZipArchive::EM_NONE
-      ZipArchive::EM_AES_128
-      ZipArchive::EM_AES_192
-      ZipArchive::EM_AES_256
-  . accept 'password' from zip stream context
-  . ZipArchive implements countable, added ZipArchive::count() method.
-
+readline:
+  . Support for the completion_append_character and completion_suppress_append
+    options has been added to readline_info(). These options are only available
+    if PHP is linked against libreadline (rather than libedit).
 
 ========================================
 3. Changes in SAPI modules
@@ -166,216 +88,157 @@ PHP 7.2 UPGRADE NOTES
 4. Deprecated Functionality
 ========================================
 
-All the deprecated functionality listed in the following will be removed in
-PHP 8.0.
-
-- Core:
-  . The track_errors ini directive has been deprecated.
-  . The __autoload() mechanism has been deprecated, use spl_autoload_register()
-    instead.
-  . The (unset) cast has been deprecated. This does not affect the unset($var)
-    language construct.
-  . The create_function() function has been deprecated, use anonymous functions
-    instead.
-  . The each() function has been deprecated, use a foreach loop instead.
-  . The $errcontext error handler argument has been deprecated. However, using
-    it does not trigger a deprecation warning for technical reasons.
-  
-- EXIF:
-  . The read_exif_data() alias has been deprecated, use exif_read_data() instead.
-
-- GD:
-  . png2wbmp() and jpeg2wbmp() have been deprecated.
-
-- GMP:
-  . The gmp_random() function has been deprecated, use gmp_random_bits() or
-    gmp_random_range() instead.
-
-- Intl:
-  . INTL_IDNA_VARIANT_2003 has been deprecated; use INTL_IDNA_VARIANT_UTS46
-    instead.
-
-- Mbstring:
-  . The mbstring.func_overload ini directive has been deprecated.
-
-- Standard:
-  . Calling parse_str() without the result argument has been deprecated.
-  . Calling assert() with a string argument has been deprecated, use an ordinary
-    expression instead.
-
-See also: https://wiki.php.net/rfc/deprecations_php_7_2
-
 ========================================
 5. Changed Functions
 ========================================
 
-- Standard:
-  . password_hash() can generate Argon2i hashes when the algorithm is set to PASSWORD_ARGON2I. 
-    When using PASSWORD_ARGON2I, the following cost factors may be set: 'memory_cost', 'time_cost', 
-    and 'threads'. These cost factors will default to 'PASSWORD_ARGON2_DEFAULT_MEMORY_COST', 
-    'PASSWORD_ARGON2_DEFAULT_TIME_COST', and 'PASSWORD_ARGON2_DEFAULT_THREADS' respectively if not set.
-  . password_verify() can verify Argon2i hashes.
-  . password_get_info() and password_needs_rehash() can accept Argon2i hashes.
-  . mail()/mb_send_mail() accept array $extra_header. Array parameter is checked against RFC 2822.
-    Array format is 
-    $extra_headers = [
-      'Header-Name' => 'Header value',
-      'Multiple' => ['One header', 'Another header'],
-      'Multiline' = "FirstLine\r\n SecondLine",
-    ];
-  . count() now raises a warning when an invalid parameter is passed.
-    Only arrays and objects implementing the Countable interface should be passed.
-  . pack() and unpack() now support float and double in both little and big endian.
-  . number_format() ensures zero values never contain a negative sign.
+JSON:
+  . A new flag has been added, JSON_THROW_ON_ERROR, which can be used with
+    json_decode() or json_encode() and causes these functions to throw a
+    JsonException upon an error, instead of setting the global error state that
+    is retrieved with json_last_error(). JSON_PARTIAL_OUTPUT_ON_ERROR takes
+    precedence over JSON_THROW_ON_ERROR.
+    (RFC: https://wiki.php.net/rfc/json_throw_on_error)
 
-- XML:
-  . utf8_encode() and utf8_decode() have been moved to the Standard extension
-    as string functions.
+Standard:
+  . debug_zval_dump() was changed to display recursive arrays and objects
+    in the same way as var_dump(). Now, it doesn't display them twice.
+  . array_push() and array_unshift() can now also be called with a single
+    argument, which is particularly convenient wrt. the spread operator.
+
+PCRE:
+  . preg_quote() now also escapes the '#' character.
 
 ========================================
 6. New Functions
 ========================================
 
-- Core:
-  . Added stream_isatty().
-  . Added sapi_windows_vt100_support().
+Core:
+  . Added monotonic timer function hrtime([bool get_as_num]). It returns an
+    array of the form [seconds, nanoseconds] with the timestamp starting at
+    an unspecified point in the past. If the optional argument is passed as
+    true, the return value is an integer on 64-bit systems or float on
+    32-bit systems, representing the nanoseconds. The timestamp is not
+    adjustable and is not related to wall clock or time of day. The timers
+    are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
+    derivatives. If no required timers are provided by a corresponding
+    platform, the function returns false.
 
-- DOM:
-  . DomNodeList implements Countable, added DomNodeList::count().
-  . DOMNamedNodeMap implements Countable, added DOMNamedNodeMap::count().
+Date:
+  . Added the DateTime::createFromImmutable() method, which mirrors
+    DateTimeImmutable::createFromMutable().
 
-- FTP:
-  . Added ftp_append().
+GMP:
+  . Added gmp_binomial(n, k) for calculating binomial coefficients.
+  . Added gmp_lcm(a, b) for calculating the least common multiple.
+  . Added gmp_perfect_power(a) to check if number is a perfect power.
+  . Added gmp_kronecker(a, b) to compute the Kronecker symbol.
 
-- GD:
-  . Added imagesetclip() and imagegetclip().
-  . Added imageopenpolygon().
-  . Added imageresolution().
-  . Added imagecreatefrombmp() and imagebmp().
+Intl:
+  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
+    when linked with ICU >= 58.1. Levels are represented as class constants
+    - Spoofchecker::ASCII
+    - Spoofchecker::HIGHLY_RESTRICTIVE
+    - Spoofchecker::MODERATELY_RESTRICTIVE
+    - Spoofchecker::MINIMALLY_RESTRICTIVE
+    - Spoofchecker::UNRESTRICTIVE
+    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
+    For the detailed documentation on the restriction levels, see
+    URestrictionLevel under
+    http://icu-project.org/apiref/icu4c/uspoof_8h.html
+  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
+    to retrieve the Decomposition_Mapping property of a character.
 
-- Hash:
-  . Added hash_hmac_algos().
-
-- Mbstring:
-  . Added mb_chr() and mb_ord().
-  . Added mb_scrub() that scrubs broken multibyte strings.
-
-- OCI8:
-  . Added oci_register_taf_callback() and oci_unregister_taf_callback() for
-    Oracle Database TAF callback support.
-
-- Sockets:
-  . Added socket_addrinfo_lookup(), socket_addrinfo_connect(),
-    socket_addrinfo_bind() and socket_addrinfo_explain().
-
-- SPL:
-  . Added spl_object_id().
+Standard:
+  . Added is_countable() function, to check whether a value may be passed to
+    count().
+    (RFC: https://wiki.php.net/rfc/is-countable)
 
 ========================================
 7. New Classes and Interfaces
 ========================================
 
+JSON:
+  . JsonException
+
 ========================================
 8. Removed Extensions and SAPIs
 ========================================
-
-- Mcrypt:
-  . The deprecated mcrypt extension has been moved to PECL.
-  . libmcrypt has not been maintained since 2007 and the continued use of this
-    extension is strongly discouraged.
-  . Users are advised to use alternatives such as OpenSSL or libsodium.
 
 ========================================
 9. Other Changes to Extensions
 ========================================
 
-- EXIF:
-   . Added extended exif tag support for the following formats: 
-     Samsung, DJI, Panasonic, Sony, Pentax, Minolta, Sigma/Foveon, 
-	 AGFA, Kyocera, Ricoh & Epson.
-   . exif_read_data() and exif_thumbnail() now supports a passed streams as their 
-     first parameter.
+ Curl:
+  . libcurl >= 7.15.5 is now required.
 
-- GD:
-  . Removed --enable-gd-native-ttf configuration option which was unused as
-    of PHP 5.5.0 anyway.
-  . imagegd() stores truecolor images as real truecolor images. Formerly, they
-    have been converted to palette.
-  . imageantialias() is now also available if compiled with a system libgd.
+ Filter:
+  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
+    defines the set of allowed thousand separator chars.  The default (`"',."`)
+    is fully backward compatible with former PHP versions.
 
-- Mbstring
-  . mb_check_encoding() accepts array parameter. Both key and value
-    encodings are checked recursively.
-  . mb_convert_encoding() accepts array parameter. Only value encodings
-    are converted recursively.
+ FTP:
+  . Set default transfer mode to binary
 
-- PDO_OCI:
-  . The '--with-pdo-oci' configure syntax no longer needs the vesion number of the
-    Oracle Instant Client.
+ Intl:
+  . Normalizer::NONE is deprecated, when PHP is linked with ICU >= 56
+  . Introduced Normalizer::FORM_KC_CF as Normalizer::normalize() argument
+    for NFKC_Casefold normalization, available when linked with ICU >= 56
 
-- pdo_sqlite
-  . Use sqlite3_prepare_v2() and sqlite3_close_v2() functions instead of their
-    legacy counterparts.
+ MBString:
+  . The configuration option --with-libmbfl is no longer available.
+
+ ODBC: 
+  . Support for ODBCRouter has been removed.
+  . Support for Birdstep has been removed.
+
+ ZIP:
+  . Bundled libzip has been dropped,
+    system library is now required.
 
 ========================================
 10. New Global Constants
 ========================================
 
-- Core:
-  . PHP_FLOAT_DIG     number of decimal digits, that can be rounded into a
-                      float and back without precision loss
-  . PHP_FLOAT_EPSILON smallest representable positive number x, so then
-                      x + 1.0 != 1.0
-  . PHP_FLOAT_MIN     min representable float number
-  . PHP_FLOAT_MAX     max representable float number
-  . PHP_OS_FAMILY     current operating system family
+Curl:
+  . CURLOPT_REQUEST_TARGET
 
-- Fileinfo:
-  . FILEINFO_EXTENSION include list of possible file extensions
+JSON:
+  . JSON_THROW_ON_ERROR
 
-- GD:
-  . IMG_EFFECT_MULTIPLY
-  . IMG_BMP
-
-- PCRE
-  . PREG_UNMATCHED_AS_NULL
-
-- Standard:
-  . PASSWORD_ARGON2_DEFAULT_MEMORY_COST
-  . PASSWORD_ARGON2_DEFAULT_TIME_COST
-  . PASSWORD_ARGON2_DEFAULT_THREADS
-  . PASSWORD_ARGON2I
+PGSQL:
+  . Requires Postgres 9.3
+    - PGSQL_DIAG_SCHEMA_NAME
+	- PGSQL_DIAG_TABLE_NAME
+	- PGSQL_DIAG_COLUMN_NAME
+	- PGSQL_DIAG_DATATYPE_NAME
+	- PGSQL_DIAG_CONSTRAINT_NAME
+  . Requires Postgres 9.6
+    - PGSQL_DIAG_SEVERITY_NONLOCALIZED
 
 ========================================
 11. Changes to INI File Handling
 ========================================
 
-- sql.safe_mode
+- birdstep.max_links
   . This INI directive has been removed.
 
-- realpath_cache_size
-  . Set to 4096k by default
-
-- opcache.fast_shutdown
-  . This INI directive has been removed. A variant of the fast_shutdown
-    process has been integrated into PHP core and is always enabled for
-    production builds if possible.
+- opcache.inherited_hack
+  . This INI directive has been removed. The value has already been ignored
+    since PHP 5.3.0.
 
 ========================================
 12. Windows Support
 ========================================
 
-- Support for VT100 console mode
-
-  On systems starting with 10.0.10586, cmd.exe supports ANSI escape sequences.
-  The corresponding console mode is enabled by default on CLI on suitable
-  systems. As well, the function sapi_windows_vt100_support() is provided,
-  to control and query the corresponding information in the scripts.
+- Core
+  . File descriptors are opened in shared read/write/delete mode by default.
+    This effectively maps the UNIX semantics and allows to delete files with
+    handles in use. It is not 100% same, some platform differences still
+    persist. After the deletion, the filename entry is blocked, until all
+    the opened handles to it are closed.
 
 ========================================
 13. Other Changes
 ========================================
 
-- Build system
-
-  Autoconf minimal version is now 2.64.

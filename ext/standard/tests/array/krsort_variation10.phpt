@@ -54,7 +54,7 @@ var_dump($temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : usage variations ***
 
 -- Testing krsort() by supplying heredoc string array, 'flag' value is defualt --

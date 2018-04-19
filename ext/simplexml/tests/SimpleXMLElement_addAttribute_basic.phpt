@@ -10,7 +10,7 @@ SimpleXMLElement->addAttribute()
 	var_dump($simple->attributes());
 	echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 object(SimpleXMLElement)#2 (1) {
   ["@attributes"]=>
   array(1) {

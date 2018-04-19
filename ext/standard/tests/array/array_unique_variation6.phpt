@@ -33,7 +33,7 @@ var_dump( array_unique($input, SORT_STRING) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : array with reference variables for $input argument ***
 array(2) {
   [0]=>

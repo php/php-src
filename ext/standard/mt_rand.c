@@ -207,7 +207,7 @@ PHP_FUNCTION(mt_srand)
 		default:
 			BG(mt_rand_mode) = MT_RAND_MT19937;
 	}
-	
+
 	php_mt_srand(seed);
 }
 /* }}} */
@@ -244,7 +244,7 @@ static uint32_t rand_range32(uint32_t umax) {
 #if ZEND_ULONG_MAX > UINT32_MAX
 static uint64_t rand_range64(uint64_t umax) {
 	uint64_t result, limit;
-	
+
 	result = php_mt_rand();
 	result = (result << 32) | php_mt_rand();
 

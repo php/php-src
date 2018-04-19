@@ -1,5 +1,97 @@
 History
 
+2018/03/19: Version 6.8.1
+
+2018/03/19: update LTVERSION from 4:0:0 to 5:0:0
+2018/03/19: add flag, sb_range etc.. into OnigEncodingType
+2018/03/19: move regex structure from oniguruma.h to regint.h
+2018/03/19: ONIGENC_CTYPE_XXX to be enum (Issue #33)
+
+2018/03/16: Version 6.8.0
+
+2018/03/12: add doc/CALLOUTS.BUILTIN for builtin callouts
+2018/03/08: allow abbreviated notation for callouts (?(*name)..|..) (?(?{...})..|..)
+2018/03/02: NEW API: move onigenc_strdup() from regenc.h to oniguruma.h
+2018/02/21: remove all USE_COMBINATION_EXPLOSION_CHECK
+2018/02/15: fix #78: bad definition of PV_()
+2018/02/14: add configure option --enable-posix-api (for #77)
+2018/02/08: implement callouts of name
+2018/02/01: implement callouts of contents
+2018/01/30: define ONIGURUMA_VERSION_INT
+2018/01/29: enable USE_TRY_IN_MATCH_LIMIT by default
+2018/01/29: NEW API: onig_search_with_param() onig_match_with_param()
+2018/01/26: remove include windows.h from oniguruma.h
+
+2018/01/26: Version 6.7.1
+
+2018/01/25: disable USE_TRY_IN_MATCH_LIMIT by default
+2018/01/24: implement mechanism of try-in-match-limit
+2018/01/24: #76: rename EXPORT to ONIGURUMA_EXPORT
+2018/01/15: #73: update for automake 1.15.1
+2018/01/14: #74: update description of README
+2018/01/10: #72: Correct spelling and grammar in FAQ (English)
+2017/12/25: remove USE_COMBINATION_EXPLOSION_CHECK codes
+
+2017/12/11: Version 6.7.0
+
+2017/12/08: Disable \N and \O on ONIG_SYNTAX_RUBY
+2017/12/08: add ONIG_SYNTAX_ONIGURUMA (default syntax)
+2017/12/05: restructure StackType
+2017/11/13: implement subexp calls (?R), (?&name), (?-n), (?+n) for Perl syntax
+2017/09/25: use string pool of gperf for Unicode Property lookup function
+2017/09/16: fix #70: an empty greedy regex and a word boundary (.*\b) fails
+2017/09/13: remove a stack type STK_POS
+2017/09/08: fix #69: add a declaration of onig_end()
+2017/09/07: fix #68: Compilation failure in out-of-source build
+2017/09/03: [new] hexadecimal codepoint \uHHHH
+
+2017/08/30: Version 6.6.1
+
+2017/08/29: fix definition of \X to (?>\O(?:\Y\O)*)
+
+2017/08/28: Version 6.6.0
+
+2017/08/26: fix #67: can't compile with Visual Studio 2005
+2017/08/24: rename Absent clear to Range clear
+2017/08/21: [new] Extended Grapheme Cluster \X and boundary \y, \Y
+2017/08/17: fix: invalid index(ctype) value assigned to Unicode Block properties
+2017/08/16: --enable-crnl-as-line-terminator to be deprecated
+2017/08/15: [new] ASCII only mode options (?WDSP)
+2017/08/14: [new] ONIG_OPTION_XXXX_IS_ASCII  options
+2017/08/11: disable OP_CCLASS_NODE
+2017/08/11: [spec] Absent clear restore previous range value at backtrack
+2017/08/07: optimize for simple one char repetition in Absent expression
+2017/08/07: fix: invalid impl. for reluctant repetition in Absent expression
+2017/08/04: remove compile switch USE_NAMED_GROUP
+
+2017/08/03: Version 6.5.0
+
+2017/07/30: [new] support Absent clear (Absent functions)
+2017/07/25: abolish configure option: --enable-combination-explosion-check
+2017/07/23: [new] support Absent functions (?~...)
+2017/07/14: fix #65: SIZEOF_SIZE_T doesn't exist on certain architecutres
+2017/07/11: [new] support \O (true anychar)
+2017/07/10: [new] support \K (keep)
+2017/07/10: add new node type: NODE_GIMMICK
+2017/07/07: [new] support \N (no newline)
+2017/07/05: [new] support \R (general newline)
+2017/07/05: [new] support if-then-else syntax
+2017/07/04: [new] support backref validity checker
+
+2017/07/03: Version 6.4.0
+
+2017/06/30: fix memory leaks
+2017/06/29: fix memory leaks
+2017/06/28: change encoding of doc/XXXX.ja from EUC-JP to UTF-8
+2017/06/28: update doc/RE, and doc/RE.ja
+2017/06/26: fix fatal bug of endless repeat check on Windows
+2017/06/26: PR #62 : add check for return values
+2017/06/23: [new] support call zero (\g{0})
+2017/06/23: [new] support relative call by positive number
+2017/06/23: [new] support relative back-reference by positive number
+2017/06/15: fix #60 : check value type
+2017/06/02: change output format for ONIG_DEBUG_COMPILE and ONIG_DEBUG_MATCH
+
 2017/05/29: Version 6.3.0
 
 2017/05/24: fix #60 : invalid state(CCS_VALUE) in parse_char_class()

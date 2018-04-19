@@ -19,7 +19,7 @@ var_dump(interface_exists("AutoInterface"));
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing interface_exists() : test autoload default value ***
 bool(true)
 

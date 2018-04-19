@@ -21,7 +21,7 @@ while ($h->valid()) {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 count($h) = 4
 $h->count() = 4
 3=>5

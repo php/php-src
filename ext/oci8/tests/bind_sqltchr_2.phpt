@@ -43,7 +43,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1 - PL/SQL IN and OUT variables
 string(22) "Cat got your keyboard?"
 string(22) "CAT GOT YOUR KEYBOARD?"

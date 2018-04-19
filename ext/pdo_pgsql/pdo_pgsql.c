@@ -40,7 +40,7 @@
 #endif
 
 /* {{{ pdo_pgsql_functions[] */
-const zend_function_entry pdo_pgsql_functions[] = {
+static const zend_function_entry pdo_pgsql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

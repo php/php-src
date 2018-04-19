@@ -47,7 +47,7 @@ echo 'Number of properties: '. count($r->getStaticProperties()) . "\n";
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 base::show(2)
 derived::show(2)
 base::inc()

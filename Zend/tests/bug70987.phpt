@@ -11,5 +11,5 @@ $bar = function () {
 var_dump($bar->call(new foo));
 
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "foo"

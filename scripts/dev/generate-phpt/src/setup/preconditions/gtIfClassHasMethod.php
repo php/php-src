@@ -5,17 +5,11 @@
  *
  */
 class gtIfClassHasMethod extends gtPreCondition {
-  
+
   public function check( $clo) {
-    if($clo->hasOption('c')) {
-      if(!$clo->hasOption('m')) {
-        return false;
-      }
-      return  true;
-    }
-    return true;
+    return !$clo->hasOption('c') || $clo->hasOption('m');
   }
-  
+
   public function getMessage() {
     return gtText::get('methodNotSpecified');
   }

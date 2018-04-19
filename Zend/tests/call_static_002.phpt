@@ -19,7 +19,7 @@ call_user_func(array($a, 'aAa'));
 call_user_func(array('Foo', 'aAa'));
 
 ?>
---EXPECTF--
+--EXPECT--
 nonstatic
 string(3) "aAa"
 static

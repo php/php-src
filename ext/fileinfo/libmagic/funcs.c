@@ -471,11 +471,11 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	pcre_cache_entry *pce;
 	zend_string *res;
 	zend_string *repl;
-	int  rep_cnt = 0;
+	size_t rep_cnt = 0;
 
 	(void)setlocale(LC_CTYPE, "C");
 
-	opts |= PCRE_MULTILINE;
+	opts |= PCRE2_MULTILINE;
 	convert_libmagic_pattern(&patt, (char*)pat, strlen(pat), opts);
 	if ((pce = pcre_get_compiled_regex_cache(Z_STR(patt))) == NULL) {
 		zval_ptr_dtor(&patt);

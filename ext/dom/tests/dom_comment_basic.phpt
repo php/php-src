@@ -27,7 +27,7 @@ for ($index = 0; $index < $children->length; $index++) {
 	var_dump($current->textContent);
 }
 
---EXPECTF--
+--EXPECT--
 bool(true)
 --- child 0 ---
 DOMText

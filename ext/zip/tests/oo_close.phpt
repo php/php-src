@@ -21,5 +21,5 @@ if ($zip->status == ZIPARCHIVE::ER_OK) {
 	echo "failed\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 ok

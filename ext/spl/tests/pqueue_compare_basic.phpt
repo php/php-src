@@ -12,7 +12,7 @@ var_dump($h->compare(5, 4) > 0);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

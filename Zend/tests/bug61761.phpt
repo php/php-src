@@ -15,5 +15,5 @@ class B extends A
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 ==DONE==

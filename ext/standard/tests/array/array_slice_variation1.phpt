@@ -21,7 +21,7 @@ var_dump($a);
 
 ?>
 
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(1)

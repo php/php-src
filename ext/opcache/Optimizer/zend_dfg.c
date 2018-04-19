@@ -95,6 +95,7 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_BIND_GLOBAL:
 					case ZEND_BIND_STATIC:
 					case ZEND_SEND_VAR_EX:
+					case ZEND_SEND_FUNC_ARG:
 					case ZEND_SEND_REF:
 					case ZEND_SEND_VAR_NO_REF:
 					case ZEND_SEND_VAR_NO_REF_EX:
@@ -127,7 +128,12 @@ int zend_build_dfg(const zend_op_array *op_array, const zend_cfg *cfg, zend_dfg 
 					case ZEND_FETCH_OBJ_RW:
 					case ZEND_FETCH_OBJ_FUNC_ARG:
 					case ZEND_FETCH_OBJ_UNSET:
+					case ZEND_FETCH_LIST_W:
 					case ZEND_VERIFY_RETURN_TYPE:
+					case ZEND_PRE_INC_OBJ:
+					case ZEND_PRE_DEC_OBJ:
+					case ZEND_POST_INC_OBJ:
+					case ZEND_POST_DEC_OBJ:
 op1_def:
 						/* `def` always come along with dtor or separation,
 						 * thus the origin var info might be also `use`d in the feature(CG) */

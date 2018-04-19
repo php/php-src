@@ -25,7 +25,7 @@ var_dump(array_reduce($array, array(new A(), "adder2")));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_reduce() : variation - object callbacks ***
 
 --- Static method callback ---

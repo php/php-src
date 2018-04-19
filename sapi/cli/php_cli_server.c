@@ -1574,10 +1574,13 @@ static void php_cli_server_client_save_header(php_cli_server_client *client)
 {
 	/* strip off the colon */
 	zend_string *orig_header_name = zend_string_init(client->current_header_name, client->current_header_name_len, 1);
-	char *lc_header_name = zend_str_tolower_dup(client->current_header_name, client->current_header_name_len);
-	zend_hash_str_add_ptr(&client->request.headers, lc_header_name, client->current_header_name_len, client->current_header_value);
+	zend_string *lc_header_name = zend_string_alloc(client->current_header_name_len, 1);
+	zend_str_tolower_copy(ZSTR_VAL(lc_header_name), client->current_header_name, client->current_header_name_len);
+	GC_MAKE_PERSISTENT_LOCAL(orig_header_name);
+	GC_MAKE_PERSISTENT_LOCAL(lc_header_name);
+	zend_hash_add_ptr(&client->request.headers, lc_header_name, client->current_header_value);
 	zend_hash_add_ptr(&client->request.headers_original_case, orig_header_name, client->current_header_value);
-	efree(lc_header_name);
+	zend_string_release(lc_header_name);
 	zend_string_release(orig_header_name);
 
 	if (client->current_header_name_allocated) {
@@ -2028,9 +2031,6 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		php_cli_server_chunk *chunk;
 		smart_str buffer = { 0 };
 		const char *mime_type = get_mime_type(server, client->request.ext, client->request.ext_len);
-		if (!mime_type) {
-			mime_type = "application/octet-stream";
-		}
 
 		append_http_status_line(&buffer, client->request.protocol_version, status, 1);
 		if (!buffer.s) {
@@ -2039,12 +2039,14 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 			return FAILURE;
 		}
 		append_essential_headers(&buffer, client, 1);
-		smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
-		smart_str_appends_ex(&buffer, mime_type, 1);
-		if (strncmp(mime_type, "text/", 5) == 0) {
-			smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
+		if (mime_type) {
+			smart_str_appendl_ex(&buffer, "Content-Type: ", sizeof("Content-Type: ") - 1, 1);
+			smart_str_appends_ex(&buffer, mime_type, 1);
+			if (strncmp(mime_type, "text/", 5) == 0) {
+				smart_str_appends_ex(&buffer, "; charset=UTF-8", 1);
+			}
+			smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		}
-		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);
 		smart_str_appends_ex(&buffer, "Content-Length: ", 1);
 		smart_str_append_unsigned_ex(&buffer, client->request.sb.st_size, 1);
 		smart_str_appendl_ex(&buffer, "\r\n", 2, 1);

@@ -38,10 +38,10 @@ typedef struct _zend_ini_entry_def {
 	void *mh_arg3;
 	const char *value;
 	void (*displayer)(zend_ini_entry *ini_entry, int type);
-	int modifiable;
 
-	uint32_t name_length;
 	uint32_t value_length;
+	uint16_t name_length;
+	uint8_t modifiable;
 } zend_ini_entry_def;
 
 struct _zend_ini_entry {
@@ -53,11 +53,13 @@ struct _zend_ini_entry {
 	zend_string *value;
 	zend_string *orig_value;
 	void (*displayer)(zend_ini_entry *ini_entry, int type);
-	int modifiable;
 
-	int orig_modifiable;
-	int modified;
 	int module_number;
+
+	uint8_t modifiable;
+	uint8_t orig_modifiable;
+	uint8_t modified;
+
 };
 
 BEGIN_EXTERN_C()
@@ -81,10 +83,12 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API zend_long zend_ini_long(char *name, uint32_t name_length, int orig);
-ZEND_API double zend_ini_double(char *name, uint32_t name_length, int orig);
-ZEND_API char *zend_ini_string(char *name, uint32_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(char *name, uint32_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig);
+ZEND_API double zend_ini_double(char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_string *zend_ini_get_value(zend_string *name);
+ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -97,7 +101,7 @@ END_EXTERN_C()
 #define ZEND_INI_END()		{ NULL, NULL, NULL, NULL, NULL, NULL, NULL, 0, 0, 0} };
 
 #define ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, displayer) \
-	{ name, on_modify, arg1, arg2, arg3, default_value, displayer, modifiable, sizeof(name)-1, sizeof(default_value)-1 },
+	{ name, on_modify, arg1, arg2, arg3, default_value, displayer, sizeof(default_value)-1, sizeof(name)-1, modifiable },
 
 #define ZEND_INI_ENTRY3(name, default_value, modifiable, on_modify, arg1, arg2, arg3) \
 	ZEND_INI_ENTRY3_EX(name, default_value, modifiable, on_modify, arg1, arg2, arg3, NULL)
@@ -172,6 +176,8 @@ END_EXTERN_C()
 #define ZEND_INI_STAGE_DEACTIVATE	(1<<3)
 #define ZEND_INI_STAGE_RUNTIME		(1<<4)
 #define ZEND_INI_STAGE_HTACCESS		(1<<5)
+
+#define ZEND_INI_STAGE_IN_REQUEST   (ZEND_INI_STAGE_ACTIVATE|ZEND_INI_STAGE_DEACTIVATE|ZEND_INI_STAGE_RUNTIME|ZEND_INI_STAGE_HTACCESS)
 
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);

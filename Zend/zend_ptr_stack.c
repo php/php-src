@@ -90,6 +90,15 @@ ZEND_API void zend_ptr_stack_apply(zend_ptr_stack *stack, void (*func)(void *))
 	}
 }
 
+ZEND_API void zend_ptr_stack_reverse_apply(zend_ptr_stack *stack, void (*func)(void *))
+{
+	int i = 0;
+
+	while (i < stack->top) {
+		func(stack->elements[i++]);
+	}
+}
+
 
 ZEND_API void zend_ptr_stack_clean(zend_ptr_stack *stack, void (*func)(void *), zend_bool free_elements)
 {

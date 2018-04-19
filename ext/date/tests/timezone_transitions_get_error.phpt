@@ -50,7 +50,7 @@ bool(false)
 Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, object given in %s on line %d
 bool(false)
 
-Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, integer given in %s on line %d
+Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, int given in %s on line %d
 bool(false)
 
 Warning: timezone_transitions_get() expects parameter 1 to be DateTimeZone, null given in %s on line %d

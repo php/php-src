@@ -37,7 +37,7 @@ if (strcmp($str, $decode) == 0) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing str_rot13() : basic functionality ***
 
 Basic tests

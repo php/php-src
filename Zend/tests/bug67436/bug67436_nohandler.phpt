@@ -1,9 +1,5 @@
 --TEST--
 bug67436: E_STRICT instead of custom error handler
-
---INI--
-error_reporting=-1
-
 --FILE--
 <?php
 

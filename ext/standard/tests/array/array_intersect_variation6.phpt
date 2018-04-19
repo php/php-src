@@ -76,7 +76,7 @@ foreach($arrays as $arr2) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect() : assoc array with diff keys to $arr2 argument ***
 -- Iterator 1 --
 array(0) {

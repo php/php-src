@@ -14,5 +14,5 @@ require_once('skipifconnectfailure.inc');
 	$mysqli->init();
 	echo "done";
 ?>
---EXPECTF--
+--EXPECT--
 done

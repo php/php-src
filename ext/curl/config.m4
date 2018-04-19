@@ -30,12 +30,12 @@ if test "$PHP_CURL" != "no"; then
   fi
 
   if test -n "$PKNAME"; then
-    AC_MSG_CHECKING(for cURL 7.10.5 or greater)
-    if $PKG_CONFIG --atleast-version 7.10.5 $PKNAME; then
+    AC_MSG_CHECKING(for cURL 7.15.5 or greater)
+    if $PKG_CONFIG --atleast-version 7.15.5 $PKNAME; then
       curl_version_full=`$PKG_CONFIG --modversion $PKNAME`
       AC_MSG_RESULT($curl_version_full)
     else
-      AC_MSG_ERROR(cURL version 7.10.5 or later is required to compile php with cURL support)
+      AC_MSG_ERROR(cURL version 7.15.5 or later is required to compile php with cURL support)
     fi
 
     CURL_LIBS=`$PKG_CONFIG --libs   $PKNAME`
@@ -65,7 +65,7 @@ if test "$PHP_CURL" != "no"; then
     fi
 
     CURL_CONFIG="curl-config"
-    AC_MSG_CHECKING(for cURL 7.10.5 or greater)
+    AC_MSG_CHECKING(for cURL 7.15.5 or greater)
 
     if ${CURL_DIR}/bin/curl-config --libs > /dev/null 2>&1; then
       CURL_CONFIG=${CURL_DIR}/bin/curl-config
@@ -77,13 +77,13 @@ if test "$PHP_CURL" != "no"; then
 
     curl_version_full=`$CURL_CONFIG --version`
     curl_version=`echo ${curl_version_full} | sed -e 's/libcurl //' | $AWK 'BEGIN { FS = "."; } { printf "%d", ($1 * 1000 + $2) * 1000 + $3;}'`
-    if test "$curl_version" -ge 7010005; then
+    if test "$curl_version" -ge 7015005; then
       AC_MSG_RESULT($curl_version_full)
       CURL_LIBS=`$CURL_CONFIG --libs`
       CURL_INCL=`$CURL_CONFIG --cflags`
       CURL_SSL=`$CURL_CONFIG --feature | $EGREP SSL`
     else
-      AC_MSG_ERROR(cURL version 7.10.5 or later is required to compile php with cURL support)
+      AC_MSG_ERROR(cURL version 7.15.5 or later is required to compile php with cURL support)
     fi
   fi
 

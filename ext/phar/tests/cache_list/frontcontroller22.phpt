@@ -14,8 +14,8 @@ files/frontcontroller13.phar
 --EXPECTHEADERS--
 Content-type: text/html; charset=UTF-8
 --EXPECTF--
-%string|unicode%(4) "test"
-%string|unicode%(12) "oof/test.php"
+string(4) "test"
+string(12) "oof/test.php"
 
 Warning: include(./hi.php): failed to open stream: No such file or directory in phar://%s/oof/test.php on line %d
 

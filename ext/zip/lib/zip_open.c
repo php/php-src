@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -88,17 +88,17 @@ zip_open_from_source(zip_source_t *src, int _flags, zip_error_t *error)
 {
     static zip_int64_t needed_support_read = -1;
     static zip_int64_t needed_support_write = -1;
-    
+
     unsigned int flags;
     zip_int64_t supported;
     exists_t exists;
-    
+
     if (_flags < 0 || src == NULL) {
 	zip_error_set(error, ZIP_ER_INVAL, 0);
         return NULL;
     }
     flags = (unsigned int)_flags;
-    
+
     supported = zip_source_supports(src);
     if (needed_support_read == -1) {
         needed_support_read = zip_source_make_command_bitmap(ZIP_SOURCE_OPEN, ZIP_SOURCE_READ, ZIP_SOURCE_CLOSE, ZIP_SOURCE_SEEK, ZIP_SOURCE_TELL, ZIP_SOURCE_STAT, -1);
@@ -118,7 +118,7 @@ zip_open_from_source(zip_source_t *src, int _flags, zip_error_t *error)
     }
 
     exists = _zip_file_exists(src, error);
-    switch (exists) { 
+    switch (exists) {
     case EXISTS_ERROR:
 	return NULL;
 
@@ -161,7 +161,7 @@ ZIP_EXTERN int
 zip_archive_set_tempdir(zip_t *za, const char *tempdir)
 {
     char *new_tempdir;
-    
+
     if (tempdir) {
         if ((new_tempdir = strdup(tempdir)) == NULL) {
             zip_error_set(&za->error, ZIP_ER_MEMORY, errno);
@@ -170,10 +170,10 @@ zip_archive_set_tempdir(zip_t *za, const char *tempdir)
     }
     else
         new_tempdir = NULL;
-    
+
     free(za->tempdir);
     za->tempdir = new_tempdir;
-    
+
     return 0;
 }
 
@@ -209,7 +209,7 @@ _zip_open(zip_source_t *src, unsigned int flags, zip_error_t *error)
     if ((za=_zip_allocate_new(src, flags, error)) == NULL) {
         return NULL;
     }
-    
+
     if ((cdir = _zip_find_central_dir(za, len)) == NULL) {
         _zip_error_copy(error, &za->error);
 	/* keep src so discard does not get rid of it */
@@ -233,7 +233,7 @@ _zip_open(zip_source_t *src, unsigned int flags, zip_error_t *error)
 		zip_discard(za);
 		return NULL;
 	}
-	
+
 	if (_zip_hash_add(za->names, name, idx, ZIP_FL_UNCHANGED, &za->error) == false) {
 	    if (za->error.zip_err != ZIP_ER_EXISTS || (flags & ZIP_CHECKCONS)) {
 		_zip_error_copy(error, &za->error);
@@ -244,7 +244,7 @@ _zip_open(zip_source_t *src, unsigned int flags, zip_error_t *error)
 	    }
 	}
     }
-    
+
     za->ch_flags = za->flags;
 
     return za;
@@ -269,7 +269,7 @@ _zip_set_open_error(int *zep, const zip_error_t *err, int ze)
 /* _zip_readcdir:
    tries to find a valid end-of-central-directory at the beginning of
    buf, and then the corresponding central directory entries.
-   Returns a struct zip_cdir which contains the central directory 
+   Returns a struct zip_cdir which contains the central directory
    entries, or NULL if unsuccessful. */
 
 static zip_cdir_t *
@@ -286,7 +286,7 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
 	zip_error_set(error, ZIP_ER_NOZIP, 0);
 	return NULL;
     }
-    
+
     /* check for end-of-central-dir magic */
     if (memcmp(_zip_buffer_get(buffer, 4), EOCD_MAGIC, 4) != 0) {
 	zip_error_set(error, ZIP_ER_NOZIP, 0);
@@ -317,10 +317,10 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
 
     if (comment_len || (za->open_flags & ZIP_CHECKCONS)) {
         zip_uint64_t tail_len;
-        
+
         _zip_buffer_set_offset(buffer, eocd_offset + EOCDLEN);
         tail_len = _zip_buffer_left(buffer);
-        
+
         if (tail_len < comment_len || ((za->open_flags & ZIP_CHECKCONS) && tail_len != comment_len)) {
             zip_error_set(error, ZIP_ER_INCONS, 0);
             _zip_cdir_free(cd);
@@ -339,7 +339,7 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
         zip_uint8_t *data;
 	/* if buffer already read in, use it */
         _zip_buffer_set_offset(buffer, cd->offset - buf_offset);
-        
+
         if ((data = _zip_buffer_get(buffer, cd->size)) == NULL) {
             zip_error_set(error, ZIP_ER_INCONS, 0);
             _zip_cdir_free(cd);
@@ -353,7 +353,7 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
     }
     else {
         cd_buffer = NULL;
-        
+
         if (zip_source_seek(za->src, (zip_int64_t)cd->offset, SEEK_SET) < 0) {
             _zip_error_set_from_source(error, za->src);
             _zip_cdir_free(cd);
@@ -380,23 +380,23 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
 	i++;
         left -= (zip_uint64_t)entry_size;
     }
-    
+
     if (i != cd->nentry) {
         zip_error_set(error, ZIP_ER_INCONS, 0);
         _zip_buffer_free(cd_buffer);
         _zip_cdir_free(cd);
         return NULL;
     }
-    
+
     if (za->open_flags & ZIP_CHECKCONS) {
         bool ok;
-        
+
         if (cd_buffer) {
             ok = _zip_buffer_eof(cd_buffer);
         }
         else {
             zip_int64_t offset = zip_source_tell(za->src);
-            
+
             if (offset < 0) {
                 _zip_error_set_from_source(error, za->src);
                 _zip_buffer_free(cd_buffer);
@@ -405,7 +405,7 @@ _zip_read_cdir(zip_t *za, zip_buffer_t *buffer, zip_uint64_t buf_offset, zip_err
             }
             ok = ((zip_uint64_t)offset == cd->offset + cd->size);
         }
-        
+
         if (!ok) {
             zip_error_set(error, ZIP_ER_INCONS, 0);
             _zip_buffer_free(cd_buffer);
@@ -447,7 +447,7 @@ _zip_checkcons(zip_t *za, zip_cdir_t *cd, zip_error_t *error)
 	    zip_error_set(error, ZIP_ER_NOZIP, 0);
 	    return -1;
 	}
-	
+
 	j = cd->entry[i].orig->offset + cd->entry[i].orig->comp_size
 	    + _zip_string_length(cd->entry[i].orig->filename) + LENTRYSIZE;
 	if (j > max)
@@ -456,27 +456,27 @@ _zip_checkcons(zip_t *za, zip_cdir_t *cd, zip_error_t *error)
 	    zip_error_set(error, ZIP_ER_NOZIP, 0);
 	    return -1;
 	}
-	
+
         if (zip_source_seek(za->src, (zip_int64_t)cd->entry[i].orig->offset, SEEK_SET) < 0) {
             _zip_error_set_from_source(error, za->src);
             return -1;
 	}
-	
+
 	if (_zip_dirent_read(&temp, za->src, NULL, true, error) == -1) {
 	    _zip_dirent_finalize(&temp);
 	    return -1;
 	}
-	
+
 	if (_zip_headercomp(cd->entry[i].orig, &temp) != 0) {
 	    zip_error_set(error, ZIP_ER_INCONS, 0);
 	    _zip_dirent_finalize(&temp);
 	    return -1;
 	}
-	
+
 	cd->entry[i].orig->extra_fields = _zip_ef_merge(cd->entry[i].orig->extra_fields, temp.extra_fields);
 	cd->entry[i].orig->local_extra_fields_read = 1;
 	temp.extra_fields = NULL;
-	
+
 	_zip_dirent_finalize(&temp);
     }
 
@@ -586,7 +586,7 @@ _zip_find_central_dir(zip_t *za, zip_uint64_t len)
         _zip_error_set_from_source(&za->error, za->src);
         return NULL;
     }
-    
+
     if ((buffer = _zip_buffer_new_from_source(za->src, buflen, NULL, &za->error)) == NULL) {
         return NULL;
     }
@@ -607,7 +607,7 @@ _zip_find_central_dir(zip_t *za, zip_uint64_t len)
                 if (best <= 0) {
                     best = _zip_checkcons(za, cdir, &error);
                 }
-                
+
                 a = _zip_checkcons(za, cdirnew, &error);
                 if (best < a) {
                     _zip_cdir_free(cdir);
@@ -628,13 +628,13 @@ _zip_find_central_dir(zip_t *za, zip_uint64_t len)
             }
             cdirnew = NULL;
         }
-        
+
         match++;
         _zip_buffer_set_offset(buffer, (zip_uint64_t)(match - _zip_buffer_data(buffer)));
     }
 
     _zip_buffer_free(buffer);
-    
+
     if (best < 0) {
         _zip_error_copy(&za->error, &error);
         _zip_cdir_free(cdir);
@@ -649,7 +649,7 @@ static unsigned char *
 _zip_memmem(const unsigned char *big, size_t biglen, const unsigned char *little, size_t littlelen)
 {
     const unsigned char *p;
-    
+
     if ((biglen < littlelen) || (littlelen == 0))
 	return NULL;
     p = big-1;
@@ -673,7 +673,7 @@ _zip_read_eocd(zip_buffer_t *buffer, zip_uint64_t buf_offset, unsigned int flags
 	zip_error_set(error, ZIP_ER_INCONS, 0);
 	return NULL;
     }
-    
+
     eocd_offset = _zip_buffer_offset(buffer);
 
     _zip_buffer_get(buffer, 4); /* magic already verified */
@@ -700,7 +700,7 @@ _zip_read_eocd(zip_buffer_t *buffer, zip_uint64_t buf_offset, unsigned int flags
         zip_error_set(error, ZIP_ER_SEEK, EFBIG);
         return NULL;
     }
-    
+
     if (offset+size > buf_offset + eocd_offset) {
 	/* cdir spans past EOCD record */
 	zip_error_set(error, ZIP_ER_INCONS, 0);
@@ -717,7 +717,7 @@ _zip_read_eocd(zip_buffer_t *buffer, zip_uint64_t buf_offset, unsigned int flags
 
     cd->size = size;
     cd->offset = offset;
-    
+
     return cd;
 }
 
@@ -734,13 +734,13 @@ _zip_read_eocd64(zip_source_t *src, zip_buffer_t *buffer, zip_uint64_t buf_offse
     zip_uint32_t num_disks, num_disks64, eocd_disk, eocd_disk64;
 
     eocdloc_offset = _zip_buffer_offset(buffer);
-    
+
     _zip_buffer_get(buffer, 4); /* magic already verified */
 
     num_disks = _zip_buffer_get_16(buffer);
     eocd_disk = _zip_buffer_get_16(buffer);
     eocd_offset = _zip_buffer_get_64(buffer);
-    
+
     if (eocd_offset > ZIP_INT64_MAX || eocd_offset + EOCD64LEN < eocd_offset) {
         zip_error_set(error, ZIP_ER_SEEK, EFBIG);
         return NULL;
@@ -773,7 +773,7 @@ _zip_read_eocd64(zip_source_t *src, zip_buffer_t *buffer, zip_uint64_t buf_offse
         }
 	return NULL;
     }
-    
+
     size = _zip_buffer_get_64(buffer);
 
     if ((flags & ZIP_CHECKCONS) && size + eocd_offset + 12 != buf_offset + eocdloc_offset) {
@@ -820,7 +820,7 @@ _zip_read_eocd64(zip_source_t *src, zip_buffer_t *buffer, zip_uint64_t buf_offse
 
     size = _zip_buffer_get_64(buffer);
     offset = _zip_buffer_get_64(buffer);
-    
+
     if (!_zip_buffer_ok(buffer)) {
         zip_error_set(error, ZIP_ER_INTERNAL, 0);
         if (free_buffer) {
@@ -850,7 +850,7 @@ _zip_read_eocd64(zip_source_t *src, zip_buffer_t *buffer, zip_uint64_t buf_offse
     if ((cd=_zip_cdir_new(nentry, error)) == NULL)
 	return NULL;
 
-    
+
     cd->size = size;
     cd->offset = offset;
 

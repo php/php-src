@@ -10,11 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$strict_on = false;
-	if (defined('E_STRICT')) {
-		error_reporting(((int)ini_get('error_reporting')) | E_STRICT );
-		$strict_on = true;
-	}
 	$tmp    = NULL;
 	$link   = NULL;
 
@@ -32,9 +27,6 @@ require_once('skipifconnectfailure.inc');
 	if (!mysqli_multi_query($link, "SELECT 1 AS a; SELECT 1 AS a, 2 AS b; SELECT id FROM test ORDER BY id LIMIT 3"))
 		printf("[005] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if ($strict_on)
-		ob_start();
-
 	$i = 0;
 	do {
 		$res = mysqli_store_result($link);
@@ -43,17 +35,6 @@ require_once('skipifconnectfailure.inc');
 		mysqli_free_result($res);
 		$i++;
 	} while (mysqli_next_result($link));
-
-	if ($strict_on) {
-		$tmp = ob_get_contents();
-		ob_end_clean();
-		if (!preg_match('@Strict Standards: mysqli_next_result\(\): There is no next result set@ismU', $tmp)) {
-			printf("[005a] Strict Standards warning missing\n");
-		} else {
-			$tmp = trim(preg_replace('@Strict Standards: mysqli_next_result\(\).*on line \d+@ism', '', $tmp));
-		}
-		print trim($tmp) . "\n";
-	}
 
 	printf("[006] %d\n", $i);
 
@@ -74,23 +55,11 @@ require_once('skipifconnectfailure.inc');
 	if (!mysqli_multi_query($link, "SELECT id, label FROM test"))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 
-	if ($strict_on)
-		ob_start();
 	$i = 0;
 	while (mysqli_next_result($link) && ($res = mysqli_store_result($link))) {
 		while ($row = mysqli_fetch_array($res))
 			$i++;
 		mysqli_free_result($res);
-	}
-	if ($strict_on) {
-		$tmp = ob_get_contents();
-		ob_end_clean();
-		if (!preg_match('@Strict Standards: mysqli_next_result\(\): There is no next result set@ismU', $tmp)) {
-			printf("[009a] Strict Standards warning missing\n");
-		} else {
-			$tmp = trim(preg_replace('@Strict Standards: mysqli_next_result\(\).*on line \d+@ism', '', $tmp));
-		}
-		print trim($tmp) . "\n";
 	}
 	printf("[010] %d\n", $i);
 
@@ -151,12 +120,15 @@ require_once('skipifconnectfailure.inc');
 	require_once("clean_table.inc");
 ?>
 --EXPECTF--
+
+Strict Standards: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 [006] 3
 [008] 0
 [009] [2014] Commands out of sync; you can't run this command now
 
+Strict Standards: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 [010] 7
 
 Warning: mysqli_multi_query(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

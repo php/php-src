@@ -7,7 +7,6 @@ var_dump(preg_match('/((?1)?z)/', ''));
 var_dump(preg_last_error() === \PREG_INTERNAL_ERROR);
 
 ?>
---EXPECTF--
-Warning: preg_match(): Compilation failed: recursive call could loop indefinitely at offset %s in %s on line %s
+--EXPECT--
+int(0)
 bool(false)
-bool(true)
