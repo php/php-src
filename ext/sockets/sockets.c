@@ -293,9 +293,24 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_addrinfo_explain, 0, 0, 1)
 	ZEND_ARG_INFO(0, addr)
 ZEND_END_ARG_INFO()
 
+#ifdef PHP_WIN32
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_export, 0, 0, 2)
+	ZEND_ARG_INFO(0, socket)
+	ZEND_ARG_INFO(0, target_pid)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_import, 0, 0, 1)
+	ZEND_ARG_INFO(0, info_id)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_socket_wsaprotocol_info_release, 0, 0, 1)
+	ZEND_ARG_INFO(0, info_id)
+ZEND_END_ARG_INFO()
+#endif
 /* }}} */
 
 static PHP_GINIT_FUNCTION(sockets);
+static PHP_GSHUTDOWN_FUNCTION(sockets);
 static PHP_MINIT_FUNCTION(sockets);
 static PHP_MSHUTDOWN_FUNCTION(sockets);
 static PHP_MINFO_FUNCTION(sockets);
@@ -336,6 +351,11 @@ PHP_FUNCTION(socket_addrinfo_lookup);
 PHP_FUNCTION(socket_addrinfo_connect);
 PHP_FUNCTION(socket_addrinfo_bind);
 PHP_FUNCTION(socket_addrinfo_explain);
+#ifdef PHP_WIN32
+PHP_FUNCTION(socket_wsaprotocol_info_export);
+PHP_FUNCTION(socket_wsaprotocol_info_import);
+PHP_FUNCTION(socket_wsaprotocol_info_release);
+#endif
 
 /* {{{ sockets_functions[]
  */
@@ -383,6 +403,12 @@ static const zend_function_entry sockets_functions[] = {
 	PHP_FALIAS(socket_getopt, socket_get_option, arginfo_socket_get_option)
 	PHP_FALIAS(socket_setopt, socket_set_option, arginfo_socket_set_option)
 
+#ifdef PHP_WIN32
+	PHP_FE(socket_wsaprotocol_info_export, arginfo_socket_wsaprotocol_info_export)
+	PHP_FE(socket_wsaprotocol_info_import, arginfo_socket_wsaprotocol_info_import)
+	PHP_FE(socket_wsaprotocol_info_release, arginfo_socket_wsaprotocol_info_release)
+#endif
+
 	PHP_FE_END
 };
 /* }}} */
@@ -399,7 +425,7 @@ zend_module_entry sockets_module_entry = {
 	PHP_SOCKETS_VERSION,
 	PHP_MODULE_GLOBALS(sockets),
 	PHP_GINIT(sockets),
-	NULL,
+	PHP_GSHUTDOWN(sockets),
 	NULL,
 	STANDARD_MODULE_PROPERTIES_EX
 };
@@ -647,6 +673,14 @@ char *sockets_strerror(int error) /* {{{ */
 }
 /* }}} */
 
+#ifdef PHP_WIN32
+static void sockets_destroy_wsa_info(zval *data)
+{/*{{{*/
+	HANDLE h = (HANDLE)Z_PTR_P(data);
+	CloseHandle(h);
+}/*}}}*/
+#endif
+
 /* {{{ PHP_GINIT_FUNCTION */
 static PHP_GINIT_FUNCTION(sockets)
 {
@@ -655,6 +689,19 @@ static PHP_GINIT_FUNCTION(sockets)
 #endif
 	sockets_globals->last_error = 0;
 	sockets_globals->strerror_buf = NULL;
+#ifdef PHP_WIN32
+	sockets_globals->wsa_child_count = 0;
+	zend_hash_init(&sockets_globals->wsa_info, 0, NULL, sockets_destroy_wsa_info, 1);
+#endif
+}
+/* }}} */
+
+/* {{{ PHP_GSHUTDOWN_FUNCTION */
+static PHP_GSHUTDOWN_FUNCTION(sockets)
+{
+#ifdef PHP_WIN32
+	zend_hash_destroy(&sockets_globals->wsa_info);
+#endif
 }
 /* }}} */
 
@@ -2754,6 +2801,153 @@ PHP_FUNCTION(socket_addrinfo_explain)
 	add_assoc_zval(return_value, "ai_addr", &sockaddr);
 }
 /* }}} */
+
+#ifdef PHP_WIN32
+
+ /* {{{ proto string socket_wsaprotocol_info_export(resource stream, int target_pid)
+   Exports the network socket information suitable to be used in another process and returns the info id. */
+PHP_FUNCTION(socket_wsaprotocol_info_export)
+{
+	WSAPROTOCOL_INFO wi;
+	zval *zsocket;
+	php_socket *socket;
+	zend_long target_pid;
+	zend_off_t offset = 0;
+	char seg_name[24] = {0};
+	size_t seg_name_len;
+	HANDLE map;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zsocket, &target_pid) == FAILURE) {
+		return;
+	}
+	if ((socket = (php_socket *) zend_fetch_resource(Z_RES_P(zsocket), le_socket_name, le_socket)) == NULL) {
+		RETURN_FALSE;
+	}
+
+	if (SOCKET_ERROR == WSADuplicateSocket(socket->bsd_socket, (DWORD)target_pid, &wi)) {
+		DWORD err = WSAGetLastError();
+		LPSTR buf = NULL;
+
+		if (!FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				err,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPSTR)&buf,
+			0, NULL)) {
+			php_error_docref(NULL, E_WARNING, "Unable to export WSA protocol info [0x%08lx]", err);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Unable to export WSA protocol info [0x%08lx]: %s", err, buf);
+		}
+
+		RETURN_FALSE;
+	}
+
+	seg_name_len = snprintf(seg_name, sizeof(seg_name)-1, "php_wsa_for_%u", SOCKETS_G(wsa_child_count)++);
+	seg_name[seg_name_len] = '\0';
+	map = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(WSAPROTOCOL_INFO), seg_name);
+	if (NULL != map) {
+		LPVOID view = MapViewOfFile(map, FILE_MAP_WRITE, 0, 0, 0);
+		if (view) {
+			memcpy(view, &wi, sizeof(wi));
+			UnmapViewOfFile(view);
+			zend_hash_str_add_ptr(&(SOCKETS_G(wsa_info)), seg_name, seg_name_len, map);
+			RETURN_STRING(seg_name);
+		} else {
+			DWORD err = GetLastError();
+			php_error_docref(NULL, E_WARNING, "Unable to map file view [0x%08lx]", err);
+		}
+	} else {
+		DWORD err = GetLastError();
+		php_error_docref(NULL, E_WARNING, "Unable to create file mapping [0x%08lx]", err);
+	}
+
+	RETURN_FALSE;
+}
+/* }}} */
+
+/* {{{ proto resource socket_wsaprotocol_info_import(string id)
+   Imports the network socket information using the supplied id and creates a new socket on its base. */
+PHP_FUNCTION(socket_wsaprotocol_info_import)
+{
+	char *id;
+	size_t id_len;
+	WSAPROTOCOL_INFO wi;
+	PHP_SOCKET sock;
+	php_socket	*php_sock;
+	HANDLE map;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &id, &id_len) == FAILURE) {
+		return;
+	}
+
+	map = OpenFileMapping(FILE_MAP_READ, FALSE, id);
+	if (map) {
+		LPVOID view = MapViewOfFile(map, FILE_MAP_READ, 0, 0, 0);
+		if (view) {
+			memcpy(&wi, view, sizeof(WSAPROTOCOL_INFO));
+			UnmapViewOfFile(view);
+		} else {
+			DWORD err = GetLastError();
+			php_error_docref(NULL, E_WARNING, "Unable to map file view [0x%08lx]", err);
+			RETURN_FALSE;
+		}
+		CloseHandle(map);
+	} else {
+		DWORD err = GetLastError();
+		php_error_docref(NULL, E_WARNING, "Unable to open file mapping [0x%08lx]", err);
+		RETURN_FALSE;
+	}
+
+	sock = WSASocket(FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, FROM_PROTOCOL_INFO, &wi, 0, 0);
+	if (INVALID_SOCKET == sock) {
+		DWORD err = WSAGetLastError();
+		LPSTR buf = NULL;
+
+		if (!FormatMessage(
+				FORMAT_MESSAGE_ALLOCATE_BUFFER |
+				FORMAT_MESSAGE_FROM_SYSTEM |
+				FORMAT_MESSAGE_IGNORE_INSERTS,
+				NULL,
+				err,
+				MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
+				(LPSTR)&buf,
+			0, NULL)) {
+			php_error_docref(NULL, E_WARNING, "Unable to import WSA protocol info [0x%08lx]", err);
+		} else {
+			php_error_docref(NULL, E_WARNING, "Unable to import WSA protocol info [0x%08lx]: %s", err, buf);
+		}
+
+		RETURN_FALSE;
+	}
+
+	php_sock = php_create_socket();
+	php_sock->bsd_socket = sock;
+	php_sock->type = wi.iAddressFamily;
+	php_sock->error = 0;
+	php_sock->blocking = 1;
+
+	RETURN_RES(zend_register_resource(php_sock, le_socket));
+}
+/* }}} */
+
+/* {{{ proto bool socket_wsaprotocol_info_release(string id)
+   Frees the exported info and corresponding resources using the supplied id. */
+PHP_FUNCTION(socket_wsaprotocol_info_release)
+{
+	char *id;
+	size_t id_len;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &id, &id_len) == FAILURE) {
+		return;
+	}
+
+	RETURN_BOOL(SUCCESS == zend_hash_str_del(&(SOCKETS_G(wsa_info)), id, id_len));
+}
+/* }}} */
+#endif
 
 /*
  * Local variables:
