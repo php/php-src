@@ -1855,7 +1855,7 @@ static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len
 	char test[51];
 	const char *pos;
 
-	if (ext_len >= 50) {
+	if (ext_len < 0 || ext_len >= 50) {
 		return FAILURE;
 	}
 
