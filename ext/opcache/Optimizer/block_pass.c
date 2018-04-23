@@ -54,7 +54,7 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	if (retval) {
-		if (c->flags & CONST_PERSISTENT) {
+		if ((c->flags & CONST_PERSISTENT) && strcmp(c->name->val, "PHP_SAPI")) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
