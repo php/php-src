@@ -2408,18 +2408,16 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 							if (n <= 0) {
 								int err = SSL_get_error(sslsock->ssl_handle, n);
 
-								if (err == SSL_ERROR_SYSCALL) {
-									alive = php_socket_errno() == EAGAIN;
-									break;
+								switch (err) {
+									case SSL_ERROR_SYSCALL:
+									case SSL_ERROR_WANT_READ:
+									case SSL_ERROR_WANT_WRITE:
+										alive = php_socket_errno() == EAGAIN;
+										break;
+									default:
+										/* any other problem is a fatal error */
+										alive = 0;
 								}
-
-								if (err == SSL_ERROR_WANT_READ || err == SSL_ERROR_WANT_WRITE) {
-									/* re-negotiate */
-									continue;
-								}
-
-								/* any other problem is a fatal error */
-								alive = 0;
 							}
 							/* either peek succeeded or there was an error; we
 							 * have set the alive flag appropriately */
