@@ -2672,6 +2672,9 @@ static int php_iconv_stream_filter_append_bucket(
 								tcnt = 0;
 								break;
 							}
+						} else {
+						    php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
+						    goto out_failure;
 						}
 						break;
 
