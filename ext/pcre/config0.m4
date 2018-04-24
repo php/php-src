@@ -24,11 +24,11 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
 
     AC_MSG_CHECKING([for PCRE library location])
     for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
-      test -f $j/libpcre2.a || test -f $j/libpcre2.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
+      test -f $j/libpcre2-8.a || test -f $j/libpcre2-8.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
     done
     
     if test -z "$PCRE_LIBDIR" ; then
-      AC_MSG_ERROR([Could not find libpcre2.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
+      AC_MSG_ERROR([Could not find libpcre2-8.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
     fi
     AC_MSG_RESULT([$PCRE_LIBDIR])
 
