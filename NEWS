@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018 PHP 7.0.30
+?? ??? 2018 PHP 7.0.31
+
+
+
+26 Apr 2018 PHP 7.0.30
 
 - Exif:
   . Fixed bug #76130 (Heap Buffer Overflow (READ: 1786) in exif_iif_add_value).
