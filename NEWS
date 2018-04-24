@@ -27,7 +27,7 @@ PHP                                                                        NEWS
   . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
 
 - Exif:
-  . Fixed bug#76130 (Heap Buffer Overflow (READ: 1786) in exif_iif_add_value).
+  . Fixed bug #76130 (Heap Buffer Overflow (READ: 1786) in exif_iif_add_value).
     (Stas)
 
 - FPM:
