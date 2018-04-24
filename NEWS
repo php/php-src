@@ -2,7 +2,6 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.5
 
-
 - Core:
   . Fixed bug #75722 (Convert valgrind detection to configure option).
     (Michael Heimpold)
