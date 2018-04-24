@@ -3,14 +3,16 @@ PHP                                                                        NEWS
 ?? ??? ????, PHP 7.2.5
 
 
-12 Apr 2018, PHP 7.2.5RC1
-
 - Core:
   . Fixed bug #75722 (Convert valgrind detection to configure option).
     (Michael Heimpold)
 
 - Date:
   . Fixed bug #76131 (mismatch arginfo for date_create). (carusogabriel)
+
+- Exif:
+  . Fixed bug#76130 (Heap Buffer Overflow (READ: 1786) in exif_iif_add_value).
+    (Stas)
 
 - FPM:
   . Fixed bug #68440 (ERROR: failed to reload: execvp() failed: Argument list
@@ -24,6 +26,13 @@ PHP                                                                        NEWS
 - intl:
   . Fixed bug #76153 (Intl compilation fails with icu4c 61.1). (Anatol)
 
+- iconv:
+  . Fixed bug #76249 (stream filter convert.iconv leads to infinite loop on
+    invalid sequence). (Stas)
+
+- ldap:
+  . Fixed bug #76248 (Malicious LDAP-Server Response causes Crash). (Stas)
+
 - mbstring:
   . Fixed bug #75944 (Wrong cp1251 detection). (dmk001)
   . Fixed bug #76113 (mbstring does not build with Oniguruma 6.8.1).
@@ -35,6 +44,9 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #76094 (Access violation when using opcache). (Laruence)
+
+- Phar:
+  . Fixed bug #76129 (fix for CVE-2018-5712 may not be complete). (Stas)
 
 - phpdbg:
   . Fixed bug #76143 (Memory corruption: arbitrary NUL overwrite). (Laruence)
