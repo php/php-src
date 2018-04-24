@@ -317,8 +317,7 @@ static void phar_do_403(char *entry, int entry_len) /* {{{ */
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 	sapi_send_headers();
 	PHPWRITE("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ", sizeof("<html>\n <head>\n  <title>Access Denied</title>\n </head>\n <body>\n  <h1>403 - File ") - 1);
-	PHPWRITE(entry, entry_len);
-	PHPWRITE(" Access Denied</h1>\n </body>\n</html>", sizeof(" Access Denied</h1>\n </body>\n</html>") - 1);
+	PHPWRITE("Access Denied</h1>\n </body>\n</html>", sizeof("Access Denied</h1>\n </body>\n</html>") - 1);
 }
 /* }}} */
 
@@ -342,8 +341,7 @@ static void phar_do_404(phar_archive_data *phar, char *fname, int fname_len, cha
 	sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
 	sapi_send_headers();
 	PHPWRITE("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ", sizeof("<html>\n <head>\n  <title>File Not Found</title>\n </head>\n <body>\n  <h1>404 - File ") - 1);
-	PHPWRITE(entry, entry_len);
-	PHPWRITE(" Not Found</h1>\n </body>\n</html>",  sizeof(" Not Found</h1>\n </body>\n</html>") - 1);
+	PHPWRITE("Not Found</h1>\n </body>\n</html>",  sizeof("Not Found</h1>\n </body>\n</html>") - 1);
 }
 /* }}} */
 
