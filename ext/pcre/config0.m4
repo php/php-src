@@ -23,8 +23,8 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     AC_MSG_RESULT([$PCRE_INCDIR])
 
     changequote({,})
-    pcre_major=`grep PCRE2_MAJOR $PCRE_INCDIR/pcre2.h | sed -e 's/[^0-9]//g'`
-    pcre_minor=`grep PCRE2_MINOR $PCRE_INCDIR/pcre2.h | sed -e 's/[^0-9]//g'`
+    pcre_major=`grep PCRE2_MAJOR $PCRE_INCDIR/pcre2.h | sed -E 's/.+PCRE2_MAJOR\s+([0-9]+)/\1/g'`
+    pcre_minor=`grep PCRE2_MINOR $PCRE_INCDIR/pcre2.h | sed -E 's/.+PCRE2_MINOR\s+([0-9]+)/\1/g'`
     changequote([,])
     pcre_minor_length=`echo "$pcre_minor" | wc -c | sed -e 's/[^0-9]//g'`
     if test "$pcre_minor_length" -eq 2 ; then
