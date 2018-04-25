@@ -22,16 +22,6 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
     fi
     AC_MSG_RESULT([$PCRE_INCDIR])
 
-    AC_MSG_CHECKING([for PCRE library location])
-    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
-      test -f $j/libpcre2-8.a || test -f $j/libpcre2-8.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
-    done
-    
-    if test -z "$PCRE_LIBDIR" ; then
-      AC_MSG_ERROR([Could not find libpcre2-8.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
-    fi
-    AC_MSG_RESULT([$PCRE_LIBDIR])
-
     changequote({,})
     pcre_major=`grep PCRE2_MAJOR $PCRE_INCDIR/pcre2.h | sed -e 's/[^0-9]//g'`
     pcre_minor=`grep PCRE2_MINOR $PCRE_INCDIR/pcre2.h | sed -e 's/[^0-9]//g'`
@@ -45,14 +35,42 @@ PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality 
       AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 10.30])
     fi
 
-    PHP_CHECK_LIBRARY(pcre2, pcre2_jit_exec,
+    AC_MSG_CHECKING([for PCRE library location])
+    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
+      test -f $j/libpcre2-8.a || test -f $j/libpcre2-8.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
+    done
+    
+    if test -z "$PCRE_LIBDIR" ; then
+      AC_MSG_RESULT([not found])
+      if test -z "$PKG_CONFIG"; then
+        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+      fi
+      dnl retry once more if pkg-config is available
+      if test -x "$PKG_CONFIG"; then
+        AC_MSG_CHECKING([for PCRE library flags with pkg-config])
+        if test "`$PKG_CONFIG --variable=prefix libpcre2-8`" = "$PHP_PCRE_REGEX"; then
+          PHP_PCRE2_LDFLAGS=`$PKG_CONFIG --libs libpcre2-8`
+          PHP_EVAL_LIBLINE($PHP_PCRE2_LDFLAGS)
+          AC_MSG_RESULT([$PHP_PCRE2_LDFLAGS])
+        else
+          AC_MSG_ERROR([Could not find libpcre2-8.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
+        fi
+      else
+        AC_MSG_ERROR([Could not find libpcre2-8.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
+      fi
+    else
+      PHP_PCRE2_LDFLAGS=-L$PCRE_LIBDIR
+      PHP_ADD_LIBRARY_WITH_PATH(pcre2-8, $PCRE_LIBDIR)
+      AC_MSG_RESULT([$PCRE_LIBDIR])
+    fi
+
+    PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
     [
       AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
     ],[
     ],[
-      -L$PCRE_LIBDIR
+      $PHP_PCRE2_LDFLAGS
     ])
-    PHP_ADD_LIBRARY_WITH_PATH(pcre2, $PCRE_LIBDIR)
     
     AC_DEFINE(HAVE_PCRE, 1, [ ])
     AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
