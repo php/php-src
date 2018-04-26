@@ -102,7 +102,7 @@ struct _zend_module_entry {
 };
 
 #define MODULE_DEP_REQUIRED		1
-#define MODULE_DEP_CONFLICTS	2
+#define MODULE_DEP_CONFLICTS		2
 #define MODULE_DEP_OPTIONAL		3
 
 #define ZEND_MOD_REQUIRED_EX(name, rel, ver)	{ name, rel, ver, MODULE_DEP_REQUIRED  },
