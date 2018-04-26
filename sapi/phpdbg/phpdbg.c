@@ -1805,6 +1805,11 @@ phpdbg_main:
 
 		if (php_request_startup() == FAILURE) {
 			PUTS("Could not startup");
+#ifndef _WIN32
+			if (address) {
+				free(address);
+			}
+#endif
 			return 1;
 		}
 
