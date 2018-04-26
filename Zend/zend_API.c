@@ -2871,6 +2871,7 @@ ZEND_API int zend_disable_class(char *class_name, size_t class_name_length) /* {
 	key = zend_string_alloc(class_name_length, 0);
 	zend_str_tolower_copy(ZSTR_VAL(key), class_name, class_name_length);
 	disabled_class = zend_hash_find_ptr(CG(class_table), key);
+	zend_string_release(key);
 	if (!disabled_class) {
 		return FAILURE;
 	}
