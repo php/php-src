@@ -3201,7 +3201,7 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 
 	if (needle_len < ZSTR_LEN(haystack)) {
 		const char *end;
-		const char *s, *p, *r;
+		const char *p, *r;
 		char *e;
 
 		if (needle_len == str_len) {
@@ -3238,7 +3238,7 @@ static zend_string *php_str_to_str_ex(zend_string *haystack,
 				new_str = zend_string_alloc(count * (str_len - needle_len) + ZSTR_LEN(haystack), 0);
 			}
 
-			s = e = ZSTR_VAL(new_str);
+			e = ZSTR_VAL(new_str);
 			end = ZSTR_VAL(haystack) + ZSTR_LEN(haystack);
 			for (p = ZSTR_VAL(haystack); (r = (char*)php_memnstr(p, needle, needle_len, end)); p = r + needle_len) {
 				memcpy(e, p, r - p);
@@ -3284,7 +3284,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 
 	if (ZSTR_LEN(needle) < ZSTR_LEN(haystack)) {
 		const char *end;
-		const char *s, *p, *r;
+		const char *p, *r;
 		char *e;
 
 		if (ZSTR_LEN(needle) == str_len) {
@@ -3328,7 +3328,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 				new_str = zend_string_alloc(count * (str_len - ZSTR_LEN(lc_needle)) + ZSTR_LEN(haystack), 0);
 			}
 
-			s = e = ZSTR_VAL(new_str);
+			e = ZSTR_VAL(new_str);
 			end = lc_haystack + ZSTR_LEN(haystack);
 
 			for (p = lc_haystack; (r = (char*)php_memnstr(p, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle), end)); p = r + ZSTR_LEN(lc_needle)) {
