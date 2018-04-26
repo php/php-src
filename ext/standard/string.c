@@ -5772,14 +5772,14 @@ static zend_string *php_str_rot13(zend_string *str)
 
 #ifdef __SSE2__
 	if (e - p > 15) {
-		const __m128i _a = _mm_set1_epi8('a' - 1);
-		const __m128i m_ = _mm_set1_epi8('m' + 1);
-		const __m128i _n = _mm_set1_epi8('n' - 1);
-		const __m128i z_ = _mm_set1_epi8('z' + 1);
-		const __m128i _A = _mm_set1_epi8('A' - 1);
-		const __m128i M_ = _mm_set1_epi8('M' + 1);
-		const __m128i _N = _mm_set1_epi8('N' - 1);
-		const __m128i Z_ = _mm_set1_epi8('Z' + 1);
+		const __m128i a_minus_1 = _mm_set1_epi8('a' - 1);
+		const __m128i m_plus_1 = _mm_set1_epi8('m' + 1);
+		const __m128i n_minus_1 = _mm_set1_epi8('n' - 1);
+		const __m128i z_plus_1 = _mm_set1_epi8('z' + 1);
+		const __m128i A_minus_1 = _mm_set1_epi8('A' - 1);
+		const __m128i M_plus_1 = _mm_set1_epi8('M' + 1);
+		const __m128i N_minus_1 = _mm_set1_epi8('N' - 1);
+		const __m128i Z_plus_1 = _mm_set1_epi8('Z' + 1);
 		const __m128i add = _mm_set1_epi8(13);
 		const __m128i sub = _mm_set1_epi8(-13);
 
@@ -5789,32 +5789,32 @@ static zend_string *php_str_rot13(zend_string *str)
 			delta = _mm_setzero_si128();
 			in = _mm_loadu_si128((__m128i *)p);
 
-			gt = _mm_cmpgt_epi8(in, _a);
-			lt = _mm_cmplt_epi8(in, m_);
+			gt = _mm_cmpgt_epi8(in, a_minus_1);
+			lt = _mm_cmplt_epi8(in, m_plus_1);
 			cmp = _mm_and_si128(lt, gt);
 			if (_mm_movemask_epi8(cmp)) {
 				cmp = _mm_and_si128(cmp, add);
 				delta = _mm_or_si128(delta, cmp);
 			}
 
-			gt = _mm_cmpgt_epi8(in, _n);
-			lt = _mm_cmplt_epi8(in, z_);
+			gt = _mm_cmpgt_epi8(in, n_minus_1);
+			lt = _mm_cmplt_epi8(in, z_plus_1);
 			cmp = _mm_and_si128(lt, gt);
 			if (_mm_movemask_epi8(cmp)) {
 				cmp = _mm_and_si128(cmp, sub);
 				delta = _mm_or_si128(delta, cmp);
 			}
 
-			gt = _mm_cmpgt_epi8(in, _A);
-			lt = _mm_cmplt_epi8(in, M_);
+			gt = _mm_cmpgt_epi8(in, A_minus_1);
+			lt = _mm_cmplt_epi8(in, M_plus_1);
 			cmp = _mm_and_si128(lt, gt);
 			if (_mm_movemask_epi8(cmp)) {
 				cmp = _mm_and_si128(cmp, add);
 				delta = _mm_or_si128(delta, cmp);
 			}
 
-			gt = _mm_cmpgt_epi8(in, _N);
-			lt = _mm_cmplt_epi8(in, Z_);
+			gt = _mm_cmpgt_epi8(in, N_minus_1);
+			lt = _mm_cmplt_epi8(in, Z_plus_1);
 			cmp = _mm_and_si128(lt, gt);
 			if (_mm_movemask_epi8(cmp)) {
 				cmp = _mm_and_si128(cmp, sub);
