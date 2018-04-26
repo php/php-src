@@ -2813,8 +2813,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 	php_socket *socket;
 	zend_long target_pid;
 	zend_off_t offset = 0;
-	char seg_name[24] = {0};
-	size_t seg_name_len;
+	zend_string *seg_name;
 	HANDLE map;
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rl", &zsocket, &target_pid) == FAILURE) {
@@ -2845,16 +2844,15 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 		RETURN_FALSE;
 	}
 
-	seg_name_len = snprintf(seg_name, sizeof(seg_name)-1, "php_wsa_for_%u", SOCKETS_G(wsa_child_count)++);
-	seg_name[seg_name_len] = '\0';
-	map = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(WSAPROTOCOL_INFO), seg_name);
+	seg_name = zend_strpprintf(0, "php_wsa_for_%u", SOCKETS_G(wsa_child_count)++);
+	map = CreateFileMapping(INVALID_HANDLE_VALUE, NULL, PAGE_READWRITE, 0, sizeof(WSAPROTOCOL_INFO), ZSTR_VAL(seg_name));
 	if (NULL != map) {
 		LPVOID view = MapViewOfFile(map, FILE_MAP_WRITE, 0, 0, 0);
 		if (view) {
 			memcpy(view, &wi, sizeof(wi));
 			UnmapViewOfFile(view);
-			zend_hash_str_add_ptr(&(SOCKETS_G(wsa_info)), seg_name, seg_name_len, map);
-			RETURN_STRING(seg_name);
+			zend_hash_add_ptr(&(SOCKETS_G(wsa_info)), seg_name, map);
+			RETURN_STR(seg_name);
 		} else {
 			DWORD err = GetLastError();
 			php_error_docref(NULL, E_WARNING, "Unable to map file view [0x%08lx]", err);
@@ -2863,6 +2861,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 		DWORD err = GetLastError();
 		php_error_docref(NULL, E_WARNING, "Unable to create file mapping [0x%08lx]", err);
 	}
+	zend_string_release(seg_name);
 
 	RETURN_FALSE;
 }
