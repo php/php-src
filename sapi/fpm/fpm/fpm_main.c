@@ -1926,6 +1926,12 @@ consult the installation file that came with this distribution, or visit \n\
 			/* check if request_method has been sent.
 			 * if not, it's certainly not an HTTP over fcgi request */
 			if (UNEXPECTED(!SG(request_info).request_method)) {
+				zend_try {
+					zlog(ZLOG_ERROR, "SCRIPT_FILENAME not found in cgi env");
+					SG(sapi_headers).http_response_code = 500;
+					PUTS("Method not found.\n");
+				} zend_catch {
+				} zend_end_try();
 				goto fastcgi_request_done;
 			}
 
