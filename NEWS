@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #76075 --with-fpm-acl wrongly tries to find libacl on FreeBSD.
     (mgorny)
 
+- Opcache:
+  . Fixed bug #76275 (Assertion failure in file cache when unserializing empty
+    try_catch_array). (Nikita)
+
 - Reflection:
   . Fixed arginfo of array_replace(_recursive) and array_merge(_recursive).
     (carusogabriel)
