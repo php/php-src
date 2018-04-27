@@ -2410,9 +2410,11 @@ static int php_openssl_sockop_set_option(php_stream *stream, int option, int val
 
 								switch (err) {
 									case SSL_ERROR_SYSCALL:
+										alive = php_socket_errno() == EAGAIN;
+										break;
 									case SSL_ERROR_WANT_READ:
 									case SSL_ERROR_WANT_WRITE:
-										alive = php_socket_errno() == EAGAIN;
+										alive = 1;
 										break;
 									default:
 										/* any other problem is a fatal error */
