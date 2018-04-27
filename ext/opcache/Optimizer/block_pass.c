@@ -928,6 +928,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array)
 		}
 		if (i != j) {
 			op_array->last_try_catch = j;
+			if (j == 0) {
+				efree(op_array->try_catch_array);
+				op_array->try_catch_array = NULL;
+			}
+
 			if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 				zend_op *opline = new_opcodes;
 				zend_op *end = opline + len;
