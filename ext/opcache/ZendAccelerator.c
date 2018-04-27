@@ -1393,14 +1393,20 @@ static zend_persistent_script *store_script_in_file_cache(zend_persistent_script
 
 static zend_persistent_script *cache_script_in_file_cache(zend_persistent_script *new_persistent_script, int *from_shared_memory)
 {
+	uint32_t orig_compiler_options;
+
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
 		return new_persistent_script;
 	}
 
+	orig_compiler_options = CG(compiler_options);
+	CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
 	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
+		CG(compiler_options) = orig_compiler_options;
 		return new_persistent_script;
 	}
+	CG(compiler_options) = orig_compiler_options;
 
 	*from_shared_memory = 1;
 	return store_script_in_file_cache(new_persistent_script);
@@ -1411,15 +1417,24 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 {
 	zend_accel_hash_entry *bucket;
 	uint32_t memory_used;
+	uint32_t orig_compiler_options;
 
 	/* Check if script may be stored in shared memory */
 	if (!zend_accel_script_persistable(new_persistent_script)) {
 		return new_persistent_script;
 	}
 
+	orig_compiler_options = CG(compiler_options);
+#ifdef HAVE_OPCACHE_FILE_CACHE
+	if (ZCG(accel_directives).file_cache) {
+		CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
+	}
+#endif
 	if (!zend_optimize_script(&new_persistent_script->script, ZCG(accel_directives).optimization_level, ZCG(accel_directives).opt_debug_level)) {
+		CG(compiler_options) = orig_compiler_options;
 		return new_persistent_script;
 	}
+	CG(compiler_options) = orig_compiler_options;
 
 	/* exclusive lock */
 	zend_shared_alloc_lock();
@@ -1691,6 +1706,11 @@ static zend_persistent_script *opcache_compile_file(zend_file_handle *file_handl
 		CG(compiler_options) |= ZEND_COMPILE_IGNORE_INTERNAL_CLASSES;
 		CG(compiler_options) |= ZEND_COMPILE_DELAYED_BINDING;
 		CG(compiler_options) |= ZEND_COMPILE_NO_CONSTANT_SUBSTITUTION;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+		if (ZCG(accel_directives).file_cache) {
+			CG(compiler_options) |= ZEND_COMPILE_WITH_FILE_CACHE;
+		}
+#endif
 		op_array = *op_array_p = accelerator_orig_compile_file(file_handle, type);
 		CG(compiler_options) = orig_compiler_options;
 	} zend_catch {

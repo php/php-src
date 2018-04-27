@@ -1014,6 +1014,9 @@ END_EXTERN_C()
 /* disable builtin special case function calls */
 #define ZEND_COMPILE_NO_BUILTINS				(1<<10)
 
+/* result of compilation may be stored in file cache */
+#define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
+
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY
 

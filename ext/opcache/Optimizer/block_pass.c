@@ -54,7 +54,9 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	if (retval) {
-		if (c->flags & CONST_PERSISTENT) {
+		if ((c->flags & CONST_PERSISTENT)
+		 && (!(c->flags & CONST_NO_FILE_CACHE)
+		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
