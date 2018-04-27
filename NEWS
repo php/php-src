@@ -9,6 +9,8 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #76275 (Assertion failure in file cache when unserializing empty
     try_catch_array). (Nikita)
+  . Fixed bug #76281 (Opcache causes incorrect "undefined variable" errors).
+    (Nikita)
 
 - Reflection:
   . Fixed arginfo for array_replace(_recursive) and array_merge(_recursive).
