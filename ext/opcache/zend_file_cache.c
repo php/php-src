@@ -101,10 +101,11 @@ static int zend_file_cache_flock(int fd, int type)
 #define IS_SERIALIZED(ptr) \
 	((char*)(ptr) <= (char*)script->size)
 #define IS_UNSERIALIZED(ptr) \
-	((char*)(ptr) >= (char*)script->mem && (char*)(ptr) < (char*)script->mem + script->size)
+	(((char*)(ptr) >= (char*)script->mem && (char*)(ptr) < (char*)script->mem + script->size) || \
+	 IS_ACCEL_INTERNED(ptr))
 #define SERIALIZE_PTR(ptr) do { \
 		if (ptr) { \
-			ZEND_ASSERT(IS_UNSERIALIZED(ptr) || IS_ACCEL_INTERNED(ptr)); \
+			ZEND_ASSERT(IS_UNSERIALIZED(ptr)); \
 			(ptr) = (void*)((char*)(ptr) - (char*)script->mem); \
 		} \
 	} while (0)
@@ -960,12 +961,12 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 	switch (Z_TYPE_P(zv)) {
 		case IS_STRING:
 		case IS_CONSTANT:
-			if (IS_SERIALIZED(Z_STR_P(zv))) {
+			if (!IS_UNSERIALIZED(Z_STR_P(zv))) {
 				UNSERIALIZE_STR(Z_STR_P(zv));
 			}
 			break;
 		case IS_ARRAY:
-			if (IS_SERIALIZED(Z_ARR_P(zv))) {
+			if (!IS_UNSERIALIZED(Z_ARR_P(zv))) {
 				HashTable *ht;
 
 				UNSERIALIZE_PTR(Z_ARR_P(zv));
@@ -975,7 +976,7 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			}
 			break;
 		case IS_REFERENCE:
-			if (IS_SERIALIZED(Z_REF_P(zv))) {
+			if (!IS_UNSERIALIZED(Z_REF_P(zv))) {
 				zend_reference *ref;
 
 				UNSERIALIZE_PTR(Z_REF_P(zv));
@@ -984,12 +985,12 @@ static void zend_file_cache_unserialize_zval(zval                    *zv,
 			}
 			break;
 		case IS_CONSTANT_AST:
-			if (IS_SERIALIZED(Z_AST_P(zv))) {
+			if (!IS_UNSERIALIZED(Z_AST_P(zv))) {
 				zend_ast_ref *ast;
 
 				UNSERIALIZE_PTR(Z_AST_P(zv));
 				ast = Z_AST_P(zv);
-				if (IS_SERIALIZED(ast->ast)) {
+				if (!IS_UNSERIALIZED(ast->ast)) {
 					ast->ast = zend_file_cache_unserialize_ast(ast->ast, script, buf);
 				}
 			}
@@ -1001,7 +1002,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
                                                  zend_persistent_script  *script,
                                                  void                    *buf)
 {
-	if (op_array->static_variables && IS_SERIALIZED(op_array->static_variables)) {
+	if (op_array->static_variables && !IS_UNSERIALIZED(op_array->static_variables)) {
 		HashTable *ht;
 
 		UNSERIALIZE_PTR(op_array->static_variables);
@@ -1026,7 +1027,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		return;
 	}
 
-	if (op_array->literals && IS_SERIALIZED(op_array->literals)) {
+	if (op_array->literals && !IS_UNSERIALIZED(op_array->literals)) {
 		zval *p, *end;
 
 		UNSERIALIZE_PTR(op_array->literals);
@@ -1038,7 +1039,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 		}
 	}
 
-	if (IS_SERIALIZED(op_array->opcodes)) {
+	if (!IS_UNSERIALIZED(op_array->opcodes)) {
 		zend_op *opline, *end;
 
 		UNSERIALIZE_PTR(op_array->opcodes);
@@ -1099,7 +1100,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 				end++;
 			}
 			while (p < end) {
-				if (IS_SERIALIZED(p->name)) {
+				if (!IS_UNSERIALIZED(p->name)) {
 					UNSERIALIZE_STR(p->name);
 				}
 				if (p->type & (Z_UL(1) << (sizeof(zend_type)*8-1))) { /* type is class */
@@ -1120,7 +1121,7 @@ static void zend_file_cache_unserialize_op_array(zend_op_array           *op_arr
 			p = op_array->vars;
 			end = p + op_array->last_var;
 			while (p < end) {
-				if (IS_SERIALIZED(*p)) {
+				if (!IS_UNSERIALIZED(*p)) {
 					UNSERIALIZE_STR(*p);
 				}
 				p++;
@@ -1152,19 +1153,19 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
                                                   zend_persistent_script  *script,
                                                   void                    *buf)
 {
-	if (IS_SERIALIZED(Z_PTR_P(zv))) {
+	if (!IS_UNSERIALIZED(Z_PTR_P(zv))) {
 		zend_property_info *prop;
 
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		prop = Z_PTR_P(zv);
 
-		if (prop->ce && IS_SERIALIZED(prop->ce)) {
+		if (prop->ce && !IS_UNSERIALIZED(prop->ce)) {
 			UNSERIALIZE_PTR(prop->ce);
 		}
-		if (prop->name && IS_SERIALIZED(prop->name)) {
+		if (prop->name && !IS_UNSERIALIZED(prop->name)) {
 			UNSERIALIZE_STR(prop->name);
 		}
-		if (prop->doc_comment && IS_SERIALIZED(prop->doc_comment)) {
+		if (prop->doc_comment && !IS_UNSERIALIZED(prop->doc_comment)) {
 			UNSERIALIZE_STR(prop->doc_comment);
 		}
 	}
@@ -1174,17 +1175,17 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
                                                        zend_persistent_script  *script,
                                                        void                    *buf)
 {
-	if (IS_SERIALIZED(Z_PTR_P(zv))) {
+	if (!IS_UNSERIALIZED(Z_PTR_P(zv))) {
 		zend_class_constant *c;
 
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
 		zend_file_cache_unserialize_zval(&c->value, script, buf);
-		if (c->ce && IS_SERIALIZED(c->ce)) {
+		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
 		}
-		if (c->doc_comment && IS_SERIALIZED(c->doc_comment)) {
+		if (c->doc_comment && !IS_UNSERIALIZED(c->doc_comment)) {
 			UNSERIALIZE_STR(c->doc_comment);
 		}
 	}
