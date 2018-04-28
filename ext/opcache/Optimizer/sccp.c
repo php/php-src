@@ -660,7 +660,7 @@ static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, z
 }
 
 static inline void ct_eval_type_check(zval *result, uint32_t type_mask, zval *op1) {
-	ZVAL_BOOL(result, (1 << Z_TYPE_P(op1)) & type_mask);
+	ZVAL_BOOL(result, (type_mask >> Z_TYPE_P(op1)) & 1);
 }
 
 static inline int ct_eval_in_array(zval *result, uint32_t extended_value, zval *op1, zval *op2) {

@@ -1679,7 +1679,7 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
 	ch = (uint32_t)((unsigned char *)var_name)[0];
 #if 1
-	if (UNEXPECTED(!(charset[ch >> 5] & (1 << (ch & 0x1f))))) {
+	if (UNEXPECTED(!((charset[ch >> 5] >> (ch & 0x1f)) & 1))) {
 #else
 	if (var_name[0] != '_' &&
 		(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
@@ -1696,7 +1696,7 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 		do {
 			ch = (uint32_t)((unsigned char *)var_name)[i];
 #if 1
-			if (UNEXPECTED(!(charset[8 + (ch >> 5)] & (1 << (ch & 0x1f))))) {
+			if (UNEXPECTED(!((charset[8 + (ch >> 5)] >> (ch & 0x1f)) & 1))) {
 #else
 			if (var_name[i] != '_' &&
 				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&
