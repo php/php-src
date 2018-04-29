@@ -332,7 +332,7 @@ PHP_FUNCTION(curl_multi_info_read)
 		RETURN_FALSE;
 	}
 	if (zmsgs_in_queue) {
-		zval_dtor(zmsgs_in_queue);
+		zval_ptr_dtor(zmsgs_in_queue);
 		ZVAL_LONG(zmsgs_in_queue, queued_msgs);
 	}
 
