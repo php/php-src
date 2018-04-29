@@ -79,10 +79,6 @@ static const struct nv {
 	{ NULL,				NULL,			},
 };
 
-#ifdef PHP_WIN32
-# define strcasestr strstr
-#endif
-
 static const struct cv {
 	uint64_t clsid[2];
 	const char *mime;
