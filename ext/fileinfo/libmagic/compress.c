@@ -209,10 +209,10 @@ file_zmagic(struct magic_set *ms, int fd, const char *name,
 				goto error;
 			if ((rbuf = file_pop_buffer(ms, pb)) != NULL) {
 				if (file_printf(ms, "%s", rbuf) == -1) {
-					free(rbuf);
+					efree(rbuf);
 					goto error;
 				}
-				free(rbuf);
+				efree(rbuf);
 			}
 			if (!mime && file_printf(ms, ")") == -1)
 				goto error;
@@ -452,7 +452,7 @@ uncompresszlib(const unsigned char *old, unsigned char **newch,
 	int rc;
 	z_stream z;
 
-	if ((*newch = CAST(unsigned char *, malloc(bytes_max + 1))) == NULL)
+	if ((*newch = CAST(unsigned char *, emalloc(bytes_max + 1))) == NULL)
 		return makeerror(newch, n, "No buffer, %s", strerror(errno));
 
 	z.next_in = CCAST(Bytef *, old);
@@ -669,7 +669,7 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 		if (fd == -1)
 			writechild(fdp, old, *n);
 
-		*newch = CAST(unsigned char *, malloc(bytes_max + 1));
+		*newch = CAST(unsigned char *, emalloc(bytes_max + 1));
 		if (*newch == NULL) {
 			rv = makeerror(newch, n, "No buffer, %s",
 			    strerror(errno));
@@ -688,7 +688,7 @@ uncompressbuf(int fd, size_t bytes_max, size_t method, const unsigned char *old,
 			r = filter_error(*newch, r);
 			break;
 		}
-		free(*newch);
+		efree(*newch);
 		if  (r == 0)
 			rv = makeerror(newch, n, "Read failed, %s",
 			    strerror(errno));

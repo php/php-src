@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2008 Christos Zoulas
+ * Copyright (c) 2008, 2016 Christos Zoulas
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.65 2017/04/08 20:58:03 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.66 2017/11/02 20:25:39 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -274,10 +274,10 @@ cdf_file_catalog(struct magic_set *ms, const cdf_header_t *h,
 			if (file_printf(ms, "%s%s",
 			    cdf_u16tos8(buf, ce[i].ce_namlen, ce[i].ce_name),
 			    i == cat->cat_num - 1 ? "]" : ", ") == -1) {
-				free(cat);
+				efree(cat);
 				return -1;
 			}
-		free(cat);
+		efree(cat);
 	} else {
 		if (file_printf(ms, "application/CDFV2") == -1)
 			return -1;
@@ -338,7 +338,7 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 	}
 
         m = cdf_file_property_info(ms, info, count, root_storage);
-        free(info);
+        efree(info);
 
         return m == -1 ? -2 : m;
 }
@@ -530,9 +530,11 @@ cdf_file_dir_info(struct magic_set *ms, const cdf_dir_t *dir)
 }
 
 protected int
-file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
-    size_t nbytes)
+file_trycdf(struct magic_set *ms, const struct buffer *b)
 {
+	int fd = b->fd;
+	const unsigned char *buf = b->fbuf;
+	size_t nbytes = b->flen;
         cdf_info_t info;
         cdf_header_t h;
         cdf_sat_t sat, ssat;
@@ -646,11 +648,11 @@ out5:
 	cdf_zero_stream(&scn);
 	cdf_zero_stream(&sst);
 out3:
-        free(dir.dir_tab);
+        efree(dir.dir_tab);
 out2:
-        free(ssat.sat_tab);
+        efree(ssat.sat_tab);
 out1:
-        free(sat.sat_tab);
+        efree(sat.sat_tab);
 out0:
 	if (i == -1) {
 	    if (NOTMIME(ms)) {
