@@ -35,7 +35,7 @@
 #include "file.h"
 
 #ifndef	lint
-FILE_RCSID("@(#)$File: encoding.c,v 1.13 2015/06/04 19:16:28 christos Exp $")
+FILE_RCSID("@(#)$File: encoding.c,v 1.14 2017/11/02 20:25:39 christos Exp $")
 #endif	/* lint */
 
 #include "magic.h"
@@ -66,11 +66,21 @@ private void from_ebcdic(const unsigned char *, size_t, unsigned char *);
  * ubuf, and the number of characters converted in ulen.
  */
 protected int
-file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, unichar **ubuf, size_t *ulen, const char **code, const char **code_mime, const char **type)
+file_encoding(struct magic_set *ms, const struct buffer *b, unichar **ubuf,
+    size_t *ulen, const char **code, const char **code_mime, const char **type)
 {
+	const unsigned char *buf = b->fbuf;
+	size_t nbytes = b->flen;
 	size_t mlen;
 	int rv = 1, ucs_type;
 	unsigned char *nbuf = NULL;
+	unichar *udefbuf;
+	size_t udeflen;
+
+	if (ubuf == NULL)
+		ubuf = &udefbuf;
+	if (ulen == NULL)
+		ulen = &udeflen;
 
 	*type = "text";
 	*ulen = 0;
@@ -78,12 +88,12 @@ file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, uni
 	*code_mime = "binary";
 
 	mlen = (nbytes + 1) * sizeof((*ubuf)[0]);
-	if ((*ubuf = CAST(unichar *, calloc((size_t)1, mlen))) == NULL) {
+	if ((*ubuf = CAST(unichar *, ecalloc((size_t)1, mlen))) == NULL) {
 		file_oomem(ms, mlen);
 		goto done;
 	}
 	mlen = (nbytes + 1) * sizeof(nbuf[0]);
-	if ((nbuf = CAST(unsigned char *, calloc((size_t)1, mlen))) == NULL) {
+	if ((nbuf = CAST(unsigned char *, ecalloc((size_t)1, mlen))) == NULL) {
 		file_oomem(ms, mlen);
 		goto done;
 	}
@@ -143,7 +153,9 @@ file_encoding(struct magic_set *ms, const unsigned char *buf, size_t nbytes, uni
 	}
 
  done:
-	free(nbuf);
+	efree(nbuf);
+	if (ubuf == &udefbuf)
+		efree(udefbuf);
 
 	return rv;
 }

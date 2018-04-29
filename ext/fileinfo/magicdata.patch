@@ -1,6 +1,6 @@
-diff -u file-5.31.orig/magic/Magdir/cafebabe file-5.31/magic/Magdir/cafebabe
---- file-5.31.orig/magic/Magdir/cafebabe	2017-03-17 21:35:28.000000000 +0000
-+++ file-5.31/magic/Magdir/cafebabe	2017-10-11 14:30:57.476077825 +0000
+diff -u Magdir.orig/cafebabe Magdir/cafebabe
+--- Magdir.orig/cafebabe	2017-05-25 22:07:23.000000000 +0200
++++ Magdir/cafebabe	2018-04-28 12:26:00.840857162 +0200
 @@ -15,22 +15,6 @@
  # might add another one or two as time goes by...
  #
@@ -57,33 +57,9 @@ diff -u file-5.31.orig/magic/Magdir/cafebabe file-5.31/magic/Magdir/cafebabe
  >>>48	use		mach-o		\b
  >>4	belong		4
  >>>68	use		mach-o		\b
-diff -u file-5.31.orig/magic/Magdir/commands file-5.31/magic/Magdir/commands
---- file-5.31.orig/magic/Magdir/commands	2017-04-04 20:34:24.000000000 +0000
-+++ file-5.31/magic/Magdir/commands	2017-10-11 14:29:57.653552987 +0000
-@@ -56,7 +56,7 @@
- !:mime	text/x-awk
- 0	string/wt	#!\ /usr/bin/awk	awk script text executable
- !:mime	text/x-awk
--0	regex/4096	=^[A-Za-z0-9_]{0,100}BEGIN[A-Za-z0-9_]{0,100}[{]	awk or perl script text
-+0	regex/4096	=^[\040\t\f\r\n]{0,100}BEGIN[\040\t\f\r\n]{0,100}[{]	awk or perl script text
- 
- # AT&T Bell Labs' Plan 9 shell
- 0	string/wt	#!\ /bin/rc	Plan 9 rc shell script text executable
-diff -u file-5.31.orig/magic/Magdir/dump file-5.31/magic/Magdir/dump
---- file-5.31.orig/magic/Magdir/dump	2017-03-17 21:35:28.000000000 +0000
-+++ file-5.31/magic/Magdir/dump	2017-10-11 14:30:09.622057792 +0000
-@@ -69,6 +69,8 @@
- >0	use	old-dump-be
- 
- 24	lelong	60012		new-fs dump file (little endian),
-+# to correctly recognize '*.mo' GNU message catalog (little endian)
-+!:strength - 15
- >0	use	\^new-dump-be
- 
- 24	lelong	60011		old-fs dump file (little endian),
-diff -u file-5.31.orig/magic/Magdir/filesystems file-5.31/magic/Magdir/filesystems
---- file-5.31.orig/magic/Magdir/filesystems	2017-03-24 19:29:26.000000000 +0000
-+++ file-5.31/magic/Magdir/filesystems	2017-10-11 14:30:57.476077825 +0000
+diff -u Magdir.orig/filesystems Magdir/filesystems
+--- Magdir.orig/filesystems	2018-03-11 01:46:42.000000000 +0100
++++ Magdir/filesystems	2018-04-28 12:26:11.080817126 +0200
 @@ -254,7 +254,7 @@
  30		search/481	\x55\xAA
  # to display DOS/MBR boot sector (40) before old one (strength=50+21),Syslinux bootloader (71),SYSLINUX MBR (37+36),NetBSD mbr (110),AdvanceMAME mbr (111)
@@ -102,74 +78,9 @@ diff -u file-5.31.orig/magic/Magdir/filesystems file-5.31/magic/Magdir/filesyste
  >2		string		OSBS		OS/BS MBR
  # added by Joerg Jenderek at Feb 2013 according to http://thestarman.pcministry.com/asm/mbr/
  # and http://en.wikipedia.org/wiki/Master_Boot_Record
-Only in file-5.31/magic/Magdir/: gconv
-diff -u file-5.31.orig/magic/Magdir/images file-5.31/magic/Magdir/images
---- file-5.31.orig/magic/Magdir/images	2017-04-04 20:34:24.000000000 +0000
-+++ file-5.31/magic/Magdir/images	2017-10-11 14:29:57.653552987 +0000
-@@ -175,42 +175,42 @@
- >>>&0	regex		=[0-9]{1,50}			\b %s
- 
- 0	search/1	P1
-->0	regex/4		P1[A-Za-z0-9_]
-+>0	regex/4		P1[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, bitmap
- !:strength + 45
- !:mime	image/x-portable-bitmap
- 
- 0	search/1	P2
-->0	regex/4		P2[A-Za-z0-9_]
-+>0	regex/4		P2[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, greymap
- !:strength + 45
- !:mime	image/x-portable-greymap
- 
- 0	search/1	P3
-->0	regex/4		P3[A-Za-z0-9_]
-+>0	regex/4		P3[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, pixmap
- !:strength + 45
- !:mime	image/x-portable-pixmap
- 
- 0	string		P4
-->0	regex/4		P4[A-Za-z0-9_]
-+>0	regex/4		P4[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, rawbits, bitmap
- !:strength + 45
- !:mime	image/x-portable-bitmap
- 
- 0	string		P5
-->0	regex/4		P5[A-Za-z0-9_]
-+>0	regex/4		P5[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, rawbits, greymap
- !:strength + 45
- !:mime	image/x-portable-greymap
- 
- 0	string		P6
-->0	regex/4		P6[A-Za-z0-9_]
-+>0	regex/4		P6[\040\t\f\r\n]
- >>0	use		netpbm
- >>>0	string		x	\b, rawbits, pixmap
- !:strength + 45
-diff -u file-5.31.orig/magic/Magdir/python file-5.31/magic/Magdir/python
---- file-5.31.orig/magic/Magdir/python	2017-05-08 18:10:13.000000000 +0000
-+++ file-5.31/magic/Magdir/python	2017-10-11 14:29:57.653552987 +0000
-@@ -64,7 +64,7 @@
- # except: or finally:
- # block
- 0	search/4096	try:
-->&0	regex	\^[A-Za-z0-9_]*except.*:	Python script text executable
-+>&0	regex	\^[\040\t\f\r\n]*except.*:	Python script text executable
- !:strength + 15
- !:mime text/x-python
- >&0	search/4096	finally:	Python script text executable
-diff -u file-5.31.orig/magic/Magdir/rpm file-5.31/magic/Magdir/rpm
---- file-5.31.orig/magic/Magdir/rpm	2017-03-17 21:34:26.000000000 +0000
-+++ file-5.31/magic/Magdir/rpm	2017-10-11 14:30:57.480078009 +0000
+diff -u Magdir.orig/rpm Magdir/rpm
+--- Magdir.orig/rpm	2013-01-11 17:45:23.000000000 +0100
++++ Magdir/rpm	2018-04-28 12:26:14.072805431 +0200
 @@ -29,6 +29,7 @@
  >>8	beshort		17		SuperH
  >>8	beshort		18		Xtensa
@@ -178,76 +89,18 @@ diff -u file-5.31.orig/magic/Magdir/rpm file-5.31/magic/Magdir/rpm
  
  #delta RPM    Daniel Novotny (dnovotny@redhat.com)
  0	string		drpm		Delta RPM
-diff -u file-5.31.orig/magic/Magdir/ruby file-5.31/magic/Magdir/ruby
---- file-5.31.orig/magic/Magdir/ruby	2017-03-17 21:34:26.000000000 +0000
-+++ file-5.31/magic/Magdir/ruby	2017-10-11 14:30:24.410682267 +0000
-@@ -6,27 +6,46 @@
- # From: Reuben Thomas <rrt@sc3d.org>
- 
- # Ruby scripts
--0	search/1/w	#!\ /usr/bin/ruby	Ruby script text executable
-+0	search/1/w	#!\ /usr/bin/ruby				Ruby script text executable
- !:strength + 15
- !:mime text/x-ruby
- 0	search/1/w	#!\ /usr/local/bin/ruby	Ruby script text executable
- !:strength + 15
- !:mime text/x-ruby
--0	search/1	#!/usr/bin/env\ ruby	Ruby script text executable
-+0	search/1	#!/usr/bin/env\ ruby				Ruby script text executable
- !:strength + 15
- !:mime text/x-ruby
--0	search/1	#!\ /usr/bin/env\ ruby	Ruby script text executable
-+0	search/1	#!\ /usr/bin/env\ ruby			Ruby script text executable
- !:strength + 15
- !:mime text/x-ruby
- 
- # What looks like ruby, but does not have a shebang
- # (modules and such)
- # From: Lubomir Rintel <lkundrak@v3.sk>
--0	regex		\^[\ \t]*require[\ \t]'[A-Za-z_/]+'
-->0	regex		include\ [A-Z]|def\ [a-z]|\ do$
-->>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby script text
-+0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'
-+>0	regex		def\ [a-z]|\ do$
-+>>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+!:strength + 30
- !:mime	text/x-ruby
--0	regex		\^[\ \t]*(class|module)[\ \t][A-Z]
-+0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
- >0	regex		(modul|includ)e\ [A-Z]|def\ [a-z]
-->>0	regex		\^[\ \t]*end([\ \t]*[;#].*)?$		Ruby module source text
-+>>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+!:strength + 30
-+!:mime	text/x-ruby
-+# Classes with no modules or defs, beats simple ASCII
-+0	regex		\^[[:space:]]*(class|module)[[:space:]][A-Z]
-+>&0	regex	\^[[:space:]]*end([[:space:]]+[;#if].*)?$		Ruby script text
-+!:strength + 10
-+!:mime	text/x-ruby
-+# Looks for function definiton to balance python magic
-+# def name (args)
-+# end
-+0	regex		\^[[:space:]]*def\ [a-z]|def\ [[:alpha:]]+::[a-z]
-+>&0	regex		\^[[:space:]]*end([[:space:]]+[;#].*)?$		Ruby script text
-+!:strength + 10
-+!:mime	text/x-ruby
-+
-+0	regex		\^[[:space:]]*require[[:space:]]'[A-Za-z_/]+'	Ruby script text
-+!:mime	text/x-ruby
-+0 regex 	\^[[:space:]]*include\ ([A-Z]+[a-z]*(::))+	Ruby script text
- !:mime	text/x-ruby
-diff -u file-5.31.orig/magic/Magdir/securitycerts file-5.31/magic/Magdir/securitycerts
---- file-5.31.orig/magic/Magdir/securitycerts	2017-03-17 21:34:26.000000000 +0000
-+++ file-5.31/magic/Magdir/securitycerts	2017-10-11 14:30:57.480078009 +0000
+diff -u Magdir.orig/securitycerts Magdir/securitycerts
+--- Magdir.orig/securitycerts	2009-09-19 18:28:12.000000000 +0200
++++ Magdir/securitycerts	2018-04-28 12:26:14.072805431 +0200
 @@ -4,3 +4,5 @@
  0	search/1		-----BEGIN\ CERTIFICATE------	RFC1421 Security Certificate text
  0	search/1		-----BEGIN\ NEW\ CERTIFICATE	RFC1421 Security Certificate Signing Request text
  0	belong	0xedfeedfe	Sun 'jks' Java Keystore File data
 +
 +0	string \0volume_key	volume_key escrow packet
-diff -u file-5.31.orig/magic/Magdir/varied.script file-5.31/magic/Magdir/varied.script
---- file-5.31.orig/magic/Magdir/varied.script	2017-03-17 21:34:26.000000000 +0000
-+++ file-5.31/magic/Magdir/varied.script	2017-10-11 14:30:57.480078009 +0000
+diff -u Magdir.orig/varied.script Magdir/varied.script
+--- Magdir.orig/varied.script	2015-03-27 18:59:39.000000000 +0100
++++ Magdir/varied.script	2018-04-28 12:26:14.072805431 +0200
 @@ -4,27 +4,35 @@
  
  0	string/t		#!\ /			a
