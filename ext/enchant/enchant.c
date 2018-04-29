@@ -719,7 +719,7 @@ PHP_FUNCTION(enchant_dict_quick_check)
 	}
 
 	if (sugg) {
-		zval_dtor(sugg);
+		zval_ptr_dtor(sugg);
 		array_init(sugg);
 	}
 
