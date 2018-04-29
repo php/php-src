@@ -220,6 +220,7 @@ der_tag(char *buf, size_t len, uint32_t tag)
 static int
 der_data(char *buf, size_t blen, uint32_t tag, const void *q, uint32_t len)
 {
+	uint32_t i = 0;
 	const uint8_t *d = CAST(const uint8_t *, q);
 	switch (tag) {
 	case DER_TAG_PRINTABLE_STRING:
@@ -231,7 +232,7 @@ der_data(char *buf, size_t blen, uint32_t tag, const void *q, uint32_t len)
 		break;
 	}
 		
-	for (uint32_t i = 0; i < len; i++) {
+	for (; i < len; i++) {
 		uint32_t z = i << 1;
 		if (z < blen - 2)
 			snprintf(buf + z, blen - z, "%.2x", d[i]);
