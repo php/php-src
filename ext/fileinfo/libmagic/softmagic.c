@@ -1829,7 +1829,7 @@ file_strncmp16(const char *a, const char *b, size_t len, uint32_t flags)
 }
 
 public void
-convert_libmagic_pattern(zval *pattern, char *val, int len, int options)
+convert_libmagic_pattern(zval *pattern, char *val, size_t len, uint32_t options)
 {
 	int i, j=0;
 	zend_string *t;
@@ -2024,7 +2024,7 @@ magiccheck(struct magic_set *ms, struct magic *m)
 	}
 	case FILE_REGEX: {
 		zval pattern;
-		int options = 0;
+		uint32_t options = 0;
 		pcre_cache_entry *pce;
 
 		options |= PCRE2_MULTILINE;
