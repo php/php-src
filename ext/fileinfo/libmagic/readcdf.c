@@ -133,7 +133,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 {
         size_t i;
         cdf_timestamp_t tp;
-        struct timeval ts;
+        struct timespec ts;
         char buf[64];
         const char *str = NULL;
         const char *s, *e;
@@ -220,11 +220,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                                 return -1;
                                 } else {
                                         char *c, *ec;
-					const time_t sec = ts.tv_sec;
-                                        if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
-											return -1;
-										}
-                                        c = cdf_ctime(&sec, tbuf);
+                                        cdf_timestamp_to_timespec(&ts, tp);
+                                        c = cdf_ctime(&ts.tv_sec, tbuf);
                                         if (c != NULL &&
 					    (ec = strchr(c, '\n')) != NULL)
 						*ec = '\0';

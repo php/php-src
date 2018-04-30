@@ -244,8 +244,8 @@ file_fmttime(uint64_t v, int flags, char *buf)
 	struct tm *tm = NULL;
 
 	if (flags & FILE_T_WINDOWS) {
-		struct timeval ts;
-		cdf_timestamp_to_timespec(&ts, t);
+		struct timespec ts;
+		cdf_timestamp_to_timespec(&ts, CAST(cdf_timestamp_t, v));
 		t = ts.tv_sec;
 	} else {
 		// XXX: perhaps detect and print something if overflow
