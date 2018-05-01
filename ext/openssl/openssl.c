@@ -3819,6 +3819,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 				/* not a X509 certificate, try to retrieve public key */
 				BIO* in;
 				if (filename) {
+					if (php_openssl_open_base_dir_chk(filename)) {
+						TMP_CLEAN;
+					}
 					in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 				} else {
 					in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));
