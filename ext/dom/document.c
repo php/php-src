@@ -2148,6 +2148,7 @@ PHP_FUNCTION(dom_document_save_html)
 	zval *id, *nodep = NULL;
 	xmlDoc *docp;
 	xmlNode *node;
+	xmlOutputBufferPtr outBuf;
 	xmlBufferPtr buf;
 	dom_object *intern, *nodeobj;
 	xmlChar *mem = NULL;
@@ -2174,7 +2175,8 @@ PHP_FUNCTION(dom_document_save_html)
 		}
 
 		buf = xmlBufferCreate();
-		if (!buf) {
+		outBuf = xmlOutputBufferCreateBuffer(buf, NULL);
+		if (!outBuf || !buf) {
 			php_error_docref(NULL, E_WARNING, "Could not fetch buffer");
 			RETURN_FALSE;
 		}
@@ -2183,20 +2185,21 @@ PHP_FUNCTION(dom_document_save_html)
 			int one_size;
 
 			for (node = node->children; node; node = node->next) {
-				one_size = htmlNodeDump(buf, docp, node);
-
+				htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+				one_size = !outBuf->error ? xmlOutputBufferGetSize(outBuf) : -1;
 				if (one_size >= 0) {
-					size += one_size;
+					size = one_size;
 				} else {
 					size = -1;
 					break;
 				}
 			}
 		} else {
-			size = htmlNodeDump(buf, docp, node);
+			htmlNodeDumpFormatOutput(outBuf, docp, node, NULL, format);
+			size = !outBuf->error ? xmlOutputBufferGetSize(outBuf): -1;
 		}
 		if (size >= 0) {
-			mem = (xmlChar*) xmlBufferContent(buf);
+			mem = (xmlChar*) xmlOutputBufferGetContent(outBuf);
 			if (!mem) {
 				RETVAL_FALSE;
 			} else {
@@ -2206,7 +2209,7 @@ PHP_FUNCTION(dom_document_save_html)
 			php_error_docref(NULL, E_WARNING, "Error dumping HTML node");
 			RETVAL_FALSE;
 		}
-		xmlBufferFree(buf);
+		xmlOutputBufferClose(outBuf);
 	} else {
 #if LIBXML_VERSION >= 20623
 		htmlDocDumpMemoryFormat(docp, &mem, &size, format);
