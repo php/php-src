@@ -10,7 +10,8 @@ if (PHP_ZIP != "no") {
 	) {
 		EXTENSION('zip', 'php_zip.c zip_stream.c');
 
-		if (!PHP_ZIP_SHARED) {
+		if (get_define("LIBS_ZIP").match("libzip_a.lib")) {
+			/* Using static dependency lib. */
 			AC_DEFINE("ZIP_STATIC", 1);
 		}
 
