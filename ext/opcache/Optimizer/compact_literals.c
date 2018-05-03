@@ -740,6 +740,25 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 		zend_hash_destroy(&hash);
 		zend_arena_release(&ctx->arena, checkpoint);
 
+		if (1) {
+			opline = op_array->opcodes;
+			while (1) {
+				if (opline->opcode == ZEND_RECV_INIT) {
+					zval *val = &op_array->literals[opline->op2.constant];
+
+					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+						uint32_t slot = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
+
+						Z_CACHE_SLOT_P(val) = slot;
+						op_array->cache_size += sizeof(zval);
+					}
+				} else if (opline->opcode != ZEND_RECV) {
+					break;
+				}
+				opline++;
+			}
+		}
+
 #if DEBUG_COMPACT_LITERALS
 		{
 			int i, use_copy;

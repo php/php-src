@@ -2237,14 +2237,28 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_RECV_INIT_SPEC_CON
 	arg_num = opline->op1.num;
 	param = _get_zval_ptr_cv_undef_BP_VAR_W(opline->result.var EXECUTE_DATA_CC);
 	if (arg_num > EX_NUM_ARGS()) {
-		ZVAL_COPY(param, RT_CONSTANT(opline, opline->op2));
-		if (Z_OPT_TYPE_P(param) == IS_CONSTANT_AST) {
-			SAVE_OPLINE();
-			if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
-				zval_ptr_dtor_nogc(param);
-				ZVAL_UNDEF(param);
-				HANDLE_EXCEPTION();
+		zval *default_value = RT_CONSTANT(opline, opline->op2);
+
+		if (Z_OPT_TYPE_P(default_value) == IS_CONSTANT_AST) {
+			zval *cache_val = (zval*)CACHE_ADDR(Z_CACHE_SLOT_P(default_value));
+
+			/* we keep in cache only not refcounted values */
+			if (Z_TYPE_P(cache_val) != IS_UNDEF) {
+				ZVAL_COPY_VALUE(param, cache_val);
+			} else {
+				SAVE_OPLINE();
+				ZVAL_COPY(param, default_value);
+				if (UNEXPECTED(zval_update_constant_ex(param, EX(func)->op_array.scope) != SUCCESS)) {
+					zval_ptr_dtor_nogc(param);
+					ZVAL_UNDEF(param);
+					HANDLE_EXCEPTION();
+				}
+				if (!Z_REFCOUNTED_P(param)) {
+					ZVAL_COPY_VALUE(cache_val, param);
+				}
 			}
+		} else {
+			ZVAL_COPY(param, default_value);
 		}
 	}
 

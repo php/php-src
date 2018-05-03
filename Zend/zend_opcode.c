@@ -579,6 +579,16 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	end = opline + op_array->last;
 	while (opline < end) {
 		switch (opline->opcode) {
+			case ZEND_RECV_INIT:
+				{
+					zval *val = CT_CONSTANT(opline->op2);
+					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+						uint32_t slot = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
+						Z_CACHE_SLOT_P(val) = slot;
+						op_array->cache_size += sizeof(zval);
+					}
+				}
+				break;
 			case ZEND_FAST_CALL:
 				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);
