@@ -443,7 +443,6 @@ static void pdo_stmt_construct(zend_execute_data *execute_data, pdo_stmt_t *stmt
 		zend_fcall_info_args(&fci, ctor_args);
 
 		fcc.function_handler = dbstmt_ce->constructor;
-		fcc.calling_scope = zend_get_executed_scope();
 		fcc.called_scope = Z_OBJCE_P(object);
 		fcc.object = Z_OBJ_P(object);
 

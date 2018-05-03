@@ -646,13 +646,7 @@ int zend_call_function(zend_fcall_info *fci, zend_fcall_info_cache *fci_cache) /
 		return FAILURE; /* we would result in an instable executor otherwise */
 	}
 
-	switch (fci->size) {
-		case sizeof(zend_fcall_info):
-			break; /* nothing to do currently */
-		default:
-			zend_error_noreturn(E_CORE_ERROR, "Corrupted fcall_info provided to zend_call_function()");
-			break;
-	}
+	ZEND_ASSERT(fci->size == sizeof(zend_fcall_info));
 
 	/* Initialize execute_data */
 	if (!EG(current_execute_data)) {
@@ -954,7 +948,6 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	fcall_info.no_separation = 1;
 
 	fcall_cache.function_handler = EG(autoload_func);
-	fcall_cache.calling_scope = NULL;
 	fcall_cache.called_scope = NULL;
 	fcall_cache.object = NULL;
 

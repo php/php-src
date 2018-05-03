@@ -152,7 +152,6 @@ ZEND_METHOD(Closure, call)
 		}
 	}
 
-	fci_cache.calling_scope = closure->called_scope;
 	fci_cache.called_scope = newobj->ce;
 	fci_cache.object = fci.object = newobj;
 
@@ -250,7 +249,6 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 
 	fci.object = Z_OBJ(EX(This));
 	fcc.object = Z_OBJ(EX(This));
-	fcc.calling_scope = zend_get_executed_scope();
 
 	zend_call_function(&fci, &fcc);
 

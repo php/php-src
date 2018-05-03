@@ -431,7 +431,6 @@ PHP_FUNCTION(spl_autoload_call)
 			if (Z_ISUNDEF(alfi->obj)) {
 				fci.object = NULL;
 				fcic.object = NULL;
-				fcic.calling_scope = alfi->ce;
 				if (alfi->ce &&
 				    (!called_scope ||
 				     !instanceof_function(called_scope, alfi->ce))) {
