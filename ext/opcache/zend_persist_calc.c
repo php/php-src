@@ -60,15 +60,15 @@ static void zend_hash_persist_calc(HashTable *ht, void (*pPersistElement)(zval *
 		return;
 	}
 
-	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
+	if (!(HT_FLAGS(ht) & HASH_FLAG_PACKED) && ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
-			hash_size = HT_MIN_SIZE;
+			hash_size = HT_MIN_SIZE * 2;
 		} else {
 			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
-			while (hash_size >> 1 > ht->nNumUsed) {
+			while (hash_size >> 2 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}

@@ -114,17 +114,17 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
-	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
 		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
-			hash_size = HT_MIN_SIZE;
+			hash_size = HT_MIN_SIZE * 2;
 		} else {
 			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
-			while (hash_size >> 1 > ht->nNumUsed) {
+			while (hash_size >> 2 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
