@@ -2976,14 +2976,14 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 
 			if (object &&
 			    instanceof_function(object->ce, scope) &&
-			    instanceof_function(scope, fcc->calling_scope)) {
+			    instanceof_function(scope, ce)) {
 				fcc->object = object;
 				fcc->called_scope = object->ce;
 			} else {
-				fcc->called_scope = fcc->calling_scope;
+				fcc->called_scope = ce;
 			}
 		} else {
-			fcc->called_scope = fcc->object ? fcc->object->ce : fcc->calling_scope;
+			fcc->called_scope = fcc->object ? fcc->object->ce : ce;
 		}
 		*strict_class = 1;
 		ret = 1;
@@ -2995,7 +2995,7 @@ static int zend_is_callable_check_class(zend_string *name, zend_class_entry *sco
 }
 /* }}} */
 
-static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, int strict_class, char **error) /* {{{ */
+static zend_always_inline int zend_is_callable_check_func(int check_flags, zval *callable, zend_fcall_info_cache *fcc, int strict_class, char **error) /* {{{ */
 {
 	zend_class_entry *ce_org = fcc->calling_scope;
 	int retval = 0;
@@ -3009,12 +3009,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 	zval *zv;
 	ALLOCA_FLAG(use_heap)
 
-	if (error) {
-		*error = NULL;
-	}
-
 	fcc->calling_scope = NULL;
-	fcc->function_handler = NULL;
 
 	if (!ce_org) {
 		zend_string *lmname;
@@ -3065,7 +3060,7 @@ static int zend_is_callable_check_func(int check_flags, zval *callable, zend_fca
 		mlen = Z_STRLEN_P(callable) - clen - 2;
 
 		if (colon == Z_STRVAL_P(callable)) {
-			if (error) zend_spprintf(error, 0, "invalid function name");
+			if (error) *error = estrdup("invalid function name");
 			return 0;
 		}
 
@@ -3353,10 +3348,11 @@ ZEND_API zend_string *zend_get_callable_name(zval *callable) /* {{{ */
 }
 /* }}} */
 
-static zend_bool zend_is_callable_impl(zval *callable, zend_object *object, uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
+static zend_always_inline zend_bool zend_is_callable_impl(zval *callable, zend_object *object, uint32_t check_flags, zend_fcall_info_cache *fcc, char **error) /* {{{ */
 {
 	zend_bool ret;
 	zend_fcall_info_cache fcc_local;
+	int strict_class = 0;
 
 	if (fcc == NULL) {
 		fcc = &fcc_local;
@@ -3383,7 +3379,8 @@ again:
 				return 1;
 			}
 
-			ret = zend_is_callable_check_func(check_flags, callable, fcc, 0, error);
+check_func:
+			ret = zend_is_callable_check_func(check_flags, callable, fcc, strict_class, error);
 			if (fcc == &fcc_local &&
 			    fcc->function_handler &&
 				((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
@@ -3401,7 +3398,6 @@ again:
 			{
 				zval *method = NULL;
 				zval *obj = NULL;
-				int strict_class = 0;
 
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
 					obj = zend_hash_index_find(Z_ARRVAL_P(callable), 0);
@@ -3442,31 +3438,20 @@ again:
 						break;
 					}
 
-					ret = zend_is_callable_check_func(check_flags, method, fcc, strict_class, error);
-					if (fcc == &fcc_local &&
-					    fcc->function_handler &&
-						((fcc->function_handler->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) ||
-					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY ||
-					     fcc->function_handler->type == ZEND_OVERLOADED_FUNCTION)) {
-						if (fcc->function_handler->type != ZEND_OVERLOADED_FUNCTION &&
-							fcc->function_handler->common.function_name) {
-							zend_string_release(fcc->function_handler->common.function_name);
-						}
-						zend_free_trampoline(fcc->function_handler);
-					}
-					return ret;
+					callable = method;
+					goto check_func;
 
 				} while (0);
 				if (zend_hash_num_elements(Z_ARRVAL_P(callable)) == 2) {
 					if (!obj || (!Z_ISREF_P(obj)?
 								(Z_TYPE_P(obj) != IS_STRING && Z_TYPE_P(obj) != IS_OBJECT) :
 								(Z_TYPE_P(Z_REFVAL_P(obj)) != IS_STRING && Z_TYPE_P(Z_REFVAL_P(obj)) != IS_OBJECT))) {
-						if (error) zend_spprintf(error, 0, "first array member is not a valid class name or object");
+						if (error) *error = estrdup("first array member is not a valid class name or object");
 					} else {
-						if (error) zend_spprintf(error, 0, "second array member is not a valid method");
+						if (error) *error = estrdup("second array member is not a valid method");
 					}
 				} else {
-					if (error) zend_spprintf(error, 0, "array must have exactly two members");
+					if (error) *error = estrdup("array must have exactly two members");
 				}
 			}
 			return 0;
@@ -3475,13 +3460,13 @@ again:
 				fcc->called_scope = fcc->calling_scope;
 				return 1;
 			}
-			if (error) zend_spprintf(error, 0, "no array or string given");
+			if (error) *error = estrdup("no array or string given");
 			return 0;
 		case IS_REFERENCE:
 			callable = Z_REFVAL_P(callable);
 			goto again;
 		default:
-			if (error) zend_spprintf(error, 0, "no array or string given");
+			if (error) *error = estrdup("no array or string given");
 			return 0;
 	}
 }
