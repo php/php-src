@@ -550,14 +550,13 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 		prop = Z_PTR_P(zv);
 		UNSERIALIZE_PTR(prop);
 
-		if (prop->ce && !IS_SERIALIZED(prop->ce)) {
+		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
+		if (!IS_SERIALIZED(prop->ce)) {
 			SERIALIZE_PTR(prop->ce);
-		}
-		if (prop->name && !IS_SERIALIZED(prop->name)) {
 			SERIALIZE_STR(prop->name);
-		}
-		if (prop->doc_comment && !IS_SERIALIZED(prop->doc_comment)) {
-			SERIALIZE_STR(prop->doc_comment);
+			if (prop->doc_comment) {
+				SERIALIZE_STR(prop->doc_comment);
+			}
 		}
 	}
 }
@@ -574,12 +573,15 @@ static void zend_file_cache_serialize_class_constant(zval                     *z
 		c = Z_PTR_P(zv);
 		UNSERIALIZE_PTR(c);
 
-		zend_file_cache_serialize_zval(&c->value, script, info, buf);
-		if (c->ce && !IS_SERIALIZED(c->ce)) {
+		ZEND_ASSERT(c->ce != NULL);
+		if (!IS_SERIALIZED(c->ce)) {
 			SERIALIZE_PTR(c->ce);
-		}
-		if (c->doc_comment && !IS_SERIALIZED(c->doc_comment)) {
-			SERIALIZE_STR(c->doc_comment);
+
+			zend_file_cache_serialize_zval(&c->value, script, info, buf);
+
+			if (c->doc_comment) {
+				SERIALIZE_STR(c->doc_comment);
+			}
 		}
 	}
 }
@@ -1179,14 +1181,13 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		prop = Z_PTR_P(zv);
 
-		if (prop->ce && !IS_UNSERIALIZED(prop->ce)) {
+		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
+		if (!IS_UNSERIALIZED(prop->ce)) {
 			UNSERIALIZE_PTR(prop->ce);
-		}
-		if (prop->name && !IS_UNSERIALIZED(prop->name)) {
 			UNSERIALIZE_STR(prop->name);
-		}
-		if (prop->doc_comment && !IS_UNSERIALIZED(prop->doc_comment)) {
-			UNSERIALIZE_STR(prop->doc_comment);
+			if (prop->doc_comment) {
+				UNSERIALIZE_STR(prop->doc_comment);
+			}
 		}
 	}
 }
@@ -1201,12 +1202,15 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		zend_file_cache_unserialize_zval(&c->value, script, buf);
-		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
+		ZEND_ASSERT(c->ce != NULL);
+		if (!IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
-		}
-		if (c->doc_comment && !IS_UNSERIALIZED(c->doc_comment)) {
-			UNSERIALIZE_STR(c->doc_comment);
+
+			zend_file_cache_unserialize_zval(&c->value, script, buf);
+
+			if (c->doc_comment) {
+				UNSERIALIZE_STR(c->doc_comment);
+			}
 		}
 	}
 }
