@@ -59,7 +59,7 @@ if [[ ! -d $directory ]]; then
 fi
 
 
-echo "Creating session path in $directory with a depth of $depth for session.hash_bits_per_character = $bitsperchar"
+echo "Creating session path in $directory with a depth of $depth for session.xxx_bits_per_character = $bitsperchar"
 
 for i in $hash_chars; do
        newpath="$directory/$i"
