@@ -26,6 +26,7 @@
 #define ZEND_INCLUDE_FULL_WINDOWS_HEADERS
 
 #include "php.h"
+#include <assert.h>
 #include <stdio.h>
 #include <fcntl.h>
 #ifdef PHP_WIN32
@@ -271,49 +272,38 @@ static void php_disable_classes(void)
  */
 static void php_binary_init(void)
 {
-	char *binary_location = NULL;
+	zend_stat_t s;
+	char binary_location[MAXPATHLEN], *path;
 #ifdef PHP_WIN32
-	binary_location = (char *)malloc(MAXPATHLEN);
-	if (binary_location && GetModuleFileName(0, binary_location, MAXPATHLEN) == 0) {
-		free(binary_location);
-		PG(php_binary) = NULL;
+	if (GetModuleFileName(0, binary_location, MAXPATHLEN)) {
+		goto success;
 	}
 #else
-	if (sapi_module.executable_location) {
-		binary_location = (char *)malloc(MAXPATHLEN);
-		if (binary_location && !strchr(sapi_module.executable_location, '/')) {
-			char *envpath, *path;
-			int found = 0;
-
-			if ((envpath = getenv("PATH")) != NULL) {
-				char *search_dir, search_path[MAXPATHLEN];
-				char *last = NULL;
-				zend_stat_t s;
-
-				path = estrdup(envpath);
-				search_dir = php_strtok_r(path, ":", &last);
-
-				while (search_dir) {
-					snprintf(search_path, MAXPATHLEN, "%s/%s", search_dir, sapi_module.executable_location);
-					if (VCWD_REALPATH(search_path, binary_location) && !VCWD_ACCESS(binary_location, X_OK) && VCWD_STAT(binary_location, &s) == 0 && S_ISREG(s.st_mode)) {
-						found = 1;
-						break;
-					}
-					search_dir = php_strtok_r(NULL, ":", &last);
-				}
-				efree(path);
-			}
-			if (!found) {
-				free(binary_location);
-				binary_location = NULL;
-			}
-		} else if (!VCWD_REALPATH(sapi_module.executable_location, binary_location) || VCWD_ACCESS(binary_location, X_OK)) {
-			free(binary_location);
-			binary_location = NULL;
+	if (!sapi_module.executable_location) {
+		goto failure;
+	}
+	if (strchr(sapi_module.executable_location, '/') && VCWD_REALPATH(sapi_module.executable_location, binary_location) && !VCWD_ACCESS(binary_location, X_OK)) {
+		goto success;
+	}
+	
+	path = getenv("PATH");
+	if (!path) {
+		goto failure;
+	}
+	
+	for (size_t x = 0, y; path[x]; x += y + !!path[x+y]) {
+		assert(x < PATH_MAX); y = strcspn(path + x, ":");
+		assert(y < PATH_MAX); memcpy(binary_location, path + x, y);
+		                      snprintf(binary_location + y, PATH_MAX - y, "/%s", sapi_module.executable_location);
+		if (VCWD_REALPATH(binary_location, binary_location) && !VCWD_ACCESS(binary_location, X_OK) && VCWD_STAT(binary_location, &s) == 0 && S_ISREG(s.st_mode)) {
+			goto success;
 		}
 	}
 #endif
-	PG(php_binary) = binary_location;
+failure:
+	*binary_location = '\0';
+success:
+	PG(php_binary) = *binary_location ? estrdup(binary_location) : NULL;
 }
 /* }}} */
 
