@@ -158,6 +158,12 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_mime_content_type, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_finfo_magic_file_get, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_finfo_method_magic_file_get, 0)
+ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ finfo_class_functions
@@ -167,6 +173,7 @@ static const zend_function_entry finfo_class_functions[] = {
 	ZEND_ME_MAPPING(set_flags,      finfo_set_flags,arginfo_finfo_method_set_flags, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(file,           finfo_file,     arginfo_finfo_method_file, ZEND_ACC_PUBLIC)
 	ZEND_ME_MAPPING(buffer,         finfo_buffer,   arginfo_finfo_method_buffer, ZEND_ACC_PUBLIC)
+	ZEND_ME_MAPPING(getMagicFile,   finfo_magic_file_get, arginfo_finfo_method_magic_file_get, ZEND_ACC_PUBLIC)
 	PHP_FE_END
 };
 /* }}} */
@@ -203,6 +210,7 @@ static const zend_function_entry fileinfo_functions[] = {
 	PHP_FE(finfo_file,		arginfo_finfo_file)
 	PHP_FE(finfo_buffer,	arginfo_finfo_buffer)
 	PHP_FE(mime_content_type, arginfo_mime_content_type)
+	PHP_FE(finfo_magic_file_get, arginfo_finfo_magic_file_get)
 	PHP_FE_END
 };
 /* }}} */
@@ -619,6 +627,36 @@ PHP_FUNCTION(finfo_buffer)
 PHP_FUNCTION(mime_content_type)
 {
 	_php_finfo_get_type(INTERNAL_FUNCTION_PARAM_PASSTHRU, -1, 1);
+}
+/* }}} */
+
+/* {{{ proto string finfo_magic_file_get()
+   Return path for the magic file */
+PHP_FUNCTION(finfo_magic_file_get)
+{
+	php_fileinfo *finfo;
+	zval *zfinfo;
+	char *ret_val = NULL;
+
+	FILEINFO_DECLARE_INIT_OBJECT(object)
+
+	if (object) {
+		ZEND_PARSE_PARAMETERS_START(0, 0)
+		ZEND_PARSE_PARAMETERS_END();
+
+		FILEINFO_FROM_OBJECT(finfo, object);
+	} else {
+		ZEND_PARSE_PARAMETERS_START(1, 1)
+			Z_PARAM_RESOURCE(zfinfo);
+		ZEND_PARSE_PARAMETERS_END();
+
+		if ((finfo = (php_fileinfo *)zend_fetch_resource(Z_RES_P(zfinfo), "file_info", le_fileinfo)) == NULL) {
+			RETURN_FALSE;
+		}
+	}
+
+	ret_val = (char *) magic_magic_file_get(finfo->magic);
+	RETVAL_STRING(ret_val);
 }
 /* }}} */
 

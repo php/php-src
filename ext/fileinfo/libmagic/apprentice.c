@@ -632,8 +632,6 @@ file_apprentice(struct magic_set *ms, const char *fn, int action)
 		fn = p;
 	}
 
-	efree(mfn);
-
 	if (errs == -1) {
 		for (i = 0; i < MAGIC_SETS; i++) {
 			mlist_free(ms->mlist[i]);

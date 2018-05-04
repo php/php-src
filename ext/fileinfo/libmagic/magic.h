@@ -125,6 +125,7 @@ const char *magic_file(magic_t, const char *);
 const char *magic_stream(magic_t, php_stream *);
 const char *magic_descriptor(magic_t, int);
 const char *magic_buffer(magic_t, const void *, size_t);
+const char *magic_magic_file_get(struct magic_set *ms);
 
 const char *magic_error(magic_t);
 int magic_getflags(magic_t);
