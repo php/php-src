@@ -4,9 +4,7 @@ if [[ "$2" = "" ]] || [[ "$3" = "" ]]; then
        echo "Usage: $0 BASE_DIRECTORY DEPTH BITS_PER_CHAR"
        echo "BASE_DIRECTORY will be created if it doesn't exist"
        echo "DEPTH must be an integer number >0"
-       echo "For PHP < 7.1.0. BITS_PER_CHAR(session.hash_bits_per_character) should be one of 4, 5, or 6."
-       echo "For PHP >= 7.1.0. BITS_PER_CHAR(session.sid_bits_per_character) should be one of 4, 5, or 6."
-       # http://php.net/manual/en/session.configuration.php#ini.session.hash-bits-per-character
+       echo "BITS_PER_CHAR(session.sid_bits_per_character) should be one of 4, 5, or 6."
        # http://php.net/manual/en/session.configuration.php#ini.session.sid-bits-per-character
        exit 1
 fi
@@ -59,7 +57,7 @@ if [[ ! -d $directory ]]; then
 fi
 
 
-echo "Creating session path in $directory with a depth of $depth for session.xxx_bits_per_character = $bitsperchar"
+echo "Creating session path in $directory with a depth of $depth for session.sid_bits_per_character = $bitsperchar"
 
 for i in $hash_chars; do
        newpath="$directory/$i"
