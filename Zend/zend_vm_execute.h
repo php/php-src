@@ -64231,7 +64231,7 @@ ZEND_API int zend_vm_kind(void)
 	return ZEND_VM_KIND;
 }
 
-static const void *zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)
+static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, const zend_op* op)
 {
 	static const int zend_vm_decode[] = {
 		_UNUSED_CODE, /* 0 = IS_UNUSED  */
