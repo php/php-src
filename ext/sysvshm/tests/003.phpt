@@ -3,55 +3,60 @@ shm_detach() tests
 --SKIPIF--
 <?php
 if (!extension_loaded("sysvshm")){ print 'skip'; }
-if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
 <?php
 
-$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
+$key = 123;
 
 var_dump(shm_detach());
-var_dump(shm_detach(1,1));
+try {
+    var_dump(shm_detach($key,1));
+} catch (TypeError $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
 
 $s = shm_attach($key);
-
+var_dump($s);
 var_dump(shm_detach($s));
-var_dump(shm_detach($s));
+try {
+    var_dump(shm_detach($s));
+} catch (TypeError $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
 shm_remove($s);
-
-var_dump(shm_detach(0));
-var_dump(shm_detach(1));
-var_dump(shm_detach(-1));
-
+var_dump($s);
+var_dump(shm_detach($s));
+var_dump($s);
+echo '=====' . PHP_EOL;
+shm_put_var($s, 1, "value!");
+var_dump(shm_get_var($s, 1));
 echo "Done\n";
 ?>
 --CLEAN--
 <?php
 
-$key = ftok(dirname(__FILE__)."/003.phpt", 'q');
-$s = shm_attach($key);
+$s = shm_attach(123);
 shm_remove($s);
 
 ?>
 --EXPECTF--	
-Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line %d
+Warning: shm_detach() expects exactly 1 parameter, 0 given in %s003.php on line 5
+NULL
+Argument 1 passed to shm_detach() must be an instance of SharedMemoryBlock, int given
+object(SharedMemoryBlock)#2 (0) {
+}
+
+Warning: shm_detach() expects parameter 1 to be SharedMemoryBlock, object given in %s003.php on line 14
 NULL
 
-Warning: shm_detach() expects exactly 1 parameter, 2 given in %s003.php on line %d
-NULL
-bool(true)
-
-Warning: shm_detach(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
-bool(false)
-
-Warning: shm_remove(): supplied resource is not a valid sysvshm resource in %s003.php on line %d
-
-Warning: shm_detach() expects parameter 1 to be resource, int given in %s003.php on line %d
+Warning: shm_detach() expects parameter 1 to be SharedMemoryBlock, object given in %s003.php on line 16
 NULL
 
-Warning: shm_detach() expects parameter 1 to be resource, int given in %s003.php on line %d
-NULL
+Warning: shm_remove() expects parameter 1 to be SharedMemoryBlock, object given in %s003.php on line 20
+object(SharedMemoryBlock)#2 (0) {
+}
 
-Warning: shm_detach() expects parameter 1 to be resource, int given in %s003.php on line %d
+Warning: shm_detach() expects parameter 1 to be SharedMemoryBlock, object given in %s003.php on line 22
 NULL
 Done

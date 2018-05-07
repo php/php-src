@@ -26,6 +26,7 @@
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
 
+// #include "php.h"
 #include "php_version.h"
 #define PHP_SYSVSHM_VERSION PHP_VERSION
 
@@ -41,6 +42,11 @@ extern zend_module_entry sysvshm_module_entry;
 # include <sys/ipc.h>
 # include <sys/shm.h>
 #endif
+
+#include "zend_exceptions.h"
+#include "ext/spl/spl_exceptions.h"
+
+zend_class_entry *shm_ce_ptr;
 
 #define PHP_SHM_RSRC_NAME "sysvshm"
 
@@ -69,6 +75,75 @@ typedef struct {
 	zend_long id;                 /* returned by shmget */
 	sysvshm_chunk_head *ptr; /* memory address of shared memory */
 } sysvshm_shm;
+
+typedef struct {
+	sysvshm_shm *shm_object_ptr;
+	zend_object  std;
+} shm_object;
+static zend_object_handlers shm_object_handlers;
+
+/* {{{ arginfo */
+ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_object___construct, 0, 0, 1)
+    ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
+    ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 1)
+    ZEND_ARG_TYPE_INFO(0, perm, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_object_has, 0, 0, _IS_BOOL, NULL)
+    ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_object_free, 0, 0, IS_VOID, NULL)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_object_set, 0, 2, IS_VOID, NULL)
+    ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+	ZEND_ARG_INFO(0, variable)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_object_get, 0, 0, 2)
+    ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_object_remove, 0, 1, IS_VOID, NULL)
+    ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_OBJ_INFO_EX(arginfo_shm_attach, 0, 1, SharedMemoryBlock, 0)
+	ZEND_ARG_TYPE_INFO(0, key, IS_LONG, 0)
+	ZEND_ARG_TYPE_INFO(0, size, IS_LONG, 1)
+	ZEND_ARG_TYPE_INFO(0, mode, IS_LONG, 1)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_detach, 0, 1, _IS_BOOL, NULL)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_has_var, 0, 2, _IS_BOOL, NULL)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+	ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_remove, 0, 1, IS_VOID, NULL)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_WITH_RETURN_TYPE_INFO_EX(arginfo_shm_put_var, 0, 3, _IS_BOOL, NULL)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+	ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+	ZEND_ARG_INFO(0, variable)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_get_var, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+	ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX(arginfo_shm_remove_var, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, object, SharedMemoryBlock, 0)
+	ZEND_ARG_TYPE_INFO(0, variable_key, IS_LONG, 0)
+ZEND_END_ARG_INFO()
+/* }}} */
 
 PHP_MINIT_FUNCTION(sysvshm);
 PHP_FUNCTION(shm_attach);
