@@ -554,18 +554,30 @@ static zend_always_inline Bucket *zend_hash_find_bucket(const HashTable *ht, zen
 	arData = ht->arData;
 	nIndex = h | ht->nTableMask;
 	idx = HT_HASH_EX(arData, nIndex);
-	while (EXPECTED(idx != HT_INVALID_IDX)) {
-		p = HT_HASH_TO_BUCKET_EX(arData, idx);
-		if (EXPECTED(p->key == key)) { /* check for the same interned string */
-			return p;
-		} else if (EXPECTED(p->h == ZSTR_H(key)) &&
-		     EXPECTED(p->key) &&
-		     EXPECTED(zend_string_equal_content(p->key, key))) {
+
+	if (UNEXPECTED(idx == HT_INVALID_IDX)) {
+		return NULL;
+	}
+	p = HT_HASH_TO_BUCKET_EX(arData, idx);
+	if (EXPECTED(p->key == key)) { /* check for the same interned string */
+		return p;
+	}
+
+	while (1) {
+		if (p->h == ZSTR_H(key) &&
+		    EXPECTED(p->key) &&
+		    zend_string_equal_content(p->key, key)) {
 			return p;
 		}
 		idx = Z_NEXT(p->val);
+		if (idx == HT_INVALID_IDX) {
+			return NULL;
+		}
+		p = HT_HASH_TO_BUCKET_EX(arData, idx);
+		if (p->key == key) { /* check for the same interned string */
+			return p;
+		}
 	}
-	return NULL;
 }
 
 static zend_always_inline Bucket *zend_hash_str_find_bucket(const HashTable *ht, const char *str, size_t len, zend_ulong h)
