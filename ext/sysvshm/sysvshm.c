@@ -31,7 +31,7 @@
 #include "php.h"
 #include "zend_types.h"
 
-// #if HAVE_SYSVSHM
+#if HAVE_SYSVSHM
 
 #include <errno.h>
 
@@ -618,7 +618,7 @@ static int php_remove_shm_data(sysvshm_chunk_head *ptr, zend_long shm_varpos)
 }
 /* }}} */
 
-// #endif /* HAVE_SYSVSHM */
+#endif /* HAVE_SYSVSHM */
 
 /*
  * Local variables:

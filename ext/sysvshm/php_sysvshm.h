@@ -26,7 +26,6 @@
 extern zend_module_entry sysvshm_module_entry;
 #define sysvshm_module_ptr &sysvshm_module_entry
 
-// #include "php.h"
 #include "php_version.h"
 #define PHP_SYSVSHM_VERSION PHP_VERSION
 
