@@ -99,7 +99,7 @@ static uint32_t add_static_slot(HashTable     *hash,
 		Z_STRVAL_P(prop_name),
 		Z_STRLEN_P(prop_name) + 1);
 
-	ZSTR_H(key) = zend_hash_func(ZSTR_VAL(key), ZSTR_LEN(key));
+	ZSTR_H(key) = zend_string_hash_func(key);
 	ZSTR_H(key) += kind;
 
 	pos = zend_hash_find(hash, key);

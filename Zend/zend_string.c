@@ -48,6 +48,11 @@ ZEND_API zend_string  *zend_empty_string = NULL;
 ZEND_API zend_string  *zend_one_char_string[256];
 ZEND_API zend_string **zend_known_strings = NULL;
 
+ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str)
+{
+	return ZSTR_H(str) = zend_hash_func(ZSTR_VAL(str), ZSTR_LEN(str));
+}
+
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len)
 {
 	return zend_inline_hash_func(str, len);

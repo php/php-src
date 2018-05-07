@@ -32,6 +32,7 @@ typedef zend_string *(ZEND_FASTCALL *zend_string_init_interned_func_t)(const cha
 ZEND_API extern zend_new_interned_string_func_t zend_new_interned_string;
 ZEND_API extern zend_string_init_interned_func_t zend_string_init_interned;
 
+ZEND_API zend_ulong ZEND_FASTCALL zend_string_hash_func(zend_string *str);
 ZEND_API zend_ulong ZEND_FASTCALL zend_hash_func(const char *str, size_t len);
 ZEND_API zend_string* ZEND_FASTCALL zend_interned_string_find_permanent(zend_string *str);
 
@@ -97,10 +98,7 @@ END_EXTERN_C()
 
 static zend_always_inline zend_ulong zend_string_hash_val(zend_string *s)
 {
-	if (!ZSTR_H(s)) {
-		ZSTR_H(s) = zend_hash_func(ZSTR_VAL(s), ZSTR_LEN(s));
-	}
-	return ZSTR_H(s);
+	return ZSTR_H(s) ? ZSTR_H(s) : zend_string_hash_func(s);
 }
 
 static zend_always_inline void zend_string_forget_hash_val(zend_string *s)
