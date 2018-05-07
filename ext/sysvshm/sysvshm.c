@@ -433,24 +433,10 @@ PHP_FUNCTION(shm_put_var)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	intern = (shm_object *)shm_object_from_zend_object(Z_OBJ_P(object));
-	if (intern == NULL) {
-		printf("\e[0;31mintern is NULL\3[0m\n\n");
-	}
-	printf("key: %d, id: " ZEND_LONG_FMT, intern->shm_object_ptr->key, intern->shm_object_ptr->id);
 	if (((shm_object_ptr = (sysvshm_shm *)intern->shm_object_ptr) == NULL) || (((sysvshm_chunk_head *)intern->shm_object_ptr->ptr) == NULL)) {
 		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid object %s internal state", ZSTR_VAL(Z_OBJCE_P(object)->name));
 		RETURN_NULL();
 	}	
-	printf("####\n");
-	if (intern->shm_object_ptr == NULL) {
-		printf("\e[0;32mshm_set_shm_data BREAKE1;\e[0m\n");
-	}
-	if (!(sysvshm_shm *)intern->shm_object_ptr->ptr) {
-		printf("\e[0;32mshm_set_shm_data BREAKE2;\e[0m\n");
-	}
-	if (!(zend_long *)intern->shm_object_ptr->ptr->start) {
-		printf("\e[0;32mshm_set_shm_data BREAKE3;\e[0m\n");		
-	}
 
 	ret = shm_set(intern->shm_object_ptr, shm_key, arg_var);
 
@@ -546,16 +532,12 @@ static int shm_set_shm_data(sysvshm_chunk_head *ptr, zend_long key, const char *
 	zend_long total_size;
 	zend_long shm_varpos;
 
-	if (((zend_long *)ptr->start) == NULL) {
-printf("\e[0;32mshm_set_shm_data BREAKE;\e[0m\n");		
-	}
-
 	total_size = ((zend_long) (len + sizeof(sysvshm_chunk) - 1) / sizeof(zend_long)) * sizeof(zend_long) + sizeof(zend_long); /* zend_long alligment */
-printf("\e[0;32mshm_set_shm_data\e[0m\n");
+
 	if ((shm_varpos = shm_has_shm_data(ptr, key)) > 0) {
 		php_remove_shm_data(ptr, shm_varpos);
 	}
-printf("\e[0;32mshm_set_shm_data2\e[0m\n");
+
 	if (ptr->free < total_size) {
 		return -1; /* not enough memory */
 	}
@@ -577,15 +559,15 @@ static zend_long shm_has_shm_data(sysvshm_chunk_head *ptr, zend_long key)
 {
 	zend_long pos;
 	sysvshm_chunk *shm_var;
-printf("\e[0;32mshm_has_shm_data: ptr->start: %d\e[0m\n", (zend_long *)ptr->start);
+
 	pos = ptr->start;
-printf("\e[0;32mshm_has_shm_data\e[0m\n");
+
 	for (;;) {
 		if (pos >= ptr->end) {
 			return -1;
 		}
 		shm_var = (sysvshm_chunk*) ((char *) ptr + pos);
-		if (shm_var->key == key) {printf("\e[0;32mshm_has_shm_data2\e[0m\n");
+		if (shm_var->key == key) {
 			return pos;
 		}
 		pos += shm_var->next;
