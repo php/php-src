@@ -469,7 +469,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 {
 #if defined(HAVE_ASM_GOTO) && defined(__i386__)
 	__asm__ goto(
-		"incl (%0)\n\t"
+		"addl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -480,7 +480,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"incq (%0)\n\t"
+		"addq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -519,7 +519,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
 #if defined(HAVE_ASM_GOTO) && defined(__i386__)
 	__asm__ goto(
-		"decl (%0)\n\t"
+		"subl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -530,7 +530,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"decq (%0)\n\t"
+		"subq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
