@@ -754,7 +754,9 @@ ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast)
 	return ref;
 }
 
-ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast) {
+ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast)
+{
+tail_call:
 	if (!ast) {
 		return;
 	}
@@ -762,17 +764,23 @@ ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast) {
 	if (EXPECTED(ast->kind >= ZEND_AST_VAR)) {
 		uint32_t i, children = zend_ast_get_num_children(ast);
 
-		for (i = 0; i < children; i++) {
+		for (i = 1; i < children; i++) {
 			zend_ast_destroy(ast->child[i]);
 		}
+		ast = ast->child[0];
+		goto tail_call;
 	} else if (EXPECTED(ast->kind == ZEND_AST_ZVAL)) {
 		zval_ptr_dtor_nogc(zend_ast_get_zval(ast));
 	} else if (EXPECTED(zend_ast_is_list(ast))) {
 		zend_ast_list *list = zend_ast_get_list(ast);
-		uint32_t i;
+		if (list->children) {
+			uint32_t i;
 
-		for (i = 0; i < list->children; i++) {
-			zend_ast_destroy(list->child[i]);
+			for (i = 1; i < list->children; i++) {
+				zend_ast_destroy(list->child[i]);
+			}
+			ast = list->child[0];
+			goto tail_call;
 		}
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
 		zend_string_release(zend_ast_get_constant_name(ast));
@@ -788,7 +796,8 @@ ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast) {
 		zend_ast_destroy(decl->child[0]);
 		zend_ast_destroy(decl->child[1]);
 		zend_ast_destroy(decl->child[2]);
-		zend_ast_destroy(decl->child[3]);
+		ast = decl->child[3];
+		goto tail_call;
 	}
 }
 
