@@ -130,7 +130,7 @@ static zend_always_inline void zend_hash_real_init_mixed_ex(HashTable *ht)
 {
 	uint32_t nSize = ht->nTableSize;
 
-	(ht)->nTableMask = HT_SIZE_TO_MASK(nSize);
+	ht->nTableMask = HT_SIZE_TO_MASK(nSize);
 	HT_SET_DATA_ADDR(ht, pemalloc(HT_SIZE_EX(nSize, HT_SIZE_TO_MASK(nSize)), GC_FLAGS(ht) & IS_ARRAY_PERSISTENT));
 	HT_FLAGS(ht) |= HASH_FLAG_INITIALIZED;
 	if (EXPECTED(ht->nTableMask == HT_SIZE_TO_MASK(HT_MIN_SIZE))) {
