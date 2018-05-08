@@ -705,7 +705,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	efree(temp);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_fromUChars", error);
-		zend_string_free(ret);
+		zend_string_efree(ret);
 		return NULL;
 	}
 

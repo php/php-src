@@ -546,7 +546,7 @@ static PHP_FUNCTION(bzcompress)
 
 	error = BZ2_bzBuffToBuffCompress(ZSTR_VAL(dest), &dest_len, source, source_len, block_size, 0, work_factor);
 	if (error != BZ_OK) {
-		zend_string_free(dest);
+		zend_string_efree(dest);
 		RETURN_LONG(error);
 	} else {
 		/* Copy the buffer, we have perhaps allocate a lot more than we need,
@@ -612,7 +612,7 @@ static PHP_FUNCTION(bzdecompress)
 #if !ZEND_ENABLE_ZVAL_LONG64
 		if (UNEXPECTED(size > SIZE_MAX)) {
 			php_error_docref(NULL, E_WARNING, "Decompressed size too big, max is %zd", SIZE_MAX);
-			zend_string_free(dest);
+			zend_string_efree(dest);
 			RETVAL_LONG(BZ_MEM_ERROR);
 		} else
 #endif
@@ -623,7 +623,7 @@ static PHP_FUNCTION(bzdecompress)
 			RETVAL_STR(dest);
 		}
 	} else { /* real error */
-		zend_string_free(dest);
+		zend_string_efree(dest);
 		RETVAL_LONG(error);
 	}
 

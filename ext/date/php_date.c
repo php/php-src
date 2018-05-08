@@ -1738,7 +1738,7 @@ PHPAPI void php_strftime(INTERNAL_FUNCTION_PARAMETERS, int gmt)
 		buf = zend_string_truncate(buf, real_len, 0);
 		RETURN_NEW_STR(buf);
 	}
-	zend_string_free(buf);
+	zend_string_efree(buf);
 	RETURN_FALSE;
 }
 /* }}} */

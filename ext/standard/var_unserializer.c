@@ -252,13 +252,13 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 	unsigned char *end = *(unsigned char **)p+maxlen;
 
 	if (end < *p) {
-		zend_string_free(str);
+		zend_string_efree(str);
 		return NULL;
 	}
 
 	for (i = 0; i < len; i++) {
 		if (*p >= end) {
-			zend_string_free(str);
+			zend_string_efree(str);
 			return NULL;
 		}
 		if (**p != '\\') {
@@ -275,7 +275,7 @@ static zend_string *unserialize_str(const unsigned char **p, size_t len, size_t 
 				} else if (**p >= 'A' && **p <= 'F') {
 					ch = (ch << 4) + (**p -'A'+10);
 				} else {
-					zend_string_free(str);
+					zend_string_efree(str);
 					return NULL;
 				}
 			}
@@ -1341,7 +1341,7 @@ yy80:
 	}
 
 	if (*(YYCURSOR) != '"') {
-		zend_string_free(str);
+		zend_string_efree(str);
 		*p = YYCURSOR;
 		return 0;
 	}

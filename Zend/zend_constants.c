@@ -226,7 +226,7 @@ static zend_constant *zend_get_special_constant(const char *name, size_t name_le
 		haltname = zend_mangle_property_name(haltoff,
 			sizeof("__COMPILER_HALT_OFFSET__") - 1, cfilename, clen, 0);
 		c = zend_hash_find_ptr(EG(zend_constants), haltname);
-		zend_string_free(haltname);
+		zend_string_efree(haltname);
 		return c;
 	} else {
 		return NULL;
@@ -379,7 +379,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 		}
 failure:
 		zend_string_release(class_name);
-		zend_string_free(constant_name);
+		zend_string_efree(constant_name);
 		return ret_constant;
 	}
 

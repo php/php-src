@@ -1130,7 +1130,7 @@ static void reflection_extension_factory(zval *object, const char *name_str)
 	lcname = zend_string_alloc(name_len, 0);
 	zend_str_tolower_copy(ZSTR_VAL(lcname), name_str, name_len);
 	module = zend_hash_find_ptr(&module_registry, lcname);
-	zend_string_free(lcname);
+	zend_string_efree(lcname);
 	if (!module) {
 		return;
 	}

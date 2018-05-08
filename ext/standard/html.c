@@ -1294,7 +1294,7 @@ PHPAPI zend_string *php_escape_html_entities_ex(unsigned char *old, size_t oldle
 				len += replacement_len;
 				continue;
 			} else {
-				zend_string_free(replaced);
+				zend_string_efree(replaced);
 				return ZSTR_EMPTY_ALLOC();
 			}
 		} else { /* SUCCESS */

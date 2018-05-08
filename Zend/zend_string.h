@@ -264,6 +264,14 @@ static zend_always_inline void zend_string_free(zend_string *s)
 	}
 }
 
+static zend_always_inline void zend_string_efree(zend_string *s)
+{
+	ZEND_ASSERT(!ZSTR_IS_INTERNED(s));
+	ZEND_ASSERT(GC_REFCOUNT(s) <= 1);
+	ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+	efree(s);
+}
+
 static zend_always_inline void zend_string_release(zend_string *s)
 {
 	if (!ZSTR_IS_INTERNED(s)) {

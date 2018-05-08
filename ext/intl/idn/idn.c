@@ -146,7 +146,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 
 	uts46 = uidna_openUTS46(option, &status);
 	if (php_intl_idn_check_status(status, "failed to open UIDNA instance") == FAILURE) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		RETURN_FALSE;
 	}
 
@@ -159,7 +159,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 	if (len >= 255 || php_intl_idn_check_status(status, "failed to convert name") == FAILURE) {
 		uidna_close(uts46);
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		RETURN_FALSE;
 	}
 
@@ -189,7 +189,7 @@ static void php_intl_idn_to_46(INTERNAL_FUNCTION_PARAMETERS,
 	}
 
 	if (!buffer_used) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 	}
 
 	uidna_close(uts46);

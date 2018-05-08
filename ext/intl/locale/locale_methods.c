@@ -742,7 +742,7 @@ PHP_FUNCTION( locale_get_keywords )
 			if (U_FAILURE(status)) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR, "locale_get_keywords: Error encountered while getting the keyword  value for the  keyword", 0 );
 				if( kw_value_str){
-					zend_string_free( kw_value_str );
+					zend_string_efree( kw_value_str );
 				}
 				zval_dtor(return_value);
         		RETURN_FALSE;

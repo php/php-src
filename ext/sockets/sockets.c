@@ -1232,10 +1232,10 @@ PHP_FUNCTION(socket_read)
 			PHP_SOCKET_ERROR(php_sock, "unable to read from socket", errno);
 		}
 
-		zend_string_free(tmpbuf);
+		zend_string_efree(tmpbuf);
 		RETURN_FALSE;
 	} else if (!retval) {
-		zend_string_free(tmpbuf);
+		zend_string_efree(tmpbuf);
 		RETURN_EMPTY_STRING();
 	}
 
@@ -1670,7 +1670,7 @@ PHP_FUNCTION(socket_recv)
 	recv_buf = zend_string_alloc(len, 0);
 
 	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
-		zend_string_free(recv_buf);
+		zend_string_efree(recv_buf);
 
 		zval_ptr_dtor(buf);
 		ZVAL_NULL(buf);
@@ -1762,7 +1762,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
 			ZSTR_LEN(recv_buf) = retval;
@@ -1781,7 +1781,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin.sin_family = AF_INET;
 
 			if (arg6 == NULL) {
-				zend_string_free(recv_buf);
+				zend_string_efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
@@ -1789,7 +1789,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
 			ZSTR_LEN(recv_buf) = retval;
@@ -1812,7 +1812,7 @@ PHP_FUNCTION(socket_recvfrom)
 			sin6.sin6_family = AF_INET6;
 
 			if (arg6 == NULL) {
-				zend_string_free(recv_buf);
+				zend_string_efree(recv_buf);
 				WRONG_PARAM_COUNT;
 			}
 
@@ -1820,7 +1820,7 @@ PHP_FUNCTION(socket_recvfrom)
 
 			if (retval < 0) {
 				PHP_SOCKET_ERROR(php_sock, "unable to recvfrom", errno);
-				zend_string_free(recv_buf);
+				zend_string_efree(recv_buf);
 				RETURN_FALSE;
 			}
 			ZSTR_LEN(recv_buf) = retval;

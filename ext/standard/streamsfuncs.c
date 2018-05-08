@@ -419,7 +419,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_NEW_STR(read_buf);
 	}
 
-	zend_string_free(read_buf);
+	zend_string_efree(read_buf);
 	RETURN_FALSE;
 }
 /* }}} */

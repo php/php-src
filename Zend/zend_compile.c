@@ -6588,7 +6588,7 @@ void zend_compile_use(zend_ast *ast) /* {{{ */
 				zend_check_already_in_use(type, old_name, new_name, ns_name);
 			}
 
-			zend_string_free(ns_name);
+			zend_string_efree(ns_name);
 		} else {
 			if (zend_have_seen_symbol(lookup_name, type)) {
 				zend_check_already_in_use(type, old_name, new_name, lookup_name);

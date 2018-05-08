@@ -3531,7 +3531,7 @@ PHP_FUNCTION(pg_lo_read)
 
 	buf = zend_string_alloc(buf_len, 0);
 	if ((nbytes = lo_read((PGconn *)pgsql->conn, pgsql->lofd, ZSTR_VAL(buf), ZSTR_LEN(buf)))<0) {
-		zend_string_free(buf);
+		zend_string_efree(buf);
 		RETURN_FALSE;
 	}
 

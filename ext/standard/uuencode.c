@@ -192,7 +192,7 @@ PHPAPI zend_string *php_uudecode(char *src, size_t src_len) /* {{{ */
 	return dest;
 
 err:
-	zend_string_free(dest);
+	zend_string_efree(dest);
 
 	return NULL;
 }

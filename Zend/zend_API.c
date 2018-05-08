@@ -1878,13 +1878,13 @@ ZEND_API int zend_startup_module_ex(zend_module_entry *module) /* {{{ */
 				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
 
 				if ((req_mod = zend_hash_find_ptr(&module_registry, lcname)) == NULL || !req_mod->module_started) {
-					zend_string_free(lcname);
+					zend_string_efree(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because required module '%s' is not loaded", module->name, dep->name);
 					module->module_started = 0;
 					return FAILURE;
 				}
-				zend_string_free(lcname);
+				zend_string_efree(lcname);
 			}
 			++dep;
 		}
@@ -2066,12 +2066,12 @@ ZEND_API zend_module_entry* zend_register_module_ex(zend_module_entry *module) /
 				zend_str_tolower_copy(ZSTR_VAL(lcname), dep->name, name_len);
 
 				if (zend_hash_exists(&module_registry, lcname) || zend_get_extension(dep->name)) {
-					zend_string_free(lcname);
+					zend_string_efree(lcname);
 					/* TODO: Check version relationship */
 					zend_error(E_CORE_WARNING, "Cannot load module '%s' because conflicting module '%s' is already loaded", module->name, dep->name);
 					return NULL;
 				}
-				zend_string_free(lcname);
+				zend_string_efree(lcname);
 			}
 			++dep;
 		}
@@ -2411,7 +2411,7 @@ ZEND_API int zend_register_functions(zend_class_entry *scope, const zend_functio
 			if (zend_hash_exists(target_function_table, lowercase_name)) {
 				zend_error(error_type, "Function registration failed - duplicate name - %s%s%s", scope ? ZSTR_VAL(scope->name) : "", scope ? "::" : "", ptr->fname);
 			}
-			zend_string_free(lowercase_name);
+			zend_string_efree(lowercase_name);
 			ptr++;
 		}
 		zend_unregister_functions(functions, count, target_function_table);
@@ -2536,7 +2536,7 @@ ZEND_API void zend_unregister_functions(const zend_function_entry *functions, in
 		lowercase_name = zend_string_alloc(fname_len, 0);
 		zend_str_tolower_copy(ZSTR_VAL(lowercase_name), ptr->fname, fname_len);
 		zend_hash_del(target_function_table, lowercase_name);
-		zend_string_free(lowercase_name);
+		zend_string_efree(lowercase_name);
 		ptr++;
 		i++;
 	}
@@ -3698,7 +3698,7 @@ ZEND_API const char *zend_get_module_version(const char *module_name) /* {{{ */
 	lname = zend_string_alloc(name_len, 0);
 	zend_str_tolower_copy(ZSTR_VAL(lname), module_name, name_len);
 	module = zend_hash_find_ptr(&module_registry, lname);
-	zend_string_free(lname);
+	zend_string_efree(lname);
 	return module ? module->version : NULL;
 }
 /* }}} */
@@ -4096,7 +4096,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	EG(fake_scope) = scope;
 	property = zend_std_get_static_property(scope, key, 0);
 	EG(fake_scope) = old_scope;
-	zend_string_free(key);
+	zend_string_efree(key);
 	if (!property) {
 		return FAILURE;
 	} else {
@@ -4222,7 +4222,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 	EG(fake_scope) = scope;
 	property = zend_std_get_static_property(scope, key, silent);
 	EG(fake_scope) = old_scope;
-	zend_string_free(key);
+	zend_string_efree(key);
 
 	return property;
 }

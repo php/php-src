@@ -544,13 +544,13 @@ PHP_FUNCTION(password_hash)
 				zend_string_release(salt);
 
 				if (status != ARGON2_OK) {
-					zend_string_free(encoded);
+					zend_string_efree(encoded);
 					php_error_docref(NULL, E_WARNING, "%s", argon2_error_message(status));
 					RETURN_FALSE;
 				}
 
 				ZSTR_VAL(encoded)[ZSTR_LEN(encoded)] = 0;
-				RETURN_STR(encoded);
+				RETURN_NEW_STR(encoded);
 			}
 			break;
 #endif

@@ -2193,15 +2193,15 @@ PHP_FUNCTION(odbc_result)
 
 			if (rc == SQL_ERROR) {
 				odbc_sql_error(result->conn_ptr, result->stmt, "SQLGetData");
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_FALSE;
 			}
 
 			if (result->values[field_ind].vallen == SQL_NULL_DATA) {
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_NULL();
 			} else if (rc == SQL_NO_DATA_FOUND) {
-				zend_string_free(field_str);
+				zend_string_efree(field_str);
 				RETURN_FALSE;
 			}
 			/* Reduce fieldlen by 1 if we have char data. One day we might

@@ -164,7 +164,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d = (l - 0x10 - 0x27 * is_letter) << 4;
 		} else {
-			zend_string_free(str);
+			zend_string_efree(str);
 			return NULL;
 		}
 		c = old[j++];
@@ -173,7 +173,7 @@ static zend_string *php_hex2bin(const unsigned char *old, const size_t oldlen)
 		if (EXPECTED((((c ^ '0') - 10) >> (8 * sizeof(unsigned int) - 1)) | is_letter)) {
 			d |= l - 0x10 - 0x27 * is_letter;
 		} else {
-			zend_string_free(str);
+			zend_string_efree(str);
 			return NULL;
 		}
 		ret[i] = d;
@@ -1666,7 +1666,7 @@ PHP_FUNCTION(dirname)
 #endif
 	} else if (levels < 1) {
 		php_error_docref(NULL, E_WARNING, "Invalid argument, levels must be >= 1");
-		zend_string_free(ret);
+		zend_string_efree(ret);
 		return;
 	} else {
 		/* Some levels up */
@@ -6025,7 +6025,7 @@ PHP_FUNCTION(money_format)
 
 	str = zend_string_safe_alloc(format_len, 1, 1024, 0);
 	if ((res_len = strfmon(ZSTR_VAL(str), ZSTR_LEN(str), format, value)) < 0) {
-		zend_string_free(str);
+		zend_string_efree(str);
 		RETURN_FALSE;
 	}
 #ifdef _AIX

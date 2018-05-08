@@ -600,7 +600,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ZVAL_STRING(&tmp, SG(request_info).argv[i]);
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				zend_string_efree(Z_STR(tmp));
 			}
 		}
 	} else 	if (s && *s) {
@@ -614,7 +614,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 			ZVAL_STRING(&tmp, ss);
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				zend_string_efree(Z_STR(tmp));
 			}
 			if (space) {
 				*space = '+';

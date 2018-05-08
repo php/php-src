@@ -56,7 +56,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 #endif
@@ -66,7 +66,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 	}
@@ -88,7 +88,7 @@ PHPAPI zend_string* php_inet_ntop(const struct sockaddr *addr) {
 				ZSTR_LEN(ret) = strlen(ZSTR_VAL(ret));
 				return ret;
 			}
-			zend_string_free(ret);
+			zend_string_efree(ret);
 			break;
 		}
 	}

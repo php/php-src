@@ -5618,7 +5618,7 @@ PHP_FUNCTION(restore_include_path)
 	}
 	key = zend_string_init("include_path", sizeof("include_path")-1, 0);
 	zend_restore_ini_entry(key, PHP_INI_STAGE_RUNTIME);
-	zend_string_free(key);
+	zend_string_efree(key);
 }
 /* }}} */
 

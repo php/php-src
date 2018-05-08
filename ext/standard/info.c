@@ -257,7 +257,7 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 			}
 		} ZEND_HASH_FOREACH_END();
 	}
-	zend_string_free(key);
+	zend_string_efree(key);
 }
 /* }}} */
 

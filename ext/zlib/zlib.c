@@ -362,7 +362,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = '\0';
 			return out;
 		} else {
-			zend_string_free(out);
+			zend_string_efree(out);
 		}
 	}
 

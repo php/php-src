@@ -1047,7 +1047,7 @@ PHPAPI PHP_FUNCTION(fgets)
 
 		str = zend_string_alloc(len, 0);
 		if (php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len) == NULL) {
-			zend_string_free(str);
+			zend_string_efree(str);
 			RETURN_FALSE;
 		}
 		/* resize buffer if it's much larger than the result.
