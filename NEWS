@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? 2018, PHP 7.2.6
+10 May 2018, PHP 7.2.6RC1
 
 - EXIF:
   . Fixed bug #76164 (exif_read_data zend_mm_heap corrupted). (cmb)
