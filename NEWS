@@ -1,6 +1,10 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.18
+?? ??? ????, PHP 7.1.19
+
+
+
+24 May 2018, PHP 7.1.18
 
 - FPM:
   . Fixed bug #76075 --with-fpm-acl wrongly tries to find libacl on FreeBSD.
