@@ -226,9 +226,8 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 {
 	if (UNEXPECTED(call_info & ZEND_CALL_FREE_EXTRA_ARGS)) {
 		uint32_t count = ZEND_CALL_NUM_ARGS(call) - call->func->op_array.num_args;
-		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T + count);
+		zval *p = ZEND_CALL_VAR_NUM(call, call->func->op_array.last_var + call->func->op_array.T);
 		do {
-			p--;
 			if (Z_REFCOUNTED_P(p)) {
 				zend_refcounted *r = Z_COUNTED_P(p);
 				if (!GC_DELREF(r)) {
@@ -238,6 +237,7 @@ static zend_always_inline void zend_vm_stack_free_extra_args_ex(uint32_t call_in
 					gc_check_possible_root(r);
 				}
 			}
+			p++;
 		} while (--count);
  	}
 }
@@ -252,11 +252,9 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 	uint32_t num_args = ZEND_CALL_NUM_ARGS(call);
 
 	if (EXPECTED(num_args > 0)) {
-		zval *end = ZEND_CALL_ARG(call, 1);
-		zval *p = end + num_args;
+		zval *p = ZEND_CALL_ARG(call, 1);
 
 		do {
-			p--;
 			if (Z_REFCOUNTED_P(p)) {
 				zend_refcounted *r = Z_COUNTED_P(p);
 				if (!GC_DELREF(r)) {
@@ -264,7 +262,8 @@ static zend_always_inline void zend_vm_stack_free_args(zend_execute_data *call)
 					zval_dtor_func(r);
 				}
 			}
-		} while (p != end);
+			p++;
+		} while (--num_args);
 	}
 }
 
