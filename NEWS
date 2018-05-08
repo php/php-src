@@ -40,6 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug #75765 (Fatal error instead of Error exception when base class is
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
+  . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
