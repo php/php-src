@@ -1660,14 +1660,14 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 {
 #if 1
 	/* first 256 bits for first character, and second 256 bits for the next */
-	static const uint32_t charset[16] = {
+	static const uint32_t charset[8] = {
 	     /*  31      0   63     32   95     64   127    96 */
 			0x00000000, 0x00000000, 0x87fffffe, 0x07fffffe,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff,
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
+	static const uint32_t charset2[8] = {
 	     /*  31      0   63     32   95     64   127    96 */
 			0x00000000, 0x03ff0000, 0x87fffffe, 0x07fffffe,
-			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff
-		};
+			0xffffffff, 0xffffffff, 0xffffffff, 0xffffffff};
 #endif
 	size_t i;
 	uint32_t ch;
@@ -1679,7 +1679,7 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 	/* These are allowed as first char: [a-zA-Z_\x7f-\xff] */
 	ch = (uint32_t)((unsigned char *)var_name)[0];
 #if 1
-	if (UNEXPECTED(!((charset[ch >> 5] >> (ch & 0x1f)) & 1))) {
+	if (UNEXPECTED(!ZEND_BIT_TEST(charset, ch))) {
 #else
 	if (var_name[0] != '_' &&
 		(ch < 65  /* A    */ || /* Z    */ ch > 90)  &&
@@ -1696,7 +1696,7 @@ static zend_always_inline int php_valid_var_name(const char *var_name, size_t va
 		do {
 			ch = (uint32_t)((unsigned char *)var_name)[i];
 #if 1
-			if (UNEXPECTED(!((charset[8 + (ch >> 5)] >> (ch & 0x1f)) & 1))) {
+			if (UNEXPECTED(!ZEND_BIT_TEST(charset2, ch))) {
 #else
 			if (var_name[i] != '_' &&
 				(ch < 48  /* 0    */ || /* 9    */ ch > 57)  &&

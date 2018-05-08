@@ -350,7 +350,7 @@ static int php_json_escape_string(
 				0xffffffff, 0x500080c4, 0x10000000, 0x00000000};
 
 			pos++;
-			if (EXPECTED(!((charmap[us >> 5] >> (us & 0x1f)) & 1))) {
+			if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
 				smart_str_appendc(buf, (unsigned char) us);
 			} else {
 				switch (us) {

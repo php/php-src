@@ -108,7 +108,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, initialize_result_set_rest)(MYSQLND_RE
 
 		for (i = 0; i < result->row_count; i++) {
 			/* (i / 8) & the_bit_for_i*/
-			if ((initialized[i >> 3] >> (i & 7)) & 1) {
+			if (ZEND_BIT_TEST(initialized, i)) {
 				continue;
 			}
 
@@ -1151,7 +1151,7 @@ MYSQLND_METHOD(mysqlnd_result_buffered_c, fetch_row)(MYSQLND_RES * result, void 
 		if (rc != PASS) {
 			DBG_RETURN(FAIL);
 		}
-		if (!((set->initialized[set->current_row >> 3] >> (set->current_row & 7)) & 1)) {
+		if (!ZEND_BIT_TEST(set->initialized, set->current_row)) {
 			set->initialized[set->current_row >> 3] |= (1 << (set->current_row & 7)); /* mark initialized */
 
 			++set->initialized_rows;
