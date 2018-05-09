@@ -112,7 +112,7 @@ PHP                                                                        NEWS
   . Removed support for Birdstep. (Kalle)
 
 - OpenSSL:
-  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
+  . Added openssl_pkey_derive function. (Jim Zubov)
 
 - PCRE:
   . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)

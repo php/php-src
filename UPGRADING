@@ -149,6 +149,10 @@ Intl:
   . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
     to retrieve the Decomposition_Mapping property of a character.
 
+OpenSSL:
+  . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
+    possibly other future algorithms supported by EVP_PKEY_derive.
+
 Standard:
   . Added is_countable() function, to check whether a value may be passed to
     count().
