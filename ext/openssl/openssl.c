@@ -431,7 +431,7 @@ ZEND_BEGIN_ARG_INFO(arginfo_openssl_dh_compute_key, 0)
 	ZEND_ARG_INFO(0, dh_key)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO(arginfo_openssl_pkey_derive, 0)
+ZEND_BEGIN_ARG_INFO_EX(arginfo_openssl_pkey_derive, 0, 0, 2)
 	ZEND_ARG_INFO(0, peer_pub_key)
 	ZEND_ARG_INFO(0, priv_key)
 	ZEND_ARG_INFO(0, keylen)
