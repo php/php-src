@@ -585,6 +585,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_ARRAY_PERSISTENT			GC_PERSISTENT
 
 /* object flags (zval.value->gc.u.flags) */
+#define IS_OBJ_WEAKLY_REFERENCED	GC_PERSISTENT
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
 #define IS_OBJ_FREE_CALLED			(1<<9)
 
@@ -995,7 +996,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #if ZEND_RC_DEBUG
 extern ZEND_API zend_bool zend_rc_debug;
 # define ZEND_RC_MOD_CHECK(p) do { \
-		if (zend_rc_debug) { \
+		if (zend_rc_debug && zval_gc_type((p)->u.type_info) != IS_OBJECT) { \
 			ZEND_ASSERT(!(zval_gc_flags((p)->u.type_info) & GC_IMMUTABLE)); \
 			ZEND_ASSERT((zval_gc_flags((p)->u.type_info) & (GC_PERSISTENT|GC_PERSISTENT_LOCAL)) != GC_PERSISTENT); \
 		} \
