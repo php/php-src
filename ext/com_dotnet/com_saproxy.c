@@ -374,6 +374,8 @@ static void saproxy_free_storage(zend_object *object)
 //???		}
 //???	}
 
+	zend_object_std_dtor(object);
+
 	zval_ptr_dtor(proxy->zobj);
 	efree(proxy->indices);
 }
