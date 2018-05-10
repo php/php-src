@@ -585,8 +585,9 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define IS_ARRAY_PERSISTENT			GC_PERSISTENT
 
 /* object flags (zval.value->gc.u.flags) */
+#define IS_OBJ_WEAKLY_REFERENCED	GC_PERSISTENT_LOCAL
 #define IS_OBJ_DESTRUCTOR_CALLED	(1<<8)
-#define IS_OBJ_FREE_CALLED			(1<<9)
+#define IS_OBJ_FREE_CALLED	(1<<9)
 
 #define OBJ_FLAGS(obj)              GC_FLAGS(obj)
 
