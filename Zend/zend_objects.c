@@ -24,6 +24,7 @@
 #include "zend_API.h"
 #include "zend_interfaces.h"
 #include "zend_exceptions.h"
+#include "zend_weakrefs.h"
 
 static zend_always_inline void _zend_object_std_init(zend_object *object, zend_class_entry *ce)
 {
@@ -70,6 +71,7 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			p++;
 		} while (p != end);
 	}
+
 	if (UNEXPECTED(object->ce->ce_flags & ZEND_ACC_USE_GUARDS)) {
 		if (EXPECTED(Z_TYPE_P(p) == IS_STRING)) {
 			zval_ptr_dtor_str(p);
@@ -81,6 +83,10 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 			zend_hash_destroy(guards);
 			FREE_HASHTABLE(guards);
 		}
+	}
+
+	if (UNEXPECTED(GC_FLAGS(object) & IS_OBJ_WEAKLY_REFERENCED)) {
+		zend_weakrefs_notify(object);
 	}
 }
 
