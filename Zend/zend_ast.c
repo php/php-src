@@ -837,7 +837,7 @@ ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn) {
  *   80     right           =>
  *   85     right           yield from
  *   90     right           = += -= *= /= .= %= &= |= ^= <<= >>= **=
- *  100     left            ? :
+ *  100     left            ?:
  *  110     right           ??
  *  120     left            ||
  *  130     left            &&
