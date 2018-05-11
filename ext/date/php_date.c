@@ -612,6 +612,16 @@ PHPAPI zend_class_entry *php_date_get_timezone_ce(void)
 	return date_ce_timezone;
 }
 
+PHPAPI zend_class_entry *php_date_get_interval_ce(void)
+{
+	return date_ce_interval;
+}
+
+PHPAPI zend_class_entry *php_date_get_period_ce(void)
+{
+	return date_ce_period;
+}
+
 static zend_object_handlers date_object_handlers_date;
 static zend_object_handlers date_object_handlers_immutable;
 static zend_object_handlers date_object_handlers_timezone;
