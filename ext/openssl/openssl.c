@@ -4949,15 +4949,17 @@ PHP_FUNCTION(openssl_pkey_derive)
 	zval *peer_pub_key;
 	EVP_PKEY *pkey;
 	EVP_PKEY *peer_key;
-	zend_long keylen = 0;
+	size_t key_size;
+	zend_long key_len = 0;
 	zend_string *result;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &peer_pub_key, &priv_key, &keylen) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "zz|l", &peer_pub_key, &priv_key, &key_len) == FAILURE) {
 		RETURN_FALSE;
 	}
-	if (keylen < 0) {
+	if (key_len < 0) {
 		php_error_docref(NULL, E_WARNING, "keylen < 0, assuming NULL");
 	}
+	key_size = key_len;
 	if ((pkey = php_openssl_evp_from_zval(priv_key, 0, "", 0, 0, NULL)) == NULL
 		|| (peer_key = php_openssl_evp_from_zval(peer_pub_key, 1, NULL, 0, 0, NULL)) == NULL) {
 		RETURN_FALSE;
@@ -4968,11 +4970,11 @@ PHP_FUNCTION(openssl_pkey_derive)
 	}
 	if (EVP_PKEY_derive_init(ctx) > 0
 		&& EVP_PKEY_derive_set_peer(ctx, peer_key) > 0
-		&& (keylen > 0 || EVP_PKEY_derive(ctx, NULL, &keylen) > 0)
-		&& (result = zend_string_alloc(keylen, 0)) != NULL) {
-		if (EVP_PKEY_derive(ctx, (unsigned char*)ZSTR_VAL(result), &keylen) > 0) {
-			ZSTR_LEN(result) = keylen;
-			ZSTR_VAL(result)[keylen] = 0;
+		&& (key_size > 0 || EVP_PKEY_derive(ctx, NULL, &key_size) > 0)
+		&& (result = zend_string_alloc(key_size, 0)) != NULL) {
+		if (EVP_PKEY_derive(ctx, (unsigned char*)ZSTR_VAL(result), &key_size) > 0) {
+			ZSTR_LEN(result) = key_size;
+			ZSTR_VAL(result)[key_size] = 0;
 			RETVAL_STR(result);
 		} else {
 			php_openssl_store_errors();
