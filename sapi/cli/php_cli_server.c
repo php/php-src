@@ -2013,9 +2013,11 @@ static int php_cli_server_begin_send_static(php_cli_server *server, php_cli_serv
 		 ' ' == client->request.path_translated[client->request.path_translated_len-1])) {
 		return php_cli_server_send_error_page(server, client, 500);
 	}
-#endif
 
+	fd = client->request.path_translated ? php_win32_ioutil_open(client->request.path_translated, O_RDONLY): -1;
+#else
 	fd = client->request.path_translated ? open(client->request.path_translated, O_RDONLY): -1;
+#endif
 	if (fd < 0) {
 		return php_cli_server_send_error_page(server, client, 404);
 	}
