@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #76333 (PHP built-in server does not find files if root path
     contains special characters). (Anatol)
 
+- Standard:
+  . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
+    (Anatol)
 
 ?? ??? 2018, PHP 7.2.6
 
