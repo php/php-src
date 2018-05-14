@@ -2785,6 +2785,7 @@ ZEND_API int zend_register_class_alias_ex(const char *name, size_t name_len, zen
 
 	zend_assert_valid_class_name(lcname);
 
+	lcname = zend_new_interned_string(lcname);
 	ce = zend_hash_add_ptr(CG(class_table), lcname, ce);
 	zend_string_release(lcname);
 	if (ce) {
