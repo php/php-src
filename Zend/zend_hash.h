@@ -232,6 +232,7 @@ ZEND_API zend_bool ZEND_FASTCALL zend_hash_str_exists(const HashTable *ht, const
 ZEND_API zend_bool ZEND_FASTCALL zend_hash_index_exists(const HashTable *ht, zend_ulong h);
 
 /* traversing */
+ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_first_pos(const HashTable *ht);
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht);
 
 #define zend_hash_has_more_elements_ex(ht, pos) \
