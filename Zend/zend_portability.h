@@ -443,7 +443,7 @@ char *alloca();
 #define MIN(a, b)  (((a)<(b))?(a):(b))
 
 /* x86 instructions BT, SHL, SHR don't require masking */
-#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
+#if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__)) || defined(ZEND_WIN32)
 # define ZEND_BIT_TEST(bits, bit) (((bits)[(bit) / (sizeof((bits)[0])*8)] >> (bit)) & 1)
 #else
 # define ZEND_BIT_TEST(bits, bit) (((bits)[(bit) / (sizeof((bits)[0])*8)] >> ((bit) & (sizeof((bits)[0])*8-1))) & 1)
