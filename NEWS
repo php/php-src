@@ -1,5 +1,12 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
+?? ??? 2018, PHP 7.2.7
+
+- CLI Server:
+  . Fixed bug #76333 (PHP built-in server does not find files if root path
+    contains special characters). (Anatol)
+
+
 ?? ??? 2018, PHP 7.2.6
 
 - EXIF:
