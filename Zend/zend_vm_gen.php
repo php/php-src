@@ -2611,7 +2611,7 @@ function gen_vm($def, $skel) {
 				$else = "else ";
 			}
 			if (isset($used_extra_spec["QUICK_ARG"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);\n");
 				$else = "else ";
 			}
 			if (isset($used_extra_spec["SMART_BRANCH"])) {
@@ -2699,7 +2699,7 @@ function gen_vm($def, $skel) {
 					$else = "else ";
 				}
 				if (isset($used_extra_spec["QUICK_ARG"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num < MAX_ARG_FLAG_NUM);\n");
+					out($f, "\t\t{$else}if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);\n");
 					$else = "else ";
 				}
 				if (isset($used_extra_spec["SMART_BRANCH"])) {
