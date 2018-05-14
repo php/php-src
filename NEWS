@@ -9,6 +9,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #75232 (print_r of DateTime creating side-effect). (Nikita)
 
+- GD:
+  . Fixed bug #76324 (cannot detect recent versions of freetype with
+    pkg-config). (Eli Schwartz)
+
 - Hash:
   . The hash extension is now an integral part of PHP and cannot be disabled
     as per RFC: https://wiki.php.net/rfc/permanent_hash_ext. (Kalle)

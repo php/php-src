@@ -93,6 +93,12 @@ PHP 7.4 UPGRADE NOTES
 9. Other Changes to Extensions
 ========================================
 
+- GD:
+  . Freetype detection now relies on pkg-config. The --with-freetype-dir option
+    has been renamed to --enable-freetype and no longer accepts a directory.
+    Instead pkg-config environment variables can be used to configure custom paths,
+    see either ./configure --help or follow the instructions in error messages.
+
 - Hash:
   . The hash extension cannot be disabled anymore and is always an integral
     part of any PHP build, similar to the date extension.

@@ -177,6 +177,7 @@ rm -f libs/*
 dnl Checks for programs.
 dnl -------------------------------------------------------------------------
 
+PKG_PROG_PKG_CONFIG
 AC_PROG_CC([cc gcc])
 PHP_DETECT_ICC
 PHP_DETECT_SUNCC
