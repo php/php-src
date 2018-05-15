@@ -335,7 +335,7 @@ if (!$options['dir'] || !is_dir($options['dir'])) {
 if ($options['experimental']) {
 	print('Creating EXPERIMENTAL... ');
 
-	if (file_put_contents($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . 'EXPERIMENTAL', '') === false) {
+	if (!touch($options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . 'EXPERIMENTAL')) {
 		error('Unable to create the EXPERIMENTAL file');
 	}
 
