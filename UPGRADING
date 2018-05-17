@@ -153,6 +153,21 @@ OpenSSL:
   . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
     possibly other future algorithms supported by EVP_PKEY_derive.
 
+Sockets:
+  . Added functions to import/export the WSAPROTOCOL_INFO info struct. This
+    implementation complements the already supported SCM_RIGHTS as in
+    man 3 cmsg and is Windows specific. For the import/export, the default
+    system securities apply for the SHM reading/writing. The socket becomes
+    invalid, when the last reference to it is closed.
+    - socket_wsaprotocol_info_export(resource $sock, int $pid) - exports the
+      WSAPROTOCOL_INFO structure into shared memory and returns an identifier
+      to be used for the import, or false on failure. The exported ID is
+      only valid for the dedicated PID.
+    - socket_wsaprotocol_info_import(string $id) - returns a duplicated
+      socket as per the passed identifier, or false on failure.
+    - socket_wsaprotocol_info_release(string $id) - releases the shared memory
+      corresponding to the passed identifier.
+
 Standard:
   . Added is_countable() function, to check whether a value may be passed to
     count().
