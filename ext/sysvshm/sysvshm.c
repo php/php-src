@@ -243,7 +243,7 @@ ZEND_METHOD(SharedMemoryBlock, has)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;
@@ -266,7 +266,7 @@ ZEND_METHOD(SharedMemoryBlock, get)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_get(intern->shm_object_ptr, shm_key, return_value);
@@ -291,7 +291,7 @@ ZEND_METHOD(SharedMemoryBlock, set)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	ret = shm_set(intern->shm_object_ptr, shm_key, arg_var);
@@ -316,7 +316,7 @@ ZEND_METHOD(SharedMemoryBlock, remove)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;
@@ -343,7 +343,7 @@ ZEND_METHOD(SharedMemoryBlock, free)
 
     intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;
@@ -408,7 +408,7 @@ PHP_FUNCTION(shm_detach)
 
     intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_free_storage(Z_OBJ_P(object));
@@ -429,7 +429,7 @@ PHP_FUNCTION(shm_remove)
 
     intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;
@@ -459,7 +459,7 @@ PHP_FUNCTION(shm_put_var)
 
 	intern = (shm_object *)shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 
@@ -489,7 +489,7 @@ PHP_FUNCTION(shm_get_var)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_get(intern->shm_object_ptr, shm_key, return_value);
@@ -512,7 +512,7 @@ PHP_FUNCTION(shm_has_var)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;
@@ -537,7 +537,7 @@ PHP_FUNCTION(shm_remove_var)
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
-		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SHaredMemoryBlock object internal state");
+		zend_throw_exception_ex(spl_ce_InvalidArgumentException, 0, "Invalid SharedMemoryBlock object internal state");
 		RETURN_NULL();
 	}
 	shm_object_ptr = intern->shm_object_ptr;

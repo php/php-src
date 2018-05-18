@@ -7,9 +7,9 @@ if (!extension_loaded("sysvshm")){ print 'skip'; }
 --FILE--
 <?php
 
-$key = 123;
+shm_detach();
 
-var_dump(shm_detach());
+$key = 456;
 try {
     var_dump(shm_detach($key,1));
 } catch (TypeError $error) {
@@ -19,18 +19,33 @@ try {
 $s = shm_attach($key);
 var_dump($s);
 var_dump(shm_detach($s));
+
 try {
     var_dump(shm_detach($s));
-} catch (TypeError $error) {
-    echo $error->getMessage() . PHP_EOL;
+} catch (InvalidArgumentException $exception) {
+    echo $exception->getMessage() . PHP_EOL;
 }
-shm_remove($s);
+echo '{{{ #1'.PHP_EOL;
 var_dump($s);
-var_dump(shm_detach($s));
+echo '/eof#1 }}}'.PHP_EOL;
+try {
+    shm_remove($s);
+} catch (InvalidArgumentException $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
 var_dump($s);
+
 echo '=====' . PHP_EOL;
-shm_put_var($s, 1, "value!");
-var_dump(shm_get_var($s, 1));
+try {
+    shm_put_var($s, 1, "value!");
+} catch (InvalidArgumentException $exception) {
+    echo $exception->getMessage() . PHP_EOL;
+}
+try {
+    var_dump(shm_get_var($s, 1));
+} catch(InvalidArgumentException $excception) {
+    echo $excception->getMessage() . PHP_EOL;
+}
 echo "Done\n";
 ?>
 --CLEAN--

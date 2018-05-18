@@ -13,6 +13,7 @@ try {
 } catch (ArgumentCountError $error) {
     echo $error->getMessage() . PHP_EOL;
 }
+
 try {
     shm_attach(1,2,3,4);
 } catch (ArgumentCountError $error) {
@@ -24,11 +25,13 @@ try {
 } catch (InvalidArgumentException $exception) {
     echo $exception->getMessage() . PHP_EOL;
 }
+
 try {
     shm_attach(0, -1);
 } catch (InvalidArgumentException $exception) {
     echo $exception->getMessage() . PHP_EOL;
 }
+
 try {
     shm_attach(123, -1);
 } catch (InvalidArgumentException $exception) {
@@ -57,12 +60,12 @@ Segment size 0 must be greater than zero
 Segment size -1 must be greater than zero
 Segment size -1 must be greater than zero
 ====
-object(SharedMemoryBlock)#%d (0) {
+object(SharedMemoryBlock)#5 (0) {
 }
-object(SharedMemoryBlock)#%d (0) {
+object(SharedMemoryBlock)#7 (0) {
 }
-object(SharedMemoryBlock)#%d (0) {
+object(SharedMemoryBlock)#5 (0) {
 }
-object(SharedMemoryBlock)#%d (0) {
+object(SharedMemoryBlock)#7 (0) {
 }
 Done
