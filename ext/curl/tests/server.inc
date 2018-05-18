@@ -13,17 +13,23 @@ function curl_cli_server_start() {
     $doc_root = __DIR__;
     $router = "responder/get.php";
 
-    $descriptorspec = array(
-        0 => STDIN,
-        1 => STDOUT,
-        2 => STDERR,
-    );
-
     if (substr(PHP_OS, 0, 3) == 'WIN') {
+        $descriptorspec = array(
+            0 => STDIN,
+            1 => STDOUT,
+            2 => array("pipe", "w"),
+        );
+
         $cmd = "{$php_executable} -t {$doc_root} -n -S " . PHP_CURL_SERVER_ADDRESS;
         $cmd .= " {$router}";
         $handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
     } else {
+        $descriptorspec = array(
+            0 => STDIN,
+            1 => STDOUT,
+            2 => STDERR,
+        );
+
         $cmd = "exec {$php_executable} -t {$doc_root} -n -S " . PHP_CURL_SERVER_ADDRESS;
         $cmd .= " {$router}";
         $cmd .= " 2>/dev/null";
