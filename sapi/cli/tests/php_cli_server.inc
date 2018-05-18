@@ -11,13 +11,13 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 		file_put_contents($doc_root . '/' . ($router ?: 'index.php'), '<?php ' . $code . ' ?>');
 	}
 
-	$descriptorspec = array(
-		0 => STDIN,
-		1 => STDOUT,
-		2 => STDERR,
-	);
-
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
+		$descriptorspec = array(
+			0 => STDIN,
+			1 => STDOUT,
+			2 => array("pipe", "w"),
+		);
+
 		$cmd = "{$php_executable} -t {$doc_root} -n {$cmd_args} -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!is_null($router)) {
 			$cmd .= " {$router}";
@@ -25,6 +25,12 @@ function php_cli_server_start($code = 'echo "Hello world";', $router = 'index.ph
 
 		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
 	} else {
+		$descriptorspec = array(
+			0 => STDIN,
+			1 => STDOUT,
+			2 => STDERR,
+		);
+
 		$cmd = "exec {$php_executable} -t {$doc_root} -n {$cmd_args} -S " . PHP_CLI_SERVER_ADDRESS;
 		if (!is_null($router)) {
 			$cmd .= " {$router}";
