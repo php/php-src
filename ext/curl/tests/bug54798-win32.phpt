@@ -65,4 +65,3 @@ Hello World!Ok for CURLOPT_FILE
 
 %AOk for CURLOPT_INFILE
 ===DONE===
-%A
