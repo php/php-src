@@ -3809,6 +3809,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 			filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
+			if (php_openssl_open_base_dir_chk(filename)) {
+				TMP_CLEAN;
+			}
 		}
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
@@ -3835,9 +3838,6 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 			BIO *in;
 
 			if (filename) {
-				if (php_openssl_open_base_dir_chk(filename)) {
-					TMP_CLEAN;
-				}
 				in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 			} else {
 				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));

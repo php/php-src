@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76333 (PHP built-in server does not find files if root path
     contains special characters). (Anatol)
 
+- OpenSSL:
+  . Fixed bug #76296 (openssl_pkey_get_public does not respect open_basedir).
+    (Erik Lax, Jakub Zelenka)
+
 - Standard:
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
     (Anatol)
