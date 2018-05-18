@@ -7,16 +7,22 @@ function php_cli_server_start($ini = "") {
 	$php_executable = getenv('TEST_PHP_EXECUTABLE');
 	$doc_root = __DIR__;
 
-	$descriptorspec = array(
-		0 => STDIN,
-		1 => STDOUT,
-		2 => STDERR,
-	);
-
 	if (substr(PHP_OS, 0, 3) == 'WIN') {
+		$descriptorspec = array(
+			0 => STDIN,
+			1 => STDOUT,
+			2 => array("pipe", "w"),
+		);
+
 		$cmd = "{$php_executable} -t {$doc_root} $ini -S " . PHP_CLI_SERVER_ADDRESS;
 		$handle = proc_open(addslashes($cmd), $descriptorspec, $pipes, $doc_root, NULL, array("bypass_shell" => true,  "suppress_errors" => true));
 	} else {
+		$descriptorspec = array(
+			0 => STDIN,
+			1 => STDOUT,
+			2 => STDERR,
+		);
+
 		$cmd = "exec {$php_executable} -t {$doc_root} $ini -S " . PHP_CLI_SERVER_ADDRESS . " 2>/dev/null";
 		$handle = proc_open($cmd, $descriptorspec, $pipes, $doc_root);
 	}
