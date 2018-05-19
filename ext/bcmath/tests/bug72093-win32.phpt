@@ -6,6 +6,13 @@ if(!extension_loaded("bcmath")) print "skip";
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip valid only for windows');
 }
+
+$cur = PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD;
+$req = "10.0.17134";
+if (version_compare($cur, $req) >= 0) {
+	echo "skip Only for Windows systems < $req";
+}
+
 ?>
 --FILE--
 <?php
