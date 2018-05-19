@@ -14,7 +14,7 @@ PHP                                                                        NEWS
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
     (Anatol)
 
-?? ??? 2018, PHP 7.2.6
+24 May 2018, PHP 7.2.6
 
 - EXIF:
   . Fixed bug #76164 (exif_read_data zend_mm_heap corrupted). (cmb)
