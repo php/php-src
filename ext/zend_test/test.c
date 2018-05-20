@@ -200,6 +200,8 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_test_trait = zend_register_internal_class(&class_entry);
 	zend_test_trait->ce_flags |= ZEND_ACC_TRAIT;
 	zend_declare_property_null(zend_test_trait, "testProp", sizeof("testProp")-1, ZEND_ACC_PUBLIC);
+
+	zend_register_class_alias("_ZendTestClassAlias", zend_test_class);
 	return SUCCESS;
 }
 
