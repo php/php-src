@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? 2018, PHP 7.2.7
 
+- Core:
+  . Fixed bug #76337 (segfault when opcache enabled + extension use
+    zend_register_class_alias). (xKhorasan)
+
 - CLI Server:
   . Fixed bug #76333 (PHP built-in server does not find files if root path
     contains special characters). (Anatol)
