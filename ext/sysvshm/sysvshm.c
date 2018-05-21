@@ -65,8 +65,6 @@ static void shm_object_free_storage(zend_object *object) /* {{{ */
 		efree(shm_ptr);
 		intern->shm_object_ptr = NULL;
 	}
-
-	zend_object_std_dtor(&intern->std);
 }
 /* }}} */
 
@@ -237,9 +235,9 @@ ZEND_METHOD(SharedMemoryBlock, has)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
@@ -260,9 +258,9 @@ ZEND_METHOD(SharedMemoryBlock, get)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
@@ -284,10 +282,10 @@ ZEND_METHOD(SharedMemoryBlock, set)
 	sysvshm_shm *shm_object_ptr;
 	int ret;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
 		Z_PARAM_LONG(shm_key)
 		Z_PARAM_ZVAL(arg_var)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
@@ -310,9 +308,9 @@ ZEND_METHOD(SharedMemoryBlock, remove)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
@@ -338,8 +336,8 @@ ZEND_METHOD(SharedMemoryBlock, free)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(0, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 0, 0)
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
     intern = shm_object_from_zend_object(Z_OBJ_P(getThis()));
 	if (intern->shm_object_ptr == NULL) {
@@ -373,6 +371,8 @@ PHP_MINIT_FUNCTION(sysvshm)
     };
     INIT_CLASS_ENTRY(tmp_ce, "SharedMemoryBlock", shm_object_methods);
     tmp_ce.create_object = shm_object_new;
+	tmp_ce.serialize = zend_class_serialize_deny;
+  	tmp_ce.unserialize = zend_class_unserialize_deny;
     shm_ce_ptr = zend_register_internal_class_ex(&tmp_ce, NULL);
     memcpy(&shm_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); 
     shm_object_handlers.offset = XtOffsetOf(shm_object, std);
@@ -402,7 +402,7 @@ PHP_FUNCTION(shm_detach)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
@@ -423,9 +423,9 @@ PHP_FUNCTION(shm_remove)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(1, 1)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 1, 1)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
     intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
@@ -451,11 +451,11 @@ PHP_FUNCTION(shm_put_var)
 	sysvshm_shm *shm_object_ptr;
 	int ret;
 
-	ZEND_PARSE_PARAMETERS_START(3, 3)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 3, 3)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
 		Z_PARAM_LONG(shm_key)
 		Z_PARAM_ZVAL(arg_var)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = (shm_object *)shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
@@ -467,9 +467,8 @@ PHP_FUNCTION(shm_put_var)
 
 	if (ret == -1) {
 		zend_throw_exception(spl_ce_RuntimeException, "Not enough shared memory left", 0);
-		RETURN_FALSE;
 	}
-	RETURN_TRUE;
+	RETURN_NULL();
 }
 /* }}} */
 
@@ -482,10 +481,10 @@ PHP_FUNCTION(shm_get_var)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
@@ -505,10 +504,10 @@ PHP_FUNCTION(shm_has_var)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {
@@ -530,10 +529,10 @@ PHP_FUNCTION(shm_remove_var)
 	shm_object *intern;
 	sysvshm_shm *shm_object_ptr;
 
-	ZEND_PARSE_PARAMETERS_START(2, 2)
+	ZEND_PARSE_PARAMETERS_START_EX(ZEND_PARSE_PARAMS_THROW, 2, 2)
 		Z_PARAM_OBJECT_OF_CLASS_EX(object, shm_ce_ptr, 1, 0)
 		Z_PARAM_LONG(shm_key)
-	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
+	ZEND_PARSE_PARAMETERS_END_EX(RETURN_NULL());
 
 	intern = shm_object_from_zend_object(Z_OBJ_P(object));
 	if (intern->shm_object_ptr == NULL) {

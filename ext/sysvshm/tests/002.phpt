@@ -3,7 +3,6 @@ shm_attach() tests
 --SKIPIF--
 <?php
 if (!extension_loaded("sysvshm")){ print 'skip'; }
-if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
 <?php
@@ -53,7 +52,7 @@ shm_remove($s);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 shm_attach() expects at least 1 parameter, 0 given
 shm_attach() expects at most 3 parameters, 4 given
 Segment size 0 must be greater than zero

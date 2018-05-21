@@ -3,50 +3,57 @@ shm_remove_var() tests
 --SKIPIF--
 <?php
 if (!extension_loaded("sysvshm")){ print 'skip'; }
-if (!function_exists('ftok')){ print 'skip'; }
 ?>
 --FILE--
 <?php
 
-$key = ftok(__FILE__, 't');
-$s = shm_attach($key, 1024);
+$s = shm_attach(456, 1024);
 
 shm_put_var($s, 1, "test string");
 
-var_dump(shm_remove_var());
-var_dump(shm_remove_var(-1, -1));
-var_dump(shm_remove_var($s, -10));
-
+try {
+    shm_remove_var();
+} catch (ArgumentCountError $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
+try {
+    shm_remove_var(-1, -1);
+} catch (TypeError $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
+try {
+    shm_remove_var($s, -10);
+} catch (OutOfBoundsException $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
 var_dump(shm_get_var($s, 1));
+shm_remove_var($s, 1);
+try {
+    shm_get_var($s, 1);
+} catch (OutOfBoundsException $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
 
-var_dump(shm_remove_var($s, 1));
-var_dump(shm_get_var($s, 1));
-
-var_dump(shm_remove_var($s, 1));
-var_dump(shm_get_var($s, 1));
+try {
+    shm_remove_var($s, 1);
+} catch (OutOfBoundsException $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
+try {
+    shm_get_var($s, 1);
+} catch (OutOfBoundsException $error) {
+    echo $error->getMessage() . PHP_EOL;
+}
 
 shm_remove($s);
 echo "Done\n";
 ?>
---EXPECTF--	
-
-Warning: shm_remove_var() expects exactly 2 parameters, 0 given in %s006.php on line %d
-NULL
-
-Warning: shm_remove_var() expects parameter 1 to be resource, int given in %s006.php on line %d
-NULL
-
-Warning: shm_remove_var(): variable key -10 doesn't exist in %s006.php on line %d
-bool(false)
+--EXPECT--	
+shm_remove_var() expects exactly 2 parameters, 0 given
+Argument 1 passed to shm_remove_var() must be an instance of SharedMemoryBlock, int given
+Variable key -10 doesn't exist
 string(11) "test string"
-bool(true)
-
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
-
-Warning: shm_remove_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
-
-Warning: shm_get_var(): variable key 1 doesn't exist in %s006.php on line %d
-bool(false)
+Variable key 1 doesn't exist
+Variable key 1 doesn't exist
+Variable key 1 doesn't exist
 Done
