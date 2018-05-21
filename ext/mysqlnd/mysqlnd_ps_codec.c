@@ -242,7 +242,11 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, unsigned int pack_le
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+	if (t.second_part > 0) {
+		length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u.%06u", (t.neg ? "-" : ""), t.hour, t.minute, t.second, t.second_part);
+	} else {
+		length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+	}
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length, 1);
@@ -323,7 +327,11 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, unsigned int pac
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+	if (t.second_part > 0) {
+		length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u.%06u", t.year, t.month, t.day, t.hour, t.minute, t.second, t.second_part);
+	} else {
+		length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+	}
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length, 1);
