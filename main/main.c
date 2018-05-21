@@ -1105,6 +1105,26 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		PG(last_error_lineno) = error_lineno;
 	}
 
+	/* set status header if real error happened */
+	switch (type) {
+		case E_CORE_ERROR:
+		case E_ERROR:
+		case E_RECOVERABLE_ERROR:
+		case E_PARSE:
+		case E_COMPILE_ERROR:
+		case E_USER_ERROR:
+			if (module_initialized && !SG(headers_sent) &&
+				SG(sapi_headers).http_response_code == 200
+			) {
+				sapi_header_line ctr = {0};
+
+				ctr.line = (char*) "HTTP/1.0 500 Internal Server Error";
+				ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
+				sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
+			}
+			break;
+	}
+
 	/* display/log the error if necessary */
 	if (display && (EG(error_reporting) & type || (type & E_CORE))
 		&& (PG(log_errors) || PG(display_errors) || (!module_initialized))) {
@@ -1229,26 +1249,14 @@ static ZEND_COLD void php_error_cb(int type, const char *error_filename, const u
 		case E_COMPILE_ERROR:
 		case E_USER_ERROR:
 			EG(exit_status) = 255;
-			if (module_initialized) {
-				if (!PG(display_errors) &&
-				    !SG(headers_sent) &&
-					SG(sapi_headers).http_response_code == 200
-				) {
-					sapi_header_line ctr = {0};
-
-					ctr.line = "HTTP/1.0 500 Internal Server Error";
-					ctr.line_len = sizeof("HTTP/1.0 500 Internal Server Error") - 1;
-					sapi_header_op(SAPI_HEADER_REPLACE, &ctr);
-				}
-				/* the parser would return 1 (failure), we can bail out nicely */
-				if (type != E_PARSE) {
-					/* restore memory limit */
-					zend_set_memory_limit(PG(memory_limit));
-					efree(buffer);
-					zend_objects_store_mark_destructed(&EG(objects_store));
-					zend_bailout();
-					return;
-				}
+			/* the parser would return 1 (failure), we can bail out nicely */
+			if (module_initialized && type != E_PARSE) {
+				/* restore memory limit */
+				zend_set_memory_limit(PG(memory_limit));
+				efree(buffer);
+				zend_objects_store_mark_destructed(&EG(objects_store));
+				zend_bailout();
+				return;
 			}
 			break;
 	}
