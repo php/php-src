@@ -847,8 +847,6 @@ static void gc_compact(void)
 					if (scan <= end) {
 						break;
 					}
-				} else {
-					break;
 				}
 			}
 		}
