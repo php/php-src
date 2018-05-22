@@ -13,6 +13,8 @@ PHP                                                                        NEWS
 - OpenSSL:
   . Fixed bug #76296 (openssl_pkey_get_public does not respect open_basedir).
     (Erik Lax, Jakub Zelenka)
+  . Fixed bug #76174 (openssl extension fails to build with LibreSSL 2.7).
+    (Jakub Zelenka)
 
 - Standard:
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
