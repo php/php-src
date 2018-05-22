@@ -18,7 +18,7 @@ var_dump($fo->fgetcsv('|'));
 <?php
 unlink('SplFileObject__fgetcsv2.csv');
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   string(6) "field1"

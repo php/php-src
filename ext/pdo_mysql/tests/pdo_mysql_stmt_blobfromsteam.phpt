@@ -142,7 +142,7 @@ $db = MySQLPDOTest::factory();
 $db->exec('DROP TABLE IF EXISTS test');
 @unlink(MySQLPDOTest::getTempDir() . DIRECTORY_SEPARATOR . 'pdoblob.tst');
 ?>
---EXPECTF--
+--EXPECT--
 Emulated PS...
 Native PS...
 done!

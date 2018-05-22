@@ -3,7 +3,7 @@
 $server   = '{127.0.0.1/norsh}';
 $default_mailbox = $server . "INBOX";
 $domain = "something.com";
-$admin_user = "webmaster"; // a user with admin access 
+$admin_user = "webmaster"; // a user with admin access
 $username = "$admin_user@$domain";
 $password = 'p4ssw0rd';
 $users = array("webmaster", "info", "admin", "foo"); // tests require 4 valid userids
@@ -56,39 +56,39 @@ function displayOverviewFields($resp, $fields=null) {
 
 
 /**
- * Create a test mailbox and populate with msgs 
+ * Create a test mailbox and populate with msgs
  *
  * @param string mailbox_suffix Suffix used to uniquely identify mailboxes
- * @param int message_count number of test msgs to be written to new mailbox 
- * 
+ * @param int message_count number of test msgs to be written to new mailbox
+ *
  * @return IMAP stream to new mailbox on success; FALSE on failure
  */
 function setup_test_mailbox($mailbox_suffix, $message_count, &$new_mailbox = null, $msg_type = "simple"){
 	global $server, $default_mailbox, $username, $password;
-	
+
 	// open a stream to default mailbox
 	$imap_stream = imap_open($default_mailbox, $username, $password);
 
 	if ($imap_stream === false) {
 		echo "Cannot connect to IMAP server $server: " . imap_last_error() . "\n";
 		return false;
-	}	
-	
+	}
+
 	echo "Create a temporary mailbox and add " . $message_count .  " msgs\n";
 	$new_mailbox = create_mailbox($imap_stream, $mailbox_suffix, $message_count, $msg_type);
 	if ($new_mailbox === false) {
 	   echo "Cant create a temporary mailbox: " . imap_last_error(). "\n";
 	   return false;
 	}
-	
+
 	echo ".. mailbox '$new_mailbox' created\n";
-	
+
 	// reopen stream to new mailbox
 	if (imap_reopen($imap_stream, $new_mailbox) === false) {
 		echo "cant re-open '$new_mailbox' mailbox: " . imap_last_error() . "\n";
 		return false;
 	}
-	
+
 	return $imap_stream;
 }
 
@@ -101,9 +101,9 @@ function setup_test_mailbox($mailbox_suffix, $message_count, &$new_mailbox = nul
 function create_mailbox($imap_stream, $mailbox_suffix, $message_count, $msg_type= "simple"){
 	global $default_mailbox, $mailbox_prefix;
 	$mailbox = $default_mailbox . "." . $mailbox_prefix . $mailbox_suffix;
-	
+
 	$mailboxes = imap_getmailboxes($imap_stream, $mailbox, '*');
-	
+
 	// check mailbox does not already exist
 	if ($mailboxes) {
 		foreach($mailboxes as $value) {
@@ -111,17 +111,17 @@ function create_mailbox($imap_stream, $mailbox_suffix, $message_count, $msg_type
 				exit ("TEST FAILED : Mailbox '$mailbox' already exists\n");
 			}
 		}
-	}	
+	}
 
 	if (imap_createmailbox($imap_stream, $mailbox) === false) {
 		return false;
 	}
-	
+
 	// Add number of test msgs requested
 	if ($message_count > 0) {
 		populate_mailbox($imap_stream, $mailbox, $message_count, $msg_type);
-	}	
-	
+	}
+
 	return $mailbox;
 }
 
@@ -146,42 +146,42 @@ function populate_mailbox($imap_stream, $mailbox, $message_count, $msg_type = "s
 			$envelope["from"]= "foo@anywhere.com";
 			$envelope["to"]  = "$users[0]@$domain";
 			$envelope["subject"] = "Test msg $i";
-		
+
 			$part1["type"] = TYPEMULTIPART;
 			$part1["subtype"] = "mixed";
-			
+
 			$part2["type"] = TYPETEXT;
 			$part2["subtype"] = "plain";
 			$part2["description"] = "imap_mail_compose() function";
 			$part2["contents.data"] = "message 1:xxxxxxxxxxxxxxxxxxxxxxxxxx";
-			
+
 			$part3["type"] = TYPETEXT;
 			$part3["subtype"] = "plain";
 			$part3["description"] = "Example";
 			$part3["contents.data"] = "message 2:yyyyyyyyyyyyyyyyyyyyyyyyyy";
-			
+
 			$part4["type"] = TYPETEXT;
 			$part4["subtype"] = "plain";
 			$part4["description"] = "Return Values";
 			$part4["contents.data"] = "message 3:zzzzzzzzzzzzzzzzzzzzzzzzzz";
-			
+
 			$body[1] = $part1;
 			$body[2] = $part2;
 			$body[3] = $part3;
 			$body[4] = $part4;
-			
+
 			$msg = imap_mail_compose($envelope, $body);
 		}
-	
+
 		imap_append($imap_stream, $mailbox, $msg);
 	}
 }
 
 /**
- * Get the mailbox name from a mailbox decription, i.e strip off server details.  
+ * Get the mailbox name from a mailbox decription, i.e strip off server details.
  *
- * @param string mailbox complete mailbox name 
- * @return mailbox name 
+ * @param string mailbox complete mailbox name
+ * @return mailbox name
  */
 function get_mailbox_name($mailbox){
 

@@ -630,11 +630,16 @@ if test "$PHP_FPM" != "no"; then
 
   if test "$PHP_FPM_ACL" != "no" ; then
     AC_CHECK_HEADERS([sys/acl.h])
-    AC_CHECK_LIB(acl, acl_free, [
-      PHP_ADD_LIBRARY(acl)
+    dnl *BSD has acl_* built into libc
+    AC_CHECK_FUNC(acl_free, [
       AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
     ],[
-      AC_MSG_ERROR(libacl required not found)
+      AC_CHECK_LIB(acl, acl_free, [
+        PHP_ADD_LIBRARY(acl)
+        AC_DEFINE(HAVE_FPM_ACL, 1, [ POSIX Access Control List ])
+      ],[
+        AC_MSG_ERROR(libacl required not found)
+      ])
     ])
   fi
 

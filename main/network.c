@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -1265,11 +1265,11 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	int herr,res;
 
 	if (*hstbuflen == 0) {
-		*hstbuflen = 1024; 
+		*hstbuflen = 1024;
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while (( res = 
+	while (( res =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&hp,&herr))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */
@@ -1280,7 +1280,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 	if (res != SUCCESS) {
 		return NULL;
 	}
-		
+
 	return hp;
 }
 #endif
@@ -1295,7 +1295,7 @@ struct hostent * gethostname_re (const char *host,struct hostent *hostbuf,char *
 		*tmphstbuf = (char *)malloc (*hstbuflen);
 	}
 
-	while ((NULL == ( hp = 
+	while ((NULL == ( hp =
 		gethostbyname_r(host,hostbuf,*tmphstbuf,*hstbuflen,&herr)))
 		&& (errno == ERANGE)) {
 		/* Enlarge the buffer. */

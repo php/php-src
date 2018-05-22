@@ -40,6 +40,6 @@ try {
 	echo $e->getMessage();
 }
 ?>
---EXPECTF--
+--EXPECT--
 stream_read_exception
 stream_write_exception

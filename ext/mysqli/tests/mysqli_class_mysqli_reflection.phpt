@@ -24,7 +24,7 @@ if ($MYSQLND_VERSION < 50004)
 	inspectClass($class);
 	print "done!\n";
 ?>
---EXPECTF--
+--EXPECT--
 Inspecting class 'mysqli'
 isInternal: yes
 isUserDefined: no

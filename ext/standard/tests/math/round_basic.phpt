@@ -45,7 +45,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing round() : basic functionality ***
 round: 123456789
 ...with precision 2-> float(123456789)

@@ -1642,5 +1642,5 @@ array(37) {
   ["ExifImageLength"]=>
   int(1)
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

@@ -31,7 +31,7 @@ foreach($inputs as $key =>$value) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing getdate() : usage variation ***
 
 --octal 05--

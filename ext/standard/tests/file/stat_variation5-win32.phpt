@@ -55,7 +55,7 @@ echo "\n*** Done ***";
 $file_path = dirname(__FILE__);
 unlink("$file_path/stat_variation5.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 
 *** Testing stat(): on a file with read/write permission ***
 bool(true)

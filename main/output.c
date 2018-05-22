@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -609,11 +609,17 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
  * Register a conflict checking function on MINIT */
 PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func)
 {
+	int ret;
+	zend_string *str;
+
 	if (!EG(current_module)) {
 		zend_error(E_ERROR, "Cannot register an output handler conflict outside of MINIT");
 		return FAILURE;
 	}
-	return zend_hash_str_update_ptr(&php_output_handler_conflicts, name, name_len, check_func) ? SUCCESS : FAILURE;
+	str = zend_string_init_interned(name, name_len, 1);
+	ret = zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 /* }}} */
 
@@ -631,16 +637,21 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
 		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
+		int ret;
+		zend_string *str;
+
 		zend_hash_init(&rev, 8, NULL, NULL, 1);
 		if (NULL == zend_hash_next_index_insert_ptr(&rev, check_func)) {
 			zend_hash_destroy(&rev);
 			return FAILURE;
 		}
-		if (NULL == zend_hash_str_update_mem(&php_output_handler_reverse_conflicts, name, name_len+1, &rev, sizeof(HashTable))) {
+		str = zend_string_init_interned(name, name_len, 1);
+		ret = zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable)) ? SUCCESS : FAILURE;
+		zend_string_release(str);
+		if (ret != SUCCESS) {
 			zend_hash_destroy(&rev);
-			return FAILURE;
 		}
-		return SUCCESS;
+		return ret;
 	}
 }
 /* }}} */
@@ -657,11 +668,17 @@ PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *name
  * Registers an internal output handler as alias for a user handler */
 PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, php_output_handler_alias_ctor_t func)
 {
+	int ret;
+	zend_string *str;
+
 	if (!EG(current_module)) {
 		zend_error(E_ERROR, "Cannot register an output handler alias outside of MINIT");
 		return FAILURE;
 	}
-	return zend_hash_str_update_ptr(&php_output_handler_aliases, name, name_len, func) ? SUCCESS : FAILURE;
+	str = zend_string_init_interned(name, name_len, 1);
+	ret = zend_hash_update_ptr(&php_output_handler_aliases, str, func) ? SUCCESS : FAILURE;
+	zend_string_release(str);
+	return ret;
 }
 /* }}} */
 

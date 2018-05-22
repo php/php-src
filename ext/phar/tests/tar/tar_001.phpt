@@ -2,7 +2,6 @@
 Phar: tar-based phar corrupted
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 --FILE--
 <?php
 include dirname(__FILE__) . '/files/make_invalid_tar.php.inc';

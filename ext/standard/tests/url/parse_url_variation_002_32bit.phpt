@@ -108,7 +108,7 @@ array(8) {
 }
 
 Arg value 101234567000 
-Error: 2 - parse_url() expects parameter 2 to be integer, float given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, float given, %s(%d)
 NULL
 
 Arg value 1.07654321E-9 
@@ -119,27 +119,27 @@ string(4) "http"
 Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, array given, %s(%d)
 NULL
 Error: 8 - Array to string conversion, %s(%d)
 
 Arg value Array 
-Error: 2 - parse_url() expects parameter 2 to be integer, array given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, array given, %s(%d)
 NULL
 
 Arg value  
@@ -161,24 +161,24 @@ Arg value
 string(4) "http"
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, string given, %s(%d)
 NULL
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, string given, %s(%d)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, string given, %s(%d)
 NULL
 
 Arg value string 
-Error: 2 - parse_url() expects parameter 2 to be integer, string given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, string given, %s(%d)
 NULL
 Error: 4096 - Object of class stdClass could not be converted to string, %s(%d)
 
 Arg value  
-Error: 2 - parse_url() expects parameter 2 to be integer, object given, %s(%d)
+Error: 2 - parse_url() expects parameter 2 to be int, object given, %s(%d)
 NULL
 
 Arg value  

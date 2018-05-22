@@ -45,7 +45,7 @@ if (!mysqli_query($link, "DROP TABLE IF EXISTS temp"))
 
 mysqli_close($link);
 ?>
---EXPECTF--
+--EXPECT--
 3000000897
 3800001532
 3900002281

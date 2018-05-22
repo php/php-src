@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 {
 	if (Z_REFCOUNTED_P(zval_ptr)) {
 		zend_refcounted *ref = Z_COUNTED_P(zval_ptr);
-		if (!--GC_REFCOUNT(ref)) {
+		if (!GC_DELREF(ref)) {
 			_zval_dtor_func(ref ZEND_FILE_LINE_RELAY_CC);
 		} else {
 			gc_check_possible_root(ref);
@@ -55,23 +55,19 @@ static zend_always_inline void i_zval_ptr_dtor(zval *zval_ptr ZEND_FILE_LINE_DC)
 
 static zend_always_inline void _zval_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (Z_REFCOUNTED_P(zvalue) || Z_COPYABLE_P(zvalue)) {
-		if (Z_COPYABLE_P(zvalue)) {
-			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
-		} else {
-			Z_ADDREF_P(zvalue);
-		}
+	if (Z_TYPE_P(zvalue) == IS_ARRAY) {
+		ZVAL_ARR(zvalue, zend_array_dup(Z_ARR_P(zvalue)));
+	} else if (Z_REFCOUNTED_P(zvalue)) {
+		Z_ADDREF_P(zvalue);
 	}
 }
 
 static zend_always_inline void _zval_opt_copy_ctor(zval *zvalue ZEND_FILE_LINE_DC)
 {
-	if (Z_OPT_REFCOUNTED_P(zvalue) || Z_OPT_COPYABLE_P(zvalue)) {
-		if (Z_OPT_COPYABLE_P(zvalue)) {
-			_zval_copy_ctor_func(zvalue ZEND_FILE_LINE_RELAY_CC);
-		} else {
-			Z_ADDREF_P(zvalue);
-		}
+	if (Z_OPT_TYPE_P(zvalue) == IS_ARRAY) {
+		ZVAL_ARR(zvalue, zend_array_dup(Z_ARR_P(zvalue)));
+	} else if (Z_OPT_REFCOUNTED_P(zvalue)) {
+		Z_ADDREF_P(zvalue);
 	}
 }
 

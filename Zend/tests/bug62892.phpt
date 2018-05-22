@@ -16,6 +16,6 @@ $class = new \ReflectionClass('myClass');
 var_dump($class->getTraitAliases());
 
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }

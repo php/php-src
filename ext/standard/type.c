@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -92,9 +92,6 @@ PHP_FUNCTION(intval)
 	zval *num;
 	zend_long base = 10;
 
-	if (ZEND_NUM_ARGS() != 1 && ZEND_NUM_ARGS() != 2) {
-		WRONG_PARAM_COUNT;
-	}
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_ZVAL(num)
 		Z_PARAM_OPTIONAL
@@ -105,7 +102,7 @@ PHP_FUNCTION(intval)
 		RETVAL_LONG(zval_get_long(num));
 		return;
 	}
-	
+
 
 	if (base == 0 || base == 2) {
 		char *strval = Z_STRVAL_P(num);
@@ -122,7 +119,7 @@ PHP_FUNCTION(intval)
 			if (strval[0] == '-' || strval[0] == '+') {
 				offset = 1;
 			}
-	
+
 			if (strval[offset] == '0' && (strval[offset + 1] == 'b' || strval[offset + 1] == 'B')) {
 				char *tmpval;
 				strlen -= 2; /* Removing "0b" */
@@ -132,7 +129,7 @@ PHP_FUNCTION(intval)
 				if (offset) {
 					tmpval[0] = strval[0];
 				}
-	
+
 				/* Copy the data from after "0b" to the end of the buffer */
 				memcpy(tmpval + offset, strval + offset + 2, strlen - offset);
 				tmpval[strlen] = 0;
@@ -392,9 +389,23 @@ PHP_FUNCTION(is_iterable)
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
 		Z_PARAM_ZVAL(var)
-	ZEND_PARSE_PARAMETERS_END();	
-	
+	ZEND_PARSE_PARAMETERS_END();
+
 	RETURN_BOOL(zend_is_iterable(var));
+}
+/* }}} */
+
+/* {{{ proto bool is_countable(mixed var)
+   Returns true if var is countable (array or instance of Countable). */
+PHP_FUNCTION(is_countable)
+{
+	zval *var;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ZVAL(var)
+	ZEND_PARSE_PARAMETERS_END();
+
+	RETURN_BOOL(zend_is_countable(var));
 }
 /* }}} */
 

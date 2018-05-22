@@ -1,7 +1,7 @@
 --TEST--
 Bug #37565 (Using reflection::export with simplexml causing a crash)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml") || !extension_loaded('reflection')) print "skip"; ?>
+<?php if (!extension_loaded("simplexml")) print "skip"; ?>
 --FILE--
 <?php
 
@@ -29,7 +29,7 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Error: simplexml_load_string() expects parameter 2 to be a class name derived from SimpleXMLElement, 'Setting' given
 Error: Argument 1 passed to Reflection::export() must implement interface Reflector, null given
 Error: simplexml_load_file() expects parameter 2 to be a class name derived from SimpleXMLElement, 'Setting' given

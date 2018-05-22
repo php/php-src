@@ -72,7 +72,7 @@ for($index=0; $index<count($needle); $index++) {
 }
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: with double quoted strings ***
 -- Iteration 1 --
 int(28)

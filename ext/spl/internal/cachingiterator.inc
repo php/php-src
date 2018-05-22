@@ -18,8 +18,8 @@
  * This iterator wrapper does a one ahead iteration. This way it knows whether
  * the inner iterator has one more element.
  *
- * @note If you want to convert the elements into strings and the inner 
- *       Iterator is an internal Iterator then you need to provide the 
+ * @note If you want to convert the elements into strings and the inner
+ *       Iterator is an internal Iterator then you need to provide the
  *       flag CALL_TOSTRING to do the conversion when the actual element
  *       is being fetched. Otherwise the conversion would happen with the
  *       already changed iterator. If you do not need this then it you should
@@ -41,7 +41,7 @@ class CachingIterator implements OuterIterator
 	/** Construct from another iterator
 	 *
 	 * @param it    Iterator to cache
-	 * @param flags Bitmask: 
+	 * @param flags Bitmask:
 	 *              - CALL_TOSTRING  (whether to call __toString() for every element)
 	 */
 	function __construct(Iterator $it, $flags = self::CALL_TOSTRING)
@@ -63,7 +63,7 @@ class CachingIterator implements OuterIterator
 		$this->it->rewind();
 		$this->next();
 	}
-	
+
 	/** Forward to the next element
 	 */
 	function next()
@@ -85,7 +85,7 @@ class CachingIterator implements OuterIterator
 		}
 		$this->it->next();
 	}
-	
+
 	/** @return whether the iterator is valid
 	 */
 	function valid()
@@ -99,7 +99,7 @@ class CachingIterator implements OuterIterator
 	{
 		return $this->it->valid();
 	}
-	
+
 	/** @return the current element
 	 */
 	function current()
@@ -123,8 +123,8 @@ class CachingIterator implements OuterIterator
 	{
 		return call_user_func_array(array($this->it, $func), $params);
 	}
-	
-	/** @return the string represenatation that was generated for the current 
+
+	/** @return the string represenatation that was generated for the current
 	 *          element
 	 * @throw exception when CALL_TOSTRING was not specified in constructor
 	 */
@@ -144,10 +144,10 @@ class CachingIterator implements OuterIterator
 		}
 		return $this->strValue;
 	}
-	
+
 	/**
 	 * @return The inner iterator
-	 */	
+	 */
 	function getInnerIterator()
 	{
 		return $this->it;

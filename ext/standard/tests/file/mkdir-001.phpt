@@ -20,7 +20,7 @@ var_dump(rmdir(dirname(__FILE__)."/mkdir-001"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 bool(true)
 bool(true)
 bool(true)

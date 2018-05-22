@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ extern zend_module_entry zip_module_entry;
 #define ZIP_OVERWRITE ZIP_TRUNCATE
 #endif
 
-#define PHP_ZIP_VERSION "1.15.1"
+#define PHP_ZIP_VERSION "1.15.2"
 
 #define ZIP_OPENBASEDIR_CHECKPATH(filename) php_check_open_basedir(filename)
 
@@ -77,7 +77,7 @@ static inline ze_zip_object *php_zip_fetch_object(zend_object *obj) {
 php_stream *php_stream_zip_opener(php_stream_wrapper *wrapper, const char *path, const char *mode, int options, zend_string **opened_path, php_stream_context *context STREAMS_DC);
 php_stream *php_stream_zip_open(const char *filename, const char *path, const char *mode STREAMS_DC);
 
-extern php_stream_wrapper php_stream_zip_wrapper;
+extern const php_stream_wrapper php_stream_zip_wrapper;
 
 #endif	/* PHP_ZIP_H */
 

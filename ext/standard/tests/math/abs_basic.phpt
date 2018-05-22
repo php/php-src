@@ -32,7 +32,7 @@ for ($i = 0; $i < count($values); $i++) {
 }
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 *** Testing abs() : basic functionality ***
 int(23)
 int(23)

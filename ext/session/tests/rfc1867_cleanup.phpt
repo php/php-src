@@ -58,11 +58,11 @@ array(2) {
   ["file1"]=>
   array(5) {
     ["name"]=>
-    %string|unicode%(9) "file1.txt"
+    string(9) "file1.txt"
     ["type"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["tmp_name"]=>
-    %string|unicode%(%d) "%s"
+    string(%d) "%s"
     ["error"]=>
     int(0)
     ["size"]=>
@@ -71,11 +71,11 @@ array(2) {
   ["file2"]=>
   array(5) {
     ["name"]=>
-    %string|unicode%(9) "file2.txt"
+    string(9) "file2.txt"
     ["type"]=>
-    %string|unicode%(0) ""
+    string(0) ""
     ["tmp_name"]=>
-    %string|unicode%(%d) "%s"
+    string(%d) "%s"
     ["error"]=>
     int(0)
     ["size"]=>

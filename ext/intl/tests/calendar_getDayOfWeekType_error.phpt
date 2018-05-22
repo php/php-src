@@ -36,12 +36,12 @@ Warning: IntlCalendar::getDayOfWeekType() expects exactly 1 parameter, 0 given i
 Warning: IntlCalendar::getDayOfWeekType(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)
 
-Warning: intlcal_get_day_of_week_type() expects parameter 2 to be integer, string given in %s on line %d
+Warning: intlcal_get_day_of_week_type() expects parameter 2 to be int, string given in %s on line %d
 
 Warning: intlcal_get_day_of_week_type(): intlcal_get_day_of_week_type: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_day_of_week_type() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_day_of_week_type(1, 1)
 #1 {main}

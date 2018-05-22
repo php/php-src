@@ -33,6 +33,6 @@ $obj = New SplFileObject("SPLtest://ftruncate_test");
 var_dump($obj->fflush());
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

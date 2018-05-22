@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0,
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry xmlrpc_functions[] = {
+static const zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
 	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
 	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
@@ -279,9 +279,9 @@ static void destroy_server_data(xmlrpc_server_data *server)
 static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
-		rsrc->gc.refcount++;
+		GC_ADDREF(rsrc);
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
-		rsrc->gc.refcount--;
+		GC_DELREF(rsrc);
 	}
 }
 
@@ -516,11 +516,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_SetValueID(xReturn, key, 0);
 					} else {
 						if (Z_TYPE(val) != IS_STRING) {
-							zval newvalue;
-							ZVAL_DUP(&newvalue, &val);
-							convert_to_string(&newvalue);
-							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(newvalue), Z_STRLEN(newvalue));
-							zval_dtor(&newvalue);
+							zend_string *str = zval_get_string_func(&val);
+							xReturn = XMLRPC_CreateValueBase64(key, ZSTR_VAL(str), ZSTR_LEN(str));
+							zend_string_release(str);
 						} else {
 							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(val), Z_STRLEN(val));
 						}
@@ -981,9 +979,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
 		/* save for later use */
 
-		if (Z_REFCOUNTED_P(method_name)) {
-			Z_ADDREF_P(method_name);
-		}
+		Z_TRY_ADDREF_P(method_name);
 		/* register our php method */
 		add_zval(&server->method_map, method_key, method_name);
 
@@ -1007,9 +1003,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 		RETURN_FALSE;
 	}
 
-	if (Z_REFCOUNTED_P(method_name)) {
-		Z_ADDREF_P(method_name);
-	}
+	Z_TRY_ADDREF_P(method_name);
 	/* register our php method */
 	add_zval(&server->introspection_map, NULL, method_name);
 

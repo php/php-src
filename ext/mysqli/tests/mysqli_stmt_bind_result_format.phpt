@@ -337,5 +337,5 @@ memory_limit=83886080
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

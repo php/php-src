@@ -33,7 +33,7 @@ var_dump( array_diff_uassoc($arr_string_float, $arr_default_int, "key_compare_fu
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_uassoc() : usage variation ***
 
 -- Result of comparing integers and strings containing an integers --

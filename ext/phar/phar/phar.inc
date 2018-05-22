@@ -12,7 +12,7 @@
 // {{{ class Phar extends PHP_Archive
 /**
  * Phar class
- * 
+ *
  * @ingroup Phar
  * @brief   Phar implementation
  * @author  Marcus Boerger

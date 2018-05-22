@@ -2,6 +2,7 @@
 Edge-cases in constant conditional jump elimination
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip for machines with 64-bit longs"); ?>
+<?php if (!extension_loaded("json")) print "skip"; ?>
 <?php require_once('skipif.inc'); ?>
 --FILE--
 <?php

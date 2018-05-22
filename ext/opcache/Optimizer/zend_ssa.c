@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, SSA - Static Single Assignment Form                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -154,12 +154,10 @@ static inline void pi_not_type_mask(zend_ssa_phi *phi, uint32_t type_mask) {
 	pi_type_mask(phi, ~type_mask & relevant);
 }
 static inline uint32_t mask_for_type_check(uint32_t type) {
-	if (type == _IS_BOOL) {
-		return MAY_BE_TRUE|MAY_BE_FALSE;
-	} else if (type == IS_ARRAY) {
+	if (type & MAY_BE_ARRAY) {
 		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	} else {
-		return 1 << type;
+		return type;
 	}
 }
 
@@ -682,10 +680,11 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_SEND_VAR_NO_REF:
 				case ZEND_SEND_VAR_NO_REF_EX:
 				case ZEND_SEND_VAR_EX:
+				case ZEND_SEND_FUNC_ARG:
 				case ZEND_SEND_REF:
 				case ZEND_SEND_UNPACK:
 				case ZEND_FE_RESET_RW:
-//TODO: ???
+				case ZEND_MAKE_REF:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
@@ -739,6 +738,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 				case ZEND_FETCH_OBJ_RW:
 				case ZEND_FETCH_OBJ_FUNC_ARG:
 				case ZEND_FETCH_OBJ_UNSET:
+				case ZEND_FETCH_LIST_W:
 					if (opline->op1_type == IS_CV) {
 						ssa_ops[k].op1_def = ssa_vars_count;
 						var[EX_VAR_TO_NUM(opline->op1.var)] = ssa_vars_count;
@@ -859,7 +859,7 @@ static int zend_ssa_rename(const zend_op_array *op_array, uint32_t build_flags, 
 }
 /* }}} */
 
-int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa, uint32_t *func_flags) /* {{{ */
+int zend_build_ssa(zend_arena **arena, const zend_script *script, const zend_op_array *op_array, uint32_t build_flags, zend_ssa *ssa) /* {{{ */
 {
 	zend_basic_block *blocks = ssa->cfg.blocks;
 	zend_ssa_block *ssa_blocks;
@@ -1115,7 +1115,7 @@ int zend_ssa_compute_use_def_chains(zend_arena **arena, const zend_op_array *op_
 
 	/* Mark indirectly accessed variables */
 	for (i = 0; i < op_array->last_var; i++) {
-		if (ssa->cfg.dynamic) {
+		if ((ssa->cfg.flags & ZEND_FUNC_INDIRECT_VAR_ACCESS)) {
 			ssa_vars[i].alias = SYMTABLE_ALIAS;
 		} else if (zend_string_equals_literal(op_array->vars[i], "php_errormsg")) {
 			ssa_vars[i].alias = PHP_ERRORMSG_ALIAS;
@@ -1290,7 +1290,11 @@ static inline void zend_ssa_remove_phi_source(zend_ssa *ssa, zend_ssa_phi *phi, 
 	for (j = 0; j < predecessors_count; j++) {
 		if (phi->sources[j] == var_num) {
 			if (j < pred_offset) {
-				ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				if (next_phi == NULL) {
+					next_phi = phi->use_chains[pred_offset];
+				} else {
+					ZEND_ASSERT(phi->use_chains[pred_offset] == NULL);
+				}
 			} else if (j >= pred_offset) {
 				phi->use_chains[j] = next_phi;
 			}

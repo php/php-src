@@ -42,7 +42,7 @@ var_dump(iconv_strrpos($string_mb, $needle2));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing iconv_strrpos() : basic ***
 
 -- ASCII string 1 --

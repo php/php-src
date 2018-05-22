@@ -52,7 +52,7 @@ $file_path = dirname(__FILE__);
 unlink("$file_path/lstat_stat_variation14_hard.tmp");
 unlink("$file_path/lstat_stat_variation14.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Checking lstat() and stat() on hard link ***
 bool(true)
 bool(true)

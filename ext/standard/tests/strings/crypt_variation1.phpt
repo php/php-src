@@ -17,7 +17,7 @@ $b = str_repeat("A", 4096);
 echo crypt("A", "$5$" . $b)."\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 $5$AAAAAAAAAAAAAAAA$frotiiztWZiwcncxnY5tWG9Ida2WOZEximjLXCleQu6
 $5$AAAAAAAAAAAAAAAA$frotiiztWZiwcncxnY5tWG9Ida2WOZEximjLXCleQu6
 $5$AAAAAAAAAAAAAAAA$frotiiztWZiwcncxnY5tWG9Ida2WOZEximjLXCleQu6

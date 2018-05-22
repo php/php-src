@@ -61,7 +61,7 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 {
 	IntlDateFormatter_object*     intern;
 
-	intern = ecalloc( 1, sizeof(IntlDateFormatter_object) + zend_object_properties_size(ce));
+	intern = zend_object_alloc(sizeof(IntlDateFormatter_object), ce);
 	dateformat_data_init( &intern->datef_data );
 	zend_object_std_init( &intern->zo, ce );
 	object_properties_init(&intern->zo, ce);
@@ -69,7 +69,6 @@ zend_object *IntlDateFormatter_object_create(zend_class_entry *ce)
 	intern->time_type			= 0;
 	intern->calendar			= -1;
 	intern->requested_locale	= NULL;
-
 
 	intern->zo.handlers = &IntlDateFormatter_handlers;
 
@@ -158,7 +157,7 @@ ZEND_END_ARG_INFO()
 /* {{{ IntlDateFormatter_class_functions
  * Every 'IntlDateFormatter' class method has an entry in this table
  */
-static zend_function_entry IntlDateFormatter_class_functions[] = {
+static const zend_function_entry IntlDateFormatter_class_functions[] = {
 	PHP_ME( IntlDateFormatter, __construct, arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_CTOR )
 	ZEND_FENTRY(  create, ZEND_FN( datefmt_create ), arginfo_intldateformatter___construct, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	PHP_NAMED_FE( getDateType, ZEND_FN( datefmt_get_datetype ), arginfo_intldateformatter_getdatetype )

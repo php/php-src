@@ -7,6 +7,6 @@ error_reporting=E_ALL | E_DEPRECATED
 $string = "foobar";
 var_dump($string[0][0][0][0]);
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "f"
 

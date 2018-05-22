@@ -50,7 +50,7 @@ test2($a, $b, $c, $d, ...$array);
 var_dump($a, $b, $c, $d, $array);
 
 ?>
---EXPECTF--
+--EXPECT--
 array(3) {
   [0]=>
   int(2)

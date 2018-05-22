@@ -36,6 +36,6 @@ if (strpos($str, 'X509v3 extensions:')) {
 	echo "Ok\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 Ok
 Ok

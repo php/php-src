@@ -60,7 +60,7 @@ foreach($string_values as $string_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : unsigned formats with string values ***
 
 -- Iteration 1 --

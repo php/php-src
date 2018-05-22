@@ -23,7 +23,7 @@ next($array);
 var_dump(current($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing current() : basic functionality ***
 string(4) "zero"
 string(3) "one"

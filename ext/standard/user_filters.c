@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -180,7 +180,7 @@ php_stream_filter_status_t userfilter_filter(
 
 		/* Give the userfilter class a hook back to the stream */
 		php_stream_to_zval(stream, &tmp);
-		zval_copy_ctor(&tmp);
+		Z_ADDREF(tmp);
 		add_property_zval(obj, "stream", &tmp);
 		/* add_property_zval increments the refcount which is unwanted here */
 		zval_ptr_dtor(&tmp);
@@ -254,7 +254,7 @@ php_stream_filter_status_t userfilter_filter(
 	return ret;
 }
 
-static php_stream_filter_ops userfilter_ops = {
+static const php_stream_filter_ops userfilter_ops = {
 	userfilter_filter,
 	userfilter_dtor,
 	"user-filter"
@@ -380,7 +380,7 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	return filter;
 }
 
-static php_stream_filter_factory user_filter_factory = {
+static const php_stream_filter_factory user_filter_factory = {
 	user_filter_factory_create
 };
 
@@ -587,7 +587,7 @@ PHP_FUNCTION(stream_filter_register)
 	fdat->classname = zend_string_copy(classname);
 
 	if (zend_hash_add_ptr(BG(user_filter_map), filtername, fdat) != NULL &&
-			php_stream_filter_register_factory_volatile(ZSTR_VAL(filtername), &user_filter_factory) == SUCCESS) {
+			php_stream_filter_register_factory_volatile(filtername, &user_filter_factory) == SUCCESS) {
 		RETVAL_TRUE;
 	} else {
 		zend_string_release(classname);

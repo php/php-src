@@ -13,6 +13,6 @@ ob_start();
 echo "Hello World";
 var_dump(ob_get_clean());
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 string(11) "Hello World"

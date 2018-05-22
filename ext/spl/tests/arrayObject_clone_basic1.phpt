@@ -13,7 +13,7 @@ $aa1['new.aa1'] = 'new element added to aa1';
 $aa2['new.aa2'] = 'new element added to aa2';
 var_dump($a, $aa1, $aa2);
 ?>
---EXPECTF--
+--EXPECT--
 array(4) {
   [0]=>
   int(1)

@@ -8,6 +8,14 @@
 #include "php.h"
 #include <gmp.h>
 
+#ifdef PHP_WIN32
+# define PHP_GMP_API __declspec(dllexport)
+#elif defined(__GNUC__) && __GNUC__ >= 4
+# define PHP_GMP_API __attribute__ ((visibility("default")))
+#else
+# define PHP_GMP_API
+#endif
+
 typedef struct _gmp_object {
 	mpz_t num;
 	zend_object std;
@@ -17,7 +25,7 @@ static inline gmp_object *php_gmp_object_from_zend_object(zend_object *zobj) {
 	return (gmp_object *)( ((char *)zobj) - XtOffsetOf(gmp_object, std) );
 }
 
-PHPAPI zend_class_entry *php_gmp_class_entry();
+PHP_GMP_API zend_class_entry *php_gmp_class_entry();
 
 /* GMP and MPIR use different datatypes on different platforms */
 #ifdef PHP_WIN32

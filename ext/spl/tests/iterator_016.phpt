@@ -52,7 +52,7 @@ foreach($rit as $k=>$v)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Menu::getIterator
 <ul>
   0=>a

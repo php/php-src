@@ -38,7 +38,7 @@ echo "\nDone";
 unlink($data_file);
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing fprintf() for string types ***
 
 -- Iteration 1 --

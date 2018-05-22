@@ -22,7 +22,7 @@ var_dump( strftime($format, $timestamp) );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing strftime() : usage variation ***
 
 -- Testing strftime() function with a literal % character to format --

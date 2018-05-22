@@ -121,5 +121,5 @@ if ($version < 50000)
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

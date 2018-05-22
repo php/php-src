@@ -29,7 +29,7 @@ var_dump(session_destroy());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_decode() : variation ***
 bool(true)
 array(0) {

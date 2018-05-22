@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -65,14 +65,6 @@ void php_win32_core_globals_dtor(void *vg)
 
 PHP_RSHUTDOWN_FUNCTION(win32_core_globals)
 {/*{{{*/
-	php_win32_core_globals *wg =
-#ifdef ZTS
-		ts_resource(php_win32_core_globals_id)
-#else
-		&the_php_win32_core_globals
-#endif
-		;
-
 	closelog();
 
 	return SUCCESS;

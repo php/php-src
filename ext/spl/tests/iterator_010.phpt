@@ -13,6 +13,6 @@ foreach(new LimitIterator(new EmptyIterator(), 0, 3) as $key => $val)
 ?>
 ===DONE===
 <?php exit(0);
---EXPECTF--
+--EXPECT--
 ===EmptyIterator===
 ===DONE===

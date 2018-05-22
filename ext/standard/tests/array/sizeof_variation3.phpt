@@ -25,7 +25,7 @@ var_dump( sizeof($array4, COUNT_RECURSIVE) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sizeof() : usage variations ***
 -- Testing sizeof() for infinite recursion with arrays as argument in COUNT_RECURSIVE mode --
 int(13)

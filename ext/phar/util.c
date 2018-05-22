@@ -3,7 +3,7 @@
   | phar php single-file executable PHP extension                        |
   | utility functions                                                    |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2005-2017 The PHP Group                                |
+  | Copyright (c) 2005-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -38,7 +38,7 @@
 #include <openssl/ssl.h>
 #include <openssl/pkcs12.h>
 #else
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, int key_len, char **signature, int *signature_len);
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len);
 #endif
 
 /* for links to relative location, prepend cwd of the entry */
@@ -167,7 +167,7 @@ int phar_seek_efp(phar_entry_info *entry, zend_off_t offset, int whence, zend_of
 /* }}} */
 
 /* mount an absolute path or uri to a path internal to the phar archive */
-int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, char *path, int path_len) /* {{{ */
+int phar_mount_entry(phar_archive_data *phar, char *filename, size_t filename_len, char *path, size_t path_len) /* {{{ */
 {
 	phar_entry_info entry = {0};
 	php_stream_statbuf ssb;
@@ -178,7 +178,7 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 		return FAILURE;
 	}
 
-	if (path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		/* no creating magic phar files by mounting them */
 		return FAILURE;
 	}
@@ -243,11 +243,11 @@ int phar_mount_entry(phar_archive_data *phar, char *filename, int filename_len, 
 }
 /* }}} */
 
-zend_string *phar_find_in_include_path(char *filename, int filename_len, phar_archive_data **pphar) /* {{{ */
+zend_string *phar_find_in_include_path(char *filename, size_t filename_len, phar_archive_data **pphar) /* {{{ */
 {
 	zend_string *ret;
 	char *path, *fname, *arch, *entry, *test;
-	int arch_len, entry_len, fname_len;
+	size_t arch_len, entry_len, fname_len;
 	phar_archive_data *phar;
 
 	if (pphar) {
@@ -277,7 +277,7 @@ zend_string *phar_find_in_include_path(char *filename, int filename_len, phar_ar
 	efree(entry);
 
 	if (*filename == '.') {
-		int try_len;
+		size_t try_len;
 
 		if (FAILURE == phar_get_archive(&phar, arch, arch_len, NULL, 0, NULL)) {
 			efree(arch);
@@ -342,7 +342,7 @@ splitted:
  * appended, truncated, or read.  For read, if the entry is marked unmodified, it is
  * assumed that the file pointer, if present, is opened for reading
  */
-int phar_get_entry_data(phar_entry_data **ret, char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+int phar_get_entry_data(phar_entry_data **ret, char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry;
@@ -508,7 +508,7 @@ really_get_entry:
 /**
  * Create a new dummy file slot within a writeable phar for a newly created file
  */
-phar_entry_data *phar_get_or_create_entry_data(char *fname, int fname_len, char *path, int path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
+phar_entry_data *phar_get_or_create_entry_data(char *fname, size_t fname_len, char *path, size_t path_len, const char *mode, char allow_dir, char **error, int security) /* {{{ */
 {
 	phar_archive_data *phar;
 	phar_entry_info *entry, etemp;
@@ -920,9 +920,9 @@ phar_entry_info * phar_open_jit(phar_archive_data *phar, phar_entry_info *entry,
 }
 /* }}} */
 
-PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename, int *filename_len) /* {{{ */ {
+PHP_PHAR_API int phar_resolve_alias(char *alias, size_t alias_len, char **filename, size_t *filename_len) /* {{{ */ {
 	phar_archive_data *fd_ptr;
-	if (PHAR_G(phar_alias_map.u.flags)
+	if (HT_FLAGS(&PHAR_G(phar_alias_map))
 			&& NULL != (fd_ptr = zend_hash_str_find_ptr(&(PHAR_G(phar_alias_map)), alias, alias_len))) {
 		*filename = fd_ptr->fname;
 		*filename_len = fd_ptr->fname_len;
@@ -932,7 +932,7 @@ PHP_PHAR_API int phar_resolve_alias(char *alias, int alias_len, char **filename,
 }
 /* }}} */
 
-int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len) /* {{{ */
+int phar_free_alias(phar_archive_data *phar, char *alias, size_t alias_len) /* {{{ */
 {
 	if (phar->refcount || phar->is_persistent) {
 		return FAILURE;
@@ -955,11 +955,11 @@ int phar_free_alias(phar_archive_data *phar, char *alias, int alias_len) /* {{{ 
  * Looks up a phar archive in the filename map, connecting it to the alias
  * (if any) or returns null
  */
-int phar_get_archive(phar_archive_data **archive, char *fname, int fname_len, char *alias, int alias_len, char **error) /* {{{ */
+int phar_get_archive(phar_archive_data **archive, char *fname, size_t fname_len, char *alias, size_t alias_len, char **error) /* {{{ */
 {
 	phar_archive_data *fd, *fd_ptr;
 	char *my_realpath, *save;
-	int save_len;
+	size_t save_len;
 
 	phar_request_initialize();
 
@@ -1199,7 +1199,7 @@ char * phar_decompress_filter(phar_entry_info * entry, int return_unknown) /* {{
 /**
  * retrieve information on a file contained within a phar, or null if it ain't there
  */
-phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int path_len, char **error, int security) /* {{{ */
+phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, size_t path_len, char **error, int security) /* {{{ */
 {
 	return phar_get_entry_info_dir(phar, path, path_len, 0, error, security);
 }
@@ -1209,7 +1209,7 @@ phar_entry_info *phar_get_entry_info(phar_archive_data *phar, char *path, int pa
  * allow_dir is 0 for none, 1 for both empty directories in the phar and temp directories, and 2 for only
  * valid pre-existing empty directory entries
  */
-phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, int path_len, char dir, char **error, int security) /* {{{ */
+phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, size_t path_len, char dir, char **error, int security) /* {{{ */
 {
 	const char *pcr_error;
 	phar_entry_info *entry;
@@ -1225,7 +1225,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		*error = NULL;
 	}
 
-	if (security && path_len >= (int)sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
+	if (security && path_len >= sizeof(".phar")-1 && !memcmp(path, ".phar", sizeof(".phar")-1)) {
 		if (error) {
 			spprintf(error, 4096, "phar error: cannot directly access magic \".phar\" directory or files within it");
 		}
@@ -1246,7 +1246,7 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		return NULL;
 	}
 
-	if (!phar->manifest.u.flags) {
+	if (!HT_FLAGS(&phar->manifest)) {
 		return NULL;
 	}
 
@@ -1291,15 +1291,15 @@ phar_entry_info *phar_get_entry_info_dir(phar_archive_data *phar, char *path, in
 		}
 	}
 
-	if (phar->mounted_dirs.u.flags && zend_hash_num_elements(&phar->mounted_dirs)) {
+	if (HT_FLAGS(&phar->mounted_dirs) && zend_hash_num_elements(&phar->mounted_dirs)) {
 		zend_string *str_key;
 
 		ZEND_HASH_FOREACH_STR_KEY(&phar->mounted_dirs, str_key) {
-			if ((int)ZSTR_LEN(str_key) >= path_len || strncmp(ZSTR_VAL(str_key), path, ZSTR_LEN(str_key))) {
+			if (ZSTR_LEN(str_key) >= path_len || strncmp(ZSTR_VAL(str_key), path, ZSTR_LEN(str_key))) {
 				continue;
 			} else {
 				char *test;
-				int test_len;
+				size_t test_len;
 				php_stream_statbuf ssb;
 
 				if (NULL == (entry = zend_hash_find_ptr(&phar->manifest, str_key))) {
@@ -1385,7 +1385,7 @@ static int phar_hex_str(const char *digest, size_t digest_len, char **signature)
 /* }}} */
 
 #ifndef PHAR_HAVE_OPENSSL
-static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, int key_len, char **signature, int *signature_len) /* {{{ */
+static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t end, char *key, size_t key_len, char **signature, size_t *signature_len) /* {{{ */
 {
 	zend_fcall_info fci;
 	zend_fcall_info_cache fcc;
@@ -1473,9 +1473,9 @@ static int phar_call_openssl_signverify(int is_sign, php_stream *fp, zend_off_t 
 /* }}} */
 #endif /* #ifndef PHAR_HAVE_OPENSSL */
 
-int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, int sig_len, char *fname, char **signature, int *signature_len, char **error) /* {{{ */
+int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type, char *sig, size_t sig_len, char *fname, char **signature, size_t *signature_len, char **error) /* {{{ */
 {
-	int read_size, len;
+	size_t read_size, len;
 	zend_off_t read_len;
 	unsigned char buf[1024];
 
@@ -1489,7 +1489,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			EVP_MD *mdtype = (EVP_MD *) EVP_sha1();
 			EVP_MD_CTX *md_ctx;
 #else
-			int tempsig;
+			size_t tempsig;
 #endif
 			zend_string *pubkey = NULL;
 			char *pfile;
@@ -1567,7 +1567,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
-				read_size = (int)read_len;
+				read_size = (size_t)read_len;
 			}
 
 			php_stream_seek(fp, 0, SEEK_SET);
@@ -1577,7 +1577,7 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 				read_len -= (zend_off_t)len;
 
 				if (read_len < read_size) {
-					read_size = (int)read_len;
+					read_size = (size_t)read_len;
 				}
 			}
 
@@ -1616,14 +1616,14 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
-				read_size = (int)read_len;
+				read_size = (size_t)read_len;
 			}
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA512Update(&context, buf, len);
 				read_len -= (zend_off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
+				if ((size_t)read_len < read_size) {
+					read_size = (size_t)read_len;
 				}
 			}
 
@@ -1656,14 +1656,14 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
-				read_size = (int)read_len;
+				read_size = (size_t)read_len;
 			}
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA256Update(&context, buf, len);
 				read_len -= (zend_off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
+				if ((size_t)read_len < read_size) {
+					read_size = (size_t)read_len;
 				}
 			}
 
@@ -1704,14 +1704,14 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
-				read_size = (int)read_len;
+				read_size = (size_t)read_len;
 			}
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_SHA1Update(&context, buf, len);
 				read_len -= (zend_off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
+				if ((size_t)read_len < read_size) {
+					read_size = (size_t)read_len;
 				}
 			}
 
@@ -1744,14 +1744,14 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 			if ((size_t)read_len > sizeof(buf)) {
 				read_size = sizeof(buf);
 			} else {
-				read_size = (int)read_len;
+				read_size = (size_t)read_len;
 			}
 
 			while ((len = php_stream_read(fp, (char*)buf, read_size)) > 0) {
 				PHP_MD5Update(&context, buf, len);
 				read_len -= (zend_off_t)len;
-				if (read_len < read_size) {
-					read_size = (int)read_len;
+				if ((size_t)read_len < read_size) {
+					read_size = (size_t)read_len;
 				}
 			}
 
@@ -1777,10 +1777,10 @@ int phar_verify_signature(php_stream *fp, size_t end_of_phar, uint32_t sig_type,
 }
 /* }}} */
 
-int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, int *signature_length, char **error) /* {{{ */
+int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signature, size_t *signature_length, char **error) /* {{{ */
 {
 	unsigned char buf[1024];
-	int sig_len;
+	size_t sig_len;
 
 	php_stream_rewind(fp);
 
@@ -1831,7 +1831,7 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 			return FAILURE;
 #endif
 		case PHAR_SIG_OPENSSL: {
-			int siglen;
+			size_t siglen;
 			unsigned char *sigbuf;
 #ifdef PHAR_HAVE_OPENSSL
 			BIO *in;
@@ -1945,13 +1945,25 @@ int phar_create_signature(phar_archive_data *phar, php_stream *fp, char **signat
 }
 /* }}} */
 
-void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, int filename_len) /* {{{ */
+void phar_add_virtual_dirs(phar_archive_data *phar, char *filename, size_t filename_len) /* {{{ */
 {
 	const char *s;
+	zend_string *str;
+	zval *ret;
 
 	while ((s = zend_memrchr(filename, '/', filename_len))) {
 		filename_len = s - filename;
-		if (!filename_len || NULL == zend_hash_str_add_empty_element(&phar->virtual_dirs, filename, filename_len)) {
+		if (!filename_len) {
+			break;
+		}
+		if (GC_FLAGS(&phar->virtual_dirs) & GC_PERSISTENT) {
+			str = zend_string_init_interned(filename, filename_len, 1);
+		} else {
+			str = zend_string_init(filename, filename_len, 0);
+		}
+		ret = zend_hash_add_empty_element(&phar->virtual_dirs, str);
+		zend_string_release(str);
+		if (ret == NULL) {
 			break;
 		}
 	}

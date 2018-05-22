@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -468,7 +468,7 @@ static int php_mail_detect_multiple_crlf(char *hdr) {
  */
 PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char *extra_cmd)
 {
-#ifdef PHP_WIN32 
+#ifdef PHP_WIN32
 	int tsm_err;
 	char *tsm_errmsg = NULL;
 #endif
@@ -505,14 +505,14 @@ PHPAPI int php_mail(char *to, char *subject, char *message, char *headers, char 
 			time_t curtime;
 			zend_string *date_str;
 			size_t len;
-			
-			
+
+
 			time(&curtime);
 			date_str = php_format_date("d-M-Y H:i:s e", 13, curtime, 1);
 			len = spprintf(&tmp, 0, "[%s] %s%s", date_str->val, logline, PHP_EOL);
-			
+
 			php_mail_log_to_file(mail_log, tmp, len);
-			
+
 			zend_string_free(date_str);
 			efree(tmp);
 		}

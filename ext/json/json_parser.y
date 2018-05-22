@@ -3,7 +3,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -284,10 +284,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
-
-		if (Z_REFCOUNTED_P(zvalue)) {
-			Z_DELREF_P(zvalue);
-		}
+		Z_TRY_DELREF_P(zvalue);
 	}
 	zend_string_release(key);
 

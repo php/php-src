@@ -26,7 +26,7 @@ var_dump($a);
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 object(A)#1 (1) {
   ["foo"]=>
   array(1) {

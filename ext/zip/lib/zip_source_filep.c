@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -75,7 +75,7 @@ struct read_file {
     zip_uint64_t start;     /* start offset of data to read */
     zip_uint64_t end;       /* end offset of data to read, 0 for up to EOF */
     zip_uint64_t current;   /* current offset */
-    
+
     /* writing */
     char *tmpname;
     FILE *fout;
@@ -92,7 +92,7 @@ zip_source_filep(zip_t *za, FILE *file, zip_uint64_t start, zip_int64_t len)
 {
     if (za == NULL)
 	return NULL;
-    
+
     return zip_source_filep_create(file, start, len, &za->error);
 }
 
@@ -114,12 +114,12 @@ _zip_source_file_or_p(const char *fname, FILE *file, zip_uint64_t start, zip_int
 {
     struct read_file *ctx;
     zip_source_t *zs;
-    
+
     if (file == NULL && fname == NULL) {
 	zip_error_set(error, ZIP_ER_INVAL, 0);
 	return NULL;
     }
-    
+
     if ((ctx=(struct read_file *)malloc(sizeof(struct read_file))) == NULL) {
 	zip_error_set(error, ZIP_ER_MEMORY, 0);
 	return NULL;
@@ -144,10 +144,10 @@ _zip_source_file_or_p(const char *fname, FILE *file, zip_uint64_t start, zip_int
     else {
 	zip_stat_init(&ctx->st);
     }
-    
+
     ctx->tmpname = NULL;
     ctx->fout = NULL;
-   
+
     zip_error_init(&ctx->error);
 
     ctx->supports = ZIP_SOURCE_SUPPORTS_READABLE | zip_source_make_command_bitmap(ZIP_SOURCE_SUPPORTS, ZIP_SOURCE_TELL, -1);
@@ -179,7 +179,7 @@ create_temp_output(struct read_file *ctx)
     int tfd;
     mode_t mask;
     FILE *tfp;
-    
+
     if ((temp=(char *)malloc(strlen(ctx->fname)+8)) == NULL) {
 	zip_error_set(&ctx->error, ZIP_ER_MEMORY, 0);
 	return -1;
@@ -202,7 +202,7 @@ create_temp_output(struct read_file *ctx)
         free(temp);
         return -1;
     }
-    
+
 #ifdef _WIN32
     /*
      According to Pierre Joye, Windows in some environments per
@@ -210,10 +210,10 @@ create_temp_output(struct read_file *ctx)
      */
     _setmode(_fileno(tfp), _O_BINARY );
 #endif
-    
+
     ctx->fout = tfp;
     ctx->tmpname = temp;
-    
+
     return 0;
 }
 
@@ -236,7 +236,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
                 return -1;
             }
             return create_temp_output(ctx);
-            
+
         case ZIP_SOURCE_COMMIT_WRITE: {
 	    mode_t mask;
 
@@ -257,17 +257,17 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 	    ctx->tmpname = NULL;
             return 0;
 	}
-            
+
         case ZIP_SOURCE_CLOSE:
             if (ctx->fname) {
                 fclose(ctx->f);
                 ctx->f = NULL;
             }
             return 0;
-            
+
         case ZIP_SOURCE_ERROR:
             return zip_error_to_data(&ctx->error, data, len);
-            
+
         case ZIP_SOURCE_FREE:
             free(ctx->fname);
 	    free(ctx->tmpname);
@@ -275,7 +275,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
                 fclose(ctx->f);
             free(ctx);
             return 0;
-            
+
         case ZIP_SOURCE_OPEN:
             if (ctx->fname) {
                 if ((ctx->f=fopen(ctx->fname, "rb")) == NULL) {
@@ -283,7 +283,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
                     return -1;
                 }
             }
-            
+
             if (ctx->start > 0) {
                 if (_zip_fseek_u(ctx->f, ctx->start, SEEK_SET, &ctx->error) < 0) {
                     return -1;
@@ -291,7 +291,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
             }
             ctx->current = ctx->start;
             return 0;
-            
+
         case ZIP_SOURCE_READ:
             if (ctx->end > 0) {
                 n = ctx->end-ctx->current;
@@ -302,7 +302,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
             else {
                 n = len;
             }
-            
+
             if (n > SIZE_MAX)
                 n = SIZE_MAX;
 
@@ -315,14 +315,14 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
             ctx->current += i;
 
             return (zip_int64_t)i;
-            
+
         case ZIP_SOURCE_REMOVE:
             if (remove(ctx->fname) < 0) {
                 zip_error_set(&ctx->error, ZIP_ER_REMOVE, errno);
                 return -1;
             }
             return 0;
-            
+
         case ZIP_SOURCE_ROLLBACK_WRITE:
             if (ctx->fout) {
                 fclose(ctx->fout);
@@ -332,7 +332,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 	    free(ctx->tmpname);
             ctx->tmpname = NULL;
             return 0;
-	
+
         case ZIP_SOURCE_SEEK: {
             zip_int64_t new_current;
             int need_seek;
@@ -340,14 +340,14 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 
 	    if (args == NULL)
 		return -1;
-            
+
             need_seek = 1;
-            
+
             switch (args->whence) {
                 case SEEK_SET:
                     new_current = args->offset;
                     break;
-                    
+
                 case SEEK_END:
                     if (ctx->end == 0) {
                         if (_zip_fseek(ctx->f, args->offset, SEEK_END, &ctx->error) < 0) {
@@ -376,7 +376,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
                 zip_error_set(&ctx->error, ZIP_ER_INVAL, 0);
                 return -1;
             }
-            
+
             ctx->current = (zip_uint64_t)new_current;
 
             if (need_seek) {
@@ -386,15 +386,15 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
             }
             return 0;
         }
-            
+
         case ZIP_SOURCE_SEEK_WRITE: {
             zip_source_args_seek_t *args;
-            
+
             args = ZIP_SOURCE_GET_ARGS(zip_source_args_seek_t, data, len, &ctx->error);
             if (args == NULL) {
                 return -1;
             }
-            
+
             if (_zip_fseek(ctx->fout, args->offset, args->whence, &ctx->error) < 0) {
                 return -1;
             }
@@ -411,7 +411,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 		zip_stat_t *st;
 		struct stat fst;
 		int err;
-	    
+
 		if (ctx->f)
 		    err = fstat(fileno(ctx->f), &fst);
 		else
@@ -423,7 +423,7 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 		}
 
 		st = (zip_stat_t *)data;
-		
+
 		zip_stat_init(st);
 		st->mtime = fst.st_mtime;
 		st->valid |= ZIP_STAT_MTIME;
@@ -441,32 +441,32 @@ read_file(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 
         case ZIP_SOURCE_SUPPORTS:
 	    return ctx->supports;
-            
+
         case ZIP_SOURCE_TELL:
             return (zip_int64_t)ctx->current;
-            
+
         case ZIP_SOURCE_TELL_WRITE:
         {
             off_t ret = ftello(ctx->fout);
-            
+
             if (ret < 0) {
                 zip_error_set(&ctx->error, ZIP_ER_TELL, errno);
                 return -1;
             }
             return ret;
         }
-            
+
         case ZIP_SOURCE_WRITE:
         {
             size_t ret;
-            
+
 	    clearerr(ctx->fout);
             ret = fwrite(data, 1, len, ctx->fout);
             if (ret != len || ferror(ctx->fout)) {
                 zip_error_set(&ctx->error, ZIP_ER_WRITE, errno);
                 return -1;
             }
-            
+
             return (zip_int64_t)ret;
         }
 

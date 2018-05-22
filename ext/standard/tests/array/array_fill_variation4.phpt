@@ -43,7 +43,7 @@ for($i =0; $i < count($values); $i ++)
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_fill() : variation ***
 *** Filling 2 dimensional array with all basic valid values ***
 -- Iteration 1 --

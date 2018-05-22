@@ -89,7 +89,7 @@ var_dump($_SESSION["c"]);
 
 session_destroy();
 ?>
---EXPECTF--
+--EXPECT--
 OPEN: PHPSESSID
 READ: abtest
 object(foo)#4 (2) {

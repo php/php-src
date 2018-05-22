@@ -10,12 +10,6 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("connect.inc");
 
-	$strict_on = false;
-	if (defined('E_STRICT')) {
-		error_reporting(((int)ini_get('error_reporting')) | E_STRICT );
-		$strict_on = true;
-	}
-
 	$tmp    = NULL;
 	$link   = NULL;
 
@@ -35,9 +29,6 @@ require_once('skipifconnectfailure.inc');
 	print "[006]\n";
 	$i = 1;
 
-	if ($strict_on)
-		ob_start();
-
 	if (mysqli_get_server_version($link) > 41000 && !($ret = mysqli_more_results($link)))
 		printf("[007] Expecting boolean/true, got %s/%s\n", gettype($ret), $ret);
 	do {
@@ -47,17 +38,6 @@ require_once('skipifconnectfailure.inc');
 			printf("%d\n", $i++);
 	} while (mysqli_next_result($link));
 
-	if ($strict_on) {
-		$tmp = ob_get_contents();
-		ob_end_clean();
-		if (!preg_match('@Strict Standards: mysqli_next_result\(\): There is no next result set@ismU', $tmp)) {
-			printf("[008] Strict Standards warning missing\n");
-		} else {
-			$tmp = trim(preg_replace('@Strict Standards: mysqli_next_result\(\).*on line \d+@ism', '', $tmp));
-		}
-			print trim($tmp) . "\n";
-	}
-
 	if (!mysqli_multi_query($link, "SELECT 1 AS a; SELECT 1 AS a, 2 AS b; SELECT id FROM test ORDER BY id LIMIT 3"))
 		printf("[009] [%d] %s\n", mysqli_errno($link), mysqli_error($link));
 	print "[010]\n";
@@ -65,8 +45,6 @@ require_once('skipifconnectfailure.inc');
 	if (mysqli_get_server_version($link) > 41000 && !($ret = mysqli_more_results($link)))
 		printf("[011] Expecting boolean/true, got %s/%s\n", gettype($ret), $ret);
 
-	if ($strict_on)
-		ob_start();
 	do {
 		$res = mysqli_use_result($link);
 		// NOTE: if you use mysqli_use_result() with mysqli_more_results() or any other info function,
@@ -79,16 +57,6 @@ require_once('skipifconnectfailure.inc');
 			printf("%d\n", $i++);
 	} while (mysqli_next_result($link));
 
-	if ($strict_on) {
-		$tmp = ob_get_contents();
-		ob_end_clean();
-		if (!preg_match('@Strict Standards: mysqli_next_result\(\): There is no next result set@ismU', $tmp)) {
-			printf("[008] Strict Standards warning missing\n");
-		} else {
-			$tmp = trim(preg_replace('@Strict Standards: mysqli_next_result\(\).*on line \d+@ism', '', $tmp));
-		}
-		print trim($tmp) . "\n";
-	}
 	mysqli_close($link);
 
 	var_dump(mysqli_more_results($link));
@@ -105,10 +73,14 @@ bool(false)
 [006]
 1
 2
+
+Strict Standards: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
 [010]
 1
 2
 
+Strict Standards: mysqli_next_result(): There is no next result set. Please, call mysqli_more_results()/mysqli::more_results() to check whether to call this function/method in %s on line %d
+
 Warning: mysqli_more_results(): Couldn't fetch mysqli in %s on line %d
-NULL
+bool(false)
 done!

@@ -46,7 +46,7 @@ $deflated = deflate_add(
 echo bin2hex(substr($deflated, strlen($deflated) - 4)) . "\n";
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 0000ffff
 0000ffff
 0000ffff

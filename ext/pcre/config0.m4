@@ -12,68 +12,73 @@ PHP_ARG_WITH(pcre-regex,,
 PHP_ARG_WITH(pcre-jit,,[  --with-pcre-jit         Enable PCRE JIT functionality (BUNDLED only)], yes, no)
 
   if test "$PHP_PCRE_REGEX" != "yes" && test "$PHP_PCRE_REGEX" != "no"; then
-    AC_MSG_CHECKING([for PCRE headers location])
-    for i in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/include $PHP_PCRE_REGEX/include/pcre $PHP_PCRE_REGEX/local/include; do
-      test -f $i/pcre.h && PCRE_INCDIR=$i
-    done
 
-    if test -z "$PCRE_INCDIR"; then
-      AC_MSG_ERROR([Could not find pcre.h in $PHP_PCRE_REGEX])
-    fi
-    AC_MSG_RESULT([$PCRE_INCDIR])
-
-    AC_MSG_CHECKING([for PCRE library location])
-    for j in $PHP_PCRE_REGEX $PHP_PCRE_REGEX/$PHP_LIBDIR; do
-      test -f $j/libpcre.a || test -f $j/libpcre.$SHLIB_SUFFIX_NAME && PCRE_LIBDIR=$j
-    done
-    
-    if test -z "$PCRE_LIBDIR" ; then
-      AC_MSG_ERROR([Could not find libpcre.(a|$SHLIB_SUFFIX_NAME) in $PHP_PCRE_REGEX])
-    fi
-    AC_MSG_RESULT([$PCRE_LIBDIR])
-
-    changequote({,})
-    pcre_major=`grep PCRE_MAJOR $PCRE_INCDIR/pcre.h | sed -e 's/[^0-9]//g'`
-    pcre_minor=`grep PCRE_MINOR $PCRE_INCDIR/pcre.h | sed -e 's/[^0-9]//g'`
-    changequote([,])
-    pcre_minor_length=`echo "$pcre_minor" | wc -c | sed -e 's/[^0-9]//g'`
-    if test "$pcre_minor_length" -eq 2 ; then
-      pcre_minor="$pcre_minor"0
-    fi
-    pcre_version=$pcre_major$pcre_minor
-    if test "$pcre_version" -lt 660; then
-      AC_MSG_ERROR([The PCRE extension requires PCRE library version >= 6.6])
+    if test "$PHP_PCRE_REGEX" = "/usr"; then
+      if test -z "$PKG_CONFIG"; then
+        AC_PATH_PROG(PKG_CONFIG, pkg-config, no)
+      fi
+      if test -x "$PKG_CONFIG"; then
+        AC_MSG_CHECKING(for PCRE2 10.30 or greater)
+        if $PKG_CONFIG --atleast-version 10.30 libpcre2-8; then
+          PCRE2_VER=`$PKG_CONFIG --modversion libpcre2-8`
+          AC_MSG_RESULT($PCRE2_VER)
+        else
+          AC_MSG_ERROR(PCRE2 version 10.30 or later is required to compile php with PCRE2 support)
+        fi
+        PCRE2_LIB=`$PKG_CONFIG --libs libpcre2-8`
+        PCRE2_INC=`$PKG_CONFIG --cflags libpcre2-8`
+      fi
     fi
 
-    PHP_CHECK_LIBRARY(pcre, pcre_jit_exec,
+    dnl PCRE2 in a non standard  prefix should still have its config tool.
+    dnl CFLAGS can be empty, but libs shouldn't
+    if test -z "$PCRE2_LIB"; then
+      PCRE2_CONF=$PHP_PCRE_REGEX/bin/pcre2-config
+      if test -x "$PCRE2_CONF"; then
+        AC_MSG_CHECKING(for PCRE2 10.30 or greater)
+        PCRE2_VER=`$PCRE2_CONF --version`
+        if test "`echo $PCRE2_VER | sed 's,\.,,g'`" -lt 1030; then
+          AC_MSG_ERROR(PCRE2 version 10.30 or later is required to compile php with PCRE2 support)
+        else
+          AC_MSG_RESULT($PCRE2_VER)
+        fi
+        PCRE2_LIB=`$PCRE2_CONF --libs8`
+        PCRE2_INC=`$PCRE2_CONF --cflags`
+      else
+        AC_MSG_ERROR(Couldn't find pcre2-config)
+      fi
+    fi
+
+    PHP_CHECK_LIBRARY(pcre2-8, pcre2_jit_compile_8,
     [
       AC_DEFINE(HAVE_PCRE_JIT_SUPPORT, 1, [ ])
     ],[
     ],[
-      -L$PCRE_LIBDIR
+      $PCRE2_LIB
     ])
-    PHP_ADD_LIBRARY_WITH_PATH(pcre, $PCRE_LIBDIR)
     
+    PHP_EVAL_INCLINE($PCRE2_INC)
+    PHP_EVAL_LIBLINE($PCRE2_LIB)
     AC_DEFINE(HAVE_PCRE, 1, [ ])
-    PHP_ADD_INCLUDE($PCRE_INCDIR)
+    AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
     PHP_NEW_EXTENSION(pcre, php_pcre.c, no,, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
     PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h])
   else
     AC_MSG_CHECKING([for PCRE library to use])
     AC_MSG_RESULT([bundled])
-    pcrelib_sources="pcrelib/pcre_chartables.c pcrelib/pcre_ucd.c \
-    				 pcrelib/pcre_compile.c pcrelib/pcre_config.c pcrelib/pcre_exec.c \
-    				 pcrelib/pcre_fullinfo.c pcrelib/pcre_get.c pcrelib/pcre_globals.c \
-    				 pcrelib/pcre_maketables.c pcrelib/pcre_newline.c \
-    				 pcrelib/pcre_ord2utf8.c pcrelib/pcre_refcount.c pcrelib/pcre_study.c \
-    				 pcrelib/pcre_tables.c pcrelib/pcre_valid_utf8.c \
-    				 pcrelib/pcre_version.c pcrelib/pcre_xclass.c \
-    				 pcrelib/pcre_jit_compile.c"
-    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcrelib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
+    pcrelib_sources="pcre2lib/pcre2_auto_possess.c pcre2lib/pcre2_chartables.c pcre2lib/pcre2_compile.c \
+    	pcre2lib/pcre2_config.c pcre2lib/pcre2_context.c pcre2lib/pcre2_dfa_match.c pcre2lib/pcre2_error.c \
+	pcre2lib/pcre2_jit_compile.c pcre2lib/pcre2_maketables.c pcre2lib/pcre2_match.c pcre2lib/pcre2_match_data.c \
+	pcre2lib/pcre2_newline.c pcre2lib/pcre2_ord2utf.c pcre2lib/pcre2_pattern_info.c pcre2lib/pcre2_serialize.c \
+	pcre2lib/pcre2_string_utils.c pcre2lib/pcre2_study.c pcre2lib/pcre2_substitute.c  pcre2lib/pcre2_substring.c \
+	pcre2lib/pcre2_tables.c pcre2lib/pcre2_ucd.c pcre2lib/pcre2_valid_utf.c pcre2lib/pcre2_xclass.c \
+	pcre2lib/pcre2_find_bracket.c pcre2lib/pcre2_convert.c pcre2lib/pcre2_extuni.c"
+    PHP_PCRE_CFLAGS="-DHAVE_CONFIG_H -I@ext_srcdir@/pcre2lib -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1"
     PHP_NEW_EXTENSION(pcre, $pcrelib_sources php_pcre.c, no,,$PHP_PCRE_CFLAGS)
-    PHP_ADD_BUILD_DIR($ext_builddir/pcrelib)
-    PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcrelib/])
+    PHP_ADD_BUILD_DIR($ext_builddir/pcre2lib)
+    PHP_INSTALL_HEADERS([ext/pcre], [php_pcre.h pcre2lib/])
     AC_DEFINE(HAVE_BUNDLED_PCRE, 1, [ ])
+    AC_DEFINE(PCRE2_CODE_UNIT_WIDTH, 8, [ ])
 
     if test "$PHP_PCRE_REGEX" != "no"; then
       AC_MSG_CHECKING([whether to enable PCRE JIT functionality])

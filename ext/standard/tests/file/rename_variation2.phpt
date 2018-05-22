@@ -52,7 +52,7 @@ $file_path = dirname(__FILE__);
 unlink($file_path."/rename_variation2.tmp");
 rmdir($file_path."/rename_variation2_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() on soft links ***
 bool(true)
 bool(true)

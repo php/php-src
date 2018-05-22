@@ -33,7 +33,7 @@ for( $x = 0; $x < 20; $x++) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing get_browser() : basic functionality ***
 array(35) {
   ["browser_name_regex"]=>

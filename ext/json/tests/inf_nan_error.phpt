@@ -27,7 +27,7 @@ var_dump(json_last_error(), json_last_error_msg());
 var_dump(json_encode($nan, JSON_PARTIAL_OUTPUT_ON_ERROR));
 var_dump(json_last_error(), json_last_error_msg());
 ?>
---EXPECTF--
+--EXPECT--
 float(INF)
 bool(false)
 int(7)

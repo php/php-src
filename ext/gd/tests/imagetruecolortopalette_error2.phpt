@@ -17,6 +17,6 @@ imagetruecolortopalette($image, array(), 2);
 
 ?>
 --EXPECTF--
-Warning: imagetruecolortopalette() expects parameter 2 to be boolean, resource given in %s on line %d
+Warning: imagetruecolortopalette() expects parameter 2 to be bool, resource given in %s on line %d
 
-Warning: imagetruecolortopalette() expects parameter 2 to be boolean, array given in %s on line %d
+Warning: imagetruecolortopalette() expects parameter 2 to be bool, array given in %s on line %d

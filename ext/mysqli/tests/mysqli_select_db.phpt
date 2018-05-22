@@ -67,7 +67,7 @@ require_once('skipifconnectfailure.inc');
 
 	$current_db = $row['dbname'];
 
-	mysqli_report(MYSQLI_REPORT_OFF);	  
+	mysqli_report(MYSQLI_REPORT_OFF);
 	mysqli_select_db($link, 'I can not imagine that this database exists');
 	mysqli_report(MYSQLI_REPORT_ERROR);
 
@@ -91,7 +91,7 @@ require_once('skipifconnectfailure.inc');
 	if (strtolower($row['dbname']) != strtolower($current_db))
 		printf("[017] Current DB should not change if set fails\n");
 
-	
+
 	if (!$res = $link->query("SELECT id FROM test WHERE id = 1"))
 		printf("[018] [%d] %s\n");
 
@@ -100,8 +100,8 @@ require_once('skipifconnectfailure.inc');
 
 	mysqli_close($link);
 
-	if (NULL !== ($tmp = mysqli_select_db($link, $db)))
-		printf("[017] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = mysqli_select_db($link, $db)))
+		printf("[019] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!\n";
 ?>

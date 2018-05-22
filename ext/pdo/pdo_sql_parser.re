@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -69,10 +69,10 @@ static int scan(Scanner *s)
 struct placeholder {
 	char *pos;
 	size_t len;
-	int bindno;
 	size_t qlen;		/* quoted length of value */
 	char *quoted;	/* quoted value */
 	int freeq;
+	int bindno;
 	struct placeholder *next;
 };
 
@@ -85,7 +85,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 {
 	Scanner s;
 	char *ptr, *newbuffer;
-	int t;
+	ptrdiff_t t;
 	uint32_t bindno = 0;
 	int ret = 0;
 	size_t newbuffer_len;
@@ -102,7 +102,7 @@ PDO_API int pdo_parse_params(pdo_stmt_t *stmt, char *inquery, size_t inquery_len
 	while((t = scan(&s)) != PDO_PARSER_EOI) {
 		if (t == PDO_PARSER_BIND || t == PDO_PARSER_BIND_POS) {
 			if (t == PDO_PARSER_BIND) {
-				int len = s.cur - s.tok;
+				ptrdiff_t len = s.cur - s.tok;
 				if ((inquery < (s.cur - len)) && isalnum(*(s.cur - len - 1))) {
 					continue;
 				}

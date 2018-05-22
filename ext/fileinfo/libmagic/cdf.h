@@ -37,8 +37,6 @@
 
 #ifdef PHP_WIN32
 #include <winsock2.h>
-#define timespec timeval
-#define tv_nsec tv_usec
 #define asctime_r php_asctime_r
 #define ctime_r php_ctime_r
 #endif
@@ -274,7 +272,7 @@ typedef struct {
 typedef struct {
 	uint16_t ce_namlen;
 	uint32_t ce_num;
-	uint64_t ce_timestamp; 
+	uint64_t ce_timestamp;
 	uint16_t ce_name[256];
 } cdf_catalog_entry_t;
 
@@ -283,9 +281,9 @@ typedef struct {
 	cdf_catalog_entry_t cat_e[1];
 } cdf_catalog_t;
 
-struct timeval;
-int cdf_timestamp_to_timespec(struct timeval *, cdf_timestamp_t);
-int cdf_timespec_to_timestamp(cdf_timestamp_t *, const struct timeval *);
+struct timespec;
+int cdf_timestamp_to_timespec(struct timespec *, cdf_timestamp_t);
+int cdf_timespec_to_timestamp(cdf_timestamp_t *, const struct timespec *);
 int cdf_read_header(const cdf_info_t *, cdf_header_t *);
 void cdf_swap_header(cdf_header_t *);
 void cdf_unpack_header(cdf_header_t *, char *);

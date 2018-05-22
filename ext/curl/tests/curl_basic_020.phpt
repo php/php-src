@@ -17,7 +17,7 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_close($ch);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 Hello World!
 Hello World!int(200)
 ===DONE===

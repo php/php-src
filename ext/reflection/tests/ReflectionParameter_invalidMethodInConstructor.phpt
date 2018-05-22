@@ -39,7 +39,7 @@ catch(ReflectionException $e) {
 echo "Done.\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Class A does not exist
 Method C::b() does not exist
 Method C::b() does not exist

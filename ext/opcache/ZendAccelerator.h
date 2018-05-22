@@ -1,8 +1,8 @@
-/*
+﻿/*
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -64,7 +64,7 @@
 #endif
 
 #ifndef ZEND_EXT_API
-# if WIN32|WINNT
+# ifdef ZEND_WIN32
 #  define ZEND_EXT_API __declspec(dllexport)
 # elif defined(__GNUC__) && __GNUC__ >= 4
 #  define ZEND_EXT_API __attribute__ ((visibility("default")))
@@ -120,6 +120,8 @@ extern int lock_file;
 
 #if defined(HAVE_OPCACHE_FILE_CACHE) && defined(ZEND_WIN32)
 # define ENABLE_FILE_CACHE_FALLBACK 1
+#else
+# define ENABLE_FILE_CACHE_FALLBACK 0
 #endif
 
 #if ZEND_WIN32
@@ -177,7 +179,6 @@ typedef struct _zend_accel_directives {
 	zend_bool      save_comments;
 	zend_bool      protect_memory;
 	zend_bool      file_override_enabled;
-	zend_bool      inherited_hack;
 	zend_bool      enable_cli;
 	zend_bool      validate_permission;
 #ifndef ZEND_WIN32
@@ -251,6 +252,15 @@ typedef struct _zend_accel_globals {
 	char                    key[MAXPATHLEN * 8];
 } zend_accel_globals;
 
+typedef struct _zend_string_table {
+	uint32_t     nTableMask;
+	uint32_t     nNumOfElements;
+	zend_string *start;
+	zend_string *top;
+	zend_string *end;
+	zend_string *saved_top;
+} zend_string_table;
+
 typedef struct _zend_accel_shared_globals {
 	/* Cache Data Structures */
 	zend_ulong   hits;
@@ -274,15 +284,18 @@ typedef struct _zend_accel_shared_globals {
 	LONGLONG   restart_in;
 #endif
 	zend_bool       restart_in_progress;
-	/* Interned Strings Support */
-	char           *interned_strings_start;
-	char           *interned_strings_top;
-	char           *interned_strings_end;
-	char           *interned_strings_saved_top;
-	HashTable       interned_strings;
+
+	/* uninitialized HashTable Support */
+	uint32_t uninitialized_bucket[-HT_MIN_MASK];
+
+	/* Interned Strings Support (must be the last element) */
+	zend_string_table interned_strings;
 } zend_accel_shared_globals;
 
 extern zend_bool accel_startup_ok;
+#ifdef HAVE_OPCACHE_FILE_CACHE
+extern zend_bool file_cache_only;
+#endif
 #if ENABLE_FILE_CACHE_FALLBACK
 extern zend_bool fallback_process;
 #endif
@@ -318,8 +331,8 @@ char *accel_make_persistent_key(const char *path, size_t path_length, int *key_l
 zend_op_array *persistent_compile_file(zend_file_handle *file_handle, int type);
 
 #define IS_ACCEL_INTERNED(str) \
-	((char*)(str) >= ZCSG(interned_strings_start) && (char*)(str) < ZCSG(interned_strings_end))
+	((char*)(str) >= (char*)ZCSG(interned_strings).start && (char*)(str) < (char*)ZCSG(interned_strings).top)
 
-zend_string *accel_new_interned_string(zend_string *str);
+zend_string* ZEND_FASTCALL accel_new_interned_string(zend_string *str);
 
 #endif /* ZEND_ACCELERATOR_H */

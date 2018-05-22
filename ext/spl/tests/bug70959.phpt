@@ -19,6 +19,6 @@ $obj->setTest('test');
 var_dump($obj->getTest());
 $obj2 = unserialize(serialize($obj));
 var_dump($obj2->getTest());
---EXPECTF--
+--EXPECT--
 string(4) "test"
 string(4) "test"

@@ -9,4 +9,4 @@ class Foo {
 }
 
 --EXPECTF--
-Fatal error: Constructor %s::%s() cannot declare a return type in %s on line %s
+Fatal error: Constructor %s::%s() cannot declare a return type in %s on line %d

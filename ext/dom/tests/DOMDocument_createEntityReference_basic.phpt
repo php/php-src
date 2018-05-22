@@ -14,6 +14,6 @@ $ref = $dom->createEntityReference('nbsp');
 $dom->appendChild($ref);
 echo $dom->saveXML();
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0"?>
 &nbsp;

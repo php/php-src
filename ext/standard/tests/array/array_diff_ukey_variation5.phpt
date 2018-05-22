@@ -33,7 +33,7 @@ var_dump( array_diff_ukey($array1, $array2, 'strcasecmp') );
 var_dump( array_diff_ukey($array2, $array1, 'strcasecmp') );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_diff_ukey() : usage variation ***
 
 -- Testing array_diff_ukey() function with multi dimensional array --

@@ -14,7 +14,7 @@ while ($a->valid()) {
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(1)
 NULL
 int(2)

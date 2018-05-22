@@ -41,8 +41,8 @@ require_once('skipifconnectfailure.inc');
 
 
 	$stmt = mysqli_stmt_init($link);
-	if (!is_null($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
-		printf("[005] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_attr_set($stmt, 0, 0)))
+		printf("[005] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	$stmt->prepare("SELECT * FROM test");
 
@@ -273,5 +273,5 @@ require_once('skipifconnectfailure.inc');
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

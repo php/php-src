@@ -14,5 +14,5 @@ curl_copy_handle($curl);
 
 echo 'DONE!';
 ?>
---EXPECTF--
+--EXPECT--
 DONE!

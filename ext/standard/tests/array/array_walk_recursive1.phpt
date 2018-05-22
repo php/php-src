@@ -34,7 +34,7 @@ echo "Done\n";
 Warning: array_walk_recursive() expects at least 2 parameters, 0 given in %s on line %d
 NULL
 
-Warning: array_walk_recursive() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_walk_recursive() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 Warning: array_walk_recursive() expects parameter 2 to be a valid callback, function '' not found or invalid function name in %s on line %d

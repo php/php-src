@@ -99,7 +99,7 @@ fclose($fp);
 setlocale(LC_CTYPE, $orig);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_alnum() : usage variations ***
 
 -- Iteration 1 --

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -128,17 +128,12 @@ again:
 			}
 			count = zend_array_count(myht);
 			php_printf("%sarray(%d) {\n", COMMON, count);
-			is_temp = 0;
 
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, num, key, val) {
 				php_array_element_dump(val, num, key, level);
 			} ZEND_HASH_FOREACH_END();
 			if (level > 1 && !(GC_FLAGS(myht) & GC_IMMUTABLE)) {
 				GC_UNPROTECT_RECURSION(myht);
-			}
-			if (is_temp) {
-				zend_hash_destroy(myht);
-				efree(myht);
 			}
 			if (level > 1) {
 				php_printf("%*c", level-1, ' ');
@@ -705,7 +700,7 @@ static int php_var_serialize_call_sleep(zval *retval, zval *struc) /* {{{ */
 static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{{ */
 {
 	zval *val;
-	zend_string *name;
+	zend_string *name, *tmp_name;
 
 	zend_hash_init(ht, zend_hash_num_elements(src), NULL, NULL, 0);
 	ZEND_HASH_FOREACH_VAL(src, val) {
@@ -714,15 +709,15 @@ static void php_var_serialize_collect_names(HashTable *ht, HashTable *src) /* {{
 					"__sleep should return an array only containing the names of instance-variables to serialize.");
 		}
 
-		name = zval_get_string(val);
+		name = zval_get_tmp_string(val, &tmp_name);
 		if (zend_hash_exists(ht, name)) {
 			php_error_docref(NULL, E_NOTICE,
 					"\"%s\" is returned from __sleep multiple times", ZSTR_VAL(name));
-			zend_string_release(name);
+			zend_tmp_string_release(tmp_name);
 			continue;
 		}
 		zend_hash_add_empty_element(ht, name);
-		zend_string_release(name);
+		zend_tmp_string_release(tmp_name);
 	} ZEND_HASH_FOREACH_END();
 }
 /* }}} */
@@ -746,7 +741,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 	ZEND_HASH_FOREACH_STR_KEY(&names, name) {
 		zend_string *prot_name, *priv_name;
 
-		zval *val = zend_hash_find(propers, name);
+		zval *val = zend_hash_find_ex(propers, name, 1);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
 				val = Z_INDIRECT_P(val);
@@ -761,7 +756,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		}
 
 		priv_name = zend_mangle_property_name(
-				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+				ZSTR_VAL(ce->name), ZSTR_LEN(ce->name), ZSTR_VAL(name), ZSTR_LEN(name), 0);
 		val = zend_hash_find(propers, priv_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {
@@ -780,7 +775,7 @@ static void php_var_serialize_class(smart_str *buf, zval *struc, zval *retval_pt
 		zend_string_free(priv_name);
 
 		prot_name = zend_mangle_property_name(
-				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), ce->type & ZEND_INTERNAL_CLASS);
+				"*", 1, ZSTR_VAL(name), ZSTR_LEN(name), 0);
 		val = zend_hash_find(propers, prot_name);
 		if (val != NULL) {
 			if (Z_TYPE_P(val) == IS_INDIRECT) {

@@ -58,7 +58,7 @@ $db = MySQLPDOTest::factory();
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 [002] Suspicious FETCH_BOTH result, dumping
 array(2) {
   [0]=>

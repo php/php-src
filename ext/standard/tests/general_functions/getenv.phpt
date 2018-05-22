@@ -10,7 +10,7 @@ var_dump(getenv()["FOO"]);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 string(3) "bar"
 string(3) "bar"
 Done

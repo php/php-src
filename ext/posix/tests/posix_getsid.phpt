@@ -20,7 +20,7 @@ var_dump( is_long(posix_getsid($pid)) );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing posix_getsid() : function test ***
 
 -- Testing posix_getsid() function with current process pid --

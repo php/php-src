@@ -35,7 +35,7 @@ $file_path = dirname(__FILE__);
 $file_name = $file_path."/is_file_basic.tmp";
 unlink($file_name);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing is_file(): basic functionality ***
 bool(true)
 bool(false)

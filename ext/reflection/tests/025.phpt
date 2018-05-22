@@ -1,7 +1,5 @@
 --TEST--
 ReflectionFunction basic tests
---SKIPIF--
-<?php extension_loaded('reflection') or die('skip'); ?>
 --INI--
 opcache.save_comments=1
 --FILE--
@@ -49,7 +47,7 @@ var_dump($func->getNumberOfRequiredParameters());
 echo "Done\n";
 
 ?>
---EXPECTF--	
+--EXPECTF--
 /**
 hoho
 */

@@ -37,8 +37,14 @@ set PGPASSWORD=Password12!
 rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
 echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-"C:\Program Files\PostgreSQL\9.5\bin\createdb.exe" test
+"C:\Program Files\PostgreSQL\10\bin\createdb.exe" test
 if %errorlevel% neq 0 exit /b 3
+
+rem setup ODBC related exts
+set ODBC_TEST_USER=sa
+set ODBC_TEST_PASS=Password12!
+set ODBC_TEST_DSN=Driver={ODBC Driver 13 for SQL Server};Server=(local)\SQL2017;Database=master;uid=%ODBC_TEST_USER%;pwd=%ODBC_TEST_PASS%
+set PDOTEST_DSN=odbc:%ODBC_TEST_DSN%
 
 rem prepare for ext/openssl
 if "%APPVEYOR%" equ "True" rmdir /s /q C:\OpenSSL-Win32 >NUL 2>NUL
@@ -82,8 +88,14 @@ copy %PHP_BUILD_CACHE_ENCHANT_DICT_DIR%\* %USERPROFILE%\enchant\myspell
 
 mkdir c:\tests_tmp
 
+set TEST_PHP_JUNIT=c:\junit.out.xml
+
 cd "%APPVEYOR_BUILD_FOLDER%"
 nmake test TESTS="%OPCACHE_OPTS% -q --offline --show-diff --show-slow 1000 --set-timeout 120 -g FAIL,XFAIL,BORK,WARN,LEAK,SKIP --temp-source c:\tests_tmp --temp-target c:\tests_tmp"
 
-exit /b %errorlevel%
+set EXIT_CODE=%errorlevel%
+
+powershell -Command "$wc = New-Object 'System.Net.WebClient'; $wc.UploadFile('https://ci.appveyor.com/api/testresults/junit/%APPVEYOR_JOB_ID%', 'c:\junit.out.xml')"
+
+exit /b %EXIT_CODE%
 

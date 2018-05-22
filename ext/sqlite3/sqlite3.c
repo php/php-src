@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -676,7 +676,7 @@ PHP_METHOD(sqlite3, querySingle)
 			if (!entire_row) {
 				RETVAL_NULL();
 			} else {
-				array_init(return_value);
+				ZVAL_EMPTY_ARRAY(return_value);
 			}
 			break;
 		}
@@ -724,7 +724,7 @@ static int sqlite3_do_callback(struct php_sqlite3_fci *fc, zval *cb, int argc, s
 		if (Z_ISUNDEF(agg_context->zval_context)) {
 			ZVAL_NULL(&agg_context->zval_context);
 		}
-		ZVAL_DUP(&zargs[0], &agg_context->zval_context);
+		ZVAL_COPY(&zargs[0], &agg_context->zval_context);
 		ZVAL_LONG(&zargs[1], agg_context->row_count);
 	}
 
@@ -858,7 +858,7 @@ static void php_sqlite3_callback_final(sqlite3_context *context) /* {{{ */
 static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, int b_len, const void* b) /* {{{ */
 {
 	php_sqlite3_collation *collation = (php_sqlite3_collation*)coll;
-	zval *zargs = NULL;
+	zval zargs[2];
 	zval retval;
 	int ret;
 
@@ -868,7 +868,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 	collation->fci.fci.retval = &retval;
 	collation->fci.fci.param_count = 2;
 
-	zargs = safe_emalloc(2, sizeof(zval), 0);
 	ZVAL_STRINGL(&zargs[0], a, a_len);
 	ZVAL_STRINGL(&zargs[1], b, b_len);
 
@@ -885,7 +884,6 @@ static int php_sqlite3_callback_compare(void *coll, int a_len, const void *a, in
 
 	zval_ptr_dtor(&zargs[0]);
 	zval_ptr_dtor(&zargs[1]);
-	efree(zargs);
 
 	if (EG(exception)) {
 		ret = 0;
@@ -1205,7 +1203,7 @@ static int php_sqlite3_stream_stat(php_stream *stream, php_stream_statbuf *ssb)
 	return 0;
 }
 
-static php_stream_ops php_stream_sqlite3_ops = {
+static const php_stream_ops php_stream_sqlite3_ops = {
 	php_sqlite3_stream_write,
 	php_sqlite3_stream_read,
 	php_sqlite3_stream_close,
@@ -1671,7 +1669,7 @@ PHP_METHOD(sqlite3stmt, execute)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3Stmt::__construct(SQLite3 dbobject, String Statement)
+/* {{{ proto SQLite3Stmt::__construct(SQLite3 dbobject, String Statement)
    __constructor for SQLite3Stmt. */
 PHP_METHOD(sqlite3stmt, __construct)
 {
@@ -1893,7 +1891,7 @@ PHP_METHOD(sqlite3result, finalize)
 }
 /* }}} */
 
-/* {{{ proto int SQLite3Result::__construct()
+/* {{{ proto SQLite3Result::__construct()
    __constructor for SQLite3Result. */
 PHP_METHOD(sqlite3result, __construct)
 {
@@ -1995,7 +1993,7 @@ ZEND_END_ARG_INFO()
 /* }}} */
 
 /* {{{ php_sqlite3_class_methods */
-static zend_function_entry php_sqlite3_class_methods[] = {
+static const zend_function_entry php_sqlite3_class_methods[] = {
 	PHP_ME(sqlite3,		open,				arginfo_sqlite3_open, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		close,				arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3,		exec,				arginfo_sqlite3_query, ZEND_ACC_PUBLIC)
@@ -2024,7 +2022,7 @@ static zend_function_entry php_sqlite3_class_methods[] = {
 /* }}} */
 
 /* {{{ php_sqlite3_stmt_class_methods */
-static zend_function_entry php_sqlite3_stmt_class_methods[] = {
+static const zend_function_entry php_sqlite3_stmt_class_methods[] = {
 	PHP_ME(sqlite3stmt, paramCount,	arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, close,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3stmt, reset,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
@@ -2039,7 +2037,7 @@ static zend_function_entry php_sqlite3_stmt_class_methods[] = {
 /* }}} */
 
 /* {{{ php_sqlite3_result_class_methods */
-static zend_function_entry php_sqlite3_result_class_methods[] = {
+static const zend_function_entry php_sqlite3_result_class_methods[] = {
 	PHP_ME(sqlite3result, numColumns,		arginfo_sqlite3_void, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, columnName,		arginfo_sqlite3result_columnname, ZEND_ACC_PUBLIC)
 	PHP_ME(sqlite3result, columnType,		arginfo_sqlite3result_columntype, ZEND_ACC_PUBLIC)
@@ -2204,7 +2202,7 @@ static zend_object *php_sqlite3_object_new(zend_class_entry *class_type) /* {{{ 
 	php_sqlite3_db_object *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_db_object) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(php_sqlite3_db_object), class_type);
 
 	/* Need to keep track of things to free */
 	zend_llist_init(&(intern->free_list),  sizeof(php_sqlite3_free_list *), (llist_dtor_func_t)php_sqlite3_free_list_dtor, 0);
@@ -2223,7 +2221,7 @@ static zend_object *php_sqlite3_stmt_object_new(zend_class_entry *class_type) /*
 	php_sqlite3_stmt *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_stmt) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(php_sqlite3_stmt), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);
@@ -2239,7 +2237,7 @@ static zend_object *php_sqlite3_result_object_new(zend_class_entry *class_type) 
 	php_sqlite3_result *intern;
 
 	/* Allocate memory for it */
-	intern = ecalloc(1, sizeof(php_sqlite3_result) + zend_object_properties_size(class_type));
+	intern = zend_object_alloc(sizeof(php_sqlite3_result), class_type);
 
 	zend_object_std_init(&intern->zo, class_type);
 	object_properties_init(&intern->zo, class_type);

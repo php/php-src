@@ -101,7 +101,7 @@ PHP_ARG_WITH(tcadb,,
 [  --with-tcadb[=DIR]        DBA: Tokyo Cabinet abstract DB support], no, no)
 
 PHP_ARG_WITH(lmdb,,
-[  --with-lmdb[=DIR]        DBA: Lightning memory-mapped database support], no, no)
+[  --with-lmdb[=DIR]         DBA: Lightning memory-mapped database support], no, no)
 
 
 dnl

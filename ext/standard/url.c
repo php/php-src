@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -569,27 +569,31 @@ PHPAPI zend_string *php_raw_url_encode(char const *s, size_t len)
 {
 	register size_t x, y;
 	zend_string *str;
+	char *ret;
 
 	str = zend_string_safe_alloc(3, len, 0, 0);
+	ret = ZSTR_VAL(str);
 	for (x = 0, y = 0; len--; x++, y++) {
-		ZSTR_VAL(str)[y] = (unsigned char) s[x];
+		char c = s[x];
+
+		ret[y] = c;
 #ifndef CHARSET_EBCDIC
-		if ((ZSTR_VAL(str)[y] < '0' && ZSTR_VAL(str)[y] != '-' && ZSTR_VAL(str)[y] != '.') ||
-			(ZSTR_VAL(str)[y] < 'A' && ZSTR_VAL(str)[y] > '9') ||
-			(ZSTR_VAL(str)[y] > 'Z' && ZSTR_VAL(str)[y] < 'a' && ZSTR_VAL(str)[y] != '_') ||
-			(ZSTR_VAL(str)[y] > 'z' && ZSTR_VAL(str)[y] != '~')) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[(unsigned char) s[x] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[(unsigned char) s[x] & 15];
+		if ((c < '0' && c != '-' &&  c != '.') ||
+			(c < 'A' && c > '9') ||
+			(c > 'Z' && c < 'a' && c != '_') ||
+			(c > 'z' && c != '~')) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[(unsigned char) c >> 4];
+			ret[y] = hexchars[(unsigned char) c & 15];
 #else /*CHARSET_EBCDIC*/
-		if (!isalnum(ZSTR_VAL(str)[y]) && strchr("_-.~", ZSTR_VAL(str)[y]) != NULL) {
-			ZSTR_VAL(str)[y++] = '%';
-			ZSTR_VAL(str)[y++] = hexchars[os_toascii[(unsigned char) s[x]] >> 4];
-			ZSTR_VAL(str)[y] = hexchars[os_toascii[(unsigned char) s[x]] & 15];
+		if (!isalnum(c) && strchr("_-.~", c) != NULL) {
+			ret[y++] = '%';
+			ret[y++] = hexchars[os_toascii[(unsigned char) c] >> 4];
+			ret[y] = hexchars[os_toascii[(unsigned char) c] & 15];
 #endif /*CHARSET_EBCDIC*/
 		}
 	}
-	ZSTR_VAL(str)[y] = '\0';
+	ret[y] = '\0';
 	str = zend_string_truncate(str, y, 0);
 
 	return str;

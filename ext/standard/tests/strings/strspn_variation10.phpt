@@ -65,7 +65,7 @@ foreach($strings as $str)  {
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strspn() : with different mask strings and default start and len arguments ***
 
 -- Iteration 1 --

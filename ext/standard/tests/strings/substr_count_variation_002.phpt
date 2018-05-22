@@ -34,7 +34,7 @@ var_dump(substr_count($str, "0"));
 echo "Done\n";	
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing possible variations ***
 
 -- complex strings containing other than 7-bit chars --

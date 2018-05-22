@@ -28,7 +28,7 @@ Warning: intlcal_get_time() expects exactly 1 parameter, 2 given in %s on line %
 Warning: intlcal_get_time(): intlcal_get_time: bad arguments in %s on line %d
 bool(false)
 
-Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_time() must be an instance of IntlCalendar, integer given in %s:%d
+Fatal error: Uncaught TypeError: Argument 1 passed to intlcal_get_time() must be an instance of IntlCalendar, int given in %s:%d
 Stack trace:
 #0 %s(%d): intlcal_get_time(1)
 #1 {main}

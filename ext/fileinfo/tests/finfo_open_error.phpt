@@ -38,7 +38,7 @@ Warning: finfo_open(%sfoobarfile): failed to open stream: No such file or direct
 Warning: finfo_open(): Failed to load magic database at '%sfoobarfile'. in %sfinfo_open_error.php on line 12
 bool(false)
 
-Warning: finfo_open() expects parameter 1 to be integer, array given in %sfinfo_open_error.php on line 13
+Warning: finfo_open() expects parameter 1 to be int, array given in %sfinfo_open_error.php on line 13
 bool(false)
 
 Warning: finfo_open() expects at most 2 parameters, 3 given in %sfinfo_open_error.php on line 14
@@ -47,7 +47,7 @@ bool(false)
 Notice: finfo_open(): Warning: using regular magic file `%smagic' in %sfinfo_open_error.php on line 15
 resource(6) of type (file_info)
 
-Warning: finfo_open() expects parameter 1 to be integer, string given in %sfinfo_open_error.php on line 16
+Warning: finfo_open() expects parameter 1 to be int, string given in %sfinfo_open_error.php on line 16
 bool(false)
-finfo::finfo() expects parameter 1 to be integer, string given
+finfo::finfo() expects parameter 1 to be int, string given
 ===DONE===

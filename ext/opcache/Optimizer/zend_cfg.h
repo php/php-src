@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, CFG - Control Flow Graph                                |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -90,11 +90,7 @@ typedef struct _zend_cfg {
 	zend_basic_block *blocks;             /* array of basic blocks       */
 	int              *predecessors;
 	uint32_t         *map;
-	unsigned int      split_at_live_ranges : 1;
-	unsigned int      split_at_calls : 1;
-	unsigned int      split_at_recv : 1;
-	unsigned int      dynamic : 1;        /* accesses varables by name   */
-	unsigned int      vararg : 1;         /* uses func_get_args()        */
+	uint32_t          flags;
 } zend_cfg;
 
 /* Build Flags */
@@ -124,11 +120,11 @@ typedef struct _zend_cfg {
 
 BEGIN_EXTERN_C()
 
-int  zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg, uint32_t *func_flags);
+int  zend_build_cfg(zend_arena **arena, const zend_op_array *op_array, uint32_t build_flags, zend_cfg *cfg);
 void zend_cfg_remark_reachable_blocks(const zend_op_array *op_array, zend_cfg *cfg);
 int  zend_cfg_build_predecessors(zend_arena **arena, zend_cfg *cfg);
 int  zend_cfg_compute_dominators_tree(const zend_op_array *op_array, zend_cfg *cfg);
-int  zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg, uint32_t *flags);
+int  zend_cfg_identify_loops(const zend_op_array *op_array, zend_cfg *cfg);
 
 END_EXTERN_C()
 

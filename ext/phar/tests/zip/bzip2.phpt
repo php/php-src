@@ -2,7 +2,6 @@
 Phar: process bzip2-compressed zip entry
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
 --FILE--
 <?php

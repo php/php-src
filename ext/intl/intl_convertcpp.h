@@ -26,6 +26,8 @@
 #include <unicode/unistr.h>
 #include <zend_types.h>
 
+using icu::UnicodeString;
+
 int intl_stringFromChar(UnicodeString &ret, char *str, size_t str_len, UErrorCode *status);
 
 zend_string* intl_charFromString(const UnicodeString &from, UErrorCode *status);

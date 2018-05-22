@@ -34,7 +34,7 @@ foreach ($a as $v) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(2)
 int(3)

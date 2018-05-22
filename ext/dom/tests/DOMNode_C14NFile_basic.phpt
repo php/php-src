@@ -33,6 +33,6 @@ var_dump($content);
 $output = dirname(__FILE__).'/DOMNode_C14NFile_basic.tmp';
 unlink($output);
 ?>
---EXPECTF--
+--EXPECT--
 int(34)
 string(34) "<title>The Grapes of Wrath</title>"

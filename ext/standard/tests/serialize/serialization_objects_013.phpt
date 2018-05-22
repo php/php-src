@@ -1,7 +1,5 @@
 --TEST--
 Object serialization / unserialization: references amongst properties 
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 /* Prototype  : proto string serialize(mixed variable)

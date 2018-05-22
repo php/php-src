@@ -18,6 +18,6 @@ var_dump(file_exists($decompressed_name));
 unlink($decompressed_name);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)

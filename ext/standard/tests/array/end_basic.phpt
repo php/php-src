@@ -29,7 +29,7 @@ $array[2] = 'foo';
 var_dump(end($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing end() : basic functionality ***
 
 -- Initial Position: --

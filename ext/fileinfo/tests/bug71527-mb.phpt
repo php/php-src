@@ -15,5 +15,5 @@ USE_ZEND_ALLOC=0
 --EXPECTF--
 Warning: finfo_open(): Failed to load magic database at '%sbug71527私はガラスを食べられます.magic'. in %sbug71527-mb.php on line %d
 
-Warning: finfo_file() expects parameter 1 to be resource, boolean given in %sbug71527-mb.php on line %d
+Warning: finfo_file() expects parameter 1 to be resource, bool given in %sbug71527-mb.php on line %d
 bool(false)

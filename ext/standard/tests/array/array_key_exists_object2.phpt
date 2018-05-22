@@ -49,7 +49,7 @@ var_dump($class2);
 echo "Done";
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Testing array_key_exists() : object functionality ***
 
 -- Do not assign a value to $class1->var3 --

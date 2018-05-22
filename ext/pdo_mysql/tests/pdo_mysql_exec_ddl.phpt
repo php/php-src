@@ -88,5 +88,5 @@ MySQLPDOTest::dropTestTable($db);
 @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl');
 @$db->exec('DROP DATABASE IF EXISTS pdo_exec_ddl2');
 ?>
---EXPECTF--
+--EXPECT--
 done!

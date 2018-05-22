@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -125,7 +125,7 @@ ZEND_END_ARG_INFO()
 
 /* {{{ iconv_functions[]
  */
-const zend_function_entry iconv_functions[] = {
+static const zend_function_entry iconv_functions[] = {
 	PHP_RAW_NAMED_FE(iconv,php_if_iconv,				arginfo_iconv)
 	PHP_FE(iconv_get_encoding,						arginfo_iconv_get_encoding)
 	PHP_FE(iconv_set_encoding,						arginfo_iconv_set_encoding)
@@ -221,7 +221,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 /* }}} */
 
 /* {{{ static globals */
-static char _generic_superset_name[] = ICONV_UCS4_ENCODING;
+static const char _generic_superset_name[] = ICONV_UCS4_ENCODING;
 #define GENERIC_SUPERSET_NAME _generic_superset_name
 #define GENERIC_SUPERSET_NBYTES 4
 /* }}} */
@@ -424,7 +424,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 			} else {
 				len = spprintf(&content_type, 0, "Content-Type:%.*s; charset=%s", mimetype_len ? mimetype_len : (int) strlen(mimetype), mimetype, get_output_encoding());
 			}
-			if (content_type && SUCCESS == sapi_add_header(content_type, (uint32_t)len, 0)) {
+			if (content_type && SUCCESS == sapi_add_header(content_type, len, 0)) {
 				SG(sapi_headers).send_default_content_type = 0;
 				php_output_handler_hook(PHP_OUTPUT_HANDLER_HOOK_IMMUTABLE, NULL);
 			}
@@ -438,7 +438,7 @@ static int php_iconv_output_handler(void **nothing, php_output_context *output_c
 		if (out) {
 			output_context->out.data = estrndup(ZSTR_VAL(out), ZSTR_LEN(out));
 			output_context->out.used = ZSTR_LEN(out);
-			zend_string_free(out);
+			zend_string_efree(out);
 		} else {
 			output_context->out.data = NULL;
 			output_context->out.used = 0;
@@ -559,6 +559,8 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	size_t result;
 	zend_string *ret, *out_buffer;
 
+	*out = NULL;
+
 	/*
 	  This is not the right way to get output size...
 	  This is not space efficient for large text.
@@ -583,7 +585,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	result = iconv(cd, (const char **) &in_p, &in_size, (char **) &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
-		zend_string_free(out_buffer);
+		zend_string_efree(out_buffer);
 		return PHP_ICONV_ERR_UNKNOWN;
 	}
 
@@ -599,7 +601,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 	result = iconv(cd, NULL, NULL, &out_p, &out_left);
 
 	if (result == (size_t)(-1)) {
-		zend_string_free(out_buffer);
+		zend_string_efree(out_buffer);
 		return PHP_ICONV_ERR_UNKNOWN;
 	}
 
@@ -711,7 +713,7 @@ PHP_ICONV_API php_iconv_err_t php_iconv_string(const char *in_p, size_t in_len, 
 
 			default:
 				/* other error */
-				zend_string_free(out_buf);
+				zend_string_efree(out_buf);
 				return PHP_ICONV_ERR_UNKNOWN;
 		}
 	}
@@ -985,7 +987,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 	if (err != PHP_ICONV_ERR_SUCCESS) {
 		if (ndl_buf != NULL) {
-			zend_string_free(ndl_buf);
+			zend_string_efree(ndl_buf);
 		}
 		return err;
 	}
@@ -994,7 +996,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 
 	if (cd == (iconv_t)(-1)) {
 		if (ndl_buf != NULL) {
-			zend_string_free(ndl_buf);
+			zend_string_efree(ndl_buf);
 		}
 #if ICONV_SUPPORTS_ERRNO
 		if (errno == EINVAL) {
@@ -1129,7 +1131,7 @@ static php_iconv_err_t _php_iconv_strpos(size_t *pretval,
 	}
 
 	if (ndl_buf) {
-		zend_string_free(ndl_buf);
+		zend_string_efree(ndl_buf);
 	}
 
 	iconv_close(cd);
@@ -2271,7 +2273,7 @@ PHP_FUNCTION(iconv_mime_encode)
 
 		if ((pzval = zend_hash_str_find(Z_ARRVAL_P(pref), "line-break-chars", sizeof("line-break-chars") - 1)) != NULL) {
 			if (Z_TYPE_P(pzval) != IS_STRING) {
-				tmp_str = zval_get_string(pzval);
+				tmp_str = zval_get_string_func(pzval);
 				lfchars = ZSTR_VAL(tmp_str);
 			} else {
 				lfchars = Z_STRVAL_P(pzval);
@@ -2461,10 +2463,10 @@ PHP_NAMED_FUNCTION(php_if_iconv)
 	err = php_iconv_string(ZSTR_VAL(in_buffer), (size_t)ZSTR_LEN(in_buffer), &out_buffer, out_charset, in_charset);
 	_php_iconv_show_error(err, out_charset, in_charset);
 	if (err == PHP_ICONV_ERR_SUCCESS && out_buffer != NULL) {
-		RETVAL_STR(out_buffer);
+		RETVAL_NEW_STR(out_buffer);
 	} else {
 		if (out_buffer != NULL) {
-			zend_string_free(out_buffer);
+			zend_string_efree(out_buffer);
 		}
 		RETURN_FALSE;
 	}
@@ -2640,6 +2642,9 @@ static int php_iconv_stream_filter_append_bucket(
 								tcnt = 0;
 								break;
 							}
+						} else {
+						    php_error_docref(NULL, E_WARNING, "iconv stream filter (\"%s\"=>\"%s\"): invalid multibyte sequence", self->from_charset, self->to_charset);
+						    goto out_failure;
 						}
 						break;
 
@@ -2828,7 +2833,7 @@ static void php_iconv_stream_filter_cleanup(php_stream_filter *filter)
 }
 /* }}} */
 
-static php_stream_filter_ops php_iconv_stream_filter_ops = {
+static const php_stream_filter_ops php_iconv_stream_filter_ops = {
 	php_iconv_stream_filter_do_filter,
 	php_iconv_stream_filter_cleanup,
 	"convert.iconv.*"
@@ -2880,7 +2885,7 @@ static php_stream_filter *php_iconv_stream_filter_factory_create(const char *nam
 /* {{{ php_iconv_stream_register_factory */
 static php_iconv_err_t php_iconv_stream_filter_register_factory(void)
 {
-	static php_stream_filter_factory filter_factory = {
+	static const php_stream_filter_factory filter_factory = {
 		php_iconv_stream_filter_factory_create
 	};
 

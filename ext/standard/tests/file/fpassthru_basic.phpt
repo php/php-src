@@ -62,7 +62,7 @@ echo "*** Done ***\n";
 <?php
 unlink(dirname(__FILE__)."/passthru.tmp");
 ?>
---EXPECTF--
+--EXPECT--
 *** Test basic functionality of fpassthru() function ***
 
 -- Before seek operation --

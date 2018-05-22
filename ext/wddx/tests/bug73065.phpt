@@ -81,7 +81,7 @@ for($i=1;$i<=5;$i++) {
 }
 ?>
 DONE
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(0) {

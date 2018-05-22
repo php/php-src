@@ -23,7 +23,7 @@ f();
 
 ?>
 ==Done==
---EXPECTF--
+--EXPECT--
 *** Testing compact() : usage variations  - variables outside of current scope ***
 array(2) {
   ["b"]=>

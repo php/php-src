@@ -22,6 +22,7 @@ $empty = "";
 
 openssl_pkcs7_encrypt($infile, $encrypted, $single_cert, $headers);
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $privkey));
+var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, openssl_x509_read($single_cert), $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $single_cert, $wrong));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, $wrong, $privkey));
 var_dump(openssl_pkcs7_decrypt($encrypted, $outfile, null, $privkey));
@@ -41,6 +42,7 @@ if (file_exists($outfile)) {
 }
 ?>
 --EXPECTF--
+bool(true)
 bool(true)
 
 Warning: openssl_pkcs7_decrypt(): unable to get private key in %s on line %d

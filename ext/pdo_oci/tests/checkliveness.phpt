@@ -46,7 +46,7 @@ try {
 }
 
 $db = null;
---EXPECTF--
+--EXPECT--
 array(2) {
   ["DUMMY"]=>
   string(1) "X"

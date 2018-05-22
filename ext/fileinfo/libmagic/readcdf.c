@@ -1,5 +1,5 @@
 /*-
- * Copyright (c) 2008 Christos Zoulas
+ * Copyright (c) 2008, 2016 Christos Zoulas
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -26,7 +26,7 @@
 #include "file.h"
 
 #ifndef lint
-FILE_RCSID("@(#)$File: readcdf.c,v 1.65 2017/04/08 20:58:03 christos Exp $")
+FILE_RCSID("@(#)$File: readcdf.c,v 1.66 2017/11/02 20:25:39 christos Exp $")
 #endif
 
 #include <assert.h>
@@ -78,10 +78,6 @@ static const struct nv {
 	{ "DigitalSignature",		"Microsoft Installer",	},
 	{ NULL,				NULL,			},
 };
-
-#ifdef PHP_WIN32
-# define strcasestr strstr
-#endif
 
 static const struct cv {
 	uint64_t clsid[2];
@@ -137,7 +133,7 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
 {
         size_t i;
         cdf_timestamp_t tp;
-        struct timeval ts;
+        struct timespec ts;
         char buf[64];
         const char *str = NULL;
         const char *s, *e;
@@ -224,11 +220,8 @@ cdf_file_property_info(struct magic_set *ms, const cdf_property_info_t *info,
                                                 return -1;
                                 } else {
                                         char *c, *ec;
-					const time_t sec = ts.tv_sec;
-                                        if (cdf_timestamp_to_timespec(&ts, tp) == -1) {
-											return -1;
-										}
-                                        c = cdf_ctime(&sec, tbuf);
+                                        cdf_timestamp_to_timespec(&ts, tp);
+                                        c = cdf_ctime(&ts.tv_sec, tbuf);
                                         if (c != NULL &&
 					    (ec = strchr(c, '\n')) != NULL)
 						*ec = '\0';
@@ -274,10 +267,10 @@ cdf_file_catalog(struct magic_set *ms, const cdf_header_t *h,
 			if (file_printf(ms, "%s%s",
 			    cdf_u16tos8(buf, ce[i].ce_namlen, ce[i].ce_name),
 			    i == cat->cat_num - 1 ? "]" : ", ") == -1) {
-				free(cat);
+				efree(cat);
 				return -1;
 			}
-		free(cat);
+		efree(cat);
 	} else {
 		if (file_printf(ms, "application/CDFV2") == -1)
 			return -1;
@@ -338,7 +331,7 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 	}
 
         m = cdf_file_property_info(ms, info, count, root_storage);
-        free(info);
+        efree(info);
 
         return m == -1 ? -2 : m;
 }
@@ -346,11 +339,11 @@ cdf_file_summary_info(struct magic_set *ms, const cdf_header_t *h,
 #ifdef notdef
 private char *
 format_clsid(char *buf, size_t len, const uint64_t uuid[2]) {
-	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4" 
+	snprintf(buf, len, "%.8" PRIx64 "-%.4" PRIx64 "-%.4" PRIx64 "-%.4"
 	    PRIx64 "-%.12" PRIx64,
 	    (uuid[0] >> 32) & (uint64_t)0x000000000ffffffffULL,
 	    (uuid[0] >> 16) & (uint64_t)0x0000000000000ffffULL,
-	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL, 
+	    (uuid[0] >>  0) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >> 48) & (uint64_t)0x0000000000000ffffULL,
 	    (uuid[1] >>  0) & (uint64_t)0x0000fffffffffffffULL);
 	return buf;
@@ -429,7 +422,7 @@ private struct sinfo {
 	const char *sections[5];
 	const int  types[5];
 } sectioninfo[] = {
-	{ "Encrypted", "encrypted", 
+	{ "Encrypted", "encrypted",
 		{
 			"EncryptedPackage", "EncryptedSummary",
 			NULL, NULL, NULL,
@@ -441,7 +434,7 @@ private struct sinfo {
 
 		},
 	},
-	{ "QuickBooks", "quickbooks", 
+	{ "QuickBooks", "quickbooks",
 		{
 #if 0
 			"TaxForms", "PDFTaxForms", "modulesInBackup",
@@ -530,9 +523,11 @@ cdf_file_dir_info(struct magic_set *ms, const cdf_dir_t *dir)
 }
 
 protected int
-file_trycdf(struct magic_set *ms, int fd, const unsigned char *buf,
-    size_t nbytes)
+file_trycdf(struct magic_set *ms, const struct buffer *b)
 {
+	int fd = b->fd;
+	const unsigned char *buf = b->fbuf;
+	size_t nbytes = b->flen;
         cdf_info_t info;
         cdf_header_t h;
         cdf_sat_t sat, ssat;
@@ -646,11 +641,11 @@ out5:
 	cdf_zero_stream(&scn);
 	cdf_zero_stream(&sst);
 out3:
-        free(dir.dir_tab);
+        efree(dir.dir_tab);
 out2:
-        free(ssat.sat_tab);
+        efree(ssat.sat_tab);
 out1:
-        free(sat.sat_tab);
+        efree(sat.sat_tab);
 out0:
 	if (i == -1) {
 	    if (NOTMIME(ms)) {

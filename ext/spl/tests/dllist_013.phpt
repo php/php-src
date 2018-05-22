@@ -32,7 +32,7 @@ echo $dll->pop()."\n";
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Exception: Offset invalid or out of range
 7
 7

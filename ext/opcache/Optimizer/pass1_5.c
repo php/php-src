@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache                                                         |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -287,8 +287,8 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else if (op_array->scope &&
 					opline->op1_type == IS_VAR &&
 					(opline - 1)->opcode == ZEND_FETCH_CLASS &&
-					((opline - 1)->op1_type == IS_UNUSED &&
-					((opline - 1)->extended_value & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
+					((opline - 1)->op2_type == IS_UNUSED &&
+					((opline - 1)->op1.num & ZEND_FETCH_CLASS_MASK) == ZEND_FETCH_CLASS_SELF) &&
 					(opline - 1)->result.var == opline->op1.var) {
 					/* for self::B */
 					ce = op_array->scope;
@@ -310,8 +310,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 								break;
 							}
 						} else {
-							ZVAL_COPY_VALUE(&t, c);
-							zval_copy_ctor(&t);
+							ZVAL_COPY_OR_DUP(&t, c);
 						}
 
 						if (opline->op1_type == IS_CONST) {

@@ -41,7 +41,7 @@ var_dump( sprintf($format33, $arg1, $arg2, $arg3) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : basic functionality - using float format ***
 string(6) "format"
 string(9) "11.110000"

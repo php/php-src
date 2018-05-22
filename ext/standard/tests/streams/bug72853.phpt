@@ -24,7 +24,7 @@ while ($outs = fgets($pipes[1], 1024)) {
 var_dump(stream_get_meta_data($pipes[1]));
 proc_close($p);
 ?>
---EXPECTF--
+--EXPECT--
 array(7) {
   ["timed_out"]=>
   bool(false)

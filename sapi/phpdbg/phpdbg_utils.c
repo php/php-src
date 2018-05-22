@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -760,21 +760,25 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 				return 1;
 			}
 
-			do {
+			cur = &op_array->opcodes[catch];
+			while (1) {
 				zend_class_entry *ce;
-				cur = &op_array->opcodes[catch];
 
-				if (!(ce = CACHED_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1))))) {
+				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
 					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					CACHE_PTR(Z_CACHE_SLOT_P(RT_CONSTANT(cur, cur->op1)), ce);
+					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
 				}
 
 				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {
 					return 1;
 				}
 
-				catch += cur->extended_value / sizeof(zend_op);
-			} while (!cur->result.num);
+				if (cur->extended_value & ZEND_LAST_CATCH) {
+					return 0;
+				}
+
+				cur = OP_JMP_ADDR(cur, cur->op2);
+			}
 
 			return 0;
 		}

@@ -2,7 +2,7 @@
 Bug #72434: ZipArchive class Use After Free Vulnerability in PHP's GC algorithm and unserialize
 --SKIPIF--
 <?php
-if(!class_exists('zip')) die('ZipArchive');
+if(!class_exists('zip')) die('skip ZipArchive');
 ?>
 --FILE--
 <?php

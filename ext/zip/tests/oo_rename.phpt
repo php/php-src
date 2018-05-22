@@ -48,7 +48,7 @@ $zip->close();
 
 @unlink($file);
 ?>
---EXPECTF--
+--EXPECT--
 0 entry1.txt
 1 entry2.txt
 2 dir/entry2.txt

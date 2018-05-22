@@ -51,4 +51,4 @@ $proc->importStyleSheet($xsldoc);
 echo $proc->transformToURI(null, null);
 ?>
 --EXPECTF--
-Warning: XSLTProcessor::transformToUri() expects parameter 1 to be object, null given in %s on line %i
+Warning: XSLTProcessor::transformToUri() expects parameter 1 to be object, null given in %s on line %d

@@ -16,7 +16,7 @@ var_dump(method_exists('UndefC', 'func'));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 In autoload(UndefC)
 bool(false)
 Done

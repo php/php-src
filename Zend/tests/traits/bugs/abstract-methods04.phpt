@@ -32,5 +32,5 @@ $test = new TraitsTest2();
 $test->hello();
 
 ?>
---EXPECTF--	
+--EXPECT--	
 HelloHello

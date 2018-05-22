@@ -20,6 +20,9 @@ switch ($db->getAttribute(PDO::ATTR_DRIVER_NAME)) {
 	case 'dblib':
 		$sql = 'SELECT TOP :limit * FROM test';
 		break;
+	case 'odbc':
+		$sql = 'SELECT TOP (:limit) * FROM test';
+		break;
 	case 'firebird':
 		$sql = 'SELECT FIRST :limit * FROM test';
 		break;
@@ -37,7 +40,7 @@ if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 if(!($res = $stmt->execute())) var_dump($stmt->errorInfo());
 var_dump($stmt->fetchAll(PDO::FETCH_ASSOC));
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   [0]=>
   array(1) {

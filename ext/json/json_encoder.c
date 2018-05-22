@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -350,7 +350,7 @@ static int php_json_escape_string(
 				0xffffffff, 0x500080c4, 0x10000000, 0x00000000};
 
 			pos++;
-			if (EXPECTED(!(charmap[us >> 5] & (1 << (us & 0x1f))))) {
+			if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
 				smart_str_appendc(buf, (unsigned char) us);
 			} else {
 				switch (us) {

@@ -23,7 +23,7 @@ foreach($classes as $class) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Reflecting on instance of class C: 
 array(1) {
   ["a"]=>

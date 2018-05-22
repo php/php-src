@@ -1,11 +1,7 @@
 --TEST--
 Bug #74408 (Endless loop bypassing execution time limit)
---INI--
-error_reporting = E_ALL | E_DEPRECATED | E_STRICT
 --FILE--
 <?php
-
- //php.ini: error_reporting = E_ALL | E_DEPRECATED | E_STRICT
 
  class ErrorHandling {
 

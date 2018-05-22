@@ -46,5 +46,5 @@ array(2) {
 NULL
 
 Warning: main(): Property access is not allowed yet in %s on line %d
-NULL
+bool(false)
 done!

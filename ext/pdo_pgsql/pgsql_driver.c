@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -176,7 +176,7 @@ static int pgsql_lob_seek(php_stream *stream, zend_off_t offset, int whence,
 	return pos >= 0 ? 0 : -1;
 }
 
-php_stream_ops pdo_pgsql_lob_stream_ops = {
+const php_stream_ops pdo_pgsql_lob_stream_ops = {
 	pgsql_lob_write,
 	pgsql_lob_read,
 	pgsql_lob_close,
@@ -555,7 +555,7 @@ static PHP_METHOD(PDO, pgsqlCopyFromArray)
 	PGresult *pgsql_result;
 	ExecStatusType status;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s/a|sss",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|sss",
 					&table_name, &table_name_len, &pg_rows,
 					&pg_delim, &pg_delim_len, &pg_null_as, &pg_null_as_len, &pg_fields, &pg_fields_len) == FAILURE) {
 		return;
@@ -1166,7 +1166,7 @@ static int pdo_pgsql_set_attr(pdo_dbh_t *dbh, zend_long attr, zval *val)
 	}
 }
 
-static struct pdo_dbh_methods pgsql_methods = {
+static const struct pdo_dbh_methods pgsql_methods = {
 	pgsql_handle_closer,
 	pgsql_handle_preparer,
 	pgsql_handle_doer,
@@ -1263,7 +1263,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_pgsql_driver = {
+const pdo_driver_t pdo_pgsql_driver = {
 	PDO_DRIVER_HEADER(pgsql),
 	pdo_pgsql_handle_factory
 };

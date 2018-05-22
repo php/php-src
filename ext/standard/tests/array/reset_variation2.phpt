@@ -23,7 +23,7 @@ unset($array[0]);
 var_dump(reset($array));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : usage variations ***
 
 -- Initial Position: --

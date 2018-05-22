@@ -23,6 +23,6 @@ printf("%X\n", $p1);
 
 imagedestroy($src); imagedestroy($dst_tc);
 ?>
---EXPECTF--
+--EXPECT--
 46FF0000
 

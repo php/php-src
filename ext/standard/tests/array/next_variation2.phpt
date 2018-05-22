@@ -26,7 +26,7 @@ echo "\n-- Pass a sub-array as \$array_arg --\n";
 var_dump(next($array_arg[0]));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing next() : usage variations ***
 
 -- Pass a two-dimensional array as $array_arg --

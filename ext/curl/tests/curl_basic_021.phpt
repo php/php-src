@@ -17,6 +17,6 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   curl_close($ch);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 string(24) "text/plain;charset=utf-8"
 ===DONE===

@@ -206,6 +206,12 @@ ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
+	ZEND_ARG_INFO(0, input)
+ZEND_END_ARG_INFO();
+#endif
+
 ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
@@ -624,7 +630,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in intl_functions[].
  */
-zend_function_entry intl_functions[] = {
+static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
 	PHP_FE( collator_create, collator_static_1_arg )
@@ -662,6 +668,9 @@ zend_function_entry intl_functions[] = {
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, normalizer_args )
 	PHP_FE( normalizer_is_normalized, normalizer_args )
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+#endif
 
 	/* Locale functions */
 	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
@@ -1045,6 +1054,11 @@ PHP_RSHUTDOWN_FUNCTION( intl )
  */
 PHP_MINFO_FUNCTION( intl )
 {
+#if !UCONFIG_NO_FORMATTING
+	UErrorCode status = U_ZERO_ERROR;
+	const char *tzdata_ver = NULL;
+#endif
+
 	php_info_print_table_start();
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
@@ -1052,6 +1066,13 @@ PHP_MINFO_FUNCTION( intl )
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
+#if !UCONFIG_NO_FORMATTING
+	tzdata_ver = ucal_getTZDataVersion(&status);
+	if (U_ZERO_ERROR == status) {
+		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);
+	}
+#endif
+	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
     /* For the default locale php.ini setting */

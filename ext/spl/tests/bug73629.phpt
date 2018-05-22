@@ -15,6 +15,6 @@ try {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 expected exception: Iterators' LIFO/FIFO modes for SplStack/SplQueue objects are frozen
 ===DONE===
