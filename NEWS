@@ -16,6 +16,9 @@ PHP                                                                        NEWS
   . Fixed bug #76174 (openssl extension fails to build with LibreSSL 2.7).
     (Jakub Zelenka)
 
+- SPL:
+  . Fixed bug #76367 (NoRewindIterator segfault 11). (Laruence)
+
 - Standard:
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
     (Anatol)
