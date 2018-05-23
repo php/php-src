@@ -1039,7 +1039,7 @@ static zval *spl_array_it_get_current_data(zend_object_iterator *iter) /* {{{ */
 		return zend_user_it_get_current_data(iter);
 	} else {
 		zval *data = zend_hash_get_current_data_ex(aht, spl_array_get_pos_ptr(aht, object));
-		if (Z_TYPE_P(data) == IS_INDIRECT) {
+		if (data && Z_TYPE_P(data) == IS_INDIRECT) {
 			data = Z_INDIRECT_P(data);
 		}
 		return data;
