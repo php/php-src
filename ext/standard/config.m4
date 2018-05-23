@@ -319,7 +319,7 @@ case "$PHP_SAPI" in
   none)
     for PROG in $PHP_BINARIES; do
       case "$PROG" in
-        cgi|cli)
+        cgi|cli|phpdbg)
           PHP_ENABLE_CHROOT_FUNC=yes
         ;;
 
