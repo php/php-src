@@ -7,7 +7,10 @@ Content-Type: application/octet-stream
 --FILE--
 <?php
 $tmp_dir = ini_get('upload_tmp_dir') ? ini_get('upload_tmp_dir') : sys_get_temp_dir();
-$p = "$tmp_dir/php*";
+$new_tmp_dir = "$tmp_dir/".uniqid();
+mkdir($new_tmp_dir);
+ini_set('upload_tmp_dir', $new_tmp_dir);
+$p = "$new_tmp_dir/php*";
 var_dump(count(glob($p))); // there should be no tmp files
 
 $h = fopen("php://input/maxmemory:2",'r');
@@ -28,6 +31,9 @@ var_dump(count(glob($p))); // there should be a tmp file
 fclose($h);
 var_dump(count(glob($p))); // there should still be a tmp file
 var_dump(file_get_contents("php://input"));
+
+// restore original upload_tmp_dir
+ini_set('upload_tmp_dir', $tmp_dir);
 --EXPECTF--
 int(0)
 string(%d) "1"
