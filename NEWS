@@ -105,6 +105,8 @@ PHP                                                                        NEWS
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)
+  . Fixed bug #76319 (mb_strtolower with invalid UTF-8 causes segmentation
+    fault). (Nikita)
   . Update to Oniguruma 6.8.1. (cmb)
 
 - ODBC:

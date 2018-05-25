@@ -3252,6 +3252,14 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
+static char *mbstring_convert_case(
+		int case_mode, const char *str, size_t str_len, size_t *ret_len,
+		const mbfl_encoding *enc) {
+	return php_unicode_convert_case(
+		case_mode, str, str_len, ret_len, enc,
+		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+}
+
 /* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
    Returns a case-folded version of sourcestring */
 PHP_FUNCTION(mb_convert_case)
@@ -3280,7 +3288,7 @@ PHP_FUNCTION(mb_convert_case)
 		return;
 	}
 
-	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3312,7 +3320,7 @@ PHP_FUNCTION(mb_strtoupper)
 		RETURN_FALSE;
 	}
 
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3346,7 +3354,7 @@ PHP_FUNCTION(mb_strtolower)
 		RETURN_FALSE;
 	}
 
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -5172,7 +5180,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		 * offsets otherwise. */
 
 		size_t len = 0;
-		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
+		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5183,7 +5191,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
-		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
+		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
 		needle.len = len;
 
 		if (!needle.val) {
