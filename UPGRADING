@@ -75,6 +75,39 @@ Core:
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
 
+MBString:
+  . Support for full case-mapping and case-folding has been added. Unlike simple
+    case-mapping, full case-mapping may change the length of the string. For
+    example:
+
+      mb_strtoupper("Straße")
+      // Produces STRAßE on PHP 7.2
+      // Produces STRASSE on PHP 7.3
+
+    The different casing mapping and folding modes are available through
+    mb_convert_case():
+
+      . MB_CASE_LOWER (used by mb_strtolower)
+      . MB_CASE_UPPER (used by mb_strtolower)
+      . MB_CASE_TITLE
+      . MB_CASE_FOLD
+      . MB_CASE_LOWER_SIMPLE
+      . MB_CASE_UPPER_SIMPLE
+      . MB_CASE_TITLE_SIMPLE
+      . MB_CASE_FOLD_SIMPLE (used by case-insensitive operations)
+
+    Only unconditional, language agnostic full case-mapping is performed.
+  . Case-insensitive string operations now use case-folding instead of case-
+    mapping during comparisons. This means that more characters will be
+    considered (case insensitively) equal now.
+  . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
+    based on the Cased and CaseIgnorable derived Unicode properties. In
+    particular this also improves handling of quotes and apostophes.
+  . Data tables have been updated for Unicode 10.
+  . Mbstring now correctly supports strings larger than 2GB.
+  . Performance of the mbstring extension has been significantly improved
+    across the board. The largest improvements are in case conversion functions.
+
 readline:
   . Support for the completion_append_character and completion_suppress_append
     options has been added to readline_info(). These options are only available
