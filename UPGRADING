@@ -38,7 +38,7 @@ BCMath:
     the returned numbers may have omitted trailing decimal zeroes.
 
 Reflection:
-  . Reflection results now return `int` and `bool` instead of `integer`
+  . Reflection export to string now uses `int` and `bool` instead of `integer`
     and `boolean`.
 
 SPL:
@@ -88,7 +88,7 @@ MBString:
     mb_convert_case():
 
       . MB_CASE_LOWER (used by mb_strtolower)
-      . MB_CASE_UPPER (used by mb_strtolower)
+      . MB_CASE_UPPER (used by mb_strtoupper)
       . MB_CASE_TITLE
       . MB_CASE_FOLD
       . MB_CASE_LOWER_SIMPLE
