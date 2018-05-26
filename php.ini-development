@@ -1879,6 +1879,10 @@ ldap.max_links = -1
 ; Prevent name collisions in chroot'ed environment.
 ;opcache.validate_root=0
 
+; If specified, it produces opcode dumps for debugging different stages of
+; optimizations.
+;opcache.opt_debug_level=0
+
 [curl]
 ; A default value for the CURLOPT_CAINFO option. This is required to be an
 ; absolute path.
