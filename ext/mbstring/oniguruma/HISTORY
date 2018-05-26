@@ -1,5 +1,16 @@
 History
 
+2018/04/17: Version 6.8.2
+
+2018/04/13: add doc/CALLOUTS.API.ja
+2018/04/10: add doc/CALLOUTS.API
+2018/04/10: fix #87: Read unknown address in onig_error_code_to_str()
+2018/04/06: fix #86: typedef StateCheckNumType is unused
+2018/04/02: update automake 1.16.1
+2018/03/30: fix #84: stack-buffer-overflow in mbc_enc_len
+2018/03/28: PR #83: Improve CMake build
+2018/03/21: switch uses of UChar to OnigUChar in oniguruma.h (#80)
+
 2018/03/19: Version 6.8.1
 
 2018/03/19: update LTVERSION from 4:0:0 to 5:0:0

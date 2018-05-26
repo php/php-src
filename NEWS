@@ -108,7 +108,7 @@ PHP                                                                        NEWS
     on Windows). (Nikita)
   . Fixed bug #76319 (mb_strtolower with invalid UTF-8 causes segmentation
     fault). (Nikita)
-  . Update to Oniguruma 6.8.1. (cmb)
+  . Updated to Oniguruma 6.8.2. (cmb)
 
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)

@@ -89,25 +89,25 @@ is_valid_mbc_string(const UChar* p, const UChar* end)
       p++;
       if (p >= end) return FALSE;
       if (*p < 0x40) {
-	if (*p < 0x30 || *p > 0x39)
-	  return FALSE;
+        if (*p < 0x30 || *p > 0x39)
+          return FALSE;
 
-	p++;
-	if (p >= end) return FALSE;
-	if (*p < 0x81 || *p == 0xff) return FALSE;
+        p++;
+        if (p >= end) return FALSE;
+        if (*p < 0x81 || *p == 0xff) return FALSE;
 
-	p++;
-	if (p >= end) return FALSE;
-	if (*p < 0x30 || *p > 0x39)
-	  return FALSE;
+        p++;
+        if (p >= end) return FALSE;
+        if (*p < 0x30 || *p > 0x39)
+          return FALSE;
 
-	p++;
+        p++;
       }
       else if (*p == 0x7f || *p == 0xff) {
-	return FALSE;
+        return FALSE;
       }
       else {
-	p++;
+        p++;
       }
     }
   }
@@ -138,7 +138,7 @@ gb18030_mbc_case_fold(OnigCaseFoldType flag, const UChar** pp, const UChar* end,
 #if 0
 static int
 gb18030_is_mbc_ambiguous(OnigCaseFoldType flag,
-			 const UChar** pp, const UChar* end)
+                         const UChar** pp, const UChar* end)
 {
   return onigenc_mbn_is_mbc_ambiguous(ONIG_ENCODING_GB18030, flag, pp, end);
 }
@@ -197,16 +197,16 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
     case S_START:
       switch (GB18030_MAP[*p]) {
       case C1:
-	return (UChar *)s;
+        return (UChar *)s;
       case C2:
-	state = S_one_C2; /* C2 */
-	break;
+        state = S_one_C2; /* C2 */
+        break;
       case C4:
-	state = S_one_C4; /* C4 */
-	break;
+        state = S_one_C4; /* C4 */
+        break;
       case CM:
-	state = S_one_CM; /* CM */
-	break;
+        state = S_one_CM; /* CM */
+        break;
       }
       break;
     case S_one_C2: /* C2 */
@@ -214,10 +214,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)s;
+        return (UChar *)s;
       case CM:
-	state = S_odd_CM_one_CX; /* CM C2 */
-	break;
+        state = S_odd_CM_one_CX; /* CM C2 */
+        break;
       }
       break;
     case S_one_C4: /* C4 */
@@ -225,23 +225,23 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)s;
+        return (UChar *)s;
       case CM:
-	state = S_one_CMC4;
-	break;
+        state = S_one_CMC4;
+        break;
       }
       break;
     case S_one_CM: /* CM */
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)s;
+        return (UChar *)s;
       case C4:
-	state = S_odd_C4CM;
-	break;
+        state = S_odd_C4CM;
+        break;
       case CM:
-	state = S_odd_CM_one_CX; /* CM CM */
-	break;
+        state = S_odd_CM_one_CX; /* CM CM */
+        break;
       }
       break;
 
@@ -250,10 +250,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case CM:
-	state = S_even_CM_one_CX;
-	break;
+        state = S_even_CM_one_CX;
+        break;
       }
       break;
     case S_even_CM_one_CX: /* CM CM C2 */ /* CM CM CM */ /* CM CM C4 */
@@ -261,10 +261,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)s;
+        return (UChar *)s;
       case CM:
-	state = S_odd_CM_one_CX;
-	break;
+        state = S_odd_CM_one_CX;
+        break;
       }
       break;
 
@@ -272,26 +272,26 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case C4:
-	state = S_one_C4_odd_CMC4; /* C4 CM C4 */
-	break;
+        state = S_one_C4_odd_CMC4; /* C4 CM C4 */
+        break;
       case CM:
-	state = S_even_CM_one_CX; /* CM CM C4 */
-	break;
+        state = S_even_CM_one_CX; /* CM CM C4 */
+        break;
       }
       break;
     case S_odd_CMC4: /* CM C4 CM C4 CM C4 */
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case C4:
-	state = S_one_C4_odd_CMC4;
-	break;
+        state = S_one_C4_odd_CMC4;
+        break;
       case CM:
-	state = S_odd_CM_odd_CMC4;
-	break;
+        state = S_odd_CM_odd_CMC4;
+        break;
       }
       break;
     case S_one_C4_odd_CMC4: /* C4 CM C4 */
@@ -299,23 +299,23 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case CM:
-	state = S_even_CMC4; /* CM C4 CM C4 */
-	break;
+        state = S_even_CMC4; /* CM C4 CM C4 */
+        break;
       }
       break;
     case S_even_CMC4: /* CM C4 CM C4 */
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)(s - 3);
+        return (UChar *)(s - 3);
       case C4:
-	state = S_one_C4_even_CMC4;
-	break;
+        state = S_one_C4_even_CMC4;
+        break;
       case CM:
-	state = S_odd_CM_even_CMC4;
-	break;
+        state = S_odd_CM_even_CMC4;
+        break;
       }
       break;
     case S_one_C4_even_CMC4: /* C4 CM C4 CM C4 */
@@ -323,10 +323,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 3);
+        return (UChar *)(s - 3);
       case CM:
-	state = S_odd_CMC4;
-	break;
+        state = S_odd_CMC4;
+        break;
       }
       break;
 
@@ -335,10 +335,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 3);
+        return (UChar *)(s - 3);
       case CM:
-	state = S_even_CM_odd_CMC4;
-	break;
+        state = S_even_CM_odd_CMC4;
+        break;
       }
       break;
     case S_even_CM_odd_CMC4: /* CM CM CM C4 CM C4 CM C4 */
@@ -346,10 +346,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case CM:
-	state = S_odd_CM_odd_CMC4;
-	break;
+        state = S_odd_CM_odd_CMC4;
+        break;
       }
       break;
 
@@ -358,10 +358,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 1);
+        return (UChar *)(s - 1);
       case CM:
-	state = S_even_CM_even_CMC4;
-	break;
+        state = S_even_CM_even_CMC4;
+        break;
       }
       break;
     case S_even_CM_even_CMC4: /* CM CM CM C4 CM C4 */
@@ -369,10 +369,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 3);
+        return (UChar *)(s - 3);
       case CM:
-	state = S_odd_CM_even_CMC4;
-	break;
+        state = S_odd_CM_even_CMC4;
+        break;
       }
       break;
 
@@ -381,23 +381,23 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)s;
+        return (UChar *)s;
       case CM:
-	state = S_one_CM_odd_C4CM; /* CM C4 CM */
-	break;
+        state = S_one_CM_odd_C4CM; /* CM C4 CM */
+        break;
       }
       break;
     case S_one_CM_odd_C4CM: /* CM C4 CM */ /* CM C4 CM C4 CM C4 CM */
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)(s - 2); /* |CM C4 CM */
+        return (UChar *)(s - 2); /* |CM C4 CM */
       case C4:
-	state = S_even_C4CM;
-	break;
+        state = S_even_C4CM;
+        break;
       case CM:
-	state = S_even_CM_odd_C4CM;
-	break;
+        state = S_even_CM_odd_C4CM;
+        break;
       }
       break;
     case S_even_C4CM: /* C4 CM C4 CM */
@@ -405,23 +405,23 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 2);  /* C4|CM C4 CM */
+        return (UChar *)(s - 2);  /* C4|CM C4 CM */
       case CM:
-	state = S_one_CM_even_C4CM;
-	break;
+        state = S_one_CM_even_C4CM;
+        break;
       }
       break;
     case S_one_CM_even_C4CM: /* CM C4 CM C4 CM */
       switch (GB18030_MAP[*p]) {
       case C1:
       case C2:
-	return (UChar *)(s - 0);  /*|CM C4 CM C4|CM */
+        return (UChar *)(s - 0);  /*|CM C4 CM C4|CM */
       case C4:
-	state = S_odd_C4CM;
-	break;
+        state = S_odd_C4CM;
+        break;
       case CM:
-	state = S_even_CM_even_C4CM;
-	break;
+        state = S_even_CM_even_C4CM;
+        break;
       }
       break;
 
@@ -430,10 +430,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 0); /* |CM CM|C4|CM */
+        return (UChar *)(s - 0); /* |CM CM|C4|CM */
       case CM:
-	state = S_odd_CM_odd_C4CM;
-	break;
+        state = S_odd_CM_odd_C4CM;
+        break;
       }
       break;
     case S_odd_CM_odd_C4CM: /* CM CM CM C4 CM */
@@ -441,10 +441,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 2); /* |CM CM|CM C4 CM */
+        return (UChar *)(s - 2); /* |CM CM|CM C4 CM */
       case CM:
-	state = S_even_CM_odd_C4CM;
-	break;
+        state = S_even_CM_odd_C4CM;
+        break;
       }
       break;
 
@@ -453,10 +453,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 2); /* |CM CM|C4|CM C4 CM */
+        return (UChar *)(s - 2); /* |CM CM|C4|CM C4 CM */
       case CM:
-	state = S_odd_CM_even_C4CM;
-	break;
+        state = S_odd_CM_even_C4CM;
+        break;
       }
       break;
     case S_odd_CM_even_C4CM: /* CM CM CM C4 CM C4 CM */
@@ -464,10 +464,10 @@ gb18030_left_adjust_char_head(const UChar* start, const UChar* s)
       case C1:
       case C2:
       case C4:
-	return (UChar *)(s - 0);  /* |CM CM|CM C4 CM C4|CM */
+        return (UChar *)(s - 0);  /* |CM CM|CM C4 CM C4|CM */
       case CM:
-	state = S_even_CM_even_C4CM;
-	break;
+        state = S_even_CM_even_C4CM;
+        break;
       }
       break;
     }
@@ -535,5 +535,6 @@ OnigEncodingType OnigEncodingGB18030 = {
   NULL, /* init */
   NULL, /* is_initialized */
   is_valid_mbc_string,
-  0, 0, 0
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };
