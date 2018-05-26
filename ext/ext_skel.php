@@ -1,4 +1,5 @@
-﻿<?php
+#!/usr/bin/env php
+<?php
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
@@ -91,13 +92,13 @@ function print_success() {
  */
 function process_args($argv, $argc) {
 	$options = [
-			'unix'		=> true, 
-			'windows' 	=> true, 
-			'ext' 		=> '', 
-			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR, 
-			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR, 
-			'author'	=> false, 
-			'experimental'	=> false, 
+			'unix'		=> true,
+			'windows' 	=> true,
+			'ext' 		=> '',
+			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR,
+			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
+			'author'	=> false,
+			'experimental'	=> false,
 			'std'		=> false
 			];
 
@@ -269,7 +270,7 @@ function copy_sources() {
 	global $options;
 
 	$files = [
-			'skeleton.c'		=> $options['ext'] . '.c', 
+			'skeleton.c'		=> $options['ext'] . '.c',
 			'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
 			];
 
@@ -359,5 +360,3 @@ task('Copying sources', 'copy_sources');
 task('Copying tests', 'copy_tests');
 
 print_success();
-
-?>
