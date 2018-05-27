@@ -18,6 +18,7 @@ PHP                                                                        NEWS
 - Standard:
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
     (Anatol)
+  . Fixed bug #76383 (array_map on $GLOBALS returns IS_INDIRECT). (Bob)
 
 24 May 2018, PHP 7.1.18
 
