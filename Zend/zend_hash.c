@@ -777,7 +777,16 @@ add_to_hash:
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_add(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_ADD_NEW) {
+		return _zend_hash_add_new(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_UPDATE) {
+		return _zend_hash_update(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == (HASH_UPDATE|HASH_UPDATE_INDIRECT));
+		return _zend_hash_update_ind(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
@@ -802,9 +811,16 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key,
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	zend_ulong h = zend_hash_func(str, len);
-
-	return _zend_hash_str_add_or_update_i(ht, str, len, h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_str_add(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_ADD_NEW) {
+		return _zend_hash_str_add_new(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_UPDATE) {
+		return _zend_hash_str_update(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == (HASH_UPDATE|HASH_UPDATE_INDIRECT));
+		return _zend_hash_str_update_ind(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
@@ -945,7 +961,20 @@ add:
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_update(HashTable *ht, zend_ulong h, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_index_add(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEW)) {
+		return _zend_hash_index_add_new(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEXT)) {
+		ZEND_ASSERT(h == ht->nNextFreeElement);
+		return _zend_hash_next_index_insert(ht, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEW|HASH_ADD_NEXT)) {
+		ZEND_ASSERT(h == ht->nNextFreeElement);
+		return _zend_hash_next_index_insert_new(ht, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == HASH_UPDATE);
+		return _zend_hash_index_update(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
