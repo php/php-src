@@ -3400,45 +3400,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-
-				if (iter) {
-					OBJ_RELEASE(&iter->std);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -3495,9 +3457,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 		}
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_ARRVAL_P(array_ptr), 0);
 
-		if (IS_CONST == IS_VAR) {
-
-		}
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_CONST != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
@@ -3521,59 +3480,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 			}
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_OBJPROP_P(array_ptr), 0);
 
-			if (IS_CONST == IS_VAR) {
-
-			}
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				if (IS_CONST == IS_VAR) {
-
-				} else {
-
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					if (IS_CONST == IS_VAR) {
-
-					} else {
-
-					}
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				if (IS_CONST == IS_VAR) {
-
-				} else {
-
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
 
 			if (IS_CONST == IS_VAR) {
 
@@ -18126,45 +18035,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				zval_ptr_dtor_nogc(free_op1);
-				if (iter) {
-					OBJ_RELEASE(&iter->std);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					zval_ptr_dtor_nogc(free_op1);
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				zval_ptr_dtor_nogc(free_op1);
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
 
 			zval_ptr_dtor_nogc(free_op1);
 			if (UNEXPECTED(EG(exception))) {
@@ -18222,9 +18093,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 		}
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_ARRVAL_P(array_ptr), 0);
 
-		if (IS_TMP_VAR == IS_VAR) {
-
-		}
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_TMP_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
@@ -18248,59 +18116,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 			}
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_OBJPROP_P(array_ptr), 0);
 
-			if (IS_TMP_VAR == IS_VAR) {
-
-			}
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				if (IS_TMP_VAR == IS_VAR) {
-
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					if (IS_TMP_VAR == IS_VAR) {
-
-					} else {
-						zval_ptr_dtor_nogc(free_op1);
-					}
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				if (IS_TMP_VAR == IS_VAR) {
-
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
 
 			if (IS_TMP_VAR == IS_VAR) {
 
@@ -21307,45 +21125,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 			zval_ptr_dtor_nogc(free_op1);
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				zval_ptr_dtor_nogc(free_op1);
-				if (iter) {
-					OBJ_RELEASE(&iter->std);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					zval_ptr_dtor_nogc(free_op1);
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				zval_ptr_dtor_nogc(free_op1);
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
 
 			zval_ptr_dtor_nogc(free_op1);
 			if (UNEXPECTED(EG(exception))) {
@@ -21403,9 +21183,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 		}
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_ARRVAL_P(array_ptr), 0);
 
-		if (IS_VAR == IS_VAR) {
-			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-		}
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_VAR != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
@@ -21429,59 +21207,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			}
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_OBJPROP_P(array_ptr), 0);
 
-			if (IS_VAR == IS_VAR) {
-				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-			}
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				if (IS_VAR == IS_VAR) {
-					if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					if (IS_VAR == IS_VAR) {
-						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-					} else {
-						zval_ptr_dtor_nogc(free_op1);
-					}
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				if (IS_VAR == IS_VAR) {
-					if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-				} else {
-					zval_ptr_dtor_nogc(free_op1);
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
 
 			if (IS_VAR == IS_VAR) {
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -37542,45 +37271,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 0);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-
-				if (iter) {
-					OBJ_RELEASE(&iter->std);
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -37637,9 +37328,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 		}
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_ARRVAL_P(array_ptr), 0);
 
-		if (IS_CV == IS_VAR) {
-
-		}
 		ZEND_VM_NEXT_OPCODE();
 	} else if (IS_CV != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {
@@ -37663,59 +37351,9 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 			}
 			Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_OBJPROP_P(array_ptr), 0);
 
-			if (IS_CV == IS_VAR) {
-
-			}
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_class_entry *ce = Z_OBJCE_P(array_ptr);
-			zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, 1);
-			zend_bool is_empty;
-
-			if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
-				if (IS_CV == IS_VAR) {
-
-				} else {
-
-				}
-				if (!EG(exception)) {
-					zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-
-			iter->index = 0;
-			if (iter->funcs->rewind) {
-				iter->funcs->rewind(iter);
-				if (UNEXPECTED(EG(exception) != NULL)) {
-					OBJ_RELEASE(&iter->std);
-					if (IS_CV == IS_VAR) {
-
-					} else {
-
-					}
-					ZVAL_UNDEF(EX_VAR(opline->result.var));
-					HANDLE_EXCEPTION();
-				}
-			}
-
-			is_empty = iter->funcs->valid(iter) != SUCCESS;
-
-			if (UNEXPECTED(EG(exception) != NULL)) {
-				OBJ_RELEASE(&iter->std);
-				if (IS_CV == IS_VAR) {
-
-				} else {
-
-				}
-				ZVAL_UNDEF(EX_VAR(opline->result.var));
-				HANDLE_EXCEPTION();
-			}
-			iter->index = -1; /* will be set to 0 before using next handler */
-
-			ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
-			Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
 
 			if (IS_CV == IS_VAR) {
 

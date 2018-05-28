@@ -3188,6 +3188,49 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 }
 /* }}} */
 
+static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC) /* {{{ */
+{
+	zend_class_entry *ce = Z_OBJCE_P(array_ptr);
+	zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, by_ref);
+	zend_bool is_empty;
+
+	if (UNEXPECTED(!iter) || UNEXPECTED(EG(exception))) {
+		if (iter) {
+			OBJ_RELEASE(&iter->std);
+		}
+		if (!EG(exception)) {
+			zend_throw_exception_ex(NULL, 0, "Object of type %s did not create an Iterator", ZSTR_VAL(ce->name));
+		}
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		return 1;
+	}
+
+	iter->index = 0;
+	if (iter->funcs->rewind) {
+		iter->funcs->rewind(iter);
+		if (UNEXPECTED(EG(exception) != NULL)) {
+			OBJ_RELEASE(&iter->std);
+			ZVAL_UNDEF(EX_VAR(opline->result.var));
+			return 1;
+		}
+	}
+
+	is_empty = iter->funcs->valid(iter) != SUCCESS;
+
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		OBJ_RELEASE(&iter->std);
+		ZVAL_UNDEF(EX_VAR(opline->result.var));
+		return 1;
+	}
+	iter->index = -1; /* will be set to 0 before using next handler */
+
+	ZVAL_OBJ(EX_VAR(opline->result.var), &iter->std);
+	Z_FE_ITER_P(EX_VAR(opline->result.var)) = (uint32_t)-1;
+
+	return is_empty;
+}
+/* }}} */
+
 #ifdef ZEND_VM_TRACE_HANDLERS
 # include "zend_vm_trace_handlers.h"
 #elif defined(ZEND_VM_TRACE_MAP)
