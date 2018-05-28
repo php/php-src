@@ -972,7 +972,7 @@ PHP_FUNCTION(pcntl_exec)
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 
 			/* Cleanup */
-			zend_string_release(key);
+			zend_string_release_ex(key, 0);
 			envi++;
 			pair++;
 		} ZEND_HASH_FOREACH_END();
@@ -1049,7 +1049,7 @@ PHP_FUNCTION(pcntl_signal)
 		zend_string *func_name = zend_get_callable_name(handle);
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", ZSTR_VAL(func_name));
-		zend_string_release(func_name);
+		zend_string_release_ex(func_name, 0);
 		RETURN_FALSE;
 	}
 

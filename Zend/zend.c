@@ -393,7 +393,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			HashTable *properties = NULL;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 
 			if (Z_IS_RECURSIVE_P(expr)) {
 				ZEND_PUTS(" *RECURSION*");
@@ -445,7 +445,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 				smart_str_appends(buf, ZSTR_VAL(class_name));
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 
 				smart_str_appends(buf, " Object\n");
 				if (Z_IS_RECURSIVE_P(expr)) {
@@ -479,7 +479,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 			{
 				zend_string *str = zval_get_string_func(expr);
 				smart_str_append(buf, str);
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			break;
 	}
@@ -499,7 +499,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent) /* {{{ */
 {
 	zend_string *str = zend_print_zval_r_to_str(expr, indent);
 	zend_write(ZSTR_VAL(str), ZSTR_LEN(str));
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 }
 /* }}} */
 

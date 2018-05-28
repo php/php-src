@@ -550,7 +550,7 @@ PHP_FUNCTION(readline_completion_function)
 	if (!zend_is_callable(arg, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(arg);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -598,7 +598,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 	if (!zend_is_callable(callback, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 

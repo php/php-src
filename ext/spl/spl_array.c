@@ -852,7 +852,7 @@ static HashTable* spl_array_get_debug_info(zval *obj, int *is_temp) /* {{{ */
 			? spl_ce_ArrayIterator : spl_ce_ArrayObject;
 		zname = spl_gen_private_prop_name(base, "storage", sizeof("storage")-1);
 		zend_symtable_update(debug_info, zname, storage);
-		zend_string_release(zname);
+		zend_string_release_ex(zname, 0);
 
 		return debug_info;
 	}

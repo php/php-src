@@ -1229,10 +1229,10 @@ static int pdo_pgsql_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{
 	H->server = PQconnectdb(conn_str);
 
 	if (tmp_user) {
-		zend_string_release(tmp_user);
+		zend_string_release_ex(tmp_user, 0);
 	}
 	if (tmp_pass) {
-		zend_string_release(tmp_pass);
+		zend_string_release_ex(tmp_pass, 0);
 	}
 
 	efree(conn_str);

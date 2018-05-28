@@ -585,7 +585,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
 	*buffer = (unsigned char *) estrndup(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	*buf_len = ZSTR_LEN(buf.s);
-	zend_string_release(buf.s);
+	zend_string_release_ex(buf.s, 0);
 
 	return SUCCESS;
 }

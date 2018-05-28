@@ -2426,7 +2426,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(buff), pstr, 0);
 		if (!io_ctx) {
 			pefree(pstr, 1);
-			zend_string_release(buff);
+			zend_string_release_ex(buff, 0);
 			php_error_docref(NULL, E_WARNING,"Cannot allocate GD IO context");
 			goto out_err;
 		}
@@ -2438,7 +2438,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 		io_ctx->gd_free(io_ctx);
 		pefree(pstr, 1);
-		zend_string_release(buff);
+		zend_string_release_ex(buff, 0);
 	}
 	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
 		/* try and force the stream to be FILE* */
@@ -2723,7 +2723,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		fclose(tmp);
 		VCWD_UNLINK((const char *)ZSTR_VAL(path)); /* make sure that the temporary file is removed */
-		zend_string_release(path);
+		zend_string_release_ex(path, 0);
 	}
 	RETURN_TRUE;
 }

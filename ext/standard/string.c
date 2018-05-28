@@ -1263,7 +1263,7 @@ PHPAPI void php_implode(const zend_string *glue, zval *pieces, zval *return_valu
 			cptr -= ZSTR_LEN(ptr->str);
 			memcpy(cptr, ZSTR_VAL(ptr->str), ZSTR_LEN(ptr->str));
 			if (ptr->lval) {
-				zend_string_release(ptr->str);
+				zend_string_release_ex(ptr->str, 0);
 			}
 		} else {
 			char *oldPtr = cptr;
@@ -1750,7 +1750,7 @@ PHP_FUNCTION(pathinfo)
 	}
 
 	if (ret) {
-		zend_string_release(ret);
+		zend_string_release_ex(ret, 0);
 	}
 
 	if (opt == PHP_PATHINFO_ALL) {
@@ -2064,9 +2064,9 @@ PHP_FUNCTION(stripos)
 		RETVAL_FALSE;
 	}
 
-	zend_string_release(haystack_dup);
+	zend_string_release_ex(haystack_dup, 0);
 	if (needle_dup) {
-		zend_string_release(needle_dup);
+		zend_string_release_ex(needle_dup, 0);
 	}
 }
 /* }}} */
@@ -2205,7 +2205,7 @@ PHP_FUNCTION(strripos)
 	haystack_dup = php_string_tolower(haystack);
 	if (offset >= 0) {
 		if ((size_t)offset > ZSTR_LEN(haystack)) {
-			zend_string_release(haystack_dup);
+			zend_string_release_ex(haystack_dup, 0);
 			ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
@@ -2214,7 +2214,7 @@ PHP_FUNCTION(strripos)
 		e = ZSTR_VAL(haystack_dup) + ZSTR_LEN(haystack);
 	} else {
 		if (offset < -INT_MAX || (size_t)(-offset) > ZSTR_LEN(haystack)) {
-			zend_string_release(haystack_dup);
+			zend_string_release_ex(haystack_dup, 0);
 			ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 			php_error_docref(NULL, E_WARNING, "Offset is greater than the length of haystack string");
 			RETURN_FALSE;
@@ -2230,12 +2230,12 @@ PHP_FUNCTION(strripos)
 	needle_dup = php_string_tolower(needle);
 	if ((found = (char *)zend_memnrstr(p, ZSTR_VAL(needle_dup), ZSTR_LEN(needle_dup), e))) {
 		RETVAL_LONG(found - ZSTR_VAL(haystack_dup));
-		zend_string_release(needle_dup);
-		zend_string_release(haystack_dup);
+		zend_string_release_ex(needle_dup, 0);
+		zend_string_release_ex(haystack_dup, 0);
 		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 	} else {
-		zend_string_release(needle_dup);
-		zend_string_release(haystack_dup);
+		zend_string_release_ex(needle_dup, 0);
+		zend_string_release_ex(haystack_dup, 0);
 		ZSTR_ALLOCA_FREE(ord_needle, use_heap);
 		RETURN_FALSE;
 	}
@@ -3061,7 +3061,7 @@ static void php_strtr_array(zval *return_value, zend_string *input, HashTable *p
 			}
 			zend_hash_add(&str_hash, key_used, entry);
 			if (UNEXPECTED(!str_key)) {
-				zend_string_release(key_used);
+				zend_string_release_ex(key_used, 0);
 			}
 		} ZEND_HASH_FOREACH_END();
 		pats = &str_hash;
@@ -3297,7 +3297,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 				memcpy(ZSTR_VAL(new_str) + (r - lc_haystack), str, str_len);
 				(*replace_count)++;
 			}
-			zend_string_release(lc_needle);
+			zend_string_release_ex(lc_needle, 0);
 
 			if (!new_str) {
 				goto nothing_todo;
@@ -3318,7 +3318,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 			}
 			if (count == 0) {
 				/* Needle doesn't occur, shortcircuit the actual replacement. */
-				zend_string_release(lc_needle);
+				zend_string_release_ex(lc_needle, 0);
 				goto nothing_todo;
 			}
 
@@ -3345,7 +3345,7 @@ static zend_string *php_str_to_str_i_ex(zend_string *haystack, const char *lc_ha
 			}
 			*e = '\0';
 
-			zend_string_release(lc_needle);
+			zend_string_release_ex(lc_needle, 0);
 
 			return new_str;
 		}
@@ -3356,10 +3356,10 @@ nothing_todo:
 		lc_needle = php_string_tolower(needle);
 
 		if (memcmp(lc_haystack, ZSTR_VAL(lc_needle), ZSTR_LEN(lc_needle))) {
-			zend_string_release(lc_needle);
+			zend_string_release_ex(lc_needle, 0);
 			goto nothing_todo;
 		}
-		zend_string_release(lc_needle);
+		zend_string_release_ex(lc_needle, 0);
 
 		new_str = zend_string_init(str, str_len, 0);
 
@@ -3844,7 +3844,7 @@ PHPAPI zend_string *php_addcslashes(zend_string *str, int should_free, char *wha
 		new_str = zend_string_truncate(new_str, newlen, 0);
 	}
 	if (should_free) {
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	}
 	return new_str;
 }
@@ -4040,7 +4040,7 @@ do_escape:
 
 	*target = '\0';
 	if (should_free) {
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	}
 
 	if (ZSTR_LEN(new_str) - (target - ZSTR_VAL(new_str)) > 16) {
@@ -4119,7 +4119,7 @@ do_escape:
 
 	*target = '\0';
 	if (should_free) {
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	}
 
 	if (ZSTR_LEN(new_str) - (target - ZSTR_VAL(new_str)) > 16) {
@@ -4330,7 +4330,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 								case_sensitivity,
 								&replace_count);
 				if (lc_subject_str && replace_count != old_replace_count) {
-					zend_string_release(lc_subject_str);
+					zend_string_release_ex(lc_subject_str, 0);
 					lc_subject_str = NULL;
 				}
 			} else if (ZSTR_LEN(search_str) > 1) {
@@ -4347,7 +4347,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 					tmp_result = php_str_to_str_i_ex(Z_STR_P(result), ZSTR_VAL(lc_subject_str),
 							search_str, replace_value, replace_len, &replace_count);
 					if (replace_count != old_replace_count) {
-						zend_string_release(lc_subject_str);
+						zend_string_release_ex(lc_subject_str, 0);
 						lc_subject_str = NULL;
 					}
 				}
@@ -4356,22 +4356,22 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 			zend_tmp_string_release(tmp_search_str);
 
 			if (tmp_replace_entry_str) {
-				zend_string_release(tmp_replace_entry_str);
+				zend_string_release_ex(tmp_replace_entry_str, 0);
 				tmp_replace_entry_str = NULL;
 			}
-			zend_string_release(Z_STR_P(result));
+			zend_string_release_ex(Z_STR_P(result), 0);
 			ZVAL_STR(result, tmp_result);
 
 			if (Z_STRLEN_P(result) == 0) {
 				if (lc_subject_str) {
-					zend_string_release(lc_subject_str);
+					zend_string_release_ex(lc_subject_str, 0);
 				}
 				zend_tmp_string_release(tmp_subject_str);
 				return replace_count;
 			}
 		} ZEND_HASH_FOREACH_END();
 		if (lc_subject_str) {
-			zend_string_release(lc_subject_str);
+			zend_string_release_ex(lc_subject_str, 0);
 		}
 	} else {
 		ZEND_ASSERT(Z_TYPE_P(search) == IS_STRING);
@@ -4393,7 +4393,7 @@ static zend_long php_str_replace_in_subject(zval *search, zval *replace, zval *s
 				ZVAL_STR(result, php_str_to_str_i_ex(subject_str, ZSTR_VAL(lc_subject_str),
 						Z_STR_P(search),
 						Z_STRVAL_P(replace), Z_STRLEN_P(replace), &replace_count));
-				zend_string_release(lc_subject_str);
+				zend_string_release_ex(lc_subject_str, 0);
 			}
 		} else {
 			ZVAL_STR_COPY(result, subject_str);
@@ -4646,7 +4646,7 @@ static void php_hebrev(INTERNAL_FUNCTION_PARAMETERS, int convert_newlines)
 
 	if (convert_newlines) {
 		RETVAL_STR(php_char_to_str_ex(broken_str, '\n', "<br />\n", 7, 1, NULL));
-		zend_string_release(broken_str);
+		zend_string_release_ex(broken_str, 0);
 	} else {
 		RETURN_NEW_STR(broken_str);
 	}
@@ -4819,12 +4819,12 @@ PHP_FUNCTION(setlocale)
 		loc = zval_get_string(plocale);
 
 		if (!strcmp("0", ZSTR_VAL(loc))) {
-			zend_string_release(loc);
+			zend_string_release_ex(loc, 0);
 			loc = NULL;
 		} else {
 			if (ZSTR_LEN(loc) >= 255) {
 				php_error_docref(NULL, E_WARNING, "Specified locale name is too long");
-				zend_string_release(loc);
+				zend_string_release_ex(loc, 0);
 				break;
 			}
 		}
@@ -4839,25 +4839,25 @@ PHP_FUNCTION(setlocale)
 				BG(locale_changed) = 1;
 				if (cat == LC_CTYPE || cat == LC_ALL) {
 					if (BG(locale_string)) {
-						zend_string_release(BG(locale_string));
+						zend_string_release_ex(BG(locale_string), 0);
 					}
 					if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 						BG(locale_string) = zend_string_copy(loc);
 						RETURN_STR(BG(locale_string));
 					} else {
 						BG(locale_string) = zend_string_init(retval, len, 0);
-						zend_string_release(loc);
+						zend_string_release_ex(loc, 0);
 						RETURN_STR_COPY(BG(locale_string));
 					}
 				} else if (len == ZSTR_LEN(loc) && !memcmp(ZSTR_VAL(loc), retval, len)) {
 					RETURN_STR(loc);
 				}
-				zend_string_release(loc);
+				zend_string_release_ex(loc, 0);
 			}
 			RETURN_STRING(retval);
 		}
 		if (loc) {
-			zend_string_release(loc);
+			zend_string_release_ex(loc, 0);
 		}
 
 		if (Z_TYPE(args[0]) == IS_ARRAY) {

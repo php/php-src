@@ -2117,7 +2117,7 @@ SPL_METHOD(RegexIterator, accept)
 	if (intern->u.regex.flags & REGIT_INVERTED) {
 		RETVAL_BOOL(Z_TYPE_P(return_value) != IS_TRUE);
 	}
-	zend_string_release(subject);
+	zend_string_release_ex(subject, 0);
 } /* }}} */
 
 /* {{{ proto string RegexIterator::getRegex()
@@ -2338,7 +2338,7 @@ static void spl_dual_it_free_storage(zend_object *_object)
 			php_pcre_pce_decref(object->u.regex.pce);
 		}
 		if (object->u.regex.regex) {
-			zend_string_release(object->u.regex.regex);
+			zend_string_release_ex(object->u.regex.regex, 0);
 		}
 	}
 #endif

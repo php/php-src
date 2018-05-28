@@ -548,7 +548,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							spprintf(&message, 0, "The argument for key '%s' "
 								"cannot be used as a date or time", ZSTR_VAL(u8key));
 							intl_errors_set(&err, err.code, message, 1);
-							zend_string_release(u8key);
+							zend_string_release_ex(u8key, 0);
 							efree(message);
 						}
 						continue;
@@ -594,7 +594,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							"is available", ZSTR_VAL(u8key));
 						intl_errors_set(&err,
 							U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-						zend_string_release(u8key);
+						zend_string_release_ex(u8key, 0);
 						efree(message);
 					}
 				}

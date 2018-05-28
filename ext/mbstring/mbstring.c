@@ -1451,7 +1451,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	if (ZSTR_LEN(tmp) > 0) {
 		if (!(re = _php_mb_compile_regex(ZSTR_VAL(tmp)))) {
-			zend_string_release(tmp);
+			zend_string_release_ex(tmp, 0);
 			return FAILURE;
 		}
 	}
@@ -1462,7 +1462,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	MBSTRG(http_output_conv_mimetypes) = re;
 
-	zend_string_release(tmp);
+	zend_string_release_ex(tmp, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1624,12 +1624,12 @@ ZEND_TSRMLS_CACHE_UPDATE();
 					ZEND_ASSERT(orig->type == ZEND_INTERNAL_FUNCTION);
 					str = zend_string_init_interned(p->save_func, strlen(p->save_func), 1);
 					zend_hash_add_mem(CG(function_table), str, orig, sizeof(zend_internal_function));
-					zend_string_release(str);
+					zend_string_release_ex(str, 1);
 					function_add_ref(orig);
 
 					str = zend_string_init_interned(p->orig_func, strlen(p->orig_func), 1);
 					ret = zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
-					zend_string_release(str);
+					zend_string_release_ex(str, 1);
 					if (ret == NULL) {
 						php_error_docref("ref.mbstring", E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
 						return FAILURE;
@@ -1792,7 +1792,7 @@ PHP_FUNCTION(mb_language)
 		} else {
 			RETVAL_TRUE;
 		}
-		zend_string_release(ini_name);
+		zend_string_release_ex(ini_name, 0);
 	}
 }
 /* }}} */
@@ -4113,7 +4113,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 								zend_hash_update(ht, fld_name, &val);
 
-								zend_string_release(fld_name);
+								zend_string_release_ex(fld_name, 0);
 							}
 
 							fld_name = fld_val = NULL;
@@ -4161,7 +4161,7 @@ out:
 
 			zend_hash_update(ht, fld_name, &val);
 
-			zend_string_release(fld_name);
+			zend_string_release_ex(fld_name, 0);
 		}
 	}
 	return state;
@@ -4231,7 +4231,7 @@ PHP_FUNCTION(mb_send_mail)
 				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
 				MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
 				str_headers = php_trim(tmp_headers, NULL, 0, 2);
-				zend_string_release(tmp_headers);
+				zend_string_release_ex(tmp_headers, 0);
 				break;
 			case IS_ARRAY:
 				str_headers = php_mail_build_headers(headers);
@@ -4382,7 +4382,7 @@ PHP_FUNCTION(mb_send_mail)
 		if (n > 0 && p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1);
 		}
-		zend_string_release(str_headers);
+		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
@@ -4427,7 +4427,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	if (extra_cmd) {
-		zend_string_release(extra_cmd);
+		zend_string_release_ex(extra_cmd, 0);
 	}
 
 	if (to_r != to) {
@@ -4442,7 +4442,7 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device_clear(&device);
 	zend_hash_destroy(&ht_headers);
 	if (str_headers) {
-		zend_string_release(str_headers);
+		zend_string_release_ex(str_headers, 0);
 	}
 }
 

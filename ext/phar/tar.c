@@ -1036,7 +1036,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				if (str) {
 					len = ZSTR_LEN(str);
 					user_stub = estrndup(ZSTR_VAL(str), ZSTR_LEN(str));
-					zend_string_release(str);
+					zend_string_release_ex(str, 0);
 				} else {
 					user_stub = NULL;
 					len = 0;

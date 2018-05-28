@@ -263,7 +263,7 @@ static void param_dtor(zval *el) /* {{{ */
 	}
 
 	if (param->name) {
-		zend_string_release(param->name);
+		zend_string_release_ex(param->name, 0);
 	}
 
 	if (!Z_ISUNDEF(param->parameter)) {
@@ -359,7 +359,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 
 	if (is_param && !rewrite_name_to_position(stmt, param)) {
 		if (param->name) {
-			zend_string_release(param->name);
+			zend_string_release_ex(param->name, 0);
 			param->name = NULL;
 		}
 		return 0;
@@ -373,7 +373,7 @@ static int really_register_bound_param(struct pdo_bound_param_data *param, pdo_s
 		if (!stmt->methods->param_hook(stmt, param, PDO_PARAM_EVT_NORMALIZE
 				)) {
 			if (param->name) {
-				zend_string_release(param->name);
+				zend_string_release_ex(param->name, 0);
 				param->name = NULL;
 			}
 			return 0;
@@ -2016,7 +2016,7 @@ static int pdo_stmt_do_next_rowset(pdo_stmt_t *stmt)
 
 		for (i = 0; i < stmt->column_count; i++) {
 			if (cols[i].name) {
-				zend_string_release(cols[i].name);
+				zend_string_release_ex(cols[i].name, 0);
 			}
 		}
 		efree(stmt->columns);
@@ -2246,7 +2246,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 	}
 
 out:
-	zend_string_release(lc_method_name);
+	zend_string_release_ex(lc_method_name, 0);
 	if (!fbc) {
 		fbc = std_object_handlers.get_method(object_pp, method_name, key);
 	}
@@ -2340,7 +2340,7 @@ PDO_API void php_pdo_free_statement(pdo_stmt_t *stmt)
 
 		for (i = 0; i < stmt->column_count; i++) {
 			if (cols[i].name) {
-				zend_string_release(cols[i].name);
+				zend_string_release_ex(cols[i].name, 0);
 				cols[i].name = NULL;
 			}
 		}
@@ -2637,11 +2637,11 @@ static union _zend_function *row_method_get(
 	lc_method_name = zend_string_tolower(method_name);
 
 	if ((fbc = zend_hash_find_ptr(&pdo_row_ce->function_table, lc_method_name)) == NULL) {
-		zend_string_release(lc_method_name);
+		zend_string_release_ex(lc_method_name, 0);
 		return NULL;
 	}
 
-	zend_string_release(lc_method_name);
+	zend_string_release_ex(lc_method_name, 0);
 
 	return fbc;
 }

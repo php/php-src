@@ -364,7 +364,7 @@ static void xsl_ext_function_php(xmlXPathParserContextPtr ctxt, int nargs, int t
 			zval_ptr_dtor(&retval);
 		}
 	}
-	zend_string_release(callable);
+	zend_string_release_ex(callable, 0);
 	zval_ptr_dtor(&handler);
 	if (fci.param_count > 0) {
 		for (i = 0; i < nargs - 1; i++) {

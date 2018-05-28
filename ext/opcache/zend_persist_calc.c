@@ -39,9 +39,6 @@
 		} else if (!IS_ACCEL_INTERNED(str)) { \
 			zend_string *tmp = accel_new_interned_string(str); \
 			if (tmp != (str)) { \
-				if (do_free) { \
-					/*zend_string_release(str);*/ \
-				} \
 				(str) = tmp; \
 			} else { \
 				ADD_STRING(str); \

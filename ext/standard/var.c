@@ -150,7 +150,7 @@ again:
 			myht = Z_OBJDEBUG_P(struc, is_temp);
 			class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 			php_printf("%sobject(%s)#%d (%d) {\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0);
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 
 			if (myht) {
 				zend_ulong num;
@@ -321,7 +321,7 @@ again:
 		}
 		class_name = Z_OBJ_HANDLER_P(struc, get_class_name)(Z_OBJ_P(struc));
 		php_printf("%sobject(%s)#%d (%d) refcount(%u){\n", COMMON, ZSTR_VAL(class_name), Z_OBJ_HANDLE_P(struc), myht ? zend_array_count(myht) : 0, Z_REFCOUNT_P(struc));
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 		if (myht) {
 			ZEND_HASH_FOREACH_KEY_VAL_IND(myht, index, key, val) {
 				zval_object_property_dump(val, index, key, level);
@@ -425,7 +425,7 @@ static void php_object_element_export(zval *zv, zend_ulong index, zend_string *k
 		smart_str_appendc(buf, '\'');
 		smart_str_append(buf, pname_esc);
 		smart_str_appendc(buf, '\'');
-		zend_string_release(pname_esc);
+		zend_string_release_ex(pname_esc, 0);
 	} else {
 		smart_str_append_long(buf, (zend_long) index);
 	}
@@ -1094,7 +1094,7 @@ PHP_FUNCTION(unserialize)
 				convert_to_string_ex(entry);
 				lcname = zend_string_tolower(Z_STR_P(entry));
 				zend_hash_add_empty_element(class_hash, lcname);
-		        zend_string_release(lcname);
+		        zend_string_release_ex(lcname, 0);
 			} ZEND_HASH_FOREACH_END();
 		}
 		php_var_unserialize_set_allowed_classes(var_hash, class_hash);

@@ -456,7 +456,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		member = zend_string_copy(prop_info_name);
 	}
 	property_info = zend_get_property_info(zobj->ce, member, 1);
-	zend_string_release(member);
+	zend_string_release_ex(member, 0);
 	if (property_info == NULL) {
 		/* undefined public property */
 		if (class_name && class_name[0] != '*') {
@@ -504,7 +504,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		     EXPECTED(zend_string_equal_content(str, member)))) {
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else if (EXPECTED(Z_PROPERTY_GUARD_P(zv) == 0)) {
-			zend_string_release(Z_STR_P(zv));
+			zend_string_release_ex(Z_STR_P(zv), 0);
 			ZVAL_STR_COPY(zv, member);
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else {
@@ -513,7 +513,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
 				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
-			zend_string_release(Z_STR_P(zv));
+			zend_string_release_ex(Z_STR_P(zv), 0);
 			ZVAL_ARR(zv, guards);
 		}
 	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
@@ -1282,7 +1282,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = ce->constructor;
 		} else {
 			if (UNEXPECTED(!key)) {
-				zend_string_release(lc_function_name);
+				zend_string_release_ex(lc_function_name, 0);
 			}
 			if (ce->__call &&
 				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
@@ -1345,7 +1345,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	}
 
 	if (UNEXPECTED(!key)) {
-		zend_string_release(lc_function_name);
+		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	return fbc;

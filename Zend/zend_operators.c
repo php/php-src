@@ -174,7 +174,7 @@ try_again:
 						zend_error(E_WARNING, "A non-numeric value encountered");
 					}
 				}
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 				break;
 			}
 		case IS_NULL:
@@ -351,7 +351,7 @@ try_again:
 				} else {
 					ZVAL_LONG(op, ZEND_STRTOL(ZSTR_VAL(str), NULL, base));
 				}
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			break;
 		case IS_ARRAY:
@@ -411,7 +411,7 @@ try_again:
 				zend_string *str = Z_STR_P(op);
 
 				ZVAL_DOUBLE(op, zend_strtod(ZSTR_VAL(str), NULL));
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			break;
 		case IS_ARRAY:
@@ -483,7 +483,7 @@ try_again:
 				} else {
 					ZVAL_TRUE(op);
 				}
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			break;
 		case IS_ARRAY:
@@ -1418,7 +1418,7 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar or = (zend_uchar) (*Z_STRVAL_P(op1) | *Z_STRVAL_P(op2));
 				if (result==op1) {
-					zend_string_release(Z_STR_P(result));
+					zend_string_release_ex(Z_STR_P(result), 0);
 				}
 				ZVAL_INTERNED_STR(result, ZSTR_CHAR(or));
 				return SUCCESS;
@@ -1436,7 +1436,7 @@ ZEND_API int ZEND_FASTCALL bitwise_or_function(zval *result, zval *op1, zval *op
 		}
 		memcpy(ZSTR_VAL(str) + i, Z_STRVAL_P(longer) + i, Z_STRLEN_P(longer) - i + 1);
 		if (result==op1) {
-			zend_string_release(Z_STR_P(result));
+			zend_string_release_ex(Z_STR_P(result), 0);
 		}
 		ZVAL_NEW_STR(result, str);
 		return SUCCESS;
@@ -1496,7 +1496,7 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar and = (zend_uchar) (*Z_STRVAL_P(op1) & *Z_STRVAL_P(op2));
 				if (result==op1) {
-					zend_string_release(Z_STR_P(result));
+					zend_string_release_ex(Z_STR_P(result), 0);
 				}
 				ZVAL_INTERNED_STR(result, ZSTR_CHAR(and));
 				return SUCCESS;
@@ -1514,7 +1514,7 @@ ZEND_API int ZEND_FASTCALL bitwise_and_function(zval *result, zval *op1, zval *o
 		}
 		ZSTR_VAL(str)[i] = 0;
 		if (result==op1) {
-			zend_string_release(Z_STR_P(result));
+			zend_string_release_ex(Z_STR_P(result), 0);
 		}
 		ZVAL_NEW_STR(result, str);
 		return SUCCESS;
@@ -1574,7 +1574,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 			if (EXPECTED(Z_STRLEN_P(op1) == Z_STRLEN_P(op2)) && Z_STRLEN_P(op1) == 1) {
 				zend_uchar xor = (zend_uchar) (*Z_STRVAL_P(op1) ^ *Z_STRVAL_P(op2));
 				if (result==op1) {
-					zend_string_release(Z_STR_P(result));
+					zend_string_release_ex(Z_STR_P(result), 0);
 				}
 				ZVAL_INTERNED_STR(result, ZSTR_CHAR(xor));
 				return SUCCESS;
@@ -1592,7 +1592,7 @@ ZEND_API int ZEND_FASTCALL bitwise_xor_function(zval *result, zval *op1, zval *o
 		}
 		ZSTR_VAL(str)[i] = 0;
 		if (result==op1) {
-			zend_string_release(Z_STR_P(result));
+			zend_string_release_ex(Z_STR_P(result), 0);
 		}
 		ZVAL_NEW_STR(result, str);
 		return SUCCESS;
@@ -2301,7 +2301,7 @@ static void ZEND_FASTCALL increment_string(zval *str) /* {{{ */
 	int ch;
 
 	if (Z_STRLEN_P(str) == 0) {
-		zend_string_release(Z_STR_P(str));
+		zend_string_release_ex(Z_STR_P(str), 0);
 		ZVAL_INTERNED_STR(str, ZSTR_CHAR('1'));
 		return;
 	}
@@ -2395,7 +2395,7 @@ try_again:
 
 				switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 					case IS_LONG:
-						zend_string_release(Z_STR_P(op1));
+						zend_string_release_ex(Z_STR_P(op1), 0);
 						if (lval == ZEND_LONG_MAX) {
 							/* switch to double */
 							double d = (double)lval;
@@ -2405,7 +2405,7 @@ try_again:
 						}
 						break;
 					case IS_DOUBLE:
-						zend_string_release(Z_STR_P(op1));
+						zend_string_release_ex(Z_STR_P(op1), 0);
 						ZVAL_DOUBLE(op1, dval+1);
 						break;
 					default:
@@ -2463,13 +2463,13 @@ try_again:
 			break;
 		case IS_STRING:		/* Like perl we only support string increment */
 			if (Z_STRLEN_P(op1) == 0) { /* consider as 0 */
-				zend_string_release(Z_STR_P(op1));
+				zend_string_release_ex(Z_STR_P(op1), 0);
 				ZVAL_LONG(op1, -1);
 				break;
 			}
 			switch (is_numeric_string(Z_STRVAL_P(op1), Z_STRLEN_P(op1), &lval, &dval, 0)) {
 				case IS_LONG:
-					zend_string_release(Z_STR_P(op1));
+					zend_string_release_ex(Z_STR_P(op1), 0);
 					if (lval == ZEND_LONG_MIN) {
 						double d = (double)lval;
 						ZVAL_DOUBLE(op1, d-1);
@@ -2478,7 +2478,7 @@ try_again:
 					}
 					break;
 				case IS_DOUBLE:
-					zend_string_release(Z_STR_P(op1));
+					zend_string_release_ex(Z_STR_P(op1), 0);
 					ZVAL_DOUBLE(op1, dval - 1);
 					break;
 			}

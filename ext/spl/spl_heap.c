@@ -494,12 +494,12 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 	pnstr = spl_gen_private_prop_name(ce, "flags", sizeof("flags")-1);
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_update(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	pnstr = spl_gen_private_prop_name(ce, "isCorrupted", sizeof("isCorrupted")-1);
 	ZVAL_BOOL(&tmp, intern->heap->flags&SPL_HEAP_CORRUPTED);
 	zend_hash_update(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	array_init(&heap_array);
 
@@ -512,7 +512,7 @@ static HashTable* spl_heap_object_get_debug_info_helper(zend_class_entry *ce, zv
 
 	pnstr = spl_gen_private_prop_name(ce, "heap", sizeof("heap")-1);
 	zend_hash_update(debug_info, pnstr, &heap_array);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	return debug_info;
 }

@@ -783,15 +783,15 @@ tail_call:
 			goto tail_call;
 		}
 	} else if (EXPECTED(ast->kind == ZEND_AST_CONSTANT)) {
-		zend_string_release(zend_ast_get_constant_name(ast));
+		zend_string_release_ex(zend_ast_get_constant_name(ast), 0);
 	} else if (EXPECTED(ast->kind >= ZEND_AST_FUNC_DECL)) {
 		zend_ast_decl *decl = (zend_ast_decl *) ast;
 
 		if (decl->name) {
-		    zend_string_release(decl->name);
+		    zend_string_release_ex(decl->name, 0);
 		}
 		if (decl->doc_comment) {
-			zend_string_release(decl->doc_comment);
+			zend_string_release_ex(decl->doc_comment, 0);
 		}
 		zend_ast_destroy(decl->child[0]);
 		zend_ast_destroy(decl->child[1]);
@@ -1193,7 +1193,7 @@ static ZEND_COLD void zend_ast_export_zval(smart_str *str, zval *zv, int priorit
 		case IS_DOUBLE:
 			key = zend_strpprintf(0, "%.*G", (int) EG(precision), Z_DVAL_P(zv));
 			smart_str_appendl(str, ZSTR_VAL(key), ZSTR_LEN(key));
-			zend_string_release(key);
+			zend_string_release_ex(key, 0);
 			break;
 		case IS_STRING:
 			smart_str_appendc(str, '\'');

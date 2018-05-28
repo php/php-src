@@ -2861,7 +2861,7 @@ PHP_FUNCTION(socket_wsaprotocol_info_export)
 		DWORD err = GetLastError();
 		php_error_docref(NULL, E_WARNING, "Unable to create file mapping [0x%08lx]", err);
 	}
-	zend_string_release(seg_name);
+	zend_string_release_ex(seg_name, 0);
 
 	RETURN_FALSE;
 }

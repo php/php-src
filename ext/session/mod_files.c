@@ -528,7 +528,7 @@ PS_READ_FUNC(files)
 		} else {
 			php_error_docref(NULL, E_WARNING, "read returned less bytes than requested");
 		}
-		zend_string_release(*val);
+		zend_string_release_ex(*val, 0);
 		*val =  ZSTR_EMPTY_ALLOC();
 		return FAILURE;
 	}
@@ -692,7 +692,7 @@ PS_CREATE_SID_FUNC(files)
 		/* FIXME: mod_data(data) should not be NULL (User handler could be NULL) */
 		if (data && ps_files_key_exists(data, ZSTR_VAL(sid)) == SUCCESS) {
 			if (sid) {
-				zend_string_release(sid);
+				zend_string_release_ex(sid, 0);
 				sid = NULL;
 			}
 			if (--maxfail < 0) {

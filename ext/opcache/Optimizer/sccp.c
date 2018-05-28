@@ -547,7 +547,7 @@ static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 			value_str = zval_get_string(value);
 			ZVAL_STR(result, new_str);
 			Z_STRVAL_P(result)[index] = ZSTR_VAL(value_str)[0];
-			zend_string_release(value_str);
+			zend_string_release_ex(value_str, 0);
 #endif
 			return FAILURE;
 		default:

@@ -143,7 +143,7 @@ static int spl_object_storage_get_hash(zend_hash_key *key, spl_SplObjectStorage 
 
 static void spl_object_storage_free_hash(spl_SplObjectStorage *intern, zend_hash_key *key) {
 	if (key->key) {
-		zend_string_release(key->key);
+		zend_string_release_ex(key->key, 0);
 	}
 }
 
@@ -309,12 +309,12 @@ static HashTable* spl_object_storage_debug_info(zval *obj, int *is_temp) /* {{{ 
 		add_assoc_zval_ex(&tmp, "obj", sizeof("obj") - 1, &element->obj);
 		add_assoc_zval_ex(&tmp, "inf", sizeof("inf") - 1, &element->inf);
 		zend_hash_update(Z_ARRVAL(storage), md5str, &tmp);
-		zend_string_release(md5str);
+		zend_string_release_ex(md5str, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	zname = spl_gen_private_prop_name(spl_ce_SplObjectStorage, "storage", sizeof("storage")-1);
 	zend_symtable_update(debug_info, zname, &storage);
-	zend_string_release(zname);
+	zend_string_release_ex(zname, 0);
 
 	return debug_info;
 }

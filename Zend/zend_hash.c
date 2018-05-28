@@ -1456,7 +1456,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 				if (EXPECTED(p->key)) {
-					zend_string_release(p->key);
+					zend_string_release_ex(p->key, 0);
 				}
 			} while (++p != end);
 		} else {
@@ -1464,7 +1464,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 					if (EXPECTED(p->key)) {
-						zend_string_release(p->key);
+						zend_string_release_ex(p->key, 0);
 					}
 				}
 			} while (++p != end);

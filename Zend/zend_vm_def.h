@@ -1368,7 +1368,7 @@ ZEND_VM_HANDLER(40, ZEND_ECHO, CONST|TMPVAR|CV, ANY)
 		} else if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(z) == IS_UNDEF)) {
 			GET_OP1_UNDEF_CV(z, BP_VAR_R);
 		}
-		zend_string_release(str);
+		zend_string_release_ex(str, 0);
 	}
 
 	FREE_OP1();
@@ -2760,7 +2760,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op2_str);
-				zend_string_release(op1_str);
+				zend_string_release_ex(op1_str, 0);
 				break;
 			}
 		}
@@ -2772,7 +2772,7 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 					}
 				}
 				ZVAL_STR(EX_VAR(opline->result.var), op1_str);
-				zend_string_release(op2_str);
+				zend_string_release_ex(op2_str, 0);
 				break;
 			}
 		}
@@ -2781,10 +2781,10 @@ ZEND_VM_HANDLER(53, ZEND_FAST_CONCAT, CONST|TMPVAR|CV, CONST|TMPVAR|CV)
 		memcpy(ZSTR_VAL(str) + ZSTR_LEN(op1_str), ZSTR_VAL(op2_str), ZSTR_LEN(op2_str)+1);
 		ZVAL_NEW_STR(EX_VAR(opline->result.var), str);
 		if (OP1_TYPE != IS_CONST) {
-			zend_string_release(op1_str);
+			zend_string_release_ex(op1_str, 0);
 		}
 		if (OP2_TYPE != IS_CONST) {
-			zend_string_release(op2_str);
+			zend_string_release_ex(op2_str, 0);
 		}
 	} while (0);
 	FREE_OP1();
@@ -2898,7 +2898,7 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV, NUM)
 			FREE_OP2();
 			if (UNEXPECTED(EG(exception))) {
 				for (i = 0; i <= opline->extended_value; i++) {
-					zend_string_release(rope[i]);
+					zend_string_release_ex(rope[i], 0);
 				}
 				ZVAL_UNDEF(EX_VAR(opline->result.var));
 				HANDLE_EXCEPTION();
@@ -2914,7 +2914,7 @@ ZEND_VM_HANDLER(56, ZEND_ROPE_END, TMP, CONST|TMPVAR|CV, NUM)
 	for (i = 0; i <= opline->extended_value; i++) {
 		memcpy(target, ZSTR_VAL(rope[i]), ZSTR_LEN(rope[i]));
 		target += ZSTR_LEN(rope[i]);
-		zend_string_release(rope[i]);
+		zend_string_release_ex(rope[i], 0);
 	}
 	*target = '\0';
 
@@ -3310,7 +3310,7 @@ ZEND_VM_C_LABEL(try_function_name):
 		if (UNEXPECTED(EG(exception))) {
 			if (call) {
 				 if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-					zend_string_release(call->func->common.function_name);
+					zend_string_release_ex(call->func->common.function_name, 0);
 					zend_free_trampoline(call->func);
 				}
 				zend_vm_stack_free_call_frame(call);
@@ -4517,7 +4517,7 @@ ZEND_VM_C_LABEL(send_again):
 					if (Z_TYPE(key) == IS_STRING) {
 						zend_throw_error(NULL,
 							"Cannot unpack Traversable with string keys");
-						zend_string_release(Z_STR(key));
+						zend_string_release_ex(Z_STR(key), 0);
 						break;
 					}
 

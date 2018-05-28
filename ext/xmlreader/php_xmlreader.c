@@ -68,7 +68,7 @@ static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name,
 	hnd.type = rettype;
 	str = zend_string_init_interned(name, strlen(name), 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(xmlreader_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 

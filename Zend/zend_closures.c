@@ -56,7 +56,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	}
 
 	/* destruct the function also, then - we have allocated it in get_method */
-	zend_string_release(func->internal_function.function_name);
+	zend_string_release_ex(func->internal_function.function_name, 0);
 	efree(func);
 #if ZEND_DEBUG
 	execute_data->func = NULL;
@@ -202,7 +202,7 @@ ZEND_METHOD(Closure, bind)
 				ce = closure->func.common.scope;
 			} else if ((ce = zend_lookup_class_ex(class_name, NULL, 1)) == NULL) {
 				zend_error(E_WARNING, "Class '%s' not found", ZSTR_VAL(class_name));
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 				RETURN_NULL();
 			}
 			zend_tmp_string_release(tmp_class_name);
@@ -540,7 +540,7 @@ static HashTable *zend_closure_get_debug_info(zval *object, int *is_temp) /* {{{
 			}
 			ZVAL_NEW_STR(&info, zend_strpprintf(0, "%s", i >= required ? "<optional>" : "<required>"));
 			zend_hash_update(Z_ARRVAL(val), name, &info);
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 			arg_info++;
 		}
 		zend_hash_str_update(debug_info, "parameter", sizeof("parameter")-1, &val);

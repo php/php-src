@@ -169,7 +169,7 @@ PDO_API void pdo_handle_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt) /* {{{ */
 	}
 
 	if (message) {
-		zend_string_release(message);
+		zend_string_release_ex(message, 0);
 	}
 
 	if (supp) {
@@ -1253,7 +1253,7 @@ const zend_function_entry pdo_dbh_functions[] = /* {{{ */ {
 static void cls_method_dtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
-		zend_string_release(func->common.function_name);
+		zend_string_release_ex(func->common.function_name, 0);
 	}
 	efree(func);
 }
@@ -1262,7 +1262,7 @@ static void cls_method_dtor(zval *el) /* {{{ */ {
 static void cls_method_pdtor(zval *el) /* {{{ */ {
 	zend_function *func = (zend_function*)Z_PTR_P(el);
 	if (func->common.function_name) {
-		zend_string_release(func->common.function_name);
+		zend_string_release_ex(func->common.function_name, 1);
 	}
 	pefree(func, 1);
 }
@@ -1356,7 +1356,7 @@ static union _zend_function *dbh_method_get(zend_object **object, zend_string *m
 
 		lc_method_name = zend_string_tolower(method_name);
 		fbc = zend_hash_find_ptr(dbh_obj->inner->cls_methods[PDO_DBH_DRIVER_METHOD_KIND_DBH], lc_method_name);
-		zend_string_release(lc_method_name);
+		zend_string_release_ex(lc_method_name, 0);
 	}
 
 out:

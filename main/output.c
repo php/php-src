@@ -504,7 +504,7 @@ PHPAPI php_output_handler *php_output_handler_create_user(zval *output_handler, 
 				efree(error);
 			}
 			if (handler_name) {
-				zend_string_release(handler_name);
+				zend_string_release_ex(handler_name, 0);
 			}
 	}
 
@@ -521,7 +521,7 @@ PHPAPI php_output_handler *php_output_handler_create_internal(const char *name, 
 
 	handler = php_output_handler_init(str, chunk_size, (flags & ~0xf) | PHP_OUTPUT_HANDLER_INTERNAL);
 	handler->func.internal = output_handler;
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 
 	return handler;
 }
@@ -618,7 +618,7 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	ret = zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func) ? SUCCESS : FAILURE;
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 	return ret;
 }
 /* }}} */
@@ -647,7 +647,7 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 		}
 		str = zend_string_init_interned(name, name_len, 1);
 		ret = zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable)) ? SUCCESS : FAILURE;
-		zend_string_release(str);
+		zend_string_release_ex(str, 1);
 		if (ret != SUCCESS) {
 			zend_hash_destroy(&rev);
 		}
@@ -677,7 +677,7 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 	}
 	str = zend_string_init_interned(name, name_len, 1);
 	ret = zend_hash_update_ptr(&php_output_handler_aliases, str, func) ? SUCCESS : FAILURE;
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 	return ret;
 }
 /* }}} */
@@ -716,7 +716,7 @@ PHPAPI int php_output_handler_hook(php_output_handler_hook_t type, void *arg)
 PHPAPI void php_output_handler_dtor(php_output_handler *handler)
 {
 	if (handler->name) {
-		zend_string_release(handler->name);
+		zend_string_release_ex(handler->name, 0);
 	}
 	if (handler->buffer.data) {
 		efree(handler->buffer.data);

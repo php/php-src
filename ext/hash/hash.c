@@ -172,7 +172,7 @@ static void php_hash_do_hash(INTERNAL_FUNCTION_PARAMETERS, int isfilename, zend_
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }
@@ -307,7 +307,7 @@ static void php_hash_do_hash_hmac(INTERNAL_FUNCTION_PARAMETERS, int isfilename, 
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), ops->digest_size);
 		ZSTR_VAL(hex_digest)[2 * ops->digest_size] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }
@@ -561,7 +561,7 @@ PHP_FUNCTION(hash_final)
 
 		php_hash_bin2hex(ZSTR_VAL(hex_digest), (unsigned char *) ZSTR_VAL(digest), digest_len);
 		ZSTR_VAL(hex_digest)[2 * digest_len] = 0;
-		zend_string_release(digest);
+		zend_string_release_ex(digest, 0);
 		RETURN_NEW_STR(hex_digest);
 	}
 }

@@ -111,7 +111,7 @@ static uint32_t add_static_slot(HashTable     *hash,
 		ZVAL_LONG(&tmp, ret);
 		zend_hash_add(hash, key, &tmp);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 	return ret;
 }
 
@@ -379,7 +379,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					    (LITERAL_NUM_RELATED(info[i].flags) != 2 ||
 					     ((info[i].flags & LITERAL_KIND_MASK) != LITERAL_VALUE &&
 					      (info[Z_LVAL_P(pos)].flags & LITERAL_KIND_MASK) != LITERAL_VALUE))) {
-						zend_string_release(key);
+						zend_string_release_ex(key, 0);
 						map[i] = Z_LVAL_P(pos);
 						zval_ptr_dtor_nogc(&op_array->literals[i]);
 						n = LITERAL_NUM_RELATED(info[i].flags);
@@ -392,7 +392,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						map[i] = j;
 						ZVAL_LONG(&zv, j);
 						zend_hash_add_new(&hash, key, &zv);
-						zend_string_release(key);
+						zend_string_release_ex(key, 0);
 						if (i != j) {
 							op_array->literals[j] = op_array->literals[i];
 							info[j] = info[i];

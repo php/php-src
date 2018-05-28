@@ -843,7 +843,7 @@ PHP_FUNCTION(tempnam)
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
-	zend_string_release(p);
+	zend_string_release_ex(p, 0);
 }
 /* }}} */
 

@@ -441,7 +441,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 			php_pcre_free_match_data(match_data);
 		}
 	}
-	zend_string_release(pattern);
+	zend_string_release_ex(pattern, 0);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }

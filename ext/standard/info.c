@@ -230,7 +230,7 @@ static void php_print_gpcse_array(char *name, uint32_t name_length)
 					php_info_print("<pre>");
 					php_info_print_html_esc(ZSTR_VAL(str), ZSTR_LEN(str));
 					php_info_print("</pre>");
-					zend_string_release(str);
+					zend_string_release_ex(str, 0);
 				} else {
 					zend_print_zval_r(tmp, 0);
 				}

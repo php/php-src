@@ -1397,7 +1397,7 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 
 		string_len = ZSTR_LEN(tmp);
 		c = (zend_uchar)ZSTR_VAL(tmp)[0];
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	} else {
 		string_len = Z_STRLEN_P(value);
 		c = (zend_uchar)Z_STRVAL_P(value)[0];
@@ -2774,7 +2774,7 @@ static void cleanup_unfinished_calls(zend_execute_data *execute_data, uint32_t o
 			if (call->func->common.fn_flags & ZEND_ACC_CLOSURE) {
 				zend_object_release(ZEND_CLOSURE_OBJECT(call->func));
 			} else if (call->func->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
-				zend_string_release(call->func->common.function_name);
+				zend_string_release_ex(call->func->common.function_name, 0);
 				zend_free_trampoline(call->func);
 			}
 
@@ -2831,11 +2831,11 @@ static void cleanup_live_vars(zend_execute_data *execute_data, uint32_t op_num, 
 						last--;
 					}
 					if (last->opcode == ZEND_ROPE_INIT) {
-						zend_string_release(*rope);
+						zend_string_release_ex(*rope, 0);
 					} else {
 						int j = last->extended_value;
 						do {
-							zend_string_release(rope[j]);
+							zend_string_release_ex(rope[j], 0);
 						} while (j--);
 					}
 				} else if (kind == ZEND_LIVE_SILENCE) {
@@ -2889,7 +2889,7 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 
 		called_scope = zend_fetch_class_by_name(lcname, NULL, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
 		if (UNEXPECTED(called_scope == NULL)) {
-			zend_string_release(lcname);
+			zend_string_release_ex(lcname, 0);
 			return NULL;
 		}
 
@@ -2904,13 +2904,13 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 			if (EXPECTED(!EG(exception))) {
 				zend_undefined_method(called_scope, mname);
 			}
-			zend_string_release(lcname);
-			zend_string_release(mname);
+			zend_string_release_ex(lcname, 0);
+			zend_string_release_ex(mname, 0);
 			return NULL;
 		}
 
-		zend_string_release(lcname);
-		zend_string_release(mname);
+		zend_string_release_ex(lcname, 0);
+		zend_string_release_ex(mname, 0);
 
 		if (UNEXPECTED(!(fbc->common.fn_flags & ZEND_ACC_STATIC))) {
 			zend_non_static_method_call(fbc);
@@ -2927,10 +2927,10 @@ static zend_never_inline zend_execute_data *zend_init_dynamic_call_string(zend_s
 		}
 		if (UNEXPECTED((func = zend_hash_find(EG(function_table), lcname)) == NULL)) {
 			zend_throw_error(NULL, "Call to undefined function %s()", ZSTR_VAL(function));
-			zend_string_release(lcname);
+			zend_string_release_ex(lcname, 0);
 			return NULL;
 		}
-		zend_string_release(lcname);
+		zend_string_release_ex(lcname, 0);
 
 		fbc = Z_FUNC_P(func);
 		called_scope = NULL;
@@ -3111,9 +3111,9 @@ static zend_never_inline zend_op_array* ZEND_FASTCALL zend_include_or_eval(zval 
 						if (zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path)) {
 							zend_op_array *op_array = zend_compile_file(&file_handle, (type==ZEND_INCLUDE_ONCE?ZEND_INCLUDE:ZEND_REQUIRE));
 							zend_destroy_file_handle(&file_handle);
-							zend_string_release(resolved_path);
+							zend_string_release_ex(resolved_path, 0);
 							if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-								zend_string_release(Z_STR(tmp_inc_filename));
+								zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
 							}
 							return op_array;
 						} else {
@@ -3128,7 +3128,7 @@ already_compiled:
 							zend_message_dispatcher(ZMSG_FAILED_REQUIRE_FOPEN, Z_STRVAL_P(inc_filename));
 						}
 					}
-					zend_string_release(resolved_path);
+					zend_string_release_ex(resolved_path, 0);
 				}
 				break;
 			case ZEND_INCLUDE:
@@ -3145,7 +3145,7 @@ already_compiled:
 		}
 	}
 	if (Z_TYPE(tmp_inc_filename) != IS_UNDEF) {
-		zend_string_release(Z_STR(tmp_inc_filename));
+		zend_string_release_ex(Z_STR(tmp_inc_filename), 0);
 	}
 	return new_op_array;
 }
@@ -3160,7 +3160,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 	if (UNEXPECTED(Z_TYPE(call->This) != IS_OBJECT)) {
 		zend_vm_stack_free_args(call);
 		if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-			zend_string_release(fbc->common.function_name);
+			zend_string_release_ex(fbc->common.function_name, 0);
 		}
 		efree(fbc);
 		zend_vm_stack_free_call_frame(call);
@@ -3180,7 +3180,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 	zend_vm_stack_free_args(call);
 
 	if (fbc->type == ZEND_OVERLOADED_FUNCTION_TEMPORARY) {
-		zend_string_release(fbc->common.function_name);
+		zend_string_release_ex(fbc->common.function_name, 0);
 	}
 	efree(fbc);
 

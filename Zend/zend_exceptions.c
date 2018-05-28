@@ -531,7 +531,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, "Object(");
 			smart_str_appends(str, ZSTR_VAL(class_name));
 			smart_str_appends(str, "), ");
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 			break;
 		}
 	}
@@ -687,7 +687,7 @@ ZEND_METHOD(exception, __toString)
 
 		if ((Z_OBJCE_P(exception) == zend_ce_type_error || Z_OBJCE_P(exception) == zend_ce_argument_count_error) && strstr(ZSTR_VAL(message), ", called in ")) {
 			zend_string *real_message = zend_strpprintf(0, "%s and defined", ZSTR_VAL(message));
-			zend_string_release(message);
+			zend_string_release_ex(message, 0);
 			message = real_message;
 		}
 
@@ -705,9 +705,9 @@ ZEND_METHOD(exception, __toString)
 					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
 		}
 
-		zend_string_release(prev_str);
-		zend_string_release(message);
-		zend_string_release(file);
+		zend_string_release_ex(prev_str, 0);
+		zend_string_release_ex(message, 0);
+		zend_string_release_ex(file, 0);
 		zval_ptr_dtor(&trace);
 
 		Z_PROTECT_RECURSION_P(exception);
@@ -716,7 +716,7 @@ ZEND_METHOD(exception, __toString)
 			break;
 		}
 	}
-	zend_string_release(fname);
+	zend_string_release_ex(fname, 0);
 
 	exception = getThis();
 	/* Reset apply counts */
@@ -970,8 +970,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 
 		zend_error_helper(E_PARSE, ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
 
-		zend_string_release(file);
-		zend_string_release(message);
+		zend_string_release_ex(file, 0);
+		zend_string_release_ex(message, 0);
 	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -1002,7 +1002,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
 			if (file) {
-				zend_string_release(file);
+				zend_string_release_ex(file, 0);
 			}
 		}
 
@@ -1013,8 +1013,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_error_va(severity, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
 			"Uncaught %s\n  thrown", ZSTR_VAL(str));
 
-		zend_string_release(str);
-		zend_string_release(file);
+		zend_string_release_ex(str, 0);
+		zend_string_release_ex(file, 0);
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ZSTR_VAL(ce_exception->name));
 	}

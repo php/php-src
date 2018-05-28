@@ -476,7 +476,7 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				zend_string_release_ex(name, 0);
 				continue;
 			}
 
@@ -488,7 +488,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 		}
 	}
 
@@ -511,7 +511,7 @@ static void generate_dispids(php_dispatchex *disp)
 
 			/* Find the existing id */
 			if ((tmp = zend_hash_find(disp->name_to_dispid, name)) != NULL) {
-				zend_string_release(name);
+				zend_string_release_ex(name, 0);
 				continue;
 			}
 
@@ -523,7 +523,7 @@ static void generate_dispids(php_dispatchex *disp)
 			ZVAL_LONG(&tmp2, pid);
 			zend_hash_update(disp->name_to_dispid, name, &tmp2);
 
-			zend_string_release(name);
+			zend_string_release_ex(name, 0);
 		}
 	}
 }

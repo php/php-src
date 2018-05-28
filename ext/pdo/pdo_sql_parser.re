@@ -226,12 +226,12 @@ safe:
 							ret = -1;
 							strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 							if (buf) {
-								zend_string_release(buf);
+								zend_string_release_ex(buf, 0);
 							}
 							goto clean_up;
 						}
 						if (buf) {
-							zend_string_release(buf);
+							zend_string_release_ex(buf, 0);
 						}
 					} else {
 						pdo_raise_impl_error(stmt->dbh, stmt, "HY105", "Expected a stream resource");
@@ -278,7 +278,7 @@ safe:
 								ret = -1;
 								strncpy(stmt->error_code, stmt->dbh->error_code, 6);
 								if (buf) {
-									zend_string_release(buf);
+									zend_string_release_ex(buf, 0);
 								}
 								goto clean_up;
 							}
@@ -286,7 +286,7 @@ safe:
 					}
 
 					if (buf) {
-						zend_string_release(buf);
+						zend_string_release_ex(buf, 0);
 					}
 				}
 			} else {

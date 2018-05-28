@@ -308,7 +308,7 @@ static void dom_register_prop_handler(HashTable *prop_handler, char *name, size_
 	hnd.write_func = write_func ? write_func : dom_write_na;
 	str = zend_string_init_interned(name, name_len, 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(dom_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
@@ -323,7 +323,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void
 		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -354,7 +354,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -376,7 +376,7 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 		std_hnd->write_property(object, member, value, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 }
 /* }}} */
 
@@ -409,7 +409,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 		retval = std_hnd->has_property(object, member, check_empty, cache_slot);
 	}
 
-	zend_string_release(member_str);
+	zend_string_release_ex(member_str, 0);
 	return retval;
 }
 /* }}} */
@@ -451,7 +451,7 @@ static HashTable* dom_get_debug_info_helper(zval *object, int *is_temp) /* {{{ *
 		zend_hash_add(debug_info, string_key, &value);
 	} ZEND_HASH_FOREACH_END();
 
-	zend_string_release(object_str);
+	zend_string_release_ex(object_str, 0);
 
 	return debug_info;
 }

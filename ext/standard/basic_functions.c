@@ -3848,7 +3848,7 @@ PHP_RSHUTDOWN_FUNCTION(basic) /* {{{ */
 		setlocale(LC_CTYPE, "");
 		zend_update_current_locale();
 		if (BG(locale_string)) {
-			zend_string_release(BG(locale_string));
+			zend_string_release_ex(BG(locale_string), 0);
 			BG(locale_string) = NULL;
 		}
 	}
@@ -5044,7 +5044,7 @@ static int user_shutdown_function_call(zval *zv) /* {{{ */
 		zend_string *function_name
 			= zend_get_callable_name(&shutdown_function_entry->arguments[0]);
 		php_error(E_WARNING, "(Registered shutdown functions) Unable to call %s() - function does not exist", ZSTR_VAL(function_name));
-		zend_string_release(function_name);
+		zend_string_release_ex(function_name, 0);
 		return 0;
 	}
 
@@ -5180,7 +5180,7 @@ PHP_FUNCTION(register_shutdown_function)
 			= zend_get_callable_name(&shutdown_function_entry.arguments[0]);
 		php_error_docref(NULL, E_WARNING, "Invalid shutdown callback '%s' passed", ZSTR_VAL(callback_name));
 		efree(shutdown_function_entry.arguments);
-		zend_string_release(callback_name);
+		zend_string_release_ex(callback_name, 0);
 		RETVAL_FALSE;
 	} else {
 		if (!BG(user_shutdown_function_names)) {
@@ -5579,11 +5579,11 @@ PHP_FUNCTION(set_include_path)
 
 	key = zend_string_init("include_path", sizeof("include_path") - 1, 0);
 	if (zend_alter_ini_entry_ex(key, new_value, PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0) == FAILURE) {
-		zend_string_release(key);
+		zend_string_release_ex(key, 0);
 		zval_dtor(return_value);
 		RETURN_FALSE;
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -5677,7 +5677,7 @@ PHP_FUNCTION(ignore_user_abort)
 	if (ZEND_NUM_ARGS()) {
 		zend_string *key = zend_string_init("ignore_user_abort", sizeof("ignore_user_abort") - 1, 0);
 		zend_alter_ini_entry_chars(key, arg ? "1" : "0", 1, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-		zend_string_release(key);
+		zend_string_release_ex(key, 0);
 	}
 
 	RETURN_LONG(old_setting);
@@ -5825,10 +5825,10 @@ PHP_FUNCTION(register_tick_function)
 	if (!zend_is_callable(&tick_fe.arguments[0], 0, &function_name)) {
 		efree(tick_fe.arguments);
 		php_error_docref(NULL, E_WARNING, "Invalid tick callback '%s' passed", ZSTR_VAL(function_name));
-		zend_string_release(function_name);
+		zend_string_release_ex(function_name, 0);
 		RETURN_FALSE;
 	} else if (function_name) {
-		zend_string_release(function_name);
+		zend_string_release_ex(function_name, 0);
 	}
 
 	if (Z_TYPE(tick_fe.arguments[0]) != IS_ARRAY && Z_TYPE(tick_fe.arguments[0]) != IS_OBJECT) {

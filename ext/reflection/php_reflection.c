@@ -211,7 +211,7 @@ static void _free_function(zend_function *fptr) /* {{{ */
 	if (fptr
 		&& (fptr->internal_function.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE))
 	{
-		zend_string_release(fptr->internal_function.function_name);
+		zend_string_release_ex(fptr->internal_function.function_name, 0);
 		zend_free_trampoline(fptr);
 	}
 }
@@ -244,7 +244,7 @@ static void reflection_free_objects_storage(zend_object *object) /* {{{ */
 			break;
 		case REF_TYPE_DYNAMIC_PROPERTY:
 			prop_reference = (property_reference*)intern->ptr;
-			zend_string_release(prop_reference->prop.name);
+			zend_string_release_ex(prop_reference->prop.name, 0);
 			efree(intern->ptr);
 			break;
 		case REF_TYPE_GENERATOR:
@@ -528,7 +528,7 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 	smart_str_append_printf(str, "%s  }\n", indent);
 
 	smart_str_append_printf(str, "%s}\n", indent);
-	zend_string_release(sub_indent);
+	zend_string_release_ex(sub_indent, 0);
 }
 /* }}} */
 
@@ -760,7 +760,7 @@ static void _function_string(smart_str *str, zend_function *fptr, zend_class_ent
 					smart_str_append_printf(str, ", overwrites %s", ZSTR_VAL(overwrites->common.scope->name));
 				}
 			}
-			zend_string_release(lc_name);
+			zend_string_release_ex(lc_name, 0);
 		}
 	}
 	if (fptr->common.prototype && fptr->common.prototype->common.scope) {
@@ -1060,7 +1060,7 @@ static void _extension_string(smart_str *str, zend_module_entry *module, char *i
 			smart_str_append_printf(str, "%s  }\n", indent);
 		}
 		smart_str_free(&str_classes);
-		zend_string_release(sub_indent);
+		zend_string_release_ex(sub_indent, 0);
 	}
 
 	smart_str_append_printf(str, "%s}\n", indent);
@@ -2391,7 +2391,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position < 0 || (uint32_t)position >= num_args) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release(fptr->common.function_name);
+					zend_string_release_ex(fptr->common.function_name, 0);
 				}
 				zend_free_trampoline(fptr);
 			}
@@ -2430,7 +2430,7 @@ ZEND_METHOD(reflection_parameter, __construct)
 		if (position == -1) {
 			if (fptr->common.fn_flags & ZEND_ACC_CALL_VIA_TRAMPOLINE) {
 				if (fptr->type != ZEND_OVERLOADED_FUNCTION) {
-					zend_string_release(fptr->common.function_name);
+					zend_string_release_ex(fptr->common.function_name, 0);
 				}
 				zend_free_trampoline(fptr);
 			}
@@ -4337,10 +4337,10 @@ ZEND_METHOD(reflection_class, getProperty)
 			if (!EG(exception)) {
 				zend_throw_exception_ex(reflection_exception_ptr, -1, "Class %s does not exist", ZSTR_VAL(classname));
 			}
-			zend_string_release(classname);
+			zend_string_release_ex(classname, 0);
 			return;
 		}
-		zend_string_release(classname);
+		zend_string_release_ex(classname, 0);
 
 		if (!instanceof_function(ce, ce2)) {
 			zend_throw_exception_ex(reflection_exception_ptr, -1, "Fully qualified property name %s::%s does not specify a base class of %s", ZSTR_VAL(ce2->name), str_name, ZSTR_VAL(ce->name));

@@ -1907,7 +1907,7 @@ void php_snmp_add_property(HashTable *h, const char *name, size_t name_length, p
 	p.write_func = (write_func) ? write_func : NULL;
 	str = zend_string_init_interned(name, name_length, 1);
 	zend_hash_add_mem(h, str, &p, sizeof(php_snmp_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 

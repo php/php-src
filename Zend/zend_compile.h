@@ -45,7 +45,7 @@
 
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
-		zend_string_release(CG(doc_comment)); \
+		zend_string_release_ex(CG(doc_comment), 0); \
 		CG(doc_comment) = NULL; \
 	} \
 } while (0)

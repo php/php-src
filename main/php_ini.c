@@ -196,7 +196,7 @@ PHPAPI void config_zval_dtor(zval *zvalue)
 		zend_hash_destroy(Z_ARRVAL_P(zvalue));
 		free(Z_ARR_P(zvalue));
 	} else if (Z_TYPE_P(zvalue) == IS_STRING) {
-		zend_string_release(Z_STR_P(zvalue));
+		zend_string_release_ex(Z_STR_P(zvalue), 1);
 	}
 }
 /* Reset / free active_ini_sectin global */
@@ -637,7 +637,7 @@ int php_init_config(void)
 			ZVAL_NEW_STR(&tmp, zend_string_init(fh.filename, strlen(fh.filename), 1));
 			zend_hash_str_update(&configuration_hash, "cfg_file_path", sizeof("cfg_file_path")-1, &tmp);
 			if (opened_path) {
-				zend_string_release(opened_path);
+				zend_string_release_ex(opened_path, 0);
 			} else {
 				efree((char *)fh.filename);
 			}

@@ -72,7 +72,8 @@ static void ZEND_FASTCALL zend_string_destroy(zend_string *str ZEND_FILE_LINE_DC
 	CHECK_ZVAL_STRING_REL(str);
 	ZEND_ASSERT(!ZSTR_IS_INTERNED(str));
 	ZEND_ASSERT(GC_REFCOUNT(str) == 0);
-	pefree(str, UNEXPECTED(GC_FLAGS(str) & IS_STR_PERSISTENT));
+	ZEND_ASSERT(!(GC_FLAGS(str) & IS_STR_PERSISTENT));
+	efree(str);
 }
 
 static void ZEND_FASTCALL zend_reference_destroy(zend_reference *ref ZEND_FILE_LINE_DC)
@@ -112,7 +113,7 @@ ZEND_API void _zval_internal_dtor(zval *zvalue ZEND_FILE_LINE_DC)
 	switch (Z_TYPE_P(zvalue)) {
 		case IS_STRING:
 			CHECK_ZVAL_STRING_REL(Z_STR_P(zvalue));
-			zend_string_release(Z_STR_P(zvalue));
+			zend_string_release_ex(Z_STR_P(zvalue), 1);
 			break;
 		case IS_ARRAY:
 		case IS_CONSTANT_AST:
