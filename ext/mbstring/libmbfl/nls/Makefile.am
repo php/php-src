@@ -1,5 +1,5 @@
 noinst_LTLIBRARIES=libmbfl_nls.la
-INCLUDES=-I../mbfl
+AM_CPPFLAGS=-I../mbfl
 libmbfl_nls_la_LDFLAGS=-version-info $(SHLIB_VERSION)
 libmbfl_nls_la_SOURCES=nls_ja.c \
 	nls_de.c \

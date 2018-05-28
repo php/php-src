@@ -1,6 +1,6 @@
 EXTRA_DIST=Makefile.bcc32 mk_sb_tbl.awk
 noinst_LTLIBRARIES=libmbfl_filters.la
-INCLUDES=-I../mbfl
+AM_CPPFLAGS=-I../mbfl
 PERL=perl
 libmbfl_filters_la_LDFLAGS=-version-info $(SHLIB_VERSION)
 libmbfl_filters_la_SOURCES=mbfilter_cp936.c \

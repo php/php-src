@@ -1,7 +1,7 @@
 # Process this file with autoconf to produce a configure script.
-AC_INIT(mbfl/mbfilter.c)
-AM_INIT_AUTOMAKE(libmbfl, 1.1.0)
-AC_CONFIG_SRCDIR(mbfl/mbfilter.c)
+AC_INIT([libmbfl], [1.1.0])
+AC_CONFIG_SRCDIR([mbfl/mbfilter.c])
+AM_INIT_AUTOMAKE
 AM_CONFIG_HEADER(config.h)
 
 # SHLIB isn't a version number but the API reference
