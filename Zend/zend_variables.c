@@ -44,7 +44,7 @@ static void ZEND_FASTCALL zend_ast_ref_destroy_wrapper(zend_ast_ref *ast ZEND_FI
 # define zend_ast_ref_destroy_wrapper  zend_ast_ref_destroy
 #endif
 
-typedef void (ZEND_FASTCALL *zend_zval_dtor_func_t)(zend_refcounted *p);
+typedef void (ZEND_FASTCALL *zend_zval_dtor_func_t)(zend_refcounted *p ZEND_FILE_LINE_DC);
 
 static const zend_zval_dtor_func_t zend_zval_dtor_func[] = {
 	/* IS_UNDEF        */ (zend_zval_dtor_func_t)zend_empty_destroy,
@@ -64,7 +64,7 @@ static const zend_zval_dtor_func_t zend_zval_dtor_func[] = {
 ZEND_API void ZEND_FASTCALL _zval_dtor_func(zend_refcounted *p ZEND_FILE_LINE_DC)
 {
 	ZEND_ASSERT(GC_TYPE(p) <= IS_CONSTANT_AST);
-	zend_zval_dtor_func[GC_TYPE(p)](p);
+	zend_zval_dtor_func[GC_TYPE(p)](p ZEND_FILE_LINE_RELAY_CC);
 }
 
 static void ZEND_FASTCALL zend_string_destroy(zend_string *str ZEND_FILE_LINE_DC)
