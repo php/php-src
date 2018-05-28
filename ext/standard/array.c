@@ -6140,7 +6140,7 @@ PHP_FUNCTION(array_map)
 		array_init_size(return_value, maxlen);
 		zend_hash_real_init(Z_ARRVAL_P(return_value), HT_FLAGS(Z_ARRVAL(arrays[0])) & HASH_FLAG_PACKED);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
+		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
 			fci.retval = &result;
 			fci.param_count = 1;
 			fci.params = &arg;
