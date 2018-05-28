@@ -137,7 +137,6 @@ Zend/zend_language_parser.h
 Zend/zend_language_parser.output
 
 # Extension specific ignores
-ext/*/configure.in
 ext/*/configure.ac
 ext/*/ltmain.sh
 ext/*/libs.mk
