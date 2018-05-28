@@ -3188,7 +3188,7 @@ ZEND_API int ZEND_FASTCALL zend_do_fcall_overloaded(zend_execute_data *call, zva
 }
 /* }}} */
 
-static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC) /* {{{ */
+static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *array_ptr, int by_ref OPLINE_DC EXECUTE_DATA_DC) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(array_ptr);
 	zend_object_iterator *iter = ce->get_iterator(ce, array_ptr, by_ref);

@@ -5687,7 +5687,7 @@ ZEND_VM_HANDLER(77, ZEND_FE_RESET_R, CONST|TMP|VAR|CV, JMP_ADDR)
 			FREE_OP1_IF_VAR();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			FREE_OP1();
 			if (UNEXPECTED(EG(exception))) {
@@ -5772,7 +5772,7 @@ ZEND_VM_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 			FREE_OP1_VAR_PTR();
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (OP1_TYPE == IS_VAR) {
 				FREE_OP1_VAR_PTR();

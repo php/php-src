@@ -3400,7 +3400,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CONST_HANDLER(
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -3482,7 +3482,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CONST_HANDLER
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_CONST == IS_VAR) {
 
@@ -18035,7 +18035,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_TMP_HANDLER(ZE
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			zval_ptr_dtor_nogc(free_op1);
 			if (UNEXPECTED(EG(exception))) {
@@ -18118,7 +18118,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_TMP_HANDLER(Z
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_TMP_VAR == IS_VAR) {
 
@@ -21125,7 +21125,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_VAR_HANDLER(ZE
 			zval_ptr_dtor_nogc(free_op1);
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			zval_ptr_dtor_nogc(free_op1);
 			if (UNEXPECTED(EG(exception))) {
@@ -21210,7 +21210,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_VAR_HANDLER(Z
 			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_VAR == IS_VAR) {
 				if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -37265,7 +37265,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_R_SPEC_CV_HANDLER(ZEN
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 0 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (UNEXPECTED(EG(exception))) {
 				HANDLE_EXCEPTION();
@@ -37347,7 +37347,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_RESET_RW_SPEC_CV_HANDLER(ZE
 
 			ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 		} else {
-			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC);
+			zend_bool is_empty = zend_fe_reset_iterator(array_ptr, 1 OPLINE_CC EXECUTE_DATA_CC);
 
 			if (IS_CV == IS_VAR) {
 
