@@ -30,6 +30,20 @@ Core:
     thrown exceptions.
   . TypeError now reports wrong types as `int` and `bool` instead of `integer`
     and `boolean`.
+  . Due to the introduction of flexible heredoc/nowdoc syntax (see New Features
+    section), doc strings that contain the ending label inside their body may
+    cause syntax errors or change in interpretation. For example in
+
+        $str = <<<FOO
+        abcdefg
+            FOO
+        FOO;
+
+    the indented occurrence of "FOO" did not previously have any special
+    meaning. Now it will be interpreted as the end of the heredoc string and
+    the following "FOO;" will cause a syntax error. This issue can always be
+    resolved by choosing an ending label that does not occur within the contents
+    of the string.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
