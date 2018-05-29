@@ -5153,13 +5153,11 @@ ZEND_VM_HANDLER(72, ZEND_ADD_ARRAY_ELEMENT, CONST|TMP|VAR|CV, CONST|TMPVAR|UNUSE
 	    UNEXPECTED(opline->extended_value & ZEND_ARRAY_ELEMENT_REF)) {
 		expr_ptr = GET_OP1_ZVAL_PTR_PTR(BP_VAR_W);
 		if (Z_ISREF_P(expr_ptr)) {
-			if (OP1_TYPE == IS_CV) {
-				Z_ADDREF_P(expr_ptr);
-			}
+			Z_ADDREF_P(expr_ptr);
 		} else {
 			ZVAL_MAKE_REF_EX(expr_ptr, 2);
-			FREE_OP1_VAR_PTR();
 		}
+		FREE_OP1_VAR_PTR();
 	} else {
 		expr_ptr = GET_OP1_ZVAL_PTR(BP_VAR_R);
 		if (OP1_TYPE == IS_TMP_VAR) {
