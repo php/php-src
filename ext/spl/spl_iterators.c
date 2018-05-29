@@ -2509,7 +2509,6 @@ static inline void spl_limit_it_seek(spl_dual_it_object *intern, zend_long pos)
 		ZVAL_LONG(&zpos, pos);
 		spl_dual_it_free(intern);
 		zend_call_method_with_1_params(&intern->inner.zobject, intern->inner.ce, NULL, "seek", NULL, &zpos);
-		zval_ptr_dtor(&zpos);
 		if (!EG(exception)) {
 			intern->current.pos = pos;
 			if (spl_limit_it_valid(intern) == SUCCESS) {

@@ -476,7 +476,7 @@ static void php_wddx_serialize_object(wddx_packet *packet, zval *obj)
 	 * We try to call __sleep() method on object. It's supposed to return an
 	 * array of property names to be serialized.
 	 */
-	if (call_user_function_ex(CG(function_table), obj, &fname, &retval, 0, 0, 1, NULL) == SUCCESS) {
+	if (call_user_function(CG(function_table), obj, &fname, &retval, 0, 0) == SUCCESS) {
 		if (!Z_ISUNDEF(retval) && (sleephash = HASH_OF(&retval))) {
 			php_wddx_add_chunk_static(packet, WDDX_STRUCT_S);
 			snprintf(tmp_buf, WDDX_BUF_LEN, WDDX_VAR_S, PHP_CLASS_NAME_VAR);
@@ -926,7 +926,7 @@ static void php_wddx_pop_element(void *user_data, const XML_Char *name)
 
 			ZVAL_STRING(&fname, "__wakeup");
 
-			call_user_function_ex(NULL, &ent1->data, &fname, &retval, 0, 0, 0, NULL);
+			call_user_function(NULL, &ent1->data, &fname, &retval, 0, 0);
 
 			zval_ptr_dtor(&fname);
 			zval_ptr_dtor(&retval);

@@ -1553,10 +1553,6 @@ static size_t curl_progress(void *clientp, double dltotal, double dlnow, double 
 				}
 			}
 			zval_ptr_dtor(&argv[0]);
-			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
-			zval_ptr_dtor(&argv[3]);
-			zval_ptr_dtor(&argv[4]);
 			break;
 		}
 	}
@@ -1619,7 +1615,6 @@ static size_t curl_read(char *data, size_t size, size_t nmemb, void *ctx)
 
 			zval_ptr_dtor(&argv[0]);
 			zval_ptr_dtor(&argv[1]);
-			zval_ptr_dtor(&argv[2]);
 			break;
 		}
 	}

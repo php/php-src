@@ -877,7 +877,6 @@ static zval *spl_fixedarray_it_get_current_data(zend_object_iterator *iter) /* {
 		ZVAL_LONG(&zindex, object->current);
 
 		data = spl_fixedarray_object_read_dimension_helper(object, &zindex);
-		zval_ptr_dtor(&zindex);
 
 		if (data == NULL) {
 			data = &EG(uninitialized_zval);
@@ -982,8 +981,6 @@ SPL_METHOD(SplFixedArray, current)
 	ZVAL_LONG(&zindex, intern->current);
 
 	value = spl_fixedarray_object_read_dimension_helper(intern, &zindex);
-
-	zval_ptr_dtor(&zindex);
 
 	if (value) {
 		ZVAL_DEREF(value);

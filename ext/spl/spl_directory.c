@@ -1521,7 +1521,6 @@ SPL_METHOD(RecursiveDirectoryIterator, getChildren)
 	ZVAL_STRINGL(&zpath, intern->file_name, intern->file_name_len);
 	spl_instantiate_arg_ex2(Z_OBJCE_P(getThis()), return_value, &zpath, &zflags);
 	zval_ptr_dtor(&zpath);
-	zval_ptr_dtor(&zflags);
 
 	subdir = Z_SPLFILESYSTEM_P(return_value);
 	if (subdir) {

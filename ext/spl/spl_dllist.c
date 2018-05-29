@@ -1146,7 +1146,6 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* flags */
 	ZVAL_LONG(&flags, intern->flags);
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	/* elements */
 	while (current) {

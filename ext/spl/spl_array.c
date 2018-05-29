@@ -1479,7 +1479,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 
 	if (!use_arg) {
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 1, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, 1, params);
 		intern->nApplyCount--;
 	} else if (use_arg == SPL_ARRAY_METHOD_MAY_USER_ARG) {
 		if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "|z", &arg) == FAILURE) {
@@ -1490,7 +1490,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 			ZVAL_COPY_VALUE(&params[1], arg);
 		}
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, arg ? 2 : 1, params);
 		intern->nApplyCount--;
 	} else {
 		if (ZEND_NUM_ARGS() != 1 || zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "z", &arg) == FAILURE) {
@@ -1499,7 +1499,7 @@ static void spl_array_method(INTERNAL_FUNCTION_PARAMETERS, char *fname, int fnam
 		}
 		ZVAL_COPY_VALUE(&params[1], arg);
 		intern->nApplyCount++;
-		call_user_function_ex(EG(function_table), NULL, &function_name, return_value, 2, params, 1, NULL);
+		call_user_function(EG(function_table), NULL, &function_name, return_value, 2, params);
 		intern->nApplyCount--;
 	}
 

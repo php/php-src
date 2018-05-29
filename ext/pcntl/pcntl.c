@@ -1463,8 +1463,9 @@ void pcntl_signal_dispatch()
 				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
 				call_user_function(EG(function_table), NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
-				zval_ptr_dtor(&params[0]);
+#ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
+#endif
 			}
 		}
 

@@ -2433,7 +2433,6 @@ try_again:
 
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_ADD, op1, op1, &op2);
-				zval_ptr_dtor(&op2);
 
 				return res;
 			}
@@ -2501,7 +2500,6 @@ try_again:
 
 				ZVAL_LONG(&op2, 1);
 				res = Z_OBJ_HANDLER_P(op1, do_operation)(ZEND_SUB, op1, op1, &op2);
-				zval_ptr_dtor(&op2);
 
 				return res;
 			}

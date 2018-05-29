@@ -218,7 +218,6 @@ PHP_FUNCTION(assert)
 	if (Z_TYPE(ASSERTG(callback)) != IS_UNDEF) {
 		zval args[4];
 		zval retval;
-		int i;
 		uint32_t lineno = zend_get_executed_lineno();
 		const char *filename = zend_get_executed_filename();
 
@@ -231,15 +230,14 @@ PHP_FUNCTION(assert)
 		/* XXX do we want to check for error here? */
 		if (!description) {
 			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 3, args);
-			for (i = 0; i <= 2; i++) {
-				zval_ptr_dtor(&(args[i]));
-			}
+			zval_ptr_dtor(&(args[2]));
+			zval_ptr_dtor(&(args[0]));
 		} else {
 			ZVAL_STR(&args[3], zval_get_string(description));
 			call_user_function(CG(function_table), NULL, &ASSERTG(callback), &retval, 4, args);
-			for (i = 0; i <= 3; i++) {
-				zval_ptr_dtor(&(args[i]));
-			}
+			zval_ptr_dtor(&(args[3]));
+			zval_ptr_dtor(&(args[2]));
+			zval_ptr_dtor(&(args[0]));
 		}
 
 		zval_ptr_dtor(&retval);

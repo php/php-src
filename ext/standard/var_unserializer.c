@@ -221,7 +221,7 @@ PHPAPI void var_destroy(php_unserialize_data_t *var_hashx)
 					}
 
 					BG(serialize_lock)++;
-					if (call_user_function_ex(CG(function_table), zv, &wakeup_name, &retval, 0, 0, 1, NULL) == FAILURE || Z_ISUNDEF(retval)) {
+					if (call_user_function(CG(function_table), zv, &wakeup_name, &retval, 0, 0) == FAILURE || Z_ISUNDEF(retval)) {
 						wakeup_failed = 1;
 						GC_ADD_FLAGS(Z_OBJ_P(zv), IS_OBJ_DESTRUCTOR_CALLED);
 					}

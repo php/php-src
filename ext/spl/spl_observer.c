@@ -713,7 +713,6 @@ SPL_METHOD(SplObjectStorage, serialize)
 	smart_str_appendl(&buf, "x:", 2);
 	ZVAL_LONG(&flags, zend_hash_num_elements(&intern->storage));
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	zend_hash_internal_pointer_reset_ex(&intern->storage, &pos);
 

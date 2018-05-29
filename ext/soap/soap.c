@@ -2563,8 +2563,6 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		_bailout = 1;
 	} zend_end_try();
 	zval_ptr_dtor(&func);
-	zval_ptr_dtor(&params[4]);
-	zval_ptr_dtor(&params[3]);
 	zval_ptr_dtor(&params[2]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[0]);

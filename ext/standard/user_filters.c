@@ -139,11 +139,10 @@ static void userfilter_dtor(php_stream_filter *thisfilter)
 
 	ZVAL_STRINGL(&func_name, "onclose", sizeof("onclose")-1);
 
-	call_user_function_ex(NULL,
+	call_user_function(NULL,
 			obj,
 			&func_name,
 			&retval,
-			0, NULL,
 			0, NULL);
 
 	zval_ptr_dtor(&retval);
@@ -344,11 +343,10 @@ static php_stream_filter *user_filter_factory_create(const char *filtername,
 	/* invoke the constructor */
 	ZVAL_STRINGL(&func_name, "oncreate", sizeof("oncreate")-1);
 
-	call_user_function_ex(NULL,
+	call_user_function(NULL,
 			&obj,
 			&func_name,
 			&retval,
-			0, NULL,
 			0, NULL);
 
 	if (Z_TYPE(retval) != IS_UNDEF) {

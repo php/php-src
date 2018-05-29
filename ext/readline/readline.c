@@ -509,7 +509,6 @@ static void _readline_long_zval(zval *ret, long l)
 static char **_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
-	int i;
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
@@ -531,9 +530,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 		}
 	}
 
-	for (i = 0; i < 3; i++) {
-		zval_ptr_dtor(&params[i]);
-	}
+	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 
 	return matches;

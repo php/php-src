@@ -1470,7 +1470,7 @@ ZEND_METHOD(reflection, export)
 
 	/* Invoke the __toString() method */
 	ZVAL_STRINGL(&fname, "__tostring", sizeof("__tostring") - 1);
-	result= call_user_function_ex(NULL, object, &fname, &retval, 0, NULL, 0, NULL);
+	result= call_user_function(NULL, object, &fname, &retval, 0, NULL);
 	zval_dtor(&fname);
 
 	if (result == FAILURE) {

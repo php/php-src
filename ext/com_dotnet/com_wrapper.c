@@ -288,8 +288,8 @@ static HRESULT STDMETHODCALLTYPE disp_invokeex(
 		} else if (wFlags & DISPATCH_METHOD) {
 			zend_try {
 				retval = &rv;
-				if (SUCCESS == call_user_function_ex(EG(function_table), &disp->object, name,
-							retval, pdp->cArgs, params, 1, NULL)) {
+				if (SUCCESS == call_user_function(EG(function_table), &disp->object, name,
+							retval, pdp->cArgs, params)) {
 					ret = S_OK;
 					trace("function called ok\n");
 

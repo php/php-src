@@ -1740,7 +1740,6 @@ ZEND_API int add_property_long_ex(zval *arg, const char *key, size_t key_len, ze
 	ZVAL_LONG(&tmp, n);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
@@ -1754,7 +1753,6 @@ ZEND_API int add_property_bool_ex(zval *arg, const char *key, size_t key_len, ze
 	ZVAL_BOOL(&tmp, b);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
@@ -1768,7 +1766,6 @@ ZEND_API int add_property_null_ex(zval *arg, const char *key, size_t key_len) /*
 	ZVAL_NULL(&tmp);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }
@@ -1796,7 +1793,6 @@ ZEND_API int add_property_double_ex(zval *arg, const char *key, size_t key_len, 
 	ZVAL_DOUBLE(&tmp, d);
 	ZVAL_STRINGL(&z_key, key, key_len);
 	Z_OBJ_HANDLER_P(arg, write_property)(arg, &z_key, &tmp, NULL);
-	zval_ptr_dtor(&tmp); /* write_property will add 1 to refcount */
 	zval_ptr_dtor(&z_key);
 	return SUCCESS;
 }

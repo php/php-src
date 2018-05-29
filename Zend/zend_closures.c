@@ -51,7 +51,7 @@ ZEND_METHOD(Closure, __invoke) /* {{{ */
 	zend_function *func = EX(func);
 	zval *arguments = ZEND_CALL_ARG(execute_data, 1);
 
-	if (call_user_function_ex(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments, 1, NULL) == FAILURE) {
+	if (call_user_function(CG(function_table), NULL, getThis(), return_value, ZEND_NUM_ARGS(), arguments) == FAILURE) {
 		RETVAL_FALSE;
 	}
 

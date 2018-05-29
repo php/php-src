@@ -1341,7 +1341,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				CG(in_compilation) = 0;
 			}
 
-			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -1361,10 +1361,8 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			}
 
 			zval_ptr_dtor(&params[4]);
-			zval_ptr_dtor(&params[3]);
 			zval_ptr_dtor(&params[2]);
 			zval_ptr_dtor(&params[1]);
-			zval_ptr_dtor(&params[0]);
 
 			if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
 				ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
@@ -1529,7 +1527,7 @@ ZEND_API void zend_try_exception_handler() /* {{{ */
 			ZVAL_OBJ(&params[0], old_exception);
 			ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
 
-			if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 				zval_ptr_dtor(&retval2);
 				if (EG(exception)) {
 					OBJ_RELEASE(EG(exception));
