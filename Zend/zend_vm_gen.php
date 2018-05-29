@@ -1034,6 +1034,20 @@ function is_hot_handler($hot, $op1, $op2, $extra_spec) {
 	}
 }
 
+function is_cold_handler($hot, $op1, $op2, $extra_spec) {
+	if ($hot === 'COLD_') {
+		return true;
+	} else if ($hot === 'COLD_CONST_') {
+		return ($op1 === 'CONST');
+	} else if ($hot === 'COLD_CONSTCONST_') {
+		return ($op1 === 'CONST' && $op2 === 'CONST');
+	} else if ($hot === 'HOT_OBJ_') {
+		return ($op1 === 'CONST');
+	} else {
+		return false;
+	}
+}
+
 // Generates opcode handler
 function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, $opcode, $extra_spec = null, &$switch_labels = array()) {
 	global $definition_file, $prefix, $opnames, $gen_order;
@@ -1064,6 +1078,8 @@ function gen_handler($f, $spec, $kind, $name, $op1, $op2, $use, $code, $lineno, 
 		case ZEND_VM_KIND_CALL:
 			if ($opcode["hot"] && ZEND_VM_KIND == ZEND_VM_KIND_HYBRID && is_hot_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
 				out($f,"static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
+			} else if ($opcode["hot"] && is_cold_handler($opcode["hot"], $op1, $op2, $extra_spec)) {
+				out($f,"static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 			} else {
 				out($f,"static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL {$spec_name}_HANDLER(ZEND_OPCODE_HANDLER_ARGS)\n");
 			}
@@ -1791,10 +1807,12 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							if ($kind == ZEND_VM_KIND_HYBRID) {
 								out($f,"# if (ZEND_VM_KIND == ZEND_VM_KIND_HYBRID)\n");
 								out($f,"#  define ZEND_VM_RETURN()        opline = &hybrid_halt_op; return\n");
-								out($f,"#  define ZEND_VM_HOT             zend_always_inline ZEND_OPT_SIZE\n");
+								out($f,"#  define ZEND_VM_HOT             zend_always_inline ZEND_COLD ZEND_OPT_SIZE\n");
+								out($f,"#  define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
 								out($f,"# else\n");
 								out($f,"#  define ZEND_VM_RETURN()        opline = NULL; return\n");
 								out($f,"#  define ZEND_VM_HOT\n");
+								out($f,"#  define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
 								out($f,"# endif\n");
 							} else {
 								out($f,"# define ZEND_VM_RETURN()        opline = NULL; return\n");
@@ -1806,6 +1824,7 @@ function gen_executor($f, $skl, $spec, $kind, $executor_name, $initializer_name)
 							out($f,"# define ZEND_VM_RETURN()        return -1\n");
 							if ($kind == ZEND_VM_KIND_HYBRID) {
 								out($f,"# define ZEND_VM_HOT\n");
+								out($f,"# define ZEND_VM_COLD            ZEND_COLD ZEND_OPT_SIZE\n");
 							}
 							out($f,"#endif\n");
 							out($f,"\n");
@@ -2239,10 +2258,13 @@ function gen_vm($def, $skel) {
 		    strpos($line,"ZEND_VM_HOT_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_NOCONST_HANDLER(") === 0 ||
 		    strpos($line,"ZEND_VM_HOT_SEND_HANDLER(") === 0 ||
-		    strpos($line,"ZEND_VM_HOT_OBJ_HANDLER(") === 0) {
+		    strpos($line,"ZEND_VM_HOT_OBJ_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_COLD_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_COLD_CONST_HANDLER(") === 0 ||
+		    strpos($line,"ZEND_VM_COLD_CONSTCONST_HANDLER(") === 0) {
 		  // Parsing opcode handler's definition
 			if (preg_match(
-					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
+					"/^ZEND_VM_(HOT_|HOT_OBJ_|HOT_SEND_|HOT_NOCONST_|COLD_|COLD_CONST_|COLD_CONSTCONST_)?HANDLER\(\s*([0-9]+)\s*,\s*([A-Z_]+)\s*,\s*([A-Z_|]+)\s*,\s*([A-Z_|]+)\s*(,\s*([A-Z_|]+)\s*)?(,\s*SPEC\(([A-Z_|=,]+)\)\s*)?\)/",
 					$line,
 					$m) == 0) {
 				die("ERROR ($def:$lineno): Invalid ZEND_VM_HANDLER definition.\n");
