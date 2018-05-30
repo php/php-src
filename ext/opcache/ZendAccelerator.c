@@ -1481,8 +1481,36 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 	/* Align to 64-byte boundary */
 	ZCG(mem) = zend_shared_alloc(memory_used + 64);
 	if (ZCG(mem)) {
-		memset(ZCG(mem), 0, memory_used + 64);
 		ZCG(mem) = (void*)(((zend_uintptr_t)ZCG(mem) + 63L) & ~63L);
+#if defined(__x86_64__)
+		memset(ZCG(mem), 0, memory_used);
+#elif defined(__AVX__)
+		{
+			char *p = (char*)ZCG(mem);
+			char *end = p + memory_used;
+			__m256i ymm0 = _mm256_zeroall();
+
+			while (p < end) {
+				_mm256_store_si256((__m256i*)p, ymm0);
+				_mm256_store_si256((__m256i*)(p+32), ymm0);
+				p += 64;
+			}
+		}
+#else
+		{
+			char *p = (char*)ZCG(mem);
+			char *end = p + memory_used;
+			__m128i xmm0 = _mm_setzero_si128();
+
+			while (p < end) {
+				_mm_store_si128((__m128i*)p, xmm0);
+				_mm_store_si128((__m128i*)(p+16), xmm0);
+				_mm_store_si128((__m128i*)(p+32), xmm0);
+				_mm_store_si128((__m128i*)(p+48), xmm0);
+				p += 64;
+			}
+		}
+#endif
 	}
 #else
 	ZCG(mem) = zend_shared_alloc(memory_used);
