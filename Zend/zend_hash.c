@@ -92,8 +92,8 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 
 	/* Use big enough power of 2 */
 	/* size should be between HT_MIN_SIZE and HT_MAX_SIZE */
-	if (nSize < HT_MIN_SIZE) {
-		nSize = HT_MIN_SIZE;
+	if (nSize <= HT_MIN_SIZE) {
+		return HT_MIN_SIZE;
 	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
@@ -212,6 +212,13 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 	_zend_hash_init_int(ht, nSize, pDestructor, persistent);
+}
+
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(ZEND_FILE_LINE_D)
+{
+	HashTable *ht = emalloc(sizeof(HashTable));
+	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	return ht;
 }
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize ZEND_FILE_LINE_DC)

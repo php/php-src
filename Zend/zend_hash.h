@@ -289,9 +289,23 @@ ZEND_API zval* ZEND_FASTCALL zend_hash_minmax(const HashTable *ht, compare_func_
 
 ZEND_API int ZEND_FASTCALL zend_hash_rehash(HashTable *ht);
 
-#define zend_new_array(size) \
+#if !ZEND_DEBUG && defined(HAVE_BUILTIN_CONSTANT_P)
+# define zend_new_array(size) \
+	(__builtin_constant_p(size) ? \
+		((((uint32_t)(size)) <= HT_MIN_SIZE) ? \
+			_zend_new_array_0(ZEND_FILE_LINE_C) \
+		: \
+			_zend_new_array((size) ZEND_FILE_LINE_CC) \
+		) \
+	: \
+		_zend_new_array((size) ZEND_FILE_LINE_CC) \
+	)
+#else
+# define zend_new_array(size) \
 	_zend_new_array(size ZEND_FILE_LINE_CC)
+#endif
 
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(ZEND_FILE_LINE_D);
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t size ZEND_FILE_LINE_DC);
 ZEND_API uint32_t zend_array_count(HashTable *ht);
 ZEND_API HashTable* ZEND_FASTCALL zend_array_dup(HashTable *source);
