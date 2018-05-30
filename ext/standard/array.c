@@ -5753,7 +5753,7 @@ PHP_FUNCTION(array_multisort)
 		hash->nNextFreeElement = array_size;
 		if (repack) {
 			zend_hash_to_packed(hash);
-		} else {
+		} else if (!(HT_FLAGS(hash) & HASH_FLAG_PACKED)) {
 			zend_hash_rehash(hash);
 		}
 	}
