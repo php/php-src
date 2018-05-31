@@ -77,6 +77,10 @@ typedef int gid_t;
 #include <sys/stat.h>
 #include <errno.h>
 
+#ifdef __AVX__
+#include <immintrin.h>
+#endif
+
 #define SHM_PROTECT() \
 	do { \
 		if (ZCG(accel_directives).protect_memory) { \
@@ -1488,7 +1492,7 @@ static zend_persistent_script *cache_script_in_shared_memory(zend_persistent_scr
 		{
 			char *p = (char*)ZCG(mem);
 			char *end = p + memory_used;
-			__m256i ymm0 = _mm256_zeroall();
+			__m256i ymm0 = _mm256_setzero_si256();
 
 			while (p < end) {
 				_mm256_store_si256((__m256i*)p, ymm0);
