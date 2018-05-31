@@ -141,7 +141,7 @@ zend_string* intl_convert_utf16_to_utf8(
 	u_strToUTF8( ZSTR_VAL(dst), dst_len, NULL, src, src_len, status );
 	if( U_FAILURE( *status ) )
 	{
-		zend_string_free(dst);
+		zend_string_efree(dst);
 		return NULL;
 	}
 

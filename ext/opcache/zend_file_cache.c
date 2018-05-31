@@ -96,8 +96,10 @@ static int zend_file_cache_flock(int fd, int type)
 
 #define IS_SERIALIZED_INTERNED(ptr) \
 	((size_t)(ptr) & Z_UL(1))
+
+/* Allowing == here to account for a potential empty allocation at the end of the memory */
 #define IS_SERIALIZED(ptr) \
-	((char*)(ptr) < (char*)script->size)
+	((char*)(ptr) <= (char*)script->size)
 #define IS_UNSERIALIZED(ptr) \
 	(((char*)(ptr) >= (char*)script->mem && (char*)(ptr) < (char*)script->mem + script->size) || \
 	 IS_ACCEL_INTERNED(ptr))
@@ -548,14 +550,13 @@ static void zend_file_cache_serialize_prop_info(zval                     *zv,
 		prop = Z_PTR_P(zv);
 		UNSERIALIZE_PTR(prop);
 
-		if (prop->ce && !IS_SERIALIZED(prop->ce)) {
+		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
+		if (!IS_SERIALIZED(prop->ce)) {
 			SERIALIZE_PTR(prop->ce);
-		}
-		if (prop->name && !IS_SERIALIZED(prop->name)) {
 			SERIALIZE_STR(prop->name);
-		}
-		if (prop->doc_comment && !IS_SERIALIZED(prop->doc_comment)) {
-			SERIALIZE_STR(prop->doc_comment);
+			if (prop->doc_comment) {
+				SERIALIZE_STR(prop->doc_comment);
+			}
 		}
 	}
 }
@@ -572,12 +573,15 @@ static void zend_file_cache_serialize_class_constant(zval                     *z
 		c = Z_PTR_P(zv);
 		UNSERIALIZE_PTR(c);
 
-		zend_file_cache_serialize_zval(&c->value, script, info, buf);
-		if (c->ce && !IS_SERIALIZED(c->ce)) {
+		ZEND_ASSERT(c->ce != NULL);
+		if (!IS_SERIALIZED(c->ce)) {
 			SERIALIZE_PTR(c->ce);
-		}
-		if (c->doc_comment && !IS_SERIALIZED(c->doc_comment)) {
-			SERIALIZE_STR(c->doc_comment);
+
+			zend_file_cache_serialize_zval(&c->value, script, info, buf);
+
+			if (c->doc_comment) {
+				SERIALIZE_STR(c->doc_comment);
+			}
 		}
 	}
 }
@@ -878,7 +882,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
 		unlink(filename);
@@ -892,7 +896,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		write(fd, ((zend_string*)ZCG(mem))->val, info.str_size) != info.str_size
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
 		unlink(filename);
@@ -901,7 +905,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	}
 #endif
 
-	zend_string_release((zend_string*)ZCG(mem));
+	zend_string_release_ex((zend_string*)ZCG(mem), 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);
@@ -1182,14 +1186,13 @@ static void zend_file_cache_unserialize_prop_info(zval                    *zv,
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		prop = Z_PTR_P(zv);
 
-		if (prop->ce && !IS_UNSERIALIZED(prop->ce)) {
+		ZEND_ASSERT(prop->ce != NULL && prop->name != NULL);
+		if (!IS_UNSERIALIZED(prop->ce)) {
 			UNSERIALIZE_PTR(prop->ce);
-		}
-		if (prop->name && !IS_UNSERIALIZED(prop->name)) {
 			UNSERIALIZE_STR(prop->name);
-		}
-		if (prop->doc_comment && !IS_UNSERIALIZED(prop->doc_comment)) {
-			UNSERIALIZE_STR(prop->doc_comment);
+			if (prop->doc_comment) {
+				UNSERIALIZE_STR(prop->doc_comment);
+			}
 		}
 	}
 }
@@ -1204,12 +1207,15 @@ static void zend_file_cache_unserialize_class_constant(zval                    *
 		UNSERIALIZE_PTR(Z_PTR_P(zv));
 		c = Z_PTR_P(zv);
 
-		zend_file_cache_unserialize_zval(&c->value, script, buf);
-		if (c->ce && !IS_UNSERIALIZED(c->ce)) {
+		ZEND_ASSERT(c->ce != NULL);
+		if (!IS_UNSERIALIZED(c->ce)) {
 			UNSERIALIZE_PTR(c->ce);
-		}
-		if (c->doc_comment && !IS_UNSERIALIZED(c->doc_comment)) {
-			UNSERIALIZE_STR(c->doc_comment);
+
+			zend_file_cache_unserialize_zval(&c->value, script, buf);
+
+			if (c->doc_comment) {
+				UNSERIALIZE_STR(c->doc_comment);
+			}
 		}
 	}
 }

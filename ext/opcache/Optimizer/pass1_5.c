@@ -175,7 +175,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 				} else { /* ZEND_ADD_STRING */
 					memcpy(ptr, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 					ptr += Z_STRLEN(ZEND_OP2_LITERAL(opline));
-					zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
+					zend_string_release_ex(Z_STR(ZEND_OP2_LITERAL(opline)), 0);
 					ZVAL_NEW_STR(&ZEND_OP2_LITERAL(opline), str);
 				}
 				next_op = opline + 1;
@@ -451,7 +451,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					}
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					break;
 				} else if (Z_STRLEN(ZEND_OP2_LITERAL(init_opline)) == sizeof("extension_loaded")-1 &&
 					!memcmp(Z_STRVAL(ZEND_OP2_LITERAL(init_opline)),
@@ -463,7 +463,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 					zend_module_entry *m = zend_hash_find_ptr(&module_registry,
 							lc_name);
 
-					zend_string_release(lc_name);
+					zend_string_release_ex(lc_name, 0);
 					if (!m) {
 						if (PG(enable_dl)) {
 							break;
@@ -541,7 +541,7 @@ void zend_optimizer_pass1(zend_op_array *op_array, zend_optimizer_ctx *ctx)
 							zend_optimizer_update_op1_const(op_array, opline, &t);
 						}
 					} else {
-						zend_string_release(dirname);
+						zend_string_release_ex(dirname, 0);
 					}
 					break;
 				}

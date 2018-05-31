@@ -151,7 +151,7 @@ PHP_FUNCTION(stream_socket_client)
 		zend_string *quoted_host = php_addslashes(host, 0);
 
 		php_error_docref(NULL, E_WARNING, "unable to connect to %s (%s)", ZSTR_VAL(quoted_host), errstr == NULL ? "Unknown error" : ZSTR_VAL(errstr));
-		zend_string_release(quoted_host);
+		zend_string_release_ex(quoted_host, 0);
 	}
 
 	if (hashkey) {
@@ -167,13 +167,13 @@ PHP_FUNCTION(stream_socket_client)
 			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -237,13 +237,13 @@ PHP_FUNCTION(stream_socket_server)
 			zval_ptr_dtor(zerrstr);
 			ZVAL_STR(zerrstr, errstr);
 		} else if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		RETURN_FALSE;
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 
 	php_stream_to_zval(stream, return_value);
@@ -302,7 +302,7 @@ PHP_FUNCTION(stream_socket_accept)
 	}
 
 	if (errstr) {
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 	}
 }
 /* }}} */
@@ -331,7 +331,7 @@ PHP_FUNCTION(stream_socket_get_name)
 	}
 
 	if ((ZSTR_LEN(name) == 0) || (ZSTR_VAL(name)[0] == 0)) {
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -419,7 +419,7 @@ PHP_FUNCTION(stream_socket_recvfrom)
 		RETURN_NEW_STR(read_buf);
 	}
 
-	zend_string_free(read_buf);
+	zend_string_efree(read_buf);
 	RETURN_FALSE;
 }
 /* }}} */

@@ -203,7 +203,7 @@ static int unlink_filename(zval *el) /* {{{ */
 
 static void free_filename(zval *el) {
 	zend_string *filename = Z_STR_P(el);
-	zend_string_release(filename);
+	zend_string_release_ex(filename, 0);
 }
 
 PHPAPI void destroy_uploaded_files_hash(void) /* {{{ */
@@ -1113,7 +1113,7 @@ SAPI_API SAPI_POST_HANDLER_FUNC(rfc1867_post_handler) /* {{{ */
 					if (cancel_upload != UPLOAD_ERROR_E) { /* file creation failed */
 						unlink(ZSTR_VAL(temp_filename));
 					}
-					zend_string_release(temp_filename);
+					zend_string_release_ex(temp_filename, 0);
 				}
 				temp_filename = NULL;
 			} else {

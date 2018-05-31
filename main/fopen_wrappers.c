@@ -439,7 +439,7 @@ PHPAPI int php_fopen_primary_script(zend_file_handle *file_handle)
 		}
 		return FAILURE;
 	}
-	zend_string_release(resolved_path);
+	zend_string_release_ex(resolved_path, 0);
 
 	orig_display_errors = PG(display_errors);
 	PG(display_errors) = 0;

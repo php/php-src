@@ -64,7 +64,7 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string *key = zend_string_init_interned(name, name_len, 0);
 
 	zend_hash_update_ind(ht, key, val);
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 
 PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)
@@ -600,7 +600,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 		for (i = 0; i < SG(request_info).argc; i++) {
 			ZVAL_STRING(&tmp, SG(request_info).argv[i]);
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				zend_string_efree(Z_STR(tmp));
 			}
 		}
 	} else 	if (s && *s) {
@@ -614,7 +614,7 @@ PHPAPI void php_build_argv(char *s, zval *track_vars_array)
 			ZVAL_STRING(&tmp, ss);
 			count++;
 			if (zend_hash_next_index_insert(Z_ARRVAL(arr), &tmp) == NULL) {
-				zend_string_free(Z_STR(tmp));
+				zend_string_efree(Z_STR(tmp));
 			}
 			if (space) {
 				*space = '+';

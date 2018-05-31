@@ -699,7 +699,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 # endif
 
 	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 
@@ -722,7 +722,7 @@ zend_string *php_base64_decode_ex_ssse3(const unsigned char *str, size_t length,
 	PHP_BASE64_DECODE_SSSE3_LOOP;
 
 	if (!php_base64_decode_impl(c, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 
@@ -767,7 +767,7 @@ PHPAPI zend_string *php_base64_decode_ex(const unsigned char *str, size_t length
 	result = zend_string_alloc(length, 0);
 
 	if (!php_base64_decode_impl(str, length, (unsigned char*)ZSTR_VAL(result), &outl, strict)) {
-		zend_string_free(result);
+		zend_string_efree(result);
 		return NULL;
 	}
 

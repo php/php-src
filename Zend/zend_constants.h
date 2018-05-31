@@ -27,6 +27,7 @@
 #define CONST_CS				(1<<0)				/* Case Sensitive */
 #define CONST_PERSISTENT		(1<<1)				/* Persistent */
 #define CONST_CT_SUBST			(1<<2)				/* Allow compile-time substitution */
+#define CONST_NO_FILE_CACHE		(1<<3)				/* Can't be saved in file cache */
 
 #define	PHP_USER_CONSTANT INT_MAX	/* a constant defined in user space */
 

@@ -360,7 +360,7 @@ ZEND_API zend_resource* zend_register_persistent_resource(const char *key, size_
 	zend_string *str = zend_string_init(key, key_len, 1);
 	zend_resource *ret  = zend_register_persistent_resource_ex(str, rsrc_pointer, rsrc_type);
 
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 	return ret;
 }
 

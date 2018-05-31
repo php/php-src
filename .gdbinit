@@ -16,9 +16,11 @@ define ____executor_globals
 		end
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
+		set $eg_ptr = $eg
 	else
 		set $eg = executor_globals
 		set $cg = compiler_globals
+		set $eg_ptr = (zend_executor_globals*) &executor_globals
 	end
 end
 
@@ -287,6 +289,16 @@ define ____printzv
 	else
 		____printzv_contents $zcontents 0 
 	end
+end
+
+define print_global_vars
+	____executor_globals
+	set $symtable = ((HashTable *)&($eg_ptr->symbol_table))
+	print_ht $symtable
+end
+
+document print_global_vars
+	Prints the global variables
 end
 
 define print_const_table

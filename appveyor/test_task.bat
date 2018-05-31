@@ -37,7 +37,7 @@ set PGPASSWORD=Password12!
 rem set PGSQL_TEST_CONNSTR=host=127.0.0.1 dbname=test port=5432 user=postgres password=Password12!
 echo ^<?php $conn_str = "host=127.0.0.1 dbname=test port=5432 user=%PGUSER% password=%PGPASSWORD%"; ?^> >> "./ext/pgsql/tests/config.inc"
 set PDO_PGSQL_TEST_DSN=pgsql:host=127.0.0.1 port=5432 dbname=test user=%PGUSER% password=%PGPASSWORD%
-"C:\Program Files\PostgreSQL\9.6\bin\createdb.exe" test
+"C:\Program Files\PostgreSQL\10\bin\createdb.exe" test
 if %errorlevel% neq 0 exit /b 3
 
 rem setup ODBC related exts

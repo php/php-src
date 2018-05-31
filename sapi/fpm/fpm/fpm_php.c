@@ -43,7 +43,7 @@ static int fpm_php_zend_ini_alter_master(char *name, int name_length, char *new_
 			ini_entry->modifiable = mode;
 		}
 	} else {
-		zend_string_release(duplicate);
+		zend_string_release_ex(duplicate, 1);
 	}
 
 	return SUCCESS;

@@ -69,7 +69,12 @@ function ut_main()
 	{
 		foreach( $strs as $str )
 		{
-			$str_norm = ut_norm_normalize( $str, $form );
+			if (Normalizer::NONE == $form) {
+				/* Hide deprecation warning. */
+				$str_norm = @ut_norm_normalize( $str, $form );
+			} else {
+				$str_norm = ut_norm_normalize( $str, $form );
+			}
 			$error_code = intl_get_error_code();
 			$error_message = intl_get_error_message();
 

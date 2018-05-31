@@ -27,6 +27,11 @@
 #include "zend_portability.h"
 #include "zend_long.h"
 
+#ifdef __SSE2__
+# include <mmintrin.h>
+# include <emmintrin.h>
+#endif
+
 #ifdef WORDS_BIGENDIAN
 # define ZEND_ENDIAN_LOHI(lo, hi)          hi; lo;
 # define ZEND_ENDIAN_LOHI_3(lo, mi, hi)    hi; mi; lo;
@@ -192,6 +197,7 @@ struct _zval_struct {
 	} u1;
 	union {
 		uint32_t     next;                 /* hash collision chain */
+		uint32_t     cache_slot;           /* cache slot (for RECV_INIT) */
 		uint32_t     opline_num;           /* opline number (for FAST_CALL) */
 		uint32_t     lineno;               /* line number (for ast nodes) */
 		uint32_t     num_args;             /* arguments number for EX(This) */
@@ -296,6 +302,8 @@ struct _zend_array {
 #define HT_HASH(ht, idx) \
 	HT_HASH_EX((ht)->arData, idx)
 
+#define HT_SIZE_TO_MASK(nTableSize) \
+	((uint32_t)(-((nTableSize) + (nTableSize))))
 #define HT_HASH_SIZE(nTableMask) \
 	(((size_t)(uint32_t)-(int32_t)(nTableMask)) * sizeof(uint32_t))
 #define HT_DATA_SIZE(nTableSize) \
@@ -306,8 +314,26 @@ struct _zend_array {
 	HT_SIZE_EX((ht)->nTableSize, (ht)->nTableMask)
 #define HT_USED_SIZE(ht) \
 	(HT_HASH_SIZE((ht)->nTableMask) + ((size_t)(ht)->nNumUsed * sizeof(Bucket)))
-#define HT_HASH_RESET(ht) \
+#ifdef __SSE2__
+# define HT_HASH_RESET(ht) do { \
+		char *p = (char*)&HT_HASH(ht, (ht)->nTableMask); \
+		size_t size = HT_HASH_SIZE((ht)->nTableMask); \
+		__m128i xmm0 = _mm_setzero_si128(); \
+		xmm0 = _mm_cmpeq_epi8(xmm0, xmm0); \
+		ZEND_ASSERT(size >= 64 && ((size & 0x3f) == 0)); \
+		do { \
+			_mm_storeu_si128((__m128i*)p, xmm0); \
+			_mm_storeu_si128((__m128i*)(p+16), xmm0); \
+			_mm_storeu_si128((__m128i*)(p+32), xmm0); \
+			_mm_storeu_si128((__m128i*)(p+48), xmm0); \
+			p += 64; \
+			size -= 64; \
+		} while (size != 0); \
+	} while (0)
+#else
+# define HT_HASH_RESET(ht) \
 	memset(&HT_HASH(ht, (ht)->nTableMask), HT_INVALID_IDX, HT_HASH_SIZE((ht)->nTableMask))
+#endif
 #define HT_HASH_RESET_PACKED(ht) do { \
 		HT_HASH(ht, -2) = HT_INVALID_IDX; \
 		HT_HASH(ht, -1) = HT_INVALID_IDX; \
@@ -403,6 +429,9 @@ static zend_always_inline zend_uchar zval_get_type(const zval* pz) {
 
 #define Z_NEXT(zval)				(zval).u2.next
 #define Z_NEXT_P(zval_p)			Z_NEXT(*(zval_p))
+
+#define Z_CACHE_SLOT(zval)			(zval).u2.cache_slot
+#define Z_CACHE_SLOT_P(zval_p)		Z_CACHE_SLOT(*(zval_p))
 
 #define Z_LINENO(zval)				(zval).u2.lineno
 #define Z_LINENO_P(zval_p)			Z_LINENO(*(zval_p))

@@ -280,7 +280,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 		}
 		else {
 			smart_str_append( &ret, u8str );
-			zend_string_release( u8str );
+			zend_string_release_ex( u8str, 0 );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;
@@ -300,7 +300,7 @@ smart_str intl_parse_error_to_string( UParseError* pe )
 		else
 		{
 			smart_str_append( &ret, u8str );
-			zend_string_release( u8str );
+			zend_string_release_ex( u8str, 0 );
 		}
 		smart_str_appends( &ret, "\"" );
 		any = 1;

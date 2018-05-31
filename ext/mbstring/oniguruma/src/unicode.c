@@ -335,7 +335,7 @@ onigenc_unicode_get_case_fold_codes_by_str(OnigEncoding enc,
           n++;
         }
       }
-      code = items[0].code[0]; // for multi-code to unfold search.
+      code = items[0].code[0]; /* for multi-code to unfold search. */
     }
     else if ((flag & INTERNAL_ONIGENC_CASE_FOLD_MULTI_CHAR) != 0) {
       OnigCodePoint cs[3][4];

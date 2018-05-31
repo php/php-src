@@ -54,7 +54,9 @@ int zend_optimizer_get_persistent_constant(zend_string *name, zval *result, int 
 	}
 
 	if (retval) {
-		if (c->flags & CONST_PERSISTENT) {
+		if ((c->flags & CONST_PERSISTENT)
+		 && (!(c->flags & CONST_NO_FILE_CACHE)
+		  || !(CG(compiler_options) & ZEND_COMPILE_WITH_FILE_CACHE))) {
 			ZVAL_COPY_VALUE(result, &c->value);
 			if (copy) {
 				Z_TRY_ADDREF_P(result);
@@ -702,7 +704,7 @@ static void zend_optimize_block(zend_basic_block *block, zend_op_array *op_array
 						Z_TYPE_INFO(ZEND_OP2_LITERAL(src)) = IS_STRING_EX;
 						memcpy(Z_STRVAL(ZEND_OP2_LITERAL(src)) + old_len, Z_STRVAL(ZEND_OP2_LITERAL(opline)), Z_STRLEN(ZEND_OP2_LITERAL(opline)));
 						Z_STRVAL(ZEND_OP2_LITERAL(src))[l] = '\0';
-						zend_string_release(Z_STR(ZEND_OP2_LITERAL(opline)));
+						zend_string_release_ex(Z_STR(ZEND_OP2_LITERAL(opline)), 0);
 						ZVAL_STR(&ZEND_OP2_LITERAL(opline), zend_new_interned_string(Z_STR(ZEND_OP2_LITERAL(src))));
 						ZVAL_NULL(&ZEND_OP2_LITERAL(src));
 						MAKE_NOP(src);
@@ -1049,6 +1051,11 @@ static void assemble_code_blocks(zend_cfg *cfg, zend_op_array *op_array, zend_op
 		}
 		if (i != j) {
 			op_array->last_try_catch = j;
+			if (j == 0) {
+				efree(op_array->try_catch_array);
+				op_array->try_catch_array = NULL;
+			}
+
 			if (op_array->fn_flags & ZEND_ACC_HAS_FINALLY_BLOCK) {
 				zend_op *opline = new_opcodes;
 				zend_op *end = opline + len;

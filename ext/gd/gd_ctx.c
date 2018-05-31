@@ -164,12 +164,6 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 		ctx->putC = _php_image_output_putc;
 		ctx->putBuf = _php_image_output_putbuf;
 		ctx->gd_free = _php_image_output_ctxfree;
-
-#if APACHE && defined(CHARSET_EBCDIC)
-		/* XXX this is unlikely to work any more thies@thieso.net */
-		/* This is a binary file already: avoid EBCDIC->ASCII conversion */
-		ap_bsetflag(php3_rqst->connection->client, B_EBCDIC2ASCII, 0);
-#endif
 	}
 
 	if (!ctx)	{

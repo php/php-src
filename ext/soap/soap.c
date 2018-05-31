@@ -962,9 +962,9 @@ PHP_METHOD(SoapFault, __toString)
 	               ZSTR_VAL(faultcode_val), ZSTR_VAL(faultstring_val), ZSTR_VAL(file_val), line_val,
 	               Z_STRLEN(trace) ? Z_STRVAL(trace) : "#0 {main}\n");
 
-	zend_string_release(file_val);
-	zend_string_release(faultstring_val);
-	zend_string_release(faultcode_val);
+	zend_string_release_ex(file_val, 0);
+	zend_string_release_ex(faultstring_val, 0);
+	zend_string_release_ex(faultcode_val, 0);
 	zval_ptr_dtor(&trace);
 
 	RETVAL_STR(str);
@@ -1433,7 +1433,7 @@ PHP_METHOD(SoapServer, addFunction)
 				ZVAL_STR_COPY(&function_copy, f->common.function_name);
 				zend_hash_update(service->soap_functions.ft, key, &function_copy);
 
-				zend_string_release(key);
+				zend_string_release_ex(key, 0);
 			} ZEND_HASH_FOREACH_END();
 		}
 	} else if (Z_TYPE_P(function_name) == IS_STRING) {
@@ -1453,7 +1453,7 @@ PHP_METHOD(SoapServer, addFunction)
 
 		ZVAL_STR_COPY(&function_copy, f->common.function_name);
 		zend_hash_update(service->soap_functions.ft, key, &function_copy);
-		zend_string_release(key);
+		zend_string_release_ex(key, 0);
 	} else if (Z_TYPE_P(function_name) == IS_LONG) {
 		if (Z_LVAL_P(function_name) == SOAP_FUNCTIONS_ALL) {
 			if (service->soap_functions.ft != NULL) {
@@ -1484,7 +1484,7 @@ static void _soap_server_exception(soapServicePtr service, sdlFunctionPtr functi
 			zval rv;
 			zend_string *msg = zval_get_string(zend_read_property(zend_ce_error, &exception_object, "message", sizeof("message")-1, 0, &rv));
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", ZSTR_VAL(msg), NULL, NULL);
-			zend_string_release(msg);
+			zend_string_release_ex(msg, 0);
 		} else {
 			add_soap_fault_ex(&exception_object, this_ptr, "Server", "Internal Error", NULL, NULL);
 		}
@@ -1607,16 +1607,16 @@ PHP_METHOD(SoapServer, handle)
 						php_stream_filter_append(&SG(request_info).request_body->readfilters, zf);
 					} else {
 						php_error_docref(NULL, E_WARNING,"Can't uncompress compressed request");
-						zend_string_release(server);
+						zend_string_release_ex(server, 0);
 						return;
 					}
 				} else {
 					php_error_docref(NULL, E_WARNING,"Request is compressed with unknown compression '%s'",Z_STRVAL_P(encoding));
-					zend_string_release(server);
+					zend_string_release_ex(server, 0);
 					return;
 				}
 			}
-			zend_string_release(server);
+			zend_string_release_ex(server, 0);
 
 			doc_request = soap_xmlParseFile("php://input");
 
@@ -2550,7 +2550,7 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 				/* change class */
 				EG(exception)->ce = soap_fault_class_entry;
 				set_soap_fault(&exception_object, NULL, "Client", ZSTR_VAL(msg), NULL, NULL, NULL);
-				zend_string_release(msg);
+				zend_string_release_ex(msg, 0);
 			} else if ((fault = zend_hash_str_find(Z_OBJPROP_P(this_ptr), "__soap_fault", sizeof("__soap_fault")-1)) == NULL) {
 				add_soap_fault(this_ptr, "Client", "SoapClient::__doRequest() returned non string value", NULL, NULL);
 			}
@@ -2563,8 +2563,6 @@ static int do_request(zval *this_ptr, xmlDoc *request, char *location, char *act
 		_bailout = 1;
 	} zend_end_try();
 	zval_ptr_dtor(&func);
-	zval_ptr_dtor(&params[4]);
-	zval_ptr_dtor(&params[3]);
 	zval_ptr_dtor(&params[2]);
 	zval_ptr_dtor(&params[1]);
 	zval_ptr_dtor(&params[0]);
@@ -3957,7 +3955,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				} else {
 					xmlNodeSetContentLen(node, BAD_CAST(ZSTR_VAL(str)), (int)ZSTR_LEN(str));
 				}
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			if ((tmp = zend_hash_str_find(prop, "faultstring", sizeof("faultstring")-1)) != NULL) {
 				xmlNodePtr node = master_to_xml(get_conversion(IS_STRING), tmp, SOAP_LITERAL, param);
@@ -3982,7 +3980,7 @@ static xmlDocPtr serialize_response_call(sdlFunctionPtr function, char *function
 				} else {
 					xmlNodeSetContentLen(node, BAD_CAST(ZSTR_VAL(str)), (int)ZSTR_LEN(str));
 				}
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			if ((tmp = zend_hash_str_find(prop, "faultstring", sizeof("faultstring")-1)) != NULL) {
 				xmlNodePtr node = xmlNewChild(param, ns, BAD_CAST("Reason"), NULL);

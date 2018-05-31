@@ -18,6 +18,10 @@
 #include "zend_exceptions.h"
 
 #include <unicode/utypes.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#include <unicode/utf16.h>
+#endif
 #include <unicode/ucnv.h>
 #include <unicode/ustring.h>
 
@@ -701,7 +705,7 @@ static zend_string* php_converter_do_convert(UConverter *dest_cnv,
 	efree(temp);
 	if (U_FAILURE(error)) {
 		THROW_UFAILURE(objval, "ucnv_fromUChars", error);
-		zend_string_free(ret);
+		zend_string_efree(ret);
 		return NULL;
 	}
 
@@ -1057,7 +1061,7 @@ static zend_object *php_converter_clone_object(zval *object) {
 
 		err_msg = intl_error_get_message(&oldobj->error);
 		zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-		zend_string_release(err_msg);
+		zend_string_release_ex(err_msg, 0);
 
 		return retval;
 	}
@@ -1084,7 +1088,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	INIT_CLASS_ENTRY(ce, "UConverter", php_converter_methods);
 	php_converter_ce = zend_register_internal_class(&ce);
 	php_converter_ce->create_object = php_converter_create_object;
-	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;

@@ -2237,6 +2237,15 @@ AC_DEFUN([PHP_SETUP_ICU],[
     ICU_LIBS=`$ICU_CONFIG --ldflags --ldflags-icuio`
     PHP_EVAL_INCLINE($ICU_INCS)
     PHP_EVAL_LIBLINE($ICU_LIBS, $1)
+
+    ICU_CXXFLAGS=`$ICU_CONFIG --cxxflags`
+    if test "$icu_version" -ge "49000"; then
+      ICU_CXXFLAGS="$ICU_CXXFLAGS -DUNISTR_FROM_CHAR_EXPLICIT=explicit -DUNISTR_FROM_STRING_EXPLICIT=explicit"
+      ICU_CFLAGS="-DU_NO_DEFAULT_INCLUDE_UTF_HEADERS=1"
+    fi
+    if test "$icu_version" -ge "60000"; then
+      ICU_CFLAGS="$ICU_CFLAGS -DU_HIDE_OBSOLETE_UTF_OLD_H=1"
+    fi
   fi
 ])
 
@@ -3310,23 +3319,3 @@ dnl Load the AX_CHECK_COMPILE_FLAG macro from the autoconf archive.
 m4_include([build/ax_check_compile_flag.m4])
 
 m4_include([build/ax_gcc_func_attribute.m4])
-
-dnl PHP_CHECK_VALGRIND
-AC_DEFUN([PHP_CHECK_VALGRIND], [
-  AC_MSG_CHECKING([for valgrind])
-
-  SEARCH_PATH="/usr/local /usr"
-  SEARCH_FOR="/include/valgrind/valgrind.h"
-  for i in $SEARCH_PATH ; do
-    if test -r $i/$SEARCH_FOR; then
-      VALGRIND_DIR=$i
-    fi
-  done
-
-  if test -z "$VALGRIND_DIR"; then
-    AC_MSG_RESULT([not found])
-  else
-    AC_MSG_RESULT(found in $VALGRIND_DIR)
-    AC_DEFINE(HAVE_VALGRIND, 1, [ ])
-  fi
-])

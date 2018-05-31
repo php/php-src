@@ -619,8 +619,8 @@ static void do_inheritance_check_on_method(zend_function *child, zend_function *
 			error_verb = "should";
 		}
 		zend_error(error_level, "Declaration of %s %s be compatible with %s", ZSTR_VAL(child_prototype), error_verb, ZSTR_VAL(method_prototype));
-		zend_string_free(child_prototype);
-		zend_string_free(method_prototype);
+		zend_string_efree(child_prototype);
+		zend_string_efree(method_prototype);
 	}
 }
 /* }}} */
@@ -1158,7 +1158,7 @@ static void zend_add_magic_methods(zend_class_entry* ce, zend_string* mname, zen
 			ce->constructor = fe;
 			fe->common.fn_flags |= ZEND_ACC_CTOR;
 		}
-		zend_string_release(lowercase_name);
+		zend_string_release_ex(lowercase_name, 0);
 	}
 }
 /* }}} */
@@ -1288,7 +1288,7 @@ static int zend_traits_copy_functions(zend_string *fnname, zend_function *fn, ze
 
 				lcname = zend_string_tolower(alias->alias);
 				zend_add_trait_method(ce, ZSTR_VAL(alias->alias), lcname, &fn_copy, overriden);
-				zend_string_release(lcname);
+				zend_string_release_ex(lcname, 0);
 
 				/* Record the trait from which this alias was resolved. */
 				if (!alias->trait_method->ce) {
@@ -1380,7 +1380,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				lcname = zend_string_tolower(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 												 lcname);
-				zend_string_release(lcname);
+				zend_string_release_ex(lcname, 0);
 				if (!method_exists) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							   "A precedence rule was defined for %s::%s but this method does not exist",
@@ -1414,7 +1414,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 								   ZSTR_VAL(cur_precedence->trait_method->ce->name));
 					}
 
-					zend_string_release(class_name);
+					zend_string_release_ex(class_name, 0);
 					j++;
 				}
 			}
@@ -1438,7 +1438,7 @@ static void zend_traits_init_trait_structures(zend_class_entry *ce) /* {{{ */
 				lcname = zend_string_tolower(cur_method_ref->method_name);
 				method_exists = zend_hash_exists(&cur_method_ref->ce->function_table,
 						lcname);
-				zend_string_release(lcname);
+				zend_string_release_ex(lcname, 0);
 
 				if (!method_exists) {
 					zend_error_noreturn(E_COMPILE_ERROR, "An alias was defined for %s::%s but this method does not exist", ZSTR_VAL(cur_method_ref->ce->name), ZSTR_VAL(cur_method_ref->method_name));
@@ -1465,10 +1465,10 @@ static void zend_traits_compile_exclude_table(HashTable* exclude_table, zend_tra
 					zend_string *lcname =
 						zend_string_tolower(precedences[i]->trait_method->method_name);
 					if (zend_hash_add_empty_element(exclude_table, lcname) == NULL) {
-						zend_string_release(lcname);
+						zend_string_release_ex(lcname, 0);
 						zend_error_noreturn(E_COMPILE_ERROR, "Failed to evaluate a trait precedence (%s). Method of trait %s was defined to be excluded multiple times", ZSTR_VAL(precedences[i]->trait_method->method_name), ZSTR_VAL(trait->name));
 					}
-					zend_string_release(lcname);
+					zend_string_release_ex(lcname, 0);
 				}
 				++j;
 			}
@@ -1587,9 +1587,9 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			/* next: check for conflicts with current class */
 			if ((coliding_prop = zend_hash_find_ptr(&ce->properties_info, prop_name)) != NULL) {
 				if (coliding_prop->flags & ZEND_ACC_SHADOW) {
-					zend_string_release(coliding_prop->name);
+					zend_string_release_ex(coliding_prop->name, 0);
 					if (coliding_prop->doc_comment) {
-						zend_string_release(coliding_prop->doc_comment);
+						zend_string_release_ex(coliding_prop->doc_comment, 0);
                     }
 					zend_hash_del(&ce->properties_info, prop_name);
 					flags |= ZEND_ACC_CHANGED;
@@ -1643,7 +1643,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 								ZSTR_VAL(ce->name));
 					}
 
-					zend_string_release(prop_name);
+					zend_string_release_ex(prop_name, 0);
 					continue;
 				}
 			}
@@ -1660,7 +1660,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			zend_declare_property_ex(ce, prop_name,
 									 prop_value, flags,
 								     doc_comment);
-			zend_string_release(prop_name);
+			zend_string_release_ex(prop_name, 0);
 		} ZEND_HASH_FOREACH_END();
 	}
 }
@@ -1697,12 +1697,12 @@ static void zend_do_check_for_inconsistent_traits_aliasing(zend_class_entry *ce)
 						cur_alias->trait_method->method_name);
 					if (zend_hash_exists(&ce->function_table,
 										 lc_method_name)) {
-						zend_string_release(lc_method_name);
+						zend_string_release_ex(lc_method_name, 0);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers for the trait alias %s() need to be changed in the same statement in which the alias is defined. Error",
 								   ZSTR_VAL(cur_alias->trait_method->method_name));
 					} else {
-						zend_string_release(lc_method_name);
+						zend_string_release_ex(lc_method_name, 0);
 						zend_error_noreturn(E_COMPILE_ERROR,
 								   "The modifiers of the trait method %s() are changed, but this method does not exist. Error",
 								   ZSTR_VAL(cur_alias->trait_method->method_name));

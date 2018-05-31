@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -180,7 +180,7 @@ PHP_FUNCTION(hrtime)
 		PHP_RETURN_HRTIME(t);
 	} else {
 		array_init_size(return_value, 2);
-		zend_hash_real_init(Z_ARRVAL_P(return_value), 1);
+		zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
 		add_next_index_long(return_value, (zend_long)(t / (php_hrtime_t)NANO_IN_SEC));
 		add_next_index_long(return_value, (zend_long)(t % (php_hrtime_t)NANO_IN_SEC));
 	}

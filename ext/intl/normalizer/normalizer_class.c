@@ -34,6 +34,12 @@ ZEND_BEGIN_ARG_INFO_EX( normalizer_args, 0, 0, 1 )
 	ZEND_ARG_INFO( 0, form )
 ZEND_END_ARG_INFO()
 
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+ZEND_BEGIN_ARG_INFO_EX( decomposition_args, 0, 0, 1 )
+	ZEND_ARG_INFO( 0, input )
+ZEND_END_ARG_INFO();
+#endif
+
 /* }}} */
 
 /* {{{ Normalizer_class_functions
@@ -43,6 +49,9 @@ ZEND_END_ARG_INFO()
 static const zend_function_entry Normalizer_class_functions[] = {
 	ZEND_FENTRY( normalize, ZEND_FN( normalizer_normalize ), normalizer_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
 	ZEND_FENTRY( isNormalized, ZEND_FN( normalizer_is_normalized ), normalizer_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	ZEND_FENTRY( getRawDecomposition, ZEND_FN( normalizer_get_raw_decomposition ), decomposition_args, ZEND_ACC_PUBLIC|ZEND_ACC_STATIC )
+#endif
 	PHP_FE_END
 };
 /* }}} */

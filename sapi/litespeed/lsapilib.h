@@ -384,7 +384,7 @@ int LSAPI_is_suEXEC_Daemon(void);
 
 int LSAPI_Set_Restored_Parent_Pid(int pid);
 
-typedef void (*LSAPI_On_Timer_pf)(void);
+typedef void (*LSAPI_On_Timer_pf)(int *forked_child_pid);
 void LSAPI_Register_Pgrp_Timer_Callback(LSAPI_On_Timer_pf);
 
 int LSAPI_Inc_Req_Processed(int cnt);

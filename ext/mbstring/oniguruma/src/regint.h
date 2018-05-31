@@ -47,12 +47,6 @@
 #endif
 #endif
 
-#ifdef EXPORT
-#ifndef ONIGURUMA_EXPORT
-#define ONIGURUMA_EXPORT
-#endif
-#endif
-
 #if defined(__i386) || defined(__i386__) || defined(_M_IX86) || \
     (defined(__ppc__) && defined(__APPLE__)) || \
     defined(__x86_64) || defined(__x86_64__) || \
@@ -63,37 +57,48 @@
 /* config */
 /* spec. config */
 #define USE_CALL
+#define USE_CALLOUT
 #define USE_BACKREF_WITH_LEVEL        /* \k<name+n>, \k<name-n> */
-#define USE_INSISTENT_CHECK_CAPTURES_STATUS_IN_ENDLESS_REPEAT  /* /(?:()|())*\2/ */
+#define USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT    /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
 
-//#define USE_TRY_IN_MATCH_LIMIT
-#ifdef USE_COMBINATION_EXPLOSION_CHECK
-#ifndef USE_TRY_IN_MATCH_LIMIT
-#define USE_TRY_IN_MATCH_LIMIT
-#endif
-#endif
+#define USE_RETRY_LIMIT_IN_MATCH
 
 /* internal config */
 #define USE_OP_PUSH_OR_JUMP_EXACT
 #define USE_QUANT_PEEK_NEXT
 #define USE_ST_LIBRARY
 
+#include "regenc.h"
+
+#ifdef __cplusplus
+# ifndef  HAVE_STDARG_PROTOTYPES
+#  define HAVE_STDARG_PROTOTYPES 1
+# endif
+#endif
+
+/* escape Mac OS X/Xcode 2.4/gcc 4.0.1 problem */
+#if defined(__APPLE__) && defined(__GNUC__) && __GNUC__ >= 4
+# ifndef  HAVE_STDARG_PROTOTYPES
+#  define HAVE_STDARG_PROTOTYPES 1
+# endif
+#endif
+
+#ifdef HAVE_STDARG_H
+# ifndef  HAVE_STDARG_PROTOTYPES
+#  define HAVE_STDARG_PROTOTYPES 1
+# endif
+#endif
+
+
 #define INIT_MATCH_STACK_SIZE                     160
 #define DEFAULT_MATCH_STACK_LIMIT_SIZE              0 /* unlimited */
-#define DEFAULT_TRY_IN_MATCH_LIMIT           10000000
+#define DEFAULT_RETRY_LIMIT_IN_MATCH         10000000
 #define DEFAULT_PARSE_DEPTH_LIMIT                4096
-
-#if defined(__GNUC__)
-#  define ARG_UNUSED  __attribute__ ((unused))
-#else
-#  define ARG_UNUSED
-#endif
 
 /* */
 /* escape other system UChar definition */
-#include "config.h"
 #ifdef ONIG_ESCAPE_UCHAR_COLLISION
 #undef ONIG_ESCAPE_UCHAR_COLLISION
 #endif
@@ -196,8 +201,6 @@ typedef unsigned int  uintptr_t;
 #endif
 #endif
 
-#include "regenc.h"
-
 #ifdef MIN
 #undef MIN
 #endif
@@ -249,13 +252,92 @@ typedef unsigned int  uintptr_t;
 
 #endif /* PLATFORM_UNALIGNED_WORD_ACCESS */
 
-typedef struct {
-  int  num_keeper;
-  int* keepers;
-} RegExt;
 
-#define REG_EXTP(reg)      (RegExt* )((reg)->chain)
+#ifdef USE_CALLOUT
+
+typedef struct {
+  int           flag;
+  OnigCalloutOf of;
+  int           in;
+  int           name_id;
+  const UChar*  tag_start;
+  const UChar*  tag_end;
+  OnigCalloutType type;
+  OnigCalloutFunc start_func;
+  OnigCalloutFunc end_func;
+  union {
+    struct {
+      const UChar* start;
+      const UChar* end;
+    } content;
+    struct {
+      int num;
+      int passed_num;
+      OnigType  types[ONIG_CALLOUT_MAX_ARGS_NUM];
+      OnigValue vals[ONIG_CALLOUT_MAX_ARGS_NUM];
+    } arg;
+  } u;
+} CalloutListEntry;
+
+#endif
+
+typedef struct {
+  const UChar* pattern;
+  const UChar* pattern_end;
+#ifdef USE_CALLOUT
+  void*  tag_table;
+  int    callout_num;
+  int    callout_list_alloc;
+  CalloutListEntry* callout_list;    /* index: callout num */
+#endif
+} RegexExt;
+
+#define REG_EXTP(reg)      ((RegexExt* )((reg)->chain))
 #define REG_EXTPL(reg)     ((reg)->chain)
+
+struct re_pattern_buffer {
+  /* common members of BBuf(bytes-buffer) */
+  unsigned char* p;         /* compiled pattern */
+  unsigned int used;        /* used space for p */
+  unsigned int alloc;       /* allocated space for p */
+
+  int num_mem;                   /* used memory(...) num counted from 1 */
+  int num_repeat;                /* OP_REPEAT/OP_REPEAT_NG id-counter */
+  int num_null_check;            /* OP_EMPTY_CHECK_START/END id counter */
+  int num_comb_exp_check;        /* no longer used (combination explosion check) */
+  int num_call;                  /* number of subexp call */
+  unsigned int capture_history;  /* (?@...) flag (1-31) */
+  unsigned int bt_mem_start;     /* need backtrack flag */
+  unsigned int bt_mem_end;       /* need backtrack flag */
+  int stack_pop_level;
+  int repeat_range_alloc;
+  OnigRepeatRange* repeat_range;
+
+  OnigEncoding      enc;
+  OnigOptionType    options;
+  OnigSyntaxType*   syntax;
+  OnigCaseFoldType  case_fold_flag;
+  void*             name_table;
+
+  /* optimization info (string search, char-map and anchors) */
+  int            optimize;          /* optimize flag */
+  int            threshold_len;     /* search str-length for apply optimize */
+  int            anchor;            /* BEGIN_BUF, BEGIN_POS, (SEMI_)END_BUF */
+  OnigLen   anchor_dmin;       /* (SEMI_)END_BUF anchor distance */
+  OnigLen   anchor_dmax;       /* (SEMI_)END_BUF anchor distance */
+  int            sub_anchor;        /* start-anchor for exact or map */
+  unsigned char *exact;
+  unsigned char *exact_end;
+  unsigned char  map[ONIG_CHAR_TABLE_SIZE]; /* used as BM skip or char-map */
+  int           *int_map;                   /* BM skip for exact_len > 255 */
+  int           *int_map_backward;          /* BM skip for backward search */
+  OnigLen   dmin;                      /* min-distance of exact or map */
+  OnigLen   dmax;                      /* max-distance of exact or map */
+
+  /* regex_t link chain */
+  struct re_pattern_buffer* chain;  /* escape compile-conflict */
+};
+
 
 /* stack pop level */
 enum StackPopLevel {
@@ -481,8 +563,8 @@ typedef struct _BBuf {
 #define ANCHOR_NO_WORD_BOUNDARY (1<<11)
 #define ANCHOR_WORD_BEGIN       (1<<12)
 #define ANCHOR_WORD_END         (1<<13)
-#define ANCHOR_ANYCHAR_STAR     (1<<14)   /* ".*" optimize info */
-#define ANCHOR_ANYCHAR_STAR_ML  (1<<15)   /* ".*" optimize info (multi-line) */
+#define ANCHOR_ANYCHAR_INF      (1<<14)
+#define ANCHOR_ANYCHAR_INF_ML   (1<<15)
 #define ANCHOR_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY    (1<<16)
 #define ANCHOR_NO_EXTENDED_GRAPHEME_CLUSTER_BOUNDARY (1<<17)
 
@@ -571,7 +653,7 @@ enum OpCode {
   OP_JUMP,
   OP_PUSH,
   OP_PUSH_SUPER,
-  OP_POP,
+  OP_POP_OUT,
   OP_PUSH_OR_JUMP_EXACT1,  /* if match exact then push, else jump. */
   OP_PUSH_IF_PEEK_NEXT,    /* if match exact then push, else none. */
   OP_REPEAT,               /* {n,m} */
@@ -595,10 +677,14 @@ enum OpCode {
   OP_LOOK_BEHIND_NOT_START, /* (?<!...) start */
   OP_LOOK_BEHIND_NOT_END,   /* (?<!...) end   */
 
-  OP_CALL,                 /* \g<name> */
+  OP_CALL,                  /* \g<name> */
   OP_RETURN,
   OP_PUSH_SAVE_VAL,
   OP_UPDATE_VAR,
+#ifdef USE_CALLOUT
+  OP_CALLOUT_CONTENTS,      /* (?{...}) (?{{...}}) */
+  OP_CALLOUT_NAME,          /* (*name) (*name[tag](args...)) */
+#endif
 
   /* no need: IS_DYNAMIC_OPTION() == 0 */
   OP_SET_OPTION_PUSH,    /* set option and push recover option */
@@ -624,7 +710,6 @@ typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
 typedef int MemNumType;
-typedef short int StateCheckNumType;
 typedef void* PointerType;
 typedef int SaveType;
 typedef int UpdateVarType;
@@ -668,7 +753,7 @@ typedef int ModeType;
 #define SIZE_OP_JUMP                   (SIZE_OPCODE + SIZE_RELADDR)
 #define SIZE_OP_PUSH                   (SIZE_OPCODE + SIZE_RELADDR)
 #define SIZE_OP_PUSH_SUPER             (SIZE_OPCODE + SIZE_RELADDR)
-#define SIZE_OP_POP                     SIZE_OPCODE
+#define SIZE_OP_POP_OUT                 SIZE_OPCODE
 #define SIZE_OP_PUSH_OR_JUMP_EXACT1    (SIZE_OPCODE + SIZE_RELADDR + 1)
 #define SIZE_OP_PUSH_IF_PEEK_NEXT      (SIZE_OPCODE + SIZE_RELADDR + 1)
 #define SIZE_OP_REPEAT_INC             (SIZE_OPCODE + SIZE_MEMNUM)
@@ -698,6 +783,11 @@ typedef int ModeType;
 #define SIZE_OP_RETURN                  SIZE_OPCODE
 #define SIZE_OP_PUSH_SAVE_VAL          (SIZE_OPCODE + SIZE_SAVE_TYPE + SIZE_MEMNUM)
 #define SIZE_OP_UPDATE_VAR             (SIZE_OPCODE + SIZE_UPDATE_VAR_TYPE + SIZE_MEMNUM)
+
+#ifdef USE_CALLOUT
+#define SIZE_OP_CALLOUT_CONTENTS       (SIZE_OPCODE + SIZE_MEMNUM)
+#define SIZE_OP_CALLOUT_NAME           (SIZE_OPCODE + SIZE_MEMNUM + SIZE_MEMNUM)
+#endif
 
 #define MC_ESC(syn)               (syn)->meta_char_table.esc
 #define MC_ANYCHAR(syn)           (syn)->meta_char_table.anychar
@@ -772,6 +862,85 @@ extern int    onig_bbuf_init P_((BBuf* buf, int size));
 extern int    onig_compile P_((regex_t* reg, const UChar* pattern, const UChar* pattern_end, OnigErrorInfo* einfo));
 extern void   onig_transfer P_((regex_t* to, regex_t* from));
 extern int    onig_is_code_in_cc_len P_((int enclen, OnigCodePoint code, void* /* CClassNode* */ cc));
+extern RegexExt* onig_get_regex_ext(regex_t* reg);
+extern int    onig_ext_set_pattern(regex_t* reg, const UChar* pattern, const UChar* pattern_end);
+
+#ifdef USE_CALLOUT
+
+extern OnigCalloutType onig_get_callout_type_by_name_id(int name_id);
+extern OnigCalloutFunc onig_get_callout_start_func_by_name_id(int id);
+extern OnigCalloutFunc onig_get_callout_end_func_by_name_id(int id);
+extern int             onig_callout_tag_table_free(void* table);
+extern void            onig_free_reg_callout_list(int n, CalloutListEntry* list);
+extern CalloutListEntry* onig_reg_callout_list_at(regex_t* reg, int num);
+extern OnigCalloutFunc onig_get_callout_start_func(regex_t* reg, int callout_num);
+
+/* for definition of builtin callout */
+#define BC0_P(name, func)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                              (UChar* )(name), (UChar* )((name) + len),\
+                              ONIG_CALLOUT_IN_PROGRESS,\
+                              onig_builtin_ ## func, 0, 0, 0, 0, 0);\
+  if (id < 0) return id;\
+} while(0)
+
+#define BC0_R(name, func)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                              (UChar* )(name), (UChar* )((name) + len),\
+                              ONIG_CALLOUT_IN_RETRACTION,\
+                              onig_builtin_ ## func, 0, 0, 0, 0, 0);\
+  if (id < 0) return id;\
+} while(0)
+
+#define BC0_B(name, func)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                              (UChar* )(name), (UChar* )((name) + len),\
+                              ONIG_CALLOUT_IN_BOTH,\
+                              onig_builtin_ ## func, 0, 0, 0, 0, 0);\
+  if (id < 0) return id;\
+} while(0)
+
+#define BC_P(name, func, na, ts)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                              (UChar* )(name), (UChar* )((name) + len),\
+                              ONIG_CALLOUT_IN_PROGRESS,\
+                                onig_builtin_ ## func, 0, (na), (ts), 0, 0); \
+  if (id < 0) return id;\
+} while(0)
+
+#define BC_P_O(name, func, nts, ts, nopts, opts)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                           (UChar* )(name), (UChar* )((name) + len),\
+                           ONIG_CALLOUT_IN_PROGRESS,\
+                           onig_builtin_ ## func, 0, (nts), (ts), (nopts), (opts));\
+  if (id < 0) return id;\
+} while(0)
+
+#define BC_B(name, func, na, ts)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                              (UChar* )(name), (UChar* )((name) + len),\
+                              ONIG_CALLOUT_IN_BOTH,\
+                              onig_builtin_ ## func, 0, (na), (ts), 0, 0);\
+  if (id < 0) return id;\
+} while(0)
+
+#define BC_B_O(name, func, nts, ts, nopts, opts)  do {\
+  int len = onigenc_str_bytelen_null(enc, (UChar* )name);\
+  id = onig_set_callout_of_name(enc, ONIG_CALLOUT_TYPE_SINGLE,\
+                           (UChar* )(name), (UChar* )((name) + len),\
+                           ONIG_CALLOUT_IN_BOTH,\
+                           onig_builtin_ ## func, 0, (nts), (ts), (nopts), (opts));\
+  if (id < 0) return id;\
+} while(0)
+
+#endif /* USE_CALLOUT */
+
 
 /* strend hash */
 typedef void hash_table_type;

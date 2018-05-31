@@ -183,6 +183,20 @@ if (getenv('TEST_PHPDBG_EXECUTABLE')) {
 	$environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 }
 
+if (!function_exists("hrtime")) {
+	function hrtime(bool $as_num = false)
+	{
+		$t = microtime(true);
+
+		if ($as_num) {
+			return $t*1000000000;
+		}
+
+		$s = floor($t);
+		return array(0 => $s, 1 => ($t - $s)*1000000000);
+	}
+}
+
 function verify_config()
 {
 	global $php;
@@ -778,7 +792,7 @@ HELP;
 
 			if (!$testfile && strpos($argv[$i], '*') !== false && function_exists('glob')) {
 
-				if (preg_match("/\.phpt$/", $argv[$i])) {
+				if (substr($argv[$i], -5) == '.phpt') {
 					$pattern_match = glob($argv[$i]);
 				} else if (preg_match("/\*$/", $argv[$i])) {
 					$pattern_match = glob($argv[$i] . '.phpt');
@@ -792,7 +806,7 @@ HELP;
 
 			} else if (is_dir($testfile)) {
 				find_files($testfile);
-			} else if (preg_match("/\.phpt$/", $testfile)) {
+			} else if (substr($testfile, -5) == '.phpt') {
 				$test_files[] = $testfile;
 			} else {
 				die('Cannot find test file "' . $argv[$i] . '".' . PHP_EOL);
@@ -883,7 +897,7 @@ $test_dirs = array();
 $optionals = array('tests', 'ext', 'Zend', 'sapi');
 
 foreach($optionals as $dir) {
-	if (@filetype($dir) == 'dir') {
+	if (is_dir($dir)) {
 		$test_dirs[] = $dir;
 	}
 }
@@ -1120,7 +1134,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	if ($captureStdErr) {
 		$descriptorspec[2] = array('pipe', 'w');
 	}
-	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true));
 
 	if (!$proc) {
 		return false;
@@ -1268,23 +1282,19 @@ TEST $file
 
 	$fp = fopen($file, "rb") or error("Cannot open test file: $file");
 
-	$borked = false;
-	$bork_info = '';
+	$bork_info = null;
 
 	if (!feof($fp)) {
 		$line = fgets($fp);
 
 		if ($line === false) {
 			$bork_info = "cannot read test";
-			$borked = true;
 		}
 	} else {
 		$bork_info = "empty test [$file]";
-		$borked = true;
 	}
-	if (!$borked && strncmp('--TEST--', $line, 8)) {
+	if ($bork_info === null && strncmp('--TEST--', $line, 8)) {
 		$bork_info = "tests must start with --TEST-- [$file]";
-		$borked = true;
 	}
 
 	$section = 'TEST';
@@ -1300,12 +1310,10 @@ TEST $file
 
 		// Match the beginning of a section.
 		if (preg_match('/^--([_A-Z]+)--/', $line, $r)) {
-			$section = $r[1];
-			settype($section, 'string');
+			$section = (string) $r[1];
 
 			if (isset($section_text[$section]) && $section_text[$section]) {
 				$bork_info = "duplicated $section section";
-				$borked    = true;
 			}
 
 			// check for unknown sections
@@ -1319,7 +1327,6 @@ TEST $file
 				'CREDITS', 'DESCRIPTION',
 			))) {
 				$bork_info = 'Unknown section "' . $section . '"';
-				$borked = true;
 			}
 
 			$section_text[$section] = '';
@@ -1341,24 +1348,20 @@ TEST $file
 
 	// the redirect section allows a set of tests to be reused outside of
 	// a given test dir
-	if (!$borked) {
-		if (@count($section_text['REDIRECTTEST']) == 1) {
+	if ($bork_info === null) {
+		if (isset($section_text['REDIRECTTEST'])) {
 
 			if ($IN_REDIRECT) {
-				$borked = true;
 				$bork_info = "Can't redirect a test from within a redirected test";
-			} else {
-				$borked = false;
 			}
 
 		} else {
 
 			if (!isset($section_text['PHPDBG']) && @count($section_text['FILE']) + @count($section_text['FILEEOF']) + @count($section_text['FILE_EXTERNAL']) != 1) {
 				$bork_info = "missing section --FILE--";
-				$borked = true;
 			}
 
-			if (@count($section_text['FILEEOF']) == 1) {
+			if (isset($section_text['FILEEOF'])) {
 				$section_text['FILE'] = preg_replace("/[\r\n]+$/", '', $section_text['FILEEOF']);
 				unset($section_text['FILEEOF']);
 			}
@@ -1366,7 +1369,7 @@ TEST $file
 			foreach (array( 'FILE', 'EXPECT', 'EXPECTF', 'EXPECTREGEX' ) as $prefix) {
 				$key = $prefix . '_EXTERNAL';
 
-				if (@count($section_text[$key]) == 1) {
+				if (isset($section_text[$key])) {
 					// don't allow tests to retrieve files from anywhere but this subdirectory
 					$section_text[$key] = dirname($file) . '/' . trim(str_replace('..', '', $section_text[$key]));
 
@@ -1375,14 +1378,12 @@ TEST $file
 						unset($section_text[$key]);
 					} else {
 						$bork_info = "could not load --" . $key . "-- " . dirname($file) . '/' . trim($section_text[$key]);
-						$borked = true;
 					}
 				}
 			}
 
 			if ((@count($section_text['EXPECT']) + @count($section_text['EXPECTF']) + @count($section_text['EXPECTREGEX'])) != 1) {
 				$bork_info = "missing section --EXPECT--, --EXPECTF-- or --EXPECTREGEX--";
-				$borked = true;
 			}
 		}
 	}
@@ -1391,7 +1392,7 @@ TEST $file
 	$shortname = str_replace(TEST_PHP_SRCDIR . '/', '', $file);
 	$tested_file = $shortname;
 
-	if ($borked) {
+	if ($bork_info !== null) {
 		show_result("BORK", $bork_info, $tested_file);
 		$PHP_FAILED_TESTS['BORKED'][] = array (
 								'name'      => $file,
@@ -1683,7 +1684,7 @@ TEST $file
 		return 'SKIPPED';
 	}
 
-	if (@count($section_text['REDIRECTTEST']) == 1) {
+	if (isset($section_text['REDIRECTTEST'])) {
 		$test_files = array();
 
 		$IN_REDIRECT = eval($section_text['REDIRECTTEST']);
@@ -1936,19 +1937,21 @@ COMMAND $cmd
 ";
 
 	junit_start_timer($shortname);
-	$startTime = microtime(true);
+	$hrtime = hrtime();
+	$startTime = $hrtime[0]*1000000000 + $hrtime[1];
 
 	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
-	$time = microtime(true) - $startTime;
-	if ($time * 1000 >= $slow_min_ms) {
+	$hrtime = hrtime();
+	$time = $hrtime[0]*1000000000 + $hrtime[1] - $startTime;
+	if ($time >= $slow_min_ms * 1000000) {
 		$PHP_FAILED_TESTS['SLOW'][] = array(
 			'name'      => $file,
 			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 			'output'    => '',
 			'diff'      => '',
-			'info'      => $time,
+			'info'      => $time / 1000000000,
 		);
 	}
 
@@ -2080,7 +2083,7 @@ COMMAND $cmd
 				$startOffset = $end + 2;
 			}
 			$wanted_re = $temp;
-			
+
 			// Stick to basics
 			$wanted_re = str_replace('%e', '\\' . DIRECTORY_SEPARATOR, $wanted_re);
 			$wanted_re = str_replace('%s', '[^\r\n]+', $wanted_re);

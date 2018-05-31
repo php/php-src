@@ -3,6 +3,9 @@
 #include "intl_convert.h"
 
 #include <unicode/uchar.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -258,7 +261,7 @@ IC_METHOD(charName) {
 	error = U_ZERO_ERROR;
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		INTL_CHECK_STATUS_OR_NULL(error, "Failure getting character name");
 	}
 	RETURN_NEW_STR(buffer);

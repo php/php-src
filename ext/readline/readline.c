@@ -262,6 +262,11 @@ PHP_FUNCTION(readline_info)
 		add_assoc_long(return_value,"pending_input",rl_pending_input);
 		add_assoc_string(return_value,"prompt",SAFE_STRING(rl_prompt));
 		add_assoc_string(return_value,"terminal_name",(char *)SAFE_STRING(rl_terminal_name));
+		add_assoc_str(return_value, "completion_append_character",
+			rl_completion_append_character == 0
+				? ZSTR_EMPTY_ALLOC()
+				: ZSTR_CHAR(rl_completion_append_character));
+		add_assoc_bool(return_value,"completion_suppress_append",rl_completion_suppress_append);
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		add_assoc_long(return_value,"erase_empty_line",rl_erase_empty_line);
@@ -307,6 +312,20 @@ PHP_FUNCTION(readline_info)
 			RETVAL_STRING(SAFE_STRING(rl_prompt));
 		} else if (!strcasecmp(what, "terminal_name")) {
 			RETVAL_STRING((char *)SAFE_STRING(rl_terminal_name));
+		} else if (!strcasecmp(what, "completion_suppress_append")) {
+			oldval = rl_completion_suppress_append;
+			if (value) {
+				rl_completion_suppress_append = zend_is_true(value);
+			}
+			RETVAL_BOOL(oldval);
+		} else if (!strcasecmp(what, "completion_append_character")) {
+			oldval = rl_completion_append_character;
+			if (value) {
+				convert_to_string_ex(value)
+				rl_completion_append_character = (int)Z_STRVAL_P(value)[0];
+			}
+			RETVAL_INTERNED_STR(
+				oldval == 0 ? ZSTR_EMPTY_ALLOC() : ZSTR_CHAR(oldval));
 #endif
 #if HAVE_ERASE_EMPTY_LINE
 		} else if (!strcasecmp(what, "erase_empty_line")) {
@@ -490,7 +509,6 @@ static void _readline_long_zval(zval *ret, long l)
 static char **_readline_completion_cb(const char *text, int start, int end)
 {
 	zval params[3];
-	int i;
 	char **matches = NULL;
 
 	_readline_string_zval(&params[0], text);
@@ -512,9 +530,7 @@ static char **_readline_completion_cb(const char *text, int start, int end)
 		}
 	}
 
-	for (i = 0; i < 3; i++) {
-		zval_ptr_dtor(&params[i]);
-	}
+	zval_ptr_dtor(&params[0]);
 	zval_ptr_dtor(&_readline_array);
 
 	return matches;
@@ -531,7 +547,7 @@ PHP_FUNCTION(readline_completion_function)
 	if (!zend_is_callable(arg, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(arg);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 
@@ -579,7 +595,7 @@ PHP_FUNCTION(readline_callback_handler_install)
 	if (!zend_is_callable(callback, 0, NULL)) {
 		zend_string *name = zend_get_callable_name(callback);
 		php_error_docref(NULL, E_WARNING, "%s is not callable", ZSTR_VAL(name));
-		zend_string_release(name);
+		zend_string_release_ex(name, 0);
 		RETURN_FALSE;
 	}
 

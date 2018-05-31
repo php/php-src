@@ -11,7 +11,8 @@ if test "$PHP_FILEINFO" != "no"; then
     libmagic/cdf.c libmagic/cdf_time.c libmagic/compress.c \
     libmagic/encoding.c libmagic/fsmagic.c libmagic/funcs.c \
     libmagic/is_tar.c libmagic/magic.c libmagic/print.c \
-    libmagic/readcdf.c libmagic/softmagic.c libmagic/der.c"
+    libmagic/readcdf.c libmagic/softmagic.c libmagic/der.c \
+    libmagic/buffer.c"
 
   AC_MSG_CHECKING([for strcasestr])
   AC_TRY_RUN([

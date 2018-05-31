@@ -13,7 +13,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 $descriptors = array(array('pipe', 'r'), array('pipe', 'w'), array('pipe', 'w'));
 $stdin = str_repeat('*', 4097);
 
-$options = array_merge(array('suppress_errors' => true, 'binary_pipes' => true, 'bypass_shell' => false));
+$options = array_merge(array('suppress_errors' => true, 'bypass_shell' => false));
 $process = proc_open($cmd, $descriptors, $pipes, getcwd(), array(), $options);
 
 foreach ($pipes as $pipe) {

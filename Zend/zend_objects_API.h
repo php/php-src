@@ -67,7 +67,6 @@ static zend_always_inline void zend_object_store_ctor_failed(zend_object *obj)
 
 #define ZEND_OBJECTS_STORE_HANDLERS 0, zend_object_std_dtor, zend_objects_destroy_object, zend_objects_clone_obj
 
-ZEND_API const zend_object_handlers * ZEND_FASTCALL zend_get_std_object_handlers(void);
 END_EXTERN_C()
 
 static zend_always_inline void zend_object_release(zend_object *obj)

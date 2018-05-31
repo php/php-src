@@ -347,7 +347,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 			{
 				zend_string *str = zval_get_string(newval);
 				xmlNodeSetContentLen(nodep, (xmlChar *) ZSTR_VAL(str), ZSTR_LEN(str) + 1);
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 				break;
 			}
 		default:
@@ -748,14 +748,14 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 				}
 
 				if (ns == NULL) {
-					zend_string_release(str);
+					zend_string_release_ex(str, 0);
 					php_dom_throw_error(NAMESPACE_ERR, dom_get_strict_error(obj->document));
 					return FAILURE;
 				}
 
 				xmlSetNs(nodep, ns);
 			}
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			break;
 		default:
 			break;
@@ -868,7 +868,7 @@ int dom_node_text_content_write(dom_object *obj, zval *newval)
 	/* we have to use xmlNodeAddContent() to get the same behavior as with xmlNewText() */
 	xmlNodeSetContent(nodep, (xmlChar *) "");
 	xmlNodeAddContent(nodep, (xmlChar *) ZSTR_VAL(str));
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 
 	return SUCCESS;
 }

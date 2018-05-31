@@ -195,7 +195,7 @@ void dateformat_register_IntlDateFormatter_class( void )
 	ce.create_object = IntlDateFormatter_object_create;
 	IntlDateFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&IntlDateFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&IntlDateFormatter_handlers, &std_object_handlers,
 		sizeof IntlDateFormatter_handlers);
 	IntlDateFormatter_handlers.offset = XtOffsetOf(IntlDateFormatter_object, zo);
 	IntlDateFormatter_handlers.clone_obj = IntlDateFormatter_object_clone;

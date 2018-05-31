@@ -330,7 +330,10 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 	int decimal_set;
 	size_t decimal_len;
 	char dec_sep = '.';
-	char tsd_sep[3] = "',.";
+	char *thousand;
+	int thousand_set;
+	size_t thousand_len;
+	char *tsd_sep;
 
 	zend_long lval;
 	double dval;
@@ -352,6 +355,19 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 		} else {
 			dec_sep = *decimal;
 		}
+	}
+
+	FETCH_STRING_OPTION(thousand, "thousand");
+
+	if (thousand_set) {
+		if (thousand_len < 1) {
+			php_error_docref(NULL, E_WARNING, "thousand separator must be at least one char");
+			RETURN_VALIDATION_FAILED
+		} else {
+			tsd_sep = thousand;
+		}
+	} else {
+		tsd_sep = "',.";
 	}
 
 	num = p = emalloc(len+1);
@@ -387,7 +403,7 @@ void php_filter_float(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 			}
 			break;
 		}
-		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && (*str == tsd_sep[0] || *str == tsd_sep[1] || *str == tsd_sep[2])) {
+		if ((flags & FILTER_FLAG_ALLOW_THOUSAND) && strchr(tsd_sep, *str)) {
 			if (first?(n < 1 || n > 3):(n != 3)) {
 				goto error;
 			}
@@ -628,11 +644,10 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
 	re = pcre_get_compiled_regex(sregexp, &capture_count, &preg_options);
+	zend_string_release_ex(sregexp, 0);
 	if (!re) {
-		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	zend_string_release(sregexp);
 	match_data = php_pcre_create_match_data(capture_count, re);
 	if (!match_data) {
 		RETURN_VALIDATION_FAILED

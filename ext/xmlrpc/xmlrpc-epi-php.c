@@ -518,7 +518,7 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						if (Z_TYPE(val) != IS_STRING) {
 							zend_string *str = zval_get_string_func(&val);
 							xReturn = XMLRPC_CreateValueBase64(key, ZSTR_VAL(str), ZSTR_LEN(str));
-							zend_string_release(str);
+							zend_string_release_ex(str, 0);
 						} else {
 							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(val), Z_STRLEN(val));
 						}
@@ -948,7 +948,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", ZSTR_VAL(php_function_name));
 		}
-		zend_string_release(php_function_name);
+		zend_string_release_ex(php_function_name, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	/* so we don't call the same callbacks ever again */

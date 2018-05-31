@@ -68,7 +68,7 @@ static void xmlreader_register_prop_handler(HashTable *prop_handler, char *name,
 	hnd.type = rettype;
 	str = zend_string_init_interned(name, strlen(name), 1);
 	zend_hash_add_mem(prop_handler, str, &hnd, sizeof(xmlreader_prop_handler));
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 }
 /* }}} */
 
@@ -122,7 +122,6 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
 	zval tmp_member;
 	zval *retval = NULL;
 	xmlreader_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -136,8 +135,7 @@ zval *xmlreader_get_property_ptr_ptr(zval *object, zval *member, int type, void 
 	}
 
 	if (hnd == NULL) {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -155,7 +153,6 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
 	zval tmp_member;
 	zval *retval = NULL;
 	xmlreader_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -175,8 +172,7 @@ zval *xmlreader_read_property(zval *object, zval *member, int type, void **cache
 			retval = rv;
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	if (member == &tmp_member) {
@@ -192,7 +188,6 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, void **ca
 	xmlreader_object *obj;
 	zval tmp_member;
 	xmlreader_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 
  	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -207,8 +202,7 @@ void xmlreader_write_property(zval *object, zval *member, zval *value, void **ca
 	if (hnd != NULL) {
 		php_error_docref(NULL, E_WARNING, "Cannot write to read-only property");
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -1303,7 +1297,7 @@ PHP_MINIT_FUNCTION(xmlreader)
 
 	zend_class_entry ce;
 
-	memcpy(&xmlreader_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&xmlreader_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	xmlreader_object_handlers.offset = XtOffsetOf(xmlreader_object, std);
 	xmlreader_object_handlers.dtor_obj = zend_objects_destroy_object;
 	xmlreader_object_handlers.free_obj = xmlreader_objects_free_storage;

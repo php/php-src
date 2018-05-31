@@ -529,7 +529,7 @@ TODO:
 			class_name = zend_string_alloc(class_name_len, 0);
 			zend_str_tolower_copy(ZSTR_VAL(class_name), text, class_name_len);
 			if ((ce = zend_lookup_class(class_name)) == NULL) {
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 				return NULL;
 			}
 			lc_text = zend_str_tolower_dup(class_name_end + 2, textlen - 2 - class_name_len);
@@ -560,7 +560,7 @@ TODO:
 		}
 		efree(lc_text);
 		if (class_name_end) {
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 		}
 		if (ce && retval) {
 			int len = class_name_len + 2 + strlen(retval) + 1;
@@ -637,10 +637,10 @@ static int readline_shell_run(void) /* {{{ */
 				cmd = zend_string_init(&line[1], param - &line[1] - 1, 0);
 
 				zend_alter_ini_entry_chars_ex(cmd, param, strlen(param), PHP_INI_USER, PHP_INI_STAGE_RUNTIME, 0);
-				zend_string_release(cmd);
+				zend_string_release_ex(cmd, 0);
 				add_history(line);
 
-				zend_string_release(prompt);
+				zend_string_release_ex(prompt, 0);
 				/* TODO: This might be wrong! */
 				prompt = cli_get_prompt("php", '>');
 				continue;
@@ -662,7 +662,7 @@ static int readline_shell_run(void) /* {{{ */
 		}
 
 		free(line);
-		zend_string_release(prompt);
+		zend_string_release_ex(prompt, 0);
 
 		if (!cli_is_valid_code(code, pos, &prompt)) {
 			continue;
@@ -704,7 +704,7 @@ static int readline_shell_run(void) /* {{{ */
 	free(history_file);
 #endif
 	efree(code);
-	zend_string_release(prompt);
+	zend_string_release_ex(prompt, 0);
 	return EG(exit_status);
 }
 /* }}} */

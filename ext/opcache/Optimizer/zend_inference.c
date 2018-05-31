@@ -2237,7 +2237,7 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 		zend_string *lcname = zend_string_tolower(ZEND_TYPE_NAME(arg_info->type));
 		tmp |= MAY_BE_OBJECT;
 		*pce = get_class_entry(script, lcname);
-		zend_string_release(lcname);
+		zend_string_release_ex(lcname, 0);
 	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
 		zend_uchar type_hint = ZEND_TYPE_CODE(arg_info->type);
 

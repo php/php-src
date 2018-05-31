@@ -4,7 +4,7 @@
   regparse.h -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2017  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -51,7 +51,11 @@ enum GimmickType {
   GIMMICK_KEEP = 1,
   GIMMICK_SAVE = 2,
   GIMMICK_UPDATE_VAR = 3,
+#ifdef USE_CALLOUT
+  GIMMICK_CALLOUT = 4,
+#endif
 };
+
 
 /* node type bit */
 #define NODE_TYPE2BIT(type)      (1<<(type))
@@ -97,7 +101,7 @@ enum GimmickType {
   (NODE_IS_FIXED_OPTION(node) ? CTYPE_(node)->options : reg->options)
 
 
-#define ANCHOR_ANYCHAR_STAR_MASK (ANCHOR_ANYCHAR_STAR | ANCHOR_ANYCHAR_STAR_ML)
+#define ANCHOR_ANYCHAR_INF_MASK  (ANCHOR_ANYCHAR_INF | ANCHOR_ANYCHAR_INF_ML)
 #define ANCHOR_END_BUF_MASK      (ANCHOR_END_BUF | ANCHOR_SEMI_END_BUF)
 
 enum EnclosureType {
@@ -329,6 +333,7 @@ typedef struct {
 
   enum GimmickType type;
   int  detail_type;
+  int  num;
   int  id;
 } GimmickNode;
 
@@ -439,6 +444,10 @@ extern int    onig_parse_tree P_((Node** root, const UChar* pattern, const UChar
 extern int    onig_free_shared_cclass_table P_((void));
 extern int    onig_is_code_in_cc P_((OnigEncoding enc, OnigCodePoint code, CClassNode* cc));
 extern OnigLen onig_get_tiny_min_len(Node* node, unsigned int inhibit_node_types, int* invalid_node);
+
+#ifdef USE_CALLOUT
+extern int onig_global_callout_names_free(void);
+#endif
 
 #ifdef ONIG_DEBUG
 extern int onig_print_names(FILE*, regex_t*);

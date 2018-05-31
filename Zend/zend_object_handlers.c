@@ -68,8 +68,7 @@ ZEND_API void rebuild_object_properties(zend_object *zobj) /* {{{ */
 
 		zobj->properties = zend_new_array(ce->default_properties_count);
 		if (ce->default_properties_count) {
-			zend_hash_real_init(zobj->properties, 0);
-			zobj->properties->nInternalPointer = 0;
+			zend_hash_real_init_mixed(zobj->properties);
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (/*prop_info->ce == ce &&*/
 				    (prop_info->flags & ZEND_ACC_STATIC) == 0) {
@@ -457,7 +456,7 @@ ZEND_API int zend_check_property_access(zend_object *zobj, zend_string *prop_inf
 		member = zend_string_copy(prop_info_name);
 	}
 	property_info = zend_get_property_info(zobj->ce, member, 1);
-	zend_string_release(member);
+	zend_string_release_ex(member, 0);
 	if (property_info == NULL) {
 		/* undefined public property */
 		if (class_name && class_name[0] != '*') {
@@ -505,7 +504,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 		     EXPECTED(zend_string_equal_content(str, member)))) {
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else if (EXPECTED(Z_PROPERTY_GUARD_P(zv) == 0)) {
-			zend_string_release(Z_STR_P(zv));
+			zend_string_release_ex(Z_STR_P(zv), 0);
 			ZVAL_STR_COPY(zv, member);
 			return &Z_PROPERTY_GUARD_P(zv);
 		} else {
@@ -514,7 +513,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 			/* mark pointer as "special" using low bit */
 			zend_hash_add_new_ptr(guards, str,
 				(void*)(((zend_uintptr_t)&Z_PROPERTY_GUARD_P(zv)) | 1));
-			zend_string_release(Z_STR_P(zv));
+			zend_string_release_ex(Z_STR_P(zv), 0);
 			ZVAL_ARR(zv, guards);
 		}
 	} else if (EXPECTED(Z_TYPE_P(zv) == IS_ARRAY)) {
@@ -537,7 +536,7 @@ ZEND_API uint32_t *zend_get_property_guard(zend_object *zobj, zend_string *membe
 }
 /* }}} */
 
-zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
+ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member, tmp_object;
@@ -771,7 +770,7 @@ exit:
 }
 /* }}} */
 
-zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
+ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
@@ -821,7 +820,7 @@ zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv) /*
 }
 /* }}} */
 
-static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
+ZEND_API void zend_std_write_dimension(zval *object, zval *offset, zval *value) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
@@ -843,7 +842,7 @@ static void zend_std_write_dimension(zval *object, zval *offset, zval *value) /*
 }
 /* }}} */
 
-static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
+ZEND_API int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval retval, tmp_offset, tmp_object;
@@ -877,7 +876,7 @@ static int zend_std_has_dimension(zval *object, zval *offset, int check_empty) /
 }
 /* }}} */
 
-static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
+ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
 	zend_string *name, *tmp_name;
@@ -941,7 +940,7 @@ static zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type,
 }
 /* }}} */
 
-static void zend_std_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
+ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -1011,7 +1010,7 @@ exit:
 }
 /* }}} */
 
-static void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
+ZEND_API void zend_std_unset_dimension(zval *object, zval *offset) /* {{{ */
 {
 	zend_class_entry *ce = Z_OBJCE_P(object);
 	zval tmp_offset, tmp_object;
@@ -1159,7 +1158,7 @@ static zend_always_inline zend_function *zend_get_user_call_function(zend_class_
 }
 /* }}} */
 
-static union _zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
+ZEND_API zend_function *zend_std_get_method(zend_object **obj_ptr, zend_string *method_name, const zval *key) /* {{{ */
 {
 	zend_object *zobj = *obj_ptr;
 	zval *func;
@@ -1283,7 +1282,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 			fbc = ce->constructor;
 		} else {
 			if (UNEXPECTED(!key)) {
-				zend_string_release(lc_function_name);
+				zend_string_release_ex(lc_function_name, 0);
 			}
 			if (ce->__call &&
 				(object = zend_get_this_object(EG(current_execute_data))) != NULL &&
@@ -1346,7 +1345,7 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 	}
 
 	if (UNEXPECTED(!key)) {
-		zend_string_release(lc_function_name);
+		zend_string_release_ex(lc_function_name, 0);
 	}
 
 	return fbc;
@@ -1400,7 +1399,7 @@ ZEND_API ZEND_COLD zend_bool zend_std_unset_static_property(zend_class_entry *ce
 }
 /* }}} */
 
-ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
+ZEND_API zend_function *zend_std_get_constructor(zend_object *zobj) /* {{{ */
 {
 	zend_function *constructor = zobj->ce->constructor;
 	zend_class_entry *scope;
@@ -1451,7 +1450,7 @@ ZEND_API union _zend_function *zend_std_get_constructor(zend_object *zobj) /* {{
 }
 /* }}} */
 
-static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
+ZEND_API int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 {
 	zend_object *zobj1, *zobj2;
 
@@ -1523,7 +1522,7 @@ static int zend_std_compare_objects(zval *o1, zval *o2) /* {{{ */
 }
 /* }}} */
 
-static int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
+ZEND_API int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
 	int result;
@@ -1641,7 +1640,7 @@ exit:
 }
 /* }}} */
 
-zend_string *zend_std_object_get_class_name(const zend_object *zobj) /* {{{ */
+ZEND_API zend_string *zend_std_get_class_name(const zend_object *zobj) /* {{{ */
 {
 	return zend_string_copy(zobj->ce->name);
 }
@@ -1709,7 +1708,7 @@ ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int ty
 }
 /* }}} */
 
-int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
+ZEND_API int zend_std_get_closure(zval *obj, zend_class_entry **ce_ptr, zend_function **fptr_ptr, zend_object **obj_ptr) /* {{{ */
 {
 	zval *func;
 	zend_class_entry *ce = Z_OBJCE_P(obj);
@@ -1755,7 +1754,7 @@ ZEND_API const zend_object_handlers std_object_handlers = {
 	zend_std_get_method,					/* get_method */
 	NULL,									/* call_method */
 	zend_std_get_constructor,				/* get_constructor */
-	zend_std_object_get_class_name,			/* get_class_name */
+	zend_std_get_class_name,				/* get_class_name */
 	zend_std_compare_objects,				/* compare_objects */
 	zend_std_cast_object_tostring,			/* cast_object */
 	NULL,									/* count_elements */

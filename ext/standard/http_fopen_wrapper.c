@@ -224,7 +224,7 @@ static php_stream *php_stream_url_wrap_http_ex(php_stream_wrapper *wrapper,
 
 	if (errstr) {
 		php_stream_wrapper_log_error(wrapper, options, "%s", ZSTR_VAL(errstr));
-		zend_string_release(errstr);
+		zend_string_release_ex(errstr, 0);
 		errstr = NULL;
 	}
 
@@ -520,7 +520,7 @@ finish:
 
 		}
 		if (tmp) {
-			zend_string_release(tmp);
+			zend_string_release_ex(tmp, 0);
 		}
 	}
 
@@ -864,7 +864,7 @@ finish:
 						if (!s) {
 							s = ZSTR_VAL(resource->path);
 							if (!ZSTR_LEN(resource->path)) {
-								zend_string_release(resource->path);
+								zend_string_release_ex(resource->path, 0);
 								resource->path = zend_string_init("/", 1, 0);
 								s = ZSTR_VAL(resource->path);
 							} else {

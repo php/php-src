@@ -41,6 +41,8 @@
 	smart_str_append_long_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
+#define smart_str_free(dest) \
+	smart_str_free_ex((dest), 0)
 
 BEGIN_EXTERN_C()
 
@@ -69,9 +71,9 @@ do_smart_str_realloc:
 	return len;
 }
 
-static zend_always_inline void smart_str_free(smart_str *str) {
+static zend_always_inline void smart_str_free_ex(smart_str *str, zend_bool persistent) {
 	if (str->s) {
-		zend_string_release(str->s);
+		zend_string_release_ex(str->s, persistent);
 		str->s = NULL;
 	}
 	str->a = 0;

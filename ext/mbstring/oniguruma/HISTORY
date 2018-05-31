@@ -1,5 +1,38 @@
 History
 
+2018/04/17: Version 6.8.2
+
+2018/04/13: add doc/CALLOUTS.API.ja
+2018/04/10: add doc/CALLOUTS.API
+2018/04/10: fix #87: Read unknown address in onig_error_code_to_str()
+2018/04/06: fix #86: typedef StateCheckNumType is unused
+2018/04/02: update automake 1.16.1
+2018/03/30: fix #84: stack-buffer-overflow in mbc_enc_len
+2018/03/28: PR #83: Improve CMake build
+2018/03/21: switch uses of UChar to OnigUChar in oniguruma.h (#80)
+
+2018/03/19: Version 6.8.1
+
+2018/03/19: update LTVERSION from 4:0:0 to 5:0:0
+2018/03/19: add flag, sb_range etc.. into OnigEncodingType
+2018/03/19: move regex structure from oniguruma.h to regint.h
+2018/03/19: ONIGENC_CTYPE_XXX to be enum (Issue #33)
+
+2018/03/16: Version 6.8.0
+
+2018/03/12: add doc/CALLOUTS.BUILTIN for builtin callouts
+2018/03/08: allow abbreviated notation for callouts (?(*name)..|..) (?(?{...})..|..)
+2018/03/02: NEW API: move onigenc_strdup() from regenc.h to oniguruma.h
+2018/02/21: remove all USE_COMBINATION_EXPLOSION_CHECK
+2018/02/15: fix #78: bad definition of PV_()
+2018/02/14: add configure option --enable-posix-api (for #77)
+2018/02/08: implement callouts of name
+2018/02/01: implement callouts of contents
+2018/01/30: define ONIGURUMA_VERSION_INT
+2018/01/29: enable USE_TRY_IN_MATCH_LIMIT by default
+2018/01/29: NEW API: onig_search_with_param() onig_match_with_param()
+2018/01/26: remove include windows.h from oniguruma.h
+
 2018/01/26: Version 6.7.1
 
 2018/01/25: disable USE_TRY_IN_MATCH_LIMIT by default

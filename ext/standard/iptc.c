@@ -229,7 +229,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xFF) {
 		fclose(fp);
 		if (spoolbuf) {
-			zend_string_free(spoolbuf);
+			zend_string_efree(spoolbuf);
 		}
 		RETURN_FALSE;
 	}
@@ -237,7 +237,7 @@ PHP_FUNCTION(iptcembed)
 	if (php_iptc_get1(fp, spool, poi?&poi:0) != 0xD8) {
 		fclose(fp);
 		if (spoolbuf) {
-			zend_string_free(spoolbuf);
+			zend_string_efree(spoolbuf);
 		}
 		RETURN_FALSE;
 	}

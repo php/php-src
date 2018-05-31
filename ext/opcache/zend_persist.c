@@ -54,11 +54,11 @@
 #define zend_accel_store_string(str) do { \
 		zend_string *new_str = zend_shared_alloc_get_xlat_entry(str); \
 		if (new_str) { \
-			zend_string_release(str); \
+			zend_string_release_ex(str, 0); \
 			str = new_str; \
 		} else { \
 	    	new_str = zend_accel_memdup((void*)str, _ZSTR_STRUCT_SIZE(ZSTR_LEN(str))); \
-			zend_string_release(str); \
+			zend_string_release_ex(str, 0); \
 	    	str = new_str; \
 	    	zend_string_hash_val(str); \
 		zend_set_str_gc_flags(str); \
@@ -118,17 +118,17 @@ static void zend_hash_persist(HashTable *ht, zend_persist_func_t pPersistElement
 		void *data = HT_GET_DATA_ADDR(ht);
 		zend_accel_store(data, HT_USED_SIZE(ht));
 		HT_SET_DATA_ADDR(ht, data);
-	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
 		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
-			hash_size = HT_MIN_SIZE;
+			hash_size = HT_MIN_SIZE * 2;
 		} else {
 			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
-			while (hash_size >> 1 > ht->nNumUsed) {
+			while (hash_size >> 2 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
@@ -211,17 +211,17 @@ static void zend_hash_persist_immutable(HashTable *ht)
 	}
 	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		HT_SET_DATA_ADDR(ht, zend_accel_memdup(HT_GET_DATA_ADDR(ht), HT_USED_SIZE(ht)));
-	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 2) {
+	} else if (ht->nNumUsed < (uint32_t)(-(int32_t)ht->nTableMask) / 4) {
 		/* compact table */
 		void *old_data = HT_GET_DATA_ADDR(ht);
 		Bucket *old_buckets = ht->arData;
 		uint32_t hash_size;
 
 		if (ht->nNumUsed <= HT_MIN_SIZE) {
-			hash_size = HT_MIN_SIZE;
+			hash_size = HT_MIN_SIZE * 2;
 		} else {
 			hash_size = (uint32_t)(-(int32_t)ht->nTableMask);
-			while (hash_size >> 1 > ht->nNumUsed) {
+			while (hash_size >> 2 > ht->nNumUsed) {
 				hash_size >>= 1;
 			}
 		}
@@ -576,7 +576,7 @@ static void zend_persist_op_array_ex(zend_op_array *op_array, zend_persistent_sc
 			}
 		} else {
 			if (!already_stored) {
-				zend_string_release(op_array->doc_comment);
+				zend_string_release_ex(op_array->doc_comment, 0);
 			}
 			op_array->doc_comment = NULL;
 		}
@@ -673,7 +673,7 @@ static void zend_persist_property_info(zval *zv)
 			if (!zend_shared_alloc_get_xlat_entry(prop->doc_comment)) {
 				zend_shared_alloc_register_xlat_entry(prop->doc_comment, prop->doc_comment);
 			}
-			zend_string_release(prop->doc_comment);
+			zend_string_release_ex(prop->doc_comment, 0);
 			prop->doc_comment = NULL;
 		}
 	}
@@ -705,7 +705,7 @@ static void zend_persist_class_constant(zval *zv)
 			zend_string *doc_comment = zend_shared_alloc_get_xlat_entry(c->doc_comment);
 			if (!doc_comment) {
 				zend_shared_alloc_register_xlat_entry(c->doc_comment, c->doc_comment);
-				zend_string_release(c->doc_comment);
+				zend_string_release_ex(c->doc_comment, 0);
 			}
 			c->doc_comment = NULL;
 		}
@@ -753,7 +753,7 @@ static void zend_persist_class_entry(zval *zv)
 			} else {
 				if (!zend_shared_alloc_get_xlat_entry(ce->info.user.doc_comment)) {
 					zend_shared_alloc_register_xlat_entry(ce->info.user.doc_comment, ce->info.user.doc_comment);
-					zend_string_release(ce->info.user.doc_comment);
+					zend_string_release_ex(ce->info.user.doc_comment, 0);
 				}
 				ce->info.user.doc_comment = NULL;
 			}

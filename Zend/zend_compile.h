@@ -45,7 +45,7 @@
 
 #define RESET_DOC_COMMENT() do { \
 	if (CG(doc_comment)) { \
-		zend_string_release(CG(doc_comment)); \
+		zend_string_release_ex(CG(doc_comment), 0); \
 		CG(doc_comment) = NULL; \
 	} \
 } while (0)
@@ -875,7 +875,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_TYPE_MASK	0xe
 
-#define ZEND_ISSET				(1<<0)
+#define ZEND_ISEMPTY			(1<<0)
 
 #define ZEND_LAST_CATCH			(1<<0)
 
@@ -1013,6 +1013,9 @@ END_EXTERN_C()
 
 /* disable builtin special case function calls */
 #define ZEND_COMPILE_NO_BUILTINS				(1<<10)
+
+/* result of compilation may be stored in file cache */
+#define ZEND_COMPILE_WITH_FILE_CACHE			(1<<11)
 
 /* The default value for CG(compiler_options) */
 #define ZEND_COMPILE_DEFAULT					ZEND_COMPILE_HANDLE_OP_ARRAY

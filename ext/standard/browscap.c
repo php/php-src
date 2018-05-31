@@ -72,9 +72,9 @@ ZEND_DECLARE_MODULE_GLOBALS(browscap)
 static void browscap_entry_dtor(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
-	zend_string_release(entry->pattern);
+	zend_string_release_ex(entry->pattern, 0);
 	if (entry->parent) {
-		zend_string_release(entry->parent);
+		zend_string_release_ex(entry->parent, 0);
 	}
 	efree(entry);
 }
@@ -82,9 +82,9 @@ static void browscap_entry_dtor(zval *zvalue)
 static void browscap_entry_dtor_persistent(zval *zvalue)
 {
 	browscap_entry *entry = Z_PTR_P(zvalue);
-	zend_string_release(entry->pattern);
+	zend_string_release_ex(entry->pattern, 1);
 	if (entry->parent) {
-		zend_string_release(entry->parent);
+		zend_string_release_ex(entry->parent, 1);
 	}
 	pefree(entry, 1);
 }
@@ -788,7 +788,7 @@ PHP_FUNCTION(get_browser)
 		efree(agent_ht);
 	}
 
-	zend_string_release(lookup_browser_name);
+	zend_string_release_ex(lookup_browser_name, 0);
 }
 /* }}} */
 

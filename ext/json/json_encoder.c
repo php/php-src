@@ -350,7 +350,7 @@ static int php_json_escape_string(
 				0xffffffff, 0x500080c4, 0x10000000, 0x00000000};
 
 			pos++;
-			if (EXPECTED(!(charmap[us >> 5] & (1 << (us & 0x1f))))) {
+			if (EXPECTED(!ZEND_BIT_TEST(charmap, us))) {
 				smart_str_appendc(buf, (unsigned char) us);
 			} else {
 				switch (us) {
@@ -462,7 +462,7 @@ static int php_json_encode_serializable_object(smart_str *buf, zval *val, int op
 
 	ZVAL_STRING(&fname, "jsonSerialize");
 
-	if (FAILURE == call_user_function_ex(EG(function_table), val, &fname, &retval, 0, NULL, 1, NULL) || Z_TYPE(retval) == IS_UNDEF) {
+	if (FAILURE == call_user_function(EG(function_table), val, &fname, &retval, 0, NULL) || Z_TYPE(retval) == IS_UNDEF) {
 		if (!EG(exception)) {
 			zend_throw_exception_ex(NULL, 0, "Failed calling %s::jsonSerialize()", ZSTR_VAL(ce->name));
 		}

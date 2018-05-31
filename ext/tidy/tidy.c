@@ -101,7 +101,7 @@
 		ce.create_object = tidy_object_new_ ## name; \
 		tidy_ce_ ## name = zend_register_internal_class_ex(&ce, parent); \
 		tidy_ce_ ## name->ce_flags |= __flags;  \
-		memcpy(&tidy_object_handlers_ ## name, zend_get_std_object_handlers(), sizeof(zend_object_handlers)); \
+		memcpy(&tidy_object_handlers_ ## name, &std_object_handlers, sizeof(zend_object_handlers)); \
 		tidy_object_handlers_ ## name.clone_obj = NULL; \
 	}
 
@@ -653,7 +653,7 @@ static void php_tidy_quick_repair(INTERNAL_FUNCTION_PARAMETERS, zend_bool is_fil
 	}
 
 	if (is_file) {
-		zend_string_release(data);
+		zend_string_release_ex(data, 0);
 	}
 
 	tidyBufFree(errbuf);
@@ -1316,7 +1316,7 @@ static PHP_FUNCTION(tidy_parse_file)
 		RETVAL_FALSE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 /* }}} */
 
@@ -1635,7 +1635,7 @@ static TIDY_DOC_METHOD(__construct)
 
 		php_tidy_parse_string(obj, ZSTR_VAL(contents), (uint32_t)ZSTR_LEN(contents), enc);
 
-		zend_string_release(contents);
+		zend_string_release_ex(contents, 0);
 	}
 }
 
@@ -1675,7 +1675,7 @@ static TIDY_DOC_METHOD(parseFile)
 		RETVAL_TRUE;
 	}
 
-	zend_string_release(contents);
+	zend_string_release_ex(contents, 0);
 }
 
 static TIDY_DOC_METHOD(parseString)

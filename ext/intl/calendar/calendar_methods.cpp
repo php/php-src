@@ -43,6 +43,8 @@ extern "C" {
 }
 #include "../common/common_enum.h"
 
+using icu::Locale;
+
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
 	zend_throw_exception( NULL,

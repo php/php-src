@@ -87,7 +87,13 @@ opcache.max_accelerated_files (default "2000")
 	between 200 and 1000000 are allowed.
 
 opcache.max_wasted_percentage (default "5")
-	The maximum percentage of "wasted" memory until a restart is scheduled.
+    When the cache fills up this setting decides when to actually reset (dump
+    all entries) it. At the default of 5% it means that if less than 5% of
+    the entries in the now full cache are wasted/orphaned, then you have a good
+    active cache. There is no point emptying a cache full of good entries
+    only to most likely refill it with those same entries. Once more than 5%
+    of the cache consists of wasted entries, the cache will reset in this
+    cache-full scenario. This can be set up to as high as 50%.
 
 opcache.use_cwd (default "1")
 	When this directive is enabled, the OPcache appends the current working

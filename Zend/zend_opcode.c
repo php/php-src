@@ -102,7 +102,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
-		zend_string_release(function->common.function_name);
+		zend_string_release_ex(function->common.function_name, 1);
 
 		if (function->common.arg_info &&
 		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
@@ -115,7 +115,7 @@ ZEND_API void destroy_zend_function(zend_function *function)
 			}
 			for (i = 0 ; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+					zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
 				}
 			}
 			free(arg_info);
@@ -134,7 +134,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 	} else {
 		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
 		ZEND_ASSERT(function->common.function_name);
-		zend_string_release(function->common.function_name);
+		zend_string_release_ex(function->common.function_name, 1);
 
 		if ((function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS)) &&
 		    !function->common.scope && function->common.arg_info) {
@@ -148,7 +148,7 @@ ZEND_API void zend_function_dtor(zval *zv)
 			}
 			for (i = 0 ; i < num_args; i++) {
 				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+					zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
 				}
 			}
 			free(arg_info);
@@ -192,16 +192,16 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		while (ce->trait_aliases[i]) {
 			if (ce->trait_aliases[i]->trait_method) {
 				if (ce->trait_aliases[i]->trait_method->method_name) {
-	 				zend_string_release(ce->trait_aliases[i]->trait_method->method_name);
+	 				zend_string_release_ex(ce->trait_aliases[i]->trait_method->method_name, 0);
 				}
 				if (ce->trait_aliases[i]->trait_method->class_name) {
-	 				zend_string_release(ce->trait_aliases[i]->trait_method->class_name);
+	 				zend_string_release_ex(ce->trait_aliases[i]->trait_method->class_name, 0);
 				}
 				efree(ce->trait_aliases[i]->trait_method);
 			}
 
 			if (ce->trait_aliases[i]->alias) {
-				zend_string_release(ce->trait_aliases[i]->alias);
+				zend_string_release_ex(ce->trait_aliases[i]->alias, 0);
 			}
 
 			efree(ce->trait_aliases[i]);
@@ -215,15 +215,15 @@ void _destroy_zend_class_traits_info(zend_class_entry *ce)
 		size_t i = 0;
 
 		while (ce->trait_precedences[i]) {
-			zend_string_release(ce->trait_precedences[i]->trait_method->method_name);
-			zend_string_release(ce->trait_precedences[i]->trait_method->class_name);
+			zend_string_release_ex(ce->trait_precedences[i]->trait_method->method_name, 0);
+			zend_string_release_ex(ce->trait_precedences[i]->trait_method->class_name, 0);
 			efree(ce->trait_precedences[i]->trait_method);
 
 			if (ce->trait_precedences[i]->exclude_from_classes) {
 				size_t j = 0;
 				zend_trait_precedence *cur_precedence = ce->trait_precedences[i];
 				while (cur_precedence->exclude_from_classes[j].class_name) {
-					zend_string_release(cur_precedence->exclude_from_classes[j].class_name);
+					zend_string_release_ex(cur_precedence->exclude_from_classes[j].class_name, 0);
 					j++;
 				}
 				efree(ce->trait_precedences[i]->exclude_from_classes);
@@ -268,14 +268,14 @@ ZEND_API void destroy_zend_class(zval *zv)
 			}
 			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
 				if (prop_info->ce == ce || (prop_info->flags & ZEND_ACC_SHADOW)) {
-					zend_string_release(prop_info->name);
+					zend_string_release_ex(prop_info->name, 0);
 					if (prop_info->doc_comment) {
-						zend_string_release(prop_info->doc_comment);
+						zend_string_release_ex(prop_info->doc_comment, 0);
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
 			zend_hash_destroy(&ce->properties_info);
-			zend_string_release(ce->name);
+			zend_string_release_ex(ce->name, 0);
 			zend_hash_destroy(&ce->function_table);
 			if (zend_hash_num_elements(&ce->constants_table)) {
 				zend_class_constant *c;
@@ -284,7 +284,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (c->ce == ce) {
 						zval_ptr_dtor_nogc(&c->value);
 						if (c->doc_comment) {
-							zend_string_release(c->doc_comment);
+							zend_string_release_ex(c->doc_comment, 0);
 						}
 					}
 				} ZEND_HASH_FOREACH_END();
@@ -294,7 +294,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				efree(ce->interfaces);
 			}
 			if (ce->info.user.doc_comment) {
-				zend_string_release(ce->info.user.doc_comment);
+				zend_string_release_ex(ce->info.user.doc_comment, 0);
 			}
 
 			_destroy_zend_class_traits_info(ce);
@@ -322,7 +322,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 				free(ce->default_static_members_table);
 			}
 			zend_hash_destroy(&ce->properties_info);
-			zend_string_release(ce->name);
+			zend_string_release_ex(ce->name, 1);
 
 			/* TODO: eliminate this loop for classes without functions with arg_info */
 			ZEND_HASH_FOREACH_PTR(&ce->function_table, fn) {
@@ -341,7 +341,7 @@ ZEND_API void destroy_zend_class(zval *zv)
 					if (c->ce == ce) {
 						zval_internal_ptr_dtor(&c->value);
 						if (c->doc_comment) {
-							zend_string_release(c->doc_comment);
+							zend_string_release_ex(c->doc_comment, 1);
 						}
 					}
 					free(c);
@@ -389,7 +389,7 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		i = op_array->last_var;
 		while (i > 0) {
 			i--;
-			zend_string_release(op_array->vars[i]);
+			zend_string_release_ex(op_array->vars[i], 0);
 		}
 		efree(op_array->vars);
 	}
@@ -409,10 +409,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 	efree(op_array->opcodes);
 
 	if (op_array->function_name) {
-		zend_string_release(op_array->function_name);
+		zend_string_release_ex(op_array->function_name, 0);
 	}
 	if (op_array->doc_comment) {
-		zend_string_release(op_array->doc_comment);
+		zend_string_release_ex(op_array->doc_comment, 0);
 	}
 	if (op_array->live_range) {
 		efree(op_array->live_range);
@@ -438,10 +438,10 @@ ZEND_API void destroy_op_array(zend_op_array *op_array)
 		}
 		for (i = 0 ; i < num_args; i++) {
 			if (arg_info[i].name) {
-				zend_string_release(arg_info[i].name);
+				zend_string_release_ex(arg_info[i].name, 0);
 			}
 			if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-				zend_string_release(ZEND_TYPE_NAME(arg_info[i].type));
+				zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 0);
 			}
 		}
 		efree(arg_info);
@@ -579,6 +579,16 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	end = opline + op_array->last;
 	while (opline < end) {
 		switch (opline->opcode) {
+			case ZEND_RECV_INIT:
+				{
+					zval *val = CT_CONSTANT(opline->op2);
+					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+						uint32_t slot = ZEND_MM_ALIGNED_SIZE_EX(op_array->cache_size, 8);
+						Z_CACHE_SLOT_P(val) = slot;
+						op_array->cache_size += sizeof(zval);
+					}
+				}
+				break;
 			case ZEND_FAST_CALL:
 				opline->op1.opline_num = op_array->try_catch_array[opline->op1.num].finally_op;
 				ZEND_PASS_TWO_UPDATE_JMP_TARGET(op_array, opline, opline->op1);

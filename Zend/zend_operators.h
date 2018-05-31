@@ -284,7 +284,7 @@ static zend_always_inline zend_string *zval_get_tmp_string(zval *op, zend_string
 }
 static zend_always_inline void zend_tmp_string_release(zend_string *tmp) {
 	if (UNEXPECTED(tmp)) {
-		zend_string_release(tmp);
+		zend_string_release_ex(tmp, 0);
 	}
 }
 
@@ -469,7 +469,7 @@ static zend_always_inline void fast_long_increment_function(zval *op1)
 {
 #if defined(HAVE_ASM_GOTO) && defined(__i386__)
 	__asm__ goto(
-		"incl (%0)\n\t"
+		"addl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -480,7 +480,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MAX + 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"incq (%0)\n\t"
+		"addq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -519,7 +519,7 @@ static zend_always_inline void fast_long_decrement_function(zval *op1)
 {
 #if defined(HAVE_ASM_GOTO) && defined(__i386__)
 	__asm__ goto(
-		"decl (%0)\n\t"
+		"subl $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)
@@ -530,7 +530,7 @@ overflow: ZEND_ATTRIBUTE_COLD_LABEL
 	ZVAL_DOUBLE(op1, (double)ZEND_LONG_MIN - 1.0);
 #elif defined(HAVE_ASM_GOTO) && defined(__x86_64__)
 	__asm__ goto(
-		"decq (%0)\n\t"
+		"subq $1,(%0)\n\t"
 		"jo  %l1\n"
 		:
 		: "r"(&op1->value)

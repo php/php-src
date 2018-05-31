@@ -58,9 +58,10 @@ onig2posix_error_code(int code)
   static const O2PERR o2p[] = {
     { ONIG_MISMATCH,                                      REG_NOMATCH },
     { ONIG_NO_SUPPORT_CONFIG,                             REG_EONIG_INTERNAL },
+    { ONIG_ABORT,                                         REG_EONIG_INTERNAL },
     { ONIGERR_MEMORY,                                     REG_ESPACE  },
     { ONIGERR_MATCH_STACK_LIMIT_OVER,                     REG_EONIG_INTERNAL },
-    { ONIGERR_TRY_IN_MATCH_LIMIT_OVER,                    REG_EONIG_INTERNAL },
+    { ONIGERR_RETRY_LIMIT_IN_MATCH_OVER,                  REG_EONIG_INTERNAL },
     { ONIGERR_TYPE_BUG,                                   REG_EONIG_INTERNAL },
     { ONIGERR_PARSER_BUG,                                 REG_EONIG_INTERNAL },
     { ONIGERR_STACK_BUG,                                  REG_EONIG_INTERNAL },
@@ -118,6 +119,12 @@ onig2posix_error_code(int code)
     { ONIGERR_INVALID_IF_ELSE_SYNTAX,                     REG_BADPAT },
     { ONIGERR_INVALID_ABSENT_GROUP_PATTERN,               REG_BADPAT },
     { ONIGERR_INVALID_ABSENT_GROUP_GENERATOR_PATTERN,     REG_BADPAT },
+    { ONIGERR_INVALID_CALLOUT_PATTERN,                    REG_BADPAT },
+    { ONIGERR_INVALID_CALLOUT_NAME,                       REG_BADPAT },
+    { ONIGERR_UNDEFINED_CALLOUT_NAME,                     REG_BADPAT },
+    { ONIGERR_INVALID_CALLOUT_BODY,                       REG_BADPAT },
+    { ONIGERR_INVALID_CALLOUT_TAG_NAME,                   REG_BADPAT },
+    { ONIGERR_INVALID_CALLOUT_ARG,                        REG_BADPAT },
     { ONIGERR_NOT_SUPPORTED_ENCODING_COMBINATION,         REG_EONIG_BADARG },
     { ONIGERR_LIBRARY_IS_NOT_INITIALIZED,                 REG_EONIG_INTERNAL }
   };
@@ -261,8 +268,7 @@ reg_set_encoding(int mb_code)
     break;
   }
 
-  onig_initialize(0, 0);
-  onig_initialize_encoding(enc);
+  onig_initialize(&enc, 1);
 
   onigenc_set_default_encoding(enc);
 }
