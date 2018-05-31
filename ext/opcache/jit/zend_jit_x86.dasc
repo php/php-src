@@ -8575,7 +8575,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 	uint32_t op1_info, op2_info;
 	zend_jit_addr op1_addr, op2_addr, res_addr;
 
-	if (!ssa->ops || !ssa->var_info || !(opline->extended_value & ZEND_ISSET)) {
+	if (!ssa->ops || !ssa->var_info || (opline->extended_value & ZEND_ISEMPTY)) {
 		// TODO: support for empty() ???
 		goto fallback;
 	}
@@ -8639,7 +8639,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 			return 0;
 		}
 	}
-	if (opline->extended_value & ZEND_ISSET) {
+	if (!(opline->extended_value & ZEND_ISEMPTY)) {
 		if ((opline+1)->opcode == ZEND_JMPZ) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[1];
 			|	jmp =>target_label
@@ -8666,7 +8666,7 @@ static int zend_jit_isset_isempty_dim(dasm_State **Dst, const zend_op *opline, i
 			return 0;
 		}
 	}
-	if (opline->extended_value & ZEND_ISSET) {
+	if (!(opline->extended_value & ZEND_ISEMPTY)) {
 		if ((opline+1)->opcode == ZEND_JMPZ) {
 			unsigned int target_label = ssa->cfg.blocks[b].successors[0];
 			|	jmp =>target_label
