@@ -459,7 +459,7 @@ void calendar_register_IntlCalendar_class(void)
 	ce.create_object = Calendar_object_create;
 	Calendar_ce_ptr = zend_register_internal_class(&ce);
 
-	memcpy( &Calendar_handlers, zend_get_std_object_handlers(),
+	memcpy( &Calendar_handlers, &std_object_handlers,
 		sizeof Calendar_handlers);
 	Calendar_handlers.offset = XtOffsetOf(Calendar_object, zo);
 	Calendar_handlers.clone_obj = Calendar_clone_obj;

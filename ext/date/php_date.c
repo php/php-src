@@ -2062,7 +2062,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 	obj = Z_PHPINTERVAL_P(object);
 
 	if (!obj->initialized) {
-		retval = (zend_get_std_object_handlers())->has_property(object, member, type, cache_slot);
+		retval = zend_std_has_property(object, member, type, cache_slot);
 		if (member == &tmp_member) {
 			zval_dtor(member);
 		}
@@ -2080,7 +2080,7 @@ static int date_interval_has_property(zval *object, zval *member, int type, void
 			retval = (Z_TYPE_P(prop) != IS_NULL);
 		}
 	} else {
-		retval = (zend_get_std_object_handlers())->has_property(object, member, type, cache_slot);
+		retval = zend_std_has_property(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -2120,7 +2120,7 @@ static void date_register_classes(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce_date, "DateTime", date_funcs_date);
 	ce_date.create_object = date_object_new_date;
 	date_ce_date = zend_register_internal_class_ex(&ce_date, NULL);
-	memcpy(&date_object_handlers_date, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&date_object_handlers_date, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_date.offset = XtOffsetOf(php_date_obj, std);
 	date_object_handlers_date.free_obj = date_object_free_storage_date;
 	date_object_handlers_date.clone_obj = date_object_clone_date;
@@ -2132,7 +2132,7 @@ static void date_register_classes(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce_immutable, "DateTimeImmutable", date_funcs_immutable);
 	ce_immutable.create_object = date_object_new_date;
 	date_ce_immutable = zend_register_internal_class_ex(&ce_immutable, NULL);
-	memcpy(&date_object_handlers_immutable, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&date_object_handlers_immutable, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_immutable.clone_obj = date_object_clone_date;
 	date_object_handlers_immutable.compare_objects = date_object_compare_date;
 	date_object_handlers_immutable.get_properties = date_object_get_properties;
@@ -2142,7 +2142,7 @@ static void date_register_classes(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce_timezone, "DateTimeZone", date_funcs_timezone);
 	ce_timezone.create_object = date_object_new_timezone;
 	date_ce_timezone = zend_register_internal_class_ex(&ce_timezone, NULL);
-	memcpy(&date_object_handlers_timezone, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&date_object_handlers_timezone, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_timezone.offset = XtOffsetOf(php_timezone_obj, std);
 	date_object_handlers_timezone.free_obj = date_object_free_storage_timezone;
 	date_object_handlers_timezone.clone_obj = date_object_clone_timezone;
@@ -2171,7 +2171,7 @@ static void date_register_classes(void) /* {{{ */
 	INIT_CLASS_ENTRY(ce_interval, "DateInterval", date_funcs_interval);
 	ce_interval.create_object = date_object_new_interval;
 	date_ce_interval = zend_register_internal_class_ex(&ce_interval, NULL);
-	memcpy(&date_object_handlers_interval, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&date_object_handlers_interval, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_interval.offset = XtOffsetOf(php_interval_obj, std);
 	date_object_handlers_interval.free_obj = date_object_free_storage_interval;
 	date_object_handlers_interval.clone_obj = date_object_clone_interval;
@@ -2188,7 +2188,7 @@ static void date_register_classes(void) /* {{{ */
 	date_ce_period->get_iterator = date_object_period_get_iterator;
 	date_ce_period->iterator_funcs.funcs = &date_period_it_funcs;
 	zend_class_implements(date_ce_period, 1, zend_ce_traversable);
-	memcpy(&date_object_handlers_period, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&date_object_handlers_period, &std_object_handlers, sizeof(zend_object_handlers));
 	date_object_handlers_period.offset = XtOffsetOf(php_period_obj, std);
 	date_object_handlers_period.free_obj = date_object_free_storage_period;
 	date_object_handlers_period.clone_obj = date_object_clone_period;
@@ -4176,7 +4176,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 	obj = Z_PHPINTERVAL_P(object);
 
 	if (!obj->initialized) {
-		retval = (zend_get_std_object_handlers())->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 		if (member == &tmp_member) {
 			zval_dtor(member);
 		}
@@ -4202,7 +4202,7 @@ zval *date_interval_read_property(zval *object, zval *member, int type, void **c
 		GET_VALUE_FROM_STRUCT(invert, "invert");
 		GET_VALUE_FROM_STRUCT(days, "days");
 		/* didn't find any */
-		retval = (zend_get_std_object_handlers())->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 
 		if (member == &tmp_member) {
 			zval_dtor(member);
@@ -4244,7 +4244,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 	obj = Z_PHPINTERVAL_P(object);
 
 	if (!obj->initialized) {
-		(zend_get_std_object_handlers())->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 		if (member == &tmp_member) {
 			zval_dtor(member);
 		}
@@ -4270,7 +4270,7 @@ void date_interval_write_property(zval *object, zval *member, zval *value, void 
 		}
 		SET_VALUE_FROM_STRUCT(invert, "invert");
 		/* didn't find any */
-		(zend_get_std_object_handlers())->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	} while(0);
 
 	if (member == &tmp_member) {
@@ -4301,7 +4301,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 		/* Fallback to read_property. */
 		ret = NULL;
 	} else {
-		ret = (zend_get_std_object_handlers())->get_property_ptr_ptr(object, member, type, cache_slot);
+		ret = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -5304,7 +5304,7 @@ static zval *date_period_read_property(zval *object, zval *member, int type, voi
 
 	Z_OBJPROP_P(object); /* build properties hash table */
 
-	zv = std_object_handlers.read_property(object, member, type, cache_slot, rv);
+	zv = zend_std_read_property(object, member, type, cache_slot, rv);
 	if (Z_TYPE_P(zv) == IS_OBJECT && Z_OBJ_HANDLER_P(zv, clone_obj)) {
 		/* defensive copy */
 		ZVAL_OBJ(zv, Z_OBJ_HANDLER_P(zv, clone_obj)(zv));

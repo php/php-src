@@ -386,7 +386,7 @@ static zend_function *zend_closure_get_method(zend_object **object, zend_string 
 		return zend_get_closure_invoke_method(*object);
 	}
 
-	return std_object_handlers.get_method(object, method, key);
+	return zend_std_get_method(object, method, key);
 }
 /* }}} */
 
@@ -609,7 +609,7 @@ void zend_register_closure_ce(void) /* {{{ */
 	zend_ce_closure->serialize = zend_class_serialize_deny;
 	zend_ce_closure->unserialize = zend_class_unserialize_deny;
 
-	memcpy(&closure_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&closure_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	closure_handlers.free_obj = zend_closure_free_storage;
 	closure_handlers.get_constructor = zend_closure_get_constructor;
 	closure_handlers.get_method = zend_closure_get_method;

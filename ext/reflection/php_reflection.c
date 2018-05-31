@@ -6688,8 +6688,6 @@ static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 	PHP_FE_END
 }; /* }}} */
 
-static const zend_object_handlers *zend_std_obj_handlers;
-
 /* {{{ _reflection_write_property */
 static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
@@ -6703,7 +6701,7 @@ static void _reflection_write_property(zval *object, zval *member, zval *value, 
 	}
 	else
 	{
-		zend_std_obj_handlers->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 }
 /* }}} */
@@ -6712,8 +6710,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 {
 	zend_class_entry _reflection_entry;
 
-	zend_std_obj_handlers = zend_get_std_object_handlers();
-	memcpy(&reflection_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&reflection_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	reflection_object_handlers.offset = XtOffsetOf(reflection_object, zo);
 	reflection_object_handlers.free_obj = reflection_free_objects_storage;
 	reflection_object_handlers.clone_obj = NULL;

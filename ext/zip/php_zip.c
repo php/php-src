@@ -878,7 +878,6 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -893,8 +892,7 @@ static zval *php_zip_get_property_ptr_ptr(zval *object, zval *member, int type, 
 	}
 
 	if (hnd == NULL) {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -911,7 +909,6 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 	zval tmp_member;
 	zval *retval = NULL;
 	zip_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
 		ZVAL_STR(&tmp_member, zval_get_string_func(member));
@@ -931,8 +928,7 @@ static zval *php_zip_read_property(zval *object, zval *member, int type, void **
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	if (member == &tmp_member) {
@@ -948,7 +944,6 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 	ze_zip_object *obj;
 	zval tmp_member;
 	zip_prop_handler *hnd = NULL;
-	const zend_object_handlers *std_hnd;
 	int retval = 0;
 
 	if (Z_TYPE_P(member) != IS_STRING) {
@@ -978,8 +973,7 @@ static int php_zip_has_property(zval *object, zval *member, int type, void **cac
 
 		zval_ptr_dtor(&tmp);
 	} else {
-		std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, type, cache_slot);
+		retval = zend_std_has_property(object, member, type, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -3156,7 +3150,7 @@ static PHP_MINIT_FUNCTION(zip)
 {
 	zend_class_entry ce;
 
-	memcpy(&zip_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&zip_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zip_object_handlers.offset = XtOffsetOf(ze_zip_object, zo);
 	zip_object_handlers.free_obj = php_zip_object_free_storage;
 	zip_object_handlers.clone_obj = NULL;

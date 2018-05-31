@@ -340,7 +340,7 @@ static HashTable *spl_object_storage_get_gc(zval *obj, zval **table, int *n) /* 
 	*table = intern->gcdata;
 	*n = i;
 
-	return std_object_handlers.get_properties(obj);
+	return zend_std_get_properties(obj);
 }
 /* }}} */
 
@@ -1244,7 +1244,7 @@ PHP_MINIT_FUNCTION(spl_observer)
 	REGISTER_SPL_INTERFACE(SplSubject);
 
 	REGISTER_SPL_STD_CLASS_EX(SplObjectStorage, spl_SplObjectStorage_new, spl_funcs_SplObjectStorage);
-	memcpy(&spl_handler_SplObjectStorage, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplObjectStorage, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplObjectStorage.offset          = XtOffsetOf(spl_SplObjectStorage, std);
 	spl_handler_SplObjectStorage.get_debug_info  = spl_object_storage_debug_info;

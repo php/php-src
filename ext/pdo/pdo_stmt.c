@@ -2198,7 +2198,7 @@ static void dbstmt_prop_write(zval *object, zval *member, zval *value, void **ca
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 	} else {
-		std_object_handlers.write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 }
 
@@ -2211,7 +2211,7 @@ static void dbstmt_prop_delete(zval *object, zval *member, void **cache_slot)
 	if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 		pdo_raise_impl_error(stmt->dbh, stmt, "HY000", "property queryString is read only");
 	} else {
-		std_object_handlers.unset_property(object, member, cache_slot);
+		zend_std_unset_property(object, member, cache_slot);
 	}
 }
 
@@ -2248,7 +2248,7 @@ static union _zend_function *dbstmt_method_get(zend_object **object_pp, zend_str
 out:
 	zend_string_release_ex(lc_method_name, 0);
 	if (!fbc) {
-		fbc = std_object_handlers.get_method(object_pp, method_name, key);
+		fbc = zend_std_get_method(object_pp, method_name, key);
 	}
 	return fbc;
 }
@@ -2528,7 +2528,7 @@ static zval *row_prop_read(zval *object, zval *member, int type, void **cache_sl
 			if (strcmp(Z_STRVAL_P(member), "queryString") == 0) {
 				ZVAL_OBJ(&zobj, &stmt->std);
 				//zval_ptr_dtor(rv);
-				return std_object_handlers.read_property(&zobj, member, type, cache_slot, rv);
+				return zend_std_read_property(&zobj, member, type, cache_slot, rv);
 			}
 		}
 	}

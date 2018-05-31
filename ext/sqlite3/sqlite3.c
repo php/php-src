@@ -2278,9 +2278,9 @@ PHP_MINIT_FUNCTION(sqlite3)
 	}
 #endif
 
-	memcpy(&sqlite3_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	memcpy(&sqlite3_stmt_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
-	memcpy(&sqlite3_result_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&sqlite3_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	memcpy(&sqlite3_stmt_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
+	memcpy(&sqlite3_result_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 
 	/* Register SQLite 3 Class */
 	INIT_CLASS_ENTRY(ce, "SQLite3", php_sqlite3_class_methods);

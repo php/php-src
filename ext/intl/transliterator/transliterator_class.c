@@ -219,7 +219,7 @@ static zval *Transliterator_get_property_ptr_ptr( zval *object, zval *member, in
 	}
 	else
 	{
-		retval = std_object_handlers.get_property_ptr_ptr( object, member, type, cache_slot );
+		retval = zend_std_get_property_ptr_ptr( object, member, type, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -244,7 +244,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 	}
 	else
 	{
-		retval = std_object_handlers.read_property( object, member, type, cache_slot, rv );
+		retval = zend_std_read_property( object, member, type, cache_slot, rv );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -274,7 +274,7 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 	}
 	else
 	{
-		std_object_handlers.write_property( object, member, value, cache_slot );
+		zend_std_write_property( object, member, value, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
@@ -334,7 +334,7 @@ void transliterator_register_Transliterator_class( void )
 	INIT_CLASS_ENTRY( ce, "Transliterator", Transliterator_class_functions );
 	ce.create_object = Transliterator_object_create;
 	Transliterator_ce_ptr = zend_register_internal_class( &ce );
-	memcpy( &Transliterator_handlers, zend_get_std_object_handlers(),
+	memcpy( &Transliterator_handlers, &std_object_handlers,
 		sizeof Transliterator_handlers );
 	Transliterator_handlers.offset = XtOffsetOf(Transliterator_object, zo);
 	Transliterator_handlers.free_obj = Transliterator_objects_free;

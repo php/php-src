@@ -321,7 +321,7 @@ U_CFUNC void intl_register_IntlIterator_class(void)
 	zend_class_implements(IntlIterator_ce_ptr, 1,
 		zend_ce_iterator);
 
-	memcpy(&IntlIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&IntlIterator_handlers, &std_object_handlers,
 		sizeof IntlIterator_handlers);
 	IntlIterator_handlers.offset = XtOffsetOf(IntlIterator_object, zo);
 	IntlIterator_handlers.clone_obj = NULL;

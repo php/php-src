@@ -1241,7 +1241,7 @@ PHP_MINIT_FUNCTION(hash)
 	php_hashcontext_ce->serialize = zend_class_serialize_deny;
 	php_hashcontext_ce->unserialize = zend_class_unserialize_deny;
 
-	memcpy(&php_hashcontext_handlers, zend_get_std_object_handlers(),
+	memcpy(&php_hashcontext_handlers, &std_object_handlers,
 	       sizeof(zend_object_handlers));
 	php_hashcontext_handlers.offset = XtOffsetOf(php_hashcontext_object, std);
 	php_hashcontext_handlers.dtor_obj = php_hashcontext_dtor;

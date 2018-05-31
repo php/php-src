@@ -319,8 +319,7 @@ static zval *dom_get_property_ptr_ptr(zval *object, zval *member, int type, void
 	zval *retval = NULL;
 
 	if (!obj->prop_handler || !zend_hash_exists(obj->prop_handler, member_str)) {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->get_property_ptr_ptr(object, member, type, cache_slot);
+		retval = zend_std_get_property_ptr_ptr(object, member, type, cache_slot);
 	}
 
 	zend_string_release_ex(member_str, 0);
@@ -350,8 +349,7 @@ zval *dom_read_property(zval *object, zval *member, int type, void **cache_slot,
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	zend_string_release_ex(member_str, 0);
@@ -372,8 +370,7 @@ void dom_write_property(zval *object, zval *member, zval *value, void **cache_sl
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	zend_string_release_ex(member_str, 0);
@@ -405,8 +402,7 @@ static int dom_property_exists(zval *object, zval *member, int check_empty, void
 			zval_dtor(&tmp);
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->has_property(object, member, check_empty, cache_slot);
+		retval = zend_std_has_property(object, member, check_empty, cache_slot);
 	}
 
 	zend_string_release_ex(member_str, 0);
@@ -598,7 +594,7 @@ PHP_MINIT_FUNCTION(dom)
 {
 	zend_class_entry ce;
 
-	memcpy(&dom_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&dom_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	dom_object_handlers.offset = XtOffsetOf(dom_object, std);
 	dom_object_handlers.free_obj = dom_objects_free_storage;
 	dom_object_handlers.read_property = dom_read_property;

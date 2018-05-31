@@ -678,12 +678,12 @@ zend_function *spl_filesystem_object_get_method_check(zend_object **object, zend
 	if (fsobj->u.dir.dirp == NULL && fsobj->orig_path == NULL) {
 		zend_function *func;
 		zend_string *tmp = zend_string_init("_bad_state_ex", sizeof("_bad_state_ex") - 1, 0);
-		func = zend_get_std_object_handlers()->get_method(object, tmp, NULL);
+		func = zend_std_get_method(object, tmp, NULL);
 		zend_string_release_ex(tmp, 0);
 		return func;
 	}
 
-	return zend_get_std_object_handlers()->get_method(object, method, key);
+	return zend_std_get_method(object, method, key);
 }
 /* }}} */
 
@@ -1858,7 +1858,7 @@ static int spl_filesystem_object_cast(zval *readobj, zval *writeobj, int type)
 
 	if (type == IS_STRING) {
 		if (Z_OBJCE_P(readobj)->__tostring) {
-			return std_object_handlers.cast_object(readobj, writeobj, type);
+			return zend_std_cast_object_tostring(readobj, writeobj, type);
 		}
 
 		switch (intern->type) {
@@ -3099,7 +3099,7 @@ static const zend_function_entry spl_SplTempFileObject_functions[] = {
 PHP_MINIT_FUNCTION(spl_directory)
 {
 	REGISTER_SPL_STD_CLASS_EX(SplFileInfo, spl_filesystem_object_new, spl_SplFileInfo_functions);
-	memcpy(&spl_filesystem_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_filesystem_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	spl_filesystem_object_handlers.offset = XtOffsetOf(spl_filesystem_object, std);
 	spl_filesystem_object_handlers.clone_obj = spl_filesystem_object_clone;
 	spl_filesystem_object_handlers.cast_object = spl_filesystem_object_cast;

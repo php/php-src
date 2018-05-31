@@ -753,7 +753,7 @@ int php_com_persist_minit(INIT_FUNC_ARGS)
 {
 	zend_class_entry ce;
 
-	memcpy(&helper_handlers, zend_get_std_object_handlers(), sizeof(helper_handlers));
+	memcpy(&helper_handlers, &std_object_handlers, sizeof(helper_handlers));
 	helper_handlers.free_obj = helper_free_storage;
 	helper_handlers.clone_obj = helper_clone;
 

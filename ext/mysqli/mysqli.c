@@ -321,8 +321,7 @@ zval *mysqli_read_property(zval *object, zval *member, int type, void **cache_sl
 			retval = &EG(uninitialized_zval);
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		retval = std_hnd->read_property(object, member, type, cache_slot, rv);
+		retval = zend_std_read_property(object, member, type, cache_slot, rv);
 	}
 
 	if (member == &tmp_member) {
@@ -354,8 +353,7 @@ void mysqli_write_property(zval *object, zval *member, zval *value, void **cache
 	if (hnd) {
 		hnd->write_func(obj, value);
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		std_hnd->write_property(object, member, value, cache_slot);
+		zend_std_write_property(object, member, value, cache_slot);
 	}
 
 	if (member == &tmp_member) {
@@ -409,8 +407,7 @@ static int mysqli_object_has_property(zval *object, zval *member, int has_set_ex
 				php_error_docref(NULL, E_WARNING, "Invalid value for has_set_exists");
 		}
 	} else {
-		const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
-		ret = std_hnd->has_property(object, member, has_set_exists, cache_slot);
+		ret = zend_std_has_property(object, member, has_set_exists, cache_slot);
 	}
 
 	return ret;
@@ -561,7 +558,6 @@ static PHP_GINIT_FUNCTION(mysqli)
 PHP_MINIT_FUNCTION(mysqli)
 {
 	zend_class_entry *ce,cex;
-	const zend_object_handlers *std_hnd = zend_get_std_object_handlers();
 
 	REGISTER_INI_ENTRIES();
 #ifndef MYSQLI_USE_MYSQLND
@@ -570,13 +566,12 @@ PHP_MINIT_FUNCTION(mysqli)
 	}
 #endif
 
-	memcpy(&mysqli_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&mysqli_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	mysqli_object_handlers.offset = XtOffsetOf(mysqli_object, zo);
 	mysqli_object_handlers.free_obj = mysqli_objects_free_storage;
 	mysqli_object_handlers.clone_obj = NULL;
 	mysqli_object_handlers.read_property = mysqli_read_property;
 	mysqli_object_handlers.write_property = mysqli_write_property;
-	mysqli_object_handlers.get_property_ptr_ptr = std_hnd->get_property_ptr_ptr;
 	mysqli_object_handlers.has_property = mysqli_object_has_property;
 	mysqli_object_handlers.get_debug_info = mysqli_object_get_debug_info;
 	memcpy(&mysqli_object_driver_handlers, &mysqli_object_handlers, sizeof(zend_object_handlers));
