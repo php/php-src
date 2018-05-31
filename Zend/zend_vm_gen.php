@@ -792,8 +792,8 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 			"/opline->extended_value\s*==\s*0/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_DIM/",
 			"/opline->extended_value\s*==\s*ZEND_ASSIGN_OBJ/",
-			"/opline->extended_value\s*&\s*ZEND_ISSET/",
-			"/opline->extended_value\s*&\s*~\s*ZEND_ISSET/",
+			"/opline->extended_value\s*&\s*ZEND_ISEMPTY/",
+			"/opline->extended_value\s*&\s*~\s*ZEND_ISEMPTY/",
 		),
 		array(
 			$op1_type[$op1],
@@ -864,7 +864,7 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 				($extra_spec['ISSET'] == 0 ? "0" : "1")
 				: "\\0",
 			isset($extra_spec['ISSET']) ?
-				($extra_spec['ISSET'] == 0 ? "opline->extended_value" : "\\0")
+				($extra_spec['ISSET'] == 0 ? "\\0" : "opline->extended_value")
 				: "\\0",
 		),
 		$code);
@@ -1518,9 +1518,9 @@ function extra_spec_name($extra_spec) {
 	}
 	if (isset($extra_spec["ISSET"])) {
 		if ($extra_spec["ISSET"] == 0) {
-			$s .= "_EMPTY";
-		} else {
 			$s .= "_SET";
+		} else {
+			$s .= "_EMPTY";
 		}
 	}
 	return $s;
@@ -2659,7 +2659,7 @@ function gen_vm($def, $skel) {
 				$else = "else ";
 			}
 			if (isset($used_extra_spec["ISSET"])) {
-				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISSET);\n");
+				out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
 				$else = "else ";
 			}
 			out($f, "\t}\n");
@@ -2747,7 +2747,7 @@ function gen_vm($def, $skel) {
 					$else = "else ";
 				}
 				if (isset($used_extra_spec["ISSET"])) {
-					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISSET);\n");
+					out($f, "\t\t{$else}if (spec & SPEC_RULE_ISSET) offset = offset * 2 + (op->extended_value & ZEND_ISEMPTY);\n");
 					$else = "else ";
 				}
 				out($f, "\t}\n");

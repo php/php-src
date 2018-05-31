@@ -536,12 +536,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						// op2 property
 						if (opline->op1_type == IS_UNUSED &&
 						    property_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_ISSET);
+							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_ISEMPTY);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISSET);
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISEMPTY);
 							cache_size += 2 * sizeof(void *);
 							if (opline->op1_type == IS_UNUSED) {
-								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_ISSET;
+								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_ISEMPTY;
 							}
 						}
 					}
@@ -668,19 +668,19 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 								opline->op2.constant,
 								opline->op1.constant,
 								LITERAL_STATIC_PROPERTY,
-								&cache_size) | (opline->extended_value & ZEND_ISSET);
+								&cache_size) | (opline->extended_value & ZEND_ISEMPTY);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISSET);
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISEMPTY);
 							cache_size += 2 * sizeof(void *);
 						}
 					} else if (opline->op2_type == IS_CONST) {
 						// op2 class
 						if (class_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = class_slot[opline->op2.constant] | (opline->extended_value & ZEND_ISSET);
+							opline->extended_value = class_slot[opline->op2.constant] | (opline->extended_value & ZEND_ISEMPTY);
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISSET);
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_ISEMPTY);
 							cache_size += sizeof(void *);
-							class_slot[opline->op2.constant] = opline->extended_value & ~ZEND_ISSET;
+							class_slot[opline->op2.constant] = opline->extended_value & ~ZEND_ISEMPTY;
 						}
 					}
 					break;
