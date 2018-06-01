@@ -636,7 +636,6 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 	if (NULL != (rev_ptr = zend_hash_str_find_ptr(&php_output_handler_reverse_conflicts, name, name_len))) {
 		return zend_hash_next_index_insert_ptr(rev_ptr, check_func) ? SUCCESS : FAILURE;
 	} else {
-		int ret;
 		zend_string *str;
 
 		zend_hash_init(&rev, 8, NULL, NULL, 1);
@@ -664,7 +663,6 @@ PHPAPI php_output_handler_alias_ctor_t php_output_handler_alias(const char *name
  * Registers an internal output handler as alias for a user handler */
 PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, php_output_handler_alias_ctor_t func)
 {
-	int ret;
 	zend_string *str;
 
 	if (!EG(current_module)) {
