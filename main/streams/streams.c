@@ -2205,14 +2205,12 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	if (NULL == wrapperhash) {
 		array_init(&category);
 		wrapperhash = zend_hash_str_update(Z_ARRVAL(context->options), (char*)wrappername, strlen(wrappername), &category);
-		if (NULL == wrapperhash) {
-			return FAILURE;
-		}
 	}
 	ZVAL_DEREF(optionvalue);
 	Z_TRY_ADDREF_P(optionvalue);
 	SEPARATE_ARRAY(wrapperhash);
-	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
+	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
+	return SUCCESS;
 }
 /* }}} */
 

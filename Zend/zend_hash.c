@@ -1994,12 +1994,12 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
 			}
 			if (p->key) {
 				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
-				if (t && pCopyConstructor) {
+				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
 				t = zend_hash_index_update(target, p->h, &p->val);
-				if (t && pCopyConstructor) {
+				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}
@@ -2053,7 +2053,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *sou
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		if (zend_hash_replace_checker_wrapper(target, &p->val, p, pParam, pMergeSource)) {
 			t = zend_hash_update(target, p->key, &p->val);
-			if (t && pCopyConstructor) {
+			if (pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		}

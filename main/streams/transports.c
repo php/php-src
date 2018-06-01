@@ -31,12 +31,11 @@ PHPAPI HashTable *php_stream_xport_get_hash(void)
 
 PHPAPI int php_stream_xport_register(const char *protocol, php_stream_transport_factory factory)
 {
-	int ret;
 	zend_string *str = zend_string_init_interned(protocol, strlen(protocol), 1);
 
-	ret = zend_hash_update_ptr(&xport_hash, str, factory) ? SUCCESS : FAILURE;
+	zend_hash_update_ptr(&xport_hash, str, factory);
 	zend_string_release_ex(str, 1);
-	return ret;
+	return SUCCESS;
 }
 
 PHPAPI int php_stream_xport_unregister(const char *protocol)

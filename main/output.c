@@ -609,7 +609,6 @@ PHPAPI int php_output_handler_conflict(const char *handler_new, size_t handler_n
  * Register a conflict checking function on MINIT */
 PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_len, php_output_handler_conflict_check_t check_func)
 {
-	int ret;
 	zend_string *str;
 
 	if (!EG(current_module)) {
@@ -617,9 +616,9 @@ PHPAPI int php_output_handler_conflict_register(const char *name, size_t name_le
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
-	ret = zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func) ? SUCCESS : FAILURE;
+	zend_hash_update_ptr(&php_output_handler_conflicts, str, check_func);
 	zend_string_release_ex(str, 1);
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 
@@ -646,12 +645,9 @@ PHPAPI int php_output_handler_reverse_conflict_register(const char *name, size_t
 			return FAILURE;
 		}
 		str = zend_string_init_interned(name, name_len, 1);
-		ret = zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable)) ? SUCCESS : FAILURE;
+		zend_hash_update_mem(&php_output_handler_reverse_conflicts, str, &rev, sizeof(HashTable));
 		zend_string_release_ex(str, 1);
-		if (ret != SUCCESS) {
-			zend_hash_destroy(&rev);
-		}
-		return ret;
+		return SUCCESS;
 	}
 }
 /* }}} */
@@ -676,9 +672,9 @@ PHPAPI int php_output_handler_alias_register(const char *name, size_t name_len, 
 		return FAILURE;
 	}
 	str = zend_string_init_interned(name, name_len, 1);
-	ret = zend_hash_update_ptr(&php_output_handler_aliases, str, func) ? SUCCESS : FAILURE;
+	zend_hash_update_ptr(&php_output_handler_aliases, str, func);
 	zend_string_release_ex(str, 1);
-	return ret;
+	return SUCCESS;
 }
 /* }}} */
 

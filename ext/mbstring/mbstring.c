@@ -1608,7 +1608,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 		zend_function *func, *orig;
 		const struct mb_overload_def *p;
 		zend_string *str;
-		void *ret;
 
 		p = &(mb_ovld[0]);
 		while (p->type > 0) {
@@ -1628,13 +1627,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
 					function_add_ref(orig);
 
 					str = zend_string_init_interned(p->orig_func, strlen(p->orig_func), 1);
-					ret = zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
+					zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
 					zend_string_release_ex(str, 1);
-					if (ret == NULL) {
-						php_error_docref("ref.mbstring", E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
-						return FAILURE;
-					}
-
 					function_add_ref(func);
 				}
 			}

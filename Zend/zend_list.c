@@ -347,10 +347,6 @@ ZEND_API zend_resource* zend_register_persistent_resource_ex(zend_string *key, v
 	GC_MAKE_PERSISTENT_LOCAL(key);
 
 	zv = zend_hash_update(&EG(persistent_list), key, &tmp);
-	if (UNEXPECTED(zv == NULL)) {
-		free(Z_RES(tmp));
-		return NULL;
-	}
 
 	return Z_RES_P(zv);
 }
