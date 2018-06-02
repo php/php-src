@@ -20,8 +20,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -6821,10 +6819,7 @@ PHP_MINIT_FUNCTION(reflection) /* {{{ */
 PHP_MINFO_FUNCTION(reflection) /* {{{ */
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Reflection", "enabled");
-
-	php_info_print_table_row(2, "Version", "$Id$");
-
+	php_info_print_table_row(2, "Reflection", "enabled");
 	php_info_print_table_end();
 } /* }}} */
 
