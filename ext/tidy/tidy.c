@@ -16,8 +16,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -1098,7 +1096,7 @@ static PHP_MSHUTDOWN_FUNCTION(tidy)
 static PHP_MINFO_FUNCTION(tidy)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Tidy support", "enabled");
+	php_info_print_table_row(2, "Tidy support", "enabled");
 #if HAVE_TIDYBUFFIO_H
 	php_info_print_table_row(2, "libTidy Version", (char *)tidyLibraryVersion());
 #elif HAVE_TIDYP_H
@@ -1107,7 +1105,6 @@ static PHP_MINFO_FUNCTION(tidy)
 #if HAVE_TIDYRELEASEDATE
 	php_info_print_table_row(2, "libTidy Release", (char *)tidyReleaseDate());
 #endif
-	php_info_print_table_row(2, "Extension Version", PHP_TIDY_VERSION " ($Id$)");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
