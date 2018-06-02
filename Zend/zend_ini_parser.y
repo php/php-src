@@ -278,7 +278,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 
 /* {{{ zval_ini_dtor()
 */
-static int zval_ini_dtor(zval *zv)
+static void zval_ini_dtor(zval *zv)
 {
 	if (Z_TYPE_P(zv) == IS_STRING) {
 		zend_string_release(Z_STR_P(zv));
