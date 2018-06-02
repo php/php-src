@@ -242,10 +242,7 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 	}
 
     if (field->decimals > 0) {
-        char * format;
-        mnd_sprintf(&format, 0, "%%s%%02u:%%02u:%%02u.%%%02uu", field->decimals);
-        length = mnd_sprintf(&value, 0, format, (t.neg ? "-" : ""), t.hour, t.minute, t.second, t.second_part);
-        mnd_sprintf_free(format);
+        length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u.%0*u", (t.neg ? "-" : ""), t.hour, t.minute, t.second, field->decimals, t.second_part);
     } else {
         length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
     }
@@ -330,10 +327,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 	}
 
     if (field->decimals > 0) {
-        char * format;
-        mnd_sprintf(&format, 0, "%%04u-%%02u-%%02u %%02u:%%02u:%%02u.%%%02uu", field->decimals);
-        length = mnd_sprintf(&value, 0, format, t.year, t.month, t.day, t.hour, t.minute, t.second, t.second_part);
-        mnd_sprintf_free(format);
+    	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u.%0*u", t.year, t.month, t.day, t.hour, t.minute, t.second, field->decimals, t.second_part);
     } else {
     	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
     }
