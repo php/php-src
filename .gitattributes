@@ -14,8 +14,6 @@ ext/dba/libinifile/inifile.c    ident
 ext/dba/libflatfile/flatfile.c  ident
 ext/dba/libcdb/cdb_make.c       ident
 ext/dba/libcdb/cdb.c            ident
-ext/filter/filter.c             ident
-README.input_filter             ident
 run-tests.php                   ident
 ext/exif/exif.c                 ident
 ext/ldap/ldap.c                 ident
