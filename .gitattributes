@@ -8,7 +8,6 @@ ext/phar/phar/pharcommand.inc   ident
 ext/phar/phar.c                 ident
 ext/sysvmsg/sysvmsg.c           ident
 ext/enchant/enchant.c           ident
-ext/reflection/php_reflection.c ident
 ext/oci8/oci8.c                 ident
 ext/dba/libinifile/inifile.c    ident
 ext/dba/libflatfile/flatfile.c  ident
