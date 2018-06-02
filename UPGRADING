@@ -135,6 +135,9 @@ readline:
 4. Deprecated Functionality
 ========================================
 
+Intl:
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
+
 ========================================
 5. Changed Functions
 ========================================
