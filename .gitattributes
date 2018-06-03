@@ -10,7 +10,6 @@ ext/dba/libcdb/cdb_make.c       ident
 ext/dba/libcdb/cdb.c            ident
 run-tests.php                   ident
 ext/exif/exif.c                 ident
-ext/pdo_pgsql/pdo_pgsql.c       ident
 NEWS                            merge=NEWS
 UPGRADING                       merge=NEWS
 UPGRADING.INTERNALS             merge=NEWS
