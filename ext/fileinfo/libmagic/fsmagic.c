@@ -68,16 +68,6 @@ FILE_RCSID("@(#)$File: fsmagic.c,v 1.77 2017/05/24 19:17:50 christos Exp $")
 
 # undef S_IFIFO
 #endif
-
-
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
-#ifndef S_ISREG
-#define S_ISREG(mode) ((mode) & _S_IFREG)
-#endif
-
 private int
 handle_mime(struct magic_set *ms, int mime, const char *str)
 {
