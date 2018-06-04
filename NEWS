@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
+    'php ext_skel.php' for all options. This means there are no dependencies,
+    thus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
