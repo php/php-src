@@ -1,5 +1,8 @@
 --TEST--
 Test ftp_ssl_connect() function : error conditions
+--CREDITS--
+Chance Garcia <chance [at] chancegarcia [dot] com>
+#testfest php[tek] 2017-06-17
 --SKIPIF--
 <?php
 $ssl = 1;
@@ -24,7 +27,7 @@ echo "\n-- Testing ftp_ssl_connect() function timeout warning for value 0 --\n";
 ftp_ssl_connect('totes.invalid', 21, 0);
 
 echo "===DONE===\n";
-
+?>
 --EXPECTF--
 *** Testing ftp_ssl_connect() function : error conditions ***
 
