@@ -2569,13 +2569,13 @@ ZEND_API void* ZEND_FASTCALL _safe_realloc(void *ptr, size_t nmemb, size_t size,
 	return perealloc(ptr, zend_safe_address_guarded(nmemb, size, offset), 1);
 }
 
-
 ZEND_API void* ZEND_FASTCALL _ecalloc(size_t nmemb, size_t size ZEND_FILE_LINE_DC ZEND_FILE_LINE_ORIG_DC)
 {
 	void *p;
 
-	p = _safe_emalloc(nmemb, size, 0 ZEND_FILE_LINE_RELAY_CC ZEND_FILE_LINE_ORIG_RELAY_CC);
-	memset(p, 0, size * nmemb);
+	size = zend_safe_address_guarded(nmemb, size, 0);
+	p = emalloc_rel(size);
+	memset(p, 0, size);
 	return p;
 }
 
@@ -2904,8 +2904,11 @@ ZEND_API void * __zend_malloc(size_t len)
 
 ZEND_API void * __zend_calloc(size_t nmemb, size_t len)
 {
-	void *tmp = _safe_malloc(nmemb, len, 0);
-	memset(tmp, 0, nmemb * len);
+	void *tmp;
+
+	len = zend_safe_address_guarded(nmemb, len, 0);
+	tmp = __zend_malloc(len);
+	memset(tmp, 0, len);
 	return tmp;
 }
 
