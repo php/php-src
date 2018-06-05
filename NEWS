@@ -20,6 +20,7 @@ PHP                                                                        NEWS
   . Fixed bug #76367 (NoRewindIterator segfault 11). (Laruence)
 
 - Standard:
+  . Fixed bug #76410 (SIGV in zend_mm_alloc_small). (Laruence)
   . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
     (Anatol)
 
