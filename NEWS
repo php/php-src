@@ -2,7 +2,23 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.19
 
+- CLI Server:
+  . Fixed bug #76333 (PHP built-in server does not find files if root path
+    contains special characters). (Anatol)
 
+- OpenSSL:
+  . Fixed bug #76296 (openssl_pkey_get_public does not respect open_basedir).
+    (Erik Lax, Jakub Zelenka)
+  . Fixed bug #76174 (openssl extension fails to build with LibreSSL 2.7).
+    (Jakub Zelenka)
+
+- SPL:
+  . Fixed bug #76367 (NoRewindIterator segfault 11). (Laruence)
+
+- Standard:
+  . Fixed bug #76335 ("link(): Bad file descriptor" with non-ASCII path).
+    (Anatol)
+  . Fixed bug #76383 (array_map on $GLOBALS returns IS_INDIRECT). (Bob)
 
 24 May 2018, PHP 7.1.18
 

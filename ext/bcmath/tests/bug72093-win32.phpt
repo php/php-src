@@ -6,6 +6,11 @@ if(!extension_loaded("bcmath")) print "skip";
 if (substr(PHP_OS, 0, 3) != 'WIN') {
     die('skip valid only for windows');
 }
+$cur = PHP_WINDOWS_VERSION_MAJOR.'.'.PHP_WINDOWS_VERSION_MINOR.'.'.PHP_WINDOWS_VERSION_BUILD;
+$req = "10.0.17134";
+if (version_compare($cur, $req) >= 0) {
+	echo "skip Only for Windows systems < $req";
+}
 ?>
 --FILE--
 <?php
@@ -14,5 +19,4 @@ var_dump(bcpowmod(1, 1.2, 1, 1));
 ?>
 --EXPECTF--
 string(1) "1"
-string(3) "0.0"
-bc math warning: non-zero scale in exponent
+%Astring(3) "0.0"%A

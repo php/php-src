@@ -73,7 +73,7 @@
 #ifdef HAVE_OPENSSL_MD2_H
 #define OPENSSL_ALGO_MD2	4
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 #define OPENSSL_ALGO_DSS1	5
 #endif
 #define OPENSSL_ALGO_SHA224 6
@@ -560,7 +560,7 @@ ZEND_GET_MODULE(openssl)
 #endif
 
 /* {{{ OpenSSL compatibility functions and macros */
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 #define EVP_PKEY_get0_RSA(_pkey) _pkey->pkey.rsa
 #define EVP_PKEY_get0_DH(_pkey) _pkey->pkey.dh
 #define EVP_PKEY_get0_DSA(_pkey) _pkey->pkey.dsa
@@ -677,7 +677,7 @@ static const unsigned char *ASN1_STRING_get0_data(const ASN1_STRING *asn1)
 	return M_ASN1_STRING_data(asn1);
 }
 
-#if OPENSSL_VERSION_NUMBER < 0x10002000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10002
 
 static int X509_get_signature_nid(const X509 *x)
 {
@@ -1237,7 +1237,7 @@ static void php_openssl_dispose_config(struct php_x509_request * req) /* {{{ */
 }
 /* }}} */
 
-#if defined(PHP_WIN32) || (OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER))
+#if defined(PHP_WIN32) || PHP_OPENSSL_API_VERSION >= 0x10100
 #define PHP_OPENSSL_RAND_ADD_TIME() ((void) 0)
 #else
 #define PHP_OPENSSL_RAND_ADD_TIME() php_openssl_rand_add_timeval()
@@ -1324,7 +1324,7 @@ static EVP_MD * php_openssl_get_evp_md_from_algo(zend_long algo) { /* {{{ */
 			mdtype = (EVP_MD *) EVP_md2();
 			break;
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 		case OPENSSL_ALGO_DSS1:
 			mdtype = (EVP_MD *) EVP_dss1();
 			break;
@@ -1450,7 +1450,7 @@ PHP_MINIT_FUNCTION(openssl)
 #ifdef HAVE_OPENSSL_MD2_H
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_MD2", OPENSSL_ALGO_MD2, CONST_CS|CONST_PERSISTENT);
 #endif
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_DSS1", OPENSSL_ALGO_DSS1, CONST_CS|CONST_PERSISTENT);
 #endif
 	REGISTER_LONG_CONSTANT("OPENSSL_ALGO_SHA224", OPENSSL_ALGO_SHA224, CONST_CS|CONST_PERSISTENT);
@@ -3620,7 +3620,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 		RETURN_FALSE;
 	}
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION >= 0x10100
 	/* Due to changes in OpenSSL 1.1 related to locking when decoding CSR,
 	 * the pub key is not changed after assigning. It means if we pass
 	 * a private key, it will be returned including the private part.
@@ -3631,7 +3631,7 @@ PHP_FUNCTION(openssl_csr_get_public_key)
 	/* Retrieve the public key from the CSR */
 	tpubkey = X509_REQ_get_pubkey(csr);
 
-#if OPENSSL_VERSION_NUMBER >= 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION >= 0x10100
 	/* We need to free the CSR as it was duplicated */
 	X509_REQ_free(csr);
 #endif
@@ -3785,6 +3785,9 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 
 		if (Z_STRLEN_P(val) > 7 && memcmp(Z_STRVAL_P(val), "file://", sizeof("file://") - 1) == 0) {
 			filename = Z_STRVAL_P(val) + (sizeof("file://") - 1);
+			if (php_openssl_open_base_dir_chk(filename)) {
+				TMP_CLEAN;
+			}
 		}
 		/* it's an X509 file/cert of some kind, and we need to extract the data from that */
 		if (public_key) {
@@ -3811,9 +3814,6 @@ static EVP_PKEY * php_openssl_evp_from_zval(
 			BIO *in;
 
 			if (filename) {
-				if (php_openssl_open_base_dir_chk(filename)) {
-					TMP_CLEAN;
-				}
 				in = BIO_new_file(filename, PHP_OPENSSL_BIO_MODE_R(PKCS7_BINARY));
 			} else {
 				in = BIO_new_mem_buf(Z_STRVAL_P(val), (int)Z_STRLEN_P(val));

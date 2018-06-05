@@ -91,7 +91,7 @@
 /* Used for peer verification in windows */
 #define PHP_X509_NAME_ENTRY_TO_UTF8(ne, i, out) ASN1_STRING_to_UTF8(&out, X509_NAME_ENTRY_get_data(X509_NAME_get_entry(ne, i)))
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength);
 #endif
 
@@ -1128,7 +1128,7 @@ static void init_server_reneg_limit(php_stream *stream, php_openssl_netstream_da
 }
 /* }}} */
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 static RSA *tmp_rsa_cb(SSL *s, int is_export, int keylength)
 {
 	BIGNUM *bn = NULL;
@@ -1197,7 +1197,7 @@ static int set_server_dh_param(php_stream * stream, SSL_CTX *ctx) /* {{{ */
 }
 /* }}} */
 
-#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
+#if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
 static int set_server_ecdh_curve(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 {
 	zval *zvcurve;
@@ -1240,13 +1240,13 @@ static int set_server_specific_opts(php_stream *stream, SSL_CTX *ctx) /* {{{ */
 	zval *zv;
 	long ssl_ctx_options = SSL_CTX_get_options(ctx);
 
-#if defined(HAVE_ECDH) && (OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER))
+#if defined(HAVE_ECDH) && PHP_OPENSSL_API_VERSION < 0x10100
 	if (set_server_ecdh_curve(stream, ctx) == FAILURE) {
 		return FAILURE;
 	}
 #endif
 
-#if OPENSSL_VERSION_NUMBER < 0x10100000L || defined (LIBRESSL_VERSION_NUMBER)
+#if PHP_OPENSSL_API_VERSION < 0x10100
 	SSL_CTX_set_tmp_rsa_callback(ctx, tmp_rsa_cb);
 #endif
 	/* We now use tmp_rsa_cb to generate a key of appropriate size whenever necessary */
