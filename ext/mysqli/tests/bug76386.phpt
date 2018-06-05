@@ -43,12 +43,13 @@ $stmt->fetch();
 var_dump($ts, $ts2, $ts4, $ts6);
 $stmt->free_result();
 
-$stmt = $link->prepare('SELECT * FROM t_test;');
-$stmt->execute();
+$stmt2 = $link->prepare('SELECT * FROM t_test;');
+$stmt2->execute();
 $id = $t = $t2 = $t3 = $t4 = null;
-$stmt->bind_result($id, $t, $t2, $t4, $t6);
-$stmt->fetch();
+$stmt2->bind_result($id, $t, $t2, $t4, $t6);
+$stmt2->fetch();
 var_dump($t, $t2, $t4, $t6);
+$stmt2->free_result();
 
 $link->close();
 ?>
