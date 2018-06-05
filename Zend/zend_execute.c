@@ -3269,13 +3269,16 @@ static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *ar
 #define ZEND_VM_SET_RELATIVE_OPCODE(opline, offset) \
 	ZEND_VM_SET_OPCODE(ZEND_OFFSET_TO_OPLINE(opline, offset))
 
-#define ZEND_VM_JMP(new_op) do { \
-		if (UNEXPECTED(EG(exception))) { \
+#define ZEND_VM_JMP_EX(new_op, check_exception) do { \
+		if (check_exception && UNEXPECTED(EG(exception))) { \
 			HANDLE_EXCEPTION(); \
 		} \
 		ZEND_VM_SET_OPCODE(new_op); \
 		ZEND_VM_CONTINUE(); \
 	} while (0)
+
+#define ZEND_VM_JMP(new_op) \
+	ZEND_VM_JMP_EX(new_op, 1)
 
 #define ZEND_VM_INC_OPCODE() \
 	OPLINE++
