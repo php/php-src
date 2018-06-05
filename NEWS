@@ -184,7 +184,7 @@ PHP                                                                        NEWS
     (carusogabriel)
 
 - SQLite3:
-  . Updated bundled libsqlite to 3.23.1. (cmb)
+  . Updated bundled libsqlite to 3.24.0. (cmb)
 
 - Standard:
   . Added is_countable() function. (Gabriel Caruso)
