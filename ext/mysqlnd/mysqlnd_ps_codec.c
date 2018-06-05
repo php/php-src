@@ -252,7 +252,7 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
             t.minute,
             t.second,
             field->decimals,
-           (int) (t.second_part / pow(10, 6 - field->decimals))
+           (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
         );
     } else {
         length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
@@ -349,7 +349,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
             t.minute,
             t.second,
             field->decimals,
-            (int) (t.second_part / pow(10, 6 - field->decimals))
+            (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
         );
     } else {
     	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
