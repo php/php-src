@@ -1632,7 +1632,7 @@ after_open_fp:
 		}
 
 		if (opened) {
-			zend_string_release(opened);
+			zend_string_release_ex(opened, 0);
 		}
 
 		if (close_fp) {
@@ -1651,7 +1651,7 @@ after_open_fp:
 		}
 
 		if (opened) {
-			zend_string_release(opened);
+			zend_string_release_ex(opened, 0);
 		}
 
 		if (temp) {
@@ -3963,7 +3963,7 @@ carry_on:
 		}
 		zend_throw_exception_ex(spl_ce_RuntimeException, 0,
 			"Unable to read stub");
-		zend_string_release(buf);
+		zend_string_release_ex(buf, 0);
 		return;
 	}
 

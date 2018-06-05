@@ -585,7 +585,7 @@ static int gmp_serialize(zval *object, unsigned char **buffer, size_t *buf_len, 
 	PHP_VAR_SERIALIZE_DESTROY(serialize_data);
 	*buffer = (unsigned char *) estrndup(ZSTR_VAL(buf.s), ZSTR_LEN(buf.s));
 	*buf_len = ZSTR_LEN(buf.s);
-	zend_string_release(buf.s);
+	zend_string_release_ex(buf.s, 0);
 
 	return SUCCESS;
 }
@@ -663,7 +663,7 @@ ZEND_MINIT_FUNCTION(gmp)
 	gmp_ce->serialize = gmp_serialize;
 	gmp_ce->unserialize = gmp_unserialize;
 
-	memcpy(&gmp_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&gmp_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	gmp_object_handlers.offset = XtOffsetOf(gmp_object, std);
 	gmp_object_handlers.free_obj = gmp_free_object_storage;
 	gmp_object_handlers.cast_object = gmp_cast_object;

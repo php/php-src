@@ -632,7 +632,7 @@ static size_t php_ftp_dirstream_read(php_stream *stream, char *buf, size_t count
 	tmp_len = MIN(sizeof(ent->d_name), ZSTR_LEN(basename) - 1);
 	memcpy(ent->d_name, ZSTR_VAL(basename), tmp_len);
 	ent->d_name[tmp_len - 1] = '\0';
-	zend_string_release(basename);
+	zend_string_release_ex(basename, 0);
 
 	/* Trim off trailing whitespace characters */
 	while (tmp_len > 0 &&

@@ -1365,20 +1365,20 @@ int phar_create_or_parse_filename(char *fname, size_t fname_len, char *alias, si
 				(*pphar)->is_writeable = 1;
 			}
 			if (actual) {
-				zend_string_release(actual);
+				zend_string_release_ex(actual, 0);
 			}
 			return SUCCESS;
 		} else {
 			/* file exists, but is either corrupt or not a phar archive */
 			if (actual) {
-				zend_string_release(actual);
+				zend_string_release_ex(actual, 0);
 			}
 			return FAILURE;
 		}
 	}
 
 	if (actual) {
-		zend_string_release(actual);
+		zend_string_release_ex(actual, 0);
 	}
 
 	if (PHAR_G(readonly) && !is_data) {
@@ -1519,7 +1519,7 @@ int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t a
 			}
 		}
 		if (actual) {
-			zend_string_release(actual);
+			zend_string_release_ex(actual, 0);
 		}
 		return FAILURE;
 	}
@@ -1532,7 +1532,7 @@ int phar_open_from_filename(char *fname, size_t fname_len, char *alias, size_t a
 	ret =  phar_open_from_fp(fp, fname, fname_len, alias, alias_len, options, pphar, is_data, error);
 
 	if (actual) {
-		zend_string_release(actual);
+		zend_string_release_ex(actual, 0);
 	}
 
 	return ret;
@@ -2314,7 +2314,7 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 			spprintf(error, 0, "unable to open phar for reading \"%s\"", fname);
 		}
 		if (actual) {
-			zend_string_release(actual);
+			zend_string_release_ex(actual, 0);
 		}
 		return FAILURE;
 	}
@@ -2327,7 +2327,7 @@ int phar_open_executed_filename(char *alias, size_t alias_len, char **error) /* 
 	ret = phar_open_from_fp(fp, fname, fname_len, alias, alias_len, REPORT_ERRORS, NULL, 0, error);
 
 	if (actual) {
-		zend_string_release(actual);
+		zend_string_release_ex(actual, 0);
 	}
 
 	return ret;

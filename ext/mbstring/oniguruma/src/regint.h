@@ -59,7 +59,7 @@
 #define USE_CALL
 #define USE_CALLOUT
 #define USE_BACKREF_WITH_LEVEL        /* \k<name+n>, \k<name-n> */
-#define USE_INSISTENT_CHECK_CAPTURES_STATUS_IN_ENDLESS_REPEAT  /* /(?:()|())*\2/ */
+#define USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT    /* /(?:()|())*\2/ */
 #define USE_NEWLINE_AT_END_OF_STRING_HAS_EMPTY_LINE     /* /\n$/ =~ "\n" */
 #define USE_WARNING_REDUNDANT_NESTED_REPEAT_OPERATOR
 
@@ -710,7 +710,6 @@ typedef int AbsAddrType;
 typedef int LengthType;
 typedef int RepeatNumType;
 typedef int MemNumType;
-typedef short int StateCheckNumType;
 typedef void* PointerType;
 typedef int SaveType;
 typedef int UpdateVarType;

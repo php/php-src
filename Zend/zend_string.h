@@ -281,6 +281,21 @@ static zend_always_inline void zend_string_release(zend_string *s)
 	}
 }
 
+static zend_always_inline void zend_string_release_ex(zend_string *s, int persistent)
+{
+	if (!ZSTR_IS_INTERNED(s)) {
+		if (GC_DELREF(s) == 0) {
+			if (persistent) {
+				ZEND_ASSERT(GC_FLAGS(s) & IS_STR_PERSISTENT);
+				free(s);
+			} else {
+				ZEND_ASSERT(!(GC_FLAGS(s) & IS_STR_PERSISTENT));
+				efree(s);
+			}
+		}
+	}
+}
+
 #if defined(__GNUC__) && (defined(__i386__) || defined(__x86_64__))
 ZEND_API zend_bool ZEND_FASTCALL zend_string_equal_val(zend_string *s1, zend_string *s2);
 #else

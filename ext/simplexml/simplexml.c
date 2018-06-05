@@ -18,8 +18,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -465,7 +463,7 @@ long_dim:
 			if (Z_TYPE_P(member) != IS_STRING) {
 				trim_str = zval_get_string_func(member);
 				ZVAL_STR(&tmp_zv, php_trim(trim_str, NULL, 0, 3));
-				zend_string_release(trim_str);
+				zend_string_release_ex(trim_str, 0);
 				member = &tmp_zv;
 			}
 
@@ -1013,7 +1011,7 @@ static void sxe_properties_add(HashTable *rv, char *name, int namelen, zval *val
 	} else {
 		zend_hash_add_new(rv, key, value);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -1506,7 +1504,7 @@ static inline void sxe_add_namespace_name(zval *return_value, xmlNsPtr ns) /* {{
 		ZVAL_STRING(&zv, (char*)ns->href);
 		zend_hash_add_new(Z_ARRVAL_P(return_value), key, &zv);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 /* }}} */
 
@@ -2689,7 +2687,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_class_entry->iterator_funcs.funcs = &php_sxe_iterator_funcs;
 	zend_class_implements(sxe_class_entry, 1, zend_ce_traversable);
 
-	memcpy(&sxe_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&sxe_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	sxe_object_handlers.offset = XtOffsetOf(php_sxe_object, zo);
 	sxe_object_handlers.dtor_obj = sxe_object_dtor;
 	sxe_object_handlers.free_obj = sxe_object_free_storage;
@@ -2711,7 +2709,7 @@ PHP_MINIT_FUNCTION(simplexml)
 	sxe_object_handlers.get_debug_info = sxe_get_debug_info;
 	sxe_object_handlers.get_closure = NULL;
 	sxe_object_handlers.get_gc = sxe_get_gc;
-	
+
 	sxe_class_entry->serialize = zend_class_serialize_deny;
 	sxe_class_entry->unserialize = zend_class_unserialize_deny;
 
@@ -2737,8 +2735,7 @@ PHP_MSHUTDOWN_FUNCTION(simplexml)
 PHP_MINFO_FUNCTION(simplexml)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "Simplexml support", "enabled");
-	php_info_print_table_row(2, "Revision", "$Id$");
+	php_info_print_table_row(2, "SimpleXML support", "enabled");
 	php_info_print_table_row(2, "Schema support",
 #ifdef LIBXML_SCHEMAS_ENABLED
 		"enabled");

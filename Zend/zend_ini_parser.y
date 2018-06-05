@@ -276,6 +276,16 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 }
 /* }}} */
 
+/* {{{ zval_ini_dtor()
+*/
+static void zval_ini_dtor(zval *zv)
+{
+	if (Z_TYPE_P(zv) == IS_STRING) {
+		zend_string_release(Z_STR_P(zv));
+	}
+}
+/* }}} */
+
 %}
 
 %expect 0
@@ -300,7 +310,7 @@ ZEND_API int zend_parse_ini_string(char *str, zend_bool unbuffered_errors, int s
 %left '|' '&' '^'
 %right '~' '!'
 
-%destructor { zval_ptr_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL
+%destructor { zval_ini_dtor(&$$); } TC_RAW TC_CONSTANT TC_NUMBER TC_STRING TC_WHITESPACE TC_LABEL TC_OFFSET TC_VARNAME BOOL_TRUE BOOL_FALSE NULL_NULL
 
 %%
 
@@ -323,7 +333,7 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$3, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG);
 			zend_string_release(Z_STR($1));
-			zval_ptr_dtor(&$3);
+			zval_ini_dtor(&$3);
 		}
 	|	TC_OFFSET option_offset ']' '=' string_or_value {
 #if DEBUG_CFG_PARSER
@@ -331,12 +341,8 @@ statement:
 #endif
 			ZEND_INI_PARSER_CB(&$1, &$5, &$2, ZEND_INI_PARSER_POP_ENTRY, ZEND_INI_PARSER_ARG);
 			zend_string_release(Z_STR($1));
-			if (Z_TYPE($2) == IS_STRING) {
-				zend_string_release(Z_STR($2));
-			} else {
-				zval_dtor(&$2);
-			}
-			zval_ptr_dtor(&$5);
+			zval_ini_dtor(&$2);
+			zval_ini_dtor(&$5);
 		}
 	|	TC_LABEL	{ ZEND_INI_PARSER_CB(&$1, NULL, NULL, ZEND_INI_PARSER_ENTRY, ZEND_INI_PARSER_ARG); zend_string_release(Z_STR($1)); }
 	|	END_OF_LINE

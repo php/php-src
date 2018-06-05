@@ -379,7 +379,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
 	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL);
 	if (post_data_str) {
-		zend_string_release(post_data_str);
+		zend_string_release_ex(post_data_str, 0);
 	}
 
 	MBSTRG(http_input_identify) = detected;

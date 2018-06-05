@@ -139,8 +139,8 @@ int json_yydebug = 1;
 
 /* In a future release of Bison, this section will be replaced
    by #include "json_parser.tab.h".  */
-#ifndef YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
-# define YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+#ifndef YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
+# define YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
@@ -201,7 +201,7 @@ typedef union YYSTYPE YYSTYPE;
 
 int php_json_yyparse (php_json_parser *parser);
 
-#endif /* !YY_PHP_JSON_YY_HOME_HUIXINCHEN_OPENSOURCE_TRUNK_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
+#endif /* !YY_PHP_JSON_YY_HOME_DMITRY_PHP_PHP_MASTER_EXT_JSON_JSON_PARSER_TAB_H_INCLUDED  */
 
 /* Copy the second part of user declarations.  */
 
@@ -1140,7 +1140,7 @@ yydestruct (const char *yymsg, int yytype, YYSTYPE *yyvaluep, php_json_parser *p
 
     case 25: /* pair  */
 
-      { zend_string_release(((*yyvaluep).pair).key); zval_dtor(&((*yyvaluep).pair).val); }
+      { zend_string_release_ex(((*yyvaluep).pair).key, 0); zval_dtor(&((*yyvaluep).pair).val); }
 
         break;
 
@@ -1885,7 +1885,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
-			zend_string_release(key);
+			zend_string_release_ex(key, 0);
 			zval_dtor(zvalue);
 			zval_dtor(object);
 			return FAILURE;
@@ -1894,7 +1894,7 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		zend_std_write_property(object, &zkey, zvalue, NULL);
 		Z_TRY_DELREF_P(zvalue);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 
 	return SUCCESS;
 }

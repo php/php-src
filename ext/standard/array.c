@@ -1966,7 +1966,7 @@ static zend_long php_extract_ref_prefix_if_exists(zend_array *arr, zend_array *s
 					count++;
 				}
 			}
-			zend_string_release(Z_STR(final_name));
+			zend_string_release_ex(Z_STR(final_name), 0);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2019,7 +2019,7 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 					count++;
 				}
 			}
-			zend_string_release(Z_STR(final_name));
+			zend_string_release_ex(Z_STR(final_name), 0);
 		}
 	} ZEND_HASH_FOREACH_END();
 
@@ -2081,7 +2081,7 @@ static zend_long php_extract_ref_prefix_same(zend_array *arr, zend_array *symbol
 					count++;
 				}
 			}
-			zend_string_release(Z_STR(final_name));
+			zend_string_release_ex(Z_STR(final_name), 0);
 		} else {
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				continue;
@@ -2155,7 +2155,7 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 					count++;
 				}
 			}
-			zend_string_release(Z_STR(final_name));
+			zend_string_release_ex(Z_STR(final_name), 0);
 		} else {
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				continue;
@@ -2195,7 +2195,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 		} else {
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 		}
 		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (zend_string_equals_literal(Z_STR(final_name), "this")) {
@@ -2221,7 +2221,7 @@ static zend_long php_extract_ref_prefix_all(zend_array *arr, zend_array *symbol_
 				count++;
 			}
 		}
-		zend_string_release(Z_STR(final_name));
+		zend_string_release_ex(Z_STR(final_name), 0);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2245,7 +2245,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 		} else {
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 		}
 		if (php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
 			if (zend_string_equals_literal(Z_STR(final_name), "this")) {
@@ -2269,7 +2269,7 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 				count++;
 			}
 		}
-		zend_string_release(Z_STR(final_name));
+		zend_string_release_ex(Z_STR(final_name), 0);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2289,7 +2289,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-					zend_string_release(Z_STR(final_name));
+					zend_string_release_ex(Z_STR(final_name), 0);
 					continue;
 				}
 			} else {
@@ -2298,9 +2298,9 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 		} else {
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-				zend_string_release(Z_STR(final_name));
+				zend_string_release_ex(Z_STR(final_name), 0);
 				continue;
 			}
 		}
@@ -2326,7 +2326,7 @@ static zend_long php_extract_ref_prefix_invalid(zend_array *arr, zend_array *sym
 			}
 			count++;
 		}
-		zend_string_release(Z_STR(final_name));
+		zend_string_release_ex(Z_STR(final_name), 0);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2346,7 +2346,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			if (!php_valid_var_name(ZSTR_VAL(var_name), ZSTR_LEN(var_name))) {
 				php_prefix_varname(&final_name, prefix, ZSTR_VAL(var_name), ZSTR_LEN(var_name), 1);
 				if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-					zend_string_release(Z_STR(final_name));
+					zend_string_release_ex(Z_STR(final_name), 0);
 					continue;
 				}
 			} else {
@@ -2355,9 +2355,9 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 		} else {
 			zend_string *str = zend_long_to_str(num_key);
 			php_prefix_varname(&final_name, prefix, ZSTR_VAL(str), ZSTR_LEN(str), 1);
-			zend_string_release(str);
+			zend_string_release_ex(str, 0);
 			if (!php_valid_var_name(Z_STRVAL(final_name), Z_STRLEN(final_name))) {
-				zend_string_release(Z_STR(final_name));
+				zend_string_release_ex(Z_STR(final_name), 0);
 				continue;
 			}
 		}
@@ -2381,7 +2381,7 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 			}
 			count++;
 		}
-		zend_string_release(Z_STR(final_name));
+		zend_string_release_ex(Z_STR(final_name), 0);
 	} ZEND_HASH_FOREACH_END();
 
 	return count;
@@ -2558,7 +2558,13 @@ PHP_FUNCTION(extract)
 				count = php_extract_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
 			case EXTR_OVERWRITE:
-				count = php_extract_overwrite(Z_ARRVAL_P(var_array_param), symbol_table);
+				{
+					zval zv;
+					/* The array might be stored in a local variable that will be overwritten */
+					ZVAL_COPY(&zv, var_array_param);
+					count = php_extract_overwrite(Z_ARRVAL(zv), symbol_table);
+					zval_ptr_dtor(&zv);
+				}
 				break;
 			case EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
@@ -2793,10 +2799,18 @@ PHP_FUNCTION(range)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (zstep) {
-		if (Z_TYPE_P(zstep) == IS_DOUBLE ||
-			(Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)
-		) {
+		if (Z_TYPE_P(zstep) == IS_DOUBLE) {
 			is_step_double = 1;
+		} else if (Z_TYPE_P(zstep) == IS_STRING) {
+			int type = is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0);
+			if (type == IS_DOUBLE) {
+				is_step_double = 1;
+			}
+			if (type == 0) {
+				/* bad number */
+				php_error_docref(NULL, E_WARNING, "Invalid range string - must be numeric");
+				RETURN_FALSE;
+			}
 		}
 
 		step = zval_get_double(zstep);
@@ -2924,6 +2938,10 @@ long_str:
 		}
 
 		lstep = (zend_ulong)step;
+		if (step <= 0) {
+			err = 1;
+			goto err;
+		}
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
@@ -3040,7 +3058,7 @@ static void php_array_data_shuffle(zval *array) /* {{{ */
 	for (j = 0; j < n_elems; j++) {
 		p = hash->arData + j;
 		if (p->key) {
-			zend_string_release(p->key);
+			zend_string_release_ex(p->key, 0);
 		}
 		p->h = j;
 		p->key = NULL;
@@ -4445,7 +4463,7 @@ PHP_FUNCTION(array_change_key_case)
 				new_key = php_string_tolower(string_key);
 			}
 			entry = zend_hash_update(Z_ARRVAL_P(return_value), new_key, entry);
-			zend_string_release(new_key);
+			zend_string_release_ex(new_key, 0);
 		}
 
 		zval_add_ref(entry);
@@ -5753,7 +5771,7 @@ PHP_FUNCTION(array_multisort)
 		hash->nNextFreeElement = array_size;
 		if (repack) {
 			zend_hash_to_packed(hash);
-		} else {
+		} else if (!(HT_FLAGS(hash) & HASH_FLAG_PACKED)) {
 			zend_hash_rehash(hash);
 		}
 	}
@@ -6140,7 +6158,7 @@ PHP_FUNCTION(array_map)
 		array_init_size(return_value, maxlen);
 		zend_hash_real_init(Z_ARRVAL_P(return_value), HT_FLAGS(Z_ARRVAL(arrays[0])) & HASH_FLAG_PACKED);
 
-		ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
+		ZEND_HASH_FOREACH_KEY_VAL_IND(Z_ARRVAL(arrays[0]), num_key, str_key, zv) {
 			fci.retval = &result;
 			fci.param_count = 1;
 			fci.params = &arg;

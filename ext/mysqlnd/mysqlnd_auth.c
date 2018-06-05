@@ -747,7 +747,7 @@ mysqlnd_sha256_get_rsa_key(MYSQLND_CONN_DATA * conn,
 				BIO_free(bio);
 				DBG_INF("Successfully loaded");
 				DBG_INF_FMT("Public key:%*.s", ZSTR_LEN(key_str), ZSTR_VAL(key_str));
-				zend_string_release(key_str);
+				zend_string_release_ex(key_str, 0);
 			}
 			php_stream_close(stream);
 		}

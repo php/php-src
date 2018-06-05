@@ -582,8 +582,8 @@ ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref)
 
 static zend_never_inline void ZEND_FASTCALL gc_remove_compressed(zend_refcounted *ref, uint32_t idx)
 {
-       gc_root_buffer *root = gc_decompress(ref, idx);
-       gc_remove_from_roots(root);
+	gc_root_buffer *root = gc_decompress(ref, idx);
+	gc_remove_from_roots(root);
 }
 
 ZEND_API void ZEND_FASTCALL gc_remove_from_buffer(zend_refcounted *ref)
@@ -847,8 +847,6 @@ static void gc_compact(void)
 					if (scan <= end) {
 						break;
 					}
-				} else {
-					break;
 				}
 			}
 		}

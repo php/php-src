@@ -249,7 +249,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
-			zend_string_release(bufz);
+			zend_string_release_ex(bufz, 0);
 		}
 
 		if (status == Z_OK) {

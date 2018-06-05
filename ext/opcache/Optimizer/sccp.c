@@ -428,7 +428,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		if (IS_PARTIAL_ARRAY(op1) && (!value || IS_BOT(value))) {
 			return FAILURE;
 		}
-		if (extended_value & ZEND_ISSET) {
+		if (!(extended_value & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
@@ -438,7 +438,7 @@ static inline int ct_eval_isset_dim(zval *result, uint32_t extended_value, zval 
 		// TODO
 		return FAILURE;
 	} else {
-		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
+		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -547,7 +547,7 @@ static inline int ct_eval_assign_dim(zval *result, zval *value, zval *key) {
 			value_str = zval_get_string(value);
 			ZVAL_STR(result, new_str);
 			Z_STRVAL_P(result)[index] = ZSTR_VAL(value_str)[0];
-			zend_string_release(value_str);
+			zend_string_release_ex(value_str, 0);
 #endif
 			return FAILURE;
 		default:
@@ -585,14 +585,14 @@ static inline int ct_eval_isset_obj(zval *result, uint32_t extended_value, zval 
 		if (!value || IS_BOT(value)) {
 			return FAILURE;
 		}
-		if (extended_value & ZEND_ISSET) {
+		if (!(extended_value & ZEND_ISEMPTY)) {
 			ZVAL_BOOL(result, value && Z_TYPE_P(value) != IS_NULL);
 		} else {
 			ZVAL_BOOL(result, !value || !zend_is_true(value));
 		}
 		return SUCCESS;
 	} else {
-		ZVAL_BOOL(result, !(extended_value & ZEND_ISSET));
+		ZVAL_BOOL(result, (extended_value & ZEND_ISEMPTY));
 		return SUCCESS;
 	}
 }
@@ -651,7 +651,7 @@ static inline int ct_eval_incdec(zval *result, zend_uchar opcode, zval *op1) {
 }
 
 static inline int ct_eval_isset_isempty(zval *result, uint32_t extended_value, zval *op1) {
-	if (extended_value & ZEND_ISSET) {
+	if (!(extended_value & ZEND_ISEMPTY)) {
 		ZVAL_BOOL(result, Z_TYPE_P(op1) != IS_NULL);
 	} else {
 		ZVAL_BOOL(result, !zend_is_true(op1));

@@ -196,7 +196,7 @@ MYSQLND_METHOD(mysqlnd_vio, open_tcp_or_unix)(MYSQLND_VIO * const vio, const MYS
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		DBG_RETURN(NULL);
 	}

@@ -183,6 +183,20 @@ if (getenv('TEST_PHPDBG_EXECUTABLE')) {
 	$environment['TEST_PHPDBG_EXECUTABLE'] = $phpdbg;
 }
 
+if (!function_exists("hrtime")) {
+	function hrtime(bool $as_num = false)
+	{
+		$t = microtime(true);
+
+		if ($as_num) {
+			return $t*1000000000;
+		}
+
+		$s = floor($t);
+		return array(0 => $s, 1 => ($t - $s)*1000000000);
+	}
+}
+
 function verify_config()
 {
 	global $php;
@@ -1120,7 +1134,7 @@ function system_with_timeout($commandline, $env = null, $stdin = null, $captureS
 	if ($captureStdErr) {
 		$descriptorspec[2] = array('pipe', 'w');
 	}
-	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true, 'binary_pipes' => true));
+	$proc = proc_open($commandline, $descriptorspec, $pipes, TEST_PHP_SRCDIR, $bin_env, array('suppress_errors' => true));
 
 	if (!$proc) {
 		return false;
@@ -1923,19 +1937,21 @@ COMMAND $cmd
 ";
 
 	junit_start_timer($shortname);
-	$startTime = microtime(true);
+	$hrtime = hrtime();
+	$startTime = $hrtime[0]*1000000000 + $hrtime[1];
 
 	$out = system_with_timeout($cmd, $env, isset($section_text['STDIN']) ? $section_text['STDIN'] : null, $captureStdIn, $captureStdOut, $captureStdErr);
 
 	junit_finish_timer($shortname);
-	$time = microtime(true) - $startTime;
-	if ($time * 1000 >= $slow_min_ms) {
+	$hrtime = hrtime();
+	$time = $hrtime[0]*1000000000 + $hrtime[1] - $startTime;
+	if ($time >= $slow_min_ms * 1000000) {
 		$PHP_FAILED_TESTS['SLOW'][] = array(
 			'name'      => $file,
 			'test_name' => (is_array($IN_REDIRECT) ? $IN_REDIRECT['via'] : '') . $tested . " [$tested_file]",
 			'output'    => '',
 			'diff'      => '',
-			'info'      => $time,
+			'info'      => $time / 1000000000,
 		);
 	}
 

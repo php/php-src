@@ -290,7 +290,7 @@ end:
 
 err:
 	if (mysql->hash_key) {
-		zend_string_release(mysql->hash_key);
+		zend_string_release_ex(mysql->hash_key, 0);
 		mysql->hash_key = NULL;
 		mysql->persistent = FALSE;
 	}

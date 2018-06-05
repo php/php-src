@@ -206,7 +206,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		DBG_RETURN(NULL);
 	}

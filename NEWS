@@ -5,8 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
+    'php ext_skel.php' for all options. This means there are no dependencies,
+    thus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
@@ -40,6 +40,7 @@ PHP                                                                        NEWS
   . Fixed bug #75765 (Fatal error instead of Error exception when base class is
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
+  . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -105,14 +106,16 @@ PHP                                                                        NEWS
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)
-  . Update to Oniguruma 6.8.1. (cmb)
+  . Fixed bug #76319 (mb_strtolower with invalid UTF-8 causes segmentation
+    fault). (Nikita)
+  . Updated to Oniguruma 6.8.2. (cmb)
 
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)
   . Removed support for Birdstep. (Kalle)
 
 - OpenSSL:
-  . Fixed bug #75307 (Wrong reflection for openssl_open function). (villfa)
+  . Added openssl_pkey_derive function. (Jim Zubov)
 
 - PCRE:
   . Implemented https://wiki.php.net/rfc/pcre2-migration (Anatol, Dmitry)
@@ -181,7 +184,7 @@ PHP                                                                        NEWS
     (carusogabriel)
 
 - SQLite3:
-  . Updated bundled libsqlite to 3.23.1. (cmb)
+  . Updated bundled libsqlite to 3.24.0. (cmb)
 
 - Standard:
   . Added is_countable() function. (Gabriel Caruso)

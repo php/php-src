@@ -1,4 +1,4 @@
-CALLOUTS.BUILTIN               2018/03/19
+CALLOUTS.BUILTIN               2018/03/26
 
 
 * FAIL    (progress)
@@ -12,15 +12,15 @@ CALLOUTS.BUILTIN               2018/03/19
 
   (*MISMATCH)
 
-  Terminate Match process.
-  Continue Search process.
+  Terminates Match process.
+  Continues Search process.
 
 
 * ERROR    (progress)
 
   (*ERROR{n::LONG})
 
-  Terminate Search/Match process.
+  Terminates Search/Match process.
 
   Return value is the argument 'n'. (The value must be less than -1)
   'n' is an optional argument. (default value is ONIG_ABORT)
@@ -28,12 +28,20 @@ CALLOUTS.BUILTIN               2018/03/19
 
 * MAX    (progress/retraction)
 
-  (*MAX{n::LONG})
+  (*MAX{n::LONG/TAG, c::CHAR})
 
-  Restrict the maximum count of success.
+  Restricts the maximum count of success(default), progress or retraction.
+  If 'n' type is tag, slot 0 value of the tag are used.
+  Depends on 'c' argument, the slot 0 value changes.
+  'c' is an optional argument, default value is 'X'.
+
+  (* success count = progress count - retraction count)
+
+
+  ex. "(?:(*COUNT[T]{X})a)*(?:(*MAX{T})c)*"
 
   [callout data]
-  slot 0: current success count.
+  slot 0: '>': progress count, '<': retraction count, 'X': success count (default)
 
 
 * COUNT    (progress/retraction)
@@ -42,14 +50,12 @@ CALLOUTS.BUILTIN               2018/03/19
 
   Counter.
   Depends on 'c' argument, the slot 0 value changes.
-  'c' is an optional argument, deefault value is '>'.
+  'c' is an optional argument, default value is '>'.
 
   [callout data]
-  slot 0: '>': progress count, '<': retraction count, 'X': success count
+  slot 0: '>': progress count (default), '<': retraction count, 'X': success count
   slot 1: progress count
   slot 2: retraction count
-
-  (* success count = progress count - retraction count)
 
   ** If option ONIG_OPTION_FIND_LONGEST or ONIG_OPTION_FIND_NOT_EMPTY is used,
      counts are not accurate.
@@ -61,10 +67,10 @@ CALLOUTS.BUILTIN               2018/03/19
 
   It's the almost same as COUNT.
   But the counts are integrated in a search process.
-  'c' is an optional argument, deefault value is '>'.
+  'c' is an optional argument, default value is '>'.
 
   [callout data]
-  slot 0: '>': progress count, '<': retraction count, 'X': success count
+  slot 0: '>': progress count (default), '<': retraction count, 'X': success count
   slot 1: progress count
   slot 2: retraction count
 
@@ -76,7 +82,8 @@ CALLOUTS.BUILTIN               2018/03/19
 
   (*CMP{x::TAG/LONG, op::STRING, y::TAG/LONG})
 
-  Compare x value and y value with op operator.
+  Compares x value and y value with op operator.
+  If x and y types are tag, slot 0 value of the tag are used.
 
   op: '==', '!=', '>', '<', '>=', '<='
 

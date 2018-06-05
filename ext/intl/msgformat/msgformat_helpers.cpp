@@ -122,11 +122,7 @@ static HashTable *umsg_get_numeric_types(MessageFormatter_object *mfo,
 
 	for (int i = 0; i < parts_count; i++) {
 		const Formattable::Type t = types[i];
-		if (zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t)) == NULL) {
-			intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-				"Write to argument types hash table failed", 0);
-			break;
-		}
+		zend_hash_index_update_mem(ret, (zend_ulong)i, (void*)&t, sizeof(t));
 	}
 
 	if (U_FAILURE(err.code)) {
@@ -196,12 +192,8 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 			if ((storedType = (Formattable::Type*)zend_hash_str_find_ptr(ret, (char*)argName.getBuffer(), argName.length())) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
-						(void*)&bogusType, sizeof(bogusType))) == NULL) {
-					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-						"Write to argument types hash table failed", 0);
-					continue;
-				}
+				storedType = (Formattable::Type*)zend_hash_str_update_mem(ret, (char*)argName.getBuffer(), argName.length(),
+						(void*)&bogusType, sizeof(bogusType));
 			}
 		} else if (name_part.getType() == UMSGPAT_PART_TYPE_ARG_NUMBER) {
 			int32_t argNumber = name_part.getValue();
@@ -213,11 +205,7 @@ static HashTable *umsg_parse_format(MessageFormatter_object *mfo,
 			if ((storedType = (Formattable::Type*)zend_hash_index_find_ptr(ret, (zend_ulong)argNumber)) == NULL) {
 				/* not found already; create new entry in HT */
 				Formattable::Type bogusType = Formattable::kObject;
-				if ((storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType))) == NULL) {
-					intl_errors_set(&err, U_MEMORY_ALLOCATION_ERROR,
-						"Write to argument types hash table failed", 0);
-					continue;
-				}
+				storedType = (Formattable::Type*)zend_hash_index_update_mem(ret, (zend_ulong)argNumber, (void*)&bogusType, sizeof(bogusType));
 			}
 		} else {
 			intl_errors_set(&err, U_INVALID_FORMAT_ERROR, "Invalid part type encountered", 0);
@@ -548,7 +536,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							spprintf(&message, 0, "The argument for key '%s' "
 								"cannot be used as a date or time", ZSTR_VAL(u8key));
 							intl_errors_set(&err, err.code, message, 1);
-							zend_string_release(u8key);
+							zend_string_release_ex(u8key, 0);
 							efree(message);
 						}
 						continue;
@@ -594,7 +582,7 @@ U_CFUNC void umsg_format_helper(MessageFormatter_object *mfo,
 							"is available", ZSTR_VAL(u8key));
 						intl_errors_set(&err,
 							U_ILLEGAL_ARGUMENT_ERROR, message, 1);
-						zend_string_release(u8key);
+						zend_string_release_ex(u8key, 0);
 						efree(message);
 					}
 				}

@@ -4308,7 +4308,7 @@ static int exif_read_from_impl(image_info_type *ImageInfo, php_stream *stream, i
 			base = php_basename(stream->orig_path, strlen(stream->orig_path), NULL, 0);
 			ImageInfo->FileName = estrndup(ZSTR_VAL(base), ZSTR_LEN(base));
 
-			zend_string_release(base);
+			zend_string_release_ex(base, 0);
 
 			/* Store file date/time. */
 			ImageInfo->FileDateTime = st.st_mtime;

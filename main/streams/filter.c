@@ -49,7 +49,7 @@ PHPAPI int php_stream_filter_register_factory(const char *filterpattern, const p
 	int ret;
 	zend_string *str = zend_string_init_interned(filterpattern, strlen(filterpattern), 1);
 	ret = zend_hash_add_ptr(&stream_filters_hash, str, (void*)factory) ? SUCCESS : FAILURE;
-	zend_string_release(str);
+	zend_string_release_ex(str, 1);
 	return ret;
 }
 

@@ -152,7 +152,7 @@ void msgformat_register_class( void )
 	ce.create_object = MessageFormatter_object_create;
 	MessageFormatter_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&MessageFormatter_handlers, zend_get_std_object_handlers(),
+	memcpy(&MessageFormatter_handlers, &std_object_handlers,
 		sizeof MessageFormatter_handlers);
 	MessageFormatter_handlers.offset = XtOffsetOf(MessageFormatter_object, zo);
 	MessageFormatter_handlers.clone_obj = MessageFormatter_object_clone;

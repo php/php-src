@@ -441,7 +441,7 @@ check_fmt(struct magic_set *ms, const char *fmt)
 			php_pcre_free_match_data(match_data);
 		}
 	}
-	zend_string_release(pattern);
+	zend_string_release_ex(pattern, 0);
 	(void)setlocale(LC_CTYPE, "");
 	return rv;
 }
@@ -732,15 +732,12 @@ mprint(struct magic_set *ms, struct magic *m, const struct buffer *b)
 		t = ms->offset + sizeof(double);
   		break;
 
+	case FILE_SEARCH:
 	case FILE_REGEX: {
 		char *cp;
 		int rval;
 
 		cp = estrndup((const char *)ms->search.s, ms->search.rm_len);
-		if (cp == NULL) {
-			file_oomem(ms, ms->search.rm_len);
-			return -1;
-		}
 		rval = file_printf(ms, F(ms, desc, "%s"),
 		    file_printable(sbuf, sizeof(sbuf), cp));
 		efree(cp);
@@ -754,15 +751,6 @@ mprint(struct magic_set *ms, struct magic *m, const struct buffer *b)
 			t = ms->search.offset + ms->search.rm_len;
 		break;
 	}
-
-	case FILE_SEARCH:
-		if (file_printf(ms, F(ms, desc, "%s"), m->value.s) == -1)
-			return -1;
-		if ((m->str_flags & REGEX_OFFSET_START))
-			t = ms->search.offset;
-		else
-			t = ms->search.offset + m->vallen;
-		break;
 
 	case FILE_DEFAULT:
 	case FILE_CLEAR:

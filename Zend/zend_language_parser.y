@@ -50,7 +50,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 }
 
 %destructor { zend_ast_destroy($$); } <ast>
-%destructor { if ($$) zend_string_release($$); } <str>
+%destructor { if ($$) zend_string_release_ex($$, 0); } <str>
 
 %left T_INCLUDE T_INCLUDE_ONCE T_EVAL T_REQUIRE T_REQUIRE_ONCE
 %left ','

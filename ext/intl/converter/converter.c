@@ -1061,7 +1061,7 @@ static zend_object *php_converter_clone_object(zval *object) {
 
 		err_msg = intl_error_get_message(&oldobj->error);
 		zend_throw_exception(NULL, ZSTR_VAL(err_msg), 0);
-		zend_string_release(err_msg);
+		zend_string_release_ex(err_msg, 0);
 
 		return retval;
 	}
@@ -1088,7 +1088,7 @@ int php_converter_minit(INIT_FUNC_ARGS) {
 	INIT_CLASS_ENTRY(ce, "UConverter", php_converter_methods);
 	php_converter_ce = zend_register_internal_class(&ce);
 	php_converter_ce->create_object = php_converter_create_object;
-	memcpy(&php_converter_object_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&php_converter_object_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	php_converter_object_handlers.offset = XtOffsetOf(php_converter_object, obj);
 	php_converter_object_handlers.clone_obj = php_converter_clone_object;
 	php_converter_object_handlers.dtor_obj = php_converter_dtor_object;

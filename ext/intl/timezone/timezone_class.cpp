@@ -513,7 +513,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 		return;
 	}
 
-	memcpy(&TimeZone_handlers, zend_get_std_object_handlers(),
+	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
 	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;

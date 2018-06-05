@@ -64,7 +64,7 @@ static zend_always_inline void php_register_variable_quick(const char *name, siz
 	zend_string *key = zend_string_init_interned(name, name_len, 0);
 
 	zend_hash_update_ind(ht, key, val);
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 }
 
 PHPAPI void php_register_variable_ex(char *var_name, zval *val, zval *track_vars_array)

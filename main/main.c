@@ -1366,7 +1366,7 @@ PHP_FUNCTION(set_time_limit)
 	} else {
 		RETVAL_FALSE;
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 	efree(new_timeout_str);
 }
 /* }}} */

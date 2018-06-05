@@ -595,11 +595,7 @@ int php_oci_statement_execute(php_oci_statement *statement, ub4 mode)
 		for (counter = 1; counter <= colcount; counter++) {
 			outcol = (php_oci_out_column *) ecalloc(1, sizeof(php_oci_out_column));
 
-			if ((outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol)) == NULL) {
-				FREE_HASHTABLE(statement->columns);
-				/* out of memory */
-				return 1;
-			}
+			outcol = zend_hash_index_update_ptr(statement->columns, counter, outcol);
 
 			/* get column */
 			PHP_OCI_CALL_RETURN(errstatus, OCIParamGet, ((dvoid *)statement->stmt, OCI_HTYPE_STMT, statement->err, (dvoid**)&param, counter));
@@ -1256,7 +1252,7 @@ int php_oci_bind_by_name(php_oci_statement *statement, char *name, size_t name_l
 		zvtmp = zend_string_init(name, name_len, 0);
 		bindp = (php_oci_bind *) ecalloc(1, sizeof(php_oci_bind));
 		bindp = zend_hash_update_ptr(statement->binds, zvtmp, bindp);
-		zend_string_release(zvtmp);
+		zend_string_release_ex(zvtmp, 0);
 	}
 
 	/* Make sure the minimum of value_sz is 1 to avoid ORA-3149
@@ -1702,7 +1698,7 @@ int php_oci_bind_array_by_name(php_oci_statement *statement, char *name, size_t 
 
 	zvtmp = zend_string_init(name, name_len, 0);
 	zend_hash_update_ptr(statement->binds, zvtmp, bind);
-	zend_string_release(zvtmp);
+	zend_string_release_ex(zvtmp, 0);
 
 	statement->errcode = 0; /* retain backwards compat with OCI8 1.4 */
 	return 0;

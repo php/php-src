@@ -236,10 +236,10 @@ int parse_packet_soap(zval *this_ptr, char *buffer, int buffer_size, sdlFunction
 		}
 		add_soap_fault(this_ptr, faultcode, faultstring ? ZSTR_VAL(faultstring) : NULL, faultactor ? ZSTR_VAL(faultactor) : NULL, &details);
 		if (faultstring) {
-			zend_string_release(faultstring);
+			zend_string_release_ex(faultstring, 0);
 		}
 		if (faultactor) {
-			zend_string_release(faultactor);
+			zend_string_release_ex(faultactor, 0);
 		}
 		if (Z_REFCOUNTED(details)) {
 			Z_DELREF(details);

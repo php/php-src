@@ -972,7 +972,7 @@ PHP_FUNCTION(pcntl_exec)
 			strlcat(*pair, Z_STRVAL_P(element), pair_length);
 
 			/* Cleanup */
-			zend_string_release(key);
+			zend_string_release_ex(key, 0);
 			envi++;
 			pair++;
 		} ZEND_HASH_FOREACH_END();
@@ -1049,14 +1049,13 @@ PHP_FUNCTION(pcntl_signal)
 		zend_string *func_name = zend_get_callable_name(handle);
 		PCNTL_G(last_error) = EINVAL;
 		php_error_docref(NULL, E_WARNING, "%s is not a callable function name error", ZSTR_VAL(func_name));
-		zend_string_release(func_name);
+		zend_string_release_ex(func_name, 0);
 		RETURN_FALSE;
 	}
 
 	/* Add the function name to our signal table */
-	if (zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle)) {
-		Z_TRY_ADDREF_P(handle);
-	}
+	handle = zend_hash_index_update(&PCNTL_G(php_signal_table), signo, handle);
+	Z_TRY_ADDREF_P(handle);
 
 	if (php_signal4(signo, pcntl_signal_handler, (int) restart_syscalls, 1) == (Sigfunc *)SIG_ERR) {
 		PCNTL_G(last_error) = errno;
@@ -1463,8 +1462,9 @@ void pcntl_signal_dispatch()
 				/* FIXME: this is probably broken when multiple signals are handled in this while loop (retval) */
 				call_user_function(EG(function_table), NULL, handle, &retval, 2, params);
 				zval_ptr_dtor(&retval);
-				zval_ptr_dtor(&params[0]);
+#ifdef HAVE_STRUCT_SIGINFO_T
 				zval_ptr_dtor(&params[1]);
+#endif
 			}
 		}
 

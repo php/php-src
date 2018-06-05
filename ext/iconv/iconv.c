@@ -1340,7 +1340,7 @@ static php_iconv_err_t _php_iconv_mime_encode(smart_str *pretval, const char *fn
 				smart_str_appendl(pretval, "?=", sizeof("?=") - 1);
 				char_cnt -= 2;
 
-				zend_string_release(encoded);
+				zend_string_release_ex(encoded, 0);
 				encoded = NULL;
 			} break; /* case PHP_ICONV_ENC_SCHEME_BASE64: */
 
@@ -1462,7 +1462,7 @@ out:
 		iconv_close(cd_pl);
 	}
 	if (encoded != NULL) {
-		zend_string_release(encoded);
+		zend_string_release_ex(encoded, 0);
 	}
 	if (buf != NULL) {
 		efree(buf);
@@ -1844,7 +1844,7 @@ static php_iconv_err_t _php_iconv_mime_decode(smart_str *pretval, const char *st
 						}
 
 						err = _php_iconv_appendl(pretval, ZSTR_VAL(decoded_text), ZSTR_LEN(decoded_text), cd);
-						zend_string_release(decoded_text);
+						zend_string_release_ex(decoded_text, 0);
 
 						if (err != PHP_ICONV_ERR_SUCCESS) {
 							if ((mode & PHP_ICONV_MIME_DECODE_CONTINUE_ON_ERROR)) {
@@ -2298,7 +2298,7 @@ PHP_FUNCTION(iconv_mime_encode)
 	}
 
 	if (tmp_str) {
-		zend_string_release(tmp_str);
+		zend_string_release_ex(tmp_str, 0);
 	}
 }
 /* }}} */
@@ -2501,7 +2501,7 @@ PHP_FUNCTION(iconv_set_encoding)
 	}
 
 	retval = zend_alter_ini_entry(name, charset, PHP_INI_USER, PHP_INI_STAGE_RUNTIME);
-	zend_string_release(name);
+	zend_string_release_ex(name, 0);
 
 	if (retval == SUCCESS) {
 		RETURN_TRUE;

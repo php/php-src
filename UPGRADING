@@ -30,6 +30,20 @@ Core:
     thrown exceptions.
   . TypeError now reports wrong types as `int` and `bool` instead of `integer`
     and `boolean`.
+  . Due to the introduction of flexible heredoc/nowdoc syntax (see New Features
+    section), doc strings that contain the ending label inside their body may
+    cause syntax errors or change in interpretation. For example in
+
+        $str = <<<FOO
+        abcdefg
+            FOO
+        FOO;
+
+    the indented occurrence of "FOO" did not previously have any special
+    meaning. Now it will be interpreted as the end of the heredoc string and
+    the following "FOO;" will cause a syntax error. This issue can always be
+    resolved by choosing an ending label that does not occur within the contents
+    of the string.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
@@ -38,7 +52,7 @@ BCMath:
     the returned numbers may have omitted trailing decimal zeroes.
 
 Reflection:
-  . Reflection results now return `int` and `bool` instead of `integer`
+  . Reflection export to string now uses `int` and `bool` instead of `integer`
     and `boolean`.
 
 SPL:
@@ -75,6 +89,39 @@ Core:
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
 
+MBString:
+  . Support for full case-mapping and case-folding has been added. Unlike simple
+    case-mapping, full case-mapping may change the length of the string. For
+    example:
+
+      mb_strtoupper("Straße")
+      // Produces STRAßE on PHP 7.2
+      // Produces STRASSE on PHP 7.3
+
+    The different casing mapping and folding modes are available through
+    mb_convert_case():
+
+      . MB_CASE_LOWER (used by mb_strtolower)
+      . MB_CASE_UPPER (used by mb_strtoupper)
+      . MB_CASE_TITLE
+      . MB_CASE_FOLD
+      . MB_CASE_LOWER_SIMPLE
+      . MB_CASE_UPPER_SIMPLE
+      . MB_CASE_TITLE_SIMPLE
+      . MB_CASE_FOLD_SIMPLE (used by case-insensitive operations)
+
+    Only unconditional, language agnostic full case-mapping is performed.
+  . Case-insensitive string operations now use case-folding instead of case-
+    mapping during comparisons. This means that more characters will be
+    considered (case insensitively) equal now.
+  . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
+    based on the Cased and CaseIgnorable derived Unicode properties. In
+    particular this also improves handling of quotes and apostophes.
+  . Data tables have been updated for Unicode 10.
+  . Mbstring now correctly supports strings larger than 2GB.
+  . Performance of the mbstring extension has been significantly improved
+    across the board. The largest improvements are in case conversion functions.
+
 readline:
   . Support for the completion_append_character and completion_suppress_append
     options has been added to readline_info(). These options are only available
@@ -87,6 +134,9 @@ readline:
 ========================================
 4. Deprecated Functionality
 ========================================
+
+Intl:
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
 
 ========================================
 5. Changed Functions
@@ -148,6 +198,25 @@ Intl:
     http://icu-project.org/apiref/icu4c/uspoof_8h.html
   . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
     to retrieve the Decomposition_Mapping property of a character.
+
+OpenSSL:
+  . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
+    possibly other future algorithms supported by EVP_PKEY_derive.
+
+Sockets:
+  . Added functions to import/export the WSAPROTOCOL_INFO info struct. This
+    implementation complements the already supported SCM_RIGHTS as in
+    man 3 cmsg and is Windows specific. For the import/export, the default
+    system securities apply for the SHM reading/writing. The socket becomes
+    invalid, when the last reference to it is closed.
+    - socket_wsaprotocol_info_export(resource $sock, int $pid) - exports the
+      WSAPROTOCOL_INFO structure into shared memory and returns an identifier
+      to be used for the import, or false on failure. The exported ID is
+      only valid for the dedicated PID.
+    - socket_wsaprotocol_info_import(string $id) - returns a duplicated
+      socket as per the passed identifier, or false on failure.
+    - socket_wsaprotocol_info_release(string $id) - releases the shared memory
+      corresponding to the passed identifier.
 
 Standard:
   . Added is_countable() function, to check whether a value may be passed to

@@ -120,6 +120,10 @@ struct PropertyNameCtype {
 #define ONIG_ENCODING_INIT_DEFAULT           ONIG_ENCODING_ASCII
 
 
+#define ENC_FLAG_ASCII_COMPATIBLE      (1<<0)
+#define ENC_FLAG_UNICODE               (1<<1)
+
+
 /* for encoding system implementation (internal) */
 extern int onigenc_end(void);
 extern int onigenc_ascii_apply_all_case_fold P_((OnigCaseFoldType flag, OnigApplyAllCaseFoldFunc f, void* arg));
@@ -156,7 +160,7 @@ extern int onigenc_mb4_code_to_mbc P_((OnigEncoding enc, OnigCodePoint code, UCh
 extern int onigenc_mb4_is_code_ctype P_((OnigEncoding enc, OnigCodePoint code, unsigned int ctype));
 extern struct PropertyNameCtype* euc_jp_lookup_property_name P_((register const char *str, register unsigned int len));
 extern struct PropertyNameCtype* sjis_lookup_property_name P_((register const char *str, register unsigned int len));
-//extern const struct PropertyNameCtype* unicode_lookup_property_name P_((register const char *str, register unsigned int len));
+/* extern const struct PropertyNameCtype* unicode_lookup_property_name P_((register const char *str, register unsigned int len)); */
 
 /* in enc/unicode.c */
 extern int onigenc_unicode_is_code_ctype P_((OnigCodePoint code, unsigned int ctype));
@@ -250,8 +254,9 @@ extern const unsigned short OnigEncAsciiCtypeTable[];
   ONIGENC_IS_ASCII_CODE_CTYPE(code, ONIGENC_CTYPE_LOWER))
    
 #define ONIGENC_IS_UNICODE_ENCODING(enc) \
-  ((enc)->is_code_ctype == onigenc_unicode_is_code_ctype)
+  (((enc)->flag & ENC_FLAG_UNICODE) != 0)
 
-#define ONIGENC_IS_ASCII_COMPATIBLE_ENCODING(enc)  ((enc)->min_enc_len == 1)
+#define ONIGENC_IS_ASCII_COMPATIBLE_ENCODING(enc)  \
+  (((enc)->flag & ENC_FLAG_ASCII_COMPATIBLE) != 0)
 
 #endif /* REGENC_H */

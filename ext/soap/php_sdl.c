@@ -3360,18 +3360,12 @@ cache_in_memory:
 			p.time = t;
 			p.sdl = psdl;
 
-			if (NULL != zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
-											uri_len, &p, sizeof(sdl_cache_bucket))) {
-				/* remove non-persitent sdl structure */
-				delete_sdl_impl(sdl);
-				/* and replace it with persistent one */
-				sdl = psdl;
-			} else {
-				php_error_docref(NULL, E_WARNING, "Failed to register persistent entry");
-				/* clean up persistent sdl */
-				delete_psdl_int(&p);
-				/* keep non-persistent sdl and return it */
-			}
+			zend_hash_str_update_mem(SOAP_GLOBAL(mem_cache), uri,
+											uri_len, &p, sizeof(sdl_cache_bucket));
+			/* remove non-persitent sdl structure */
+			delete_sdl_impl(sdl);
+			/* and replace it with persistent one */
+			sdl = psdl;
 		}
 	}
 

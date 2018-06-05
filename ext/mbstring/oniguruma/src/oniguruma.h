@@ -36,7 +36,7 @@ extern "C" {
 #define ONIGURUMA
 #define ONIGURUMA_VERSION_MAJOR   6
 #define ONIGURUMA_VERSION_MINOR   8
-#define ONIGURUMA_VERSION_TEENY   1
+#define ONIGURUMA_VERSION_TEENY   2
 
 #define ONIGURUMA_VERSION_INT     60801
 
@@ -115,7 +115,7 @@ typedef struct {
   OnigCodePoint one_or_more_time;
   OnigCodePoint anychar_anytime;
 } OnigMetaCharTableType;
-  
+
 typedef int (*OnigApplyAllCaseFoldFunc)(OnigCodePoint from, OnigCodePoint* to, int to_len, void* arg);
 
 typedef struct OnigEncodingTypeST {
@@ -344,7 +344,7 @@ int onigenc_str_bytelen_null P_((OnigEncoding enc, const OnigUChar* p));
 ONIG_EXTERN
 int onigenc_is_valid_mbc_string P_((OnigEncoding enc, const OnigUChar* s, const OnigUChar* end));
 ONIG_EXTERN
-UChar* onigenc_strdup P_((OnigEncoding enc, const UChar* s, const UChar* end));
+OnigUChar* onigenc_strdup P_((OnigEncoding enc, const OnigUChar* s, const OnigUChar* end));
 
 
 /* PART: regular expression */
@@ -549,7 +549,7 @@ ONIG_EXTERN OnigSyntaxType*   OnigDefaultSyntax;
 #define ONIGERR_SPECIFIED_ENCODING_CANT_CONVERT_TO_WIDE_CHAR  -22
 #define ONIGERR_FAIL_TO_INITIALIZE                            -23
 /* general error */
-#define ONIGERR_INVALID_ARGUMENT                              -30 
+#define ONIGERR_INVALID_ARGUMENT                              -30
 /* syntax error */
 #define ONIGERR_END_PATTERN_AT_LEFT_BRACE                    -100
 #define ONIGERR_END_PATTERN_AT_LEFT_BRACKET                  -101
@@ -894,6 +894,8 @@ ONIG_EXTERN
 int onig_set_progress_callout_of_match_param P_((OnigMatchParam* param, OnigCalloutFunc f));
 ONIG_EXTERN
 int onig_set_retraction_callout_of_match_param P_((OnigMatchParam* param, OnigCalloutFunc f));
+ONIG_EXTERN
+int onig_set_callout_user_data_of_match_param P_((OnigMatchParam* param, void* user_data));
 
 /* for callout functions */
 ONIG_EXTERN
@@ -905,15 +907,15 @@ OnigCalloutFunc onig_get_retraction_callout P_((void));
 ONIG_EXTERN
 int onig_set_retraction_callout P_((OnigCalloutFunc f));
 ONIG_EXTERN
-int onig_set_callout_of_name P_((OnigEncoding enc, OnigCalloutType type, OnigUChar* name, OnigUChar* name_end, int callout_in, OnigCalloutFunc callout, OnigCalloutFunc end_callout, int arg_num, unsigned int arg_types[], int optional_arg_num, OnigValue opt_defaults[])); /* name: single-byte string */
+int onig_set_callout_of_name P_((OnigEncoding enc, OnigCalloutType type, OnigUChar* name, OnigUChar* name_end, int callout_in, OnigCalloutFunc callout, OnigCalloutFunc end_callout, int arg_num, unsigned int arg_types[], int optional_arg_num, OnigValue opt_defaults[]));
 ONIG_EXTERN
 OnigUChar* onig_get_callout_name_by_name_id P_((int id));
 ONIG_EXTERN
-int onig_get_callout_num_by_tag P_((OnigRegex reg, const UChar* tag, const UChar* tag_end));
+int onig_get_callout_num_by_tag P_((OnigRegex reg, const OnigUChar* tag, const OnigUChar* tag_end));
 ONIG_EXTERN
-int onig_get_callout_data_by_tag P_((OnigRegex reg, OnigMatchParam* mp, const UChar* tag, const UChar* tag_end, int slot, OnigType* type, OnigValue* val));
+int onig_get_callout_data_by_tag P_((OnigRegex reg, OnigMatchParam* mp, const OnigUChar* tag, const OnigUChar* tag_end, int slot, OnigType* type, OnigValue* val));
 ONIG_EXTERN
-int onig_set_callout_data_by_tag P_((OnigRegex reg, OnigMatchParam* mp, const UChar* tag, const UChar* tag_end, int slot, OnigType type, OnigValue* val));
+int onig_set_callout_data_by_tag P_((OnigRegex reg, OnigMatchParam* mp, const OnigUChar* tag, const OnigUChar* tag_end, int slot, OnigType type, OnigValue* val));
 
 /* used in callout functions */
 ONIG_EXTERN
