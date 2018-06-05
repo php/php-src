@@ -2793,10 +2793,18 @@ PHP_FUNCTION(range)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	if (zstep) {
-		if (Z_TYPE_P(zstep) == IS_DOUBLE ||
-			(Z_TYPE_P(zstep) == IS_STRING && is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0) == IS_DOUBLE)
-		) {
+		if (Z_TYPE_P(zstep) == IS_DOUBLE) {
 			is_step_double = 1;
+		} else if (Z_TYPE_P(zstep) == IS_STRING) {
+			int type = is_numeric_string(Z_STRVAL_P(zstep), Z_STRLEN_P(zstep), NULL, NULL, 0);
+			if (type == IS_DOUBLE) {
+				is_step_double = 1;
+			}
+			if (type == 0) {
+				/* bad number */
+				php_error_docref(NULL, E_WARNING, "Invalid range string - must be numeric");
+				RETURN_FALSE;
+			}
 		}
 
 		step = zval_get_double(zstep);
@@ -2924,6 +2932,10 @@ long_str:
 		}
 
 		lstep = (zend_ulong)step;
+		if (step <= 0) {
+			err = 1;
+			goto err;
+		}
 
 		Z_TYPE_INFO(tmp) = IS_LONG;
 		if (low > high) { 		/* Negative steps */
