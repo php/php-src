@@ -2558,7 +2558,13 @@ PHP_FUNCTION(extract)
 				count = php_extract_if_exists(Z_ARRVAL_P(var_array_param), symbol_table);
 				break;
 			case EXTR_OVERWRITE:
-				count = php_extract_overwrite(Z_ARRVAL_P(var_array_param), symbol_table);
+				{
+					zval zv;
+					/* The array might be stored in a local variable that will be overwritten */
+					ZVAL_COPY(&zv, var_array_param);
+					count = php_extract_overwrite(Z_ARRVAL(zv), symbol_table);
+					zval_ptr_dtor(&zv);
+				}
 				break;
 			case EXTR_PREFIX_IF_EXISTS:
 				count = php_extract_prefix_if_exists(Z_ARRVAL_P(var_array_param), symbol_table, prefix);
