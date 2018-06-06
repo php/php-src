@@ -970,6 +970,7 @@ struct st_mysqlnd_packet_chg_user_resp;
 struct st_mysqlnd_packet_auth_pam;
 struct st_mysqlnd_packet_sha256_pk_request;
 struct st_mysqlnd_packet_sha256_pk_request_response;
+struct st_mysqlnd_packet_cached_sha2_result;
 
 typedef struct st_mysqlnd_packet_greet *		(*func_mysqlnd_protocol_payload_decoder_factory__get_greet_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
 typedef struct st_mysqlnd_packet_auth *			(*func_mysqlnd_protocol_payload_decoder_factory__get_auth_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
@@ -986,6 +987,7 @@ typedef struct st_mysqlnd_packet_prepare_response *(*func_mysqlnd_protocol_paylo
 typedef struct st_mysqlnd_packet_chg_user_resp*(*func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
 typedef struct st_mysqlnd_packet_sha256_pk_request *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
 typedef struct st_mysqlnd_packet_sha256_pk_request_response *(*func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
+typedef struct st_mysqlnd_packet_cached_sha2_result *(*func_mysqlnd_protocol_payload_decoder_factory__get_cached_sha2_result_packet)(MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * const factory, const zend_bool persistent);
 
 typedef enum_func_status (*func_mysqlnd_protocol_payload_decoder_factory__send_command)(
 			MYSQLND_PROTOCOL_PAYLOAD_DECODER_FACTORY * payload_decoder_factory,
@@ -1043,6 +1045,7 @@ MYSQLND_CLASS_METHODS_TYPE(mysqlnd_protocol_payload_decoder_factory)
 	func_mysqlnd_protocol_payload_decoder_factory__get_change_user_response_packet get_change_user_response_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_packet get_sha256_pk_request_packet;
 	func_mysqlnd_protocol_payload_decoder_factory__get_sha256_pk_request_response_packet get_sha256_pk_request_response_packet;
+	func_mysqlnd_protocol_payload_decoder_factory__get_cached_sha2_result_packet get_cached_sha2_result_packet;
 
 	func_mysqlnd_protocol_payload_decoder_factory__send_command send_command;
 	func_mysqlnd_protocol_payload_decoder_factory__send_command_handle_response send_command_handle_response;
@@ -1355,11 +1358,18 @@ typedef zend_uchar * (*func_auth_plugin__get_auth_data)(struct st_mysqlnd_authen
 														const MYSQLND_PFC_DATA * const pfc_data, zend_ulong mysql_flags
 														);
 
+typedef void (*func_auth_plugin__handle_server_response)(struct st_mysqlnd_authentication_plugin * self, 
+		MYSQLND_CONN_DATA * conn,
+		const zend_uchar * auth_plugin_data, size_t auth_plugin_data_len,
+		const char * const passwd,
+		const size_t passwd_len);
+
 struct st_mysqlnd_authentication_plugin
 {
 	struct st_mysqlnd_plugin_header plugin_header;
 	struct {
 		func_auth_plugin__get_auth_data get_auth_data;
+		func_auth_plugin__handle_server_response handle_server_response;
 	} methods;
 };
 
