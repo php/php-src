@@ -401,9 +401,9 @@ char *alloca();
 # define ZEND_FILE_LINE_ORIG_RELAY_C	__zend_orig_filename, __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
 #else
-# define ZEND_FILE_LINE_D
+# define ZEND_FILE_LINE_D				void
 # define ZEND_FILE_LINE_DC
-# define ZEND_FILE_LINE_ORIG_D
+# define ZEND_FILE_LINE_ORIG_D			void
 # define ZEND_FILE_LINE_ORIG_DC
 # define ZEND_FILE_LINE_RELAY_C
 # define ZEND_FILE_LINE_RELAY_CC
