@@ -25,12 +25,16 @@ $link->query(
     '"2018-04-04 11:22:33.999999");'
 );
 $stmt = $link->prepare('SELECT * FROM ts_test;'); // must be statement
-$stmt->execute();
-$tsid = $ts = $ts2 = $ts4 = $ts6 = null;
-$stmt->bind_result($tsid, $ts, $ts2, $ts4, $ts6);
-$stmt->fetch();
-var_dump($ts, $ts2, $ts4, $ts6);
-$stmt->free_result();
+if ($stmt) {
+    $stmt->execute();
+    $tsid = $ts = $ts2 = $ts4 = $ts6 = null;
+    $stmt->bind_result($tsid, $ts, $ts2, $ts4, $ts6);
+    $stmt->fetch();
+    var_dump($ts, $ts2, $ts4, $ts6);
+    $stmt->free_result();
+} else {
+    echo('[FIRST][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+}
 $link->close();
 
 // test part 2 - TIME(n)
@@ -47,12 +51,16 @@ $link->query(
     '"21:22:33.5555", "21:22:33.676767");'
 );
 $stmt = $link->prepare('SELECT * FROM t_test;');
-$stmt->execute();
-$tid = $t = $t2 = $t3 = $t4 = null;
-$stmt->bind_result($tid, $t, $t2, $t4, $t6);
-$stmt->fetch();
-var_dump($t, $t2, $t4, $t6);
-$stmt->free_result();
+if ($stmt) {
+    $stmt->execute();
+    $tid = $t = $t2 = $t3 = $t4 = null;
+    $stmt->bind_result($tid, $t, $t2, $t4, $t6);
+    $stmt->fetch();
+    var_dump($t, $t2, $t4, $t6);
+    $stmt->free_result();
+} else {
+    echo('[SECOND][FAIL] mysqli::prepare returned false: ' . $link->error . PHP_EOL);
+}
 $link->close();
 ?>
 --EXPECTF--
