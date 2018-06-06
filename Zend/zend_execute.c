@@ -641,7 +641,7 @@ static zend_never_inline ZEND_COLD int zend_wrong_assign_to_variable_reference(z
 		return 0;
 	}
 
-	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, value_type);
+	value_ptr = zend_assign_to_variable(variable_ptr, value_ptr, value_type, EX_USES_STRICT_TYPES());
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
 		ZVAL_COPY(EX_VAR(opline->result.var), value_ptr);
@@ -1636,10 +1636,10 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 		 * a dereferenced value and then written back. The type check in write_property should
 		 * thus be sufficient. */
 		if (UNEXPECTED(Z_ISREF_P(z))) {
+			zend_property_info *prop_info;
 			zend_type ref_type = Z_REFTYPE_P(z);
 			tmp = Z_REFVAL_P(z);
-			ZVAL_COPY(result, tmp);
-			zend_property_info *prop_info;
+			ZVAL_COPY(EX_VAR(opline->result.var), tmp);
 
 			if (inc) {
 				increment_function(tmp);
@@ -1656,10 +1656,9 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 						zend_verify_property_type_error(prop_info, Z_STR_P(property), tmp);
 					}
 					zval_ptr_dtor(tmp);
-					ZVAL_COPY_VALUE(tmp, result);
+					ZVAL_COPY_VALUE(tmp, EX_VAR(opline->result.var));
 				}
 			}
-			ZVAL_COPY(EX_VAR(opline->result.var), Z_REFVAL_P(z));
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), z);
 			ZVAL_COPY(&z_copy, EX_VAR(opline->result.var));

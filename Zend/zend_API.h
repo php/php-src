@@ -1135,7 +1135,7 @@ ZEND_API ZEND_COLD void ZEND_FASTCALL zend_wrong_callback_exception(int num, cha
 
 /* old "t" */
 #define Z_PARAM_ARRAY_ASSIGNABLE_EX(dest, check_null, separate) \
-		Z_PARAM_PROLOGUE(separate); \
+		Z_PARAM_PROLOGUE(1, separate); \
 		if (Z_ISREF_P(_real_arg) && Z_REFTYPE_P(_real_arg) && !zend_verify_ref_type_assignable(Z_REFTYPE_P(_real_arg), IS_ARRAY)) { \
 			_expected_type = Z_EXPECTED_ARRAY; \
 			error_code = ZPP_ERROR_WRONG_ARG; \

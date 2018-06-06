@@ -2281,7 +2281,7 @@ static uint32_t zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ss
 			ce = ssa->var_info[ssa->ops[i].op1_use].ce;
 		}
 		if (ce) {
-			prop_info = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(CRT_CONSTANT_EX(op_array, opline->op2, ssa->rt_constants)));
+			prop_info = zend_hash_find_ptr(&ce->properties_info, Z_STR_P(CRT_CONSTANT_EX(op_array, opline, opline->op2, ssa->rt_constants)));
 		}
 	}
 

@@ -2707,7 +2707,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 static zend_op *zend_compile_prop(znode *result, zend_ast *ast, uint32_t type, int by_ref) /* {{{ */
 {
 	uint32_t offset = zend_delayed_compile_begin();
-	zend_delayed_compile_prop(result, ast, type);
+	zend_op *opline = zend_delayed_compile_prop(result, ast, type);
 	if (by_ref) {
 		/* TODO(typed_props) extended_value is now used for the cache slot */
 		opline->extended_value |= ZEND_FETCH_REF;
@@ -3020,7 +3020,7 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 						"Cannot assign reference to non referencable value");
 				}
 
-				zend_compile_var(&expr_node, expr_ast, BP_VAR_W);
+				zend_compile_var(&expr_node, expr_ast, BP_VAR_W, 1);
 				/* MAKE_REF is usually not necessary for CVs. However, if there are
 				 * self-assignments, this forces the RHS to evaluate first. */
 				if (expr_node.op_type != IS_CV
@@ -4341,7 +4341,7 @@ void zend_compile_unset(zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_UNSET_DIM;
 			return;
 		case ZEND_AST_PROP:
-			opline = zend_compile_prop(NULL, var_ast, BP_VAR_UNSET);
+			opline = zend_compile_prop(NULL, var_ast, BP_VAR_UNSET, 0);
 			opline->opcode = ZEND_UNSET_OBJ;
 			return;
 		case ZEND_AST_STATIC_PROP:
@@ -7312,7 +7312,7 @@ void zend_compile_post_incdec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(var_ast);
 
 	if (var_ast->kind == ZEND_AST_PROP) {
-		zend_op *opline = zend_compile_prop(NULL, var_ast, BP_VAR_RW);
+		zend_op *opline = zend_compile_prop(NULL, var_ast, BP_VAR_RW, 0);
 		opline->opcode = ast->kind == ZEND_AST_POST_INC ? ZEND_POST_INC_OBJ : ZEND_POST_DEC_OBJ;
 		zend_make_tmp_result(result, opline);
 	} else {
@@ -7332,7 +7332,7 @@ void zend_compile_pre_incdec(znode *result, zend_ast *ast) /* {{{ */
 	zend_ensure_writable_variable(var_ast);
 
 	if (var_ast->kind == ZEND_AST_PROP) {
-		zend_op *opline = zend_compile_prop(result, var_ast, BP_VAR_RW);
+		zend_op *opline = zend_compile_prop(result, var_ast, BP_VAR_RW, 0);
 		opline->opcode = ast->kind == ZEND_AST_PRE_INC ? ZEND_PRE_INC_OBJ : ZEND_PRE_DEC_OBJ;
 	} else {
 		znode var_node;
@@ -7615,7 +7615,7 @@ void zend_compile_isset_or_empty(znode *result, zend_ast *ast) /* {{{ */
 			opline->opcode = ZEND_ISSET_ISEMPTY_DIM_OBJ;
 			break;
 		case ZEND_AST_PROP:
-			opline = zend_compile_prop(result, var_ast, BP_VAR_IS);
+			opline = zend_compile_prop(result, var_ast, BP_VAR_IS, 0);
 			opline->opcode = ZEND_ISSET_ISEMPTY_PROP_OBJ;
 			break;
 		case ZEND_AST_STATIC_PROP:

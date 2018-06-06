@@ -22059,7 +22059,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -22961,7 +22961,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23102,7 +23102,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23243,7 +23243,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23384,7 +23384,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -23935,7 +23935,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -24061,7 +24061,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -24850,7 +24850,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -25757,7 +25757,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -25898,7 +25898,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26039,7 +26039,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26180,7 +26180,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -26675,7 +26675,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -26801,7 +26801,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -29104,7 +29104,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -30006,7 +30006,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -30147,7 +30147,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -30288,7 +30288,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -30429,7 +30429,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -31029,7 +31029,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -31155,7 +31155,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -31797,7 +31797,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 	}
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
-	zend_assign_to_variable(variable_ptr, value, IS_CV);
+	zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -31849,7 +31849,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FETCH_R_SIMPLE_
 	}
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
-	zend_assign_to_variable(variable_ptr, value, IS_CV);
+	zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
@@ -32126,7 +32126,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -32810,7 +32810,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -32951,7 +32951,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -33092,7 +33092,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -33233,7 +33233,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -33378,7 +33378,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -33503,7 +33503,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -34341,7 +34341,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -35029,7 +35029,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -35170,7 +35170,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -35311,7 +35311,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -35452,7 +35452,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -35597,7 +35597,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -35722,7 +35722,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -37189,7 +37189,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -37873,7 +37873,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -38014,7 +38014,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -38155,7 +38155,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -38296,7 +38296,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -38441,7 +38441,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -38566,7 +38566,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -41726,7 +41726,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -42999,7 +42999,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -43140,7 +43140,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -43281,7 +43281,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -43422,7 +43422,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -43973,7 +43973,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -44098,7 +44098,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -46093,7 +46093,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -47248,7 +47248,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -47389,7 +47389,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -47530,7 +47530,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -47671,7 +47671,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 						zval_ptr_dtor_nogc(free_op2);
 
@@ -48166,7 +48166,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -48291,7 +48291,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -52155,7 +52155,7 @@ assign_op_object:
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -53303,7 +53303,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -53444,7 +53444,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -53585,7 +53585,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						zval_ptr_dtor_nogc(free_op_data);
 
 
@@ -53726,7 +53726,7 @@ assign_object:
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 
 
 
@@ -54325,7 +54325,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, execute_data, &free_op_data);
+	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
 	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {
@@ -54450,7 +54450,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 		HANDLE_EXCEPTION();
 	}
 
-	value_ptr = _get_zval_ptr_cv_BP_VAR_W(execute_data, (opline+1)->op1.var);
+	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
 	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
 	 || UNEXPECTED(Z_ISERROR(variable))) {

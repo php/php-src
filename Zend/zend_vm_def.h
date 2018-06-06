@@ -872,7 +872,7 @@ ZEND_VM_C_LABEL(assign_op_object):
 				}
 			}
 		} else {
-			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op, OPLINE_CC EXECUTE_DATA_CC);
+			zend_assign_op_overloaded_property(object, property, cache_slot, value, binary_op OPLINE_CC EXECUTE_DATA_CC);
 		}
 	} while (0);
 
@@ -2387,7 +2387,7 @@ ZEND_VM_C_LABEL(assign_object):
 				if (UNEXPECTED(prop_info != NULL)) {
 					val = i_zend_verify_property_type(prop_info, value, &tmp, EX_USES_STRICT_TYPES());
 					if (UNEXPECTED(!val)) {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property_name), value);
+						zend_verify_property_type_error(prop_info, Z_STR_P(property), value);
 						FREE_OP_DATA();
 						FREE_OP2();
 						FREE_OP1_VAR_PTR();
@@ -9190,7 +9190,7 @@ ZEND_VM_HOT_TYPE_SPEC_HANDLER(ZEND_FE_FETCH_R, op->op2_type == IS_CV && (op1_inf
 	}
 
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
-	zend_assign_to_variable(variable_ptr, value, IS_CV);
+	zend_assign_to_variable(variable_ptr, value, IS_CV, EX_USES_STRICT_TYPES());
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 

@@ -342,11 +342,7 @@ PHP_FUNCTION(flock)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_LONG(operation)
 		Z_PARAM_OPTIONAL
-<<<<<<< HEAD
 		Z_PARAM_ZVAL(wouldblock)
-=======
-		Z_PARAM_ZVAL_DEREF(wouldblock)
->>>>>>> master
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
@@ -358,12 +354,7 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
-<<<<<<< HEAD
 		ZEND_TRY_ASSIGN_LONG(wouldblock, 0);
-=======
-		zval_ptr_dtor(wouldblock);
-		ZVAL_LONG(wouldblock, 0);
->>>>>>> master
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
