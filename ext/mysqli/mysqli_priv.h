@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -33,7 +33,7 @@
 #define HAVE_MYSQLI_GET_CHARSET
 #endif
 
-#if defined(MYSQLND_VERSION_ID) || (MYSQL_VERSION_ID > 40112 && MYSQL_VERSION_ID < 50000) || MYSQL_VERSION_ID > 50005
+#if defined(MYSQLND_VERSION_ID) || MYSQL_VERSION_ID > 50005
 #define HAVE_MYSQLI_SET_CHARSET
 #endif
 

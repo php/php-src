@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -46,7 +46,7 @@
 #include "phpdbg_wait.h"
 #include "phpdbg_eol.h"
 
-#if ZEND_VM_KIND != ZEND_VM_KIND_CALL
+#if ZEND_VM_KIND != ZEND_VM_KIND_CALL && ZEND_VM_KIND != ZEND_VM_KIND_HYBRID
 #error "phpdbg can only be built with CALL zend vm kind"
 #endif
 
@@ -612,13 +612,13 @@ int phpdbg_compile(void) /* {{{ */
 			memmove(data->line + 1, data->line, sizeof(uint32_t) * data->lines);
 			data->line[0] = 0;
 			data->buf = erealloc(data->buf, data->len + start_line_len);
-			memmove(data->buf + start_line_len, data->buf, data->len * sizeof(uint32_t));
+			memmove(data->buf + start_line_len, data->buf, data->len);
 			memcpy(data->buf, start_line, start_line_len);
 			efree(start_line);
 			data->len += start_line_len;
 			for (i = 1; i <= data->lines; i++) {
 				data->line[i] += start_line_len;
-			}		
+			}
 			zend_hash_update_ptr(&PHPDBG_G(file_sources), PHPDBG_G(ops)->filename, data);
 		}
 
@@ -1307,7 +1307,7 @@ PHPDBG_API const char *phpdbg_load_module_or_extension(char **path, char **name)
 	handle = DL_LOAD(*path);
 
 	if (!handle) {
-#if PHP_WIN32
+#ifdef PHP_WIN32
 		char *err = GET_DL_ERROR();
 		if (err && err[0]) {
 			phpdbg_error("dl", "type=\"unknown\"", "%s", err);
@@ -1692,7 +1692,7 @@ int phpdbg_interactive(zend_bool allow_async_unsafe, char *input) /* {{{ */
 			backup_opline = EG(current_execute_data)->opline; \
 		} \
 		before_ex = EG(opline_before_exception); \
-		++GC_REFCOUNT(exception); \
+		GC_ADDREF(exception); \
 		zend_clear_exception(); \
 	} \
 	if (!(PHPDBG_G(flags) & PHPDBG_IN_EVAL)) { \

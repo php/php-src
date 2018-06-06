@@ -31,8 +31,8 @@ include $pname . '/b/c.php';
 
 Warning: fopen(phar://%sopen_for_write_existing_c.phar.php/b/c.php): failed to open stream: phar error: write operations disabled by the php.ini setting phar.readonly in %sopen_for_write_existing_c.php on line %d
 
-Warning: fwrite() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fwrite() expects parameter 1 to be resource, bool given in %spen_for_write_existing_c.php on line %d
 
-Warning: fclose() expects parameter 1 to be resource, boolean given in %spen_for_write_existing_c.php on line %d
+Warning: fclose() expects parameter 1 to be resource, bool given in %spen_for_write_existing_c.php on line %d
 This is b/c
 ===DONE===

@@ -19,41 +19,5 @@ $fill_freed_space_2 = "filler_zval_2";
 var_dump($free_me);
 ?>
 --EXPECTF--
-array(3) {
-  [0]=>
-  array(3) {
-    [0]=>
-    *RECURSION*
-    [1]=>
-    *RECURSION*
-    [2]=>
-    object(ArrayObject)#%d (1) {
-      ["storage":"ArrayObject":private]=>
-      *RECURSION*
-    }
-  }
-  [1]=>
-  array(3) {
-    [0]=>
-    *RECURSION*
-    [1]=>
-    *RECURSION*
-    [2]=>
-    object(ArrayObject)#%d (1) {
-      ["storage":"ArrayObject":private]=>
-      *RECURSION*
-    }
-  }
-  [2]=>
-  object(ArrayObject)#%d (1) {
-    ["storage":"ArrayObject":private]=>
-    array(3) {
-      [0]=>
-      *RECURSION*
-      [1]=>
-      *RECURSION*
-      [2]=>
-      *RECURSION*
-    }
-  }
-}
+Notice: unserialize(): Error at offset %d of %d bytes in %sbug72433.php on line 8
+bool(false)

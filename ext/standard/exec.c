@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -235,8 +235,11 @@ static void php_exec_ex(INTERNAL_FUNCTION_PARAMETERS, int mode) /* {{{ */
 		ret = php_exec(mode, cmd, NULL, return_value);
 	} else {
 		if (Z_TYPE_P(ret_array) != IS_ARRAY) {
-			zval_dtor(ret_array);
+			zval_ptr_dtor(ret_array);
 			array_init(ret_array);
+		} else if (Z_REFCOUNT_P(ret_array) > 1) {
+			zval_ptr_dtor(ret_array);
+			ZVAL_ARR(ret_array, zend_array_dup(Z_ARR_P(ret_array)));
 		}
 		ret = php_exec(2, cmd, ret_array, return_value);
 	}
@@ -291,7 +294,7 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 
 	/* max command line length - two single quotes - \0 byte length */
 	if (l > cmd_max_len - 2 - 1) {
-		php_error_docref(NULL, E_ERROR, "Command exceeds the allowed length of %d bytes", cmd_max_len);
+		php_error_docref(NULL, E_ERROR, "Command exceeds the allowed length of %zu bytes", cmd_max_len);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -367,8 +370,8 @@ PHPAPI zend_string *php_escape_shell_cmd(char *str)
 	ZSTR_VAL(cmd)[y] = '\0';
 
 	if (y > cmd_max_len + 1) {
-		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %d bytes", cmd_max_len);
-		zend_string_release(cmd);
+		php_error_docref(NULL, E_ERROR, "Escaped command exceeds the allowed length of %zu bytes", cmd_max_len);
+		zend_string_release_ex(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -395,7 +398,7 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 
 	/* max command line length - two single quotes - \0 byte length */
 	if (l > cmd_max_len - 2 - 1) {
-		php_error_docref(NULL, E_ERROR, "Argument exceeds the allowed length of %d bytes", cmd_max_len);
+		php_error_docref(NULL, E_ERROR, "Argument exceeds the allowed length of %zu bytes", cmd_max_len);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -454,8 +457,8 @@ PHPAPI zend_string *php_escape_shell_arg(char *str)
 	ZSTR_VAL(cmd)[y] = '\0';
 
 	if (y > cmd_max_len + 1) {
-		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %d bytes", cmd_max_len);
-		zend_string_release(cmd);
+		php_error_docref(NULL, E_ERROR, "Escaped argument exceeds the allowed length of %zu bytes", cmd_max_len);
+		zend_string_release_ex(cmd, 0);
 		return ZSTR_EMPTY_ALLOC();
 	}
 
@@ -561,7 +564,7 @@ PHP_FUNCTION(proc_nice)
 	php_ignore_value(nice(pri));
 	if (errno) {
 #ifdef PHP_WIN32
-		php_error_docref(NULL, E_WARNING, php_win_err());
+		php_error_docref(NULL, E_WARNING, "%s", php_win_err());
 #else
 		php_error_docref(NULL, E_WARNING, "Only a super user may attempt to increase the priority of a process");
 #endif

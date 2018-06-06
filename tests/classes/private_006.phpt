@@ -1,7 +1,5 @@
 --TEST--
 ZE2 A private method can be overwritten in a second derived class
---SKIPIF--
-<?php if (version_compare(zend_version(), '2.0.0-dev', '<')) die('skip ZendEngine 2 needed'); ?>
 --FILE--
 <?php
 class first {
@@ -34,7 +32,7 @@ class fail extends third {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 Call show()
 Call show()
 Call show()

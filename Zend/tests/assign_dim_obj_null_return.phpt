@@ -49,8 +49,8 @@ NULL
 Warning: Cannot use a scalar value as an array in %s on line %d
 NULL
 
-Warning: Attempt to assign property of non-object in %s on line %d
+Warning: Attempt to assign property 'foo' of non-object in %s on line %d
 NULL
 
-Warning: Attempt to assign property of non-object in %s on line %d
+Warning: Attempt to assign property 'foo' of non-object in %s on line %d
 NULL

@@ -16,9 +16,11 @@ define ____executor_globals
 		end
 		set $eg = ((zend_executor_globals*) (*((void ***) $tsrm_ls))[executor_globals_id-1])
 		set $cg = ((zend_compiler_globals*) (*((void ***) $tsrm_ls))[compiler_globals_id-1])
+		set $eg_ptr = $eg
 	else
 		set $eg = executor_globals
 		set $cg = compiler_globals
+		set $eg_ptr = (zend_executor_globals*) &executor_globals
 	end
 end
 
@@ -171,7 +173,7 @@ define ____printzv_contents
 		printf "UNDEF"
 	end
 	if $type == 1
-        printf "NULL"
+		printf "NULL"
 	end
 	if $type == 2
 		printf "bool: false"
@@ -179,15 +181,15 @@ define ____printzv_contents
 	if $type == 3
 		printf "bool: true"
 	end
-    if $type == 4
+	if $type == 4
 		printf "long: %ld", $zvalue->value.lval
-    end
-    if $type == 5
-        printf "double: %f", $zvalue->value.dval
-    end
-    if $type == 6
-       printf "string: %s", $zvalue->value.str->val
-    end
+	end
+	if $type == 5
+		printf "double: %f", $zvalue->value.dval
+	end
+	if $type == 6
+		printf "string: %s", $zvalue->value.str->val
+	end
 	if $type == 7 
 		printf "array: "
 		if ! $arg1
@@ -207,12 +209,17 @@ define ____printzv_contents
 		____executor_globals
 		set $handle = $zvalue->value.obj.handle
 		set $handlers = $zvalue->value.obj.handlers
-        set $zobj = $zvalue->value.obj
-        set $cname = $zobj->ce->name->val
+		set $zobj = $zvalue->value.obj
+		set $cname = $zobj->ce->name->val
 		printf "(%s) #%d", $cname, $handle
 		if ! $arg1
 			if $handlers->get_properties == &zend_std_get_properties
-				set $ht = $zobj->properties
+				if $zobj->properties
+					set $ht = $zobj->properties
+				else
+					set $ht = &$zobj->ce->properties_info
+				end
+				printf "\nProperties "
 				if $ht
 					set $ind = $ind + 1
 					____print_ht $ht 1
@@ -223,7 +230,7 @@ define ____printzv_contents
 						set $i = $i - 1
 					end
 				else
-					echo "no properties found"
+					echo "not found"
 				end
 			end
 		end
@@ -240,25 +247,31 @@ define ____printzv_contents
 		printf "const: %s", $zvalue->value.str->val
 	end
 	if $type == 12
-		printf "const_ast"
+		printf "CONSTANT_AST"
 	end
 	if $type == 13
-		printf "_IS_BOOL"
+		printf "_BOOL"
 	end
 	if $type == 14
-		printf "IS_CALLABLE"
+		printf "CALLABLE"
 	end
 	if $type == 15
 		printf "indirect: "
 		____printzv $zvalue->value.zv $arg1
 	end
-	if $type == 16
-		printf "string_offset"
-	end
 	if $type == 17
 		printf "pointer: %p", $zvalue->value.ptr
 	end
-	if $type > 17
+	if $type == 18
+		printf "ITERABLE"
+	end
+	if $type == 19
+		printf "VOID"
+	end
+	if $type == 20
+		printf "_ERROR"
+	end
+	if $type == 16 || $type > 20
 		printf "unknown type %d", $type
 	end
 	printf "\n"
@@ -278,36 +291,26 @@ define ____printzv
 	end
 end
 
-define ____print_const_table
-	set $ht = $arg0
-	set $p = $ht->pListHead
+define print_global_vars
+	____executor_globals
+	set $symtable = ((HashTable *)&($eg_ptr->symbol_table))
+	print_ht $symtable
+end
 
-	while $p != 0
-		set $const = (zend_constant *) $p->pData
-
-		set $i = $ind
-		while $i > 0
-			printf "  "
-			set $i = $i - 1
-		end
-
-		if $p->nKeyLength > 0
-			____print_str $p->arKey $p->nKeyLength
-			printf " => "
-		else
-			printf "%d => ", $p->h
-		end
-
-		____printzv_contents &$const->value 0
-		set $p = $p->pListNext
-	end
+document print_global_vars
+	Prints the global variables
 end
 
 define print_const_table
 	set $ind = 1
 	printf "[%p] {\n", $arg0
-	____print_const_table $arg0
+	____print_ht $arg0 4
 	printf "}\n"
+end
+
+document print_const_table
+	Dumps elements of Constants HashTable
+	Example: print_const_table executor_globals.zend_constants
 end
 
 define ____print_ht
@@ -355,6 +358,10 @@ define ____print_ht
 			if $arg1 == 3
 				set $func = (zend_function*)$p->val.value.ptr
 				printf "\"%s\"\n", $func->common.function_name->val
+			end
+			if $arg1 == 4
+				set $const = (zend_constant *)$p->val.value.ptr
+				____printzv $const 1
 			end
 		end
 		set $i = $i + 1
@@ -466,10 +473,13 @@ define print_inh
 end
 
 define print_pi
-	set $pi = $arg0
+	set $pi = (zend_property_info *)$arg0
+	set $initial_offset = ((uint32_t)(zend_uintptr_t)(&((zend_object*)0)->properties_table[(0)]))
+	set $ptr_to_val = (zval*)((char*)$pi->ce->default_properties_table + $pi->offset - $initial_offset)
 	printf "[%p] {\n", $pi
-	printf "    h     = %lu\n", $pi->h
-	printf "    flags = %d (", $pi->flags
+	printf "    offset = %p\n", $pi->offset
+	printf "    ce = [%p] %s\n", $pi->ce, $pi->ce->name->val
+	printf "    flags = 0x%x (", $pi->flags
 	if $pi->flags & 0x100
 		printf "ZEND_ACC_PUBLIC"
 	else
@@ -480,23 +490,40 @@ define print_pi
 				printf "ZEND_ACC_PRIVATE"
 			else
 				if $pi->flags & 0x800
-					printf "ZEND_ACC_CHANGED"
+					printf "ZEND_ACC_EARLY_BINDING"
+				else
+					if $pi->flags & 0x20000
+						printf "ZEND_ACC_SHADOW"
+					end
 				end
 			end
 		end
 	end
 	printf ")\n"
 	printf "    name  = "
-	____print_str $pi->name $pi->name_length
-	printf "\n}\n"
+	print_zstr $pi->name
+	printf "    default value: "
+	printzv $ptr_to_val
+	printf "}\n"
+end
+
+document print_pi
+	Takes a pointer to an object's property and prints the property information
+	usage: print_pi <ptr>
 end
 
 define ____print_str
 	set $tmp = 0
 	set $str = $arg0
+	if $argc > 2
+		set $maxlen = $arg2
+	else
+		set $maxlen = 256
+	end
+
 	printf "\""
-	while $tmp < $arg1 && $tmp < 256
-		if $str[$tmp] > 32 && $str[$tmp] < 127
+	while $tmp < $arg1 && $tmp < $maxlen
+		if $str[$tmp] > 31 && $str[$tmp] < 127
 			printf "%c", $str[$tmp]
 		else
 			printf "\\%o", $str[$tmp]
@@ -567,14 +594,19 @@ end
 
 define print_zstr
 	set $zstr = (zend_string *)$arg0
+	if $argc == 2
+		set $maxlen = $arg1
+	else
+		set $maxlen = $zstr->len
+	end
 	printf "string(%d) ", $zstr->len
-	____print_str $zstr->val $zstr->len
+	____print_str $zstr->val $zstr->len $maxlen
 	printf "\n"
 end
 
 document print_zstr
 	print the length and contents of a zend string
-	usage: print_zstr <ptr>
+	usage: print_zstr <ptr> [max length]
 end
 
 define zbacktrace
@@ -587,79 +619,6 @@ document zbacktrace
 	This command is almost a short cut for
 	> (gdb) ____executor_globals
 	> (gdb) dump_bt $eg.current_execute_data
-end
-
-define zmemcheck
-	set $p = alloc_globals.head
-	set $stat = "?"
-	set $total_size = 0
-	if $arg0 != 0
-		set $not_found = 1
-	else
-		set $not_found = 0
-	end
-	printf " block      size      status file:line\n"
-	printf "-------------------------------------------------------------------------------\n"
-	while $p
-		set $aptr = $p + sizeof(struct _zend_mem_header) + sizeof(align_test)
-		if $arg0 == 0 || (void *)$aptr == (void *)$arg0
-			if $p->magic == 0x7312f8dc 
-				set $stat = "OK"
-			end
-			if $p->magic == 0x99954317
-				set $stat = "FREED"
-			end
-			if $p->magic == 0xfb8277dc
-				set $stat = "CACHED"
-			end
-			set $filename = strrchr($p->filename->val, '/')
-			if !$filename
-				set $filename = $p->filename->val
-			else
-				set $filename = $filename + 1
-			end
-			printf " %p ", $aptr
-			if $p->size == sizeof(struct _zval_struct) && ((struct _zval_struct *)$aptr)->type >= 0 && ((struct _zval_struct *)$aptr)->type < 10
-				printf "ZVAL?(%-2d) ", $p->size
-			else
-				printf "%-9d ", $p->size
-			end
-			set $total_size = $total_size + $p->size
-			printf "%-06s %s:%d", $stat, $filename, $p->lineno
-			if $p->orig_filename
-				set $orig_filename = strrchr($p->orig_filename, '/')
-				if !$orig_filename
-					set $orig_filename = $p->orig_filename
-				else
-					set $orig_filename = $orig_filename + 1
-				end
-				printf " <= %s:%d\n", $orig_filename, $p->orig_lineno
-			else
-				printf "\n"
-			end
-			if $arg0 != 0
-				set $p = 0
-				set $not_found = 0
-			else
-				set $p = $p->pNext
-			end
-		else
-			set $p = $p->pNext
-		end
-	end
-	if $not_found
-		printf "no such block that begins at %p.\n", $aptr
-	end
-	if $arg0 == 0
-		printf "-------------------------------------------------------------------------------\n"
-		printf "     total: %d bytes\n", $total_size
-	end
-end
-
-document zmemcheck
-	show status of a memory block.
-	usage: zmemcheck [ptr].
-	if ptr is 0, all blocks will be listed.
 end
 
 define lookup_root

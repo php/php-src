@@ -37,7 +37,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -141,7 +141,7 @@ ZEND_BEGIN_ARG_INFO_EX(arginfo_xmlrpc_server_register_introspection_callback, 0,
 ZEND_END_ARG_INFO()
 /* }}} */
 
-const zend_function_entry xmlrpc_functions[] = {
+static const zend_function_entry xmlrpc_functions[] = {
 	PHP_FE(xmlrpc_encode,									arginfo_xmlrpc_encode)
 	PHP_FE(xmlrpc_decode,									arginfo_xmlrpc_decode)
 	PHP_FE(xmlrpc_decode_request,							arginfo_xmlrpc_decode_request)
@@ -279,9 +279,9 @@ static void destroy_server_data(xmlrpc_server_data *server)
 static void xmlrpc_server_destructor(zend_resource *rsrc)
 {
 	if (rsrc && rsrc->ptr) {
-		rsrc->gc.refcount++;
+		GC_ADDREF(rsrc);
 		destroy_server_data((xmlrpc_server_data*) rsrc->ptr);
-		rsrc->gc.refcount--;
+		GC_DELREF(rsrc);
 	}
 }
 
@@ -516,11 +516,9 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_SetValueID(xReturn, key, 0);
 					} else {
 						if (Z_TYPE(val) != IS_STRING) {
-							zval newvalue;
-							ZVAL_DUP(&newvalue, &val);
-							convert_to_string(&newvalue);
-							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(newvalue), Z_STRLEN(newvalue));
-							zval_dtor(&newvalue);
+							zend_string *str = zval_get_string_func(&val);
+							xReturn = XMLRPC_CreateValueBase64(key, ZSTR_VAL(str), ZSTR_LEN(str));
+							zend_string_release_ex(str, 0);
 						} else {
 							xReturn = XMLRPC_CreateValueBase64(key, Z_STRVAL(val), Z_STRLEN(val));
 						}
@@ -556,9 +554,12 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 						XMLRPC_VECTOR_TYPE vtype;
 
 						ht = HASH_OF(&val);
-						if (ht && ht->u.v.nApplyCount > 1) {
-							zend_throw_error(NULL, "XML-RPC doesn't support circular references");
-							return NULL;
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							if (GC_IS_RECURSIVE(ht)) {
+								zend_throw_error(NULL, "XML-RPC doesn't support circular references");
+								return NULL;
+							}
+							GC_PROTECT_RECURSION(ht);
 						}
 
 						ZVAL_COPY(&val_arr, &val);
@@ -569,10 +570,6 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 
 						ZEND_HASH_FOREACH_KEY_VAL(Z_ARRVAL(val_arr), num_index, my_key, pIter) {
 							ZVAL_DEREF(pIter);
-							ht = HASH_OF(pIter);
-							if (ht) {
-								ht->u.v.nApplyCount++;
-							}
 							if (my_key == NULL) {
 								char *num_str = NULL;
 
@@ -587,10 +584,10 @@ static XMLRPC_VALUE PHP_to_XMLRPC_worker (const char* key, zval* in_val, int dep
 							} else {
 								XMLRPC_AddValueToVector(xReturn, PHP_to_XMLRPC_worker(ZSTR_VAL(my_key), pIter, depth++));
 							}
-							if (ht) {
-								ht->u.v.nApplyCount--;
-							}
 						} ZEND_HASH_FOREACH_END();
+						if (ht && !(GC_FLAGS(ht) & GC_IMMUTABLE)) {
+							GC_UNPROTECT_RECURSION(ht);
+						}
 						zval_ptr_dtor(&val_arr);
 					}
 					break;
@@ -951,7 +948,7 @@ static void php_xmlrpc_introspection_callback(XMLRPC_SERVER server, void* data) 
 		} else {
 			php_error_docref(NULL, E_WARNING, "Invalid callback '%s' passed", ZSTR_VAL(php_function_name));
 		}
-		zend_string_release(php_function_name);
+		zend_string_release_ex(php_function_name, 0);
 	} ZEND_HASH_FOREACH_END();
 
 	/* so we don't call the same callbacks ever again */
@@ -982,9 +979,7 @@ PHP_FUNCTION(xmlrpc_server_register_method)
 	if (XMLRPC_ServerRegisterMethod(server->server_ptr, method_key, php_xmlrpc_callback)) {
 		/* save for later use */
 
-		if (Z_REFCOUNTED_P(method_name)) {
-			Z_ADDREF_P(method_name);
-		}
+		Z_TRY_ADDREF_P(method_name);
 		/* register our php method */
 		add_zval(&server->method_map, method_key, method_name);
 
@@ -1008,9 +1003,7 @@ PHP_FUNCTION(xmlrpc_server_register_introspection_callback)
 		RETURN_FALSE;
 	}
 
-	if (Z_REFCOUNTED_P(method_name)) {
-		Z_ADDREF_P(method_name);
-	}
+	Z_TRY_ADDREF_P(method_name);
 	/* register our php method */
 	add_zval(&server->introspection_map, NULL, method_name);
 
@@ -1292,9 +1285,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 						ZVAL_LONG(&ztimestamp, timestamp);
 
 						convert_to_object(value);
-						if (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type)) {
-							bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR) - 1, &ztimestamp) != NULL)? SUCCESS : FAILURE;
-						}
+						zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type);
+						bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_VALUE_TS_ATTR, sizeof(OBJECT_VALUE_TS_ATTR) - 1, &ztimestamp) != NULL)? SUCCESS : FAILURE;
 					} else {
 						zval_ptr_dtor(&type);
 					}
@@ -1304,7 +1296,8 @@ int set_zval_xmlrpc_type(zval* value, XMLRPC_VALUE_TYPE newtype) /* {{{ */
 				}
 			} else {
 				convert_to_object(value);
-				bSuccess = (zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type) != NULL)? SUCCESS : FAILURE;
+				zend_hash_str_update(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1, &type);
+				bSuccess = SUCCESS;
 			}
 		}
 	}
@@ -1340,9 +1333,6 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 			case IS_DOUBLE:
 				type = xmlrpc_double;
 				break;
-			case IS_CONSTANT:
-				type = xmlrpc_string;
-				break;
 			case IS_STRING:
 				type = xmlrpc_string;
 				break;
@@ -1354,7 +1344,7 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 					zval* attr;
 					type = xmlrpc_vector;
 
-					if ((attr = zend_hash_str_find(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1)) != NULL) {
+					if ((attr = zend_hash_str_find_ind(Z_OBJPROP_P(value), OBJECT_TYPE_ATTR, sizeof(OBJECT_TYPE_ATTR) - 1)) != NULL) {
 						if (Z_TYPE_P(attr) == IS_STRING) {
 							type = xmlrpc_str_as_type(Z_STRVAL_P(attr));
 						}
@@ -1368,7 +1358,7 @@ XMLRPC_VALUE_TYPE get_zval_xmlrpc_type(zval* value, zval* newvalue) /* {{{ */
 			zval* val;
 
 			if ((type == xmlrpc_base64 && Z_TYPE_P(value) == IS_OBJECT) || type == xmlrpc_datetime) {
-				if ((val = zend_hash_str_find(Z_OBJPROP_P(value), OBJECT_VALUE_ATTR, sizeof(OBJECT_VALUE_ATTR) - 1)) != NULL) {
+				if ((val = zend_hash_str_find_ind(Z_OBJPROP_P(value), OBJECT_VALUE_ATTR, sizeof(OBJECT_VALUE_ATTR) - 1)) != NULL) {
 					ZVAL_COPY_VALUE(newvalue, val);
 				}
 			} else {

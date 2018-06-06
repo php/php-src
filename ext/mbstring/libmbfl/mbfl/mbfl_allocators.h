@@ -31,15 +31,16 @@
 #ifndef MBFL_ALLOCATORS_H
 #define MBFL_ALLOCATORS_H
 
+#include <stddef.h>
 #include "mbfl_defs.h"
 
 typedef struct _mbfl_allocators {
-	void *(*malloc)(unsigned int);
-	void *(*realloc)(void *, unsigned int);
-	void *(*calloc)(unsigned int, unsigned int);
+	void *(*malloc)(size_t);
+	void *(*realloc)(void *, size_t);
+	void *(*calloc)(size_t, size_t);
 	void (*free)(void *);
-	void *(*pmalloc)(unsigned int);
-	void *(*prealloc)(void *, unsigned int);
+	void *(*pmalloc)(size_t);
+	void *(*prealloc)(void *, size_t);
 	void (*pfree)(void *);
 } mbfl_allocators;
 

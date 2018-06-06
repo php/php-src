@@ -53,7 +53,7 @@ var_dump($phar['e']->isCompressed());
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.php');
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "a"
 bool(false)
 string(1) "b"

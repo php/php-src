@@ -28,7 +28,7 @@ namespace testing {
 
 ?>
 --EXPECTF--
-%string|unicode%(6) "foobar"
+string(6) "foobar"
 
 Warning: call_user_func() expects parameter 1 to be a valid callback, cannot access private method testing\foo::priv() in %s on line %d
 

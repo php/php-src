@@ -102,7 +102,7 @@ dnl
 
 PHP_ARG_WITH(odbcver,,
 [  --with-odbcver[=HEX]      Force support for the passed ODBC version. A hex number is expected, default 0x0350.
-                             Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
+                          Use the special value of 0 to prevent an explicit ODBCVER to be defined. ], 0x0350)
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(adabas,,
@@ -220,28 +220,6 @@ You need to source your DB2 environment before running PHP configure:
 fi
 
 if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(ODBCRouter,,
-[  --with-ODBCRouter[=DIR]   Include ODBCRouter.com support [/usr]])
-
-  AC_MSG_CHECKING(for ODBCRouter.com support)
-  if test "$PHP_ODBCROUTER" != "no"; then
-    if test "$PHP_ODBCROUTER" = "yes"; then
-      PHP_ODBCROUTER=/usr
-    fi
-    ODBC_INCDIR=$PHP_ODBCROUTER/include
-    ODBC_LIBDIR=$PHP_ODBCROUTER/lib
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_LIBS=-lodbcsdk
-    ODBC_TYPE=ODBCRouter
-    AC_DEFINE(HAVE_ODBC_ROUTER,1,[ ])
-    AC_MSG_RESULT([$ext_output])
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress,,
 [  --with-empress[=DIR]      Include Empress support [\$EMPRESSPATH]
                           (Empress Version >= 8.60 required)])
@@ -268,8 +246,7 @@ fi
 
 if test -z "$ODBC_TYPE"; then
 PHP_ARG_WITH(empress-bcs,,
-[  --with-empress-bcs[=DIR]
-                          Include Empress Local Access support [\$EMPRESSPATH]
+[  --with-empress-bcs[=DIR]  Include Empress Local Access support [\$EMPRESSPATH]
                           (Empress Version >= 8.60 required)])
 
   AC_MSG_CHECKING(for Empress local access support)
@@ -303,55 +280,6 @@ PHP_ARG_WITH(empress-bcs,,
     AC_DEFINE(HAVE_EMPRESS,1,[ ])
     AC_MSG_RESULT([$ext_output])
     PHP_ODBC_FIND_EMPRESS_BCS_LIBS($ODBC_LIBDIR)
-  else
-    AC_MSG_RESULT(no)
-  fi
-fi
-
-if test -z "$ODBC_TYPE"; then
-PHP_ARG_WITH(birdstep,,
-[  --with-birdstep[=DIR]     Include Birdstep support [/usr/local/birdstep]])
-  
-  AC_MSG_CHECKING(for Birdstep support)
-  if test "$PHP_BIRDSTEP" != "no"; then
-    if test "$PHP_BIRDSTEP" = "yes"; then
-        ODBC_INCDIR=/usr/local/birdstep/include
-        ODBC_LIBDIR=/usr/local/birdstep/lib
-    else
-        ODBC_INCDIR=$PHP_BIRDSTEP/include
-        ODBC_LIBDIR=$PHP_BIRDSTEP/$PHP_LIBDIR
-    fi
-   
-    case $host_alias in
-      *aix*[)]
-        AC_DEFINE(AIX,1,[ ]);;
-      *hpux*[)]
-        AC_DEFINE(HPUX,1,[ ]);;
-      *linux*[)]
-        AC_DEFINE(LINUX,1,[ ]);;
-      *qnx*[)]
-        AC_DEFINE(NEUTRINO,1,[ ]);;
-      i?86-*-solaris*[)]
-        AC_DEFINE(ISOLARIS,1,[ ]);;
-      sparc-*-solaris*[)]
-        AC_DEFINE(SOLARIS,1,[ ]);;
-      *unixware*[)]
-        AC_DEFINE(UNIXWARE,1,[ ]);;
-    esac
-
-    ODBC_INCLUDE=-I$ODBC_INCDIR
-    ODBC_TYPE=birdstep
-    ODBC_LFLAGS=-L$ODBC_LIBDIR
-    ODBC_LIBS="-lCadm -lCdict -lCenc -lCrdm -lCrpc -lCrdbc -lCrm -lCuapi -lutil"
-
-    if test -f "$ODBC_LIBDIR/libCrdbc32.$SHLIB_SUFFIX_NAME"; then
-      ODBC_LIBS="-lCrdbc32 -lCadm32 -lCncp32 -lCrm32 -lCsql32 -lCdict32 -lCrdm32 -lCrpc32 -lutil"
-    elif test -f "$ODBC_LIBDIR/libCrdbc.$SHLIB_SUFFIX_NAME"; then
-      ODBC_LIBS="-lCrdbc -lCadm -lCncp -lCrm -lCsql -lCdict -lCrdm -lCrpc -lutil"
-    fi
-
-    AC_DEFINE(HAVE_BIRDSTEP,1,[ ])
-    AC_MSG_RESULT([$ext_output])
   else
     AC_MSG_RESULT(no)
   fi
@@ -536,7 +464,7 @@ dnl
 if test -n "$ODBC_TYPE"; then
   if test "$ODBC_TYPE" != "dbmaker"; then
     PHP_EVAL_LIBLINE([$ODBC_LFLAGS $ODBC_LIBS], ODBC_SHARED_LIBADD)
-    if test "$ODBC_TYPE" != "birdstep" && test "$ODBC_TYPE" != "solid"; then
+    if test "$ODBC_TYPE" != "solid"; then
       AC_DEFINE(HAVE_SQLDATASOURCES,1,[ ])
     fi
   fi

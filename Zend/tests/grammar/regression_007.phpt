@@ -29,7 +29,7 @@ var_dump(Foo::use);
 
 echo "\nDone\n";
 
---EXPECTF--
+--EXPECT--
 Foo::new
 Foo::new
 Foo::new

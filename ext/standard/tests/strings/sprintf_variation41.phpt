@@ -56,7 +56,7 @@ foreach($float_values as $float_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : unsigned formats with float values ***
 
 -- Iteration 1 --

@@ -42,7 +42,9 @@ const mbfl_encoding mbfl_encoding_koi8u = {
 	"KOI8-U",
 	(const char *(*)[])&mbfl_encoding_koi8u_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_koi8u_wchar,
+	&vtbl_wchar_koi8u
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_koi8u = {

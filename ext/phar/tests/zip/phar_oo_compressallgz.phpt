@@ -39,7 +39,7 @@ var_dump($phar['c']->isCompressed(Phar::GZ));
 <?php 
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.zip.php');
 ?>
---EXPECTF--
+--EXPECT--
 string(1) "a"
 bool(false)
 string(1) "b"

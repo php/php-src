@@ -20,6 +20,7 @@ $str = '¸µÏ½ÍÜ»½Ğò¼Òº¾µ½É½¸½Ç½ÎÏÉ½¼¨±½ÌÈÄäË½ÎÏÅ½ÉÕ¹½Ê¸·½»ÒÍ½ÃÎñ½Æ¬¥½¥Õ¥¡¡¼';
 var_dump(strlen($str));
 var_dump(mb_strlen($str));
 --EXPECT--
+Deprecated: The mbstring.func_overload directive is deprecated in Unknown on line 0
 EUC-JP
 int(33)
 int(33)

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend OPcache JIT                                                     |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2014 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -86,7 +86,7 @@ static inline uint32_t zend_bitset_len(uint32_t n)
 
 static inline zend_bool zend_bitset_in(zend_bitset set, uint32_t n)
 {
-	return (set[ZEND_BITSET_ELM_NUM(n)] & (Z_UL(1) << ZEND_BITSET_BIT_NUM(n))) != Z_UL(0);
+	return ZEND_BIT_TEST(set, n);
 }
 
 static inline void zend_bitset_incl(zend_bitset set, uint32_t n)
@@ -245,6 +245,14 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
 	} \
 } while (0)
 
+static inline int zend_bitset_pop_first(zend_bitset set, uint32_t len) {
+	int i = zend_bitset_first(set, len);
+	if (i >= 0) {
+		zend_bitset_excl(set, i);
+	}
+	return i;
+}
+
 #endif /* _ZEND_BITSET_H_ */
 
 /*
@@ -253,4 +261,6 @@ static inline int zend_bitset_last(zend_bitset set, uint32_t len)
  * c-basic-offset: 4
  * indent-tabs-mode: t
  * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
  */

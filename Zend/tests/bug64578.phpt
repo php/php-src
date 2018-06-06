@@ -9,6 +9,6 @@ function x($s) { $s['a'] = 1; };
 $y = '1';
 x($y);
 print_r($y);
---EXPECTF--
+--EXPECT--
 string(25) "Illegal string offset 'a'"
 1

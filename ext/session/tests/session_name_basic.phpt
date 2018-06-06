@@ -3,6 +3,7 @@ Test session_name() function : error functionality
 --INI--
 session.save_path=
 session.name=PHPSESSID
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--
@@ -28,7 +29,7 @@ var_dump(session_name());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_name() : error functionality ***
 string(9) "PHPSESSID"
 string(9) "PHPSESSID"

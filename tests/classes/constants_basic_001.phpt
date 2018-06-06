@@ -63,7 +63,7 @@ Notice: Undefined variable: undef in %s on line 5
 
 Attempt to access various kinds of class constants:
 
-Notice: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' in %s on line %d
+Warning: Use of undefined constant UNDEFINED - assumed 'UNDEFINED' (this will throw an Error in a future version of PHP) in %s on line %d
 string(9) "UNDEFINED"
 int(1)
 float(1.5)

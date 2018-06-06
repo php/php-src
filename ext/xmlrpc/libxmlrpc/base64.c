@@ -57,9 +57,6 @@ void base64_encode_xmlrpc(struct buffer_st *b, const char *source, int length)
 {
   int i, hiteof = 0;
   int offset = 0;
-  int olen;
-
-  olen = 0;
 
   buffer_new(b);
 

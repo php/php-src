@@ -6,7 +6,7 @@ if (!extension_loaded('sockets')) {
     die('skip sockets extension not available.');
 }
 if (PHP_OS !== 'Darwin') {
-    die('is not OSX.');
+    die('skip Is not OSX.');
 }
 --FILE--
 <?php
@@ -18,5 +18,5 @@ $so = socket_set_option($socket, IPPROTO_IP, MCAST_JOIN_GROUP, array(
     "interface" => 0,
 ));
 var_dump($so);
---EXPECTF--
+--EXPECT--
 bool(true)

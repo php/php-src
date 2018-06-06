@@ -69,22 +69,9 @@ typedef int ts_rsrc_id;
 #elif defined(PTHREADS)
 # define THREAD_T pthread_t
 # define MUTEX_T pthread_mutex_t *
-#elif defined(NSAPI)
-# define THREAD_T SYS_THREAD
-# define MUTEX_T CRITICAL
-#elif defined(PI3WEB)
-# define THREAD_T PIThread *
-# define MUTEX_T PISync *
 #elif defined(TSRM_ST)
 # define THREAD_T st_thread_t
 # define MUTEX_T st_mutex_t
-#elif defined(BETHREADS)
-# define THREAD_T thread_id
-typedef struct {
-  sem_id sem;
-  int32 ben;
-} beos_ben;
-# define MUTEX_T beos_ben *
 #endif
 
 #ifdef HAVE_SIGNAL_H
@@ -128,6 +115,7 @@ TSRM_API void ts_free_id(ts_rsrc_id id);
 
 typedef void (*tsrm_thread_begin_func_t)(THREAD_T thread_id);
 typedef void (*tsrm_thread_end_func_t)(THREAD_T thread_id);
+typedef void (*tsrm_shutdown_func_t)(void);
 
 
 TSRM_API int tsrm_error(int level, const char *format, ...);
@@ -145,6 +133,7 @@ TSRM_API int tsrm_sigmask(int how, const sigset_t *set, sigset_t *oldset);
 
 TSRM_API void *tsrm_set_new_thread_begin_handler(tsrm_thread_begin_func_t new_thread_begin_handler);
 TSRM_API void *tsrm_set_new_thread_end_handler(tsrm_thread_end_func_t new_thread_end_handler);
+TSRM_API void *tsrm_set_shutdown_handler(tsrm_shutdown_func_t shutdown_handler);
 
 /* these 3 APIs should only be used by people that fully understand the threading model
  * used by PHP/Zend and the selected SAPI. */
@@ -153,11 +142,17 @@ TSRM_API void *tsrm_set_interpreter_context(void *new_ctx);
 TSRM_API void tsrm_free_interpreter_context(void *context);
 
 TSRM_API void *tsrm_get_ls_cache(void);
+TSRM_API uint8_t tsrm_is_main_thread(void);
+TSRM_API const char *tsrm_api_name(void);
 
-#ifdef TSRM_WIN32
-# define TSRM_TLS __declspec(thread)
+#if defined(__cplusplus) && __cplusplus > 199711L
+# define TSRM_TLS thread_local
 #else
-# define TSRM_TLS __thread
+# ifdef TSRM_WIN32
+#  define TSRM_TLS __declspec(thread)
+# else
+#  define TSRM_TLS __thread
+# endif
 #endif
 
 #define TSRM_SHUFFLE_RSRC_ID(rsrc_id)		((rsrc_id)+1)
@@ -174,8 +169,10 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #define TSRMLS_CACHE_DEFINE() TSRM_TLS void *TSRMLS_CACHE = NULL;
 #if ZEND_DEBUG
 #define TSRMLS_CACHE_UPDATE() TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()
 #else
 #define TSRMLS_CACHE_UPDATE() if (!TSRMLS_CACHE) TSRMLS_CACHE = tsrm_get_ls_cache()
+#define TSRMLS_CACHE_RESET()  TSRMLS_CACHE = NULL
 #endif
 #define TSRMLS_CACHE _tsrm_ls_cache
 
@@ -213,3 +210,12 @@ TSRM_API void *tsrm_get_ls_cache(void);
 #endif /* ZTS */
 
 #endif /* TSRM_H */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

@@ -26,6 +26,9 @@ extern "C" {
 #include "../intl_convertcpp.h"
 #include "../intl_common.h"
 
+using icu::RuleBasedBreakIterator;
+using icu::Locale;
+
 static inline RuleBasedBreakIterator *fetch_rbbi(BreakIterator_object *bio) {
 	return (RuleBasedBreakIterator*)bio->biter;
 }
@@ -79,6 +82,7 @@ static void _php_intlrbbi_constructor_body(INTERNAL_FUNCTION_PARAMETERS)
 		if (U_FAILURE(status)) {
 			intl_error_set(NULL, status, "rbbi_create_instance: unable to "
 				"create instance from compiled rules", 0);
+			delete rbbi;
 			return;
 		}
 #else

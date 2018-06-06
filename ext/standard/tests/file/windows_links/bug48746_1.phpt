@@ -13,7 +13,7 @@ include_once __DIR__ . '/common.inc';
 $cmd = "mklink /?";
 $ret = @exec($cmd, $output, $return_val);
 if (count($output) == 0) {
-    die("mklink.exe not found in PATH");
+    die("skip mklink.exe not found in PATH");
 }
 ?>
 --FILE--

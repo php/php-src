@@ -24,7 +24,7 @@ if ($MYSQLND_VERSION < 50004)
 	inspectClass($class);
 	print "done!\n";
 ?>
---EXPECTF--
+--EXPECT--
 Inspecting class 'mysqli'
 isInternal: yes
 isUserDefined: no
@@ -49,7 +49,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 256
 Number of Parameters: 6
 Number of Required Parameters: 0
 
@@ -107,7 +107,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 8448
+Modifiers: 256
 Number of Parameters: 6
 Number of Required Parameters: 0
 
@@ -657,7 +657,7 @@ isDestructor: no
 isInternal: yes
 isUserDefined: no
 returnsReference: no
-Modifiers: 268435713
+Modifiers: 257
 Number of Parameters: 5
 Number of Required Parameters: 4
 
@@ -732,7 +732,7 @@ isInternal: yes
 isUserDefined: no
 returnsReference: no
 Modifiers: 256
-Number of Parameters: 1
+Number of Parameters: 2
 Number of Required Parameters: 1
 
 Inspecting parameter 'query' of method 'query'
@@ -740,6 +740,13 @@ isArray: no
 allowsNull: no
 isPassedByReference: no
 isOptional: no
+isDefaultValueAvailable: no
+
+Inspecting parameter 'resultmode' of method 'query'
+isArray: no
+allowsNull: no
+isPassedByReference: no
+isOptional: yes
 isDefaultValueAvailable: no
 
 Inspecting method 'real_connect'

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -73,7 +73,8 @@ const php_hash_ops php_hash_sha1_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	20,
 	64,
-	sizeof(PHP_SHA1_CTX)
+	sizeof(PHP_SHA1_CTX),
+	1
 };
 
 #ifdef PHP_HASH_SHA1_NOT_IN_CORE
@@ -91,7 +92,6 @@ PHP_FUNCTION(sha1)
 	char *arg;
 	size_t arg_len;
 	zend_bool raw_output = 0;
-	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 
@@ -99,15 +99,14 @@ PHP_FUNCTION(sha1)
 		return;
 	}
 
-	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
 	PHP_SHA1Update(&context, arg, arg_len);
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20);
 	} else {
-		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_sha1_digest(Z_STRVAL_P(return_value), digest);
 	}
 
 }
@@ -121,7 +120,6 @@ PHP_FUNCTION(sha1_file)
 	char          *arg;
 	size_t        arg_len;
 	zend_bool raw_output = 0;
-	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
@@ -154,8 +152,8 @@ PHP_FUNCTION(sha1_file)
 	if (raw_output) {
 		RETURN_STRINGL(digest, 20);
 	} else {
-		make_sha1_digest(sha1str, digest);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_sha1_digest(Z_STRVAL_P(return_value), digest);
 	}
 }
 /* }}} */
@@ -415,7 +413,8 @@ const php_hash_ops php_hash_sha256_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	64,
-	sizeof(PHP_SHA256_CTX)
+	sizeof(PHP_SHA256_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha224_ops = {
@@ -425,7 +424,8 @@ const php_hash_ops php_hash_sha224_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	28,
 	64,
-	sizeof(PHP_SHA224_CTX)
+	sizeof(PHP_SHA224_CTX),
+	1
 };
 
 #define ROTR32(b,x)		((x >> b) | (x << (32 - b)))
@@ -917,7 +917,8 @@ const php_hash_ops php_hash_sha384_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	48,
 	128,
-	sizeof(PHP_SHA384_CTX)
+	sizeof(PHP_SHA384_CTX),
+	1
 };
 
 /* {{{ PHP_SHA512Init
@@ -1089,7 +1090,8 @@ const php_hash_ops php_hash_sha512_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	64,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha512_256_ops = {
@@ -1099,7 +1101,8 @@ const php_hash_ops php_hash_sha512_256_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	32,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 const php_hash_ops php_hash_sha512_224_ops = {
@@ -1109,7 +1112,8 @@ const php_hash_ops php_hash_sha512_224_ops = {
 	(php_hash_copy_func_t) php_hash_copy,
 	28,
 	128,
-	sizeof(PHP_SHA512_CTX)
+	sizeof(PHP_SHA512_CTX),
+	1
 };
 
 /*

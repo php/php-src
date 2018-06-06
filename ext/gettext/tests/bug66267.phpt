@@ -42,7 +42,7 @@ foreach ($loc as $l) {
 
 ?>
 ==DONE==
---EXPECTF--
+--EXPECT--
 LC_ALL=de_DE
 hello=hallo
 

@@ -50,7 +50,7 @@ $file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : basic functionality ***
 string(17) "Foo is 30 and bar"
 int(17)

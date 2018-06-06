@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -37,56 +37,9 @@ static int firebird_alloc_prepare_stmt(pdo_dbh_t*, const char*, size_t, XSQLDA*,
 /* map driver specific error message to PDO error */
 void _firebird_error(pdo_dbh_t *dbh, pdo_stmt_t *stmt, char const *file, zend_long line) /* {{{ */
 {
-#if 0
-	pdo_firebird_db_handle *H = stmt ? ((pdo_firebird_stmt *)stmt->driver_data)->H
-		: (pdo_firebird_db_handle *)dbh->driver_data;
-#endif
 	pdo_error_type *const error_code = stmt ? &stmt->error_code : &dbh->error_code;
 
-#if 0
-	switch (isc_sqlcode(H->isc_status)) {
-
-		case 0:
-			*error_code = PDO_ERR_NONE;
-			break;
-		default:
-			*error_code = PDO_ERR_CANT_MAP;
-			break;
-		case -104:
-			*error_code = PDO_ERR_SYNTAX;
-			break;
-		case -530:
-		case -803:
-			*error_code = PDO_ERR_CONSTRAINT;
-			break;
-		case -204:
-		case -205:
-		case -206:
-		case -829:
-			*error_code = PDO_ERR_NOT_FOUND;
-			break;
-
-			*error_code = PDO_ERR_ALREADY_EXISTS;
-			break;
-
-			*error_code = PDO_ERR_NOT_IMPLEMENTED;
-			break;
-		case -313:
-		case -804:
-			*error_code = PDO_ERR_MISMATCH;
-			break;
-		case -303:
-		case -314:
-		case -413:
-			*error_code = PDO_ERR_TRUNCATED;
-			break;
-
-			*error_code = PDO_ERR_DISCONNECTED;
-			break;
-	}
-#else
 	strcpy(*error_code, "HY000");
-#endif
 }
 /* }}} */
 
@@ -517,7 +470,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 					efree(H->date_format);
 				}
 				spprintf(&H->date_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			return 1;
 
@@ -528,7 +481,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 					efree(H->time_format);
 				}
 				spprintf(&H->time_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			return 1;
 
@@ -539,7 +492,7 @@ static int firebird_handle_set_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 					efree(H->timestamp_format);
 				}
 				spprintf(&H->timestamp_format, 0, "%s", ZSTR_VAL(str));
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			return 1;
 	}
@@ -592,6 +545,9 @@ static int firebird_handle_get_attribute(pdo_dbh_t *dbh, zend_long attr, zval *v
 				info_func(tmp);
 				ZVAL_STRING(val, tmp);
 			}
+#ifdef PHP_WIN32
+			FreeLibrary(l);
+#endif
 #else
 			ZVAL_NULL(val);
 #endif
@@ -639,7 +595,7 @@ static int pdo_firebird_fetch_error_func(pdo_dbh_t *dbh, pdo_stmt_t *stmt, zval 
 }
 /* }}} */
 
-static struct pdo_dbh_methods firebird_methods = { /* {{{ */
+static const struct pdo_dbh_methods firebird_methods = { /* {{{ */
 	firebird_handle_closer,
 	firebird_handle_preparer,
 	firebird_handle_doer,
@@ -724,7 +680,7 @@ static int pdo_firebird_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* 
 /* }}} */
 
 
-pdo_driver_t pdo_firebird_driver = { /* {{{ */
+const pdo_driver_t pdo_firebird_driver = { /* {{{ */
 	PDO_DRIVER_HEADER(firebird),
 	pdo_firebird_handle_factory
 };

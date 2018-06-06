@@ -3,14 +3,14 @@ Test DateTime::setDate() function : usage variation - Passing unexpected values 
 --FILE--
 <?php
 /* Prototype  : public DateTime DateTime::setDate  ( int $year  , int $month  , int $day  )
- * Description: Resets the current date of the DateTime object to a different date. 
+ * Description: Resets the current date of the DateTime object to a different date.
  * Source code: ext/date/php_date.c
  * Alias to functions: date_date_set
  */
 
 echo "*** Testing DateTime::setDate() : usage variation -  unexpected values to third argument \$day***\n";
 
-//Set the default time zone 
+//Set the default time zone
 date_default_timezone_set("Europe/London");
 
 //get an unset variable
@@ -90,8 +90,8 @@ $inputs = array(
 
       // unset data
       'unset var' => @$unset_var,
-      
-      // resource 
+
+      // resource
       'resource' => $file_handle
 );
 
@@ -184,22 +184,22 @@ object(DateTime)#%d (3) {
 
 -- empty array --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- int indexed array --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- associative array --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- nested arrays --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, array given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, array given in %s on line %d
 bool(false)
 
 -- uppercase NULL --
@@ -264,42 +264,42 @@ object(DateTime)#%d (3) {
 
 -- empty string DQ --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- empty string SQ --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- string DQ --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- string SQ --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- mixed case string --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- heredoc --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, string given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, string given in %s on line %d
 bool(false)
 
 -- instance of classWithToString --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, object given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 
 -- instance of classWithoutToString --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, object given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, object given in %s on line %d
 bool(false)
 
 -- undefined var --
@@ -324,6 +324,6 @@ object(DateTime)#%d (3) {
 
 -- resource --
 
-Warning: DateTime::setDate() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: DateTime::setDate() expects parameter 3 to be int, resource given in %s on line %d
 bool(false)
 ===DONE===

@@ -21,7 +21,7 @@ foreach ($classes as $class) {
 	var_dump($rc->getModifiers());
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)
@@ -41,4 +41,4 @@ int(4)
 bool(false)
 bool(true)
 bool(false)
-int(64)
+int(0)

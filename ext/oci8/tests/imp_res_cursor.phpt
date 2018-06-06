@@ -87,7 +87,7 @@ oci8_test_sql_execute($c, $stmtarray);
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 Test 1
   X
   1  abcde

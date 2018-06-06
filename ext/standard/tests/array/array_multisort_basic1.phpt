@@ -25,7 +25,7 @@ var_dump($ar2);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : basic functionality ***
 
 -- Testing array_multisort() function with all normal arguments --

@@ -15,8 +15,8 @@
  * @version 1.2
  * @since PHP 5.1
  *
- * This extended FilterIterator allows a recursive iteration using 
- * RecursiveIteratorIterator that only shows those elements which have 
+ * This extended FilterIterator allows a recursive iteration using
+ * RecursiveIteratorIterator that only shows those elements which have
  * children.
  */
 class ParentIterator extends RecursiveFilterIterator

@@ -2,7 +2,6 @@
 Phar: tar-based phar, make new bzipped tar
 --SKIPIF--
 <?php if (!extension_loaded('phar')) die('skip'); ?>
-<?php if (!extension_loaded("spl")) die("skip SPL not available"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not available"); ?>
 --INI--
 phar.readonly=0
@@ -33,7 +32,7 @@ var_dump($phar2->isCompressed() == Phar::BZ2);
 @unlink(dirname(__FILE__) . '/tar_makebz2.phar.tar.bz2');
 @unlink(dirname(__FILE__) . '/tar_makebz2_b.phar.tar.bz2');
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

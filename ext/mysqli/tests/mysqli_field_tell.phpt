@@ -106,5 +106,5 @@ bool(true)
 int(0)
 
 Warning: mysqli_field_tell(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

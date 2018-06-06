@@ -11,6 +11,8 @@ function foo() {
 foo();
 ?>
 --EXPECTF--
+Deprecated: mb_parse_str(): Calling mb_parse_str() without the result argument is deprecated in %s on line %d
+
 Fatal error: Uncaught Error: Cannot re-assign $this in %sthis_in_mb_parse_str.php:3
 Stack trace:
 #0 %sthis_in_mb_parse_str.php(3): mb_parse_str('this=42')

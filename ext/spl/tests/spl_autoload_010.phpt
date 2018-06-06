@@ -23,7 +23,7 @@ new C;
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 B -> C
 A -> C
 C -> C

@@ -30,7 +30,7 @@ var_dump(ini_get("session.cache_expire"));
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_cache_expire() : variation ***
 string(3) "180"
 int(180)
@@ -38,8 +38,6 @@ string(3) "180"
 int(180)
 string(10) "1234567890"
 bool(true)
-
-Warning: session_cache_expire(): Cannot change cache expire when session is active in %s on line 19
 int(1234567890)
 string(10) "1234567890"
 bool(true)

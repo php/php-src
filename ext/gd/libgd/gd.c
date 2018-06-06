@@ -1239,6 +1239,12 @@ void gdImageAALine (gdImagePtr im, int x1, int y1, int x2, int y2, int col)
 	long x, y, inc, frac;
 	long dx, dy,tmp;
 
+	if (!im->trueColor) {
+		/* TBB: don't crash when the image is of the wrong type */
+		gdImageLine(im, x1, y1, x2, y2, col);
+		return;
+	}
+
 	/* 2.0.10: Nick Atty: clip to edges of drawing rectangle, return if no points need to be drawn */
 	if (!clip_1d(&x1,&y1,&x2,&y2,gdImageSX(im)-1) || !clip_1d(&y1,&x1,&y2,&x2,gdImageSY(im)-1)) {
 		return;
@@ -1332,7 +1338,6 @@ void gdImageDashedLine (gdImagePtr im, int x1, int y1, int x2, int y2, int color
 		} else {
 			wid = 1;
 		}
-		wid = (int)(thick * sin(atan2(dy, dx)));
 		vert = 1;
 
 		d = 2 * dy - dx;
@@ -2069,7 +2074,7 @@ void gdImageRectangle (gdImagePtr im, int x1, int y1, int x2, int y2, int color)
 		y1 = y2;
 		y2 = t;
 	}
-	
+
 	if (x2 < x1) {
 		t = x1;
 		x1 = x2;

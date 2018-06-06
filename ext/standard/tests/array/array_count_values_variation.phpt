@@ -37,7 +37,7 @@ echo "Done";
 <?php
 unlink("array_count_file");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_count_values() : parameter variations ***
 array(3) {
   ["bobv"]=>

@@ -29,7 +29,7 @@ Rick Buitenman <rick@meritos.nl>
   var_dump( $curl_content );
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing curl copy handle with simple GET ***
 string(106) "array(2) {
   ["test"]=>

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -313,7 +313,7 @@ ZEND_API void zend_file_handle_dtor(zend_file_handle *fh) /* {{{ */
 			break;
 	}
 	if (fh->opened_path) {
-		zend_string_release(fh->opened_path);
+		zend_string_release_ex(fh->opened_path, 0);
 		fh->opened_path = NULL;
 	}
 	if (fh->free_filename && fh->filename) {
@@ -345,3 +345,13 @@ ZEND_API int zend_compare_file_handles(zend_file_handle *fh1, zend_file_handle *
 	}
 	return 0;
 } /* }}} */
+
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

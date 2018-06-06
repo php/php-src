@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -35,6 +35,21 @@
 #if HAVE_IMAP
 
 #if defined(HAVE_IMAP2000) || defined(HAVE_IMAP2001)
+
+ /* For now these appear on Windows, remove this check if it appears outside */
+# ifdef PHP_WIN32
+ /* Undefine these LOG defines to avoid warnings */
+#  undef LOG_EMERG
+#  undef LOG_CRIT
+#  undef LOG_ERR
+#  undef LOG_WARNING
+#  undef LOG_NOTICE
+#  undef LOG_DEBUG
+
+ /* c-client also redefines its own ftruncate */
+#  undef ftruncate
+# endif
+
  /* these are used for quota support */
 # include "c-client.h"	/* includes mail.h and rfc822.h */
 # include "imap4r1.h"	/* location of c-client quota functions */

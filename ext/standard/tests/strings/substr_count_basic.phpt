@@ -24,7 +24,7 @@ var_dump(substr_count($a, "bca", -200, -50));
 echo "Done\n";	
 
 ?>
---EXPECTF--
+--EXPECT--
 ***Testing basic operations ***
 bool(false)
 bool(false)

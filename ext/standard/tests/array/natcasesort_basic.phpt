@@ -23,7 +23,7 @@ var_dump($array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing natcasesort() : basic functionality ***
 
 -- Before sorting: --

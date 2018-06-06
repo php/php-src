@@ -35,7 +35,7 @@ pg_close($dbh);
 echo PHP_EOL."Done".PHP_EOL;
 
 ?>
---EXPECTF--
+--EXPECT--
 array(2) {
   [0]=>
   array(2) {

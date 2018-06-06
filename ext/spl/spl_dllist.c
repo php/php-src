@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -373,7 +373,7 @@ static zend_object *spl_dllist_object_new_ex(zend_class_entry *class_type, zval 
 	zend_class_entry  *parent = class_type;
 	int                inherited = 0;
 
-	intern = ecalloc(1, sizeof(spl_dllist_object) + zend_object_properties_size(parent));
+	intern = zend_object_alloc(sizeof(spl_dllist_object), parent);
 
 	zend_object_std_init(&intern->std, class_type);
 	object_properties_init(&intern->std, class_type);
@@ -506,14 +506,13 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 		rebuild_object_properties(&intern->std);
 	}
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 1, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(1);
 	zend_hash_copy(debug_info, intern->std.properties, (copy_ctor_func_t) zval_add_ref);
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "flags", sizeof("flags")-1);
 	ZVAL_LONG(&tmp, intern->flags);
 	zend_hash_add(debug_info, pnstr, &tmp);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	array_init(&dllist_array);
 
@@ -531,7 +530,7 @@ static HashTable* spl_dllist_object_get_debug_info(zval *obj, int *is_temp) /* {
 
 	pnstr = spl_gen_private_prop_name(spl_ce_SplDoublyLinkedList, "dllist", sizeof("dllist")-1);
 	zend_hash_add(debug_info, pnstr, &dllist_array);
-	zend_string_release(pnstr);
+	zend_string_release_ex(pnstr, 0);
 
 	return debug_info;
 }
@@ -733,7 +732,7 @@ SPL_METHOD(SplDoublyLinkedList, setIteratorMode)
 		return;
 	}
 
-	intern->flags = value & SPL_DLLIST_IT_MASK;
+	intern->flags = (value & SPL_DLLIST_IT_MASK) | (intern->flags & SPL_DLLIST_IT_FIX);
 
 	RETURN_LONG(intern->flags);
 }
@@ -1147,7 +1146,6 @@ SPL_METHOD(SplDoublyLinkedList, serialize)
 	/* flags */
 	ZVAL_LONG(&flags, intern->flags);
 	php_var_serialize(&buf, &flags, &var_hash);
-	zval_ptr_dtor(&flags);
 
 	/* elements */
 	while (current) {
@@ -1249,9 +1247,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 		return;
 	}
 
-	if (Z_REFCOUNTED_P(value)) {
-		Z_ADDREF_P(value);
-	}
+	Z_TRY_ADDREF_P(value);
 	if (index == intern->llist->count) {
 		/* If index is the last entry+1 then we do a push because we're not inserting before any entry */
 		spl_ptr_llist_push(intern->llist, value);
@@ -1285,7 +1281,7 @@ SPL_METHOD(SplDoublyLinkedList, add)
 } /* }}} */
 
 /* {{{ iterator handler table */
-zend_object_iterator_funcs spl_dllist_it_funcs = {
+static const zend_object_iterator_funcs spl_dllist_it_funcs = {
 	spl_dllist_it_dtor,
 	spl_dllist_it_valid,
 	spl_dllist_it_get_current_data,
@@ -1391,7 +1387,7 @@ static const zend_function_entry spl_funcs_SplDoublyLinkedList[] = {
 PHP_MINIT_FUNCTION(spl_dllist) /* {{{ */
 {
 	REGISTER_SPL_STD_CLASS_EX(SplDoublyLinkedList, spl_dllist_object_new, spl_funcs_SplDoublyLinkedList);
-	memcpy(&spl_handler_SplDoublyLinkedList, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&spl_handler_SplDoublyLinkedList, &std_object_handlers, sizeof(zend_object_handlers));
 
 	spl_handler_SplDoublyLinkedList.offset = XtOffsetOf(spl_dllist_object, std);
 	spl_handler_SplDoublyLinkedList.clone_obj = spl_dllist_object_clone;

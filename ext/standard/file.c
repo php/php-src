@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -50,6 +50,7 @@
 # include "win32/param.h"
 # include "win32/winutil.h"
 # include "win32/fnmatch.h"
+# include "win32/ioutil.h"
 #else
 # if HAVE_SYS_PARAM_H
 #  include <sys/param.h>
@@ -341,7 +342,11 @@ PHP_FUNCTION(flock)
 		Z_PARAM_RESOURCE(res)
 		Z_PARAM_LONG(operation)
 		Z_PARAM_OPTIONAL
+<<<<<<< HEAD
 		Z_PARAM_ZVAL(wouldblock)
+=======
+		Z_PARAM_ZVAL_DEREF(wouldblock)
+>>>>>>> master
 	ZEND_PARSE_PARAMETERS_END();
 
 	PHP_STREAM_TO_ZVAL(stream, res);
@@ -353,7 +358,12 @@ PHP_FUNCTION(flock)
 	}
 
 	if (wouldblock) {
+<<<<<<< HEAD
 		ZEND_TRY_ASSIGN_LONG(wouldblock, 0);
+=======
+		zval_ptr_dtor(wouldblock);
+		ZVAL_LONG(wouldblock, 0);
+>>>>>>> master
 	}
 
 	/* flock_values contains all possible actions if (operation & 4) we won't block on the lock */
@@ -515,7 +525,7 @@ PHP_FUNCTION(get_meta_tags)
 }
 /* }}} */
 
-/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, long offset [, long maxlen]]]])
+/* {{{ proto string file_get_contents(string filename [, bool use_include_path [, resource context [, int offset [, int maxlen]]]])
    Read the entire file into a string */
 PHP_FUNCTION(file_get_contents)
 {
@@ -590,7 +600,7 @@ PHP_FUNCTION(file_put_contents)
 
 	ZEND_PARSE_PARAMETERS_START(2, 4)
 		Z_PARAM_PATH(filename, filename_len)
-		Z_PARAM_ZVAL_DEREF_EX(data, 0, 1)
+		Z_PARAM_ZVAL(data)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(flags)
 		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
@@ -668,18 +678,19 @@ PHP_FUNCTION(file_put_contents)
 				zval *tmp;
 
 				ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(data), tmp) {
-					zend_string *str = zval_get_string(tmp);
+					zend_string *t;
+					zend_string *str = zval_get_tmp_string(tmp, &t);
 					if (ZSTR_LEN(str)) {
 						numbytes += ZSTR_LEN(str);
 						bytes_written = php_stream_write(stream, ZSTR_VAL(str), ZSTR_LEN(str));
 						if (bytes_written != ZSTR_LEN(str)) {
 							php_error_docref(NULL, E_WARNING, "Failed to write %zd bytes to %s", ZSTR_LEN(str), filename);
-							zend_string_release(str);
+							zend_tmp_string_release(t);
 							numbytes = -1;
 							break;
 						}
 					}
-					zend_string_release(str);
+					zend_tmp_string_release(t);
 				} ZEND_HASH_FOREACH_END();
 			}
 			break;
@@ -840,7 +851,7 @@ PHP_FUNCTION(tempnam)
 		close(fd);
 		RETVAL_STR(opened_path);
 	}
-	zend_string_release(p);
+	zend_string_release_ex(p, 0);
 }
 /* }}} */
 
@@ -880,7 +891,7 @@ PHP_NAMED_FUNCTION(php_if_fopen)
 		Z_PARAM_STRING(mode, mode_len)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_BOOL(use_include_path)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1044,7 +1055,7 @@ PHPAPI PHP_FUNCTION(fgets)
 
 		str = zend_string_alloc(len, 0);
 		if (php_stream_get_line(stream, ZSTR_VAL(str), len, &line_len) == NULL) {
-			zend_string_free(str);
+			zend_string_efree(str);
 			RETURN_FALSE;
 		}
 		/* resize buffer if it's much larger than the result.
@@ -1343,7 +1354,7 @@ PHP_FUNCTION(mkdir)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(mode)
 		Z_PARAM_BOOL(recursive)
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1364,7 +1375,7 @@ PHP_FUNCTION(rmdir)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(dir, dir_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1466,7 +1477,7 @@ PHP_FUNCTION(rename)
 		Z_PARAM_PATH(old_name, old_name_len)
 		Z_PARAM_PATH(new_name, new_name_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	wrapper = php_stream_locate_url_wrapper(old_name, NULL, 0);
@@ -1505,7 +1516,7 @@ PHP_FUNCTION(unlink)
 	ZEND_PARSE_PARAMETERS_START(1, 2)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END_EX(RETURN_FALSE);
 
 	context = php_stream_context_from_zval(zcontext, 0);
@@ -1633,19 +1644,19 @@ PHP_NAMED_FUNCTION(php_if_fstat)
 	zend_hash_next_index_insert(Z_ARRVAL_P(return_value), &stat_blocks);
 
 	/* Store string indexes referencing the same zval*/
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
-	zend_hash_str_update(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[0], strlen(stat_sb_names[0]), &stat_dev);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[1], strlen(stat_sb_names[1]), &stat_ino);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[2], strlen(stat_sb_names[2]), &stat_mode);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[3], strlen(stat_sb_names[3]), &stat_nlink);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[4], strlen(stat_sb_names[4]), &stat_uid);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[5], strlen(stat_sb_names[5]), &stat_gid);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[6], strlen(stat_sb_names[6]), &stat_rdev);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[7], strlen(stat_sb_names[7]), &stat_size);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[8], strlen(stat_sb_names[8]), &stat_atime);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[9], strlen(stat_sb_names[9]), &stat_mtime);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[10], strlen(stat_sb_names[10]), &stat_ctime);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[11], strlen(stat_sb_names[11]), &stat_blksize);
+	zend_hash_str_add_new(Z_ARRVAL_P(return_value), stat_sb_names[12], strlen(stat_sb_names[12]), &stat_blocks);
 }
 /* }}} */
 
@@ -1662,7 +1673,7 @@ PHP_FUNCTION(copy)
 		Z_PARAM_PATH(source, source_len)
 		Z_PARAM_PATH(target, target_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_RESOURCE(zcontext)
+		Z_PARAM_RESOURCE_EX(zcontext, 1, 0)
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (php_check_open_basedir(source)) {
@@ -1814,6 +1825,10 @@ PHPAPI PHP_FUNCTION(fread)
 
 	/* needed because recv/read/gzread doesnt put a null at the end*/
 	Z_STRVAL_P(return_value)[Z_STRLEN_P(return_value)] = 0;
+
+	if (Z_STRLEN_P(return_value) < len / 2) {
+		Z_STR_P(return_value) = zend_string_truncate(Z_STR_P(return_value), Z_STRLEN_P(return_value), 0);
+	}
 }
 /* }}} */
 
@@ -1931,7 +1946,8 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 
 	count = zend_hash_num_elements(Z_ARRVAL_P(fields));
 	ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(fields), field_tmp) {
-		zend_string *field_str = zval_get_string(field_tmp);
+		zend_string *tmp_field_str;
+		zend_string *field_str = zval_get_tmp_string(field_tmp, &tmp_field_str);
 
 		/* enclose a field that contains a delimiter, an enclosure character, or a newline */
 		if (FPUTCSV_FLD_CHK(delimiter) ||
@@ -1966,7 +1982,7 @@ PHPAPI size_t php_fputcsv(php_stream *stream, zval *fields, char delimiter, char
 		if (++i != count) {
 			smart_str_appendl(&csvline, &delimiter, 1);
 		}
-		zend_string_release(field_str);
+		zend_tmp_string_release(tmp_field_str);
 	} ZEND_HASH_FOREACH_END();
 
 	smart_str_appendc(&csvline, '\n');
@@ -2007,7 +2023,7 @@ PHP_FUNCTION(fgetcsv)
 		ZEND_PARSE_PARAMETERS_START(1, 5)
 			Z_PARAM_RESOURCE(fd)
 			Z_PARAM_OPTIONAL
-			Z_PARAM_ZVAL_DEREF(len_zv)
+			Z_PARAM_ZVAL(len_zv)
 			Z_PARAM_STRING(delimiter_str, delimiter_str_len)
 			Z_PARAM_STRING(enclosure_str, enclosure_str_len)
 			Z_PARAM_STRING(escape_str, escape_str_len)
@@ -2339,7 +2355,7 @@ out:
 }
 /* }}} */
 
-#if (!defined(__BEOS__) && HAVE_REALPATH) || defined(ZTS)
+#if HAVE_REALPATH || defined(ZTS)
 /* {{{ proto string realpath(string path)
    Return the resolved path */
 PHP_FUNCTION(realpath)

@@ -43,7 +43,7 @@ foreach($rc->getMethods() as $m) {
 	var_dump($m->isGenerator());
 }
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 bool(false)

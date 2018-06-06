@@ -20,6 +20,8 @@ var_dump($r2=assert($sa));
 echo "If this is printed BAIL hasn't worked";
 --EXPECTF--
 int(0)
+
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 f1 called
 
 Warning: assert(): assert($sa): "0 != 0" failed in %s on line 10

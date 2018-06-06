@@ -14,7 +14,7 @@ var_dump($recItIt->nextElement());
 
 ?>
 
---EXPECTF--
+--EXPECT--
 NULL
 NULL
 NULL

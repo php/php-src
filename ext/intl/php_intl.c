@@ -154,6 +154,11 @@ ZEND_BEGIN_ARG_INFO_EX(collator_sort_args, 0, 0, 2)
 	ZEND_ARG_INFO(0, sort_flags)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX(collator_sort_with_sort_keys_args, 0, 0, 2)
+	ZEND_ARG_OBJ_INFO(0, coll, Collator, 0)
+	ZEND_ARG_ARRAY_INFO(1, arr, 0)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, formatter)
 	ZEND_ARG_INFO(0, string)
@@ -168,29 +173,29 @@ ZEND_BEGIN_ARG_INFO_EX(numfmt_parse_currency_arginfo, 0, 0, 3)
 	ZEND_ARG_INFO(1, position)
 ZEND_END_ARG_INFO()
 
+ZEND_BEGIN_ARG_INFO_EX( locale_get_loc_in_loc_args, 0, ZEND_RETURN_VALUE, 1 )
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, in_locale)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( locale_filter_matches_args, 0, ZEND_RETURN_VALUE, 2 )
+	ZEND_ARG_INFO(0, langtag)
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, canonicalize)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO_EX( locale_lookup_args, 0, ZEND_RETURN_VALUE, 2 )
+	ZEND_ARG_INFO(0, langtag)
+	ZEND_ARG_INFO(0, locale)
+	ZEND_ARG_INFO(0, canonicalize)
+	ZEND_ARG_INFO(0, def)
+ZEND_END_ARG_INFO()
+
 ZEND_BEGIN_ARG_INFO_EX(locale_0_args, 0, 0, 0)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(locale_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, arg1)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_2_args, 0, 0, 2)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_3_args, 0, 0, 3)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-	ZEND_ARG_INFO(0, arg3)
-ZEND_END_ARG_INFO()
-
-ZEND_BEGIN_ARG_INFO_EX(locale_4_args, 0, 0, 4)
-	ZEND_ARG_INFO(0, arg1)
-	ZEND_ARG_INFO(0, arg2)
-	ZEND_ARG_INFO(0, arg3)
-	ZEND_ARG_INFO(0, arg4)
 ZEND_END_ARG_INFO()
 
 #define intl_0_args collator_static_0_args
@@ -200,6 +205,12 @@ ZEND_BEGIN_ARG_INFO_EX(normalizer_args, 0, 0, 1)
 	ZEND_ARG_INFO(0, input)
 	ZEND_ARG_INFO(0, form)
 ZEND_END_ARG_INFO()
+
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+ZEND_BEGIN_ARG_INFO_EX(decomposition_args, 0, 0, 1)
+	ZEND_ARG_INFO(0, input)
+ZEND_END_ARG_INFO();
+#endif
 
 ZEND_BEGIN_ARG_INFO_EX(grapheme_1_arg, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
@@ -619,7 +630,7 @@ ZEND_END_ARG_INFO()
  *
  * Every user visible function must have an entry in intl_functions[].
  */
-zend_function_entry intl_functions[] = {
+static const zend_function_entry intl_functions[] = {
 
 	/* collator functions */
 	PHP_FE( collator_create, collator_static_1_arg )
@@ -629,12 +640,12 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( collator_get_strength, collator_0_args )
 	PHP_FE( collator_set_strength, collator_1_arg )
 	PHP_FE( collator_sort, collator_sort_args )
-	PHP_FE( collator_sort_with_sort_keys, collator_sort_args )
+	PHP_FE( collator_sort_with_sort_keys, collator_sort_with_sort_keys_args )
 	PHP_FE( collator_asort, collator_sort_args )
 	PHP_FE( collator_get_locale, collator_1_arg )
 	PHP_FE( collator_get_error_code, collator_0_args )
 	PHP_FE( collator_get_error_message, collator_0_args )
-	PHP_FE( collator_get_sort_key, collator_2_args )
+	PHP_FE( collator_get_sort_key, collator_1_arg )
 
 	/* formatter functions */
 	PHP_FE( numfmt_create, arginfo_numfmt_create )
@@ -657,6 +668,9 @@ zend_function_entry intl_functions[] = {
 	/* normalizer functions */
 	PHP_FE( normalizer_normalize, normalizer_args )
 	PHP_FE( normalizer_is_normalized, normalizer_args )
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+	PHP_FE( normalizer_get_raw_decomposition, decomposition_args )
+#endif
 
 	/* Locale functions */
 	PHP_NAMED_FE( locale_get_default, zif_locale_get_default, locale_0_args )
@@ -665,17 +679,17 @@ zend_function_entry intl_functions[] = {
 	PHP_FE( locale_get_script, locale_1_arg )
 	PHP_FE( locale_get_region, locale_1_arg )
 	PHP_FE( locale_get_keywords, locale_1_arg )
-	PHP_FE( locale_get_display_script, locale_2_args )
-	PHP_FE( locale_get_display_region, locale_2_args )
-	PHP_FE( locale_get_display_name, locale_2_args )
-	PHP_FE( locale_get_display_language, locale_2_args)
-	PHP_FE( locale_get_display_variant, locale_2_args )
+	PHP_FE( locale_get_display_script, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_region, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_name, locale_get_loc_in_loc_args )
+	PHP_FE( locale_get_display_language, locale_get_loc_in_loc_args)
+	PHP_FE( locale_get_display_variant, locale_get_loc_in_loc_args )
 	PHP_FE( locale_compose, locale_1_arg )
 	PHP_FE( locale_parse, locale_1_arg )
 	PHP_FE( locale_get_all_variants, locale_1_arg )
-	PHP_FE( locale_filter_matches, locale_3_args )
+	PHP_FE( locale_filter_matches, locale_filter_matches_args )
 	PHP_FE( locale_canonicalize, locale_1_arg )
-	PHP_FE( locale_lookup, locale_4_args )
+	PHP_FE( locale_lookup, locale_lookup_args )
 	PHP_FE( locale_accept_from_http, locale_1_arg )
 
 	/* MessageFormatter functions */
@@ -1040,6 +1054,11 @@ PHP_RSHUTDOWN_FUNCTION( intl )
  */
 PHP_MINFO_FUNCTION( intl )
 {
+#if !UCONFIG_NO_FORMATTING
+	UErrorCode status = U_ZERO_ERROR;
+	const char *tzdata_ver = NULL;
+#endif
+
 	php_info_print_table_start();
 	php_info_print_table_header( 2, "Internationalization support", "enabled" );
 	php_info_print_table_row( 2, "version", INTL_MODULE_VERSION );
@@ -1047,6 +1066,13 @@ PHP_MINFO_FUNCTION( intl )
 #ifdef U_ICU_DATA_VERSION
 	php_info_print_table_row( 2, "ICU Data version", U_ICU_DATA_VERSION );
 #endif
+#if !UCONFIG_NO_FORMATTING
+	tzdata_ver = ucal_getTZDataVersion(&status);
+	if (U_ZERO_ERROR == status) {
+		php_info_print_table_row( 2, "ICU TZData version", tzdata_ver);
+	}
+#endif
+	php_info_print_table_row( 2, "ICU Unicode version", U_UNICODE_VERSION );
 	php_info_print_table_end();
 
     /* For the default locale php.ini setting */

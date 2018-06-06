@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -70,8 +70,8 @@
  */
 static int		ftp_putcmd(	ftpbuf_t *ftp,
 					const char *cmd,
-					const size_t cmd_len, 
-					const char *args, 
+					const size_t cmd_len,
+					const char *args,
 					const size_t args_len);
 
 /* wrapper around send/recv to handle timeouts */
@@ -698,6 +698,60 @@ ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive)
 }
 /* }}} */
 
+/* {{{ ftp_mlsd
+ */
+char**
+ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len)
+{
+	return ftp_genlist(ftp, "MLSD", sizeof("MLSD")-1, path, path_len);
+}
+/* }}} */
+
+/* {{{ ftp_mlsd_parse_line
+ */
+int
+ftp_mlsd_parse_line(HashTable *ht, const char *input) {
+
+	zval zstr;
+	const char *end = input + strlen(input);
+
+	const char *sp = memchr(input, ' ', end - input);
+	if (!sp) {
+		php_error_docref(NULL, E_WARNING, "Missing pathname in MLSD response");
+		return FAILURE;
+	}
+
+	/* Extract pathname */
+	ZVAL_STRINGL(&zstr, sp + 1, end - sp - 1);
+	zend_hash_str_update(ht, "name", sizeof("name")-1, &zstr);
+	end = sp;
+
+	while (input < end) {
+		const char *semi, *eq;
+
+		/* Find end of fact */
+		semi = memchr(input, ';', end - input);
+		if (!semi) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		/* Separate fact key and value */
+		eq = memchr(input, '=', semi - input);
+		if (!eq) {
+			php_error_docref(NULL, E_WARNING, "Malformed fact in MLSD response");
+			return FAILURE;
+		}
+
+		ZVAL_STRINGL(&zstr, eq + 1, semi - eq - 1);
+		zend_hash_str_update(ht, input, eq - input, &zstr);
+		input = semi + 1;
+	}
+
+	return SUCCESS;
+}
+/* }}} */
+
 /* {{{ ftp_type
  */
 int
@@ -957,6 +1011,74 @@ ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *inst
 	}
 
 	if (!ftp_putcmd(ftp, "STOR", sizeof("STOR")-1, path, path_len)) {
+		goto bail;
+	}
+	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
+		goto bail;
+	}
+	if ((data = data_accept(data, ftp)) == NULL) {
+		goto bail;
+	}
+
+	size = 0;
+	ptr = data->buf;
+	while (!php_stream_eof(instream) && (ch = php_stream_getc(instream))!=EOF) {
+		/* flush if necessary */
+		if (FTP_BUFSIZE - size < 2) {
+			if (my_send(ftp, data->fd, data->buf, size) != size) {
+				goto bail;
+			}
+			ptr = data->buf;
+			size = 0;
+		}
+
+		if (ch == '\n' && type == FTPTYPE_ASCII) {
+			*ptr++ = '\r';
+			size++;
+		}
+
+		*ptr++ = ch;
+		size++;
+	}
+
+	if (size && my_send(ftp, data->fd, data->buf, size) != size) {
+		goto bail;
+	}
+	ftp->data = data = data_close(ftp, data);
+
+	if (!ftp_getresp(ftp) || (ftp->resp != 226 && ftp->resp != 250 && ftp->resp != 200)) {
+		goto bail;
+	}
+	return 1;
+bail:
+	ftp->data = data_close(ftp, data);
+	return 0;
+}
+/* }}} */
+
+
+/* {{{ ftp_append
+ */
+int
+ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type)
+{
+	databuf_t		*data = NULL;
+	zend_long			size;
+	char			*ptr;
+	int			ch;
+
+	if (ftp == NULL) {
+		return 0;
+	}
+	if (!ftp_type(ftp, type)) {
+		goto bail;
+	}
+	if ((data = ftp_getdata(ftp)) == NULL) {
+		goto bail;
+	}
+	ftp->data = data;
+
+	if (!ftp_putcmd(ftp, "APPE", sizeof("APPE")-1, path, path_len)) {
 		goto bail;
 	}
 	if (!ftp_getresp(ftp) || (ftp->resp != 150 && ftp->resp != 125)) {
@@ -1681,7 +1803,7 @@ data_accepted:
 	if (ftp->use_ssl && ftp->use_ssl_for_data) {
 		ctx = SSL_get_SSL_CTX(ftp->ssl_handle);
 		if (ctx == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL context");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL context");
 			return 0;
 		}
 
@@ -1700,7 +1822,7 @@ data_accepted:
 		/* get the session from the control connection so we can re-use it */
 		session = SSL_get_session(ftp->ssl_handle);
 		if (session == NULL) {
-			php_error_docref(NULL, E_WARNING, "data_accept: failed to retreive the existing SSL session");
+			php_error_docref(NULL, E_WARNING, "data_accept: failed to retrieve the existing SSL session");
 			SSL_free(data->ssl_handle);
 			return 0;
 		}

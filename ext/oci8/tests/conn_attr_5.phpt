@@ -52,7 +52,7 @@ function get_scope() {
 clean_up($c);
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 **Test - Set and get values for the attributes with scope end ************
 Testing with oci_connect()
 Value of CLIENT_INFO has been set successfully

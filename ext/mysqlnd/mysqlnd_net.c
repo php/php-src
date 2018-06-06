@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -206,7 +206,7 @@ MYSQLND_METHOD(mysqlnd_net, open_tcp_or_unix)(MYSQLND_NET * const net, const cha
 						 UNKNOWN_SQLSTATE,
 						 errstr? ZSTR_VAL(errstr):"Unknown error while connecting");
 		if (errstr) {
-			zend_string_release(errstr);
+			zend_string_release_ex(errstr, 0);
 		}
 		DBG_RETURN(NULL);
 	}
@@ -906,9 +906,6 @@ MYSQLND_METHOD(mysqlnd_net, enable_ssl)(MYSQLND_NET * const net)
 	zend_bool any_flag = FALSE;
 
 	DBG_ENTER("mysqlnd_net::enable_ssl");
-	if (!context) {
-		DBG_RETURN(FAIL);
-	}
 
 	if (net->data->options.ssl_key) {
 		zval key_zval;

@@ -28,7 +28,7 @@ foreach ($classes as $class) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 is myA a A? bool(true)
 is myB a A? bool(true)
 is myC a A? bool(false)

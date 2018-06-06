@@ -1,7 +1,5 @@
 --TEST--
 ZE2: set_exception_handler()
---SKIPIF--
-<?php if (version_compare(zend_version(), "2.0.0-dev", "<")) print "skip Zend engine 2 required"; ?>
 --FILE--
 <?php
 class MyException extends Exception {

@@ -1,168 +1,103 @@
-/* __header_here__ */
+%HEADER%
 
 #ifdef HAVE_CONFIG_H
-#include "config.h"
+# include "config.h"
 #endif
 
 #include "php.h"
-#include "php_ini.h"
 #include "ext/standard/info.h"
-#include "php_extname.h"
+#include "php_%EXTNAME%.h"
 
-/* If you declare any globals in php_extname.h uncomment this:
-ZEND_DECLARE_MODULE_GLOBALS(extname)
-*/
-
-/* True global resources - no need for thread safety here */
-static int le_extname;
-
-/* {{{ PHP_INI
+/* {{{ void %EXTNAME%_test1()
  */
-/* Remove comments and fill if you need to have entries in php.ini
-PHP_INI_BEGIN()
-    STD_PHP_INI_ENTRY("extname.global_value",      "42", PHP_INI_ALL, OnUpdateLong, global_value, zend_extname_globals, extname_globals)
-    STD_PHP_INI_ENTRY("extname.global_string", "foobar", PHP_INI_ALL, OnUpdateString, global_string, zend_extname_globals, extname_globals)
-PHP_INI_END()
-*/
-/* }}} */
-
-/* Remove the following function when you have successfully modified config.m4
-   so that your module can be compiled into PHP, it exists only for testing
-   purposes. */
-
-/* Every user-visible function in PHP should document itself in the source */
-/* {{{ proto string confirm_extname_compiled(string arg)
-   Return a string to confirm that the module is compiled in */
-PHP_FUNCTION(confirm_extname_compiled)
+PHP_FUNCTION(%EXTNAME%_test1)
 {
-	char *arg = NULL;
-	size_t arg_len, len;
-	zend_string *strg;
+	ZEND_PARSE_PARAMETERS_NONE();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s", &arg, &arg_len) == FAILURE) {
-		return;
-	}
-
-	strg = strpprintf(0, "Congratulations! You have successfully modified ext/%.78s/config.m4. Module %.78s is now compiled into PHP.", "extname", arg);
-
-	RETURN_STR(strg);
-}
-/* }}} */
-/* The previous line is meant for vim and emacs, so it can correctly fold and
-   unfold functions in source code. See the corresponding marks just before
-   function definition, where the functions purpose is also documented. Please
-   follow this convention for the convenience of others editing your code.
-*/
-
-/* __function_stubs_here__ */
-
-/* {{{ php_extname_init_globals
- */
-/* Uncomment this function if you have INI entries
-static void php_extname_init_globals(zend_extname_globals *extname_globals)
-{
-	extname_globals->global_value = 0;
-	extname_globals->global_string = NULL;
-}
-*/
-/* }}} */
-
-/* {{{ PHP_MINIT_FUNCTION
- */
-PHP_MINIT_FUNCTION(extname)
-{
-	/* If you have INI entries, uncomment these lines
-	REGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
+	php_printf("The extension %s is loaded and working!\r\n", "%EXTNAME%");
 }
 /* }}} */
 
-/* {{{ PHP_MSHUTDOWN_FUNCTION
+/* {{{ string %EXTNAME%_test2( [ string $var ] )
  */
-PHP_MSHUTDOWN_FUNCTION(extname)
+PHP_FUNCTION(%EXTNAME%_test2)
 {
-	/* uncomment this line if you have INI entries
-	UNREGISTER_INI_ENTRIES();
-	*/
-	return SUCCESS;
-}
-/* }}} */
+	char *var = "World";
+	size_t var_len = sizeof("World") - 1;
+	zend_string *retval;
 
-/* Remove if there's nothing to do at request start */
+	ZEND_PARSE_PARAMETERS_START(0, 1)
+		Z_PARAM_OPTIONAL
+		Z_PARAM_STRING(var, var_len)
+	ZEND_PARSE_PARAMETERS_END();
+
+	retval = strpprintf(0, "Hello %s", var);
+
+	RETURN_STR(retval);
+}
+/* }}}*/
+
 /* {{{ PHP_RINIT_FUNCTION
  */
-PHP_RINIT_FUNCTION(extname)
+PHP_RINIT_FUNCTION(%EXTNAME%)
 {
-#if defined(COMPILE_DL_EXTNAME) && defined(ZTS)
+#if defined(ZTS) && defined(COMPILE_DL_%EXTNAMECAPS%)
 	ZEND_TSRMLS_CACHE_UPDATE();
 #endif
-	return SUCCESS;
-}
-/* }}} */
 
-/* Remove if there's nothing to do at request end */
-/* {{{ PHP_RSHUTDOWN_FUNCTION
- */
-PHP_RSHUTDOWN_FUNCTION(extname)
-{
 	return SUCCESS;
 }
 /* }}} */
 
 /* {{{ PHP_MINFO_FUNCTION
  */
-PHP_MINFO_FUNCTION(extname)
+PHP_MINFO_FUNCTION(%EXTNAME%)
 {
 	php_info_print_table_start();
-	php_info_print_table_header(2, "extname support", "enabled");
+	php_info_print_table_header(2, "%EXTNAME% support", "enabled");
 	php_info_print_table_end();
-
-	/* Remove comments if you have entries in php.ini
-	DISPLAY_INI_ENTRIES();
-	*/
 }
 /* }}} */
 
-/* {{{ extname_functions[]
- *
- * Every user visible function must have an entry in extname_functions[].
+/* {{{ arginfo
  */
-const zend_function_entry extname_functions[] = {
-	PHP_FE(confirm_extname_compiled,	NULL)		/* For testing, remove later. */
-	/* __function_entries_here__ */
-	PHP_FE_END	/* Must be the last line in extname_functions[] */
+ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test1, 0)
+ZEND_END_ARG_INFO()
+
+ZEND_BEGIN_ARG_INFO(arginfo_%EXTNAME%_test2, 0)
+	ZEND_ARG_INFO(0, str)
+ZEND_END_ARG_INFO()
+/* }}} */
+
+/* {{{ %EXTNAME%_functions[]
+ */
+static const zend_function_entry %EXTNAME%_functions[] = {
+	PHP_FE(%EXTNAME%_test1,		arginfo_%EXTNAME%_test1)
+	PHP_FE(%EXTNAME%_test2,		arginfo_%EXTNAME%_test2)
+	PHP_FE_END
 };
 /* }}} */
 
-/* {{{ extname_module_entry
+/* {{{ %EXTNAME%_module_entry
  */
-zend_module_entry extname_module_entry = {
+zend_module_entry %EXTNAME%_module_entry = {
 	STANDARD_MODULE_HEADER,
-	"extname",
-	extname_functions,
-	PHP_MINIT(extname),
-	PHP_MSHUTDOWN(extname),
-	PHP_RINIT(extname),		/* Replace with NULL if there's nothing to do at request start */
-	PHP_RSHUTDOWN(extname),	/* Replace with NULL if there's nothing to do at request end */
-	PHP_MINFO(extname),
-	PHP_EXTNAME_VERSION,
+	"%EXTNAME%",					/* Extension name */
+	%EXTNAME%_functions,			/* zend_function_entry */
+	NULL,							/* PHP_MINIT - Module initialization */
+	NULL,							/* PHP_MSHUTDOWN - Module shutdown */
+	PHP_RINIT(%EXTNAME%),			/* PHP_RINIT - Request initialization */
+	NULL,							/* PHP_RSHUTDOWN - Request shutdown */
+	PHP_MINFO(%EXTNAME%),			/* PHP_MINFO - Module info */
+	PHP_%EXTNAMECAPS%_VERSION,		/* Version */
 	STANDARD_MODULE_PROPERTIES
 };
 /* }}} */
 
-#ifdef COMPILE_DL_EXTNAME
-#ifdef ZTS
+#ifdef COMPILE_DL_%EXTNAMECAPS%
+# ifdef ZTS
 ZEND_TSRMLS_CACHE_DEFINE()
+# endif
+ZEND_GET_MODULE(%EXTNAME%)
 #endif
-ZEND_GET_MODULE(extname)
-#endif
-
-/*
- * Local variables:
- * tab-width: 4
- * c-basic-offset: 4
- * End:
- * vim600: noet sw=4 ts=4 fdm=marker
- * vim<600: noet sw=4 ts=4
- */
+%FOOTER%

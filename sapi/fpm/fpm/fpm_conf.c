@@ -132,6 +132,7 @@ static struct ini_value_parser_s ini_fpm_pool_options[] = {
 	{ "listen.mode",               &fpm_conf_set_string,      WPO(listen_mode) },
 	{ "listen.allowed_clients",    &fpm_conf_set_string,      WPO(listen_allowed_clients) },
 	{ "process.priority",          &fpm_conf_set_integer,     WPO(process_priority) },
+	{ "process.dumpable",          &fpm_conf_set_boolean,     WPO(process_dumpable) },
 	{ "pm",                        &fpm_conf_set_pm,          WPO(pm) },
 	{ "pm.max_children",           &fpm_conf_set_integer,     WPO(pm_max_children) },
 	{ "pm.start_servers",          &fpm_conf_set_integer,     WPO(pm_start_servers) },
@@ -614,6 +615,7 @@ static void *fpm_worker_pool_config_alloc() /* {{{ */
 	wp->config->listen_backlog = FPM_BACKLOG_DEFAULT;
 	wp->config->pm_process_idle_timeout = 10; /* 10s by default */
 	wp->config->process_priority = 64; /* 64 means unset */
+	wp->config->process_dumpable = 0;
 	wp->config->clear_env = 1;
 
 	if (!fpm_worker_all_pools) {
@@ -1275,7 +1277,7 @@ static void fpm_conf_cleanup(int which, void *arg) /* {{{ */
 static void fpm_conf_ini_parser_include(char *inc, void *arg) /* {{{ */
 {
 	char *filename;
-	int *error = (int *)arg;;
+	int *error = (int *)arg;
 #ifdef HAVE_GLOB
 	glob_t g;
 #endif
@@ -1490,17 +1492,17 @@ static void fpm_conf_ini_parser(zval *arg1, zval *arg2, zval *arg3, int callback
 	switch(callback_type) {
 		case ZEND_INI_PARSER_ENTRY:
 			fpm_conf_ini_parser_entry(arg1, arg2, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_SECTION:
 			fpm_conf_ini_parser_section(arg1, error);
-			break;;
+			break;
 		case ZEND_INI_PARSER_POP_ENTRY:
 			fpm_conf_ini_parser_array(arg1, arg3, arg2, error);
-			break;;
+			break;
 		default:
 			zlog(ZLOG_ERROR, "[%s:%d] Unknown INI syntax", ini_filename, ini_lineno);
 			*error = 1;
-			break;;
+			break;
 	}
 }
 /* }}} */
@@ -1646,6 +1648,7 @@ static void fpm_conf_dump() /* {{{ */
 		} else {
 			zlog(ZLOG_NOTICE, "\tprocess.priority = %d", wp->config->process_priority);
 		}
+		zlog(ZLOG_NOTICE, "\tprocess.dumpable = %s",           BOOL2STR(wp->config->process_dumpable));
 		zlog(ZLOG_NOTICE, "\tpm = %s",                         PM2STR(wp->config->pm));
 		zlog(ZLOG_NOTICE, "\tpm.max_children = %d",            wp->config->pm_max_children);
 		zlog(ZLOG_NOTICE, "\tpm.start_servers = %d",           wp->config->pm_start_servers);

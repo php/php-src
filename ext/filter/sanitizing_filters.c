@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -159,8 +159,7 @@ static void filter_map_update(filter_map *map, int flag, const unsigned char *al
 static void filter_map_apply(zval *value, filter_map *map)
 {
 	unsigned char *str;
-	size_t i;
-	int c;
+	size_t i, c;
 	zend_string *buf;
 
 	str = (unsigned char *)Z_STRVAL_P(value);
@@ -213,7 +212,7 @@ void php_filter_string(PHP_INPUT_FILTER_PARAM_DECL)
 	Z_STRLEN_P(value) = new_len;
 
 	if (new_len == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		if (flags & FILTER_FLAG_EMPTY_STRING_NULL) {
 			ZVAL_NULL(value);
 		} else {
@@ -293,7 +292,7 @@ void php_filter_unsafe_raw(PHP_INPUT_FILTER_PARAM_DECL)
 
 		php_filter_encode_html(value, enc);
 	} else if (flags & FILTER_FLAG_EMPTY_STRING_NULL && Z_STRLEN_P(value) == 0) {
-		zval_dtor(value);
+		zval_ptr_dtor(value);
 		ZVAL_NULL(value);
 	}
 }

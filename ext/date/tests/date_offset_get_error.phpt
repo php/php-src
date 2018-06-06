@@ -49,7 +49,7 @@ bool(false)
 Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, object given in %s on line %d
 bool(false)
 
-Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, integer given in %s on line %d
+Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, int given in %s on line %d
 bool(false)
 
 Warning: date_offset_get() expects parameter 1 to be DateTimeInterface, null given in %s on line %d

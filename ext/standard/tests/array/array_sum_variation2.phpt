@@ -36,7 +36,7 @@ var_dump( array_sum($mixed_int_value) );
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_sum() : different integer array ***
 -- Sum of Integer array --
 int(-573)

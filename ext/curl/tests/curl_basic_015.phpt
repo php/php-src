@@ -11,6 +11,6 @@ Jean-Marc Fontaine <jmf@durcommefaire.net>
   var_dump($url == curl_getinfo($ch, CURLINFO_EFFECTIVE_URL));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 bool(true)
 ===DONE===

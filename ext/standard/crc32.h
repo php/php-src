@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,7 +22,7 @@
  * This code implements the AUTODIN II polynomial
  * The variable corresponding to the macro argument "crc" should
  * be an unsigned long.
- * Oroginal code  by Spencer Garrett <srg@quick.com>
+ * Original code by Spencer Garrett <srg@quick.com>
  */
 
 #define CRC32(crc, ch)	 (crc = (crc >> 8) ^ crc32tab[(crc ^ (ch)) & 0xff])

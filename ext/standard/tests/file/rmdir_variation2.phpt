@@ -123,19 +123,19 @@ fclose($fileres);
 *** Testing rmdir() : usage variation ***
 
 --int 0--
-Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, int given, %s(%d)
 bool(false)
 
 --int 1--
-Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, int given, %s(%d)
 bool(false)
 
 --int 12345--
-Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, int given, %s(%d)
 bool(false)
 
 --int -12345--
-Error: 2 - rmdir() expects parameter 2 to be resource, integer given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, int given, %s(%d)
 bool(false)
 
 --float 10.5--
@@ -175,27 +175,25 @@ Error: 2 - rmdir() expects parameter 2 to be resource, array given, %s(%d)
 bool(false)
 
 --uppercase NULL--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase null--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --lowercase true--
-Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, bool given, %s(%d)
 bool(false)
 
 --lowercase false--
-Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase TRUE--
-Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, bool given, %s(%d)
 bool(false)
 
 --uppercase FALSE--
-Error: 2 - rmdir() expects parameter 2 to be resource, boolean given, %s(%d)
+Error: 2 - rmdir() expects parameter 2 to be resource, bool given, %s(%d)
 bool(false)
 
 --empty string DQ--
@@ -231,12 +229,10 @@ Error: 2 - rmdir() expects parameter 2 to be resource, object given, %s(%d)
 bool(false)
 
 --undefined var--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --unset var--
-Error: 2 - rmdir() expects parameter 2 to be resource, null given, %s(%d)
-bool(false)
+bool(true)
 
 --0--
 Error: 2 - rmdir(): supplied resource is not a valid Stream-Context resource, %s(%d)

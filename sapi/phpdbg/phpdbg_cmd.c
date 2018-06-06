@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -751,7 +751,11 @@ PHPDBG_API char *phpdbg_read_input(char *buffered) /* {{{ */
 		}
 
 		if (buffered == NULL) {
-#define USE_LIB_STAR (defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT))
+#if defined(HAVE_LIBREADLINE) || defined(HAVE_LIBEDIT)
+#define USE_LIB_STAR 1
+#else
+#define USE_LIB_STAR 0
+#endif
 			/* note: EOF makes readline write prompt again in local console mode - and ignored if compiled without readline */
 #if USE_LIB_STAR
 			if ((PHPDBG_G(flags) & PHPDBG_IS_REMOTE) || !isatty(PHPDBG_G(io)[PHPDBG_STDIN].fd))

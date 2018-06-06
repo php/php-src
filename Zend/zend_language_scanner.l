@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -181,6 +181,7 @@ void startup_scanner(void)
 	CG(extra_fn_flags) = 0;
 	zend_stack_init(&SCNG(state_stack), sizeof(int));
 	zend_ptr_stack_init(&SCNG(heredoc_label_stack));
+	SCNG(heredoc_scan_ahead) = 0;
 }
 
 static void heredoc_label_dtor(zend_heredoc_label *heredoc_label) {
@@ -194,6 +195,7 @@ void shutdown_scanner(void)
 	zend_stack_destroy(&SCNG(state_stack));
 	zend_ptr_stack_clean(&SCNG(heredoc_label_stack), (void (*)(void *)) &heredoc_label_dtor, 1);
 	zend_ptr_stack_destroy(&SCNG(heredoc_label_stack));
+	SCNG(heredoc_scan_ahead) = 0;
 	SCNG(on_event) = NULL;
 }
 
@@ -558,7 +560,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	zend_set_compiled_filename(compiled_filename);
-	zend_string_release(compiled_filename);
+	zend_string_release_ex(compiled_filename, 0);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -648,9 +650,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 	zend_string *opened_path = NULL;
 
 	if (Z_TYPE_P(filename) != IS_STRING) {
-		tmp = *filename;
-		zval_copy_ctor(&tmp);
-		convert_to_string(&tmp);
+		ZVAL_STR(&tmp, zval_get_string(filename));
 		filename = &tmp;
 	}
 	file_handle.filename = Z_STRVAL_P(filename);
@@ -668,13 +668,13 @@ zend_op_array *compile_filename(int type, zval *filename)
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
 
 		if (opened_path) {
-			zend_string_release(opened_path);
+			zend_string_release_ex(opened_path, 0);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
 
-	if (filename==&tmp) {
-		zval_dtor(&tmp);
+	if (UNEXPECTED(filename == &tmp)) {
+		zval_ptr_dtor(&tmp);
 	}
 	return retval;
 }
@@ -718,7 +718,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename);
-	zend_string_release(new_compiled_filename);
+	zend_string_release_ex(new_compiled_filename, 0);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();
@@ -753,22 +753,25 @@ zend_op_array *compile_string(zval *source_string, char *filename)
 	zend_op_array *op_array = NULL;
 	zval tmp;
 
-	if (Z_STRLEN_P(source_string)==0) {
+	if (UNEXPECTED(Z_TYPE_P(source_string) != IS_STRING)) {
+		ZVAL_STR(&tmp, zval_get_string_func(source_string));
+	} else {
+		ZVAL_COPY(&tmp, source_string);
+	}
+
+	if (Z_STRLEN(tmp)==0) {
+		zval_ptr_dtor(&tmp);
 		return NULL;
 	}
 
-	ZVAL_DUP(&tmp, source_string);
-	convert_to_string(&tmp);
-	source_string = &tmp;
-
 	zend_save_lexical_state(&original_lex_state);
-	if (zend_prepare_string_for_scanning(source_string, filename) == SUCCESS) {
+	if (zend_prepare_string_for_scanning(&tmp, filename) == SUCCESS) {
 		BEGIN(ST_IN_SCRIPTING);
 		op_array = zend_compile(ZEND_EVAL_CODE);
 	}
 
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(&tmp);
+	zval_ptr_dtor(&tmp);
 
 	return op_array;
 }
@@ -803,13 +806,18 @@ int highlight_file(char *filename, zend_syntax_highlighter_ini *syntax_highlight
 int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_ini, char *str_name)
 {
 	zend_lex_state original_lex_state;
-	zval tmp = *str;
+	zval tmp;
 
-	str = &tmp;
-	zval_copy_ctor(str);
+	if (UNEXPECTED(Z_TYPE_P(str) != IS_STRING)) {
+		ZVAL_STR(&tmp, zval_get_string_func(str));
+		str = &tmp;
+	}
 	zend_save_lexical_state(&original_lex_state);
 	if (zend_prepare_string_for_scanning(str, str_name)==FAILURE) {
 		zend_restore_lexical_state(&original_lex_state);
+		if (UNEXPECTED(str == &tmp)) {
+			zval_ptr_dtor(&tmp);
+		}
 		return FAILURE;
 	}
 	BEGIN(INITIAL);
@@ -819,7 +827,9 @@ int highlight_string(zval *str, zend_syntax_highlighter_ini *syntax_highlighter_
 		SCNG(script_filtered) = NULL;
 	}
 	zend_restore_lexical_state(&original_lex_state);
-	zval_dtor(str);
+	if (UNEXPECTED(str == &tmp)) {
+		zval_ptr_dtor(&tmp);
+	}
 	return SUCCESS;
 }
 
@@ -866,6 +876,8 @@ ZEND_API void zend_multibyte_yyinput_again(zend_encoding_filter old_input_filter
 		SCNG(output_filter)((unsigned char **)&s, &sz, (unsigned char *)yytext, (size_t)yyleng); \
 		ZVAL_STRINGL(zendlval, s, sz); \
 		efree(s); \
+	} else if (yyleng == 1) { \
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext))); \
 	} else { \
 		ZVAL_STRINGL(zendlval, yytext, yyleng); \
 	}
@@ -875,11 +887,38 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 	register char *s, *t;
 	char *end;
 
+	if (len <= 1) {
+		if (len < 1) {
+			ZVAL_EMPTY_STRING(zendlval);
+		} else {
+			zend_uchar c = (zend_uchar)*str;
+			if (c == '\n' || c == '\r') {
+				CG(zend_lineno)++;
+			}
+			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+		}
+		goto skip_escape_conversion;
+	}
+
 	ZVAL_STRINGL(zendlval, str, len);
 
 	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
+	s = Z_STRVAL_P(zendlval);
 	end = s+Z_STRLEN_P(zendlval);
+	while (1) {
+		if (UNEXPECTED(*s=='\\')) {
+			break;
+		}
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
+		if (s == end) {
+			goto skip_escape_conversion;
+		}
+	}
+
+	t = s;
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
@@ -891,23 +930,18 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 			switch(*s) {
 				case 'n':
 					*t++ = '\n';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'r':
 					*t++ = '\r';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 't':
 					*t++ = '\t';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'f':
 					*t++ = '\f';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'v':
 					*t++ = '\v';
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'e':
 #ifdef ZEND_WIN32
@@ -915,7 +949,6 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 #else
 					*t++ = '\e';
 #endif
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case '"':
 				case '`':
@@ -927,20 +960,15 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 				case '\\':
 				case '$':
 					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
 					break;
 				case 'x':
 				case 'X':
 					if (ZEND_IS_HEX(*(s+1))) {
 						char hex_buf[3] = { 0, 0, 0 };
 
-						Z_STRLEN_P(zendlval)--; /* for the 'x' */
-
 						hex_buf[0] = *(++s);
-						Z_STRLEN_P(zendlval)--;
 						if (ZEND_IS_HEX(*(s+1))) {
 							hex_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
 						}
 						*t++ = (char) ZEND_STRTOL(hex_buf, NULL, 16);
 					} else {
@@ -956,7 +984,6 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						size_t len = 0;
 						zend_bool valid = 1;
 						unsigned long codepoint;
-						size_t byte_len = 0;
 
 						if (*start != '{') {
 							/* we silently let this pass to avoid breaking code
@@ -1012,27 +1039,20 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 
 						/* based on https://en.wikipedia.org/wiki/UTF-8#Sample_code */
 						if (codepoint < 0x80) {
-							byte_len = 1;
 							*t++ = codepoint;
 						} else if (codepoint <= 0x7FF) {
-							byte_len = 2;
 							*t++ = (codepoint >> 6) + 0xC0;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						} else if (codepoint <= 0xFFFF) {
-							byte_len = 3;
 							*t++ = (codepoint >> 12) + 0xE0;
 							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						} else if (codepoint <= 0x10FFFF) {
-							byte_len = 4;
 							*t++ = (codepoint >> 18) + 0xF0;
 							*t++ = ((codepoint >> 12) & 0x3F) + 0x80;
 							*t++ = ((codepoint >> 6) & 0x3F) + 0x80;
 							*t++ = (codepoint & 0x3F) + 0x80;
 						}
-
-						Z_STRLEN_P(zendlval) -= 2; /* \u */
-						Z_STRLEN_P(zendlval) -= (len - byte_len);
 					}
 					break;
 				default:
@@ -1041,13 +1061,10 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 						char octal_buf[4] = { 0, 0, 0, 0 };
 
 						octal_buf[0] = *s;
-						Z_STRLEN_P(zendlval)--;
 						if (ZEND_IS_OCT(*(s+1))) {
 							octal_buf[1] = *(++s);
-							Z_STRLEN_P(zendlval)--;
 							if (ZEND_IS_OCT(*(s+1))) {
 								octal_buf[2] = *(++s);
-								Z_STRLEN_P(zendlval)--;
 							}
 						}
 						if (octal_buf[2] &&
@@ -1073,6 +1090,9 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 		s++;
 	}
 	*t = 0;
+	Z_STRLEN_P(zendlval) = t - Z_STRVAL_P(zendlval);
+
+skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		unsigned char *str;
@@ -1086,22 +1106,119 @@ static int zend_scan_escape_string(zval *zendlval, char *str, int len, char quot
 	return SUCCESS;
 }
 
-static zend_always_inline int emit_token(int token, int token_line)
+#define HEREDOC_USING_SPACES 1
+#define HEREDOC_USING_TABS 2
+
+static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
 {
-	if (SCNG(on_event)) {
-		SCNG(on_event)(ON_TOKEN, token, token_line, SCNG(on_event_context));
+	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip, newline_count = 0;
+	char *copy = Z_STRVAL_P(zendlval);
+	zend_bool trailing_newline = 0;
+
+	while (j < len) {
+		trailing_newline = 0;
+
+		for (skip = 0; skip < indentation; ++skip, ++j, --new_len) {
+			if (copy[j] == '\r' || copy[j] == '\n') {
+				goto skip;
+			}
+
+			if (copy[j] != ' ' && copy[j] != '\t') {
+				CG(zend_lineno) += newline_count;
+				zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
+				goto error;
+			}
+
+			if ((!using_spaces && copy[j] == ' ') || (using_spaces && copy[j] == '\t')) {
+				CG(zend_lineno) += newline_count;
+				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+				goto error;
+			}
+		}
+
+		while (j < len && copy[j] != '\r' && copy[j] != '\n') {
+			copy[i++] = copy[j++];
+		}
+
+		if (j == len) {
+			break;
+		}
+skip:
+		if (copy[j] == '\r') {
+			copy[i++] = copy[j++];
+			trailing_newline = 1;
+		}
+
+		if (copy[j] == '\n') {
+			copy[i++] = copy[j++];
+			trailing_newline = 1;
+		}
+
+		if (trailing_newline) {
+			++newline_count;
+		}
 	}
 
-	return token;
+	if (YYSTATE != STATE(ST_END_HEREDOC) && trailing_newline && indentation) {
+		CG(zend_lineno) += newline_count;
+		zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", indentation);
+		goto error;
+	}
+
+	Z_STRVAL_P(zendlval)[new_len - newline] = '\0';
+	Z_STRLEN_P(zendlval) = new_len - newline;
+
+	return 1;
+
+error:
+	zval_dtor(zendlval);
+	ZVAL_UNDEF(zendlval);
+
+	return 0;
 }
 
-#define RETURN_TOKEN(token) return emit_token(token, start_line);
-
-int lex_scan(zval *zendlval)
+static void copy_heredoc_label_stack(void *void_heredoc_label)
 {
+	zend_heredoc_label *heredoc_label = void_heredoc_label;
+	zend_heredoc_label *new_heredoc_label = emalloc(sizeof(zend_heredoc_label));
 
+	*new_heredoc_label = *heredoc_label;
+	new_heredoc_label->label = estrndup(heredoc_label->label, heredoc_label->length);
+
+	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) new_heredoc_label);
+}
+
+#define PARSER_MODE() \
+	EXPECTED(elem != NULL)
+
+#define RETURN_TOKEN(_token) do { \
+		token = _token; \
+		goto emit_token; \
+	} while (0)
+
+#define RETURN_TOKEN_WITH_VAL(_token) do { \
+		token = _token; \
+		goto emit_token_with_val; \
+	} while (0)
+
+#define RETURN_TOKEN_WITH_STR(_token, _offset) do { \
+		token = _token; \
+		offset = _offset; \
+		goto emit_token_with_str; \
+	} while (0)
+
+#define SKIP_TOKEN(_token) do { \
+		token = _token; \
+		goto skip_token; \
+	} while (0)
+
+int ZEND_FASTCALL lex_scan(zval *zendlval, zend_parser_stack_elem *elem)
+{
+int token;
+int offset;
 int start_line = CG(zend_lineno);
 
+	ZVAL_UNDEF(zendlval);
 restart:
 	SCNG(yy_text) = YYCURSOR;
 
@@ -1142,7 +1259,8 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_RETURN);
 }
 
-<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from" {
+<ST_IN_SCRIPTING>"yield"{WHITESPACE}"from"[^a-zA-Z0-9_\x80-\xff] {
+	yyless(yyleng - 1);
 	HANDLE_NEWLINES(yytext, yyleng);
 	RETURN_TOKEN(T_YIELD_FROM);
 }
@@ -1289,8 +1407,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 }
 
 <ST_IN_SCRIPTING,ST_LOOKING_FOR_PROPERTY>{WHITESPACE}+ {
-	HANDLE_NEWLINES(yytext, yyleng);
-	RETURN_TOKEN(T_WHITESPACE);
+	goto return_whitespace;
 }
 
 <ST_LOOKING_FOR_PROPERTY>"->" {
@@ -1299,8 +1416,7 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_LOOKING_FOR_PROPERTY>{LABEL} {
 	yy_pop_state();
-	zend_copy_value(zendlval, yytext, yyleng);
-	RETURN_TOKEN(T_STRING);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
 
 <ST_LOOKING_FOR_PROPERTY>{ANY_CHAR} {
@@ -1601,10 +1717,9 @@ NEWLINE ("\r"|"\n"|"\r\n")
 
 <ST_LOOKING_FOR_VARNAME>{LABEL}[[}] {
 	yyless(yyleng - 1);
-	zend_copy_value(zendlval, yytext, yyleng);
 	yy_pop_state();
 	yy_push_state(ST_IN_SCRIPTING);
-	RETURN_TOKEN(T_STRING_VARNAME);
+	RETURN_TOKEN_WITH_STR(T_STRING_VARNAME, 0);
 }
 
 
@@ -1634,12 +1749,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(bin, &end, 2));
 			ZEND_ASSERT(!errno && end == yytext + yyleng);
 		}
-		RETURN_TOKEN(T_LNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_bin_strtod(bin, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == yytext + yyleng);
-		RETURN_TOKEN(T_DNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 	}
 }
 
@@ -1654,7 +1769,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_LNUMBER);
+			if (PARSER_MODE()) {
+				RETURN_TOKEN(T_ERROR);
+			}
+			RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 		}
 	} else {
 		errno = 0;
@@ -1662,7 +1780,6 @@ NEWLINE ("\r"|"\n"|"\r\n")
 		if (errno == ERANGE) { /* Overflow */
 			errno = 0;
 			if (yytext[0] == '0') { /* octal overflow */
-				errno = 0;
 				ZVAL_DOUBLE(zendlval, zend_oct_strtod(yytext, (const char **)&end));
 			} else {
 				ZVAL_DOUBLE(zendlval, zend_strtod(yytext, (const char **)&end));
@@ -1672,20 +1789,24 @@ NEWLINE ("\r"|"\n"|"\r\n")
 				zend_throw_exception(zend_ce_parse_error,
 					"Invalid numeric literal", 0);
 				ZVAL_UNDEF(zendlval);
-				RETURN_TOKEN(T_DNUMBER);
+				if (PARSER_MODE()) {
+					RETURN_TOKEN(T_ERROR);
+				}
 			}
-			ZEND_ASSERT(!errno);
-			RETURN_TOKEN(T_DNUMBER);
+			RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 		}
 		/* Also not an assert for the same reason */
 		if (end != yytext + yyleng) {
 			zend_throw_exception(zend_ce_parse_error, "Invalid numeric literal", 0);
 			ZVAL_UNDEF(zendlval);
-			RETURN_TOKEN(T_DNUMBER);
+			if (PARSER_MODE()) {
+				RETURN_TOKEN(T_ERROR);
+			}
+			RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 		}
 	}
 	ZEND_ASSERT(!errno);
-	RETURN_TOKEN(T_LNUMBER);
+	RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 }
 
 <ST_IN_SCRIPTING>{HNUM} {
@@ -1707,12 +1828,12 @@ NEWLINE ("\r"|"\n"|"\r\n")
 			ZVAL_LONG(zendlval, ZEND_STRTOL(hex, &end, 16));
 			ZEND_ASSERT(!errno && end == hex + len);
 		}
-		RETURN_TOKEN(T_LNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_LNUMBER);
 	} else {
 		ZVAL_DOUBLE(zendlval, zend_hex_strtod(hex, (const char **)&end));
 		/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 		ZEND_ASSERT(end == hex + len);
-		RETURN_TOKEN(T_DNUMBER);
+		RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 	}
 }
 
@@ -1729,12 +1850,16 @@ NEWLINE ("\r"|"\n"|"\r\n")
 string:
 		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
-	RETURN_TOKEN(T_NUM_STRING);
+	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
 
 <ST_VAR_OFFSET>{LNUM}|{HNUM}|{BNUM} { /* Offset must be treated as a string */
-	ZVAL_STRINGL(zendlval, yytext, yyleng);
-	RETURN_TOKEN(T_NUM_STRING);
+	if (yyleng == 1) {
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*(yytext)));
+	} else {
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
+	}
+	RETURN_TOKEN_WITH_VAL(T_NUM_STRING);
 }
 
 <ST_IN_SCRIPTING>{DNUM}|{EXPONENT_DNUM} {
@@ -1743,7 +1868,7 @@ string:
 	ZVAL_DOUBLE(zendlval, zend_strtod(yytext, &end));
 	/* errno isn't checked since we allow HUGE_VAL/INF overflow */
 	ZEND_ASSERT(end == yytext + yyleng);
-	RETURN_TOKEN(T_DNUMBER);
+	RETURN_TOKEN_WITH_VAL(T_DNUMBER);
 }
 
 <ST_IN_SCRIPTING>"__CLASS__" {
@@ -1781,6 +1906,9 @@ string:
 
 <INITIAL>"<?=" {
 	BEGIN(ST_IN_SCRIPTING);
+	if (PARSER_MODE()) {
+		RETURN_TOKEN(T_ECHO);
+	}
 	RETURN_TOKEN(T_OPEN_TAG_WITH_ECHO);
 }
 
@@ -1788,6 +1916,9 @@ string:
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
+	if (EXPECTED(elem != NULL)) {
+		SKIP_TOKEN(T_OPEN_TAG);
+	}
 	RETURN_TOKEN(T_OPEN_TAG);
 }
 
@@ -1795,6 +1926,9 @@ string:
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
+		if (EXPECTED(elem != NULL)) {
+			SKIP_TOKEN(T_OPEN_TAG);
+		}
 		RETURN_TOKEN(T_OPEN_TAG);
 	} else {
 		goto inline_char_handler;
@@ -1839,11 +1973,13 @@ inline_char_handler:
 		if (readsize < yyleng) {
 			yyless(readsize);
 		}
+	} else if (yyleng == 1) {
+		ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR((zend_uchar)*yytext));
 	} else {
-	  ZVAL_STRINGL(zendlval, yytext, yyleng);
+		ZVAL_STRINGL(zendlval, yytext, yyleng);
 	}
 	HANDLE_NEWLINES(yytext, yyleng);
-	RETURN_TOKEN(T_INLINE_HTML);
+	RETURN_TOKEN_WITH_VAL(T_INLINE_HTML);
 }
 
 
@@ -1853,8 +1989,7 @@ inline_char_handler:
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"->"[a-zA-Z_\x80-\xff] {
 	yyless(yyleng - 3);
 	yy_push_state(ST_LOOKING_FOR_PROPERTY);
-	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	RETURN_TOKEN(T_VARIABLE);
+	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
 /* A [ always designates a variable offset, regardless of what follows
@@ -1862,13 +1997,11 @@ inline_char_handler:
 <ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE>"$"{LABEL}"[" {
 	yyless(yyleng - 1);
 	yy_push_state(ST_VAR_OFFSET);
-	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	RETURN_TOKEN(T_VARIABLE);
+	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
 <ST_IN_SCRIPTING,ST_DOUBLE_QUOTES,ST_HEREDOC,ST_BACKQUOTE,ST_VAR_OFFSET>"$"{LABEL} {
-	zend_copy_value(zendlval, (yytext+1), (yyleng-1));
-	RETURN_TOKEN(T_VARIABLE);
+	RETURN_TOKEN_WITH_STR(T_VARIABLE, 1);
 }
 
 <ST_VAR_OFFSET>"]" {
@@ -1886,12 +2019,11 @@ inline_char_handler:
 	yyless(0);
 	yy_pop_state();
 	ZVAL_NULL(zendlval);
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
 <ST_IN_SCRIPTING,ST_VAR_OFFSET>{LABEL} {
-	zend_copy_value(zendlval, yytext, yyleng);
-	RETURN_TOKEN(T_STRING);
+	RETURN_TOKEN_WITH_STR(T_STRING, 0);
 }
 
 
@@ -1921,6 +2053,9 @@ inline_char_handler:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
+	if (EXPECTED(elem != NULL)) {
+		SKIP_TOKEN(T_COMMENT);
+	}
 	RETURN_TOKEN(T_COMMENT);
 }
 
@@ -1951,15 +2086,27 @@ inline_char_handler:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
+		if (EXPECTED(elem != NULL)) {
+			SKIP_TOKEN(T_DOC_COMMENT);
+		}
 		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 
+	if (EXPECTED(elem != NULL)) {
+		SKIP_TOKEN(T_COMMENT);
+	}
 	RETURN_TOKEN(T_COMMENT);
 }
 
 <ST_IN_SCRIPTING>"?>"{NEWLINE}? {
 	BEGIN(INITIAL);
-	RETURN_TOKEN(T_CLOSE_TAG);  /* implicit ';' at php-end tag */
+	if (yytext[yyleng-1] != '>') {
+		CG(increment_lineno) = 1;
+	}
+	if (PARSER_MODE()) {
+		RETURN_TOKEN(';');  /* implicit ';' at php-end tag */
+	}
+	RETURN_TOKEN(T_CLOSE_TAG);
 }
 
 
@@ -1985,41 +2132,62 @@ inline_char_handler:
 			 * for ' (unrecognized by parser), instead of old flex fallback to "Unexpected character..."
 			 * rule, which continued in ST_IN_SCRIPTING state after the quote */
 			ZVAL_NULL(zendlval);
-			RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+			RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 		}
 	}
 
+	if (yyleng-bprefix-2 <= 1) {
+		if (yyleng-bprefix-2 < 1) {
+			ZVAL_EMPTY_STRING(zendlval);
+		} else {
+			zend_uchar c = (zend_uchar)*(yytext+bprefix+1);
+			if (c == '\n' || c == '\r') {
+				CG(zend_lineno)++;
+			}
+			ZVAL_INTERNED_STR(zendlval, ZSTR_CHAR(c));
+		}
+		goto skip_escape_conversion;
+	}
 	ZVAL_STRINGL(zendlval, yytext+bprefix+1, yyleng-bprefix-2);
 
 	/* convert escape sequences */
-	s = t = Z_STRVAL_P(zendlval);
+	s = Z_STRVAL_P(zendlval);
 	end = s+Z_STRLEN_P(zendlval);
+	while (1) {
+		if (UNEXPECTED(*s=='\\')) {
+			break;
+		}
+		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
+			CG(zend_lineno)++;
+		}
+		s++;
+		if (s == end) {
+			goto skip_escape_conversion;
+		}
+	}
+
+	t = s;
 	while (s<end) {
 		if (*s=='\\') {
 			s++;
-
-			switch(*s) {
-				case '\\':
-				case '\'':
-					*t++ = *s;
-					Z_STRLEN_P(zendlval)--;
-					break;
-				default:
-					*t++ = '\\';
-					*t++ = *s;
-					break;
+			if (*s == '\\' || *s == '\'') {
+				*t++ = *s;
+			} else {
+				*t++ = '\\';
+				*t++ = *s;
 			}
 		} else {
 			*t++ = *s;
 		}
-
 		if (*s == '\n' || (*s == '\r' && (*(s+1) != '\n'))) {
 			CG(zend_lineno)++;
 		}
 		s++;
 	}
 	*t = 0;
+	Z_STRLEN_P(zendlval) = t - Z_STRVAL_P(zendlval);
 
+skip_escape_conversion:
 	if (SCNG(output_filter)) {
 		size_t sz = 0;
 		char *str = NULL;
@@ -2028,7 +2196,7 @@ inline_char_handler:
 		SCNG(output_filter)((unsigned char **)&str, &sz, (unsigned char *)s, (size_t)Z_STRLEN_P(zendlval));
 		ZVAL_STRINGL(zendlval, str, sz);
 	}
-	RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
+	RETURN_TOKEN_WITH_VAL(T_CONSTANT_ENCAPSED_STRING);
 }
 
 
@@ -2039,8 +2207,12 @@ inline_char_handler:
 		switch (*YYCURSOR++) {
 			case '"':
 				yyleng = YYCURSOR - SCNG(yy_text);
-				zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"');
-				RETURN_TOKEN(T_CONSTANT_ENCAPSED_STRING);
+				if (EXPECTED(zend_scan_escape_string(zendlval, yytext+bprefix+1, yyleng-bprefix-2, '"') == SUCCESS)
+				 || !PARSER_MODE()) {
+					RETURN_TOKEN_WITH_VAL(T_CONSTANT_ENCAPSED_STRING);
+				} else {
+					RETURN_TOKEN(T_ERROR);
+				}
 			case '$':
 				if (IS_LABEL_START(*YYCURSOR) || *YYCURSOR == '{') {
 					break;
@@ -2076,8 +2248,10 @@ inline_char_handler:
 
 <ST_IN_SCRIPTING>b?"<<<"{TABS_AND_SPACES}({LABEL}|([']{LABEL}['])|(["]{LABEL}["])){NEWLINE} {
 	char *s;
-	int bprefix = (yytext[0] != '<') ? 1 : 0;
+	unsigned char *saved_cursor;
+	int bprefix = (yytext[0] != '<') ? 1 : 0, spacing = 0, indentation = 0;
 	zend_heredoc_label *heredoc_label = emalloc(sizeof(zend_heredoc_label));
+	zend_bool is_heredoc = 1;
 
 	CG(zend_lineno)++;
 	heredoc_label->length = yyleng-bprefix-3-1-(yytext[yyleng-2]=='\r'?1:0);
@@ -2090,6 +2264,7 @@ inline_char_handler:
 	if (*s == '\'') {
 		s++;
 		heredoc_label->length -= 2;
+		is_heredoc = 0;
 
 		BEGIN(ST_NOWDOC);
 	} else {
@@ -2102,21 +2277,101 @@ inline_char_handler:
 	}
 
 	heredoc_label->label = estrndup(s, heredoc_label->length);
+	heredoc_label->indentation = 0;
+	saved_cursor = YYCURSOR;
+
+	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) heredoc_label);
+
+	while (YYCURSOR < YYLIMIT && (*YYCURSOR == ' ' || *YYCURSOR == '\t')) {
+		if (*YYCURSOR == '\t') {
+			spacing |= HEREDOC_USING_TABS;
+		} else {
+			spacing |= HEREDOC_USING_SPACES;
+		}
+		++YYCURSOR;
+		++indentation;
+	}
+
+	if (YYCURSOR == YYLIMIT) {
+		YYCURSOR = saved_cursor;
+		RETURN_TOKEN(T_START_HEREDOC);
+	}
 
 	/* Check for ending label on the next line */
 	if (heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, s, heredoc_label->length)) {
-		YYCTYPE *end = YYCURSOR + heredoc_label->length;
+		if (!IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+			if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+				zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
+			}
 
-		if (*end == ';') {
-			end++;
-		}
+			YYCURSOR = saved_cursor;
+			heredoc_label->indentation = indentation;
 
-		if (*end == '\n' || *end == '\r') {
 			BEGIN(ST_END_HEREDOC);
+			RETURN_TOKEN(T_START_HEREDOC);
 		}
 	}
 
-	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) heredoc_label);
+	YYCURSOR = saved_cursor;
+
+	if (is_heredoc && !SCNG(heredoc_scan_ahead)) {
+		zend_lex_state current_state;
+		int heredoc_nesting_level = 1;
+		int first_token = 0;
+
+		zend_save_lexical_state(&current_state);
+
+		SCNG(heredoc_scan_ahead) = 1;
+		SCNG(heredoc_indentation) = 0;
+		SCNG(heredoc_indentation_uses_spaces) = 0;
+		LANG_SCNG(on_event) = NULL;
+
+		zend_ptr_stack_reverse_apply(&current_state.heredoc_label_stack, copy_heredoc_label_stack);
+
+		while (heredoc_nesting_level) {
+			zval zv;
+			int retval;
+
+			ZVAL_UNDEF(&zv);
+			retval = lex_scan(&zv, NULL);
+			zval_dtor(&zv);
+
+			if (EG(exception)) {
+				zend_clear_exception();
+				break;
+			}
+
+			if (!first_token) {
+				first_token = retval;
+			}
+
+			switch (retval) {
+				case T_START_HEREDOC:
+					++heredoc_nesting_level;
+					break;
+				case T_END_HEREDOC:
+					--heredoc_nesting_level;
+					break;
+				case END:
+					heredoc_nesting_level = 0;
+			}
+		}
+
+		if (
+		    (first_token == T_VARIABLE
+		     || first_token == T_DOLLAR_OPEN_CURLY_BRACES
+		     || first_token == T_CURLY_OPEN
+		    ) && SCNG(heredoc_indentation)) {
+			zend_throw_exception_ex(zend_ce_parse_error, 0, "Invalid body indentation level (expecting an indentation level of at least %d)", SCNG(heredoc_indentation));
+		}
+
+		heredoc_label->indentation = SCNG(heredoc_indentation);
+		heredoc_label->indentation_uses_spaces = SCNG(heredoc_indentation_uses_spaces);
+
+		zend_restore_lexical_state(&current_state);
+		SCNG(heredoc_scan_ahead) = 0;
+		CG(increment_lineno) = 0;
+	}
 
 	RETURN_TOKEN(T_START_HEREDOC);
 }
@@ -2131,8 +2386,8 @@ inline_char_handler:
 <ST_END_HEREDOC>{ANY_CHAR} {
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_pop(&SCNG(heredoc_label_stack));
 
-	YYCURSOR += heredoc_label->length - 1;
-	yyleng = heredoc_label->length;
+	yyleng = heredoc_label->indentation + heredoc_label->length;
+	YYCURSOR += yyleng - 1;
 
 	heredoc_label_dtor(heredoc_label);
 	efree(heredoc_label);
@@ -2143,7 +2398,6 @@ inline_char_handler:
 
 
 <ST_DOUBLE_QUOTES,ST_BACKQUOTE,ST_HEREDOC>"{$" {
-	Z_LVAL_P(zendlval) = (zend_long) '{';
 	yy_push_state(ST_IN_SCRIPTING);
 	yyless(1);
 	RETURN_TOKEN(T_CURLY_OPEN);
@@ -2206,8 +2460,12 @@ inline_char_handler:
 double_quotes_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '"');
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '"') == SUCCESS)
+	 || !PARSER_MODE()) {
+		RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+	} else {
+		RETURN_TOKEN(T_ERROR);
+	}
 }
 
 
@@ -2248,15 +2506,18 @@ double_quotes_scan_done:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng, '`');
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	if (EXPECTED(zend_scan_escape_string(zendlval, yytext, yyleng, '`') == SUCCESS)
+	 || !PARSER_MODE()) {
+		RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+	} else {
+		RETURN_TOKEN(T_ERROR);
+	}
 }
 
 
 <ST_HEREDOC>{ANY_CHAR} {
-	int newline = 0;
-
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+	int newline = 0, indentation = 0, spacing = 0;
 
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -2272,28 +2533,55 @@ double_quotes_scan_done:
 				}
 				/* fall through */
 			case '\n':
+				indentation = spacing = 0;
+
+				while (YYCURSOR < YYLIMIT && (*YYCURSOR == ' ' || *YYCURSOR == '\t')) {
+					if (*YYCURSOR == '\t') {
+						spacing |= HEREDOC_USING_TABS;
+					} else {
+						spacing |= HEREDOC_USING_SPACES;
+					}
+					++YYCURSOR;
+					++indentation;
+				}
+
+				if (YYCURSOR == YYLIMIT) {
+					yyleng = YYCURSOR - SCNG(yy_text);
+					HANDLE_NEWLINES(yytext, yyleng);
+					ZVAL_NULL(zendlval);
+					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+				}
+
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					YYCTYPE *end = YYCURSOR + heredoc_label->length;
-
-					if (*end == ';') {
-						end++;
+					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+						continue;
 					}
 
-					if (*end == '\n' || *end == '\r') {
-						/* newline before label will be subtracted from returned text, but
-						 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
-						if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
-							newline = 2; /* Windows newline */
-						} else {
-							newline = 1;
-						}
-
-						CG(increment_lineno) = 1; /* For newline before label */
-						BEGIN(ST_END_HEREDOC);
-
-						goto heredoc_scan_done;
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 					}
+
+					/* newline before label will be subtracted from returned text, but
+					 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
+					if (YYCURSOR[-indentation - 2] == '\r' && YYCURSOR[-indentation - 1] == '\n') {
+						newline = 2; /* Windows newline */
+					} else {
+						newline = 1;
+					}
+
+					CG(increment_lineno) = 1; /* For newline before label */
+
+					if (SCNG(heredoc_scan_ahead)) {
+						SCNG(heredoc_indentation) = indentation;
+						SCNG(heredoc_indentation_uses_spaces) = (spacing == HEREDOC_USING_SPACES);
+					} else {
+						YYCURSOR -= indentation;
+					}
+
+					BEGIN(ST_END_HEREDOC);
+
+					goto heredoc_scan_done;
 				}
 				continue;
 			case '$':
@@ -2320,17 +2608,34 @@ double_quotes_scan_done:
 	}
 
 heredoc_scan_done:
-	yyleng = YYCURSOR - SCNG(yy_text);
 
-	zend_scan_escape_string(zendlval, yytext, yyleng - newline, 0);
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	yyleng = YYCURSOR - SCNG(yy_text);
+	ZVAL_STRINGL(zendlval, yytext, yyleng);
+
+	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
+		zend_string *copy = Z_STR_P(zendlval);
+
+	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+			RETURN_TOKEN(T_ERROR);
+		}
+
+		if (UNEXPECTED(zend_scan_escape_string(zendlval, ZSTR_VAL(copy), ZSTR_LEN(copy), 0) != SUCCESS)) {
+			zend_string_efree(copy);
+			RETURN_TOKEN(T_ERROR);
+		}
+
+		zend_string_efree(copy);
+	} else {
+		HANDLE_NEWLINES(yytext, yyleng - newline);
+	}
+
+	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
 <ST_NOWDOC>{ANY_CHAR} {
-	int newline = 0;
-
 	zend_heredoc_label *heredoc_label = zend_ptr_stack_top(&SCNG(heredoc_label_stack));
+	int newline = 0, indentation = 0, spacing = -1;
 
 	if (YYCURSOR > YYLIMIT) {
 		RETURN_TOKEN(END);
@@ -2346,28 +2651,51 @@ heredoc_scan_done:
 				}
 				/* fall through */
 			case '\n':
+				indentation = spacing = 0;
+
+				while (YYCURSOR < YYLIMIT && (*YYCURSOR == ' ' || *YYCURSOR == '\t')) {
+					if (*YYCURSOR == '\t') {
+						spacing |= HEREDOC_USING_TABS;
+					} else {
+						spacing |= HEREDOC_USING_SPACES;
+					}
+					++YYCURSOR;
+					++indentation;
+				}
+
+				if (YYCURSOR == YYLIMIT) {
+					yyleng = YYCURSOR - SCNG(yy_text);
+					HANDLE_NEWLINES(yytext, yyleng);
+					ZVAL_NULL(zendlval);
+					RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
+				}
+
 				/* Check for ending label on the next line */
 				if (IS_LABEL_START(*YYCURSOR) && heredoc_label->length < YYLIMIT - YYCURSOR && !memcmp(YYCURSOR, heredoc_label->label, heredoc_label->length)) {
-					YYCTYPE *end = YYCURSOR + heredoc_label->length;
-
-					if (*end == ';') {
-						end++;
+					if (IS_LABEL_START(YYCURSOR[heredoc_label->length])) {
+						continue;
 					}
 
-					if (*end == '\n' || *end == '\r') {
-						/* newline before label will be subtracted from returned text, but
-						 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
-						if (YYCURSOR[-2] == '\r' && YYCURSOR[-1] == '\n') {
-							newline = 2; /* Windows newline */
-						} else {
-							newline = 1;
-						}
-
-						CG(increment_lineno) = 1; /* For newline before label */
-						BEGIN(ST_END_HEREDOC);
-
-						goto nowdoc_scan_done;
+					if (spacing == (HEREDOC_USING_SPACES | HEREDOC_USING_TABS)) {
+						zend_throw_exception(zend_ce_parse_error, "Invalid indentation - tabs and spaces cannot be mixed", 0);
 					}
+
+					/* newline before label will be subtracted from returned text, but
+					 * yyleng/yytext will include it, for zend_highlight/strip, tokenizer, etc. */
+					if (YYCURSOR[-indentation - 2] == '\r' && YYCURSOR[-indentation - 1] == '\n') {
+						newline = 2; /* Windows newline */
+					} else {
+						newline = 1;
+					}
+
+					CG(increment_lineno) = 1; /* For newline before label */
+
+					YYCURSOR -= indentation;
+					heredoc_label->indentation = indentation;
+
+					BEGIN(ST_END_HEREDOC);
+
+					goto nowdoc_scan_done;
 				}
 				/* fall through */
 			default:
@@ -2377,10 +2705,15 @@ heredoc_scan_done:
 
 nowdoc_scan_done:
 	yyleng = YYCURSOR - SCNG(yy_text);
+	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
-	zend_copy_value(zendlval, yytext, yyleng - newline);
+	if (!EG(exception) && spacing != -1 && PARSER_MODE()
+	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
+		RETURN_TOKEN(T_ERROR);
+	}
+
 	HANDLE_NEWLINES(yytext, yyleng - newline);
-	RETURN_TOKEN(T_ENCAPSED_AND_WHITESPACE);
+	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
 
 
@@ -2394,4 +2727,38 @@ nowdoc_scan_done:
 }
 
 */
+
+emit_token_with_str:
+	zend_copy_value(zendlval, (yytext + offset), (yyleng - offset));
+
+emit_token_with_val:
+	if (PARSER_MODE()) {
+		ZEND_ASSERT(Z_TYPE_P(zendlval) != IS_UNDEF);
+		elem->ast = zend_ast_create_zval_with_lineno(zendlval, start_line);
+	}
+
+emit_token:
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+	}
+	return token;
+
+return_whitespace:
+	HANDLE_NEWLINES(yytext, yyleng);
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, T_WHITESPACE, start_line, SCNG(on_event_context));
+	}
+	if (PARSER_MODE()) {
+		start_line = CG(zend_lineno);
+		goto restart;
+	} else {
+		return T_WHITESPACE;
+	}
+
+skip_token:
+	if (SCNG(on_event)) {
+		SCNG(on_event)(ON_TOKEN, token, start_line, SCNG(on_event_context));
+	}
+	start_line = CG(zend_lineno);
+	goto restart;
 }

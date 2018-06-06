@@ -38,6 +38,7 @@ extern "C" {
 }
 
 using PHP::CodePointBreakIterator;
+using icu::RuleBasedBreakIterator;
 
 /* {{{ Global variables */
 zend_class_entry *BreakIterator_ce_ptr;
@@ -144,8 +145,7 @@ static HashTable *BreakIterator_get_debug_info(zval *object, int *is_temp)
 
 	*is_temp = 1;
 
-	ALLOC_HASHTABLE(debug_info);
-	zend_hash_init(debug_info, 8, NULL, ZVAL_PTR_DTOR, 0);
+	debug_info = zend_new_array(8);
 
 	bio  = Z_INTL_BREAKITERATOR_P(object);
 	biter = bio->biter;
@@ -319,7 +319,7 @@ U_CFUNC void breakiterator_register_BreakIterator_class(void)
 	ce.get_iterator = _breakiterator_get_iterator;
 	BreakIterator_ce_ptr = zend_register_internal_class(&ce);
 
-	memcpy(&BreakIterator_handlers, zend_get_std_object_handlers(),
+	memcpy(&BreakIterator_handlers, &std_object_handlers,
 		sizeof BreakIterator_handlers);
 	BreakIterator_handlers.offset = XtOffsetOf(BreakIterator_object, zo);
 	BreakIterator_handlers.compare_objects = BreakIterator_compare_objects;

@@ -3,23 +3,18 @@ openssl_x509_parse() tests
 --SKIPIF--
 <?php if (!extension_loaded("openssl")) print "skip"; 
 if (OPENSSL_VERSION_NUMBER < 0x10000000) die("skip Output requires OpenSSL 1.0");
-if(substr(PHP_OS, 0, 3) == 'WIN') {
-	$exp = "W. Europe Standard Time";
-	$cmd = "powershell -command [System.TimeZoneInfo]::Local.Id";
-	$r = trim(shell_exec($cmd));
-	if ($exp !== $r) {
-		die("skip expect '$exp', got '$r'");
-	}
-}
 ?>
 --FILE--
 <?php
 $cert = "file://" . dirname(__FILE__) . "/cert.crt";
 
-var_dump(openssl_x509_parse($cert));
+$parsedCert = openssl_x509_parse($cert);
+var_dump($parsedCert === openssl_x509_parse(openssl_x509_read($cert)));
+var_dump($parsedCert);
 var_dump(openssl_x509_parse($cert, false));
 ?>
 --EXPECTF--
+bool(true)
 array(16) {
   ["name"]=>
   string(96) "/C=BR/ST=Rio Grande do Sul/L=Porto Alegre/CN=Henrique do N. Angelo/emailAddress=hnangelo@php.net"

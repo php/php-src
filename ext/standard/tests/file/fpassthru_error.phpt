@@ -28,7 +28,7 @@ echo "\n*** Done ***\n";
 
 Warning: fread() expects parameter 1 to be resource, string given in %s on line %d
 
-Warning: fpassthru() expects parameter 1 to be resource, boolean given in %s on line %d
+Warning: fpassthru() expects parameter 1 to be resource, bool given in %s on line %d
 bool(false)
 
 Warning: fpassthru() expects exactly 1 parameter, 0 given in %s on line %d

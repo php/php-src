@@ -20,7 +20,7 @@ if (!$IS_MYSQLND)
 ?>
 --FILE--
 <?php
-	require_once('connect.inc');;
+	require_once('connect.inc');
 
 	if (true !== ($tmp = mysqli_debug(sprintf('d:t:O,%s/mysqli_debug_phpt.trace', sys_get_temp_dir()))))
 		printf("[001] Expecting boolean/true, got %s/%s\n", gettype($tmp), $tmp);

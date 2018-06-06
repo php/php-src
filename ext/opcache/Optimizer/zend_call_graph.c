@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Call Graph                                              |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -152,6 +152,7 @@ int zend_analyze_calls(zend_arena **arena, zend_script *script, uint32_t build_f
 			case ZEND_SEND_VAR:
 			case ZEND_SEND_VAL_EX:
 			case ZEND_SEND_VAR_EX:
+			case ZEND_SEND_FUNC_ARG:
 			case ZEND_SEND_REF:
 			case ZEND_SEND_VAR_NO_REF:
 			case ZEND_SEND_VAR_NO_REF_EX:
@@ -263,6 +264,29 @@ int zend_build_call_graph(zend_arena **arena, zend_script *script, uint32_t buil
 	zend_sort_op_arrays(call_graph);
 
 	return SUCCESS;
+}
+/* }}} */
+
+zend_call_info **zend_build_call_map(zend_arena **arena, zend_func_info *info, zend_op_array *op_array) /* {{{ */
+{
+	zend_call_info **map, *call;
+	if (!info->callee_info) {
+		/* Don't build call map if function contains no calls */
+		return NULL;
+	}
+
+	map = zend_arena_calloc(arena, sizeof(zend_call_info *), op_array->last);
+	for (call = info->callee_info; call; call = call->next_callee) {
+		int i;
+		map[call->caller_init_opline - op_array->opcodes] = call;
+		map[call->caller_call_opline - op_array->opcodes] = call;
+		for (i = 0; i < call->num_args; i++) {
+			if (call->arg_info[i].opline) {
+				map[call->arg_info[i].opline - op_array->opcodes] = call;
+			}
+		}
+	}
+	return map;
 }
 /* }}} */
 

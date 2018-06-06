@@ -9,6 +9,6 @@ class B implements\A {}
 
 echo "Done", PHP_EOL;
 
---EXPECTF--
+--EXPECT--
 
 Done

@@ -6,6 +6,7 @@ session.lazy_write=1
 session.save_path=
 session.name=PHPSESSID
 session.gc_probability=0
+session.save_handler=files
 --SKIPIF--
 <?php include('skipif.inc'); ?>
 --FILE--

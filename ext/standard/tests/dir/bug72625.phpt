@@ -45,9 +45,9 @@ while ($tmp > $base) {
 string(%d) "%s/_test/documents/projects/myproject/vendor/name/library/classpath"
 bool(true)
 string(%d) "%s\_test\documents\projects\myproject\vendor\name\library\classpath"
-string(%d) "%s\_test\documents\projects\myproject\vendor\name\library"
+string(%d) "%s/_test/documents/projects/myproject/vendor/name/library"
 string(%d) "%s/_test/documents/projects/myproject/vendor/name/library/classpath/../../../../../../../../_test/documents/projects/myproject/vendor/name/library/../../../../../../../_test/documents/projects/myproject/vendor/name/library/classpath"
 bool(true)
 string(%d) "%s\_test\documents\projects\myproject\vendor\name\library\classpath"
-string(%d) "%s\_test\documents\projects\myproject\vendor\name\library"
+string(%d) "%s/_test/documents/projects/myproject/vendor/name/library"
 ===DONE===

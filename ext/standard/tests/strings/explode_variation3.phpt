@@ -177,15 +177,15 @@ array(6) {
 }
 -- Iteration 10 --
 
-Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
+Warning: explode() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
+Warning: explode() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: explode() expects parameter 3 to be integer, array given in %s on line %d
+Warning: explode() expects parameter 3 to be int, array given in %s on line %d
 NULL
 -- Iteration 13 --
 array(1) {
@@ -219,11 +219,11 @@ array(1) {
 }
 -- Iteration 19 --
 
-Warning: explode() expects parameter 3 to be integer, object given in %s on line %d
+Warning: explode() expects parameter 3 to be int, object given in %s on line %d
 NULL
 -- Iteration 20 --
 
-Warning: explode() expects parameter 3 to be integer, resource given in %s on line %d
+Warning: explode() expects parameter 3 to be int, resource given in %s on line %d
 NULL
 -- Iteration 21 --
 array(1) {

@@ -2,7 +2,6 @@
 Phar: test stat function interceptions and is_file/is_link edge cases (PHP 5.3+)
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip");?>
-<?php if (substr(phpversion(), 0, 3) == '5.2') die("skip PHP 5.3+ required for this test");?>
 --INI--
 phar.readonly=0
 phar.require_hash=0
@@ -17,7 +16,7 @@ $fname2 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.tar';
 $fname3 = dirname(__FILE__) . '/' . basename(__FILE__, '.php') . '.phar.tar';
 copy(dirname(__FILE__) . '/tar/files/links.tar', $fname2);
 $a = new PharData($fname2);
-$b = $a->convertToExecutable(Phar::TAR, Phar::NONE, '.3.phar.tar');
+$b = $a->convertToExecutable(Phar::TAR, Phar::NONE, '.phar.tar');
 unset($a);
 Phar::unlinkArchive($fname2);
 $b['foo/stat.php'] = '<?php

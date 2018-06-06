@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -45,7 +45,7 @@ const zend_function_entry php_dom_entityreference_class_functions[] = {
 	PHP_FE_END
 };
 
-/* {{{ proto void DOMEntityReference::__construct(string name) */
+/* {{{ proto DOMEntityReference::__construct(string name) */
 PHP_METHOD(domentityreference, __construct)
 {
 	zval *id = getThis();

@@ -66,6 +66,16 @@ TODO:
 # include <emmintrin.h>
 #endif
 
+#ifndef HAVE_FLOORF
+# define HAVE_FLOORF 0
+#endif
+#if HAVE_FLOORF == 0
+# ifndef floorf
+/* float floorf(float x);*/
+#  define floorf(x) ((float)(floor(x)))
+# endif
+#endif
+
 #ifndef MIN
 #define MIN(a,b) ((a)<(b)?(a):(b))
 #endif
@@ -935,7 +945,6 @@ static inline LineContribType *_gdContributionsCalc(unsigned int line_size, unsi
 	int windows_size;
 	unsigned int u;
 	LineContribType *res;
-	int overflow_error = 0;
 
 	if (scale_d < 1.0) {
 		width_d = filter_width_d / scale_d;
@@ -1043,7 +1052,6 @@ static inline void _gdScaleCol (gdImagePtr pSrc,  unsigned int src_width, gdImag
 		const int iLeft = contrib->ContribRow[y].Left;
 		const int iRight = contrib->ContribRow[y].Right;
 		int i;
-		int *row = pRes->tpixels[y];
 
 		/* Accumulate each channel */
 		for (i = iLeft; i <= iRight; i++) {
@@ -1709,13 +1717,28 @@ gdImagePtr gdImageScale(const gdImagePtr src, const unsigned int new_width, cons
 	return im_scaled;
 }
 
+static int gdRotatedImageSize(gdImagePtr src, const float angle, gdRectPtr bbox)
+{
+    gdRect src_area;
+    double m[6];
+
+    gdAffineRotate(m, angle);
+    src_area.x = 0;
+    src_area.y = 0;
+    src_area.width = gdImageSX(src);
+    src_area.height = gdImageSY(src);
+    if (gdTransformAffineBoundingBox(&src_area, m, bbox) != GD_TRUE) {
+        return GD_FALSE;
+    }
+
+    return GD_TRUE;
+}
+
 gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
 	const int src_w  = gdImageSX(src);
 	const int src_h = gdImageSY(src);
-	const unsigned int new_width = (unsigned int)(abs((int)(src_w * cos(_angle))) + abs((int)(src_h * sin(_angle))) + 0.5f);
-	const unsigned int new_height = (unsigned int)(abs((int)(src_w * sin(_angle))) + abs((int)(src_h * cos(_angle))) + 0.5f);
 	const gdFixed f_0_5 = gd_ftofx(0.5f);
 	const gdFixed f_H = gd_itofx(src_h/2);
 	const gdFixed f_W = gd_itofx(src_w/2);
@@ -1726,6 +1749,12 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 	unsigned int dst_offset_y = 0;
 	unsigned int i;
 	gdImagePtr dst;
+	gdRect bbox;
+	int new_height, new_width;
+
+    gdRotatedImageSize(src, degrees, &bbox);
+    new_width = bbox.width;
+    new_height = bbox.height;
 
 	if (new_width == 0 || new_height == 0) {
 		return NULL;
@@ -1765,11 +1794,8 @@ gdImagePtr gdImageRotateNearestNeighbour(gdImagePtr src, const float degrees, co
 gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int bgColor)
 {
 	float _angle = ((float) (-degrees / 180.0f) * (float)M_PI);
-	const int angle_rounded = (int)floor(degrees * 100);
 	const int src_w  = gdImageSX(src);
 	const int src_h = gdImageSY(src);
-	const unsigned int new_width = (unsigned int)(abs((int)(src_w * cos(_angle))) + abs((int)(src_h * sin(_angle))) + 0.5f);
-	const unsigned int new_height = (unsigned int)(abs((int)(src_w * sin(_angle))) + abs((int)(src_h * cos(_angle))) + 0.5f);
 	const gdFixed f_0_5 = gd_ftofx(0.5f);
 	const gdFixed f_H = gd_itofx(src_h/2);
 	const gdFixed f_W = gd_itofx(src_w/2);
@@ -1780,17 +1806,23 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 	unsigned int dst_offset_y = 0;
 	unsigned int i;
 	gdImagePtr dst;
+	int new_width, new_height;
+	gdRect bbox;
 
 	const gdFixed f_slop_y = f_sin;
 	const gdFixed f_slop_x = f_cos;
-	const gdFixed f_slop = f_slop_x > 0 && f_slop_x > 0 ?
-							f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y)
+	const gdFixed f_slop = f_slop_x > 0 && f_slop_y > 0 ?
+							(f_slop_x > f_slop_y ? gd_divfx(f_slop_y, f_slop_x) : gd_divfx(f_slop_x, f_slop_y))
 						: 0;
 
 
 	if (bgColor < 0) {
 		return NULL;
 	}
+
+    gdRotatedImageSize(src, degrees, &bbox);
+    new_width = bbox.width;
+    new_height = bbox.height;
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (!dst) {
@@ -1812,7 +1844,6 @@ gdImagePtr gdImageRotateGeneric(gdImagePtr src, const float degrees, const int b
 			if ((n <= 0) || (m <= 0) || (m >= src_h) || (n >= src_w)) {
 				dst->tpixels[dst_offset_y][dst_offset_x++] = bgColor;
 			} else if ((n <= 1) || (m <= 1) || (m >= src_h - 1) || (n >= src_w - 1)) {
-				gdFixed f_127 = gd_itofx(127);
 				register int c = getPixelInterpolated(src, n, m, bgColor);
 				c = c | (( gdTrueColorGetAlpha(c) + ((int)(127* gd_fxtof(f_slop)))) << 24);
 
@@ -1831,8 +1862,7 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 	float _angle = (float)((- degrees / 180.0f) * M_PI);
 	const unsigned int src_w = gdImageSX(src);
 	const unsigned int src_h = gdImageSY(src);
-	unsigned int new_width = abs((int)(src_w*cos(_angle))) + abs((int)(src_h*sin(_angle) + 0.5f));
-	unsigned int new_height = abs((int)(src_w*sin(_angle))) + abs((int)(src_h*cos(_angle) + 0.5f));
+	unsigned int new_width, new_height;
 	const gdFixed f_0_5 = gd_ftofx(0.5f);
 	const gdFixed f_H = gd_itofx(src_h/2);
 	const gdFixed f_W = gd_itofx(src_w/2);
@@ -1844,6 +1874,12 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 	unsigned int dst_offset_y = 0;
 	unsigned int src_offset_x, src_offset_y;
 	gdImagePtr dst;
+	gdRect bbox;
+
+	gdRotatedImageSize(src, degrees, &bbox);
+
+	new_width = bbox.width;
+	new_height = bbox.height;
 
 	dst = gdImageCreateTrueColor(new_width, new_height);
 	if (dst == NULL) {
@@ -1863,18 +1899,13 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 			const unsigned int m = gd_fxtoi(f_m);
 			const unsigned int n = gd_fxtoi(f_n);
 
-			if ((m > 0) && (m < src_h - 1) && (n > 0) && (n < src_w - 1)) {
+			if ((m >= 0) && (m < src_h - 1) && (n >= 0) && (n < src_w - 1)) {
 				const gdFixed f_f = f_m - gd_itofx(m);
 				const gdFixed f_g = f_n - gd_itofx(n);
 				const gdFixed f_w1 = gd_mulfx(f_1-f_f, f_1-f_g);
 				const gdFixed f_w2 = gd_mulfx(f_1-f_f, f_g);
 				const gdFixed f_w3 = gd_mulfx(f_f, f_1-f_g);
 				const gdFixed f_w4 = gd_mulfx(f_f, f_g);
-
-				if (n < src_w - 1) {
-					src_offset_x = n + 1;
-					src_offset_y = m;
-				}
 
 				if (m < src_h-1) {
 					src_offset_x = n;
@@ -1890,13 +1921,13 @@ gdImagePtr gdImageRotateBilinear(gdImagePtr src, const float degrees, const int 
 					register int pixel2, pixel3, pixel4;
 
 					if (src_offset_y + 1 >= src_h) {
-						pixel2 = bgColor;
-						pixel3 = bgColor;
-						pixel4 = bgColor;
+						pixel2 = pixel1;
+						pixel3 = pixel1;
+						pixel4 = pixel1;
 					} else if (src_offset_x + 1 >= src_w) {
-						pixel2 = bgColor;
-						pixel3 = bgColor;
-						pixel4 = bgColor;
+						pixel2 = pixel1;
+						pixel3 = pixel1;
+						pixel4 = pixel1;
 					} else {
 					    pixel2 = src->tpixels[src_offset_y][src_offset_x + 1];
 						pixel3 = src->tpixels[src_offset_y + 1][src_offset_x];
@@ -1946,8 +1977,7 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 	const float _angle = (float)((- degrees / 180.0f) * M_PI);
 	const int src_w = gdImageSX(src);
 	const int src_h = gdImageSY(src);
-	const unsigned int new_width = abs((int)(src_w*cos(_angle))) + abs((int)(src_h*sin(_angle) + 0.5f));
-	const unsigned int new_height = abs((int)(src_w*sin(_angle))) + abs((int)(src_h*cos(_angle) + 0.5f));
+	unsigned int new_width, new_height;
 	const gdFixed f_0_5 = gd_ftofx(0.5f);
 	const gdFixed f_H = gd_itofx(src_h/2);
 	const gdFixed f_W = gd_itofx(src_w/2);
@@ -1963,7 +1993,11 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 	unsigned int dst_offset_y = 0;
 	unsigned int i;
 	gdImagePtr dst;
+	gdRect bbox;
 
+	gdRotatedImageSize(src, degrees, &bbox);
+	new_width = bbox.width;
+	new_height = bbox.height;
 	dst = gdImageCreateTrueColor(new_width, new_height);
 
 	if (dst == NULL) {
@@ -2206,7 +2240,10 @@ gdImagePtr gdImageRotateBicubicFixed(gdImagePtr src, const float degrees, const 
 
 gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, int bgcolor)
 {
-	const int angle_rounded = (int)floor(angle * 100);
+	/* round to two decimals and keep the 100x multiplication to use it in the common square angles
+	   case later. Keep the two decimal precisions so smaller rotation steps can be done, useful for
+	   slow animations, f.e. */
+	const int angle_rounded = fmod((int) floorf(angle * 100), 360 * 100);
 
 	if (bgcolor < 0) {
 		return NULL;
@@ -2224,6 +2261,18 @@ gdImagePtr gdImageRotateInterpolated(const gdImagePtr src, const float angle, in
 
 	/* no interpolation needed here */
 	switch (angle_rounded) {
+		case    0: {
+			gdImagePtr dst = gdImageCreateTrueColor(src->sx, src->sy);
+			if (dst == NULL) {
+				return NULL;
+			}
+			dst->transparent = src->transparent;
+			dst->saveAlphaFlag = 1;
+			dst->alphaBlendingFlag = gdEffectReplace;
+
+			gdImageCopy(dst, src, 0,0,0,0,src->sx,src->sy);
+			return dst;
+		}
 		case -27000:
 		case   9000:
 			return gdImageRotate90(src, 0);

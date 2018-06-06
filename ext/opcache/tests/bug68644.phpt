@@ -13,5 +13,6 @@ var_dump(strlen("中国, 北京"));
 var_dump(mb_strlen("中国, 北京"));
 ?>
 --EXPECT--
+Deprecated: The mbstring.func_overload directive is deprecated in Unknown on line 0
 int(6)
 int(6)

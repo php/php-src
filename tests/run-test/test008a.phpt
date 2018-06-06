@@ -4,6 +4,8 @@ Error message handling (with ZendOpcache)
 <?php
 if (!extension_loaded("Zend Opcache")) die("skip Zend Opcache is not loaded");
 ?>
+--INI--
+track_errors=1
 --FILE--
 <?php
 // If this test fails ask the developers of run-test.php
@@ -24,6 +26,7 @@ $error = 1 / $zero;
 var_dump($php_errormsg);
 ?>
 --EXPECTF--
+Deprecated: Directive 'track_errors' is deprecated in Unknown on line 0
 string(1) "1"
 string(5) "32767"
 string(1) "0"

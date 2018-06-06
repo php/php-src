@@ -41,7 +41,9 @@ const mbfl_encoding mbfl_encoding_cp850 = {
 	"CP850",
 	(const char *(*)[])&mbfl_encoding_cp850_aliases,
 	NULL,
-	MBFL_ENCTYPE_SBCS
+	MBFL_ENCTYPE_SBCS,
+	&vtbl_cp850_wchar,
+	&vtbl_wchar_cp850
 };
 
 const struct mbfl_identify_vtbl vtbl_identify_cp850 = {

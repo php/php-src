@@ -154,19 +154,19 @@ testing readfile
 testing readfile
 
 --empty array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, array given, %s(%d)
 File not read
 
 --int indexed array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, array given, %s(%d)
 File not read
 
 --associative array--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, array given, %s(%d)
 File not read
 
 --nested arrays--
-Error: 2 - readfile() expects parameter 2 to be boolean, array given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, array given, %s(%d)
 File not read
 
 --uppercase NULL--
@@ -206,11 +206,11 @@ testing readfile
 testing readfile
 
 --instance of classWithToString--
-Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, object given, %s(%d)
 File not read
 
 --instance of classWithoutToString--
-Error: 2 - readfile() expects parameter 2 to be boolean, object given, %s(%d)
+Error: 2 - readfile() expects parameter 2 to be bool, object given, %s(%d)
 File not read
 
 --undefined var--

@@ -21,7 +21,7 @@ echo "Summer offset: " . $summer->getOffset() / 3600 . " hours\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing DateTime::getOffset() : basic functionality ***
 Winter offset: 0 hours
 Summer offset: 1 hours

@@ -14,6 +14,8 @@ test();
 
 ?>
 --EXPECTF--
+Deprecated: Directive 'track_errors' is deprecated in Unknown on line 0
+
 Notice: Undefined variable: undef in %s on line %d
 
 Warning: A non-numeric value encountered in %s on line %d

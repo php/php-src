@@ -15,7 +15,7 @@ $sizes = array(7, 22, 54, 17, 27, 15, 1000);
 
 var_dump(gztell($h));
 foreach ($sizes as $size) { 
-   echo "bytes written=".gzwrite($h, str_repeat('1', $size))."\n";;
+   echo "bytes written=".gzwrite($h, str_repeat('1', $size))."\n";
    echo "tell=".gztell($h)."\n";
 }
 

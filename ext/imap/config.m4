@@ -147,7 +147,7 @@ if test "$PHP_IMAP" != "no"; then
 
     old_CFLAGS=$CFLAGS
     CFLAGS="-I$IMAP_INC_DIR"
-    AC_CACHE_CHECK(for U8T_DECOMPOSE, ac_cv_u8t_canonical,
+    AC_CACHE_CHECK(for U8T_DECOMPOSE, ac_cv_u8t_decompose,
       AC_TRY_COMPILE([
 #include <c-client.h>
       ],[

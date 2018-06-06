@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -249,7 +249,7 @@ static struct gfxinfo *php_handle_swc(php_stream * stream)
 		} while ((status==Z_BUF_ERROR)&&(factor<maxfactor));
 
 		if (bufz) {
-			zend_string_release(bufz);
+			zend_string_release_ex(bufz, 0);
 		}
 
 		if (status == Z_OK) {
@@ -1186,7 +1186,7 @@ PHPAPI char * php_image_type_to_mime_type(int image_type)
 		case IMAGE_FILETYPE_PSD:
 			return "image/psd";
 		case IMAGE_FILETYPE_BMP:
-			return "image/x-ms-bmp";
+			return "image/bmp";
 		case IMAGE_FILETYPE_TIFF_II:
 		case IMAGE_FILETYPE_TIFF_MM:
 			return "image/tiff";
@@ -1346,7 +1346,7 @@ PHPAPI int php_getimagetype(php_stream * stream, char *filetype)
 
     /* WBMP may be smaller than 12 bytes, so delay error */
 	twelve_bytes_read = (php_stream_read(stream, filetype+4, 8) == 8);
-    
+
 /* BYTES READ: 12 */
    	if (twelve_bytes_read && !memcmp(filetype, php_sig_jp2, 12)) {
 		return IMAGE_FILETYPE_JP2;
@@ -1479,7 +1479,7 @@ static void php_getimagesize_from_any(INTERNAL_FUNCTION_PARAMETERS, int mode) { 
 	ZEND_PARSE_PARAMETERS_END();
 
 	if (argc == 2) {
-		zval_dtor(info);
+		zval_ptr_dtor(info);
 		array_init(info);
 	}
 
@@ -1512,6 +1512,7 @@ PHP_FUNCTION(getimagesizefromstring)
 {
 	php_getimagesize_from_any(INTERNAL_FUNCTION_PARAM_PASSTHRU, FROM_DATA);
 }
+/* }}} */
 
 /*
  * Local variables:

@@ -44,7 +44,7 @@ $wsdl  = <<<EOF
 	</binding>
 	<service name="testService">
    <port name="testPort" binding="tns:testBinding">
-     <soap:address location="test://" /> 
+     <soap:address location="test://" />
    </port>
  </service>
 </definitions>

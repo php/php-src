@@ -10,4 +10,4 @@ echo $tz->getOffset($dt);
 echo $tz->getOffset(1);
 --EXPECTF--
 3600
-Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, integer given in %s
+Warning: DateTimeZone::getOffset() expects parameter 1 to be DateTimeInterface, int given in %s

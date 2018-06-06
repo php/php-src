@@ -16,5 +16,6 @@ function a() {
 create_function('', 'var_dump("22");');
 
 a();
---EXPECT--
+--EXPECTF--
+Deprecated: Function create_function() is deprecated in %s on line %d
 okey

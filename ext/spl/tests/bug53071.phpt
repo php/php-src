@@ -22,6 +22,6 @@ var_dump(gc_collect_cycles());
 echo "Done.\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 int(4)
 Done.

@@ -3,6 +3,7 @@ Bug #70741 (Session WDDX Packet Deserialization Type Confusion Vulnerability)
 --SKIPIF--
 <?php
 if (!extension_loaded("wddx")) print "skip";
+if (!extension_loaded("session")) print "skip session extension not available";
 ?>
 --FILE--
 <?php

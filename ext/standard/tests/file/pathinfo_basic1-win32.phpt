@@ -71,7 +71,7 @@ foreach($paths as $path) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing basic functions of pathinfo() ***
 -- Iteration 1 --
 string(0) ""

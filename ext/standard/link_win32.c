@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -63,7 +63,7 @@ TODO:
 PHP_FUNCTION(readlink)
 {
 	char *link;
-	size_t link_len;
+	ssize_t link_len;
 	char target[MAXPATHLEN];
 
 	if (zend_parse_parameters(ZEND_NUM_ARGS(), "p", &link, &link_len) == FAILURE) {
@@ -74,7 +74,8 @@ PHP_FUNCTION(readlink)
 		RETURN_FALSE;
 	}
 
-	if (php_sys_readlink(link, target, MAXPATHLEN) == -1) {
+	link_len = php_sys_readlink(link, target, MAXPATHLEN);
+	if (link_len == -1) {
 		php_error_docref(NULL, E_WARNING, "readlink failed to read the symbolic link (%s), error %d)", link, GetLastError());
 		RETURN_FALSE;
 	}
@@ -196,6 +197,7 @@ PHP_FUNCTION(link)
 	int ret;
 	char source_p[MAXPATHLEN];
 	char dest_p[MAXPATHLEN];
+	wchar_t *dstw, *srcw;
 
 	/*First argument to link function is the target and hence should go to frompath
 	  Second argument to link function is the link itself and hence should go to topath */
@@ -224,15 +226,37 @@ PHP_FUNCTION(link)
 	}
 
 #ifndef ZTS
-	ret = CreateHardLinkA(topath, frompath, NULL);
+# define _TO_PATH topath
+# define _FROM_PATH frompath
 #else
-	ret = CreateHardLinkA(dest_p, source_p, NULL);
+# define _TO_PATH dest_p
+# define _FROM_PATH source_p
 #endif
+	dstw = php_win32_ioutil_any_to_w(_TO_PATH);
+	if (!dstw) {
+		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
+		RETURN_FALSE;
+	}
+	srcw = php_win32_ioutil_any_to_w(_FROM_PATH);
+	if (!srcw) {
+		free(dstw);
+		php_error_docref(NULL, E_WARNING, "UTF-16 conversion failed (error %d)", GetLastError());
+		RETURN_FALSE;
+	}
+#undef _TO_PATH
+#undef _FROM_PATH
+
+	ret = CreateHardLinkW(dstw, srcw, NULL);
 
 	if (ret == 0) {
+		free(dstw);
+		free(srcw);
 		php_error_docref(NULL, E_WARNING, "%s", strerror(errno));
 		RETURN_FALSE;
 	}
+
+	free(dstw);
+	free(srcw);
 
 	RETURN_TRUE;
 }

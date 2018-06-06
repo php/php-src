@@ -113,7 +113,7 @@ unlink($filename);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Accessing and updating data of file through soft link ***
 bool(true)
 

@@ -1,8 +1,8 @@
 <?php
 abstract class gtTestSubject {
 
-  protected $optionalArgumentNames;
-  protected $mandatoryArgumentNames;
+  protected $optionalArgumentNames = [];
+  protected $mandatoryArgumentNames = [];
 
   protected $extraArgumentList = '';
   protected $shortArgumentList = '';

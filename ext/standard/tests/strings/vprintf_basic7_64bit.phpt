@@ -6,8 +6,8 @@ if (PHP_INT_SIZE != 8) die("skip this test is for 64bit platform only");
 ?>
 --FILE--
 <?php
-/* Prototype  : string vprintf(string $format , aaray $args)
- * Description: Output a formatted string 
+/* Prototype  : string vprintf(string $format , array $args)
+ * Description: Output a formatted string
  * Source code: ext/standard/formatted_print.c
 */
 
@@ -35,7 +35,7 @@ echo "\n";
 var_dump($result);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing vprintf() : basic functionality - using unsigned format ***
 18446744073709550505
 int(20)

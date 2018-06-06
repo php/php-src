@@ -14,6 +14,6 @@ foreach($nodes as $node) {
 	var_dump($node->getLineNo());
 }
 ?>
---EXPECTF--
+--EXPECT--
 int(4)
 int(8)

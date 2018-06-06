@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -82,7 +82,7 @@ static MYSQLND * pdo_mysql_convert_zv_to_mysqlnd(zval * zv)
 	return NULL;
 }
 
-static MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
+static const MYSQLND_REVERSE_API pdo_mysql_reverse_api = {
 	&pdo_mysql_module_entry,
 	pdo_mysql_convert_zv_to_mysqlnd
 };
@@ -130,6 +130,9 @@ static PHP_MINIT_FUNCTION(pdo_mysql)
 	 REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SERVER_PUBLIC_KEY", (zend_long)PDO_MYSQL_ATTR_SERVER_PUBLIC_KEY);
 #endif
 	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_MULTI_STATEMENTS", (zend_long)PDO_MYSQL_ATTR_MULTI_STATEMENTS);
+#ifdef PDO_USE_MYSQLND
+	REGISTER_PDO_CLASS_CONST_LONG("MYSQL_ATTR_SSL_VERIFY_SERVER_CERT", (zend_long)PDO_MYSQL_ATTR_SSL_VERIFY_SERVER_CERT);
+#endif
 
 #ifdef PDO_USE_MYSQLND
 	mysqlnd_reverse_api_register_api(&pdo_mysql_reverse_api);
@@ -223,7 +226,7 @@ ZEND_TSRMLS_CACHE_UPDATE();
 /* }}} */
 
 /* {{{ pdo_mysql_functions[] */
-const zend_function_entry pdo_mysql_functions[] = {
+static const zend_function_entry pdo_mysql_functions[] = {
 	PHP_FE_END
 };
 /* }}} */

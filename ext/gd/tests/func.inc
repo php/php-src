@@ -18,44 +18,44 @@ function get_php_info()
 function get_freetype_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',FreeType Version => (\d+\.\d+\.\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libjpeg_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libJPEG Version => ([a-z0-9]+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libpng_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libPNG Version => (\d+\.\d+\.\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 
 function get_libxpm_version()
 {
 	$version = 0;
-	
+
 	if (preg_match(',libXpm Version => (\d+),s', get_php_info(), $match)) {
 		$version = $match[1];
 	}
-	
+
 	return $version;
 }
 

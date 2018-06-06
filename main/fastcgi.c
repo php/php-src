@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -76,7 +76,9 @@ static int is_impersonate = 0;
 # include <netdb.h>
 # include <signal.h>
 
-# if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
+# if defined(HAVE_POLL_H) && defined(HAVE_POLL)
+#  include <poll.h>
+# elif defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
 #  include <sys/poll.h>
 # endif
 # if defined(HAVE_SYS_SELECT_H)
@@ -462,6 +464,11 @@ void fcgi_terminate(void)
 	in_shutdown = 1;
 }
 
+void fcgi_request_set_keep(fcgi_request *req, int new_value)
+{
+	req->keep = new_value;
+}
+
 #ifndef HAVE_ATTRIBUTE_WEAK
 void fcgi_set_logger(fcgi_logger lg) {
 	fcgi_log = lg;
@@ -732,9 +739,9 @@ int fcgi_listen(const char *path, int backlog)
 		return listen_socket;
 
 #else
-		int path_len = strlen(path);
+		size_t path_len = strlen(path);
 
-		if (path_len >= (int)sizeof(sa.sa_unix.sun_path)) {
+		if (path_len >= sizeof(sa.sa_unix.sun_path)) {
 			fcgi_log(FCGI_ERROR, "Listening socket's path name is too long.\n");
 			return -1;
 		}
@@ -1425,11 +1432,9 @@ int fcgi_accept_request(fcgi_request *req)
 				break;
 #else
 				if (req->fd >= 0) {
-#if defined(HAVE_SYS_POLL_H) && defined(HAVE_POLL)
+#if defined(HAVE_POLL)
 					struct pollfd fds;
 					int ret;
-
-					req->hook.on_read();
 
 					fds.fd = req->fd;
 					fds.events = POLLIN;
@@ -1443,8 +1448,6 @@ int fcgi_accept_request(fcgi_request *req)
 					}
 					fcgi_close(req, 1, 0);
 #else
-					req->hook.on_read();
-
 					if (req->fd < FD_SETSIZE) {
 						struct timeval tv = {5,0};
 						fd_set set;
@@ -1471,6 +1474,7 @@ int fcgi_accept_request(fcgi_request *req)
 		} else if (in_shutdown) {
 			return -1;
 		}
+		req->hook.on_read();
 		if (fcgi_read_request(req)) {
 #ifdef _WIN32
 			if (is_impersonate && !req->tcp) {
@@ -1730,8 +1734,12 @@ void fcgi_impersonate(void)
 void fcgi_set_mgmt_var(const char * name, size_t name_len, const char * value, size_t value_len)
 {
 	zval zvalue;
+	zend_string *key = zend_string_init(name, name_len, 1);
 	ZVAL_NEW_STR(&zvalue, zend_string_init(value, value_len, 1));
-	zend_hash_str_add(&fcgi_mgmt_vars, name, name_len, &zvalue);
+	GC_MAKE_PERSISTENT_LOCAL(key);
+	GC_MAKE_PERSISTENT_LOCAL(Z_STR(zvalue));
+	zend_hash_add(&fcgi_mgmt_vars, key, &zvalue);
+	zend_string_release_ex(key, 1);
 }
 
 void fcgi_free_mgmt_var_cb(zval *zv)

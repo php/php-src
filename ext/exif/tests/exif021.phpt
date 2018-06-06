@@ -1655,5 +1655,5 @@ array(34) {
     string(4) "53/1"
   }
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

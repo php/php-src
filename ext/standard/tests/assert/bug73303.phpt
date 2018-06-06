@@ -19,5 +19,6 @@ $obj = new Test();
 $obj->main();
 
 ?>
---EXPECT--
+--EXPECTF--
+Deprecated: assert(): Calling assert() with a string argument is deprecated in %s on line %d
 Success

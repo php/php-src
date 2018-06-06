@@ -42,7 +42,5 @@ array(1) {
 array(0) {
 }
 
-Warning: SimpleXMLElement::xpath(): Invalid expression in %s on line %d
-
-Warning: SimpleXMLElement::xpath(): xmlXPathEval: evaluation failed in %s on line %d
+Warning: SimpleXMLElement::xpath(): Invalid expression in %s on line %d%A
 bool(false)

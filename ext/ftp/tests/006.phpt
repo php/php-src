@@ -30,6 +30,8 @@ var_dump(ftp_rename($ftp));
 var_dump(ftp_site($ftp));
 var_dump(ftp_set_option($ftp));
 var_dump(ftp_get_option($ftp));
+var_dump(ftp_mlsd($ftp));
+var_dump(ftp_append($ftp));
 
 ?>
 --EXPECTF--
@@ -54,13 +56,13 @@ NULL
 Warning: ftp_rawlist() expects at least 2 parameters, 1 given in %s006.php on line 10
 NULL
 
-Warning: ftp_fget() expects at least 4 parameters, 1 given in %s006.php on line 11
+Warning: ftp_fget() expects at least 3 parameters, 1 given in %s006.php on line 11
 NULL
 
-Warning: ftp_nb_fget() expects at least 4 parameters, 1 given in %s006.php on line 12
+Warning: ftp_nb_fget() expects at least 3 parameters, 1 given in %s006.php on line 12
 NULL
 
-Warning: ftp_nb_get() expects at least 4 parameters, 1 given in %s006.php on line 13
+Warning: ftp_nb_get() expects at least 3 parameters, 1 given in %s006.php on line 13
 NULL
 
 Warning: ftp_pasv() expects exactly 2 parameters, 1 given in %s006.php on line 14
@@ -69,16 +71,16 @@ NULL
 Warning: ftp_nb_continue() expects exactly 1 parameter, 0 given in %s006.php on line 15
 NULL
 
-Warning: ftp_fput() expects at least 4 parameters, 0 given in %s006.php on line 16
+Warning: ftp_fput() expects at least 3 parameters, 0 given in %s006.php on line 16
 NULL
 
-Warning: ftp_nb_fput() expects at least 4 parameters, 1 given in %s006.php on line 17
+Warning: ftp_nb_fput() expects at least 3 parameters, 1 given in %s006.php on line 17
 NULL
 
-Warning: ftp_put() expects at least 4 parameters, 1 given in %s006.php on line 18
+Warning: ftp_put() expects at least 3 parameters, 1 given in %s006.php on line 18
 NULL
 
-Warning: ftp_nb_put() expects at least 4 parameters, 1 given in %s006.php on line 19
+Warning: ftp_nb_put() expects at least 3 parameters, 1 given in %s006.php on line 19
 NULL
 
 Warning: ftp_size() expects exactly 2 parameters, 1 given in %s006.php on line 20
@@ -97,4 +99,10 @@ Warning: ftp_set_option() expects exactly 3 parameters, 1 given in %s006.php on 
 NULL
 
 Warning: ftp_get_option() expects exactly 2 parameters, 1 given in %s006.php on line 25
+NULL
+
+Warning: ftp_mlsd() expects exactly 2 parameters, 1 given in %s006.php on line 26
+NULL
+
+Warning: ftp_append() expects at least 3 parameters, 1 given in %s006.php on line 27
 NULL

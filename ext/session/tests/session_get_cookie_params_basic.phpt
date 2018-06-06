@@ -30,7 +30,7 @@ var_dump(session_get_cookie_params());
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_get_cookie_params() : basic functionality ***
 array(5) {
   ["lifetime"]=>

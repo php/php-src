@@ -3,9 +3,9 @@ Testing call_user_func() with autoload and passing invalid params
 --FILE--
 <?php
 
-function __autoload($class) {
+spl_autoload_register(function ($class) {
 	var_dump($class);
-}
+});
 
 call_user_func(array('foo', 'bar'));
 call_user_func(array('', 'bar'));

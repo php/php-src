@@ -10,11 +10,7 @@ function au($class) {
               }');
 }
 
-function __autoload($class) {
-        au($class);
-}
-
-//spl_autoload_register('au');
+spl_autoload_register('au');
 
 set_exception_handler(function($exception) {
         $h = new handler();

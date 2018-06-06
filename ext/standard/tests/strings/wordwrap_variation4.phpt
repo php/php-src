@@ -107,23 +107,23 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 10 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 -- Iteration 11 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 -- Iteration 12 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 -- Iteration 13 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 -- Iteration 14 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, array given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, array given in %s on line %d
 NULL
 -- Iteration 15 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"
@@ -131,7 +131,7 @@ string(39) "testing<br />\nwordwrap<br />\nfunction"
 string(39) "testing<br />\nwordwrap<br />\nfunction"
 -- Iteration 17 --
 
-Warning: wordwrap() expects parameter 4 to be boolean, object given in %s on line %d
+Warning: wordwrap() expects parameter 4 to be bool, object given in %s on line %d
 NULL
 -- Iteration 18 --
 string(39) "testing<br />\nwordwrap<br />\nfunction"

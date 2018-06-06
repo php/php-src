@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -29,8 +29,28 @@ extern zend_module_entry openssl_module_entry;
 #include "php_version.h"
 #define PHP_OPENSSL_VERSION PHP_VERSION
 
+#include <openssl/opensslv.h>
+#if defined(LIBRESSL_VERSION_NUMBER)
+/* LibreSSL version check */
+#if LIBRESSL_VERSION_NUMBER < 0x20700000L
+#define PHP_OPENSSL_API_VERSION 0x10001
+#else
+#define PHP_OPENSSL_API_VERSION 0x10100
+#endif
+#else
+/* OpenSSL version check */
+#if OPENSSL_VERSION_NUMBER < 0x10002000L
+#define PHP_OPENSSL_API_VERSION 0x10001
+#elif OPENSSL_VERSION_NUMBER < 0x10100000L
+#define PHP_OPENSSL_API_VERSION 0x10002
+#else
+#define PHP_OPENSSL_API_VERSION 0x10100
+#endif
+#endif
+
 #define OPENSSL_RAW_DATA 1
 #define OPENSSL_ZERO_PADDING 2
+#define OPENSSL_DONT_ZERO_PAD_KEY 4
 
 #define OPENSSL_ERROR_X509_PRIVATE_KEY_VALUES_MISMATCH 0x0B080074
 
@@ -97,6 +117,7 @@ PHP_FUNCTION(openssl_pkcs7_verify);
 PHP_FUNCTION(openssl_pkcs7_decrypt);
 PHP_FUNCTION(openssl_pkcs7_sign);
 PHP_FUNCTION(openssl_pkcs7_encrypt);
+PHP_FUNCTION(openssl_pkcs7_read);
 
 PHP_FUNCTION(openssl_error_string);
 
@@ -126,6 +147,15 @@ PHP_FUNCTION(openssl_spki_export);
 PHP_FUNCTION(openssl_spki_export_challenge);
 
 PHP_FUNCTION(openssl_get_cert_locations);
+
+#ifdef PHP_WIN32
+#define PHP_OPENSSL_BIO_MODE_R(flags) (((flags) & PKCS7_BINARY) ? "rb" : "r")
+#define PHP_OPENSSL_BIO_MODE_W(flags) (((flags) & PKCS7_BINARY) ? "wb" : "w")
+#else
+#define PHP_OPENSSL_BIO_MODE_R(flags) "r"
+#define PHP_OPENSSL_BIO_MODE_W(flags) "w"
+#endif
+
 #else
 
 #define phpext_openssl_ptr NULL

@@ -12,7 +12,7 @@ assert.bail=true
 <?php
 $doc = new DOMDocument();
 $result = $doc->loadHTMLFile(dirname(__FILE__) . "/empty.html");
-assert('$result === true');
+assert($result === true);
 ?>
 --EXPECTF--
 %r(PHP ){0,1}%rWarning: DOMDocument::loadHTMLFile(): Document is empty %s

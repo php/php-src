@@ -8,13 +8,13 @@ Steve Seear <stevseea@php.net>
 $rc = new ReflectionClass("ReflectionClass");
 echo $rc;
 ?>
---EXPECTF--
+--EXPECT--
 Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
 
   - Constants [3] {
-    Constant [ public integer IS_IMPLICIT_ABSTRACT ] { 16 }
-    Constant [ public integer IS_EXPLICIT_ABSTRACT ] { 32 }
-    Constant [ public integer IS_FINAL ] { 4 }
+    Constant [ public int IS_IMPLICIT_ABSTRACT ] { 16 }
+    Constant [ public int IS_EXPLICIT_ABSTRACT ] { 32 }
+    Constant [ public int IS_FINAL ] { 4 }
   }
 
   - Static properties [0] {
@@ -34,7 +34,7 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     Property [ <default> public $name ]
   }
 
-  - Methods [52] {
+  - Methods [53] {
     Method [ <internal:Reflection> final private method __clone ] {
 
       - Parameters [0] {
@@ -318,6 +318,12 @@ Class [ <internal:Reflection> class ReflectionClass implements Reflector ] {
     }
 
     Method [ <internal:Reflection> public method getDefaultProperties ] {
+
+      - Parameters [0] {
+      }
+    }
+
+    Method [ <internal:Reflection> public method isIterable ] {
 
       - Parameters [0] {
       }

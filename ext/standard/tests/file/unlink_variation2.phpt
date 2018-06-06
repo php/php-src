@@ -1,11 +1,5 @@
 --TEST--
 Test unlink() function : usage variations - unlink file in use
---SKIPIF--
-<?php
-if (substr(PHP_OS, 0, 3) == 'WIN') {
-    die('skip only on Linux');
-}
-?>
 --FILE--
 <?php
 /* Prototype : bool unlink ( string $filename [, resource $context] );
@@ -30,7 +24,7 @@ fclose($fp);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing unlink() on a file which is in use ***
 bool(true)
 bool(false)

@@ -103,12 +103,12 @@ foreach($inputs as $key =>$value) {
 --int 0--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --int 1--
 string(5) "01:09"
 float(1.155%d)
-int(1218177558)
+int(1218177560)
 
 --int 12345--
 bool(false)
@@ -167,32 +167,32 @@ bool(false)
 --uppercase NULL--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --lowercase null--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --lowercase true--
 string(5) "01:09"
 float(1.155%d)
-int(1218177558)
+int(1218177560)
 
 --lowercase false--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --uppercase TRUE--
 string(5) "01:09"
 float(1.155%d)
-int(1218177558)
+int(1218177560)
 
 --uppercase FALSE--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --empty string DQ--
 
@@ -285,10 +285,10 @@ bool(false)
 --undefined var--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 
 --unset var--
 string(5) "01:10"
 float(1.174%d)
-int(1218177627)
+int(1218177629)
 ===DONE===

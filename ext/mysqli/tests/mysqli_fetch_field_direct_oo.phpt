@@ -43,8 +43,8 @@ require_once('skipifconnectfailure.inc');
 
 	$res->free_result();
 
-	if (NULL !== ($tmp = $res->fetch_field_direct(0)))
-		printf("[007] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = $res->fetch_field_direct(0)))
+		printf("[007] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	$mysqli->close();
 	print "done!";

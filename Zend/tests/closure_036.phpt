@@ -27,7 +27,7 @@ var_dump($cb());
 var_dump($cb2());
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(11)
 int(12)

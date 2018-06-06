@@ -2,7 +2,7 @@
   reggnu.c -  Oniguruma (regular expression library)
 **********************************************************************/
 /*-
- * Copyright (c) 2002-2008  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
+ * Copyright (c) 2002-2018  K.Kosako  <sndgk393 AT ybb DOT ne DOT jp>
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without
@@ -28,10 +28,7 @@
  */
 
 #include "regint.h"
-
-#ifndef ONIGGNU_H
 #include "oniggnu.h"
-#endif
 
 extern void
 re_free_registers(OnigRegion* r)
@@ -54,7 +51,7 @@ re_adjust_startpos(regex_t* reg, const char* string, int size,
     else {
       p = ONIGENC_LEFT_ADJUST_CHAR_HEAD(reg->enc, (UChar* )string, s);
     }
-    return p - (UChar* )string;
+    return (int )(p - (UChar* )string);
   }
 
   return startpos;
@@ -140,8 +137,7 @@ re_mbcinit(int mb_code)
     break;
   }
 
-  onig_initialize(0, 0);
-  onig_initialize_encoding(enc);
+  onig_initialize(&enc, 1);
 
   onigenc_set_default_encoding(enc);
 }

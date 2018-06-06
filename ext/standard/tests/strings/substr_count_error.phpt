@@ -49,7 +49,7 @@ bool(false)
 Warning: substr_count(): Invalid length value in %s on line %d
 bool(false)
 
-Warning: substr_count() expects parameter 3 to be integer, string given in %s on line %d
+Warning: substr_count() expects parameter 3 to be int, string given in %s on line %d
 NULL
 
 Warning: substr_count(): Invalid length value in %s on line %d

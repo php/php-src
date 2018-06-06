@@ -123,7 +123,7 @@ fclose($fp);
 *** Testing mb_substitute_character() : usage variation ***
 
 --int 0--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --int 1--
@@ -133,30 +133,30 @@ bool(true)
 bool(true)
 
 --int -12345--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float 10.5--
 bool(true)
 
 --float -10.5--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float 12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float -12.3456789000e10--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --float .5--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --empty array--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --int indexed array--
@@ -169,25 +169,25 @@ bool(true)
 bool(true)
 
 --uppercase NULL--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --lowercase null--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --lowercase true--
 bool(true)
 
 --lowercase false--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --uppercase TRUE--
 bool(true)
 
 --uppercase FALSE--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --empty string DQ--
@@ -197,19 +197,19 @@ bool(true)
 bool(true)
 
 --string DQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --string SQ--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --mixed case string--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --heredoc--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --instance of classWithToString--
@@ -221,11 +221,11 @@ Error: 8 - Object of class classWithoutToString could not be converted to int, %
 bool(true)
 
 --undefined var--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 
 --unset var--
-Error: 2 - mb_substitute_character(): Unknown character., %s(%d)
+Error: 2 - mb_substitute_character(): Unknown character, %s(%d)
 bool(false)
 ===DONE===
 

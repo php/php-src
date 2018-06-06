@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -41,13 +41,15 @@
 	smart_str_append_long_ex((dest), (val), 0)
 #define smart_str_append_unsigned(dest, val) \
 	smart_str_append_unsigned_ex((dest), (val), 0)
+#define smart_str_free(dest) \
+	smart_str_free_ex((dest), 0)
 
 BEGIN_EXTERN_C()
 
 ZEND_API void ZEND_FASTCALL smart_str_erealloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_realloc(smart_str *str, size_t len);
 ZEND_API void ZEND_FASTCALL smart_str_append_escaped(smart_str *str, const char *s, size_t l);
-ZEND_API void ZEND_FASTCALL smart_str_append_printf(smart_str *dest, const char *format, ...)
+ZEND_API void smart_str_append_printf(smart_str *dest, const char *format, ...)
 	ZEND_ATTRIBUTE_FORMAT(printf, 2, 3);
 
 END_EXTERN_C()
@@ -69,9 +71,9 @@ do_smart_str_realloc:
 	return len;
 }
 
-static zend_always_inline void smart_str_free(smart_str *str) {
+static zend_always_inline void smart_str_free_ex(smart_str *str, zend_bool persistent) {
 	if (str->s) {
-		zend_string_release(str->s);
+		zend_string_release_ex(str->s, persistent);
 		str->s = NULL;
 	}
 	str->a = 0;
@@ -140,3 +142,12 @@ static zend_always_inline void smart_str_setl(smart_str *dest, const char *src, 
 
 #endif
 
+/*
+ * Local variables:
+ * tab-width: 4
+ * c-basic-offset: 4
+ * indent-tabs-mode: t
+ * End:
+ * vim600: sw=4 ts=4 fdm=marker
+ * vim<600: sw=4 ts=4
+ */

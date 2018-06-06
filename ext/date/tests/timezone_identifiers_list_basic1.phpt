@@ -24,7 +24,7 @@ var_dump(in_array("UTC", $zones));
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_identifiers_list() : basic functionality ***
 Check return tpe is ARRAY
 bool(true)

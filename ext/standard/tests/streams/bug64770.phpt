@@ -9,7 +9,7 @@ $descs = array(
 	2 => array('pipe', 'w'), // strerr
 );
 
-$other_opts = array('suppress_errors' => false, 'binary_pipes' => true);
+$other_opts = array('suppress_errors' => false);
 
 $cmd = (substr(PHP_OS, 0, 3) == 'WIN') ? 'dir' : 'ls';
 $p = proc_open($cmd, $descs, $pipes, '.', NULL, $other_opts);

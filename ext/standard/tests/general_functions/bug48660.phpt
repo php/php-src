@@ -25,7 +25,7 @@ var_dump(parse_ini_file($ini_location, true, INI_SCANNER_NORMAL));
 ?>
 --CLEAN--
 <?php @unlink(dirname(__FILE__) . '/bug48660.tmp'); ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["cases"]=>
   array(5) {

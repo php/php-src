@@ -14,7 +14,7 @@ $r5 = new ReflectionClass("C");
 var_dump($r1->isUserDefined(), $r2->isUserDefined(), $r3->isUserDefined(), 
 		 $r4->isUserDefined(), $r5->isUserDefined());
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(false)

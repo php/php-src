@@ -22,7 +22,7 @@ echo "Done\n";
 Warning: array_search() expects at least 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: array_search() expects parameter 2 to be array, integer given in %s on line %d
+Warning: array_search() expects parameter 2 to be array, int given in %s on line %d
 NULL
 int(1)
 bool(false)

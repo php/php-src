@@ -39,7 +39,7 @@ for ($i = 0; $i < count($values); $i++) {
 	var_dump($res);
 }
 ?>
---EXPECTF--
+--EXPECT--
  number_format tests.....default
 string(5) "1,235"
 string(6) "-1,235"

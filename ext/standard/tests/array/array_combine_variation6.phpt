@@ -30,7 +30,7 @@ var_dump( array_combine($arr_binary, $arr_normal) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_combine() : binary safe checking ***
 array(2) {
   ["hello"]=>

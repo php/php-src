@@ -60,5 +60,5 @@ object(PDORow)#%d (2) {
 string(19) "SELECT id FROM test"
 ----------------------------------
 
-Notice: Trying to get property of non-object in %s on line %d
+Notice: Trying to get property 'queryString' of non-object in %s on line %d
 NULL

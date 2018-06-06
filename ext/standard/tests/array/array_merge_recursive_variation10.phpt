@@ -39,7 +39,7 @@ var_dump( array_merge_recursive($arr1["array"], $arr2["array"]) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_merge_recursive() : two dimensional array for $arr1 argument ***
 -- Passing the entire 2-d array --
 -- With default argument --

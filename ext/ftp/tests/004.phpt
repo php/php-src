@@ -20,7 +20,6 @@ var_dump(ftp_alloc($ftp, array()));
 var_dump(ftp_cdup($ftp, 0));
 var_dump(ftp_chdir($ftp, array()));
 var_dump(ftp_chmod($ftp, 0666));
-var_dump(ftp_get($ftp, 1234,12));
 var_dump(ftp_close());
 var_dump(ftp_connect('sfjkfjaksfjkasjf'));
 var_dump(ftp_delete($ftp, array()));
@@ -38,7 +37,7 @@ var_dump(ftp_quit($ftp));
 bool(true)
 string(4) "UNIX"
 
-Warning: ftp_alloc() expects parameter 2 to be integer, array given in %s004.php on line 12
+Warning: ftp_alloc() expects parameter 2 to be int, array given in %s004.php on line 12
 bool(false)
 
 Warning: ftp_cdup() expects exactly 1 parameter, 2 given in %s004.php on line 13
@@ -50,30 +49,27 @@ NULL
 Warning: ftp_chmod() expects exactly 3 parameters, 2 given in %s on line %d
 bool(false)
 
-Warning: ftp_get() expects at least 4 parameters, 3 given in %s on line %d
+Warning: ftp_close() expects exactly 1 parameter, 0 given in %s004.php on line 16
 NULL
 
-Warning: ftp_close() expects exactly 1 parameter, 0 given in %s004.php on line 17
-NULL
-
-Warning: ftp_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s004.php on line 18
+Warning: ftp_connect(): php_network_getaddresses: getaddrinfo failed: %s in %s004.php on line 17
 bool(false)
 
-Warning: ftp_delete() expects parameter 2 to be string, array given in %s004.php on line 19
+Warning: ftp_delete() expects parameter 2 to be string, array given in %s004.php on line 18
 NULL
 
-Warning: ftp_exec() expects parameter 2 to be string, array given in %s004.php on line 20
+Warning: ftp_exec() expects parameter 2 to be string, array given in %s004.php on line 19
 NULL
 
-Warning: ftp_systype() expects exactly 1 parameter, 2 given in %s004.php on line 22
+Warning: ftp_systype() expects exactly 1 parameter, 2 given in %s004.php on line 21
 NULL
 
-Warning: ftp_pwd() expects exactly 1 parameter, 2 given in %s004.php on line 23
+Warning: ftp_pwd() expects exactly 1 parameter, 2 given in %s004.php on line 22
 NULL
 
-Warning: ftp_login() expects exactly 3 parameters, 1 given in %s004.php on line 25
+Warning: ftp_login() expects exactly 3 parameters, 1 given in %s004.php on line 24
 NULL
 
-Warning: ftp_login(): Not logged in. in %s004.php on line 26
+Warning: ftp_login(): Not logged in. in %s004.php on line 25
 bool(false)
 bool(true)

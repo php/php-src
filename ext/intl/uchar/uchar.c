@@ -3,6 +3,9 @@
 #include "intl_convert.h"
 
 #include <unicode/uchar.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 
 #define IC_METHOD(mname) PHP_METHOD(IntlChar, mname)
 
@@ -141,7 +144,7 @@ IC_METHOD(getIntPropertyMinValue) {
 }
 /* }}} */
 
-/* {{{ proto int IntlChar::getIntPropertyMxValue(int $property) */
+/* {{{ proto int IntlChar::getIntPropertyMaxValue(int $property) */
 ZEND_BEGIN_ARG_INFO_EX(getIntPropertyMaxValue_arginfo, 0, ZEND_RETURN_VALUE, 1)
 	ZEND_ARG_INFO(0, property)
 ZEND_END_ARG_INFO();
@@ -188,7 +191,7 @@ static UBool enumCharType_callback(enumCharType_data *context,
 	zval args[3];
 
 	ZVAL_NULL(&retval);
-	/* Note that $start is INclusive, whiel $limit is EXclusive
+	/* Note that $start is INclusive, while $limit is EXclusive
 	 * Therefore (0, 32, 15) means CPs 0..31 are of type 15
 	 */
 	ZVAL_LONG(&args[0], start);
@@ -258,7 +261,7 @@ IC_METHOD(charName) {
 	error = U_ZERO_ERROR;
 	buffer_len = u_charName(cp, (UCharNameChoice)nameChoice, ZSTR_VAL(buffer), ZSTR_LEN(buffer) + 1, &error);
 	if (U_FAILURE(error)) {
-		zend_string_free(buffer);
+		zend_string_efree(buffer);
 		INTL_CHECK_STATUS_OR_NULL(error, "Failure getting character name");
 	}
 	RETURN_NEW_STR(buffer);
@@ -665,7 +668,7 @@ IC_CHAR_METHOD_CHAR(getBidiPairedBracket)
 #undef IC_CHAR_METHOD_CHAR
 /* }}} */
 
-static zend_function_entry intlchar_methods[] = {
+static const zend_function_entry intlchar_methods[] = {
 #define IC_ME(mname) PHP_ME(IntlChar, mname, mname##_arginfo, ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	IC_ME(chr)
 	IC_ME(ord)

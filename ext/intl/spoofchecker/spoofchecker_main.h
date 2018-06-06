@@ -23,5 +23,8 @@ PHP_METHOD(Spoofchecker, isSuspicious);
 PHP_METHOD(Spoofchecker, areConfusable);
 PHP_METHOD(Spoofchecker, setAllowedLocales);
 PHP_METHOD(Spoofchecker, setChecks);
+#if U_ICU_VERSION_MAJOR_NUM >= 58
+PHP_METHOD(Spoofchecker, setRestrictionLevel);
+#endif
 
 #endif // SPOOFCHECKER_MAIN_H

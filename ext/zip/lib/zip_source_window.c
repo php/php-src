@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -61,31 +61,31 @@ zip_source_t *
 _zip_source_window_new(zip_source_t *src, zip_uint64_t start, zip_uint64_t length, zip_stat_t *st, zip_error_t *error)
 {
     struct window *ctx;
-    
+
     if (src == NULL || start + length < start) {
         zip_error_set(error, ZIP_ER_INVAL, 0);
         return NULL;
     }
-    
+
     if ((ctx=(struct window *)malloc(sizeof(*ctx))) == NULL) {
         zip_error_set(error, ZIP_ER_MEMORY, 0);
         return NULL;
     }
-    
+
     ctx->start = start;
     ctx->end = start + length;
     zip_stat_init(&ctx->stat);
     zip_error_init(&ctx->error);
     ctx->supports = (zip_source_supports(src) & ZIP_SOURCE_SUPPORTS_SEEKABLE) | (zip_source_make_command_bitmap(ZIP_SOURCE_SUPPORTS, ZIP_SOURCE_TELL, -1));
     ctx->needs_seek = (ctx->supports & ZIP_SOURCE_MAKE_COMMAND_BITMASK(ZIP_SOURCE_SEEK)) ? true : false;
-    
+
     if (st) {
         if (_zip_stat_merge(&ctx->stat, st, error) < 0) {
             free(ctx);
             return NULL;
         }
     }
-    
+
     return zip_source_layered_create(src, window_read, ctx, error);
 }
 
@@ -123,10 +123,10 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
     switch (cmd) {
         case ZIP_SOURCE_CLOSE:
             return 0;
-            
+
         case ZIP_SOURCE_ERROR:
             return zip_error_to_data(&ctx->error, data, len);
-            
+
         case ZIP_SOURCE_FREE:
             free(ctx);
             return 0;
@@ -144,7 +144,7 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
                         return -1;
                     }
                 }
-		
+
             }
 	    ctx->offset = ctx->start;
             return 0;
@@ -152,17 +152,17 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
         case ZIP_SOURCE_READ:
             if (len > ctx->end - ctx->offset)
                 len = ctx->end - ctx->offset;
-            
+
             if (len == 0)
                 return 0;
-            
+
             if (ctx->needs_seek) {
                 if (zip_source_seek(src, (zip_int64_t)ctx->offset, SEEK_SET) < 0) {
                     _zip_error_set_from_source(&ctx->error, src);
                     return -1;
                 }
             }
-            
+
             if ((ret=zip_source_read(src, data, len)) < 0) {
                 zip_error_set(&ctx->error, ZIP_ER_EOF, 0);
                 return -1;
@@ -177,7 +177,7 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
                 }
             }
             return ret;
-            
+
         case ZIP_SOURCE_SEEK:
         {
             zip_int64_t new_offset = zip_source_seek_compute_offset(ctx->offset - ctx->start, ctx->end - ctx->start, data, len, &ctx->error);
@@ -185,7 +185,7 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
             if (new_offset < 0) {
                 return -1;
             }
-            
+
             ctx->offset = (zip_uint64_t)new_offset + ctx->start;
             return 0;
         }
@@ -193,21 +193,21 @@ window_read(zip_source_t *src, void *_ctx, void *data, zip_uint64_t len, zip_sou
        case ZIP_SOURCE_STAT:
         {
             zip_stat_t *st;
-            
+
 	    st = (zip_stat_t *)data;
-            
+
             if (_zip_stat_merge(st, &ctx->stat, &ctx->error) < 0) {
                 return -1;
             }
             return 0;
         }
-            
+
         case ZIP_SOURCE_SUPPORTS:
             return ctx->supports;
-            
+
         case ZIP_SOURCE_TELL:
             return (zip_int64_t)(ctx->offset - ctx->start);
-            
+
        default:
             zip_error_set(&ctx->error, ZIP_ER_OPNOTSUPP, 0);
             return -1;
@@ -219,7 +219,7 @@ void
 _zip_deregister_source(zip_t *za, zip_source_t *src)
 {
     unsigned int i;
-    
+
     for (i=0; i<za->nopen_source; i++) {
         if (za->open_source[i] == src) {
             za->open_source[i] = za->open_source[za->nopen_source-1];
@@ -234,7 +234,7 @@ int
 _zip_register_source(zip_t *za, zip_source_t *src)
 {
     zip_source_t **open_source;
-    
+
     if (za->nopen_source+1 >= za->nopen_source_alloc) {
         unsigned int n;
         n = za->nopen_source_alloc + 10;
@@ -246,8 +246,8 @@ _zip_register_source(zip_t *za, zip_source_t *src)
         za->nopen_source_alloc = n;
         za->open_source = open_source;
     }
-    
+
     za->open_source[za->nopen_source++] = src;
-    
+
     return 0;
 }

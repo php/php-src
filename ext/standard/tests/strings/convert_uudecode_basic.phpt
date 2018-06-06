@@ -48,7 +48,7 @@ echo "TEST PASSED\n";
 
 ?>
 ===DONE=== 
---EXPECTF--
+--EXPECT--
 *** Testing convert_uudecode() : basic functionality ***
 TEST PASSED
 ===DONE===

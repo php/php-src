@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -768,7 +768,7 @@ static PHP_FUNCTION(pspell_config_runtogether)
 }
 /* }}} */
 
-/* {{{ proto bool pspell_config_mode(int conf, long mode)
+/* {{{ proto bool pspell_config_mode(int conf, int mode)
    Select mode for config (PSPELL_FAST, PSPELL_NORMAL or PSPELL_BAD_SPELLERS) */
 static PHP_FUNCTION(pspell_config_mode)
 {

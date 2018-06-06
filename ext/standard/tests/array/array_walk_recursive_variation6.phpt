@@ -81,7 +81,7 @@ var_dump( array_walk_recursive($input, "for_mixed"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk_recursive() : 'input' as an associative array ***
 -- Associative array with numeric keys --
 int(1)

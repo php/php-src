@@ -37,7 +37,7 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
   for dir in $PHP_MBSTRING_EXTRA_BUILD_DIRS; do
     PHP_ADD_BUILD_DIR([$ext_builddir/$dir], 1)
   done
-  
+
   for dir in $PHP_MBSTRING_EXTRA_INCLUDES; do
     PHP_ADD_INCLUDE([$ext_srcdir/$dir])
     PHP_ADD_INCLUDE([$ext_builddir/$dir])
@@ -54,8 +54,8 @@ AC_DEFUN([PHP_MBSTRING_EXTENSION], [
       out="php_config.h"
     fi
   fi
-  
-  if test "$PHP_MBSTRING_BUNDLED_ONIG" = "1"; then 
+
+  if test "$PHP_MBSTRING_BUNDLED_ONIG" = "1"; then
     cp $ext_srcdir/oniguruma/src/oniguruma.h $ext_srcdir/oniguruma/oniguruma.h
   fi
 
@@ -83,12 +83,12 @@ AC_DEFUN([PHP_MBSTRING_SETUP_MBREGEX], [
         AC_TRY_RUN([
 #include <stdarg.h>
 int foo(int x, ...) {
-	va_list va;
-	va_start(va, x);
-	va_arg(va, int);
-	va_arg(va, char *);
-	va_arg(va, double);
-	return 0;
+  va_list va;
+  va_start(va, x);
+  va_arg(va, int);
+  va_arg(va, char *);
+  va_arg(va, double);
+  return 0;
 }
 int main() { return foo(10, "", 3.14); }
         ], [php_cv_mbstring_stdarg=yes], [php_cv_mbstring_stdarg=no], [
@@ -101,21 +101,21 @@ int main() { return foo(10, "", 3.14); }
       AC_CHECK_SIZEOF(short, 2)
       AC_CHECK_SIZEOF(long, 4)
       AC_C_CONST
-      AC_HEADER_TIME 
+      AC_HEADER_TIME
       AC_FUNC_ALLOCA
       AC_FUNC_MEMCMP
       AC_CHECK_HEADER([stdarg.h], [
         AC_DEFINE([HAVE_STDARG_PROTOTYPES], [1], [Define to 1 if you have the <stdarg.h> header file.])
       ], [])
       AC_DEFINE([PHP_ONIG_BUNDLED], [1], [Define to 1 if the bundled oniguruma is used])
-      AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available]) 
+      AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available])
       PHP_MBSTRING_ADD_CFLAG([-DNOT_RUBY])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma])
       PHP_MBSTRING_ADD_BUILD_DIR([oniguruma/src])
       PHP_MBSTRING_ADD_INCLUDE([oniguruma])
       PHP_MBSTRING_ADD_CONFIG_HEADER([oniguruma/src/config.h])
       PHP_MBSTRING_ADD_SOURCES([
-		oniguruma/src/ascii.c
+                oniguruma/src/ascii.c
                 oniguruma/src/big5.c
                 oniguruma/src/cp1251.c
                 oniguruma/src/euc_jp.c
@@ -180,7 +180,7 @@ int main() { return foo(10, "", 3.14); }
 
       PHP_CHECK_LIBRARY(onig, onig_init, [
         PHP_ADD_LIBRARY_WITH_PATH(onig, $PHP_ONIG/$PHP_LIBDIR, MBSTRING_SHARED_LIBADD)
-        AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available]) 
+        AC_DEFINE([HAVE_ONIG], [1], [Define to 1 if the oniguruma library is available])
       ],[
         AC_MSG_ERROR([Problem with oniguruma. Please check config.log for more information.])
       ], [
@@ -214,135 +214,108 @@ return (int)(ONIG_ENCODING_KOI8 + 1);
 ])
 
 AC_DEFUN([PHP_MBSTRING_SETUP_LIBMBFL], [
-  dnl libmbfl is required and can not be disabled
-  if test "$PHP_LIBMBFL" = "yes" || test "$PHP_LIBMBFL" = "no"; then
-    dnl
-    dnl Bundled libmbfl
-    dnl
-    PHP_MBSTRING_ADD_BUILD_DIR([libmbfl])
-    PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/mbfl])
-    PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/filters])
-    PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/nls])
-    PHP_MBSTRING_ADD_INCLUDE([libmbfl])
-    PHP_MBSTRING_ADD_INCLUDE([libmbfl/mbfl])
-    PHP_MBSTRING_ADD_CONFIG_HEADER([libmbfl/config.h])
+  dnl
+  dnl Bundled libmbfl is required and can not be disabled
+  dnl
+  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl])
+  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/mbfl])
+  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/filters])
+  PHP_MBSTRING_ADD_BUILD_DIR([libmbfl/nls])
+  PHP_MBSTRING_ADD_INCLUDE([libmbfl])
+  PHP_MBSTRING_ADD_INCLUDE([libmbfl/mbfl])
+  PHP_MBSTRING_ADD_CONFIG_HEADER([libmbfl/config.h])
 
-    PHP_MBSTRING_ADD_SOURCES([
-     libmbfl/filters/html_entities.c
-     libmbfl/filters/mbfilter_7bit.c
-     libmbfl/filters/mbfilter_ascii.c
-     libmbfl/filters/mbfilter_base64.c
-     libmbfl/filters/mbfilter_big5.c
-     libmbfl/filters/mbfilter_byte2.c
-     libmbfl/filters/mbfilter_byte4.c
-     libmbfl/filters/mbfilter_cp1251.c
-     libmbfl/filters/mbfilter_cp1252.c
-     libmbfl/filters/mbfilter_cp1254.c
-     libmbfl/filters/mbfilter_cp5022x.c
-     libmbfl/filters/mbfilter_cp51932.c
-     libmbfl/filters/mbfilter_cp850.c
-     libmbfl/filters/mbfilter_cp866.c
-     libmbfl/filters/mbfilter_cp932.c
-     libmbfl/filters/mbfilter_cp936.c
-     libmbfl/filters/mbfilter_gb18030.c
-     libmbfl/filters/mbfilter_euc_cn.c
-     libmbfl/filters/mbfilter_euc_jp.c
-     libmbfl/filters/mbfilter_euc_jp_2004.c
-     libmbfl/filters/mbfilter_euc_jp_win.c
-     libmbfl/filters/mbfilter_euc_kr.c
-     libmbfl/filters/mbfilter_euc_tw.c
-     libmbfl/filters/mbfilter_htmlent.c
-     libmbfl/filters/mbfilter_hz.c
-     libmbfl/filters/mbfilter_iso2022_jp_ms.c
-     libmbfl/filters/mbfilter_iso2022jp_2004.c
-     libmbfl/filters/mbfilter_iso2022jp_mobile.c
-     libmbfl/filters/mbfilter_iso2022_kr.c
-     libmbfl/filters/mbfilter_iso8859_1.c
-     libmbfl/filters/mbfilter_iso8859_10.c
-     libmbfl/filters/mbfilter_iso8859_13.c
-     libmbfl/filters/mbfilter_iso8859_14.c
-     libmbfl/filters/mbfilter_iso8859_15.c
-     libmbfl/filters/mbfilter_iso8859_16.c
-     libmbfl/filters/mbfilter_iso8859_2.c
-     libmbfl/filters/mbfilter_iso8859_3.c
-     libmbfl/filters/mbfilter_iso8859_4.c
-     libmbfl/filters/mbfilter_iso8859_5.c
-     libmbfl/filters/mbfilter_iso8859_6.c
-     libmbfl/filters/mbfilter_iso8859_7.c
-     libmbfl/filters/mbfilter_iso8859_8.c
-     libmbfl/filters/mbfilter_iso8859_9.c
-     libmbfl/filters/mbfilter_jis.c
-     libmbfl/filters/mbfilter_koi8r.c
-     libmbfl/filters/mbfilter_armscii8.c
-     libmbfl/filters/mbfilter_qprint.c
-     libmbfl/filters/mbfilter_sjis.c
-     libmbfl/filters/mbfilter_sjis_open.c
-     libmbfl/filters/mbfilter_sjis_mobile.c
-     libmbfl/filters/mbfilter_sjis_mac.c
-     libmbfl/filters/mbfilter_sjis_2004.c
-     libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.c
-     libmbfl/filters/mbfilter_ucs2.c
-     libmbfl/filters/mbfilter_ucs4.c
-     libmbfl/filters/mbfilter_uhc.c
-     libmbfl/filters/mbfilter_utf16.c
-     libmbfl/filters/mbfilter_utf32.c
-     libmbfl/filters/mbfilter_utf7.c
-     libmbfl/filters/mbfilter_utf7imap.c
-     libmbfl/filters/mbfilter_utf8.c
-     libmbfl/filters/mbfilter_utf8_mobile.c
-     libmbfl/filters/mbfilter_uuencode.c
-     libmbfl/filters/mbfilter_koi8u.c
-     libmbfl/mbfl/mbfilter.c
-     libmbfl/mbfl/mbfilter_8bit.c
-     libmbfl/mbfl/mbfilter_pass.c
-     libmbfl/mbfl/mbfilter_wchar.c
-     libmbfl/mbfl/mbfl_convert.c
-     libmbfl/mbfl/mbfl_encoding.c
-     libmbfl/mbfl/mbfl_filter_output.c
-     libmbfl/mbfl/mbfl_ident.c
-     libmbfl/mbfl/mbfl_language.c
-     libmbfl/mbfl/mbfl_memory_device.c
-     libmbfl/mbfl/mbfl_string.c
-     libmbfl/mbfl/mbfl_allocators.c
-     libmbfl/nls/nls_de.c
-     libmbfl/nls/nls_en.c
-     libmbfl/nls/nls_ja.c
-     libmbfl/nls/nls_kr.c
-     libmbfl/nls/nls_neutral.c
-     libmbfl/nls/nls_ru.c
-     libmbfl/nls/nls_uni.c
-     libmbfl/nls/nls_zh.c
-     libmbfl/nls/nls_hy.c
-     libmbfl/nls/nls_tr.c
-     libmbfl/nls/nls_ua.c
-    ])
-    PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
-    PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
-  else
-    dnl
-    dnl External libmfl
-    dnl  
-    for inc in include include/mbfl-1.0 include/mbfl; do
-      if test -f "$PHP_LIBMBFL/$inc/mbfilter.h"; then
-        PHP_LIBMBFL_INCLUDE="$inc"
-        break
-      fi
-    done
-
-    if test -z "$PHP_LIBMBFL_INCLUDE"; then
-      AC_MSG_ERROR([mbfilter.h not found. Please reinstall libmbfl library.])
-    else 
-      PHP_ADD_INCLUDE([$PHP_LIBMBFL_INCLUDE])
-    fi
-
-    PHP_CHECK_LIBRARY(mbfl, mbfl_buffer_converter_new, [
-      PHP_ADD_LIBRARY_WITH_PATH(mbfl, $PHP_LIBMBFL/$PHP_LIBDIR, MBSTRING_SHARED_LIBADD)
-    ],[
-      AC_MSG_ERROR([Problem with libmbfl. Please check config.log for more information.])
-    ], [
-      -L$PHP_LIBMBFL/$PHP_LIBDIR
-    ])
-  fi
+  PHP_MBSTRING_ADD_SOURCES([
+    libmbfl/filters/html_entities.c
+    libmbfl/filters/mbfilter_7bit.c
+    libmbfl/filters/mbfilter_ascii.c
+    libmbfl/filters/mbfilter_base64.c
+    libmbfl/filters/mbfilter_big5.c
+    libmbfl/filters/mbfilter_byte2.c
+    libmbfl/filters/mbfilter_byte4.c
+    libmbfl/filters/mbfilter_cp1251.c
+    libmbfl/filters/mbfilter_cp1252.c
+    libmbfl/filters/mbfilter_cp1254.c
+    libmbfl/filters/mbfilter_cp5022x.c
+    libmbfl/filters/mbfilter_cp51932.c
+    libmbfl/filters/mbfilter_cp850.c
+    libmbfl/filters/mbfilter_cp866.c
+    libmbfl/filters/mbfilter_cp932.c
+    libmbfl/filters/mbfilter_cp936.c
+    libmbfl/filters/mbfilter_gb18030.c
+    libmbfl/filters/mbfilter_euc_cn.c
+    libmbfl/filters/mbfilter_euc_jp.c
+    libmbfl/filters/mbfilter_euc_jp_2004.c
+    libmbfl/filters/mbfilter_euc_jp_win.c
+    libmbfl/filters/mbfilter_euc_kr.c
+    libmbfl/filters/mbfilter_euc_tw.c
+    libmbfl/filters/mbfilter_htmlent.c
+    libmbfl/filters/mbfilter_hz.c
+    libmbfl/filters/mbfilter_iso2022_jp_ms.c
+    libmbfl/filters/mbfilter_iso2022jp_2004.c
+    libmbfl/filters/mbfilter_iso2022jp_mobile.c
+    libmbfl/filters/mbfilter_iso2022_kr.c
+    libmbfl/filters/mbfilter_iso8859_1.c
+    libmbfl/filters/mbfilter_iso8859_10.c
+    libmbfl/filters/mbfilter_iso8859_13.c
+    libmbfl/filters/mbfilter_iso8859_14.c
+    libmbfl/filters/mbfilter_iso8859_15.c
+    libmbfl/filters/mbfilter_iso8859_16.c
+    libmbfl/filters/mbfilter_iso8859_2.c
+    libmbfl/filters/mbfilter_iso8859_3.c
+    libmbfl/filters/mbfilter_iso8859_4.c
+    libmbfl/filters/mbfilter_iso8859_5.c
+    libmbfl/filters/mbfilter_iso8859_6.c
+    libmbfl/filters/mbfilter_iso8859_7.c
+    libmbfl/filters/mbfilter_iso8859_8.c
+    libmbfl/filters/mbfilter_iso8859_9.c
+    libmbfl/filters/mbfilter_jis.c
+    libmbfl/filters/mbfilter_koi8r.c
+    libmbfl/filters/mbfilter_armscii8.c
+    libmbfl/filters/mbfilter_qprint.c
+    libmbfl/filters/mbfilter_sjis.c
+    libmbfl/filters/mbfilter_sjis_open.c
+    libmbfl/filters/mbfilter_sjis_mobile.c
+    libmbfl/filters/mbfilter_sjis_mac.c
+    libmbfl/filters/mbfilter_sjis_2004.c
+    libmbfl/filters/mbfilter_tl_jisx0201_jisx0208.c
+    libmbfl/filters/mbfilter_ucs2.c
+    libmbfl/filters/mbfilter_ucs4.c
+    libmbfl/filters/mbfilter_uhc.c
+    libmbfl/filters/mbfilter_utf16.c
+    libmbfl/filters/mbfilter_utf32.c
+    libmbfl/filters/mbfilter_utf7.c
+    libmbfl/filters/mbfilter_utf7imap.c
+    libmbfl/filters/mbfilter_utf8.c
+    libmbfl/filters/mbfilter_utf8_mobile.c
+    libmbfl/filters/mbfilter_uuencode.c
+    libmbfl/filters/mbfilter_koi8u.c
+    libmbfl/mbfl/mbfilter.c
+    libmbfl/mbfl/mbfilter_8bit.c
+    libmbfl/mbfl/mbfilter_pass.c
+    libmbfl/mbfl/mbfilter_wchar.c
+    libmbfl/mbfl/mbfl_convert.c
+    libmbfl/mbfl/mbfl_encoding.c
+    libmbfl/mbfl/mbfl_filter_output.c
+    libmbfl/mbfl/mbfl_ident.c
+    libmbfl/mbfl/mbfl_language.c
+    libmbfl/mbfl/mbfl_memory_device.c
+    libmbfl/mbfl/mbfl_string.c
+    libmbfl/mbfl/mbfl_allocators.c
+    libmbfl/nls/nls_de.c
+    libmbfl/nls/nls_en.c
+    libmbfl/nls/nls_ja.c
+    libmbfl/nls/nls_kr.c
+    libmbfl/nls/nls_neutral.c
+    libmbfl/nls/nls_ru.c
+    libmbfl/nls/nls_uni.c
+    libmbfl/nls/nls_zh.c
+    libmbfl/nls/nls_hy.c
+    libmbfl/nls/nls_tr.c
+    libmbfl/nls/nls_ua.c
+  ])
+  PHP_MBSTRING_ADD_CFLAG([-DHAVE_CONFIG_H])
+  PHP_MBSTRING_ADD_INSTALL_HEADERS([libmbfl/config.h libmbfl/mbfl/eaw_table.h libmbfl/mbfl/mbfilter.h libmbfl/mbfl/mbfilter_8bit.h libmbfl/mbfl/mbfilter_pass.h libmbfl/mbfl/mbfilter_wchar.h libmbfl/mbfl/mbfl_allocators.h libmbfl/mbfl/mbfl_consts.h libmbfl/mbfl/mbfl_convert.h libmbfl/mbfl/mbfl_defs.h libmbfl/mbfl/mbfl_encoding.h libmbfl/mbfl/mbfl_filter_output.h libmbfl/mbfl/mbfl_ident.h libmbfl/mbfl/mbfl_language.h libmbfl/mbfl/mbfl_memory_device.h libmbfl/mbfl/mbfl_string.h])
 ])
 
 dnl
@@ -359,15 +332,11 @@ PHP_ARG_ENABLE([mbregex_backtrack], [whether to check multibyte regex backtrack]
 [  --disable-mbregex-backtrack
                           MBSTRING: Disable multibyte regex backtrack check], yes, no)
 
-PHP_ARG_WITH(libmbfl, [for external libmbfl],
-[  --with-libmbfl[=DIR]      MBSTRING: Use external libmbfl.  DIR is the libmbfl base
-                          install directory [BUNDLED]], no, no)
-
 PHP_ARG_WITH(onig, [for external oniguruma],
 [  --with-onig[=DIR]         MBSTRING: Use external oniguruma. DIR is the oniguruma install prefix.
                           If DIR is not set, the bundled oniguruma will be used], no, no)
 
-if test "$PHP_MBSTRING" != "no"; then  
+if test "$PHP_MBSTRING" != "no"; then
   AC_DEFINE([HAVE_MBSTRING],1,[whether to have multibyte string support])
 
   PHP_MBSTRING_ADD_BASE_SOURCES([mbstring.c php_unicode.c mb_gpc.c])
@@ -375,7 +344,7 @@ if test "$PHP_MBSTRING" != "no"; then
   if test "$PHP_MBREGEX" != "no"; then
     PHP_MBSTRING_SETUP_MBREGEX
   fi
-  
+
   dnl libmbfl is required
   PHP_MBSTRING_SETUP_LIBMBFL
   PHP_MBSTRING_EXTENSION

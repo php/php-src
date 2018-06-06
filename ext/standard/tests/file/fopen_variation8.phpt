@@ -122,7 +122,7 @@ function test_fopen($mode) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 
 --- testing include path ---
 

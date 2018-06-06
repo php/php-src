@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -163,6 +163,18 @@ char**		ftp_nlist(ftpbuf_t *ftp, const char *path, const size_t path_len);
  */
 char**		ftp_list(ftpbuf_t *ftp, const char *path, const size_t path_len, int recursive);
 
+/* populates a hashtable with the facts contained in one line of
+ * an MLSD response.
+ */
+int			ftp_mlsd_parse_line(HashTable *ht, const char *input);
+
+/* returns a NULL-terminated array of lines returned by the ftp
+ * MLSD command for the given path or NULL on error.  the return
+ * array must be freed (but don't
+ * free the array elements)
+ */
+char**		ftp_mlsd(ftpbuf_t *ftp, const char *path, const size_t path_len);
+
 /* switches passive mode on or off
  * returns true on success, false on error
  */
@@ -177,6 +189,11 @@ int		ftp_get(ftpbuf_t *ftp, php_stream *outstream, const char *path, const size_
  * returns true on success, false on error
  */
 int		ftp_put(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type, zend_long startpos);
+
+/* append the data from a file, socket, or process as a file on the remote server
+ * returns true on success, false on error
+ */
+int		ftp_append(ftpbuf_t *ftp, const char *path, const size_t path_len, php_stream *instream, ftptype_t type);
 
 /* returns the size of the given file, or -1 on error */
 zend_long		ftp_size(ftpbuf_t *ftp, const char *path, const size_t path_len);

@@ -33,7 +33,7 @@ TEST 0
 bool(true)
 bool(true)
 
-Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed, the expected length is 12 bytes in %s on line %d
+Warning: openssl_encrypt(): Setting of IV length for AEAD mode failed in %s on line %d
 bool(false)
 string(8) "p/lvgA=="
 int(1024)

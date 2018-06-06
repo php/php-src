@@ -38,11 +38,11 @@ var_dump(preg_replace_callback_array(
 		'/d/' => array("Foo", "rep"),
 		"/c/" => new Rep,
 		"/a/" => 'b',
-		"/b/" => create_function('$a', 'return "ok";')), 'a', -1, $count));
+		"/b/" => function($a) { return "ok"; }), 'a', -1, $count));
 
 var_dump($count);
 ?>
---EXPECTF--
+--EXPECT--
 string(2) "ok"
 string(2) "ok"
 string(2) "ok"

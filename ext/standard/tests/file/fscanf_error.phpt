@@ -78,7 +78,7 @@ int(-1)
 
 Notice: Undefined variable: undefined_var in %s on line %d
 
-Notice: Use of undefined constant undefined_constant - assumed 'undefined_constant' in %s on line %d
+Warning: Use of undefined constant undefined_constant - assumed 'undefined_constant' (this will throw an Error in a future version of PHP) in %s on line %d
 array(0) {
 }
 array(0) {

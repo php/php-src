@@ -19,7 +19,7 @@ var_dump($ao2->natsort('blah'));
 var_dump($ao2);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ArrayObject::natsort() : basic functionality ***
 bool(true)
 object(ArrayObject)#1 (1) {

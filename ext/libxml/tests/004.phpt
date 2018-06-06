@@ -37,7 +37,7 @@ Warning: libxml_set_streams_context() expects parameter 1 to be resource, string
 NULL
 bool(true)
 
-Warning: libxml_set_streams_context() expects parameter 1 to be resource, integer given in %s004.php on line %d
+Warning: libxml_set_streams_context() expects parameter 1 to be resource, int given in %s004.php on line %d
 NULL
 bool(true)
 

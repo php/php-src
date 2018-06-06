@@ -1,15 +1,8 @@
 --TEST--
 Bug #34657 (If you get a communication problem when loading the WSDL, it fatal's)
 --SKIPIF--
-<?php 
-require_once('skipif.inc'); 
-if (extension_loaded("openssl")) {
-	/* 
-	 when openssl loaded, tcp stream is less verbose, so some error messages are missing 
-	 so let's skip the test in this case  
-	 */
-	die("skip OpenSSL extension required");
-}
+<?php
+require_once('skipif.inc');
 ?>
 --FILE--
 <?php

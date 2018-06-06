@@ -49,5 +49,5 @@ $c = new C;
 $c->func('This should work!');
 
 ?>
---EXPECTF--
+--EXPECT--
 string(26) "A::func: This should work!"

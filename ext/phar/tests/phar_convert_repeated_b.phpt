@@ -74,17 +74,19 @@ try {
 } catch(Exception $e) {
 	echo $e->getMessage()."\n";
 }
-
 ?>
 ===DONE===
 --CLEAN--
-<?php 
+<?php
+echo dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz' . "\n";
+
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.phar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar.gz');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.tar');
-unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.2.tar');
+unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.2.tar');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.zip');
 unlink(dirname(__FILE__) . '/' . basename(__FILE__, '.clean.php') . '.1.zip');
+
 ?>
 --EXPECT--
 =================== new PharData() ==================

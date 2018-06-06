@@ -3,13 +3,14 @@ Bug #46665 (Triggering autoload with a variable classname causes truncated autol
 --FILE--
 <?php
 
-$baz = '\\Foo\\Bar\\Baz';
-new $baz();
-function __autoload($class) {
+spl_autoload_register(function ($class) {
     var_dump($class);
     require __DIR__ .'/bug46665_autoload.inc';
-}
+});
+
+$baz = '\\Foo\\Bar\\Baz';
+new $baz();
 
 ?>
 --EXPECTF--
-%string|unicode%(11) "Foo\Bar\Baz"
+string(11) "Foo\Bar\Baz"

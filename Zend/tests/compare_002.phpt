@@ -48,7 +48,7 @@ foreach($a as $var) {
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} === array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)}
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== string(0) ""
 array(3) {  [0]=>  int(1)  [1]=>  int(2)  [2]=>  int(3)} !== int(1)

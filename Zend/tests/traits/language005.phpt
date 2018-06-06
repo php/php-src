@@ -36,5 +36,5 @@ $t->bigTalk();
 $t->talk();
 
 ?>
---EXPECTF--	
+--EXPECT--	
 bAB

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine, Func Info                                               |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 The PHP Group                                |
+   | Copyright (c) 1998-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -22,14 +22,15 @@
 #include "zend_ssa.h"
 
 /* func flags */
-#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)
+#define ZEND_FUNC_INDIRECT_VAR_ACCESS      (1<<0)  /* accesses varables by name   */
 #define ZEND_FUNC_HAS_CALLS                (1<<1)
-#define ZEND_FUNC_VARARG                   (1<<2)
+#define ZEND_FUNC_VARARG                   (1<<2)  /* uses func_get_args()        */
 #define ZEND_FUNC_NO_LOOPS                 (1<<3)
 #define ZEND_FUNC_IRREDUCIBLE              (1<<4)
 #define ZEND_FUNC_RECURSIVE                (1<<7)
 #define ZEND_FUNC_RECURSIVE_DIRECTLY       (1<<8)
 #define ZEND_FUNC_RECURSIVE_INDIRECTLY     (1<<9)
+#define ZEND_FUNC_HAS_EXTENDED_INFO        (1<<10)
 
 /* The following flags are valid only for return values of internal functions
  * returned by zend_get_func_info()

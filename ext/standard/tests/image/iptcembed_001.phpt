@@ -13,6 +13,6 @@ unlink($file);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 Done	

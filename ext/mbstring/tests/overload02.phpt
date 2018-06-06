@@ -29,6 +29,7 @@ foreach($ngchars as $c) {
 }
 ?>
 --EXPECT--
+Deprecated: The mbstring.func_overload directive is deprecated in Unknown on line 0
 EUC-JP
 int(10)
 int(8)

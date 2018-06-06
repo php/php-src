@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -131,12 +131,6 @@ ub4 _oci_error(OCIError *err, pdo_dbh_t *dbh, pdo_stmt_t *stmt, char *what, swor
 				case 1013:	/* user requested cancel of current operation */
 					zend_bailout();
 					break;
-
-#if 0
-				case 955:	/* ORA-00955: name is already used by an existing object */
-					*pdo_err = PDO_ERR_ALREADY_EXISTS;
-					break;
-#endif
 
 				case 12154:	/* ORA-12154: TNS:could not resolve service name */
 					strcpy(*pdo_err, "42S02");
@@ -575,7 +569,7 @@ static int pdo_oci_check_liveness(pdo_dbh_t *dbh) /* {{{ */
 }
 /* }}} */
 
-static struct pdo_dbh_methods oci_methods = {
+static const struct pdo_dbh_methods oci_methods = {
 	oci_handle_closer,
 	oci_handle_preparer,
 	oci_handle_doer,
@@ -699,6 +693,13 @@ static int pdo_oci_handle_factory(pdo_dbh_t *dbh, zval *driver_options) /* {{{ *
 		goto cleanup;
 	}
 
+	/* Get max character width */
+ 	H->last_err = OCINlsNumericInfoGet(H->env, H->err, &H->max_char_width, OCI_NLS_CHARSET_MAXBYTESZ);
+ 	if (H->last_err) {
+ 		oci_drv_error("OCINlsNumericInfoGet: OCI_NLS_CHARSET_MAXBYTESZ");
+ 		goto cleanup;
+ 	}
+
 	dbh->methods = &oci_methods;
 	dbh->alloc_own_columns = 1;
 	dbh->native_case = PDO_CASE_UPPER;
@@ -720,7 +721,7 @@ cleanup:
 }
 /* }}} */
 
-pdo_driver_t pdo_oci_driver = {
+const pdo_driver_t pdo_oci_driver = {
 	PDO_DRIVER_HEADER(oci),
 	pdo_oci_handle_factory
 };

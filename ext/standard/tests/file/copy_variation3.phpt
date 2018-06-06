@@ -75,7 +75,7 @@ echo "*** Done ***\n";
 unlink(dirname(__FILE__)."/copy_variation3.tmp");
 ?>
 
---EXPECTF--
+--EXPECT--
 *** Test copy() function: destination file names containing whitespaces ***
 Size of the source file before copy operation => int(1500)
 

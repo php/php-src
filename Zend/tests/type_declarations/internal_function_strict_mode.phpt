@@ -26,9 +26,9 @@ try {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Trying Ord With Integer
-*** Caught ord() expects parameter 1 to be string, integer given
+*** Caught ord() expects parameter 1 to be string, int given
 *** Trying Array Map With Invalid Callback
 *** Caught array_map() expects parameter 1 to be a valid callback, first array member is not a valid class name or object
 *** Trying Strlen With Float

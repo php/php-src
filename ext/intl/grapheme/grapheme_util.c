@@ -138,7 +138,6 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	UBreakIterator* bi = NULL;
 	UErrorCode status;
 	UStringSearch* src = NULL;
-	UCollator *coll;
 
 	if(puchar_pos) {
 		*puchar_pos = -1;
@@ -166,7 +165,7 @@ int32_t grapheme_strpos_utf16(char *haystack, size_t haystack_len, char *needle,
 	STRPOS_CHECK_STATUS(status, "Error creating search object");
 
 	if(f_ignore_case) {
-		coll = usearch_getCollator(src);
+		UCollator *coll = usearch_getCollator(src);
 		status = U_ZERO_ERROR;
 		ucol_setAttribute(coll, UCOL_STRENGTH, UCOL_SECONDARY, &status);
 		STRPOS_CHECK_STATUS(status, "Error setting collation strength");

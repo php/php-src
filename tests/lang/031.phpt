@@ -49,8 +49,10 @@ while(list(,$o) = each($arrayOuter)){
 reset($arrayOuter);
 reset($arrayInner);
 ?>
---EXPECT--
+--EXPECTF--
 Correct - with inner loop reset.
+
+Deprecated: The each() function is deprecated. This message will be suppressed on further calls in %s on line %d
 inloop 0 for key1
 inloop 1 for key1
 inloop 0 for key2

@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -363,7 +363,7 @@ PHP_FUNCTION(round)
 	double return_val;
 
 	ZEND_PARSE_PARAMETERS_START(1, 3)
-		Z_PARAM_ZVAL_DEREF(value)
+		Z_PARAM_ZVAL(value)
 		Z_PARAM_OPTIONAL
 		Z_PARAM_LONG(precision)
 		Z_PARAM_LONG(mode)
@@ -627,8 +627,8 @@ PHP_FUNCTION(pow)
 	zval *zbase, *zexp;
 
 	ZEND_PARSE_PARAMETERS_START(2, 2)
-		Z_PARAM_ZVAL_DEREF_EX(zbase, 0, 1)
-		Z_PARAM_ZVAL_DEREF_EX(zexp, 0, 1)
+		Z_PARAM_ZVAL(zbase)
+		Z_PARAM_ZVAL(zexp)
 	ZEND_PARSE_PARAMETERS_END();
 
 	pow_function(return_value, zbase, zexp);
@@ -929,9 +929,10 @@ PHPAPI zend_string * _php_math_longtobase(zval *arg, int base)
 	*ptr = '\0';
 
 	do {
+		ZEND_ASSERT(ptr > buf);
 		*--ptr = digits[value % base];
 		value /= base;
-	} while (ptr > buf && value);
+	} while (value);
 
 	return zend_string_init(ptr, end - ptr, 0);
 }
@@ -983,7 +984,7 @@ PHP_FUNCTION(bindec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1000,7 +1001,7 @@ PHP_FUNCTION(hexdec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1017,7 +1018,7 @@ PHP_FUNCTION(octdec)
 	zval *arg;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_string_ex(arg);
@@ -1035,7 +1036,7 @@ PHP_FUNCTION(decbin)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1052,7 +1053,7 @@ PHP_FUNCTION(decoct)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1069,7 +1070,7 @@ PHP_FUNCTION(dechex)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(1, 1)
-		Z_PARAM_ZVAL_DEREF(arg)
+		Z_PARAM_ZVAL(arg)
 	ZEND_PARSE_PARAMETERS_END();
 
 	convert_to_long_ex(arg);
@@ -1087,7 +1088,7 @@ PHP_FUNCTION(base_convert)
 	zend_string *result;
 
 	ZEND_PARSE_PARAMETERS_START(3, 3)
-		Z_PARAM_ZVAL_DEREF(number)
+		Z_PARAM_ZVAL(number)
 		Z_PARAM_LONG(frombase)
 		Z_PARAM_LONG(tobase)
 	ZEND_PARSE_PARAMETERS_END();
@@ -1143,6 +1144,11 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 		return tmpbuf;
 	}
 
+	/* Check if the number is no longer negative after rounding */
+	if (is_negative && d == 0) {
+		is_negative = 0;
+	}
+
 	/* find decimal point, if expected */
 	if (dec) {
 		dp = strpbrk(ZSTR_VAL(tmpbuf), ".,");
@@ -1188,7 +1194,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	 * we requested due to internal buffer limitations */
 	if (dec) {
 		size_t declen = (dp ? s - dp : 0);
-		size_t topad = dec > declen ? dec - declen : 0;
+		size_t topad = (size_t)dec > declen ? dec - declen : 0;
 
 		/* pad with '0's */
 		while (topad--) {
@@ -1226,7 +1232,7 @@ PHPAPI zend_string *_php_math_number_format_ex(double d, int dec, char *dec_poin
 	}
 
 	ZSTR_LEN(res) = reslen;
-	zend_string_release(tmpbuf);
+	zend_string_release_ex(tmpbuf, 0);
 	return res;
 }
 

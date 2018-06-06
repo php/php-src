@@ -100,7 +100,7 @@ AC_FUNC_ALLOCA
 AC_CHECK_FUNCS(memcpy strdup getpid kill strtod strtol finite fpclass sigsetjmp)
 AC_ZEND_BROKEN_SPRINTF
 
-AC_CHECK_FUNCS(finite isfinite isinf isnan)
+AC_CHECK_DECLS([isfinite, isnan, isinf], [], [], [[#include <math.h>]])
 
 ZEND_FP_EXCEPT
 
