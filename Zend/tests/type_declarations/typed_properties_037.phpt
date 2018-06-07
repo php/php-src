@@ -12,6 +12,6 @@ object(class@anonymous)#%d (%d) {
   ["bar"]=>
   int(10)
   ["qux"]=>
-  uninitialized(integer)
+  uninitialized(int)
 }
 

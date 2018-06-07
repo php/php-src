@@ -49,4 +49,4 @@ try {
 }
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with integer type can only be integer in %styped_properties_049.php on line 3
+Fatal error: Default value for properties with int type can only be int in %styped_properties_049.php on line 3

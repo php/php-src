@@ -4751,7 +4751,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -6835,7 +6835,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -9905,7 +9905,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -13561,7 +13561,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CONST_
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -15145,7 +15145,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_TMPVAR
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -17007,7 +17007,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_TMPVAR_CV_HAN
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -32516,7 +32516,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_U
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -34731,7 +34731,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_TMPVAR
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -37575,7 +37575,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_UNUSED_CV_HAN
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -42676,7 +42676,7 @@ static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_C
 		zval *retval;
 
 		if (IS_CONST == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -46920,7 +46920,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_TMPVAR_HAN
 		zval *retval;
 
 		if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
@@ -52976,7 +52976,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_R_SPEC_CV_CV_HANDLER
 		zval *retval;
 
 		if (IS_CV == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);

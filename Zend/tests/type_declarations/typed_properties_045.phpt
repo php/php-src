@@ -24,7 +24,7 @@ foreach ($foo = new Foo as $k => &$val) {
 --EXPECT--
 int(0)
 int(20)
-Cannot assign array to reference of type integer
+Cannot assign array to reference of type int
 float(0.5)
 float(20)
 Cannot assign array to reference of type float

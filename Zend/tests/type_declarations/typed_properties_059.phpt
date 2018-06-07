@@ -19,11 +19,11 @@ var_dump($x);
 --EXPECT--
 object(A)#1 (2) {
   ["a2"]=>
-  uninitialized(integer)
+  uninitialized(int)
   ["b2"]=>
   NULL
   ["a1"]=>
-  uninitialized(integer)
+  uninitialized(int)
   ["b1"]=>
   NULL
 }

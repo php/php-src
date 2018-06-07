@@ -15,7 +15,7 @@ $foo = new Foo();
 var_dump($foo->inc());
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property Foo::$bar must be integer, float used in %s:6
+Fatal error: Uncaught TypeError: Typed property Foo::$bar must be int, float used in %s:6
 Stack trace:
 #0 %s(12): Foo->inc()
 #1 {main}

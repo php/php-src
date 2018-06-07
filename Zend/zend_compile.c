@@ -2708,8 +2708,7 @@ static zend_op *zend_compile_prop(znode *result, zend_ast *ast, uint32_t type, i
 {
 	uint32_t offset = zend_delayed_compile_begin();
 	zend_op *opline = zend_delayed_compile_prop(result, ast, type);
-	if (by_ref) {
-		/* TODO(typed_props) extended_value is now used for the cache slot */
+	if (by_ref && (type == BP_VAR_W || type == BP_VAR_FUNC_ARG)) { /* shared with cache_slot */
 		opline->extended_value |= ZEND_FETCH_REF;
 	}
 	return zend_delayed_compile_end(offset);

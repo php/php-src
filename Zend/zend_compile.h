@@ -876,8 +876,7 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_TYPE_MASK	0xe
 
-/* TODO(typed_refs) Is this still free? */
-#define ZEND_FETCH_REF			    0x00400000
+#define ZEND_FETCH_REF			(1<<0)
 
 #define ZEND_ISEMPTY			(1<<0)
 

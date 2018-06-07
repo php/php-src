@@ -25,7 +25,7 @@ var_dump($o->foo);
 unset($o);
 ?>
 --EXPECT--
-Typed property A::$foo must be string, integer used
+Typed property A::$foo must be string, int used
 string(3) "100"
-Typed property A::$foo must be string, integer used
+Typed property A::$foo must be string, int used
 string(3) "100"

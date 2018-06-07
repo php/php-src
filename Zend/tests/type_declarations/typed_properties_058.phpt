@@ -32,6 +32,6 @@ for ($i = 0; $i < 2; $i++) {
 ?>
 --EXPECT--
 int(5)
-Typed property B::$foo must be string, integer used
-Typed property B::$foo must be string, integer used
+Typed property B::$foo must be string, int used
+Typed property B::$foo must be string, int used
 

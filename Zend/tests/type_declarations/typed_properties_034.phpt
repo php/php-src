@@ -38,11 +38,11 @@ var_dump($foo);
 ?>
 --EXPECTF--
 int(42)
-Cannot assign null to reference of type integer
+Cannot assign null to reference of type int
 int(1)
 int(10)
 int(10)
-Cannot assign null to reference of type integer
+Cannot assign null to reference of type int
 object(class@anonymous)#1 (2) {
   ["bar"]=>
   &int(10)

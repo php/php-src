@@ -25,7 +25,7 @@ try {
 var_dump($foo);
 ?>
 --EXPECTF--
-Cannot assign float to reference of type integer
+Cannot assign float to reference of type int
 object(class@anonymous)#1 (4) {
   ["foo"]=>
   int(2)

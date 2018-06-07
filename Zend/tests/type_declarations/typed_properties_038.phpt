@@ -39,22 +39,22 @@ try {
 
 var_dump($foo);
 --EXPECTF--
-string(64) "Typed property class@anonymous::$bar must be integer, float used"
+string(60) "Typed property class@anonymous::$bar must be int, float used"
 object(class@anonymous)#%d (%d) {
   ["bar"]=>
   int(%d)
 }
-string(64) "Typed property class@anonymous::$bar must be integer, float used"
+string(60) "Typed property class@anonymous::$bar must be int, float used"
 object(class@anonymous)#%d (%d) {
   ["bar"]=>
   int(%d)
 }
-string(64) "Typed property class@anonymous::$bar must be integer, float used"
+string(60) "Typed property class@anonymous::$bar must be int, float used"
 object(class@anonymous)#%d (%d) {
   ["bar"]=>
   int(%d)
 }
-string(64) "Typed property class@anonymous::$bar must be integer, float used"
+string(60) "Typed property class@anonymous::$bar must be int, float used"
 object(class@anonymous)#%d (%d) {
   ["bar"]=>
   int(%d)

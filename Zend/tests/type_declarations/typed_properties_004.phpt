@@ -11,7 +11,7 @@ new class("PHP 7 is better than you, and it knows it ...") {
 };
 ?>
 --EXPECTF--
-Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must be integer, string used in %s:6
+Fatal error: Uncaught TypeError: Typed property class@anonymous::$int must be int, string used in %s:6
 Stack trace:
 #0 %s(2): class@anonymous->__construct('PHP 7 is better...')
 #1 {main}

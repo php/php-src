@@ -1,5 +1,5 @@
 --TEST--
-Memory leaks on wrong assignment to typed roperty
+Memory leaks on wrong assignment to typed property
 --FILE--
 <?php
 class Foo {
@@ -22,8 +22,8 @@ for ($i = 0; $i < 5; $i++) {
 	}
 }
 --EXPECT--
-Typed property Foo::$bbb must be integer, string used
-Typed property Foo::$bbb must be integer, string used
-Typed property Foo::$bbb must be integer, string used
-Typed property Foo::$bbb must be integer, string used
-Typed property Foo::$bbb must be integer, string used
+Typed property Foo::$bbb must be int, string used
+Typed property Foo::$bbb must be int, string used
+Typed property Foo::$bbb must be int, string used
+Typed property Foo::$bbb must be int, string used
+Typed property Foo::$bbb must be int, string used

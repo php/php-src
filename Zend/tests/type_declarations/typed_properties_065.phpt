@@ -45,11 +45,11 @@ echo gettype($a->foo),"\n";
 --EXPECT--
 int(2)
 int(21)
-Cannot assign string to reference of type integer
+Cannot assign string to reference of type int
 int(21)
 int(20)
 int(19)
-Cannot assign float to reference of type integer
+Cannot assign float to reference of type int
 integer
-Cannot assign float to reference of type integer
+Cannot assign float to reference of type int
 integer

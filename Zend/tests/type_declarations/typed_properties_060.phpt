@@ -16,7 +16,7 @@ $o->a = "a";
 --EXPECTF--
 int(1)
 
-Fatal error: Uncaught TypeError: Typed property A::$a must be integer, string used in %s:%d
+Fatal error: Uncaught TypeError: Typed property A::$a must be int, string used in %s:%d
 Stack trace:
 #0 {main}
   thrown in %s on line %d

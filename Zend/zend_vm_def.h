@@ -2066,7 +2066,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 		zval *retval;
 
 		if (OP2_TYPE == IS_CONST) {
-			cache_slot = CACHE_ADDR(opline->extended_value);
+			cache_slot = CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF /* FUNC_ARG fetch may contain it */);
 
 			if (EXPECTED(zobj->ce == CACHED_PTR_EX(cache_slot))) {
 				uintptr_t prop_offset = (uintptr_t)CACHED_PTR_EX(cache_slot + 1);
