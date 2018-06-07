@@ -2476,12 +2476,11 @@ str_offset:
 	}
 }
 
-/* TODO(typed_refs) Can we use OPLINE_DC instead of passing by_ref? */
 static zend_always_inline void zend_fetch_property_address(zval *result, zval *container, uint32_t container_op_type, zval *prop_ptr, uint32_t prop_op_type, void **cache_slot, int type, uint32_t by_ref OPLINE_DC)
 {
 	zval *ptr;
 
-    if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
+	if (container_op_type != IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) != IS_OBJECT)) {
 		do {
 			if (Z_ISREF_P(container)) {
 				container = Z_REFVAL_P(container);
@@ -2508,7 +2507,7 @@ static zend_always_inline void zend_fetch_property_address(zval *result, zval *c
 			if (EXPECTED(Z_TYPE_P(ptr) != IS_UNDEF)) {
 return_indirect:
 				ZVAL_INDIRECT(result, ptr);
-				if ((by_ref & ZEND_FETCH_REF)
+				if (by_ref
 				 && (prop_op_type == IS_CONST || EXPECTED(Z_TYPE_P(prop_ptr) == IS_STRING))
 				 && Z_TYPE_P(ptr) != IS_REFERENCE) {
 					zend_property_info *prop_info;

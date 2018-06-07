@@ -4810,7 +4810,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -4905,7 +4904,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -6897,7 +6895,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -6993,7 +6990,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -9968,7 +9964,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -10063,7 +10058,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CONST_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -13626,7 +13620,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -13721,7 +13714,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -15213,7 +15205,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -15309,7 +15300,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -17076,7 +17066,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_IS_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -17171,7 +17160,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FAST_CONCAT_SPEC_TMPVAR_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -22826,7 +22814,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CONST_HAN
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -23924,7 +23912,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -23943,7 +23931,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -24050,7 +24038,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -24069,7 +24057,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -25621,7 +25609,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_TMPVAR_HA
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -26664,7 +26652,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -26683,7 +26671,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -26790,7 +26778,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -26809,7 +26797,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -29871,7 +29859,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_VAR_CV_HANDLE
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_VAR, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_VAR == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -31018,7 +31006,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -31037,7 +31025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
@@ -31144,7 +31132,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -31163,7 +31151,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
@@ -32587,7 +32575,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -32603,7 +32590,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CONST_
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -32727,7 +32714,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -33367,7 +33353,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -33386,7 +33372,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -33492,7 +33478,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -33511,7 +33497,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -34805,7 +34791,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -34821,7 +34806,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_TMPVAR
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -34946,7 +34931,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -35586,7 +35570,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -35605,7 +35589,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -35711,7 +35695,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -35730,7 +35714,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -37650,7 +37634,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -37666,7 +37649,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_UNUSED_CV_HAN
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_UNUSED, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_UNUSED == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -37790,7 +37773,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_UNUSED_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -38430,7 +38412,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -38449,7 +38431,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
@@ -38555,7 +38537,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -38574,7 +38556,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
@@ -42753,7 +42735,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -42769,7 +42750,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CONST_HAND
 
 	property = RT_CONSTANT(opline, opline->op2);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CONST, ((IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -42893,7 +42874,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -43962,7 +43942,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -43981,7 +43961,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -44087,7 +44067,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -44106,7 +44086,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CONST == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CONST == IS_CONST) {
@@ -47000,7 +46980,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -47016,7 +46995,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_TMPVAR_HAN
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 	zval_ptr_dtor_nogc(free_op2);
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -47141,7 +47120,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -48155,7 +48133,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -48174,7 +48152,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -48280,7 +48258,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -48299,7 +48277,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
@@ -53057,7 +53035,6 @@ fetch_obj_r_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF + CACHE_SLOT collision */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -53073,7 +53050,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_W_SPEC_CV_CV_HANDLER
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 	result = EX_VAR(opline->result.var);
-	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL), BP_VAR_W, opline->extended_value OPLINE_CC);
+	zend_fetch_property_address(result, container, IS_CV, property, IS_CV, ((IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_FETCH_REF) : NULL), BP_VAR_W, opline->extended_value & ZEND_FETCH_REF OPLINE_CC);
 
 	if (IS_CV == IS_VAR) {
 		FREE_VAR_PTR_AND_EXTRACT_RESULT_IF_NECESSARY(free_op1, result);
@@ -53197,7 +53174,6 @@ fetch_obj_is_no_object:
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-/* TODO(typed_refs) FETCH_REF collision. Maybe also missing flag on forwarding */
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FETCH_OBJ_FUNC_ARG_SPEC_CV_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	if (UNEXPECTED(ZEND_CALL_INFO(EX(call)) & ZEND_CALL_SEND_ARG_BY_REF)) {
@@ -54314,7 +54290,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -54333,7 +54309,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
@@ -54439,7 +54415,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
 
-	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0);
+	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
 	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
 	    UNEXPECTED(!Z_ISERROR(variable))) {
@@ -54458,7 +54434,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	} else {
 		variable_ptr = Z_INDIRECT(variable);
 
-		if ((IS_CV == IS_CONST) ? EXPECTED(ZEND_DYNAMIC_PROPERTY_OFFSET != (uint32_t)(intptr_t) CACHED_PTR_EX(cache_addr + 1)) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
 			if (IS_CV == IS_CONST) {
