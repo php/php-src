@@ -246,7 +246,7 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
         length = mnd_sprintf(
             &value,
             0,
-            "%s%02u:%02u:%02u.%*u",
+            "%s%02u:%02u:%02u.%0*u",
             (t.neg ? "-" : ""),
             t.hour,
             t.minute,
@@ -341,7 +341,7 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
     	length = mnd_sprintf(
             &value,
             0,
-            "%04u-%02u-%02u %02u:%02u:%02u.%*u",
+            "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
             t.year,
             t.month,
             t.day,
