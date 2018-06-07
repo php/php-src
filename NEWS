@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.1.19
+22 Jun 2018, PHP 7.1.19
 
 - CLI Server:
   . Fixed bug #76333 (PHP built-in server does not find files if root path
