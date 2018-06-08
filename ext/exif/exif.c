@@ -4650,11 +4650,11 @@ PHP_FUNCTION(exif_thumbnail)
 		if (!ImageInfo.Thumbnail.width || !ImageInfo.Thumbnail.height) {
 			exif_scan_thumbnail(&ImageInfo);
 		}
-		ZEND_TRY_ASSIGN_LONG(p_width,  ImageInfo.Thumbnail.width);
-		ZEND_TRY_ASSIGN_LONG(p_height, ImageInfo.Thumbnail.height);
+		ZEND_TRY_ASSIGN_LONG(z_width,  ImageInfo.Thumbnail.width);
+		ZEND_TRY_ASSIGN_LONG(z_height, ImageInfo.Thumbnail.height);
 	}
 	if (arg_c >= 4)	{
-		ZEND_TRY_ASSIGN_LONG(p_imagetype, ImageInfo.Thumbnail.filetype);
+		ZEND_TRY_ASSIGN_LONG(z_imagetype, ImageInfo.Thumbnail.filetype);
 	}
 
 #ifdef EXIF_DEBUG
