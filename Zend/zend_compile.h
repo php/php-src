@@ -876,10 +876,9 @@ void zend_assert_valid_class_name(const zend_string *const_name);
 
 #define ZEND_FETCH_TYPE_MASK	0xe
 
-#define ZEND_ISEMPTY			(1<<0)
-
-/* Stored in ex_flags */
+/* Flags stored in ex_flags */
 #define ZEND_LAST_CATCH			(1<<0)
+#define ZEND_ISEMPTY			(1<<0)
 
 #define ZEND_FREE_ON_RETURN     (1<<0)
 
