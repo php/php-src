@@ -147,9 +147,10 @@ struct _zend_op {
 	uint32_t extended_value;
 	uint32_t lineno;
 	zend_uchar opcode;
-	zend_uchar op1_type;
-	zend_uchar op2_type;
+	zend_uchar op1_type : 4;
+	zend_uchar op2_type : 4;
 	zend_uchar result_type;
+	zend_uchar ex_flags;
 };
 
 

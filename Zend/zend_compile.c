@@ -95,6 +95,7 @@ static void init_op(zend_op *op)
 {
 	MAKE_NOP(op);
 	op->extended_value = 0;
+	op->ex_flags = 0;
 	op->lineno = CG(zend_lineno);
 }
 
