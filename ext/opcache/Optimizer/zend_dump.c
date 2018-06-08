@@ -670,7 +670,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else {
 		uint32_t op2_flags = ZEND_VM_OP2_FLAGS(flags);
 		if (ZEND_VM_OP_JMP_ADDR == (op2_flags & ZEND_VM_OP_MASK)) {
-			if (opline->opcode != ZEND_CATCH || !(opline->extended_value & ZEND_LAST_CATCH)) {
+			if (opline->opcode != ZEND_CATCH || !(opline->ex_flags & ZEND_LAST_CATCH)) {
 				if (b) {
 					fprintf(stderr, " BB%d", b->successors[n++]);
 				} else {

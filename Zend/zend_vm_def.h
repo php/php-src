@@ -4082,11 +4082,11 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 	if (EG(exception) == NULL) {
 		ZEND_VM_JMP_EX(OP_JMP_ADDR(opline, opline->op2), 0);
 	}
-	catch_ce = CACHED_PTR(opline->extended_value & ~ZEND_LAST_CATCH);
+	catch_ce = CACHED_PTR(opline->extended_value);
 	if (UNEXPECTED(catch_ce == NULL)) {
 		catch_ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(opline, opline->op1)), RT_CONSTANT(opline, opline->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
 
-		CACHE_PTR(opline->extended_value & ~ZEND_LAST_CATCH, catch_ce);
+		CACHE_PTR(opline->extended_value, catch_ce);
 	}
 	ce = EG(exception)->ce;
 
@@ -4098,7 +4098,7 @@ ZEND_VM_HANDLER(107, ZEND_CATCH, CONST, JMP_ADDR, LAST_CATCH|CACHE_SLOT)
 
 	if (ce != catch_ce) {
 		if (!catch_ce || !instanceof_function(ce, catch_ce)) {
-			if (opline->extended_value & ZEND_LAST_CATCH) {
+			if (opline->ex_flags & ZEND_LAST_CATCH) {
 				zend_rethrow_exception(execute_data);
 				HANDLE_EXCEPTION();
 			}

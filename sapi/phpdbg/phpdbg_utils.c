@@ -764,16 +764,16 @@ PHPDBG_API zend_bool phpdbg_check_caught_ex(zend_execute_data *execute_data, zen
 			while (1) {
 				zend_class_entry *ce;
 
-				if (!(ce = CACHED_PTR(cur->extended_value & ~ZEND_LAST_CATCH))) {
+				if (!(ce = CACHED_PTR(cur->extended_value))) {
 					ce = zend_fetch_class_by_name(Z_STR_P(RT_CONSTANT(cur, cur->op1)), RT_CONSTANT(cur, cur->op1) + 1, ZEND_FETCH_CLASS_NO_AUTOLOAD);
-					CACHE_PTR(cur->extended_value & ~ZEND_LAST_CATCH, ce);
+					CACHE_PTR(cur->extended_value, ce);
 				}
 
 				if (ce == exception->ce || (ce && instanceof_function(exception->ce, ce))) {
 					return 1;
 				}
 
-				if (cur->extended_value & ZEND_LAST_CATCH) {
+				if (cur->ex_flags & ZEND_LAST_CATCH) {
 					return 0;
 				}
 

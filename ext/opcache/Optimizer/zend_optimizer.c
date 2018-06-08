@@ -275,7 +275,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & ZEND_LAST_CATCH);
+			opline->extended_value = alloc_cache_slots(op_array, 1);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
 		case ZEND_DEFINED:
@@ -819,7 +819,7 @@ void zend_optimizer_migrate_jump(zend_op_array *op_array, zend_op *new_opline, z
 			new_opline->extended_value = ZEND_OPLINE_NUM_TO_OFFSET(op_array, new_opline, ZEND_OFFSET_TO_OPLINE_NUM(op_array, opline, opline->extended_value));
 			break;
 		case ZEND_CATCH:
-			if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+			if (!(opline->ex_flags & ZEND_LAST_CATCH)) {
 				ZEND_SET_OP_JMP_ADDR(new_opline, new_opline->op2, ZEND_OP2_JMP_ADDR(opline));
 			}
 			break;
@@ -859,7 +859,7 @@ void zend_optimizer_shift_jump(zend_op_array *op_array, zend_op *opline, uint32_
 			ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 			break;
 		case ZEND_CATCH:
-			if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+			if (!(opline->ex_flags & ZEND_LAST_CATCH)) {
 				ZEND_SET_OP_JMP_ADDR(opline, opline->op2, ZEND_OP2_JMP_ADDR(opline) - shiftlist[ZEND_OP2_JMP_ADDR(opline) - op_array->opcodes]);
 			}
 			break;
@@ -1227,7 +1227,7 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 					break;
 				case ZEND_CATCH:
-					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					if (!(opline->ex_flags & ZEND_LAST_CATCH)) {
 						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 					}
 					break;
@@ -1313,7 +1313,7 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 					opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 					break;
 				case ZEND_CATCH:
-					if (!(opline->extended_value & ZEND_LAST_CATCH)) {
+					if (!(opline->ex_flags & ZEND_LAST_CATCH)) {
 						opline->op2.jmp_addr = &op_array->opcodes[opline->op2.jmp_addr - old_opcodes];
 					}
 					break;

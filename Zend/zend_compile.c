@@ -5162,7 +5162,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 			opline->result.var = lookup_cv(CG(active_op_array), var_name);
 
 			if (is_last_catch && is_last_class) {
-				opline->extended_value |= ZEND_LAST_CATCH;
+				opline->ex_flags |= ZEND_LAST_CATCH;
 			}
 
 			if (!is_last_class) {

@@ -715,11 +715,11 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					if (opline->op1_type == IS_CONST) {
 						// op1 class
 						if (class_slot[opline->op1.constant] >= 0) {
-							opline->extended_value = class_slot[opline->op1.constant] | (opline->extended_value & ZEND_LAST_CATCH);
+							opline->extended_value = class_slot[opline->op1.constant];
 						} else {
-							opline->extended_value = cache_size | (opline->extended_value & ZEND_LAST_CATCH);
+							opline->extended_value = cache_size;
 							cache_size += sizeof(void *);
-							class_slot[opline->op1.constant] = opline->extended_value & ~ZEND_LAST_CATCH;
+							class_slot[opline->op1.constant] = opline->extended_value;
 						}
 					}
 					break;
