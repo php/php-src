@@ -47,6 +47,8 @@ env:
       - ENABLE_MAINTAINER_ZTS=1 ENABLE_DEBUG=1
 
 before_script:
+    # Enable IPv6
+    - sudo sh -c 'echo 0 > /proc/sys/net/ipv6/conf/all/disable_ipv6'
     # Compile PHP
     - ./travis/compile.sh
     # Setup Extensions 
