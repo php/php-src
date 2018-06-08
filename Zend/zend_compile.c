@@ -2195,19 +2195,30 @@ ZEND_API int zend_is_smart_branch(zend_op *opline) /* {{{ */
 }
 /* }}} */
 
+ZEND_API void zend_set_smart_branch_flags(zend_op *opline, const zend_op *end) /* {{{ */
+{
+	zend_op *next_op = opline + 1;
+	opline->ex_flags &= ~(ZEND_SMART_BRANCH_JMPZ|ZEND_SMART_BRANCH_JMPNZ);
+
+	if (next_op < end &&
+		(next_op->opcode == ZEND_JMPZ || next_op->opcode == ZEND_JMPNZ) &&
+		(opline->result_type & (IS_VAR|IS_TMP_VAR)) &&
+		next_op->op1_type == opline->result_type &&
+		next_op->op1.var == opline->result.var
+	) {
+		if (next_op->opcode == ZEND_JMPZ) {
+			opline->ex_flags |= ZEND_SMART_BRANCH_JMPZ;
+		} else {
+			opline->ex_flags |= ZEND_SMART_BRANCH_JMPNZ;
+		}
+	}
+}
+/* }}} */
+
 static inline uint32_t zend_emit_cond_jump(zend_uchar opcode, znode *cond, uint32_t opnum_target) /* {{{ */
 {
 	uint32_t opnum = get_next_op_number(CG(active_op_array));
-	zend_op *opline;
-
-	if ((cond->op_type & (IS_CV|IS_CONST))
-	 && opnum > 0
-	 && zend_is_smart_branch(CG(active_op_array)->opcodes + opnum - 1)) {
-		/* emit extra NOP to avoid incorrect SMART_BRANCH in very rare cases */
-		zend_emit_op(NULL, ZEND_NOP, NULL, NULL);
-		opnum = get_next_op_number(CG(active_op_array));
-	}
-	opline = zend_emit_op(NULL, opcode, cond, NULL);
+	zend_op *opline = zend_emit_op(NULL, opcode, cond, NULL);
 	opline->op2.opline_num = opnum_target;
 	return opnum;
 }

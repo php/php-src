@@ -3297,9 +3297,9 @@ static zend_never_inline zend_bool ZEND_FASTCALL zend_fe_reset_iterator(zval *ar
 	ZEND_VM_CONTINUE()
 # define ZEND_VM_SMART_BRANCH(_result, _check) do { \
 		int __result; \
-		if (EXPECTED((opline+1)->opcode == ZEND_JMPZ)) { \
+		if (EXPECTED(opline->ex_flags & ZEND_SMART_BRANCH_JMPZ)) { \
 			__result = (_result); \
-		} else if (EXPECTED((opline+1)->opcode == ZEND_JMPNZ)) { \
+		} else if (EXPECTED(opline->ex_flags & ZEND_SMART_BRANCH_JMPNZ)) { \
 			__result = !(_result); \
 		} else { \
 			break; \

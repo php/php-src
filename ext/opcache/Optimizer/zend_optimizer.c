@@ -1178,6 +1178,9 @@ static void zend_redo_pass_two(zend_op_array *op_array)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
+		if (zend_is_smart_branch(opline)) {
+			zend_set_smart_branch_flags(opline, end);
+		}
 		if (opline->op1_type == IS_CONST) {
 			ZEND_PASS_TWO_UPDATE_CONSTANT(op_array, opline, opline->op1);
 		}
@@ -1255,6 +1258,9 @@ static void zend_redo_pass_two_ex(zend_op_array *op_array, zend_ssa *ssa)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
+		if (zend_is_smart_branch(opline)) {
+			zend_set_smart_branch_flags(opline, end);
+		}
 		zend_vm_set_opcode_handler_ex(opline,
 			opline->op1_type == IS_UNUSED ? 0 : (OP1_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)),
 			opline->op2_type == IS_UNUSED ? 0 : (OP2_INFO() & (MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_KEY_ANY)),

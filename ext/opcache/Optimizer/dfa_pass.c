@@ -173,14 +173,7 @@ static void zend_ssa_remove_nops(zend_op_array *op_array, zend_ssa *ssa, zend_op
 				b->start = target;
 				while (i < end) {
 					shiftlist[i] = i - target;
-					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP) ||
-					   /* Keep NOP to support ZEND_VM_SMART_BRANCH. Using "target-1" instead of
-					    * "i-1" here to check the last non-NOP instruction. */
-					   (target > 0 &&
-					    i + 1 < op_array->last &&
-					    (op_array->opcodes[i+1].opcode == ZEND_JMPZ ||
-					     op_array->opcodes[i+1].opcode == ZEND_JMPNZ) &&
-					    zend_is_smart_branch(op_array->opcodes + target - 1))) {
+					if (EXPECTED(op_array->opcodes[i].opcode != ZEND_NOP)) {
 						if (i != target) {
 							op_array->opcodes[target] = op_array->opcodes[i];
 							ssa->ops[target] = ssa->ops[i];
@@ -500,9 +493,7 @@ static void compress_block(zend_op_array *op_array, zend_basic_block *block)
 {
 	while (block->len > 0) {
 		zend_op *opline = &op_array->opcodes[block->start + block->len - 1];
-
-		if (opline->opcode == ZEND_NOP
-				&& (block->len == 1 || !zend_is_smart_branch(opline - 1))) {
+		if (opline->opcode == ZEND_NOP) {
 			block->len--;
 		} else {
 			break;

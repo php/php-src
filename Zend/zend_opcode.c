@@ -578,6 +578,10 @@ ZEND_API int pass_two(zend_op_array *op_array)
 	opline = op_array->opcodes;
 	end = opline + op_array->last;
 	while (opline < end) {
+		if (zend_is_smart_branch(opline)) {
+			zend_set_smart_branch_flags(opline, end);
+		}
+
 		switch (opline->opcode) {
 			case ZEND_RECV_INIT:
 				{

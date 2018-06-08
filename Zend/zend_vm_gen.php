@@ -2715,9 +2715,9 @@ function gen_vm($def, $skel) {
 			if (isset($used_extra_spec["SMART_BRANCH"])) {
 				out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
 				out($f,	"\t\t\toffset = offset * 3;\n");
-				out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+				out($f, "\t\t\tif (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {\n");
 				out($f,	"\t\t\t\toffset += 1;\n");
-				out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+				out($f, "\t\t\t} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {\n");
 				out($f,	"\t\t\t\toffset += 2;\n");
 				out($f, "\t\t\t}\n");
 				out($f, "\t\t}\n");
@@ -2803,9 +2803,9 @@ function gen_vm($def, $skel) {
 				if (isset($used_extra_spec["SMART_BRANCH"])) {
 					out($f, "\t\t{$else}if (spec & SPEC_RULE_SMART_BRANCH) {\n");
 					out($f,	"\t\t\toffset = offset * 3;\n");
-					out($f, "\t\t\tif ((op+1)->opcode == ZEND_JMPZ) {\n");
+					out($f, "\t\t\tif (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {\n");
 					out($f,	"\t\t\t\toffset += 1;\n");
-					out($f, "\t\t\t} else if ((op+1)->opcode == ZEND_JMPNZ) {\n");
+					out($f, "\t\t\t} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {\n");
 					out($f,	"\t\t\t\toffset += 2;\n");
 					out($f, "\t\t\t}\n");
 					out($f, "\t\t}\n");

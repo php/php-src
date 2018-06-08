@@ -64157,9 +64157,9 @@ static const void* ZEND_FASTCALL zend_vm_get_opcode_handler_ex(uint32_t spec, co
 		else if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);
 		else if (spec & SPEC_RULE_SMART_BRANCH) {
 			offset = offset * 3;
-			if ((op+1)->opcode == ZEND_JMPZ) {
+			if (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {
 				offset += 1;
-			} else if ((op+1)->opcode == ZEND_JMPNZ) {
+			} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {
 				offset += 2;
 			}
 		}
@@ -64207,9 +64207,9 @@ static const void *zend_vm_get_opcode_handler_func(zend_uchar opcode, const zend
 		else if (spec & SPEC_RULE_QUICK_ARG) offset = offset * 2 + (op->op2.num <= MAX_ARG_FLAG_NUM);
 		else if (spec & SPEC_RULE_SMART_BRANCH) {
 			offset = offset * 3;
-			if ((op+1)->opcode == ZEND_JMPZ) {
+			if (op->ex_flags & ZEND_SMART_BRANCH_JMPZ) {
 				offset += 1;
-			} else if ((op+1)->opcode == ZEND_JMPNZ) {
+			} else if (op->ex_flags & ZEND_SMART_BRANCH_JMPNZ) {
 				offset += 2;
 			}
 		}
