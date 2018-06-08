@@ -6426,7 +6426,8 @@ ZEND_VM_HANDLER(126, ZEND_FE_FETCH_RW, VAR, ANY, JMP_ADDR)
 						break;
 					}
 				}
-				break;
+				pos++;
+				p++;
 			}
 			if ((value_type & Z_TYPE_MASK) != IS_REFERENCE) {
 				zend_property_info *prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(array), p->key, NULL);
