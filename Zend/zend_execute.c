@@ -1490,11 +1490,12 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 	zval rv;
 
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
-		zval *z, *zptr, obj;
+		zval *z, obj;
+		zval z_copy;
 
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
 		Z_ADDREF(obj);
-		zptr = z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
+		z = Z_OBJ_HT(obj)->read_property(&obj, property, BP_VAR_R, cache_slot, &rv);
 		if (UNEXPECTED(EG(exception))) {
 			OBJ_RELEASE(Z_OBJ(obj));
 			if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1512,18 +1513,23 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		ZVAL_DEREF(z);
-		if (inc) {
-			increment_function(z);
+		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
+			ZVAL_COPY(&z_copy, Z_REFVAL_P(z));
 		} else {
-			decrement_function(z);
+			ZVAL_COPY(&z_copy, z);
+		}
+		if (inc) {
+			increment_function(&z_copy);
+		} else {
+			decrement_function(&z_copy);
 		}
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), z);
+			ZVAL_COPY(EX_VAR(opline->result.var), &z_copy);
 		}
-		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
-		zval_ptr_dtor(zptr);
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -1535,8 +1541,7 @@ static zend_never_inline void zend_pre_incdec_overloaded_property(zval *object, 
 static zend_never_inline void zend_assign_op_overloaded_property(zval *object, zval *property, void **cache_slot, zval *value, binary_op_type binary_op OPLINE_DC EXECUTE_DATA_DC)
 {
 	zval *z;
-	zval rv, obj;
-	zval *zptr;
+	zval rv, obj, res;
 
 	ZVAL_OBJ(&obj, Z_OBJ_P(object));
 	Z_ADDREF(obj);
@@ -1558,14 +1563,13 @@ static zend_never_inline void zend_assign_op_overloaded_property(zval *object, z
 			}
 			ZVAL_COPY_VALUE(z, value);
 		}
-		zptr = z;
-		ZVAL_DEREF(z);
-		binary_op(z, z, value);
-		Z_OBJ_HT(obj)->write_property(&obj, property, z, cache_slot);
+		binary_op(&res, z, value);
+		Z_OBJ_HT(obj)->write_property(&obj, property, &res, cache_slot);
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), z);
+			ZVAL_COPY(EX_VAR(opline->result.var), &res);
 		}
-		zval_ptr_dtor(zptr);
+		zval_ptr_dtor(z);
+		zval_ptr_dtor(&res);
 	} else {
 		zend_error(E_WARNING, "Attempt to assign property of non-object");
 		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
