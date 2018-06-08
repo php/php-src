@@ -217,6 +217,7 @@ static int is_allocation_def(zend_op_array *op_array, zend_ssa *ssa, int def, in
 				break;
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				if (OP1_INFO() & (MAY_BE_UNDEF | MAY_BE_NULL | MAY_BE_FALSE)) {
 					/* implicit object/array allocation */
 					return 1;
@@ -259,6 +260,7 @@ static int is_local_def(zend_op_array *op_array, zend_ssa *ssa, int def, int var
 				return 1;
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				return 1;
 			case ZEND_ASSIGN_ADD:
 			case ZEND_ASSIGN_SUB:
@@ -328,6 +330,7 @@ static int is_escape_use(zend_op_array *op_array, zend_ssa *ssa, int use, int va
 				/* break missing intentionally */
 			case ZEND_ASSIGN_DIM:
 			case ZEND_ASSIGN_OBJ:
+			case ZEND_ASSIGN_OBJ_REF:
 				break;
 			case ZEND_PRE_INC_OBJ:
 			case ZEND_PRE_DEC_OBJ:
@@ -508,7 +511,8 @@ int zend_ssa_escape_analysis(const zend_script *script, zend_op_array *op_array,
 
 							if (opline->opcode == ZEND_OP_DATA &&
 							    ((opline-1)->opcode == ZEND_ASSIGN_DIM ||
-							     (opline-1)->opcode == ZEND_ASSIGN_OBJ) &&
+							     (opline-1)->opcode == ZEND_ASSIGN_OBJ ||
+							     (opline-1)->opcode == ZEND_ASSIGN_OBJ_REF) &&
 							    op->op1_use == i &&
 							    (op-1)->op1_use >= 0) {
 								enclosing_root = ees[(op-1)->op1_use];

@@ -507,6 +507,7 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 					}
 					break;
 				case ZEND_ASSIGN_OBJ:
+				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_FETCH_OBJ_R:
 				case ZEND_FETCH_OBJ_W:
 				case ZEND_FETCH_OBJ_RW:
@@ -522,12 +523,12 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 						// op2 property
 						if (opline->op1_type == IS_UNUSED &&
 						    property_slot[opline->op2.constant] >= 0) {
-							opline->extended_value = property_slot[opline->op2.constant];
+							opline->extended_value = property_slot[opline->op2.constant] | (opline->extended_value & ZEND_FETCH_REF);
 						} else {
-							opline->extended_value = cache_size;
+							opline->extended_value = cache_size | (opline->extended_value & ZEND_FETCH_REF);
 							cache_size += 3 * sizeof(void *);
 							if (opline->op1_type == IS_UNUSED) {
-								property_slot[opline->op2.constant] = opline->extended_value;
+								property_slot[opline->op2.constant] = opline->extended_value & ~ZEND_FETCH_REF;
 							}
 						}
 					}

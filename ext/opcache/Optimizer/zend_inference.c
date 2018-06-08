@@ -2231,6 +2231,24 @@ static inline zend_class_entry *get_class_entry(const zend_script *script, zend_
 	return NULL;
 }
 
+static uint32_t zend_convert_type_code_to_may_be(zend_uchar type_code) {
+	if (type_code == IS_VOID) {
+		return MAY_BE_NULL;
+	} else if (type_code == IS_CALLABLE) {
+		return MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	} else if (type_code == IS_ITERABLE) {
+		return MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	} else if (type_code == IS_ARRAY) {
+		return MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
+	} else if (type_code == _IS_BOOL) {
+		return MAY_BE_TRUE|MAY_BE_FALSE;
+	}
+
+	ZEND_ASSERT(type_code < IS_REFERENCE);
+	return 1 << type_code;
+	
+}
+
 static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *arg_info, zend_class_entry **pce)
 {
 	uint32_t tmp = 0;
@@ -2243,22 +2261,7 @@ static uint32_t zend_fetch_arg_info(const zend_script *script, zend_arg_info *ar
 		*pce = get_class_entry(script, lcname);
 		zend_string_release_ex(lcname, 0);
 	} else if (ZEND_TYPE_IS_CODE(arg_info->type)) {
-		zend_uchar type_hint = ZEND_TYPE_CODE(arg_info->type);
-
-		if (type_hint == IS_VOID) {
-			tmp |= MAY_BE_NULL;
-		} else if (type_hint == IS_CALLABLE) {
-			tmp |= MAY_BE_STRING|MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (type_hint == IS_ITERABLE) {
-			tmp |= MAY_BE_OBJECT|MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (type_hint == IS_ARRAY) {
-			tmp |= MAY_BE_ARRAY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
-		} else if (type_hint == _IS_BOOL) {
-			tmp |= MAY_BE_TRUE|MAY_BE_FALSE;
-		} else {
-			ZEND_ASSERT(type_hint < IS_REFERENCE);
-			tmp |= 1 << type_hint;
-		}
+		tmp |= zend_convert_type_code_to_may_be(ZEND_TYPE_CODE(arg_info->type));
 	} else {
 		tmp |= MAY_BE_ANY|MAY_BE_ARRAY_KEY_ANY|MAY_BE_ARRAY_OF_ANY|MAY_BE_ARRAY_OF_REF;
 	}
@@ -2286,7 +2289,7 @@ static uint32_t zend_fetch_prop_info(const zend_op_array *op_array, zend_ssa *ss
 	}
 
 	if (prop_info && ZEND_TYPE_IS_SET(prop_info->type)) {
-		uint32_t type = MAY_BE_UNDEF | MAY_BE_REF | (1 << (ZEND_TYPE_IS_CLASS(prop_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(prop_info->type)));
+		uint32_t type = MAY_BE_UNDEF | MAY_BE_REF | (ZEND_TYPE_IS_CLASS(prop_info->type) ? MAY_BE_OBJECT : zend_convert_type_code_to_may_be(ZEND_TYPE_CODE(prop_info->type)));
 
 		if (ZEND_TYPE_ALLOW_NULL(prop_info->type)) {
 			type |= MAY_BE_NULL;
@@ -2868,6 +2871,58 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			}
 			break;
+		case ZEND_ASSIGN_OBJ_REF:
+			if (opline->op1_type == IS_CV) {
+				tmp = t1;
+				if (t1 & (MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE)) {
+					tmp &= ~(MAY_BE_UNDEF|MAY_BE_NULL|MAY_BE_FALSE);
+					tmp |= MAY_BE_OBJECT | MAY_BE_RC1 | MAY_BE_RCN;
+				}
+				if (tmp & MAY_BE_OBJECT) {
+					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
+			}
+			t2 = OP1_DATA_INFO();
+			if ((opline+1)->op1_type == IS_VAR && (opline->extended_value & ZEND_RETURNS_FUNCTION)) {
+				tmp = (MAY_BE_REF | MAY_BE_RCN | MAY_BE_RC1 | t2) & ~MAY_BE_UNDEF;
+			} else {
+				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_ERROR|MAY_BE_RC1|MAY_BE_RCN);
+			}
+			if (t2 & MAY_BE_UNDEF) {
+				tmp |= MAY_BE_NULL;
+			}
+			UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			if (ssa_ops[i].result_def >= 0) {
+				// TODO: ???
+				t1 = zend_fetch_prop_info(op_array, ssa, opline, i, &ce);
+				if (t1) {
+					tmp &= t1;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
+				if (ce) {
+					UPDATE_SSA_OBJ_TYPE(ce, 1, ssa_ops[i].result_def);
+				}
+			}
+			if ((opline+1)->op1_type == IS_CV) {
+				opline++;
+				i++;
+				tmp = (MAY_BE_REF | t2) & ~(MAY_BE_UNDEF|MAY_BE_RC1|MAY_BE_RCN);
+				if (t2 & MAY_BE_UNDEF) {
+					tmp |= MAY_BE_NULL;
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+
+				tmp = OP1_INFO();
+				if (tmp & (MAY_BE_ANY | MAY_BE_REF)) {
+					if (tmp & MAY_BE_RC1) {
+						tmp |= MAY_BE_RCN;
+					}
+				}
+				UPDATE_SSA_TYPE(tmp, ssa_ops[i].op1_def);
+			}
+			break;
 		case ZEND_BIND_GLOBAL:
 			tmp = MAY_BE_REF | MAY_BE_ANY
 				| MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
@@ -3300,6 +3355,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 						case ZEND_SEND_VAR_NO_REF_EX:
 						case ZEND_SEND_REF:
 						case ZEND_ASSIGN_REF:
+						case ZEND_ASSIGN_OBJ_REF:
 						case ZEND_YIELD:
 						case ZEND_INIT_ARRAY:
 						case ZEND_ADD_ARRAY_ELEMENT:
@@ -4234,7 +4290,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 					return 1;
 			}
 		}
-    } else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
+	} else if (opline->op1_type & (IS_TMP_VAR|IS_VAR)) {
 		if (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY)) {
 			switch (opline->opcode) {
 				case ZEND_CASE:
@@ -4258,9 +4314,9 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 					return 1;
 			}
 		}
-    }
+	}
 
-    if (opline->op2_type == IS_CV) {
+	if (opline->op2_type == IS_CV) {
 		if (t2 & MAY_BE_UNDEF) {
 			switch (opline->opcode) {
 				case ZEND_ASSIGN_REF:
@@ -4280,7 +4336,7 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 					return 1;
 			}
 		}
-    }
+	}
 
 	switch (opline->opcode) {
 		case ZEND_NOP:
@@ -4442,6 +4498,9 @@ int zend_may_throw(const zend_op *opline, zend_op_array *op_array, zend_ssa *ssa
 			return (t1 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT)) ||
 				(t2 & (MAY_BE_STRING|MAY_BE_ARRAY|MAY_BE_OBJECT));
 		case ZEND_ASSIGN:
+			if (t1 & MAY_BE_REF) {
+				return 1;
+			}
 		case ZEND_UNSET_VAR:
 			return (t1 & (MAY_BE_OBJECT|MAY_BE_RESOURCE|MAY_BE_ARRAY_OF_OBJECT|MAY_BE_ARRAY_OF_RESOURCE|MAY_BE_ARRAY_OF_ARRAY));
 		case ZEND_ASSIGN_DIM:

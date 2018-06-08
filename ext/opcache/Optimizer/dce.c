@@ -326,6 +326,7 @@ static zend_bool try_remove_var_def(context *ctx, int free_var, int use_chain, z
 			switch (def_opline->opcode) {
 				case ZEND_ASSIGN:
 				case ZEND_ASSIGN_REF:
+				case ZEND_ASSIGN_OBJ_REF:
 				case ZEND_ASSIGN_DIM:
 				case ZEND_ASSIGN_OBJ:
 				case ZEND_ASSIGN_ADD:

@@ -203,6 +203,7 @@ static zend_bool can_replace_op1(
 		case ZEND_ASSIGN_REF:
 		case ZEND_ASSIGN_DIM:
 		case ZEND_ASSIGN_OBJ:
+		case ZEND_ASSIGN_OBJ_REF:
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
 		case ZEND_ASSIGN_MUL:
