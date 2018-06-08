@@ -3091,10 +3091,11 @@ void zend_compile_assign_ref(znode *result, zend_ast *ast) /* {{{ */
 		zend_make_var_result(result, opline);
 	} else {
 		opline = zend_emit_op(result, ZEND_ASSIGN_REF, &target_node, &source_node);
+		opline->extended_value = 0;
 	}
 
 	if (zend_is_call(source_ast)) {
-		opline->extended_value = ZEND_RETURNS_FUNCTION;
+		opline->extended_value |= ZEND_RETURNS_FUNCTION;
 	}
 }
 /* }}} */

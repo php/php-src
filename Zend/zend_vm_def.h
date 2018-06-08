@@ -2646,7 +2646,7 @@ ZEND_VM_HANDLER(39, ZEND_ASSIGN_REF, VAR|CV, VAR|CV, SRC)
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, SRC, SPEC(OP_DATA=VAR|CV))
+ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, CACHE_SLOT|SRC, SPEC(OP_DATA=VAR|CV))
 {
 	USE_OPLINE
 	zend_free_op free_op1, free_op2, free_op_data;
@@ -2660,7 +2660,7 @@ ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, S
 	SAVE_OPLINE();
 
 	if (OP_DATA_TYPE == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -2683,7 +2683,7 @@ ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, S
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, OP1_TYPE, property, OP2_TYPE, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 

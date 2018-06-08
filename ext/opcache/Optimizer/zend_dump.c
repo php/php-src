@@ -554,7 +554,7 @@ static void zend_dump_op(const zend_op_array *op_array, const zend_basic_block *
 	} else if (ZEND_VM_EXT_SRC == (flags & ZEND_VM_EXT_MASK)) {
 		if (opline->extended_value == ZEND_RETURNS_VALUE) {
 			fprintf(stderr, " (value)");
-		} else if (opline->extended_value == ZEND_RETURNS_FUNCTION) {
+		} else if (opline->extended_value & ZEND_RETURNS_FUNCTION) {
 			fprintf(stderr, " (function)");
 		}
 	} else {

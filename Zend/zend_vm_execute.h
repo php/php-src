@@ -23887,7 +23887,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -23910,7 +23910,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -24013,7 +24013,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -24036,7 +24036,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -26627,7 +26627,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -26650,7 +26650,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -26753,7 +26753,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -26776,7 +26776,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -30981,7 +30981,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -31004,7 +31004,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -31107,7 +31107,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -31130,7 +31130,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -33328,7 +33328,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -33351,7 +33351,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -33453,7 +33453,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -33476,7 +33476,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -35545,7 +35545,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -35568,7 +35568,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -35670,7 +35670,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -35693,7 +35693,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -38387,7 +38387,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -38410,7 +38410,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -38512,7 +38512,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -38535,7 +38535,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -43917,7 +43917,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -43940,7 +43940,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -44042,7 +44042,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -44065,7 +44065,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -48108,7 +48108,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -48131,7 +48131,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -48233,7 +48233,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -48256,7 +48256,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -54265,7 +54265,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	SAVE_OPLINE();
 
 	if (IS_VAR == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -54288,7 +54288,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
@@ -54390,7 +54390,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	SAVE_OPLINE();
 
 	if (IS_CV == IS_VAR
-	 && opline->extended_value == ZEND_RETURNS_FUNCTION
+	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
 	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
 		zend_error(E_NOTICE, "Only variables should be assigned by reference");
 		if (UNEXPECTED(EG(exception) != NULL)) {
@@ -54413,7 +54413,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 		HANDLE_EXCEPTION();
 	}
 
-	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(Z_CACHE_SLOT_P(property)) : NULL;
+	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
 
