@@ -6143,6 +6143,11 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 								"Default value for property of type %s can only be an array",
 								zend_get_type_by_const(optional_type));
 					}
+				} else if (optional_type == IS_DOUBLE) {
+					if (Z_TYPE(value_zv) != IS_DOUBLE && Z_TYPE(value_zv) != IS_LONG) {
+						zend_error_noreturn(E_COMPILE_ERROR,
+								"Default value for property of type float can only be float or int");
+					}
 				} else if (!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE(value_zv))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
 							"Default value for property of type %s can only be %s",
