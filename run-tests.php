@@ -2069,10 +2069,10 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, $start - $startOffset),  '/');
+				$temp .= preg_quote(substr($wanted_re, $startOffset, $start - $startOffset),  '/');
 				// add the re unquoted.
 				if ($end > $start) {
-					$temp = $temp . '(' . substr($wanted_re, $start+2, $end - $start-2). ')';
+					$temp .= '(' . substr($wanted_re, $start+2, $end - $start-2). ')';
 				}
 				$startOffset = $end + 2;
 			}
