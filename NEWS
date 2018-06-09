@@ -2,6 +2,9 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.8
 
+- EXIF:
+  . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+
 07 Jun 2018, PHP 7.2.7
 
 - Core:
