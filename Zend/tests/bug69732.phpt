@@ -17,14 +17,15 @@ function ret_assoc() {
  
 $wpq = new wpq;
 $wpq->interesting =& ret_assoc();
-$x = &$wpq->interesting;
-var_dump($x);
-?>
+$x = $wpq->interesting;
+printf("%s\n", $x);
 --EXPECTF--
-Notice: Only variables should be assigned by reference in %s on line %d
-array(2) {
-  ["foo"]=>
-  string(3) "bar"
-  [0]=>
-  string(3) "XXX"
-}
+Notice: Undefined property: wpq::$interesting in %sbug69732.php on line 6
+
+Notice: Indirect modification of overloaded property wpq::$interesting has no effect in %sbug69732.php on line 16
+
+Fatal error: Uncaught Error: Cannot assign by reference to overloaded object in %s:%d
+Stack trace:
+#0 {main}
+  thrown in %s on line %d
+
