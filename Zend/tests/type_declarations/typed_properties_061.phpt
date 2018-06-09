@@ -11,7 +11,7 @@ $a = new class {
 	}
 
 	function __set($x, $y) {
-		print "ERROR: __set() called on by-ref __get()";
+		echo "set($y)\n";
 	}
 };
 
@@ -21,9 +21,7 @@ var_dump($a->foo);
 $a->_ .= "1";
 var_dump($a->foo);
 
-try {
-	$a->_ .= "e50";
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
+$a->_ .= "e50";
 var_dump($a->foo);
 
 $a->_--;
@@ -34,25 +32,25 @@ var_dump($a->foo);
 
 $a->foo = PHP_INT_MAX;
 
-try {
-	$a->_++;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
-echo gettype($a->foo),"\n";
+$a->_++;
+var_dump($a->foo);
 
-try {
-	++$a->_;
-} catch (Error $e) { echo $e->getMessage(), "\n"; }
-echo gettype($a->foo),"\n";
+++$a->_;
+var_dump($a->foo);
 
 ?>
 --EXPECT--
-int(2)
-int(21)
-Cannot assign string to reference of type int
-int(21)
-int(20)
-int(19)
-Cannot assign float to reference of type int
-integer
-Cannot assign float to reference of type int
-integer
+set(2)
+int(1)
+set(11)
+int(1)
+set(1e50)
+int(1)
+set(0)
+int(1)
+set(0)
+int(1)
+set(9.2233720368548E+18)
+int(9223372036854775807)
+set(9.2233720368548E+18)
+int(9223372036854775807)
