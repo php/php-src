@@ -1611,7 +1611,7 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 {
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {
 		zval rv, obj;
-		zval *z, *tmp;
+		zval *z;
 		zval z_copy;
 
 		ZVAL_OBJ(&obj, Z_OBJ_P(object));
@@ -1632,46 +1632,21 @@ static zend_never_inline void zend_post_incdec_overloaded_property(zval *object,
 			ZVAL_COPY_VALUE(z, value);
 		}
 
-		/* TODO(typed_refs) Is this even necessary? The increment here is (was) performed on
-		 * a dereferenced value and then written back. The type check in write_property should
-		 * thus be sufficient. */
-		if (UNEXPECTED(Z_ISREF_P(z))) {
-			zend_property_info *prop_info;
-			zend_type ref_type = Z_REFTYPE_P(z);
-			tmp = Z_REFVAL_P(z);
-			ZVAL_COPY(EX_VAR(opline->result.var), tmp);
-
-			if (inc) {
-				increment_function(tmp);
-			} else {
-				decrement_function(tmp);
-			}
-
-			if (UNEXPECTED(ref_type || (prop_info = zend_object_fetch_property_type_info(Z_OBJCE(obj), Z_STR_P(property), NULL)))) {
-				/* ref types are always stricter than prop types */
-				if (UNEXPECTED(ref_type ? !zend_verify_ref_type_assignable_zval(ref_type, tmp, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))) : !zend_verify_property_type(prop_info, &z_copy, &z_copy, ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data))))) {
-					if (ref_type) {
-						zend_throw_ref_type_error(ref_type, tmp);
-					} else {
-						zend_verify_property_type_error(prop_info, Z_STR_P(property), tmp);
-					}
-					zval_ptr_dtor(tmp);
-					ZVAL_COPY_VALUE(tmp, EX_VAR(opline->result.var));
-				}
-			}
+		if (UNEXPECTED(Z_TYPE_P(z) == IS_REFERENCE)) {
+			ZVAL_COPY(EX_VAR(opline->result.var), Z_REFVAL_P(z));
 		} else {
 			ZVAL_COPY(EX_VAR(opline->result.var), z);
-			ZVAL_COPY(&z_copy, EX_VAR(opline->result.var));
-			if (inc) {
-				increment_function(&z_copy);
-			} else {
-				decrement_function(&z_copy);
-			}
-			Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
-			zval_ptr_dtor(&z_copy);
 		}
-		zval_ptr_dtor(z);
+		ZVAL_COPY(&z_copy, EX_VAR(opline->result.var));
+		if (inc) {
+			increment_function(&z_copy);
+		} else {
+			decrement_function(&z_copy);
+		}
+		Z_OBJ_HT(obj)->write_property(&obj, property, &z_copy, cache_slot);
 		OBJ_RELEASE(Z_OBJ(obj));
+		zval_ptr_dtor(&z_copy);
+		zval_ptr_dtor(z);
 	} else {
 		zend_error(E_WARNING, "Attempt to increment/decrement property of non-object");
 		ZVAL_NULL(EX_VAR(opline->result.var));
