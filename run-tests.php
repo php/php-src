@@ -908,11 +908,11 @@ foreach ($exts_to_test as $key => $val) {
 }
 
 foreach ($test_dirs as $dir) {
-	find_files(TEST_PHP_SRCDIR."/{$dir}", ($dir == 'ext'));
+	find_files(TEST_PHP_SRCDIR."/{$dir}", $dir == 'ext');
 }
 
 foreach ($user_tests as $dir) {
-	find_files($dir, ($dir == 'ext'));
+	find_files($dir, $dir == 'ext');
 }
 
 function find_files($dir, $is_ext_dir = false, $ignore = false)
@@ -1028,7 +1028,7 @@ function mail_qa_team($data, $status = false)
 {
 	$url_bits = parse_url(QA_SUBMISSION_PAGE);
 
-	if (($proxy = getenv('http_proxy'))) {
+	if ($proxy = getenv('http_proxy')) {
 		$proxy = parse_url($proxy);
 		$path = $url_bits['host'].$url_bits['path'];
 		$host = $proxy['host'];
@@ -2069,10 +2069,10 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, $start - $startOffset),  '/');
 				// add the re unquoted.
 				if ($end > $start) {
-					$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+					$temp = $temp . '(' . substr($wanted_re, $start+2, $end - $start-2). ')';
 				}
 				$startOffset = $end + 2;
 			}
