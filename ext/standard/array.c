@@ -3612,7 +3612,7 @@ PHP_FUNCTION(array_slice)
 				}
 				if (UNEXPECTED(Z_ISREF_P(entry)) &&
 					UNEXPECTED(Z_REFCOUNT_P(entry) == 1)) {
-					ZVAL_UNREF(entry);
+					entry = Z_REFVAL_P(entry);
 				}
 				Z_TRY_ADDREF_P(entry);
 				ZEND_HASH_FILL_ADD(entry);
@@ -3725,7 +3725,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 			ZEND_HASH_FOREACH_VAL(src, src_entry) {
 				if (UNEXPECTED(Z_ISREF_P(src_entry)) &&
 					UNEXPECTED(Z_REFCOUNT_P(src_entry) == 1)) {
-					ZVAL_UNREF(src_entry);
+					src_entry = Z_REFVAL_P(src_entry);
 				}
 				Z_TRY_ADDREF_P(src_entry);
 				ZEND_HASH_FILL_ADD(src_entry);
@@ -3735,7 +3735,7 @@ PHPAPI int php_array_merge(HashTable *dest, HashTable *src) /* {{{ */
 		ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 			if (UNEXPECTED(Z_ISREF_P(src_entry) &&
 				Z_REFCOUNT_P(src_entry) == 1)) {
-				ZVAL_UNREF(src_entry);
+				src_entry = Z_REFVAL_P(src_entry);
 			}
 			Z_TRY_ADDREF_P(src_entry);
 			if (string_key) {
@@ -3883,7 +3883,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 				ZEND_HASH_FOREACH_VAL(src, src_entry) {
 					if (UNEXPECTED(Z_ISREF_P(src_entry) &&
 						Z_REFCOUNT_P(src_entry) == 1)) {
-						ZVAL_UNREF(src_entry);
+						src_entry = Z_REFVAL_P(src_entry);
 					}
 					Z_TRY_ADDREF_P(src_entry);
 					ZEND_HASH_FILL_ADD(src_entry);
@@ -3895,7 +3895,7 @@ static inline void php_array_merge_or_replace_wrapper(INTERNAL_FUNCTION_PARAMETE
 			ZEND_HASH_FOREACH_STR_KEY_VAL(src, string_key, src_entry) {
 				if (UNEXPECTED(Z_ISREF_P(src_entry) &&
 					Z_REFCOUNT_P(src_entry) == 1)) {
-					ZVAL_UNREF(src_entry);
+					src_entry = Z_REFVAL_P(src_entry);
 				}
 				Z_TRY_ADDREF_P(src_entry);
 				if (EXPECTED(string_key)) {
@@ -4285,7 +4285,7 @@ PHP_FUNCTION(array_reverse)
 			ZEND_HASH_REVERSE_FOREACH_VAL(Z_ARRVAL_P(input), entry) {
 				if (UNEXPECTED(Z_ISREF_P(entry) &&
 					Z_REFCOUNT_P(entry) == 1)) {
-					ZVAL_UNREF(entry);
+					entry = Z_REFVAL_P(entry);
 				}
 				Z_TRY_ADDREF_P(entry);
 				ZEND_HASH_FILL_ADD(entry);
@@ -4679,7 +4679,7 @@ static void php_array_intersect_key(INTERNAL_FUNCTION_PARAMETERS, int data_compa
 			if (Z_TYPE_P(val) == IS_UNDEF) continue;
 		}
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-			ZVAL_UNREF(val);
+			val = Z_REFVAL_P(val);
 		}
 		if (p->key == NULL) {
 			ok = 1;
@@ -5090,7 +5090,7 @@ static void php_array_diff_key(INTERNAL_FUNCTION_PARAMETERS, int data_compare_ty
 			if (Z_TYPE_P(val) == IS_UNDEF) continue;
 		}
 		if (Z_ISREF_P(val) && Z_REFCOUNT_P(val) == 1) {
-			ZVAL_UNREF(val);
+			val = Z_REFVAL_P(val);
 		}
 		if (p->key == NULL) {
 			ok = 1;
