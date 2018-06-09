@@ -2980,7 +2980,7 @@ class RuntestsValgrind {
 	protected $version = '';
 	protected $header = '';
 	protected $version_3_3_0 = false;
-	protected $verison_3_8_0 = false;
+	protected $version_3_8_0 = false;
 
 	public function getVersion() {
 		return $this->version;
