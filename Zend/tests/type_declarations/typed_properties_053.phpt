@@ -4,7 +4,7 @@ Default values of callable properties
 <?php
 class A {
 	public callable $a1;
-	public callable $a2 = null;
+	public ?callable $a2 = null;
 }
 $obj = new A;
 var_dump($obj);

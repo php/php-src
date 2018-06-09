@@ -7,6 +7,7 @@ class Foo {
 	public float $flt = 2.2;
 	public array $arr = [];
 	public bool $bool = false;
+    public iterable $iter = [];
 }
 echo "ok\n";
 ?>

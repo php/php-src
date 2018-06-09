@@ -7,8 +7,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with class type are disallowed in %s on line 3
-
-
-
-
+Fatal error: Default value for property of type stdClass may not be null. Use the nullable type ?stdClass to allow null default value in %s on line %d

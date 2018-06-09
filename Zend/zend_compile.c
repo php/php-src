@@ -6059,16 +6059,17 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 					ZSTR_VAL(name));
 			}
 
+			if (type_ast->attr & ZEND_TYPE_NULLABLE) {
+				allow_null = 1;
+				type_ast->attr &= ~ZEND_TYPE_NULLABLE;
+			}
+
 			if (type_ast->kind == ZEND_AST_TYPE) {
 				optional_type = type_ast->attr;
 			} else {
 				zend_string *class_name = zend_ast_get_str(type_ast);
 				zend_uchar type = zend_lookup_builtin_type_by_name(class_name);
 
-				if (type_ast->attr & ZEND_TYPE_NULLABLE) {
-					allow_null = 1;
-					type_ast->attr &= ~ZEND_TYPE_NULLABLE;
-				}
 				if (type != 0) {
 					if (type_ast->attr != ZEND_NAME_NOT_FQ) {
 						zend_error_noreturn(E_COMPILE_ERROR,
@@ -6121,24 +6122,30 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 			zend_const_expr_to_zval(&value_zv, value_ast);
 
 			if (optional_type && !Z_CONSTANT(value_zv)) {
-				if (allow_null && Z_TYPE(value_zv) == IS_NULL) {
-					/* pass */
-				} else if (optional_type == IS_ARRAY) {
+				if (Z_TYPE(value_zv) == IS_NULL) {
+					if (!allow_null) {
+						const char *name = optional_type_name
+							? ZSTR_VAL(optional_type_name) : zend_get_type_by_const(optional_type);
+						zend_error_noreturn(E_COMPILE_ERROR,
+								"Default value for property of type %s may not be null. "
+								"Use the nullable type ?%s to allow null default value",
+								name, name);
+					}
+				} else if (optional_type_name ||
+							optional_type == IS_CALLABLE || optional_type == IS_OBJECT) {
+					const char *name = optional_type_name
+						? ZSTR_VAL(optional_type_name) : zend_get_type_by_const(optional_type);
+					zend_error_noreturn(E_COMPILE_ERROR,
+							"Property of type %s may not have default value", name);
+				} else if (optional_type == IS_ARRAY || optional_type == IS_ITERABLE) {
 					if (Z_TYPE(value_zv) != IS_ARRAY) {
 						zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with array type can only be an array");
+								"Default value for property of type %s can only be an array",
+								zend_get_type_by_const(optional_type));
 					}
-				} else if (optional_type == IS_CALLABLE) {
-					if (Z_TYPE(value_zv) != IS_NULL) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with callable type can only be null");
-					}
-				} else if (optional_type == IS_OBJECT) {
-					zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with class type are disallowed");
 				} else if (!ZEND_SAME_FAKE_TYPE(optional_type, Z_TYPE(value_zv))) {
 					zend_error_noreturn(E_COMPILE_ERROR,
-							"Default value for properties with %s type can only be %s",
+							"Default value for property of type %s can only be %s",
 							zend_get_type_by_const(optional_type),
 							zend_get_type_by_const(optional_type));
 				}

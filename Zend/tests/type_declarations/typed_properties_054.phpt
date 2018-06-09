@@ -9,4 +9,4 @@ $obj = new A;
 var_dump($obj);
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with callable type can only be null in %styped_properties_054.php on line 3
+Fatal error: Property of type callable may not have default value in %s on line %d

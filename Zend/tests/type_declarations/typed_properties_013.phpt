@@ -7,8 +7,4 @@ class Foo {
 }
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with int type can only be int in %s on line 3
-
-
-
-
+Fatal error: Default value for property of type int can only be int in %s on line 3
