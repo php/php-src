@@ -10,5 +10,5 @@ exif_read_data('.');
 ?>
 ===DONE===
 --EXPECTF--
-Warning: exif_read_data(): Not a file in %s on line %d
+Warning: exif_read_data(): %s in %s on line %d
 ===DONE===
