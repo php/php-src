@@ -2162,7 +2162,7 @@ size_t php_mysqlnd_cached_sha2_result_write(MYSQLND_CONN_DATA * conn, void * _pa
 	MYSQLND_PFC * pfc = conn->protocol_frame_codec;
 	MYSQLND_VIO * vio = conn->vio;
 	MYSQLND_STATS * stats = conn->stats;
-#ifndef _MSC_VER
+#if HAVE_COMPILER_C99_VLA
 	zend_uchar buffer[MYSQLND_HEADER_SIZE + packet->password_len + 1];
 #else
 	ALLOCA_FLAG(use_heap)
@@ -2180,7 +2180,7 @@ size_t php_mysqlnd_cached_sha2_result_write(MYSQLND_CONN_DATA * conn, void * _pa
 		sent = pfc->data->m.send(pfc, vio, buffer, packet->password_len, stats, error_info);
 	}
 
-#ifdef _MSC_VER
+#if !HAVE_COMPILER_C99_VLA
 	free_alloca(buffer, use_heap);
 #endif
 
