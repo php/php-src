@@ -270,6 +270,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_ASSIGN_DIM:
 		case ZEND_RETURN_BY_REF:
 		case ZEND_INSTANCEOF:
+		case ZEND_MAKE_REF:
 			return 0;
 		case ZEND_CATCH:
 			REQUIRES_STRING(val);
