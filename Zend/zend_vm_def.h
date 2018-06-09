@@ -1526,7 +1526,7 @@ ZEND_VM_HANDLER(36, ZEND_POST_INC, VAR|CV, ANY)
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *var_ptr, *val;
+	zval *var_ptr;
 	zend_type ref_type = 0;
 
 	var_ptr = GET_OP1_ZVAL_PTR_PTR_UNDEF(BP_VAR_RW);

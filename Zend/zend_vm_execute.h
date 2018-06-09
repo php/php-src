@@ -20443,7 +20443,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *var_ptr, *val;
+	zval *var_ptr;
 	zend_type ref_type = 0;
 
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -39451,7 +39451,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 {
 	USE_OPLINE
 
-	zval *var_ptr, *val;
+	zval *var_ptr;
 	zend_type ref_type = 0;
 
 	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
