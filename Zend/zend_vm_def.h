@@ -2673,15 +2673,13 @@ ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 		ZEND_VM_DISPATCH_TO_HANDLER(ZEND_ASSIGN_OBJ);
 	}
 
-	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
-
 	container = GET_OP1_OBJ_ZVAL_PTR_PTR_UNDEF(BP_VAR_W);
+
 	if (OP1_TYPE == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		FREE_OP2();
-		FREE_UNFETCHED_OP_DATA();
-		HANDLE_EXCEPTION();
+		ZEND_VM_DISPATCH_TO_HELPER(zend_this_not_in_object_context_helper);
 	}
+
+	property = GET_OP2_ZVAL_PTR(BP_VAR_R);
 
 	cache_addr = (OP2_TYPE == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
