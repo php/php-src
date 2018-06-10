@@ -3,7 +3,6 @@ ext/iconv/php_iconv.h           ident
 ext/ext_skel.php                ident
 ext/phar/phar/pharcommand.inc   ident
 ext/phar/phar.c                 ident
-ext/oci8/oci8.c                 ident
 ext/dba/libinifile/inifile.c    ident
 ext/dba/libflatfile/flatfile.c  ident
 ext/dba/libcdb/cdb_make.c       ident
