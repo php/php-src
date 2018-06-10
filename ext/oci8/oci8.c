@@ -1207,7 +1207,6 @@ PHP_MINFO_FUNCTION(oci)
 	php_info_print_table_row(2, "OCI8 DTrace Support", "disabled");
 #endif
 	php_info_print_table_row(2, "OCI8 Version", PHP_OCI8_VERSION);
-	php_info_print_table_row(2, "Revision", "$Id$");
 
 #if ((OCI_MAJOR_VERSION > 10) || ((OCI_MAJOR_VERSION == 10) && (OCI_MINOR_VERSION >= 2)))
 	php_oci_client_get_version(ver, sizeof(ver));
