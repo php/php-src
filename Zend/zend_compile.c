@@ -6155,7 +6155,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 							zend_get_type_by_const(optional_type));
 				}
 			}
-		} else if (!optional_type || allow_null) {
+		} else if (!optional_type) {
 			ZVAL_NULL(&value_zv);
 		} else {
 			ZVAL_UNDEF(&value_zv);
