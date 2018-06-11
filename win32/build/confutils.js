@@ -2023,11 +2023,6 @@ function generate_tmp_php_ini()
 		
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
 
-		// FIXME: Remove this once ZEND_EXTENSION() is merged to XDEBUG
-		if ("xdebug" == extensions_enabled[i][0]) {
-			directive = "zend_extension";
-		}
-
 		var ext_name = extensions_enabled[i][0];
 		if ("gd" == ext_name) {
 			ext_name = "gd2";
