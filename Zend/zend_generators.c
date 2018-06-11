@@ -145,7 +145,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		/* Free closure object */
-		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+		if ((EX_CALL_INFO() & ZEND_CALL_CLOSURE) &&
+			EXPECTED(GC_TYPE(ZEND_CLOSURE_OBJECT(EX(func))) == IS_OBJECT)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 

@@ -37,6 +37,10 @@
 		(o) = (zend_object*)((((zend_uintptr_t)(n)) << 1) | OBJ_BUCKET_INVALID); \
 	} while (0)
 
+#define ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(h) do { \
+		SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[(h)], EG(objects_store).free_list_head); \
+		EG(objects_store).free_list_head = (h); \
+	} while (0)
 
 #define OBJ_RELEASE(obj) zend_object_release(obj)
 
