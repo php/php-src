@@ -117,7 +117,7 @@ MBString:
   . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
     based on the Cased and CaseIgnorable derived Unicode properties. In
     particular this also improves handling of quotes and apostophes.
-  . Data tables have been updated for Unicode 10.
+  . Data tables have been updated for Unicode 11.
   . Mbstring now correctly supports strings larger than 2GB.
   . Performance of the mbstring extension has been significantly improved
     across the board. The largest improvements are in case conversion functions.
