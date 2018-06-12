@@ -103,12 +103,6 @@ int fpm_stdio_init_child(struct fpm_worker_pool_s *wp) /* {{{ */
 	fpm_globals.error_log_fd = -1;
 	zlog_set_fd(-1);
 
-	if (wp->listening_socket != STDIN_FILENO) {
-		if (0 > dup2(wp->listening_socket, STDIN_FILENO)) {
-			zlog(ZLOG_SYSERROR, "failed to init child stdio: dup2()");
-			return -1;
-		}
-	}
 	return 0;
 }
 /* }}} */
