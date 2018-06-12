@@ -2,7 +2,7 @@
 non freed statement test
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

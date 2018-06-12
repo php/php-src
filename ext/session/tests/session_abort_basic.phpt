@@ -1,7 +1,7 @@
 --TEST--
 Test session_abort() function : basic functionality
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.save_path=
 session.name=PHPSESSID

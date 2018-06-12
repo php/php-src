@@ -5,7 +5,7 @@ Tyson Andre <tandre@ifwe.co>
 # Based on ldap_search_basic.phpt
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--

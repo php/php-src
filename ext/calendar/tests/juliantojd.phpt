@@ -1,7 +1,7 @@
 --TEST--
 juliantojd()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo juliantojd( 0, 0,    0). "\n";

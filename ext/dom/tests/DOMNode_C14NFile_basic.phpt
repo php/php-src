@@ -2,7 +2,7 @@
 DOMNode::C14NFile()
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

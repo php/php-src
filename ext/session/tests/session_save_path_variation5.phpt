@@ -1,7 +1,7 @@
 --TEST--
 Test session_save_path() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); 
+<?php require 'skipif.inc'; 
 if(substr(PHP_OS, 0, 3) == "WIN")
 	die("skip Not for Windows");
 ?>

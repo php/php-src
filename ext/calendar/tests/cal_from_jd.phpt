@@ -1,7 +1,7 @@
 --TEST--
 cal_from_jd()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 print_r(cal_from_jd(1748326, CAL_GREGORIAN));

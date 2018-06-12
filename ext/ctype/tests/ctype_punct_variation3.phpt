@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_punct() function : usage variations - different punctuation
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_punct(mixed $c)

@@ -5,7 +5,7 @@ opcache.enable=1
 opcache.enable_cli=1
 opcache.log_verbosity_level=2
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

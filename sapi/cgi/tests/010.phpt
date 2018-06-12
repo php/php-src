@@ -1,7 +1,7 @@
 --TEST--
 Bug #45860 (header() function fails to correctly replace all Status lines)
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : usage variations - FT_UID option
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

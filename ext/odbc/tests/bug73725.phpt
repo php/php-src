@@ -1,7 +1,7 @@
 --TEST--
 Bug #73725 Unable to retrieve value of varchar(max) type
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

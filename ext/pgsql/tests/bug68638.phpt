@@ -1,7 +1,7 @@
 --TEST--
 Bug #68638 pg_update() fails to store infinite values
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

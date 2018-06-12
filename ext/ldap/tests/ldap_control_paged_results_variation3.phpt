@@ -4,7 +4,7 @@ ldap_ldap_control_paged_result() test (fetching the first page then the next fin
 Jean-Sebastien Hedde <jeanseb@au-fil-du.net>
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifbindfailure.inc');
 ?>
 --FILE--

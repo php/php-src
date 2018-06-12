@@ -4,7 +4,7 @@ DOMAttr read $name property.
 Nic Rosental <nicrosental@gmail.com>
 # TestFest Atlanta 2009-05-14
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $attr = new DOMAttr('category', 'books');

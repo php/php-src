@@ -2,7 +2,7 @@
 SOAP Bug #71610 - Type Confusion Vulnerability - SOAP / make_http_soap_request()
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 if (getenv("SKIP_ONLINE_TESTS")) die("skip online test");
 ?>
 --FILE--

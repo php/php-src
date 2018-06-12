@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 84: SOAP 1.2 Array with SOAP_USE_XSI_ARRAY_TYPE (second way)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

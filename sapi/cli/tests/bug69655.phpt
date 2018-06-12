@@ -4,7 +4,7 @@ Bug #69655 (php -S changes MKCALENDAR request method to MKCOL)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

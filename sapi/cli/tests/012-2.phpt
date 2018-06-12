@@ -1,7 +1,7 @@
 --TEST--
 more invalid arguments and error messages
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 Bug #45575 (Segfault with invalid non-string as event handler callback)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 4: simpleType/restriction (reference to undefined type)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 precision=14
 --FILE--

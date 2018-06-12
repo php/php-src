@@ -2,7 +2,7 @@
 XML Parser test: concat character data and set empty handlers
 --SKIPIF--
 <?php
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -3,7 +3,7 @@ DBA lock modifier error message test
 --SKIPIF--
 <?php 
 $handler = "flatfile";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

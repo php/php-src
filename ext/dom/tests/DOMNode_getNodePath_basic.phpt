@@ -2,7 +2,7 @@
 DOMNode::getNodePath()
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

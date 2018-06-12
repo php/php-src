@@ -4,7 +4,7 @@ Test curl_exec() function with basic functionality
 Sebastian Deutsch <sebastian.deutsch@9elements.com>
 TestFest 2009 - AFUP - Jean-Marc Fontaine <jmf@durcommefaire.net>
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool curl_exec(resource ch)

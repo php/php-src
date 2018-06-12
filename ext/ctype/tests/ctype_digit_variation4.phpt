@@ -1,7 +1,7 @@
 --TEST--
 Test ctype_digit() function : usage variations - octal and hexadecimal values
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool ctype_digit(mixed $c)

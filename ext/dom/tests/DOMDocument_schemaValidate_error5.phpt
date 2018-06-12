@@ -4,7 +4,7 @@ DomDocument::schemaValidate() - non-existent schema file
 Daniel Convissor <danielc@php.net>
 # TestFest 2009 NYPHP
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

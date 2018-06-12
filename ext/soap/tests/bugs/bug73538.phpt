@@ -1,7 +1,7 @@
 --TEST--
 SOAP: SoapClient::__setHeaders array overrides previous headers
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

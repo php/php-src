@@ -1,7 +1,7 @@
 --TEST--
 PDO_Firebird: connect/disconnect
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 <?php function_exists("ibase_query") or die("skip"); ?>
 --FILE--
 <?php /* $Id$ */

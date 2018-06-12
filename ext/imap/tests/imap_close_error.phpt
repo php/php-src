@@ -2,12 +2,12 @@
 Test imap_close() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once (dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php
 /* Prototype  : bool imap_close(resource $stream_id [, int $options])
- * Description: Close an IMAP stream 
+ * Description: Close an IMAP stream
  * Source code: ext/imap/php_imap.c
  */
 

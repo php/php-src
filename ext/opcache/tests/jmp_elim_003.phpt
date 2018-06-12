@@ -1,7 +1,7 @@
 --TEST--
 Incorrect empty basic block elimination
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 class A {

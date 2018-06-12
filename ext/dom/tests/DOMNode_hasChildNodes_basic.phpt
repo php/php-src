@@ -2,7 +2,7 @@
 Test whether a node has child nodes: hasChildNodes()
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php 

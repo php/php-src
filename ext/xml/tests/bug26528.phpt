@@ -2,7 +2,7 @@
 Bug #26528 (HTML entities are not being decoded)
 --SKIPIF--
 <?php 
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

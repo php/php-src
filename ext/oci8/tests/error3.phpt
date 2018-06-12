@@ -3,7 +3,7 @@ Maximum Oracle error length
 --SKIPIF--
 <?php 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 // Assume runtime client version is >= compile time client version
 $cv = explode('.', oci_client_version());
 if ($cv[0] < 11 || ($cv[0] == 11 && $cv[1] < 2) || ($cv[0] == 11 && $cv[1] == 2 && $cv[3] < 3)) {

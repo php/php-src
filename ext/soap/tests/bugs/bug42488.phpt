@@ -1,7 +1,7 @@
 --TEST--
 Bug #42488 (SoapServer reports an encoding error and the error itself breaks)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

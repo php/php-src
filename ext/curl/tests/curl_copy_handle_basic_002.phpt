@@ -4,7 +4,7 @@ Test curl_copy_handle() with simple POST
 Rick Buitenman <rick@meritos.nl>
 #testfest Utrecht 2009
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
   include 'server.inc';

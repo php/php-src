@@ -2,7 +2,7 @@
 PostgreSQL non-blocking async query params
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 if (!function_exists('pg_send_query_params')) die('skip function pg_send_query_params() does not exist');
 ?>
 --FILE--

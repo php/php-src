@@ -2,7 +2,7 @@
 DBA dba_popen Test
 --SKIPIF--
 <?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require 'skipif.inc';
 	print("info $HND handler used");
 ?>
 --FILE--

@@ -6,7 +6,7 @@ function test: mysqli_insert_id()
 		echo 'skip test valid only for 32bit systems';
 		exit;
 	}
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 PostgreSQL pg_convert() and JSON/Array
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_server_version('9.2');
 ?>
 --FILE--

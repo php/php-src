@@ -4,7 +4,7 @@ Test curl_setopt() CURLOPT_FILE readonly file handle
 Mark van der Velden
 #testfest Utrecht 2009
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /*

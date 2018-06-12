@@ -2,7 +2,7 @@
 DBA with array keys
 --SKIPIF--
 <?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require 'skipif.inc';
 	die("info $HND handler used");
 ?>
 --FILE--

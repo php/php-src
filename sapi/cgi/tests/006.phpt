@@ -1,7 +1,7 @@
 --TEST--
 syntax check
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 display_errors=stdout
 --FILE--

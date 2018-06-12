@@ -4,7 +4,7 @@ SQLite3::lastInsertRowID parameter test
 Jelle Lampaert
 #Belgian Testfest 2009
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

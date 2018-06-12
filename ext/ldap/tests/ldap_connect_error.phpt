@@ -6,7 +6,7 @@ Patrick Allaert <patrickallaert@php.net>
 --INI--
 ldap.max_links=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 require "connect.inc";

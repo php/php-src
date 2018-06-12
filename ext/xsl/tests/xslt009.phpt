@@ -2,7 +2,7 @@
 Test 9: Stream Wrapper XPath-Document() 
 --SKIPIF--
 <?php
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require 'skipif.inc';
 	if (!extension_loaded('zlib')) die('skip zlib extension not available');
 ?>
 --FILE--

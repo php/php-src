@@ -3,7 +3,7 @@ DomDocument::CreateEntityReference() - Creates an entity reference with the appr
 --CREDITS--
 Clint Priest @ PhpTek09
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 	$objDoc = new DomDocument();

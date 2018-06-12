@@ -2,7 +2,7 @@
 Bug #53574 (Integer overflow in SdnToJulian; leads to segfault)
 --SKIPIF--
 <?php
-include 'skipif.inc';
+require 'skipif.inc';
 if (PHP_INT_SIZE != 4) {
         die("skip this test is for 32bit platform only");
 }

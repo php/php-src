@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test status page
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --XFAIL--
 randomly intermittently failing all the time in CI, with diff:
 017+ active processes:     0

@@ -3,7 +3,7 @@ DBA INIFILE handler test
 --SKIPIF--
 <?php 
 	$handler = 'inifile';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 Test session_destroy() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

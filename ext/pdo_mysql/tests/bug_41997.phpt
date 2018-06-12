@@ -4,7 +4,7 @@ PDO MySQL Bug #41997 (stored procedure call returning single rowset blocks futur
 nextRowset() problem with stored proc & emulation mode & mysqlnd
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require 'skipif.inc';
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 

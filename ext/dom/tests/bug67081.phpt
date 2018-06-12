@@ -2,7 +2,7 @@
 Bug #67081 DOMDocumentType->internalSubset returns entire DOCTYPE tag, not only the subset
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

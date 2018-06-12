@@ -4,7 +4,7 @@ SQLite3::changes empty str tests
 Ward Hus
 #@ PHP TESTFEST 2009 (BELGIUM)
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

@@ -1,7 +1,7 @@
 --TEST--
 Test session_cache_expire() function : variation
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.cache_expire=360
 --FILE--

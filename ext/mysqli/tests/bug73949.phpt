@@ -2,7 +2,7 @@
 Bug #73949 (leak in mysqli_fetch_object)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>

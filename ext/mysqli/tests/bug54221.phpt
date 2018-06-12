@@ -2,7 +2,7 @@
 Bug #54221 mysqli::get_warnings segfault when used in multi queries
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --INI--

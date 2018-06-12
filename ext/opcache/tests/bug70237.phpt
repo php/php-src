@@ -4,7 +4,7 @@ Bug #70237 (Empty while and do-while segmentation fault with opcode on CLI enabl
 opcache.enable=1
 opcache.enable_cli=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

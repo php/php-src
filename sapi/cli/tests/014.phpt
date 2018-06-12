@@ -1,7 +1,7 @@
 --TEST--
 syntax highlighting
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

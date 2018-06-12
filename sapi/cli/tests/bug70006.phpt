@@ -2,7 +2,7 @@
 Bug #70006 (cli - function with default arg = STDOUT crash output)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

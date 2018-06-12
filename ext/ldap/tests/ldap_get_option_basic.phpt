@@ -4,7 +4,7 @@ ldap_get_option() - Basic ldap_get_option() operation
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 require "connect.inc";

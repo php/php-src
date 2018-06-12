@@ -9,7 +9,7 @@ session.gc_maxlifetime=300
 session.save_path=
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

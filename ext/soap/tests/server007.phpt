@@ -1,7 +1,7 @@
 --TEST--
 SOAP Server 7: addfunction and getfunctions
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function Add($x,$y) {

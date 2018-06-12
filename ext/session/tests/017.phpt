@@ -1,7 +1,7 @@
 --TEST--
 setting $_SESSION before session_start() should not cause segfault
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.cache_limiter=

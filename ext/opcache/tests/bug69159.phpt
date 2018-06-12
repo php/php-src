@@ -4,7 +4,7 @@ Bug #69159 (Opcache causes problem when passing a variable variable to a functio
 opcache.enable=1
 opcache.optimization_level=-1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $i = 1;

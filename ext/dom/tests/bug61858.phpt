@@ -2,7 +2,7 @@
 Bug #61858 DOMAttr debug info generates E_WARNING
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

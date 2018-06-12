@@ -2,7 +2,7 @@
 Bug #72099: xml_parse_into_struct segmentation fault
 --SKIPIF--
 <?php
-require_once("skipif.inc");
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

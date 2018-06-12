@@ -1,7 +1,7 @@
 --TEST--
 Test 5: HTML Test
 --SKIPIF--
-<?php  require_once('skipif.inc'); ?>
+<?php  require 'skipif.inc'; ?>
 --FILE--
 <?php
 $dom = new domdocument;

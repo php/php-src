@@ -1,7 +1,7 @@
 --TEST--
 Bug #70876 Segmentation fault when regenerating session id with strict mode
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 html_errors=0
 session.save_handler=files

@@ -3,7 +3,7 @@ Test session_set_cookie_params() function : variation
 --INI--
 session.cookie_secure=TRUE
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

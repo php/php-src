@@ -1,7 +1,7 @@
 --TEST--
 Test curl_copy_handle() with CURLOPT_PROGRESSFUNCTION
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
   include 'server.inc';

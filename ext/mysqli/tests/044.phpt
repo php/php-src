@@ -2,7 +2,7 @@
 mysqli_get_server_version
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

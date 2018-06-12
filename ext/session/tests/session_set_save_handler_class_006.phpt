@@ -4,7 +4,7 @@ Test session_set_save_handler() : using objects in close
 session.save_handler=files
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

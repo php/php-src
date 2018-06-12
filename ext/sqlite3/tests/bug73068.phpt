@@ -1,7 +1,7 @@
 --TEST--
 Bug #73068 SQLite3 may fail to DELETE
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

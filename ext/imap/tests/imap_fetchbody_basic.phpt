@@ -2,7 +2,7 @@
 Test imap_fetchbody() function : basic functionality
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

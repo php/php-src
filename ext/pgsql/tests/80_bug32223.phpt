@@ -2,7 +2,7 @@
 Bug #32223 (weird behaviour of pg_last_notice)
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 
 _skip_lc_messages();
 	

@@ -3,7 +3,7 @@ ldap_bind_ext() - Basic binding
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
 --SKIPIF--
-<?php require_once dirname(__FILE__) .'/skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 <?php require_once dirname(__FILE__) .'/skipifbindfailure.inc'; ?>
 <?php
 require_once('skipifcontrol.inc');

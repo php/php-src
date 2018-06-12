@@ -1,7 +1,7 @@
 --TEST--
 unset($_SESSION["name"]); should work
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.use_strict_mode=0

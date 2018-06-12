@@ -2,7 +2,7 @@
 Bug #39457 (Multiple invoked OO connections never close)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

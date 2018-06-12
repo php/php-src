@@ -4,7 +4,7 @@ DOMAttr __construct() with no arguments.
 Josh Sweeney <jsweeney@alt-invest.net>
 # TestFest Atlanta 2009-05-14
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 try {

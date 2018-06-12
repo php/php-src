@@ -1,7 +1,7 @@
 --TEST--
 odbc_tables(): Basic test
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

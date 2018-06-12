@@ -6,7 +6,7 @@ opcache.enable_cli=1
 opcache.optimization_level=-1
 opcache.opt_debug_level=0
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function a ($field_type, $allowed_values) {

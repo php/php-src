@@ -11,7 +11,7 @@ session.save_path=
 session.sid_length=32
 session.name=PHPSESSID
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

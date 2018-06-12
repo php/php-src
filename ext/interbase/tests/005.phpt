@@ -1,7 +1,7 @@
 --TEST--
 InterBase: transactions
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

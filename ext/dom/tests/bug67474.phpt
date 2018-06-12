@@ -2,7 +2,7 @@
 Bug #67474 getElementsByTagNameNS and default namespace
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

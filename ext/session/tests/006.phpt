@@ -1,7 +1,7 @@
 --TEST--
 correct instantiation of references between variables in sessions
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 session.use_cookies=0
 session.use_strict_mode=0

@@ -1,7 +1,7 @@
 --TEST--
 jewishtojd()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo jewishtojd(-1,-1,-1). "\n";

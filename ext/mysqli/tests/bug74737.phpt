@@ -2,7 +2,7 @@
 Bug #74737: Incorrect ReflectionFunction information for mysqli_get_client_info
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

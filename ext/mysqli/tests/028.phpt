@@ -2,7 +2,7 @@
 function test: mysqli_character_set_name
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

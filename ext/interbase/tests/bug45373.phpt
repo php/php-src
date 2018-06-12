@@ -1,7 +1,7 @@
 --TEST--
 Bug #45373 (php crash on query with errors in params)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

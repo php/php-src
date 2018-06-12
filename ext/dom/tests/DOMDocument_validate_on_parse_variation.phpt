@@ -5,7 +5,7 @@ Hans Zaunere
 # TestFest 2009 NYPHP
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

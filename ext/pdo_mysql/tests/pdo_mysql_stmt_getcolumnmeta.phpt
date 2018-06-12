@@ -2,7 +2,7 @@
 MySQL: PDOStatement->getColumnMeta()
 --SKIPIF--
 <?php # vim:ft=php
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require 'skipif.inc';
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 MySQLPDOTest::skip();
 // Too many differences among MySQL version - run only with a recent one

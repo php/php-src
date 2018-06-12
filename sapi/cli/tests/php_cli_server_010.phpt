@@ -2,7 +2,7 @@
 Bug #60180 ($_SERVER["PHP_SELF"] incorrect)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

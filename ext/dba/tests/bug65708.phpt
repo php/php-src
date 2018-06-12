@@ -2,7 +2,7 @@
 Bug #65708 (dba functions cast $key param to string in-place, bypassing copy on write)
 --SKIPIF--
 <?php 
-	require_once(dirname(__FILE__) .'/skipif.inc');
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

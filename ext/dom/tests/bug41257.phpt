@@ -1,7 +1,7 @@
 --TEST--
 Bug #41257 (lookupNamespaceURI does not work as expected)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

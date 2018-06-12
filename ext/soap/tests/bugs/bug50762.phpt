@@ -1,7 +1,7 @@
 --TEST--
 Bug #50762 (in WSDL mode Soap Header handler function only being called if defined in WSDL)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 class testSoap {

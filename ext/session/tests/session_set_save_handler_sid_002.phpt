@@ -5,7 +5,7 @@ session.save_handler=files
 session.name=PHPSESSID
 session.save_path=/tmp
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

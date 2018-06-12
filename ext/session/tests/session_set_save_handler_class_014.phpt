@@ -6,7 +6,7 @@ session.name=PHPSESSID
 display_errors=off
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 using invalid combinations of cmdline options
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
 Bug #75451 (Assertion fails while foreach on empty xpath query)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

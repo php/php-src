@@ -3,7 +3,7 @@ DOMNode::insertBefore() should fail if node belongs to another document
 --CREDITS--
 Knut Urdalen <knut@php.net>
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

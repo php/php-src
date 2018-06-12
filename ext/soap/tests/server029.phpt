@@ -15,7 +15,7 @@ SOAP Server 29-CGI: new/addfunction/handle
 --SKIPIF--
 <?php 
 	if (php_sapi_name()=='cli') echo 'skip';
-	require_once('skipif.inc'); 
+	require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

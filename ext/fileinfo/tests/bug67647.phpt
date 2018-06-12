@@ -1,7 +1,7 @@
 --TEST--
 Bug #67647: Bundled libmagic 5.17 does not detect quicktime files correctly
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

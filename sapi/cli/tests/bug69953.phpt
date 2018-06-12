@@ -4,7 +4,7 @@ FR #69953 (Support MKCALENDAR request method)
 allow_url_fopen=1
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 DOMDocument::save  Test basic function of save method
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

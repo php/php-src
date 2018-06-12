@@ -1,7 +1,7 @@
 --TEST--
 Bug #69975 (PHP segfaults when accessing nvarchar(max) defined columns)
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include 'config.inc';

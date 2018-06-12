@@ -1,7 +1,7 @@
 --TEST--
 Bug #48203 (Crash when CURLOPT_STDERR is set to regular file)
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 <?php
 if(substr(PHP_OS, 0, 3) == 'WIN' ) {
     die('skip now for Windows');

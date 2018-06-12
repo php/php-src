@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : error conditions - incorrect number of args
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

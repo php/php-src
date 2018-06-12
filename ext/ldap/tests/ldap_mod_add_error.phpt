@@ -4,7 +4,7 @@ ldap_mod_add() - ldap_mod_add() operations that should fail
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php

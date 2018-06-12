@@ -3,7 +3,7 @@ DBA DB4 with persistent connections
 --SKIPIF--
 <?php 
 $handler = "db4";
-require_once(dirname(__FILE__) .'/skipif.inc');
+require 'skipif.inc';
 die("info $HND handler used");
 ?>
 --FILE--

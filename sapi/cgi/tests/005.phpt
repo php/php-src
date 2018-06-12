@@ -7,7 +7,7 @@ if (substr(PHP_OS, 0, 3) == 'WIN') {
 	die ("skip not for Windows");
 }
 
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

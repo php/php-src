@@ -2,7 +2,7 @@
 Bug #47199 (pg_delete fails on NULL)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

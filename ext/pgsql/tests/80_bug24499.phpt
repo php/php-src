@@ -2,7 +2,7 @@
 Bug #24499 (Notice: Undefined property: stdClass::)
 --SKIPIF--
 <?php 
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

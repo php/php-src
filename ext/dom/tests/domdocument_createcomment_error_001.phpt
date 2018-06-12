@@ -3,7 +3,7 @@ DomDocument::CreateComment() - Incorrect Parameters
 --CREDITS--
 Clint Priest @ PhpTek09
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 	$x = new DomDocument();

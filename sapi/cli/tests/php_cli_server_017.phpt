@@ -2,7 +2,7 @@
 Implement Req #60850 (Built in web server does not set $_SERVER['SCRIPT_FILENAME'] when using router)
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

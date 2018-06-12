@@ -2,7 +2,7 @@
 Bug #26614 (CDATA sections skipped on line count)
 --SKIPIF--
 <?php 
-require_once("skipif.inc");
+require 'skipif.inc';
 if (defined("LIBXML_VERSION")) die('skip expat test'); 
 ?>
 --FILE--

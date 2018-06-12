@@ -2,7 +2,7 @@
 Correctly handle split and empty header
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

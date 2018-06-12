@@ -4,7 +4,7 @@ Function snmp_set_oid_output_format
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 if (!function_exists('snmp_set_oid_output_format')) die('This function is only available if using NET_SNMP');
 ?>
 --FILE--

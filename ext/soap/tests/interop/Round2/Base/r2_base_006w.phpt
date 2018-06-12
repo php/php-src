@@ -1,7 +1,7 @@
 --TEST--
 SOAP Interop Round2 base 006 (php/wsdl): echoStringArray
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

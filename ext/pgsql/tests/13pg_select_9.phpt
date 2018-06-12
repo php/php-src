@@ -2,7 +2,7 @@
 PostgreSQL pg_select() (9.0+)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_server_version('9.0', '<');
 ?>
 --FILE--

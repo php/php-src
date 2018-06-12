@@ -4,7 +4,7 @@ Bug #64482 (Opcodes for dynamic includes should not be cached)
 opcache.enable=1
 opcache.enable_cli=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php 
 include 'bug64482.inc';

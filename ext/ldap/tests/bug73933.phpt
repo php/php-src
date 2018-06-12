@@ -2,7 +2,7 @@
 Bug #73933 (error/segfault with ldap_mod_replace and opcache)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

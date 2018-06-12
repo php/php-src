@@ -1,7 +1,7 @@
 --TEST--
 PostgreSQL large object
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test reload configuration (bug #68442)
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

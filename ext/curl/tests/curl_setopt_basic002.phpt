@@ -4,7 +4,7 @@ curl_setopt basic tests with CURLOPT_STDERR.
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

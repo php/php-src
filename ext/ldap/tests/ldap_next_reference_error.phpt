@@ -4,7 +4,7 @@ ldap_next_reference() - Testing ldap_next_reference() that should fail
 Patrick Allaert <patrickallaert@php.net>
 # Belgian PHP Testfest 2009
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 require "connect.inc";

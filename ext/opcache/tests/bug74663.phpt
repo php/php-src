@@ -9,7 +9,7 @@ opcache.validate_timestamps=1
 opcache.revalidate_freq=0
 opcache.protect_memory=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $file = __DIR__ . "/bug74663.inc";

@@ -3,7 +3,7 @@ ldap_exop_whoami() - EXOP whoami operation
 --CREDITS--
 Côme Chilliet <mcmic@php.net>
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 <?php require_once('skipifbindfailure.inc'); ?>
 --FILE--
 <?php

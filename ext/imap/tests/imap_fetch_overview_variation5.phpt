@@ -2,7 +2,7 @@
 Test imap_fetch_overview() function : usage variations - $msg_no argument 
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

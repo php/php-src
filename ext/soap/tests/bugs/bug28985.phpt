@@ -1,7 +1,7 @@
 --TEST--
 Bug #28985 (__getTypes() returning nothing on complex WSDL)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 soap.wsdl_cache_enabled=0
 --FILE--

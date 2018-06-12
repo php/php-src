@@ -2,7 +2,7 @@
 Bug #52891 (Wrong data inserted with mysqli/mysqlnd when using bind_param,value > LONG_MAX)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 if (!$IS_MYSQLND) {
 	die("skip: test applies only to mysqlnd");

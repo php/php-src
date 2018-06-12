@@ -3,7 +3,7 @@ jdtounix()
 --INI--
 date.timezone=UTC
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo date("Y-m-d",jdtounix(2440588)). "\n";

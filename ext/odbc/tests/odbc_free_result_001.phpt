@@ -1,7 +1,7 @@
 --TEST--
 odbc_free_result(): Basic test
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

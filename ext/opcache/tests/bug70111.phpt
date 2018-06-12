@@ -4,7 +4,7 @@ Bug #70111 (Segfault when a function uses both an explicit return type and an ex
 opcache.enable=1
 opcache.enable_cli=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

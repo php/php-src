@@ -2,7 +2,7 @@
 Bug #71863 Segfault when EXPLAIN with "Unknown Column" Error
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 require_once("connect.inc");
 if (!$IS_MYSQLND) {

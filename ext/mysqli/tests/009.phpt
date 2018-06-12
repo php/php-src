@@ -6,7 +6,7 @@ mysqli fetch bigint values (ok to fail with 4.1.x)
 		echo 'skip test valid only for 32bit systems';
 		exit;
 	}
-	require_once('skipif.inc');
+	require 'skipif.inc';
 	require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

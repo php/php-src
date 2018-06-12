@@ -3,7 +3,7 @@ Bug #44707 (The MySQL PDO driver resets variable content after bindParam on tiny
 --SKIPIF--
 <?php
 if (!extension_loaded('pdo') || !extension_loaded('pdo_mysql')) die('skip not loaded');
-require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'skipif.inc');
+require 'skipif.inc';
 require_once(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'mysql_pdo_test.inc');
 
 MySQLPDOTest::skip();

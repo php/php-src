@@ -1,7 +1,7 @@
 --TEST--
 Bug #28751 (SoapServer does not call _autoload())
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 spl_autoload_register(function ($className) {

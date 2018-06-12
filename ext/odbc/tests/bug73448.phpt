@@ -1,7 +1,7 @@
 --TEST--
 Bug #73448 odbc_errormsg returns trash, always 513 bytes
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

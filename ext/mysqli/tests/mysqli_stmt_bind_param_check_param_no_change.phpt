@@ -2,7 +2,7 @@
 mysqli_stmt_bind_param() - checking whether the parameters are modified (bug#44390)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>

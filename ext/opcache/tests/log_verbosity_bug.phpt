@@ -11,7 +11,7 @@ opcache.file_cache_only=0
 opcache.memory_consumption=999999999
 opcache.log_verbosity_level=-1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 var_dump("Script should fail");

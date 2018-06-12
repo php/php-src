@@ -4,7 +4,7 @@ Function snmp_get_valueretrieval / snmp_set_valueretrieval
 Olivier Doucet
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

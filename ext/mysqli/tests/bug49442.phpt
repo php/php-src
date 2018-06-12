@@ -2,7 +2,7 @@
 Bug #49422 (mysqlnd: mysqli_real_connect() and LOAD DATA INFILE crash)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 
 $link = mysqli_init();

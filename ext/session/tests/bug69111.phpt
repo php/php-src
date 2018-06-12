@@ -1,7 +1,7 @@
 --TEST--
 Bug #69111 Crash in SessionHandler::read()
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $sh = new SessionHandler;

@@ -1,7 +1,7 @@
 --TEST--
 SOAP XML Schema 49: Restriction of complex type (2)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 include "test_schema.inc";

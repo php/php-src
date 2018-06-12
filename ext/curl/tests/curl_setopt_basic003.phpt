@@ -4,7 +4,7 @@ curl_setopt() call with CURLOPT_HTTPHEADER
 Paul Sohier
 #phptestfest utrecht
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

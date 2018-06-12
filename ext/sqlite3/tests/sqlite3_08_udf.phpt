@@ -1,7 +1,7 @@
 --TEST--
 SQLite3::createFunction
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

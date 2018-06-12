@@ -2,7 +2,7 @@
 Bug #65633 (built-in server treat some http headers as case-sensitive)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

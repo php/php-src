@@ -2,7 +2,7 @@
 DOMImplementation::createDocument()
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

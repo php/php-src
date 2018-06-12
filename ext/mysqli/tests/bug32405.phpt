@@ -2,7 +2,7 @@
 Bug #32405 (mysqli->fetch() is returning bad data)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

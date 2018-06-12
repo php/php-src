@@ -1,7 +1,7 @@
 --TEST--
 InterBase: connect, close and pconnect
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

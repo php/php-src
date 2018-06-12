@@ -4,7 +4,7 @@ SQLite3Result::numColumns parameters
 Jachim Coudenys
 # TestFest 2009 Belgium
 --SKIPIF--
-<?php require_once(__DIR__ . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $db = new SQLite3(':memory:');

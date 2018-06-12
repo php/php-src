@@ -2,7 +2,7 @@
 Bug #68745 (Invalid HTTP requests make web server segfault)
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

@@ -2,7 +2,7 @@
 Bug #74021 (fetch_array broken data. Data more then MEDIUMBLOB)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

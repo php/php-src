@@ -1,7 +1,7 @@
 --TEST--
 Bug #43045i (SOAP encoding violation on "INF" for type double/float)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 function test($x) {

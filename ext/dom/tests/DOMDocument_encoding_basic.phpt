@@ -4,7 +4,7 @@ DOMDocument::$encoding - read/write tests (dom_document_encoding_read/dom_docume
 Hans Zaunere
 # TestFest 2009 NYPHP
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

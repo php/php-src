@@ -1,7 +1,7 @@
 --TEST--
 Bug #55688 (Crash when calling SessionHandler::gc())
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --INI--
 html_errors=0
 session.save_handler=files

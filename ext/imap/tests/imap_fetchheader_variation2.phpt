@@ -2,7 +2,7 @@
 Test imap_fetchheader() function : usage variations - diff data types for $msg_no arg
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

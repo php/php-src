@@ -1,7 +1,7 @@
 --TEST--
 Bug #49463 (setAttributeNS fails setting default namespace).
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

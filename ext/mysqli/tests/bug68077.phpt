@@ -2,7 +2,7 @@
 Bug #68077 (LOAD DATA LOCAL INFILE / open_basedir restriction)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 if (!$IS_MYSQLND) {
 	die("skip: test applies only to mysqlnd");

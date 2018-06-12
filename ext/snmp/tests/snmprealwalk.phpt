@@ -4,7 +4,7 @@ Function snmprealwalk
 Olivier Doucet Olivier Doucet Boris Lytochkin
 --SKIPIF--
 <?php
-require_once(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

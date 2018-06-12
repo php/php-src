@@ -3,7 +3,7 @@ Test curl_opt() function with CURLOPT_HTTP_VERSION/CURL_HTTP_VERSION_1_0
 --CREDITS--
 TestFest 2009 - AFUP - Xavier Gorse <xgorse@elao.com>   
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 /* Prototype  : bool curl_setopt(resource ch, int option, mixed value)

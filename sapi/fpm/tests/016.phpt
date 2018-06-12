@@ -2,7 +2,7 @@
 FPM: Test splited configuration and load order #68391
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 
 $cfg = <<<EOT
 [global]

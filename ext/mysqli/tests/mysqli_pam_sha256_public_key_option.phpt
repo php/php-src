@@ -2,7 +2,7 @@
 PAM: SHA-256, option: MYSQLI_SERVER_PUBLIC_KEY
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 

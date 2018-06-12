@@ -2,7 +2,7 @@
 Bug #74432, BC issue on undocumented connect string
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('skipifconnectfailure.inc');
 ?>

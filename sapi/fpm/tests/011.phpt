@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test IPv4 all addresses (bug #68420)
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

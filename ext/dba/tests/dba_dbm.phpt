@@ -3,7 +3,7 @@ DBA DBM handler test
 --SKIPIF--
 <?php 
 	$handler = 'dbm';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

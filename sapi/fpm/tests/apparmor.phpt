@@ -6,7 +6,7 @@ apparmor hat a. Test succeeds if apparmor is not running or hat is non
 existent.
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 include "skipapparmor.inc";
 
 ?>

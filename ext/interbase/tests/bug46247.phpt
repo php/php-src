@@ -1,7 +1,7 @@
 --TEST--
 Bug #46247 (ibase_set_event_handler() is allowing to pass callback without event)
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

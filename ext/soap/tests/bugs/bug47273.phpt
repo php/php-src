@@ -1,7 +1,7 @@
 --TEST--
 Bug #47273 (Encoding bug in SoapServer->fault)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $request1 = <<<EOF

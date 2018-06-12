@@ -4,7 +4,7 @@ Bug #65845 (Error when Zend Opcache Optimizer is fully enabled)
 opcache.enable=1
 opcache.enable_cli=1
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 $Pile['vars'][(string)'toto'] = 'tutu';

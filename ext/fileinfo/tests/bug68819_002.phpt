@@ -1,7 +1,7 @@
 --TEST--
 Bug #68819 Fileinfo on specific file causes spurious OOM and/or segfault, var 2
 --SKIPIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

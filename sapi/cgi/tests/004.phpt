@@ -2,7 +2,7 @@
 execute a file with -f
 --SKIPIF--
 <?php 
-include "skipif.inc"; 
+require 'skipif.inc'; 
 ?>
 --FILE--
 <?php

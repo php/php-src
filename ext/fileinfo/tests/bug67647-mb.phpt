@@ -2,7 +2,7 @@
 Bug #67647: Bundled libmagic 5.17 does not detect quicktime files correctly
 --SKIPIF--
 <?php
-	require_once(dirname(__FILE__) . '/skipif.inc');
+	require 'skipif.inc';
 
 	if (ini_get("default_charset") != "UTF-8") {
 		die("skip require default_charset == UTF-8");

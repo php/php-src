@@ -16,7 +16,7 @@ session.upload_progress.name=PHP_SESSION_UPLOAD_PROGRESS
 session.upload_progress.freq=0
 session.save_handler=files
 --SKIPIF--
-<?php include('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --GET--
 PHPSESSID=rfc1867-tests-get
 --POST_RAW--

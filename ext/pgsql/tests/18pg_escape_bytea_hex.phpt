@@ -2,7 +2,7 @@
 PostgreSQL pg_escape_bytea() functions (hex format)
 --SKIPIF--
 <?php
-include("skipif.inc");
+require 'skipif.inc';
 skip_bytea_not_hex();
 ?>
 --FILE--

@@ -2,7 +2,7 @@
 Translit UTF-8 quotes
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ( ICONV_IMPL != "libiconv" ) and die("skip ICONV_IMPL != \"libiconv\""); 
 ?>
 --INI--

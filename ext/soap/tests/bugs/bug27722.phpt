@@ -1,7 +1,7 @@
 --TEST--
 Bug #27722 (Segfault on schema without targetNamespace)
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --GET--
 wsdl
 --INI--

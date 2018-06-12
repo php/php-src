@@ -3,7 +3,7 @@ DBA LMDB handler test
 --SKIPIF--
 <?php
 	$handler = 'lmdb';
-	require_once dirname(__FILE__) .'/skipif.inc';
+	require 'skipif.inc';
 ?>
 --FILE--
 <?php

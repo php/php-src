@@ -4,7 +4,7 @@ __DOMCharacterData::substringData pull mid section of string
 Nic Rosental nicrosental@gmail.com
 # TestFest Atlanta 2009-5-28 
 --SKIPIF--
-<?php require_once('skipif.inc'); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

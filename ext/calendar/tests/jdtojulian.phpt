@@ -1,7 +1,7 @@
 --TEST--
 jdtojulian()
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 echo jdtojulian(0). "\n";

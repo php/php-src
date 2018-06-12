@@ -2,7 +2,7 @@
 PAM auth plugin
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifemb.inc');
 require_once('connect.inc');
 

@@ -3,7 +3,7 @@ Test cal_days_in_month() function : error conditions
 --CREDITS--
 edgarsandi - <edgar.r.sandi@gmail.com>
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 var_dump(cal_days_in_month(-1, 4, 2017));

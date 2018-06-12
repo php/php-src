@@ -1,7 +1,7 @@
 --TEST--
 Bug #71144 (Sementation fault when using cURL with ZTS)
 --SKIPIF--
-<?php include 'skipif.inc'; ?>
+<?php require 'skipif.inc'; ?>
 <?php if (!PHP_ZTS) { print "skip only for zts build"; } ?>
 --FILE--
 <?php

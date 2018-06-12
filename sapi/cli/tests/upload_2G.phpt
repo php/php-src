@@ -2,7 +2,7 @@
 file upload greater than 2G
 --SKIPIF--
 <?php
-include "skipif.inc";
+require 'skipif.inc';
 
 if (PHP_INT_SIZE < 8) {
 	die("skip need PHP_INT_SIZE>=8");

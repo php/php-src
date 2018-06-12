@@ -1,7 +1,7 @@
 --TEST--
 ibase_rollback(): Basic test
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 

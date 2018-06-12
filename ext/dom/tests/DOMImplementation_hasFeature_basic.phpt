@@ -2,7 +2,7 @@
 DOMImplementation::hasFeature()
 --SKIPIF--
 <?php
-include('skipif.inc');
+require 'skipif.inc';
 ?>
 --FILE--
 <?php

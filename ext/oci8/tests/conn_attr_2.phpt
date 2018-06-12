@@ -3,7 +3,7 @@ Set and get of connection attributes across persistent connections and sysdba co
 --SKIPIF--
 <?php 
 $target_dbs = array('oracledb' => true, 'timesten' => false);  // test runs on these DBs
-require(dirname(__FILE__).'/skipif.inc');
+require 'skipif.inc';
 
 if (strcasecmp($user, "system") && strcasecmp($user, "sys")) die("skip needs to be run as a DBA user");
 if ($test_drcp) die("skip output might vary with DRCP");

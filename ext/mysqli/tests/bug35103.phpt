@@ -2,7 +2,7 @@
 Bug #35103 (Bad handling of unsigned bigint)
 --SKIPIF--
 <?php
-require_once('skipif.inc');
+require 'skipif.inc';
 require_once('skipifconnectfailure.inc');
 ?>
 --FILE--

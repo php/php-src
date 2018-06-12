@@ -1,7 +1,7 @@
 --TEST--
 Bug #71998 Function pg_insert does not insert when column type = inet
 --SKIPIF--
-<?php include("skipif.inc"); ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 // Kudos for the IP regex to 

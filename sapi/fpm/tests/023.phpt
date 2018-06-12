@@ -1,7 +1,7 @@
 --TEST--
 FPM: Test already bound address
 --SKIPIF--
-<?php include "skipif.inc"; ?>
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 
