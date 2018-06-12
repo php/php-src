@@ -2,7 +2,8 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.1.20
 
-
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
 
 22 Jun 2019, PHP 7.1.19
 
