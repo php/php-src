@@ -6077,13 +6077,6 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 							ZSTR_VAL(zend_string_tolower(class_name)));
 					}
 
-					if (type == IS_VOID) {
-						zend_error_noreturn(E_COMPILE_ERROR,
-							"Typed property %s::$%s must not be void",
-							ZSTR_VAL(ce->name),
-							ZSTR_VAL(name));
-					}
-
 					optional_type = type;
 				} else {
 					uint32_t fetch_type = zend_get_class_fetch_type_ast(type_ast);
@@ -6099,6 +6092,14 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 					optional_type = IS_OBJECT;
 					optional_type_name = class_name;
 				}
+			}
+
+			if (optional_type == IS_VOID || optional_type == IS_CALLABLE) {
+				zend_error_noreturn(E_COMPILE_ERROR,
+					"Typed property %s::$%s cannot have type %s",
+					ZSTR_VAL(ce->name),
+					ZSTR_VAL(name),
+					zend_get_type_by_const(optional_type));
 			}
 		}
 
@@ -6131,8 +6132,7 @@ void zend_compile_prop_decl(zend_ast *ast, zend_ast *type_ast) /* {{{ */
 								"Use the nullable type ?%s to allow null default value",
 								name, name);
 					}
-				} else if (optional_type_name ||
-							optional_type == IS_CALLABLE || optional_type == IS_OBJECT) {
+				} else if (optional_type_name || optional_type == IS_OBJECT) {
 					const char *name = optional_type_name
 						? ZSTR_VAL(optional_type_name) : zend_get_type_by_const(optional_type);
 					zend_error_noreturn(E_COMPILE_ERROR,

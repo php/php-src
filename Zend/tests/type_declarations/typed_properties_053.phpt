@@ -1,18 +1,12 @@
 --TEST--
-Default values of callable properties
+Typed properties disallow callable
 --FILE--
 <?php
 class A {
-	public callable $a1;
-	public ?callable $a2 = null;
+	public callable $a;
 }
 $obj = new A;
 var_dump($obj);
 ?>
---EXPECT--
-object(A)#1 (1) {
-  ["a1"]=>
-  uninitialized(callable)
-  ["a2"]=>
-  NULL
-}
+--EXPECTF--
+Fatal error: Typed property A::$a cannot have type callable in %s on line %d

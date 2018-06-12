@@ -9,8 +9,4 @@ class Foo {
 $foo = new Foo();
 ?>
 --EXPECTF--
-Fatal error: Typed property Foo::$int must not be void in %s on line 3
-
-
-
-
+Fatal error: Typed property Foo::$int cannot have type void in %s on line 3
