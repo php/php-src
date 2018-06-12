@@ -1,5 +1,4 @@
 ext/mysqlnd/mysqlnd.h           ident
-ext/iconv/php_iconv.h           ident
 ext/ext_skel.php                ident
 ext/phar/phar/pharcommand.inc   ident
 ext/phar/phar.c                 ident
