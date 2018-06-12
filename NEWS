@@ -12,6 +12,10 @@ PHP                                                                        NEWS
 - Interbase:
   . Fixed bug #76443 (php+php_interbase.dll crash on module_shutdown). (Kalle)
 
+- ZIP:
+  . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
+    (Dennis Birkholz, Remi)
+
 07 Jun 2018, PHP 7.3.0alpha1
 
 - Core:
