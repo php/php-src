@@ -1,4 +1,3 @@
-/* $Id: fpm_config.h,v 1.16 2008/05/25 00:30:43 anight Exp $ */
 /* (c) 2007,2008 Andrei Nigmatulin */
 
 #include <php_config.h>

@@ -1,6 +1,3 @@
-$Id: README.NEW-OUTPUT-API 219039 2006-08-30 07:39:09Z mike $
-
-
 API adjustment to the old output control code:
 
 	Everything now resides beneath the php_output namespace, 
