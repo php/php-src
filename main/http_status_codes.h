@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: $ */
-
 #ifndef HTTP_STATUS_CODES_H
 #define HTTP_STATUS_CODES_H
 

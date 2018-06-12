@@ -21,8 +21,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id: cgi_main.c 291497 2009-11-30 14:43:22Z dmitry $ */
-
 #include "php.h"
 #include "php_globals.h"
 #include "php_variables.h"

@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_conf.h,v 1.12.2.2 2008/12/13 03:46:49 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_CONF_H

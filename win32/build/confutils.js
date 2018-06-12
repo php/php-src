@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.33 2009-05-29 07:43:07 kalle Exp $
-
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
 var WshShell = WScript.CreateObject("WScript.Shell");

@@ -17,8 +17,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
-
 #include "php.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
