@@ -5,6 +5,10 @@ PHP                                                                        NEWS
 - Date:
   . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
 
+- FPM:
+  . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
+    non-blocking). (Nikita)
+
 22 Jun 2019, PHP 7.1.19
 
 - CLI Server:
