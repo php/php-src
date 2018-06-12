@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
   . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
 
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
+
 - EXIF:
   . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
 
