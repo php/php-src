@@ -2406,7 +2406,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				if (t1 & MAY_BE_OBJECT) {
 					tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 				} else {
-					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | MAY_BE_ARRAY_KEY_LONG;
+					tmp |= ((t1 & MAY_BE_ANY) << MAY_BE_ARRAY_SHIFT) | ((t1 & MAY_BE_ANY)? MAY_BE_ARRAY_KEY_LONG : 0);
 				}
 			}
 			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
