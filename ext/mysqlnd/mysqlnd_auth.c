@@ -1024,6 +1024,7 @@ mysqlnd_caching_sha2_get_and_use_key(MYSQLND_CONN_DATA *conn,
 	}
 	DBG_RETURN(0);
 #else
+	DBG_ENTER("mysqlnd_caching_sha2_get_and_use_key(");
 	php_error_docref(NULL, E_WARNING, "PHP was built without openssl extension, can't send password encrypted");
 	DBG_RETURN(0);
 #endif

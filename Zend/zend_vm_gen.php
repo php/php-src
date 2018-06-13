@@ -1129,6 +1129,8 @@ function is_cold_handler($hot, $op1, $op2, $extra_spec) {
 		return ($op1 === 'CONST' && $op2 === 'CONST');
 	} else if ($hot === 'HOT_OBJ_') {
 		return ($op1 === 'CONST');
+	} else if ($hot === 'HOT_NOCONST_') {
+		return ($op1 === 'CONST');
 	} else {
 		return false;
 	}

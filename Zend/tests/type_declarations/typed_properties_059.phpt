@@ -17,13 +17,13 @@ $x = new A;
 var_dump($x);
 ?>
 --EXPECT--
-object(A)#1 (2) {
+object(A)#1 (0) {
   ["a2"]=>
   uninitialized(int)
   ["b2"]=>
-  NULL
+  uninitialized(?int)
   ["a1"]=>
   uninitialized(int)
   ["b1"]=>
-  NULL
+  uninitialized(?int)
 }

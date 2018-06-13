@@ -1642,14 +1642,14 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TICKS_SPEC_HANDLER(ZEND_OPCODE
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXT_NOP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_EXT_NOP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
 	ZEND_VM_NEXT_OPCODE();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NOP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_NOP_SPEC_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -2588,7 +2588,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ECHO_SPEC_CONST_HANDLER(ZEND_O
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -2619,7 +2619,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZ_SPEC_CONST_HANDLER(ZEND_O
 	ZEND_VM_JMP(opline);
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -2650,7 +2650,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPNZ_SPEC_CONST_HANDLER(ZEND_
 	ZEND_VM_JMP(opline);
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_JMPZNZ_SPEC_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 
@@ -12737,7 +12737,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FREE_SPEC_TMPVAR_HANDLER(ZEND_
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FREE_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_FE_FREE_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	zval *var;
 	USE_OPLINE
@@ -13014,6 +13014,46 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEN
 	}
 	zval_ptr_dtor_nogc(free_op1);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+}
+
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+{
+	USE_OPLINE
+	zval *value;
+	int result = 0;
+	zend_free_op free_op1;
+
+	value = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
+	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
+type_check_resource:
+		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
+		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
+			result = 1;
+		}
+	} else if (((IS_TMP_VAR|IS_VAR) & (IS_CV|IS_VAR)) && Z_ISREF_P(value)) {
+		value = Z_REFVAL_P(value);
+		if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
+			goto type_check_resource;
+		}
+	} else if ((IS_TMP_VAR|IS_VAR) == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
+		result = ((1 << IS_NULL) & opline->extended_value) != 0;
+		SAVE_OPLINE();
+		GET_OP1_UNDEF_CV(value, BP_VAR_R);
+		ZEND_VM_SMART_BRANCH(result, 1);
+		ZVAL_BOOL(EX_VAR(opline->result.var), result);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	}
+	if ((IS_TMP_VAR|IS_VAR) & (IS_TMP_VAR|IS_VAR)) {
+		SAVE_OPLINE();
+		zval_ptr_dtor_nogc(free_op1);
+		ZEND_VM_SMART_BRANCH(result, 1);
+		ZVAL_BOOL(EX_VAR(opline->result.var), result);
+		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
+	} else {
+		ZEND_VM_SMART_BRANCH(result, 0);
+		ZVAL_BOOL(EX_VAR(opline->result.var), result);
+		ZEND_VM_NEXT_OPCODE();
+	}
 }
 
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ADD_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -18578,46 +18618,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZE
 	ZEND_VM_RETURN();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	int result = 0;
-	zend_free_op free_op1;
-
-	value = _get_zval_ptr_tmp(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-type_check_resource:
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
-		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
-			result = 1;
-		}
-	} else if ((IS_TMP_VAR & (IS_CV|IS_VAR)) && Z_ISREF_P(value)) {
-		value = Z_REFVAL_P(value);
-		if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-			goto type_check_resource;
-		}
-	} else if (IS_TMP_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
-		SAVE_OPLINE();
-		GET_OP1_UNDEF_CV(value, BP_VAR_R);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-	if (IS_TMP_VAR & (IS_TMP_VAR|IS_VAR)) {
-		SAVE_OPLINE();
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	} else {
-		ZEND_VM_SMART_BRANCH(result, 0);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE();
-	}
-}
-
 static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
@@ -21067,7 +21067,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_VAR_HANDLER(ZEND
 {
 	USE_OPLINE
 	zend_free_op free_op1;
-	zval *var_ptr, *val;
+	zval *var_ptr;
 	zend_type ref_type = 0;
 
 	var_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
@@ -22470,46 +22470,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZE
 	SAVE_OPLINE();
 
 	ZEND_VM_RETURN();
-}
-
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
-{
-	USE_OPLINE
-	zval *value;
-	int result = 0;
-	zend_free_op free_op1;
-
-	value = _get_zval_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-type_check_resource:
-		if (EXPECTED(Z_TYPE_P(value) != IS_RESOURCE)
-		 || EXPECTED(NULL != zend_rsrc_list_get_rsrc_type(Z_RES_P(value)))) {
-			result = 1;
-		}
-	} else if ((IS_VAR & (IS_CV|IS_VAR)) && Z_ISREF_P(value)) {
-		value = Z_REFVAL_P(value);
-		if ((opline->extended_value >> (uint32_t)Z_TYPE_P(value)) & 1) {
-			goto type_check_resource;
-		}
-	} else if (IS_VAR == IS_CV && UNEXPECTED(Z_TYPE_P(value) == IS_UNDEF)) {
-		result = ((1 << IS_NULL) & opline->extended_value) != 0;
-		SAVE_OPLINE();
-		GET_OP1_UNDEF_CV(value, BP_VAR_R);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	}
-	if (IS_VAR & (IS_TMP_VAR|IS_VAR)) {
-		SAVE_OPLINE();
-		zval_ptr_dtor_nogc(free_op1);
-		ZEND_VM_SMART_BRANCH(result, 1);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
-	} else {
-		ZEND_VM_SMART_BRANCH(result, 0);
-		ZVAL_BOOL(EX_VAR(opline->result.var), result);
-		ZEND_VM_NEXT_OPCODE();
-	}
 }
 
 static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_SEND_VAR_SIMPLE_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
@@ -24670,51 +24630,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -24796,51 +24758,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_CONST_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -27569,51 +27533,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(free_op2);
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+			zval_ptr_dtor_nogc(free_op2);
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -27695,51 +27661,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_TMPVAR_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(free_op2);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+			zval_ptr_dtor_nogc(free_op2);
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -28524,15 +28492,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 	value_ptr = _get_zval_ptr_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-	if (IS_VAR == IS_VAR &&
-	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
-	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+
 		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
 		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
@@ -28543,22 +28514,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_VAR_HANDLE
 			HANDLE_EXCEPTION();
 		}
 
+		/* op2 freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		ZEND_VM_NEXT_OPCODE();
 	} else {
-
-		if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
-		    (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
-			variable_ptr = &EG(uninitialized_zval);
-		} else {
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-		}
-
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
-		}
-
-		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
+		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
 
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+	}
+
+	if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -32042,15 +32009,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
 	variable_ptr = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-	if (IS_VAR == IS_VAR &&
-	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
-	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+	if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+
 		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
 		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
@@ -32061,19 +32031,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_VAR_CV_HANDLER
 			HANDLE_EXCEPTION();
 		}
 
+		/* op2 freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+		ZEND_VM_NEXT_OPCODE();
 	} else {
+		zend_assign_to_variable_reference(variable_ptr, value_ptr);
+	}
 
-		if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
-		    (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
-			variable_ptr = &EG(uninitialized_zval);
-		} else {
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-		}
-
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
-		}
-
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
 	}
 
 	if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
@@ -32093,51 +32059,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -32219,51 +32187,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
-			zval_ptr_dtor_nogc(EX_VAR(opline->op1.var));
+	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
 
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_VAR_CV_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_ptr_var(opline->op1.var, &free_op1 EXECUTE_DATA_CC);
-	if (IS_VAR == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_VAR, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+			if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+		if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -34451,51 +34421,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -34576,51 +34548,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_CONST_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -36679,51 +36653,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+		zval_ptr_dtor_nogc(free_op2);
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+
+			zval_ptr_dtor_nogc(free_op2);
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -36804,51 +36780,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_TMPVAR_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+		zval_ptr_dtor_nogc(free_op2);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+
+			zval_ptr_dtor_nogc(free_op2);
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -39532,51 +39510,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -39657,51 +39637,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
 
-
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_UNUSED_CV_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_obj_zval_ptr_unused(EXECUTE_DATA_C);
-	if (IS_UNUSED == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_UNUSED, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -40636,7 +40618,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_POST_INC_SPEC_CV_HANDLER(ZEND_
 {
 	USE_OPLINE
 
-	zval *var_ptr, *val;
+	zval *var_ptr;
 	zend_type ref_type = 0;
 
 	var_ptr = _get_zval_ptr_cv_undef_BP_VAR_RW(opline->op1.var EXECUTE_DATA_CC);
@@ -42011,7 +41993,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_STRLEN_SPEC_CV_HANDLER(ZEND_OP
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
-static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
+static ZEND_VM_HOT ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_TYPE_CHECK_SPEC_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS)
 {
 	USE_OPLINE
 	zval *value;
@@ -45254,51 +45236,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -45379,51 +45363,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_CONST_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = RT_CONSTANT(opline, opline->op2);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CONST, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CONST OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -49550,51 +49536,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-		zval_ptr_dtor_nogc(free_op2);
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+		zval_ptr_dtor_nogc(free_op2);
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+
+			zval_ptr_dtor_nogc(free_op2);
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -49675,51 +49663,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-			zval_ptr_dtor_nogc(EX_VAR(opline->op2.var));
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_TMPVAR_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, (IS_TMP_VAR|IS_VAR), cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-		zval_ptr_dtor_nogc(free_op2);
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+		zval_ptr_dtor_nogc(free_op2);
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, (IS_TMP_VAR|IS_VAR) OPLINE_CC EXECUTE_DATA_CC))) {
+
+			zval_ptr_dtor_nogc(free_op2);
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+		zval_ptr_dtor_nogc(free_op2);
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -50883,15 +50873,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 	value_ptr = _get_zval_ptr_ptr_var(opline->op2.var, &free_op2 EXECUTE_DATA_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-	if (IS_CV == IS_VAR &&
-	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
-	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+
 		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
 
 		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_VAR == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
@@ -50902,21 +50895,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_VAR_HANDLER
 			HANDLE_EXCEPTION();
 		}
 
+		/* op2 freed by assign_to_variable */
+
+		ZEND_VM_NEXT_OPCODE();
 	} else {
-
-		if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
-		    (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
-			variable_ptr = &EG(uninitialized_zval);
-		} else {
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-		}
-
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
-		}
-
-		if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
+		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+	}
+
+	if (UNEXPECTED(free_op2)) {zval_ptr_dtor_nogc(free_op2);};
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -55785,15 +55775,18 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W(opline->op2.var EXECUTE_DATA_CC);
 	variable_ptr = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-	if (IS_CV == IS_VAR &&
-	   UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT) &&
-	   UNEXPECTED(!Z_ISERROR_P(variable_ptr)) &&
-	   UNEXPECTED(!Z_ISREF_P(variable_ptr))) {
+	if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           UNEXPECTED(Z_TYPE_P(EX_VAR(opline->op1.var)) != IS_INDIRECT)) {
+
 		zend_throw_error(NULL, "Cannot assign by reference to an array dimension of an object");
 
 
 		UNDEF_RESULT();
 		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
 	} else if (IS_CV == IS_VAR &&
 	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
 			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
@@ -55804,20 +55797,17 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_REF_SPEC_CV_CV_HANDLER(
 			HANDLE_EXCEPTION();
 		}
 
+		/* op2 freed by assign_to_variable */
+
+		ZEND_VM_NEXT_OPCODE();
 	} else {
-
-		if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(variable_ptr))) ||
-		    (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))) {
-			variable_ptr = &EG(uninitialized_zval);
-		} else {
-			zend_assign_to_variable_reference(variable_ptr, value_ptr);
-		}
-
-		if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-			ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
-		}
-
+		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 	}
+
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), variable_ptr);
+	}
+
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
@@ -55835,51 +55825,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 	SAVE_OPLINE();
 
-	if (IS_VAR == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-
-			zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-		zval_ptr_dtor_nogc(EX_VAR((opline+1)->op1.var));
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC);
 
-	if ((IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+		if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_VAR == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_VAR == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+			if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -55960,51 +55952,53 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 	SAVE_OPLINE();
 
-	if (IS_CV == IS_VAR
-	 && (opline->extended_value & ZEND_RETURNS_FUNCTION)
-	 && UNEXPECTED(!Z_ISREF_P(EX_VAR((opline+1)->op1.var)))) {
-		zend_error(E_NOTICE, "Only variables should be assigned by reference");
-		if (UNEXPECTED(EG(exception) != NULL)) {
+	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
 
-
-
-			HANDLE_EXCEPTION();
-		}
-
-		ZEND_VM_TAIL_CALL(ZEND_ASSIGN_OBJ_SPEC_CV_CV_OP_DATA_CV_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
+	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
+		ZEND_VM_TAIL_CALL(zend_this_not_in_object_context_helper_SPEC(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU));
 	}
 
 	property = _get_zval_ptr_cv_BP_VAR_R(opline->op2.var EXECUTE_DATA_CC);
 
-	container = _get_zval_ptr_cv_undef_BP_VAR_W(opline->op1.var EXECUTE_DATA_CC);
-	if (IS_CV == IS_UNUSED && UNEXPECTED(Z_TYPE_P(container) == IS_UNDEF)) {
-		zend_throw_error(NULL, "Using $this when not in object context");
-
-
-		HANDLE_EXCEPTION();
-	}
-
 	cache_addr = (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value & ~ZEND_RETURNS_FUNCTION) : NULL;
 
 	zend_fetch_property_address(variable_ptr, container, IS_CV, property, IS_CV, cache_addr, BP_VAR_W, 0 OPLINE_CC);
-
-	if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT) &&
-	    UNEXPECTED(!Z_ISERROR(variable))) {
-		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
-
-
-
-		HANDLE_EXCEPTION();
+	if (Z_TYPE_P(variable_ptr) == IS_INDIRECT) {
+		variable_ptr = Z_INDIRECT_P(variable_ptr);
 	}
 
 	value_ptr = _get_zval_ptr_cv_BP_VAR_W((opline+1)->op1.var EXECUTE_DATA_CC);
 
-	if ((IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr)))
-	 || UNEXPECTED(Z_ISERROR(variable))) {
+	if (UNEXPECTED(Z_ISERROR_P(variable_ptr))) {
 		variable_ptr = &EG(uninitialized_zval);
-	} else {
-		variable_ptr = Z_INDIRECT(variable);
+	} else if (UNEXPECTED(Z_TYPE(variable) != IS_INDIRECT)) {
 
+		zend_throw_error(NULL, "Cannot assign by reference to overloaded object");
+
+
+
+		UNDEF_RESULT();
+		HANDLE_EXCEPTION();
+	} else if (IS_CV == IS_VAR && UNEXPECTED(Z_ISERROR_P(value_ptr))) {
+		variable_ptr = &EG(uninitialized_zval);
+	} else if (IS_CV == IS_VAR &&
+	           opline->extended_value == ZEND_RETURNS_FUNCTION &&
+			   UNEXPECTED(!Z_ISREF_P(value_ptr))) {
+
+		if (UNEXPECTED(!zend_wrong_assign_to_variable_reference(
+				Z_INDIRECT_P(variable_ptr), value_ptr, IS_CV OPLINE_CC EXECUTE_DATA_CC))) {
+
+
+
+			UNDEF_RESULT();
+			HANDLE_EXCEPTION();
+		}
+
+		/* op_data freed by assign_to_variable */
+
+
+		ZEND_VM_NEXT_OPCODE_EX(1, 2);
+	} else {
 		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			zend_property_info *prop_info;
 
@@ -59273,8 +59267,8 @@ ZEND_API void execute_ex(zend_execute_data *ex)
 			(void*)&&ZEND_STRLEN_SPEC_CV_LABEL,
 			(void*)&&ZEND_DEFINED_SPEC_CONST_LABEL,
 			(void*)&&ZEND_TYPE_CHECK_SPEC_CONST_LABEL,
-			(void*)&&ZEND_TYPE_CHECK_SPEC_TMP_LABEL,
-			(void*)&&ZEND_TYPE_CHECK_SPEC_VAR_LABEL,
+			(void*)&&ZEND_TYPE_CHECK_SPEC_TMPVAR_LABEL,
+			(void*)&&ZEND_TYPE_CHECK_SPEC_TMPVAR_LABEL,
 			(void*)&&ZEND_NULL_LABEL,
 			(void*)&&ZEND_TYPE_CHECK_SPEC_CV_LABEL,
 			(void*)&&ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_LABEL,
@@ -63099,6 +63093,10 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_STRLEN_SPEC_TMPVAR)
 				ZEND_STRLEN_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
+			HYBRID_CASE(ZEND_TYPE_CHECK_SPEC_TMPVAR):
+				VM_TRACE(ZEND_TYPE_CHECK_SPEC_TMPVAR)
+				ZEND_TYPE_CHECK_SPEC_TMPVAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
+				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_ADD_SPEC_TMPVAR_CONST):
 				VM_TRACE(ZEND_ADD_SPEC_TMPVAR_CONST)
 				ZEND_ADD_SPEC_TMPVAR_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -63713,10 +63711,6 @@ zend_leave_helper_SPEC_LABEL:
 				VM_TRACE(ZEND_YIELD_FROM_SPEC_TMP)
 				ZEND_YIELD_FROM_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_TYPE_CHECK_SPEC_TMP):
-				VM_TRACE(ZEND_TYPE_CHECK_SPEC_TMP)
-				ZEND_TYPE_CHECK_SPEC_TMP_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_IS_IDENTICAL_SPEC_TMP_CONST):
 				VM_TRACE(ZEND_IS_IDENTICAL_SPEC_TMP_CONST)
 				ZEND_IS_IDENTICAL_SPEC_TMP_CONST_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
@@ -64178,10 +64172,6 @@ zend_leave_helper_SPEC_LABEL:
 			HYBRID_CASE(ZEND_YIELD_FROM_SPEC_VAR):
 				VM_TRACE(ZEND_YIELD_FROM_SPEC_VAR)
 				ZEND_YIELD_FROM_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
-				HYBRID_BREAK();
-			HYBRID_CASE(ZEND_TYPE_CHECK_SPEC_VAR):
-				VM_TRACE(ZEND_TYPE_CHECK_SPEC_VAR)
-				ZEND_TYPE_CHECK_SPEC_VAR_HANDLER(ZEND_OPCODE_HANDLER_ARGS_PASSTHRU);
 				HYBRID_BREAK();
 			HYBRID_CASE(ZEND_SEND_VAR_SIMPLE_SPEC_VAR):
 				VM_TRACE(ZEND_SEND_VAR_SIMPLE_SPEC_VAR)
@@ -70144,8 +70134,8 @@ void zend_vm_init(void)
 		ZEND_STRLEN_SPEC_CV_HANDLER,
 		ZEND_DEFINED_SPEC_CONST_HANDLER,
 		ZEND_TYPE_CHECK_SPEC_CONST_HANDLER,
-		ZEND_TYPE_CHECK_SPEC_TMP_HANDLER,
-		ZEND_TYPE_CHECK_SPEC_VAR_HANDLER,
+		ZEND_TYPE_CHECK_SPEC_TMPVAR_HANDLER,
+		ZEND_TYPE_CHECK_SPEC_TMPVAR_HANDLER,
 		ZEND_NULL_HANDLER,
 		ZEND_TYPE_CHECK_SPEC_CV_HANDLER,
 		ZEND_VERIFY_RETURN_TYPE_SPEC_CONST_UNUSED_HANDLER,

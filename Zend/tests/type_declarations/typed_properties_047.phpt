@@ -3,7 +3,7 @@ Nullable typed property
 --FILE--
 <?php
 class Foo {
-	public ?int $foo;
+	public ?int $foo = null;
 }
 $x = new Foo();
 var_dump($x);

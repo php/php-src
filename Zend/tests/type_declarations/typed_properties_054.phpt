@@ -1,12 +1,12 @@
 --TEST--
-Default values of callable properties
+Typed properties disallow callable (nullable variant)
 --FILE--
 <?php
 class A {
-	public callable $a1 = 42;
+	public ?callable $a;
 }
 $obj = new A;
 var_dump($obj);
 ?>
 --EXPECTF--
-Fatal error: Default value for properties with callable type can only be null in %styped_properties_054.php on line 3
+Fatal error: Typed property A::$a cannot have type callable in %s on line %d
