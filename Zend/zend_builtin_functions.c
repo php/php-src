@@ -21,6 +21,7 @@
 
 #include "zend.h"
 #include "zend_API.h"
+#include "zend_gc.h"
 #include "zend_builtin_functions.h"
 #include "zend_constants.h"
 #include "zend_ini.h"
@@ -85,6 +86,7 @@ static ZEND_FUNCTION(gc_collect_cycles);
 static ZEND_FUNCTION(gc_enabled);
 static ZEND_FUNCTION(gc_enable);
 static ZEND_FUNCTION(gc_disable);
+static ZEND_FUNCTION(gc_status);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_zend__void, 0)
@@ -293,6 +295,7 @@ static const zend_function_entry builtin_functions[] = { /* {{{ */
 	ZEND_FE(gc_enabled, 		arginfo_zend__void)
 	ZEND_FE(gc_enable, 		arginfo_zend__void)
 	ZEND_FE(gc_disable, 		arginfo_zend__void)
+	ZEND_FE(gc_status, 		arginfo_zend__void)
 	ZEND_FE_END
 };
 /* }}} */
@@ -384,6 +387,21 @@ ZEND_FUNCTION(gc_disable)
 	zend_string_release_ex(key, 0);
 }
 /* }}} */
+
+/* {{{ proto array gc_status(void)
+   Returns current GC statistics */
+ZEND_FUNCTION(gc_status)
+{
+	zend_gc_status status;
+
+	zend_gc_get_status(&status);
+
+	array_init_size(return_value, 3);
+
+	add_assoc_long_ex(return_value, "gc_runs", sizeof("gc_runs")-1, (long)status.gc_runs);
+	add_assoc_long_ex(return_value, "collected", sizeof("collected")-1, (long)status.collected);
+	add_assoc_long_ex(return_value, "gc_threshold", sizeof("gc_threshold")-1, (long)status.gc_threshold);
+}
 
 /* {{{ proto int func_num_args(void)
    Get the number of arguments that were passed to the function */

@@ -23,6 +23,13 @@
 #define ZEND_GC_H
 
 BEGIN_EXTERN_C()
+
+typedef struct _zend_gc_status {
+	uint32_t gc_runs;
+	uint32_t collected;
+	uint32_t gc_threshold;
+} zend_gc_status;
+
 ZEND_API extern int (*gc_collect_cycles)(void);
 
 ZEND_API void ZEND_FASTCALL gc_possible_root(zend_refcounted *ref);
@@ -38,6 +45,8 @@ ZEND_API zend_bool gc_protected(void);
 
 /* The default implementation of the gc_collect_cycles callback. */
 ZEND_API int  zend_gc_collect_cycles(void);
+
+ZEND_API void zend_gc_get_status(zend_gc_status *status);
 
 void gc_globals_ctor(void);
 void gc_globals_dtor(void);
