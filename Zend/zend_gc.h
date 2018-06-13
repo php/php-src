@@ -25,9 +25,9 @@
 BEGIN_EXTERN_C()
 
 typedef struct _zend_gc_status {
-	uint32_t gc_runs;
+	uint32_t runs;
 	uint32_t collected;
-	uint32_t gc_threshold;
+	uint32_t threshold;
 } zend_gc_status;
 
 ZEND_API extern int (*gc_collect_cycles)(void);

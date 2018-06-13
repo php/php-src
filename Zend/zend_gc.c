@@ -1444,9 +1444,9 @@ ZEND_API int zend_gc_collect_cycles(void)
 
 ZEND_API void zend_gc_get_status(zend_gc_status *status)
 {
-	status->gc_runs = GC_G(gc_runs);
+	status->runs = GC_G(gc_runs);
 	status->collected = GC_G(collected);
-	status->gc_threshold = GC_G(gc_threshold);
+	status->threshold = GC_G(gc_threshold);
 }
 
 /*

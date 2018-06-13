@@ -398,9 +398,9 @@ ZEND_FUNCTION(gc_status)
 
 	array_init_size(return_value, 3);
 
-	add_assoc_long_ex(return_value, "gc_runs", sizeof("gc_runs")-1, (long)status.gc_runs);
+	add_assoc_long_ex(return_value, "runs", sizeof("runs")-1, (long)status.runs);
 	add_assoc_long_ex(return_value, "collected", sizeof("collected")-1, (long)status.collected);
-	add_assoc_long_ex(return_value, "gc_threshold", sizeof("gc_threshold")-1, (long)status.gc_threshold);
+	add_assoc_long_ex(return_value, "threshold", sizeof("threshold")-1, (long)status.threshold);
 }
 
 /* {{{ proto int func_num_args(void)

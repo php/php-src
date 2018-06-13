@@ -13,18 +13,18 @@ gc_collect_cycles();
 var_dump(gc_status());
 --EXPECT--
 array(3) {
-  ["gc_runs"]=>
+  ["runs"]=>
   int(0)
   ["collected"]=>
   int(0)
-  ["gc_threshold"]=>
+  ["threshold"]=>
   int(10001)
 }
 array(3) {
-  ["gc_runs"]=>
+  ["runs"]=>
   int(1)
   ["collected"]=>
   int(1)
-  ["gc_threshold"]=>
+  ["threshold"]=>
   int(10001)
 }
