@@ -377,10 +377,7 @@ file_getbuffer(struct magic_set *ms)
 		return NULL;
 	}
 	psize = len * 4 + 1;
-	if ((pbuf = CAST(char *, erealloc(ms->o.pbuf, psize))) == NULL) {
-		file_oomem(ms, psize);
-		return NULL;
-	}
+	pbuf = erealloc(ms->o.pbuf, psize));
 	ms->o.pbuf = pbuf;
 
 #if defined(HAVE_WCHAR_H) && defined(HAVE_MBRTOWC) && defined(HAVE_WCWIDTH)
