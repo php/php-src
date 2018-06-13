@@ -2,7 +2,6 @@
 #38943, properties in extended class cannot be set (5.3)
 --SKIPIF--
 <?php
-/* $Id: bug38943_2.phpt 271800 2008-12-24 11:28:25Z pajoye $ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
