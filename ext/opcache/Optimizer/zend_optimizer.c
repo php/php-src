@@ -310,6 +310,22 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			}
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			break;
+		case ZEND_ASSIGN_ADD:
+		case ZEND_ASSIGN_SUB:
+		case ZEND_ASSIGN_MUL:
+		case ZEND_ASSIGN_DIV:
+		case ZEND_ASSIGN_MOD:
+		case ZEND_ASSIGN_SL:
+		case ZEND_ASSIGN_SR:
+		case ZEND_ASSIGN_CONCAT:
+		case ZEND_ASSIGN_BW_OR:
+		case ZEND_ASSIGN_BW_AND:
+		case ZEND_ASSIGN_BW_XOR:
+		case ZEND_ASSIGN_POW:
+			if (opline->extended_value != ZEND_ASSIGN_STATIC_PROP) {
+				break;
+			}
+		case ZEND_ASSIGN_STATIC_PROP:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
@@ -405,6 +421,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			opline->result.num = alloc_cache_slots(op_array, 1);
 			break;
+		case ZEND_ASSIGN_STATIC_PROP:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
@@ -421,6 +438,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			}
 			break;
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+handle_static_prop:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
@@ -514,6 +532,8 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 				TO_STRING_NOWARN(val);
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 				(opline+1)->extended_value = alloc_cache_slots(op_array, 3);
+			} else if (opline->extended_value == ZEND_ASSIGN_STATIC_PROP) {
+				goto handle_static_prop;
 			} else {
 				opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			}

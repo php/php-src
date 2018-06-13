@@ -275,7 +275,8 @@ END_EXTERN_C()
 #define ZEND_ISSET_ISEMPTY_CV                197
 #define ZEND_FETCH_LIST_W                    198
 #define ZEND_ASSIGN_OBJ_REF                  199
+#define ZEND_ASSIGN_STATIC_PROP              200
 
-#define ZEND_VM_LAST_OPCODE                  199
+#define ZEND_VM_LAST_OPCODE                  200
 
 #endif

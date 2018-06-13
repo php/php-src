@@ -2571,6 +2571,91 @@ use_read_property:
 	}
 }
 
+static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
+	zend_free_op free_op1;
+	zend_string *name, *tmp_name;
+	zend_class_entry *ce;
+
+	zend_uchar op1_type = opline->op1_type, op2_type = opline->op2_type;
+
+	if (EXPECTED(op2_type == IS_CONST)) {
+		zval *class_name = RT_CONSTANT(opline, opline->op2);
+
+		ZEND_ASSERT(op1_type != IS_CONST || CACHED_PTR(cache_slot) == NULL);
+
+		if (EXPECTED((ce = CACHED_PTR(cache_slot)) == NULL)) {
+			ce = zend_fetch_class_by_name(Z_STR_P(class_name), class_name + 1, ZEND_FETCH_CLASS_DEFAULT | ZEND_FETCH_CLASS_EXCEPTION);
+			if (UNEXPECTED(ce == NULL)) {
+				FREE_UNFETCHED_OP(op1_type, opline->op1.var);
+				return FAILURE;
+			}
+			if (UNEXPECTED(op1_type != IS_CONST)) {
+				CACHE_PTR(cache_slot, ce);
+			}
+		}
+	} else {
+		if (EXPECTED(op2_type == IS_UNUSED)) {
+			ce = zend_fetch_class(NULL, opline->op2.num);
+			if (UNEXPECTED(ce == NULL)) {
+				FREE_UNFETCHED_OP(op1_type, opline->op1.var);
+				return FAILURE;
+			}
+		} else {
+			ce = Z_CE_P(EX_VAR(opline->op2.var));
+		}
+		if (EXPECTED(op1_type == IS_CONST) && EXPECTED(CACHED_PTR(cache_slot) == ce)) {
+			*retval = CACHED_PTR(cache_slot + sizeof(void*));
+			return SUCCESS;
+		}
+	}
+
+	if (EXPECTED(op1_type == IS_CONST)) {
+		name = Z_STR_P(RT_CONSTANT(opline, opline->op1));
+	} else {
+		zval *varname = get_zval_ptr_undef(opline->op1_type, opline->op1, &free_op1, BP_VAR_R);
+		if (EXPECTED(Z_TYPE_P(varname) == IS_STRING)) {
+			name = Z_STR_P(varname);
+			tmp_name = NULL;
+		} else {
+			if (op1_type == IS_CV && UNEXPECTED(Z_TYPE_P(varname) == IS_UNDEF)) {
+				zval_undefined_cv(opline->op1.var EXECUTE_DATA_CC);
+			}
+			name = zval_get_tmp_string(varname, &tmp_name);
+		}
+	}
+
+	*retval = zend_std_get_static_property(ce, name, fetch_type == BP_VAR_IS);
+
+	if (UNEXPECTED(op1_type != IS_CONST)) {
+		zend_tmp_string_release(tmp_name);
+
+		if (op1_type != IS_CV) {
+			zval_ptr_dtor_nogc(free_op1);
+		}
+	}
+
+	if (UNEXPECTED(*retval == NULL)) {
+		return FAILURE;
+	}
+
+	if (EXPECTED(op1_type == IS_CONST)) {
+		CACHE_POLYMORPHIC_PTR(cache_slot, ce, *retval);
+	}
+
+	return SUCCESS;
+}
+
+
+static zend_always_inline int zend_fetch_static_property_address(zval **retval, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
+	if (opline->op1_type == IS_CONST && (opline->op2_type == IS_CONST || (opline->op2_type == IS_UNUSED && (opline->op2.num == ZEND_FETCH_CLASS_SELF || opline->op2.num == ZEND_FETCH_CLASS_PARENT))) && EXPECTED(CACHED_PTR(cache_slot) != NULL)) {
+		*retval = CACHED_PTR(cache_slot + sizeof(void *));
+		return SUCCESS;
+	} else {
+		return zend_fetch_static_property_address_ex(retval, cache_slot, fetch_type OPLINE_CC EXECUTE_DATA_CC);
+        }
+
+}
+
 ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv) {
 	zend_throw_exception_ex(
 		zend_ce_type_error, 0,
@@ -2615,7 +2700,6 @@ static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DAT
 		EMPTY_SWITCH_DEFAULT_CASE()
 	}
 }
-
 
 #if ZEND_INTENSIVE_DEBUGGING
 

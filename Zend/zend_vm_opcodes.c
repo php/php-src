@@ -22,7 +22,7 @@
 #include <zend.h>
 #include <zend_vm_opcodes.h>
 
-static const char *zend_vm_opcodes_names[200] = {
+static const char *zend_vm_opcodes_names[201] = {
 	"ZEND_NOP",
 	"ZEND_ADD",
 	"ZEND_SUB",
@@ -223,9 +223,10 @@ static const char *zend_vm_opcodes_names[200] = {
 	"ZEND_ISSET_ISEMPTY_CV",
 	"ZEND_FETCH_LIST_W",
 	"ZEND_ASSIGN_OBJ_REF",
+	"ZEND_ASSIGN_STATIC_PROP",
 };
 
-static uint32_t zend_vm_opcodes_flags[200] = {
+static uint32_t zend_vm_opcodes_flags[201] = {
 	0x00000000,
 	0x00000707,
 	0x00000707,
@@ -249,17 +250,17 @@ static uint32_t zend_vm_opcodes_flags[200] = {
 	0x00000707,
 	0x07000003,
 	0x00000003,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
-	0x04046751,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
+	0x04046753,
 	0x00000001,
 	0x00000001,
 	0x00000001,
@@ -393,7 +394,7 @@ static uint32_t zend_vm_opcodes_flags[200] = {
 	0x0000a110,
 	0x00000000,
 	0x00000707,
-	0x04046751,
+	0x04046753,
 	0x00040301,
 	0x00002003,
 	0x00000707,
@@ -426,6 +427,7 @@ static uint32_t zend_vm_opcodes_flags[200] = {
 	0x00020101,
 	0x00000701,
 	0x0b040751,
+	0x00040307,
 };
 
 ZEND_API const char* ZEND_FASTCALL zend_get_opcode_name(zend_uchar opcode) {

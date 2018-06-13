@@ -2972,12 +2972,21 @@ void zend_compile_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
-		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_W, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			zend_emit_op(result, ZEND_ASSIGN, &var_node, &expr_node);
+			return;
+		case ZEND_AST_STATIC_PROP:
+			offset = zend_delayed_compile_begin();
+			zend_delayed_compile_var(result, var_ast, BP_VAR_W, 0);
+			zend_compile_expr(&expr_node, expr_ast);
+
+			opline = zend_delayed_compile_end(offset);
+			opline->opcode = ZEND_ASSIGN_STATIC_PROP;
+
+			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
@@ -3122,12 +3131,24 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 
 	switch (var_ast->kind) {
 		case ZEND_AST_VAR:
-		case ZEND_AST_STATIC_PROP:
 			offset = zend_delayed_compile_begin();
 			zend_delayed_compile_var(&var_node, var_ast, BP_VAR_RW, 0);
 			zend_compile_expr(&expr_node, expr_ast);
 			zend_delayed_compile_end(offset);
 			zend_emit_op(result, opcode, &var_node, &expr_node);
+			return;
+		case ZEND_AST_STATIC_PROP:
+			offset = zend_delayed_compile_begin();
+			zend_delayed_compile_var(result, var_ast, BP_VAR_RW, 0);
+			zend_compile_expr(&expr_node, expr_ast);
+
+			opline = zend_delayed_compile_end(offset);
+			cache_slot = opline->extended_value;
+			opline->opcode = opcode;
+			opline->extended_value = ZEND_ASSIGN_STATIC_PROP;
+
+			opline = zend_emit_op_data(&expr_node);
+			opline->extended_value = cache_slot;
 			return;
 		case ZEND_AST_DIM:
 			offset = zend_delayed_compile_begin();
@@ -3138,7 +3159,7 @@ void zend_compile_compound_assign(znode *result, zend_ast *ast) /* {{{ */
 			opline->opcode = opcode;
 			opline->extended_value = ZEND_ASSIGN_DIM;
 
-			opline = zend_emit_op_data(&expr_node);
+			zend_emit_op_data(&expr_node);
 			return;
 		case ZEND_AST_PROP:
 			offset = zend_delayed_compile_begin();
