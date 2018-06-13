@@ -27,6 +27,8 @@
 	smart_str_appendl_ex((dest), (src), strlen(src), (what))
 #define smart_str_appends(dest, src) \
 	smart_str_appendl((dest), (src), strlen(src))
+#define smart_str_extend(dest, len) \
+	smart_str_extend_ex((dest), (len), 0)
 #define smart_str_appendc(dest, c) \
 	smart_str_appendc_ex((dest), (c), 0)
 #define smart_str_appendl(dest, src, len) \
@@ -69,6 +71,13 @@ do_smart_str_realloc:
 		}
 	}
 	return len;
+}
+
+static zend_always_inline char* smart_str_extend_ex(smart_str *dest, size_t len, zend_bool persistent) {
+	size_t new_len = smart_str_alloc(dest, len, persistent);
+	char *ret = ZSTR_VAL(dest->s) + ZSTR_LEN(dest->s);
+	ZSTR_LEN(dest->s) = new_len;
+	return ret;
 }
 
 static zend_always_inline void smart_str_free_ex(smart_str *str, zend_bool persistent) {
