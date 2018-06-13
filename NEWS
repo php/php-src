@@ -17,6 +17,8 @@ PHP                                                                        NEWS
 
 - Opcache:
   . Fixed bug #76463 (var has array key type but not value type). (Laruence)
+  . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
+    `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
 
 - ZIP:
   . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
