@@ -76,9 +76,6 @@ static char* convert(const char* src, int src_len, int *new_len, const char* fro
                   outlen += inlenleft;
                   outlenleft += inlenleft;
                   outbuf = (char*)erealloc(outbuf, outlen + 1);
-                  if(!outbuf) {
-                     break;
-                  }
                   out_ptr = outbuf + diff;
                }
                else {
