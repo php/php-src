@@ -672,6 +672,7 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 			conn->unix_socket.s = NULL;
 			goto err;
 		}
+		conn->unix_socket.s = NULL;
 	}
 
 	{
