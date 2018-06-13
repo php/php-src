@@ -3603,6 +3603,18 @@ static int spl_iterator_to_values_apply(zend_object_iterator *iter, void *puser)
 }
 /* }}} */
 
+static int spl_iterator_to_array_do_convert(zval *val, zend_bool use_keys, zval *retval) /* {{{ */
+{
+	array_init(retval);
+
+	if (spl_iterator_apply(val, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)retval) != SUCCESS) {
+		zval_ptr_dtor(retval);
+		return 0;
+	}
+
+	return 1;
+} /* }}} */
+
 /* {{{ proto array iterator_to_array(Traversable it [, bool use_keys = true])
    Copy the iterator into an array */
 PHP_FUNCTION(iterator_to_array)
@@ -3614,12 +3626,60 @@ PHP_FUNCTION(iterator_to_array)
 		RETURN_FALSE;
 	}
 
-	array_init(return_value);
-
-	if (spl_iterator_apply(obj, use_keys ? spl_iterator_to_array_apply : spl_iterator_to_values_apply, (void*)return_value) != SUCCESS) {
-		zval_ptr_dtor(return_value);
+	if (spl_iterator_to_array_do_convert(obj, use_keys, return_value) == 0) {
 		RETURN_NULL();
 	}
+} /* }}} */
+
+/* {{{ proto array iterable_to_array(iterable it [, bool use_keys = true])
+   Convert an iterable into an array */
+PHP_FUNCTION(iterable_to_array)
+{
+	zval  *iter, *entry;
+	zend_bool use_keys = 1;
+	zend_long arrlen;
+
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|b", &iter, &use_keys) == FAILURE) {
+		RETURN_FALSE;
+	}
+
+	if (zend_is_iterable(iter) == 0) {
+		zend_type_error("Argument 1 passed to iterable_to_array() must be iterable, %s given",
+		                zend_zval_type_name(iter));
+		RETURN_NULL();
+	}
+
+	if (Z_TYPE_P(iter) != IS_ARRAY) {
+		if (spl_iterator_to_array_do_convert(iter, use_keys, return_value) == 0) {
+			RETURN_NULL();
+		}
+
+		return;
+	}
+
+	arrlen = zend_hash_num_elements(Z_ARRVAL_P(iter));
+
+	if (arrlen == 0) {
+		ZVAL_EMPTY_ARRAY(return_value);
+		return;
+	}
+
+	if (use_keys == 1) {
+		RETURN_ZVAL(iter, 1, 0);
+	}
+
+	array_init_size(return_value, arrlen);
+	zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+
+	ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+		ZEND_HASH_FOREACH_VAL(Z_ARRVAL_P(iter), entry) {
+			if (UNEXPECTED(Z_ISREF_P(entry) && Z_REFCOUNT_P(entry) == 1)) {
+				entry = Z_REFVAL_P(entry);
+			}
+			Z_TRY_ADDREF_P(entry);
+			ZEND_HASH_FILL_ADD(entry);
+		} ZEND_HASH_FOREACH_END();
+	} ZEND_HASH_FILL_END();
 } /* }}} */
 
 static int spl_iterator_count_apply(zend_object_iterator *iter, void *puser) /* {{{ */
