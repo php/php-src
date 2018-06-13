@@ -401,7 +401,9 @@ ZEND_FUNCTION(gc_status)
 	add_assoc_long_ex(return_value, "runs", sizeof("runs")-1, (long)status.runs);
 	add_assoc_long_ex(return_value, "collected", sizeof("collected")-1, (long)status.collected);
 	add_assoc_long_ex(return_value, "threshold", sizeof("threshold")-1, (long)status.threshold);
+	add_assoc_long_ex(return_value, "roots", sizeof("roots")-1, (long)status.num_roots);
 }
+/* }}} */
 
 /* {{{ proto int func_num_args(void)
    Get the number of arguments that were passed to the function */

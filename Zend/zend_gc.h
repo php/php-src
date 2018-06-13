@@ -28,6 +28,7 @@ typedef struct _zend_gc_status {
 	uint32_t runs;
 	uint32_t collected;
 	uint32_t threshold;
+	uint32_t num_roots;
 } zend_gc_status;
 
 ZEND_API extern int (*gc_collect_cycles)(void);

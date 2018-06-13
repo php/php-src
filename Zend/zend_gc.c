@@ -1447,6 +1447,7 @@ ZEND_API void zend_gc_get_status(zend_gc_status *status)
 	status->runs = GC_G(gc_runs);
 	status->collected = GC_G(collected);
 	status->threshold = GC_G(gc_threshold);
+	status->num_roots = GC_G(num_roots);
 }
 
 /*
