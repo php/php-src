@@ -98,13 +98,19 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 			zend_refcounted *garbage;
 
 			if (Z_ISREF_P(variable_ptr)) {
-				if (ZEND_CONST_COND(value_type == IS_CONST, 1)) {
-					ZVAL_COPY_VALUE(&tmp, value);
-					value = &tmp;
-				}
-				if (!zend_verify_ref_type_assignable_zval(Z_REFTYPE_P(variable_ptr), value, strict)) {
-					zend_throw_ref_type_error(Z_REFTYPE_P(variable_ptr), value);
-					return Z_REFVAL_P(variable_ptr);
+				if (UNEXPECTED(Z_REFTYPE_P(variable_ptr))) {
+					zend_bool need_copy = (value_type & (IS_CONST|IS_CV)) || ((value_type & IS_VAR) && UNEXPECTED(ref) && Z_REFCOUNT_P(variable_ptr) > 1);
+					if (need_copy) {
+						ZVAL_COPY(&tmp, value);
+						value = &tmp;
+					}
+					if (!zend_verify_ref_type_assignable_zval(Z_REFTYPE_P(variable_ptr), value, strict)) {
+						zend_throw_ref_type_error(Z_REFTYPE_P(variable_ptr), value);
+						return Z_REFVAL_P(variable_ptr);
+					}
+					if (need_copy) {
+						Z_TRY_DELREF_P(value);
+					}
 				}
 
 				variable_ptr = Z_REFVAL_P(variable_ptr);
