@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
   . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
+  . Improved effectivness ZEND_SECURE_ZERO for NetBSD and systems
+    without native similar feature (devnexen).
 
 - Date:
   . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
@@ -23,6 +25,9 @@ PHP                                                                        NEWS
 - ZIP:
   . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
     (Dennis Birkholz, Remi)
+
+- Tidy:
+  . Able to choose tidy or tidy library (devnexen).
 
 07 Jun 2018, PHP 7.3.0alpha1
 
