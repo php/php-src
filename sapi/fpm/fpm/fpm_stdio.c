@@ -14,6 +14,7 @@
 
 #include "fpm.h"
 #include "fpm_children.h"
+#include "fpm_cleanup.h"
 #include "fpm_events.h"
 #include "fpm_sockets.h"
 #include "fpm_stdio.h"
@@ -22,12 +23,21 @@
 static int fd_stdout[2];
 static int fd_stderr[2];
 
+static void fpm_stdio_cleanup(int which, void *arg) /* {{{ */
+{
+	zlog_cleanup();
+}
+/* }}} */
+
 int fpm_stdio_init_main() /* {{{ */
 {
 	int fd = open("/dev/null", O_RDWR);
 
 	if (0 > fd) {
 		zlog(ZLOG_SYSERROR, "failed to init stdio: open(\"/dev/null\")");
+		return -1;
+	}
+	if (0 > fpm_cleanup_add(FPM_CLEANUP_PARENT, fpm_stdio_cleanup, 0)) {
 		return -1;
 	}
 
@@ -115,20 +125,29 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 	int is_stdout;
 	struct fpm_event_s *event;
 	int fifo_in = 1, fifo_out = 1;
-	int is_last_message = 0;
 	int in_buf = 0;
 	int res;
+	struct zlog_stream stream;
 
 	if (!arg) {
 		return;
 	}
 	child = (struct fpm_child_s *)arg;
+
 	is_stdout = (fd == child->fd_stdout);
 	if (is_stdout) {
 		event = &child->ev_stdout;
 	} else {
 		event = &child->ev_stderr;
 	}
+
+	zlog_stream_init_ex(&stream, ZLOG_WARNING, STDERR_FILENO);
+	zlog_stream_set_decorating(&stream, child->wp->config->decorate_workers_output);
+	zlog_stream_set_wrapping(&stream, ZLOG_TRUE);
+	zlog_stream_set_msg_prefix(&stream, "[pool %s] child %d said into %s: ",
+			child->wp->config->name, (int) child->pid, is_stdout ? "stdout" : "stderr");
+	zlog_stream_set_msg_suffix(&stream, NULL, ", pipe is closed");
+	zlog_stream_set_msg_quoting(&stream, ZLOG_TRUE);
 
 	while (fifo_in || fifo_out) {
 		if (fifo_in) {
@@ -144,7 +163,6 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 					}
 
 					fpm_event_del(event);
-					is_last_message = 1;
 
 					if (is_stdout) {
 						close(child->fd_stdout);
@@ -164,42 +182,27 @@ static void fpm_stdio_child_said(struct fpm_event_s *ev, short which, void *arg)
 				fifo_out = 0;
 			} else {
 				char *nl;
-				int should_print = 0;
-				buf[in_buf] = '\0';
 
-				/* FIXME: there might be binary data */
-
-				/* we should print if no more space in the buffer */
-				if (in_buf == max_buf_size - 1) {
-					should_print = 1;
-				}
-
-				/* we should print if no more data to come */
-				if (!fifo_in) {
-					should_print = 1;
-				}
-
-				nl = strchr(buf, '\n');
-				if (nl || should_print) {
-
-					if (nl) {
-						*nl = '\0';
-					}
-
-					zlog(ZLOG_WARNING, "[pool %s] child %d said into %s: \"%s\"%s", child->wp->config->name,
-					  (int) child->pid, is_stdout ? "stdout" : "stderr", buf, is_last_message ? ", pipe is closed" : "");
-
-					if (nl) {
-						int out_buf = 1 + nl - buf;
-						memmove(buf, buf + out_buf, in_buf - out_buf);
-						in_buf -= out_buf;
-					} else {
-						in_buf = 0;
-					}
+				nl = memchr(buf, '\n', in_buf);
+				if (nl) {
+					/* we should print each new line int the new message */
+					int out_len = nl - buf;
+					zlog_stream_str(&stream, buf, out_len);
+					zlog_stream_finish(&stream);
+					/* skip new line */
+					out_len++;
+					/* move data in the buffer */
+					memmove(buf, buf + out_len, in_buf - out_len);
+					in_buf -= out_len;
+				} else if (in_buf == max_buf_size - 1 || !fifo_in) {
+					/* we should print if no more space in the buffer or no more data to come */
+					zlog_stream_str(&stream, buf, in_buf);
+					in_buf = 0;
 				}
 			}
 		}
 	}
+	zlog_stream_close(&stream);
 }
 /* }}} */
 
