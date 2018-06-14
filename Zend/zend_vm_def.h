@@ -1454,7 +1454,7 @@ ZEND_VM_C_LABEL(fetch_this):
 
 	ZEND_ASSERT(retval != NULL);
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
-		ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
 	}
@@ -1580,7 +1580,7 @@ ZEND_VM_HELPER(zend_fetch_static_prop_helper, CONST|TMPVAR|CV, UNUSED|CONST|VAR,
 	}
 
 	if (type == BP_VAR_R || type == BP_VAR_IS) {
-		ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
 	} else {
 		ZVAL_INDIRECT(EX_VAR(opline->result.var), retval);
 	}
@@ -1634,7 +1634,7 @@ ZEND_VM_COLD_CONSTCONST_HANDLER(81, ZEND_FETCH_DIM_R, CONST|TMPVAR|CV, CONST|TMP
 ZEND_VM_C_LABEL(fetch_dim_r_array):
 			value = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, OP2_TYPE, BP_VAR_R EXECUTE_DATA_CC);
 			result = EX_VAR(opline->result.var);
-			ZVAL_COPY_UNREF(result, value);
+			ZVAL_COPY_DEREF(result, value);
 		} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
 			container = Z_REFVAL_P(container);
 			if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
@@ -1809,7 +1809,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 				if (EXPECTED(IS_VALID_PROPERTY_OFFSET(prop_offset))) {
 					retval = OBJ_PROP(zobj, prop_offset);
 					if (EXPECTED(Z_TYPE_INFO_P(retval) != IS_UNDEF)) {
-						ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
+						ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
 						break;
 					}
 				} else if (EXPECTED(zobj->properties != NULL)) {
@@ -1824,7 +1824,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 						         (EXPECTED(p->h == ZSTR_H(Z_STR_P(offset))) &&
 						          EXPECTED(p->key != NULL) &&
 						          EXPECTED(zend_string_equal_content(p->key, Z_STR_P(offset)))))) {
-								ZVAL_COPY_UNREF(EX_VAR(opline->result.var), &p->val);
+								ZVAL_COPY_DEREF(EX_VAR(opline->result.var), &p->val);
 								break;
 							}
 						}
@@ -1834,7 +1834,7 @@ ZEND_VM_HOT_OBJ_HANDLER(82, ZEND_FETCH_OBJ_R, CONST|TMPVAR|UNUSED|THIS|CV, CONST
 					if (EXPECTED(retval)) {
 						uintptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 						CACHE_PTR_EX(cache_slot + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-						ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
+						ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
 						break;
 					}
 				}
@@ -1851,7 +1851,9 @@ ZEND_VM_C_LABEL(fetch_obj_r_no_object):
 			retval = zobj->handlers->read_property(container, offset, BP_VAR_R, cache_slot, EX_VAR(opline->result.var));
 
 			if (retval != EX_VAR(opline->result.var)) {
-				ZVAL_COPY_UNREF(EX_VAR(opline->result.var), retval);
+				ZVAL_COPY_DEREF(EX_VAR(opline->result.var), retval);
+			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+				zend_unwrap_reference(retval);
 			}
 		}
 	} while (0);
@@ -8654,7 +8656,7 @@ ZEND_VM_C_LABEL(fetch_dim_r_index_array):
 		}
 		ht = Z_ARRVAL_P(container);
 		ZEND_HASH_INDEX_FIND(ht, offset, value, ZEND_VM_C_LABEL(fetch_dim_r_index_undef));
-		ZVAL_COPY_UNREF(EX_VAR(opline->result.var), value);
+		ZVAL_COPY_DEREF(EX_VAR(opline->result.var), value);
 		if (OP1_TYPE & (IS_TMP_VAR|IS_VAR)) {
 			SAVE_OPLINE();
 			FREE_OP1();
