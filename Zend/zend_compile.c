@@ -4988,16 +4988,20 @@ void zend_compile_switch(zend_ast *ast) /* {{{ */
 
 		zend_compile_expr(&cond_node, cond_ast);
 
-		if (expr_node.op_type == IS_CONST
+		if (!case_ast->attr
+			&& expr_node.op_type == IS_CONST
 			&& Z_TYPE(expr_node.u.constant) == IS_FALSE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPZ, &cond_node, 0);
-		} else if (expr_node.op_type == IS_CONST
+		} else if (!case_ast->attr
+			&& expr_node.op_type == IS_CONST
 			&& Z_TYPE(expr_node.u.constant) == IS_TRUE) {
 			jmpnz_opnums[i] = zend_emit_cond_jump(ZEND_JMPNZ, &cond_node, 0);
 		} else {
-			opline = zend_emit_op(NULL,
-				(expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE : ZEND_IS_EQUAL,
-				&expr_node, &cond_node);
+			zend_uchar equality_op = case_ast->attr;
+			if (!equality_op) {
+				equality_op = (expr_node.op_type & (IS_VAR|IS_TMP_VAR)) ? ZEND_CASE : ZEND_IS_EQUAL;
+			}
+			opline = zend_emit_op(NULL, equality_op, &expr_node, &cond_node);
 			SET_NODE(opline->result, &case_node);
 			if (opline->op1_type == IS_CONST) {
 				Z_TRY_ADDREF_P(CT_CONSTANT(opline->op1));
