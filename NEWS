@@ -222,6 +222,7 @@ PHP                                                                        NEWS
   . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
   . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
   . Remove superfluous warnings from inet_ntop()/inet_pton(). (daverandom)
+  . Added hrtime() function, to get high resolution time. (welting)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
