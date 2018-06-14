@@ -2536,9 +2536,10 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		return FAILURE;
 	}
 
+	*prop_info = property_info;
+
 	if (EXPECTED(op1_type == IS_CONST)) {
 		CACHE_POLYMORPHIC_PTR(cache_slot, ce, *retval);
-		*prop_info = property_info;
 		CACHE_PTR(cache_slot + sizeof(void *) * 2, property_info);
 	}
 

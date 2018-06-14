@@ -3980,7 +3980,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	}
 	ZVAL_DEREF(variable_ptr);
 
-	if (zend_verify_property_type(prop_info, value, value, EX_USES_STRICT_TYPES())) {
+	if (!prop_info->type || zend_verify_property_type(prop_info, value, value, EX_USES_STRICT_TYPES())) {
 		zval_ptr_dtor(variable_ptr);
 		ZVAL_COPY(variable_ptr, value);
 	} else {
