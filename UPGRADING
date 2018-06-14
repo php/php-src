@@ -135,6 +135,9 @@ readline:
 4. Deprecated Functionality
 ========================================
 
+Core:
+  . The == and != operators have been deprecated.
+
 GD:
   . image2wbmp() has been deprecated.
 

@@ -7021,6 +7021,13 @@ void zend_compile_binary_op(znode *result, zend_ast *ast) /* {{{ */
 	uint32_t opcode = ast->attr;
 
 	znode left_node, right_node;
+
+	if (opcode == ZEND_IS_EQUAL) {
+		zend_error(E_DEPRECATED, "The == operator is deprecated");
+	} else if (opcode == ZEND_IS_NOT_EQUAL) {
+		zend_error(E_DEPRECATED, "The != operator is deprecated");
+	}
+
 	zend_compile_expr(&left_node, left_ast);
 	zend_compile_expr(&right_node, right_ast);
 
