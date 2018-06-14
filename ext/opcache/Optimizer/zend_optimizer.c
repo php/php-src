@@ -336,10 +336,10 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_UNSET_STATIC_PROP:
 			TO_STRING_NOWARN(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && opline->extended_value + sizeof(void*) == op_array->cache_size) {
+			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_FETCH_REF) + sizeof(void*) == op_array->cache_size) {
 				op_array->cache_size += sizeof(void *);
 			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 2);
+				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_FETCH_REF);
 			}
 			break;
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
@@ -348,7 +348,7 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_ISEMPTY) + sizeof(void*) == op_array->cache_size) {
 				op_array->cache_size += sizeof(void *);
 			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 2) | (opline->extended_value & ZEND_ISEMPTY);
+				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_ISEMPTY);
 			}
 			break;
 		case ZEND_SEND_VAR:
@@ -423,6 +423,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			opline->result.num = alloc_cache_slots(op_array, 1);
 			break;
 		case ZEND_ASSIGN_STATIC_PROP:
+		case ZEND_ASSIGN_STATIC_PROP_REF:
 		case ZEND_FETCH_STATIC_PROP_R:
 		case ZEND_FETCH_STATIC_PROP_W:
 		case ZEND_FETCH_STATIC_PROP_RW:
@@ -435,7 +436,7 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1);
+				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION | ZEND_FETCH_REF));
 			}
 			break;
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
