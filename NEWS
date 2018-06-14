@@ -71,6 +71,8 @@ PHP                                                                        NEWS
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
   . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
+  . Improved effectiveness of ZEND_SECURE_ZERO for NetBSD and systems
+    without native similar feature (devnexen).
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -237,6 +239,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
     functions taking tidy). (Gabriel Caruso)
+  . Support using tidyp instead of tidy (devnexen).
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)
