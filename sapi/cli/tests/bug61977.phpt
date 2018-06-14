@@ -2,7 +2,7 @@
 Bug #61977 test CLI web-server support for Mime Type File extensions mapping
 --SKIPIF--
 <?php
-include "skipif.inc"; 
+include "skipif.inc";
 ?>
 --FILE--
 <?php
@@ -18,7 +18,7 @@ $mimetypes = ['html', 'htm', 'svg', 'css', 'js', 'png', 'webm', 'ogv', 'ogg'];
 function test_mimetypes($mimetypes) {
     foreach ($mimetypes as $mimetype) {
         list($host, $port) = explode(':', PHP_CLI_SERVER_ADDRESS);
-        $port = intval($port) ? : 80;
+        $port = intval($port) ?: 80;
         $fp   = fsockopen($host, $port, $errno, $errstr, 0.5);
         if (!$fp) die('Connect failed');
         file_put_contents(__DIR__ . "/foo.{$mimetype}", '');

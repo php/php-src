@@ -18,7 +18,7 @@ class Tree
      */
     public function __construct(Node $head = null)
     {
-        $this->head = $head ? : new Node('HEAD');
+        $this->head = $head ?: new Node('HEAD');
     }
 
     /**
@@ -122,7 +122,7 @@ class Node extends \RecursiveArrayIterator implements \Countable
         }
 
         $this->data = $data;
-        $this->uid = $uid ? : uniqid(sha1(serialize($data)), true);
+        $this->uid = $uid ?: uniqid(sha1(serialize($data)), true);
         $this->assureUnique = $assureUnique;
     }
 

@@ -63,6 +63,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %right T_YIELD_FROM
 %left '=' T_PLUS_EQUAL T_MINUS_EQUAL T_MUL_EQUAL T_DIV_EQUAL T_CONCAT_EQUAL T_MOD_EQUAL T_AND_EQUAL T_OR_EQUAL T_XOR_EQUAL T_SL_EQUAL T_SR_EQUAL T_POW_EQUAL
 %left '?' ':'
+%left T_SHORT_TERNARY
 %right T_COALESCE
 %left T_BOOLEAN_OR
 %left T_BOOLEAN_AND
@@ -130,6 +131,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %token T_SPACESHIP "<=> (T_SPACESHIP)"
 %token T_SL "<< (T_SL)"
 %token T_SR ">> (T_SR)"
+%token T_SHORT_TERNARY "?: (T_SHORT_TERNARY)"
 %token T_INSTANCEOF  "instanceof (T_INSTANCEOF)"
 %token T_INC "++ (T_INC)"
 %token T_DEC "-- (T_DEC)"
@@ -957,8 +959,8 @@ expr_without_variable:
 	|	new_expr { $$ = $1; }
 	|	expr '?' expr ':' expr
 			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, $3, $5); }
-	|	expr '?' ':' expr
-			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $4); }
+	|	expr T_SHORT_TERNARY expr
+			{ $$ = zend_ast_create(ZEND_AST_CONDITIONAL, $1, NULL, $3); }
 	|	expr T_COALESCE expr
 			{ $$ = zend_ast_create(ZEND_AST_COALESCE, $1, $3); }
 	|	internal_functions_in_yacc { $$ = $1; }
