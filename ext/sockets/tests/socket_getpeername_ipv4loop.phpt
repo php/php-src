@@ -1,8 +1,8 @@
 --TEST--
 ext/sockets - socket_getpeername_ipv4loop - basic test
 --CREDITS--
+Tatjana Andersen tatjana.andersen@redpill-linpro.com
 # TestFest 2009 - NorwayUG
-# $Id: socket_getpeername_ipv4loop.phpt 494 2009-06-09 20:38:05Z tatjana.andersen@redpill-linpro.com $
 --SKIPIF--
 <?php   
         if (!extension_loaded('sockets')) {

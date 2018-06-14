@@ -907,7 +907,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				entry->filename = estrndup(ZSTR_VAL(new_str_key), ZSTR_LEN(new_str_key));
 				entry->filename_len = ZSTR_LEN(new_str_key);
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
@@ -925,7 +925,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
 				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}
@@ -943,7 +943,7 @@ static int phar_wrapper_rename(php_stream_wrapper *wrapper, const char *url_from
 				memcpy(ZSTR_VAL(new_str_key) + to_len, ZSTR_VAL(str_key) + from_len, ZSTR_LEN(str_key) - from_len);
 				ZSTR_VAL(new_str_key)[ZSTR_LEN(new_str_key)] = 0;
 
-				zend_string_release(str_key);
+				zend_string_release_ex(str_key, 0);
 				b->h = zend_string_hash_val(new_str_key);
 				b->key = new_str_key;
 			}

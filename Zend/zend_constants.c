@@ -41,13 +41,17 @@ void free_zend_constant(zval *zv)
 
 	if (!(c->flags & CONST_PERSISTENT)) {
 		zval_ptr_dtor(&c->value);
+		if (c->name) {
+			zend_string_release_ex(c->name, 0);
+		}
+		efree(c);
 	} else {
 		zval_internal_dtor(&c->value);
+		if (c->name) {
+			zend_string_release_ex(c->name, 1);
+		}
+		free(c);
 	}
-	if (c->name) {
-		zend_string_release(c->name);
-	}
-	pefree(c, c->flags & CONST_PERSISTENT);
 }
 
 
@@ -378,7 +382,7 @@ ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope,
 			}
 		}
 failure:
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 		zend_string_efree(constant_name);
 		return ret_constant;
 	}

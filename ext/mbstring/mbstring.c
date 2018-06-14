@@ -1045,13 +1045,15 @@ static void _php_mb_free_regex(void *opaque)
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
-	pcre *retval;
-	const char *err_str;
-	int err_offset;
+	pcre2_code *retval;
+	PCRE2_SIZE err_offset;
+	int errnum;
 
-	if (!(retval = pcre_compile(pattern,
-			PCRE_CASELESS, &err_str, &err_offset, NULL))) {
-		php_error_docref(NULL, E_WARNING, "%s (offset=%d): %s", pattern, err_offset, err_str);
+	if (!(retval = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
+			PCRE2_CASELESS, &errnum, &err_offset, php_pcre_cctx()))) {
+		PCRE2_UCHAR err_str[256];
+		pcre2_get_error_message(errnum, err_str, sizeof(err_str));
+		php_error_docref(NULL, E_WARNING, "%s (offset=%zu): %s", pattern, err_offset, err_str);
 	}
 	return retval;
 }
@@ -1060,15 +1062,25 @@ static void *_php_mb_compile_regex(const char *pattern)
 /* {{{ _php_mb_match_regex */
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 {
-	return pcre_exec((pcre *)opaque, NULL, str, (int)str_len, 0,
-			0, NULL, 0) >= 0;
+	int res;
+
+	pcre2_match_data *match_data = php_pcre_create_match_data(0, opaque);
+	if (NULL == match_data) {
+		pcre2_code_free(opaque);
+		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
+		return FAILURE;
+	}
+	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
+
+	return res;
 }
 /* }}} */
 
 /* {{{ _php_mb_free_regex */
 static void _php_mb_free_regex(void *opaque)
 {
-	pcre_free(opaque);
+	pcre2_code_free(opaque);
 }
 /* }}} */
 #endif
@@ -1451,7 +1463,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	if (ZSTR_LEN(tmp) > 0) {
 		if (!(re = _php_mb_compile_regex(ZSTR_VAL(tmp)))) {
-			zend_string_release(tmp);
+			zend_string_release_ex(tmp, 0);
 			return FAILURE;
 		}
 	}
@@ -1462,7 +1474,7 @@ static PHP_INI_MH(OnUpdate_mbstring_http_output_conv_mimetypes)
 
 	MBSTRG(http_output_conv_mimetypes) = re;
 
-	zend_string_release(tmp);
+	zend_string_release_ex(tmp, 0);
 	return SUCCESS;
 }
 /* }}} */
@@ -1608,7 +1620,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 		zend_function *func, *orig;
 		const struct mb_overload_def *p;
 		zend_string *str;
-		void *ret;
 
 		p = &(mb_ovld[0]);
 		while (p->type > 0) {
@@ -1624,17 +1635,12 @@ ZEND_TSRMLS_CACHE_UPDATE();
 					ZEND_ASSERT(orig->type == ZEND_INTERNAL_FUNCTION);
 					str = zend_string_init_interned(p->save_func, strlen(p->save_func), 1);
 					zend_hash_add_mem(CG(function_table), str, orig, sizeof(zend_internal_function));
-					zend_string_release(str);
+					zend_string_release_ex(str, 1);
 					function_add_ref(orig);
 
 					str = zend_string_init_interned(p->orig_func, strlen(p->orig_func), 1);
-					ret = zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
-					zend_string_release(str);
-					if (ret == NULL) {
-						php_error_docref("ref.mbstring", E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
-						return FAILURE;
-					}
-
+					zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
+					zend_string_release_ex(str, 1);
 					function_add_ref(func);
 				}
 			}
@@ -1792,7 +1798,7 @@ PHP_FUNCTION(mb_language)
 		} else {
 			RETVAL_TRUE;
 		}
-		zend_string_release(ini_name);
+		zend_string_release_ex(ini_name, 0);
 	}
 }
 /* }}} */
@@ -3252,6 +3258,14 @@ PHP_FUNCTION(mb_convert_encoding)
 }
 /* }}} */
 
+static char *mbstring_convert_case(
+		int case_mode, const char *str, size_t str_len, size_t *ret_len,
+		const mbfl_encoding *enc) {
+	return php_unicode_convert_case(
+		case_mode, str, str_len, ret_len, enc,
+		MBSTRG(current_filter_illegal_mode), MBSTRG(current_filter_illegal_substchar));
+}
+
 /* {{{ proto string mb_convert_case(string sourcestring, int mode [, string encoding])
    Returns a case-folded version of sourcestring */
 PHP_FUNCTION(mb_convert_case)
@@ -3280,7 +3294,7 @@ PHP_FUNCTION(mb_convert_case)
 		return;
 	}
 
-	newstr = php_unicode_convert_case(case_mode, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(case_mode, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3312,7 +3326,7 @@ PHP_FUNCTION(mb_strtoupper)
 		RETURN_FALSE;
 	}
 
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_UPPER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -3346,7 +3360,7 @@ PHP_FUNCTION(mb_strtolower)
 		RETURN_FALSE;
 	}
 
-	newstr = php_unicode_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
+	newstr = mbstring_convert_case(PHP_UNICODE_CASE_LOWER, str, str_len, &ret_len, enc);
 
 	if (newstr) {
 		// TODO: avoid reallocation ???
@@ -4105,7 +4119,7 @@ static int _php_mbstr_parse_mail_headers(HashTable *ht, const char *str, size_t 
 
 								zend_hash_update(ht, fld_name, &val);
 
-								zend_string_release(fld_name);
+								zend_string_release_ex(fld_name, 0);
 							}
 
 							fld_name = fld_val = NULL;
@@ -4153,7 +4167,7 @@ out:
 
 			zend_hash_update(ht, fld_name, &val);
 
-			zend_string_release(fld_name);
+			zend_string_release_ex(fld_name, 0);
 		}
 	}
 	return state;
@@ -4223,7 +4237,7 @@ PHP_FUNCTION(mb_send_mail)
 				tmp_headers = zend_string_init(Z_STRVAL_P(headers), Z_STRLEN_P(headers), 0);
 				MAIL_ASCIIZ_CHECK_MBSTRING(ZSTR_VAL(tmp_headers), ZSTR_LEN(tmp_headers));
 				str_headers = php_trim(tmp_headers, NULL, 0, 2);
-				zend_string_release(tmp_headers);
+				zend_string_release_ex(tmp_headers, 0);
 				break;
 			case IS_ARRAY:
 				str_headers = php_mail_build_headers(headers);
@@ -4374,7 +4388,7 @@ PHP_FUNCTION(mb_send_mail)
 		if (n > 0 && p[n - 1] != '\n') {
 			mbfl_memory_device_strncat(&device, "\n", 1);
 		}
-		zend_string_release(str_headers);
+		zend_string_release_ex(str_headers, 0);
 	}
 
 	if (!zend_hash_str_exists(&ht_headers, "MIME-VERSION", sizeof("MIME-VERSION") - 1)) {
@@ -4419,7 +4433,7 @@ PHP_FUNCTION(mb_send_mail)
 	}
 
 	if (extra_cmd) {
-		zend_string_release(extra_cmd);
+		zend_string_release_ex(extra_cmd, 0);
 	}
 
 	if (to_r != to) {
@@ -4434,7 +4448,7 @@ PHP_FUNCTION(mb_send_mail)
 	mbfl_memory_device_clear(&device);
 	zend_hash_destroy(&ht_headers);
 	if (str_headers) {
-		zend_string_release(str_headers);
+		zend_string_release_ex(str_headers, 0);
 	}
 }
 
@@ -5172,7 +5186,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 		 * offsets otherwise. */
 
 		size_t len = 0;
-		haystack.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
+		haystack.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_haystack, old_haystack_len, &len, enc);
 		haystack.len = len;
 
 		if (!haystack.val) {
@@ -5183,7 +5197,7 @@ MBSTRING_API size_t php_mb_stripos(int mode, const char *old_haystack, size_t ol
 			break;
 		}
 
-		needle.val = (unsigned char *)php_unicode_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
+		needle.val = (unsigned char *)mbstring_convert_case(PHP_UNICODE_CASE_FOLD_SIMPLE, (char *)old_needle, old_needle_len, &len, enc);
 		needle.len = len;
 
 		if (!needle.val) {

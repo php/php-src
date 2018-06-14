@@ -833,9 +833,6 @@ PHP_MINFO_FUNCTION(ibase)
 			info_func(s = tmp);
 		}
 		php_info_print_table_row(2, "Run-time Client Library Version", s);
-#ifdef PHP_WIN32
-		FreeLibrary(l);
-#endif
 	} while (0);
 #endif
 	php_info_print_table_end();
@@ -1015,10 +1012,8 @@ static void _php_ibase_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent) /* 
 	/* add it to the hash */
 	new_index_ptr.ptr = (void *) Z_RES_P(return_value);
 	new_index_ptr.type = le_index_ptr;
-	if (zend_hash_str_update_mem(&EG(regular_list), hash, sizeof(hash)-1,
-			(void *) &new_index_ptr, sizeof(zend_resource)) == NULL) {
-		RETURN_FALSE;
-	}
+	zend_hash_str_update_mem(&EG(regular_list), hash, sizeof(hash)-1,
+			(void *) &new_index_ptr, sizeof(zend_resource));
 	if (IBG(default_link)) {
 		zend_list_delete(IBG(default_link));
 	}

@@ -644,11 +644,10 @@ void php_filter_validate_email(PHP_INPUT_FILTER_PARAM_DECL) /* {{{ */
 
 	sregexp = zend_string_init(regexp, regexp_len, 0);
 	re = pcre_get_compiled_regex(sregexp, &capture_count, &preg_options);
+	zend_string_release_ex(sregexp, 0);
 	if (!re) {
-		zend_string_release(sregexp);
 		RETURN_VALIDATION_FAILED
 	}
-	zend_string_release(sregexp);
 	match_data = php_pcre_create_match_data(capture_count, re);
 	if (!match_data) {
 		RETURN_VALIDATION_FAILED

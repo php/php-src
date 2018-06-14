@@ -145,7 +145,8 @@ static int phar_add_empty(HashTable *ht, char *arKey, uint32_t nKeyLength)  /* {
 	zval dummy;
 
 	ZVAL_NULL(&dummy);
-	return (zend_hash_str_update(ht, arKey, nKeyLength, &dummy) != NULL) ? SUCCESS : FAILURE;
+	zend_hash_str_update(ht, arKey, nKeyLength, &dummy);
+	return SUCCESS;
 }
 /* }}} */
 

@@ -2023,11 +2023,6 @@ function generate_tmp_php_ini()
 		
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
 
-		// FIXME: Remove this once ZEND_EXTENSION() is merged to XDEBUG
-		if ("xdebug" == extensions_enabled[i][0]) {
-			directive = "zend_extension";
-		}
-
 		var ext_name = extensions_enabled[i][0];
 		if ("gd" == ext_name) {
 			ext_name = "gd2";
@@ -3231,6 +3226,10 @@ function toolset_setup_common_cflags()
 			}
 		}
 
+		if (VCVERS >= 1914) {
+			/* This is only in effect for CXX sources, __cplusplus is not defined in C sources. */
+			ADD_FLAG("CFLAGS", "/Zc:__cplusplus");
+		}
 	} else if (CLANG_TOOLSET) {
 		if (X64) {
 			ADD_FLAG('CFLAGS', '-m64');

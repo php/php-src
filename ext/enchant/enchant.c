@@ -15,8 +15,6 @@
   | Author: Pierre-Alain Joye <paj@pearfr.org>                           |
   |         Ilia Alshanetsky <ilia@prohost.org>                          |
   +----------------------------------------------------------------------+
-
-  $Id$
 */
 
 #ifdef HAVE_CONFIG_H
@@ -316,8 +314,7 @@ PHP_MINFO_FUNCTION(enchant)
 
 	pbroker = enchant_broker_init();
 	php_info_print_table_start();
-	php_info_print_table_header(2, "enchant support", "enabled");
-	php_info_print_table_row(2, "Version", PHP_ENCHANT_VERSION);
+	php_info_print_table_row(2, "enchant support", "enabled");
 #ifdef ENCHANT_VERSION_STRING
 	php_info_print_table_row(2, "Libenchant Version", ENCHANT_VERSION_STRING);
 #elif defined(HAVE_ENCHANT_BROKER_SET_PARAM)

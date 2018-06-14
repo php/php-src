@@ -135,7 +135,6 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char *tn, void (*func_p)());
 static int _php_image_type(char data[12]);
 static void _php_image_convert(INTERNAL_FUNCTION_PARAMETERS, int image_type);
-static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold);
 
 /* {{{ arginfo */
 ZEND_BEGIN_ARG_INFO(arginfo_gd_info, 0)
@@ -764,7 +763,7 @@ ZEND_END_ARG_INFO()
 ZEND_BEGIN_ARG_INFO_EX(arginfo_image2wbmp, 0, 0, 1)
 	ZEND_ARG_INFO(0, im)
 	ZEND_ARG_INFO(0, filename)
-	ZEND_ARG_INFO(0, threshold)
+	ZEND_ARG_INFO(0, foreground)
 ZEND_END_ARG_INFO()
 
 #if defined(HAVE_GD_JPG)
@@ -1000,7 +999,7 @@ static const zend_function_entry gd_functions[] = {
 #if defined(HAVE_GD_PNG)
 	PHP_DEP_FE(png2wbmp,							arginfo_png2wbmp)
 #endif
-	PHP_FE(image2wbmp,								arginfo_image2wbmp)
+	PHP_DEP_FE(image2wbmp,							arginfo_image2wbmp)
 	PHP_FE(imagelayereffect,						arginfo_imagelayereffect)
 	PHP_FE(imagexbm,                                arginfo_imagexbm)
 
@@ -2426,7 +2425,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		io_ctx = gdNewDynamicCtxEx(ZSTR_LEN(buff), pstr, 0);
 		if (!io_ctx) {
 			pefree(pstr, 1);
-			zend_string_release(buff);
+			zend_string_release_ex(buff, 0);
 			php_error_docref(NULL, E_WARNING,"Cannot allocate GD IO context");
 			goto out_err;
 		}
@@ -2438,7 +2437,7 @@ static void _php_image_create_from(INTERNAL_FUNCTION_PARAMETERS, int image_type,
 		}
 		io_ctx->gd_free(io_ctx);
 		pefree(pstr, 1);
-		zend_string_release(buff);
+		zend_string_release_ex(buff, 0);
 	}
 	else if (php_stream_can_cast(stream, PHP_STREAM_AS_STDIO)) {
 		/* try and force the stream to be FILE* */
@@ -2600,7 +2599,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 	int argc = ZEND_NUM_ARGS();
 	int q = -1, i, t = 1;
 
-	/* The quality parameter for Wbmp stands for the threshold when called from image2wbmp() */
+	/* The quality parameter for Wbmp stands for the foreground when called from image2wbmp() */
 	/* When called from imagewbmp() the quality parameter stands for the foreground color. Default: black. */
 	/* The quality parameter for gd2 stands for chunk size */
 
@@ -2723,7 +2722,7 @@ static void _php_image_output(INTERNAL_FUNCTION_PARAMETERS, int image_type, char
 
 		fclose(tmp);
 		VCWD_UNLINK((const char *)ZSTR_VAL(path)); /* make sure that the temporary file is removed */
-		zend_string_release(path);
+		zend_string_release_ex(path, 0);
 	}
 	RETURN_TRUE;
 }
@@ -4073,11 +4072,11 @@ static void php_imagettftext_common(INTERNAL_FUNCTION_PARAMETERS, int mode, int 
 /* }}} */
 #endif	/* ENABLE_GD_TTF */
 
-/* {{{ proto bool image2wbmp(resource im [, string filename [, int threshold]])
+/* {{{ proto bool image2wbmp(resource im [, string filename [, int foreground]])
    Output WBMP image to browser or file */
 PHP_FUNCTION(image2wbmp)
 {
-	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_CONVERT_WBM, "WBMP", _php_image_bw_convert);
+	_php_image_output(INTERNAL_FUNCTION_PARAM_PASSTHRU, PHP_GDIMG_CONVERT_WBM, "WBMP", NULL);
 }
 /* }}} */
 
@@ -4100,59 +4099,6 @@ PHP_FUNCTION(png2wbmp)
 }
 /* }}} */
 #endif
-
-/* {{{ _php_image_bw_convert
- * It converts a gd Image to bw using a threshold value */
-static void _php_image_bw_convert(gdImagePtr im_org, gdIOCtx *out, int threshold)
-{
-	gdImagePtr im_dest;
-	int white, black;
-	int color, color_org, median;
-	int dest_height = gdImageSY(im_org);
-	int dest_width = gdImageSX(im_org);
-	int x, y;
-
-	im_dest = gdImageCreate(dest_width, dest_height);
-	if (im_dest == NULL) {
-		php_error_docref(NULL, E_WARNING, "Unable to allocate temporary buffer");
-		return;
-	}
-
-	white = gdImageColorAllocate(im_dest, 255, 255, 255);
-	if (white == -1) {
-		php_error_docref(NULL, E_WARNING, "Unable to allocate the colors for the destination buffer");
-		return;
-	}
-
-	black = gdImageColorAllocate(im_dest, 0, 0, 0);
-	if (black == -1) {
-		php_error_docref(NULL, E_WARNING, "Unable to allocate the colors for the destination buffer");
-		return;
-	}
-
-	if (im_org->trueColor) {
-		if (!gdImageTrueColorToPalette(im_org, 1, 256)) {
-			php_error_docref(NULL, E_WARNING, "Unable to convert to palette");
-			return;
-		}
-	}
-
-	for (y = 0; y < dest_height; y++) {
-		for (x = 0; x < dest_width; x++) {
-			color_org = gdImageGetPixel(im_org, x, y);
-			median = (im_org->red[color_org] + im_org->green[color_org] + im_org->blue[color_org]) / 3;
-			if (median < threshold) {
-				color = black;
-			} else {
-				color = white;
-			}
-			gdImageSetPixel (im_dest, x, y, color);
-		}
-	}
-	gdImageWBMPCtx (im_dest, black, out);
-
-}
-/* }}} */
 
 /* {{{ _php_image_convert
  * _php_image_convert converts jpeg/png images to wbmp and resizes them as needed  */

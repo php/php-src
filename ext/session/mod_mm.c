@@ -482,7 +482,7 @@ PS_CREATE_SID_FUNC(mm)
 		/* Check collision */
 		if (ps_mm_key_exists(data, sid->val) == SUCCESS) {
 			if (sid) {
-				zend_string_release(sid);
+				zend_string_release_ex(sid, 0);
 				sid = NULL;
 			}
 			if (!(maxfail--)) {

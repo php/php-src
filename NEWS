@@ -1,12 +1,36 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha1
+?? ??? ????, PHP 7.3.0alpha2
+
+- Core:
+  . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
+  . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
+
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
+
+- EXIF:
+  . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+
+- Interbase:
+  . Fixed bug #76443 (php+php_interbase.dll crash on module_shutdown). (Kalle)
+
+- Opcache:
+  . Fixed bug #76463 (var has array key type but not value type). (Laruence)
+  . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
+    `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
+
+- ZIP:
+  . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
+    (Dennis Birkholz, Remi)
+
+07 Jun 2018, PHP 7.3.0alpha1
 
 - Core:
   . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
+    'php ext_skel.php' for all options. This means there are no dependencies,
+    thus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
@@ -40,6 +64,7 @@ PHP                                                                        NEWS
   . Fixed bug #75765 (Fatal error instead of Error exception when base class is
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
+  . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -105,7 +130,9 @@ PHP                                                                        NEWS
   . Fixed bug #73528 (Crash in zif_mb_send_mail). (Nikita)
   . Fixed bug #74929 (mbstring functions version 7.1.1 are slow compared to 5.3
     on Windows). (Nikita)
-  . Update to Oniguruma 6.8.1. (cmb)
+  . Fixed bug #76319 (mb_strtolower with invalid UTF-8 causes segmentation
+    fault). (Nikita)
+  . Updated to Oniguruma 6.8.2. (cmb)
 
 - ODBC:
   . Removed support for ODBCRouter. (Kalle)
@@ -181,7 +208,7 @@ PHP                                                                        NEWS
     (carusogabriel)
 
 - SQLite3:
-  . Updated bundled libsqlite to 3.23.1. (cmb)
+  . Updated bundled libsqlite to 3.24.0. (cmb)
 
 - Standard:
   . Added is_countable() function. (Gabriel Caruso)

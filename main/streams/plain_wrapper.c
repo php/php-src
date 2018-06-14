@@ -479,7 +479,7 @@ static int php_stdiop_close(php_stream *stream, int close_handle)
 			unlink(ZSTR_VAL(data->temp_name));
 #endif
 			/* temporary streams are never persistent */
-			zend_string_release(data->temp_name);
+			zend_string_release_ex(data->temp_name, 0);
 			data->temp_name = NULL;
 		}
 	} else {
@@ -854,7 +854,29 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					if (new_size < 0) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
+#ifdef PHP_WIN32
+					HANDLE h = (HANDLE) _get_osfhandle(fd);
+					if (INVALID_HANDLE_VALUE == h) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					LARGE_INTEGER sz;
+#if defined(_WIN64)
+					sz.HighPart = (new_size >> 32);
+					sz.LowPart = (new_size & 0xffffffff);
+#else
+					sz.HighPart = 0;
+					sz.LowPart = new_size;
+#endif
+					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					if (0 == SetEndOfFile(h)) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+#else
 					return ftruncate(fd, new_size) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+#endif
 				}
 			}
 
@@ -1045,7 +1067,7 @@ PHPAPI php_stream *_php_stream_fopen(const char *filename, const char *mode, zen
 				r = do_fstat(self, 0);
 				if ((r == 0 && !S_ISREG(self->sb.st_mode))) {
 					if (opened_path) {
-						zend_string_release(*opened_path);
+						zend_string_release_ex(*opened_path, 0);
 						*opened_path = NULL;
 					}
 					php_stream_close(ret);

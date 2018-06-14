@@ -201,7 +201,7 @@ PHP_FUNCTION(random_bytes)
 	bytes = zend_string_alloc(size, 0);
 
 	if (php_random_bytes_throw(ZSTR_VAL(bytes), size) == FAILURE) {
-		zend_string_release(bytes);
+		zend_string_release_ex(bytes, 0);
 		return;
 	}
 

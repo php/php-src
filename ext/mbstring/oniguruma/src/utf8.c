@@ -29,7 +29,7 @@
 
 #include "regenc.h"
 
-//#define USE_INVALID_CODE_SCHEME
+/* #define USE_INVALID_CODE_SCHEME */
 
 #ifdef USE_INVALID_CODE_SCHEME
 /* virtual codepoint values for invalid encoding byte 0xfe and 0xff */
@@ -296,5 +296,7 @@ OnigEncodingType OnigEncodingUTF8 = {
   onigenc_always_true_is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  ENC_FLAG_ASCII_COMPATIBLE|ENC_FLAG_UNICODE,
+  0, 0
 };

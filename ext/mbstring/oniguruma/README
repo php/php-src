@@ -1,10 +1,10 @@
-README  2018/01/14
+README  2018/04/05
 
 Oniguruma  ----   (C) K.Kosako
 
 https://github.com/kkos/oniguruma
 
-FIXED Security Issues:
+FIXED Security Issues (in Oniguruma 6.3.0):
   CVE-2017-9224, CVE-2017-9225, CVE-2017-9226
   CVE-2017-9227, CVE-2017-9228, CVE-2017-9229
 

@@ -144,8 +144,8 @@ static zend_string *php_win32_mail_trim_header(char *header)
 				  -1,
 				  NULL);
 
-	zend_string_release(replace);
-	zend_string_release(regex);
+	zend_string_release_ex(replace, 0);
+	zend_string_release_ex(regex, 0);
 
 	if (NULL == result) {
 		return NULL;
@@ -159,9 +159,9 @@ static zend_string *php_win32_mail_trim_header(char *header)
 				   replace,
 				  -1,
 				  NULL);
-	zend_string_release(replace);
-	zend_string_release(regex);
-	zend_string_release(result);
+	zend_string_release_ex(replace, 0);
+	zend_string_release_ex(regex, 0);
+	zend_string_release_ex(result, 0);
 
 	return result2;
 }
@@ -211,7 +211,7 @@ PHPAPI int TSendMail(char *host, int *error, char **error_message,
 		 * insensitive when searching for a pattern. */
 		headers_lc = zend_string_tolower(headers_trim);
 		if (headers_lc == headers_trim) {
-			zend_string_release(headers_lc);
+			zend_string_release_ex(headers_lc, 0);
 		}
 	}
 

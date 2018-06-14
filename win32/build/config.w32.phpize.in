@@ -1,6 +1,6 @@
 // vim:ft=javascript
 // $Id: config.w32 306241 2010-12-11 22:18:10Z pajoye $
-// "Master" config file; think of it as a configure.in
+// "Master" config file; think of it as a configure.ac
 // equivalent.
 
 ARG_WITH("verbosity", "Output verbosity, 0-2.", "1");

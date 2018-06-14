@@ -2450,7 +2450,6 @@ is_exclusive(Node* x, Node* y, regex_t* reg)
       if (NODE_STRING_LEN(x) == 0)
         break;
 
-      //c = *(xs->s);
       switch (ytype) {
       case NODE_CTYPE:
         switch (CTYPE_(y)->ctype) {
@@ -2758,7 +2757,7 @@ tree_min_len(Node* node, ScanEnv* env)
           len = en->min_len;
         else {
           if (NODE_IS_MARK1(node))
-            len = 0;  // recursive
+            len = 0;  /* recursive */
           else {
             NODE_STATUS_ADD(node, NST_MARK1);
             len = tree_min_len(NODE_BODY(node), env);
@@ -3763,7 +3762,7 @@ expand_case_fold_string(Node* node, regex_t* reg)
   return r;
 }
 
-#ifdef USE_INSISTENT_CHECK_CAPTURES_STATUS_IN_ENDLESS_REPEAT
+#ifdef USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT
 static enum QuantBodyEmpty
 quantifiers_memory_node_info(Node* node)
 {
@@ -3847,7 +3846,7 @@ quantifiers_memory_node_info(Node* node)
 
   return r;
 }
-#endif /* USE_INSISTENT_CHECK_CAPTURES_STATUS_IN_ENDLESS_REPEAT */
+#endif /* USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT */
 
 
 #define IN_ALT          (1<<0)
@@ -4375,7 +4374,7 @@ setup_quant(Node* node, regex_t* reg, int state, ScanEnv* env)
   if (IS_REPEAT_INFINITE(qn->upper) || qn->upper >= 1) {
     d = tree_min_len(body, env);
     if (d == 0) {
-#ifdef USE_INSISTENT_CHECK_CAPTURES_STATUS_IN_ENDLESS_REPEAT
+#ifdef USE_INSISTENT_CHECK_CAPTURES_IN_EMPTY_REPEAT
       qn->body_empty_info = quantifiers_memory_node_info(body);
       if (qn->body_empty_info == QUANT_BODY_IS_EMPTY_REC) {
         if (NODE_TYPE(body) == NODE_ENCLOSURE &&
@@ -5979,7 +5978,10 @@ onig_compile(regex_t* reg, const UChar* pattern, const UChar* pattern_end,
 #endif
 
   root = 0;
-  if (IS_NOT_NULL(einfo)) einfo->par = (UChar* )NULL;
+  if (IS_NOT_NULL(einfo)) {
+    einfo->enc = reg->enc;
+    einfo->par = (UChar* )NULL;
+  }
 
 #ifdef ONIG_DEBUG
   print_enc_string(stderr, reg->enc, pattern, pattern_end);
@@ -6124,7 +6126,6 @@ onig_compile(regex_t* reg, const UChar* pattern, const UChar* pattern_end,
  err:
   if (IS_NOT_NULL(scan_env.error)) {
     if (IS_NOT_NULL(einfo)) {
-      einfo->enc     = scan_env.enc;
       einfo->par     = scan_env.error;
       einfo->par_end = scan_env.error_end;
     }

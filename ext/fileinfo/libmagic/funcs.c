@@ -486,7 +486,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	repl = zend_string_init(rep, strlen(rep), 0);
 	res = php_pcre_replace_impl(pce, NULL, ms->o.buf, strlen(ms->o.buf), repl, -1, &rep_cnt);
 
-	zend_string_release(repl);
+	zend_string_release_ex(repl, 0);
 	if (NULL == res) {
 		rep_cnt = -1;
 		goto out;
@@ -495,7 +495,7 @@ file_replace(struct magic_set *ms, const char *pat, const char *rep)
 	strncpy(ms->o.buf, ZSTR_VAL(res), ZSTR_LEN(res));
 	ms->o.buf[ZSTR_LEN(res)] = '\0';
 
-	zend_string_release(res);
+	zend_string_release_ex(res, 0);
 
 out:
 	(void)setlocale(LC_CTYPE, "");

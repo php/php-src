@@ -1762,7 +1762,7 @@ int zend_func_info_startup(void)
 			if (zend_hash_add_ptr(&func_info, key, (void**)&func_infos[i]) == NULL) {
 				fprintf(stderr, "ERROR: Duplicate function info for \"%s\"\n", func_infos[i].name);
 			}
-			zend_string_release(key);
+			zend_string_release_ex(key, 1);
 		}
 	}
 

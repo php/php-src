@@ -38,16 +38,19 @@ init(void)
     int id;
     OnigEncoding enc;
     char* name;
-    unsigned int t_long;
     unsigned int args[4];
     OnigValue opts[4];
 
     enc = ONIG_ENCODING_UTF16_BE;
-    t_long = ONIG_TYPE_LONG;
 
     name = "\000F\000A\000I\000L\000\000";            BC0_P(name, fail);
     name = "\000M\000I\000S\000M\000A\000T\000C\000H\000\000"; BC0_P(name, mismatch);
-    name = "\000M\000A\000X\000\000";                 BC_B(name, max, 1, &t_long);
+
+    name = "\000M\000A\000X\000\000";
+    args[0] = ONIG_TYPE_TAG | ONIG_TYPE_LONG;
+    args[1] = ONIG_TYPE_CHAR;
+    opts[0].c = 'X';
+    BC_B_O(name, max, 2, args, 1, opts);
 
     name = "\000E\000R\000R\000O\000R\000\000";
     args[0] = ONIG_TYPE_LONG; opts[0].l = ONIG_ABORT;
@@ -274,5 +277,7 @@ OnigEncodingType OnigEncodingUTF16_BE = {
   onigenc_always_false_is_allowed_reverse_match,
   init,
   0, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  ENC_FLAG_UNICODE,
+  0, 0
 };

@@ -36,7 +36,7 @@ php_mysqlnd_free_field_metadata(MYSQLND_FIELD *meta)
 		meta->root = NULL;
 		meta->def = NULL;
 		if (meta->sname) {
-			zend_string_release(meta->sname);
+			zend_string_release_ex(meta->sname, 0);
 		}
 	}
 }

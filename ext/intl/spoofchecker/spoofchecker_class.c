@@ -144,7 +144,7 @@ void spoofchecker_register_Spoofchecker_class(void)
 	ce.create_object = Spoofchecker_object_create;
 	Spoofchecker_ce_ptr = zend_register_internal_class(&ce);
 
-	memcpy(&Spoofchecker_handlers, zend_get_std_object_handlers(),
+	memcpy(&Spoofchecker_handlers, &std_object_handlers,
 		sizeof Spoofchecker_handlers);
 	Spoofchecker_handlers.offset = XtOffsetOf(Spoofchecker_object, zo);
 	Spoofchecker_handlers.clone_obj = spoofchecker_clone_obj;

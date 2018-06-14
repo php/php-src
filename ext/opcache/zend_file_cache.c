@@ -877,7 +877,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 
 	if (writev(fd, vec, 3) != (ssize_t)(sizeof(info) + script->size + info.str_size)) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
 		unlink(filename);
@@ -891,7 +891,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 		write(fd, ((zend_string*)ZCG(mem))->val, info.str_size) != info.str_size
 		) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot write to file '%s'\n", filename);
-		zend_string_release((zend_string*)ZCG(mem));
+		zend_string_release_ex((zend_string*)ZCG(mem), 0);
 		close(fd);
 		efree(mem);
 		unlink(filename);
@@ -900,7 +900,7 @@ int zend_file_cache_script_store(zend_persistent_script *script, int in_shm)
 	}
 #endif
 
-	zend_string_release((zend_string*)ZCG(mem));
+	zend_string_release_ex((zend_string*)ZCG(mem), 0);
 	efree(mem);
 	if (zend_file_cache_flock(fd, LOCK_UN) != 0) {
 		zend_accel_error(ACCEL_LOG_WARNING, "opcache cannot unlock file '%s'\n", filename);

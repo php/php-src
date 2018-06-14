@@ -393,7 +393,7 @@ ZEND_API void zend_print_flat_zval_r(zval *expr) /* {{{ */
 			HashTable *properties = NULL;
 			zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 			zend_printf("%s Object (", ZSTR_VAL(class_name));
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 
 			if (Z_IS_RECURSIVE_P(expr)) {
 				ZEND_PUTS(" *RECURSION*");
@@ -445,7 +445,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 
 				zend_string *class_name = Z_OBJ_HANDLER_P(expr, get_class_name)(Z_OBJ_P(expr));
 				smart_str_appends(buf, ZSTR_VAL(class_name));
-				zend_string_release(class_name);
+				zend_string_release_ex(class_name, 0);
 
 				smart_str_appends(buf, " Object\n");
 				if (Z_IS_RECURSIVE_P(expr)) {
@@ -479,7 +479,7 @@ static void zend_print_zval_r_to_buf(smart_str *buf, zval *expr, int indent) /* 
 			{
 				zend_string *str = zval_get_string_func(expr);
 				smart_str_append(buf, str);
-				zend_string_release(str);
+				zend_string_release_ex(str, 0);
 			}
 			break;
 	}
@@ -499,7 +499,7 @@ ZEND_API void zend_print_zval_r(zval *expr, int indent) /* {{{ */
 {
 	zend_string *str = zend_print_zval_r_to_str(expr, indent);
 	zend_write(ZSTR_VAL(str), ZSTR_LEN(str));
-	zend_string_release(str);
+	zend_string_release_ex(str, 0);
 }
 /* }}} */
 
@@ -1341,7 +1341,7 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 				CG(in_compilation) = 0;
 			}
 
-			if (call_user_function_ex(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params, 1, NULL) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_error_handler, &retval, 5, params) == SUCCESS) {
 				if (Z_TYPE(retval) != IS_UNDEF) {
 					if (Z_TYPE(retval) == IS_FALSE) {
 						zend_error_cb(type, error_filename, error_lineno, format, args);
@@ -1361,10 +1361,8 @@ static ZEND_COLD void zend_error_va_list(int type, const char *format, va_list a
 			}
 
 			zval_ptr_dtor(&params[4]);
-			zval_ptr_dtor(&params[3]);
 			zval_ptr_dtor(&params[2]);
 			zval_ptr_dtor(&params[1]);
-			zval_ptr_dtor(&params[0]);
 
 			if (Z_TYPE(EG(user_error_handler)) == IS_UNDEF) {
 				ZVAL_COPY_VALUE(&EG(user_error_handler), &orig_user_error_handler);
@@ -1529,7 +1527,7 @@ ZEND_API void zend_try_exception_handler() /* {{{ */
 			ZVAL_OBJ(&params[0], old_exception);
 			ZVAL_COPY_VALUE(&orig_user_exception_handler, &EG(user_exception_handler));
 
-			if (call_user_function_ex(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params, 1, NULL) == SUCCESS) {
+			if (call_user_function(CG(function_table), NULL, &orig_user_exception_handler, &retval2, 1, params) == SUCCESS) {
 				zval_ptr_dtor(&retval2);
 				if (EG(exception)) {
 					OBJ_RELEASE(EG(exception));

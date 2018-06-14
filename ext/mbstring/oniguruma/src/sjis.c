@@ -337,5 +337,7 @@ OnigEncodingType OnigEncodingSJIS = {
   is_allowed_reverse_match,
   NULL, /* init */
   NULL, /* is_initialized */
-  is_valid_mbc_string
+  is_valid_mbc_string,
+  ENC_FLAG_ASCII_COMPATIBLE,
+  0, 0
 };

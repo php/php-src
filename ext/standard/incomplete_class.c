@@ -42,7 +42,7 @@ static void incomplete_class_message(zval *object, int error_type)
 
 	if (class_name) {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, ZSTR_VAL(class_name));
-		zend_string_release(class_name);
+		zend_string_release_ex(class_name, 0);
 	} else {
 		php_error_docref(NULL, error_type, INCOMPLETE_CLASS_MSG, "unknown");
 	}

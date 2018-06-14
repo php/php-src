@@ -92,8 +92,8 @@ static zend_always_inline uint32_t zend_hash_check_size(uint32_t nSize)
 
 	/* Use big enough power of 2 */
 	/* size should be between HT_MIN_SIZE and HT_MAX_SIZE */
-	if (nSize < HT_MIN_SIZE) {
-		nSize = HT_MIN_SIZE;
+	if (nSize <= HT_MIN_SIZE) {
+		return HT_MIN_SIZE;
 	} else if (UNEXPECTED(nSize >= HT_MAX_SIZE)) {
 		zend_error_noreturn(E_ERROR, "Possible integer overflow in memory allocation (%u * %zu + %zu)", nSize, sizeof(Bucket), sizeof(Bucket));
 	}
@@ -212,6 +212,13 @@ static zend_always_inline void _zend_hash_init_int(HashTable *ht, uint32_t nSize
 ZEND_API void ZEND_FASTCALL _zend_hash_init(HashTable *ht, uint32_t nSize, dtor_func_t pDestructor, zend_bool persistent)
 {
 	_zend_hash_init_int(ht, nSize, pDestructor, persistent);
+}
+
+ZEND_API HashTable* ZEND_FASTCALL _zend_new_array_0(ZEND_FILE_LINE_D)
+{
+	HashTable *ht = emalloc(sizeof(HashTable));
+	_zend_hash_init_int(ht, HT_MIN_SIZE, ZVAL_PTR_DTOR, 0);
+	return ht;
 }
 
 ZEND_API HashTable* ZEND_FASTCALL _zend_new_array(uint32_t nSize ZEND_FILE_LINE_DC)
@@ -777,7 +784,16 @@ add_to_hash:
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add_or_update(HashTable *ht, zend_string *key, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_add_or_update_i(ht, key, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_add(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_ADD_NEW) {
+		return _zend_hash_add_new(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_UPDATE) {
+		return _zend_hash_update(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == (HASH_UPDATE|HASH_UPDATE_INDIRECT));
+		return _zend_hash_update_ind(ht, key, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_add(HashTable *ht, zend_string *key, zval *pData ZEND_FILE_LINE_DC)
@@ -802,9 +818,16 @@ ZEND_API zval* ZEND_FASTCALL _zend_hash_add_new(HashTable *ht, zend_string *key,
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_add_or_update(HashTable *ht, const char *str, size_t len, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	zend_ulong h = zend_hash_func(str, len);
-
-	return _zend_hash_str_add_or_update_i(ht, str, len, h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_str_add(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_ADD_NEW) {
+		return _zend_hash_str_add_new(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == HASH_UPDATE) {
+		return _zend_hash_str_update(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == (HASH_UPDATE|HASH_UPDATE_INDIRECT));
+		return _zend_hash_str_update_ind(ht, str, len, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_str_update(HashTable *ht, const char *str, size_t len, zval *pData ZEND_FILE_LINE_DC)
@@ -868,18 +891,11 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 	IS_CONSISTENT(ht);
 	HT_ASSERT_RC1(ht);
 
-	if (UNEXPECTED(!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED))) {
-		if (h < ht->nTableSize) {
-			zend_hash_real_init_packed_ex(ht);
-			p = ht->arData + h;
-			goto add_to_packed;
-		}
-		zend_hash_real_init_mixed(ht);
-		goto add_to_hash;
-	} else if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
+	if (HT_FLAGS(ht) & HASH_FLAG_PACKED) {
 		if (h < ht->nNumUsed) {
 			p = ht->arData + h;
 			if (Z_TYPE(p->val) != IS_UNDEF) {
+replace:
 				if (flag & HASH_ADD) {
 					return NULL;
 				}
@@ -892,81 +908,80 @@ static zend_always_inline zval *_zend_hash_index_add_or_update_i(HashTable *ht, 
 				goto convert_to_hash;
 			}
 		} else if (EXPECTED(h < ht->nTableSize)) {
+add_to_packed:
 			p = ht->arData + h;
+			/* incremental initialization of empty Buckets */
+			if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) != (HASH_ADD_NEW|HASH_ADD_NEXT)) {
+				if (h > ht->nNumUsed) {
+					Bucket *q = ht->arData + ht->nNumUsed;
+					while (q != p) {
+						ZVAL_UNDEF(&q->val);
+						q++;
+					}
+				}
+			}
+			ht->nNextFreeElement = ht->nNumUsed = h + 1;
+			goto add;
 		} else if ((h >> 1) < ht->nTableSize &&
 		           (ht->nTableSize >> 1) < ht->nNumOfElements) {
 			zend_hash_packed_grow(ht);
-			p = ht->arData + h;
+			goto add_to_packed;
 		} else {
-			goto convert_to_hash;
-		}
-
-add_to_packed:
-		/* incremental initialization of empty Buckets */
-		if ((flag & (HASH_ADD_NEW|HASH_ADD_NEXT)) == (HASH_ADD_NEW|HASH_ADD_NEXT)) {
-			ht->nNumUsed = h + 1;
-		} else if (h >= ht->nNumUsed) {
-			if (h > ht->nNumUsed) {
-				Bucket *q = ht->arData + ht->nNumUsed;
-				while (q != p) {
-					ZVAL_UNDEF(&q->val);
-					q++;
-				}
+			if (ht->nNumUsed >= ht->nTableSize) {
+				ht->nTableSize += ht->nTableSize;
 			}
-			ht->nNumUsed = h + 1;
-		}
-		ht->nNumOfElements++;
-		if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-			ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-		}
-		p->h = h;
-		p->key = NULL;
-		ZVAL_COPY_VALUE(&p->val, pData);
-
-		return &p->val;
-
 convert_to_hash:
-		zend_hash_packed_to_hash(ht);
-	} else if ((flag & HASH_ADD_NEW) == 0) {
-		p = zend_hash_index_find_bucket(ht, h);
-		if (p) {
-			if (flag & HASH_ADD) {
-				return NULL;
-			}
-			ZEND_ASSERT(&p->val != pData);
-			if (ht->pDestructor) {
-				ht->pDestructor(&p->val);
-			}
-			ZVAL_COPY_VALUE(&p->val, pData);
-			if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
-				ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
-			}
-			return &p->val;
+			zend_hash_packed_to_hash(ht);
 		}
+	} else if (!(HT_FLAGS(ht) & HASH_FLAG_INITIALIZED)) {
+		if (h < ht->nTableSize) {
+			zend_hash_real_init_packed_ex(ht);
+			goto add_to_packed;
+		}
+		zend_hash_real_init_mixed(ht);
+	} else {
+		if ((flag & HASH_ADD_NEW) == 0) {
+			p = zend_hash_index_find_bucket(ht, h);
+			if (p) {
+				goto replace;
+			}
+		}
+		ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
 	}
 
-	ZEND_HASH_IF_FULL_DO_RESIZE(ht);		/* If the Hash table is full, resize it */
-
-add_to_hash:
 	idx = ht->nNumUsed++;
-	ht->nNumOfElements++;
+	nIndex = h | ht->nTableMask;
+	p = ht->arData + idx;
+	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
+	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 	if ((zend_long)h >= (zend_long)ht->nNextFreeElement) {
 		ht->nNextFreeElement = h < ZEND_LONG_MAX ? h + 1 : ZEND_LONG_MAX;
 	}
-	p = ht->arData + idx;
+add:
+	ht->nNumOfElements++;
 	p->h = h;
 	p->key = NULL;
-	nIndex = h | ht->nTableMask;
 	ZVAL_COPY_VALUE(&p->val, pData);
-	Z_NEXT(p->val) = HT_HASH(ht, nIndex);
-	HT_HASH(ht, nIndex) = HT_IDX_TO_HASH(idx);
 
 	return &p->val;
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add_or_update(HashTable *ht, zend_ulong h, zval *pData, uint32_t flag ZEND_FILE_LINE_DC)
 {
-	return _zend_hash_index_add_or_update_i(ht, h, pData, flag ZEND_FILE_LINE_RELAY_CC);
+	if (flag == HASH_ADD) {
+		return _zend_hash_index_add(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEW)) {
+		return _zend_hash_index_add_new(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEXT)) {
+		ZEND_ASSERT(h == ht->nNextFreeElement);
+		return _zend_hash_next_index_insert(ht, pData ZEND_FILE_LINE_RELAY_CC);
+	} else if (flag == (HASH_ADD|HASH_ADD_NEW|HASH_ADD_NEXT)) {
+		ZEND_ASSERT(h == ht->nNextFreeElement);
+		return _zend_hash_next_index_insert_new(ht, pData ZEND_FILE_LINE_RELAY_CC);
+	} else {
+		ZEND_ASSERT(flag == HASH_UPDATE);
+		return _zend_hash_index_update(ht, h, pData ZEND_FILE_LINE_RELAY_CC);
+	}
 }
 
 ZEND_API zval* ZEND_FASTCALL _zend_hash_index_add(HashTable *ht, zend_ulong h, zval *pData ZEND_FILE_LINE_DC)
@@ -1456,7 +1471,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 			do {
 				i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 				if (EXPECTED(p->key)) {
-					zend_string_release(p->key);
+					zend_string_release_ex(p->key, 0);
 				}
 			} while (++p != end);
 		} else {
@@ -1464,7 +1479,7 @@ ZEND_API void ZEND_FASTCALL zend_array_destroy(HashTable *ht)
 				if (EXPECTED(Z_TYPE(p->val) != IS_UNDEF)) {
 					i_zval_ptr_dtor(&p->val ZEND_FILE_LINE_CC);
 					if (EXPECTED(p->key)) {
-						zend_string_release(p->key);
+						zend_string_release_ex(p->key, 0);
 					}
 				}
 			} while (++p != end);
@@ -1979,12 +1994,12 @@ ZEND_API void ZEND_FASTCALL _zend_hash_merge(HashTable *target, HashTable *sourc
 			}
 			if (p->key) {
 				t = _zend_hash_add_or_update_i(target, p->key, &p->val, HASH_UPDATE | HASH_UPDATE_INDIRECT ZEND_FILE_LINE_RELAY_CC);
-				if (t && pCopyConstructor) {
+				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			} else {
 				t = zend_hash_index_update(target, p->h, &p->val);
-				if (t && pCopyConstructor) {
+				if (pCopyConstructor) {
 					pCopyConstructor(t);
 				}
 			}
@@ -2038,7 +2053,7 @@ ZEND_API void ZEND_FASTCALL zend_hash_merge_ex(HashTable *target, HashTable *sou
 		if (UNEXPECTED(Z_TYPE(p->val) == IS_UNDEF)) continue;
 		if (zend_hash_replace_checker_wrapper(target, &p->val, p, pParam, pMergeSource)) {
 			t = zend_hash_update(target, p->key, &p->val);
-			if (t && pCopyConstructor) {
+			if (pCopyConstructor) {
 				pCopyConstructor(t);
 			}
 		}

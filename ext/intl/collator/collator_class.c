@@ -127,7 +127,7 @@ void collator_register_Collator_class( void )
 	ce.create_object = Collator_object_create;
 	Collator_ce_ptr = zend_register_internal_class( &ce );
 
-	memcpy(&Collator_handlers, zend_get_std_object_handlers(),
+	memcpy(&Collator_handlers, &std_object_handlers,
 		sizeof Collator_handlers);
 	/* Collator has no usable clone semantics - ucol_cloneBinary/ucol_openBinary require binary buffer
 	   for which we don't have the place to keep */

@@ -39,7 +39,7 @@
 	}
 
 #define PHP_CLEANUP_CLASS_ATTRIBUTES()	\
-	zend_string_release(class_name)
+	zend_string_release_ex(class_name, 0)
 
 #define PHP_CLASS_ATTRIBUTES											\
 	zend_string *class_name;											\

@@ -125,7 +125,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		/* always free the CV's, in the symtable are only not-free'd IS_INDIRECT's */
 		zend_free_compiled_variables(execute_data);
 
-		if (EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) {
+		if ((EX_CALL_INFO() & ZEND_CALL_RELEASE_THIS) &&
+			EXPECTED(GC_TYPE(Z_OBJ(execute_data->This)) == IS_OBJECT)) {
 			OBJ_RELEASE(Z_OBJ(execute_data->This));
 		}
 
@@ -145,7 +146,8 @@ ZEND_API void zend_generator_close(zend_generator *generator, zend_bool finished
 		}
 
 		/* Free closure object */
-		if (EX_CALL_INFO() & ZEND_CALL_CLOSURE) {
+		if ((EX_CALL_INFO() & ZEND_CALL_CLOSURE) &&
+			EXPECTED(GC_TYPE(ZEND_CLOSURE_OBJECT(EX(func))) == IS_OBJECT)) {
 			OBJ_RELEASE(ZEND_CLOSURE_OBJECT(EX(func)));
 		}
 
@@ -1201,7 +1203,7 @@ void zend_register_generator_ce(void) /* {{{ */
 	zend_ce_generator->get_iterator = zend_generator_get_iterator;
 	zend_ce_generator->iterator_funcs.funcs = &zend_generator_iterator_functions;
 
-	memcpy(&zend_generator_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&zend_generator_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_generator_handlers.free_obj = zend_generator_free_storage;
 	zend_generator_handlers.dtor_obj = zend_generator_dtor_storage;
 	zend_generator_handlers.get_gc = zend_generator_get_gc;

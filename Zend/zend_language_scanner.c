@@ -562,7 +562,7 @@ ZEND_API int open_file_for_scanning(zend_file_handle *file_handle)
 	}
 
 	zend_set_compiled_filename(compiled_filename);
-	zend_string_release(compiled_filename);
+	zend_string_release_ex(compiled_filename, 0);
 
 	if (CG(start_lineno)) {
 		CG(zend_lineno) = CG(start_lineno);
@@ -670,7 +670,7 @@ zend_op_array *compile_filename(int type, zval *filename)
 		zend_hash_add_empty_element(&EG(included_files), file_handle.opened_path);
 
 		if (opened_path) {
-			zend_string_release(opened_path);
+			zend_string_release_ex(opened_path, 0);
 		}
 	}
 	zend_destroy_file_handle(&file_handle);
@@ -720,7 +720,7 @@ ZEND_API int zend_prepare_string_for_scanning(zval *str, char *filename)
 
 	new_compiled_filename = zend_string_init(filename, strlen(filename), 0);
 	zend_set_compiled_filename(new_compiled_filename);
-	zend_string_release(new_compiled_filename);
+	zend_string_release_ex(new_compiled_filename, 0);
 	CG(zend_lineno) = 1;
 	CG(increment_lineno) = 0;
 	RESET_DOC_COMMENT();

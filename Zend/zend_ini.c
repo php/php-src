@@ -88,12 +88,12 @@ static void free_ini_entry(zval *zv) /* {{{ */
 {
 	zend_ini_entry *entry = (zend_ini_entry*)Z_PTR_P(zv);
 
-	zend_string_release(entry->name);
+	zend_string_release_ex(entry->name, 1);
 	if (entry->value) {
 		zend_string_release(entry->value);
 	}
 	if (entry->orig_value) {
-		zend_string_release(entry->orig_value);
+		zend_string_release_ex(entry->orig_value, 1);
 	}
 	free(entry);
 }
@@ -252,7 +252,7 @@ ZEND_API int zend_register_ini_entries(const zend_ini_entry_def *ini_entry, int 
 
 		if (zend_hash_add_ptr(directives, p->name, (void*)p) == NULL) {
 			if (p->name) {
-				zend_string_release(p->name);
+				zend_string_release_ex(p->name, 1);
 			}
 			zend_unregister_ini_entries(module_number);
 			return FAILURE;
