@@ -20,8 +20,8 @@ PHP 7.3 UPGRADE NOTES
 ========================================
 
 Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
+  . The ext_skel utility has been completely redesigned with new options and
+    some old options removed. This is now written in PHP and has no external
 	dependencies.
   . Support for BeOS has been dropped.
   . Exceptions thrown due to automatic conversion of warnings into exceptions
@@ -50,6 +50,23 @@ BCMath:
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+mysqli:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+
+PDO/MySQL:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+    Please note that this only affects the usage of PDO_MYSQL with emulated
+    prepares turned off (e.g. using the native preparation functionality).
+    Statements using connections having PDO::ATTR_EMULATE_PREPARES=true (which
+    is the default) were not affected by the bug fixed and have already been
+    getting the proper fractional seconds values from the engine.
 
 Reflection:
   . Reflection export to string now uses `int` and `bool` instead of `integer`
@@ -254,7 +271,7 @@ JSON:
  MBString:
   . The configuration option --with-libmbfl is no longer available.
 
- ODBC: 
+ ODBC:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
