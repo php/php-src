@@ -2033,7 +2033,9 @@ try_string_offset:
 			ZEND_ASSERT(result != NULL);
 			if (retval) {
 				if (result != retval) {
-					ZVAL_COPY(result, retval);
+					ZVAL_COPY_DEREF(result, retval);
+				} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+					zend_unwrap_reference(result);
 				}
 			} else {
 				ZVAL_NULL(result);
