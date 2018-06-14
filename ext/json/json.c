@@ -186,7 +186,6 @@ static PHP_MINFO_FUNCTION(json)
 {
 	php_info_print_table_start();
 	php_info_print_table_row(2, "json support", "enabled");
-	php_info_print_table_row(2, "json version", PHP_JSON_VERSION);
 	php_info_print_table_end();
 }
 /* }}} */
