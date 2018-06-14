@@ -26,6 +26,16 @@ switch ($a) {
   default:
     echo "Default\n";
 }
+
+switch ($a) {
+  case === 123:
+    echo "Should match\n";
+    break;
+  default:
+    echo "Default\n";
+}
+
 --EXPECT--
+Should match
 Should match
 Should match
