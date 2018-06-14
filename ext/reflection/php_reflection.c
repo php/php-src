@@ -3924,6 +3924,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	zend_property_info *prop_info;
 	zend_string *name;
 	zval *prop, *def_value = NULL;
 
@@ -3936,7 +3937,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	prop = zend_std_get_static_property(ce, name, 1);
+	prop = zend_std_get_static_property(ce, name, 1, &prop_info);
 	if (!prop) {
 		if (def_value) {
 			ZVAL_COPY(return_value, def_value);
@@ -3958,6 +3959,7 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 {
 	reflection_object *intern;
 	zend_class_entry *ce;
+	zend_property_info *prop_info;
 	zend_string *name;
 	zval *variable_ptr, *value;
 
@@ -3970,15 +3972,21 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	variable_ptr = zend_std_get_static_property(ce, name, 1);
+	variable_ptr = zend_std_get_static_property(ce, name, 1, &prop_info);
 	if (!variable_ptr) {
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		return;
 	}
 	ZVAL_DEREF(variable_ptr);
-	zval_ptr_dtor(variable_ptr);
-	ZVAL_COPY(variable_ptr, value);
+
+	if (zend_verify_property_type(prop_info, value, value, EX_USES_STRICT_TYPES())) {
+		zval_ptr_dtor(variable_ptr);
+		ZVAL_COPY(variable_ptr, value);
+	} else {
+        	zend_verify_property_type_error(prop_info, prop_info->name, value);
+	}
+
 }
 /* }}} */
 

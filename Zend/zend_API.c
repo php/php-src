@@ -3756,15 +3756,7 @@ ZEND_API int zend_declare_typed_property(zend_class_entry *ce, zend_string *name
 {
 	zend_property_info *property_info, *property_info_ptr;
 
-	if (optional_type) {
-		if (access_type & ZEND_ACC_STATIC) {
-			zend_error(ce->type == ZEND_USER_CLASS ? E_COMPILE_ERROR : E_CORE_ERROR,
-				"Typed property %s::$%s must not be static",
-				ZSTR_VAL(ce->name),
-				ZSTR_VAL(name));
-			return FAILURE;
-		}
-
+	if (optional_type && (access_type & ZEND_ACC_STATIC) == 0) {
 		ce->ce_flags |= ZEND_ACC_HAS_TYPE_HINTS;
 	}
 
@@ -4155,11 +4147,12 @@ ZEND_API void zend_update_property_stringl(zend_class_entry *scope, zval *object
 ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *name, size_t name_length, zval *value) /* {{{ */
 {
 	zval *property;
+	zend_property_info *prop_info;
 	zend_class_entry *old_scope = EG(fake_scope);
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(fake_scope) = scope;
-	property = zend_std_get_static_property(scope, key, 0);
+	property = zend_std_get_static_property(scope, key, 0, &prop_info);
 	EG(fake_scope) = old_scope;
 	zend_string_efree(key);
 	if (!property) {
@@ -4281,11 +4274,12 @@ ZEND_API zval *zend_read_property(zend_class_entry *scope, zval *object, const c
 ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *name, size_t name_length, zend_bool silent) /* {{{ */
 {
 	zval *property;
+	zend_property_info *prop_info;
 	zend_class_entry *old_scope = EG(fake_scope);
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(fake_scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent);
+	property = zend_std_get_static_property(scope, key, silent, &prop_info);
 	EG(fake_scope) = old_scope;
 	zend_string_efree(key);
 

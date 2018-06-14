@@ -2467,10 +2467,11 @@ use_read_property:
 	}
 }
 
-static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
+static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
 	zend_free_op free_op1;
 	zend_string *name, *tmp_name;
 	zend_class_entry *ce;
+	zend_property_info *property_info;
 
 	zend_uchar op1_type = opline->op1_type, op2_type = opline->op2_type;
 
@@ -2500,7 +2501,8 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 			ce = Z_CE_P(EX_VAR(opline->op2.var));
 		}
 		if (EXPECTED(op1_type == IS_CONST) && EXPECTED(CACHED_PTR(cache_slot) == ce)) {
-			*retval = CACHED_PTR(cache_slot + sizeof(void*));
+			*retval = CACHED_PTR(cache_slot + sizeof(void *));
+			*prop_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 			return SUCCESS;
 		}
 	}
@@ -2520,7 +2522,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		}
 	}
 
-	*retval = zend_std_get_static_property(ce, name, fetch_type == BP_VAR_IS);
+	*retval = zend_std_get_static_property(ce, name, fetch_type == BP_VAR_IS, &property_info);
 
 	if (UNEXPECTED(op1_type != IS_CONST)) {
 		zend_tmp_string_release(tmp_name);
@@ -2536,20 +2538,50 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 
 	if (EXPECTED(op1_type == IS_CONST)) {
 		CACHE_POLYMORPHIC_PTR(cache_slot, ce, *retval);
+		*prop_info = property_info;
+		CACHE_PTR(cache_slot + sizeof(void *) * 2, property_info);
 	}
 
 	return SUCCESS;
 }
 
 
-static zend_always_inline int zend_fetch_static_property_address(zval **retval, uint32_t cache_slot, int fetch_type OPLINE_DC EXECUTE_DATA_DC) {
+static zend_always_inline int zend_fetch_static_property_address(zval **retval, zend_property_info **prop_info, uint32_t cache_slot, int fetch_type, int by_ref OPLINE_DC EXECUTE_DATA_DC) {
+	int success;
+	zend_property_info *property_info;
+
 	if (opline->op1_type == IS_CONST && (opline->op2_type == IS_CONST || (opline->op2_type == IS_UNUSED && (opline->op2.num == ZEND_FETCH_CLASS_SELF || opline->op2.num == ZEND_FETCH_CLASS_PARENT))) && EXPECTED(CACHED_PTR(cache_slot) != NULL)) {
 		*retval = CACHED_PTR(cache_slot + sizeof(void *));
-		return SUCCESS;
+		property_info = CACHED_PTR(cache_slot + sizeof(void *) * 2);
 	} else {
-		return zend_fetch_static_property_address_ex(retval, cache_slot, fetch_type OPLINE_CC EXECUTE_DATA_CC);
+		success = zend_fetch_static_property_address_ex(retval, &property_info, cache_slot, fetch_type OPLINE_CC EXECUTE_DATA_CC);
+		if (UNEXPECTED(success != SUCCESS)) {
+			return FAILURE;
+		}
         }
 
+	if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW) && UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
+		zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
+			"Typed static property %s::$%s must not be accessed before initialization",
+			ZSTR_VAL(property_info->ce->name),
+			ZSTR_VAL(property_info->name));
+		return FAILURE;
+	}
+
+	if (by_ref && UNEXPECTED(property_info) && Z_TYPE_P(*retval) != IS_REFERENCE) {
+		if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(*retval) <= IS_NULL)) {
+			zend_throw_error(NULL, "Cannot access uninitialized property by reference");
+			return FAILURE;
+		}
+		ZVAL_NEW_REF(*retval, *retval);
+		Z_REF_P(*retval)->type = zend_get_prop_info_ref_type(property_info);
+	}
+
+	if (prop_info) {
+		*prop_info = property_info;
+	}
+
+	return SUCCESS;
 }
 
 ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv) {
@@ -2561,6 +2593,34 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv) {
 		ZEND_TYPE_IS_CLASS(type) ? ZSTR_VAL(ZEND_TYPE_CE(type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(type))
 	);
 }
+
+static zend_always_inline zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
+	if (!ZEND_TYPE_ALLOW_NULL(old_type)) {
+		ref_type = ZEND_TYPE_WITHOUT_NULL(ref_type); /* remove allow_null if not allowed on assigned reference */
+	}
+	if (ZEND_TYPE_WITHOUT_NULL(old_type) == ref_type) {
+		return ref_type;
+	}
+	if (ZEND_TYPE_IS_CLASS(ref_type) && ZEND_TYPE_IS_CLASS(old_type)) {
+		if (instanceof_function(ZEND_TYPE_CE(ref_type), ZEND_TYPE_CE(old_type))) {
+			return ZEND_TYPE_ALLOW_NULL(ref_type) ? old_type : ZEND_TYPE_WITHOUT_NULL(old_type);
+		} else if (instanceof_function(ZEND_TYPE_CE(old_type), ZEND_TYPE_CE(ref_type))) {
+			return ref_type;
+		}
+	}
+
+	zend_throw_exception_ex(
+		zend_ce_type_error, ZEND_TYPE_IS_CLASS(ref_type) ? IS_OBJECT : ZEND_TYPE_CODE(ref_type),
+		"%s and reference types %s%s and %s%s are not compatible",
+		source,
+		ZEND_TYPE_ALLOW_NULL(ref_type) ? "?" : "",
+		ZEND_TYPE_IS_CLASS(ref_type) ? ZSTR_VAL(ZEND_TYPE_CE(ref_type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(ref_type)),
+		ZEND_TYPE_ALLOW_NULL(old_type) ? "?" : "",
+		ZEND_TYPE_IS_CLASS(old_type) ? ZSTR_VAL(ZEND_TYPE_CE(old_type)->name) : zend_get_type_by_const(ZEND_TYPE_CODE(old_type))
+	);
+	return 0;
+}
+
 
 static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DATA_DC)
 {
