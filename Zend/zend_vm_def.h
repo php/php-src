@@ -2773,7 +2773,7 @@ ZEND_VM_HANDLER(199, ZEND_ASSIGN_OBJ_REF, VAR|UNUSED|THIS|CV, CONST|TMPVAR|CV, C
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							FREE_OP1_VAR_PTR();
 							FREE_OP2();
 							FREE_OP_DATA_VAR_PTR();
@@ -2843,7 +2843,7 @@ ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP_REF, CONST|TMPVAR|CV, UNUSED|CONST|
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						FREE_OP_DATA_VAR_PTR();
 						HANDLE_EXCEPTION();
 					}

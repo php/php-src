@@ -662,11 +662,24 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
 				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot)))) {
-				zval tmp, *val;
+				zval *val = retval;
+				zend_type old_type;
 
-				val = zend_verify_property_type(prop_info, retval, &tmp, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES) != 0);
-				if (UNEXPECTED(!val)) {
-					zend_verify_property_type_error(prop_info, Z_STR_P(member), retval);
+				if (Z_ISREF_P(val)) {
+					zend_type new_type = zend_get_prop_info_ref_type(prop_info);
+					old_type = Z_REFTYPE_P(val);
+					if (old_type != 0 && (new_type = zend_check_typed_assign_typed_ref("Property", old_type, new_type)) == 0) {
+						goto exit;
+					}
+					Z_REFTYPE_P(val) = new_type;
+					val = Z_REFVAL_P(val);
+				}
+
+				if (UNEXPECTED(zend_verify_property_type(prop_info, val, val, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES)) == NULL)) {
+					zend_verify_property_type_error(prop_info, Z_STR_P(member), val);
+					if (Z_ISREF_P(retval)) {
+						Z_REFTYPE_P(retval) = old_type;
+					}
 				}
 			}
 			goto exit;

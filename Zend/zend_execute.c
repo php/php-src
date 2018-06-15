@@ -2595,7 +2595,7 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv) {
 	);
 }
 
-static zend_always_inline zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
+static zend_always_inline zend_type i_zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
 	if (!ZEND_TYPE_ALLOW_NULL(old_type)) {
 		ref_type = ZEND_TYPE_WITHOUT_NULL(ref_type); /* remove allow_null if not allowed on assigned reference */
 	}
@@ -2622,6 +2622,9 @@ static zend_always_inline zend_type zend_check_typed_assign_typed_ref(const char
 	return 0;
 }
 
+ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
+	return i_zend_check_typed_assign_typed_ref(source, old_type, ref_type);
+}
 
 static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DATA_DC)
 {

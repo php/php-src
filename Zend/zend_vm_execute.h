@@ -5260,7 +5260,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -5323,7 +5323,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -8663,7 +8663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -8726,7 +8726,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -9554,7 +9554,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -9617,7 +9617,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -15025,7 +15025,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -15088,7 +15088,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -17366,7 +17366,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -17429,7 +17429,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -18001,7 +18001,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -18064,7 +18064,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -26278,7 +26278,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -26386,7 +26386,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 
@@ -29168,7 +29168,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 							zval_ptr_dtor_nogc(free_op2);
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -29276,7 +29276,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 							zval_ptr_dtor_nogc(free_op2);
 
@@ -33681,7 +33681,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -33789,7 +33789,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 
@@ -36003,7 +36003,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -36110,7 +36110,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
@@ -38195,7 +38195,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 							zval_ptr_dtor_nogc(free_op2);
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -38302,7 +38302,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 							zval_ptr_dtor_nogc(free_op2);
 
@@ -41012,7 +41012,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -41119,7 +41119,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
@@ -46833,7 +46833,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -46940,7 +46940,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
@@ -47009,7 +47009,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -47072,7 +47072,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -51245,7 +51245,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 							zval_ptr_dtor_nogc(free_op2);
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -51352,7 +51352,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 							zval_ptr_dtor_nogc(free_op2);
 
@@ -52663,7 +52663,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -52726,7 +52726,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -54192,7 +54192,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 						HANDLE_EXCEPTION();
 					}
@@ -54255,7 +54255,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 				if (old_type) {
-					if ((ref_type = zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
+					if ((ref_type = i_zend_check_typed_assign_typed_ref("Static property", old_type, ref_type)) == 0) {
 
 						HANDLE_EXCEPTION();
 					}
@@ -57987,7 +57987,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
@@ -58094,7 +58094,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
 					if (old_type) {
-						if ((ref_type = zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
