@@ -17,6 +17,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   n. IS_TYPE_COPYABLE
   o. IS_UNUSED
   p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
+  q. sapi_cli_single_write()
 
 2. Build system changes
   a. Unix build system changes
@@ -122,6 +123,8 @@ PHP 7.3 INTERNALS UPGRADE NOTES
     - FETCH_CLASS     op1<fetch-flags>, op2<name>, result<var>
     - FETCH_CONSTANT  op1<fetch-flags>, op2<name>, result<tmp>
     - CATCH           ext<last-flag>, op1<name>, op2<jump_addr>, result<cv>
+
+ q.  sapi_cli_single_write() now returns ssize_t instead of size_t.
 
 ========================
 2. Build system changes

@@ -6,6 +6,10 @@ PHP                                                                        NEWS
   . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
   . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
 
+- CLI:
+  . Fixed bug #44217 (Output after stdout/stderr closed cause immediate exit
+    with status 0). (Robert Lu)
+
 - Date:
   . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
 
