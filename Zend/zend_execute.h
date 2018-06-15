@@ -108,6 +108,9 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 					}
 					if (!zend_verify_ref_type_assignable_zval(Z_REFTYPE_P(variable_ptr), value, strict)) {
 						zend_throw_ref_type_error(Z_REFTYPE_P(variable_ptr), value);
+						if (need_copy) {
+							Z_TRY_DELREF_P(value);
+						}
 						return Z_REFVAL_P(variable_ptr);
 					}
 					if (need_copy) {
