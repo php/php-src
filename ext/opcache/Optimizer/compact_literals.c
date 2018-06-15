@@ -192,6 +192,10 @@ void zend_optimizer_compact_literals(zend_op_array *op_array, zend_optimizer_ctx
 				case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 				case ZEND_UNSET_STATIC_PROP:
 				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+				case ZEND_PRE_INC_STATIC_PROP:
+				case ZEND_PRE_DEC_STATIC_PROP:
+				case ZEND_POST_INC_STATIC_PROP:
+				case ZEND_POST_DEC_STATIC_PROP:
 literals_handle_static_prop:
 					if (opline->op2_type == IS_CONST) {
 						LITERAL_INFO(opline->op2.constant, LITERAL_CLASS, 2);
@@ -671,6 +675,10 @@ literals_handle_static_prop:
 				case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 				case ZEND_UNSET_STATIC_PROP:
 				case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+				case ZEND_PRE_INC_STATIC_PROP:
+				case ZEND_PRE_DEC_STATIC_PROP:
+				case ZEND_POST_INC_STATIC_PROP:
+				case ZEND_POST_DEC_STATIC_PROP:
 					if (opline->op1_type == IS_CONST) {
 						// op1 static property
 						if (opline->op2_type == IS_CONST) {

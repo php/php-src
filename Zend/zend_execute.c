@@ -1607,6 +1607,135 @@ static zend_never_inline void zend_assign_to_string_offset(zval *str, zval *dim,
 	}
 }
 
+static void zend_pre_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
+{
+	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+		if (inc) {
+			fast_long_increment_function(prop);
+		} else {
+			fast_long_decrement_function(prop);
+		}
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG) && UNEXPECTED(prop_info)) {
+			zval tmp, *val;
+
+			val = zend_verify_property_type(prop_info, prop, &tmp, EX_USES_STRICT_TYPES());
+			if (UNEXPECTED(!val)) {
+				zend_verify_property_type_error(prop_info, prop_info->name, prop);
+				if (inc) {
+					ZVAL_LONG(prop, ZEND_LONG_MAX);
+				} else {
+					ZVAL_LONG(prop, ZEND_LONG_MIN);
+				}
+			}
+		}
+	} else {
+		zend_type ref_type = 0;
+		if (Z_ISREF_P(prop)) {
+			ref_type = Z_REFTYPE_P(prop);
+			prop = Z_REFVAL_P(prop);
+		}
+
+		if (UNEXPECTED(ref_type || prop_info)) {
+			/* special case for typed properties */
+			zval z_copy;
+
+			ZVAL_COPY(&z_copy, prop);
+			if (inc) {
+				increment_function(&z_copy);
+			} else {
+				decrement_function(&z_copy);
+			}
+			if (EXPECTED(ref_type ? zend_verify_ref_type_assignable_zval(ref_type, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+				zval_ptr_dtor(prop);
+				ZVAL_COPY_VALUE(prop, &z_copy);
+			} else {
+				if (ref_type) {
+					zend_throw_ref_type_error(ref_type, &z_copy);
+				} else {
+					zend_verify_property_type_error(prop_info, prop_info->name, &z_copy);
+				}
+				zval_ptr_dtor(&z_copy);
+			}
+		} else {
+			SEPARATE_ZVAL_NOREF(prop);
+			if (inc) {
+				increment_function(prop);
+			} else {
+				decrement_function(prop);
+			}
+		}
+	}
+	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
+		ZVAL_COPY(EX_VAR(opline->result.var), prop);
+	}
+}
+
+static void zend_post_incdec_property_zval(zval *prop, zend_property_info *prop_info, int inc OPLINE_DC EXECUTE_DATA_DC)
+{
+	if (EXPECTED(Z_TYPE_P(prop) == IS_LONG)) {
+		ZVAL_LONG(EX_VAR(opline->result.var), Z_LVAL_P(prop));
+		if (inc) {
+			fast_long_increment_function(prop);
+		} else {
+			fast_long_decrement_function(prop);
+		}
+		if (UNEXPECTED(Z_TYPE_P(prop) != IS_LONG)) {
+			if (UNEXPECTED(prop_info)) {
+				zval tmp, *val;
+
+				val = zend_verify_property_type(prop_info, prop, &tmp, EX_USES_STRICT_TYPES());
+				if (UNEXPECTED(!val)) {
+					zend_verify_property_type_error(prop_info, prop_info->name, prop);
+					if (inc) {
+						ZVAL_LONG(prop, ZEND_LONG_MAX);
+					} else {
+						ZVAL_LONG(prop, ZEND_LONG_MIN);
+					}
+				}
+			}
+		}
+	} else {
+		zend_type ref_type = 0;
+		if (Z_ISREF_P(prop)) {
+			ref_type = Z_REFTYPE_P(prop);
+			prop = Z_REFVAL_P(prop);
+		}
+
+		ZVAL_COPY_VALUE(EX_VAR(opline->result.var), prop);
+
+		if (UNEXPECTED(ref_type || prop_info)) {
+			/* special case for typed properties */
+			zval z_copy;
+
+			ZVAL_DUP(&z_copy, prop);
+			if (inc) {
+				increment_function(&z_copy);
+			} else {
+				decrement_function(&z_copy);
+			}
+			if (EXPECTED(ref_type ? zend_verify_ref_type_assignable_zval(ref_type, &z_copy, EX_USES_STRICT_TYPES()) : zend_verify_property_type(prop_info, &z_copy, &z_copy, EX_USES_STRICT_TYPES()) != NULL)) {
+				zval_ptr_dtor(prop);
+				ZVAL_COPY_VALUE(prop, &z_copy);
+			} else {
+				if (ref_type) {
+					zend_throw_ref_type_error(ref_type, &z_copy);
+				} else {
+					zend_verify_property_type_error(prop_info, prop_info->name, &z_copy);
+				}
+				zval_ptr_dtor(&z_copy);
+				Z_TRY_ADDREF_P(prop); /* we copied by value into result.var */
+			}
+		} else {
+			zval_opt_copy_ctor(prop);
+			if (inc) {
+				increment_function(prop);
+			} else {
+				decrement_function(prop);
+			}
+		}
+	}
+}
+
 static zend_never_inline void zend_post_incdec_overloaded_property(zval *object, zval *property, void **cache_slot, int inc OPLINE_DC EXECUTE_DATA_DC)
 {
 	if (Z_OBJ_HT_P(object)->read_property && Z_OBJ_HT_P(object)->write_property) {

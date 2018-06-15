@@ -342,21 +342,17 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 		case ZEND_UNSET_STATIC_PROP:
-			TO_STRING_NOWARN(val);
-			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_FETCH_REF) + sizeof(void*) == op_array->cache_size) {
-				op_array->cache_size += sizeof(void *);
-			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_FETCH_REF);
-			}
-			break;
 		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_POST_INC_STATIC_PROP:
+		case ZEND_POST_DEC_STATIC_PROP:
 			TO_STRING_NOWARN(val);
 			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
-			if (opline->op2_type == IS_CONST && (opline->extended_value & ~ZEND_ISEMPTY) + sizeof(void*) == op_array->cache_size) {
+			if (opline->op2_type == IS_CONST && (opline->extended_value & ~(ZEND_FETCH_REF|ZEND_ISEMPTY)) + sizeof(void*) == op_array->cache_size) {
 				op_array->cache_size += sizeof(void *);
 			} else {
-				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & ZEND_ISEMPTY);
+				opline->extended_value = alloc_cache_slots(op_array, 3) | (opline->extended_value & (ZEND_FETCH_REF|ZEND_ISEMPTY));
 			}
 			break;
 		case ZEND_SEND_VAR:
@@ -439,22 +435,17 @@ int zend_optimizer_update_op2_const(zend_op_array *op_array,
 		case ZEND_FETCH_STATIC_PROP_UNSET:
 		case ZEND_FETCH_STATIC_PROP_FUNC_ARG:
 		case ZEND_UNSET_STATIC_PROP:
-			REQUIRES_STRING(val);
-			drop_leading_backslash(val);
-			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
-			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
-			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION | ZEND_FETCH_REF));
-			}
-			break;
-		case ZEND_ISSET_ISEMPTY_STATIC_PROP:
+		case ZEND_PRE_INC_STATIC_PROP:
+		case ZEND_PRE_DEC_STATIC_PROP:
+		case ZEND_POST_INC_STATIC_PROP:
+		case ZEND_POST_DEC_STATIC_PROP:
 handle_static_prop:
 			REQUIRES_STRING(val);
 			drop_leading_backslash(val);
 			opline->op2.constant = zend_optimizer_add_literal(op_array, val);
 			zend_optimizer_add_literal_string(op_array, zend_string_tolower(Z_STR_P(val)));
 			if (opline->op1_type != IS_CONST) {
-				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & ZEND_ISEMPTY);
+				opline->extended_value = alloc_cache_slots(op_array, 1) | (opline->extended_value & (ZEND_RETURNS_FUNCTION | ZEND_FETCH_REF | ZEND_ISEMPTY));
 			}
 			break;
 		case ZEND_INIT_FCALL:
