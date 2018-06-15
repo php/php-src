@@ -48,7 +48,7 @@ var_dump($rp->isOptional());
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 int(2)
 int(1)
 int(2)

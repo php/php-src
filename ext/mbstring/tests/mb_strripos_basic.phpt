@@ -97,7 +97,7 @@ foreach ($greek_needles as $needle) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing mb_strripos() : basic functionality***
 
  -- ASCII Strings, needle should be found --

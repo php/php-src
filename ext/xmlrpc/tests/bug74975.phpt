@@ -32,7 +32,7 @@ echo xmlrpc_encode([
 ]);
 
 ?>
---EXPECTF--
+--EXPECT--
 <?xml version="1.0" encoding="utf-8"?>
 <params>
 <param>

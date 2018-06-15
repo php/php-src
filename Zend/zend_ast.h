@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -25,6 +25,10 @@
 
 #include "zend.h"
 
+#ifndef ZEND_AST_SPEC
+# define ZEND_AST_SPEC 1
+#endif
+
 #define ZEND_AST_SPECIAL_SHIFT      6
 #define ZEND_AST_IS_LIST_SHIFT      7
 #define ZEND_AST_NUM_CHILDREN_SHIFT 8
@@ -32,6 +36,7 @@
 enum _zend_ast_kind {
 	/* special nodes */
 	ZEND_AST_ZVAL = 1 << ZEND_AST_SPECIAL_SHIFT,
+	ZEND_AST_CONSTANT,
 	ZEND_AST_ZNODE,
 
 	/* declaration nodes */
@@ -61,6 +66,7 @@ enum _zend_ast_kind {
 	/* 0 child nodes */
 	ZEND_AST_MAGIC_CONST = 0 << ZEND_AST_NUM_CHILDREN_SHIFT,
 	ZEND_AST_TYPE,
+	ZEND_AST_CONSTANT_CLASS,
 
 	/* 1 child node */
 	ZEND_AST_VAR = 1 << ZEND_AST_NUM_CHILDREN_SHIFT,
@@ -189,26 +195,101 @@ typedef struct _zend_ast_decl {
 typedef void (*zend_ast_process_t)(zend_ast *ast);
 extern ZEND_API zend_ast_process_t zend_ast_process;
 
-ZEND_API zend_ast *zend_ast_create_zval_with_lineno(zval *zv, zend_ast_attr attr, uint32_t lineno);
-ZEND_API zend_ast *zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_with_lineno(zval *zv, uint32_t lineno);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_ex(zval *zv, zend_ast_attr attr);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval(zval *zv);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_str(zend_string *str);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_zval_from_long(zend_long lval);
 
-ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_constant(zend_string *name, zend_ast_attr attr);
+
+#if ZEND_AST_SPEC
+# ifdef ZEND_WIN32
+#  define ZEND_AST_EXPAND_VA(a) a
+# endif
+
+# ifdef ZEND_WIN32
+#  define ZEND_AST_SPEC_CALL(name, ...) \
+	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
+# else
+#  define ZEND_AST_SPEC_CALL(name, ...) \
+	ZEND_AST_SPEC_CALL_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
+# endif
+# define ZEND_AST_SPEC_CALL_(name, _, _4, _3, _2, _1, suffix, ...) \
+	name ## suffix
+
+# ifdef ZEND_WIN32
+#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
+	ZEND_AST_EXPAND_VA(ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__))
+# else
+#  define ZEND_AST_SPEC_CALL_EX(name, ...) \
+	ZEND_AST_SPEC_CALL_EX_(name, __VA_ARGS__, _4, _3, _2, _1, _0)(__VA_ARGS__)
+# endif
+# define ZEND_AST_SPEC_CALL_EX_(name, _, _5, _4, _3, _2, _1, suffix, ...) \
+	name ## suffix
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_0(zend_ast_kind kind);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_1(zend_ast_kind kind, zend_ast *child);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_3(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_4(zend_ast_kind kind, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4);
+
+static zend_always_inline zend_ast * zend_ast_create_ex_0(zend_ast_kind kind, zend_ast_attr attr) {
+	zend_ast *ast = zend_ast_create_0(kind);
+	ast->attr = attr;
+	return ast;
+}
+static zend_always_inline zend_ast * zend_ast_create_ex_1(zend_ast_kind kind, zend_ast_attr attr, zend_ast *child) {
+	zend_ast *ast = zend_ast_create_1(kind, child);
+	ast->attr = attr;
+	return ast;
+}
+static zend_always_inline zend_ast * zend_ast_create_ex_2(zend_ast_kind kind, zend_ast_attr attr, zend_ast *child1, zend_ast *child2) {
+	zend_ast *ast = zend_ast_create_2(kind, child1, child2);
+	ast->attr = attr;
+	return ast;
+}
+static zend_always_inline zend_ast * zend_ast_create_ex_3(zend_ast_kind kind, zend_ast_attr attr, zend_ast *child1, zend_ast *child2, zend_ast *child3) {
+	zend_ast *ast = zend_ast_create_3(kind, child1, child2, child3);
+	ast->attr = attr;
+	return ast;
+}
+static zend_always_inline zend_ast * zend_ast_create_ex_4(zend_ast_kind kind, zend_ast_attr attr, zend_ast *child1, zend_ast *child2, zend_ast *child3, zend_ast *child4) {
+	zend_ast *ast = zend_ast_create_4(kind, child1, child2, child3, child4);
+	ast->attr = attr;
+	return ast;
+}
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_0(zend_ast_kind kind);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_1(zend_ast_kind kind, zend_ast *child);
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_create_list_2(zend_ast_kind kind, zend_ast *child1, zend_ast *child2);
+
+# define zend_ast_create(...) \
+	ZEND_AST_SPEC_CALL(zend_ast_create, __VA_ARGS__)
+# define zend_ast_create_ex(...) \
+	ZEND_AST_SPEC_CALL_EX(zend_ast_create_ex, __VA_ARGS__)
+# define zend_ast_create_list(init_children, ...) \
+	ZEND_AST_SPEC_CALL(zend_ast_create_list, __VA_ARGS__)
+
+#else
 ZEND_API zend_ast *zend_ast_create(zend_ast_kind kind, ...);
+ZEND_API zend_ast *zend_ast_create_ex(zend_ast_kind kind, zend_ast_attr attr, ...);
+ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
+#endif
+
+ZEND_API zend_ast * ZEND_FASTCALL zend_ast_list_add(zend_ast *list, zend_ast *op);
 
 ZEND_API zend_ast *zend_ast_create_decl(
 	zend_ast_kind kind, uint32_t flags, uint32_t start_lineno, zend_string *doc_comment,
 	zend_string *name, zend_ast *child0, zend_ast *child1, zend_ast *child2, zend_ast *child3
 );
 
-ZEND_API zend_ast *zend_ast_create_list(uint32_t init_children, zend_ast_kind kind, ...);
-ZEND_API zend_ast *zend_ast_list_add(zend_ast *list, zend_ast *op);
-
-ZEND_API int zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
+ZEND_API int ZEND_FASTCALL zend_ast_evaluate(zval *result, zend_ast *ast, zend_class_entry *scope);
 ZEND_API zend_string *zend_ast_export(const char *prefix, zend_ast *ast, const char *suffix);
 
-ZEND_API zend_ast *zend_ast_copy(zend_ast *ast);
-ZEND_API void zend_ast_destroy(zend_ast *ast);
-ZEND_API void zend_ast_destroy_and_free(zend_ast *ast);
+ZEND_API zend_ast_ref * ZEND_FASTCALL zend_ast_copy(zend_ast *ast);
+ZEND_API void ZEND_FASTCALL zend_ast_destroy(zend_ast *ast);
+ZEND_API void ZEND_FASTCALL zend_ast_ref_destroy(zend_ast_ref *ast);
 
 typedef void (*zend_ast_apply_func)(zend_ast **ast_ptr);
 ZEND_API void zend_ast_apply(zend_ast *ast, zend_ast_apply_func fn);
@@ -231,6 +312,12 @@ static zend_always_inline zend_string *zend_ast_get_str(zend_ast *ast) {
 	return Z_STR_P(zv);
 }
 
+static zend_always_inline zend_string *zend_ast_get_constant_name(zend_ast *ast) {
+	ZEND_ASSERT(ast->kind == ZEND_AST_CONSTANT);
+	ZEND_ASSERT(Z_TYPE(((zend_ast_zval *) ast)->val) == IS_STRING);
+	return Z_STR(((zend_ast_zval *) ast)->val);
+}
+
 static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 	ZEND_ASSERT(!zend_ast_is_list(ast));
 	return ast->kind >> ZEND_AST_NUM_CHILDREN_SHIFT;
@@ -238,24 +325,10 @@ static zend_always_inline uint32_t zend_ast_get_num_children(zend_ast *ast) {
 static zend_always_inline uint32_t zend_ast_get_lineno(zend_ast *ast) {
 	if (ast->kind == ZEND_AST_ZVAL) {
 		zval *zv = zend_ast_get_zval(ast);
-		return zv->u2.lineno;
+		return Z_LINENO_P(zv);
 	} else {
 		return ast->lineno;
 	}
-}
-
-static zend_always_inline zend_ast *zend_ast_create_zval(zval *zv) {
-	return zend_ast_create_zval_ex(zv, 0);
-}
-static zend_always_inline zend_ast *zend_ast_create_zval_from_str(zend_string *str) {
-	zval zv;
-	ZVAL_STR(&zv, str);
-	return zend_ast_create_zval(&zv);
-}
-static zend_always_inline zend_ast *zend_ast_create_zval_from_long(zend_long lval) {
-	zval zv;
-	ZVAL_LONG(&zv, lval);
-	return zend_ast_create_zval(&zv);
 }
 
 static zend_always_inline zend_ast *zend_ast_create_binary_op(uint32_t opcode, zend_ast *op0, zend_ast *op1) {

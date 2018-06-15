@@ -32,6 +32,8 @@ extern "C" {
 }
 
 using PHP::CodePointBreakIterator;
+using icu::BreakIterator;
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(BreakIterator, __construct)
 {
@@ -51,7 +53,7 @@ static void _breakiter_factory(const char *func_name,
 	UErrorCode		status = UErrorCode();
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "s!",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|s!",
 			&locale_str, &dummy) == FAILURE) {
 		spprintf(&msg, 0, "%s: bad arguments", func_name);
 		intl_error_set(NULL, U_ILLEGAL_ARGUMENT_ERROR, msg, 1);

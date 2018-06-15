@@ -19,11 +19,85 @@
 #endif
 
 #include "php_intl.h"
+#if U_ICU_VERSION_MAJOR_NUM < 56
 #include "unicode/unorm.h"
+#else
+#include <unicode/unorm2.h>
+#endif
 #include "normalizer.h"
 #include "normalizer_class.h"
 #include "normalizer_normalize.h"
 #include "intl_convert.h"
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
+
+
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+static const UNormalizer2 *intl_get_normalizer(zend_long form, UErrorCode *err)
+{/*{{{*/
+	switch (form)
+	{
+		case NORMALIZER_FORM_C:
+			return unorm2_getNFCInstance(err);
+			break;
+		case NORMALIZER_FORM_D:
+			return unorm2_getNFDInstance(err);
+			break;
+		case NORMALIZER_FORM_KC:
+			return unorm2_getNFKCInstance(err);
+			break;
+		case NORMALIZER_FORM_KD:
+			return unorm2_getNFKDInstance(err);
+			break;
+		case NORMALIZER_FORM_KC_CF:
+			return unorm2_getNFKCCasefoldInstance(err);
+			break;
+	}
+
+	*err = U_ILLEGAL_ARGUMENT_ERROR;
+	return NULL;
+}/*}}}*/
+
+static int32_t intl_normalize(zend_long form, const UChar *src, int32_t src_len, UChar *dst, int32_t dst_len, UErrorCode *err)
+{/*{{{*/
+	const UNormalizer2 *norm;
+
+	/* Mimic the behavior of ICU < 56. */
+	if (UNEXPECTED(NORMALIZER_NONE == form)) {
+		/* FIXME This is a noop which should be removed somewhen after PHP 7.3.*/
+		zend_error(E_DEPRECATED, "Normalizer::NONE is obsolete with ICU 56 and above and will be removed in later PHP versions");
+
+		if (dst_len >= src_len) {
+			memmove(dst, src, sizeof(UChar) * src_len);
+			dst[src_len] = '\0';
+			*err = U_ZERO_ERROR;
+			return src_len;
+		}
+
+		*err = U_BUFFER_OVERFLOW_ERROR;
+		return -1;
+	}
+
+	norm = intl_get_normalizer(form, err);
+	if(U_FAILURE(*err)) {
+		return -1;
+	}
+
+	return unorm2_normalize(norm, src, src_len, dst, dst_len, err);
+}/*}}}*/
+
+static UBool intl_is_normalized(zend_long form, const UChar *uinput, int32_t uinput_len, UErrorCode *err)
+{/*{{{*/
+	const UNormalizer2 *norm = intl_get_normalizer(form, err);
+
+	if(U_FAILURE(*err)) {
+		return FALSE;
+	}
+
+	return unorm2_isNormalized(norm, uinput, uinput_len, err);
+}/*}}}*/
+#endif
 
 /* {{{ proto string Normalizer::normalize( string $input [, string $form = FORM_C] )
  * Normalize a string. }}} */
@@ -74,6 +148,9 @@ PHP_FUNCTION( normalizer_normalize )
 			break;
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+		case NORMALIZER_FORM_KC_CF:
+#endif
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -107,7 +184,11 @@ PHP_FUNCTION( normalizer_normalize )
 	uret_buf = eumalloc( uret_len + 1 );
 
 	/* normalize */
+#if U_ICU_VERSION_MAJOR_NUM < 56
 	size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
+#else
+	size_needed = intl_normalize(form, uinput, uinput_len, uret_buf, uret_len, &status);
+#endif
 
 	/* Bail out if an unexpected error occurred.
 	 * (U_BUFFER_OVERFLOW_ERROR means that *target buffer is not large enough).
@@ -130,7 +211,11 @@ PHP_FUNCTION( normalizer_normalize )
 		status = U_ZERO_ERROR;
 
 		/* try normalize again */
+#if U_ICU_VERSION_MAJOR_NUM < 56
 		size_needed = unorm_normalize( uinput, uinput_len, form, (int32_t) 0 /* options */, uret_buf, uret_len, &status);
+#else
+		size_needed = intl_normalize(form, uinput, uinput_len, uret_buf, uret_len, &status);
+#endif
 
 		/* Bail out if an unexpected error occurred. */
 		if( U_FAILURE(status)  ) {
@@ -164,7 +249,7 @@ PHP_FUNCTION( normalizer_normalize )
 
 /* {{{ proto bool Normalizer::isNormalized( string $input [, string $form = FORM_C] )
  * Test if a string is in a given normalization form. }}} */
-/* {{{ proto bool normalizer_is_normalize( string $input [, string $form = FORM_C] )
+/* {{{ proto bool normalizer_is_normalized( string $input [, string $form = FORM_C] )
  * Test if a string is in a given normalization form.
  */
 PHP_FUNCTION( normalizer_is_normalized )
@@ -199,6 +284,9 @@ PHP_FUNCTION( normalizer_is_normalized )
 		case NORMALIZER_FORM_KD:
 		case NORMALIZER_FORM_C:
 		case NORMALIZER_FORM_KC:
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+		case NORMALIZER_FORM_KC_CF:
+#endif
 			break;
 		default:
 			intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,
@@ -229,7 +317,11 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 
 	/* test string */
+#if U_ICU_VERSION_MAJOR_NUM < 56
 	uret = unorm_isNormalizedWithOptions( uinput, uinput_len, form, (int32_t) 0 /* options */, &status);
+#else
+	uret = intl_is_normalized(form, uinput, uinput_len, &status);
+#endif
 
 	efree( uinput );
 
@@ -245,6 +337,58 @@ PHP_FUNCTION( normalizer_is_normalized )
 
 	RETURN_FALSE;
 }
+/* }}} */
+
+/* {{{ proto string|null Normalizer::getRawDecomposition( string $input [, string $form = FORM_C] )
+ * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point. }}} */
+/* {{{ proto string|null normalizer_get_raw_decomposition( string $input [, string $form = FORM_C] )
+ * Returns the Decomposition_Mapping property for the given UTF-8 encoded code point.
+ */
+#if U_ICU_VERSION_MAJOR_NUM >= 56
+PHP_FUNCTION( normalizer_get_raw_decomposition )
+{
+	char* input = NULL;
+	size_t input_length = 0;
+
+	UChar32 codepoint = -1;
+	int32_t offset = 0;
+
+    UErrorCode status = U_ZERO_ERROR;
+    const UNormalizer2 *norm;
+    UChar decomposition[32];
+    int32_t decomposition_length;
+
+	zend_long form = NORMALIZER_DEFAULT;
+
+	intl_error_reset(NULL);
+
+	if ((zend_parse_parameters(ZEND_NUM_ARGS(), "s|l", &input, &input_length, &form) == FAILURE)) {
+		return;
+	}
+
+	norm = intl_get_normalizer(form, &status);
+
+	U8_NEXT(input, offset, input_length, codepoint);
+	if ((size_t)offset != input_length) {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Input string must be exactly one UTF-8 encoded code point long.", 0);
+		return;
+	}
+
+	if ((codepoint < UCHAR_MIN_VALUE) || (codepoint > UCHAR_MAX_VALUE)) {
+		intl_error_set_code(NULL, U_ILLEGAL_ARGUMENT_ERROR);
+		intl_error_set_custom_msg(NULL, "Code point out of range", 0);
+		return;
+	}
+	
+	decomposition_length = unorm2_getRawDecomposition(norm, codepoint, decomposition, 32, &status);
+	if (decomposition_length == -1) {
+		RETURN_NULL();
+	}
+
+	RETVAL_NEW_STR(intl_convert_utf16_to_utf8(decomposition, decomposition_length, &status));
+}
+#endif
 /* }}} */
 
 /*

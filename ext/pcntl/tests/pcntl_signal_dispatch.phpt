@@ -20,7 +20,7 @@ pcntl_signal_dispatch();
 echo "Done!\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 Start!
 Signal handler called!
 Done!

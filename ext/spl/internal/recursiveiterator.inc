@@ -20,7 +20,7 @@ interface RecursiveIterator extends Iterator
 	/** @return whether the current element has children
 	 */
 	function hasChildren();
-	
+
 	/** @return the sub iterator for the current element
 	 * @note The returned object must implement RecursiveIterator.
 	 */

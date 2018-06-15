@@ -32,7 +32,7 @@ var_dump( stripos($heredoc_str, $heredoc_str) );
 var_dump( stripos("Hello, World", "ooo") );
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing stripos() function: basic functionality ***
 -- With default arguments --
 int(0)

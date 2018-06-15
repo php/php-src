@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -37,7 +37,7 @@ static inline const char *phpdbg_decode_opcode(zend_uchar opcode) /* {{{ */
 } /* }}} */
 
 static inline char *phpdbg_decode_op(
-		zend_op_array *ops, const znode_op *op, uint32_t type) /* {{{ */
+		zend_op_array *ops, const zend_op *opline, const znode_op *op, uint32_t type) /* {{{ */
 {
 	char *decode = NULL;
 
@@ -56,7 +56,7 @@ static inline char *phpdbg_decode_op(
 			spprintf(&decode, 0, "~%u", EX_VAR_TO_NUM(op->var) - ops->last_var);
 		break;
 		case IS_CONST: {
-			zval *literal = RT_CONSTANT(ops, *op);
+			zval *literal = RT_CONSTANT(opline, *op);
 			decode = phpdbg_short_zval_print(literal, 20);
 		} break;
 	}
@@ -68,7 +68,7 @@ char *phpdbg_decode_input_op(
 		uint32_t flags) {
 	char *result = NULL;
 	if (op_type != IS_UNUSED) {
-		result = phpdbg_decode_op(ops, &op, op_type);
+		result = phpdbg_decode_op(ops, opline, &op, op_type);
 	} else if (ZEND_VM_OP_JMP_ADDR == (flags & ZEND_VM_OP_MASK)) {
 		spprintf(&result, 0, "J%td", OP_JMP_ADDR(opline, op) - ops->opcodes);
 	} else if (ZEND_VM_OP_NUM == (flags & ZEND_VM_OP_MASK)) {
@@ -76,10 +76,6 @@ char *phpdbg_decode_input_op(
 	} else if (ZEND_VM_OP_TRY_CATCH == (flags & ZEND_VM_OP_MASK)) {
 		if (op.num != (uint32_t)-1) {
 			spprintf(&result, 0, "try-catch(%" PRIu32 ")", op.num);
-		}
-	} else if (ZEND_VM_OP_LIVE_RANGE == (flags & ZEND_VM_OP_MASK)) {
-		if (opline->extended_value & ZEND_FREE_ON_RETURN) {
-			spprintf(&result, 0, "live-range(%" PRIu32 ")", op.num);
 		}
 	} else if (ZEND_VM_OP_THIS == (flags & ZEND_VM_OP_MASK)) {
 		result = estrdup("THIS");
@@ -115,10 +111,16 @@ char *phpdbg_decode_opline(zend_op_array *ops, zend_op *opline) /*{{{ */
 	/* RESULT */
 	switch (opline->opcode) {
 	case ZEND_CATCH:
-		spprintf(&decode[3], 0, "%" PRIu32, opline->result.num);
+		if (opline->extended_value & ZEND_LAST_CATCH) {
+			if (decode[2]) {
+				efree(decode[2]);
+				decode[2] = NULL;
+			}
+		}
+		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);
 		break;
 	default:
-		decode[3] = phpdbg_decode_op(ops, &opline->result, opline->result_type);
+		decode[3] = phpdbg_decode_op(ops, opline, &opline->result, opline->result_type);
 		break;
 	}
 

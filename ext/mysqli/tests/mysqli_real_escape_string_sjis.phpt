@@ -46,7 +46,7 @@ mysqli_close($link);
 	mysqli_close($link);
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 done!

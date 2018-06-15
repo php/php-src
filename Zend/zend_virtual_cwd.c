@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -44,6 +44,19 @@
 #  define IO_REPARSE_TAG_DEDUP   0x80000013
 # endif
 
+# ifndef IO_REPARSE_TAG_CLOUD
+#  define IO_REPARSE_TAG_CLOUD    (0x9000001AL)
+# endif
+/* IO_REPARSE_TAG_CLOUD_1 through IO_REPARSE_TAG_CLOUD_F have values of 0x9000101AL
+   to 0x9000F01AL, they can be checked against the mask. */
+#ifndef IO_REPARSE_TAG_CLOUD_MASK
+#define IO_REPARSE_TAG_CLOUD_MASK (0x0000F000L)
+#endif
+
+#ifndef IO_REPARSE_TAG_ONEDRIVE
+#define IO_REPARSE_TAG_ONEDRIVE   (0x80000021L)
+#endif
+
 # ifndef VOLUME_NAME_NT
 #  define VOLUME_NAME_NT 0x2
 # endif
@@ -72,7 +85,7 @@ ts_rsrc_id cwd_globals_id;
 virtual_cwd_globals cwd_globals;
 #endif
 
-cwd_state main_cwd_state; /* True global */
+static cwd_state main_cwd_state; /* True global */
 
 #ifndef ZEND_WIN32
 #include <unistd.h>
@@ -142,7 +155,6 @@ typedef struct {
 static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 {
 	__int64 UnixTime;
-	long *nsec = NULL;
 	SYSTEMTIME SystemTime;
 	FileTimeToSystemTime(FileTime, &SystemTime);
 
@@ -150,10 +162,6 @@ static inline time_t FileTimeToUnixTime(const FILETIME *FileTime)
 	FileTime->dwLowDateTime;
 
 	UnixTime -= (SECS_BETWEEN_EPOCHS * SECS_TO_100NS);
-
-	if (nsec) {
-		*nsec = (UnixTime % SECS_TO_100NS) * (__int64)100;
-	}
 
 	UnixTime /= SECS_TO_100NS; /* now convert to seconds */
 
@@ -179,8 +187,8 @@ CWD_API ssize_t php_sys_readlink(const char *link, char *target, size_t target_l
 	}
 
 	hFile = CreateFileW(linkw,            // file to open
-				 GENERIC_READ,          // open for reading
-				 FILE_SHARE_READ,       // share for reading
+				 0,  // query possible attributes
+				 PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
 				 NULL,                  // default security
 				 OPEN_EXISTING,         // existing file only
 				 FILE_FLAG_BACKUP_SEMANTICS, // normal file
@@ -291,7 +299,13 @@ CWD_API int php_sys_stat_ex(const char *path, zend_stat_t *buf, int lstat) /* {{
 		REPARSE_DATA_BUFFER * pbuffer;
 		DWORD retlength = 0;
 
-		hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+		hLink = CreateFileW(pathw,
+				FILE_READ_ATTRIBUTES,
+				PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+				NULL,
+				OPEN_EXISTING,
+				FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,
+				NULL);
 		if(hLink == INVALID_HANDLE_VALUE) {
 			free(pathw);
 			return -1;
@@ -616,7 +630,7 @@ CWD_API void realpath_cache_del(const char *path, size_t path_len) /* {{{ */
 }
 /* }}} */
 
-static inline void realpath_cache_add(const char *path, int path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
+static inline void realpath_cache_add(const char *path, size_t path_len, const char *realpath, size_t realpath_len, int is_dir, time_t t) /* {{{ */
 {
 	zend_long size = sizeof(realpath_cache_bucket) + path_len + 1;
 	int same = 1;
@@ -871,7 +885,13 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 				return (size_t)-1;
 			}
 
-			hLink = CreateFileW(pathw, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS, NULL);
+			hLink = CreateFileW(pathw,
+					0,
+					PHP_WIN32_IOUTIL_DEFAULT_SHARE_MODE,
+					NULL,
+					OPEN_EXISTING,
+					FILE_FLAG_OPEN_REPARSE_POINT|FILE_FLAG_BACKUP_SEMANTICS,
+					NULL);
 			if(hLink == INVALID_HANDLE_VALUE) {
 				free_alloca(tmp, use_heap);
 				FREE_PATHW()
@@ -964,7 +984,11 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 					return (size_t)-1;
 				}
 			}
-			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP) {
+			else if (pbuffer->ReparseTag == IO_REPARSE_TAG_DEDUP ||
+					/* Starting with 1709. */
+					(pbuffer->ReparseTag & IO_REPARSE_TAG_CLOUD_MASK) != 0 && 0x90001018L != pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_CLOUD == pbuffer->ReparseTag ||
+					IO_REPARSE_TAG_ONEDRIVE == pbuffer->ReparseTag) {
 				isabsolute = 1;
 				substitutename = malloc((len + 1) * sizeof(char));
 				if (!substitutename) {
@@ -1185,12 +1209,46 @@ static size_t tsrm_realpath_r(char *path, size_t start, size_t len, int *ll, tim
 }
 /* }}} */
 
+#ifdef ZEND_WIN32
+static size_t tsrm_win32_realpath_quick(char *path, size_t len, time_t *t) /* {{{ */
+{
+	char tmp_resolved_path[MAXPATHLEN];
+	int tmp_resolved_path_len;
+	BY_HANDLE_FILE_INFORMATION info;
+	realpath_cache_bucket *bucket;
+
+	if (!*t) {
+		*t = time(0);
+	}
+
+	if (CWDG(realpath_cache_size_limit) && (bucket = realpath_cache_find(path, len, *t)) != NULL) {
+		memcpy(path, bucket->realpath, bucket->realpath_len + 1);
+		return bucket->realpath_len;
+	}
+
+	if (!php_win32_ioutil_realpath_ex0(path, tmp_resolved_path, &info)) {
+		DWORD err = GetLastError();
+		SET_ERRNO_FROM_WIN32_CODE(err);
+		return (size_t)-1;
+	}
+
+	tmp_resolved_path_len = strlen(tmp_resolved_path);
+	if (CWDG(realpath_cache_size_limit)) {
+		realpath_cache_add(path, len, tmp_resolved_path, tmp_resolved_path_len, info.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY, *t);
+	}
+	memmove(path, tmp_resolved_path, tmp_resolved_path_len + 1);
+
+	return tmp_resolved_path_len;
+}
+/* }}} */
+#endif
+
 /* Resolve path relatively to state and put the real path into state */
 /* returns 0 for ok, 1 for error */
 CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func verify_path, int use_realpath) /* {{{ */
 {
 	size_t path_length = strlen(path);
-	char resolved_path[MAXPATHLEN];
+	char resolved_path[MAXPATHLEN] = {0};
 	size_t start = 1;
 	int ll = 0;
 	time_t t;
@@ -1312,7 +1370,27 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 
 	add_slash = (use_realpath != CWD_REALPATH) && path_length > 0 && IS_SLASH(resolved_path[path_length-1]);
 	t = CWDG(realpath_cache_ttl) ? 0 : -1;
+#ifdef ZEND_WIN32
+	if (CWD_EXPAND != use_realpath) {
+		size_t tmp_len = tsrm_win32_realpath_quick(resolved_path, path_length, &t);
+		if ((size_t)-1 != tmp_len) {
+			path_length = tmp_len;
+		} else {
+			DWORD err = GetLastError();
+			/* The access denied error can mean something completely else,
+				fallback to complicated way. */
+			if (CWD_REALPATH == use_realpath && ERROR_ACCESS_DENIED != err) {
+				SET_ERRNO_FROM_WIN32_CODE(err);
+				return 1;
+			}
+			path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
+		}
+	} else {
+		path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
+	}
+#else
 	path_length = tsrm_realpath_r(resolved_path, start, path_length, &ll, &t, use_realpath, 0, NULL);
+#endif
 
 	if (path_length == (size_t)-1) {
 		errno = ENOENT;
@@ -1322,6 +1400,7 @@ CWD_API int virtual_file_ex(cwd_state *state, const char *path, verify_path_func
 	if (!start && !path_length) {
 		resolved_path[path_length++] = '.';
 	}
+
 	if (add_slash && path_length && !IS_SLASH(resolved_path[path_length-1])) {
 		if (path_length >= MAXPATHLEN-1) {
 			return -1;
@@ -1375,7 +1454,7 @@ CWD_API int virtual_chdir(const char *path) /* {{{ */
 
 CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path)) /* {{{ */
 {
-	int length = (int)strlen(path);
+	size_t length = strlen(path);
 	char *temp;
 	int retval;
 	ALLOCA_FLAG(use_heap)
@@ -1383,10 +1462,10 @@ CWD_API int virtual_chdir_file(const char *path, int (*p_chdir)(const char *path
 	if (length == 0) {
 		return 1; /* Can't cd to empty string */
 	}
-	while(--length >= 0 && !IS_SLASH(path[length])) {
+	while(--length < SIZE_MAX && !IS_SLASH(path[length])) {
 	}
 
-	if (length == -1) {
+	if (length == SIZE_MAX) {
 		/* No directory only file name */
 		errno = ENOENT;
 		return -1;

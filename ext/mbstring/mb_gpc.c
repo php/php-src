@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -261,7 +261,7 @@ const mbfl_encoding *_php_mb_encoding_handler_ex(const php_mb_encoding_handler_i
 	num = n; /* make sure to process initialized vars only */
 
 	/* initialize converter */
-	if (info->num_from_encodings <= 0) {
+	if (info->num_from_encodings == 0) {
 		from_encoding = &mbfl_encoding_pass;
 	} else if (info->num_from_encodings == 1) {
 		from_encoding = info->from_encodings[0];
@@ -379,7 +379,7 @@ SAPI_POST_HANDLER_FUNC(php_mb_post_handler)
 	post_data_str = php_stream_copy_to_mem(SG(request_info).request_body, PHP_STREAM_COPY_ALL, 0);
 	detected = _php_mb_encoding_handler_ex(&info, arg, post_data_str ? ZSTR_VAL(post_data_str) : NULL);
 	if (post_data_str) {
-		zend_string_release(post_data_str);
+		zend_string_release_ex(post_data_str, 0);
 	}
 
 	MBSTRG(http_input_identify) = detected;

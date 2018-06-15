@@ -69,6 +69,19 @@ if test "$PHP_SOCKETS" != "no"; then
     AC_DEFINE(HAVE_AI_ALL,1,[Whether you have AI_ALL])
   fi
 
+  dnl Check for AI_IDN flag
+  AC_CACHE_CHECK([if getaddrinfo supports AI_IDN],[ac_cv_gai_ai_idn],
+  [
+    AC_TRY_COMPILE([
+#include <netdb.h>
+  ], [int flag = AI_IDN;],
+     ac_cv_gai_ai_idn=yes, ac_cv_gai_ai_idn=no)
+  ])
+
+  if test "$ac_cv_gai_ai_idn" = yes; then
+    AC_DEFINE(HAVE_AI_IDN,1,[Whether you have AI_IDN])
+  fi
+
   PHP_NEW_EXTENSION([sockets], [sockets.c multicast.c conversions.c sockaddr_conv.c sendrecvmsg.c], [$ext_shared],, -DZEND_ENABLE_STATIC_TSRMLS_CACHE=1)
   PHP_INSTALL_HEADERS([ext/sockets/], [php_sockets.h])
 fi

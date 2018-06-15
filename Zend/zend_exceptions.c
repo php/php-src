@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -100,7 +100,7 @@ void zend_exception_set_previous(zend_object *exception, zend_object *add_previo
 		previous = zend_read_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), 1, &rv);
 		if (Z_TYPE_P(previous) == IS_NULL) {
 			zend_update_property_ex(base_ce, ex, ZSTR_KNOWN(ZEND_STR_PREVIOUS), &pv);
-			GC_REFCOUNT(add_previous)--;
+			GC_DELREF(add_previous);
 			return;
 		}
 		ex = previous;
@@ -334,13 +334,12 @@ ZEND_METHOD(exception, __wakeup)
    ErrorException constructor */
 ZEND_METHOD(error_exception, __construct)
 {
-	char  *message = NULL, *filename = NULL;
+	zend_string *message = NULL, *filename = NULL;
 	zend_long   code = 0, severity = E_ERROR, lineno;
 	zval   tmp, *object, *previous = NULL;
 	int    argc = ZEND_NUM_ARGS();
-	size_t message_len, filename_len;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|sllslO!", &message, &message_len, &code, &severity, &filename, &filename_len, &lineno, &previous, zend_ce_throwable) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, argc, "|SllSlO!", &message, &code, &severity, &filename, &lineno, &previous, zend_ce_throwable) == FAILURE) {
 		zend_class_entry *ce;
 
 		if (Z_TYPE(EX(This)) == IS_OBJECT) {
@@ -357,7 +356,7 @@ ZEND_METHOD(error_exception, __construct)
 	object = getThis();
 
 	if (message) {
-		ZVAL_STRING(&tmp, message);
+		ZVAL_STR_COPY(&tmp, message);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_MESSAGE), &tmp);
 		zval_ptr_dtor(&tmp);
 	}
@@ -375,7 +374,7 @@ ZEND_METHOD(error_exception, __construct)
 	zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_SEVERITY), &tmp);
 
 	if (argc >= 4) {
-		ZVAL_STRING(&tmp, filename);
+		ZVAL_STR_COPY(&tmp, filename);
 		zend_update_property_ex(zend_ce_exception, object, ZSTR_KNOWN(ZEND_STR_FILE), &tmp);
 		zval_ptr_dtor(&tmp);
     	if (argc < 5) {
@@ -532,7 +531,7 @@ static void _build_trace_args(zval *arg, smart_str *str) /* {{{ */
 			smart_str_appends(str, "Object(");
 			smart_str_appends(str, ZSTR_VAL(class_name));
 			smart_str_appends(str, "), ");
-			zend_string_release(class_name);
+			zend_string_release_ex(class_name, 0);
 			break;
 		}
 	}
@@ -547,14 +546,14 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	smart_str_append_long(str, num);
 	smart_str_appendc(str, ' ');
 
-	file = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_FILE));
+	file = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_FILE), 1);
 	if (file) {
 		if (Z_TYPE_P(file) != IS_STRING) {
 			zend_error(E_WARNING, "Function name is no string");
 			smart_str_appends(str, "[unknown function]");
 		} else{
 			zend_long line;
-			tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_LINE));
+			tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_LINE), 1);
 			if (tmp) {
 				if (Z_TYPE_P(tmp) == IS_LONG) {
 					line = Z_LVAL_P(tmp);
@@ -577,7 +576,7 @@ static void _build_trace_string(smart_str *str, HashTable *ht, uint32_t num) /* 
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_TYPE));
 	TRACE_APPEND_KEY(ZSTR_KNOWN(ZEND_STR_FUNCTION));
 	smart_str_appendc(str, '(');
-	tmp = zend_hash_find(ht, ZSTR_KNOWN(ZEND_STR_ARGS));
+	tmp = zend_hash_find_ex(ht, ZSTR_KNOWN(ZEND_STR_ARGS), 1);
 	if (tmp) {
 		if (Z_TYPE_P(tmp) == IS_ARRAY) {
 			size_t last_len = ZSTR_LEN(str->s);
@@ -688,7 +687,7 @@ ZEND_METHOD(exception, __toString)
 
 		if ((Z_OBJCE_P(exception) == zend_ce_type_error || Z_OBJCE_P(exception) == zend_ce_argument_count_error) && strstr(ZSTR_VAL(message), ", called in ")) {
 			zend_string *real_message = zend_strpprintf(0, "%s and defined", ZSTR_VAL(message));
-			zend_string_release(message);
+			zend_string_release_ex(message, 0);
 			message = real_message;
 		}
 
@@ -706,24 +705,24 @@ ZEND_METHOD(exception, __toString)
 					ZSTR_LEN(prev_str) ? "\n\nNext " : "", ZSTR_VAL(prev_str));
 		}
 
-		zend_string_release(prev_str);
-		zend_string_release(message);
-		zend_string_release(file);
+		zend_string_release_ex(prev_str, 0);
+		zend_string_release_ex(message, 0);
+		zend_string_release_ex(file, 0);
 		zval_ptr_dtor(&trace);
 
-		Z_OBJPROP_P(exception)->u.v.nApplyCount++;
+		Z_PROTECT_RECURSION_P(exception);
 		exception = GET_PROPERTY(exception, ZEND_STR_PREVIOUS);
-		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_OBJPROP_P(exception)->u.v.nApplyCount > 0) {
+		if (exception && Z_TYPE_P(exception) == IS_OBJECT && Z_IS_RECURSIVE_P(exception)) {
 			break;
 		}
 	}
-	zend_string_release(fname);
+	zend_string_release_ex(fname, 0);
 
 	exception = getThis();
 	/* Reset apply counts */
 	while (exception && Z_TYPE_P(exception) == IS_OBJECT && (base_ce = i_get_exception_base(exception)) && instanceof_function(Z_OBJCE_P(exception), base_ce)) {
-		if (Z_OBJPROP_P(exception)->u.v.nApplyCount) {
-			Z_OBJPROP_P(exception)->u.v.nApplyCount--;
+		if (Z_IS_RECURSIVE_P(exception)) {
+			Z_UNPROTECT_RECURSION_P(exception);
 		} else {
 			break;
 		}
@@ -743,7 +742,7 @@ ZEND_METHOD(exception, __toString)
 /* }}} */
 
 /** {{{ Throwable method definition */
-const zend_function_entry zend_funcs_throwable[] = {
+static const zend_function_entry zend_funcs_throwable[] = {
 	ZEND_ABSTRACT_ME(throwable, getMessage,       NULL)
 	ZEND_ABSTRACT_ME(throwable, getCode,          NULL)
 	ZEND_ABSTRACT_ME(throwable, getFile,          NULL)
@@ -809,7 +808,7 @@ void zend_register_default_exception(void) /* {{{ */
 
 	REGISTER_MAGIC_INTERFACE(throwable, Throwable);
 
-	memcpy(&default_exception_handlers, zend_get_std_object_handlers(), sizeof(zend_object_handlers));
+	memcpy(&default_exception_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	default_exception_handlers.clone_obj = NULL;
 
 	INIT_CLASS_ENTRY(ce, "Exception", default_exception_functions);
@@ -971,8 +970,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 
 		zend_error_helper(E_PARSE, ZSTR_VAL(file), line, "%s", ZSTR_VAL(message));
 
-		zend_string_release(file);
-		zend_string_release(message);
+		zend_string_release_ex(file, 0);
+		zend_string_release_ex(message, 0);
 	} else if (instanceof_function(ce_exception, zend_ce_throwable)) {
 		zval tmp, rv;
 		zend_string *str, *file = NULL;
@@ -1003,7 +1002,7 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 				ZSTR_VAL(Z_OBJCE(zv)->name), ZSTR_VAL(ce_exception->name));
 
 			if (file) {
-				zend_string_release(file);
+				zend_string_release_ex(file, 0);
 			}
 		}
 
@@ -1014,8 +1013,8 @@ ZEND_API ZEND_COLD void zend_exception_error(zend_object *ex, int severity) /* {
 		zend_error_va(severity, (file && ZSTR_LEN(file) > 0) ? ZSTR_VAL(file) : NULL, line,
 			"Uncaught %s\n  thrown", ZSTR_VAL(str));
 
-		zend_string_release(str);
-		zend_string_release(file);
+		zend_string_release_ex(str, 0);
+		zend_string_release_ex(file, 0);
 	} else {
 		zend_error(severity, "Uncaught exception '%s'", ZSTR_VAL(ce_exception->name));
 	}

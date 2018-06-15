@@ -49,7 +49,7 @@ foreach($array_type as $type) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_search() with different haystack values ***
 -- Iteration 1 --
 int(0)

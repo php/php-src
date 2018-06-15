@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -362,7 +362,7 @@ static zend_string *php_zlib_encode(const char *in_buf, size_t in_len, int encod
 			ZSTR_VAL(out)[ZSTR_LEN(out)] = '\0';
 			return out;
 		} else {
-			zend_string_free(out);
+			zend_string_efree(out);
 		}
 	}
 
@@ -811,7 +811,7 @@ static zend_bool zlib_create_dictionary_string(HashTable *options, char **dict, 
 						memcpy(dictptr, ZSTR_VAL(*ptr), ZSTR_LEN(*ptr));
 						dictptr += ZSTR_LEN(*ptr);
 						*dictptr++ = 0;
-						zend_string_release(*ptr);
+						zend_string_release_ex(*ptr, 0);
 					} while (++ptr != end);
 					efree(strings);
 				}
@@ -936,7 +936,7 @@ PHP_FUNCTION(inflate_add)
 				"flush mode must be ZLIB_NO_FLUSH, ZLIB_PARTIAL_FLUSH, ZLIB_SYNC_FLUSH, ZLIB_FULL_FLUSH, ZLIB_BLOCK or ZLIB_FINISH");
 			RETURN_FALSE;
 	}
-	
+
 	/* Lazy-resetting the zlib stream so ctx->total_in remains available until the next inflate_add() call. */
 	if (((php_zlib_context *) ctx)->status == Z_STREAM_END)
 	{
@@ -995,7 +995,7 @@ PHP_FUNCTION(inflate_add)
 						case Z_DATA_ERROR:
 							php_error_docref(NULL, E_WARNING, "dictionary does not match expected dictionary (incorrect adler32 hash)");
 							efree(php_ctx->inflateDict);
-							zend_string_release(out);
+							zend_string_release_ex(out, 0);
 							php_ctx->inflateDict = NULL;
 							RETURN_FALSE;
 						EMPTY_SWITCH_DEFAULT_CASE()
@@ -1006,7 +1006,7 @@ PHP_FUNCTION(inflate_add)
 					RETURN_FALSE;
 				}
 			default:
-				zend_string_release(out);
+				zend_string_release_ex(out, 0);
 				php_error_docref(NULL, E_WARNING, "%s", zError(status));
 				RETURN_FALSE;
 		}
@@ -1036,7 +1036,7 @@ PHP_FUNCTION(inflate_get_status)
 		php_error_docref(NULL, E_WARNING, "Invalid zlib.inflate resource");
 		RETURN_FALSE;
 	}
-	
+
 	RETURN_LONG(((php_zlib_context *) ctx)->status);
 }
 /* }}} */
@@ -1238,7 +1238,7 @@ PHP_FUNCTION(deflate_add)
 			RETURN_STR(out);
 			break;
 		default:
-			zend_string_release(out);
+			zend_string_release_ex(out, 0);
 			php_error_docref(NULL, E_WARNING, "zlib error (%s)", zError(status));
 			RETURN_FALSE;
 	}
@@ -1366,11 +1366,13 @@ ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_init, 0, 0, 1)
 	ZEND_ARG_INFO(0, encoding)
+	ZEND_ARG_INFO(0, options)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_add, 0, 0, 2)
-	ZEND_ARG_INFO(0, resource)
-	ZEND_ARG_INFO(0, flush_behavior)
+	ZEND_ARG_INFO(0, context)
+	ZEND_ARG_INFO(0, encoded_data)
+	ZEND_ARG_INFO(0, flush_mode)
 ZEND_END_ARG_INFO()
 
 ZEND_BEGIN_ARG_INFO_EX(arginfo_inflate_get_status, 0, 0, 1)

@@ -17,7 +17,7 @@ var_dump( $tz2->getName() );
 
 ?>
 ===DONE=== 
---EXPECTF--
+--EXPECT--
 object(DateTimeZone)#1 (2) {
   ["timezone_type"]=>
   int(3)

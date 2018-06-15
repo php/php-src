@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -112,7 +112,7 @@ static int php_password_salt_to64(const char *str, const size_t str_len, const s
 	buffer = php_base64_encode((unsigned char*) str, str_len);
 	if (ZSTR_LEN(buffer) < out_len) {
 		/* Too short of an encoded string generated */
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return FAILURE;
 	}
 	for (pos = 0; pos < out_len; pos++) {
@@ -142,18 +142,18 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 	buffer = zend_string_alloc(length * 3 / 4 + 1, 0);
 	if (FAILURE == php_random_bytes_silent(ZSTR_VAL(buffer), ZSTR_LEN(buffer))) {
 		php_error_docref(NULL, E_WARNING, "Unable to generate salt");
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return NULL;
 	}
 
 	ret = zend_string_alloc(length, 0);
 	if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), length, ZSTR_VAL(ret)) == FAILURE) {
 		php_error_docref(NULL, E_WARNING, "Generated salt too short");
-		zend_string_release(buffer);
-		zend_string_release(ret);
+		zend_string_release_ex(buffer, 0);
+		zend_string_release_ex(ret, 0);
 		return NULL;
 	}
-	zend_string_release(buffer);
+	zend_string_release_ex(buffer, 0);
 	ZSTR_VAL(ret)[length] = 0;
 	return ret;
 }
@@ -212,7 +212,7 @@ PHP_FUNCTION(password_get_info)
 }
 /** }}} */
 
-/* {{{ proto boolean password_needs_rehash(string $hash, integer $algo[, array $options])
+/* {{{ proto bool password_needs_rehash(string $hash, int $algo[, array $options])
 Determines if a given hash requires re-hashing based upon parameters */
 PHP_FUNCTION(password_needs_rehash)
 {
@@ -286,7 +286,7 @@ PHP_FUNCTION(password_needs_rehash)
 }
 /* }}} */
 
-/* {{{ proto boolean password_verify(string password, string hash)
+/* {{{ proto bool password_verify(string password, string hash)
 Verify a hash created using crypt() or password_hash() */
 PHP_FUNCTION(password_verify)
 {
@@ -379,13 +379,13 @@ static zend_string* php_password_get_salt(zval *return_value, size_t required_sa
 		the > INT_MAX check. */
 	if (ZEND_SIZE_T_INT_OVFL(ZSTR_LEN(buffer))) {
 		php_error_docref(NULL, E_WARNING, "Supplied salt is too long");
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return NULL;
 	}
 
 	if (ZSTR_LEN(buffer) < required_salt_len) {
 		php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd expecting %zd", ZSTR_LEN(buffer), required_salt_len);
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return NULL;
 	}
 
@@ -393,16 +393,16 @@ static zend_string* php_password_get_salt(zval *return_value, size_t required_sa
 		zend_string *salt = zend_string_alloc(required_salt_len, 0);
 		if (php_password_salt_to64(ZSTR_VAL(buffer), ZSTR_LEN(buffer), required_salt_len, ZSTR_VAL(salt)) == FAILURE) {
 			php_error_docref(NULL, E_WARNING, "Provided salt is too short: %zd", ZSTR_LEN(buffer));
-			zend_string_release(salt);
-			zend_string_release(buffer);
+			zend_string_release_ex(salt, 0);
+			zend_string_release_ex(buffer, 0);
 			return NULL;
 		}
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return salt;
 	} else {
 		zend_string *salt = zend_string_alloc(required_salt_len, 0);
 		memcpy(ZSTR_VAL(salt), ZSTR_VAL(buffer), required_salt_len);
-		zend_string_release(buffer);
+		zend_string_release_ex(buffer, 0);
 		return salt;
 	}
 }
@@ -450,11 +450,11 @@ PHP_FUNCTION(password_hash)
 				sprintf(ZSTR_VAL(hash), "%s%s", hash_format, ZSTR_VAL(salt));
 				ZSTR_VAL(hash)[hash_format_len + ZSTR_LEN(salt)] = 0;
 
-				zend_string_release(salt);
+				zend_string_release_ex(salt, 0);
 
 				/* This cast is safe, since both values are defined here in code and cannot overflow */
 				result = php_crypt(ZSTR_VAL(password), (int)ZSTR_LEN(password), ZSTR_VAL(hash), (int)ZSTR_LEN(hash), 1);
-				zend_string_release(hash);
+				zend_string_release_ex(hash, 0);
 
 				if (!result) {
 					RETURN_FALSE;
@@ -473,7 +473,7 @@ PHP_FUNCTION(password_hash)
 			{
 				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
-				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST; 
+				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
 				argon2_type type = Argon2_i;
@@ -523,7 +523,7 @@ PHP_FUNCTION(password_hash)
 #endif
 				);
 
-				encoded = zend_string_alloc(encoded_len, 0);
+				encoded = zend_string_alloc(encoded_len - 1, 0);
 				status = argon2_hash(
 					time_cost,
 					memory_cost,
@@ -535,22 +535,22 @@ PHP_FUNCTION(password_hash)
 					ZSTR_VAL(out),
 					ZSTR_LEN(out),
 					ZSTR_VAL(encoded),
-					ZSTR_LEN(encoded),
+					encoded_len,
 					type,
 					ARGON2_VERSION_NUMBER
 				);
 
-				zend_string_release(out);
-				zend_string_release(salt);
+				zend_string_release_ex(out, 0);
+				zend_string_release_ex(salt, 0);
 
 				if (status != ARGON2_OK) {
-					zend_string_free(encoded);
+					zend_string_efree(encoded);
 					php_error_docref(NULL, E_WARNING, "%s", argon2_error_message(status));
 					RETURN_FALSE;
 				}
 
 				ZSTR_VAL(encoded)[ZSTR_LEN(encoded)] = 0;
-				RETURN_STR(encoded);
+				RETURN_NEW_STR(encoded);
 			}
 			break;
 #endif

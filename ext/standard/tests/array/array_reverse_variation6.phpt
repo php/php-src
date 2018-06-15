@@ -43,7 +43,7 @@ var_dump( array_reverse($two_dimensional_array[1], false) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_reverse() : usage variations ***
 -- with default argument --
 array(3) {

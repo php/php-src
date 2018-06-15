@@ -12,6 +12,6 @@ object(SplFixedArray)#1 (1) {
   [0]=>
   array(1) {
     [0]=>
-    %string|unicode%(1) "1"
+    string(1) "1"
   }
 }

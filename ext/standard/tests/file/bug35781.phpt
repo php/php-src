@@ -18,7 +18,7 @@ var_dump(file_get_contents($filename));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECT--	
 string(15) "Guvf vf n grfg
 "
 Done

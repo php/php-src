@@ -23,8 +23,8 @@ require_once('skipifconnectfailure.inc');
 	require('table.inc');
 
 	$stmt = mysqli_stmt_init($link);
-	if (NULL !== ($tmp = @mysqli_stmt_insert_id($stmt)))
-		printf("[003] Expecting NULL/NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @mysqli_stmt_insert_id($stmt)))
+		printf("[003] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	if (!mysqli_stmt_prepare($stmt, "SELECT id, label FROM test ORDER BY id LIMIT 1") ||
 		!mysqli_stmt_execute($stmt)) {
@@ -73,5 +73,5 @@ require_once('skipifconnectfailure.inc');
 ?>
 --EXPECTF--
 Warning: mysqli_stmt_insert_id(): Couldn't fetch mysqli_stmt in %s on line %d
-NULL
+bool(false)
 done!

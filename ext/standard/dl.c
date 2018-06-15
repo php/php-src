@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -88,8 +88,10 @@ PHPAPI void *php_load_shlib(char *path, char **errp)
 		err = GET_DL_ERROR();
 #ifdef PHP_WIN32
 		if (err && (*err)) {
+			size_t i = strlen(err);
 			(*errp)=estrdup(err);
 			LocalFree(err);
+			while (i > 0 && isspace((*errp)[i-1])) { (*errp)[i-1] = '\0'; i--; }
 		} else {
 			(*errp) = estrdup("<No message>");
 		}
@@ -110,7 +112,7 @@ PHPAPI int php_load_extension(char *filename, int type, int start_now)
 	char *libpath;
 	zend_module_entry *module_entry;
 	zend_module_entry *(*get_module)(void);
-	int error_type, slash_suffix;
+	int error_type, slash_suffix = 0;
 	char *extension_dir;
 	char *err1, *err2;
 

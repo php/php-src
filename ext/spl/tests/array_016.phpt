@@ -20,7 +20,7 @@ foreach(new IteratorIterator($it) as $v)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(1)
 int(2)

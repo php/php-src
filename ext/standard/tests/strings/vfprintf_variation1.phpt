@@ -63,7 +63,7 @@ $file = 'vfprintf_test.txt';
 unlink( $file );
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vfprintf() : variation functionality ***
 string(6) "format"
 int(6)

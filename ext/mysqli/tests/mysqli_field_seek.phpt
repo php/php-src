@@ -218,7 +218,7 @@ Warning: mysqli_field_seek(): Invalid field offset in %s on line %d
 bool(false)
 bool(false)
 
-Warning: mysqli_field_seek() expects parameter 2 to be integer, float given in %s on line %d
+Warning: mysqli_field_seek() expects parameter 2 to be int, float given in %s on line %d
 NULL
 bool(true)
 object(stdClass)#%d (13) {
@@ -251,5 +251,5 @@ object(stdClass)#%d (13) {
 }
 
 Warning: mysqli_field_seek(): Couldn't fetch mysqli_result in %s on line %d
-NULL
+bool(false)
 done!

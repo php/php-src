@@ -40,7 +40,7 @@ max_execution_time=12
 
 	print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 array(1) {
   ["SLEEP(6)"]=>
   string(1) "0"

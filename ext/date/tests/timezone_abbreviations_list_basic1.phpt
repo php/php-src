@@ -23,7 +23,7 @@ var_dump( $abbr["acst"] );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing timezone_abbreviations_list() : basic functionality ***
 string(5) "array"
 int(142)

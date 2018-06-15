@@ -35,7 +35,7 @@ C::testForward();
 C::testNoForward();
 
 ?>
---EXPECTF--
+--EXPECT--
 C
 C
 C

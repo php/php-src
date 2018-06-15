@@ -1,6 +1,5 @@
 --TEST--
 PHP encoding setting test
---INI--
 --FILE--
 <?php
 var_dump(ini_get('default_charset'));
@@ -20,7 +19,7 @@ var_dump(ini_set('output_encoding', 'EUC-JP'));
 var_dump(ini_get('input_encoding'));
 var_dump(ini_get('internal_encoding'));
 var_dump(ini_get('output_encoding'));
-
+?>
 --EXPECT--
 string(5) "UTF-8"
 string(0) ""

@@ -32,7 +32,7 @@ var_dump($a, $b);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_multisort() : natural sorting
 array(5) {
   [0]=>

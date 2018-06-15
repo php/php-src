@@ -1,9 +1,10 @@
+#!/usr/bin/env php
 <?php
 /*
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +37,7 @@ function print_help() {
 	printf('  --ext <name>		The name of the extension defined as <name>%s', PHP_EOL);
 	printf('  --experimental	Passed if this extension is experimental, this creates%s', PHP_EOL);
 	printf('                        the EXPERIMENTAL file in the root of the extension%s', PHP_EOL);
-	printf('  --author <name>       Your name, this is used if --header is passed and%s', PHP_EOL);
+	printf('  --author <name>       Your name, this is used if --std is passed and%s', PHP_EOL);
 	printf('                        for the CREDITS file%s', PHP_EOL);
 	printf('  --dir <path>		Path to the directory for where extension should be%s', PHP_EOL);
 	printf('                        created. Defaults to the directory of where this script%s', PHP_EOL);
@@ -91,13 +92,13 @@ function print_success() {
  */
 function process_args($argv, $argc) {
 	$options = [
-			'unix'		=> true, 
-			'windows' 	=> true, 
-			'ext' 		=> '', 
-			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR, 
-			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR, 
-			'author'	=> false, 
-			'experimental'	=> false, 
+			'unix'		=> true,
+			'windows' 	=> true,
+			'ext' 		=> '',
+			'dir'		=> __DIR__ . DIRECTORY_SEPARATOR,
+			'skel' 		=> __DIR__ . DIRECTORY_SEPARATOR . 'skeleton' . DIRECTORY_SEPARATOR,
+			'author'	=> false,
+			'experimental'	=> false,
 			'std'		=> false
 			];
 
@@ -140,7 +141,7 @@ function process_args($argv, $argc) {
 					continue;
 				}
 
-				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) : $argv[$i + 1]);
+				$options[$opt] = ($opt == 'dir' ? realpath($argv[$i + 1]) . DIRECTORY_SEPARATOR : $argv[$i + 1]);
 			}
 			break;
 			default: {
@@ -249,9 +250,7 @@ function copy_config_scripts() {
 		$files[] = 'config.w32';
 	}
 
-	if (!$files) {
-		return;
-	}
+	$files[] = '.gitignore';
 
 	foreach($files as $config_script) {
 		$new_config_script = $options['dir'] . $options['ext'] . DIRECTORY_SEPARATOR . $config_script;
@@ -271,7 +270,7 @@ function copy_sources() {
 	global $options;
 
 	$files = [
-			'skeleton.c'		=> $options['ext'] . '.c', 
+			'skeleton.c'		=> $options['ext'] . '.c',
 			'php_skeleton.h'	=> 'php_' . $options['ext'] . '.h'
 			];
 
@@ -361,5 +360,3 @@ task('Copying sources', 'copy_sources');
 task('Copying tests', 'copy_tests');
 
 print_success();
-
-?>

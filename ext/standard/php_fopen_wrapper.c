@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -52,7 +52,7 @@ static int php_stream_output_close(php_stream *stream, int close_handle) /* {{{ 
 }
 /* }}} */
 
-php_stream_ops php_stream_output_ops = {
+const php_stream_ops php_stream_output_ops = {
 	php_stream_output_write,
 	php_stream_output_read,
 	php_stream_output_close,
@@ -137,7 +137,7 @@ static int php_stream_input_seek(php_stream *stream, zend_off_t offset, int when
 }
 /* }}} */
 
-php_stream_ops php_stream_input_ops = {
+const php_stream_ops php_stream_input_ops = {
 	php_stream_input_write,
 	php_stream_input_read,
 	php_stream_input_close,
@@ -415,8 +415,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 	if (pipe_requested && stream && context) {
 		zval *blocking_pipes = php_stream_context_get_option(context, "pipe", "blocking");
 		if (blocking_pipes) {
-			convert_to_long(blocking_pipes);
-			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, Z_LVAL_P(blocking_pipes), NULL);
+			php_stream_set_option(stream, PHP_STREAM_OPTION_PIPE_BLOCKING, zval_get_long(blocking_pipes), NULL);
 		}
 	}
 #endif
@@ -424,7 +423,7 @@ php_stream * php_stream_url_wrap_php(php_stream_wrapper *wrapper, const char *pa
 }
 /* }}} */
 
-static php_stream_wrapper_ops php_stdio_wops = {
+static const php_stream_wrapper_ops php_stdio_wops = {
 	php_stream_url_wrap_php,
 	NULL, /* close */
 	NULL, /* fstat */
@@ -438,7 +437,7 @@ static php_stream_wrapper_ops php_stdio_wops = {
 	NULL
 };
 
-PHPAPI php_stream_wrapper php_stream_php_wrapper =	{
+PHPAPI const php_stream_wrapper php_stream_php_wrapper =	{
 	&php_stdio_wops,
 	NULL,
 	0, /* is_url */

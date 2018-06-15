@@ -131,7 +131,7 @@ zend_long FrenchToSdn(
 			+ FRENCH_SDN_OFFSET);
 }
 
-char *FrenchMonthName[14] =
+const char * const FrenchMonthName[14] =
 {
 	"",
 	"Vendemiaire",

@@ -87,7 +87,7 @@ foreach($inputs as $input) {
 
 ?>
 ===Done===
---EXPECTF-- 
+--EXPECT-- 
 *** Testing json_encode() : basic functionality ***
 -- Iteration 1 --
 string(1) "0"

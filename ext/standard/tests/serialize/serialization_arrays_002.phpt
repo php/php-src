@@ -100,7 +100,7 @@ check($a);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 
 
 --- No references:

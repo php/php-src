@@ -31,7 +31,7 @@ for ($i = 1;$i <= 6;$i++) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 C::a1: int(256)
 D::a1: int(256)
 C::a2: int(512)

@@ -34,7 +34,7 @@ for($mode = 0000; $mode <= 0777; $mode++ ) {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing unlink() on a file ***
 File permission : 0
 bool(true)

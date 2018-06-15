@@ -47,7 +47,7 @@ $closure();
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ReflectionMethod::getClosure() : basic functionality ***
 string(34) "Static Example class, Hello World!"
 string(22) "Example class, bar: 42"

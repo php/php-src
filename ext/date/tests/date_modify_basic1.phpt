@@ -30,7 +30,7 @@ echo "After modification 4: " . date_format($datetime, "D, d M Y") . "\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_modify() : basic functionality ***
 After modification 1: Sun, 01 Feb 2009
 After modification 2: Tue, 10 Feb 2009 18:28:43

@@ -57,7 +57,7 @@ NULL
 
 -- Testing array_column() function with int as first parameter --
 
-Warning: array_column() expects parameter 1 to be array, integer given in %s on line %d
+Warning: array_column() expects parameter 1 to be array, int given in %s on line %d
 NULL
 
 -- Testing array_column() column key parameter should be a string or an integer (testing bool) --

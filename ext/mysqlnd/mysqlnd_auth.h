@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -31,26 +31,9 @@ mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
 						unsigned int server_charset_no,
 						zend_bool use_full_blown_auth_packet,
 						const char * const auth_protocol,
-						const zend_uchar * const auth_plugin_data,
-						const size_t auth_plugin_data_len,
-						char ** switch_to_auth_protocol,
-						size_t * switch_to_auth_protocol_len,
-						zend_uchar ** switch_to_auth_protocol_data,
-						size_t * switch_to_auth_protocol_data_len
-						);
-
-enum_func_status
-mysqlnd_auth_handshake(MYSQLND_CONN_DATA * conn,
-						const char * const user,
-						const char * const passwd,
-						const size_t passwd_len,
-						const char * const db,
-						const size_t db_len,
-						const MYSQLND_SESSION_OPTIONS * const session_options,
-						zend_ulong mysql_flags,
-						unsigned int server_charset_no,
-						zend_bool use_full_blown_auth_packet,
-						const char * const auth_protocol,
+						struct st_mysqlnd_authentication_plugin * auth_plugin,
+						const zend_uchar * const orig_auth_plugin_data,
+						const size_t orig_auth_plugin_data_len,
 						const zend_uchar * const auth_plugin_data,
 						const size_t auth_plugin_data_len,
 						char ** switch_to_auth_protocol,

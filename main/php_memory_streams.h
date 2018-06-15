@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -56,10 +56,10 @@ PHPAPI const char *_php_stream_mode_to_str(int mode);
 
 END_EXTERN_C()
 
-extern PHPAPI php_stream_ops php_stream_memory_ops;
-extern PHPAPI php_stream_ops php_stream_temp_ops;
-extern PHPAPI php_stream_ops php_stream_rfc2397_ops;
-extern PHPAPI php_stream_wrapper php_stream_rfc2397_wrapper;
+extern PHPAPI const php_stream_ops php_stream_memory_ops;
+extern PHPAPI const php_stream_ops php_stream_temp_ops;
+extern PHPAPI const php_stream_ops php_stream_rfc2397_ops;
+extern PHPAPI const php_stream_wrapper php_stream_rfc2397_wrapper;
 
 #define PHP_STREAM_IS_MEMORY &php_stream_memory_ops
 #define PHP_STREAM_IS_TEMP   &php_stream_temp_ops

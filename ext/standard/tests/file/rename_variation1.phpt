@@ -54,7 +54,7 @@ echo "Done\n";
 $file_path = dirname(__FILE__);
 rmdir($file_path."/rename_variation1_dir");
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing rename() : renaming directory across directories ***
 -- Iteration 1 --
 bool(true)

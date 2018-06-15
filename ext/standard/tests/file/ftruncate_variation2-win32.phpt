@@ -69,7 +69,7 @@ foreach($file_content_types as $file_content_type) {
 }//end of outer foreach loop
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing ftruncate() : usage variations ***
 
 -- Testing ftruncate() with file having data of type numeric --
@@ -77,7 +77,7 @@ echo "Done\n";
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)
@@ -85,7 +85,7 @@ int(1024)
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)
@@ -93,7 +93,7 @@ int(1024)
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)
@@ -271,7 +271,7 @@ int(1024)
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)
@@ -279,7 +279,7 @@ int(1024)
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)
@@ -287,7 +287,7 @@ int(1024)
 -- Testing ftruncate(): truncate file to size = current size --
 int(1024)
 int(0)
-bool(true)
+bool(false)
 int(0)
 bool(false)
 int(1024)

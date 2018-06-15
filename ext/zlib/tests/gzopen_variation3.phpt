@@ -142,19 +142,19 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --empty array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, array given, %s(%d)
 NULL
 
 --int indexed array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, array given, %s(%d)
 NULL
 
 --associative array--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, array given, %s(%d)
 NULL
 
 --nested arrays--
-Error: 2 - gzopen() expects parameter 3 to be integer, array given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, array given, %s(%d)
 NULL
 
 --uppercase NULL--
@@ -176,35 +176,35 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --empty string DQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --empty string SQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --string DQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --string SQ--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --mixed case string--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --heredoc--
-Error: 2 - gzopen() expects parameter 3 to be integer, string given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, string given, %s(%d)
 NULL
 
 --instance of classWithToString--
-Error: 2 - gzopen() expects parameter 3 to be integer, object given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, object given, %s(%d)
 NULL
 
 --instance of classWithoutToString--
-Error: 2 - gzopen() expects parameter 3 to be integer, object given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, object given, %s(%d)
 NULL
 
 --undefined var--
@@ -214,6 +214,6 @@ resource(%d) of type (stream)
 resource(%d) of type (stream)
 
 --resource--
-Error: 2 - gzopen() expects parameter 3 to be integer, resource given, %s(%d)
+Error: 2 - gzopen() expects parameter 3 to be int, resource given, %s(%d)
 NULL
 ===DONE===

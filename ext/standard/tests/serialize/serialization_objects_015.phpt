@@ -1,7 +1,5 @@
 --TEST--
 Object serialization / unserialization: properties reference containing object 
---INI--
-error_reporting = E_ALL & ~E_STRICT
 --FILE--
 <?php
 

@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -26,7 +26,7 @@
 #include "php_cli_process_title.h"
 #include "ps_title.h"
 
-/* {{{ proto boolean cli_set_process_title(string arg)
+/* {{{ proto bool cli_set_process_title(string arg)
    Return a boolean to confirm if the process title was successfully changed or not */
 PHP_FUNCTION(cli_set_process_title)
 {

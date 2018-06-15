@@ -20,16 +20,67 @@ PHP 7.3 UPGRADE NOTES
 ========================================
 
 Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
+  . The ext_skel utility has been completely redesigned with new options and
+    some old options removed. This is now written in PHP and has no external
 	dependencies.
   . Support for BeOS has been dropped.
+  . Exceptions thrown due to automatic conversion of warnings into exceptions
+    in EH_THROW mode (e.g. some DateTime exceptions) no longer populate
+    error_get_last() state. As such, they now work the same way as manually
+    thrown exceptions.
+  . TypeError now reports wrong types as `int` and `bool` instead of `integer`
+    and `boolean`.
+  . Due to the introduction of flexible heredoc/nowdoc syntax (see New Features
+    section), doc strings that contain the ending label inside their body may
+    cause syntax errors or change in interpretation. For example in
+
+        $str = <<<FOO
+        abcdefg
+            FOO
+        FOO;
+
+    the indented occurrence of "FOO" did not previously have any special
+    meaning. Now it will be interpreted as the end of the heredoc string and
+    the following "FOO;" will cause a syntax error. This issue can always be
+    resolved by choosing an ending label that does not occur within the contents
+    of the string.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
-	  Formerly some warnings have directly been written to stderr.
+    Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+mysqli:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+
+PDO/MySQL:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+    Please note that this only affects the usage of PDO_MYSQL with emulated
+    prepares turned off (e.g. using the native preparation functionality).
+    Statements using connections having PDO::ATTR_EMULATE_PREPARES=true (which
+    is the default) were not affected by the bug fixed and have already been
+    getting the proper fractional seconds values from the engine.
+
+Reflection:
+  . Reflection export to string now uses `int` and `bool` instead of `integer`
+    and `boolean`.
+
+SPL:
+  . If an SPL autoloader throws an exception, following autoloaders will not be
+    executed. Previously all autoloaders were executed and exceptions were
+    chained.
+
+SimpleXML:
+  . Mathematic operations involving SimpleXML objects will now treat the text as
+    an integer or float, whichever is more appropriate. Previously values were
+    treated as integers unconditionally.
 
 Standard:
   . getimagesize() and related functions now report the mime type of BMP images
@@ -40,8 +91,58 @@ Standard:
 2. New Features
 ========================================
 
+Core:
+  . Implemented flexible heredoc and nowdoc syntax: The closing marker for doc
+    strings is no longer required to be followed by a semicolon or newline.
+    Additionally the closing marker may be indented, in which case the
+    indentation will be stripped from all lines in the doc string.
+    (RFC: https://wiki.php.net/rfc/flexible_heredoc_nowdoc_syntaxes)
+  . Array destructuring now supports reference assignments using the syntax
+    [&$a, [$b, &$c]] = $d. The same is also supported for list().
+    (RFC: https://wiki.php.net/rfc/list_reference_assignment)
+  . instanceof now allows literals as the first operand,
+    in which case the result is always FALSE.
+
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
+
+MBString:
+  . Support for full case-mapping and case-folding has been added. Unlike simple
+    case-mapping, full case-mapping may change the length of the string. For
+    example:
+
+      mb_strtoupper("Straße")
+      // Produces STRAßE on PHP 7.2
+      // Produces STRASSE on PHP 7.3
+
+    The different casing mapping and folding modes are available through
+    mb_convert_case():
+
+      . MB_CASE_LOWER (used by mb_strtolower)
+      . MB_CASE_UPPER (used by mb_strtoupper)
+      . MB_CASE_TITLE
+      . MB_CASE_FOLD
+      . MB_CASE_LOWER_SIMPLE
+      . MB_CASE_UPPER_SIMPLE
+      . MB_CASE_TITLE_SIMPLE
+      . MB_CASE_FOLD_SIMPLE (used by case-insensitive operations)
+
+    Only unconditional, language agnostic full case-mapping is performed.
+  . Case-insensitive string operations now use case-folding instead of case-
+    mapping during comparisons. This means that more characters will be
+    considered (case insensitively) equal now.
+  . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
+    based on the Cased and CaseIgnorable derived Unicode properties. In
+    particular this also improves handling of quotes and apostophes.
+  . Data tables have been updated for Unicode 11.
+  . Mbstring now correctly supports strings larger than 2GB.
+  . Performance of the mbstring extension has been significantly improved
+    across the board. The largest improvements are in case conversion functions.
+
+readline:
+  . Support for the completion_append_character and completion_suppress_append
+    options has been added to readline_info(). These options are only available
+    if PHP is linked against libreadline (rather than libedit).
 
 ========================================
 3. Changes in SAPI modules
@@ -51,21 +152,103 @@ BCMath:
 4. Deprecated Functionality
 ========================================
 
+GD:
+  . image2wbmp() has been deprecated.
+
+Intl:
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
+
 ========================================
 5. Changed Functions
 ========================================
+
+JSON:
+  . A new flag has been added, JSON_THROW_ON_ERROR, which can be used with
+    json_decode() or json_encode() and causes these functions to throw a
+    JsonException upon an error, instead of setting the global error state that
+    is retrieved with json_last_error(). JSON_PARTIAL_OUTPUT_ON_ERROR takes
+    precedence over JSON_THROW_ON_ERROR.
+    (RFC: https://wiki.php.net/rfc/json_throw_on_error)
+
+Standard:
+  . debug_zval_dump() was changed to display recursive arrays and objects
+    in the same way as var_dump(). Now, it doesn't display them twice.
+  . array_push() and array_unshift() can now also be called with a single
+    argument, which is particularly convenient wrt. the spread operator.
+
+PCRE:
+  . preg_quote() now also escapes the '#' character.
 
 ========================================
 6. New Functions
 ========================================
 
+Core:
+  . Added monotonic timer function hrtime([bool get_as_num]). It returns an
+    array of the form [seconds, nanoseconds] with the timestamp starting at
+    an unspecified point in the past. If the optional argument is passed as
+    true, the return value is an integer on 64-bit systems or float on
+    32-bit systems, representing the nanoseconds. The timestamp is not
+    adjustable and is not related to wall clock or time of day. The timers
+    are available under Linux, FreeBSD, Windows, Mac, SunOS, AIX and their
+    derivatives. If no required timers are provided by a corresponding
+    platform, the function returns false.
+
 Date:
   . Added the DateTime::createFromImmutable() method, which mirrors
     DateTimeImmutable::createFromMutable().
 
+GMP:
+  . Added gmp_binomial(n, k) for calculating binomial coefficients.
+  . Added gmp_lcm(a, b) for calculating the least common multiple.
+  . Added gmp_perfect_power(a) to check if number is a perfect power.
+  . Added gmp_kronecker(a, b) to compute the Kronecker symbol.
+
+Intl:
+  . Added void Spoofchecker::setRestrictionLevel(int $level) method, available
+    when linked with ICU >= 58.1. Levels are represented as class constants
+    - Spoofchecker::ASCII
+    - Spoofchecker::HIGHLY_RESTRICTIVE
+    - Spoofchecker::MODERATELY_RESTRICTIVE
+    - Spoofchecker::MINIMALLY_RESTRICTIVE
+    - Spoofchecker::UNRESTRICTIVE
+    - Spoofchecker::SINGLE_SCRIPT_RESTRICTIVE
+    For the detailed documentation on the restriction levels, see
+    URestrictionLevel under
+    http://icu-project.org/apiref/icu4c/uspoof_8h.html
+  . Added Normalizer::getRawDecomposition() and normalizer_get_raw_decomposition(),
+    to retrieve the Decomposition_Mapping property of a character.
+
+OpenSSL:
+  . Added openssl_pkey_derive that derives a shared secret for DH, ECDH and
+    possibly other future algorithms supported by EVP_PKEY_derive.
+
+Sockets:
+  . Added functions to import/export the WSAPROTOCOL_INFO info struct. This
+    implementation complements the already supported SCM_RIGHTS as in
+    man 3 cmsg and is Windows specific. For the import/export, the default
+    system securities apply for the SHM reading/writing. The socket becomes
+    invalid, when the last reference to it is closed.
+    - socket_wsaprotocol_info_export(resource $sock, int $pid) - exports the
+      WSAPROTOCOL_INFO structure into shared memory and returns an identifier
+      to be used for the import, or false on failure. The exported ID is
+      only valid for the dedicated PID.
+    - socket_wsaprotocol_info_import(string $id) - returns a duplicated
+      socket as per the passed identifier, or false on failure.
+    - socket_wsaprotocol_info_release(string $id) - releases the shared memory
+      corresponding to the passed identifier.
+
+Standard:
+  . Added is_countable() function, to check whether a value may be passed to
+    count().
+    (RFC: https://wiki.php.net/rfc/is-countable)
+
 ========================================
 7. New Classes and Interfaces
 ========================================
+
+JSON:
+  . JsonException
 
 ========================================
 8. Removed Extensions and SAPIs
@@ -75,20 +258,42 @@ Date:
 9. Other Changes to Extensions
 ========================================
 
+ Curl:
+  . libcurl >= 7.15.5 is now required.
+
+ Filter:
+  . FILTER_VALIDATE_FLOAT now also supports a `thousand` option, which
+    defines the set of allowed thousand separator chars.  The default (`"',."`)
+    is fully backward compatible with former PHP versions.
+
  FTP:
   . Set default transfer mode to binary
 
- ODBC: 
+ Intl:
+  . Normalizer::NONE is deprecated, when PHP is linked with ICU >= 56
+  . Introduced Normalizer::FORM_KC_CF as Normalizer::normalize() argument
+    for NFKC_Casefold normalization, available when linked with ICU >= 56
+
+ MBString:
+  . The configuration option --with-libmbfl is no longer available.
+
+ ODBC:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
  ZIP:
-  . Bunled libzip has been dropped,
+  . Bundled libzip has been dropped,
     system library is now required.
 
 ========================================
 10. New Global Constants
 ========================================
+
+Curl:
+  . CURLOPT_REQUEST_TARGET
+
+JSON:
+  . JSON_THROW_ON_ERROR
 
 PGSQL:
   . Requires Postgres 9.3
@@ -107,9 +312,20 @@ PGSQL:
 - birdstep.max_links
   . This INI directive has been removed.
 
+- opcache.inherited_hack
+  . This INI directive has been removed. The value has already been ignored
+    since PHP 5.3.0.
+
 ========================================
 12. Windows Support
 ========================================
+
+- Core
+  . File descriptors are opened in shared read/write/delete mode by default.
+    This effectively maps the UNIX semantics and allows to delete files with
+    handles in use. It is not 100% same, some platform differences still
+    persist. After the deletion, the filename entry is blocked, until all
+    the opened handles to it are closed.
 
 ========================================
 13. Other Changes

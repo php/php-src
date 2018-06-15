@@ -37,7 +37,7 @@ for( $count = 1; $count <=10; $count++ )  {
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strtok() : with modification of input string in between tokenising ***
 
 *** Testing strtok() when string being tokenised is prefixed with another string in between the process ***

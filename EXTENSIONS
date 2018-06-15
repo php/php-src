@@ -37,7 +37,7 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           cli
-MAINTENANCE:         Marcus Boerger <helly@php.net>, Edin Kadribasic <edink@php.net>
+MAINTENANCE:         Marcus BÃ¶rger <helly@php.net>, Edin Kadribasic <edink@php.net>
 STATUS:              Working
 SINCE:               4.3.0
 -------------------------------------------------------------------------------
@@ -47,7 +47,7 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           fpm
-PRIMARY MAINTAINER:  Antony Dovgal <tony2001@php.net>, Jerome Loyet <fat@php.net>
+PRIMARY MAINTAINER:  Jakub Zelenka <bukka@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3.3
@@ -68,7 +68,7 @@ STATUS:              5.6
 
 -------------------------------------------------------------------------------
 EXTENSION:           dba
-PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>,Christopher Jones <sixd@php.net>, Pierre-Alain Joye <pajoye@php.net>
+PRIMARY MAINTAINER:  Marcus BÃ¶rger <helly@php.net>,Christopher Jones <sixd@php.net>, Pierre-Alain Joye <pajoye@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             DBM abstraction for db2, db3, db4, dbm, ndbm, gdbm, ini
@@ -79,13 +79,13 @@ MAINTENANCE:         Odd fixes
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           mysqli
-PRIMARY MAINTAINER:  Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>,  Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Georg Richter <georg@php.net>, Andrey Hristov <andrey@php.net>,  Johannes SchlÃ¼ter <johannes@php.net>, Ulf Wendel <uw@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           mysqlnd
-PRIMARY MAINTAINER:  Andrey Hristov <andrey@php.net>, Johannes Schlüter <johannes@php.net>, Ulf Wendel <uw@php.net>      
+PRIMARY MAINTAINER:  Andrey Hristov <andrey@php.net>, Johannes SchlÃ¼ter <johannes@php.net>, Ulf Wendel <uw@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
@@ -99,7 +99,7 @@ EXTENSION:           odbc
 PRIMARY MAINTAINER:  Daniel R. Kalowsky <kalowsky@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
-COMMENT:             Working 
+COMMENT:             Working
 -------------------------------------------------------------------------------
 EXTENSION:           pdo
 PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Wez Furlong <wez@php.net>
@@ -120,7 +120,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pdo_mysql
-PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes Schlüter <johannes@php.net>, Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>
+PRIMARY MAINTAINER:  Ilia Alshanetsky <iliaa@php.net>, Johannes SchlÃ¼ter <johannes@php.net>, Andrey Hristov <andrey@php.net>,  Ulf Wendel <uw@php.net>
 MAINTENANCE:         Odd fixes
 STATUS:              Working
 SINCE:               5.1
@@ -150,7 +150,7 @@ STATUS:              Working
 SINCE:               5.1
 -------------------------------------------------------------------------------
 EXTENSION:           pgsql
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Yasuo Ohgaki <yohgaki@php.net>
+PRIMARY MAINTAINER:  Marcus BÃ¶rger <helly@php.net>, Yasuo Ohgaki <yohgaki@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 COMMENT:             Use PostgreSQL 7.0.x or later. PostgreSQL 6.5.3 or less have fatal bug.
@@ -168,13 +168,13 @@ COMMENT:             Integrates SQLite 3 embeddable SQL database engine.
 
 -------------------------------------------------------------------------------
 EXTENSION:           dom
-PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>, Marcus Boerger <helly@php.net>
+PRIMARY MAINTAINER:  Christian Stocker <chregu@php.net>, Rob Richards <rrichards@php.net>, Marcus BÃ¶rger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
 -------------------------------------------------------------------------------
 EXTENSION:           simplexml
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>
+PRIMARY MAINTAINER:  Marcus BÃ¶rger <helly@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0
@@ -195,12 +195,12 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           libxml
-PRIMARY MAINTAINER:   Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net> 
+PRIMARY MAINTAINER:   Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           xmlreader
-PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net> 
+PRIMARY MAINTAINER:  Rob Richards <rrichards@php.net>, Christian Stocker <chregu@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -335,7 +335,7 @@ STATUS:              Working
 SINCE:               5.2
 -------------------------------------------------------------------------------
 EXTENSION:           ldap
-PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>, Douglas Goldstein <cardoe@php.net>, Pierre-Alain Joye <pajoye@php.net>, Côme Bernigaud <mcmic@php.net>
+PRIMARY MAINTAINER:  Stig Venaas <venaas@php.net>, Douglas Goldstein <cardoe@php.net>, Pierre-Alain Joye <pajoye@php.net>, CÃ´me Bernigaud <mcmic@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -367,13 +367,13 @@ MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           phar
-PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus Börger <helly@php.net>, Steph Fox <sfox@php.net>
+PRIMARY MAINTAINER:  Greg Beaver <cellog@php.net>, Marcus BÃ¶rger <helly@php.net>, Steph Fox <sfox@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.3
 -------------------------------------------------------------------------------
 EXTENSION:           posix
-PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
+PRIMARY MAINTAINER:  Kristian KÃ¶hntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -388,12 +388,12 @@ MAINTENANCE:         Unknown
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           recode
-PRIMARY MAINTAINER:  Kristian Köhntopp <kris@koehntopp.de>
+PRIMARY MAINTAINER:  Kristian KÃ¶hntopp <kris@koehntopp.de>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
 EXTENSION:           reflection
-PRIMARY MAINTAINER:  Marcus Börger <helly@php.net>, Johannes Schlüter <johannes@php.net>
+PRIMARY MAINTAINER:  Marcus BÃ¶rger <helly@php.net>, Johannes SchlÃ¼ter <johannes@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 -------------------------------------------------------------------------------
@@ -426,7 +426,7 @@ STATUS:              Working
 SINCE:               7.2.0
 -------------------------------------------------------------------------------
 EXTENSION:           spl
-PRIMARY MAINTAINER:  Marcus Boerger <helly@php.net>, Etienne Kneuss <colder@php.net>
+PRIMARY MAINTAINER:  Marcus BÃ¶rger <helly@php.net>, Etienne Kneuss <colder@php.net>
 MAINTENANCE:         Maintained
 STATUS:              Working
 SINCE:               5.0.0

@@ -208,7 +208,7 @@ print "result=".date("l Y-m-d H:i:s T I", $strtotime_tstamp)."\n";
 print "wanted=Monday            00:30:00\n\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 TZ=Africa/Bujumbura - *Note*: Unexpected, as does not appear to
 have a DST or timezone transition.
 tStamp=Thursday 1970-01-01 17:17:17 CAT 0

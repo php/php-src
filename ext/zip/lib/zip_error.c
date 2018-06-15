@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -77,7 +77,7 @@ zip_error_init_with_code(zip_error_t *error, int ze)
     default:
 	error->sys_err = 0;
 	break;
-    }	
+    }
 }
 
 
@@ -85,7 +85,7 @@ ZIP_EXTERN int
 zip_error_system_type(const zip_error_t *error) {
     if (error->zip_err < 0 || error->zip_err >= _zip_nerr_str)
         return ZIP_ET_NONE;
-    
+
     return _zip_err_type[error->zip_err];
 }
 
@@ -144,11 +144,11 @@ zip_int64_t
 zip_error_to_data(const zip_error_t *error, void *data, zip_uint64_t length)
 {
     int *e = (int *)data;
-    
+
     if (length < sizeof(int)*2) {
         return -1;
     }
-    
+
     e[0] = zip_error_code_zip(error);
     e[1] = zip_error_code_system(error);
     return sizeof(int)*2;

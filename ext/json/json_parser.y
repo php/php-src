@@ -3,7 +3,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -75,7 +75,7 @@ int json_yydebug = 1;
 %type <pair> pair
 
 %destructor { zval_dtor(&$$); } <value>
-%destructor { zend_string_release($$.key); zval_dtor(&$$.val); } <pair>
+%destructor { zend_string_release_ex($$.key, 0); zval_dtor(&$$.val); } <pair>
 
 %code {
 static int php_json_yylex(union YYSTYPE *value, php_json_parser *parser);
@@ -277,19 +277,16 @@ static int php_json_parser_object_update(php_json_parser *parser, zval *object, 
 		zval zkey;
 		if (ZSTR_LEN(key) > 0 && ZSTR_VAL(key)[0] == '\0') {
 			parser->scanner.errcode = PHP_JSON_ERROR_INVALID_PROPERTY_NAME;
-			zend_string_release(key);
+			zend_string_release_ex(key, 0);
 			zval_dtor(zvalue);
 			zval_dtor(object);
 			return FAILURE;
 		}
 		ZVAL_NEW_STR(&zkey, key);
 		zend_std_write_property(object, &zkey, zvalue, NULL);
-
-		if (Z_REFCOUNTED_P(zvalue)) {
-			Z_DELREF_P(zvalue);
-		}
+		Z_TRY_DELREF_P(zvalue);
 	}
-	zend_string_release(key);
+	zend_string_release_ex(key, 0);
 
 	return SUCCESS;
 }

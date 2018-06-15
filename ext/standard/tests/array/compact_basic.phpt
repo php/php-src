@@ -34,7 +34,7 @@ var_dump (compact(array("g")));
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing compact() : basic functionality ***
 array(6) {
   ["a"]=>

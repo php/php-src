@@ -30,7 +30,7 @@ var_dump( strrpos($heredoc_str, $heredoc_str) );
 
 echo "*** Done ***";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing strrpos() function: basic functionality ***
 -- With default arguments --
 int(0)

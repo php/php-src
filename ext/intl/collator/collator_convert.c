@@ -382,13 +382,12 @@ zval* collator_convert_string_to_number_if_possible( zval* str, zval *rv )
 zval* collator_make_printable_zval( zval* arg, zval *rv)
 {
 	zval arg_copy;
-	int use_copy = 0;
 	zval* str    = NULL;
 
 	if( Z_TYPE_P(arg) != IS_STRING )
 	{
 
-		use_copy = zend_make_printable_zval(arg, &arg_copy);
+		int use_copy = zend_make_printable_zval(arg, &arg_copy);
 
 		if( use_copy )
 		{

@@ -105,7 +105,7 @@ PHP_FUNCTION( msgfmt_create )
 }
 /* }}} */
 
-/* {{{ proto void MessageFormatter::__construct( string $locale, string $pattern )
+/* {{{ proto MessageFormatter::__construct( string $locale, string $pattern )
  * MessageFormatter object constructor.
  */
 PHP_METHOD( MessageFormatter, __construct )

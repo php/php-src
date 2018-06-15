@@ -21,7 +21,7 @@ echo "Summer offset: " . date_offset_get($summer) / 3600 . " hours\n";
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_offset_get() : basic functionality ***
 Winter offset: 0 hours
 Summer offset: 1 hours

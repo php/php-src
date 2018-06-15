@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -36,7 +36,6 @@ PHP_FUNCTION(sha1)
 {
 	zend_string *arg;
 	zend_bool raw_output = 0;
-	char sha1str[41];
 	PHP_SHA1_CTX context;
 	unsigned char digest[20];
 
@@ -46,15 +45,14 @@ PHP_FUNCTION(sha1)
 		Z_PARAM_BOOL(raw_output)
 	ZEND_PARSE_PARAMETERS_END();
 
-	sha1str[0] = '\0';
 	PHP_SHA1Init(&context);
 	PHP_SHA1Update(&context, (unsigned char *) ZSTR_VAL(arg), ZSTR_LEN(arg));
 	PHP_SHA1Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 20);
 	} else {
-		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 20);
 	}
 
 }
@@ -69,7 +67,6 @@ PHP_FUNCTION(sha1_file)
 	char          *arg;
 	size_t           arg_len;
 	zend_bool raw_output = 0;
-	char          sha1str[41];
 	unsigned char buf[1024];
 	unsigned char digest[20];
 	PHP_SHA1_CTX   context;
@@ -100,8 +97,8 @@ PHP_FUNCTION(sha1_file)
 	if (raw_output) {
 		RETURN_STRINGL((char *) digest, 20);
 	} else {
-		make_digest_ex(sha1str, digest, 20);
-		RETVAL_STRING(sha1str);
+		RETVAL_NEW_STR(zend_string_alloc(40, 0));
+		make_digest_ex(Z_STRVAL_P(return_value), digest, 20);
 	}
 }
 /* }}} */
@@ -111,7 +108,7 @@ static void SHA1Transform(uint32_t[5], const unsigned char[64]);
 static void SHA1Encode(unsigned char *, uint32_t *, unsigned int);
 static void SHA1Decode(uint32_t *, const unsigned char *, unsigned int);
 
-static unsigned char PADDING[64] =
+static const unsigned char PADDING[64] =
 {
 	0x80, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

@@ -22,16 +22,16 @@ function foo(int $x) {
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_008.php:1-11
-L0:     RETURN int(1)
+L0 (11):    RETURN int(1)
 
 foo: ; (lines=8, args=1, vars=2, tmps=1)
     ; (after optimizer)
     ; %ssccp_008.php:2-9
-L0:     CV0($x) = RECV 1
-L1:     JMPZ CV0($x) L4
-L2:     CV1($a) = QM_ASSIGN array(...)
-L3:     JMP L5
-L4:     CV1($a) = QM_ASSIGN array(...)
-L5:     V2 = FETCH_DIM_R CV1($a) int(1)
-L6:     ECHO V2
-L7:     RETURN null
+L0 (2):     CV0($x) = RECV 1
+L1 (3):     JMPZ CV0($x) L4
+L2 (4):     CV1($a) = QM_ASSIGN array(...)
+L3 (4):     JMP L5
+L4 (6):     CV1($a) = QM_ASSIGN array(...)
+L5 (8):     V2 = FETCH_DIM_R CV1($a) int(1)
+L6 (8):     ECHO V2
+L7 (9):     RETURN null

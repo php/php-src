@@ -2,8 +2,8 @@
 public bool SQLite3::busyTimeout ( int $msecs );
 --CREDITS--
 marcosptf - <marcosptf@yahoo.com.br> - @phpsp - sao paulo - br
---XFAILIF--
-<?php require_once(dirname(__FILE__) . '/skipif.inc'); ?>
+--SKIPIF--
+<?php require 'skipif.inc'; ?>
 --FILE--
 <?php
 require_once(dirname(__FILE__) . '/new_db.inc');

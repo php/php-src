@@ -13,7 +13,7 @@ var_dump($b->get('ICUVersion') !== NULL);
 $b = new ResourceBundle('supplementalData', 'ICUDATA', false);
 var_dump($b->get('cldrVersion') !== NULL);
 ?>
---EXPECTF--
+--EXPECT--
 string(11) "Deutschland"
 bool(true)
 bool(true)

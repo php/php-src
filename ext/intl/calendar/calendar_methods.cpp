@@ -18,6 +18,9 @@
 #include "config.h"
 #endif
 
+#define __STDC_FORMAT_MACROS
+#include <inttypes.h>
+
 #include "../intl_cppshims.h"
 
 #include <unicode/locid.h>
@@ -39,6 +42,8 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 #include "../common/common_enum.h"
+
+using icu::Locale;
 
 U_CFUNC PHP_METHOD(IntlCalendar, __construct)
 {
@@ -88,7 +93,7 @@ U_CFUNC PHP_FUNCTION(intlcal_create_instance)
 class BugStringCharEnumeration : public StringEnumeration
 {
 public:
-	BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
+	explicit BugStringCharEnumeration(UEnumeration* _uenum) : uenum(_uenum) {}
 
 	~BugStringCharEnumeration()
 	{
@@ -1236,7 +1241,7 @@ U_CFUNC PHP_FUNCTION(intlcal_to_date_time)
 	ZVAL_UNDEF(&retval);
 	ts = (int64_t)date;
 
-	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%I64d", ts);
+	ts_str_len = slprintf(ts_str, sizeof(ts_str), "@%" PRIi64, ts);
 	ZVAL_STRINGL(&ts_zval, ts_str, ts_str_len);
 
 	/* Now get the time zone */

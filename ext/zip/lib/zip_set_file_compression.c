@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -57,11 +57,11 @@ zip_set_file_compression(zip_t *za, zip_uint64_t idx, zip_int32_t method, zip_ui
     }
 
     e = za->entry+idx;
-    
+
     old_method = (e->orig == NULL ? ZIP_CM_DEFAULT : e->orig->comp_method);
-    
+
     /* TODO: revisit this when flags are supported, since they may require a recompression */
-    
+
     if (method == old_method) {
 	if (e->changes) {
 	    e->changes->changed &= ~ZIP_DIRENT_COMP_METHOD;
@@ -82,6 +82,6 @@ zip_set_file_compression(zip_t *za, zip_uint64_t idx, zip_int32_t method, zip_ui
         e->changes->comp_method = method;
         e->changes->changed |= ZIP_DIRENT_COMP_METHOD;
     }
-    
+
     return 0;
 }

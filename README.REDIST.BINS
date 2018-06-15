@@ -1,7 +1,7 @@
 1. libmagic (ext/fileinfo) see ext/fileinfo/libmagic/LICENSE
 2. Oniguruma (ext/mbstring) see ext/mbstring/oniguruma/COPYING
 3. libmbfl (ext/mbstring) see ext/mbstring/libmbfl/LICENSE
-4. pcrelib (ext/pcre) see ext/pcre/pcrelib/LICENCE
+4. pcre2lib (ext/pcre)
 5. ext/standard crypt
 6. ext/standard crypt's blowfish implementation
 7. Sqlite/Sqlite3 ext/sqlite3 ext/sqlite
@@ -15,6 +15,107 @@
 15. main/strlcat
 16. main/strlcpy
 17. libgd see ext/gd/libgd/COPYING
+18. ext/phar portions of tar implementations
+19. libbcmath (ext/bcmath) see ext/bcmath/libbcmath/COPYING.LIB
+
+
+4. pcre2lib (ext/pcre)
+
+PCRE2 LICENCE
+-------------
+
+PCRE2 is a library of functions to support regular expressions whose syntax
+and semantics are as close as possible to those of the Perl 5 language.
+
+Release 10 of PCRE2 is distributed under the terms of the "BSD" licence, as
+specified below, with one exemption for certain binary redistributions. The
+documentation for PCRE2, supplied in the "doc" directory, is distributed under
+the same terms as the software itself. The data in the testdata directory is
+not copyrighted and is in the public domain.
+
+The basic library functions are written in C and are freestanding. Also
+included in the distribution is a just-in-time compiler that can be used to
+optimize pattern matching. This is an optional feature that can be omitted when
+the library is built.
+
+
+THE BASIC LIBRARY FUNCTIONS
+---------------------------
+
+Written by:       Philip Hazel
+Email local part: ph10
+Email domain:     cam.ac.uk
+
+University of Cambridge Computing Service,
+Cambridge, England.
+
+Copyright (c) 1997-2018 University of Cambridge
+All rights reserved.
+
+
+PCRE2 JUST-IN-TIME COMPILATION SUPPORT
+--------------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2010-2018 Zoltan Herczeg
+All rights reserved.
+
+
+STACK-LESS JUST-IN-TIME COMPILER
+--------------------------------
+
+Written by:       Zoltan Herczeg
+Email local part: hzmester
+Emain domain:     freemail.hu
+
+Copyright(c) 2009-2018 Zoltan Herczeg
+All rights reserved.
+
+
+THE "BSD" LICENCE
+-----------------
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+    * Redistributions of source code must retain the above copyright notices,
+      this list of conditions and the following disclaimer.
+
+    * Redistributions in binary form must reproduce the above copyright
+      notices, this list of conditions and the following disclaimer in the
+      documentation and/or other materials provided with the distribution.
+
+    * Neither the name of the University of Cambridge nor the names of any
+      contributors may be used to endorse or promote products derived from this
+      software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE
+LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
+
+
+EXEMPTION FOR BINARY LIBRARY-LIKE PACKAGES
+------------------------------------------
+
+The second condition in the BSD licence (covering binary redistributions) does
+not apply all the way down a chain of software. If binary package A includes
+PCRE2, it must respect the condition, but if package B is software that
+includes package A, the condition is not imposed on package B unless it uses
+PCRE2 independently.
+
+End
+
 
 5. ext/standard crypt
 
@@ -46,7 +147,7 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT
 LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
- 
+
 
 6. ext/standard crypt's blowfish implementation
 
@@ -92,7 +193,7 @@ http://www.usenix.org/events/usenix99/provos.html
 Some of the tricks in BF_ROUND might be inspired by Eric Young's
 Blowfish library (I can't be sure if I would think of something if I
 hadn't seen his code).
- 
+
 
 7. Sqlite/Sqlite3 ext/sqlite3 ext/sqlite
 
@@ -126,7 +227,7 @@ Modeling and Computer Simulation, Vol. 8, No. 1, January 1998, pp 3-30.
 
 Copyright (C) 1997 - 2002, Makoto Matsumoto and Takuji Nishimura,
 Copyright (C) 2000 - 2003, Richard J. Wagner
-All rights reserved.                          
+All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions
@@ -139,8 +240,8 @@ are met:
 	 notice, this list of conditions and the following disclaimer in the
 	 documentation and/or other materials provided with the distribution.
 
-3. The names of its contributors may not be used to endorse or promote 
-	 products derived from this software without specific prior written 
+3. The names of its contributors may not be used to endorse or promote
+	 products derived from this software without specific prior written
 	 permission.
 
 THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
@@ -261,26 +362,26 @@ SUCH DAMAGE.
 
 12. libxmlrpc ext/xmlrpc
 
-Copyright 2000 Epinions, Inc. 
+Copyright 2000 Epinions, Inc.
 
-Subject to the following 3 conditions, Epinions, Inc.  permits you, free 
-of charge, to (a) use, copy, distribute, modify, perform and display this 
-software and associated documentation files (the "Software"), and (b) 
-permit others to whom the Software is furnished to do so as well.  
+Subject to the following 3 conditions, Epinions, Inc.  permits you, free
+of charge, to (a) use, copy, distribute, modify, perform and display this
+software and associated documentation files (the "Software"), and (b)
+permit others to whom the Software is furnished to do so as well.
 
-1) The above copyright notice and this permission notice shall be included 
-without modification in all copies or substantial portions of the 
-Software.  
+1) The above copyright notice and this permission notice shall be included
+without modification in all copies or substantial portions of the
+Software.
 
-2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF 
-ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY 
-IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR 
-PURPOSE OR NONINFRINGEMENT.  
+2) THE SOFTWARE IS PROVIDED "AS IS", WITHOUT ANY WARRANTY OR CONDITION OF
+ANY KIND, EXPRESS, IMPLIED OR STATUTORY, INCLUDING WITHOUT LIMITATION ANY
+IMPLIED WARRANTIES OF ACCURACY, MERCHANTABILITY, FITNESS FOR A PARTICULAR
+PURPOSE OR NONINFRINGEMENT.
 
-3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT, 
-SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT 
-OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING 
-NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH 
+3) IN NO EVENT SHALL EPINIONS, INC. BE LIABLE FOR ANY DIRECT, INDIRECT,
+SPECIAL, INCIDENTAL OR CONSEQUENTIAL DAMAGES OR LOST PROFITS ARISING OUT
+OF OR IN CONNECTION WITH THE SOFTWARE (HOWEVER ARISING, INCLUDING
+NEGLIGENCE), EVEN IF EPINIONS, INC.  IS AWARE OF THE POSSIBILITY OF SUCH
 DAMAGES.
 
 13. libzip ext/zip
@@ -415,3 +516,30 @@ WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR
 OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+18. ext/phar portions of tar implementations
+
+portions of tar implementations in ext/phar - phar_tar_octal() are based on an
+implementation by Tim Kientzle from libarchive, licensed with this license:
+
+ Copyright (c) 2003-2007 Tim Kientzle
+ All rights reserved.
+
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions
+ are met:
+ 1. Redistributions of source code must retain the above copyright
+    notice, this list of conditions and the following disclaimer.
+ 2. Redistributions in binary form must reproduce the above copyright
+    notice, this list of conditions and the following disclaimer in the
+    documentation and/or other materials provided with the distribution.
+
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR(S) ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
+ OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
+ IN NO EVENT SHALL THE AUTHOR(S) BE LIABLE FOR ANY DIRECT, INDIRECT,
+ INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT
+ NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF
+ THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.

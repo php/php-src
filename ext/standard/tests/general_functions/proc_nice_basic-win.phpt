@@ -86,7 +86,7 @@ foreach ($p as $test => $data) {
 	print (($wp = get_priority_from_wmic()) === $data[0] ? 'Passed' : 'Failed (' . $wp . ')') . PHP_EOL;
 }
 ?>
---EXPECTF--
+--EXPECT--
 Testing 'Idle' (10): Passed
 Testing 'Below normal' (5): Passed
 Testing 'Normal' (0): Passed

@@ -124,8 +124,8 @@ mysqli->autocommit()
 
 	$mysqli->close();
 
-	if (NULL !== ($tmp = @$mysqli->autocommit( false)))
-		printf("[030] Expecting NULL, got %s/%s\n", gettype($tmp), $tmp);
+	if (false !== ($tmp = @$mysqli->autocommit( false)))
+		printf("[030] Expecting false, got %s/%s\n", gettype($tmp), $tmp);
 
 	print "done!";
 ?>
@@ -133,5 +133,5 @@ mysqli->autocommit()
 <?php
 	require_once("clean_table.inc");
 ?>
---EXPECTF--
+--EXPECT--
 done!

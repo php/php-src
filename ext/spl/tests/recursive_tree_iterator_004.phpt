@@ -30,7 +30,7 @@ foreach($it as $k => $v) {
 }
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 [0] => |-Array
 [0] => | |-a
 [1] => | \-1

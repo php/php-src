@@ -46,9 +46,9 @@ var_dump($msg_orig === $msg);
 $signature = sodium_crypto_sign_detached($msg, $alice_secretkey);
 var_dump(strlen($signature) === SODIUM_CRYPTO_SIGN_BYTES);
 var_dump(sodium_crypto_sign_verify_detached($signature,
-											 $msg, $alice_publickey));
+                                             $msg, $alice_publickey));
 var_dump(sodium_crypto_sign_verify_detached($signature,
-											 $msg . "\0", $alice_publickey));
+                                             $msg . "\0", $alice_publickey));
 
 $calc_pubkey = sodium_crypto_sign_publickey_from_secretkey($alice_secretkey);
 var_dump(sodium_memcmp($calc_pubkey, $alice_publickey) === 0);
@@ -58,9 +58,9 @@ $curve25519key = sodium_crypto_sign_ed25519_sk_to_curve25519($ed25519key);
 var_dump($curve25519key === sodium_hex2bin("381b2be5e3d38820deb1243fb58b4be654da30dd3ccde492cb88f937eb489363"));
 
 try {
-	sodium_crypto_sign($msg, substr($alice_secretkey, 1));
+    sodium_crypto_sign($msg, substr($alice_secretkey, 1));
 } catch (SodiumException $ex) {
-	var_dump(true);
+    var_dump(true);
 }
 ?>
 --EXPECT--

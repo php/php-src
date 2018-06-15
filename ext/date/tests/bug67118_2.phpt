@@ -21,7 +21,7 @@ $date = '12 Sep 2007 15:49:12 UT';
 var_dump(new Foo($date));
 ?>
 Done
---EXPECTF--
+--EXPECT--
 First try
 Second try
 object(Foo)#1 (3) {

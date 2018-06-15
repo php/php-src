@@ -37,7 +37,7 @@ var_dump(array_uintersect_uassoc($arr1, $arr2, 'too_few_parameters', 'too_few_pa
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing array_uintersect_uassoc() : usage variation - incorrect callbacks ***
 
 -- comparison function with an incorrect return value --

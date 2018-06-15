@@ -20,7 +20,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -313,7 +313,7 @@ struct zip {
     zip_source_t **open_source;         /* open sources using archive */
 
     zip_hash_t *names;			/* hash table for name lookup */
-    
+
     char *tempdir;                      /* custom temp dir (needed e.g. for OS X sandboxing) */
 };
 
@@ -432,7 +432,7 @@ struct zip_string {
 struct zip_buffer {
     bool ok;
     bool free_data;
-    
+
     zip_uint8_t *data;
     zip_uint64_t size;
     zip_uint64_t offset;

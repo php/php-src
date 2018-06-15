@@ -541,9 +541,9 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 {
 	int					res;
 	struct sockaddr_in	saddr = {0};
-	zend_string			*addr_str;
+	zend_string			*addr_str, *tmp_addr_str;
 
-	addr_str = zval_get_string((zval *) zaddr_str);
+	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
 	res = php_set_inet_addr(&saddr, ZSTR_VAL(addr_str), ctx->sock);
 	if (res) {
 		memcpy(inaddr, &saddr.sin_addr, sizeof saddr.sin_addr);
@@ -553,7 +553,7 @@ static void from_zval_write_sin_addr(const zval *zaddr_str, char *inaddr, ser_co
 				"address", ZSTR_VAL(addr_str));
 	}
 
-	zend_string_release(addr_str);
+	zend_tmp_string_release(tmp_addr_str);
 }
 static void to_zval_read_sin_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -591,9 +591,9 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 {
 	int					res;
 	struct sockaddr_in6	saddr6 = {0};
-	zend_string			*addr_str;
+	zend_string			*addr_str, *tmp_addr_str;
 
-	addr_str = zval_get_string((zval *) zaddr_str);
+	addr_str = zval_get_tmp_string((zval *) zaddr_str, &tmp_addr_str);
 	res = php_set_inet6_addr(&saddr6, ZSTR_VAL(addr_str), ctx->sock);
 	if (res) {
 		memcpy(addr6, &saddr6.sin6_addr, sizeof saddr6.sin6_addr);
@@ -603,7 +603,7 @@ static void from_zval_write_sin6_addr(const zval *zaddr_str, char *addr6, ser_co
 				"address", Z_STRVAL_P(zaddr_str));
 	}
 
-	zend_string_release(addr_str);
+	zend_tmp_string_release(tmp_addr_str);
 }
 static void to_zval_read_sin6_addr(const char *data, zval *zv, res_context *ctx)
 {
@@ -642,28 +642,30 @@ static void to_zval_read_sockaddr_in6(const char *data, zval *zv, res_context *c
 #endif /* HAVE_IPV6 */
 static void from_zval_write_sun_path(const zval *path, char *sockaddr_un_c, ser_context *ctx)
 {
-	zend_string			*path_str;
+	zend_string			*path_str, *tmp_path_str;
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)sockaddr_un_c;
 
-	path_str = zval_get_string((zval *) path);
+	path_str = zval_get_tmp_string((zval *) path, &tmp_path_str);
 
 	/* code in this file relies on the path being nul terminated, even though
 	 * this is not required, at least on linux for abstract paths. It also
 	 * assumes that the path is not empty */
 	if (ZSTR_LEN(path_str) == 0) {
 		do_from_zval_err(ctx, "%s", "the path is cannot be empty");
+		zend_tmp_string_release(tmp_path_str);
 		return;
 	}
 	if (ZSTR_LEN(path_str) >= sizeof(saddr->sun_path)) {
 		do_from_zval_err(ctx, "the path is too long, the maximum permitted "
 				"length is %zd", sizeof(saddr->sun_path) - 1);
+		zend_tmp_string_release(tmp_path_str);
 		return;
 	}
 
 	memcpy(&saddr->sun_path, ZSTR_VAL(path_str), ZSTR_LEN(path_str));
 	saddr->sun_path[ZSTR_LEN(path_str)] = '\0';
 
-	zend_string_release(path_str);
+	zend_tmp_string_release(tmp_path_str);
 }
 static void to_zval_read_sun_path(const char *data, zval *zv, res_context *ctx) {
 	struct sockaddr_un	*saddr = (struct sockaddr_un*)data;
@@ -1075,19 +1077,15 @@ static void from_zval_write_msghdr_buffer_size(const zval *elem, char *msghdr_c,
 static void from_zval_write_iov_array_aux(zval *elem, unsigned i, void **args, ser_context *ctx)
 {
 	struct msghdr	*msg = args[0];
-	size_t			len;
+	zend_string     *str, *tmp_str;
 
-	if (Z_REFCOUNTED_P(elem)) {
-		Z_ADDREF_P(elem);
-	}
-	convert_to_string_ex(elem);
+	str = zval_get_tmp_string(elem, &tmp_str);
 
-	len = Z_STRLEN_P(elem);
-	msg->msg_iov[i - 1].iov_base = accounted_emalloc(len, ctx);
-	msg->msg_iov[i - 1].iov_len = len;
-	memcpy(msg->msg_iov[i - 1].iov_base, Z_STRVAL_P(elem), len);
+	msg->msg_iov[i - 1].iov_base = accounted_emalloc(ZSTR_LEN(str), ctx);
+	msg->msg_iov[i - 1].iov_len = ZSTR_LEN(str);
+	memcpy(msg->msg_iov[i - 1].iov_base, ZSTR_VAL(str), ZSTR_LEN(str));
 
-	zval_ptr_dtor(elem);
+	zend_tmp_string_release(tmp_str);
 }
 static void from_zval_write_iov_array(const zval *arr, char *msghdr_c, ser_context *ctx)
 {
@@ -1243,9 +1241,9 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 			ret = (unsigned)Z_LVAL_P(zv);
 		}
 	} else {
-		zend_string *str;
+		zend_string *str, *tmp_str;
 
-		str = zval_get_string((zval *) zv);
+		str = zval_get_tmp_string((zval *) zv, &tmp_str);
 
 #if HAVE_IF_NAMETOINDEX
 		ret = if_nametoindex(ZSTR_VAL(str));
@@ -1277,7 +1275,7 @@ static void from_zval_write_ifindex(const zval *zv, char *uinteger, ser_context 
 				"name, an integer interface index must be supplied instead");
 #endif
 
-		zend_string_release(str);
+		zend_tmp_string_release(tmp_str);
 	}
 
 	if (!ctx->err.has_error) {

@@ -5,13 +5,9 @@
  *
  */
 class gtIsSpecifiedTestType extends gtPreCondition {
-  
+
   public function check( $clo) {
-    if($clo->hasOption('b') || $clo->hasOption('e') || $clo->hasOption('v') ) {
-    
-        return true;
-      }
-    return false;
+    return $clo->hasOption('b') || $clo->hasOption('e') || $clo->hasOption('v');
   }
   
   public function getMessage() {

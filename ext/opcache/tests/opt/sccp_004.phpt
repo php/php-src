@@ -28,12 +28,12 @@ function foo(int $x) {
 $_main: ; (lines=1, args=0, vars=0, tmps=0)
     ; (after optimizer)
     ; %ssccp_004.php:1-17
-L0:     RETURN int(1)
+L0 (17):    RETURN int(1)
 
 foo: ; (lines=4, args=1, vars=1, tmps=0)
     ; (after optimizer)
     ; %ssccp_004.php:2-15
-L0:     CV0($x) = RECV 1
-L1:     ECHO bool(true)
-L2:     ECHO int(1)
-L3:     RETURN null
+L0 (2):     CV0($x) = RECV 1
+L1 (11):    ECHO bool(true)
+L2 (14):    ECHO int(1)
+L3 (15):    RETURN null

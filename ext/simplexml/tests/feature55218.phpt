@@ -49,7 +49,7 @@ var_dump( $x->person[1]->getDocNamespaces(false, false) );
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 getDocNamespaces
 
 Backwards Compatibility:

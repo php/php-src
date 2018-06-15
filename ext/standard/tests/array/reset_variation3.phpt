@@ -39,7 +39,7 @@ echo "\$array2: ";
 var_dump(current($array2));
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing reset() : usage variations ***
 
 -- Initial position of internal pointer --

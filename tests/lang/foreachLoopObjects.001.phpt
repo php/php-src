@@ -34,7 +34,7 @@ foreach (new C as $k => $v) {
 echo "\nCheck key and value after the loop.\n";
 var_dump($k, $v);
 ?>
---EXPECTF--
+--EXPECT--
 
 
 Simple loop.

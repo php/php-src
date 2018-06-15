@@ -36,7 +36,7 @@ var_dump($temp_array);
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unshift() : basic functionality with associative array ***
 int(5)
 array(5) {

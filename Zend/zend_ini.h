@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2017 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -83,10 +83,12 @@ ZEND_API int zend_alter_ini_entry_chars_ex(zend_string *name, const char *value,
 ZEND_API int zend_restore_ini_entry(zend_string *name, int stage);
 ZEND_API void display_ini_entries(zend_module_entry *module);
 
-ZEND_API zend_long zend_ini_long(char *name, uint32_t name_length, int orig);
-ZEND_API double zend_ini_double(char *name, uint32_t name_length, int orig);
-ZEND_API char *zend_ini_string(char *name, uint32_t name_length, int orig);
-ZEND_API char *zend_ini_string_ex(char *name, uint32_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_long zend_ini_long(char *name, size_t name_length, int orig);
+ZEND_API double zend_ini_double(char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string(char *name, size_t name_length, int orig);
+ZEND_API char *zend_ini_string_ex(char *name, size_t name_length, int orig, zend_bool *exists);
+ZEND_API zend_string *zend_ini_get_value(zend_string *name);
+ZEND_API zend_bool zend_ini_parse_bool(zend_string *str);
 
 ZEND_API int zend_ini_register_displayer(char *name, uint32_t name_length, void (*displayer)(zend_ini_entry *ini_entry, int type));
 
@@ -174,6 +176,8 @@ END_EXTERN_C()
 #define ZEND_INI_STAGE_DEACTIVATE	(1<<3)
 #define ZEND_INI_STAGE_RUNTIME		(1<<4)
 #define ZEND_INI_STAGE_HTACCESS		(1<<5)
+
+#define ZEND_INI_STAGE_IN_REQUEST   (ZEND_INI_STAGE_ACTIVATE|ZEND_INI_STAGE_DEACTIVATE|ZEND_INI_STAGE_RUNTIME|ZEND_INI_STAGE_HTACCESS)
 
 /* INI parsing engine */
 typedef void (*zend_ini_parser_cb_t)(zval *arg1, zval *arg2, zval *arg3, int callback_type, void *arg);

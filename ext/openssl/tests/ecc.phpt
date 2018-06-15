@@ -1,7 +1,7 @@
 --TEST--
 openssl_*() with OPENSSL_KEYTYPE_EC
 --SKIPIF--
-<?php if (!extension_loaded("openssl") && !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
+<?php if (!extension_loaded("openssl") || !defined("OPENSSL_KEYTYPE_EC")) print "skip"; ?>
 --FILE--
 <?php
 $args = array(

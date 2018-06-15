@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -150,7 +150,7 @@ const zend_function_entry php_dom_element_class_functions[] = { /* {{{ */
 };
 /* }}} */
 
-/* {{{ proto void DOMElement::__construct(string name, [string value], [string uri]) */
+/* {{{ proto DOMElement::__construct(string name, [string value], [string uri]) */
 PHP_METHOD(domelement, __construct)
 {
 
@@ -1070,7 +1070,7 @@ PHP_FUNCTION(dom_element_get_elements_by_tag_name_ns)
 }
 /* }}} end dom_element_get_elements_by_tag_name_ns */
 
-/* {{{ proto boolean dom_element_has_attribute(string name);
+/* {{{ proto bool dom_element_has_attribute(string name);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttr
 Since: DOM Level 2
 */
@@ -1098,7 +1098,7 @@ PHP_FUNCTION(dom_element_has_attribute)
 }
 /* }}} end dom_element_has_attribute */
 
-/* {{{ proto boolean dom_element_has_attribute_ns(string namespaceURI, string localName);
+/* {{{ proto bool dom_element_has_attribute_ns(string namespaceURI, string localName);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElHasAttrNS
 Since: DOM Level 2
 */
@@ -1155,7 +1155,7 @@ static void php_set_attribute_id(xmlAttrPtr attrp, zend_bool is_id) /* {{{ */
 }
 /* }}} */
 
-/* {{{ proto void dom_element_set_id_attribute(string name, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute(string name, bool isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttr
 Since: DOM Level 3
 */
@@ -1191,7 +1191,7 @@ PHP_FUNCTION(dom_element_set_id_attribute)
 }
 /* }}} end dom_element_set_id_attribute */
 
-/* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute_ns(string namespaceURI, string localName, bool isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNS
 Since: DOM Level 3
 */
@@ -1227,7 +1227,7 @@ PHP_FUNCTION(dom_element_set_id_attribute_ns)
 }
 /* }}} end dom_element_set_id_attribute_ns */
 
-/* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, boolean isId);
+/* {{{ proto void dom_element_set_id_attribute_node(attr idAttr, bool isId);
 URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-ElSetIdAttrNode
 Since: DOM Level 3
 */

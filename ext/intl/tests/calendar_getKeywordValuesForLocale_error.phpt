@@ -20,7 +20,7 @@ Warning: intlcal_get_keyword_values_for_locale() expects exactly 3 parameters, 2
 Warning: intlcal_get_keyword_values_for_locale(): intlcal_get_keyword_values_for_locale: bad arguments in %s on line %d
 bool(false)
 
-Warning: IntlCalendar::getKeywordValuesForLocale() expects parameter 3 to be boolean, array given in %s on line %d
+Warning: IntlCalendar::getKeywordValuesForLocale() expects parameter 3 to be bool, array given in %s on line %d
 
 Warning: IntlCalendar::getKeywordValuesForLocale(): intlcal_get_keyword_values_for_locale: bad arguments in %s on line %d
 bool(false)

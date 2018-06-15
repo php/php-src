@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -593,17 +593,17 @@ static void cli_register_file_handles(void) /* {{{ */
 	php_stream_to_zval(s_err, &ec.value);
 
 	ic.flags = CONST_CS;
-	ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
+	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
 	ic.module_number = 0;
 	zend_register_constant(&ic);
 
 	oc.flags = CONST_CS;
-	oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
+	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
 	oc.module_number = 0;
 	zend_register_constant(&oc);
 
 	ec.flags = CONST_CS;
-	ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
+	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
 	ec.module_number = 0;
 	zend_register_constant(&ec);
 }
@@ -697,7 +697,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				goto out;
 
 			case 'v': /* show php version & quit */
-				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2017 The PHP Group\n%s",
+				php_printf("PHP %s (%s) (built: %s %s) ( %s)\nCopyright (c) 1997-2018 The PHP Group\n%s",
 					PHP_VERSION, cli_sapi_module.name, __DATE__, __TIME__,
 #if ZTS
 					"ZTS "
@@ -917,7 +917,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 #if defined(PHP_WIN32) && !defined(PHP_CLI_WIN32_NO_CONSOLE) && (HAVE_LIBREADLINE || HAVE_LIBEDIT) && !defined(COMPILE_DL_READLINE)
 		if (!interactive) {
 		/* The -a option was not passed. If there is no file, it could
-		 	still make sense to run interactively. The presense of a file
+		 	still make sense to run interactively. The presence of a file
 			is essential to mitigate buggy console info. */
 			interactive = php_win32_console_is_own() &&
 				!(script_file ||

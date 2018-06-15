@@ -3,7 +3,6 @@ sni_server with separate pk and cert
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
-if (OPENSSL_VERSION_NUMBER >= 0x10100000) die("skip OpenSSL < v1.1.0 required");
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -11,17 +10,17 @@ $serverCode = <<<'CODE'
 	$ctx = stream_context_create(['ssl' => [
 		'local_cert' => __DIR__ . '/domain1.pem',
 		'SNI_server_certs' => [
-			"domain1.com" => [
-				'local_cert' => __DIR__ . "/sni_server_domain1_cert.pem",
-				'local_pk' => __DIR__ . "/sni_server_domain1_key.pem"
+			"cs.php.net" => [
+				'local_cert' => __DIR__ . "/sni_server_cs_cert.pem",
+				'local_pk' => __DIR__ . "/sni_server_cs_key.pem"
 			],
-			"domain2.com" => [
-				'local_cert' => __DIR__ . "/sni_server_domain2_cert.pem",
-				'local_pk' => __DIR__ . "/sni_server_domain2_key.pem"
+			"uk.php.net" => [
+				'local_cert' => __DIR__ . "/sni_server_uk_cert.pem",
+				'local_pk' => __DIR__ . "/sni_server_uk_key.pem"
 			],
-			"domain3.com" => [
-				'local_cert' => __DIR__ . "/sni_server_domain3_cert.pem",
-				'local_pk' => __DIR__ . "/sni_server_domain3_key.pem"
+			"us.php.net" => [
+				'local_cert' => __DIR__ . "/sni_server_us_cert.pem",
+				'local_pk' => __DIR__ . "/sni_server_us_key.pem"
 			],
 		]
 	]]);
@@ -43,19 +42,19 @@ $clientCode = <<<'CODE'
 
     phpt_wait();
 
-    $ctxArr['peer_name'] = 'domain1.com';
+    $ctxArr['peer_name'] = 'cs.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
-    $ctxArr['peer_name'] = 'domain2.com';
+    $ctxArr['peer_name'] = 'uk.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
     var_dump(openssl_x509_parse($cert)['subject']['CN']);
 
-    $ctxArr['peer_name'] = 'domain3.com';
+    $ctxArr['peer_name'] = 'us.php.net';
     $ctx = stream_context_create(['ssl' => $ctxArr]);
     $client = @stream_socket_client("tls://127.0.0.1:64321", $errno, $errstr, 1, $flags, $ctx);
     $cert = stream_context_get_options($ctx)['ssl']['peer_certificate'];
@@ -65,6 +64,6 @@ CODE;
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
-string(%d) "domain1.com"
-string(%d) "domain2.com"
-string(%d) "domain3.com"
+string(%d) "cs.php.net"
+string(%d) "uk.php.net"
+string(%d) "us.php.net"

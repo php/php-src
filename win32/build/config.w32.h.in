@@ -178,3 +178,8 @@
 #define HAVE_FTOK 1
 
 #define HAVE_NICE
+
+#ifdef __clang__
+#define HAVE_FUNC_ATTRIBUTE_TARGET 1
+#endif
+

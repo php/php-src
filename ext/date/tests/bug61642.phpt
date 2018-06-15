@@ -34,7 +34,7 @@ foreach ($weekdays as $days) {
 	echo implode('  ', $line), "\n";
 }
 ?>
---EXPECTF--
+--EXPECT--
 ###  2012-03-29 Thu  2012-03-30 Fri  2012-03-31 Sat  2012-04-01 Sun  2012-04-02 Mon  2012-04-03 Tue  2012-04-04 Wed  2012-04-05 Thu
 
 -11  2012-03-14 Wed  2012-03-15 Thu  2012-03-16 Fri  2012-03-16 Fri  2012-03-16 Fri  2012-03-19 Mon  2012-03-20 Tue  2012-03-21 Wed

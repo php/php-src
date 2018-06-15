@@ -46,7 +46,7 @@ foreach($array_values as $array_value) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing sprintf() : octal formats with array values ***
 
 -- Iteration 1 --

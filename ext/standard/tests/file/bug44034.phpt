@@ -15,7 +15,7 @@ foreach($urls as $url) {
 	var_dump(file($url, FILE_IGNORE_NEW_LINES));
 }
 ?>
---EXPECTF--
+--EXPECT--
 data://text/plain,foo\r\nbar\r\n
 array(2) {
   [0]=>

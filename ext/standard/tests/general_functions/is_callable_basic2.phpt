@@ -1,8 +1,5 @@
 --TEST--
 Test is_callable() function : usage variations - on objects 
---INI--
-precision=14
-error_reporting = E_ALL & ~E_NOTICE | E_STRICT
 --FILE--
 <?php
 /* Prototype: bool is_callable ( mixed $var [, bool $syntax_only [, string &$callable_name]] );
@@ -128,7 +125,7 @@ foreach($objects as $object) {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing is_callable() on objects ***
 
 ** Testing behavior of is_callable() on static methods **

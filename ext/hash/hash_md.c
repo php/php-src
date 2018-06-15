@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 1997-2017 The PHP Group                                |
+  | Copyright (c) 1997-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -111,7 +111,6 @@ PHP_NAMED_FUNCTION(php_if_md5)
 	char *arg;
 	size_t arg_len;
 	zend_bool raw_output = 0;
-	char md5str[33];
 	PHP_MD5_CTX context;
 	unsigned char digest[16];
 
@@ -119,15 +118,14 @@ PHP_NAMED_FUNCTION(php_if_md5)
 		return;
 	}
 
-	md5str[0] = '\0';
 	PHP_MD5Init(&context);
 	PHP_MD5Update(&context, arg, arg_len);
 	PHP_MD5Final(digest, &context);
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
 	} else {
-		make_digest(md5str, digest);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest(Z_STRVAL_P(return_value), digest);
 	}
 
 }
@@ -140,7 +138,6 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	char          *arg;
 	size_t        arg_len;
 	zend_bool raw_output = 0;
-	char          md5str[33];
 	unsigned char buf[1024];
 	unsigned char digest[16];
 	PHP_MD5_CTX   context;
@@ -173,8 +170,8 @@ PHP_NAMED_FUNCTION(php_if_md5_file)
 	if (raw_output) {
 		RETURN_STRINGL(digest, 16);
 	} else {
-		make_digest(md5str, digest);
-		RETVAL_STRING(md5str);
+		RETVAL_NEW_STR(zend_string_alloc(32, 0));
+		make_digest(Z_STRVAL_P(return_value), digest);
 	}
 }
 /* }}} */

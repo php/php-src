@@ -57,7 +57,7 @@ foreach($values as $value) {
 setlocale(LC_CTYPE, $orig); 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing ctype_xdigit() : usage variations ***
 
 -- Iteration 1 --

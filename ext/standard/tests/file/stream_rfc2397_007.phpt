@@ -81,7 +81,7 @@ foreach($streams as $stream)
 ?>
 ===DONE===
 <?php exit(0); ?>
---EXPECTF--
+--EXPECT--
 ===data:,012345===
 int(0)
 bool(false)

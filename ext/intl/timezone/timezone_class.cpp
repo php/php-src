@@ -37,6 +37,8 @@ extern "C" {
 #include <ext/date/php_date.h>
 }
 
+using icu::Calendar;
+
 /* {{{ Global variables */
 U_CDECL_BEGIN
 zend_class_entry *TimeZone_ce_ptr = NULL;
@@ -454,7 +456,7 @@ ZEND_END_ARG_INFO()
 /* {{{ TimeZone_class_functions
  * Every 'IntlTimeZone' class method has an entry in this table
  */
-static zend_function_entry TimeZone_class_functions[] = {
+static const zend_function_entry TimeZone_class_functions[] = {
 	PHP_ME(IntlTimeZone,				__construct,					ainfo_tz_void,				ZEND_ACC_PRIVATE)
 	PHP_ME_MAPPING(createTimeZone,		intltz_create_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
 	PHP_ME_MAPPING(fromDateTimeZone,	intltz_from_date_time_zone,		ainfo_tz_idarg,				ZEND_ACC_PUBLIC | ZEND_ACC_STATIC)
@@ -511,7 +513,7 @@ U_CFUNC void timezone_register_IntlTimeZone_class(void)
 		return;
 	}
 
-	memcpy(&TimeZone_handlers, zend_get_std_object_handlers(),
+	memcpy(&TimeZone_handlers, &std_object_handlers,
 		sizeof TimeZone_handlers);
 	TimeZone_handlers.offset = XtOffsetOf(TimeZone_object, zo);
 	TimeZone_handlers.clone_obj = TimeZone_clone_obj;

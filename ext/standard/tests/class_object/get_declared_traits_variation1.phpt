@@ -29,7 +29,7 @@ var_dump(in_array('AutoTrait', get_declared_traits()));
 echo "\nDONE\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing get_declared_traits() : testing autoloaded traits ***
 
 -- before instance is declared --

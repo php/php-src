@@ -23,7 +23,7 @@ $arr['val'] = 'changed.val';
 
 var_dump($arr, $obj, $a);
 ?>
---EXPECTF--
+--EXPECT--
 array(0) {
 }
 array(2) {

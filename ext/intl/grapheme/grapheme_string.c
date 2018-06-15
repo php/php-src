@@ -24,6 +24,9 @@
 #include "grapheme_util.h"
 
 #include <unicode/utypes.h>
+#if U_ICU_VERSION_MAJOR_NUM >= 49
+#include <unicode/utf8.h>
+#endif
 #include <unicode/ucol.h>
 #include <unicode/ustring.h>
 #include <unicode/ubrk.h>
@@ -169,7 +172,7 @@ PHP_FUNCTION(grapheme_strpos)
    Find position of first occurrence of a string within another, ignoring case differences */
 PHP_FUNCTION(grapheme_stripos)
 {
-	char *haystack, *needle, *haystack_dup, *needle_dup;
+	char *haystack, *needle;
 	size_t haystack_len, needle_len;
 	const char *found;
 	zend_long loffset = 0;
@@ -201,6 +204,7 @@ PHP_FUNCTION(grapheme_stripos)
 	is_ascii = ( grapheme_ascii_check((unsigned char*)haystack, haystack_len) >= 0 );
 
 	if ( is_ascii ) {
+		char *haystack_dup, *needle_dup;
 		int32_t noffset = offset >= 0 ? offset : (int32_t)haystack_len + offset;
 		needle_dup = estrndup(needle, needle_len);
 		php_strtolower(needle_dup, needle_len);
@@ -834,10 +838,10 @@ PHP_FUNCTION(grapheme_extract)
 	pstr = str + start;
 
 	/* just in case pstr points in the middle of a character, move forward to the start of the next char */
-	if ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
+	if ( !U8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 		char *str_end = str + str_len;
 
-		while ( !UTF8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
+		while ( !U8_IS_SINGLE(*pstr) && !U8_IS_LEAD(*pstr) ) {
 			pstr++;
 			if ( pstr >= str_end ) {
 				intl_error_set( NULL, U_ILLEGAL_ARGUMENT_ERROR,

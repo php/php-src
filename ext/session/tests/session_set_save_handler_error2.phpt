@@ -41,7 +41,7 @@ session_destroy();
 
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_set_save_handler() : error functionality ***
 array(3) {
   ["Blah"]=>

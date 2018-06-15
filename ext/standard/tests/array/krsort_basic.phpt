@@ -75,7 +75,7 @@ var_dump( $temp_array);
 
 echo "Done\n";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing krsort() : basic functionality ***
 
 -- Testing krsort() by supplying string array, 'flag' value is defualt --

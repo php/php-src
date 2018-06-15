@@ -2,7 +2,6 @@
 Phar: test edge cases of fopen() function interception #2
 --SKIPIF--
 <?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (version_compare(phpversion(), '6.0', '>=')) die('skip parameter parsing changed in 6.0'); ?>
 --INI--
 phar.readonly=0
 --FILE--

@@ -25,7 +25,6 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 	const UChar *u = nptr, *nstart;
 	UChar c = *u;
 	int any = 0;
-	ALLOCA_FLAG(use_heap);
 
 	while (u_isspace(c)) {
 		c = *++u;
@@ -72,6 +71,7 @@ static double collator_u_strtod(const UChar *nptr, UChar **endptr) /* {{{ */
 		char buf[64], *numbuf, *bufpos;
 		size_t length = u - nstart;
 		double value;
+		ALLOCA_FLAG(use_heap);
 
 		if (length < sizeof(buf)) {
 			numbuf = buf;

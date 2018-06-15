@@ -16,5 +16,5 @@ if (! is_array($nodes)) {
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 Result Count: 0

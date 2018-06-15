@@ -1618,5 +1618,5 @@ array(26) {
   ["Copyright"]=>
   string(12) "Eric Stewart"
 }
---CREDIT--
+--CREDITS--
 Eric Stewart <ericleestewart@gmail.com>

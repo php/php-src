@@ -24,7 +24,7 @@ try {
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing date_create() : error conditions ***
 
 -- Testing new DateTime() with more than expected no. of arguments --

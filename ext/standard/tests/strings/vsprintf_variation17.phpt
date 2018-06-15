@@ -44,7 +44,7 @@ foreach($formats as $format) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing vsprintf() : scientific formats and scientific values ***
 
 -- Iteration 1 --

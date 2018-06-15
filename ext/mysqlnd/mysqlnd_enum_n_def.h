@@ -2,7 +2,7 @@
   +----------------------------------------------------------------------+
   | PHP Version 7                                                        |
   +----------------------------------------------------------------------+
-  | Copyright (c) 2006-2017 The PHP Group                                |
+  | Copyright (c) 2006-2018 The PHP Group                                |
   +----------------------------------------------------------------------+
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
@@ -631,6 +631,7 @@ enum mysqlnd_packet_type
 	PROT_CHG_USER_RESP_PACKET,
 	PROT_SHA256_PK_REQUEST_PACKET,
 	PROT_SHA256_PK_REQUEST_RESPONSE_PACKET,
+	PROT_CACHED_SHA2_RESULT_PACKET,
 	PROT_LAST /* should always be last */
 };
 

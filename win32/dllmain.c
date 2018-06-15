@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -42,11 +42,11 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 		case DLL_PROCESS_ATTACH:
 			/*
 			 * We do not need to check the return value of php_win32_init_gettimeofday()
-			 * because the symbol bare minimum symbol we need is always available on our 
+			 * because the symbol bare minimum symbol we need is always available on our
 			 * lowest supported platform.
 			 *
 			 * On Windows 8 or greater, we use a more precise symbol to obtain the system
-			 * time, which is dynamically. The fallback allows us to proper support 
+			 * time, which is dynamically. The fallback allows us to proper support
 			 * Vista/7/Server 2003 R2/Server 2008/Server 2008 R2.
 			 *
 			 * Instead simply initialize the global in win32/time.c for gettimeofday()
@@ -76,8 +76,8 @@ BOOL WINAPI DllMain(HINSTANCE inst, DWORD reason, LPVOID dummy)
 	}
 
 #ifdef HAVE_LIBXML
-	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM. 
-		If that changes, this place will need some rework. 
+	/* This imply that only LIBXML_STATIC_FOR_DLL is supported ATM.
+		If that changes, this place will need some rework.
 	   TODO Also this should be revisited as no initialization
 		might be needed for TS build (libxml build with TLS
 		support. */

@@ -96,7 +96,7 @@ fclose($fp);
 echo "Done";
 ob_end_flush();
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing session_decode() : basic functionality ***
 bool(true)
 

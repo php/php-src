@@ -49,7 +49,7 @@ for($count = 0; $count < count($input_values); $count++)
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_filter() : usage variations - different types of array for 'input' argument***
 -- Iteration 1 --
 array(5) {

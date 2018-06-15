@@ -93,7 +93,7 @@ string(72) "Given object is not an instance of the class this method was declare
 
 Non-object:
 
-Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 
 Static method:
@@ -104,7 +104,7 @@ NULL
 Warning: ReflectionMethod::invokeArgs() expects exactly 2 parameters, 1 given in %s on line %d
 NULL
 
-Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, boolean given in %s on line %d
+Warning: ReflectionMethod::invokeArgs() expects parameter 1 to be object, bool given in %s on line %d
 NULL
 Called staticMethod()
 Exception: Using $this when not in object context

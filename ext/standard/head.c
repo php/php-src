@@ -2,7 +2,7 @@
    +----------------------------------------------------------------------+
    | PHP Version 7                                                        |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1997-2017 The PHP Group                                |
+   | Copyright (c) 1997-2018 The PHP Group                                |
    +----------------------------------------------------------------------+
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
@@ -104,6 +104,16 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 		return FAILURE;
 	}
 
+	if (path && strpbrk(ZSTR_VAL(path), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_error(E_WARNING, "Cookie paths cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
+		return FAILURE;
+	}
+
+	if (domain && strpbrk(ZSTR_VAL(domain), ",; \t\r\n\013\014") != NULL) { /* man isspace for \013 and \014 */
+		zend_error(E_WARNING, "Cookie domains cannot contain any of the following ',; \\t\\r\\n\\013\\014'" );
+		return FAILURE;
+	}
+
 	len += ZSTR_LEN(name);
 	if (value) {
 		if (url_encode) {
@@ -147,7 +157,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 			if (!p || *(p + 5) != ' ') {
 				zend_string_free(dt);
 				efree(cookie);
-				zend_string_release(encoded_value);
+				zend_string_release_ex(encoded_value, 0);
 				zend_error(E_WARNING, "Expiry date cannot have a year greater than 9999");
 				return FAILURE;
 			}
@@ -165,7 +175,7 @@ PHPAPI int php_setcookie(zend_string *name, zend_string *value, time_t expires, 
 	}
 
 	if (encoded_value) {
-		zend_string_release(encoded_value);
+		zend_string_release_ex(encoded_value, 0);
 	}
 
 	if (path && ZSTR_LEN(path)) {
@@ -313,7 +323,7 @@ PHP_FUNCTION(headers_list)
 }
 /* }}} */
 
-/* {{{ proto long http_response_code([int response_code])
+/* {{{ proto int http_response_code([int response_code])
    Sets a response code, or returns the current HTTP response code */
 PHP_FUNCTION(http_response_code)
 {

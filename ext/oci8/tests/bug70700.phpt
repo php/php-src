@@ -155,7 +155,7 @@ echo 'size of stream4a is ', strlen($stream4a), ' bytes, ', mb_strlen($stream4a)
 echo 'beg of stream4a is ', $start4a, PHP_EOL;
 echo 'end of stream4a is ', $ending4a, PHP_EOL;
 
---EXPECTF--
+--EXPECT--
 
 Test 1: j
 size of string1 is 1000006 bytes, 1000006 chars.

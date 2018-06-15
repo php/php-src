@@ -34,7 +34,7 @@ gzclose($h);
 
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing gzopen() : basic functionality ***
 When you're taught through feelings
 Destiny flying high above

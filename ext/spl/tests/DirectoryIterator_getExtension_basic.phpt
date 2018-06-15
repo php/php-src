@@ -40,7 +40,7 @@ foreach ($files as $file) {
 }
 rmdir($dir);
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 array(5) {
   [0]=>

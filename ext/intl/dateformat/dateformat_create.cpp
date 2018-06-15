@@ -218,7 +218,7 @@ U_CFUNC PHP_METHOD( IntlDateFormatter, __construct )
 		if (!EG(exception)) {
 			zend_string *err = intl_error_get_message(NULL);
 			zend_throw_exception(IntlException_ce_ptr, ZSTR_VAL(err), intl_error_get_code(NULL));
-			zend_string_release(err);
+			zend_string_release_ex(err, 0);
 		}
 	}
 	zend_restore_error_handling(&error_handling);

@@ -17,7 +17,7 @@
   3. The names of the authors may not be used to endorse or promote
      products derived from this software without specific prior
      written permission.
- 
+
   THIS SOFTWARE IS PROVIDED BY THE AUTHORS ``AS IS'' AND ANY EXPRESS
   OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -106,7 +106,7 @@ zip_source_buffer_create(const void *data, zip_uint64_t len, int freep, zip_erro
     ctx->out = NULL;
     ctx->mtime = time(NULL);
     zip_error_init(&ctx->error);
-    
+
     if ((zs=zip_source_function_create(read_data, ctx, error)) == NULL) {
 	buffer_free(ctx->in);
 	free(ctx);
@@ -132,7 +132,7 @@ read_data(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 
         case ZIP_SOURCE_CLOSE:
             return 0;
-            
+
         case ZIP_SOURCE_COMMIT_WRITE:
 	    buffer_free(ctx->in);
 	    ctx->in = ctx->out;
@@ -141,24 +141,24 @@ read_data(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 
         case ZIP_SOURCE_ERROR:
             return zip_error_to_data(&ctx->error, data, len);
-            
+
         case ZIP_SOURCE_FREE:
 	    buffer_free(ctx->in);
 	    buffer_free(ctx->out);
             free(ctx);
             return 0;
-            
+
         case ZIP_SOURCE_OPEN:
 	    ctx->in->offset = 0;
             return 0;
-	
+
         case ZIP_SOURCE_READ:
 	    if (len > ZIP_INT64_MAX) {
 		zip_error_set(&ctx->error, ZIP_ER_INVAL, 0);
 		return -1;
 	    }
             return buffer_read(ctx->in, data, len);
-	
+
         case ZIP_SOURCE_REMOVE:
 	{
 	    buffer_t *empty = buffer_new_read(NULL, 0, 0);
@@ -166,7 +166,7 @@ read_data(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 		zip_error_set(&ctx->error, ZIP_ER_MEMORY, 0);
 		return -1;
 	    }
-	
+
 	    buffer_free(ctx->in);
 	    ctx->in = empty;
 	    return 0;
@@ -182,11 +182,11 @@ read_data(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 
         case ZIP_SOURCE_SEEK_WRITE:
 	    return buffer_seek(ctx->out, data, len, &ctx->error);
-       
+
         case ZIP_SOURCE_STAT:
         {
             zip_stat_t *st;
-	    
+
 	    if (len < sizeof(*st)) {
                 zip_error_set(&ctx->error, ZIP_ER_INVAL, 0);
 		return -1;
@@ -201,21 +201,21 @@ read_data(void *state, void *data, zip_uint64_t len, zip_source_cmd_t cmd)
 	    st->comp_method = ZIP_CM_STORE;
 	    st->encryption_method = ZIP_EM_NONE;
 	    st->valid = ZIP_STAT_MTIME|ZIP_STAT_SIZE|ZIP_STAT_COMP_SIZE|ZIP_STAT_COMP_METHOD|ZIP_STAT_ENCRYPTION_METHOD;
-	    
+
 	    return sizeof(*st);
 	}
 
         case ZIP_SOURCE_SUPPORTS:
 	    return zip_source_make_command_bitmap(ZIP_SOURCE_OPEN, ZIP_SOURCE_READ, ZIP_SOURCE_CLOSE, ZIP_SOURCE_STAT, ZIP_SOURCE_ERROR, ZIP_SOURCE_FREE, ZIP_SOURCE_SEEK, ZIP_SOURCE_TELL, ZIP_SOURCE_BEGIN_WRITE, ZIP_SOURCE_COMMIT_WRITE, ZIP_SOURCE_REMOVE, ZIP_SOURCE_ROLLBACK_WRITE, ZIP_SOURCE_SEEK_WRITE, ZIP_SOURCE_TELL_WRITE, ZIP_SOURCE_WRITE, -1);
-            
+
         case ZIP_SOURCE_TELL:
             if (ctx->in->offset > ZIP_INT64_MAX) {
 		zip_error_set(&ctx->error, ZIP_ER_TELL, EOVERFLOW);
 		return -1;
 	    }
 	    return (zip_int64_t)ctx->in->offset;
-		
-            
+
+
         case ZIP_SOURCE_TELL_WRITE:
             if (ctx->out->offset > ZIP_INT64_MAX) {
 		zip_error_set(&ctx->error, ZIP_ER_TELL, EOVERFLOW);
@@ -241,7 +241,7 @@ static void
 buffer_free(buffer_t *buffer)
 {
     if (buffer == NULL) {
-	return; 
+	return;
     }
 
     if (buffer->free_data) {
@@ -344,7 +344,7 @@ buffer_read(buffer_t *buffer, zip_uint8_t *data, zip_uint64_t length)
     n = 0;
     while (n < length) {
 	zip_uint64_t left = ZIP_MIN(length - n, buffer->fragment_size - fragment_offset);
-	
+
 	memcpy(data + n, buffer->fragments[i] + fragment_offset, left);
 
 	n += left;
@@ -361,11 +361,11 @@ static int
 buffer_seek(buffer_t *buffer, void *data, zip_uint64_t len, zip_error_t *error)
 {
     zip_int64_t new_offset = zip_source_seek_compute_offset(buffer->offset, buffer->size, data, len, error);
-    
+
     if (new_offset < 0) {
         return -1;
     }
-    
+
     buffer->offset = (zip_uint64_t)new_offset;
     return 0;
 }
@@ -385,7 +385,7 @@ buffer_write(buffer_t *buffer, const zip_uint8_t *data, zip_uint64_t length, zip
     /* grow buffer if needed */
     if (buffer->offset + length > buffer->nfragments * buffer->fragment_size) {
 	zip_uint64_t needed_fragments = (buffer->offset + length + buffer->fragment_size - 1) / buffer->fragment_size;
-	
+
 	if (needed_fragments > buffer->fragments_capacity) {
 	    zip_uint64_t new_capacity = buffer->fragments_capacity;
 
@@ -418,7 +418,7 @@ buffer_write(buffer_t *buffer, const zip_uint8_t *data, zip_uint64_t length, zip
     n = 0;
     while (n < length) {
 	zip_uint64_t left = ZIP_MIN(length - n, buffer->fragment_size - fragment_offset);
-		
+
 	memcpy(buffer->fragments[i] + fragment_offset, data + n, left);
 
 	n += left;

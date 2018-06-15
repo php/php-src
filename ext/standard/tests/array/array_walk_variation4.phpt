@@ -40,7 +40,7 @@ var_dump( array_walk( $input, "callback"));
 
 echo "Done"
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_walk() : array with subarray ***
 int(0)
 array(0) {

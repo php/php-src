@@ -47,7 +47,7 @@ foreach($bases as $base) {
 }
 ?>
 ===Done===
---EXPECTF--
+--EXPECT--
 Base = 23
 ..... Exponent = 0 Result = 1
 ..... Exponent = 1 Result = 23

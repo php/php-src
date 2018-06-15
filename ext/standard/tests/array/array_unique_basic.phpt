@@ -23,7 +23,7 @@ var_dump( array_unique($input) );
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_unique() : basic functionality ***
 array(2) {
   [0]=>

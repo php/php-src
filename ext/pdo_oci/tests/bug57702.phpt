@@ -146,7 +146,7 @@ $stmt->execute();
 print "done\n";
 
 ?>
---EXPECTF--
+--EXPECT--
 First Query
 string(11) "row 1 col 1"
 string(11) "row 1 col 2"

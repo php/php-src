@@ -46,7 +46,7 @@ var_dump( usort($array_arg, 'cmp_function') );
 var_dump($array_arg);
 ?>
 ===DONE===
---EXPECTF--
+--EXPECT--
 *** Testing usort() : usage variation ***
 
 -- Sorting $array_arg containing different references --

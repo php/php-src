@@ -3,9 +3,23 @@ Oniguruma
 
 https://github.com/kkos/oniguruma
 
-Oniguruma is a regular expressions library.
-The characteristics of this library is that different character encoding
-for every regular expression object can be specified.
+Oniguruma is a modern and flexible regular expressions library. It
+encompasses features from different regular expression implementations
+that traditionally exist in different languages. It comes close to
+being a complete superset of all regular expression features found
+in other regular expression implementations.
+
+Its features include:
+* Character encoding can be specified per regular expression object.
+* Several regular expression types are supported:
+  * Oniguruma (native)
+  * POSIX
+  * Grep
+  * GNU Regex
+  * Perl
+  * Java
+  * Ruby
+  * Emacs
 
 Supported character encodings:
 
@@ -20,10 +34,89 @@ Supported character encodings:
 * CP1251:  contributed by Byte
 
 
+New feature of version 6.8.2
+--------------------------
+
+* Fix: #80 UChar in header causes issue
+* NEW API: onig_set_callout_user_data_of_match_param()  (* omission in 6.8.0)
+* add doc/CALLOUTS.API and doc/CALLOUTS.API.ja
+
+
+New feature of version 6.8.1
+--------------------------
+
+* Update shared library version to 5.0.0 for API incompatible changes from 6.7.1
+
+
+New feature of version 6.8.0
+--------------------------
+
+* Retry-limit-in-match function enabled by default
+* NEW: configure option --enable-posix-api=no  (* enabled by default)
+* NEW API: onig_search_with_param(), onig_match_with_param()
+* NEW: Callouts of contents  (?{...contents...}) (?{...}\[tag]\[X<>]) (?{{...}})
+* NEW: Callouts of name      (*name) (*name\[tag]{args...})
+* NEW: Builtin callouts  (*FAIL) (*MISMATCH) (*ERROR{n}) (*COUNT) (*MAX{n}) etc..
+* Examples of Callouts program: [callout.c](sample/callout.c), [count.c](sample/count.c), [echo.c](sample/echo.c)
+
+(* Callout function API is experimental level and isn't fixed definitely yet. Undocumented now)
+
+
+New feature of version 6.7.1
+--------------------------
+
+* NEW: Mechanism of retry-limit-in-match (* disabled by default)
+
+
+New feature of version 6.7.0
+--------------------------
+
+* NEW: hexadecimal codepoint \uHHHH
+* NEW: add ONIG_SYNTAX_ONIGURUMA (== ONIG_SYNTAX_DEFAULT)
+* Disabled \N and \O on ONIG_SYNTAX_RUBY
+* Reduced size of object file
+
+
+New feature of version 6.6.0
+--------------------------
+
+* NEW: ASCII only mode options for character type/property (?WDSP)
+* NEW: Extended Grapheme Cluster boundary \y, \Y (*original)
+* NEW: Extended Grapheme Cluster \X
+* Range-clear (Absent-clear) operator restores previous range in retractions.
+
+
+New feature of version 6.5.0
+--------------------------
+
+* NEW: \K (keep)
+* NEW: \R (general newline) \N (no newline)
+* NEW: \O (true anychar)
+* NEW: if-then-else   (?(...)...\|...)
+* NEW: Backreference validity checker (?(xxx)) (*original)
+* NEW: Absent repeater (?~absent)  \[is equal to (?\~\|absent|\O*)]
+* NEW: Absent expression   (?~|absent|expr)  (*original)
+* NEW: Absent stopper (?~|absent)     (*original)
+
+
+New feature of version 6.4.0
+--------------------------
+
+* Fix fatal problem of endless repeat on Windows
+* NEW: call zero (call the total regexp) \g<0>
+* NEW: relative backref/call by positive number \k<+n>, \g<+n>
+
+
 New feature of version 6.3.0
 --------------------------
 
-* NEW SYNTAX: escape-o-brace for octal codepoint.
+* NEW: octal codepoint \o{.....}
+* Fixed CVE-2017-9224
+* Fixed CVE-2017-9225
+* Fixed CVE-2017-9226
+* Fixed CVE-2017-9227
+* Fixed CVE-2017-9228
+* Fixed CVE-2017-9229
 
 
 New feature of version 6.1.2
@@ -135,6 +228,7 @@ Sample Programs
 |sample/scan.c         |example of using onig_scan().             |
 |sample/sql.c          |example of the variable meta characters.  |
 |sample/user_property.c|example of user defined Unicode property. |
+|sample/callout.c      |example of callouts.                      |
 
 
 Test Programs

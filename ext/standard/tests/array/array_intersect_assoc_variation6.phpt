@@ -79,7 +79,7 @@ foreach($arrays as $arr2) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing array_intersect_assoc() : assoc array with diff keys to $arr2 argument ***
 -- Iteration 1 --
 array(0) {

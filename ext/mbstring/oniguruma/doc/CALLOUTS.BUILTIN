@@ -1,0 +1,95 @@
+CALLOUTS.BUILTIN               2018/03/26
+
+
+* FAIL    (progress)
+
+  (*FAIL)
+
+  Always fail.
+
+
+* MISMATCH    (progress)
+
+  (*MISMATCH)
+
+  Terminates Match process.
+  Continues Search process.
+
+
+* ERROR    (progress)
+
+  (*ERROR{n::LONG})
+
+  Terminates Search/Match process.
+
+  Return value is the argument 'n'. (The value must be less than -1)
+  'n' is an optional argument. (default value is ONIG_ABORT)
+
+
+* MAX    (progress/retraction)
+
+  (*MAX{n::LONG/TAG, c::CHAR})
+
+  Restricts the maximum count of success(default), progress or retraction.
+  If 'n' type is tag, slot 0 value of the tag are used.
+  Depends on 'c' argument, the slot 0 value changes.
+  'c' is an optional argument, default value is 'X'.
+
+  (* success count = progress count - retraction count)
+
+
+  ex. "(?:(*COUNT[T]{X})a)*(?:(*MAX{T})c)*"
+
+  [callout data]
+  slot 0: '>': progress count, '<': retraction count, 'X': success count (default)
+
+
+* COUNT    (progress/retraction)
+
+  (*COUNT{c::CHAR})
+
+  Counter.
+  Depends on 'c' argument, the slot 0 value changes.
+  'c' is an optional argument, default value is '>'.
+
+  [callout data]
+  slot 0: '>': progress count (default), '<': retraction count, 'X': success count
+  slot 1: progress count
+  slot 2: retraction count
+
+  ** If option ONIG_OPTION_FIND_LONGEST or ONIG_OPTION_FIND_NOT_EMPTY is used,
+     counts are not accurate.
+
+
+* TOTAL_COUNT    (progress/retraction)
+
+  (*TOTAL_COUNT{c::CHAR})
+
+  It's the almost same as COUNT.
+  But the counts are integrated in a search process.
+  'c' is an optional argument, default value is '>'.
+
+  [callout data]
+  slot 0: '>': progress count (default), '<': retraction count, 'X': success count
+  slot 1: progress count
+  slot 2: retraction count
+
+  ** If option ONIG_OPTION_FIND_LONGEST or ONIG_OPTION_FIND_NOT_EMPTY is used,
+     counts are not accurate.
+
+
+* CMP    (progress)
+
+  (*CMP{x::TAG/LONG, op::STRING, y::TAG/LONG})
+
+  Compares x value and y value with op operator.
+  If x and y types are tag, slot 0 value of the tag are used.
+
+  op: '==', '!=', '>', '<', '>=', '<='
+
+  ex. "(?:(*MAX[TA]{7})a|(*MAX[TB]{5})b)*(*CMP{TA,>=,4})"
+
+  [callout data]
+  slot 0: op value (enum OP_CMP in src/regexec.c)
+
+//END

@@ -20,7 +20,7 @@ foreach ($urls as $url) {
 
 echo "Done";
 ?>
---EXPECTF--
+--EXPECT--
 --> 64.246.30.37   : string(12) "64.246.30.37"
 --> http://64.246.30.37   : NULL
 --> http://64.246.30.37/   : string(1) "/"

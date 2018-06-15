@@ -125,7 +125,7 @@ mysqli_close($link);
 ?>
 --XFAIL--
 Unsupported and undefined, under development
---EXPECTF--
+--EXPECT--
 [010] More results: yes
 [011] Next result: yes
 done!

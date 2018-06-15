@@ -20,5 +20,5 @@ $t=array(new stdClass);
 while($db= mysqli_fetch_object($res,'cc',$t)){}
 print "done!";
 ?>
---EXPECTF--
+--EXPECT--
 done!

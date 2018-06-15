@@ -51,7 +51,7 @@ $path_sub = $path_top . '/sub_folder';
 rmdir($path_sub);
 rmdir($path_top);
 ?>
---EXPECTF--
+--EXPECT--
 *** Testing readdir() : usage variations ***
 array(5) {
   [0]=>
