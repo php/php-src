@@ -17,6 +17,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   n. IS_TYPE_COPYABLE
   o. IS_UNUSED
   p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
+  q. sapi_cli_single_write return ssize_t, when failed return negative value.
 
 2. Build system changes
   a. Unix build system changes
