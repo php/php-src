@@ -150,6 +150,15 @@ readline:
     options has been added to readline_info(). These options are only available
     if PHP is linked against libreadline (rather than libedit).
 
+Standard:
+  . The -–with-password-argon2[=dir] configure argument now provides support for 
+    both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
+    password_get_info(), and password_needs_rehash() functions. Passwords may be
+    hashed and verified using the PASSWORD_ARGON2ID constant.
+    Support for both Argon2i and Argon2id in the password_* functions now requires
+    PHP be linked against libargon2 reference library >= 20161029.
+    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements). 
+
 ========================================
 3. Changes in SAPI modules
 ========================================
@@ -310,6 +319,9 @@ PGSQL:
 	- PGSQL_DIAG_CONSTRAINT_NAME
   . Requires Postgres 9.6
     - PGSQL_DIAG_SEVERITY_NONLOCALIZED
+
+Standard:
+  . PASSWORD_ARGON2ID
 
 ========================================
 11. Changes to INI File Handling

@@ -45,6 +45,7 @@ PHP_MINIT_FUNCTION(password) /* {{{ */
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT", PHP_PASSWORD_BCRYPT, CONST_CS | CONST_PERSISTENT);
 #if HAVE_ARGON2LIB
 	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2I", PHP_PASSWORD_ARGON2I, CONST_CS | CONST_PERSISTENT);
+	REGISTER_LONG_CONSTANT("PASSWORD_ARGON2ID", PHP_PASSWORD_ARGON2ID, CONST_CS | CONST_PERSISTENT);
 #endif
 
 	REGISTER_LONG_CONSTANT("PASSWORD_BCRYPT_DEFAULT_COST", PHP_PASSWORD_BCRYPT_COST, CONST_CS | CONST_PERSISTENT);
@@ -66,6 +67,8 @@ static zend_string* php_password_get_algo_name(const php_password_algo algo)
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
 			return zend_string_init("argon2i", sizeof("argon2i") - 1, 0);
+		case PHP_PASSWORD_ARGON2ID:
+			return zend_string_init("argon2id", sizeof("argon2id") - 1, 0);
 #endif
 		case PHP_PASSWORD_UNKNOWN:
 		default:
@@ -81,6 +84,10 @@ static php_password_algo php_password_determine_algo(const zend_string *hash)
 		return PHP_PASSWORD_BCRYPT;
 	}
 #if HAVE_ARGON2LIB
+	if (len >= sizeof("$argon2id$")-1 && !memcmp(h, "$argon2id$", sizeof("$argon2id$")-1)) {
+    	return PHP_PASSWORD_ARGON2ID;
+	}
+
 	if (len >= sizeof("$argon2i$")-1 && !memcmp(h, "$argon2i$", sizeof("$argon2i$")-1)) {
     	return PHP_PASSWORD_ARGON2I;
 	}
@@ -159,6 +166,21 @@ static zend_string* php_password_make_salt(size_t length) /* {{{ */
 }
 /* }}} */
 
+#if HAVE_ARGON2LIB
+static void extract_argon2_parameters(const php_password_algo algo, const zend_string *hash,
+									  zend_long *v, zend_long *memory_cost,
+									  zend_long *time_cost, zend_long *threads) /* {{{ */
+{
+	if (algo == PHP_PASSWORD_ARGON2ID) {
+		sscanf(ZSTR_VAL(hash), "$%*[argon2id]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, v, memory_cost, time_cost, threads);
+	} else if (algo == PHP_PASSWORD_ARGON2I) {
+		sscanf(ZSTR_VAL(hash), "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, v, memory_cost, time_cost, threads);
+	}
+
+	return;
+}
+#endif
+
 /* {{{ proto array password_get_info(string $hash)
 Retrieves information about a given hash */
 PHP_FUNCTION(password_get_info)
@@ -186,13 +208,15 @@ PHP_FUNCTION(password_get_info)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2ID:
 			{
 				zend_long v = 0;
 				zend_long memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				zend_long time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				zend_long threads = PHP_PASSWORD_ARGON2_THREADS;
 
-				sscanf(ZSTR_VAL(hash), "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &memory_cost, &time_cost, &threads);
+				extract_argon2_parameters(algo, hash, &v, &memory_cost, &time_cost, &threads);
+
 				add_assoc_long(&options, "memory_cost", memory_cost);
 				add_assoc_long(&options, "time_cost", time_cost);
 				add_assoc_long(&options, "threads", threads);
@@ -252,6 +276,7 @@ PHP_FUNCTION(password_needs_rehash)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2ID:
 			{
 				zend_long v = 0;
 				zend_long new_memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST, memory_cost = 0;
@@ -270,7 +295,7 @@ PHP_FUNCTION(password_needs_rehash)
 					new_threads = zval_get_long(option_buffer);
 				}
 
-				sscanf(ZSTR_VAL(hash), "$%*[argon2i]$v=" ZEND_LONG_FMT "$m=" ZEND_LONG_FMT ",t=" ZEND_LONG_FMT ",p=" ZEND_LONG_FMT, &v, &memory_cost, &time_cost, &threads);
+				extract_argon2_parameters(algo, hash, &v, &memory_cost, &time_cost, &threads);
 
 				if (new_time_cost != time_cost || new_memory_cost != memory_cost || new_threads != threads) {
 					RETURN_TRUE;
@@ -303,7 +328,16 @@ PHP_FUNCTION(password_verify)
 	switch(algo) {
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
-			RETURN_BOOL(ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), Argon2_i));
+		case PHP_PASSWORD_ARGON2ID:
+			{
+				argon2_type type;
+				if (algo == PHP_PASSWORD_ARGON2ID) {
+					type = Argon2_id;
+				} else if (algo == PHP_PASSWORD_ARGON2I) {
+					type = Argon2_i;
+				}
+				RETURN_BOOL(ARGON2_OK == argon2_verify(ZSTR_VAL(hash), ZSTR_VAL(password), ZSTR_LEN(password), type));
+			}
 			break;
 #endif
 		case PHP_PASSWORD_BCRYPT:
@@ -470,13 +504,19 @@ PHP_FUNCTION(password_hash)
 			break;
 #if HAVE_ARGON2LIB
 		case PHP_PASSWORD_ARGON2I:
+		case PHP_PASSWORD_ARGON2ID:
 			{
 				zval *option_buffer;
 				zend_string *salt, *out, *encoded;
 				size_t time_cost = PHP_PASSWORD_ARGON2_TIME_COST;
 				size_t memory_cost = PHP_PASSWORD_ARGON2_MEMORY_COST;
 				size_t threads = PHP_PASSWORD_ARGON2_THREADS;
-				argon2_type type = Argon2_i;
+				argon2_type type;
+				if (algo == PHP_PASSWORD_ARGON2ID) {
+					type = Argon2_id;
+				} else if (algo == PHP_PASSWORD_ARGON2I) {
+					type = Argon2_i;
+				}
 				size_t encoded_len;
 				int status = 0;
 
@@ -485,7 +525,7 @@ PHP_FUNCTION(password_hash)
 				}
 
 				if (memory_cost > ARGON2_MAX_MEMORY || memory_cost < ARGON2_MIN_MEMORY) {
-					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range", memory_cost);
+					php_error_docref(NULL, E_WARNING, "Memory cost is outside of allowed memory range");
 					RETURN_NULL();
 				}
 
@@ -494,7 +534,7 @@ PHP_FUNCTION(password_hash)
 				}
 
 				if (time_cost > ARGON2_MAX_TIME || time_cost < ARGON2_MIN_TIME) {
-					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range", time_cost);
+					php_error_docref(NULL, E_WARNING, "Time cost is outside of allowed time range");
 					RETURN_NULL();
 				}
 
@@ -503,7 +543,7 @@ PHP_FUNCTION(password_hash)
 				}
 
 				if (threads > ARGON2_MAX_LANES || threads == 0) {
-					php_error_docref(NULL, E_WARNING, "Invalid number of threads", threads);
+					php_error_docref(NULL, E_WARNING, "Invalid number of threads");
 					RETURN_NULL();
 				}
 
@@ -517,10 +557,8 @@ PHP_FUNCTION(password_hash)
 					memory_cost,
 					threads,
 					(uint32_t)ZSTR_LEN(salt),
-					ZSTR_LEN(out)
-#if HAVE_ARGON2ID
-					, type
-#endif
+					ZSTR_LEN(out),
+					type
 				);
 
 				encoded = zend_string_alloc(encoded_len - 1, 0);
