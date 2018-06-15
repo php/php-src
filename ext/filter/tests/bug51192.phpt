@@ -1,7 +1,7 @@
 --TEST--
 bug 51192, FILTER_VALIDATE_URL will invalidate a hostname that includes '-'
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(filter_var('http://example.com/path', FILTER_VALIDATE_URL));

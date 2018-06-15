@@ -2,7 +2,7 @@
 PDO Common: Bug #36428 (Incorrect error message for PDO::fetchAll())
 --SKIPIF--
 <?php # vim:ft=php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 if (!extension_loaded('simplexml')) die('skip SimpleXML not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');

@@ -2,7 +2,7 @@
 #38943, properties in extended class cannot be set (5.3+)
 --SKIPIF--
 <?php
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
 ?>
 --FILE--
 <?php

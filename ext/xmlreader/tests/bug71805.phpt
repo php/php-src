@@ -1,7 +1,7 @@
 --TEST--
 XMLReader: Bug #71805 XML files can generate UTF-8 error even if they are UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("xmlreader")) print "skip"; ?>
+<?php if(!extension_loaded("xmlreader")) die("skip xmlreader extension not loaded"); ?>
 --FILE--
 <?php
 

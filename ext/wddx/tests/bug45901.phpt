@@ -2,7 +2,7 @@
 Bug #45901 (wddx_serialize_value crash with SimpleXMLElement object)
 --SKIPIF--
 <?php
-if (!extension_loaded("wddx")) print "skip";
+if(!extension_loaded("wddx")) die("skip wddx extension not loaded");
 if (!extension_loaded("simplexml")) print "skip SimpleXML not present";
 ?>
 --FILE--

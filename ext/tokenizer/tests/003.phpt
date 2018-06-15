@@ -1,7 +1,7 @@
 --TEST--
 token_get_all() and wrong parameters
 --SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+<?php if(!extension_loaded("tokenizer")) die("skip tokenizer extension not loaded"); ?>
 --FILE--
 <?php
 

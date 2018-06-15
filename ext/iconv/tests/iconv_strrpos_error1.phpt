@@ -2,7 +2,7 @@
 Test iconv_strrpos() function : error conditions - pass incorrect number of args
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_strrpos') or die("skip iconv_strrpos() is not available in this build");
 ?>
 --FILE--

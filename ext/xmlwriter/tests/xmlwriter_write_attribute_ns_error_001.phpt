@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_write_attribute_ns with missing param
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if(!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); ?>
 --FILE--
 <?php
 $xw = xmlwriter_open_memory();

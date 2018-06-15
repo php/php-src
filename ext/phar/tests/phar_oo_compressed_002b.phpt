@@ -1,7 +1,7 @@
 --TEST--
 Phar: context/compress=BZip2
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (!extension_loaded("bz2")) die("skip bz2 not present"); ?>
 --INI--
 phar.readonly=0

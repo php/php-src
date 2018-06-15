@@ -1,7 +1,7 @@
 --TEST--
 Phar: PHP bug #74991: include_path has a 4096 char (minus "__DIR__:") limit, in some PHAR cases
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip");
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded");
 --INI--
 phar.readonly=0
 --FILE--

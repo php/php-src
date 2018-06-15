@@ -4,7 +4,7 @@ Phar front controller $_SERVER munging success tar-based
 default_charset=UTF-8
 cgi.fix_pathinfo=1
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller21.phar.php
 REQUEST_URI=/frontcontroller21.phar.php/index.php?test=hi

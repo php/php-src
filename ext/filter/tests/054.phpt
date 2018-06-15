@@ -1,7 +1,7 @@
 --TEST--
 filter_var_array() - using the add_empty option
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 

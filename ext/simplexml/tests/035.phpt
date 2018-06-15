@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: __toString
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if(!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE--
 <?php
 $string = '<?xml version="1.0"?>

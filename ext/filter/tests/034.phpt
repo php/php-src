@@ -1,7 +1,7 @@
 --TEST--
 Logical filter: boolean
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 $booleans = array(

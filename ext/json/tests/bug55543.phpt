@@ -1,7 +1,7 @@
 --TEST--
 Bug #55543 (json_encode() with JSON_NUMERIC_CHECK & numeric string properties)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 $a = new stdClass;

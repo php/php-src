@@ -1,7 +1,7 @@
 --TEST--
 openssl_x509_read() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 $fp = fopen(dirname(__FILE__) . "/cert.crt","r");

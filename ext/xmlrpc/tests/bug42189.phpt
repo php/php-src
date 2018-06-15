@@ -1,7 +1,7 @@
 --TEST--
 Bug #42189 (xmlrpc_get_type() crashes PHP on invalid dates)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 $a = '~~~~~~~~~~~~~~~~~~';
@@ -10,6 +10,6 @@ var_dump($ok);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 bool(false)
 Done

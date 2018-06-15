@@ -1,8 +1,8 @@
 --TEST--
 Phar::convertToTar() bz2 compressed
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("bz2")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
+<?php if (!extension_loaded("bz2")) die("skip bz2 extension not loaded"); ?>
 --INI--
 phar.require_hash=0
 phar.readonly=0

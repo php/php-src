@@ -2,7 +2,7 @@
 Bug #69972 (Use-after-free vulnerability in sqlite3SafetyCheckSickOrOk())
 --SKIPIF--
 <?php
-if (!extension_loaded('sqlite3')) die('skip');
+if (!extension_loaded('sqlite3')) die('skip sqlite3 extension not loaded');
 ?>
 --FILE--
 <?php

@@ -1,7 +1,7 @@
 --TEST--
 Phar object: add file
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!extension_loaded('phar')) die('skip phar extension not loaded'); ?>
 --INI--
 phar.readonly=1
 phar.require_hash=0

@@ -2,7 +2,7 @@
 Test mb_stristr() function : usage variation - multiple needles
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_stristr') or die("skip mb_stristr() is not available in this build");
 ?>
 --FILE--

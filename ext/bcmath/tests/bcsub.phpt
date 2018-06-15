@@ -1,7 +1,7 @@
 --TEST--
 bcsub() function
 --SKIPIF--
-<?php if(!extension_loaded("bcmath")) print "skip"; ?>
+<?php if(!extension_loaded("bcmath")) die("skip bcmath extension not loaded"); ?>
 --INI--
 bcmath.scale=0
 --FILE--

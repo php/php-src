@@ -2,7 +2,7 @@
 bug #61443
 --SKIPIF--
 <?php
-extension_loaded("zlib") or die("skip");
+extension_loaded("zlib") or die("skip zlib extension not loaded");
 ?>
 --FILE--
 <?php

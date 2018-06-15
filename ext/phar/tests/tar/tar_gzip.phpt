@@ -2,7 +2,7 @@
 Phar: tar-based phar, gzipped tar
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 if (!extension_loaded("zlib")) die("skip zlib not available");
 ?>
 --INI--

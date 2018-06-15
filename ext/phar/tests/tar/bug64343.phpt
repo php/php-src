@@ -1,7 +1,7 @@
 --TEST--
 Bug #64343 (phar cannot open tars with pax headers)
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 

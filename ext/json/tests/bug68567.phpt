@@ -1,7 +1,7 @@
 --TEST--
 Bug #68567 JSON_PARTIAL_OUTPUT_ON_ERROR can result in JSON with null key
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 

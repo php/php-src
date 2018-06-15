@@ -1,7 +1,7 @@
 --TEST--
 Bug #41067 (json_encode() problem with UTF-16 input)
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 $single_barline = "\360\235\204\200";

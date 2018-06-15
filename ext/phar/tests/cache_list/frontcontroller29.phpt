@@ -4,7 +4,7 @@ Phar front controller with fatal error in php file [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller29.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller29.php
 REQUEST_URI=/frontcontroller29.php/fatalerror.phps

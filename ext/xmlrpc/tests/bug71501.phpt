@@ -2,7 +2,7 @@
 Bug #71501 (xmlrpc_encode_request ignores encoding option)
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 ?>
 --FILE--
 <?php

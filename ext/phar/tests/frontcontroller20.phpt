@@ -1,7 +1,7 @@
 --TEST--
 Phar front controller $_SERVER munging failure 3
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller20.php
 REQUEST_URI=/frontcontroller20.php/

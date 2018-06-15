@@ -1,7 +1,7 @@
 --TEST--
 json_encode() with JSON_PRETTY_PRINT
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 function encode_decode($json) {

@@ -2,7 +2,7 @@
 Bug #73113 (Segfault with throwing JsonSerializable)
 Also test that the custom exception is not wrapped by ext/json
 --SKIPIF--
-<?php if (!extension_loaded("json")) print "skip"; ?>
+<?php if(!extension_loaded("json")) die("skip json extension not loaded"); ?>
 --FILE--
 <?php
 

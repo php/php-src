@@ -3,7 +3,7 @@ Phar front controller mime type override, other [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller14.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller14.php
 REQUEST_URI=/frontcontroller14.php/a.jpg

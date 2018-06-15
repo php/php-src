@@ -1,7 +1,7 @@
 --TEST--
 gmp_jacobi() basic tests
 --SKIPIF--
-<?php if (!extension_loaded("gmp")) print "skip"; ?>
+<?php if (!extension_loaded("gmp")) die("skip gmp extension not loaded"); ?>
 --FILE--
 <?php
 

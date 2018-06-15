@@ -1,7 +1,7 @@
 --TEST--
 xmlrpc_encode_request() with wrong arguments
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 

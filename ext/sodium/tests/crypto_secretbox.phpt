@@ -1,7 +1,7 @@
 --TEST--
 Check for libsodium secretbox
 --SKIPIF--
-<?php if (!extension_loaded("sodium")) print "skip"; ?>
+<?php if(!extension_loaded("sodium")) die("skip sodium extension not loaded"); ?>
 --FILE--
 <?php
 $nonce = random_bytes(SODIUM_CRYPTO_SECRETBOX_NONCEBYTES);

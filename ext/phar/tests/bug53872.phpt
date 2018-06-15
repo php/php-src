@@ -2,7 +2,7 @@
 bug#53872 (internal corruption of phar)
 --SKIPIF--
 <?php 
-if (!extension_loaded("phar")) die("skip"); 
+if (!extension_loaded("phar")) die("skip phar extension not loaded"); 
 if (!extension_loaded("zlib")) die("skip Test needs ext/zlib"); 
 ?>
 --INI--

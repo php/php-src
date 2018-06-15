@@ -1,7 +1,7 @@
 --TEST--
 Bug #18916 (xmlrpc_set_type() not working)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --INI--
 date.timezone="America/Sao_Paulo"
 --FILE--

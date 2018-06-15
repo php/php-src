@@ -1,8 +1,8 @@
 --TEST--
 Bug #49910: no support for ././@LongLink for long filenames in phar tar support
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 $fname = str_replace('\\', '/', dirname(__FILE__) . '/files/Structures_Graph-1.0.3.tgz');

@@ -1,7 +1,7 @@
 --TEST--
 gzdeflate()/gzinflate()
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php /* $Id$ */
 $original = str_repeat("hallo php",4096);

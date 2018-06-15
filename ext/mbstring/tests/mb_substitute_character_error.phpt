@@ -2,7 +2,7 @@
 Test mb_substitute_character() function : error conditions 
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_substitute_character') or die("skip mb_substitute_character() is not available in this build");
 ?>
 --FILE--

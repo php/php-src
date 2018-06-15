@@ -1,7 +1,7 @@
 --TEST--
 filter_has_var() tests
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --GET--
 a=1&b=2&c=0
 --POST--
@@ -24,7 +24,7 @@ var_dump(filter_has_var("", "cc"));
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 Warning: filter_has_var() expects exactly 2 parameters, 0 given in %s on line %d
 bool(false)
 bool(false)

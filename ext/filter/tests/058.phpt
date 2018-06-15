@@ -1,7 +1,7 @@
 --TEST--
 FILTER_VALIDATE_EMAIL unicode support (https://tools.ietf.org/html/rfc6531)
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 $values = Array(

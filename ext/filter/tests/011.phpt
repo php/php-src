@@ -3,7 +3,7 @@ filter_input()
 --INI--
 precision=14
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --GET--
 a=<b>test</b>&b=http://example.com
 --POST--

@@ -2,7 +2,7 @@
 gzopen(), gzread(), gzwrite()
 --SKIPIF--
 <?php # vim600:syn=php:
-if (!extension_loaded("zlib")) print "skip"; ?>
+if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 $original = str_repeat("hallo php",4096);

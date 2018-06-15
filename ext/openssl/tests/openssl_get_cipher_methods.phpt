@@ -4,7 +4,7 @@ openssl_get_cipher_methods basic test
 marcosptf - <marcosptf@yahoo.com.br>
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) print "skip";
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

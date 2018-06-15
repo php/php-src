@@ -1,7 +1,7 @@
 --TEST--
 Bug #54061 (Memory leak in openssl_decrypt)
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) die("skip"); ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 $data = "jfdslkjvflsdkjvlkfjvlkjfvlkdm,4w 043920r 9234r 32904r 09243

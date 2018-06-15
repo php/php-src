@@ -3,7 +3,7 @@ Phar front controller $_SERVER munging failure [cache_list]
 --INI--
 phar.cache_list={PWD}/frontcontroller18.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller18.php
 REQUEST_URI=/frontcontroller18.php/fronk.gronk

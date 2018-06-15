@@ -1,7 +1,7 @@
 --TEST--
 Parsing a file using constructor
 --SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+<?php if(!extension_loaded("tidy")) die("skip tidy extension not loaded"); ?>
 --FILE--
 <?php
         $tidy = new tidy(dirname(__FILE__)."/013.html", array("show-body-only"=>true));

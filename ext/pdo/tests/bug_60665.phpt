@@ -2,7 +2,7 @@
 PDO Common: Bug #60665 (call to empty() on NULL result using PDO::FETCH_LAZY returns false)
 --SKIPIF--
 <?php
-if (!extension_loaded('pdo')) die('skip');
+if (!extension_loaded('pdo')) die('skip pdo extension not loaded');
 $dir = getenv('REDIR_TEST_DIR');
 if (false == $dir) die('skip no driver');
 require_once $dir . 'pdo_test.inc';

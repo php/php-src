@@ -1,7 +1,7 @@
 --TEST--
 Phar: bug #69441: Buffer Overflow when parsing tar/zip/phar in phar_set_inode
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 $fname = dirname(__FILE__) . '/bug69441.phar';

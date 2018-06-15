@@ -1,10 +1,10 @@
 --TEST--
 SimpleXML [interop]: simplexml_import_dom
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) die("skip"); ?>
+<?php if (!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 <?php if (!extension_loaded("dom")) die("skip dom extension not loaded"); ?>
 --FILE--
-<?php 
+<?php
 $dom = new domDocument;
 $dom->load(dirname(__FILE__)."/book.xml");
 if(!$dom) {

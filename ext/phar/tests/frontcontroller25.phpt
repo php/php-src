@@ -3,7 +3,7 @@ Phar front controller with extra path_info
 --INI--
 default_charset=UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller25.php
 REQUEST_URI=/frontcontroller25.php/a1.phps/extra/stuff

@@ -1,7 +1,7 @@
 --TEST--
 tidy_parse_string()
 --SKIPIF--
-<?php if (!extension_loaded("tidy")) print "skip"; ?>
+<?php if(!extension_loaded("tidy")) die("skip tidy extension not loaded"); ?>
 --FILE--
 <?php
     	$a = tidy_parse_string("<HTML></HTML>");

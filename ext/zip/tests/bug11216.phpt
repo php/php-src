@@ -3,7 +3,7 @@ Bug #11216 (::addEmptyDir() crashes when the directory already exists)
 --SKIPIF--
 <?php
 /* $Id$ */
-if(!extension_loaded('zip')) die('skip');
+if(!extension_loaded('zip')) die('skip zip extension not loaded');
  ?>
 --FILE--
 <?php

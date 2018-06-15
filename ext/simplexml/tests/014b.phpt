@@ -1,7 +1,7 @@
 --TEST--
 SimpleXML: adding/removing attributes (second)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if(!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE--
 <?php 
 $xml =<<<EOF

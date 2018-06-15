@@ -2,7 +2,7 @@
 Test mb_strrchr() function : usage variation - various haystacks, needle won't be found
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strrchr') or die("skip mb_strrchr() is not available in this build");
 ?>
 --FILE--

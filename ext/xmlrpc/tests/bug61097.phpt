@@ -1,7 +1,7 @@
 --TEST--
 Bug #61097 (Memory leak in xmlrpc functions copying zvals)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 $server = xmlrpc_server_create();

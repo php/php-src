@@ -1,7 +1,7 @@
 --TEST--
 Bug #41283 (Bug with serializing array key that are doubles or floats)
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 $data = array(

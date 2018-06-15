@@ -2,7 +2,7 @@
 Bug #61930: openssl corrupts ssl key resource when using openssl_get_publickey()
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 ?>
 --FILE--
 <?php

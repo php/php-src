@@ -1,7 +1,7 @@
 --TEST--
 Phar::apiVersion
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(Phar::apiVersion());

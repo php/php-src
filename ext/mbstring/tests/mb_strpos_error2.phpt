@@ -2,7 +2,7 @@
 Test mb_strpos() function : error conditions - Pass unknown encoding
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strpos') or die("skip mb_strpos() is not available in this build");
 ?>
 --FILE--

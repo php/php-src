@@ -1,7 +1,7 @@
 --TEST--
 tiger
 --SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+<?php extension_loaded('hash') or die('skip hash extension not loaded'); ?>
 --FILE--
 <?php
 echo hash('tiger192,3', ''),"\n";

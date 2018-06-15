@@ -1,7 +1,7 @@
 --TEST--
 Bug #71063 (filter_input(INPUT_ENV, ..) does not work)
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --ENV--
 PATH=/
 --INI--

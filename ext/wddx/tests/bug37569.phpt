@@ -1,7 +1,7 @@
 --TEST--
 Bug #37569 (WDDX incorrectly encodes high-ascii characters)
 --SKIPIF--
-<?php if (!extension_loaded("wddx")) print "skip"; ?>
+<?php if(!extension_loaded("wddx")) die("skip wddx extension not loaded"); ?>
 --FILE--
 <?php
 for ($i = 65; $i < 256; $i++) {

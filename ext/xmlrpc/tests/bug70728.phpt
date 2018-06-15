@@ -2,7 +2,7 @@
 Bug #70728 (Type Confusion Vulnerability in PHP_to_XMLRPC_worker)
 --SKIPIF--
 <?php
-if (!extension_loaded("xmlrpc")) print "skip";
+if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded");
 if (PHP_INT_SIZE != 4) die("skip this test is for 32bit platform only");
 ?>
 --FILE--

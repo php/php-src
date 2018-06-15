@@ -1,7 +1,7 @@
 --TEST--
 Bug #53512 (NumberFormatter::setSymbol crash on bogus $attr values)
 --SKIPIF--
-<?php if( !extension_loaded( 'intl' ) ) die('skip');
+<?php if(!extension_loaded('intl')) die('skip intl extension not loaded');
 if (PHP_INT_SIZE != 8) die('skip 64-bit only');
 ?>
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 xmlwriter_open_uri with file:///
 --SKIPIF--
-<?php if (!extension_loaded("xmlwriter")) print "skip"; ?>
+<?php if(!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); ?>
 --FILE--
 <?php 
 var_dump(xmlwriter_open_uri('file:///'));

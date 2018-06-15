@@ -3,7 +3,7 @@ Phar front controller PHP test tar-based
 --INI--
 default_charset=UTF-8
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller2.phar.php
 REQUEST_URI=/frontcontroller2.phar.php/a.php

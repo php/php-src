@@ -1,7 +1,7 @@
 --TEST--
 Bug #45555 (Segfault with invalid non-string as register_introspection_callback)
 --SKIPIF--
-<?php if (!extension_loaded("xmlrpc")) print "skip"; ?>
+<?php if(!extension_loaded("xmlrpc")) die("skip xmlrpc extension not loaded"); ?>
 --FILE--
 <?php
 

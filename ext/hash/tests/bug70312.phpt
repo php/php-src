@@ -1,7 +1,7 @@
 --TEST--
 Bug #70312 HAVAL gives wrong hashes in specific cases
 --SKIPIF--
-<?php if(!extension_loaded("hash")) print "skip"; ?>
+<?php if(!extension_loaded("hash")) die("skip hash extension not loaded"); ?>
 --FILE--
 <?php
 var_dump(hash('haval128,5', '1234567890123456789012345678901234567890123456789012345678901234'));

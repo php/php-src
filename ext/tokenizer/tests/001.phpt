@@ -2,7 +2,7 @@
 token_name()
 --SKIPIF--
 <?php if (PHP_INT_SIZE != 8) die("skip this test is for 64-bit only");
-if (!extension_loaded("tokenizer")) print "skip"; ?>
+if(!extension_loaded("tokenizer")) die("skip tokenizer extension not loaded"); ?>
 --FILE--
 <?php
 

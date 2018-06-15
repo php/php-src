@@ -4,7 +4,7 @@ Test mb_ereg_replace() function : usage variations  - <type here specifics of th
 error_reporting=E_ALL & ~E_NOTICE
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_ereg_replace') or die("skip mb_ereg_replace() is not available in this build");
 ?>
 --FILE--

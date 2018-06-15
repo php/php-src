@@ -2,7 +2,7 @@
 openssl_spki_export() tests for exporting public key
 --SKIPIF--
 <?php
-if (!extension_loaded("openssl")) die("skip");
+if (!extension_loaded("openssl")) die("skip openssl extension not loaded");
 if (!@openssl_pkey_new()) die("skip cannot create private key");
 ?>
 --FILE--

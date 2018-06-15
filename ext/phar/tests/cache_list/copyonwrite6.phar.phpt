@@ -6,7 +6,7 @@ phar.cache_list={PWD}/copyonwrite6.phar.php
 phar.readonly=0
 open_basedir=
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE_EXTERNAL--
 files/write6.phar
 --CLEAN--

@@ -1,7 +1,7 @@
 --TEST--
 Phar: create new Phar with broken.dirname in path
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 default_charset=
 phar.readonly=0

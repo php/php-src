@@ -4,7 +4,7 @@ Phar front controller with no extension [cache_list]
 default_charset=UTF-8
 phar.cache_list={PWD}/frontcontroller27.php
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --ENV--
 SCRIPT_NAME=/frontcontroller27.php
 REQUEST_URI=/frontcontroller27.php/noext

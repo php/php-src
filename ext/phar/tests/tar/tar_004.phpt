@@ -2,7 +2,7 @@
 Phar: tar-based phar, tar phar with stub, mapPhar()
 --SKIPIF--
 <?php
-if (!extension_loaded("phar")) die("skip");
+if (!extension_loaded("phar")) die("skip phar extension not loaded");
 ?>
 --INI--
 phar.readonly=0

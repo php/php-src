@@ -3,7 +3,7 @@ zlib_get_coding_type() basic call without env
 --CREDITS--
 PHP TestFest 2017 - Bergfreunde, Florian Engelhardt <florian.engelhardt@bergfreunde.de>
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) print "skip"; ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 ini_set('zlib.output_compression', 'Off');

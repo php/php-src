@@ -1,7 +1,7 @@
 --TEST--
 filter_var_array() and different arguments
 --SKIPIF--
-<?php if (!extension_loaded("filter")) print "skip"; ?>
+<?php if(!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 
@@ -49,7 +49,7 @@ var_dump($a, $b);
 
 echo "Done\n";
 ?>
---EXPECTF--	
+--EXPECTF--
 -- (1)
 
 Warning: filter_var_array() expects parameter 1 to be array, null given in %s on line %d

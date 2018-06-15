@@ -1,7 +1,7 @@
 --TEST--
 Phar: test a zip archive created by unix "zip" command
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --FILE--
 <?php
 $a = new PharData(dirname(__FILE__) . '/files/zip.zip');

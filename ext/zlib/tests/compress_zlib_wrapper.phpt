@@ -1,7 +1,7 @@
 --TEST--
 compress.zlib:// wrapper
 --SKIPIF--
-<?php if (!extension_loaded("zlib")) die("skip"); ?>
+<?php if (!extension_loaded("zlib")) die("skip zlib extension not loaded"); ?>
 --FILE--
 <?php
 chdir(dirname(__FILE__). "/../../..");

@@ -2,7 +2,7 @@
 Bug #71587 (Use-After-Free / Double-Free in WDDX Deserialize)
 --SKIPIF--
 <?php
-if (!extension_loaded("wddx")) print "skip";
+if(!extension_loaded("wddx")) die("skip wddx extension not loaded");
 ?>
 --FILE--
 <?php

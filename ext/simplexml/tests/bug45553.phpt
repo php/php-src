@@ -1,7 +1,7 @@
 --TEST--
 Bug #45553 (Using XPath to return values for attributes with a namespace does not work)
 --SKIPIF--
-<?php if (!extension_loaded("simplexml")) print "skip"; ?>
+<?php if(!extension_loaded("simplexml")) die("skip simplexml extension not loaded"); ?>
 --FILE--
 <?php
 $xml =<<<XML

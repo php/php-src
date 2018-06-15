@@ -2,7 +2,7 @@
 Test mb_regex_encoding() function : error conditions - pass incorrect number of args
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_regex_encoding') or die("skip mb_regex_encoding() is not available in this build");
 ?>
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 Phar: invalid set alias or stub via array access
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 phar.readonly=0
 --FILE--

@@ -2,7 +2,7 @@
 Test mb_ereg_match() function : basic functionality
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_ereg_match') or die("skip mb_ereg_match() is not available in this build");
 ?>
 --FILE--

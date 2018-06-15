@@ -1,7 +1,7 @@
 --TEST--
 filter_var() and double overflow/underflow
 --SKIPIF--
-<?php if (!extension_loaded("filter")) die("skip"); ?>
+<?php if (!extension_loaded("filter")) die("skip filter extension not loaded"); ?>
 --FILE--
 <?php
 $test = array(

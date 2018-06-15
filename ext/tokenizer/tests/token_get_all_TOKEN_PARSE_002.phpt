@@ -1,7 +1,7 @@
 --TEST--
 Semi reserved words support: class const
 --SKIPIF--
-<?php if (!extension_loaded("tokenizer")) print "skip"; ?>
+<?php if(!extension_loaded("tokenizer")) die("skip tokenizer extension not loaded"); ?>
 --FILE--
 <?php
 $tokens = token_get_all('<?php

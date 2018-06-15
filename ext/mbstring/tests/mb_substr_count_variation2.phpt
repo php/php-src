@@ -2,7 +2,7 @@
 Test mb_substr_count() function : usage variations - pass different data types as $needle arg 
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_substr_count') or die("skip mb_substr_count() is not available in this build");
 ?>
 --FILE--

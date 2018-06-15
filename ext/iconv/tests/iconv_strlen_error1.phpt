@@ -2,13 +2,13 @@
 Test iconv_strlen() function : error conditions - pass incorrect number of args
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in this build");
 ?>
 --FILE--
 <?php
 /* Prototype  : int iconv_strlen(string str [, string charset])
- * Description: Get character numbers of a string 
+ * Description: Get character numbers of a string
  * Source code: ext/iconv/iconv.c
  */
 

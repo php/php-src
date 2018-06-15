@@ -1,7 +1,7 @@
 --TEST--
 Phar: disallow stub and alias setting via offset*() methods
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 --INI--
 phar.readonly=0
 phar.require_hash=1

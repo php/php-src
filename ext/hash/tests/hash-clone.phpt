@@ -1,7 +1,7 @@
 --TEST--
 hash_copy() via clone
 --SKIPIF--
-<?php extension_loaded('hash') or die('skip'); ?>
+<?php extension_loaded('hash') or die('skip hash extension not loaded'); ?>
 --FILE--
 <?php
 

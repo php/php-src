@@ -1,7 +1,7 @@
 --TEST--
 openssl_pkcs7_decrypt() tests
 --SKIPIF--
-<?php if (!extension_loaded("openssl")) print "skip"; ?>
+<?php if (!extension_loaded("openssl")) die("skip openssl extension not loaded"); ?>
 --FILE--
 <?php
 $infile = dirname(__FILE__) . "/cert.crt";

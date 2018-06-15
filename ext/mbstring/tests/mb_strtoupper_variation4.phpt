@@ -2,7 +2,7 @@
 Test mb_strtoupper() function : usage varitations - Pass different character types to check conversion is correct
 --SKIPIF--
 <?php
-extension_loaded('mbstring') or die('skip');
+extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 function_exists('mb_strtoupper') or die("skip mb_strtoupper() is not available in this build");
 ?>
 --FILE--

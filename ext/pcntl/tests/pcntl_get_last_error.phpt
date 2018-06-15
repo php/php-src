@@ -2,7 +2,7 @@
 Test pcntl_get_last_error()
 --SKIPIF--
 <?php
-	if (!extension_loaded("pcntl")) print "skip"; 
+	if if(!extension_loaded("pcntl")) die("skip pcntl extension not loaded"); 
 ?>
 --FILE--
 <?php 

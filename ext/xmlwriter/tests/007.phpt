@@ -2,7 +2,7 @@
 XMLWriter: libxml2 XML Writer, Elements & Attributes 
 --SKIPIF--
 <?php 
-if (!extension_loaded("xmlwriter")) die("skip"); 
+if (!extension_loaded("xmlwriter")) die("skip xmlwriter extension not loaded"); 
 if (LIBXML_VERSION < 20629) die("skip: libxml2 2.6.29+ required");
 ?>
 --FILE--

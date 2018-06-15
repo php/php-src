@@ -6,7 +6,7 @@ opcache.enable_cli=1
 phar.readonly=0
 --SKIPIF--
 <?php require_once('skipif.inc'); ?>
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (php_sapi_name() != "cli") die("skip CLI only"); ?>
 --FILE--
 <?php

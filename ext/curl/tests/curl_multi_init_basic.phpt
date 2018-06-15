@@ -4,7 +4,7 @@ Test curl_multi_init()
 Mark van der Velden
 #testfest Utrecht 2009
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+<?php if (!extension_loaded("curl")) die("skip curl extension not loaded"); ?>
 --FILE--
 <?php
 /* Prototype         : resource curl_multi_init(void)

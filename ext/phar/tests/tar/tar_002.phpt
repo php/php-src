@@ -1,7 +1,7 @@
 --TEST--
 Phar: tar-based phar corrupted 2
 --SKIPIF--
-<?php if (!extension_loaded('phar')) die('skip'); ?>
+<?php if (!extension_loaded('phar')) die('skip phar extension not loaded'); ?>
 --INI--
 phar.readonly=0
 --FILE--

@@ -1,7 +1,7 @@
 --TEST--
 mb_language()
 --SKIPIF--
-<?php extension_loaded('mbstring') or die('skip');
+<?php extension_loaded('mbstring') or die('skip mbstring extension not loaded');
 --INI--
 mbstring.language=
 --FILE--

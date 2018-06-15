@@ -1,7 +1,7 @@
 --TEST--
 Bug #40228 (extractTo does not create recursive empty path)
 --SKIPIF--
-<?php if (!extension_loaded("zip")) print "skip"; ?>
+<?php if(!extension_loaded("zip")) die("skip zip extension not loaded"); ?>
 --FILE--
 <?php
 $dest = dirname(__FILE__);

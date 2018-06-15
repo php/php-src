@@ -4,7 +4,7 @@ Test curl_multi_init() fail if any parameter is passed
 Paulo Eduardo <pauloelr [at] gmail [dot] com>
 #testfest SP 2014
 --SKIPIF--
-<?php if (!extension_loaded("curl")) print "skip"; ?>
+<?php if (!extension_loaded("curl")) die("skip curl extension not loaded"); ?>
 --FILE--
 <?php
 /* Prototype         : resource curl_multi_init(void)

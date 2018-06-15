@@ -1,8 +1,8 @@
 --TEST--
 Bug #62024 Cannot insert second row with null using parametrized query (Firebird PDO)
 --SKIPIF--
-<?php extension_loaded("pdo_firebird") or die("skip"); ?>
-<?php function_exists("ibase_query") or die("skip"); ?>
+<?php extension_loaded("pdo_firebird") or die("skip pdo_firebird extension not loaded"); ?>
+<?php function_exists("ibase_query") or die("skip ibase_query function not available"); ?>
 --FILE--
 <?php
 

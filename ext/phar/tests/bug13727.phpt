@@ -1,7 +1,7 @@
 --TEST--
 Phar: SLOW TEST bug #13727: "Number of files in the Phar" limited to 2042
 --SKIPIF--
-<?php if (!extension_loaded("phar")) die("skip"); ?>
+<?php if (!extension_loaded("phar")) die("skip phar extension not loaded"); ?>
 <?php if (getenv('SKIP_SLOW_TESTS')) die('skip'); ?>
 --INI--
 phar.require_hash=0

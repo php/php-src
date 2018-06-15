@@ -1,7 +1,7 @@
 --TEST--
 Bug #38161 (oci_bind_by_name() returns garbage when Oracle didn't set the variable)
 --SKIPIF--
-<?php if (!extension_loaded("oci8")) print "skip"; ?>
+<?php if(!extension_loaded("oci8")) die("skip oci8 extension not loaded"); ?>
 --FILE--
 <?php
 
@@ -24,7 +24,7 @@ var_dump($bv);
 
 echo "Done\n";
 ?>
---EXPECT--	
+--EXPECT--
 NULL
 int(0)
 Done

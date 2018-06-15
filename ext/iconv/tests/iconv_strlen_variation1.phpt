@@ -2,7 +2,7 @@
 Test iconv_strlen() function : usage variations - Pass different data types as $str arg
 --SKIPIF--
 <?php
-extension_loaded('iconv') or die('skip');
+extension_loaded('iconv') or die('skip iconv extension not loaded');
 function_exists('iconv_strlen') or die("skip iconv_strlen() is not available in this build");
 ?>
 --FILE--

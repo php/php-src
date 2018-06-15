@@ -1,7 +1,7 @@
 --TEST--
 tidy_get_body() crash
 --SKIPIF--
-<?php if (!extension_loaded('tidy')) die('skip'); ?>
+<?php if (!extension_loaded('tidy')) die('skip tidy extension not loaded'); ?>
 --FILE--
 <?php
 
@@ -13,7 +13,7 @@ $inputs = array(
 );
 
 
-foreach ($inputs as $input) { 
+foreach ($inputs as $input) {
 
 	$t = tidy_parse_string($input);
 	$t->cleanRepair();
