@@ -20,6 +20,8 @@ PHP                                                                        NEWS
     from date/time column). (Victor Csiky)
 
 - Opcache:
+  . Fixed bug #76477 (Opcache causes empty return value).
+    (Nikita, Laruence)
   . Fixed bug #76463 (var has array key type but not value type). (Laruence)
   . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
     `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
