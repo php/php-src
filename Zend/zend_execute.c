@@ -2724,21 +2724,93 @@ ZEND_API ZEND_COLD void zend_throw_ref_type_error(zend_type type, zval *zv) {
 	);
 }
 
-static zend_always_inline zend_type i_zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
-	if (!ZEND_TYPE_ALLOW_NULL(old_type)) {
-		ref_type = ZEND_TYPE_WITHOUT_NULL(ref_type); /* remove allow_null if not allowed on assigned reference */
+static zend_always_inline void swap_types(zend_type *type1, zend_type *type2) {
+	zend_type tmp = *type1;
+	*type1 = *type2;
+	*type2 = tmp;
+}
+
+/* Returns intersection type, or type "void" if intersection impossible, or 0 if intersection
+ * currently not representable. */
+static zend_type compute_intersection_type(zend_type type1, zend_type type2) {
+	ZEND_ASSERT(ZEND_TYPE_IS_SET(type1) && ZEND_TYPE_IS_SET(type2));
+	if (type1 == type2) {
+		return type1;
 	}
-	if (ZEND_TYPE_WITHOUT_NULL(old_type) == ref_type) {
-		return ref_type;
+
+	/* Intersection is nullable only if both are nullable. */
+	if (ZEND_TYPE_ALLOW_NULL(type1) != ZEND_TYPE_ALLOW_NULL(type2)) {
+		type1 = ZEND_TYPE_WITHOUT_NULL(type1);
+		type2 = ZEND_TYPE_WITHOUT_NULL(type2);
 	}
-	if (ZEND_TYPE_IS_CLASS(ref_type) && ZEND_TYPE_IS_CLASS(old_type)) {
-		if (instanceof_function(ZEND_TYPE_CE(ref_type), ZEND_TYPE_CE(old_type))) {
-			return ZEND_TYPE_ALLOW_NULL(ref_type) ? old_type : ZEND_TYPE_WITHOUT_NULL(old_type);
-		} else if (instanceof_function(ZEND_TYPE_CE(old_type), ZEND_TYPE_CE(ref_type))) {
-			return ref_type;
+
+	/* For class types, we can only handle cases where one type is a child of the other.
+	 * Anything else would require full intersection types. */
+	if (ZEND_TYPE_IS_CLASS(type1) && ZEND_TYPE_IS_CLASS(type2)) {
+		if (instanceof_function(ZEND_TYPE_CE(type1), ZEND_TYPE_CE(type2))) {
+			return type1;
+		} else if (instanceof_function(ZEND_TYPE_CE(type2), ZEND_TYPE_CE(type1))) {
+			return type2;
+		}
+		return 0;
+	}
+
+	if (ZEND_TYPE_IS_CODE(type1) && ZEND_TYPE_IS_CODE(type2)) {
+		if (ZEND_TYPE_CODE(type1) == ZEND_TYPE_CODE(type2)) {
+			return type1;
+		}
+
+		/* Make sure the smaller code is on the left. */
+		if (ZEND_TYPE_CODE(type1) > ZEND_TYPE_CODE(type2)) {
+			swap_types(&type1, &type2);
 		}
 	}
 
+	/* Make sure class type (if any) is on the right. */
+	if (ZEND_TYPE_IS_CLASS(type1)) {
+		swap_types(&type1, &type2);
+	}
+
+	ZEND_ASSERT(ZEND_TYPE_IS_CODE(type1));
+	switch (ZEND_TYPE_CODE(type1)) {
+		case _IS_BOOL:
+		case IS_LONG:
+		case IS_DOUBLE:
+		case IS_STRING:
+			break;
+		case IS_OBJECT:
+			if (ZEND_TYPE_IS_CLASS(type2)) {
+				return type2;
+			}
+			break;
+		case IS_ARRAY:
+			if (ZEND_TYPE_IS_CODE(type2) && ZEND_TYPE_CODE(type2) == IS_ITERABLE) {
+				return type1;
+			}
+			break;
+		case IS_ITERABLE:
+			if (ZEND_TYPE_IS_CLASS(type2) &&
+					instanceof_function(ZEND_TYPE_CE(type2), zend_ce_traversable)) {
+				return type2;
+			}
+			break;
+		default:
+			ZEND_ASSERT(0);
+			break;
+	}
+
+	/* Intersection is empty */
+	return ZEND_TYPE_ENCODE(IS_VOID, 0);
+}
+
+static zend_always_inline zend_type i_zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
+	zend_type intersect_type = compute_intersection_type(old_type, ref_type);
+	if (EXPECTED(intersect_type != 0 && intersect_type != ZEND_TYPE_ENCODE(IS_VOID, 0))) {
+		return intersect_type;
+	}
+
+	/* TODO(typed_refs) Throw different errors for "intersection illegal" and "can't represent
+	 * intersection" cases? */
 	zend_throw_exception_ex(
 		zend_ce_type_error, ZEND_TYPE_IS_CLASS(ref_type) ? IS_OBJECT : ZEND_TYPE_CODE(ref_type),
 		"%s and reference types %s%s and %s%s are not compatible",
