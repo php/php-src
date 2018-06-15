@@ -2778,20 +2778,23 @@ static zend_type compute_intersection_type(zend_type type1, zend_type type2) {
 		case IS_DOUBLE:
 		case IS_STRING:
 			break;
-		case IS_OBJECT:
-			if (ZEND_TYPE_IS_CLASS(type2)) {
-				return type2;
-			}
-			break;
 		case IS_ARRAY:
 			if (ZEND_TYPE_IS_CODE(type2) && ZEND_TYPE_CODE(type2) == IS_ITERABLE) {
 				return type1;
+			}
+			break;
+		case IS_OBJECT:
+			if (ZEND_TYPE_IS_CLASS(type2)) {
+				return type2;
 			}
 			break;
 		case IS_ITERABLE:
 			if (ZEND_TYPE_IS_CLASS(type2) &&
 					instanceof_function(ZEND_TYPE_CE(type2), zend_ce_traversable)) {
 				return type2;
+			}
+			if (ZEND_TYPE_IS_CODE(type2) && ZEND_TYPE_CODE(type2) == IS_OBJECT) {
+				return ZEND_TYPE_ENCODE_CLASS(zend_ce_traversable, ZEND_TYPE_ALLOW_NULL(type1));
 			}
 			break;
 		default:
