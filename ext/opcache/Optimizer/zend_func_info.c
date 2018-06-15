@@ -63,7 +63,6 @@ typedef struct _func_info_t {
 
 static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		uint32_t tmp = 0;
 		if (call_info->arg_info[0].opline) {
@@ -90,7 +89,6 @@ static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		return MAY_BE_RC1 | MAY_BE_STRING;
 	} else if (call_info->num_args != -1) {
@@ -103,7 +101,6 @@ static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 2 || call_info->num_args == 3) {
 
 		uint32_t t1 = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -136,7 +133,6 @@ static uint32_t zend_range_info(const zend_call_info *call_info, const zend_ssa 
 
 static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 		return MAY_BE_FALSE | MAY_BE_TRUE;
 	} else {
@@ -146,7 +142,6 @@ static uint32_t zend_is_type_info(const zend_call_info *call_info, const zend_ss
 
 static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 2) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
@@ -171,7 +166,6 @@ static uint32_t zend_l_ss_info(const zend_call_info *call_info, const zend_ssa *
 
 static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 3) {
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
 		uint32_t arg2_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[1].opline);
@@ -198,7 +192,6 @@ static uint32_t zend_lb_ssn_info(const zend_call_info *call_info, const zend_ssa
 
 static uint32_t zend_b_s_info(const zend_call_info *call_info, const zend_ssa *ssa)
 {
-	ZEND_ASSERT(call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args);
 	if (call_info->num_args == 1) {
 
 		uint32_t arg1_info = _ssa_op1_info(call_info->caller_op_array, ssa, call_info->arg_info[0].opline);
