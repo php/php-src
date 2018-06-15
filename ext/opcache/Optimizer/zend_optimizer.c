@@ -255,6 +255,14 @@ int zend_optimizer_update_op1_const(zend_op_array *op_array,
                                     zval          *val)
 {
 	switch (opline->opcode) {
+		case ZEND_OP_DATA:
+			switch ((opline-1)->opcode) {
+				case ZEND_ASSIGN_OBJ_REF:
+				case ZEND_ASSIGN_STATIC_PROP_REF:
+					return 0;
+			}
+			opline->op1.constant = zend_optimizer_add_literal(op_array, val);
+			break;
 		case ZEND_FREE:
 		case ZEND_CHECK_VAR:
 			MAKE_NOP(opline);
