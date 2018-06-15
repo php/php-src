@@ -8,6 +8,10 @@ PHP                                                                        NEWS
 - EXIF:
   . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
 
+- Opcache:
+  . Fixed bug #76477 (Opcache causes empty return value).
+    (Nikita, Laruence)
+
 - ZIP:
   . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
     (Dennis Birkholz, Remi)
