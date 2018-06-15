@@ -115,6 +115,10 @@ static DWORD orig_cp = 0;
 #define O_BINARY 0
 #endif
 
+#define PHP_STDIO_STDIN        1<<0
+#define PHP_STDIO_STDOUT       1<<1
+#define PHP_STDIO_STDERR       1<<2
+
 #define PHP_MODE_STANDARD      1
 #define PHP_MODE_HIGHLIGHT     2
 #define PHP_MODE_LINT          4
@@ -554,49 +558,67 @@ static void php_cli_usage(char *argv0)
 
 static php_stream *s_in_process = NULL;
 
-static void cli_register_file_handles(void) /* {{{ */
+static void cli_register_file_handles(int stdio_flag) /* {{{ */
 {
 	php_stream *s_in, *s_out, *s_err;
 	php_stream_context *sc_in=NULL, *sc_out=NULL, *sc_err=NULL;
 	zend_constant ic, oc, ec;
 
-	s_in  = php_stream_open_wrapper_ex("php://stdin",  "rb", 0, NULL, sc_in);
-	s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
-	s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
-
-	if (s_in==NULL || s_out==NULL || s_err==NULL) {
-		if (s_in) php_stream_close(s_in);
-		if (s_out) php_stream_close(s_out);
-		if (s_err) php_stream_close(s_err);
-		return;
+	if (stdio_flag & PHP_STDIO_STDIN) {
+		s_in = php_stream_open_wrapper_ex("php://stdin", "rb", 0, NULL, sc_in);
+		if(s_in==NULL) {
+			return;
+		}
+	}
+	if (stdio_flag & PHP_STDIO_STDOUT) {
+		s_out = php_stream_open_wrapper_ex("php://stdout", "wb", 0, NULL, sc_out);
+		if(s_out==NULL) {
+			php_stream_close(s_in);
+			return;
+		}
+		#if PHP_DEBUG
+		/* do not close stdout and stderr */
+		s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		#endif
+	}
+	if (stdio_flag & PHP_STDIO_STDERR) {
+		s_err = php_stream_open_wrapper_ex("php://stderr", "wb", 0, NULL, sc_err);
+		if(s_err==NULL) {
+			php_stream_close(s_in);
+			php_stream_close(s_out);
+			return;
+		}
+		#if PHP_DEBUG
+		/* do not close stdout and stderr */
+		s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
+		#endif
 	}
 
-#if PHP_DEBUG
-	/* do not close stdout and stderr */
-	s_out->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-	s_err->flags |= PHP_STREAM_FLAG_NO_CLOSE;
-#endif
+	if (stdio_flag & PHP_STDIO_STDIN) {
+		s_in_process = s_in;
+		php_stream_to_zval(s_in,  &ic.value);
 
-	s_in_process = s_in;
+		ic.flags = CONST_CS;
+		ic.name = zend_string_init("STDIN", sizeof("STDIN")-1, 1);
+		ic.module_number = 0;
+		zend_register_constant(&ic);
+	}
+	if (stdio_flag & PHP_STDIO_STDOUT) {
+		php_stream_to_zval(s_out, &oc.value);
 
-	php_stream_to_zval(s_in,  &ic.value);
-	php_stream_to_zval(s_out, &oc.value);
-	php_stream_to_zval(s_err, &ec.value);
+		oc.flags = CONST_CS;
+		oc.name = zend_string_init("STDOUT", sizeof("STDOUT")-1, 1);
+		oc.module_number = 0;
+		zend_register_constant(&oc);
+	}
+	if (stdio_flag & PHP_STDIO_STDERR) {
+		php_stream_to_zval(s_err, &ec.value);
 
-	ic.flags = CONST_CS;
-	ic.name = zend_string_init_interned("STDIN", sizeof("STDIN")-1, 0);
-	ic.module_number = 0;
-	zend_register_constant(&ic);
-
-	oc.flags = CONST_CS;
-	oc.name = zend_string_init_interned("STDOUT", sizeof("STDOUT")-1, 0);
-	oc.module_number = 0;
-	zend_register_constant(&oc);
-
-	ec.flags = CONST_CS;
-	ec.name = zend_string_init_interned("STDERR", sizeof("STDERR")-1, 0);
-	ec.module_number = 0;
-	zend_register_constant(&ec);
+		ec.flags = CONST_CS;
+		ec.name = zend_string_init("STDERR", sizeof("STDERR")-1, 1);
+		ec.module_number = 0;
+		zend_register_constant(&ec);
+	}
 }
 /* }}} */
 
@@ -990,11 +1012,14 @@ static int do_cli(int argc, char **argv) /* {{{ */
 		zend_is_auto_global_str(ZEND_STRL("_SERVER"));
 
 		PG(during_request_startup) = 0;
+		int stdio_flag = PHP_STDIO_STDIN|PHP_STDIO_STDOUT|PHP_STDIO_STDERR;
 		switch (behavior) {
 		case PHP_MODE_STANDARD:
+			stdio_flag = PHP_STDIO_STDOUT|PHP_STDIO_STDERR;
 			if (strcmp(file_handle.filename, "Standard input code")) {
-				cli_register_file_handles();
+				stdio_flag |= PHP_STDIO_STDIN;
 			}
+			cli_register_file_handles(stdio_flag);
 
 			if (interactive && cli_shell_callbacks.cli_shell_run) {
 				exit_status = cli_shell_callbacks.cli_shell_run();
@@ -1029,7 +1054,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 			}
 			break;
 		case PHP_MODE_CLI_DIRECT:
-			cli_register_file_handles();
+			cli_register_file_handles(stdio_flag);
 			if (zend_eval_string_ex(exec_direct, NULL, "Command line code", 1) == FAILURE) {
 				exit_status=254;
 			}
@@ -1041,7 +1066,7 @@ static int do_cli(int argc, char **argv) /* {{{ */
 				size_t len, index = 0;
 				zval argn, argi;
 
-				cli_register_file_handles();
+				cli_register_file_handles(stdio_flag);
 
 				if (exec_begin && zend_eval_string_ex(exec_begin, NULL, "Command line begin code", 1) == FAILURE) {
 					exit_status=254;
