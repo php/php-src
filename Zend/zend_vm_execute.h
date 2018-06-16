@@ -25568,10 +25568,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -25709,10 +25709,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -25850,10 +25850,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -25991,10 +25991,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -28384,10 +28384,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -28525,10 +28525,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -28666,10 +28666,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -28807,10 +28807,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -32663,10 +32663,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -32804,10 +32804,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -32945,10 +32945,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -33086,10 +33086,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -35309,10 +35309,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -35450,10 +35450,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -35591,10 +35591,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -35732,10 +35732,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -37371,10 +37371,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -37512,10 +37512,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -37653,10 +37653,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -37794,10 +37794,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -40058,10 +40058,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -40199,10 +40199,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -40340,10 +40340,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -40481,10 +40481,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -45191,10 +45191,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -45332,10 +45332,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -45473,10 +45473,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -45614,10 +45614,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CONST == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -49737,10 +49737,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -49878,10 +49878,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -50019,10 +50019,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -50160,10 +50160,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, ((IS_TMP_VAR|IS_VAR) == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -56357,10 +56357,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:
@@ -56498,10 +56498,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -56639,10 +56639,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 	zval_ptr_dtor_nogc(free_op_data);
 exit_assign_obj:
@@ -56780,10 +56780,10 @@ fast_assign_obj:
 		ZVAL_DEREF(value);
 	}
 
-	Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
+	property = Z_OBJ_HT_P(object)->write_property(object, property, value, (IS_CV == IS_CONST) ? CACHE_ADDR(opline->extended_value) : NULL);
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
-		ZVAL_COPY(EX_VAR(opline->result.var), value);
+		ZVAL_COPY(EX_VAR(opline->result.var), property);
 	}
 
 exit_assign_obj:

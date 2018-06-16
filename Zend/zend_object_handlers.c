@@ -716,7 +716,7 @@ exit:
 }
 /* }}} */
 
-ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
+ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot) /* {{{ */
 {
 	zend_object *zobj;
 	zval tmp_member;
@@ -744,6 +744,7 @@ ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, v
 				val = zend_verify_property_type(prop_info, value, &tmp, EG(current_execute_data) && ZEND_CALL_USES_STRICT_TYPES(EG(current_execute_data)));
 				if (UNEXPECTED(!val)) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(member), value);
+					value = &EG(error_zval);
 					goto exit;
 				}
 				value = val;
@@ -765,6 +766,7 @@ found:
 			}
 		}
 	} else if (UNEXPECTED(EG(exception))) {
+		value = &EG(error_zval);
 		goto exit;
 	}
 
@@ -772,7 +774,7 @@ found:
 	if (zobj->ce->__set) {
 		uint32_t *guard = zend_get_property_guard(zobj, Z_STR_P(member));
 
-	    if (!((*guard) & IN_SET)) {
+		if (!((*guard) & IN_SET)) {
 			zval tmp_object;
 
 			ZVAL_COPY(&tmp_object, object);
@@ -785,6 +787,7 @@ found:
 		} else {
 			if (Z_STRVAL_P(member)[0] == '\0' && Z_STRLEN_P(member) != 0) {
 				zend_throw_error(NULL, "Cannot access property started with '\\0'");
+				value = &EG(error_zval);
 				goto exit;
 			}
 		}
@@ -827,6 +830,8 @@ exit:
 	if (UNEXPECTED(Z_REFCOUNTED(tmp_member))) {
 		zval_ptr_dtor(&tmp_member);
 	}
+
+	return value;
 }
 /* }}} */
 

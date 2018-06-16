@@ -53,9 +53,10 @@ typedef zval *(*zend_object_read_dimension_t)(zval *object, zval *offset, int ty
    If you receive a value zval in write_property/write_dimension, you may only modify it if
    its reference count is 1.  Otherwise, you must create a copy of that zval before making
    any changes.  You should NOT modify the reference count of the value passed to you.
+   You must return the final value of the assigned property.
 */
 /* Used to set property of the object */
-typedef void (*zend_object_write_property_t)(zval *object, zval *member, zval *value, void **cache_slot);
+typedef zval *(*zend_object_write_property_t)(zval *object, zval *member, zval *value, void **cache_slot);
 
 /* Used to set dimension of the object */
 typedef void (*zend_object_write_dimension_t)(zval *object, zval *offset, zval *value);
@@ -184,7 +185,7 @@ ZEND_API HashTable *zend_std_get_debug_info(zval *object, int *is_temp);
 ZEND_API int zend_std_cast_object_tostring(zval *readobj, zval *writeobj, int type);
 ZEND_API zval *zend_std_get_property_ptr_ptr(zval *object, zval *member, int type, void **cache_slot);
 ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void **cache_slot, zval *rv);
-ZEND_API void zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
+ZEND_API zval *zend_std_write_property(zval *object, zval *member, zval *value, void **cache_slot);
 ZEND_API int zend_std_has_property(zval *object, zval *member, int has_set_exists, void **cache_slot);
 ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_slot);
 ZEND_API zval *zend_std_read_dimension(zval *object, zval *offset, int type, zval *rv);

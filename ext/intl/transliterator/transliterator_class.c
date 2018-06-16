@@ -255,8 +255,7 @@ static zval *Transliterator_read_property( zval *object, zval *member, int type,
 /* }}} */
 
 /* {{{ write_property handler */
-static void Transliterator_write_property( zval *object, zval *member, zval *value,
-	void **cache_slot )
+static zval *Transliterator_write_property( zval *object, zval *member, zval *value, void **cache_slot )
 {
 	zend_class_entry *scope;
 	TRANSLITERATOR_PROPERTY_HANDLER_PROLOG;
@@ -274,10 +273,12 @@ static void Transliterator_write_property( zval *object, zval *member, zval *val
 	}
 	else
 	{
-		zend_std_write_property( object, member, value, cache_slot );
+		value = zend_std_write_property( object, member, value, cache_slot );
 	}
 
 	TRANSLITERATOR_PROPERTY_HANDLER_EPILOG;
+
+	return value;
 }
 /* }}} */
 

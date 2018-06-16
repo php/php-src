@@ -6800,7 +6800,7 @@ static const zend_function_entry reflection_ext_functions[] = { /* {{{ */
 }; /* }}} */
 
 /* {{{ _reflection_write_property */
-static void _reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)
+static zval *_reflection_write_property(zval *object, zval *member, zval *value, void **cache_slot)
 {
 	if ((Z_TYPE_P(member) == IS_STRING)
 		&& zend_hash_exists(&Z_OBJCE_P(object)->properties_info, Z_STR_P(member))
@@ -6809,10 +6809,11 @@ static void _reflection_write_property(zval *object, zval *member, zval *value, 
 	{
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 			"Cannot set read-only property %s::$%s", ZSTR_VAL(Z_OBJCE_P(object)->name), Z_STRVAL_P(member));
+		return &EG(uninitialized_zval);
 	}
 	else
 	{
-		zend_std_write_property(object, member, value, cache_slot);
+		return zend_std_write_property(object, member, value, cache_slot);
 	}
 }
 /* }}} */
