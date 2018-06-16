@@ -2733,8 +2733,14 @@ static zend_always_inline void swap_types(zend_type *type1, zend_type *type2) {
 /* Returns intersection type, or type "void" if intersection impossible, or 0 if intersection
  * currently not representable. */
 static zend_type compute_intersection_type(zend_type type1, zend_type type2) {
-	ZEND_ASSERT(ZEND_TYPE_IS_SET(type1) && ZEND_TYPE_IS_SET(type2));
 	if (type1 == type2) {
+		return type1;
+	}
+
+	/* If one of the type is "mixed", the intersection is the other type. */
+	if (!ZEND_TYPE_IS_SET(type1)) {
+		return type2;
+	} else if (!ZEND_TYPE_IS_SET(type2)) {
 		return type1;
 	}
 
