@@ -11,7 +11,7 @@ Ivo Jansch <ivo@ibuildings.com>
  * Description       : Get all the sockets associated with the cURL extension, which can then be 
  *                     "selected"
  * Source code       : ?
- * Test documentation: http://wiki.php.net/qa/temp/ext/curl
+ * Test documentation: https://wiki.php.net/qa/temp/ext/curl
  */
 
 

@@ -10,7 +10,7 @@ Paulo Eduardo <pauloelr [at] gmail [dot] com>
 /* Prototype         : resource curl_multi_init(void)
  * Description       : Returns a new cURL multi handle
  * Source code       : ext/curl/multi.c
- * Test documentation:  http://wiki.php.net/qa/temp/ext/curl
+ * Test documentation:  https://wiki.php.net/qa/temp/ext/curl
  */
 
 // start testing

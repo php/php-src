@@ -2,12 +2,12 @@
    +----------------------------------------------------------------------+
    | Zend Engine                                                          |
    +----------------------------------------------------------------------+
-   | Copyright (c) 1998-2018 Zend Technologies Ltd. (http://www.zend.com) |
+   | Copyright (c) 1998-2018 Zend Technologies Ltd. (https://www.zend.com)|
    +----------------------------------------------------------------------+
    | This source file is subject to version 2.00 of the Zend license,     |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.zend.com/license/2_00.txt.                                |
+   | https://www.zend.com/license/2_00.txt.                               |
    | If you did not receive a copy of the Zend license and are unable to  |
    | obtain it through the world-wide-web, please send a note to          |
    | license@zend.com so we can mail you a copy immediately.              |
@@ -36,7 +36,7 @@ int zend_load_extension(const char *path)
 		fprintf(stderr, "Failed loading %s:  %s\n", path, DL_ERROR());
 #else
 		fprintf(stderr, "Failed loading %s\n", path);
-		/* See http://support.microsoft.com/kb/190351 */
+		/* See https://support.microsoft.com/kb/190351 */
 		fflush(stderr);
 #endif
 		return FAILURE;
@@ -44,7 +44,7 @@ int zend_load_extension(const char *path)
 	return zend_load_extension_handle(handle, path);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 	fflush(stderr);
 #endif
@@ -68,7 +68,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 	}
 	if (!extension_version_info || !new_extension) {
 		fprintf(stderr, "%s doesn't appear to be a valid Zend extension\n", path);
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
@@ -84,7 +84,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 					new_extension->name,
 					extension_version_info->zend_extension_api_no,
 					ZEND_EXTENSION_API_NO);
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 			fflush(stderr);
 #endif
@@ -100,7 +100,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 					new_extension->author,
 					new_extension->URL,
 					new_extension->name);
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 			fflush(stderr);
 #endif
@@ -111,7 +111,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 	           (!new_extension->build_id_check || new_extension->build_id_check(ZEND_EXTENSION_BUILD_ID) != SUCCESS)) {
 		fprintf(stderr, "Cannot load %s - it was built with configuration %s, whereas running engine is %s\n",
 					new_extension->name, extension_version_info->build_id, ZEND_EXTENSION_BUILD_ID);
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
@@ -119,7 +119,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 		return FAILURE;
 	} else if (zend_get_extension(new_extension->name)) {
 		fprintf(stderr, "Cannot load %s - it was already loaded\n", new_extension->name);
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 		fflush(stderr);
 #endif
@@ -130,7 +130,7 @@ int zend_load_extension_handle(DL_HANDLE handle, const char *path)
 	return zend_register_extension(new_extension, handle);
 #else
 	fprintf(stderr, "Extensions are not supported on this platform.\n");
-/* See http://support.microsoft.com/kb/190351 */
+/* See https://support.microsoft.com/kb/190351 */
 #ifdef ZEND_WIN32
 	fflush(stderr);
 #endif

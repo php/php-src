@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -794,7 +794,7 @@ finish:
 						|| 307 == response_code || 308 == response_code)) {
 					/* we shouldn't redirect automatically
 					if follow_location isn't set and response_code not in (300, 301, 302, 303 and 307)
-					see http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
+					see https://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html#sec10.3.1
 					RFC 7238 defines 308: http://tools.ietf.org/html/rfc7238 */
 					follow_location = 0;
 				}

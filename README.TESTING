@@ -152,7 +152,7 @@ advised to test for non-zero, rather then a specific value.
 [Creating new test files]
 -------------------------
  Writing test file is very easy if you are used to PHP.
-See the HOWTO at http://qa.php.net/write-test.php
+See the HOWTO at https://qa.php.net/write-test.php
 
 
 [How to help us]
@@ -244,7 +244,7 @@ NOTE: configuration as described in README.TESTING still works.
 [New Test Sections]
 ----------------
 In addition to the traditional test sections
-(see http://qa.php.net/write-test.php), several new sections are available
+(see https://qa.php.net/write-test.php), several new sections are available
 under server-tests.
 
 --POST--

@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -1076,8 +1076,8 @@ static void init_request_info(void)
 		 *     proxy:balancer://localhost:9000/some-dir/info.php/test?foo=bar
 		 * should be changed to:
 		 *     /some-dir/info.php/test
-		 * See: http://bugs.php.net/bug.php?id=54152
-		 *      http://bugs.php.net/bug.php?id=62172
+		 * See: https://bugs.php.net/bug.php?id=54152
+		 *      https://bugs.php.net/bug.php?id=62172
 		 *      https://issues.apache.org/bugzilla/show_bug.cgi?id=50851
 		 */
 		if (env_script_filename &&
@@ -1840,11 +1840,11 @@ int main(int argc, char *argv[])
 <p>This PHP CGI binary was compiled with force-cgi-redirect enabled.  This\n\
 means that a page will only be served up if the REDIRECT_STATUS CGI variable is\n\
 set, e.g. via an Apache Action directive.</p>\n\
-<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"http://php.net/security.cgi-bin\">\
+<p>For more information as to <i>why</i> this behaviour exists, see the <a href=\"https://php.net/security.cgi-bin\">\
 manual page for CGI security</a>.</p>\n\
 <p>For more information about changing this behaviour or re-enabling this webserver,\n\
 consult the installation file that came with this distribution, or visit \n\
-<a href=\"http://php.net/install.windows\">the manual page</a>.</p>\n");
+<a href=\"https://php.net/install.windows\">the manual page</a>.</p>\n");
 			} zend_catch {
 			} zend_end_try();
 #if defined(ZTS) && !defined(PHP_DEBUG)

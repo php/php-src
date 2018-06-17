@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -58,7 +58,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMCharacterData extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-FF21A306
 * Since:
 */
 
@@ -73,7 +73,7 @@ const zend_function_entry php_dom_characterdata_class_functions[] = {
 
 /* {{{ data	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-72AB8359
 Since:
 */
 int dom_characterdata_data_read(dom_object *obj, zval *retval)
@@ -118,7 +118,7 @@ int dom_characterdata_data_write(dom_object *obj, zval *newval)
 
 /* {{{ length	long
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7D61178C
 Since:
 */
 int dom_characterdata_length_read(dom_object *obj, zval *retval)
@@ -147,7 +147,7 @@ int dom_characterdata_length_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ proto string dom_characterdata_substring_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6531BCCF
 Since:
 */
 PHP_FUNCTION(dom_characterdata_substring_data)
@@ -196,7 +196,7 @@ PHP_FUNCTION(dom_characterdata_substring_data)
 /* }}} end dom_characterdata_substring_data */
 
 /* {{{ proto void dom_characterdata_append_data(string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-32791A2F
 Since:
 */
 PHP_FUNCTION(dom_characterdata_append_data)
@@ -230,7 +230,7 @@ PHP_FUNCTION(dom_characterdata_append_data)
 /* }}} end dom_characterdata_append_data */
 
 /* {{{ proto void dom_characterdata_insert_data(int offset, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3EDB695F
 Since:
 */
 PHP_FUNCTION(dom_characterdata_insert_data)
@@ -279,7 +279,7 @@ PHP_FUNCTION(dom_characterdata_insert_data)
 /* }}} end dom_characterdata_insert_data */
 
 /* {{{ proto void dom_characterdata_delete_data(int offset, int count);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-7C603781
 Since:
 */
 PHP_FUNCTION(dom_characterdata_delete_data)
@@ -334,7 +334,7 @@ PHP_FUNCTION(dom_characterdata_delete_data)
 /* }}} end dom_characterdata_delete_data */
 
 /* {{{ proto void dom_characterdata_replace_data(int offset, int count, string arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-E5CBA7FB
 Since:
 */
 PHP_FUNCTION(dom_characterdata_replace_data)

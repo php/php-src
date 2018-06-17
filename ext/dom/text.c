@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -48,7 +48,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMText extends DOMCharacterData
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1312295772
 * Since:
 */
 
@@ -95,7 +95,7 @@ PHP_METHOD(domtext, __construct)
 
 /* {{{ wholeText	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-wholeText
 Since: DOM Level 3
 */
 int dom_text_whole_text_read(dom_object *obj, zval *retval)
@@ -134,7 +134,7 @@ int dom_text_whole_text_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ proto DOMText dom_text_split_text(int offset)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-38853C1D
 Since:
 */
 PHP_FUNCTION(dom_text_split_text)
@@ -218,7 +218,7 @@ PHP_FUNCTION(dom_text_is_whitespace_in_element_content)
 /* }}} end dom_text_is_whitespace_in_element_content */
 
 /* {{{ proto DOMText dom_text_replace_whole_text(string content)
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Text3-replaceWholeText
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_text_replace_whole_text)

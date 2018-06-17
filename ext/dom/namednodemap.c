@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -65,7 +65,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMNamedNodeMap
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1780488922
 * Since:
 */
 
@@ -84,7 +84,7 @@ const zend_function_entry php_dom_namednodemap_class_functions[] = { /* {{{ */
 
 /* {{{ length	int
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6D0FB19E
 Since:
 */
 int dom_namednodemap_length_read(dom_object *obj, zval *retval)
@@ -124,7 +124,7 @@ int dom_namednodemap_length_read(dom_object *obj, zval *retval)
 /* }}} */
 
 /* {{{ proto DOMNode dom_namednodemap_get_named_item(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1074577549
 Since:
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item)
@@ -179,7 +179,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item)
 /* }}} end dom_namednodemap_get_named_item */
 
 /* {{{ proto DOMNode dom_namednodemap_set_named_item(DOMNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1025163788
 Since:
 */
 PHP_FUNCTION(dom_namednodemap_set_named_item)
@@ -189,7 +189,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item)
 /* }}} end dom_namednodemap_set_named_item */
 
 /* {{{ proto DOMNode dom_namednodemap_remove_named_item(string name);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-D58B193
 Since:
 */
 PHP_FUNCTION(dom_namednodemap_remove_named_item)
@@ -199,7 +199,7 @@ PHP_FUNCTION(dom_namednodemap_remove_named_item)
 /* }}} end dom_namednodemap_remove_named_item */
 
 /* {{{ proto DOMNode dom_namednodemap_item(int index);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-349467F9
 Since:
 */
 PHP_FUNCTION(dom_namednodemap_item)
@@ -262,7 +262,7 @@ PHP_FUNCTION(dom_namednodemap_item)
 /* }}} end dom_namednodemap_item */
 
 /* {{{ proto DOMNode dom_namednodemap_get_named_item_ns(string namespaceURI, string localName);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-getNamedItemNS
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
@@ -317,7 +317,7 @@ PHP_FUNCTION(dom_namednodemap_get_named_item_ns)
 /* }}} end dom_namednodemap_get_named_item_ns */
 
 /* {{{ proto DOMNode dom_namednodemap_set_named_item_ns(DOMNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-setNamedItemNS
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
@@ -327,7 +327,7 @@ PHP_FUNCTION(dom_namednodemap_set_named_item_ns)
 /* }}} end dom_namednodemap_set_named_item_ns */
 
 /* {{{ proto DOMNode dom_namednodemap_remove_named_item_ns(string namespaceURI, string localName);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-removeNamedItemNS
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_namednodemap_remove_named_item_ns)

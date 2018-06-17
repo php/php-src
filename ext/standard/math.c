@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -124,7 +124,7 @@ static inline double php_round_helper(double value, int mode) {
 /* {{{ _php_math_round */
 /*
  * Rounds a number to a certain number of decimal places in a certain rounding
- * mode. For the specifics of the algorithm, see http://wiki.php.net/rfc/rounding
+ * mode. For the specifics of the algorithm, see https://wiki.php.net/rfc/rounding
  */
 PHPAPI double _php_math_round(double value, int places, int mode) {
 	double f1, f2;

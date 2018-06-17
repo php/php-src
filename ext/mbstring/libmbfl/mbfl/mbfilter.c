@@ -28,8 +28,8 @@
  * 「GNU Lesser General Public License」の全文は以下のウェブページから取得でき
  * ます。「GNU Lesser General Public License」とは、これまでLibrary General
  * Public Licenseと呼ばれていたものです。
- *     http://www.gnu.org/ --- GNUウェブサイト
- *     http://www.gnu.org/copyleft/lesser.html --- ライセンス文面
+ *     https://www.gnu.org/ --- GNUウェブサイト
+ *     https://www.gnu.org/copyleft/lesser.html --- ライセンス文面
  * このライセンスの内容がわからない方、守れない方には使用を許諾しません。
  *
  * しかしながら、当社とGNUプロジェクトとの特定の関係を示唆または主張するもので

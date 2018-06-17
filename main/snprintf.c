@@ -7,7 +7,7 @@
   | This source file is subject to version 3.01 of the PHP license,      |
   | that is bundled with this package in the file LICENSE, and is        |
   | available through the world-wide-web at the following url:           |
-  | http://www.php.net/license/3_01.txt                                  |
+  | https://php.net/license/3_01.txt                                     |
   | If you did not receive a copy of the PHP license and are unable to   |
   | obtain it through the world-wide-web, please send a note to          |
   | license@php.net so we can mail you a copy immediately.               |
@@ -257,7 +257,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * 3. All advertising materials mentioning features or use of this
  *    software must display the following acknowledgment:
  *    "This product includes software developed by the Apache Group
- *    for use in the Apache HTTP server project (http://www.apache.org/)."
+ *    for use in the Apache HTTP server project (https://www.apache.org/)."
  *
  * 4. The names "Apache Server" and "Apache Group" must not be used to
  *    endorse or promote products derived from this software without
@@ -266,7 +266,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * 5. Redistributions of any form whatsoever must retain the following
  *    acknowledgment:
  *    "This product includes software developed by the Apache Group
- *    for use in the Apache HTTP server project (http://www.apache.org/)."
+ *    for use in the Apache HTTP server project (https://www.apache.org/)."
  *
  * THIS SOFTWARE IS PROVIDED BY THE APACHE GROUP ``AS IS'' AND ANY
  * EXPRESSED OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
@@ -287,7 +287,7 @@ PHPAPI char *php_gcvt(double value, int ndigit, char dec_point, char exponent, c
  * on public domain software written at the National Center for
  * Supercomputing Applications, University of Illinois, Urbana-Champaign.
  * For more information on the Apache Group and the Apache HTTP server
- * project, please see <http://www.apache.org/>.
+ * project, please see <https://www.apache.org/>.
  *
  * This code is based on, and used with the permission of, the
  * SIO stdio-replacement strx_* functions by Panos Tsirigotis

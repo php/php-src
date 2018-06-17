@@ -18,6 +18,6 @@ var_dump(gettype($reflection->export('Zend OPcache', true)) === 'string');
 string(17) "Zend Technologies"
 string(23) "Copyright (c) 1999-20%d"
 string(12) "Zend OPcache"
-string(20) "http://www.zend.com/"
+string(21) "https://www.zend.com/"
 bool(true)
 bool(true)

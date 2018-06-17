@@ -7,7 +7,7 @@
    | This source file is subject to version 3.01 of the PHP license,      |
    | that is bundled with this package in the file LICENSE, and is        |
    | available through the world-wide-web at the following url:           |
-   | http://www.php.net/license/3_01.txt                                  |
+   | https://php.net/license/3_01.txt                                     |
    | If you did not receive a copy of the PHP license and are unable to   |
    | obtain it through the world-wide-web, please send a note to          |
    | license@php.net so we can mail you a copy immediately.               |
@@ -128,7 +128,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1950641247
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1950641247
 * Since:
 */
 
@@ -193,7 +193,7 @@ static void dom_reconcile_ns(xmlDocPtr doc, xmlNodePtr nodep) /* {{{ */
 
 /* {{{ nodeName	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D095
 Since:
 */
 int dom_node_node_name_read(dom_object *obj, zval *retval)
@@ -280,7 +280,7 @@ int dom_node_node_name_read(dom_object *obj, zval *retval)
 
 /* {{{ nodeValue	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-F68D080
 Since:
 */
 int dom_node_node_value_read(dom_object *obj, zval *retval)
@@ -361,7 +361,7 @@ int dom_node_node_value_write(dom_object *obj, zval *newval)
 
 /* {{{ nodeType	int
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-111237558
 Since:
 */
 int dom_node_node_type_read(dom_object *obj, zval *retval)
@@ -389,7 +389,7 @@ int dom_node_node_type_read(dom_object *obj, zval *retval)
 
 /* {{{ parentNode	DomNode
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1060184317
 Since:
 */
 int dom_node_parent_node_read(dom_object *obj, zval *retval)
@@ -417,7 +417,7 @@ int dom_node_parent_node_read(dom_object *obj, zval *retval)
 
 /* {{{ childNodes	DomNodeList
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1451460987
 Since:
 */
 int dom_node_child_nodes_read(dom_object *obj, zval *retval)
@@ -445,7 +445,7 @@ int dom_node_child_nodes_read(dom_object *obj, zval *retval)
 
 /* {{{ firstChild DomNode
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-169727388
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-169727388
 Since:
 */
 int dom_node_first_child_read(dom_object *obj, zval *retval)
@@ -476,7 +476,7 @@ int dom_node_first_child_read(dom_object *obj, zval *retval)
 
 /* {{{ lastChild	DomNode
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-61AD09FB
 Since:
 */
 int dom_node_last_child_read(dom_object *obj, zval *retval)
@@ -507,7 +507,7 @@ int dom_node_last_child_read(dom_object *obj, zval *retval)
 
 /* {{{ previousSibling	DomNode
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-640FB3C8
 Since:
 */
 int dom_node_previous_sibling_read(dom_object *obj, zval *retval)
@@ -535,7 +535,7 @@ int dom_node_previous_sibling_read(dom_object *obj, zval *retval)
 
 /* {{{ nextSibling	DomNode
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-6AC54C2F
 Since:
 */
 int dom_node_next_sibling_read(dom_object *obj, zval *retval)
@@ -563,7 +563,7 @@ int dom_node_next_sibling_read(dom_object *obj, zval *retval)
 
 /* {{{ attributes	DomNamedNodeMap
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-84CF096
 Since:
 */
 int dom_node_attributes_read(dom_object *obj, zval *retval)
@@ -591,7 +591,7 @@ int dom_node_attributes_read(dom_object *obj, zval *retval)
 
 /* {{{ ownerDocument	DomDocument
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-node-ownerDoc
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-node-ownerDoc
 Since:
 */
 int dom_node_owner_document_read(dom_object *obj, zval *retval)
@@ -622,7 +622,7 @@ int dom_node_owner_document_read(dom_object *obj, zval *retval)
 
 /* {{{ namespaceUri	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSname
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSname
 Since: DOM Level 2
 */
 int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
@@ -661,7 +661,7 @@ int dom_node_namespace_uri_read(dom_object *obj, zval *retval)
 
 /* {{{ prefix	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSPrefix
 Since: DOM Level 2
 */
 int dom_node_prefix_read(dom_object *obj, zval *retval)
@@ -768,7 +768,7 @@ int dom_node_prefix_write(dom_object *obj, zval *newval)
 
 /* {{{ localName	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeNSLocalN
 Since: DOM Level 2
 */
 int dom_node_local_name_read(dom_object *obj, zval *retval)
@@ -793,7 +793,7 @@ int dom_node_local_name_read(dom_object *obj, zval *retval)
 
 /* {{{ baseURI	string
 readonly=yes
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-baseURI
 Since: DOM Level 3
 */
 int dom_node_base_uri_read(dom_object *obj, zval *retval)
@@ -821,7 +821,7 @@ int dom_node_base_uri_read(dom_object *obj, zval *retval)
 
 /* {{{ textContent	string
 readonly=no
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-textContent
 Since: DOM Level 3
 */
 int dom_node_text_content_read(dom_object *obj, zval *retval)
@@ -921,7 +921,7 @@ static xmlNodePtr _php_dom_insert_fragment(xmlNodePtr nodep, xmlNodePtr prevsib,
 /* }}} */
 
 /* {{{ proto domnode dom_node_insert_before(DomNode newChild, DomNode refChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-952280727
 Since:
 */
 PHP_FUNCTION(dom_node_insert_before)
@@ -1082,7 +1082,7 @@ PHP_FUNCTION(dom_node_insert_before)
 /* }}} end dom_node_insert_before */
 
 /* {{{ proto DomNode dom_node_replace_child(DomNode newChild, DomNode oldChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-785887307
 Since:
 */
 PHP_FUNCTION(dom_node_replace_child)
@@ -1170,7 +1170,7 @@ PHP_FUNCTION(dom_node_replace_child)
 /* }}} end dom_node_replace_child */
 
 /* {{{ proto DomNode dom_node_remove_child(DomNode oldChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-1734834066
 Since:
 */
 PHP_FUNCTION(dom_node_remove_child)
@@ -1221,7 +1221,7 @@ PHP_FUNCTION(dom_node_remove_child)
 /* }}} end dom_node_remove_child */
 
 /* {{{ proto DomNode dom_node_append_child(DomNode newChild);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-184E7107
 Since:
 */
 PHP_FUNCTION(dom_node_append_child)
@@ -1322,7 +1322,7 @@ PHP_FUNCTION(dom_node_append_child)
 /* }}} end dom_node_append_child */
 
 /* {{{ proto bool dom_node_has_child_nodes();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-810594187
 Since:
 */
 PHP_FUNCTION(dom_node_has_child_nodes)
@@ -1350,7 +1350,7 @@ PHP_FUNCTION(dom_node_has_child_nodes)
 /* }}} end dom_node_has_child_nodes */
 
 /* {{{ proto DomNode dom_node_clone_node(bool deep);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-3A0ED0A4
 Since:
 */
 PHP_FUNCTION(dom_node_clone_node)
@@ -1411,7 +1411,7 @@ PHP_FUNCTION(dom_node_clone_node)
 /* }}} end dom_node_clone_node */
 
 /* {{{ proto void dom_node_normalize();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-normalize
 Since:
 */
 PHP_FUNCTION(dom_node_normalize)
@@ -1432,7 +1432,7 @@ PHP_FUNCTION(dom_node_normalize)
 /* }}} end dom_node_normalize */
 
 /* {{{ proto bool dom_node_is_supported(string feature, string version);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-Level-2-Core-Node-supports
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_node_is_supported)
@@ -1454,7 +1454,7 @@ PHP_FUNCTION(dom_node_is_supported)
 /* }}} end dom_node_is_supported */
 
 /* {{{ proto bool dom_node_has_attributes();
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#core-ID-NodeHasAttrs
 Since: DOM Level 2
 */
 PHP_FUNCTION(dom_node_has_attributes)
@@ -1481,7 +1481,7 @@ PHP_FUNCTION(dom_node_has_attributes)
 /* }}} end dom_node_has_attributes */
 
 /* {{{ proto short dom_node_compare_document_position(DomNode other);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-compareDocumentPosition
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-compareDocumentPosition
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_compare_document_position)
@@ -1491,7 +1491,7 @@ PHP_FUNCTION(dom_node_compare_document_position)
 /* }}} end dom_node_compare_document_position */
 
 /* {{{ proto bool dom_node_is_same_node(DomNode other);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isSameNode
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_is_same_node)
@@ -1517,7 +1517,7 @@ PHP_FUNCTION(dom_node_is_same_node)
 /* }}} end dom_node_is_same_node */
 
 /* {{{ proto string dom_node_lookup_prefix(string namespaceURI);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-lookupNamespacePrefix
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_lookup_prefix)
@@ -1568,7 +1568,7 @@ PHP_FUNCTION(dom_node_lookup_prefix)
 /* }}} end dom_node_lookup_prefix */
 
 /* {{{ proto bool dom_node_is_default_namespace(string namespaceURI);
-URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
+URL: https://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-isDefaultNamespace
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_is_default_namespace)
@@ -1601,7 +1601,7 @@ PHP_FUNCTION(dom_node_is_default_namespace)
 /* }}} end dom_node_is_default_namespace */
 
 /* {{{ proto string dom_node_lookup_namespace_uri(string prefix);
-URL: http://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
+URL: https://www.w3.org/TR/DOM-Level-3-Core/core.html#Node3-lookupNamespaceURI
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_lookup_namespace_uri)
@@ -1635,7 +1635,7 @@ PHP_FUNCTION(dom_node_lookup_namespace_uri)
 /* }}} end dom_node_lookup_namespace_uri */
 
 /* {{{ proto bool dom_node_is_equal_node(DomNode arg);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-isEqualNode
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_is_equal_node)
@@ -1645,7 +1645,7 @@ PHP_FUNCTION(dom_node_is_equal_node)
 /* }}} end dom_node_is_equal_node */
 
 /* {{{ proto DomNode dom_node_get_feature(string feature, string version);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getFeature
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_get_feature)
@@ -1655,7 +1655,7 @@ PHP_FUNCTION(dom_node_get_feature)
 /* }}} end dom_node_get_feature */
 
 /* {{{ proto mixed dom_node_set_user_data(string key, mixed data, userdatahandler handler);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-setUserData
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_set_user_data)
@@ -1665,7 +1665,7 @@ PHP_FUNCTION(dom_node_set_user_data)
 /* }}} end dom_node_set_user_data */
 
 /* {{{ proto mixed dom_node_get_user_data(string key);
-URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
+URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#Node3-getUserData
 Since: DOM Level 3
 */
 PHP_FUNCTION(dom_node_get_user_data)

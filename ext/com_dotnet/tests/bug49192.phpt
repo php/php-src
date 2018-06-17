@@ -17,7 +17,7 @@ if (!extension_loaded("com_dotnet")) print "skip COM/.Net support not present"; 
 // I don't think its worth the trouble of making the user install the fix to
 // get an accurate test run. its better to just not run the test or expect it to fail.
 //
-// see: http://support.microsoft.com/kb/2517589
+// see: https://support.microsoft.com/kb/2517589
 // see: http://www.infoq.com/news/2011/10/ADO-Win7
 
 $dbConnection = new Com('ADODB.Connection');

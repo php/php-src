@@ -19,7 +19,7 @@ if ($ip != $url) die("skip 'fakeURL' resolves to $ip\n");
  * Prototype:     string curl_error(resource $ch)
  * Description:   Returns a clear text error message for the last cURL operation.
  * Source:        ext/curl/interface.c
- * Documentation: http://wiki.php.net/qa/temp/ext/curl
+ * Documentation: https://wiki.php.net/qa/temp/ext/curl
  */
  
 // Fake URL to trigger an error

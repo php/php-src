@@ -28,15 +28,15 @@ bug can be used to track the patch progress and prevent your changes
 getting lost in the PHP mail archives.
 
 If your change is large then create a Request For Comment (RFC) page
-on http://wiki.php.net/rfc, discuss it with the extension maintainer,
+on https://wiki.php.net/rfc, discuss it with the extension maintainer,
 and discuss it on the development mail list internals@lists.php.net.
 RFC Wiki accounts can be requested on
-http://wiki.php.net/start?do=register.  PHP extension maintainers can
+https://wiki.php.net/start?do=register.  PHP extension maintainers can
 be found in the EXTENSIONS file in the PHP source.  Mail list
-subscription is explained on http://php.net/mailing-lists.php.
+subscription is explained on https://php.net/mailing-lists.php.
 
 Information on PHP internal C functions is at
-http://php.net/internals, though this is considered incomplete.
+https://php.net/internals, though this is considered incomplete.
 Various external resources can be found on the web.  See
 https://wiki.php.net/internals for some references.  A standard
 printed reference is the book "Extending and Embedding PHP" by Sara
@@ -72,10 +72,10 @@ the PHP mail archives.
 
 If your change is large, then first discuss it with the mail list
 phpdoc@lists.php.net.  Subscription is explained on
-http://php.net/mailing-lists.php.
+https://php.net/mailing-lists.php.
 
 Information on contributing to PHP documentation is at
-http://php.net/dochowto and http://wiki.php.net/doc/howto
+https://php.net/dochowto and https://wiki.php.net/doc/howto
 
 Attach the patch to the PHP bug and consider sending a notification
 email about the change to phpdoc@lists.php.net.  Explain what has been
@@ -95,14 +95,14 @@ can be used to track the patch progress and prevent your changes
 getting lost in the PHP mail archives.
 
 If your change is large then create a Request For Comment (RFC) page
-on http://wiki.php.net/rfc, discuss it with the extension maintainer,
+on https://wiki.php.net/rfc, discuss it with the extension maintainer,
 and discuss it on the development mail list pecl-dev@lists.php.net.
 PECL mail list subscription is explained on
 http://pecl.php.net/support.php.  RFC Wiki accounts can be requested
-on http://wiki.php.net/start?do=register
+on https://wiki.php.net/start?do=register
 
 Information on PHP internal C functions is at
-http://www.php.net/internals, though this is considered incomplete.
+https://php.net/internals, though this is considered incomplete.
 Various external resources can be found on the web.  A standard
 printed reference is the book "Extending and Embedding PHP" by Sara
 Golemon.
@@ -127,8 +127,8 @@ http://pear.php.net/manual/en/guide-developers.php
 How to create your PHP, PHP Documentation or PECL patch
 -------------------------------------------------------
 PHP and most PECL packages use Git for revision control. Some PECL
-packages use Subversion (SVN) Read http://www.php.net/git.php for help
-on using Git to get and build PHP source code.  We recommend to look 
+packages use Subversion (SVN) Read https://php.net/git.php for help
+on using Git to get and build PHP source code.  We recommend to look
 at our workflow on https://wiki.php.net/vcs/gitworkflow and our FAQ
 https://wiki.php.net/vcs/gitfaq.
 
@@ -139,7 +139,7 @@ work on "master".
 Read CODING_STANDARDS before you start working.
 
 After modifying the source see README.TESTING and
-http://qa.php.net/write-test.php for how to test.  Submitting test
+https://qa.php.net/write-test.php for how to test.  Submitting test
 scripts helps us to understand what functionality has changed.  It is
 important for the stability and maintainability of PHP that tests are
 comprehensive.
