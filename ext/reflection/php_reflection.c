@@ -3978,14 +3978,24 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		return;
 	}
-	ZVAL_DEREF(variable_ptr);
 
-	if (!prop_info->type || zend_verify_property_type(prop_info, value, value, EX_USES_STRICT_TYPES())) {
-		zval_ptr_dtor(variable_ptr);
-		ZVAL_COPY(variable_ptr, value);
-	} else {
-        	zend_verify_property_type_error(prop_info, prop_info->name, value);
+	if (Z_ISREF_P(variable_ptr)) {
+		zend_type ref_type = Z_REFTYPE_P(variable_ptr);
+		variable_ptr = Z_REFVAL_P(variable_ptr);
+
+		if (ref_type && !zend_verify_ref_type_assignable_zval(ref_type, value, EX_USES_STRICT_TYPES())) {
+			zend_throw_ref_type_error(ref_type, value);
+			return;
+		}
 	}
+
+	if (prop_info->type && !zend_verify_property_type(prop_info, value, value, EX_USES_STRICT_TYPES())) {
+        	zend_verify_property_type_error(prop_info, prop_info->name, value);
+		return;
+	}
+
+	zval_ptr_dtor(variable_ptr);
+	ZVAL_COPY(variable_ptr, value);
 
 }
 /* }}} */
