@@ -31,6 +31,10 @@ PHP                                                                        NEWS
   . Fixed bug #76532 (Integer overflow and excessive memory usage
     in mb_strimwidth). (MarcusSchwarz)
 
+- OpenSSL:
+  . Add min_proto_version and max_proto_version ssl stream options as well as
+    related constants for possible TLS protocol values. (Jakub Zelenka)
+
 - PCRE:
   . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
   . Fixed bug #76514 (Regression in preg_match makes it fail with

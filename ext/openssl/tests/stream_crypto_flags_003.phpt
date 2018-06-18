@@ -14,7 +14,7 @@ $serverCode = <<<'CODE'
         'local_cert' => __DIR__ . '/bug54992.pem',
 
         // Only accept TLSv1.2 connections
-        'crypto_method' => STREAM_CRYPTO_METHOD_SSLv3_SERVER  | STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
+        'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_0_SERVER  | STREAM_CRYPTO_METHOD_TLSv1_2_SERVER,
     ]]);
 
     $server = stream_socket_server($serverUri, $errno, $errstr, $serverFlags, $serverCtx);
@@ -51,6 +51,6 @@ include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
 --EXPECTF--
 resource(%d) of type (stream)
-bool(false)
-bool(false)
+resource(%d) of type (stream)
+resource(%d) of type (stream)
 
