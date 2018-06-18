@@ -14,13 +14,11 @@ class Test {
 
 $test = new Test;
 var_dump($test);
-var_dump($intval = &$test->val);
+var_dump($val = &$test->val);
 var_dump($test);
 
-try {
-	$test->prop = "x";
-} catch (TypeError $e) { print $e->getMessage()."\n"; }
-var_dump($intval);
+$test->prop = "x";
+var_dump($test, $val);
 
 ?>
 --EXPECT--
@@ -37,5 +35,10 @@ object(Test)#1 (1) {
   ["val"]=>
   uninitialized(int)
 }
-Cannot assign string to reference of type int
-int(42)
+object(Test)#1 (1) {
+  ["prop"]=>
+  &string(1) "x"
+  ["val"]=>
+  uninitialized(int)
+}
+string(1) "x"

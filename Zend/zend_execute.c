@@ -2551,7 +2551,8 @@ return_indirect:
 						}
 
 						ZVAL_NEW_REF(ptr, ptr);
-						Z_REF_P(ptr)->type = zend_get_prop_info_ref_type(prop_info);
+						Z_REFTYPE_P(ptr) = zend_get_prop_info_ref_type(prop_info);
+						ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ptr), prop_info);
 					}
 				}
 				return;
@@ -2699,12 +2700,14 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	if (by_ref && UNEXPECTED(property_info) && Z_TYPE_P(*retval) != IS_REFERENCE) {
+		zval *ref = *retval;
 		if (UNEXPECTED(!ZEND_TYPE_ALLOW_NULL(property_info->type) && Z_TYPE_P(*retval) <= IS_NULL)) {
 			zend_throw_error(NULL, "Cannot access uninitialized property by reference");
 			return FAILURE;
 		}
-		ZVAL_NEW_REF(*retval, *retval);
-		Z_REF_P(*retval)->type = zend_get_prop_info_ref_type(property_info);
+		ZVAL_NEW_REF(ref, ref);
+		Z_REFTYPE_P(ref) = zend_get_prop_info_ref_type(property_info);
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(ref), property_info);
 	}
 
 	if (prop_info) {
@@ -2834,6 +2837,72 @@ static zend_always_inline zend_type i_zend_check_typed_assign_typed_ref(const ch
 
 ZEND_API zend_type zend_check_typed_assign_typed_ref(const char *source, zend_type old_type, zend_type ref_type) {
 	return i_zend_check_typed_assign_typed_ref(source, old_type, ref_type);
+}
+
+ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
+{
+	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
+
+	if (source_list->ptr == NULL) {
+		source_list->ptr = prop;
+		return;
+	}
+
+	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
+		list = emalloc(sizeof(zend_property_info_list) + (4 - 1) * sizeof(zend_property_info *));
+		list->ptr[0] = source_list->ptr;
+		list->num_allocated = 4;
+		list->num = 0;
+		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
+	} else if (list->num_allocated == list->num) {
+		list->num_allocated = list->num * 2;
+		list = erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *));
+		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
+	}
+
+	list->ptr[list->num++] = prop;
+}
+
+ZEND_API zend_type zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
+{
+	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
+	zend_type type;
+	zend_property_info **end, **start, **ptr;
+
+	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
+		source_list->ptr = NULL;
+		return 0;
+	}
+
+	if (list->num == 1) {
+		efree(list);
+		source_list->ptr = NULL;
+		return 0;
+	}
+
+	ptr = start = list->ptr;
+	if (*ptr == prop) {
+		*ptr = list->ptr[--list->num];
+		type = (*(ptr++))->type;			
+	} else {
+		type = (*(ptr++))->type;
+		do {
+			type = compute_intersection_type(type, (*ptr)->type);
+		} while (prop != *++ptr);
+		*ptr = list->ptr[--list->num];
+	}
+	end = start + list->num;
+	while (ptr != end) {
+		type = compute_intersection_type(type, (*ptr)->type);
+		ptr++;
+	}
+
+	if (list->num >= 4 && list->num * 4 == list->num_allocated) {
+		list->num_allocated = list->num * 2;
+		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(erealloc(list, sizeof(zend_property_info_list) + (list->num_allocated - 1) * sizeof(zend_property_info *)));
+	}
+
+	return type;
 }
 
 static zend_never_inline void zend_fetch_this_var(int type OPLINE_DC EXECUTE_DATA_DC)

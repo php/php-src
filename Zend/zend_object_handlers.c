@@ -663,23 +663,18 @@ ZEND_API zval *zend_std_read_property(zval *object, zval *member, int type, void
 			if (UNEXPECTED(ZEND_CLASS_HAS_TYPE_HINTS(zobj->ce) &&
 				(prop_info = zend_object_fetch_property_type_info(Z_OBJCE_P(object), Z_STR_P(member), cache_slot)))) {
 				zval *val = retval;
-				zend_type old_type;
 
 				if (Z_ISREF_P(val)) {
-					zend_type new_type = zend_get_prop_info_ref_type(prop_info);
-					old_type = Z_REFTYPE_P(val);
-					if (old_type != 0 && (new_type = zend_check_typed_assign_typed_ref("Property", old_type, new_type)) == 0) {
+					/* the overloaded property type must be compatible with the reference type so that we don't coercively cast and end up with a value type not matching the reference type */
+					if (zend_check_typed_assign_typed_ref("Property", Z_REFTYPE_P(val), zend_get_prop_info_ref_type(prop_info)) == 0) {
 						goto exit;
 					}
-					Z_REFTYPE_P(val) = new_type;
+					/* we do not add a reference type here - reference types must be backed up by references being assigned to an actual typed container */
 					val = Z_REFVAL_P(val);
 				}
 
 				if (UNEXPECTED(zend_verify_property_type(prop_info, val, val, (zobj->ce->__get->common.fn_flags & ZEND_ACC_STRICT_TYPES)) == NULL)) {
 					zend_verify_property_type_error(prop_info, Z_STR_P(member), val);
-					if (Z_ISREF_P(retval)) {
-						Z_REFTYPE_P(retval) = old_type;
-					}
 				}
 			}
 			goto exit;
@@ -1026,6 +1021,12 @@ ZEND_API void zend_std_unset_property(zval *object, zval *member, void **cache_s
 		zval *slot = OBJ_PROP(zobj, property_offset);
 
 		if (Z_TYPE_P(slot) != IS_UNDEF) {
+			if (UNEXPECTED(Z_ISREF_P(slot)) && Z_REFCOUNT_P(slot) > 1) {
+				zend_property_info *prop_info = zend_hash_find(&zobj->ce->properties_info, Z_STR_P(member));
+				if (UNEXPECTED(prop_info->type)) {
+					Z_REFTYPE_P(slot) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(slot), prop_info);
+				}
+			}
 			zval_ptr_dtor(slot);
 			ZVAL_UNDEF(slot);
 			if (zobj->properties) {

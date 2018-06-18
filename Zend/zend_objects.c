@@ -54,7 +54,17 @@ ZEND_API void zend_object_std_dtor(zend_object *object)
 	if (EXPECTED(object->ce->default_properties_count)) {
 		end = p + object->ce->default_properties_count;
 		do {
-			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			if (Z_REFCOUNTED_P(p)) {
+				if (UNEXPECTED(Z_ISREF_P(p)) && Z_REFCOUNT_P(p) > 1) {
+					zend_property_info *prop_info;
+					ZEND_REF_FOREACH_TYPE_SOURCES(Z_REF_P(p), prop_info) {
+						if (prop_info->ce == object->ce && p == OBJ_PROP(object, prop_info->offset)) {
+							Z_REFTYPE_P(p) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(p), prop_info);
+						}
+					} ZEND_REF_FOREACH_TYPE_SOURCES_END();
+				}
+				i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
+			}
 			p++;
 		} while (p != end);
 	}

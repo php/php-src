@@ -111,6 +111,7 @@ static zend_always_inline zval* zend_assign_to_variable(zval *variable_ptr, zval
 						if (need_copy) {
 							Z_TRY_DELREF_P(value);
 						}
+						zval_ptr_dtor(value);
 						return Z_REFVAL_P(variable_ptr);
 					}
 					if (need_copy) {
@@ -468,6 +469,47 @@ static zend_always_inline zend_property_info* zend_object_fetch_property_type_in
 
 zval* zend_verify_property_type(zend_property_info *info, zval *property, zval *tmp, zend_bool strict);
 ZEND_COLD void zend_verify_property_type_error(zend_property_info *info, zend_string *name, zval *property);
+
+#define ZEND_REF_TYPE_SOURCES(ref) \
+	(ref)->sources
+
+#define ZEND_REF_HAS_TYPE_SOURCES(ref) \
+	(ZEND_REF_TYPE_SOURCES(ref).ptr != NULL)
+
+ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+ZEND_API zend_type zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop);
+
+#define ZEND_REF_ADD_TYPE_SOURCE(ref, source) \
+	zend_ref_add_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_DEL_TYPE_SOURCE(ref, source) \
+	zend_ref_del_type_source(&ZEND_REF_TYPE_SOURCES(ref), source)
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES(ref, prop) do { \
+		zend_property_info_source_list *_source_list = &ZEND_REF_TYPE_SOURCES(ref); \
+		size_t _num; \
+		zend_property_info *_prop; \
+		zend_property_info_list *_list; \
+		if (_source_list->ptr) { \
+			if (ZEND_PROPERTY_INFO_SOURCE_IS_LIST(_source_list->list)) { \
+				_list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(_source_list->list); \
+				_num = _list->num; \
+				_prop = _list->ptr[--_num]; \
+			} else { \
+				_prop = _source_list->ptr; \
+				_num = 0; \
+			} \
+			while (1) { \
+				prop = _prop; \
+
+#define ZEND_REF_FOREACH_TYPE_SOURCES_END() \
+				if (_num == 0) { \
+					break; \
+				} \
+				_prop = _list->ptr[--_num]; \
+			} \
+		} \
+	} while (0)
 
 END_EXTERN_C()
 

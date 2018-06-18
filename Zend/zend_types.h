@@ -384,10 +384,28 @@ struct _zend_resource {
 	void             *ptr;
 };
 
+typedef struct _zend_property_info zend_property_info;
+
+typedef struct {
+	size_t num;
+	size_t num_allocated;
+	zend_property_info *ptr[1];
+} zend_property_info_list;
+
+typedef union {
+	zend_property_info *ptr;
+	uintptr_t list;
+} zend_property_info_source_list;
+
+#define ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list) (0x1 | (uintptr_t) (list))
+#define ZEND_PROPERTY_INFO_SOURCE_TO_LIST(list) ((zend_property_info_list *) ((list) & ~0x1))
+#define ZEND_PROPERTY_INFO_SOURCE_IS_LIST(list) ((list) & 0x1)
+
 struct _zend_reference {
-	zend_refcounted_h gc;
-	zval              val;
-	zend_type         type;
+	zend_refcounted_h              gc;
+	zval                           val;
+	zend_type                      type;
+	zend_property_info_source_list sources;
 };
 
 struct _zend_ast_ref {
@@ -873,6 +891,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_SET_REFCOUNT(_ref, 1);								\
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		_ref->type = 0;									\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -884,6 +903,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		_ref->type = 0;									\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
@@ -896,6 +916,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 		GC_TYPE_INFO(_ref) = IS_REFERENCE;						\
 		ZVAL_COPY_VALUE(&_ref->val, _z);						\
 		_ref->type = 0;									\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(_z) = _ref;										\
 		Z_TYPE_INFO_P(_z) = IS_REFERENCE_EX;					\
 	} while (0)
@@ -908,6 +929,7 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 			(GC_PERSISTENT << GC_FLAGS_SHIFT);					\
 		ZVAL_COPY_VALUE(&_ref->val, r);							\
 		_ref->type = 0;									\
+		_ref->sources.ptr = NULL;									\
 		Z_REF_P(z) = _ref;										\
 		Z_TYPE_INFO_P(z) = IS_REFERENCE_EX;						\
 	} while (0)
