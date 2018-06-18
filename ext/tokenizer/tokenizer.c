@@ -191,8 +191,16 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 
 	switch (event) {
 		case ON_TOKEN:
-			if (token == END) break;
-			add_token(token_stream, token, LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line);
+			{
+				if (token == END) break;
+				/* Specical cases */
+				if (token == ';' && LANG_SCNG(yy_leng) == sizeof("?>") - 1) {
+					token = T_CLOSE_TAG;
+				} else if (token == T_ECHO && LANG_SCNG(yy_leng) == sizeof("<?=") - 1) {
+					token = T_OPEN_TAG_WITH_ECHO;
+				}
+				add_token(token_stream, token, LANG_SCNG(yy_text), LANG_SCNG(yy_leng), line);
+			}
 			break;
 		case ON_FEEDBACK:
 			tokens_ht = Z_ARRVAL_P(token_stream);

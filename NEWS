@@ -27,6 +27,8 @@ PHP                                                                        NEWS
     `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
 
 - Tokenizer:
+  . Fixed bug #76437 (token_get_all with TOKEN_PARSE flag fails to recognise
+    close tag). (Laruence)
   . Fixed bug #75218 (Change remaining uncatchable fatal errors for parsing
     into ParseError). (Nikita)
 
