@@ -22,6 +22,7 @@ PHP                                                                        NEWS
 - Opcache:
   . Fixed bug #76477 (Opcache causes empty return value).
     (Nikita, Laruence)
+  . Fixed bug #76466 (Loop variable confusion). (Dmitry, Laruence, Nikita)
   . Fixed bug #76463 (var has array key type but not value type). (Laruence)
   . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
     `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
