@@ -1344,7 +1344,7 @@ yy7:
 	{
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_OPEN_TAG);
 		}
 		RETURN_TOKEN(T_OPEN_TAG);
@@ -1401,7 +1401,7 @@ yy15:
 	{
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_OPEN_TAG);
 	}
 	RETURN_TOKEN(T_OPEN_TAG);
@@ -2445,7 +2445,7 @@ yy96:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);
@@ -3522,13 +3522,13 @@ yy197:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_DOC_COMMENT);
 		}
 		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);

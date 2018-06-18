@@ -1916,7 +1916,7 @@ string:
 <INITIAL>"<?php"([ \t]|{NEWLINE}) {
 	HANDLE_NEWLINE(yytext[yyleng-1]);
 	BEGIN(ST_IN_SCRIPTING);
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_OPEN_TAG);
 	}
 	RETURN_TOKEN(T_OPEN_TAG);
@@ -1926,7 +1926,7 @@ string:
 <INITIAL>"<?" {
 	if (CG(short_tags)) {
 		BEGIN(ST_IN_SCRIPTING);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_OPEN_TAG);
 		}
 		RETURN_TOKEN(T_OPEN_TAG);
@@ -2053,7 +2053,7 @@ inline_char_handler:
 
 	yyleng = YYCURSOR - SCNG(yy_text);
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);
@@ -2086,13 +2086,13 @@ inline_char_handler:
 
 	if (doc_com) {
 		CG(doc_comment) = zend_string_init(yytext, yyleng, 0);
-		if (EXPECTED(elem != NULL)) {
+		if (PARSER_MODE()) {
 			SKIP_TOKEN(T_DOC_COMMENT);
 		}
 		RETURN_TOKEN(T_DOC_COMMENT);
 	}
 
-	if (EXPECTED(elem != NULL)) {
+	if (PARSER_MODE()) {
 		SKIP_TOKEN(T_COMMENT);
 	}
 	RETURN_TOKEN(T_COMMENT);
