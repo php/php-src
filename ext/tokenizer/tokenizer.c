@@ -193,7 +193,7 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 		case ON_TOKEN:
 			{
 				if (token == END) break;
-				/* Specical cases */
+				/* Special cases */
 				if (token == ';' && LANG_SCNG(yy_leng) == sizeof("?>") - 1) {
 					token = T_CLOSE_TAG;
 				} else if (token == T_ECHO && LANG_SCNG(yy_leng) == sizeof("<?=") - 1) {
