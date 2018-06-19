@@ -373,11 +373,6 @@ static zend_always_inline HashPosition _zend_hash_get_current_pos(const HashTabl
 	return pos;
 }
 
-ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_first_pos(const HashTable *ht)
-{
-	return _zend_hash_get_first_pos(ht);
-}
-
 ZEND_API HashPosition ZEND_FASTCALL zend_hash_get_current_pos(const HashTable *ht)
 {
 	return _zend_hash_get_current_pos(ht);

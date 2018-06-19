@@ -4027,7 +4027,7 @@ PHP_FUNCTION(array_key_first)
 	ZEND_PARSE_PARAMETERS_END();
 
 	HashTable *target_hash = HASH_OF(stack);
-	HashPosition pos = zend_hash_get_first_pos(target_hash);
+	HashPosition pos = 0;
 	zend_hash_get_current_key_zval_ex(target_hash, return_value, &pos);
 }
 /* }}} */
@@ -4091,6 +4091,56 @@ PHP_FUNCTION(array_values)
 			ZEND_HASH_FILL_ADD(entry);
 		} ZEND_HASH_FOREACH_END();
 	} ZEND_HASH_FILL_END();
+}
+/* }}} */
+
+/* {{{ array_value_result_helper
+ * Get a value out of a HashTable at the given position and copy the value into return_value.
+ */
+static inline
+void array_value_result_helper(HashTable *ht, HashPosition *pos, zval *return_value)
+{
+	zval* array_value = zend_hash_get_current_data_ex(ht, pos);
+
+	if (array_value == NULL) {
+		ZVAL_NULL(return_value);
+		return;
+	}
+
+	ZVAL_COPY(return_value, array_value);
+}
+/* }}} */
+
+/* {{{ proto mixed array_value_first(array stack)
+   Get the value of the first element of the array */
+PHP_FUNCTION(array_value_first)
+{
+	zval *stack;    /* Input stack */
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = HASH_OF(stack);
+	HashPosition pos = 0;
+	array_value_result_helper(target_hash, &pos, return_value);
+}
+/* }}} */
+
+/* {{{ proto mixed array_value_last(array stack)
+   Get the value of the last element of the array */
+PHP_FUNCTION(array_value_last)
+{
+	zval *stack;    /* Input stack */
+	HashPosition pos;
+
+	ZEND_PARSE_PARAMETERS_START(1, 1)
+		Z_PARAM_ARRAY_EX(stack, 0, 1)
+	ZEND_PARSE_PARAMETERS_END();
+
+	HashTable *target_hash = HASH_OF(stack);
+	zend_hash_internal_pointer_end_ex(target_hash, &pos);
+	array_value_result_helper(target_hash, &pos, return_value);
 }
 /* }}} */
 
