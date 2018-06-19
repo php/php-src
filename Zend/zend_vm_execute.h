@@ -5328,11 +5328,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -5391,11 +5395,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -8787,11 +8795,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -8850,11 +8862,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -9734,11 +9750,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -9797,11 +9817,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CO
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -15261,11 +15285,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -15324,11 +15352,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -17658,11 +17690,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -17721,11 +17757,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -18349,11 +18389,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -18412,11 +18456,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_TM
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -26419,7 +26467,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -26469,9 +26516,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -26483,13 +26531,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -26500,11 +26546,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -26527,7 +26578,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -26577,9 +26627,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -26591,13 +26642,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -26608,11 +26657,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CONST_
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -29179,7 +29233,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -29229,9 +29282,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -29243,13 +29297,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-							zval_ptr_dtor_nogc(free_op2);
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+						zval_ptr_dtor_nogc(free_op2);
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -29260,11 +29312,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -29287,7 +29344,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -29337,9 +29393,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -29351,13 +29408,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
-							zval_ptr_dtor_nogc(free_op2);
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+						zval_ptr_dtor_nogc(free_op2);
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -29368,11 +29423,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_TMPVAR
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -33562,7 +33622,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -33612,9 +33671,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -33626,13 +33686,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -33643,11 +33701,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -33670,7 +33733,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -33720,9 +33782,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -33734,13 +33797,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
-							if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+						if (UNEXPECTED(free_op1)) {zval_ptr_dtor_nogc(free_op1);};
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -33751,11 +33812,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_VAR_CV_OP_
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -35754,7 +35820,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -35804,9 +35869,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -35818,13 +35884,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -35835,11 +35899,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -35861,7 +35930,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -35911,9 +35979,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -35925,13 +35994,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -35942,11 +36009,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CON
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -37816,7 +37888,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -37866,9 +37937,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -37880,13 +37952,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
-							zval_ptr_dtor_nogc(free_op2);
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						zval_ptr_dtor_nogc(free_op2);
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -37897,11 +37967,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -37923,7 +37998,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -37973,9 +38047,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -37987,13 +38062,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
-							zval_ptr_dtor_nogc(free_op2);
+						zval_ptr_dtor_nogc(free_op2);
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -38004,11 +38077,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_TMP
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -40503,7 +40581,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -40553,9 +40630,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -40567,13 +40645,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -40584,11 +40660,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -40610,7 +40691,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -40660,9 +40740,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -40674,13 +40755,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -40691,11 +40770,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_UNUSED_CV_
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -46250,7 +46334,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -46300,9 +46383,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -46314,13 +46398,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -46331,11 +46413,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -46357,7 +46444,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -46407,9 +46493,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CONST == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CONST == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -46421,13 +46508,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -46438,11 +46523,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CONST_O
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -46503,11 +46593,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -46566,11 +46660,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -50532,7 +50630,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -50582,9 +50679,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -50596,13 +50694,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
-							zval_ptr_dtor_nogc(free_op2);
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						zval_ptr_dtor_nogc(free_op2);
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -50613,11 +50709,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -50639,7 +50740,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -50689,9 +50789,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 		zval_ptr_dtor_nogc(free_op2);
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if (((IS_TMP_VAR|IS_VAR) == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if ((IS_TMP_VAR|IS_VAR) == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -50703,13 +50804,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
-							zval_ptr_dtor_nogc(free_op2);
+						zval_ptr_dtor_nogc(free_op2);
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -50720,11 +50819,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_TMPVAR_
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -52083,11 +52187,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -52146,11 +52254,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -53668,11 +53780,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 				if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -53731,11 +53847,15 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_STATIC_PROP_REF_SPEC_CV
 
 				HANDLE_EXCEPTION();
 			}
+			if (UNEXPECTED(Z_REFCOUNTED_P(prop)) && Z_ISREF_P(prop)) {
+				Z_REFTYPE_P(prop) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(prop), prop_info);
+			}
 		}
 	}
 	zend_assign_to_variable_reference(prop, value_ptr);
 	if (ref_type) {
 		Z_REFTYPE_P(prop) = ref_type;
+		ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(prop), prop_info);
 	}
 
 	if (UNEXPECTED(RETURN_VALUE_USED(opline))) {
@@ -57256,7 +57376,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -57306,9 +57425,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -57320,13 +57440,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
-							if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
-							HANDLE_EXCEPTION();
-						}
+						if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -57337,11 +57455,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 					if (UNEXPECTED(free_op_data)) {zval_ptr_dtor_nogc(free_op_data);};
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 
@@ -57363,7 +57486,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 	zval variable, *variable_ptr = &variable;
 	zval *value_ptr;
 	void **cache_addr;
-	zend_type ref_type = 0;
 
 	SAVE_OPLINE();
 
@@ -57413,9 +57535,10 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
-			zend_property_info *prop_info;
+		zend_type ref_type = 0;
+		zend_property_info *prop_info;
 
+		if ((IS_CV == IS_CONST) ? EXPECTED(!IS_UNKNOWN_DYNAMIC_PROPERTY_OFFSET((uintptr_t) CACHED_PTR_EX(cache_addr + 1))) : EXPECTED(Z_TYPE_P(property) == IS_STRING)) {
 			if (IS_CV == IS_CONST) {
 				prop_info = (zend_property_info *) CACHED_PTR_EX(cache_addr + 2);
 			} else {
@@ -57427,13 +57550,11 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 				if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 					zend_type old_type = Z_REFTYPE_P(value_ptr);
 
-					if (old_type) {
-						if ((ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
+					if (old_type && (ref_type = i_zend_check_typed_assign_typed_ref("Property", old_type, ref_type)) == 0) {
 
 
 
-							HANDLE_EXCEPTION();
-						}
+						HANDLE_EXCEPTION();
 					}
 				}
 				if (!i_zend_verify_ref_type_assignable_zval(ref_type, value_ptr, EX_USES_STRICT_TYPES())) {
@@ -57444,11 +57565,16 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_ASSIGN_OBJ_REF_SPEC_CV_CV_OP_D
 
 					HANDLE_EXCEPTION();
 				}
+
+				if (UNEXPECTED(Z_REFCOUNTED_P(variable_ptr)) && Z_ISREF_P(variable_ptr)) {
+					Z_REFTYPE_P(variable_ptr) = ZEND_REF_DEL_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
+				}
 			}
 		}
 		zend_assign_to_variable_reference(variable_ptr, value_ptr);
 		if (ref_type) {
 			Z_REFTYPE_P(variable_ptr) = ref_type;
+			ZEND_REF_ADD_TYPE_SOURCE(Z_REF_P(variable_ptr), prop_info);
 		}
 	}
 

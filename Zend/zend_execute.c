@@ -2852,7 +2852,7 @@ ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_li
 		list = emalloc(sizeof(zend_property_info_list) + (4 - 1) * sizeof(zend_property_info *));
 		list->ptr[0] = source_list->ptr;
 		list->num_allocated = 4;
-		list->num = 0;
+		list->num = 1;
 		source_list->list = ZEND_PROPERTY_INFO_SOURCE_FROM_LIST(list);
 	} else if (list->num_allocated == list->num) {
 		list->num_allocated = list->num * 2;
@@ -2866,36 +2866,34 @@ ZEND_API void zend_ref_add_type_source(zend_property_info_source_list *source_li
 ZEND_API zend_type zend_ref_del_type_source(zend_property_info_source_list *source_list, zend_property_info *prop)
 {
 	zend_property_info_list *list = ZEND_PROPERTY_INFO_SOURCE_TO_LIST(source_list->list);
-	zend_type type;
-	zend_property_info **end, **start, **ptr;
+	zend_type type = 0;
+	zend_property_info **end, **ptr;
 
 	if (!ZEND_PROPERTY_INFO_SOURCE_IS_LIST(source_list->list)) {
+		ZEND_ASSERT(source_list->ptr == prop);
 		source_list->ptr = NULL;
 		return 0;
 	}
 
 	if (list->num == 1) {
+		ZEND_ASSERT(*list->ptr == prop);
 		efree(list);
 		source_list->ptr = NULL;
 		return 0;
 	}
 
-	ptr = start = list->ptr;
-	if (*ptr == prop) {
-		*ptr = list->ptr[--list->num];
-		type = (*(ptr++))->type;			
-	} else {
-		type = (*(ptr++))->type;
-		do {
-			type = compute_intersection_type(type, (*ptr)->type);
-		} while (prop != *++ptr);
-		*ptr = list->ptr[--list->num];
-	}
-	end = start + list->num;
-	while (ptr != end) {
-		type = compute_intersection_type(type, (*ptr)->type);
+	--list->num;
+
+	ptr = list->ptr;
+	while (*ptr != prop) {
 		ptr++;
 	}
+	*ptr = list->ptr[list->num];
+
+	ptr = list->ptr, end = ptr + list->num;
+	do {
+		type = compute_intersection_type(type, (*ptr)->type);
+	} while (++ptr != end);
 
 	if (list->num >= 4 && list->num * 4 == list->num_allocated) {
 		list->num_allocated = list->num * 2;
