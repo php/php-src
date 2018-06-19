@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha2
+21 Jun 2018, PHP 7.3.0alpha2
 
 - Core:
   . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
