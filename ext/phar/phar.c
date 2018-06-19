@@ -1853,14 +1853,14 @@ static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len
 	char test[51];
 	const char *pos;
 
-	if (ext_len < 0 || ext_len >= 50) {
+	if (ext_len >= 50) {
 		return FAILURE;
 	}
 
 	if (executable == 1) {
 		/* copy "." as well */
-		memcpy(test, ext_str - 1, ext_len + 1);
-		test[ext_len + 1] = '\0';
+		strlcpy(test, ext_str, ext_len + 1);
+
 		/* executable phars must contain ".phar" as a valid extension (phar://.pharmy/oops is invalid) */
 		/* (phar://hi/there/.phar/oops is also invalid) */
 		pos = strstr(test, ".phar");
