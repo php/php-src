@@ -1,6 +1,6 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.2.7
+21 Jun 2018, PHP 7.2.7
 
 - Core:
   . Fixed bug #76337 (segfault when opcache enabled + extension use
