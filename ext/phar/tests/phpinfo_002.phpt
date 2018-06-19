@@ -22,7 +22,6 @@ phpinfo(INFO_MODULES);
 Phar
 
 Phar: PHP Archive support => enabled
-Phar EXT version => %s
 Phar API version => 1.1.1
 Phar-based phar archives => enabled
 Tar-based phar archives => enabled
