@@ -2545,7 +2545,10 @@ static void exif_thumbnail_extract(image_info_type *ImageInfo, char *offset, siz
 		return;
 	}
 	/* Check to make sure we are not going to go past the ExifLength */
-	if ((ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length) {
+	if (ImageInfo->Thumbnail.size > length
+		|| (ImageInfo->Thumbnail.offset + ImageInfo->Thumbnail.size) > length
+		|| ImageInfo->Thumbnail.offset > length - ImageInfo->Thumbnail.size
+	) {
 		EXIF_ERRLOG_THUMBEOF(ImageInfo)
 		return;
 	}
