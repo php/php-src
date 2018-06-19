@@ -2766,7 +2766,7 @@ ZEND_VM_HANDLER(201, ZEND_ASSIGN_STATIC_PROP_REF, CONST|TMPVAR|CV, UNUSED|CONST|
 		/* op_data freed by assign_to_variable */
 		ZEND_VM_NEXT_OPCODE_EX(1, 2);
 	} else {
-		if (UNEXPECTED(prop_info)) {
+		if (UNEXPECTED(prop_info->type)) {
 			ref_type = zend_get_prop_info_ref_type(prop_info);
 			if (Z_TYPE_P(value_ptr) == IS_REFERENCE) {
 				zend_type old_type = Z_REFTYPE_P(value_ptr);
