@@ -300,7 +300,7 @@ PHP_FUNCTION(mail)
 		Z_PARAM_STRING(subject, subject_len)
 		Z_PARAM_STRING(message, message_len)
 		Z_PARAM_OPTIONAL
-		Z_PARAM_ZVAL_DEREF(headers)
+		Z_PARAM_ZVAL(headers)
 		Z_PARAM_STR(extra_cmd)
 	ZEND_PARSE_PARAMETERS_END();
 
