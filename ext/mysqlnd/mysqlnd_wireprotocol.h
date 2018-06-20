@@ -292,16 +292,6 @@ typedef struct  st_mysqlnd_packet_sha256_pk_request_response {
 	size_t					public_key_len;
 } MYSQLND_PACKET_SHA256_PK_REQUEST_RESPONSE;
 
-typedef struct st_mysqlnd_packet_cached_sha2_result {
-	MYSQLND_PACKET_HEADER		header;
-	uint8_t		response_code;
-	uint8_t 	result;
-	uint8_t 	request;
-	zend_uchar * password;
-	size_t password_len;
-} MYSQLND_PACKET_CACHED_SHA2_RESULT;
-
-
 
 zend_ulong		php_mysqlnd_net_field_length(const zend_uchar **packet);
 zend_uchar *	php_mysqlnd_net_store_length(zend_uchar *packet, const uint64_t length);
