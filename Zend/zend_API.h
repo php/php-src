@@ -685,17 +685,19 @@ END_EXTERN_C()
 #define ZEND_GINIT_FUNCTION			ZEND_MODULE_GLOBALS_CTOR_D
 #define ZEND_GSHUTDOWN_FUNCTION		ZEND_MODULE_GLOBALS_DTOR_D
 
-static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
+static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool silent, zend_bool strict) {
 	zend_type ref_type;
 	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_TYPE_IS_SET(ref_type = Z_REFTYPE_P(zv)))) {
 		zval tmp;
 		ZVAL_COPY(&tmp, arg);
-		if (zend_verify_ref_type_assignable_zval(ref_type, &tmp, ZEND_ARG_USES_STRICT_TYPES())) {
+		if (zend_verify_ref_type_assignable_zval(ref_type, &tmp, strict)) {
 			zv = Z_REFVAL_P(zv);
 			zval_ptr_dtor(zv);
 			ZVAL_COPY_VALUE(zv, &tmp);
 		} else {
-			zend_throw_ref_type_error(ref_type, &tmp);
+			if (!silent) {
+				zend_throw_ref_type_error(ref_type, &tmp);
+			}
 			zval_ptr_dtor(&tmp);
 			return FAILURE;
 		}
@@ -707,6 +709,10 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 
 	return SUCCESS;
 } 
+
+static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
+	return zend_try_assign_ex(zv, arg, 0, ZEND_ARG_USES_STRICT_TYPES());
+}
 
 #define ZEND_TRY_ASSIGN(func, zv, ...) \
 	do { \

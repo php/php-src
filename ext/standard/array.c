@@ -1808,9 +1808,10 @@ static zend_long php_extract_if_exists(zend_array *arr, zend_array *symbol_table
 				continue;
 			}
 			ZVAL_DEREF(entry);
-			ZVAL_DEREF(orig_var);
-			zval_ptr_dtor(orig_var);
-			ZVAL_COPY(orig_var, entry);
+			if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+				exception_thrown = 1;
+				continue;
+			}
 			count++;
 		}
 	} ZEND_HASH_FOREACH_END();
@@ -1900,9 +1901,10 @@ static zend_long php_extract_overwrite(zend_array *arr, zend_array *symbol_table
 				continue;
 			}
 			ZVAL_DEREF(entry);
-			ZVAL_DEREF(orig_var);
-			zval_ptr_dtor(orig_var);
-			ZVAL_COPY(orig_var, entry);
+			if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+				exception_thrown = 1;
+				continue;
+			}
 		} else {
 			ZVAL_DEREF(entry);
 			Z_TRY_ADDREF_P(entry);
@@ -2009,9 +2011,10 @@ static zend_long php_extract_prefix_if_exists(zend_array *arr, zend_array *symbo
 						if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
-						ZVAL_DEREF(orig_var);
-						zval_ptr_dtor(orig_var);
-						ZVAL_COPY(orig_var, entry);
+						if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+							exception_thrown = 1;
+							continue;
+						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
 						zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2145,9 +2148,10 @@ static zend_long php_extract_prefix_same(zend_array *arr, zend_array *symbol_tab
 						if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 							orig_var = Z_INDIRECT_P(orig_var);
 						}
-						ZVAL_DEREF(orig_var);
-						zval_ptr_dtor(orig_var);
-						ZVAL_COPY(orig_var, entry);
+						if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+							exception_thrown = 1;
+							continue;
+						}
 					} else {
 						Z_TRY_ADDREF_P(entry);
 						zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2259,9 +2263,10 @@ static zend_long php_extract_prefix_all(zend_array *arr, zend_array *symbol_tabl
 					if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 						orig_var = Z_INDIRECT_P(orig_var);
 					}
-					ZVAL_DEREF(orig_var);
-					zval_ptr_dtor(orig_var);
-					ZVAL_COPY(orig_var, entry);
+					if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+						exception_thrown = 1;
+						continue;
+					}
 				} else {
 					Z_TRY_ADDREF_P(entry);
 					zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
@@ -2372,9 +2377,10 @@ static zend_long php_extract_prefix_invalid(zend_array *arr, zend_array *symbol_
 				if (Z_TYPE_P(orig_var) == IS_INDIRECT) {
 					orig_var = Z_INDIRECT_P(orig_var);
 				}
-				ZVAL_DEREF(orig_var);
-				zval_ptr_dtor(orig_var);
-				ZVAL_COPY(orig_var, entry);
+				if (zend_try_assign_ex(orig_var, entry, exception_thrown, 0) == FAILURE) {
+					exception_thrown = 1;
+					continue;
+				}
 			} else {
 				Z_TRY_ADDREF_P(entry);
 				zend_hash_add_new(symbol_table, Z_STR(final_name), entry);
