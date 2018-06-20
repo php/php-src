@@ -18,9 +18,6 @@ if test "$PHP_INTL" != "no"; then
   else
     icu_spoof_src=""
   fi
-  if test "$icu_version" -ge "59000"; then
-  	ICU_CXXFLAGS="$ICU_CXXFLAGS -std=c++11 -stdlib=libc++"
-  fi
   PHP_NEW_EXTENSION(intl, php_intl.c \
     intl_error.c \
     intl_convert.c \
