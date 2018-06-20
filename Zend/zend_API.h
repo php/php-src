@@ -689,7 +689,7 @@ static zend_always_inline int zend_try_assign_ex(zval *zv, zval *arg, zend_bool 
 	zend_type ref_type;
 	if (EXPECTED(Z_ISREF_P(zv)) && UNEXPECTED(ZEND_TYPE_IS_SET(ref_type = Z_REFTYPE_P(zv)))) {
 		zval tmp;
-		ZVAL_COPY(&tmp, arg);
+		ZVAL_COPY_VALUE(&tmp, arg);
 		if (zend_verify_ref_type_assignable_zval(ref_type, &tmp, strict)) {
 			zv = Z_REFVAL_P(zv);
 			zval_ptr_dtor(zv);
