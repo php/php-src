@@ -714,20 +714,47 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 	return zend_try_assign_ex(zv, arg, 0, ZEND_ARG_USES_STRICT_TYPES());
 }
 
-#define ZEND_TRY_ASSIGN(func, zv, ...) \
-	do { \
-		zval _zv; \
-		func(&_zv, ##__VA_ARGS__); \
-		zend_try_assign(zv, &_zv); \
-        } while (0) 
+#define ZEND_TRY_ASSIGN_NULL(zv) do { \
+	zval _zv; \
+	ZVAL_NULL(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
 
-#define ZEND_TRY_ASSIGN_NULL(zv) ZEND_TRY_ASSIGN(ZVAL_NULL, zv)
-#define ZEND_TRY_ASSIGN_LONG(zv, long) ZEND_TRY_ASSIGN(ZVAL_LONG, zv, long)
-#define ZEND_TRY_ASSIGN_DOUBLE(zv, double) ZEND_TRY_ASSIGN(ZVAL_DOUBLE, zv, double)
-#define ZEND_TRY_ASSIGN_EMPTY_STRING(zv) ZEND_TRY_ASSIGN(ZVAL_EMPTY_STRING, zv)
-#define ZEND_TRY_ASSIGN_STR(zv, str) ZEND_TRY_ASSIGN(ZVAL_STR, zv, str)
-#define ZEND_TRY_ASSIGN_STRING(zv, string) ZEND_TRY_ASSIGN(ZVAL_STRING, zv, string)
-#define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) ZEND_TRY_ASSIGN(ZVAL_STRINGL, zv, string, len)
+#define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
+	zval _zv; \
+	ZVAL_LONG(&_zv, lval); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_DOUBLE(zv, dval) do { \
+	zval _zv; \
+	ZVAL_DOUBLE(&_zv, dval); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_EMPTY_STRING(zv) do { \
+	zval _zv; \
+	ZVAL_EMPTY_STRING(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STR(zv, str) do { \
+	zval _zv; \
+	ZVAL_STR(&_zv, str); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STRING(zv, string) do { \
+	zval _zv; \
+	ZVAL_STRING(&_zv, string); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) do { \
+	zval _zv; \
+	ZVAL_STRINGL(&_zv, string, len); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
 
 /* Fast parameter parsing API */
 
