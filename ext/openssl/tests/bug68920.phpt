@@ -4,6 +4,7 @@ Bug #68920: peer_fingerprint input checks should be strict
 <?php 
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -47,6 +48,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 Warning: stream_socket_client(): Expected peer fingerprint must be a string or an array in %s on line %d
 

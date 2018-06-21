@@ -5,6 +5,7 @@ Bug #65538: SSL context "cafile" supports phar wrapper
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!extension_loaded("phar")) die("skip phar not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -49,5 +50,6 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 string(12) "Hello World!"
