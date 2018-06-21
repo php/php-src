@@ -2689,7 +2689,7 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		if (UNEXPECTED(success != SUCCESS)) {
 			return FAILURE;
 		}
-        }
+	}
 
 	if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW) && UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
 		zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
