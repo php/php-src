@@ -6,6 +6,9 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- PCRE:
+  . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
+
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)

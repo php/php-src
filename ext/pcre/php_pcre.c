@@ -672,8 +672,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 			case 'u':	coptions |= PCRE2_UTF;
 	/* In  PCRE,  by  default, \d, \D, \s, \S, \w, and \W recognize only ASCII
        characters, even in UTF-8 mode. However, this can be changed by setting
-       the PCRE_UCP option. */
-#ifdef PCRE_UCP
+       the PCRE2_UCP option. */
+#ifdef PCRE2_UCP
 						coptions |= PCRE2_UCP;
 #endif
 				break;
