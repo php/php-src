@@ -16,6 +16,10 @@ PHP                                                                        NEWS
   . Fixed bug #76477 (Opcache causes empty return value).
     (Nikita, Laruence)
 
+- Standard:
+  . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
+    (Laruence)
+
 - ZIP:
   . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
     (Dennis Birkholz, Remi)
