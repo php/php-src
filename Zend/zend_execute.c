@@ -2692,10 +2692,12 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 	}
 
 	if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW) && UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
+		const char *class_name, *prop_name;
+		zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, NULL);
 		zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
 			"Typed static property %s::$%s must not be accessed before initialization",
 			ZSTR_VAL(property_info->ce->name),
-			ZSTR_VAL(property_info->name));
+			prop_name);
 		return FAILURE;
 	}
 
