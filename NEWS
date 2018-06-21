@@ -9,6 +9,10 @@ PHP                                                                        NEWS
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
 
+- Standard:
+  . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
+    (Laruence)
+
 22 Jun 2019, PHP 7.1.19
 
 - CLI Server:
