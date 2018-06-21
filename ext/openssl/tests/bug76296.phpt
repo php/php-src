@@ -7,7 +7,7 @@ Bug #76296 openssl_pkey_get_public does not respect open_basedir
 $dir = __DIR__ . '/bug76296_openbasedir';
 $pem = 'file://' . __DIR__ . '/public.key';
 if (!is_dir($dir)) {
-	mkdir($dir);
+    mkdir($dir);
 }
 
 ini_set('open_basedir', $dir);

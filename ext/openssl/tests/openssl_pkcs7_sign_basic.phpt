@@ -7,7 +7,7 @@ openssl_pkcs7_sign() tests
 $infile = dirname(__FILE__) . "/cert.crt";
 $outfile = tempnam(sys_get_temp_dir(), "ssl");
 if ($outfile === false) {
-	die("failed to get a temporary filename!");
+    die("failed to get a temporary filename!");
 }
 
 $privkey = "file://" . dirname(__FILE__) . "/private_rsa_1024.key";
@@ -32,8 +32,8 @@ var_dump(openssl_pkcs7_sign($infile, $outfile, $single_cert, $privkey, $empty));
 var_dump(openssl_pkcs7_sign($infile, $outfile, $single_cert, $wrong, $headers));
 
 if (file_exists($outfile)) {
-	echo "true\n";
-	unlink($outfile);
+    echo "true\n";
+    unlink($outfile);
 }
 ?>
 --EXPECTF--
