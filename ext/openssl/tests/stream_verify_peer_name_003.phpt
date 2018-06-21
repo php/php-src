@@ -4,6 +4,7 @@ Host name mismatch triggers error
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -35,6 +36,7 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 Warning: stream_socket_client(): Peer certificate CN=`bug54992.local' did not match expected CN=`127.0.0.1' in %s on line %d
 

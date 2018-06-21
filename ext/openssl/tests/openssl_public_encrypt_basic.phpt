@@ -10,9 +10,9 @@ $pubkey = "file://" . dirname(__FILE__) . "/public.key";
 $wrong = "wrong";
 
 class test {
-	function __toString() {
-		return "test";
-	}
+    function __toString() {
+        return "test";
+    }
 }
 $obj = new test;
 
