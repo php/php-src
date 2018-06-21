@@ -236,7 +236,7 @@ static ZEND_NAMED_FUNCTION(zend_closure_call_magic) /* {{{ */ {
 	fci.size = sizeof(zend_fcall_info);
 	fci.retval = return_value;
 
-	fcc.function_handler = (zend_function *) EX(func)->common.arg_info;
+	fcc.function_handler = (zend_function *) EX(func)->internal_function.reserved[0];
 	fci.params = params;
 	fci.param_count = 2;
 	ZVAL_STR(&fci.params[0], EX(func)->common.function_name);
@@ -274,7 +274,7 @@ static int zend_create_closure_from_callable(zval *return_value, zval *callable,
 		call.type = ZEND_INTERNAL_FUNCTION;
 		call.handler = zend_closure_call_magic;
 		call.function_name = mptr->common.function_name;
-		call.arg_info = (zend_internal_arg_info *) mptr->common.prototype;
+		call.reserved[0] = mptr->op_array.reserved[0];
 		call.scope = mptr->common.scope;
 
 		zend_free_trampoline(mptr);
