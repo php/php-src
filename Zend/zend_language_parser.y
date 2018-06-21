@@ -28,6 +28,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_language_scanner.h"
+#include "zend_exceptions.h"
 
 #define YYSIZE_T size_t
 #define yytnamerr zend_yytnamerr
@@ -414,8 +415,8 @@ inner_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
-			{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
-			      "__HALT_COMPILER() can only be used from the outermost scope"); }
+			{ $$ = NULL; zend_throw_exception(zend_ce_compile_error,
+			      "__HALT_COMPILER() can only be used from the outermost scope", 0); YYERROR; }
 ;
 
 
@@ -446,7 +447,7 @@ statement:
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
-			{ zend_handle_encoding_declaration($3); }
+			{ if (!zend_handle_encoding_declaration($3)) { YYERROR; } }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
@@ -511,7 +512,8 @@ class_declaration_statement:
 
 class_modifiers:
 		class_modifier 					{ $$ = $1; }
-	|	class_modifiers class_modifier 	{ $$ = zend_add_class_modifier($1, $2); }
+	|	class_modifiers class_modifier
+			{ $$ = zend_add_class_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 class_modifier:
@@ -798,7 +800,7 @@ method_modifiers:
 non_empty_member_modifiers:
 		member_modifier			{ $$ = $1; }
 	|	non_empty_member_modifiers member_modifier
-			{ $$ = zend_add_member_modifier($1, $2); }
+			{ $$ = zend_add_member_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 member_modifier:

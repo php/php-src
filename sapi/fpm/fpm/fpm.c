@@ -1,5 +1,4 @@
 
-	/* $Id: fpm.c,v 1.23 2008/07/20 16:38:31 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #include "fpm_config.h"

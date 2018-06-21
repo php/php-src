@@ -33,7 +33,7 @@
 #define ZEND_MODULE_INFO_FUNC_ARGS zend_module_entry *zend_module
 #define ZEND_MODULE_INFO_FUNC_ARGS_PASSTHRU zend_module
 
-#define ZEND_MODULE_API_NO 20170718
+#define ZEND_MODULE_API_NO 20180606
 #ifdef ZTS
 #define USING_ZTS 1
 #else

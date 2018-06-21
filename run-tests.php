@@ -908,11 +908,11 @@ foreach ($exts_to_test as $key => $val) {
 }
 
 foreach ($test_dirs as $dir) {
-	find_files(TEST_PHP_SRCDIR."/{$dir}", ($dir == 'ext'));
+	find_files(TEST_PHP_SRCDIR."/{$dir}", $dir == 'ext');
 }
 
 foreach ($user_tests as $dir) {
-	find_files($dir, ($dir == 'ext'));
+	find_files($dir, $dir == 'ext');
 }
 
 function find_files($dir, $is_ext_dir = false, $ignore = false)
@@ -1426,20 +1426,15 @@ TEST $file
 	/* For GET/POST/PUT tests, check if cgi sapi is available and if it is, use it. */
 	if (array_key_exists('CGI', $section_text) || !empty($section_text['GET']) || !empty($section_text['POST']) || !empty($section_text['GZIP_POST']) || !empty($section_text['DEFLATE_POST']) || !empty($section_text['POST_RAW']) || !empty($section_text['PUT']) || !empty($section_text['COOKIE']) || !empty($section_text['EXPECTHEADERS'])) {
 		if (isset($php_cgi)) {
-			$old_php = $php;
 			$php = $php_cgi . ' -C ';
 		} else if (!strncasecmp(PHP_OS, "win", 3) && file_exists(dirname($php) . "/php-cgi.exe")) {
-			$old_php = $php;
 			$php = realpath(dirname($php) . "/php-cgi.exe") . ' -C ';
 		} else {
 			if (file_exists(dirname($php) . "/../../sapi/cgi/php-cgi")) {
-				$old_php = $php;
 				$php = realpath(dirname($php) . "/../../sapi/cgi/php-cgi") . ' -C ';
 			} else if (file_exists("./sapi/cgi/php-cgi")) {
-				$old_php = $php;
 				$php = realpath("./sapi/cgi/php-cgi") . ' -C ';
 			} else if (file_exists(dirname($php) . "/php-cgi")) {
-				$old_php = $php;
 				$php = realpath(dirname($php) . "/php-cgi") . ' -C ';
 			} else {
 				show_result('SKIP', $tested, $tested_file, "reason: CGI not available");
@@ -1459,7 +1454,6 @@ TEST $file
 		}
 
 		if (isset($phpdbg)) {
-			$old_php = $php;
 			$php = $phpdbg . ' -qIb';
 		} else {
 			show_result('SKIP', $tested, $tested_file, "reason: phpdbg not available");
@@ -2075,10 +2069,10 @@ COMMAND $cmd
 					$start = $end = $length;
 				}
 				// quote a non re portion of the string
-				$temp = $temp . preg_quote(substr($wanted_re, $startOffset, ($start - $startOffset)),  '/');
+				$temp .= preg_quote(substr($wanted_re, $startOffset, $start - $startOffset),  '/');
 				// add the re unquoted.
 				if ($end > $start) {
-					$temp = $temp . '(' . substr($wanted_re, $start+2, ($end - $start-2)). ')';
+					$temp .= '(' . substr($wanted_re, $start+2, $end - $start-2). ')';
 				}
 				$startOffset = $end + 2;
 			}
@@ -2980,7 +2974,7 @@ class RuntestsValgrind {
 	protected $version = '';
 	protected $header = '';
 	protected $version_3_3_0 = false;
-	protected $verison_3_8_0 = false;
+	protected $version_3_8_0 = false;
 
 	public function getVersion() {
 		return $this->version;

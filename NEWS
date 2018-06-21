@@ -1,12 +1,51 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha2
+?? ??? ????, PHP 7.3.0alpha3
+
+- FPM:
+  . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
+    non-blocking). (Nikita)
+
+21 Jun 2018, PHP 7.3.0alpha2
 
 - Core:
+  . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
   . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
+
+- CLI:
+  . Fixed bug #44217 (Output after stdout/stderr closed cause immediate exit
+    with status 0). (Robert Lu)
+
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
 
 - EXIF:
   . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+
+- Interbase:
+  . Fixed bug #76443 (php+php_interbase.dll crash on module_shutdown). (Kalle)
+
+- Mysqlnd:
+  . Fixed bug #76386 (Prepared Statement formatter truncates fractional seconds
+    from date/time column). (Victor Csiky)
+
+- Opcache:
+  . Fixed bug #76477 (Opcache causes empty return value).
+    (Nikita, Laruence)
+  . Fixed bug #76466 (Loop variable confusion). (Dmitry, Laruence, Nikita)
+  . Fixed bug #76463 (var has array key type but not value type). (Laruence)
+  . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
+    `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
+
+- Tokenizer:
+  . Fixed bug #76437 (token_get_all with TOKEN_PARSE flag fails to recognise
+    close tag). (Laruence)
+  . Fixed bug #75218 (Change remaining uncatchable fatal errors for parsing
+    into ParseError). (Nikita)
+
+- ZIP:
+  . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
+    (Dennis Birkholz, Remi)
 
 07 Jun 2018, PHP 7.3.0alpha1
 
@@ -49,6 +88,8 @@ PHP                                                                        NEWS
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
   . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
+  . Improved effectiveness of ZEND_SECURE_ZERO for NetBSD and systems
+    without native similar feature (devnexen).
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -206,6 +247,7 @@ PHP                                                                        NEWS
   . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
   . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
   . Remove superfluous warnings from inet_ntop()/inet_pton(). (daverandom)
+  . Added hrtime() function, to get high resolution time. (welting)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
@@ -214,6 +256,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
     functions taking tidy). (Gabriel Caruso)
+  . Support using tidyp instead of tidy (devnexen).
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

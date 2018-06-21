@@ -747,8 +747,6 @@ int php_uchar_minit(INIT_FUNC_ARGS) {
 	zend_declare_class_constant_string(ce, "UNICODE_VERSION", sizeof("UNICODE_VERISON")-1, U_UNICODE_VERSION);
 	IC_CONSTL("CODEPOINT_MIN", UCHAR_MIN_VALUE)
 	IC_CONSTL("CODEPOINT_MAX", UCHAR_MAX_VALUE)
-	IC_CONSTL("FOLD_CASE_DEFAULT", U_FOLD_CASE_DEFAULT)
-	IC_CONSTL("FOLD_CASE_EXCLUDE_SPECIAL_I", U_FOLD_CASE_EXCLUDE_SPECIAL_I)
 	zend_declare_class_constant_double(ce, "NO_NUMERIC_VALUE", sizeof("NO_NUMERIC_VALUE")-1, U_NO_NUMERIC_VALUE);
 
 	/* All enums used by the uchar APIs.  There are a LOT of them,

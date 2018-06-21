@@ -427,9 +427,7 @@ php_mysqlnd_greet_read(MYSQLND_CONN_DATA * conn, void * _packet)
 		if (packet->authentication_plugin_data.l > SCRAMBLE_LENGTH) {
 			/* more data*/
 			char * new_auth_plugin_data = emalloc(packet->authentication_plugin_data.l);
-			if (!new_auth_plugin_data) {
-				goto premature_end;
-			}
+
 			/* copy what we already have */
 			memcpy(new_auth_plugin_data, packet->authentication_plugin_data.s, SCRAMBLE_LENGTH);
 			/* add additional scramble data 5.5+ sent us */

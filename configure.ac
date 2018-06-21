@@ -143,23 +143,6 @@ else
   rm -f php_version.h.new
 fi
 
-
-dnl Catch common errors here to save a few seconds of our users' time
-dnl -------------------------------------------------------------------------
-
-if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])
-fi
-
-if test -n "$with_apache" && test -n "$with_apxs"; then
-  AC_MSG_ERROR([--with-apache and --with-apxs cannot be used together])
-fi
-
-if test -n "$with_apxs2filter" && test -n "$with_apxs2"; then
-  AC_MSG_ERROR([--with-apxs2filter and --with-apxs2 cannot be used together])
-fi
-
-  
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 

@@ -1,6 +1,5 @@
 #! /bin/sh
 
-# $Id: genif.sh,v 1.6 2005-06-21 13:47:38 sniper Exp $
 # replacement for genif.pl
 
 infile=$1

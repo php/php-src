@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_request.c,v 1.9.2.1 2008/11/15 00:57:24 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 #ifdef HAVE_TIMES
 #include <sys/times.h>

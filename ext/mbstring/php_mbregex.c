@@ -700,21 +700,17 @@ static void _php_mb_regex_ereg_exec(INTERNAL_FUNCTION_PARAMETERS, int icase)
 		RETURN_FALSE;
 	}
 
-	if (!php_mb_check_encoding(
-	string,
-	string_len,
-	_php_mb_regex_mbctype2name(MBREX(current_mbctype))
-	)) {
-		if (array != NULL) {
-			zval_dtor(array);
-			array_init(array);
-		}
-		RETURN_FALSE;
-	}
-
 	if (array != NULL) {
 		zval_dtor(array);
 		array_init(array);
+	}
+
+	if (!php_mb_check_encoding(
+		string,
+		string_len,
+		_php_mb_regex_mbctype2name(MBREX(current_mbctype))
+	)) {
+		RETURN_FALSE;
 	}
 
 	options = MBREX(regex_default_options);

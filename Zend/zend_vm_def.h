@@ -3459,7 +3459,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 				if (OP1_TYPE == IS_CV && UNEXPECTED(Z_TYPE_P(object) == IS_UNDEF)) {
 					object = GET_OP1_UNDEF_CV(object, BP_VAR_R);
 					if (UNEXPECTED(EG(exception) != NULL)) {
-						FREE_OP2();
+						if (OP2_TYPE != IS_CONST) {
+							FREE_OP2();
+						}
 						HANDLE_EXCEPTION();
 					}
 				}
@@ -3524,7 +3526,9 @@ ZEND_VM_HOT_OBJ_HANDLER(112, ZEND_INIT_METHOD_CALL, CONST|TMPVAR|UNUSED|THIS|CV,
 		GC_ADDREF(obj); /* For $this pointer */
 	}
 
-	FREE_OP2();
+	if (OP2_TYPE != IS_CONST) {
+		FREE_OP2();
+	}
 	FREE_OP1();
 
 	if ((OP1_TYPE & (IS_VAR|IS_TMP_VAR)) && UNEXPECTED(EG(exception))) {
@@ -6175,7 +6179,9 @@ ZEND_VM_COLD_CONST_HANDLER(125, ZEND_FE_RESET_RW, CONST|TMP|VAR|CV, JMP_ADDR)
 		}
 		Z_FE_ITER_P(EX_VAR(opline->result.var)) = zend_hash_iterator_add(Z_ARRVAL_P(array_ptr), 0);
 
-		FREE_OP1_VAR_PTR();
+		if (OP1_TYPE == IS_VAR) {
+			FREE_OP1_VAR_PTR();
+		}
 		ZEND_VM_NEXT_OPCODE();
 	} else if (OP1_TYPE != IS_CONST && EXPECTED(Z_TYPE_P(array_ptr) == IS_OBJECT)) {
 		if (!Z_OBJCE_P(array_ptr)->get_iterator) {

@@ -1231,6 +1231,7 @@ static void sccp_visit_instr(scdf_ctx *scdf, zend_op *opline, zend_ssa_op *ssa_o
 			 * ADD_ARRAY_ELEMENT chain. We do this by only keeping the array on the last opcode
 			 * and use a NULL value everywhere else. */
 			if (Z_TYPE(ctx->values[ssa_op->result_def]) == IS_NULL) {
+				SET_RESULT_BOT(result);
 				return;
 			}
 

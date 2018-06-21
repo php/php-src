@@ -50,6 +50,9 @@
 #if HAVE_SYS_MKDEV_H
 # include <sys/mkdev.h>
 #endif
+#if HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>
+#endif
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
 static PHP_MINFO_FUNCTION(posix);

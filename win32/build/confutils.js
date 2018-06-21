@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-// $Id: confutils.js,v 1.60.2.1.2.8.2.33 2009-05-29 07:43:07 kalle Exp $
-
 var STDOUT = WScript.StdOut;
 var STDERR = WScript.StdErr;
 var WshShell = WScript.CreateObject("WScript.Shell");
@@ -2022,11 +2020,6 @@ function generate_tmp_php_ini()
 		}
 		
 		var directive = (extensions_enabled[i][2] ? 'zend_extension' : 'extension');
-
-		// FIXME: Remove this once ZEND_EXTENSION() is merged to XDEBUG
-		if ("xdebug" == extensions_enabled[i][0]) {
-			directive = "zend_extension";
-		}
 
 		var ext_name = extensions_enabled[i][0];
 		if ("gd" == ext_name) {

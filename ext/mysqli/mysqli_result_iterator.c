@@ -16,8 +16,6 @@
   |          Andrey Hristov <andrey@php.net>                             |
   |          Ulf Wendel <uw@php.net>                                     |
   +----------------------------------------------------------------------+
-
-  $Id: mysqli.c 299335 2010-05-13 11:05:09Z andrey $
 */
 
 #ifdef HAVE_CONFIG_H
