@@ -12,6 +12,8 @@ PHP                                                                        NEWS
 
 - PCRE:
   . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
+  . Fixed bug #76514 (Regression in preg_match makes it fail with
+    PREG_JIT_STACKLIMIT_ERROR). (Anatol)
 
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
