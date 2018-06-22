@@ -1164,19 +1164,10 @@ ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 #endif
 			for (i = 0; i < class_type->default_static_members_count; i++) {
 				p = &class_type->default_static_members_table[i];
-				if (Z_ISREF_P(p)) {
-					if (class_type->parent &&
-						i < class_type->parent->default_static_members_count &&
-						p == &class_type->parent->default_static_members_table[i] &&
-						Z_TYPE(CE_STATIC_MEMBERS(class_type->parent)[i]) != IS_UNDEF
-					) {
-						zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
-
-						ZVAL_NEW_REF(q, q);
-						ZVAL_COPY(&CE_STATIC_MEMBERS(class_type)[i], q);
-					} else {
-						ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], Z_REFVAL_P(p));
-					}
+				if (Z_TYPE_P(p) == IS_INDIRECT) {
+					zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
+					ZVAL_DEINDIRECT(q);
+					ZVAL_INDIRECT(&CE_STATIC_MEMBERS(class_type)[i], q);
 				} else {
 					ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
 				}

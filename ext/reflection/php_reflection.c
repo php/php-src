@@ -3795,6 +3795,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		prop = NULL;
 		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
 			prop = &ce->default_static_members_table[prop_info->offset];
+			ZVAL_DEINDIRECT(prop);
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
@@ -5503,6 +5504,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
+		ZVAL_DEINDIRECT(member_p);
 		ZVAL_DEREF(member_p);
 		ZVAL_COPY(return_value, member_p);
 	} else {
@@ -5570,6 +5572,7 @@ ZEND_METHOD(reflection_property, setValue)
 			return;
 		}
 		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
+		ZVAL_DEINDIRECT(variable_ptr);
 		if (variable_ptr != value) {
 			zval garbage;
 

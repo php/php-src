@@ -7,6 +7,8 @@ PHP                                                                        NEWS
     (Nikita)
   . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
     properly). (Nikita)
+  . Fixed bug #76509 (Inherited static properties can be desynchronized from
+    their parent by ref). (Nikita)
 
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to

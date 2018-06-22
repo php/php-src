@@ -612,12 +612,16 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		}
 	}
 	if (ce->default_static_members_table) {
-		zval *p, *end;
+		zval *table, *p, *end;
 
 		SERIALIZE_PTR(ce->default_static_members_table);
-		p = ce->default_static_members_table;
-		UNSERIALIZE_PTR(p);
-		end = p + ce->default_static_members_count;
+		table = ce->default_static_members_table;
+		UNSERIALIZE_PTR(table);
+
+		/* Serialize only static properties in this class.
+		 * Static properties from parent classes will be handled in class_copy_ctor */
+		p = table + (ce->parent ? ce->parent->default_static_members_count : 0);
+		end = table + ce->default_static_members_count;
 		while (p < end) {
 			zend_file_cache_serialize_zval(p, script, info, buf);
 			p++;
@@ -1225,6 +1229,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	ce = Z_PTR_P(zv);
 
 	UNSERIALIZE_STR(ce->name);
+	UNSERIALIZE_PTR(ce->parent);
 	zend_file_cache_unserialize_hash(&ce->function_table,
 			script, buf, zend_file_cache_unserialize_func, ZEND_FUNCTION_DTOR);
 	if (ce->default_properties_table) {
@@ -1239,11 +1244,14 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		}
 	}
 	if (ce->default_static_members_table) {
-		zval *p, *end;
+		zval *table, *p, *end;
 
+		/* Unserialize only static properties in this class.
+		 * Static properties from parent classes will be handled in class_copy_ctor */
 		UNSERIALIZE_PTR(ce->default_static_members_table);
-		p = ce->default_static_members_table;
-		end = p + ce->default_static_members_count;
+		table = ce->default_static_members_table;
+		p = table + (ce->parent ? ce->parent->default_static_members_count : 0);
+		end = table + ce->default_static_members_count;
 		while (p < end) {
 			zend_file_cache_unserialize_zval(p, script, buf);
 			p++;
@@ -1326,7 +1334,6 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		}
 	}
 
-	UNSERIALIZE_PTR(ce->parent);
 	UNSERIALIZE_PTR(ce->constructor);
 	UNSERIALIZE_PTR(ce->destructor);
 	UNSERIALIZE_PTR(ce->clone);

@@ -44,6 +44,23 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . In PHP, static properties are shared between inheriting classes, unless the
+    static property is explicitly overridden in a child class. However, due to
+    an implementation artifact it was possible to separate the static properties
+    by assigning a reference. This loophole has been fixed.
+
+        class Test {
+            public static $x = 0;
+        }
+        class Test2 extends Test { }
+
+        Test2::$x = &$x;
+        $x = 1;
+
+        var_dump(Test::$x, Test2::$x);
+        // Previously: int(0), int(1)
+        // Now:        int(1), int(1)
+
   . References returned by array and property accesses are now unwrapped as
     part of the access. This means that it is no longer possible to modify the
     reference between the access and the use of the accessed value:
