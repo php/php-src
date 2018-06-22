@@ -545,7 +545,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
 	const uint8_t       *tables = NULL;
-	uint8_t              save_tables = 0;
 	zval                *zv;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
@@ -718,8 +717,8 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	if (key != regex) {
 		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
 		if (!tables) {
-			save_tables = 1;
 			tables = pcre2_maketables(gctx);
+			zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
 		}
 		pcre2_set_character_tables(cctx, tables);
 	}
@@ -748,9 +747,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		efree(pattern);
-		if (save_tables) {
-			pefree((void*)tables, 1);
-		}
 		return NULL;
 	}
 
@@ -787,11 +783,6 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.preg_options = poptions;
 	new_entry.compile_options = coptions;
 	new_entry.extra_compile_options = extra_coptions;
-#if HAVE_SETLOCALE
-	if (save_tables) {
-		zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
-	}
-#endif
 	new_entry.refcount = 0;
 
 	rc = pcre2_pattern_info(re, PCRE2_INFO_CAPTURECOUNT, &new_entry.capture_count);
