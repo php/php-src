@@ -467,9 +467,11 @@ PHP_FUNCTION(spl_autoload_call)
 		zend_fcall_info fcall_info;
 		zend_fcall_info_cache fcall_cache;
 
+		ZVAL_UNDEF(&retval);
+
 		fcall_info.size = sizeof(fcall_info);
-		ZVAL_STR_COPY(&fcall_info.function_name, spl_autoload_fn->common.function_name);
-		fcall_info.retval = NULL;
+		ZVAL_UNDEF(&fcall_info.function_name);
+		fcall_info.retval = &retval;
 		fcall_info.param_count = 1;
 		fcall_info.params = class_name;
 		fcall_info.object = NULL;
@@ -480,7 +482,7 @@ PHP_FUNCTION(spl_autoload_call)
 		fcall_cache.object = NULL;
 
 		zend_call_function(&fcall_info, &fcall_cache);
-		zval_ptr_dtor(&fcall_info.function_name);
+		zval_ptr_dtor(&retval);
 	}
 } /* }}} */
 
