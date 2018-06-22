@@ -55,9 +55,6 @@ struct _pcre_cache_entry {
 	uint32_t compile_options;
 	uint32_t extra_compile_options;
 	uint32_t refcount;
-#if HAVE_SETLOCALE
-	const uint8_t *tables;
-#endif
 };
 
 enum {
@@ -98,6 +95,16 @@ static MUTEX_T pcre_mt = NULL;
 #define php_pcre_mutex_free()
 #define php_pcre_mutex_lock()
 #define php_pcre_mutex_unlock()
+#endif
+
+#if HAVE_SETLOCALE
+ZEND_TLS HashTable char_tables;
+
+static void php_pcre_free_char_table(zval *data)
+{/*{{{*/
+	void *ptr = Z_PTR_P(data);
+	pefree(ptr, 1);
+}/*}}}*/
 #endif
 
 static void pcre_handle_exec_error(int pcre_code) /* {{{ */
@@ -141,9 +148,6 @@ static void php_free_pcre_cache(zval *data) /* {{{ */
 	pcre_cache_entry *pce = (pcre_cache_entry *) Z_PTR_P(data);
 	if (!pce) return;
 	pcre2_code_free(pce->re);
-#if HAVE_SETLOCALE
-	if ((void*)pce->tables) pefree((void*)pce->tables, 1);
-#endif
 	pefree(pce, 1);
 }
 /* }}} */
@@ -262,6 +266,9 @@ static PHP_GINIT_FUNCTION(pcre) /* {{{ */
 #endif
 
 	php_pcre_init_pcre2(1);
+#if HAVE_SETLOCALE
+	zend_hash_init(&char_tables, 1, NULL, php_pcre_free_char_table, 1);
+#endif
 }
 /* }}} */
 
@@ -270,6 +277,9 @@ static PHP_GSHUTDOWN_FUNCTION(pcre) /* {{{ */
 	zend_hash_destroy(&pcre_globals->pcre_cache);
 
 	php_pcre_shutdown_pcre2();
+#if HAVE_SETLOCALE
+	zend_hash_destroy(&char_tables);
+#endif
 
 	php_pcre_mutex_free();
 }
@@ -535,6 +545,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
 	const uint8_t       *tables = NULL;
+	uint8_t              save_tables = 0;
 	zval                *zv;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
@@ -705,13 +716,11 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 
 #if HAVE_SETLOCALE
 	if (key != regex) {
-		/* XXX a better solution here were to create a copy of cctx
-			and to cache it along with the generated tables. Once same locale
-			is encountered, the cached cctx and tables would be fetched.
-			Currently the tables are generated every time a locale based
-			pattern is used, and the tables are overwritten in the global
-			cctx. */
-		tables = pcre2_maketables(gctx);
+		tables = (uint8_t *)zend_hash_find_ptr(&char_tables, BG(locale_string));
+		if (!tables) {
+			save_tables = 1;
+			tables = pcre2_maketables(gctx);
+		}
 		pcre2_set_character_tables(cctx, tables);
 	}
 #endif
@@ -739,7 +748,7 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 		php_error_docref(NULL,E_WARNING, "Compilation failed: %s at offset %zu", error, erroffset);
 		pcre_handle_exec_error(PCRE2_ERROR_INTERNAL);
 		efree(pattern);
-		if (tables) {
+		if (save_tables) {
 			pefree((void*)tables, 1);
 		}
 		return NULL;
@@ -779,7 +788,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	new_entry.compile_options = coptions;
 	new_entry.extra_compile_options = extra_coptions;
 #if HAVE_SETLOCALE
-	new_entry.tables = tables;
+	if (save_tables) {
+		zend_hash_add_ptr(&char_tables, BG(locale_string), (void *)tables);
+	}
 #endif
 	new_entry.refcount = 0;
 
