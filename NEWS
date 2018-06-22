@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.2.8
 
+- Core:
+  . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
+    (Nikita)
+
 - Date:
   . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
 

@@ -142,6 +142,7 @@ void init_executor(void) /* {{{ */
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
 	EG(error_handling) = EH_NORMAL;
+	EG(flags) = EG_FLAGS_INITIAL;
 
 	zend_vm_stack_init();
 
