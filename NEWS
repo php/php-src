@@ -2,6 +2,10 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha3
 
+- Core:
+  . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
+    (Nikita)
+
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
