@@ -619,7 +619,11 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 		UNSERIALIZE_PTR(p);
 		end = p + ce->default_static_members_count;
 		while (p < end) {
-			zend_file_cache_serialize_zval(p, script, info, buf);
+			if (Z_TYPE_P(p) == IS_INDIRECT) {
+				SERIALIZE_PTR(Z_INDIRECT_P(p));
+			} else {
+				zend_file_cache_serialize_zval(p, script, info, buf);
+			}
 			p++;
 		}
 	}
@@ -1245,7 +1249,11 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 		p = ce->default_static_members_table;
 		end = p + ce->default_static_members_count;
 		while (p < end) {
-			zend_file_cache_unserialize_zval(p, script, buf);
+			if (Z_TYPE_P(p) == IS_INDIRECT) {
+				UNSERIALIZE_PTR(Z_INDIRECT_P(p));
+			} else {
+				zend_file_cache_unserialize_zval(p, script, buf);
+			}
 			p++;
 		}
 	}

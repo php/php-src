@@ -1377,7 +1377,6 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 			return NULL;
 		}
 	}
-	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 
 	/* check if static properties were destoyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
@@ -1385,9 +1384,11 @@ undeclared_property:
 		if (!silent) {
 			zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 		}
-		ret = NULL;
+		return NULL;
 	}
 
+	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
+	ZVAL_DEINDIRECT(ret);
 	return ret;
 }
 /* }}} */

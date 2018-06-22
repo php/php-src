@@ -1101,6 +1101,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define ZVAL_DEINDIRECT(z) do {							\
+		if (Z_TYPE_P(z) == IS_INDIRECT) {				\
+			(z) = Z_INDIRECT_P(z);						\
+		}												\
+	} while (0)
+
 #define ZVAL_OPT_DEREF(z) do {							\
 		if (UNEXPECTED(Z_OPT_ISREF_P(z))) {				\
 			(z) = Z_REFVAL_P(z);						\
