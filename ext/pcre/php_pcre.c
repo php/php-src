@@ -544,7 +544,9 @@ PHPAPI pcre_cache_entry* pcre_get_compiled_regex_cache(zend_string *regex)
 	char				*pattern;
 	size_t				 pattern_len;
 	uint32_t			 poptions = 0;
+#if HAVE_SETLOCALE
 	const uint8_t       *tables = NULL;
+#endif
 	zval                *zv;
 	pcre_cache_entry	 new_entry;
 	int					 rc;
