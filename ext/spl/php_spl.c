@@ -50,6 +50,9 @@ ZEND_DECLARE_MODULE_GLOBALS(spl)
 
 #define SPL_DEFAULT_FILE_EXTENSIONS ".inc,.php"
 
+static zend_function *spl_autoload_fn = NULL;
+static zend_function *spl_autoload_call_fn = NULL;
+
 /* {{{ PHP_GINIT_FUNCTION
  */
 static PHP_GINIT_FUNCTION(spl)
@@ -461,7 +464,23 @@ PHP_FUNCTION(spl_autoload_call)
 		SPL_G(autoload_running) = l_autoload_running;
 	} else {
 		/* do not use or overwrite &EG(autoload_func) here */
-		zend_call_method_with_1_params(NULL, NULL, NULL, "spl_autoload", NULL, class_name);
+		zend_fcall_info fcall_info;
+		zend_fcall_info_cache fcall_cache;
+
+		fcall_info.size = sizeof(fcall_info);
+		ZVAL_STR_COPY(&fcall_info.function_name, spl_autoload_fn->common.function_name);
+		fcall_info.retval = NULL;
+		fcall_info.param_count = 1;
+		fcall_info.params = class_name;
+		fcall_info.object = NULL;
+		fcall_info.no_separation = 1;
+
+		fcall_cache.function_handler = spl_autoload_fn;
+		fcall_cache.called_scope = NULL;
+		fcall_cache.object = NULL;
+
+		zend_call_function(&fcall_info, &fcall_cache);
+		zval_ptr_dtor(&fcall_info.function_name);
 	}
 } /* }}} */
 
@@ -595,7 +614,7 @@ PHP_FUNCTION(spl_autoload_register)
 			zend_hash_init(SPL_G(autoload_functions), 1, NULL, autoload_func_info_dtor, 0);
 		}
 
-		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
+		spl_func_ptr = spl_autoload_fn;
 
 		if (EG(autoload_func) == spl_func_ptr) { /* registered already, so we insert that first */
 			autoload_func_info spl_alfi;
@@ -604,7 +623,7 @@ PHP_FUNCTION(spl_autoload_register)
 			ZVAL_UNDEF(&spl_alfi.obj);
 			ZVAL_UNDEF(&spl_alfi.closure);
 			spl_alfi.ce = NULL;
-			zend_hash_str_add_mem(SPL_G(autoload_functions), "spl_autoload", sizeof("spl_autoload") - 1,
+			zend_hash_add_mem(SPL_G(autoload_functions), spl_autoload_fn->common.function_name,
 					&spl_alfi, sizeof(autoload_func_info));
 			if (prepend && SPL_G(autoload_functions)->nNumOfElements > 1) {
 				/* Move the newly created element to the head of the hashtable */
@@ -640,9 +659,9 @@ skip:
 	}
 
 	if (SPL_G(autoload_functions)) {
-		EG(autoload_func) = zend_hash_str_find_ptr(EG(function_table), "spl_autoload_call", sizeof("spl_autoload_call") - 1);
+		EG(autoload_func) = spl_autoload_call_fn;
 	} else {
-		EG(autoload_func) =	zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
+		EG(autoload_func) = spl_autoload_fn;
 	}
 
 	RETURN_TRUE;
@@ -697,7 +716,7 @@ PHP_FUNCTION(spl_autoload_unregister)
 	zend_string_release_ex(func_name, 0);
 
 	if (SPL_G(autoload_functions)) {
-		if (ZSTR_LEN(lc_name) == sizeof("spl_autoload_call") - 1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload_call")) {
+		if (zend_string_equals(lc_name, spl_autoload_call_fn->common.function_name)) {
 			/* remove all */
 			if (!SPL_G(autoload_running)) {
 				zend_hash_destroy(SPL_G(autoload_functions));
@@ -718,9 +737,9 @@ PHP_FUNCTION(spl_autoload_unregister)
 				success = zend_hash_del(SPL_G(autoload_functions), lc_name);
 			}
 		}
-	} else if (ZSTR_LEN(lc_name) == sizeof("spl_autoload")-1 && !strcmp(ZSTR_VAL(lc_name), "spl_autoload")) {
+	} else if (zend_string_equals(lc_name, spl_autoload_fn->common.function_name)) {
 		/* register single spl_autoload() */
-		spl_func_ptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
+		spl_func_ptr = spl_autoload_fn;
 
 		if (EG(autoload_func) == spl_func_ptr) {
 			success = SUCCESS;
@@ -744,15 +763,18 @@ PHP_FUNCTION(spl_autoload_functions)
 	}
 
 	if (!EG(autoload_func)) {
-		if ((fptr = zend_hash_str_find_ptr(EG(function_table), ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME) - 1))) {
+		if ((fptr = zend_hash_find_ptr(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD)))) {
+			zval tmp;
+
 			array_init(return_value);
-			add_next_index_stringl(return_value, ZEND_AUTOLOAD_FUNC_NAME, sizeof(ZEND_AUTOLOAD_FUNC_NAME)-1);
+			ZVAL_STR_COPY(&tmp, ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
+			zend_hash_next_index_insert_new(Z_ARR_P(return_value), &tmp);
 			return;
 		}
 		RETURN_FALSE;
 	}
 
-	fptr = zend_hash_str_find_ptr(EG(function_table), "spl_autoload_call", sizeof("spl_autoload_call") - 1);
+	fptr = spl_autoload_call_fn;
 
 	if (EG(autoload_func) == fptr) {
 		zend_string *key;
@@ -979,6 +1001,10 @@ PHP_MINIT_FUNCTION(spl)
 	PHP_MINIT(spl_heap)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_fixedarray)(INIT_FUNC_ARGS_PASSTHRU);
 	PHP_MINIT(spl_observer)(INIT_FUNC_ARGS_PASSTHRU);
+
+	spl_autoload_fn = zend_hash_str_find_ptr(CG(function_table), "spl_autoload", sizeof("spl_autoload") - 1);
+	spl_autoload_call_fn = zend_hash_str_find_ptr(CG(function_table), "spl_autoload_call", sizeof("spl_autoload_call") - 1);
+	ZEND_ASSERT(spl_autoload_fn != NULL && spl_autoload_call_fn != NULL);
 
 	return SUCCESS;
 }
