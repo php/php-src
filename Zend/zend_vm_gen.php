@@ -879,6 +879,32 @@ function gen_code($f, $spec, $kind, $export, $code, $op1, $op2, $name, $extra_sp
 		),
 		$code);
 
+	$code = preg_replace_callback('/OP([12])_IS_(\w+)/', function($matches) use($op1, $op2) {
+		list(, $num, $type) = $matches;
+		$op = $num == 1 ? $op1 : $op2;
+		if ($op == 'TMP') $op = 'TMP_VAR';
+		switch ($op) {
+		case 'ANY':
+			if ($type == 'UNUSED') {
+				return "(opline->op{$num}_type == IS_UNUSED)";
+			} else {
+				return "(opline->op{$num}_type & IS_{$type})";
+			}
+		case 'UNUSED':
+		case 'TMP_VAR':
+		case 'VAR':
+		case 'CONST':
+		case 'CV':
+			return $op == $type ? '1' : '0';
+		case 'TMPVAR':
+			return $type == 'TMP_VAR' || $type == 'VAR' ? '???' : '0';
+		case 'TMPVARCV':
+			return $type == 'TMP_VAR' || $type == 'VAR' || $type == 'CV' ? '???' : '0';
+		default:
+			throw new Exception('Unknown operand type');
+		}
+	}, $code);
+
 	if (0 && strpos($code, '{') === 0) {
 		$code = "{\n\tfprintf(stderr, \"$name\\n\");\n" . substr($code, 1);
 	}
