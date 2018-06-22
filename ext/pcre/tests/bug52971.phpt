@@ -1,7 +1,5 @@
 --TEST--
 Bug #52971 (PCRE-Meta-Characters not working with utf-8)
---SKIPIF--
-<?php if ((double)PCRE_VERSION < 8.1) die('skip PCRE_VERSION >= 8.1 is required!'); ?>
 --FILE--
 <?php
 
