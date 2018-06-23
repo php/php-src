@@ -79,7 +79,8 @@ ZEND_API int zend_register_constant(zend_constant *c);
 #ifdef ZTS
 void zend_copy_constants(HashTable *target, HashTable *sourc);
 #endif
-ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags);
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(
+		const zval *key, uint32_t flags, zend_bool *is_deprecated);
 END_EXTERN_C()
 
 #define ZEND_CONSTANT_DTOR free_zend_constant

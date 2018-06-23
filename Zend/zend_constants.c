@@ -432,9 +432,28 @@ failure:
 	}
 }
 
-ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
+static zend_bool is_access_deprecated(const zend_constant *c, zend_string *access_name) {
+	const char *ns_sep = zend_memrchr(ZSTR_VAL(c->name), '\\', ZSTR_LEN(c->name));
+	if (ns_sep) {
+		/* Namespaces are always case-insensitive. Only compare shortname. */
+		size_t shortname_offset = ns_sep - ZSTR_VAL(c->name) + 1;
+		size_t shortname_len = ZSTR_LEN(c->name) - shortname_offset;
+		return memcmp(
+			ZSTR_VAL(access_name) + shortname_offset,
+			ZSTR_VAL(c->name) + shortname_offset,
+			shortname_len
+		) != 0;
+	} else {
+		/* No namespace, compare whole name */
+		return memcmp(ZSTR_VAL(access_name), ZSTR_VAL(c->name), ZSTR_LEN(c->name)) != 0;
+	}
+}
+
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(
+		const zval *key, uint32_t flags, zend_bool *is_deprecated)
 {
 	zval *zv;
+	const zval *orig_key = key;
 	zend_constant *c = NULL;
 
 	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
@@ -461,6 +480,22 @@ ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, u
 			}
 		}
 	}
+
+	if (!c) {
+		return NULL;
+	}
+
+	if (is_deprecated) {
+		if (c->flags & (CONST_CS|CONST_CT_SUBST)) {
+			/* Constant is case-sensitive or true/false/null */
+			*is_deprecated = 0;
+		} else {
+			zend_bool ns_fallback = key >= orig_key + 2;
+			const zval *access_key = ns_fallback ? orig_key + 2 : orig_key - 1;
+			*is_deprecated = is_access_deprecated(c, Z_STR_P(access_key));
+		}
+	}
+
 	return c;
 }
 
