@@ -40,6 +40,11 @@ print ns1\ns2\coNSt6 . "\n";
 print NS1\ns2\coNSt1 . "\n";
 ?>
 --EXPECTF--
+Deprecated: define(): Declaration of case-insensitive constants is deprecated in %s on line 6
+
+Deprecated: define(): Declaration of case-insensitive constants is deprecated in %s on line 7
+
+Deprecated: define(): Declaration of case-insensitive constants is deprecated in %s on line 8
 value1
 value1
 value1
