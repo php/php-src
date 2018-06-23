@@ -854,7 +854,6 @@ ZEND_FUNCTION(define)
 		case_sensitive = 0;
 	}
 
-	/* class constant, check if there is name and make sure class is valid & exists */
 	if (zend_memnstr(ZSTR_VAL(name), "::", sizeof("::") - 1, ZSTR_VAL(name) + ZSTR_LEN(name))) {
 		zend_error(E_WARNING, "Class constants cannot be defined or redefined");
 		RETURN_FALSE;
@@ -905,7 +904,13 @@ repeat:
 
 	ZVAL_COPY(&c.value, val);
 	zval_ptr_dtor(&val_free);
+
 register_constant:
+	if (non_cs) {
+		zend_error(E_DEPRECATED,
+			"define(): Declaration of case-insensitive constants is deprecated");
+	}
+
 	c.flags = case_sensitive; /* non persistent */
 	c.name = zend_string_copy(name);
 	c.module_number = PHP_USER_CONSTANT;
@@ -928,7 +933,7 @@ ZEND_FUNCTION(defined)
 		Z_PARAM_STR(name)
 	ZEND_PARSE_PARAMETERS_END();
 
-	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT)) {
+	if (zend_get_constant_ex(name, zend_get_executed_scope(), ZEND_FETCH_CLASS_SILENT | ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK)) {
 		RETURN_TRUE;
 	} else {
 		RETURN_FALSE;

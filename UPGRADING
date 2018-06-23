@@ -258,6 +258,13 @@ FPM:
 4. Deprecated Functionality
 ========================================
 
+Core:
+  . The declaration of case-insensitive constants has been deprecate. Passing
+    true as the third argument to define() will now generate a deprecation
+    warning. The use of case-insensitive constants with a case that differs from
+    the declaration is also deprecated.
+    (RFC: https://wiki.php.net/rfc/case_insensitive_constant_deprecation)
+
 GD:
   . image2wbmp() has been deprecated.
 

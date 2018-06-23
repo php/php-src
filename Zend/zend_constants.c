@@ -250,7 +250,7 @@ ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *
 }
 /* }}} */
 
-ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+static inline zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {
 	zend_constant *c;
 	ALLOCA_FLAG(use_heap)
@@ -268,10 +268,16 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 		free_alloca(lcname, use_heap);
 	}
 
+	return c;
+}
+
+ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+{
+	zend_constant *c = zend_get_constant_str_impl(name, name_len);
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant(zend_string *name)
+static inline zend_constant *zend_get_constant_impl(zend_string *name)
 {
     zval *zv;
 	zend_constant *c;
@@ -291,9 +297,32 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 			c = zend_get_special_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 		}
 		free_alloca(lcname, use_heap);
-		return c ? &c->value : NULL;
+		return c;
 	} else {
-		return &((zend_constant*)Z_PTR_P(zv))->value;
+		return (zend_constant *) Z_PTR_P(zv);
+	}
+}
+
+ZEND_API zval *zend_get_constant(zend_string *name)
+{
+	zend_constant *c = zend_get_constant_impl(name);
+	return c ? &c->value : NULL;
+}
+
+static zend_bool is_access_deprecated(const zend_constant *c, const char *access_name) {
+	const char *ns_sep = zend_memrchr(ZSTR_VAL(c->name), '\\', ZSTR_LEN(c->name));
+	if (ns_sep) {
+		/* Namespaces are always case-insensitive. Only compare shortname. */
+		size_t shortname_offset = ns_sep - ZSTR_VAL(c->name) + 1;
+		size_t shortname_len = ZSTR_LEN(c->name) - shortname_offset;
+		return memcmp(
+			access_name + shortname_offset,
+			ZSTR_VAL(c->name) + shortname_offset,
+			shortname_len
+		) != 0;
+	} else {
+		/* No namespace, compare whole name */
+		return memcmp(access_name, ZSTR_VAL(c->name), ZSTR_LEN(c->name)) != 0;
 	}
 }
 
@@ -415,26 +444,45 @@ failure:
 			}
 		}
 		free_alloca(lcname, use_heap);
-		if (c) {
-			return &c->value;
+
+		if (!c) {
+			if (!(flags & IS_CONSTANT_UNQUALIFIED)) {
+				return NULL;
+			}
+
+			/* name requires runtime resolution, need to check non-namespaced name */
+			c = zend_get_constant_str_impl(constant_name, const_name_len);
+			name = constant_name;
 		}
-		/* name requires runtime resolution, need to check non-namespaced name */
-		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
-			return zend_get_constant_str(constant_name, const_name_len);
+	} else {
+		if (cname) {
+			c = zend_get_constant_impl(cname);
+		} else {
+			c = zend_get_constant_str_impl(name, name_len);
 		}
+	}
+
+	if (!c) {
 		return NULL;
 	}
 
-	if (cname) {
-		return zend_get_constant(cname);
-	} else {
-		return zend_get_constant_str(name, name_len);
+	if (!(flags & ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK)) {
+		if (!(c->flags & (CONST_CS|CONST_CT_SUBST)) && is_access_deprecated(c, name)) {
+			zend_error(E_DEPRECATED,
+				"Case-insensitive constants are deprecated. "
+				"The correct casing for this constant is \"%s\"",
+				ZSTR_VAL(c->name));
+		}
 	}
+
+	return &c->value;
 }
 
-ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, uint32_t flags)
+ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(
+		const zval *key, uint32_t flags, zend_bool *is_deprecated)
 {
 	zval *zv;
+	const zval *orig_key = key;
 	zend_constant *c = NULL;
 
 	zv = zend_hash_find_ex(EG(zend_constants), Z_STR_P(key), 1);
@@ -461,6 +509,22 @@ ZEND_API zend_constant* ZEND_FASTCALL zend_quick_get_constant(const zval *key, u
 			}
 		}
 	}
+
+	if (!c) {
+		return NULL;
+	}
+
+	if (is_deprecated) {
+		if (c->flags & (CONST_CS|CONST_CT_SUBST)) {
+			/* Constant is case-sensitive or true/false/null */
+			*is_deprecated = 0;
+		} else {
+			zend_bool ns_fallback = key >= orig_key + 2;
+			const zval *access_key = ns_fallback ? orig_key + 2 : orig_key - 1;
+			*is_deprecated = is_access_deprecated(c, Z_STRVAL_P(access_key));
+		}
+	}
+
 	return c;
 }
 
