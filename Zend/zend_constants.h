@@ -31,6 +31,9 @@
 
 #define	PHP_USER_CONSTANT INT_MAX	/* a constant defined in user space */
 
+/* Flag for zend_get_constant_ex(). Must not class with ZEND_FETCH_CLASS_* flags. */
+#define ZEND_GET_CONSTANT_NO_DEPRECATION_CHECK 0x1000
+
 typedef struct _zend_constant {
 	zval value;
 	zend_string *name;
