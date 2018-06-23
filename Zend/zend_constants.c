@@ -250,7 +250,7 @@ ZEND_API int zend_verify_const_access(zend_class_constant *c, zend_class_entry *
 }
 /* }}} */
 
-ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+static inline zend_constant *zend_get_constant_str_impl(const char *name, size_t name_len)
 {
 	zend_constant *c;
 	ALLOCA_FLAG(use_heap)
@@ -268,10 +268,16 @@ ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
 		free_alloca(lcname, use_heap);
 	}
 
+	return c;
+}
+
+ZEND_API zval *zend_get_constant_str(const char *name, size_t name_len)
+{
+	zend_constant *c = zend_get_constant_str_impl(name, name_len);
 	return c ? &c->value : NULL;
 }
 
-ZEND_API zval *zend_get_constant(zend_string *name)
+static inline zend_constant *zend_get_constant_impl(zend_string *name)
 {
     zval *zv;
 	zend_constant *c;
@@ -291,10 +297,16 @@ ZEND_API zval *zend_get_constant(zend_string *name)
 			c = zend_get_special_constant(ZSTR_VAL(name), ZSTR_LEN(name));
 		}
 		free_alloca(lcname, use_heap);
-		return c ? &c->value : NULL;
+		return c;
 	} else {
-		return &((zend_constant*)Z_PTR_P(zv))->value;
+		return (zend_constant *) Z_PTR_P(zv);
 	}
+}
+
+ZEND_API zval *zend_get_constant(zend_string *name)
+{
+	zend_constant *c = zend_get_constant_impl(name);
+	return c ? &c->value : NULL;
 }
 
 ZEND_API zval *zend_get_constant_ex(zend_string *cname, zend_class_entry *scope, uint32_t flags)
@@ -415,21 +427,24 @@ failure:
 			}
 		}
 		free_alloca(lcname, use_heap);
-		if (c) {
-			return &c->value;
+
+		if (!c) {
+			if (!(flags & IS_CONSTANT_UNQUALIFIED)) {
+				return NULL;
+			}
+
+			/* name requires runtime resolution, need to check non-namespaced name */
+			c = zend_get_constant_str_impl(constant_name, const_name_len);
 		}
-		/* name requires runtime resolution, need to check non-namespaced name */
-		if ((flags & IS_CONSTANT_UNQUALIFIED) != 0) {
-			return zend_get_constant_str(constant_name, const_name_len);
+	} else {
+		if (cname) {
+			c = zend_get_constant_impl(cname);
+		} else {
+			c = zend_get_constant_str_impl(name, name_len);
 		}
-		return NULL;
 	}
 
-	if (cname) {
-		return zend_get_constant(cname);
-	} else {
-		return zend_get_constant_str(name, name_len);
-	}
+	return c ? &c->value : NULL;
 }
 
 static zend_bool is_access_deprecated(const zend_constant *c, zend_string *access_name) {
