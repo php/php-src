@@ -31,6 +31,7 @@
 #include "zend_strtod.h"
 #include "zend_exceptions.h"
 #include "zend_closures.h"
+#include "zend_interfaces.h"
 
 #if ZEND_USE_TOLOWER_L
 #include <locale.h>
@@ -1951,12 +1952,14 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 		ZVAL_LONG(result, ZEND_NORMALIZE_BOOL(Z_DVAL_P(result)));
 	} else {
 		convert_to_long(result);
+		Z_LVAL_P(result) = ZEND_NORMALIZE_BOOL(Z_LVAL_P(result));
 	}
 }
 /* }}} */
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
+
 	int ret;
 	int converted = 0;
 	zval op1_copy, op2_copy;
@@ -2024,10 +2027,25 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
+				if (Z_OBJ_HANDLER_P(op1, compare)) {
+					if (Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
+						convert_compare_result_to_long(result);
+						return SUCCESS;
+					}
+				}
+
 				ZVAL_LONG(result, 1);
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_OBJECT):
+				if (Z_OBJ_HANDLER_P(op2, compare)) {
+					if (Z_OBJ_HANDLER_P(op2, compare)(result, op2, op1) == SUCCESS) {
+						convert_compare_result_to_long(result);
+						Z_LVAL_P(result) *= -1;
+						return SUCCESS;
+					}
+				}
+
 				ZVAL_LONG(result, -1);
 				return SUCCESS;
 
@@ -2041,17 +2059,20 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_OBJ_HANDLER_P(op1, compare)) {
-					ret = Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2);
-					if (UNEXPECTED(Z_TYPE_P(result) != IS_LONG)) {
-						convert_compare_result_to_long(result);
-					}
-					return ret;
+
+ 					/* If compare fails, we want to fall through to give the
+ 					 * other comparison functions a chance to run. */
+ 					if (Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
+ 						convert_compare_result_to_long(result);
+ 						return SUCCESS;
+ 					}
+
 				} else if (Z_TYPE_P(op2) == IS_OBJECT && Z_OBJ_HANDLER_P(op2, compare)) {
-					ret = Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2);
-					if (UNEXPECTED(Z_TYPE_P(result) != IS_LONG)) {
+					if (Z_OBJ_HANDLER_P(op2, compare)(result, op1, op2) == SUCCESS) {
 						convert_compare_result_to_long(result);
-					}
-					return ret;
+						Z_LVAL_P(result) *= -1;
+ 						return SUCCESS;
+ 					}
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT && Z_TYPE_P(op2) == IS_OBJECT) {
