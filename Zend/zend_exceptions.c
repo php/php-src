@@ -323,7 +323,7 @@ ZEND_METHOD(exception, __wakeup)
 	CHECK_EXC_TYPE(ZEND_STR_TRACE,    IS_ARRAY);
 	pvalue = zend_read_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1, 1, &value);
 	if (pvalue && Z_TYPE_P(pvalue) != IS_NULL && (Z_TYPE_P(pvalue) != IS_OBJECT ||
-			!instanceof_function(Z_OBJCE_P(pvalue), i_get_exception_base(object)) ||
+			!instanceof_function(Z_OBJCE_P(pvalue), zend_ce_throwable) ||
 			pvalue == object)) {
 		zend_unset_property(i_get_exception_base(object), object, "previous", sizeof("previous")-1);
 	}
