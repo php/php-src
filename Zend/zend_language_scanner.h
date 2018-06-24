@@ -63,6 +63,7 @@ typedef struct _zend_heredoc_label {
 	int length;
 	int indentation;
 	zend_bool indentation_uses_spaces;
+	zend_bool body_beginning;
 } zend_heredoc_label;
 
 BEGIN_EXTERN_C()

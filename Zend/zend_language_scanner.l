@@ -1109,11 +1109,28 @@ skip_escape_conversion:
 #define HEREDOC_USING_SPACES 1
 #define HEREDOC_USING_TABS 2
 
-static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces)
+static zend_bool strip_multiline_string_indentation(zval *zendlval, int newline, int indentation, zend_bool using_spaces, zend_bool body_beginning)
 {
 	int len = Z_STRLEN_P(zendlval), new_len = len, i = 0, j = 0, skip, newline_count = 0;
 	char *copy = Z_STRVAL_P(zendlval);
 	zend_bool trailing_newline = 0;
+
+	// if we are NOT at the beginning of the heredoc, then skip up to (and including) the next new line
+	if (!body_beginning) {
+		while (j < len && copy[j] != '\r' && copy[j] != '\n') {
+			++j;
+		}
+
+		if (copy[j] == '\r') {
+			++j;
+		}
+
+		if (copy[j] == '\n') {
+			++j;
+		}
+
+		i = j;
+	}
 
 	while (j < len) {
 		trailing_newline = 0;
@@ -2278,6 +2295,7 @@ skip_escape_conversion:
 
 	heredoc_label->label = estrndup(s, heredoc_label->length);
 	heredoc_label->indentation = 0;
+	heredoc_label->body_beginning = 1;
 	saved_cursor = YYCURSOR;
 
 	zend_ptr_stack_push(&SCNG(heredoc_label_stack), (void *) heredoc_label);
@@ -2615,7 +2633,7 @@ heredoc_scan_done:
 	if (!SCNG(heredoc_scan_ahead) && !EG(exception) && PARSER_MODE()) {
 		zend_string *copy = Z_STR_P(zendlval);
 
-	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces)) {
+	    if (!strip_multiline_string_indentation(zendlval, newline, heredoc_label->indentation, heredoc_label->indentation_uses_spaces, heredoc_label->body_beginning)) {
 			RETURN_TOKEN(T_ERROR);
 		}
 
@@ -2628,6 +2646,8 @@ heredoc_scan_done:
 	} else {
 		HANDLE_NEWLINES(yytext, yyleng - newline);
 	}
+
+	heredoc_label->body_beginning = 0;
 
 	RETURN_TOKEN_WITH_VAL(T_ENCAPSED_AND_WHITESPACE);
 }
@@ -2708,7 +2728,7 @@ nowdoc_scan_done:
 	ZVAL_STRINGL(zendlval, yytext, yyleng);
 
 	if (!EG(exception) && spacing != -1 && PARSER_MODE()
-	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES)) {
+	    && !strip_multiline_string_indentation(zendlval, newline, indentation, spacing == HEREDOC_USING_SPACES, 1)) {
 		RETURN_TOKEN(T_ERROR);
 	}
 
