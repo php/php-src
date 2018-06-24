@@ -1959,7 +1959,6 @@ static void ZEND_FASTCALL convert_compare_result_to_long(zval *result) /* {{{ */
 
 ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) /* {{{ */
 {
-
 	int ret;
 	int converted = 0;
 	zval op1_copy, op2_copy;
@@ -3126,7 +3125,7 @@ process_double:
 }
 /* }}} */
 
-/*
+/* 
  * String matching - Sunday algorithm
  * http://www.iti.fh-flensburg.de/lang/algorithmen/pattern/sundayen.htm
  */
@@ -3210,7 +3209,7 @@ ZEND_API const char* ZEND_FASTCALL zend_memnrstr_ex(const char *haystack, const 
 		if (i == needle_len) {
 			return (const char *)p;
 		}
-
+		
 		if (UNEXPECTED(p == haystack)) {
 			return NULL;
 		}
