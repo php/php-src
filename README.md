@@ -2,7 +2,7 @@ The PHP Interpreter
 ===================
 
 This is the github mirror of the official PHP repository located at
-http://git.php.net.
+https://git.php.net.
 
 [![Build Status](https://secure.travis-ci.org/php/php-src.svg?branch=master)](http://travis-ci.org/php/php-src)
 [![Build status](https://ci.appveyor.com/api/projects/status/meyur6fviaxgdwdy?svg=true)](https://ci.appveyor.com/project/php/php-src)
@@ -28,7 +28,7 @@ open a ticket at https://bugs.php.net and reference the bug id using #NNNNNN.
     time. The patch removes this warning
 
 We do not merge pull requests directly on github. All PRs will be
-pulled and pushed through http://git.php.net.
+pulled and pushed through https://git.php.net.
 
 
 Guidelines for contributors

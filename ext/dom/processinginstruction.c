@@ -38,7 +38,7 @@ ZEND_END_ARG_INFO();
 /*
 * class DOMProcessingInstruction extends DOMNode
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1004215813
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#ID-1004215813
 * Since:
 */
 
