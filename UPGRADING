@@ -44,6 +44,19 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . "continue" statements targeting "switch" control flow structures will now
+    generate a warning. In PHP such "continue" statements are equivalent to
+    "break", while they behave as "continue 2" in other languages.
+
+        while ($foo) {
+            switch ($bar) {
+                case "baz":
+                    continue;
+                    // Warning: "continue" targeting switch is equivalent to
+                                "break". Did you mean to use "continue 2"?
+            }
+        }
+
   . Array accesses of type $obj["123"], where $obj implements ArrayAccess and
     "123" is an integral string literal will no longer result in an implicit
     conversion to integer, i.e., $obj->offsetGet("123") will be called instead

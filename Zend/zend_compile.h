@@ -158,6 +158,7 @@ typedef struct _zend_brk_cont_element {
 	int cont;
 	int brk;
 	int parent;
+	zend_bool is_switch;
 } zend_brk_cont_element;
 
 typedef struct _zend_label {
