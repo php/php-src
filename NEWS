@@ -5,6 +5,8 @@ PHP                                                                        NEWS
 - Core:
   . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
     (Nikita)
+  . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
+    properly). (Nikita)
 
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
