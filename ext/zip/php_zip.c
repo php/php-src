@@ -1095,7 +1095,6 @@ static void php_zip_object_free_storage(void *object TSRMLS_DC) /* {{{ */
 	if (intern->za) {
 		if (zip_close(intern->za) != 0) {
 			php_error_docref(NULL TSRMLS_CC, E_WARNING, "Cannot destroy the zip context");
-			return;
 		}
 		intern->za = NULL;
 	}
