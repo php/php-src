@@ -139,6 +139,7 @@ struct _zend_class_entry {
 	union _zend_function *__callstatic;
 	union _zend_function *__tostring;
 	union _zend_function *__debugInfo;
+	union _zend_function *__compareTo;
 	union _zend_function *serialize_func;
 	union _zend_function *unserialize_func;
 
