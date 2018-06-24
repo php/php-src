@@ -163,6 +163,10 @@ Standard:
 3. Changes in SAPI modules
 ========================================
 
+phpdbg:
+  . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
+    PHPDBG_FUNC have been removed.
+
 ========================================
 4. Deprecated Functionality
 ========================================
