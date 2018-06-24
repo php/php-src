@@ -723,6 +723,7 @@ static void zend_file_cache_serialize_class(zval                     *zv,
 	SERIALIZE_PTR(ce->__tostring);
 	SERIALIZE_PTR(ce->__callstatic);
 	SERIALIZE_PTR(ce->__debugInfo);
+	SERIALIZE_PTR(ce->__compareTo);
 }
 
 static void zend_file_cache_serialize(zend_persistent_script   *script,
@@ -1347,6 +1348,7 @@ static void zend_file_cache_unserialize_class(zval                    *zv,
 	UNSERIALIZE_PTR(ce->__tostring);
 	UNSERIALIZE_PTR(ce->__callstatic);
 	UNSERIALIZE_PTR(ce->__debugInfo);
+	UNSERIALIZE_PTR(ce->__compareTo);
 
 	if (UNEXPECTED((ce->ce_flags & ZEND_ACC_ANON_CLASS))) {
 		ce->serialize = zend_class_serialize_deny;
