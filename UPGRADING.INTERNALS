@@ -130,9 +130,9 @@ PHP 7.3 INTERNALS UPGRADE NOTES
 
  r.  fields of php_url struct change from char * to zend_string *
 
- s. Specual purose zend_functions marked by ZEND_ACC_CALL_VIA_TRAMPOLINE or
+ s. Special purpose zend_functions marked by ZEND_ACC_CALL_VIA_TRAMPOLINE or
     ZEND_ACC_FAKE_CLOSURE flags use reserved[0] for internal purpose.
-    Third party extensions must not modify reserved[] fileds of these functins.
+    Third party extensions must not modify reserved[] fields of these functions.
 
 ========================
 2. Build system changes
