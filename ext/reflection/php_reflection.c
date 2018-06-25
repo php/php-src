@@ -1559,11 +1559,11 @@ ZEND_METHOD(reflection_function, __construct)
 			/* Ignore leading "\" */
 			ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
 			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
-			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			fptr = zend_fetch_function(lcname);
 			ZSTR_ALLOCA_FREE(lcname, use_heap);
 		} else {
 			lcname = zend_string_tolower(fname);
-			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			fptr = zend_fetch_function(lcname);
 			zend_string_release(lcname);
 		}
 

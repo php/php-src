@@ -1077,7 +1077,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		if (function->op_array.refcount) {
 			(*function->op_array.refcount)++;
 		}
-		function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		if (!(function->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+			function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		}
 		return SUCCESS;
 	}
 }

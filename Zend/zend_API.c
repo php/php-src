@@ -3007,6 +3007,7 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 	fcc->calling_scope = NULL;
 
 	if (!ce_org) {
+		zend_function *func;
 		zend_string *lmname;
 
 		/* Check if function with given name exists.
@@ -3015,20 +3016,20 @@ static zend_always_inline int zend_is_callable_check_func(int check_flags, zval 
 			/* Skip leading \ */
 			ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable) - 1, use_heap);
 			zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable) + 1, Z_STRLEN_P(callable));
-			zv = zend_hash_find(EG(function_table), lmname);
+			func = zend_fetch_function(lmname);
 			ZSTR_ALLOCA_FREE(lmname, use_heap);
 		} else {
 			lmname = Z_STR_P(callable);
-			zv = zend_hash_find(EG(function_table), lmname);
-			if (!zv) {
+			func = zend_fetch_function(lmname);
+			if (!func) {
 				ZSTR_ALLOCA_ALLOC(lmname, Z_STRLEN_P(callable), use_heap);
 				zend_str_tolower_copy(ZSTR_VAL(lmname), Z_STRVAL_P(callable), Z_STRLEN_P(callable));
-				zv = zend_hash_find(EG(function_table), lmname);
+				func = zend_fetch_function(lmname);
 				ZSTR_ALLOCA_FREE(lmname, use_heap);
 			}
 		}
-		if (EXPECTED(zv != NULL)) {
-			fcc->function_handler = Z_PTR_P(zv);
+		if (EXPECTED(func != NULL)) {
+			fcc->function_handler = func;
 			return 1;
 		}
 	}

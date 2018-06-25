@@ -902,9 +902,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zval *zv = zend_hash_find_ex(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD), 1);
-		if (zv) {
-			EG(autoload_func) = (zend_function*)Z_PTR_P(zv);
+		zend_function *func = zend_fetch_function(ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
+
+		if (func) {
+			EG(autoload_func) = func;
 		} else {
 			if (!key) {
 				zend_string_release_ex(lc_name, 0);

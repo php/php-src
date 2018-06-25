@@ -202,7 +202,6 @@ typedef struct _zend_oparray_context {
  * Function and method flags
  *
  * Free flags:
- * 0x10
  * 0x20
  * 0x2000000
  */
@@ -212,6 +211,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
+
+/* Imuttable op_array (lazy loading) */
+#define ZEND_ACC_IMMUTABLE 0x10
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
