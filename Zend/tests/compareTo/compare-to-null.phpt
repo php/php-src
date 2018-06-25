@@ -5,9 +5,17 @@ __compareTo: Compare against NULL
 
 class Comparable
 {
+    private $value;
+
+    public function __construct($value)
+    {
+        $this->value = $value;
+    }
+
     public function __compareTo($other)
     {
-        var_dump("Comparing!");
+        echo "Comparing!\n";
+        return $this->value <=> $other;
     }
 }
 
@@ -21,10 +29,20 @@ var_dump(new Comparable(1) <=> null);
  */
 var_dump(null <=> new Comparable(1));
 
+/**
+ * We're doing a non-strict comparison between 0 and NULL here.
+ */
+var_dump(null <=> new Comparable(0));
+var_dump(new Comparable(0) <=> null);
+
 ?>
 --EXPECTF--
 
-string(10) "Comparing!"
+Comparing!
 int(1)
-string(10) "Comparing!"
+Comparing!
 int(-1)
+Comparing!
+int(0)
+Comparing!
+int(0)
