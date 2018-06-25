@@ -19,6 +19,7 @@ PHP 7.3 INTERNALS UPGRADE NOTES
   p. VM instruction operands (FETCH_CLASS, FETCH_CONSTANT, CATCH)
   q. sapi_cli_single_write()
   r. php_url
+  s. zend_function.reserved[]
 
 2. Build system changes
   a. Unix build system changes
@@ -128,6 +129,10 @@ PHP 7.3 INTERNALS UPGRADE NOTES
  q.  sapi_cli_single_write() now returns ssize_t instead of size_t.
 
  r.  fields of php_url struct change from char * to zend_string *
+
+ s. Specual purose zend_functions marked by ZEND_ACC_CALL_VIA_TRAMPOLINE or
+    ZEND_ACC_FAKE_CLOSURE flags use reserved[0] for internal purpose.
+    Third party extensions must not modify reserved[] fileds of these functins.
 
 ========================
 2. Build system changes
