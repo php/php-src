@@ -1,12 +1,12 @@
 --TEST--
-__equals: Equal objects automatically have the same ordering
+__equals: Should not be called for comparisons.
 --FILE--
 <?php
 class A
 {
     public function __equals($other)
     {
-        return $other % 2 == 0;
+        return 0;
     }
 
     public function __compareTo($other)
@@ -15,10 +15,12 @@ class A
     }
 }
 
-var_dump(new A <=> 1);
-var_dump(new A <=> 2);
+$a = new A();
+
+var_dump($a <=> 1);   
+var_dump($a <=> $a);
 
 ?>
 --EXPECTF--
 int(1)
-int(0)
+int(1)
