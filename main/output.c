@@ -1309,7 +1309,7 @@ PHP_FUNCTION(ob_start)
 	zend_long chunk_size = 0;
 	zend_long flags = PHP_OUTPUT_HANDLER_STDFLAGS;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|z/ll", &output_handler, &chunk_size, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "|zll", &output_handler, &chunk_size, &flags) == FAILURE) {
 		return;
 	}
 

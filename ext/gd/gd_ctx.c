@@ -106,7 +106,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			}
 			break;
 		case PHP_GDIMG_TYPE_BMP:
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!b", &imgind, &to_zval, &compressed) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!b", &imgind, &to_zval, &compressed) == FAILURE) {
 				return;
 			}
 			break;
@@ -117,7 +117,7 @@ static void _php_image_output_ctx(INTERNAL_FUNCTION_PARAMETERS, int image_type, 
 			 * PHP_GDIMG_TYPE_WBM
 			 * PHP_GDIMG_TYPE_WEBP
 			 * */
-			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z/!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
+			if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|z!ll", &imgind, &to_zval, &quality, &basefilter) == FAILURE) {
 				return;
 			}
 	}
