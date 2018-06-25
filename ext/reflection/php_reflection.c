@@ -1538,11 +1538,9 @@ ZEND_METHOD(reflection_function, __construct)
 	zval name;
 	zval *object;
 	zval *closure = NULL;
-	char *lcname, *nsname;
 	reflection_object *intern;
 	zend_function *fptr;
-	char *name_str;
-	size_t name_len;
+	zend_string *fname, *lcname;
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
@@ -1551,26 +1549,29 @@ ZEND_METHOD(reflection_function, __construct)
 		fptr = (zend_function*)zend_get_closure_method_def(closure);
 		Z_ADDREF_P(closure);
 	} else {
-		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+		ALLOCA_FLAG(use_heap)
+
+		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "S", &fname) == FAILURE) {
 			return;
 		}
 
-		lcname = zend_str_tolower_dup(name_str, name_len);
-
-		/* Ignore leading "\" */
-		nsname = lcname;
-		if (lcname[0] == '\\') {
-			nsname = &lcname[1];
-			name_len--;
+		if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
+			/* Ignore leading "\" */
+			ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
+			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
+			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			ZSTR_ALLOCA_FREE(lcname, use_heap);
+		} else {
+			lcname = zend_string_tolower(fname);
+			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			zend_string_release(lcname);
 		}
 
-		if ((fptr = zend_hash_str_find_ptr(EG(function_table), nsname, name_len)) == NULL) {
-			efree(lcname);
+		if (fptr == NULL) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Function %s() does not exist", name_str);
+				"Function %s() does not exist", ZSTR_VAL(fname));
 			return;
 		}
-		efree(lcname);
 	}
 
 	ZVAL_STR_COPY(&name, fptr->common.function_name);
