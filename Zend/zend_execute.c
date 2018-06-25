@@ -2572,6 +2572,21 @@ ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name) /*
 	return NULL;
 } /* }}} */
 
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len) /* {{{ */
+{
+	zval *zv = zend_hash_str_find(EG(function_table), name, len);
+
+	if (EXPECTED(zv != NULL)) {
+		zend_function *fbc = Z_FUNC_P(zv);
+
+		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
+			fbc = (zend_function*)init_func_run_time_cache_i(&fbc->op_array, zv);
+		}
+		return fbc;
+	}
+	return NULL;
+} /* }}} */
+
 static zend_always_inline void i_init_code_execute_data(zend_execute_data *execute_data, zend_op_array *op_array, zval *return_value) /* {{{ */
 {
 	ZEND_ASSERT(EX(func) == (zend_function*)op_array);

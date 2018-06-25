@@ -309,6 +309,7 @@ ZEND_API zend_class_entry *zend_fetch_class_by_name(zend_string *class_name, con
 void zend_verify_abstract_class(zend_class_entry *ce);
 
 ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function(zend_string *name);
+ZEND_API zend_function * ZEND_FASTCALL zend_fetch_function_str(const char *name, size_t len);
 
 ZEND_API void zend_fetch_dimension_const(zval *result, zval *container, zval *dim, int type);
 
