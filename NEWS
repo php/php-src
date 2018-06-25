@@ -22,6 +22,9 @@ PHP                                                                        NEWS
   . Fixed bug #76477 (Opcache causes empty return value).
     (Nikita, Laruence)
 
+- phpdbg:
+  . Fix arginfo wrt. optional/required parameters. (cmb)
+
 - Standard:
   . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
     (Laruence)
