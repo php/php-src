@@ -2,8 +2,7 @@
 numfmt_get_locale()
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '58.1') < 0) die('skip for ICU >= 58.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '62.1') >=  0) die('skip for ICU < 62.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '62.1') < 0) die('skip for ICU >= 62.1'); ?>
 --FILE--
 <?php
 
@@ -47,5 +46,5 @@ ut_run();
 ?>
 --EXPECT--
 en_UK:  actual='en' valid='en'
-en_US:  actual='en' valid='en_US'
-fr_CA:  actual='fr' valid='fr_CA'
+en_US:  actual='en_US' valid='en_US'
+fr_CA:  actual='fr_CA' valid='fr_CA'
