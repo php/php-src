@@ -326,7 +326,9 @@ static void zend_persist_class_entry_calc(zval *zv)
 
 			ADD_SIZE(sizeof(zval) * ce->default_static_members_count);
 			for (i = 0; i < ce->default_static_members_count; i++) {
-				zend_persist_zval_calc(&ce->default_static_members_table[i]);
+				if (Z_TYPE(ce->default_static_members_table[i]) != IS_INDIRECT) {
+					zend_persist_zval_calc(&ce->default_static_members_table[i]);
+				}
 			}
 		}
 		zend_hash_persist_calc(&ce->constants_table, zend_persist_class_constant_calc);
