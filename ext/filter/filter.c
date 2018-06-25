@@ -767,7 +767,7 @@ PHP_FUNCTION(filter_var)
 	zend_long filter = FILTER_DEFAULT;
 	zval *filter_args = NULL, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 

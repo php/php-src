@@ -1265,7 +1265,7 @@ ZEND_API zend_function *zend_get_call_trampoline_func(zend_class_entry *ce, zend
 		func->fn_flags |= ZEND_ACC_STATIC;
 	}
 	func->opcodes = &EG(call_trampoline_op);
-
+	func->run_time_cache = (void*)(intptr_t)-1;
 	func->reserved[0] = fbc;
 	func->scope = fbc->common.scope;
 	/* reserve space for arguments, local and temorary variables */

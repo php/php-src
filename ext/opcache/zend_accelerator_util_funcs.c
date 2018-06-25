@@ -544,12 +544,12 @@ static void zend_accel_function_hash_copy_from_shm(HashTable *target, HashTable 
 		if (UNEXPECTED(t != NULL)) {
 			if (EXPECTED(ZSTR_LEN(p->key) > 0) && EXPECTED(ZSTR_VAL(p->key)[0] == 0)) {
 				/* Mangled key */
-				zend_hash_update_ptr(target, p->key, ARENA_REALLOC(Z_PTR(p->val)));
+				zend_hash_update_ptr(target, p->key, Z_PTR(p->val));
 			} else {
 				goto failure;
 			}
 		} else {
-			_zend_hash_append_ptr_ex(target, p->key, ARENA_REALLOC(Z_PTR(p->val)), 1);
+			_zend_hash_append_ptr_ex(target, p->key, Z_PTR(p->val), 1);
 		}
 	}
 	target->nInternalPointer = 0;

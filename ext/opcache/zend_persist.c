@@ -613,10 +613,11 @@ static void zend_persist_op_array(zval *zv)
 	zend_op_array *op_array = Z_PTR_P(zv);
 
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_op_array));
-	Z_PTR_P(zv) = ZCG(arena_mem);
-	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
+	memcpy(ZCG(mem), Z_PTR_P(zv), sizeof(zend_op_array));
+	Z_PTR_P(zv) = ZCG(mem);
+	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
 	zend_persist_op_array_ex(Z_PTR_P(zv), NULL);
+	((zend_op_array*)Z_PTR_P(zv))->fn_flags |= ZEND_ACC_IMMUTABLE;
 }
 
 static void zend_persist_class_method(zval *zv)

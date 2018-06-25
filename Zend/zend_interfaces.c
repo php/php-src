@@ -67,12 +67,19 @@ ZEND_API zval* zend_call_method(zval *object, zend_class_entry *obj_ce, zend_fun
 			obj_ce = object ? Z_OBJCE_P(object) : NULL;
 		}
 		if (!fn_proxy || !*fn_proxy) {
-			HashTable *function_table = obj_ce ? &obj_ce->function_table : EG(function_table);
-			fcic.function_handler = zend_hash_str_find_ptr(
-				function_table, function_name, function_name_len);
-			if (fcic.function_handler == NULL) {
-				/* error at c-level */
-				zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s%s%s", obj_ce ? ZSTR_VAL(obj_ce->name) : "", obj_ce ? "::" : "", function_name);
+			if (EXPECTED(obj_ce)) {
+				fcic.function_handler = zend_hash_str_find_ptr(
+					&obj_ce->function_table, function_name, function_name_len);
+				if (UNEXPECTED(fcic.function_handler == NULL)) {
+					/* error at c-level */
+					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for method %s::%s", ZSTR_VAL(obj_ce->name), function_name);
+				}
+			} else {
+				fcic.function_handler = zend_fetch_function_str(function_name, function_name_len);
+				if (UNEXPECTED(fcic.function_handler == NULL)) {
+					/* error at c-level */
+					zend_error_noreturn(E_CORE_ERROR, "Couldn't find implementation for function %s", function_name);
+				}
 			}
 			if (fn_proxy) {
 				*fn_proxy = fcic.function_handler;

@@ -256,7 +256,7 @@ static void zend_persist_op_array_calc(zval *zv)
 	zend_op_array *op_array = Z_PTR_P(zv);
 
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	ADD_ARENA_SIZE(sizeof(zend_op_array));
+	ADD_SIZE(sizeof(zend_op_array));
 	zend_persist_op_array_calc_ex(Z_PTR_P(zv));
 }
 

@@ -3700,7 +3700,7 @@ ZEND_VM_HOT_HANDLER(59, ZEND_INIT_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 		}
 		fbc = Z_FUNC_P(func);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			init_func_run_time_cache(&fbc->op_array);
+			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
 		}
 		CACHE_PTR(opline->result.num, fbc);
 	}
@@ -3863,10 +3863,10 @@ ZEND_VM_HOT_HANDLER(69, ZEND_INIT_NS_FCALL_BY_NAME, ANY, CONST, NUM|CACHE_SLOT)
 			}
 		}
 		fbc = Z_FUNC_P(func);
-		CACHE_PTR(opline->result.num, fbc);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			init_func_run_time_cache(&fbc->op_array);
+			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
 		}
+		CACHE_PTR(opline->result.num, fbc);
 	}
 
 	call = zend_vm_stack_push_call_frame(ZEND_CALL_NESTED_FUNCTION,
@@ -3894,10 +3894,10 @@ ZEND_VM_HOT_HANDLER(61, ZEND_INIT_FCALL, NUM, CONST, NUM|CACHE_SLOT)
 			ZEND_VM_DISPATCH_TO_HELPER(zend_undefined_function_helper, function_name, fname);
 		}
 		fbc = Z_FUNC_P(func);
-		CACHE_PTR(opline->result.num, fbc);
 		if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-			init_func_run_time_cache(&fbc->op_array);
+			fbc = init_func_run_time_cache_ex(&fbc->op_array, func);
 		}
+		CACHE_PTR(opline->result.num, fbc);
 	}
 
 	call = zend_vm_stack_push_call_frame_ex(
@@ -7427,9 +7427,19 @@ ZEND_VM_HANDLER(153, ZEND_DECLARE_LAMBDA_FUNCTION, CONST, UNUSED)
 	zval *zfunc;
 	zval *object;
 	zend_class_entry *called_scope;
+	zend_function *fbc;
 
 	zfunc = zend_hash_find_ex(EG(function_table), Z_STR_P(RT_CONSTANT(opline, opline->op1)), 1);
 	ZEND_ASSERT(zfunc != NULL && Z_FUNC_P(zfunc)->type == ZEND_USER_FUNCTION);
+
+	fbc = Z_PTR_P(zfunc);
+	if (fbc->common.fn_flags & ZEND_ACC_IMMUTABLE) {
+		zend_function *new_func = zend_arena_alloc(&CG(arena), sizeof(zend_op_array));
+
+		memcpy(new_func, fbc, sizeof(zend_op_array));
+		new_func->common.fn_flags &= ~ZEND_ACC_IMMUTABLE;
+		Z_PTR_P(zfunc) = fbc = new_func;
+	}
 
 	if (Z_TYPE(EX(This)) == IS_OBJECT) {
 		called_scope = Z_OBJCE(EX(This));
