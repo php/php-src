@@ -2026,15 +2026,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_OBJECT, IS_NULL):
-				// if (Z_OBJ_HANDLER_P(op1, equals)) {
-				// 	if (Z_OBJ_HANDLER_P(op1, equals)(result, op1, op2) == SUCCESS) {
-				// 		if (i_zend_is_true(result)) {
-				// 			ZVAL_LONG(result, 0);
-				// 			return SUCCESS;
-				// 		}
-				// 	}
-				// }
-
 				if (Z_OBJ_HANDLER_P(op1, compare)) {
 					if (Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
 						convert_compare_result_to_long(result);
@@ -2046,15 +2037,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				return SUCCESS;
 
 			case TYPE_PAIR(IS_NULL, IS_OBJECT):
-				// if (Z_OBJ_HANDLER_P(op2, equals)) {
-				// 	if (Z_OBJ_HANDLER_P(op2, equals)(result, op2, op1) == SUCCESS) {
-				// 		if (i_zend_is_true(result)) {
-				// 			ZVAL_LONG(result, 0);
-				// 			return SUCCESS;
-				// 		}
-				// 	}
-				// }
-
 				if (Z_OBJ_HANDLER_P(op2, compare)) {
 					if (Z_OBJ_HANDLER_P(op2, compare)(result, op2, op1) == SUCCESS) {
 						convert_compare_result_to_long(result);
@@ -2076,13 +2058,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				}
 
 				if (Z_TYPE_P(op1) == IS_OBJECT) {
-					// if (Z_OBJ_HANDLER_P(op1, equals) && Z_OBJ_HANDLER_P(op1, equals)(result, op1, op2) == SUCCESS) {
-					// 	if (i_zend_is_true(result)) {
-					// 		ZVAL_LONG(result, 0);
-					// 		return SUCCESS;
-					// 	}
-					// }
-
 					if (Z_OBJ_HANDLER_P(op1, compare) && Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
  						convert_compare_result_to_long(result);
  						return SUCCESS;
@@ -2090,13 +2065,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 				}
 
 				if (Z_TYPE_P(op2) == IS_OBJECT) {
-					// if (Z_OBJ_HANDLER_P(op2, equals) && Z_OBJ_HANDLER_P(op2, equals)(result, op2, op1) == SUCCESS) {
-					// 	if (i_zend_is_true(result)) {
-					// 		ZVAL_LONG(result, 0);
-					// 		return SUCCESS;
-					// 	}
-					// }
-
 					if (Z_OBJ_HANDLER_P(op2, compare) && Z_OBJ_HANDLER_P(op2, compare)(result, op2, op1) == SUCCESS) {
 						convert_compare_result_to_long(result);
 						Z_LVAL_P(result) *= -1;
