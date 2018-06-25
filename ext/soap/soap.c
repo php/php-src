@@ -2806,7 +2806,7 @@ static void verify_soap_headers_array(HashTable *ht)
 }
 
 
-/* {{{ proto mixed SoapClient::__call(string function_name, array arguments [, array options [, array input_headers [, array output_headers]]])
+/* {{{ proto mixed SoapClient::__call(string function_name, array arguments [, array options [, array input_headers [, array &output_headers]]])
    Calls a SOAP function */
 PHP_METHOD(SoapClient, __call)
 {
@@ -2825,7 +2825,7 @@ PHP_METHOD(SoapClient, __call)
 	zend_bool free_soap_headers = 0;
 	zval *this_ptr;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "sa|a!zt",
 		&function, &function_len, &args, &options, &headers, &output_headers) == FAILURE) {
 		return;
 	}

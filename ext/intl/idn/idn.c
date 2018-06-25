@@ -279,7 +279,7 @@ static void php_intl_idn_handoff(INTERNAL_FUNCTION_PARAMETERS, int mode)
 
 	intl_error_reset(NULL);
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llz/",
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "S|llt",
 			&domain, &option, &variant, &idna_info) == FAILURE) {
 		php_intl_bad_args("bad arguments");
 		RETURN_NULL(); /* don't set FALSE because that's not the way it was before... */

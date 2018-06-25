@@ -1434,7 +1434,7 @@ PHP_FUNCTION(oci_fetch_all)
 	int i;
 	zend_long rows = 0, flags = 0, skip = 0, maxrows = -1;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/|lll", &z_statement, &array, &skip, &maxrows, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rt|lll", &z_statement, &array, &skip, &maxrows, &flags) == FAILURE) {
 		return;
 	}
 

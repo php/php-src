@@ -1692,7 +1692,7 @@ PHP_FUNCTION(socket_recv)
 	int			retval;
 	zend_long		len, flags;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/ll", &php_sock_res, &buf, &len, &flags) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzll", &php_sock_res, &buf, &len, &flags) == FAILURE) {
 		return;
 	}
 
@@ -1709,16 +1709,11 @@ PHP_FUNCTION(socket_recv)
 
 	if ((retval = recv(php_sock->bsd_socket, ZSTR_VAL(recv_buf), len, flags)) < 1) {
 		zend_string_efree(recv_buf);
-
-		zval_ptr_dtor(buf);
-		ZVAL_NULL(buf);
+		ZEND_TRY_ASSIGN_NULL(buf);
 	} else {
 		ZSTR_LEN(recv_buf) = retval;
 		ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
-
-		/* Rebuild buffer zval */
-		zval_ptr_dtor(buf);
-		ZVAL_NEW_STR(buf, recv_buf);
+		ZEND_TRY_ASSIGN_NEW_STR(buf, recv_buf);
 	}
 
 	if (retval == -1) {
@@ -1777,7 +1772,7 @@ PHP_FUNCTION(socket_recvfrom)
 	char				*address;
 	zend_string			*recv_buf;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rz/llz/|z/", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rzllz|z", &arg1, &arg2, &arg3, &arg4, &arg5, &arg6) == FAILURE) {
 		return;
 	}
 
@@ -1806,11 +1801,8 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			zval_ptr_dtor(arg2);
-			zval_ptr_dtor(arg5);
-
-			ZVAL_NEW_STR(arg2, recv_buf);
-			ZVAL_STRING(arg5, s_un.sun_path);
+			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_STRING(arg5, s_un.sun_path);
 			break;
 
 		case AF_INET:
@@ -1833,15 +1825,11 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			zval_ptr_dtor(arg2);
-			zval_ptr_dtor(arg5);
-			zval_ptr_dtor(arg6);
-
 			address = inet_ntoa(sin.sin_addr);
 
-			ZVAL_NEW_STR(arg2, recv_buf);
-			ZVAL_STRING(arg5, address ? address : "0.0.0.0");
-			ZVAL_LONG(arg6, ntohs(sin.sin_port));
+			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_STRING(arg5, address ? address : "0.0.0.0");
+			ZEND_TRY_ASSIGN_LONG(arg6, ntohs(sin.sin_port));
 			break;
 #if HAVE_IPV6
 		case AF_INET6:
@@ -1864,16 +1852,12 @@ PHP_FUNCTION(socket_recvfrom)
 			ZSTR_LEN(recv_buf) = retval;
 			ZSTR_VAL(recv_buf)[ZSTR_LEN(recv_buf)] = '\0';
 
-			zval_ptr_dtor(arg2);
-			zval_ptr_dtor(arg5);
-			zval_ptr_dtor(arg6);
-
 			memset(addr6, 0, INET6_ADDRSTRLEN);
 			inet_ntop(AF_INET6, &sin6.sin6_addr, addr6, INET6_ADDRSTRLEN);
 
-			ZVAL_NEW_STR(arg2, recv_buf);
-			ZVAL_STRING(arg5, addr6[0] ? addr6 : "::");
-			ZVAL_LONG(arg6, ntohs(sin6.sin6_port));
+			ZEND_TRY_ASSIGN_NEW_STR(arg2, recv_buf);
+			ZEND_TRY_ASSIGN_STRING(arg5, addr6[0] ? addr6 : "::");
+			ZEND_TRY_ASSIGN_LONG(arg6, ntohs(sin6.sin6_port));
 			break;
 #endif
 		default:
@@ -2230,7 +2214,7 @@ PHP_FUNCTION(socket_create_pair)
 	PHP_SOCKET	fds_array[2];
 	zend_long		domain, type, protocol;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllz/", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "lllt", &domain, &type, &protocol, &fds_array_zval) == FAILURE) {
 		return;
 	}
 

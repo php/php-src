@@ -3330,7 +3330,7 @@ PHP_FUNCTION(ldap_parse_result)
 	char *lmatcheddn, *lerrmsg;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz/|z/z/z/z/", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz|zztt", &link, &result, &errcode, &matcheddn, &errmsg, &referrals, &serverctrls) != SUCCESS) {
 		return;
 	}
 
@@ -3353,8 +3353,7 @@ PHP_FUNCTION(ldap_parse_result)
 		RETURN_FALSE;
 	}
 
-	zval_ptr_dtor(errcode);
-	ZVAL_LONG(errcode, lerrcode);
+	ZEND_TRY_ASSIGN_LONG(errcode, lerrcode);
 
 	/* Reverse -> fall through */
 	switch (myargcount) {
@@ -3372,19 +3371,17 @@ PHP_FUNCTION(ldap_parse_result)
 				ldap_memvfree((void**)lreferrals);
 			}
 		case 5:
-			zval_ptr_dtor(errmsg);
 			if (lerrmsg == NULL) {
-				ZVAL_EMPTY_STRING(errmsg);
+				ZEND_TRY_ASSIGN_EMPTY_STRING(errmsg);
 			} else {
-				ZVAL_STRING(errmsg, lerrmsg);
+				ZEND_TRY_ASSIGN_STRING(errmsg, lerrmsg);
 				ldap_memfree(lerrmsg);
 			}
 		case 4:
-			zval_ptr_dtor(matcheddn);
 			if (lmatcheddn == NULL) {
-				ZVAL_EMPTY_STRING(matcheddn);
+				ZEND_TRY_ASSIGN_EMPTY_STRING(matcheddn);
 			} else {
-				ZVAL_STRING(matcheddn, lmatcheddn);
+				ZEND_TRY_ASSIGN_STRING(matcheddn, lmatcheddn);
 				ldap_memfree(lmatcheddn);
 			}
 	}
@@ -3395,7 +3392,7 @@ PHP_FUNCTION(ldap_parse_result)
 
 /* {{{ Extended operation response parsing, Pierangelo Masarati */
 #ifdef HAVE_LDAP_PARSE_EXTENDED_RESULT
-/* {{{ proto bool ldap_parse_exop(resource link, resource result [, string retdata [, string retoid]])
+/* {{{ proto bool ldap_parse_exop(resource link, resource result [, string &retdata [, string &retoid]])
    Extract information from extended operation result */
 PHP_FUNCTION(ldap_parse_exop)
 {
@@ -3406,7 +3403,7 @@ PHP_FUNCTION(ldap_parse_exop)
 	struct berval *lretdata;
 	int rc, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|z/z/", &link, &result, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|zz", &link, &result, &retdata, &retoid) != SUCCESS) {
 		WRONG_PARAM_COUNT;
 	}
 
@@ -3430,20 +3427,18 @@ PHP_FUNCTION(ldap_parse_exop)
 	/* Reverse -> fall through */
 	switch (myargcount) {
 		case 4:
-			zval_dtor(retoid);
 			if (lretoid == NULL) {
-				ZVAL_EMPTY_STRING(retoid);
+				ZEND_TRY_ASSIGN_EMPTY_STRING(retoid);
 			} else {
-				ZVAL_STRING(retoid, lretoid);
+				ZEND_TRY_ASSIGN_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			}
 		case 3:
 			/* use arg #3 as the data returned by the server */
-			zval_dtor(retdata);
 			if (lretdata == NULL) {
-				ZVAL_EMPTY_STRING(retdata);
+				ZEND_TRY_ASSIGN_EMPTY_STRING(retdata);
 			} else {
-				ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+				ZEND_TRY_ASSIGN_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 				ldap_memfree(lretdata->bv_val);
 				ldap_memfree(lretdata);
 			}
@@ -3521,7 +3516,7 @@ PHP_FUNCTION(ldap_next_reference)
 /* }}} */
 
 #ifdef HAVE_LDAP_PARSE_REFERENCE
-/* {{{ proto bool ldap_parse_reference(resource link, resource reference_entry, array referrals)
+/* {{{ proto bool ldap_parse_reference(resource link, resource reference_entry, array &referrals)
    Extract information from reference entry */
 PHP_FUNCTION(ldap_parse_reference)
 {
@@ -3530,7 +3525,7 @@ PHP_FUNCTION(ldap_parse_reference)
 	ldap_resultentry *resultentry;
 	char **lreferrals, **refp;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrz/", &link, &result_entry, &referrals) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rrt", &link, &result_entry, &referrals) != SUCCESS) {
 		return;
 	}
 
@@ -4012,7 +4007,7 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 	ber_tag_t tag;
 	int rc, lerrcode, myargcount = ZEND_NUM_ARGS();
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|z/z/", &link, &result, &cookie, &estimated) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rr|zz", &link, &result, &cookie, &estimated) != SUCCESS) {
 		return;
 	}
 
@@ -4079,15 +4074,13 @@ PHP_FUNCTION(ldap_control_paged_result_response)
 
 	ldap_controls_free(lserverctrls);
 	if (myargcount == 4) {
-		zval_dtor(estimated);
-		ZVAL_LONG(estimated, lestimated);
+		ZEND_TRY_ASSIGN_LONG(estimated, lestimated);
 	}
 
-	zval_ptr_dtor(cookie);
  	if (lcookie.bv_len == 0) {
-		ZVAL_EMPTY_STRING(cookie);
+		ZEND_TRY_ASSIGN_EMPTY_STRING(cookie);
  	} else {
-		ZVAL_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len);
+		ZEND_TRY_ASSIGN_STRINGL(cookie, lcookie.bv_val, lcookie.bv_len);
  	}
  	ldap_memfree(lcookie.bv_val);
 
@@ -4112,7 +4105,7 @@ PHP_FUNCTION(ldap_exop)
 	LDAPControl **lserverctrls = NULL;
 	int rc, msgid;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!a!z/z/", &link, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "rS|S!a!zz", &link, &reqoid, &reqdata, &serverctrls, &retdata, &retoid) != SUCCESS) {
 		return;
 	}
 
@@ -4150,22 +4143,20 @@ PHP_FUNCTION(ldap_exop)
 		}
 
 		if (retoid) {
-			zval_dtor(retoid);
 			if (lretoid) {
-				ZVAL_STRING(retoid, lretoid);
+				ZEND_TRY_ASSIGN_STRING(retoid, lretoid);
 				ldap_memfree(lretoid);
 			} else {
-				ZVAL_EMPTY_STRING(retoid);
+				ZEND_TRY_ASSIGN_EMPTY_STRING(retoid);
 			}
 		}
 
-		zval_dtor(retdata);
 		if (lretdata) {
-			ZVAL_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
+			ZEND_TRY_ASSIGN_STRINGL(retdata, lretdata->bv_val, lretdata->bv_len);
 			ldap_memfree(lretdata->bv_val);
 			ldap_memfree(lretdata);
 		} else {
-			ZVAL_EMPTY_STRING(retdata);
+			ZEND_TRY_ASSIGN_EMPTY_STRING(retdata);
 		}
 
 		RETVAL_TRUE;
@@ -4216,7 +4207,7 @@ PHP_FUNCTION(ldap_exop_passwd)
 	int rc, myargcount = ZEND_NUM_ARGS(), msgid, err;
 	char* errmsg;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzz/", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "r|zzzt", &link, &user, &oldpw, &newpw, &serverctrls) == FAILURE) {
 		WRONG_PARAM_COUNT;
 	}
 

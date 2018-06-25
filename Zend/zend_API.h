@@ -720,6 +720,18 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 	zend_try_assign(zv, &_zv); \
 } while (0)
 
+#define ZEND_TRY_ASSIGN_FALSE(zv) do { \
+	zval _zv; \
+	ZVAL_FALSE(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_TRUE(zv) do { \
+	zval _zv; \
+	ZVAL_TRUE(&_zv); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
 #define ZEND_TRY_ASSIGN_LONG(zv, lval) do { \
 	zval _zv; \
 	ZVAL_LONG(&_zv, lval); \
@@ -744,6 +756,12 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 	zend_try_assign(zv, &_zv); \
 } while (0)
 
+#define ZEND_TRY_ASSIGN_NEW_STR(zv, str) do { \
+	zval _zv; \
+	ZVAL_NEW_STR(&_zv, str); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
 #define ZEND_TRY_ASSIGN_STRING(zv, string) do { \
 	zval _zv; \
 	ZVAL_STRING(&_zv, string); \
@@ -753,6 +771,12 @@ static zend_always_inline int zend_try_assign(zval *zv, zval *arg) {
 #define ZEND_TRY_ASSIGN_STRINGL(zv, string, len) do { \
 	zval _zv; \
 	ZVAL_STRINGL(&_zv, string, len); \
+	zend_try_assign(zv, &_zv); \
+} while (0)
+
+#define ZEND_TRY_ASSIGN_RES(zv, res) do { \
+	zval _zv; \
+	ZVAL_RES(&_zv, res); \
 	zend_try_assign(zv, &_zv); \
 } while (0)
 
