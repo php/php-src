@@ -1,9 +1,8 @@
 --TEST--
-numfmt_format() icu >= 61.1 && < 62.1
+numfmt_format() icu >= 62.1
 --SKIPIF--
 <?php if( !extension_loaded( 'intl' ) ) print 'skip'; ?>
-<?php if (version_compare(INTL_ICU_VERSION, '61.1') < 0) die('skip for ICU >= 61.1'); ?>
-<?php if (version_compare(INTL_ICU_VERSION, '62.1') >= 0) die('skip for ICU < 62.1'); ?>
+<?php if (version_compare(INTL_ICU_VERSION, '62.1') < 0) die('skip for ICU >= 62.1'); ?>
 --FILE--
 <?php
 
@@ -80,7 +79,7 @@ Locale is: en_US
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
-'USD1,234,567.89'
+'USD 1,234,567.89'
 
 Locale is: ru_UA
 '1234567.8912345\d+'
@@ -97,35 +96,35 @@ Locale is: ru_UA
 Locale is: de
 '1234567.8912345\d+'
 '1.234.567,891'
-'(¤ )?1.234.567,89( ¤)?'
+'1.234.567,89 XXX'
 '123\.456\.789 %'
 '1.2345678912345\d+E6'
 'eine Million zwei­hundert­vier­und­dreißig­tausend­fünf­hundert­sieben­und­sechzig Komma acht neun eins zwei drei vier fünf( sechs)? sieben( neun)?'
 '1.234.567.?'
 '1.234.567'
 '#####.###'
-'1.234.567,89 ¤¤'
+'1.234.567,89 XXX'
 
 Locale is: fr
 '1234567.8912345\d+'
 '1 234 567,891'
-'1 234 567,89 ¤'
+'1 234 567,89 XXX'
 '123 456 789 ?%'
 '1.2345678912345\d+E6'
 'un million deux cent trente-quatre mille cinq cent soixante-sept virgule huit neuf un deux trois quatre cinq( six)? sept( neuf)?'
 '1 234 567e'
 '1 234 567'
 '#####.###'
-'1 234 567,89 ¤¤'
+'1 234 567,89 XXX'
 
 Locale is: en_UK
 '1234567.8912345\d+'
 '1,234,567.891'
-'¤1,234,567.89'
+'XXX 1,234,567.89'
 '123,456,789%'
 '1.2345678912345\d+E6'
 'one million,? two hundred (and )?thirty-four thousand,? five hundred (and )?sixty-seven point eight nine one two three four five( six)? seven( nine)?'
 '1,234,567(th|ᵗʰ)'
 '342:56:07'
 '#####.###'
-'¤¤1,234,567.89'
+'XXX 1,234,567.89'
