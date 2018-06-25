@@ -36,7 +36,7 @@ ZEND_END_ARG_INFO();
 /*
 * class domstringlist
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMStringList
 * Since: DOM Level 3
 */
 
