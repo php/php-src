@@ -44,6 +44,18 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . References returned by array and property accesses are now unwrapped as
+    part of the access. This means that it is no longer possible to modify the
+    reference between the access and the use of the accessed value:
+
+        $arr = [1];
+        $ref =& $arr[0];
+        var_dump($arr[0] + ($arr[0] = 2));
+        // Previously: int(4), Now: int(3)
+
+    This makes the behavior of references and non-references consistent. Please
+    note that reading and writing a value inside a single expression remains
+    undefined behavior and may change again in the future.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
