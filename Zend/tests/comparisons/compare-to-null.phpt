@@ -37,7 +37,6 @@ var_dump(new Comparable(0) <=> null);
 
 ?>
 --EXPECTF--
-
 Comparing!
 int(1)
 Comparing!
