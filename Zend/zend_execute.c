@@ -2250,7 +2250,7 @@ static zend_always_inline void zend_fetch_dimension_address_read(zval *result, z
 		if (EXPECTED(Z_TYPE_P(container) == IS_ARRAY)) {
 try_array:
 			retval = zend_fetch_dimension_address_inner(Z_ARRVAL_P(container), dim, dim_type, type EXECUTE_DATA_CC);
-			ZVAL_COPY(result, retval);
+			ZVAL_COPY_DEREF(result, retval);
 			return;
 		} else if (EXPECTED(Z_TYPE_P(container) == IS_REFERENCE)) {
 			container = Z_REFVAL_P(container);
@@ -2330,7 +2330,9 @@ try_string_offset:
 			ZEND_ASSERT(result != NULL);
 			if (retval) {
 				if (result != retval) {
-					ZVAL_COPY(result, retval);
+					ZVAL_COPY_DEREF(result, retval);
+				} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+					zend_unwrap_reference(result);
 				}
 			} else {
 				ZVAL_NULL(result);

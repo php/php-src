@@ -3,9 +3,9 @@ openssl_encrypt() with CCM cipher algorithm tests
 --SKIPIF--
 <?php
 if (!extension_loaded("openssl"))
-	die("skip");
+    die("skip");
 if (!in_array('aes-256-ccm', openssl_get_cipher_methods()))
-	die("skip: aes-256-ccm not available");
+    die("skip: aes-256-ccm not available");
 ?>
 --FILE--
 <?php
@@ -14,11 +14,11 @@ $method = 'aes-256-ccm';
 $tests = openssl_get_cipher_tests($method);
 
 foreach ($tests as $idx => $test) {
-	echo "TEST $idx\n";
-	$ct = openssl_encrypt($test['pt'], $method, $test['key'], OPENSSL_RAW_DATA,
-		$test['iv'], $tag, $test['aad'], strlen($test['tag']));
-	var_dump($test['ct'] === $ct);
-	var_dump($test['tag'] === $tag);
+    echo "TEST $idx\n";
+    $ct = openssl_encrypt($test['pt'], $method, $test['key'], OPENSSL_RAW_DATA,
+        $test['iv'], $tag, $test['aad'], strlen($test['tag']));
+    var_dump($test['ct'] === $ct);
+    var_dump($test['tag'] === $tag);
 }
 
 // Empty IV error

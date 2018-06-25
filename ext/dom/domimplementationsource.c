@@ -41,7 +41,7 @@ ZEND_END_ARG_INFO();
 /*
 * class domimplementationsource
 *
-* URL: http://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationSource
+* URL: https://www.w3.org/TR/2003/WD-DOM-Level-3-Core-20030226/DOM3-Core.html#DOMImplementationSource
 * Since: DOM Level 3
 */
 

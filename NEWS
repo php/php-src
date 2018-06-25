@@ -2,9 +2,29 @@ PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
 ?? ??? ????, PHP 7.3.0alpha3
 
+- Core:
+  . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
+    (Nikita)
+  . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
+    properly). (Nikita)
+  . Fixed bug #76509 (Inherited static properties can be desynchronized from
+    their parent by ref). (Nikita)
+
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
     non-blocking). (Nikita)
+
+- PCRE:
+  . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
+  . Fixed bug #76514 (Regression in preg_match makes it fail with
+    PREG_JIT_STACKLIMIT_ERROR). (Anatol)
+
+- phpdbg:
+  . Fix arginfo wrt. optional/required parameters. (cmb)
+
+- Standard:
+  . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
+    (Laruence)
 
 21 Jun 2018, PHP 7.3.0alpha2
 

@@ -19,7 +19,7 @@ var_dump(openssl_x509_export($d, $output4)); // read cert from a resource
 var_dump(openssl_x509_export($e, $output5)); // read an array, fails
 
 if (PHP_EOL !== "\n") {
-	$a = str_replace(PHP_EOL, "\n", $a);
+    $a = str_replace(PHP_EOL, "\n", $a);
 }
 
 var_dump(strcmp($output, $a));

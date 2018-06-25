@@ -7,7 +7,7 @@ if (!function_exists("proc_open")) die("skip no proc_open");
 exec('openssl help', $out, $code);
 if ($code > 0) die("skip couldn't locate openssl binary");
 if(substr(PHP_OS, 0, 3) == 'WIN') {
-   die('skip not suitable for Windows');
+    die('skip not suitable for Windows');
 }
 ?>
 --FILE--
@@ -85,5 +85,6 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($serverCode, $clientCode);
+?>
 --EXPECTF--
 resource(%d) of type (stream)

@@ -377,7 +377,7 @@ struct _zend_op_array {
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;       /* number of CV variables */
-	uint32_t T;         /* numner of temporary variables */
+	uint32_t T;         /* number of temporary variables */
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;

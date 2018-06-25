@@ -1,7 +1,5 @@
 --TEST--
 Bug #52971 (PCRE-Meta-Characters not working with utf-8)
---SKIPIF--
-<?php if ((double)PCRE_VERSION < 8.1) die('skip PCRE_VERSION >= 8.1 is required!'); ?>
 --FILE--
 <?php
 
@@ -19,15 +17,8 @@ var_dump($match);
 --EXPECT--
 array(1) {
   [0]=>
-  array(2) {
+  array(1) {
     [0]=>
-    array(2) {
-      [0]=>
-      string(6) "wasser"
-      [1]=>
-      int(17)
-    }
-    [1]=>
     array(2) {
       [0]=>
       string(6) "Wasser"
@@ -38,15 +29,8 @@ array(1) {
 }
 array(1) {
   [0]=>
-  array(2) {
+  array(1) {
     [0]=>
-    array(2) {
-      [0]=>
-      string(8) "ßwasser"
-      [1]=>
-      int(15)
-    }
-    [1]=>
     array(2) {
       [0]=>
       string(7) " Wasser"

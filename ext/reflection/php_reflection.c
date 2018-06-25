@@ -207,15 +207,6 @@ static zend_function *_copy_function(zend_function *fptr) /* {{{ */
 }
 /* }}} */
 
-static void _fix_closure_prototype(zend_function *fptr) /* {{{ */
-{
-	/* Actually we are setting proxy function's prototype to null
-	 * as for it, the prototype is an object not a function
-	 * which could cause serious problems, see #74949 */
-	fptr->common.prototype = NULL;
-}
-/* }}} */
-
 static void _free_function(zend_function *fptr) /* {{{ */
 {
 	if (fptr
@@ -516,7 +507,6 @@ static void _class_string(smart_str *str, zend_class_entry *ce, zval *obj, char 
 						&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 						&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 					{
-						_fix_closure_prototype(closure);
 						mptr = closure;
 					} else {
 						closure = NULL;
@@ -1587,11 +1577,9 @@ ZEND_METHOD(reflection_function, __construct)
 	zval name;
 	zval *object;
 	zval *closure = NULL;
-	char *lcname, *nsname;
 	reflection_object *intern;
 	zend_function *fptr;
-	char *name_str;
-	size_t name_len;
+	zend_string *fname, *lcname;
 
 	object = getThis();
 	intern = Z_REFLECTION_P(object);
@@ -1600,26 +1588,29 @@ ZEND_METHOD(reflection_function, __construct)
 		fptr = (zend_function*)zend_get_closure_method_def(closure);
 		Z_ADDREF_P(closure);
 	} else {
-		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "s", &name_str, &name_len) == FAILURE) {
+		ALLOCA_FLAG(use_heap)
+
+		if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "S", &fname) == FAILURE) {
 			return;
 		}
 
-		lcname = zend_str_tolower_dup(name_str, name_len);
-
-		/* Ignore leading "\" */
-		nsname = lcname;
-		if (lcname[0] == '\\') {
-			nsname = &lcname[1];
-			name_len--;
+		if (UNEXPECTED(ZSTR_VAL(fname)[0] == '\\')) {
+			/* Ignore leading "\" */
+			ZSTR_ALLOCA_ALLOC(lcname, ZSTR_LEN(fname) - 1, use_heap);
+			zend_str_tolower_copy(ZSTR_VAL(lcname), ZSTR_VAL(fname) + 1, ZSTR_LEN(fname) - 1);
+			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			ZSTR_ALLOCA_FREE(lcname, use_heap);
+		} else {
+			lcname = zend_string_tolower(fname);
+			fptr = zend_hash_find_ptr(EG(function_table), lcname);
+			zend_string_release(lcname);
 		}
 
-		if ((fptr = zend_hash_str_find_ptr(EG(function_table), nsname, name_len)) == NULL) {
-			efree(lcname);
+		if (fptr == NULL) {
 			zend_throw_exception_ex(reflection_exception_ptr, 0,
-				"Function %s() does not exist", name_str);
+				"Function %s() does not exist", ZSTR_VAL(fname));
 			return;
 		}
-		efree(lcname);
 	}
 
 	ZVAL_STR_COPY(&name, fptr->common.function_name);
@@ -2386,7 +2377,6 @@ ZEND_METHOD(reflection_parameter, __construct)
 				{
 					/* nothing to do. don't set is_closure since is the invoke handler,
 					   not the closure itself */
-					_fix_closure_prototype(fptr);
 				} else if ((fptr = zend_hash_str_find_ptr(&ce->function_table, lcname, lcname_len)) == NULL) {
 					efree(lcname);
 					zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3096,7 +3086,6 @@ ZEND_METHOD(reflection_method, __construct)
 		&& (mptr = zend_get_closure_invoke_method(Z_OBJ_P(orig_obj))) != NULL)
 	{
 		/* do nothing, mptr already set */
-		_fix_closure_prototype(mptr);
 	} else if ((mptr = zend_hash_str_find_ptr(&ce->function_table, lcname, name_len)) == NULL) {
 		efree(lcname);
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
@@ -3872,6 +3861,7 @@ static void add_class_vars(zend_class_entry *ce, int statics, zval *return_value
 		prop = NULL;
 		if (statics && (prop_info->flags & ZEND_ACC_STATIC) != 0) {
 			prop = &ce->default_static_members_table[prop_info->offset];
+			ZVAL_DEINDIRECT(prop);
 		} else if (!statics && (prop_info->flags & ZEND_ACC_STATIC) == 0) {
 			prop = &ce->default_properties_table[OBJ_PROP_TO_NUM(prop_info->offset)];
 		}
@@ -4237,7 +4227,6 @@ ZEND_METHOD(reflection_class, getMethod)
 	{
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
-		_fix_closure_prototype(mptr);
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		efree(lc_name);
 	} else if (ce == zend_ce_closure && Z_ISUNDEF(intern->obj) && (name_len == sizeof(ZEND_INVOKE_FUNC_NAME)-1)
@@ -4245,7 +4234,6 @@ ZEND_METHOD(reflection_class, getMethod)
 		&& object_init_ex(&obj_tmp, ce) == SUCCESS && (mptr = zend_get_closure_invoke_method(Z_OBJ(obj_tmp))) != NULL) {
 		/* don't assign closure_object since we only reflect the invoke handler
 		   method and not the closure definition itself */
-		_fix_closure_prototype(mptr);
 		reflection_method_factory(ce, mptr, NULL, return_value);
 		zval_dtor(&obj_tmp);
 		efree(lc_name);
@@ -4272,7 +4260,6 @@ static void _addmethod(zend_function *mptr, zend_class_entry *ce, zval *retval, 
 			&& memcmp(ZSTR_VAL(mptr->common.function_name), ZEND_INVOKE_FUNC_NAME, sizeof(ZEND_INVOKE_FUNC_NAME)-1) == 0
 			&& (closure = zend_get_closure_invoke_method(Z_OBJ_P(obj))) != NULL)
 		{
-			_fix_closure_prototype(closure);
 			mptr = closure;
 		}
 		/* don't assign closure_object since we only reflect the invoke handler
@@ -4324,7 +4311,6 @@ ZEND_METHOD(reflection_class, getMethods)
 	if (Z_TYPE(intern->obj) != IS_UNDEF && instanceof_function(ce, zend_ce_closure)) {
 		zend_function *closure = zend_get_closure_invoke_method(Z_OBJ(intern->obj));
 		if (closure) {
-			_fix_closure_prototype(closure);
 			_addmethod(closure, ce, return_value, filter, &intern->obj);
 			_free_function(closure);
 		}
@@ -5602,6 +5588,7 @@ ZEND_METHOD(reflection_property, getValue)
 			return;
 		}
 		member_p = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
+		ZVAL_DEINDIRECT(member_p);
 		ZVAL_DEREF(member_p);
 		ZVAL_COPY(return_value, member_p);
 	} else {
@@ -5669,6 +5656,7 @@ ZEND_METHOD(reflection_property, setValue)
 			return;
 		}
 		variable_ptr = &CE_STATIC_MEMBERS(intern->ce)[ref->prop.offset];
+		ZVAL_DEINDIRECT(variable_ptr);
 		if (variable_ptr != value) {
 			zval garbage;
 

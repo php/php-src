@@ -44,6 +44,35 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . In PHP, static properties are shared between inheriting classes, unless the
+    static property is explicitly overridden in a child class. However, due to
+    an implementation artifact it was possible to separate the static properties
+    by assigning a reference. This loophole has been fixed.
+
+        class Test {
+            public static $x = 0;
+        }
+        class Test2 extends Test { }
+
+        Test2::$x = &$x;
+        $x = 1;
+
+        var_dump(Test::$x, Test2::$x);
+        // Previously: int(0), int(1)
+        // Now:        int(1), int(1)
+
+  . References returned by array and property accesses are now unwrapped as
+    part of the access. This means that it is no longer possible to modify the
+    reference between the access and the use of the accessed value:
+
+        $arr = [1];
+        $ref =& $arr[0];
+        var_dump($arr[0] + ($arr[0] = 2));
+        // Previously: int(4), Now: int(3)
+
+    This makes the behavior of references and non-references consistent. Please
+    note that reading and writing a value inside a single expression remains
+    undefined behavior and may change again in the future.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
@@ -150,9 +179,22 @@ readline:
     options has been added to readline_info(). These options are only available
     if PHP is linked against libreadline (rather than libedit).
 
+Standard:
+  . The -–with-password-argon2[=dir] configure argument now provides support for 
+    both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
+    password_get_info(), and password_needs_rehash() functions. Passwords may be
+    hashed and verified using the PASSWORD_ARGON2ID constant.
+    Support for both Argon2i and Argon2id in the password_* functions now requires
+    PHP be linked against libargon2 reference library >= 20161029.
+    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements). 
+
 ========================================
 3. Changes in SAPI modules
 ========================================
+
+phpdbg:
+  . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
+    PHPDBG_FUNC have been removed.
 
 ========================================
 4. Deprecated Functionality
@@ -310,6 +352,9 @@ PGSQL:
 	- PGSQL_DIAG_CONSTRAINT_NAME
   . Requires Postgres 9.6
     - PGSQL_DIAG_SEVERITY_NONLOCALIZED
+
+Standard:
+  . PASSWORD_ARGON2ID
 
 ========================================
 11. Changes to INI File Handling

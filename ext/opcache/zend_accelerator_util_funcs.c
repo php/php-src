@@ -346,6 +346,10 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 	*pce = ce = ARENA_REALLOC(old_ce);
 	ce->refcount = 1;
 
+	if (ce->parent) {
+		ce->parent = ARENA_REALLOC(ce->parent);
+	}
+
 	if (old_ce->default_properties_table) {
 		ce->default_properties_table = emalloc(sizeof(zval) * old_ce->default_properties_count);
 		src = old_ce->default_properties_table;
@@ -361,13 +365,29 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 
 	/* static members */
 	if (old_ce->default_static_members_table) {
+		int i, end;
+		zend_class_entry *parent = ce->parent;
+
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
-		src = old_ce->default_static_members_table;
-		end = src + old_ce->default_static_members_count;
-		dst = ce->default_static_members_table;
-		for (; src != end; src++, dst++) {
-			ZVAL_COPY_VALUE(dst, src);
-			zend_clone_zval(dst);
+		i = ce->default_static_members_count - 1;
+
+		/* Copy static properties in this class */
+		end = parent ? parent->default_static_members_count : 0;
+		for (; i >= end; i--) {
+			zval *p = &ce->default_static_members_table[i];
+			ZVAL_COPY_VALUE(p, &old_ce->default_static_members_table[i]);
+			zend_clone_zval(p);
+		}
+
+		/* Create indirections to static properties from parent classes */
+		while (parent && parent->default_static_members_table) {
+			end = parent->parent ? parent->parent->default_static_members_count : 0;
+			for (; i >= end; i--) {
+				zval *p = &ce->default_static_members_table[i];
+				ZVAL_INDIRECT(p, &parent->default_static_members_table[i]);
+			}
+
+			parent = parent->parent;
 		}
 	}
 	ce->static_members_table = ce->default_static_members_table;
@@ -384,10 +404,6 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		memset(ce->interfaces, 0, sizeof(zend_class_entry *) * ce->num_interfaces);
 	} else {
 		ce->interfaces = NULL;
-	}
-
-	if (ce->parent) {
-		ce->parent = ARENA_REALLOC(ce->parent);
 	}
 
 	zend_update_inherited_handler(constructor);

@@ -731,10 +731,13 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		if (ce->default_static_members_table) {
-		    int i;
-
+			int i;
 			zend_accel_store(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
-			for (i = 0; i < ce->default_static_members_count; i++) {
+
+			/* Persist only static properties in this class.
+			 * Static properties from parent classes will be handled in class_copy_ctor */
+			i = ce->parent ? ce->parent->default_static_members_count : 0;
+			for (; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
 		}

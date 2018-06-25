@@ -1145,6 +1145,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define ZVAL_DEINDIRECT(z) do {							\
+		if (Z_TYPE_P(z) == IS_INDIRECT) {				\
+			(z) = Z_INDIRECT_P(z);						\
+		}												\
+	} while (0)
+
 #define ZVAL_OPT_DEREF(z) do {							\
 		if (UNEXPECTED(Z_OPT_ISREF_P(z))) {				\
 			(z) = Z_REFVAL_P(z);						\
@@ -1167,12 +1173,11 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		efree_size(ref, sizeof(zend_reference));		\
 	} while (0)
 
-#define ZVAL_COPY_UNREF(z, v) do {						\
+#define ZVAL_COPY_DEREF(z, v) do {						\
 		zval *_z3 = (v);								\
 		if (Z_OPT_REFCOUNTED_P(_z3)) {					\
-			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))			\
-			 && UNEXPECTED(Z_REFCOUNT_P(_z3) == 1)) {	\
-				ZVAL_UNREF(_z3);						\
+			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))) {		\
+				_z3 = Z_REFVAL_P(_z3);					\
 				if (Z_OPT_REFCOUNTED_P(_z3)) {			\
 					Z_ADDREF_P(_z3);					\
 				}										\
