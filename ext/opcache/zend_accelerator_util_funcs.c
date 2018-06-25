@@ -369,7 +369,7 @@ static void zend_class_copy_ctor(zend_class_entry **pce)
 		zend_class_entry *parent = ce->parent;
 
 		ce->default_static_members_table = emalloc(sizeof(zval) * old_ce->default_static_members_count);
-		i = ce->default_static_members_count;
+		i = ce->default_static_members_count - 1;
 
 		/* Copy static properties in this class */
 		end = parent ? parent->default_static_members_count : 0;
