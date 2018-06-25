@@ -2059,7 +2059,7 @@ uint32_t zend_array_element_type(zend_op *opline, uint32_t t1)
 				tmp |= MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
 			}
 			if (t1 & MAY_BE_ARRAY_OF_REF) {
-				if (opline->opcode == ZEND_FETCH_DIM_R) {
+				if (!write) {
 					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
