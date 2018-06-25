@@ -212,7 +212,7 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
 
-/* Imuttable op_array (lazy loading) */
+/* Immutable op_array (lazy loading) */
 #define ZEND_ACC_IMMUTABLE 0x10
 
 /* method flags (visibility) */
