@@ -419,7 +419,7 @@ static int zend_jit_disasm_init(void)
 	REGISTER_HELPER(zend_jit_fast_concat_helper);
 	REGISTER_HELPER(zend_jit_isset_dim_helper);
 	REGISTER_HELPER(zend_jit_free_call_frame);
-	REGISTER_HELPER(zend_jit_zval_copy_unref_helper);
+	REGISTER_HELPER(zend_jit_zval_copy_deref_helper)
 	REGISTER_HELPER(zend_jit_new_ref_helper);
 	REGISTER_HELPER(zend_jit_fetch_global_helper);
 	REGISTER_HELPER(zend_jit_verify_arg_object);

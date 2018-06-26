@@ -29,8 +29,19 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_helper(zend_string *name)
 	}
 	fbc = Z_FUNC_P(func);
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-		memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
+		if (fbc->op_array.fn_flags & ZEND_ACC_IMMUTABLE) {
+			zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + fbc->op_array.cache_size);
+
+			Z_PTR_P(func) = new_op_array;
+			memcpy(new_op_array, fbc, sizeof(zend_op_array));
+			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
+			new_op_array->run_time_cache = (void**)(new_op_array + 1);
+			memset(new_op_array->run_time_cache, 0, new_op_array->cache_size);
+			return (zend_function*)new_op_array;
+		} else {
+			fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
+			memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
+		}
 	}
 	return fbc;
 }
@@ -46,8 +57,19 @@ static zend_function* ZEND_FASTCALL zend_jit_find_func_by_name_helper(zend_strin
 	}
 	fbc = Z_FUNC_P(func);
 	if (EXPECTED(fbc->type == ZEND_USER_FUNCTION) && UNEXPECTED(!fbc->op_array.run_time_cache)) {
-		fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
-		memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
+		if (fbc->op_array.fn_flags & ZEND_ACC_IMMUTABLE) {
+			zend_op_array *new_op_array = zend_arena_alloc(&CG(arena), sizeof(zend_op_array) + fbc->op_array.cache_size);
+
+			Z_PTR_P(func) = new_op_array;
+			memcpy(new_op_array, fbc, sizeof(zend_op_array));
+			new_op_array->fn_flags &= ~ZEND_ACC_IMMUTABLE;
+			new_op_array->run_time_cache = (void**)(new_op_array + 1);
+			memset(new_op_array->run_time_cache, 0, new_op_array->cache_size);
+			return (zend_function*)new_op_array;
+		} else {
+			fbc->op_array.run_time_cache = zend_arena_alloc(&CG(arena), fbc->op_array.cache_size);
+			memset(fbc->op_array.run_time_cache, 0, fbc->op_array.cache_size);
+		}
 	}
 	return fbc;
 }
@@ -277,12 +299,12 @@ str_index:
 		ZVAL_NULL(result);
 		return;
 	}
-	ZVAL_COPY_UNREF(result, retval);
+	ZVAL_COPY_DEREF(result, retval);
 	return;
 
 num_index:
 	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-	ZVAL_COPY_UNREF(result, retval);
+	ZVAL_COPY_DEREF(result, retval);
 	return;
 
 num_undef:
@@ -347,12 +369,12 @@ str_index:
 		ZVAL_NULL(result);
 		return;
 	}
-	ZVAL_COPY_UNREF(result, retval);
+	ZVAL_COPY_DEREF(result, retval);
 	return;
 
 num_index:
 	ZEND_HASH_INDEX_FIND(ht, hval, retval, num_undef);
-	ZVAL_COPY_UNREF(result, retval);
+	ZVAL_COPY_DEREF(result, retval);
 	return;
 
 num_undef:
@@ -1944,9 +1966,9 @@ err:
 	zend_verify_arg_error((zend_function*)op_array, arg_info, arg_num, ce, arg);
 }
 
-static void ZEND_FASTCALL zend_jit_zval_copy_unref_helper(zval *dst, zval *src)
+static void ZEND_FASTCALL zend_jit_zval_copy_deref_helper(zval *dst, zval *src)
 {
-	ZVAL_UNREF(src);
+	ZVAL_DEREF(src);
 	ZVAL_COPY(dst, src);
 }
 
@@ -1965,7 +1987,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 		ZVAL_OBJ(&tmp, zobj);
 		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_R, CACHE_ADDR(cache_slot), result);
 		if (retval != result) {
-			ZVAL_COPY_UNREF(result, retval);
+			ZVAL_COPY_DEREF(result, retval);
 		}
 	}
 }
@@ -1987,7 +2009,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr
 			          EXPECTED(p->key != NULL) &&
 			          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
 			          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
-					ZVAL_COPY_UNREF(result, &p->val);
+					ZVAL_COPY_DEREF(result, &p->val);
 					return;
 				}
 			}
@@ -1999,7 +2021,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_dynamic(zend_object *zobj, intptr
 		if (EXPECTED(retval)) {
 			intptr_t idx = (char*)retval - (char*)zobj->properties->arData;
 			CACHE_PTR_EX((void**)((char*)EG(current_execute_data)->run_time_cache + cache_slot) + 1, (void*)ZEND_ENCODE_DYN_PROP_OFFSET(idx));
-			ZVAL_COPY_UNREF(result, retval);
+			ZVAL_COPY_DEREF(result, retval);
 			return;
 		}
 	}
@@ -2040,7 +2062,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_dynamic(zend_object *zobj, intpt
 			          EXPECTED(p->key != NULL) &&
 			          EXPECTED(ZSTR_LEN(p->key) == Z_STRLEN_P(offset)) &&
 			          EXPECTED(memcmp(ZSTR_VAL(p->key), Z_STRVAL_P(offset), Z_STRLEN_P(offset)) == 0)))) {
-					ZVAL_COPY_UNREF(result, &p->val);
+					ZVAL_COPY_DEREF(result, &p->val);
 					return;
 				}
 			}

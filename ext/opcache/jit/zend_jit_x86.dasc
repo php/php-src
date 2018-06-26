@@ -8520,21 +8520,14 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 
 		|8:
 		if (res_info & MAY_BE_REF) {
-			|	// ZVAL_COPY_UNREF
+			|	// ZVAL_COPY_DEREF
 			if (res_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
 				|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
 			}
-			|	GET_ZVAL_PTR r1, val_addr
 			|	IF_NOT_ZVAL_TYPE val_addr, IS_REFERENCE, >1
-			|	cmp dword [r1], 1
-			|	je >3
-			|.cold_code
-			|3:
-			|	LOAD_ZVAL_ADDR FCARG1a, res_addr
-			|	LOAD_ZVAL_ADDR FCARG2a, val_addr
-			|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
-			|	jmp >9
-			|.code
+			|	GET_Z_PTR r0, r0
+			|	add r0, offsetof(zend_reference, val)
+			|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
 			|1:
 			|	GC_ADDREF r1
 			|2:
@@ -9259,7 +9252,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	}
 	|	GET_ZVAL_PTR r0, prop_addr
 	|	IF_NOT_REFCOUNTED dh, >2
-	if (opline->opcode == ZEND_FETCH_OBJ_R) {
+	if (opline->opcode == ZEND_FETCH_OBJ_R || opline->opcode == ZEND_FETCH_OBJ_IS) {
 		|	IF_TYPE dl, IS_REFERENCE, >6
 	}
 	|1:
@@ -9304,7 +9297,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 			|	lea FCARG2a, [FCARG1a + offset]
 		}
 		|	LOAD_ZVAL_ADDR FCARG1a, res_addr
-		|	EXT_CALL zend_jit_zval_copy_unref_helper, r0
+		|	EXT_CALL zend_jit_zval_copy_deref_helper, r0
 		|	jmp >9
 	}
 
