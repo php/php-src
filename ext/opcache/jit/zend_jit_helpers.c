@@ -1993,7 +1993,7 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 		if (retval != result) {
 			ZVAL_COPY_DEREF(result, retval);
 		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
-			zend_unwrap_reference(result);
+			zend_unwrap_reference(retval);
 		}
 	}
 }
@@ -2046,7 +2046,9 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_is_slow(zend_object *zobj, zval *of
 		ZVAL_OBJ(&tmp, zobj);
 		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_IS, CACHE_ADDR(cache_slot), result);
 		if (retval != result) {
-			ZVAL_COPY(result, retval);
+			ZVAL_COPY_DEREF(result, retval);
+		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+			zend_unwrap_reference(retval);
 		}
 	}
 }
