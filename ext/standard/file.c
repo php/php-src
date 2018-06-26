@@ -23,8 +23,6 @@
 
 /* $Id$ */
 
-/* Synced with php 3.0 revision 1.218 1999-06-16 [ssb] */
-
 /* {{{ includes */
 
 #include "php.h"
