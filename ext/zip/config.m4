@@ -1,6 +1,4 @@
-dnl
-dnl $Id$
-dnl
+dnl config.m4 for extension zip
 
 PHP_ARG_ENABLE(zip, for zip archive read/writesupport,
 [  --enable-zip            Include Zip read/write support])

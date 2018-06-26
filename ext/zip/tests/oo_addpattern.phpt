@@ -6,7 +6,6 @@ w/Kenzo over the shoulder
 #phptek Chicago 2014
 --SKIPIF--
 <?php
-/* $Id$ */
 if(!extension_loaded('zip')) die('skip');
 ?>
 --FILE--
