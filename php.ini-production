@@ -371,7 +371,7 @@ zend.enable_gc = On
 ; threat in any way, but it makes it possible to determine whether you use PHP
 ; on your server or not.
 ; http://php.net/expose-php
-expose_php = On
+expose_php = Off
 
 ;;;;;;;;;;;;;;;;;;;
 ; Resource Limits ;
