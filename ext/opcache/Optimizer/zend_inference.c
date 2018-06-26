@@ -2030,12 +2030,9 @@ static void handle_type_narrowing(const zend_op_array *op_array, zend_ssa *ssa, 
 	}
 }
 
-uint32_t zend_array_element_type(zend_op *opline, uint32_t t1)
+uint32_t zend_array_element_type(uint32_t t1, int write, int insert)
 {
 	uint32_t tmp = 0;
-	int write = (opline->opcode != ZEND_FETCH_DIM_R
-		&& opline->opcode != ZEND_FETCH_DIM_IS
-		&& opline->opcode != ZEND_FETCH_LIST_R);
 
 	if (t1 & MAY_BE_OBJECT) {
 	    if (!write) {
@@ -2046,11 +2043,6 @@ uint32_t zend_array_element_type(zend_op *opline, uint32_t t1)
 	    }
 	}
 	if (t1 & MAY_BE_ARRAY) {
-		int insert = (opline->opcode == ZEND_FETCH_DIM_W
-			|| opline->opcode == ZEND_FETCH_DIM_RW
-			|| opline->opcode == ZEND_FETCH_DIM_FUNC_ARG
-			|| opline->opcode == ZEND_FETCH_LIST_W)
-			&& opline->op2_type == IS_UNUSED;
 		if (insert) {
 			tmp |= MAY_BE_NULL;
 		} else {
@@ -2485,7 +2477,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			        tmp |= MAY_BE_REF;
 				}
 				orig = t1;
-				t1 = zend_array_element_type(opline, t1);
+				t1 = zend_array_element_type(t1, 1, 0);
 				t2 = OP1_DATA_INFO();
 			} else {
 				if (t1 & MAY_BE_REF) {
@@ -3296,8 +3288,11 @@ static int zend_update_type_info(const zend_op_array *op_array,
 				COPY_SSA_OBJ_TYPE(ssa_ops[i].op1_use, ssa_ops[i].op1_def);
 			}
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
-			tmp = zend_array_element_type(opline,
-				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL));
+			tmp = zend_array_element_type(
+				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
+				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
+					&& opline->opcode != ZEND_FETCH_LIST_R,
+				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||
 			    opline->opcode == ZEND_FETCH_DIM_FUNC_ARG ||
