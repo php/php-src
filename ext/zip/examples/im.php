@@ -1,5 +1,5 @@
 <?php
-/* $Id$ */
+
 $im = imagecreatefromgif('zip://' . dirname(__FILE__) . '/test_im.zip#pear_item.gif');
 imagepng($im, 'a.png');
 
