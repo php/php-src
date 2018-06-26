@@ -4395,6 +4395,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 
+			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
+				var_info |= MAY_BE_REF;
+			}
 			if (!zend_jit_simple_assign(Dst, opline, op_array, ssa, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr, 0)) {
 				return 0;
 			}
@@ -4402,6 +4405,9 @@ static int zend_jit_assign_dim(dasm_State **Dst, const zend_op *opline, zend_op_
 			uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 			zend_jit_addr var_addr = ZEND_ADDR_MEM_ZVAL(ZREG_FCARG1a, 0);
 
+			if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
+				var_info |= MAY_BE_REF;
+			}
 			|	// value = zend_assign_to_variable(variable_ptr, value, OP_DATA_TYPE);
 			|	ZVAL_DEREF FCARG1a, var_info
 			if (!zend_jit_assign_to_variable(Dst, opline, op_array, ssa, var_addr, var_info, (opline+1)->op1_type, (opline+1)->op1, op3_addr, val_info, res_addr)) {
@@ -4607,6 +4613,9 @@ static int zend_jit_assign_dim_op(dasm_State **Dst, const zend_op *opline, zend_
 		uint32_t var_info = zend_array_element_type(op1_info, 0, 0);
 		uint32_t var_def_info = zend_array_element_type(OP1_DEF_INFO(), 1, 0);
 
+		if (op1_info & (MAY_BE_ARRAY_OF_REF|MAY_BE_OBJECT)) {
+			var_info |= MAY_BE_REF;
+		}
 		|6:
 		if (opline->op2_type == IS_UNUSED) {
 			|	// var_ptr = zend_hash_next_index_insert(Z_ARRVAL_P(container), &EG(uninitialized_zval));
@@ -8519,16 +8528,15 @@ static int zend_jit_fetch_dim_read(dasm_State **Dst, const zend_op *opline, zend
 		zend_jit_addr val_addr = ZEND_ADDR_MEM_ZVAL(ZREG_R0, 0);
 
 		|8:
-		if (res_info & MAY_BE_REF) {
+		if (op1_info & MAY_BE_ARRAY_OF_REF) {
 			|	// ZVAL_COPY_DEREF
-			if (res_info & ((MAY_BE_UNDEF|MAY_BE_ANY|MAY_BE_REF)-(MAY_BE_OBJECT|MAY_BE_RESOURCE))) {
-				|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
-			}
+			|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
 			|	IF_NOT_ZVAL_TYPE val_addr, IS_REFERENCE, >1
 			|	GET_Z_PTR r0, r0
 			|	add r0, offsetof(zend_reference, val)
 			|	IF_NOT_ZVAL_REFCOUNTED val_addr, >2
 			|1:
+			|	GET_Z_PTR r1, r0
 			|	GC_ADDREF r1
 			|2:
 			|	ZVAL_COPY_VALUE res_addr, -1, val_addr, MAY_BE_ANY, ZREG_R1, ZREG_R2
@@ -9289,8 +9297,6 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 
 	if (opline->opcode == ZEND_FETCH_OBJ_R) {
 		|6:
-		|	cmp dword [r0], 1
-		|	jne <1
 		if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
 			|	mov FCARG2a, FCARG1a
 		} else {

@@ -691,7 +691,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_r_helper(zval *container, zval 
 
 		if (retval) {
 			if (result != retval) {
-				ZVAL_COPY(result, retval);
+				ZVAL_COPY_DEREF(result, retval);
+			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+				zend_unwrap_reference(retval);
 			}
 		} else {
 			ZVAL_NULL(result);
@@ -713,7 +715,9 @@ static void ZEND_FASTCALL zend_jit_fetch_dim_obj_is_helper(zval *container, zval
 
 		if (retval) {
 			if (result != retval) {
-				ZVAL_COPY(result, retval);
+				ZVAL_COPY_DEREF(result, retval);
+			} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+				zend_unwrap_reference(result);
 			}
 		} else {
 			ZVAL_NULL(result);
@@ -1988,6 +1992,8 @@ static void ZEND_FASTCALL zend_jit_fetch_obj_r_slow(zend_object *zobj, zval *off
 		retval = zobj->handlers->read_property(&tmp, offset, BP_VAR_R, CACHE_ADDR(cache_slot), result);
 		if (retval != result) {
 			ZVAL_COPY_DEREF(result, retval);
+		} else if (UNEXPECTED(Z_ISREF_P(retval))) {
+			zend_unwrap_reference(result);
 		}
 	}
 }
