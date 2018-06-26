@@ -161,11 +161,18 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 	size_t res = nmemb;
 	size_t m_overflow = 0;
 
-	__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
+	if (ZEND_CONST_COND(offset == 0, 0)) {
+		__asm__ ("mull %3\n\tadcl $0,%1"
+	     : "=&a"(res), "=&d" (m_overflow)
+	     : "%0"(res),
+	       "rm"(size));
+	} else {
+		__asm__ ("mull %3\n\taddl %4,%0\n\tadcl $0,%1"
 	     : "=&a"(res), "=&d" (m_overflow)
 	     : "%0"(res),
 	       "rm"(size),
 	       "rm"(offset));
+	}
 
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;
@@ -188,14 +195,21 @@ static zend_always_inline size_t zend_safe_address(size_t nmemb, size_t size, si
 # define LP_SUFF "q"
 #endif
 
-	__asm__ ("mul" LP_SUFF  " %3\n\t"
-		"add %4,%0\n\t"
-		"adc $0,%1"
-		: "=&a"(res), "=&d" (m_overflow)
-		: "%0"(res),
-		  "rm"(size),
-		  "rm"(offset));
-
+	if (ZEND_CONST_COND(offset == 0, 0)) {
+		__asm__ ("mul" LP_SUFF  " %3\n\t"
+			"adc $0,%1"
+			: "=&a"(res), "=&d" (m_overflow)
+			: "%0"(res),
+			  "rm"(size));
+	} else {
+		__asm__ ("mul" LP_SUFF  " %3\n\t"
+			"add %4,%0\n\t"
+			"adc $0,%1"
+			: "=&a"(res), "=&d" (m_overflow)
+			: "%0"(res),
+			  "rm"(size),
+			  "rm"(offset));
+	}
 #undef LP_SUFF
 	if (UNEXPECTED(m_overflow)) {
 		*overflow = 1;

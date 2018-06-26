@@ -689,7 +689,7 @@ static void do_inherit_property(zend_property_info *parent_info, zend_string *ke
 			}
 		}
 	} else {
-		if (UNEXPECTED(parent_info->flags & (ZEND_ACC_PRIVATE|ZEND_ACC_SHADOW))) {
+		if (UNEXPECTED(parent_info->flags & ZEND_ACC_PRIVATE)) {
 			if (UNEXPECTED(ce->type & ZEND_INTERNAL_CLASS)) {
 				child_info = zend_duplicate_property_info_internal(parent_info);
 			} else {
@@ -890,25 +890,23 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			do {
 				dst--;
 				src--;
-				if (Z_ISREF_P(src)) {
-					Z_ADDREF_P(src);
+				if (Z_TYPE_P(src) == IS_INDIRECT) {
+					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
 				} else {
-					ZVAL_MAKE_REF_EX(src, 2);
+					ZVAL_INDIRECT(dst, src);
 				}
-				ZVAL_REF(dst, Z_REF_P(src));
 			} while (dst != end);
 		} else if (ce->type == ZEND_USER_CLASS) {
 			src = parent_ce->default_static_members_table + parent_ce->default_static_members_count;
 			do {
 				dst--;
 				src--;
-				if (Z_ISREF_P(src)) {
-					Z_ADDREF_P(src);
+				if (Z_TYPE_P(src) == IS_INDIRECT) {
+					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
 				} else {
-					ZVAL_MAKE_REF_EX(src, 2);
+					ZVAL_INDIRECT(dst, src);
 				}
-				ZVAL_REF(dst, Z_REF_P(src));
-				if (Z_TYPE_P(Z_REFVAL_P(dst)) == IS_CONSTANT_AST) {
+				if (Z_TYPE_P(Z_INDIRECT_P(dst)) == IS_CONSTANT_AST) {
 					ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 				}
 			} while (dst != end);
@@ -917,11 +915,11 @@ ZEND_API void zend_do_inheritance(zend_class_entry *ce, zend_class_entry *parent
 			do {
 				dst--;
 				src--;
-				if (!Z_ISREF_P(src)) {
-					ZVAL_NEW_PERSISTENT_REF(src, src);
+				if (Z_TYPE_P(src) == IS_INDIRECT) {
+					ZVAL_INDIRECT(dst, Z_INDIRECT_P(src));
+				} else {
+					ZVAL_INDIRECT(dst, src);
 				}
-				ZVAL_COPY_VALUE(dst, src);
-				Z_ADDREF_P(dst);
 			} while (dst != end);
 		}
 		ce->default_static_members_count += parent_ce->default_static_members_count;
@@ -1605,8 +1603,8 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 						if (flags & ZEND_ACC_STATIC) {
 							op1 = &ce->default_static_members_table[coliding_prop->offset];
 							op2 = &ce->traits[i]->default_static_members_table[property_info->offset];
-							ZVAL_DEREF(op1);
-							ZVAL_DEREF(op2);
+							ZVAL_DEINDIRECT(op1);
+							ZVAL_DEINDIRECT(op2);
 						} else {
 							op1 = &ce->default_properties_table[OBJ_PROP_TO_NUM(coliding_prop->offset)];
 							op2 = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
@@ -1651,6 +1649,7 @@ static void zend_do_traits_property_binding(zend_class_entry *ce) /* {{{ */
 			/* property not found, so lets add it */
 			if (flags & ZEND_ACC_STATIC) {
 				prop_value = &ce->traits[i]->default_static_members_table[property_info->offset];
+				ZEND_ASSERT(Z_TYPE_P(prop_value) != IS_INDIRECT);
 			} else {
 				prop_value = &ce->traits[i]->default_properties_table[OBJ_PROP_TO_NUM(property_info->offset)];
 			}

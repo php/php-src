@@ -2677,12 +2677,8 @@ try_and_get_another_connection:
 		new_index_ptr.ptr = (void *)(zend_uintptr_t)Z_RES_HANDLE_P(return_value);
 		new_index_ptr.type = le_index_ptr;
 
-		if (zend_hash_str_update_mem(&EG(regular_list), hashed_details, hashed_len, (void *) &new_index_ptr,
-				   sizeof(zend_resource)) == NULL) {
-			efree(hashed_details);
-			RETURN_FALSE;
-			/* XXX Free Connection */
-		}
+		zend_hash_str_update_mem(&EG(regular_list), hashed_details, hashed_len, (void *) &new_index_ptr,
+				   sizeof(zend_resource));
 		ODBCG(num_links)++;
 	}
 	efree(hashed_details);

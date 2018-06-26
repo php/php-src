@@ -625,10 +625,11 @@ static void zend_persist_op_array(zval *zv)
 	zend_op_array *op_array = Z_PTR_P(zv);
 
 	ZEND_ASSERT(op_array->type == ZEND_USER_FUNCTION);
-	memcpy(ZCG(arena_mem), Z_PTR_P(zv), sizeof(zend_op_array));
-	Z_PTR_P(zv) = ZCG(arena_mem);
-	ZCG(arena_mem) = (void*)((char*)ZCG(arena_mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
+	memcpy(ZCG(mem), Z_PTR_P(zv), sizeof(zend_op_array));
+	Z_PTR_P(zv) = ZCG(mem);
+	ZCG(mem) = (void*)((char*)ZCG(mem) + ZEND_ALIGNED_SIZE(sizeof(zend_op_array)));
 	zend_persist_op_array_ex(Z_PTR_P(zv), NULL);
+	((zend_op_array*)Z_PTR_P(zv))->fn_flags |= ZEND_ACC_IMMUTABLE;
 }
 
 static void zend_persist_class_method(zval *zv)
@@ -732,10 +733,13 @@ static void zend_persist_class_entry(zval *zv)
 			}
 		}
 		if (ce->default_static_members_table) {
-		    int i;
-
+			int i;
 			zend_accel_store(ce->default_static_members_table, sizeof(zval) * ce->default_static_members_count);
-			for (i = 0; i < ce->default_static_members_count; i++) {
+
+			/* Persist only static properties in this class.
+			 * Static properties from parent classes will be handled in class_copy_ctor */
+			i = ce->parent ? ce->parent->default_static_members_count : 0;
+			for (; i < ce->default_static_members_count; i++) {
 				zend_persist_zval(&ce->default_static_members_table[i]);
 			}
 		}

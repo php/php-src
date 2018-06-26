@@ -624,7 +624,9 @@ PHPAPI void _php_stream_fill_read_buffer(php_stream *stream, size_t size)
 
 			/* reduce buffer memory consumption if possible, to avoid a realloc */
 			if (stream->readbuf && stream->readbuflen - stream->writepos < stream->chunk_size) {
-				memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->readbuflen - stream->readpos);
+				if (stream->writepos > stream->readpos) {
+					memmove(stream->readbuf, stream->readbuf + stream->readpos, stream->writepos - stream->readpos);
+				}
 				stream->writepos -= stream->readpos;
 				stream->readpos = 0;
 			}
@@ -2205,14 +2207,12 @@ PHPAPI int php_stream_context_set_option(php_stream_context *context,
 	if (NULL == wrapperhash) {
 		array_init(&category);
 		wrapperhash = zend_hash_str_update(Z_ARRVAL(context->options), (char*)wrappername, strlen(wrappername), &category);
-		if (NULL == wrapperhash) {
-			return FAILURE;
-		}
 	}
 	ZVAL_DEREF(optionvalue);
 	Z_TRY_ADDREF_P(optionvalue);
 	SEPARATE_ARRAY(wrapperhash);
-	return zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue) ? SUCCESS : FAILURE;
+	zend_hash_str_update(Z_ARRVAL_P(wrapperhash), optionname, strlen(optionname), optionvalue);
+	return SUCCESS;
 }
 /* }}} */
 

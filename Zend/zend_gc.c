@@ -1401,8 +1401,8 @@ ZEND_API int zend_gc_collect_cycles(void)
 							GC_DELREF(obj);
 						}
 					}
-					SET_OBJ_BUCKET_NUMBER(EG(objects_store).object_buckets[obj->handle], EG(objects_store).free_list_head);
-					EG(objects_store).free_list_head = obj->handle;
+
+					ZEND_OBJECTS_STORE_ADD_TO_FREE_LIST(obj->handle);
 					current->ref = GC_MAKE_GARBAGE(((char*)obj) - obj->handlers->offset);
 				} else if (GC_TYPE(p) == IS_ARRAY) {
 					zend_array *arr = (zend_array*)p;
@@ -1440,6 +1440,14 @@ ZEND_API int zend_gc_collect_cycles(void)
 	gc_compact();
 
 	return count;
+}
+
+ZEND_API void zend_gc_get_status(zend_gc_status *status)
+{
+	status->runs = GC_G(gc_runs);
+	status->collected = GC_G(collected);
+	status->threshold = GC_G(gc_threshold);
+	status->num_roots = GC_G(num_roots);
 }
 
 /*

@@ -25,7 +25,7 @@ var_dump($exists = file_exists($outfilename));
 <?php
 $outfilename = dirname(__FILE__) . "/openssl_x509_export_to_file__outfilename.tmp";
 if (file_exists($outfilename)) {
-	unlink($outfilename);
+    unlink($outfilename);
 }
 ?>
 --EXPECTF--

@@ -854,7 +854,29 @@ static int php_stdiop_set_option(php_stream *stream, int option, int value, void
 					if (new_size < 0) {
 						return PHP_STREAM_OPTION_RETURN_ERR;
 					}
+#ifdef PHP_WIN32
+					HANDLE h = (HANDLE) _get_osfhandle(fd);
+					if (INVALID_HANDLE_VALUE == h) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					LARGE_INTEGER sz;
+#if defined(_WIN64)
+					sz.HighPart = (new_size >> 32);
+					sz.LowPart = (new_size & 0xffffffff);
+#else
+					sz.HighPart = 0;
+					sz.LowPart = new_size;
+#endif
+					if (INVALID_SET_FILE_POINTER == SetFilePointerEx(h, sz, NULL, FILE_BEGIN) && NO_ERROR != GetLastError()) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					if (0 == SetEndOfFile(h)) {
+						return PHP_STREAM_OPTION_RETURN_ERR;
+					}
+					return PHP_STREAM_OPTION_RETURN_OK;
+#else
 					return ftruncate(fd, new_size) == 0 ? PHP_STREAM_OPTION_RETURN_OK : PHP_STREAM_OPTION_RETURN_ERR;
+#endif
 				}
 			}
 

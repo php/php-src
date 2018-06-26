@@ -997,14 +997,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 
 		entry.uncompressed_filesize = phar->alias_len;
 
-		if (NULL == zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-			if (error) {
-				spprintf(error, 0, "unable to set alias in tar-based phar \"%s\"", phar->fname);
-			}
-			php_stream_close(entry.fp);
-			efree(entry.filename);
-			return EOF;
-		}
+		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 		/* At this point the entry is saved into the manifest. The manifest destroy
 			routine will care about any resources to be freed. */
 	} else {
@@ -1129,14 +1122,7 @@ int phar_tar_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				efree(entry.filename);
 			}
 		} else {
-			if (NULL == zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-				php_stream_close(entry.fp);
-				efree(entry.filename);
-				if (error) {
-					spprintf(error, 0, "unable to overwrite stub in tar-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
+			zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 		}
 	}
 nostub:

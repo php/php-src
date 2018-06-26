@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
  */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -51,6 +49,9 @@
 #include <pwd.h>
 #if HAVE_SYS_MKDEV_H
 # include <sys/mkdev.h>
+#endif
+#if HAVE_SYS_SYSMACROS_H
+# include <sys/sysmacros.h>
 #endif
 
 ZEND_DECLARE_MODULE_GLOBALS(posix)
@@ -321,7 +322,7 @@ static const zend_function_entry posix_functions[] = {
 static PHP_MINFO_FUNCTION(posix)
 {
 	php_info_print_table_start();
-	php_info_print_table_row(2, "Revision", "$Id$");
+	php_info_print_table_row(2, "POSIX support", "enabled");
 	php_info_print_table_end();
 }
 /* }}} */

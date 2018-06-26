@@ -769,13 +769,18 @@ uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
 	if ((flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flag & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error,
+			"Multiple abstract modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((new_flags & ZEND_ACC_EXPLICIT_ABSTRACT_CLASS) && (new_flags & ZEND_ACC_FINAL)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class");
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the final modifier on an abstract class", 0);
+		return 0;
 	}
 	return new_flags;
 }
@@ -785,19 +790,26 @@ uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag) /* {{{ */
 {
 	uint32_t new_flags = flags | new_flag;
 	if ((flags & ZEND_ACC_PPP_MASK) && (new_flag & ZEND_ACC_PPP_MASK)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple access type modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error,
+			"Multiple access type modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((flags & ZEND_ACC_ABSTRACT) && (new_flag & ZEND_ACC_ABSTRACT)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple abstract modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error, "Multiple abstract modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((flags & ZEND_ACC_STATIC) && (new_flag & ZEND_ACC_STATIC)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple static modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error, "Multiple static modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((flags & ZEND_ACC_FINAL) && (new_flag & ZEND_ACC_FINAL)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Multiple final modifiers are not allowed");
+		zend_throw_exception(zend_ce_compile_error, "Multiple final modifiers are not allowed", 0);
+		return 0;
 	}
 	if ((new_flags & ZEND_ACC_ABSTRACT) && (new_flags & ZEND_ACC_FINAL)) {
-		zend_error_noreturn(E_COMPILE_ERROR, "Cannot use the final modifier on an abstract class member");
+		zend_throw_exception(zend_ce_compile_error,
+			"Cannot use the final modifier on an abstract class member", 0);
+		return 0;
 	}
 	return new_flags;
 }
@@ -1065,7 +1077,9 @@ ZEND_API int do_bind_function(const zend_op_array *op_array, const zend_op *opli
 		if (function->op_array.refcount) {
 			(*function->op_array.refcount)++;
 		}
-		function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		if (!(function->op_array.fn_flags & ZEND_ACC_IMMUTABLE)) {
+			function->op_array.static_variables = NULL; /* NULL out the unbound function */
+		}
 		return SUCCESS;
 	}
 }
@@ -5241,7 +5255,7 @@ void zend_compile_try(zend_ast *ast) /* {{{ */
 /* }}} */
 
 /* Encoding declarations must already be handled during parsing */
-void zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
+zend_bool zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 {
 	zend_ast_list *declares = zend_ast_get_list(ast);
 	uint32_t i;
@@ -5253,7 +5267,8 @@ void zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 
 		if (zend_string_equals_literal_ci(name, "encoding")) {
 			if (value_ast->kind != ZEND_AST_ZVAL) {
-				zend_error_noreturn(E_COMPILE_ERROR, "Encoding must be a literal");
+				zend_throw_exception(zend_ce_compile_error, "Encoding must be a literal", 0);
+				return 0;
 			}
 
 			if (CG(multibyte)) {
@@ -5286,6 +5301,8 @@ void zend_handle_encoding_declaration(zend_ast *ast) /* {{{ */
 			}
 		}
 	}
+
+	return 1;
 }
 /* }}} */
 

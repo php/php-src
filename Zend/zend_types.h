@@ -591,8 +591,8 @@ static zend_always_inline uint32_t zval_gc_info(uint32_t gc_type_info) {
 #define Z_COPYABLE(zval)			((Z_TYPE(zval) == IS_ARRAY)
 #define Z_COPYABLE_P(zval_p)		Z_COPYABLE(*(zval_p))
 
-/* deprecated: (IMMUTABLE is the same as IS_ARRAY && !REFCOUED) */
-#define Z_IMMUTABLE(zval)			((Z_TYPE_INFO(zval) == IS_ARRAY)
+/* deprecated: (IMMUTABLE is the same as IS_ARRAY && !REFCOUNTED) */
+#define Z_IMMUTABLE(zval)			(Z_TYPE_INFO(zval) == IS_ARRAY)
 #define Z_IMMUTABLE_P(zval_p)		Z_IMMUTABLE(*(zval_p))
 #define Z_OPT_IMMUTABLE(zval)		Z_IMMUTABLE(zval_p)
 #define Z_OPT_IMMUTABLE_P(zval_p)	Z_IMMUTABLE(*(zval_p))
@@ -1101,6 +1101,12 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		}												\
 	} while (0)
 
+#define ZVAL_DEINDIRECT(z) do {							\
+		if (Z_TYPE_P(z) == IS_INDIRECT) {				\
+			(z) = Z_INDIRECT_P(z);						\
+		}												\
+	} while (0)
+
 #define ZVAL_OPT_DEREF(z) do {							\
 		if (UNEXPECTED(Z_OPT_ISREF_P(z))) {				\
 			(z) = Z_REFVAL_P(z);						\
@@ -1123,12 +1129,11 @@ static zend_always_inline uint32_t zval_delref_p(zval* pz) {
 		efree_size(ref, sizeof(zend_reference));		\
 	} while (0)
 
-#define ZVAL_COPY_UNREF(z, v) do {						\
+#define ZVAL_COPY_DEREF(z, v) do {						\
 		zval *_z3 = (v);								\
 		if (Z_OPT_REFCOUNTED_P(_z3)) {					\
-			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))			\
-			 && UNEXPECTED(Z_REFCOUNT_P(_z3) == 1)) {	\
-				ZVAL_UNREF(_z3);						\
+			if (UNEXPECTED(Z_OPT_ISREF_P(_z3))) {		\
+				_z3 = Z_REFVAL_P(_z3);					\
 				if (Z_OPT_REFCOUNTED_P(_z3)) {			\
 					Z_ADDREF_P(_z3);					\
 				}										\

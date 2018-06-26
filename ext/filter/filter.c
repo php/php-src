@@ -19,8 +19,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #ifdef HAVE_CONFIG_H
 #include "config.h"
 #endif
@@ -330,7 +328,6 @@ PHP_MINFO_FUNCTION(filter)
 {
 	php_info_print_table_start();
 	php_info_print_table_row( 2, "Input Validation and Filtering", "enabled" );
-	php_info_print_table_row( 2, "Revision", "$Id$");
 	php_info_print_table_end();
 
 	DISPLAY_INI_ENTRIES();
@@ -770,7 +767,7 @@ PHP_FUNCTION(filter_var)
 	zend_long filter = FILTER_DEFAULT;
 	zval *filter_args = NULL, *data;
 
-	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z/|lz", &data, &filter, &filter_args) == FAILURE) {
+	if (zend_parse_parameters(ZEND_NUM_ARGS(), "z|lz", &data, &filter, &filter_args) == FAILURE) {
 		return;
 	}
 

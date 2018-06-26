@@ -1492,9 +1492,7 @@ static void php_pgsql_do_connect(INTERNAL_FUNCTION_PARAMETERS, int persistent)
 		/* add it to the hash */
 		new_index_ptr.ptr = (void *) Z_RES_P(return_value);
 		new_index_ptr.type = le_index_ptr;
-		if (zend_hash_update_mem(&EG(regular_list), str.s, (void *) &new_index_ptr, sizeof(zend_resource)) == NULL) {
-			goto err;
-		}
+		zend_hash_update_mem(&EG(regular_list), str.s, (void *) &new_index_ptr, sizeof(zend_resource));
 		PGG(num_links)++;
 	}
 	/* set notice processor */

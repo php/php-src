@@ -142,6 +142,7 @@ void init_executor(void) /* {{{ */
 	EG(in_autoload) = NULL;
 	EG(autoload_func) = NULL;
 	EG(error_handling) = EH_NORMAL;
+	EG(flags) = EG_FLAGS_INITIAL;
 
 	zend_vm_stack_init();
 
@@ -901,9 +902,10 @@ ZEND_API zend_class_entry *zend_lookup_class_ex(zend_string *name, const zval *k
 	}
 
 	if (!EG(autoload_func)) {
-		zval *zv = zend_hash_find_ex(EG(function_table), ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD), 1);
-		if (zv) {
-			EG(autoload_func) = (zend_function*)Z_PTR_P(zv);
+		zend_function *func = zend_fetch_function(ZSTR_KNOWN(ZEND_STR_MAGIC_AUTOLOAD));
+
+		if (func) {
+			EG(autoload_func) = func;
 		} else {
 			if (!key) {
 				zend_string_release_ex(lc_name, 0);
@@ -1606,11 +1608,13 @@ ZEND_API int zend_set_local_var(zend_string *name, zval *value, int force) /* {{
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_update(symbol_table, name, value) ? SUCCESS : FAILURE;
+					zend_hash_update(symbol_table, name, value);
+					return SUCCESS;
 				}
 			}
 		} else {
-			return (zend_hash_update_ind(execute_data->symbol_table, name, value) != NULL) ? SUCCESS : FAILURE;
+			zend_hash_update_ind(execute_data->symbol_table, name, value);
+			return SUCCESS;
 		}
 	}
 	return FAILURE;
@@ -1648,11 +1652,13 @@ ZEND_API int zend_set_local_var_str(const char *name, size_t len, zval *value, i
 			if (force) {
 				zend_array *symbol_table = zend_rebuild_symbol_table();
 				if (symbol_table) {
-					return zend_hash_str_update(symbol_table, name, len, value) ? SUCCESS : FAILURE;
+					zend_hash_str_update(symbol_table, name, len, value);
+					return SUCCESS;
 				}
 			}
 		} else {
-			return (zend_hash_str_update_ind(execute_data->symbol_table, name, len, value) != NULL) ? SUCCESS : FAILURE;
+			zend_hash_str_update_ind(execute_data->symbol_table, name, len, value);
+			return SUCCESS;
 		}
 	}
 	return FAILURE;

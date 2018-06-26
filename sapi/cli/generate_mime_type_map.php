@@ -29,6 +29,7 @@ array_walk($types, function ($line) use (&$extensions) {
 
 $additional_mime_maps = [
 	"map" => "application/json",	// from commit: a0d62f08ae8cbebc88e5c92e08fca8d0cdc7309d
+	"jsm" => "application/javascript",
 ];
 
 foreach($additional_mime_maps as $ext => $mime) {
@@ -69,7 +70,7 @@ typedef struct php_cli_server_ext_mime_type_pair {
 	const char *mime_type;
 } php_cli_server_ext_mime_type_pair;
 
-static php_cli_server_ext_mime_type_pair mime_type_map[] = {
+static const php_cli_server_ext_mime_type_pair mime_type_map[] = {
 <?php foreach ($extensions as $extension => $mime): ?>
 	{ "<?= addcslashes($extension, "\0..\37!@\@\177..\377") ?>", "<?= addcslashes($mime, "\0..\37!@\@\177..\377") ?>" },
 <?php endforeach ?>

@@ -689,9 +689,7 @@ static int stream_array_from_fd_set(zval *stream_array, fd_set *fds)
 					dest_elem = zend_hash_update(ht, key, elem);
 				}
 
-				if (dest_elem) {
-					zval_add_ref(dest_elem);
-				}
+				zval_add_ref(dest_elem);
 				ret++;
 				continue;
 			}

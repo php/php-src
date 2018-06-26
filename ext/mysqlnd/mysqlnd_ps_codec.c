@@ -17,6 +17,7 @@
   +----------------------------------------------------------------------+
 */
 
+#include <math.h>
 #include "php.h"
 #include "mysqlnd.h"
 #include "mysqlnd_wireprotocol.h"
@@ -241,7 +242,21 @@ ps_fetch_time(zval * zv, const MYSQLND_FIELD * const field, const unsigned int p
 		t.time_type = MYSQLND_TIMESTAMP_TIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+    if (field->decimals > 0 && field->decimals < 7) {
+        length = mnd_sprintf(
+            &value,
+            0,
+            "%s%02u:%02u:%02u.%0*u",
+            (t.neg ? "-" : ""),
+            t.hour,
+            t.minute,
+            t.second,
+            field->decimals,
+           (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
+        );
+    } else {
+        length = mnd_sprintf(&value, 0, "%s%02u:%02u:%02u", (t.neg ? "-" : ""), t.hour, t.minute, t.second);
+    }
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length);
@@ -322,7 +337,23 @@ ps_fetch_datetime(zval * zv, const MYSQLND_FIELD * const field, const unsigned i
 		t.time_type = MYSQLND_TIMESTAMP_DATETIME;
 	}
 
-	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+    if (field->decimals > 0 && field->decimals < 7) {
+    	length = mnd_sprintf(
+            &value,
+            0,
+            "%04u-%02u-%02u %02u:%02u:%02u.%0*u",
+            t.year,
+            t.month,
+            t.day,
+            t.hour,
+            t.minute,
+            t.second,
+            field->decimals,
+            (uint32_t) (t.second_part / pow(10, 6 - field->decimals))
+        );
+    } else {
+    	length = mnd_sprintf(&value, 0, "%04u-%02u-%02u %02u:%02u:%02u", t.year, t.month, t.day, t.hour, t.minute, t.second);
+    }
 
 	DBG_INF_FMT("%s", value);
 	ZVAL_STRINGL(zv, value, length);

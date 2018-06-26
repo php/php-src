@@ -71,7 +71,7 @@ PHP_MINFO_FUNCTION(intl);
 
 const char *intl_locale_get_default( void );
 
-#define PHP_INTL_VERSION "1.1.0"
+#define PHP_INTL_VERSION PHP_VERSION
 
 #endif  /* PHP_INTL_H */
 

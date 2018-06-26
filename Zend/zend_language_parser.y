@@ -28,6 +28,7 @@
 #include "zend_API.h"
 #include "zend_constants.h"
 #include "zend_language_scanner.h"
+#include "zend_exceptions.h"
 
 #define YYSIZE_T size_t
 #define yytnamerr zend_yytnamerr
@@ -233,7 +234,7 @@ static YYSIZE_T zend_yytnamerr(char*, const char*);
 %type <ast> unprefixed_use_declarations const_decl inner_statement
 %type <ast> expr optional_expr while_statement for_statement foreach_variable
 %type <ast> foreach_statement declare_statement finally_statement unset_variable variable
-%type <ast> extends_from parameter optional_type argument expr_without_variable global_var
+%type <ast> extends_from parameter optional_type argument global_var
 %type <ast> static_var class_statement trait_adaptation trait_precedence trait_alias
 %type <ast> absolute_trait_method_reference trait_method_reference property echo_expr
 %type <ast> new_expr anonymous_class class_name class_name_reference simple_variable
@@ -414,8 +415,8 @@ inner_statement:
 	|	trait_declaration_statement			{ $$ = $1; }
 	|	interface_declaration_statement		{ $$ = $1; }
 	|	T_HALT_COMPILER '(' ')' ';'
-			{ $$ = NULL; zend_error_noreturn(E_COMPILE_ERROR,
-			      "__HALT_COMPILER() can only be used from the outermost scope"); }
+			{ $$ = NULL; zend_throw_exception(zend_ce_compile_error,
+			      "__HALT_COMPILER() can only be used from the outermost scope", 0); YYERROR; }
 ;
 
 
@@ -446,7 +447,7 @@ statement:
 		foreach_statement
 			{ $$ = zend_ast_create(ZEND_AST_FOREACH, $3, $7, $5, $9); }
 	|	T_DECLARE '(' const_list ')'
-			{ zend_handle_encoding_declaration($3); }
+			{ if (!zend_handle_encoding_declaration($3)) { YYERROR; } }
 		declare_statement
 			{ $$ = zend_ast_create(ZEND_AST_DECLARE, $3, $6); }
 	|	';'	/* empty statement */ { $$ = NULL; }
@@ -511,7 +512,8 @@ class_declaration_statement:
 
 class_modifiers:
 		class_modifier 					{ $$ = $1; }
-	|	class_modifiers class_modifier 	{ $$ = zend_add_class_modifier($1, $2); }
+	|	class_modifiers class_modifier
+			{ $$ = zend_add_class_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 class_modifier:
@@ -797,7 +799,7 @@ method_modifiers:
 non_empty_member_modifiers:
 		member_modifier			{ $$ = $1; }
 	|	non_empty_member_modifiers member_modifier
-			{ $$ = zend_add_member_modifier($1, $2); }
+			{ $$ = zend_add_member_modifier($1, $2); if (!$$) { YYERROR; } }
 ;
 
 member_modifier:
@@ -869,8 +871,10 @@ new_expr:
 			{ $$ = $2; }
 ;
 
-expr_without_variable:
-		T_LIST '(' array_pair_list ')' '=' expr
+expr:
+		variable
+			{ $$ = $1; }
+	|	T_LIST '(' array_pair_list ')' '=' expr
 			{ $3->attr = ZEND_ARRAY_SYNTAX_LIST; $$ = zend_ast_create(ZEND_AST_ASSIGN, $3, $6); }
 	|	'[' array_pair_list ']' '=' expr
 			{ $2->attr = ZEND_ARRAY_SYNTAX_SHORT; $$ = zend_ast_create(ZEND_AST_ASSIGN, $2, $5); }
@@ -1096,11 +1100,6 @@ constant:
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
 	|	variable_class_name T_PAAMAYIM_NEKUDOTAYIM identifier
 			{ $$ = zend_ast_create(ZEND_AST_CLASS_CONST, $1, $3); }
-;
-
-expr:
-		variable					{ $$ = $1; }
-	|	expr_without_variable		{ $$ = $1; }
 ;
 
 optional_expr:

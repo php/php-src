@@ -202,7 +202,6 @@ typedef struct _zend_oparray_context {
  * Function and method flags
  *
  * Free flags:
- * 0x10
  * 0x20
  * 0x2000000
  */
@@ -212,6 +211,9 @@ typedef struct _zend_oparray_context {
 #define ZEND_ACC_ABSTRACT		0x02
 #define ZEND_ACC_FINAL			0x04
 #define ZEND_ACC_IMPLEMENTED_ABSTRACT		0x08
+
+/* Immutable op_array (lazy loading) */
+#define ZEND_ACC_IMMUTABLE 0x10
 
 /* method flags (visibility) */
 /* The order of those must be kept - public < protected < private */
@@ -376,7 +378,7 @@ struct _zend_op_array {
 
 	int cache_size;     /* number of run_time_cache_slots * sizeof(void*) */
 	int last_var;       /* number of CV variables */
-	uint32_t T;         /* numner of temporary variables */
+	uint32_t T;         /* number of temporary variables */
 	uint32_t last;      /* number of opcodes */
 
 	zend_op *opcodes;
@@ -723,7 +725,7 @@ zend_ast *zend_ast_append_str(zend_ast *left, zend_ast *right);
 zend_ast *zend_negate_num_string(zend_ast *ast);
 uint32_t zend_add_class_modifier(uint32_t flags, uint32_t new_flag);
 uint32_t zend_add_member_modifier(uint32_t flags, uint32_t new_flag);
-void zend_handle_encoding_declaration(zend_ast *ast);
+zend_bool zend_handle_encoding_declaration(zend_ast *ast);
 
 /* parser-driven code generators */
 void zend_do_free(znode *op1);
@@ -942,8 +944,8 @@ static zend_always_inline int zend_check_arg_send_type(const zend_function *zf, 
 #define ZEND_RETURN_REF 1
 
 
-#define ZEND_RETURNS_FUNCTION 1<<0
-#define ZEND_RETURNS_VALUE    1<<1
+#define ZEND_RETURNS_FUNCTION (1<<0)
+#define ZEND_RETURNS_VALUE    (1<<1)
 
 #define ZEND_ARRAY_ELEMENT_REF		(1<<0)
 #define ZEND_ARRAY_NOT_PACKED		(1<<1)

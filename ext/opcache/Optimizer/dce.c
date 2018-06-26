@@ -39,7 +39,7 @@
  *    postdominator tree and of postdominance frontiers, which does not seem worthwhile at this
  *    point.
  *  * We separate intrinsic side-effects from potential side-effects in the form of notices thrown
- *    by the instruction (in case we want to make this configurable). See may_have_side_effect() and
+ *    by the instruction (in case we want to make this configurable). See may_have_side_effects() and
  *    zend_may_throw().
  *  * We often cannot DCE assignments and unsets while guaranteeing that dtors run in the same
  *    order. There is an optimization option to allow reordering of dtor effects.
@@ -109,7 +109,6 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_CAST:
 		case ZEND_ROPE_INIT:
 		case ZEND_ROPE_ADD:
-		case ZEND_ROPE_END:
 		case ZEND_INIT_ARRAY:
 		case ZEND_ADD_ARRAY_ELEMENT:
 		case ZEND_SPACESHIP:
@@ -127,6 +126,9 @@ static inline zend_bool may_have_side_effects(
 		case ZEND_FUNC_GET_ARGS:
 			/* No side effects */
 			return 0;
+		case ZEND_ROPE_END:
+			/* TODO: Rope dce optmization, see #76446 */
+			return 1;
 		case ZEND_JMP:
 		case ZEND_JMPZ:
 		case ZEND_JMPNZ:

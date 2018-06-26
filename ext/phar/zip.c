@@ -1233,12 +1233,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename = estrndup(".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 		entry.filename_len = sizeof(".phar/alias.txt")-1;
 
-		if (NULL == zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-			if (error) {
-				spprintf(error, 0, "unable to set alias in zip-based phar \"%s\"", phar->fname);
-			}
-			return EOF;
-		}
+		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 	} else {
 		zend_hash_str_del(&phar->manifest, ".phar/alias.txt", sizeof(".phar/alias.txt")-1);
 	}
@@ -1331,15 +1326,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 		entry.filename = estrndup(".phar/stub.php", sizeof(".phar/stub.php")-1);
 		entry.filename_len = sizeof(".phar/stub.php")-1;
 
-		if (NULL == zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-			if (free_user_stub) {
-				efree(user_stub);
-			}
-			if (error) {
-				spprintf(error, 0, "unable to set stub in zip-based phar \"%s\"", phar->fname);
-			}
-			return EOF;
-		}
+		zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 
 		if (free_user_stub) {
 			efree(user_stub);
@@ -1378,14 +1365,7 @@ int phar_zip_flush(phar_archive_data *phar, char *user_stub, zend_long len, int 
 				efree(entry.filename);
 			}
 		} else {
-			if (NULL == zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info))) {
-				php_stream_close(entry.fp);
-				efree(entry.filename);
-				if (error) {
-					spprintf(error, 0, "unable to overwrite stub in zip-based phar \"%s\"", phar->fname);
-				}
-				return EOF;
-			}
+			zend_hash_str_update_mem(&phar->manifest, entry.filename, entry.filename_len, (void*)&entry, sizeof(phar_entry_info));
 		}
 	}
 nostub:

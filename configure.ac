@@ -143,23 +143,6 @@ else
   rm -f php_version.h.new
 fi
 
-
-dnl Catch common errors here to save a few seconds of our users' time
-dnl -------------------------------------------------------------------------
-
-if test "$with_shared_apache" != "no" && test -n "$with_shared_apache" ; then
-  AC_MSG_ERROR([--with-shared-apache is not supported. Please refer to the documentation for using APXS])
-fi
-
-if test -n "$with_apache" && test -n "$with_apxs"; then
-  AC_MSG_ERROR([--with-apache and --with-apxs cannot be used together])
-fi
-
-if test -n "$with_apxs2filter" && test -n "$with_apxs2"; then
-  AC_MSG_ERROR([--with-apxs2filter and --with-apxs2 cannot be used together])
-fi
-
-  
 dnl Settings we want to make before the checks.
 dnl -------------------------------------------------------------------------
 
@@ -782,6 +765,20 @@ end:
 
 if test "$ac_cv__asm_goto" = yes; then
   AC_DEFINE(HAVE_ASM_GOTO,1,[Define if asm goto support])
+fi
+
+dnl Check for variable length array support
+AC_CACHE_CHECK([whether compiler supports VLA], ac_cv__compiler_c99_vla,
+[AC_TRY_RUN([
+ #include <stdlib.h>
+ int main(void) {
+         int i[rand()%10];
+	 return 0;
+ }
+ ],ac_cv__compiler_c99_vla=yes, ac_cv__compiler_c99_vla=no, ac_cv__compiler_c99_vla=no)])
+
+if test "$ac_cv__compiler_c99_vla" = yes; then
+	AC_DEFINE(HAVE_COMPILER_C99_VLA, 1, [Compiler supports VLA])
 fi
 
 dnl Check valgrind support

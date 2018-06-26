@@ -17,8 +17,6 @@
   +----------------------------------------------------------------------+
 */
 
-/* $Id$ */
-
 #define PHAR_MAIN 1
 #include "phar_internal.h"
 #include "SAPI.h"
@@ -1855,14 +1853,14 @@ static int phar_check_str(const char *fname, const char *ext_str, size_t ext_len
 	char test[51];
 	const char *pos;
 
-	if (ext_len < 0 || ext_len >= 50) {
+	if (ext_len >= 50) {
 		return FAILURE;
 	}
 
 	if (executable == 1) {
 		/* copy "." as well */
-		memcpy(test, ext_str - 1, ext_len + 1);
-		test[ext_len + 1] = '\0';
+		strlcpy(test, ext_str, ext_len + 1);
+
 		/* executable phars must contain ".phar" as a valid extension (phar://.pharmy/oops is invalid) */
 		/* (phar://hi/there/.phar/oops is also invalid) */
 		pos = strstr(test, ".phar");
@@ -3555,9 +3553,7 @@ PHP_MINFO_FUNCTION(phar) /* {{{ */
 	phar_request_initialize();
 	php_info_print_table_start();
 	php_info_print_table_header(2, "Phar: PHP Archive support", "enabled");
-	php_info_print_table_row(2, "Phar EXT version", PHP_PHAR_VERSION);
 	php_info_print_table_row(2, "Phar API version", PHP_PHAR_API_VERSION);
-	php_info_print_table_row(2, "SVN revision", "$Id$");
 	php_info_print_table_row(2, "Phar-based phar archives", "enabled");
 	php_info_print_table_row(2, "Tar-based phar archives", "enabled");
 	php_info_print_table_row(2, "ZIP-based phar archives", "enabled");

@@ -42,9 +42,9 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 en_UK: '£1,234,567.89'
 en_US: '$1,234,567.89'
 ru: '1 234 567,89 р.'
 uk: '1 234 567,89 ₴'
-en: 'UAH1,234,567.89'
+en: 'UAH%A1,234,567.89'

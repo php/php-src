@@ -401,9 +401,9 @@ char *alloca();
 # define ZEND_FILE_LINE_ORIG_RELAY_C	__zend_orig_filename, __zend_orig_lineno
 # define ZEND_FILE_LINE_ORIG_RELAY_CC	, ZEND_FILE_LINE_ORIG_RELAY_C
 #else
-# define ZEND_FILE_LINE_D
+# define ZEND_FILE_LINE_D				void
 # define ZEND_FILE_LINE_DC
-# define ZEND_FILE_LINE_ORIG_D
+# define ZEND_FILE_LINE_ORIG_D			void
 # define ZEND_FILE_LINE_ORIG_DC
 # define ZEND_FILE_LINE_RELAY_C
 # define ZEND_FILE_LINE_RELAY_CC
@@ -637,6 +637,13 @@ static zend_always_inline double _zend_get_nan(void) /* {{{ */
 
 #define ZEND_SLIDE_TO_ALIGNED(alignment, ptr) (((zend_uintptr_t)(ptr) + ((alignment)-1)) & ~((alignment)-1))
 #define ZEND_SLIDE_TO_ALIGNED16(ptr) ZEND_SLIDE_TO_ALIGNED(Z_UL(16), ptr)
+
+#ifdef ZEND_WIN32
+# define _ZEND_EXPAND_VA(a) a
+# define ZEND_EXPAND_VA(code) _ZEND_EXPAND_VA(code)
+#else
+# define ZEND_EXPAND_VA(code) code
+#endif
 
 #endif /* ZEND_PORTABILITY_H */
 

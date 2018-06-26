@@ -20,8 +20,8 @@ PHP 7.3 UPGRADE NOTES
 ========================================
 
 Core:
-  . The ext_skel utility has been completely redesigned with new options and 
-    some old options removed. This is now written in PHP and has no external 
+  . The ext_skel utility has been completely redesigned with new options and
+    some old options removed. This is now written in PHP and has no external
 	dependencies.
   . Support for BeOS has been dropped.
   . Exceptions thrown due to automatic conversion of warnings into exceptions
@@ -44,12 +44,58 @@ Core:
     the following "FOO;" will cause a syntax error. This issue can always be
     resolved by choosing an ending label that does not occur within the contents
     of the string.
+  . In PHP, static properties are shared between inheriting classes, unless the
+    static property is explicitly overridden in a child class. However, due to
+    an implementation artifact it was possible to separate the static properties
+    by assigning a reference. This loophole has been fixed.
+
+        class Test {
+            public static $x = 0;
+        }
+        class Test2 extends Test { }
+
+        Test2::$x = &$x;
+        $x = 1;
+
+        var_dump(Test::$x, Test2::$x);
+        // Previously: int(0), int(1)
+        // Now:        int(1), int(1)
+
+  . References returned by array and property accesses are now unwrapped as
+    part of the access. This means that it is no longer possible to modify the
+    reference between the access and the use of the accessed value:
+
+        $arr = [1];
+        $ref =& $arr[0];
+        var_dump($arr[0] + ($arr[0] = 2));
+        // Previously: int(4), Now: int(3)
+
+    This makes the behavior of references and non-references consistent. Please
+    note that reading and writing a value inside a single expression remains
+    undefined behavior and may change again in the future.
 
 BCMath:
   . All warnings thrown by BCMath functions are now using PHP's error handling.
     Formerly some warnings have directly been written to stderr.
   . bcmul() and bcpow() now return numbers with the requested scale. Formerly,
     the returned numbers may have omitted trailing decimal zeroes.
+
+mysqli:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+
+PDO/MySQL:
+  . Prepared statements now properly report the fractional seconds for DATETIME/
+    TIME/TIMESTAMP columns with decimals specifier (e.g. TIMESTAMP(6) when using
+    microseconds). Formerly, the fractional seconds part was simply omitted from
+    the returned values.
+    Please note that this only affects the usage of PDO_MYSQL with emulated
+    prepares turned off (e.g. using the native preparation functionality).
+    Statements using connections having PDO::ATTR_EMULATE_PREPARES=true (which
+    is the default) were not affected by the bug fixed and have already been
+    getting the proper fractional seconds values from the engine.
 
 Reflection:
   . Reflection export to string now uses `int` and `bool` instead of `integer`
@@ -66,6 +112,7 @@ SimpleXML:
     treated as integers unconditionally.
 
 Standard:
+  . Undefined variables passed to compact() will now be reported as a notice.
   . getimagesize() and related functions now report the mime type of BMP images
 	  as image/bmp instead of image/x-ms-bmp, since the former has been registered
 		with the IANA (see RFC 7903).
@@ -85,6 +132,11 @@ Core:
     (RFC: https://wiki.php.net/rfc/list_reference_assignment)
   . instanceof now allows literals as the first operand,
     in which case the result is always FALSE.
+  . A new CompileError exception has been added, from which ParseError inherits.
+    A small number of compilation errors will now throw a CompileError instead
+    of generating a fatal error. Currently this only affects compilation errors
+    that may be thrown by token_get_all() in TOKEN_PARSE mode, but more errors
+    may be converted in the future.
 
 BCMath:
   . bcscale() can now also be used as getter to retrieve the current scale in use.
@@ -117,7 +169,7 @@ MBString:
   . mb_convert_case() with MB_CASE_TITLE now performs title-case conversion
     based on the Cased and CaseIgnorable derived Unicode properties. In
     particular this also improves handling of quotes and apostophes.
-  . Data tables have been updated for Unicode 10.
+  . Data tables have been updated for Unicode 11.
   . Mbstring now correctly supports strings larger than 2GB.
   . Performance of the mbstring extension has been significantly improved
     across the board. The largest improvements are in case conversion functions.
@@ -127,13 +179,32 @@ readline:
     options has been added to readline_info(). These options are only available
     if PHP is linked against libreadline (rather than libedit).
 
+Standard:
+  . The -–with-password-argon2[=dir] configure argument now provides support for 
+    both Argon2i and Argon2id hashes in the password_hash(), password_verify(), 
+    password_get_info(), and password_needs_rehash() functions. Passwords may be
+    hashed and verified using the PASSWORD_ARGON2ID constant.
+    Support for both Argon2i and Argon2id in the password_* functions now requires
+    PHP be linked against libargon2 reference library >= 20161029.
+    (RFC: https://wiki.php.net/rfc/argon2_password_hash_enhancements). 
+
 ========================================
 3. Changes in SAPI modules
 ========================================
 
+phpdbg:
+  . The unused constants PHPDBG_FILE, PHPDBG_METHOD, PHPDBG_LINENO and
+    PHPDBG_FUNC have been removed.
+
 ========================================
 4. Deprecated Functionality
 ========================================
+
+GD:
+  . image2wbmp() has been deprecated.
+
+Intl:
+  . Usage of the Normalizer::NONE form throws a deprecation warning, if PHP is linked with ICU >= 56.
 
 ========================================
 5. Changed Functions
@@ -254,7 +325,7 @@ JSON:
  MBString:
   . The configuration option --with-libmbfl is no longer available.
 
- ODBC: 
+ ODBC:
   . Support for ODBCRouter has been removed.
   . Support for Birdstep has been removed.
 
@@ -281,6 +352,9 @@ PGSQL:
 	- PGSQL_DIAG_CONSTRAINT_NAME
   . Requires Postgres 9.6
     - PGSQL_DIAG_SEVERITY_NONLOCALIZED
+
+Standard:
+  . PASSWORD_ARGON2ID
 
 ========================================
 11. Changes to INI File Handling

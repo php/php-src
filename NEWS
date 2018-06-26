@@ -1,12 +1,79 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-?? ??? ????, PHP 7.3.0alpha1
+?? ??? ????, PHP 7.3.0alpha3
+
+- Core:
+  . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
+    (Nikita)
+  . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
+    properly). (Nikita)
+  . Fixed bug #76509 (Inherited static properties can be desynchronized from
+    their parent by ref). (Nikita)
+
+- FPM:
+  . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
+    non-blocking). (Nikita)
+
+- PCRE:
+  . Fixed bug #76512 (\w no longer includes unicode characters). (cmb)
+  . Fixed bug #76514 (Regression in preg_match makes it fail with
+    PREG_JIT_STACKLIMIT_ERROR). (Anatol)
+
+- phpdbg:
+  . Fix arginfo wrt. optional/required parameters. (cmb)
+
+- Standard:
+  . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
+    (Laruence)
+
+21 Jun 2018, PHP 7.3.0alpha2
+
+- Core:
+  . Fixed bug #76427 (Segfault in zend_objects_store_put). (Laruence)
+  . Fixed bug #76422 (ftruncate fails on files > 2GB). (Anatol)
+
+- CLI:
+  . Fixed bug #44217 (Output after stdout/stderr closed cause immediate exit
+    with status 0). (Robert Lu)
+
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
+
+- EXIF:
+  . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+
+- Interbase:
+  . Fixed bug #76443 (php+php_interbase.dll crash on module_shutdown). (Kalle)
+
+- Mysqlnd:
+  . Fixed bug #76386 (Prepared Statement formatter truncates fractional seconds
+    from date/time column). (Victor Csiky)
+
+- Opcache:
+  . Fixed bug #76477 (Opcache causes empty return value).
+    (Nikita, Laruence)
+  . Fixed bug #76466 (Loop variable confusion). (Dmitry, Laruence, Nikita)
+  . Fixed bug #76463 (var has array key type but not value type). (Laruence)
+  . Fixed bug #76446 (zend_variables.c:73: zend_string_destroy: Assertion
+    `!(zval_gc_flags((str)->gc)). (Nikita, Laruence)
+
+- Tokenizer:
+  . Fixed bug #76437 (token_get_all with TOKEN_PARSE flag fails to recognise
+    close tag). (Laruence)
+  . Fixed bug #75218 (Change remaining uncatchable fatal errors for parsing
+    into ParseError). (Nikita)
+
+- ZIP:
+  . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
+    (Dennis Birkholz, Remi)
+
+07 Jun 2018, PHP 7.3.0alpha1
 
 - Core:
   . Improved PHP GC. (Dmitry, Nikita)
   . Redesigned the old ext_skel program written in PHP, run: 
-    'php ext_skel.php' for all options. This means there is no dependencies 
-    thrus making it work on Windows out of the box. (Kalle)
+    'php ext_skel.php' for all options. This means there are no dependencies,
+    thus making it work on Windows out of the box. (Kalle)
   . Removed support for BeOS. (Kalle)
   . Add PHP_VERSION to phpinfo() <title/>. (github/MattJeevas)
   . Add net_get_interfaces(). (Sara, Joe, Anatol)
@@ -41,6 +108,8 @@ PHP                                                                        NEWS
     not found). (Timur Ibragimov)
   . Fixed bug #76198 (Wording: "iterable" is not a scalar type). (Levi Morrison)
   . Fixed bug #76137 (config.guess/config.sub do not recognize RISC-V). (cmb)
+  . Improved effectiveness of ZEND_SECURE_ZERO for NetBSD and systems
+    without native similar feature (devnexen).
 
 - BCMath:
   . Fixed bug #66364 (BCMath bcmul ignores scale parameter). (cmb)
@@ -184,7 +253,7 @@ PHP                                                                        NEWS
     (carusogabriel)
 
 - SQLite3:
-  . Updated bundled libsqlite to 3.23.1. (cmb)
+  . Updated bundled libsqlite to 3.24.0. (cmb)
 
 - Standard:
   . Added is_countable() function. (Gabriel Caruso)
@@ -198,6 +267,7 @@ PHP                                                                        NEWS
   . Fixed bug #69948 (path/domain are not sanitized in setcookie). (cmb)
   . Fixed bug #75996 (incorrect url in header for mt_rand). (tatarbj)
   . Remove superfluous warnings from inet_ntop()/inet_pton(). (daverandom)
+  . Added hrtime() function, to get high resolution time. (welting)
 
 - Testing:
   . Implemented request #62055 (Make run-tests.php support --CGI-- sections).
@@ -206,6 +276,7 @@ PHP                                                                        NEWS
 - Tidy:
   . Fixed bug #74707 (Tidy has incorrect ReflectionFunction param counts for
     functions taking tidy). (Gabriel Caruso)
+  . Support using tidyp instead of tidy (devnexen).
 
 - Zlib:
   . Added zlib/level context option for compress.zlib wrapper. (Sara)

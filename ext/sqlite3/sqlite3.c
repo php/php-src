@@ -1520,8 +1520,8 @@ PHP_METHOD(sqlite3stmt, bindValue)
 	param.param_number = -1;
 	param.type = SQLITE3_TEXT;
 
-	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "lz/|l", &param.param_number, &parameter, &param.type) == FAILURE) {
-		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz/|l", &param.name, &parameter, &param.type) == FAILURE) {
+	if (zend_parse_parameters_ex(ZEND_PARSE_PARAMS_QUIET, ZEND_NUM_ARGS(), "lz|l", &param.param_number, &parameter, &param.type) == FAILURE) {
+		if (zend_parse_parameters(ZEND_NUM_ARGS(), "Sz|l", &param.name, &parameter, &param.type) == FAILURE) {
 			return;
 		}
 	}

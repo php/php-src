@@ -11,9 +11,9 @@ $signature = '';
 $ok = openssl_verify("foo", $signature, $pub_key_id, OPENSSL_ALGO_MD5);
 
 class test {
-	function __toString() {
-		return "test object";
-	}
+    function __toString() {
+        return "test object";
+    }
 }
 $t = new test;
 

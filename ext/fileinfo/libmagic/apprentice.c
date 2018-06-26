@@ -263,10 +263,6 @@ static const struct type_tbl_s special_tbl[] = {
 # undef XX
 # undef XX_NULL
 
-#ifndef S_ISDIR
-#define S_ISDIR(mode) ((mode) & _S_IFDIR)
-#endif
-
 private int
 get_type(const struct type_tbl_s *tbl, const char *l, const char **t)
 {

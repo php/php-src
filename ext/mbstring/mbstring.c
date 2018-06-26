@@ -1045,13 +1045,15 @@ static void _php_mb_free_regex(void *opaque)
 /* {{{ _php_mb_compile_regex */
 static void *_php_mb_compile_regex(const char *pattern)
 {
-	pcre *retval;
-	const char *err_str;
-	int err_offset;
+	pcre2_code *retval;
+	PCRE2_SIZE err_offset;
+	int errnum;
 
-	if (!(retval = pcre_compile(pattern,
-			PCRE_CASELESS, &err_str, &err_offset, NULL))) {
-		php_error_docref(NULL, E_WARNING, "%s (offset=%d): %s", pattern, err_offset, err_str);
+	if (!(retval = pcre2_compile((PCRE2_SPTR)pattern, PCRE2_ZERO_TERMINATED,
+			PCRE2_CASELESS, &errnum, &err_offset, php_pcre_cctx()))) {
+		PCRE2_UCHAR err_str[256];
+		pcre2_get_error_message(errnum, err_str, sizeof(err_str));
+		php_error_docref(NULL, E_WARNING, "%s (offset=%zu): %s", pattern, err_offset, err_str);
 	}
 	return retval;
 }
@@ -1060,15 +1062,25 @@ static void *_php_mb_compile_regex(const char *pattern)
 /* {{{ _php_mb_match_regex */
 static int _php_mb_match_regex(void *opaque, const char *str, size_t str_len)
 {
-	return pcre_exec((pcre *)opaque, NULL, str, (int)str_len, 0,
-			0, NULL, 0) >= 0;
+	int res;
+
+	pcre2_match_data *match_data = php_pcre_create_match_data(0, opaque);
+	if (NULL == match_data) {
+		pcre2_code_free(opaque);
+		php_error_docref(NULL, E_WARNING, "Cannot allocate match data");
+		return FAILURE;
+	}
+	res = pcre2_match(opaque, (PCRE2_SPTR)str, str_len, 0, 0, match_data, php_pcre_mctx());
+	php_pcre_free_match_data(match_data);
+
+	return res;
 }
 /* }}} */
 
 /* {{{ _php_mb_free_regex */
 static void _php_mb_free_regex(void *opaque)
 {
-	pcre_free(opaque);
+	pcre2_code_free(opaque);
 }
 /* }}} */
 #endif
@@ -1608,7 +1620,6 @@ ZEND_TSRMLS_CACHE_UPDATE();
 		zend_function *func, *orig;
 		const struct mb_overload_def *p;
 		zend_string *str;
-		void *ret;
 
 		p = &(mb_ovld[0]);
 		while (p->type > 0) {
@@ -1628,13 +1639,8 @@ ZEND_TSRMLS_CACHE_UPDATE();
 					function_add_ref(orig);
 
 					str = zend_string_init_interned(p->orig_func, strlen(p->orig_func), 1);
-					ret = zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
+					zend_hash_update_mem(CG(function_table), str, func, sizeof(zend_internal_function));
 					zend_string_release_ex(str, 1);
-					if (ret == NULL) {
-						php_error_docref("ref.mbstring", E_WARNING, "mbstring couldn't replace function %s.", p->orig_func);
-						return FAILURE;
-					}
-
 					function_add_ref(func);
 				}
 			}

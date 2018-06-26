@@ -1,5 +1,4 @@
 
-	/* $Id: fpm_atomic.h,v 1.3 2008/09/18 23:34:11 anight Exp $ */
 	/* (c) 2007,2008 Andrei Nigmatulin */
 
 #ifndef FPM_ATOMIC_H
