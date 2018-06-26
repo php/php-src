@@ -256,6 +256,9 @@ static zend_bool can_replace_op1(
 		case ZEND_VERIFY_RETURN_TYPE:
 			// TODO: This would require a non-local change ???
 			return 0;
+		case ZEND_OP_DATA:
+			return (opline - 1)->opcode != ZEND_ASSIGN_OBJ_REF &&
+				(opline - 1)->opcode != ZEND_ASSIGN_STATIC_PROP_REF;
 		default:
 			if (ssa_op->op1_def != -1) {
 				ZEND_ASSERT(0);
