@@ -723,15 +723,7 @@ void zend_do_free(znode *op1) /* {{{ */
 		}
 		if (opline->result_type == IS_VAR
 			&& opline->result.var == op1->u.op.var) {
-			if (opline->opcode == ZEND_FETCH_R ||
-			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_OBJ_R ||
-			    opline->opcode == ZEND_FETCH_STATIC_PROP_R) {
-				/* It's very rare and useless case. It's better to use
-				   additional FREE opcode and simplify the FETCH handlers
-				   their selves */
-				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
-			} else if (opline->opcode == ZEND_FETCH_THIS) {
+			if (opline->opcode == ZEND_FETCH_THIS) {
 				opline->opcode = ZEND_NOP;
 				opline->result_type = IS_UNUSED;
 			} else {
@@ -1903,12 +1895,14 @@ ZEND_API size_t zend_dirname(char *path, size_t len)
 }
 /* }}} */
 
-static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
+static void zend_adjust_for_fetch_type(zend_op *opline, znode *result, uint32_t type) /* {{{ */
 {
 	zend_uchar factor = (opline->opcode == ZEND_FETCH_STATIC_PROP_R) ? 1 : 3;
 
 	switch (type) {
 		case BP_VAR_R:
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 			return;
 		case BP_VAR_W:
 			opline->opcode += 1 * factor;
@@ -1917,6 +1911,8 @@ static void zend_adjust_for_fetch_type(zend_op *opline, uint32_t type) /* {{{ */
 			opline->opcode += 2 * factor;
 			return;
 		case BP_VAR_IS:
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
 			opline->opcode += 3 * factor;
 			return;
 		case BP_VAR_FUNC_ARG:
@@ -2598,7 +2594,7 @@ static zend_op *zend_compile_simple_var_no_cv(znode *result, zend_ast *ast, uint
 		opline->extended_value = ZEND_FETCH_LOCAL;
 	}
 
-	zend_adjust_for_fetch_type(opline, type);
+	zend_adjust_for_fetch_type(opline, result, type);
 	return opline;
 }
 /* }}} */
@@ -2617,7 +2613,11 @@ static zend_bool is_this_fetch(zend_ast *ast) /* {{{ */
 static void zend_compile_simple_var(znode *result, zend_ast *ast, uint32_t type, int delayed) /* {{{ */
 {
 	if (is_this_fetch(ast)) {
-		zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
+		zend_op *opline = zend_emit_op(result, ZEND_FETCH_THIS, NULL, NULL);
+		if ((type == BP_VAR_R) || (type == BP_VAR_IS)) {
+			opline->result_type = IS_TMP_VAR;
+			result->op_type = IS_TMP_VAR;
+		}
 	} else if (zend_try_compile_cv(result, ast) == FAILURE) {
 		zend_compile_simple_var_no_cv(result, ast, type, delayed);
 	}
@@ -2676,7 +2676,7 @@ static zend_op *zend_delayed_compile_dim(znode *result, zend_ast *ast, uint32_t 
 	}
 
 	opline = zend_delayed_emit_op(result, ZEND_FETCH_DIM_R, &var_node, &dim_node);
-	zend_adjust_for_fetch_type(opline, type);
+	zend_adjust_for_fetch_type(opline, result, type);
 	return opline;
 }
 /* }}} */
@@ -2711,7 +2711,7 @@ static zend_op *zend_delayed_compile_prop(znode *result, zend_ast *ast, uint32_t
 		opline->extended_value = zend_alloc_polymorphic_cache_slot();
 	}
 
-	zend_adjust_for_fetch_type(opline, type);
+	zend_adjust_for_fetch_type(opline, result, type);
 	return opline;
 }
 /* }}} */
@@ -2756,7 +2756,7 @@ zend_op *zend_compile_static_prop(znode *result, zend_ast *ast, uint32_t type, i
 		SET_NODE(opline->op2, &class_node);
 	}
 
-	zend_adjust_for_fetch_type(opline, type);
+	zend_adjust_for_fetch_type(opline, result, type);
 	return opline;
 }
 /* }}} */
@@ -3216,7 +3216,7 @@ uint32_t zend_compile_args(zend_ast *ast, zend_function *fbc) /* {{{ */
 					opcode = ZEND_SEND_REF;
 				} else {
 					zend_compile_var(&arg_node, arg, BP_VAR_R);
-					opcode = ZEND_SEND_VAR;
+					opcode = (arg_node.op_type == IS_TMP_VAR) ? ZEND_SEND_VAL : ZEND_SEND_VAR;
 				}
 			} else {
 				do {
