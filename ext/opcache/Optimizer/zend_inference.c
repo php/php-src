@@ -3290,8 +3290,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			/* FETCH_LIST on a string behaves like FETCH_R on null */
 			tmp = zend_array_element_type(
 				opline->opcode != ZEND_FETCH_LIST_R ? t1 : ((t1 & ~MAY_BE_STRING) | MAY_BE_NULL),
-				opline->opcode != ZEND_FETCH_DIM_R && opline->opcode != ZEND_FETCH_DIM_IS
-					&& opline->opcode != ZEND_FETCH_LIST_R,
+				opline->result_type == IS_VAR,
 				opline->op2_type == IS_UNUSED);
 			if (opline->opcode == ZEND_FETCH_DIM_W ||
 			    opline->opcode == ZEND_FETCH_DIM_RW ||
@@ -3336,7 +3335,7 @@ static int zend_update_type_info(const zend_op_array *op_array,
 			}
 			if (ssa_ops[i].result_def >= 0) {
 				tmp = MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-				if (opline->opcode == ZEND_FETCH_OBJ_R || opline->opcode == ZEND_FETCH_OBJ_IS) {
+				if (opline->result_type == IS_TMP_VAR) {
 					/* can't be REF  because of ZVAL_COPY_DEREF() usage */
 					tmp |= MAY_BE_RC1 | MAY_BE_RCN;
 				} else {
@@ -3441,14 +3440,6 @@ static int zend_update_type_info(const zend_op_array *op_array,
 		case ZEND_INCLUDE_OR_EVAL:
 			/* Forbidden opcodes */
 			ZEND_ASSERT(0);
-			break;
-		case ZEND_FETCH_R:
-		case ZEND_FETCH_IS:
-		case ZEND_FETCH_STATIC_PROP_R:
-		case ZEND_FETCH_STATIC_PROP_IS:
-			/* can't be REF  because of ZVAL_COPY_DEREF() usage */
-			tmp = MAY_BE_RC1 | MAY_BE_RCN | MAY_BE_ANY | MAY_BE_ARRAY_KEY_ANY | MAY_BE_ARRAY_OF_ANY | MAY_BE_ARRAY_OF_REF;
-			UPDATE_SSA_TYPE(tmp, ssa_ops[i].result_def);
 			break;
 		default:
 unknown_opcode:

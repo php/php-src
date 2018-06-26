@@ -723,15 +723,7 @@ void zend_do_free(znode *op1) /* {{{ */
 		}
 		if (opline->result_type == IS_VAR
 			&& opline->result.var == op1->u.op.var) {
-			if (opline->opcode == ZEND_FETCH_R ||
-			    opline->opcode == ZEND_FETCH_DIM_R ||
-			    opline->opcode == ZEND_FETCH_OBJ_R ||
-			    opline->opcode == ZEND_FETCH_STATIC_PROP_R) {
-				/* It's very rare and useless case. It's better to use
-				   additional FREE opcode and simplify the FETCH handlers
-				   their selves */
-				zend_emit_op(NULL, ZEND_FREE, op1, NULL);
-			} else if (opline->opcode == ZEND_FETCH_THIS) {
+			if (opline->opcode == ZEND_FETCH_THIS) {
 				opline->opcode = ZEND_NOP;
 				opline->result_type = IS_UNUSED;
 			} else {
