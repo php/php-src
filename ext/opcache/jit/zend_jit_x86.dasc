@@ -9295,7 +9295,7 @@ static int zend_jit_fetch_obj_read(dasm_State **Dst, zend_op *opline, zend_op_ar
 	}
 	|	jmp >9
 
-	if (opline->opcode == ZEND_FETCH_OBJ_R) {
+	if (opline->opcode == ZEND_FETCH_OBJ_R || opline->opcode == ZEND_FETCH_OBJ_IS) {
 		|6:
 		if (offset == ZEND_WRONG_PROPERTY_OFFSET) {
 			|	mov FCARG2a, FCARG1a
