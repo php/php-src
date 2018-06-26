@@ -3,44 +3,44 @@ Bug #76439: Don't always strip leading whitespace from heredoc T_ENCAPSED_AND_WH
 --FILE--
 <?php
 
-$foo = 1;
+[$one, $two, $three, $four, $five, $six, $seven, $eight, $nine] = [1, 2, 3, 4, 5, 6, 7, 8, 9];
 
 var_dump(<<<BAR
- $foo-
+ $one-
  BAR);
 
 var_dump(<<<BAR
- $foo -
+ $two -
  BAR);
 
 var_dump(<<<BAR
- $foo	-
+ $three	-
  BAR);
 
 var_dump(<<<BAR
- $foo-$foo
+ $four-$four
  BAR);
 
 var_dump(<<<BAR
- $foo-$foo-
+ $five-$five-
  BAR);
 
 var_dump(<<<BAR
- $foo-$foo-$foo
+ $six-$six-$six
  BAR);
 
 var_dump(<<<BAR
- $foo
+ $seven
  -
  BAR);
 
 var_dump(<<<BAR
- $foo
+ $eight
   -
  BAR);
 
 var_dump(<<<BAR
-$foo
+$nine
 BAR);
 
 var_dump(<<<BAR
@@ -54,15 +54,15 @@ var_dump(<<<BAR
 ?>
 --EXPECT--
 string(2) "1-"
-string(3) "1 -"
-string(3) "1	-"
-string(3) "1-1"
-string(4) "1-1-"
-string(5) "1-1-1"
-string(3) "1
+string(3) "2 -"
+string(3) "3	-"
+string(3) "4-4"
+string(4) "5-5-"
+string(5) "6-6-6"
+string(3) "7
 -"
-string(4) "1
+string(4) "8
  -"
-string(1) "1"
+string(1) "9"
 string(1) "-"
 string(2) " -"
