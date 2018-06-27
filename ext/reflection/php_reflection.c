@@ -5289,8 +5289,7 @@ ZEND_METHOD(reflection_class_constant, export)
 ZEND_METHOD(reflection_property, __construct)
 {
 	zval propname, cname, *classname;
-	char *name_str;
-	size_t name_len;
+	zend_string *name;
 	int dynam_prop = 0;
 	zval *object;
 	reflection_object *intern;
@@ -5298,7 +5297,7 @@ ZEND_METHOD(reflection_property, __construct)
 	zend_property_info *property_info = NULL;
 	property_reference *reference;
 
-	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zs", &classname, &name_str, &name_len) == FAILURE) {
+	if (zend_parse_parameters_throw(ZEND_NUM_ARGS(), "zS", &classname, &name) == FAILURE) {
 		return;
 	}
 
@@ -5324,15 +5323,15 @@ ZEND_METHOD(reflection_property, __construct)
 			/* returns out of this function */
 	}
 
-	if ((property_info = zend_hash_str_find_ptr(&ce->properties_info, name_str, name_len)) == NULL || (property_info->flags & ZEND_ACC_SHADOW)) {
+	if ((property_info = zend_hash_find_ptr(&ce->properties_info, name)) == NULL || (property_info->flags & ZEND_ACC_SHADOW)) {
 		/* Check for dynamic properties */
 		if (property_info == NULL && Z_TYPE_P(classname) == IS_OBJECT && Z_OBJ_HT_P(classname)->get_properties) {
-			if (zend_hash_str_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name_str, name_len)) {
+			if (zend_hash_exists(Z_OBJ_HT_P(classname)->get_properties(classname), name)) {
 				dynam_prop = 1;
 			}
 		}
 		if (dynam_prop == 0) {
-			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), name_str);
+			zend_throw_exception_ex(reflection_exception_ptr, 0, "Property %s::$%s does not exist", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 			return;
 		}
 	}
@@ -5342,7 +5341,7 @@ ZEND_METHOD(reflection_property, __construct)
 		zend_class_entry *tmp_ce = ce;
 		zend_property_info *tmp_info;
 
-		while (tmp_ce && (tmp_info = zend_hash_str_find_ptr(&tmp_ce->properties_info, name_str, name_len)) == NULL) {
+		while (tmp_ce && (tmp_info = zend_hash_find_ptr(&tmp_ce->properties_info, name)) == NULL) {
 			ce = tmp_ce;
 			property_info = tmp_info;
 			tmp_ce = tmp_ce->parent;
@@ -5350,16 +5349,13 @@ ZEND_METHOD(reflection_property, __construct)
 	}
 
 	if (dynam_prop == 0) {
-		const char *class_name, *prop_name;
-		size_t prop_name_len;
-		zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, &prop_name_len);
 		ZVAL_STR_COPY(&cname, property_info->ce->name);
-		ZVAL_STRINGL(&propname, prop_name, prop_name_len);
 	} else {
 		ZVAL_STR_COPY(&cname, ce->name);
-		ZVAL_STRINGL(&propname, name_str, name_len);
 	}
 	reflection_update_property_class(object, &cname);
+
+	ZVAL_STR_COPY(&propname, name);
 	reflection_update_property_name(object, &propname);
 
 	reference = (property_reference*) emalloc(sizeof(property_reference));
