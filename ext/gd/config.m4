@@ -42,6 +42,8 @@ dnl
 dnl Checks for the configure options
 dnl
 
+MACHINE_INCLUDES=$($CC -dumpmachine)
+
 AC_DEFUN([PHP_GD_ZLIB],[
 	if test "$PHP_ZLIB_DIR" != "no" && test "$PHP_ZLIB_DIR" != "yes"; then
 		if test -f "$PHP_ZLIB_DIR/include/zlib/zlib.h"; then
@@ -50,6 +52,12 @@ AC_DEFUN([PHP_GD_ZLIB],[
 		elif test -f "$PHP_ZLIB_DIR/include/zlib.h"; then
 			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
 			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include"
+		elif test -f "$PHP_ZLIB_DIR/include/$MACHINE_INCLUDES/zlib/zlib.h"; then
+			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include/$MACHINE_INCLUDES/zlib"
+		elif test -f "$PHP_ZLIB_DIR/include/$MACHINE_INCLUDES/zlib.h"; then
+			PHP_ZLIB_DIR="$PHP_ZLIB_DIR"
+			PHP_ZLIB_INCDIR="$PHP_ZLIB_DIR/include/$MACHINE_INCLUDES"
 		else
 			AC_MSG_ERROR([Can't find zlib headers under "$PHP_ZLIB_DIR"])
 		fi
@@ -61,6 +69,12 @@ AC_DEFUN([PHP_GD_ZLIB],[
 			elif test -f "$i/include/zlib.h"; then
 				PHP_ZLIB_DIR="$i"
 				PHP_ZLIB_INCDIR="$i/include"
+			elif test -f "$i/include/$MACHINE_INCLUDES/zlib/zlib.h"; then
+				PHP_ZLIB_DIR="$i"
+				PHP_ZLIB_INCDIR="$i/include/$MACHINE_INCLUDES/zlib"
+			elif test -f "$i/include/$MACHINE_INCLUDES/zlib.h"; then
+				PHP_ZLIB_DIR="$i"
+				PHP_ZLIB_INCDIR="$i/include/$MACHINE_INCLUDES"
 			fi
 		done
 	fi
@@ -71,6 +85,7 @@ AC_DEFUN([PHP_GD_WEBP],[
 
     for i in $PHP_WEBP_DIR /usr/local /usr; do
       test -f $i/include/webp/decode.h && GD_WEBP_DIR=$i && break
+      test -f $i/include/$MACHINE_INCLUDES/webp/decode.h && GD_WEBP_DIR=$i && break
     done
 
     if test -z "$GD_WEBP_DIR"; then
@@ -79,6 +94,7 @@ AC_DEFUN([PHP_GD_WEBP],[
 
     for i in $PHP_WEBP_DIR /usr/local /usr; do
       test -f $i/include/webp/encode.h && GD_WEBP_DIR=$i && break
+      test -f $i/include/$MACHINE_INCLUDES/webp/encode.h && GD_WEBP_DIR=$i && break
     done
 
     if test -z "$GD_WEBP_DIR"; then
@@ -105,6 +121,7 @@ AC_DEFUN([PHP_GD_JPEG],[
 
     for i in $PHP_JPEG_DIR /usr/local /usr; do
       test -f $i/include/jpeglib.h && GD_JPEG_DIR=$i && break
+      test -f $i/include/$MACHINE_INCLUDES/jpeglib.h && GD_JPEG_DIR=$i && break
     done
 
     if test -z "$GD_JPEG_DIR"; then
@@ -130,6 +147,7 @@ AC_DEFUN([PHP_GD_PNG],[
 
     for i in $PHP_PNG_DIR /usr/local /usr; do
       test -f $i/include/png.h && GD_PNG_DIR=$i && break
+      test -f $i/include/$MACHINE_INCLUDES/png.h && GD_PNG_DIR=$i && break
     done
 
     if test -z "$GD_PNG_DIR"; then
@@ -162,6 +180,8 @@ AC_DEFUN([PHP_GD_XPM],[
     for i in $PHP_XPM_DIR /usr/local /usr/X11R6 /usr; do
       test -f $i/include/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
       test -f $i/include/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
+      test -f $i/include/$MACHINE_INCLUDES/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i && break
+      test -f $i/include/$MACHINE_INCLUDES/X11/xpm.h && GD_XPM_DIR=$i && GD_XPM_INC=$i/X11 && break
     done
 
     if test -z "$GD_XPM_DIR"; then
