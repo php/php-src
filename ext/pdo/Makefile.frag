@@ -1,4 +1,3 @@
-phpincludedir=$(prefix)/include/php
 
 PDO_HEADER_FILES= \
 	php_pdo.h \

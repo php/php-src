@@ -193,6 +193,7 @@ sapi/phpdbg/phpdbg_parser.h
 sapi/phpdbg/phpdbg
 scripts/php-config
 scripts/phpize
+scripts/phpize.m4
 scripts/man1/*.1
 win32/*.suo
 win32/*.aps

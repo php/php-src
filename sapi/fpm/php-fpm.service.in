@@ -8,8 +8,8 @@ After=network.target
 
 [Service]
 Type=@php_fpm_systemd@
-PIDFile=@EXPANDED_LOCALSTATEDIR@/run/php-fpm.pid
-ExecStart=@EXPANDED_SBINDIR@/php-fpm --nodaemonize --fpm-config @EXPANDED_SYSCONFDIR@/php-fpm.conf
+PIDFile=@EXPANDED_LOCALSTATEDIR@/run/php7-fpm.pid
+ExecStart=@EXPANDED_SBINDIR@/@program_prefix@php-fpm@program_suffix@ --nodaemonize --fpm-config @EXPANDED_SYSCONFDIR@/php-fpm.conf
 ExecReload=/bin/kill -USR2 $MAINPID
 PrivateTmp=true
 

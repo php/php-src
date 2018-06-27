@@ -36,7 +36,7 @@ PHP_SHLIB_SUFFIX_NAMES
 
 dnl Find php-config script
 PHP_ARG_WITH(php-config,,
-[  --with-php-config=PATH  Path to php-config [php-config]], php-config, no)
+[  --with-php-config=PATH  Path to php-config [@program_prefix@php-config@program_suffix@]], @program_prefix@php-config@program_suffix@, no)
 
 dnl For BC
 PHP_CONFIG=$PHP_PHP_CONFIG
@@ -45,6 +45,7 @@ phpincludedir=`$PHP_CONFIG --include-dir 2>/dev/null`
 INCLUDES=`$PHP_CONFIG --includes 2>/dev/null`
 EXTENSION_DIR=`$PHP_CONFIG --extension-dir 2>/dev/null`
 PHP_EXECUTABLE=`$PHP_CONFIG --php-binary 2>/dev/null`
+PHP_MAJOR_VERSION=7
  
 if test -z "$prefix"; then
   AC_MSG_ERROR([Cannot find php-config. Please use --with-php-config=PATH])
@@ -181,6 +182,7 @@ PHP_SUBST(CXXFLAGS)
 PHP_SUBST(CXXFLAGS_CLEAN)
 PHP_SUBST(EXTENSION_DIR)
 PHP_SUBST(PHP_EXECUTABLE)
+PHP_SUBST(PHP_MAJOR_VERSION)
 PHP_SUBST(EXTRA_LDFLAGS)
 PHP_SUBST(EXTRA_LIBS)
 PHP_SUBST(INCLUDES)

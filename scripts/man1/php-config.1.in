@@ -1,18 +1,18 @@
-.TH @program_prefix@php\-config 1 "2018" "The PHP Group" "Scripting Language"
+.TH @program_prefix@php\-config@program_suffix@ 1 "2018" "The PHP Group" "Scripting Language"
 .SH NAME
-@program_prefix@php\-config \- get information about PHP configuration and compile options
+@program_prefix@php\-config@program_suffix@ \- get information about PHP configuration and compile options
 .SH SYNOPSIS
-.B @program_prefix@php\-config
+.B @program_prefix@php\-config@program_suffix@
 [options]
 .LP
 .SH DESCRIPTION
-.B @program_prefix@php\-config
+.B @program_prefix@php\-config@program_suffix@
 is a simple shell script for obtaining information about installed PHP configuration.
 .SH OPTIONS
 .TP 15
 .PD 0
 .B \-\-prefix
-Directory prefix where PHP is installed, e.g. /usr/local
+Directory prefix where PHP 7 is installed, e.g. /usr/local
 .TP
 .PD 0
 .B \-\-includes
@@ -61,7 +61,7 @@ PHP version as integer
 .PD 1
 .P
 .SH SEE ALSO
-.BR @program_prefix@php (1)
+.BR @program_prefix@php@program_suffix@ (1)
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT

@@ -349,10 +349,13 @@ PHP_SAPI=none
 dnl SAPI configuration.
 dnl -------------------------------------------------------------------------
 
+test "$program_prefix" = "NONE" && program_prefix=
+test "$program_suffix" = "NONE" && program_suffix=
+
 dnl paths to the targets are relative to the build directory
-SAPI_SHARED=libs/libphp[]$PHP_MAJOR_VERSION[.]$SHLIB_DL_SUFFIX_NAME
-SAPI_STATIC=libs/libphp[]$PHP_MAJOR_VERSION[.a]
-SAPI_LIBTOOL=libphp[]$PHP_MAJOR_VERSION[.la]
+SAPI_SHARED=libs/lib[]${program_prefix}[]php[]$PHP_MAJOR_VERSION[]${program_suffix}[.]$SHLIB_DL_SUFFIX_NAME
+SAPI_STATIC=libs/lib[]${program_prefix}[]php[]$PHP_MAJOR_VERSION[]${program_suffix}[.a]
+SAPI_LIBTOOL=lib[]${program_prefix}[]php[]$PHP_MAJOR_VERSION[]${program_suffix}[.la]
 
 PHP_CONFIGURE_PART(Configuring SAPI modules)
 
@@ -1191,12 +1194,12 @@ test "$program_suffix" = "NONE" && program_suffix=
 
 case $libdir in
   '${exec_prefix}/lib')
-    libdir=$libdir/php
+    libdir=$libdir/"$program_prefix""php""$program_suffix"
     ;;
 esac
 case `eval echo $datadir` in
   '${prefix}/share')
-    datadir=$datadir/php
+    datadir=$datadir/"$program_prefix""php""$program_suffix"
     ;;
 esac
 
@@ -1376,6 +1379,7 @@ PHP_SUBST(PHP_RPATHS)
 PHP_SUBST(PHP_SAPI)
 PHP_SUBST_OLD(PHP_VERSION)
 PHP_SUBST_OLD(PHP_VERSION_ID)
+PHP_SUBST_OLD(PHP_MAJOR_VERSION)
 PHP_SUBST(SHELL)
 PHP_SUBST(SHARED_LIBTOOL)
 PHP_SUBST(WARNING_LEVEL)
@@ -1529,6 +1533,7 @@ $php_shtool mkdir -p scripts
 $php_shtool mkdir -p scripts/man1
 
 ALL_OUTPUT_FILES="php7.spec main/build-defs.h \
+scripts/phpize.m4 \
 scripts/phpize scripts/man1/phpize.1 \
 scripts/php-config scripts/man1/php-config.1 \
 $PHP_OUTPUT_FILES"

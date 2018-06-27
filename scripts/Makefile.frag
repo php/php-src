@@ -3,7 +3,7 @@
 # Build environment install
 #
 
-phpincludedir = $(includedir)/php
+phpincludedir = $(includedir)/$(program_prefix)php$(program_suffix)
 phpbuilddir = $(libdir)/build
 
 BUILD_FILES = \
@@ -32,7 +32,7 @@ install-build:
 	$(INSTALL) $(BUILD_FILES_EXEC) $(INSTALL_ROOT)$(phpbuilddir) && \
 	$(INSTALL_DATA) $(BUILD_FILES) $(INSTALL_ROOT)$(phpbuilddir))
 
-install-programs: $(builddir)/phpize $(builddir)/php-config
+install-programs: $(builddir)/phpize.m4 $(builddir)/phpize $(builddir)/php-config
 	@echo "Installing helper programs:       $(INSTALL_ROOT)$(bindir)/"
 	@$(mkinstalldirs) $(INSTALL_ROOT)$(bindir)
 	@for prog in $(bin_SCRIPTS); do \
@@ -45,6 +45,9 @@ install-programs: $(builddir)/phpize $(builddir)/php-config
 		echo "  page: $(program_prefix)$${page}$(program_suffix).1"; \
 		$(INSTALL_DATA) $(builddir)/man1/$${page}.1 $(INSTALL_ROOT)$(mandir)/man1/$(program_prefix)$${page}$(program_suffix).1; \
 	done
+
+$(builddir)/phpize.m4: $(srcdir)/phpize.m4.in $(top_builddir)/config.status
+	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)
 
 $(builddir)/phpize: $(srcdir)/phpize.in $(top_builddir)/config.status
 	(CONFIG_FILES=$@ CONFIG_HEADERS= $(top_builddir)/config.status)

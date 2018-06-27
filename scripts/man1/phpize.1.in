@@ -1,12 +1,12 @@
-.TH @program_prefix@phpize 1 "2018" "The PHP Group" "Scripting Language"
+.TH @program_prefix@phpize@program_suffix@ 1 "2018" "The PHP Group" "Scripting Language"
 .SH NAME
-@program_prefix@phpize \- prepare a PHP extension for compiling
+@program_prefix@phpize@program_suffix@ \- prepare a PHP extension for compiling
 .SH SYNOPSIS
-.B @program_prefix@phpize
+.B @program_prefix@phpize@program_suffix@
 [options]
 .LP
 .SH DESCRIPTION
-.B @program_prefix@phpize
+.B @program_prefix@phpize@program_suffix@
 is a shell script to prepare PHP extension for compiling.
 .SH OPTIONS
 .TP 15
@@ -28,7 +28,7 @@ Prints API version information
 .PD 1
 .P
 .SH SEE ALSO
-.BR @program_prefix@php (1)
+.BR @program_prefix@php@program_suffix@ (1)
 .SH VERSION INFORMATION
 This manpage describes \fBphp\fP, version @PHP_VERSION@.
 .SH COPYRIGHT

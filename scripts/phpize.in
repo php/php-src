@@ -5,7 +5,7 @@ prefix='@prefix@'
 datarootdir='@datarootdir@'
 exec_prefix="`eval echo @exec_prefix@`"
 phpdir="`eval echo @libdir@`/build"
-includedir="`eval echo @includedir@`/php"
+includedir="`eval echo @includedir@`/@program_prefix@php@program_suffix@"
 builddir="`pwd`"
 SED="@SED@"
 
