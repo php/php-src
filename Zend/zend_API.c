@@ -1146,67 +1146,46 @@ ZEND_API void zend_merge_properties(zval *obj, HashTable *properties) /* {{{ */
 ZEND_API int zend_update_class_constants(zend_class_entry *class_type) /* {{{ */
 {
 	if (!(class_type->ce_flags & ZEND_ACC_CONSTANTS_UPDATED)) {
+		zend_class_entry *ce;
+		zend_class_constant *c;
+		zval *val;
+		zend_property_info *prop_info;
+
 		if (class_type->parent) {
 			if (UNEXPECTED(zend_update_class_constants(class_type->parent) != SUCCESS)) {
 				return FAILURE;
 			}
 		}
 
-		if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
-			/* initialize static members of internal class */
-			int i;
-			zval *p;
-
-#if ZTS
-			CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#else
-			class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
-#endif
-			for (i = 0; i < class_type->default_static_members_count; i++) {
-				p = &class_type->default_static_members_table[i];
-				if (Z_TYPE_P(p) == IS_INDIRECT) {
-					zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
-					ZVAL_DEINDIRECT(q);
-					ZVAL_INDIRECT(&CE_STATIC_MEMBERS(class_type)[i], q);
-				} else {
-					ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
+		ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
+			val = &c->value;
+			if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+				if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
+					return FAILURE;
 				}
 			}
-		} else {
-			zend_class_entry *ce;
-			zend_class_constant *c;
-			zval *val;
-			zend_property_info *prop_info;
+		} ZEND_HASH_FOREACH_END();
 
-			ZEND_HASH_FOREACH_PTR(&class_type->constants_table, c) {
-				val = &c->value;
-				if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-					if (UNEXPECTED(zval_update_constant_ex(val, c->ce) != SUCCESS)) {
-						return FAILURE;
+		ce = class_type;
+		while (ce) {
+			ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
+				if (prop_info->ce == ce) {
+					if (prop_info->flags & ZEND_ACC_STATIC) {
+						val = CE_STATIC_MEMBERS(class_type) + prop_info->offset;
+					} else {
+						val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
+					}
+					ZVAL_DEREF(val);
+					if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
+						if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
+							return FAILURE;
+						}
 					}
 				}
 			} ZEND_HASH_FOREACH_END();
-
-			ce = class_type;
-			while (ce) {
-				ZEND_HASH_FOREACH_PTR(&ce->properties_info, prop_info) {
-					if (prop_info->ce == ce) {
-						if (prop_info->flags & ZEND_ACC_STATIC) {
-							val = CE_STATIC_MEMBERS(class_type) + prop_info->offset;
-						} else {
-							val = (zval*)((char*)class_type->default_properties_table + prop_info->offset - OBJ_PROP_TO_OFFSET(0));
-						}
-						ZVAL_DEREF(val);
-						if (Z_TYPE_P(val) == IS_CONSTANT_AST) {
-							if (UNEXPECTED(zval_update_constant_ex(val, ce) != SUCCESS)) {
-								return FAILURE;
-							}
-						}
-					}
-				} ZEND_HASH_FOREACH_END();
-				ce = ce->parent;
-			}
+			ce = ce->parent;
 		}
+
 		class_type->ce_flags |= ZEND_ACC_CONSTANTS_UPDATED;
 	}
 
@@ -3705,9 +3684,6 @@ ZEND_API int zend_declare_property_ex(zend_class_entry *ce, zend_string *name, z
 
 	if (ce->type == ZEND_INTERNAL_CLASS) {
 		property_info = pemalloc(sizeof(zend_property_info), 1);
-		if ((access_type & ZEND_ACC_STATIC) || Z_TYPE_P(property) == IS_CONSTANT_AST) {
-			ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
-		}
 	} else {
 		property_info = zend_arena_alloc(&CG(arena), sizeof(zend_property_info));
 		if (Z_TYPE_P(property) == IS_CONSTANT_AST) {

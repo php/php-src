@@ -1420,6 +1420,34 @@ ZEND_API zend_function *zend_std_get_static_method(zend_class_entry *ce, zend_st
 }
 /* }}} */
 
+static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{ */
+{
+	int i;
+	zval *p;
+
+	if (!CE_STATIC_MEMBERS(class_type) && class_type->default_static_members_count) {
+		if (class_type->parent) {
+			zend_intenal_class_init_statics(class_type->parent);
+		}
+
+#if ZTS
+		CG(static_members_table)[(zend_intptr_t)(class_type->static_members_table)] = emalloc(sizeof(zval) * class_type->default_static_members_count);
+#else
+		class_type->static_members_table = emalloc(sizeof(zval) * class_type->default_static_members_count);
+#endif
+		for (i = 0; i < class_type->default_static_members_count; i++) {
+			p = &class_type->default_static_members_table[i];
+			if (Z_TYPE_P(p) == IS_INDIRECT) {
+				zval *q = &CE_STATIC_MEMBERS(class_type->parent)[i];
+				ZVAL_DEINDIRECT(q);
+				ZVAL_INDIRECT(&CE_STATIC_MEMBERS(class_type)[i], q);
+			} else {
+				ZVAL_COPY_OR_DUP(&CE_STATIC_MEMBERS(class_type)[i], p);
+			}
+		}
+	}
+} /* }}} */
+
 ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent) /* {{{ */
 {
 	zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
@@ -1448,11 +1476,15 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 
 	/* check if static properties were destoyed */
 	if (UNEXPECTED(CE_STATIC_MEMBERS(ce) == NULL)) {
+		if (ce->type == ZEND_INTERNAL_CLASS) {
+			zend_intenal_class_init_statics(ce);
+		} else {
 undeclared_property:
-		if (!silent) {
-			zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+			if (!silent) {
+				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+			}
+			return NULL;
 		}
-		return NULL;
 	}
 
 	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
