@@ -421,6 +421,7 @@ int php_init_config(void)
 {
 	char *php_ini_file_name = NULL;
 	char *php_ini_search_path = NULL;
+	char *env_location = NULL;
 	int php_ini_scanned_path_len;
 	char *open_basedir;
 	int free_ini_search_path = 0;
@@ -445,7 +446,6 @@ int php_init_config(void)
 	} else if (!sapi_module.php_ini_ignore) {
 		int search_path_size;
 		char *default_location;
-		char *env_location;
 		static const char paths_separator[] = { ZEND_PATHS_SEPARATOR, 0 };
 #ifdef PHP_WIN32
 		char *reg_location;
@@ -619,10 +619,6 @@ int php_init_config(void)
 		}
 	}
 
-	if (free_ini_search_path) {
-		efree(php_ini_search_path);
-	}
-
 	PG(open_basedir) = open_basedir;
 
 	if (fh.handle.fp) {
@@ -652,6 +648,33 @@ int php_init_config(void)
 		php_ini_scanned_path = PHP_CONFIG_FILE_SCAN_DIR;
 	}
 	php_ini_scanned_path_len = (int)strlen(php_ini_scanned_path);
+
+	if (!php_ini_scanned_path_len && php_ini_search_path && *php_ini_search_path) {
+		char *bufpath, *debpath, *endpath;
+		int lenpath;
+		/* Or fall back further to --with-config-file-path with added "%s.d" sapi module */
+		php_ini_scanned_path = (char *) emalloc(MAXPATHLEN + 1);
+		php_ini_scanned_path[0] = 0;
+		bufpath = estrdup(php_ini_search_path);
+		for (debpath = bufpath ; debpath ; debpath=endpath) {
+			endpath = strchr(debpath, DEFAULT_DIR_SEPARATOR);
+			if (endpath) {
+				*(endpath++) = 0;
+			}
+			lenpath = strlen(debpath);
+			if (lenpath <= 0) {
+				continue;
+			}
+			if (!sapi_module.php_ini_ignore_cwd && debpath[0] == '.' && debpath[1] == 0) {
+				/* Never search for additional ini files from current directory, ever! */
+				continue;
+			}
+			snprintf(php_ini_scanned_path, MAXPATHLEN, "%s%s%c%s.d%c", php_ini_scanned_path, debpath, DEFAULT_SLASH, sapi_module.name, DEFAULT_DIR_SEPARATOR);
+		}
+		efree(bufpath);
+		php_ini_scanned_path_len = strlen(php_ini_scanned_path);
+		php_ini_scanned_path[--php_ini_scanned_path_len] = 0;
+	}
 
 	/* Scan and parse any .ini files found in scan path if path not empty. */
 	if (!sapi_module.php_ini_ignore && php_ini_scanned_path_len) {
@@ -742,6 +765,10 @@ int php_init_config(void)
 	} else {
 		/* Make sure an empty php_ini_scanned_path ends up as NULL */
 		php_ini_scanned_path = NULL;
+	}
+
+	if (free_ini_search_path) {
+		efree(php_ini_search_path);
 	}
 
 	if (sapi_module.ini_entries) {
