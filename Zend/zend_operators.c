@@ -2031,15 +2031,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					if (Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
 						convert_compare_result_to_long(result);
 						return SUCCESS;
-					} else {
-						if (Z_OBJ_HANDLER_P(op1, equals)) {
-							if (Z_OBJ_HANDLER_P(op1, equals)(result, op1, op2) == SUCCESS) {
-								if (i_zend_is_true(result)) {
-									ZVAL_LONG(result, 0);
-									return SUCCESS;
-								}
-							}
-						}
 					}
 				}
 
@@ -2052,15 +2043,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 						convert_compare_result_to_long(result);
 						Z_LVAL_P(result) *= -1;
 						return SUCCESS;
-					} else {
-						if (Z_OBJ_HANDLER_P(op2, equals)) {
-							if (Z_OBJ_HANDLER_P(op2, equals)(result, op2, op1) == SUCCESS) {
-								if (i_zend_is_true(result)) {
-									ZVAL_LONG(result, 0);
-									return SUCCESS;
-								}
-							}
-						}
 					}
 				}
 
@@ -2080,15 +2062,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 					if (Z_OBJ_HANDLER_P(op1, compare) && Z_OBJ_HANDLER_P(op1, compare)(result, op1, op2) == SUCCESS) {
  						convert_compare_result_to_long(result);
  						return SUCCESS;
- 					} else {
- 						if (Z_OBJ_HANDLER_P(op1, equals)) {
-							if (Z_OBJ_HANDLER_P(op1, equals)(result, op1, op2) == SUCCESS) {
-								if (i_zend_is_true(result)) {
-									ZVAL_LONG(result, 0);
-									return SUCCESS;
-								}
-							}
-						}
  					}
 				}
 
@@ -2097,15 +2070,6 @@ ZEND_API int ZEND_FASTCALL compare_function(zval *result, zval *op1, zval *op2) 
 						convert_compare_result_to_long(result);
 						Z_LVAL_P(result) *= -1;
  						return SUCCESS;
- 					} else {
- 						if (Z_OBJ_HANDLER_P(op2, equals)) {
-							if (Z_OBJ_HANDLER_P(op2, equals)(result, op2, op1) == SUCCESS) {
-								if (i_zend_is_true(result)) {
-									ZVAL_LONG(result, 0);
-									return SUCCESS;
-								}
-							}
-						}
  					}
 				}
 
@@ -2323,6 +2287,26 @@ ZEND_API int ZEND_FASTCALL is_smaller_or_equal_function(zval *result, zval *op1,
 		return FAILURE;
 	}
 	ZVAL_BOOL(result, (Z_LVAL_P(result) <= 0));
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL is_greater_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (compare_function(result, op1, op2) == FAILURE) {
+		return FAILURE;
+	}
+	ZVAL_BOOL(result, (Z_LVAL_P(result) > 0));
+	return SUCCESS;
+}
+/* }}} */
+
+ZEND_API int ZEND_FASTCALL is_greater_or_equal_function(zval *result, zval *op1, zval *op2) /* {{{ */
+{
+	if (compare_function(result, op1, op2) == FAILURE) {
+		return FAILURE;
+	}
+	ZVAL_BOOL(result, (Z_LVAL_P(result) >= 0));
 	return SUCCESS;
 }
 /* }}} */

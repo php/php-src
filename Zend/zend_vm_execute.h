@@ -47689,7 +47689,6 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_EQUAL_SPEC_CV_CV_HANDLER(ZE
 	result = EX_VAR(opline->result.var);
 	is_equal_function(result, op1, op2);
 
-
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
 }
 
