@@ -2358,48 +2358,6 @@ static zend_object *date_object_clone_timezone(zval *this_ptr) /* {{{ */
 	return &new_obj->std;
 } /* }}} */
 
-static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
-{
-	HashTable *props;
-	zval zv;
-	php_timezone_obj     *tzobj;
-
-
-	tzobj = Z_PHPTIMEZONE_P(object);
-
-	props = zend_std_get_properties(object);
-
-	if (!tzobj->initialized) {
-		return props;
-	}
-
-	ZVAL_LONG(&zv, tzobj->type);
-	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
-
-	switch (tzobj->type) {
-		case TIMELIB_ZONETYPE_ID:
-			ZVAL_STRING(&zv, tzobj->tzi.tz->name);
-			break;
-		case TIMELIB_ZONETYPE_OFFSET: {
-			zend_string *tmpstr = zend_string_alloc(sizeof("UTC+05:00")-1, 0);
-
-			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
-				tzobj->tzi.utc_offset < 0 ? '-' : '+',
-				abs(tzobj->tzi.utc_offset / 3600),
-				abs(((tzobj->tzi.utc_offset % 3600) / 60)));
-
-			ZVAL_NEW_STR(&zv, tmpstr);
-			}
-			break;
-		case TIMELIB_ZONETYPE_ABBR:
-			ZVAL_STRING(&zv, tzobj->tzi.z.abbr);
-			break;
-	}
-	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
-
-	return props;
-} /* }}} */
-
 static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 {
 	switch (tzobj->type) {
@@ -2412,8 +2370,8 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 
 			ZSTR_LEN(tmpstr) = snprintf(ZSTR_VAL(tmpstr), sizeof("+05:00"), "%c%02d:%02d",
 				utc_offset < 0 ? '-' : '+',
-				abs(utc_offset / 3600),
-				abs(((utc_offset % 3600) / 60)));
+				abs((int)(utc_offset / 3600)),
+				abs((int)(utc_offset % 3600) / 60));
 
 			ZVAL_NEW_STR(zv, tmpstr);
 			}
@@ -2423,6 +2381,29 @@ static void php_timezone_to_string(php_timezone_obj *tzobj, zval *zv)
 			break;
 	}
 }
+
+static HashTable *date_object_get_properties_timezone(zval *object) /* {{{ */
+{
+	HashTable *props;
+	zval zv;
+	php_timezone_obj     *tzobj;
+
+	tzobj = Z_PHPTIMEZONE_P(object);
+
+	props = zend_std_get_properties(object);
+
+	if (!tzobj->initialized) {
+		return props;
+	}
+
+	ZVAL_LONG(&zv, tzobj->type);
+	zend_hash_str_update(props, "timezone_type", sizeof("timezone_type")-1, &zv);
+
+	php_timezone_to_string(tzobj, &zv);
+	zend_hash_str_update(props, "timezone", sizeof("timezone")-1, &zv);
+
+	return props;
+} /* }}} */
 
 static HashTable *date_object_get_debug_info_timezone(zval *object, int *is_temp) /* {{{ */
 {
@@ -4298,6 +4279,7 @@ static zval *date_interval_get_property_ptr_ptr(zval *object, zval *member, int 
 		zend_binary_strcmp("h", sizeof("h") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||
 		zend_binary_strcmp("i", sizeof("i") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||
 		zend_binary_strcmp("s", sizeof("s") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||
+		zend_binary_strcmp("f", sizeof("f") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||
 		zend_binary_strcmp("days", sizeof("days") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0 ||
 		zend_binary_strcmp("invert", sizeof("invert") - 1, Z_STRVAL_P(member), Z_STRLEN_P(member)) == 0) {
 		/* Fallback to read_property. */

@@ -1,6 +1,41 @@
 PHP                                                                        NEWS
 |||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||
-21 Jun 2018, PHP 7.2.7
+?? ??? ????, PHP 7.2.8
+
+- Core:
+  . Fixed bug #76534 (PHP hangs on 'illegal string offset on string references
+    with an error handler). (Laruence)
+  . Fixed bug #76520 (Object creation leaks memory when executed over HTTP).
+    (Nikita)
+  . Fixed bug #76502 (Chain of mixed exceptions and errors does not serialize
+    properly). (Nikita)
+
+- Date:
+  . Fixed bug #76462 (Undefined property: DateInterval::$f). (Anatol)
+
+- EXIF:
+  . Fixed bug #76409 (heap use after free in _php_stream_free). (cmb)
+
+- FPM:
+  . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
+    non-blocking). (Nikita)
+
+- Opcache:
+  . Fixed bug #76477 (Opcache causes empty return value).
+    (Nikita, Laruence)
+
+- phpdbg:
+  . Fix arginfo wrt. optional/required parameters. (cmb)
+
+- Standard:
+  . Fixed bug #76505 (array_merge_recursive() is duplicating sub-array keys).
+    (Laruence)
+
+- ZIP:
+  . Fixed bug #76461 (OPSYS_Z_CPM defined instead of OPSYS_CPM).
+    (Dennis Birkholz, Remi)
+
+07 Jun 2018, PHP 7.2.7
 
 - Core:
   . Fixed bug #76337 (segfault when opcache enabled + extension use

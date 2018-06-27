@@ -756,16 +756,16 @@ ZEND_BEGIN_ARG_INFO_EX(phpdbg_break_function_arginfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, function)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_color_arginfo, 0, 0, 2)
 	ZEND_ARG_INFO(0, element)
 	ZEND_ARG_INFO(0, color)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_prompt_arginfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, string)
 ZEND_END_ARG_INFO()
 
-ZEND_BEGIN_ARG_INFO_EX(phpdbg_exec_arginfo, 0, 0, 0)
+ZEND_BEGIN_ARG_INFO_EX(phpdbg_exec_arginfo, 0, 0, 1)
 	ZEND_ARG_INFO(0, context)
 ZEND_END_ARG_INFO()
 

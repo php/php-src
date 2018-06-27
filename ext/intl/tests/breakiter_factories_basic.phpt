@@ -12,35 +12,29 @@ ini_set("intl.default_locale", "ja");
 $m = array('createWordInstance', 'createLineInstance', 'createCharacterInstance',
 	'createSentenceInstance', 'createTitleInstance');
 
-$t = 'Frase 1... Frase 2'.
+$t = 'Frase 1... Frase 2';
 
-$o1 = $o2 = null;
 foreach ($m as $method) {
 	echo "===== $method =====\n";
-	$o1 = call_user_func(array('IntlBreakIterator', $method), 'ja');
-	var_dump($o1 == $o2);
-	$o2 = call_user_func(array('IntlBreakIterator', $method), NULL);
-	var_dump($o1 == $o2);
+	$o1 = IntlBreakIterator::$method('ja');
+	$o2 = IntlBreakIterator::$method(NULL);
+	$o3 = IntlBreakIterator::$method();
+	var_dump($o1 == $o2 && $o2 == $o3);
 	echo "\n";
 }
 --EXPECT--
 ===== createWordInstance =====
-bool(false)
 bool(true)
 
 ===== createLineInstance =====
-bool(false)
 bool(true)
 
 ===== createCharacterInstance =====
-bool(false)
 bool(true)
 
 ===== createSentenceInstance =====
-bool(false)
 bool(true)
 
 ===== createTitleInstance =====
-bool(false)
 bool(true)
 

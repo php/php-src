@@ -4,6 +4,7 @@ capture_peer_cert context captures on verify failure
 <?php
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -35,5 +36,6 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECTF--
 string(%d) "bug54992.local"

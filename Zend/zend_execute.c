@@ -1651,7 +1651,9 @@ fetch_from_array:
 			zend_throw_error(NULL, "[] operator not supported for strings");
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
-			zend_wrong_string_offset(EXECUTE_DATA_C);
+			if (EXPECTED(EG(exception) == NULL)) {
+				zend_wrong_string_offset(EXECUTE_DATA_C);
+			}
 		}
 		ZVAL_ERROR(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
