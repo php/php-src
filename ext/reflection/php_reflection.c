@@ -3927,7 +3927,7 @@ ZEND_METHOD(reflection_class, getStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	prop = zend_std_get_static_property(ce, name, 1, &prop_info);
+	prop = zend_std_get_static_property(ce, name, BP_VAR_IS, &prop_info);
 	if (!prop) {
 		if (def_value) {
 			ZVAL_COPY(return_value, def_value);
@@ -3962,8 +3962,9 @@ ZEND_METHOD(reflection_class, setStaticPropertyValue)
 	if (UNEXPECTED(zend_update_class_constants(ce) != SUCCESS)) {
 		return;
 	}
-	variable_ptr = zend_std_get_static_property(ce, name, 1, &prop_info);
+	variable_ptr = zend_std_get_static_property(ce, name, BP_VAR_W, &prop_info);
 	if (!variable_ptr) {
+		zend_clear_exception();
 		zend_throw_exception_ex(reflection_exception_ptr, 0,
 				"Class %s does not have a property named %s", ZSTR_VAL(ce->name), ZSTR_VAL(name));
 		return;

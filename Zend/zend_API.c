@@ -4110,7 +4110,7 @@ ZEND_API int zend_update_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(fake_scope) = scope;
-	property = zend_std_get_static_property(scope, key, 0, &prop_info);
+	property = zend_std_get_static_property(scope, key, BP_VAR_W, &prop_info);
 	EG(fake_scope) = old_scope;
 	zend_string_efree(key);
 	if (!property) {
@@ -4237,7 +4237,7 @@ ZEND_API zval *zend_read_static_property(zend_class_entry *scope, const char *na
 	zend_string *key = zend_string_init(name, name_length, 0);
 
 	EG(fake_scope) = scope;
-	property = zend_std_get_static_property(scope, key, silent, &prop_info);
+	property = zend_std_get_static_property(scope, key, silent ? BP_VAR_IS : BP_VAR_R, &prop_info);
 	EG(fake_scope) = old_scope;
 	zend_string_efree(key);
 

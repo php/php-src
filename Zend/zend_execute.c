@@ -2658,7 +2658,7 @@ static zend_never_inline int zend_fetch_static_property_address_ex(zval **retval
 		}
 	}
 
-	*retval = zend_std_get_static_property(ce, name, fetch_type == BP_VAR_IS, &property_info);
+	*retval = zend_std_get_static_property(ce, name, fetch_type, &property_info);
 
 	if (UNEXPECTED(op1_type != IS_CONST)) {
 		zend_tmp_string_release(tmp_name);
@@ -2695,16 +2695,6 @@ static zend_always_inline int zend_fetch_static_property_address(zval **retval, 
 		if (UNEXPECTED(success != SUCCESS)) {
 			return FAILURE;
 		}
-	}
-
-	if ((fetch_type == BP_VAR_R || fetch_type == BP_VAR_RW) && UNEXPECTED(Z_TYPE_P(*retval) == IS_UNDEF) && UNEXPECTED(property_info->type != 0)) {
-		const char *class_name, *prop_name;
-		zend_unmangle_property_name_ex(property_info->name, &class_name, &prop_name, NULL);
-		zend_throw_exception_ex(zend_ce_type_error, ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
-			"Typed static property %s::$%s must not be accessed before initialization",
-			ZSTR_VAL(property_info->ce->name),
-			prop_name);
-		return FAILURE;
 	}
 
 	if (by_ref && UNEXPECTED(property_info) && Z_TYPE_P(*retval) != IS_REFERENCE) {

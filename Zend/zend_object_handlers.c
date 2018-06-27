@@ -1514,23 +1514,24 @@ static void zend_intenal_class_init_statics(zend_class_entry *class_type) /* {{{
 	}
 } /* }}} */
 
-ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, zend_bool silent, zend_property_info **property_info) /* {{{ */
+ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *property_name, int type, zend_property_info **property_info_ptr) /* {{{ */
 {
 	zval *ret;
-	*property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
+	zend_property_info *property_info = zend_hash_find_ptr(&ce->properties_info, property_name);
+	*property_info_ptr = property_info;
 
-	if (UNEXPECTED(*property_info == NULL)) {
+	if (UNEXPECTED(property_info == NULL)) {
 		goto undeclared_property;
 	}
 
-	if (UNEXPECTED(!zend_verify_property_access(*property_info, ce))) {
-		if (!silent) {
-			zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string((*property_info)->flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
+	if (UNEXPECTED(!zend_verify_property_access(property_info, ce))) {
+		if (type != BP_VAR_IS) {
+			zend_throw_error(NULL, "Cannot access %s property %s::$%s", zend_visibility_string(property_info->flags), ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 		}
 		return NULL;
 	}
 
-	if (UNEXPECTED(((*property_info)->flags & ZEND_ACC_STATIC) == 0)) {
+	if (UNEXPECTED((property_info->flags & ZEND_ACC_STATIC) == 0)) {
 		goto undeclared_property;
 	}
 
@@ -1546,15 +1547,26 @@ ZEND_API zval *zend_std_get_static_property(zend_class_entry *ce, zend_string *p
 			zend_intenal_class_init_statics(ce);
 		} else {
 undeclared_property:
-			if (!silent) {
+			if (type != BP_VAR_IS) {
 				zend_throw_error(NULL, "Access to undeclared static property: %s::$%s", ZSTR_VAL(ce->name), ZSTR_VAL(property_name));
 			}
 			return NULL;
 		}
 	}
 
-	ret = CE_STATIC_MEMBERS(ce) + (*property_info)->offset;
+	ret = CE_STATIC_MEMBERS(ce) + property_info->offset;
 	ZVAL_DEINDIRECT(ret);
+
+	if (UNEXPECTED((type == BP_VAR_R || type == BP_VAR_RW)
+				&& Z_TYPE_P(ret) == IS_UNDEF && property_info->type != 0)) {
+		zend_throw_exception_ex(zend_ce_type_error,
+			ZEND_TYPE_IS_CLASS(property_info->type) ? IS_OBJECT : ZEND_TYPE_CODE(property_info->type),
+			"Typed static property %s::$%s must not be accessed before initialization",
+			ZSTR_VAL(property_info->ce->name),
+			ZSTR_VAL(property_name));
+		return NULL;
+	}
+
 	return ret;
 }
 /* }}} */
