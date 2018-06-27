@@ -571,7 +571,7 @@ $op_data_get_zval_ptr_deref = array(
 );
 
 $op_data_get_zval_ptr_ptr = array(
-	"ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, execute_data, &free_op_data, \\1)",
+	"ANY"      => "get_zval_ptr_ptr((opline+1)->op1_type, (opline+1)->op1, &free_op_data, \\1 EXECUTE_DATA_CC)",
 	"TMP"      => "NULL",
 	"VAR"      => "_get_zval_ptr_ptr_var((opline+1)->op1.var, &free_op_data EXECUTE_DATA_CC)",
 	"CONST"    => "NULL",
