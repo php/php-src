@@ -27,6 +27,7 @@
 
 static zend_class_entry *zend_test_interface;
 static zend_class_entry *zend_test_class;
+static zend_class_entry *zend_test_child_class;
 static zend_class_entry *zend_test_trait;
 static zend_object_handlers zend_test_class_handlers;
 
@@ -191,6 +192,11 @@ PHP_MINIT_FUNCTION(zend_test)
 	zend_class_implements(zend_test_class, 1, zend_test_interface);
 	zend_test_class->create_object = zend_test_class_new;
 	zend_test_class->get_static_method = zend_test_class_static_method_get;
+
+	zend_declare_property_null(zend_test_class, "_StaticProp", sizeof("_StaticProp") - 1, ZEND_ACC_STATIC);
+
+	INIT_CLASS_ENTRY(class_entry, "_ZendTestChildClass", NULL);
+	zend_test_child_class = zend_register_internal_class_ex(&class_entry, zend_test_class);
 
 	memcpy(&zend_test_class_handlers, &std_object_handlers, sizeof(zend_object_handlers));
 	zend_test_class_handlers.get_method = zend_test_class_method_get;
