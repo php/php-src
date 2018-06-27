@@ -1,14 +1,13 @@
 --TEST--
 CVE 2013-4073: Null-byte certificate handling
 --SKIPIF--
-<?php 
-if (!extension_loaded("openssl")) die("skip");
+<?php if (!extension_loaded("openssl")) die("skip"); ?>
 --FILE--
 <?php
 $cert = file_get_contents(__DIR__ . '/cve2013_4073.pem');
 $info = openssl_x509_parse($cert);
 var_export($info['extensions']);
-
+?>
 --EXPECTF--
 array (
   'basicConstraints' => 'CA:FALSE',

@@ -6,7 +6,7 @@ openssl_pkcs7_decrypt() and invalid parameters
 <?php
 
 function myErrorHandler($errno, $errstr, $errfile, $errline) {
-	var_dump($errstr);
+    var_dump($errstr);
 } 
 set_error_handler("myErrorHandler"); 
 
