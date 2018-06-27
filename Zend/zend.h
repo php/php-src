@@ -156,11 +156,13 @@ struct _zend_class_entry {
 
 	uint32_t num_interfaces;
 	uint32_t num_traits;
+	uint32_t num_friends;
 	zend_class_entry **interfaces;
 
 	zend_class_entry **traits;
 	zend_trait_alias **trait_aliases;
 	zend_trait_precedence **trait_precedences;
+	zend_class_entry **friends;
 
 	union {
 		struct {

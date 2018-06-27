@@ -1530,6 +1530,10 @@ NEWLINE ("\r"|"\n"|"\r\n")
 	RETURN_TOKEN(T_USE);
 }
 
+<ST_IN_SCRIPTING>"friend" {
+	RETURN_TOKEN(T_FRIEND);
+}
+
 <ST_IN_SCRIPTING>"insteadof" {
     RETURN_TOKEN(T_INSTEADOF);
 }
