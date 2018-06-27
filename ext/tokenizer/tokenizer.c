@@ -194,7 +194,7 @@ void on_event(zend_php_scanner_event event, int token, int line, void *context)
 			{
 				if (token == END) break;
 				/* Special cases */
-				if (token == ';' && LANG_SCNG(yy_leng) == sizeof("?>") - 1) {
+				if (token == ';' && LANG_SCNG(yy_leng) > 1) { /* <? or <?\n or <?\r\n */
 					token = T_CLOSE_TAG;
 				} else if (token == T_ECHO && LANG_SCNG(yy_leng) == sizeof("<?=") - 1) {
 					token = T_OPEN_TAG_WITH_ECHO;
