@@ -340,7 +340,7 @@ static zend_always_inline int zend_verify_property_access(zend_property_info *pr
 		} else {
 			scope = zend_get_executed_scope();
 		}
-		return (ce == scope || property_info->ce == scope || is_friend_of(ce, scope));
+		return (ce == scope || property_info->ce == scope);
 	} else if (property_info->flags & ZEND_ACC_PROTECTED) {
 		if (EG(fake_scope)) {
 			scope = EG(fake_scope);
