@@ -41,9 +41,9 @@ $derived->touch();
 
 ?>
 --EXPECTF--
-Notice: Undefined property: Derived::$secret in /var/www/html/php-src/Zend/tests/friends/friend_inheritance_003.php on line %d
+Notice: Undefined property: Derived::$secret in %s on line %d
 
 derived
 override
 
-Notice: Undefined property: Derived::$secret in /var/www/html/php-src/Zend/tests/friends/friend_inheritance_003.php on line %d
+Notice: Undefined property: Derived::$secret in %s on line %d

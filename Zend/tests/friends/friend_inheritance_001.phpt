@@ -34,8 +34,8 @@ $friend->touch($derived);
 --EXPECTF--
 base
 
-Fatal error: Uncaught Error: Cannot access protected property Derived::$property in /var/www/html/php-src/Zend/tests/friends/friend_inheritance_001.php:%d
+Fatal error: Uncaught Error: Cannot access protected property Derived::$property in %s:%d
 Stack trace:
-#0 /var/www/html/php-src/Zend/tests/friends/friend_inheritance_001.php(%d): Friendly->touch(Object(Derived))
+#0 %s(%d): Friendly->touch(Object(Derived))
 #1 {main}
-  thrown in /var/www/html/php-src/Zend/tests/friends/friend_inheritance_001.php on line %d
+  thrown in %s on line %d
