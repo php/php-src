@@ -55,7 +55,7 @@ static void zend_accel_destroy_zend_function(zval *zv)
 		}
 	}
 
-	destroy_zend_function(function);
+	zend_function_dtor(zv);
 }
 
 static void zend_accel_destroy_zend_class(zval *zv)

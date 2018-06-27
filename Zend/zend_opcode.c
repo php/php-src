@@ -97,30 +97,10 @@ void init_op_array(zend_op_array *op_array, zend_uchar type, int initial_ops_siz
 
 ZEND_API void destroy_zend_function(zend_function *function)
 {
-	if (function->type == ZEND_USER_FUNCTION) {
-		destroy_op_array(&function->op_array);
-	} else {
-		ZEND_ASSERT(function->type == ZEND_INTERNAL_FUNCTION);
-		ZEND_ASSERT(function->common.function_name);
-		zend_string_release_ex(function->common.function_name, 1);
+	zval tmp;
 
-		if (function->common.arg_info &&
-		    (function->common.fn_flags & (ZEND_ACC_HAS_RETURN_TYPE|ZEND_ACC_HAS_TYPE_HINTS))) {
-			uint32_t i;
-			uint32_t num_args = function->common.num_args + 1;
-			zend_arg_info *arg_info = function->common.arg_info - 1;
-
-			if (function->common.fn_flags & ZEND_ACC_VARIADIC) {
-				num_args++;
-			}
-			for (i = 0 ; i < num_args; i++) {
-				if (ZEND_TYPE_IS_CLASS(arg_info[i].type)) {
-					zend_string_release_ex(ZEND_TYPE_NAME(arg_info[i].type), 1);
-				}
-			}
-			free(arg_info);
-		}
-	}
+	ZVAL_PTR(&tmp, function);
+	zend_function_dtor(&tmp);
 }
 
 ZEND_API void zend_function_dtor(zval *zv)
@@ -172,7 +152,6 @@ ZEND_API void zend_cleanup_internal_class_data(zend_class_entry *ce)
 #else
 		ce->static_members_table = NULL;
 #endif
-		ce->ce_flags &= ~ZEND_ACC_CONSTANTS_UPDATED;
 		while (p != end) {
 			i_zval_ptr_dtor(p ZEND_FILE_LINE_CC);
 			p++;

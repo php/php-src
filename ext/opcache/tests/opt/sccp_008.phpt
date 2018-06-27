@@ -32,6 +32,6 @@ L1 (3):     JMPZ CV0($x) L4
 L2 (4):     CV1($a) = QM_ASSIGN array(...)
 L3 (4):     JMP L5
 L4 (6):     CV1($a) = QM_ASSIGN array(...)
-L5 (8):     V2 = FETCH_DIM_R CV1($a) int(1)
-L6 (8):     ECHO V2
+L5 (8):     T2 = FETCH_DIM_R CV1($a) int(1)
+L6 (8):     ECHO T2
 L7 (9):     RETURN null

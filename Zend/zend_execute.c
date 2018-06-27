@@ -1396,6 +1396,10 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 	const zend_op *end;
 	uint32_t var;
 
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return;
+	}
+
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
