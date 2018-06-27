@@ -11,6 +11,7 @@ PHP                                                                        NEWS
     properly). (Nikita)
   . Fixed bug #76509 (Inherited static properties can be desynchronized from
     their parent by ref). (Nikita)
+  . Fixed bug #76439 (Changed behaviour in unclosed HereDoc). (Nikita, tpunt)
 
 - FPM:
   . Fixed bug #73342 (Vulnerability in php-fpm by changing stdin to
