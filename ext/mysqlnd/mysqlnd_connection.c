@@ -678,9 +678,13 @@ MYSQLND_METHOD(mysqlnd_conn_data, connect)(MYSQLND_CONN_DATA * conn,
 
 	{
 		const MYSQLND_CSTRING scheme = { transport.s, transport.l };
+		/* This will be overwritten below with a copy, but we can use it during authentication */
+		conn->unix_socket.s = (char *)socket_or_pipe.s;
 		if (FAIL == conn->m->connect_handshake(conn, &scheme, &username, &password, &database, mysql_flags)) {
+			conn->unix_socket.s = NULL;
 			goto err;
 		}
+		conn->unix_socket.s = NULL;
 	}
 
 	{
