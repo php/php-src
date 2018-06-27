@@ -16,8 +16,6 @@
    +----------------------------------------------------------------------+
 */
 
-/* $Id:$ */
-
 #include "php.h"
 #include "zend_compile.h"
 #include "zend_extensions.h"
@@ -79,9 +77,11 @@ static uint32_t zend_strlen_info(const zend_call_info *call_info, const zend_ssa
 			tmp |= MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
 		}
 		return tmp;
-	} else {
+	} else if (call_info->num_args != -1) {
 		/* warning, and returns NULL */
 		return FUNC_MAY_WARN | MAY_BE_NULL;
+	} else {
+		return MAY_BE_LONG | FUNC_MAY_WARN | MAY_BE_NULL;
 	}
 }
 
@@ -90,9 +90,11 @@ static uint32_t zend_dechex_info(const zend_call_info *call_info, const zend_ssa
 	if (call_info->caller_init_opline->extended_value == (uint32_t)call_info->num_args &&
 	    call_info->num_args == 1) {
 		return MAY_BE_RC1 | MAY_BE_STRING;
-	} else {
+	} else if (call_info->num_args != -1) {
 		/* warning, and returns NULL */
 		return FUNC_MAY_WARN | MAY_BE_NULL;
+	} else {
+		return FUNC_MAY_WARN | MAY_BE_RC1 | MAY_BE_STRING | MAY_BE_NULL;
 	}
 }
 

@@ -88,7 +88,7 @@ include_once( 'ut_common.inc' );
 ut_run();
 
 ?>
---EXPECT--
+--EXPECTF--
 Symbol 'DECIMAL_SEPARATOR_SYMBOL'
 Default symbol: [.]
 New symbol: [_._]
@@ -132,7 +132,7 @@ A number formatted with the new symbol: 1.2345123456E4
 Symbol 'CURRENCY_SYMBOL'
 Default symbol: [$]
 New symbol: [_$_]
-A number formatted with the new symbol: _$_12,345.12
+A number formatted with the new symbol: _$_%A12,345.12
 
 Symbol 'INTL_CURRENCY_SYMBOL'
 Default symbol: [USD]

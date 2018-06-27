@@ -637,6 +637,7 @@ PHP_MINIT_FUNCTION(sodium)
 
 PHP_MSHUTDOWN_FUNCTION(sodium)
 {
+	randombytes_close();
 	return SUCCESS;
 }
 

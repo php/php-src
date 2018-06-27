@@ -4,7 +4,7 @@
 <?php 
 if (!extension_loaded("openssl")) die("skip openssl not loaded");
 if (!function_exists("proc_open")) die("skip no proc_open");
-if (OPENSSL_VERSION_NUMBER < 0x009070af) die("skip openssl version too low");
+?>
 --FILE--
 <?php
 $serverCode = <<<'CODE'
@@ -38,5 +38,6 @@ CODE;
 
 include 'ServerClientTestCase.inc';
 ServerClientTestCase::getInstance()->run($clientCode, $serverCode);
+?>
 --EXPECT--
 Sending bug 46127
