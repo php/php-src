@@ -121,8 +121,7 @@ static void php_phpdbg_destroy_bp_condition(zval *data) /* {{{ */
 
 static void php_phpdbg_destroy_registered(zval *data) /* {{{ */
 {
-	zend_function *function = (zend_function *) Z_PTR_P(data);
-	destroy_zend_function(function);
+	zend_function_dtor(data);
 } /* }}} */
 
 static void php_phpdbg_destroy_file_source(zval *data) /* {{{ */
