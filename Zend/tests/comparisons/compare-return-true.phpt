@@ -14,5 +14,5 @@ class A
 var_dump(new A <=> new A);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)

@@ -49,7 +49,7 @@ var_dump(new ReversedComparable(1) <=> new Comparable(2)); // 1
 
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(0)
 int(-1)

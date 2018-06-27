@@ -43,7 +43,7 @@ var_dump(new Equatable(1) <=> new Equatable(1)); //  0
 var_dump(new Equatable(1) <=> new Equatable(2)); //  1
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)
 bool(false)

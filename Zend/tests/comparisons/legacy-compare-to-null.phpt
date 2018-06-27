@@ -23,7 +23,7 @@ var_dump(null >   new stdClass);
 var_dump(null <=> new stdClass);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
 bool(false)

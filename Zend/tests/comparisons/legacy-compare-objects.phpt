@@ -20,7 +20,7 @@ var_dump($b <=> $a);
 var_dump($b <=> $b);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(0)
 int(-1)
 int(1)

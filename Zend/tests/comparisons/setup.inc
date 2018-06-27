@@ -1,7 +1,9 @@
 <?php
 
 /**
- * 
+ * Base class that has a $value, and $decoy which exists to make sure that we
+ * don't get false positives when default behaviour compares $value and our
+ * magic methods aren't called at all. 
  */
 class Base 
 {

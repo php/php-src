@@ -21,7 +21,7 @@ var_dump(new A <=> new B);
 var_dump(new B <=> new A);
 
 ?>
---EXPECTF--
+--EXPECT--
 Comparing!
 int(-1)
 Comparing!

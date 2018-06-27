@@ -28,7 +28,7 @@ var_dump(in_array(new Comparable(4), $array)); // no
 var_dump(in_array(new Comparable(5), $array)); // no
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

@@ -21,7 +21,7 @@ var_dump(new Comparable(1) <=> 'c');
 
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(0)
 int(-1)

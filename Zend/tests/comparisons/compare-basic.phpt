@@ -41,7 +41,7 @@ var_dump(new Comparable(1) <=> new Comparable(1)); //  0
 var_dump(new Comparable(1) <=> new Comparable(2)); // -1
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(false)
 bool(true)

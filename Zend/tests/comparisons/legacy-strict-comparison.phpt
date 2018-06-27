@@ -18,6 +18,6 @@ var_dump($a === $a);
 var_dump($a === $b);
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(false)

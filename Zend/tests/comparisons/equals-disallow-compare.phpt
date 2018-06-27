@@ -23,19 +23,18 @@ class Comparable
     }
 }
 
-
 /**
- * 
+ * This should call __equals which returns FALSE.
  */
 var_dump(new Comparable(1) == new Comparable(2));
 
 /**
- * 
+ * This should call __equals which returns TRUE.
  */
 var_dump(new Comparable(2) == new Comparable(2));
 
 /**
- * 
+ * This should call __compareTo which is explicitly unsupported.
  */
 try {
     new Comparable(2) <= new Comparable(2);
@@ -44,17 +43,44 @@ try {
 }
 
 /**
- * 
+ * These should call __compareTo which is explicitly unsupported.
  */
 try {
-    new Comparable(1) > new Comparable(2);
+    new Comparable(1) > new Comparable(1);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new Comparable(1) < new Comparable(1);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new Comparable(1) >= new Comparable(1);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new Comparable(1) <= new Comparable(1);
+} catch (Exception $e) {
+    var_dump($e->getMessage());
+}
+
+try {
+    new Comparable(1) <=> new Comparable(1);
 } catch (Exception $e) {
     var_dump($e->getMessage());
 }
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(false)
 bool(true)
+string(39) "This object does not support comparison"
+string(39) "This object does not support comparison"
+string(39) "This object does not support comparison"
 string(39) "This object does not support comparison"
 string(39) "This object does not support comparison"

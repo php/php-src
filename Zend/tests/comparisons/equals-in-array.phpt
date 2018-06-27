@@ -24,7 +24,7 @@ var_dump(in_array(new Equatable(4), $array));
 var_dump(in_array(new Equatable(5), $array));
 
 ?>
---EXPECTF--
+--EXPECT--
 bool(true)
 bool(true)
 bool(true)

@@ -17,7 +17,7 @@ var_dump($array[1]);
 var_dump($array[2]);
 
 ?>
---EXPECTF--
+--EXPECT--
 object(Comparable)#2 (2) {
   ["decoy":protected]=>
   int(-1)

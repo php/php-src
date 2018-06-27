@@ -32,7 +32,7 @@ var_dump(new B <=> 2);
 var_dump(new C <=> 3);
 
 ?>
---EXPECTF--
+--EXPECT--
 int(1)
 int(-1)
 int(0)
