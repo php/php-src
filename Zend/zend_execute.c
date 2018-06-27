@@ -1228,6 +1228,10 @@ static zend_never_inline ZEND_COLD void zend_wrong_string_offset(EXECUTE_DATA_D)
 	const zend_op *end;
 	uint32_t var;
 
+	if (UNEXPECTED(EG(exception) != NULL)) {
+		return;
+	}
+
 	switch (opline->opcode) {
 		case ZEND_ASSIGN_ADD:
 		case ZEND_ASSIGN_SUB:
@@ -1859,9 +1863,7 @@ fetch_from_array:
 			zend_use_new_element_for_string();
 		} else {
 			zend_check_string_offset(dim, type EXECUTE_DATA_CC);
-			if (EXPECTED(EG(exception) == NULL)) {
-				zend_wrong_string_offset(EXECUTE_DATA_C);
-			}
+			zend_wrong_string_offset(EXECUTE_DATA_C);
 		}
 		ZVAL_ERROR(result);
 	} else if (EXPECTED(Z_TYPE_P(container) == IS_OBJECT)) {
