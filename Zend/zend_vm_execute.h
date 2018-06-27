@@ -4379,7 +4379,7 @@ static ZEND_VM_COLD ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_C
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -6699,7 +6699,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_TMPVAR_H
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -9790,7 +9790,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CONST_CV_HANDL
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -13289,7 +13289,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CONST_H
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -15014,7 +15014,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_TMPVAR_
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -16982,7 +16982,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_TMPVAR_CV_HAND
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 	zval_ptr_dtor_nogc(free_op1);
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -38348,7 +38348,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CONST_HANDL
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -42222,7 +42222,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_TMPVAR_HAND
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 	zval_ptr_dtor_nogc(free_op2);
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
@@ -47777,7 +47777,7 @@ static ZEND_OPCODE_HANDLER_RET ZEND_FASTCALL ZEND_IS_SMALLER_SPEC_CV_CV_HANDLER(
 		op2 = GET_OP2_UNDEF_CV(op2, BP_VAR_R);
 	}
 	result = EX_VAR(opline->result.var);
-	is_smaller_function(result);
+	is_smaller_function(result, op1, op2);
 
 
 	ZEND_VM_NEXT_OPCODE_CHECK_EXCEPTION();
